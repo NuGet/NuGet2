@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using NuGet.Common;
 
@@ -11,7 +12,7 @@ namespace NuGet.Commands {
         private readonly List<string> _sources = new List<string>();
 
         [Option(typeof(NuGetResources), "ListCommandSourceDescription")]
-        public List<string> Source {
+        public ICollection<string> Source {
             get { return _sources; }
         }
 
@@ -39,6 +40,7 @@ namespace NuGet.Commands {
             SourceProvider = sourceProvider;
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This call is expensive")]
         public IEnumerable<IPackage> GetPackages() {
             IPackageRepository packageRepository = GetRepository();
             IQueryable<IPackage> packages = packageRepository.GetPackages().OrderBy(p => p.Id);

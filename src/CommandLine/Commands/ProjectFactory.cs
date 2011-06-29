@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -85,6 +86,7 @@ namespace NuGet.Commands {
             }
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to continue regardless of any error we encounter extracting metadata.")]
         public PackageBuilder CreateBuilder() {
             BuildProject();
 
@@ -171,20 +173,21 @@ namespace NuGet.Commands {
                     Logger.Log(MessageLevel.Info, NuGetResources.BuildingProjectTargetingFramework, TargetFramework);
                 }
 
-                var projectCollection = new ProjectCollection(ToolsetDefinitionLocations.Registry | ToolsetDefinitionLocations.ConfigurationFile);
-                BuildRequestData requestData = new BuildRequestData(_project.FullPath, Properties, _project.ToolsVersion, new string[0], null);
-                BuildParameters parameters = new BuildParameters(projectCollection);
-                parameters.Loggers = new[] { new ConsoleLogger() { Verbosity = LoggerVerbosity.Quiet } };
-                parameters.NodeExeLocation = typeof(ProjectFactory).Assembly.Location;
-                parameters.ToolsetDefinitionLocations = projectCollection.ToolsetLocations;
-                BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, requestData);
-                // Build the project so that the outputs are created
-                if (result.OverallResult == BuildResultCode.Failure) {
-                    // If the build fails, report the error
-                    throw new CommandLineException(NuGetResources.FailedToBuildProject, Path.GetFileName(_project.FullPath));
-                }
+                using (var projectCollection = new ProjectCollection(ToolsetDefinitionLocations.Registry | ToolsetDefinitionLocations.ConfigurationFile)) {
+                    BuildRequestData requestData = new BuildRequestData(_project.FullPath, Properties, _project.ToolsVersion, new string[0], null);
+                    BuildParameters parameters = new BuildParameters(projectCollection);
+                    parameters.Loggers = new[] { new ConsoleLogger() { Verbosity = LoggerVerbosity.Quiet } };
+                    parameters.NodeExeLocation = typeof(ProjectFactory).Assembly.Location;
+                    parameters.ToolsetDefinitionLocations = projectCollection.ToolsetLocations;
+                    BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, requestData);
+                    // Build the project so that the outputs are created
+                    if (result.OverallResult == BuildResultCode.Failure) {
+                        // If the build fails, report the error
+                        throw new CommandLineException(NuGetResources.FailedToBuildProject, Path.GetFileName(_project.FullPath));
+                    }
 
-                TargetPath = ResolveTargetPath(result);
+                    TargetPath = ResolveTargetPath(result);
+                }
             }
             else {
                 TargetPath = ResolveTargetPath();
@@ -257,7 +260,7 @@ namespace NuGet.Commands {
 
             // By default we add all files in the project's output directory
             foreach (var file in Directory.GetFiles(projectOutputDirectory, targetFileName + "*")) {
-                string extension = Path.GetExtension(file).ToLowerInvariant();
+                string extension = Path.GetExtension(file);
 
                 // Only look at files we care about
                 if (!allowedOutputExtensions.Contains(extension)) {
@@ -337,11 +340,11 @@ namespace NuGet.Commands {
             }
         }
 
-        private IEnumerable<IPackage> GetMinimumSet(List<IPackage> packages) {
+        private static IEnumerable<IPackage> GetMinimumSet(List<IPackage> packages) {
             return new Walker(packages).GetMinimalSet();
         }
 
-        private void ProcessTransformFiles(PackageBuilder builder, IEnumerable<IPackageFile> transformFiles) {
+        private static void ProcessTransformFiles(PackageBuilder builder, IEnumerable<IPackageFile> transformFiles) {
             // Group transform by target file
             var transformGroups = transformFiles.GroupBy(file => RemoveExtension(file.Path), StringComparer.OrdinalIgnoreCase);
             var fileLookup = builder.Files.ToDictionary(file => file.Path, StringComparer.OrdinalIgnoreCase);
@@ -398,7 +401,7 @@ namespace NuGet.Commands {
             return null;
         }
 
-        private string GetPackagesPath(string dir) {
+        private static string GetPackagesPath(string dir) {
             string configPath = Path.Combine(dir, NuGetConfig);
 
             try {
@@ -547,6 +550,7 @@ namespace NuGet.Commands {
                 return _streamFactory.Value();
             }
 
+            [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We need to return the MemoryStream for use.")]
             private static Func<Stream> ReverseTransform(IPackageFile file, IEnumerable<IPackageFile> transforms) {
                 // Get the original
                 XElement element = GetElement(file);

@@ -93,7 +93,7 @@ namespace NuGet.Common {
             Project.Save();
         }
 
-        private Project GetProject(string projectFile) {
+        private static Project GetProject(string projectFile) {
             return ProjectCollection.GlobalProjectCollection.GetLoadedProjects(projectFile).FirstOrDefault() ?? new Project(projectFile);
         }
     }

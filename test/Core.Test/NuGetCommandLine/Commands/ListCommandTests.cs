@@ -60,10 +60,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             ListCommand cmd = new ListCommand(factory, GetSourceProvider());
             cmd.Source.Add(DefaultRepoUrl);
             cmd.Console = console;
-            List<string> searchTerms = new List<string>();
-            searchTerms.Add("SearchPackage");
-            searchTerms.Add("AnotherTerm");
-            cmd.Arguments = searchTerms;
+            cmd.Arguments.Add("SearchPackage");
+            cmd.Arguments.Add("AnotherTerm");
+             
 
             // Act
             var packages = cmd.GetPackages();

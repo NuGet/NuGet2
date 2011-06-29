@@ -15,7 +15,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             // Arrange
             var fileSystem = new MockFileSystem();
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
-            installCommand.Arguments = new List<string> { "Foo" };
+            installCommand.Arguments.Add("Foo");
 
             // Act
             installCommand.ExecuteCommand();
@@ -29,7 +29,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             // Arrange
             var fileSystem = new MockFileSystem();
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
-            installCommand.Arguments = new List<string> { "Foo" };
+            installCommand.Arguments.Add("Foo");
             installCommand.Source.Add("Some source name");
 
             // Act
@@ -62,9 +62,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             factory.Setup(c => c.CreateRepository("A")).Returns(repositoryA);
             factory.Setup(c => c.CreateRepository("B")).Returns(repositoryB.Object);
             var installCommand = new TestInstallCommand(factory.Object, sourceProvider, fileSystem) {
-                Arguments = new List<string> { "Foo" },
                 Console = console.Object
             };
+            installCommand.Arguments.Add("Foo");
 
             // Act
             installCommand.ExecuteCommand();
@@ -79,12 +79,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             // Arrange
             var fileSystem = new MockFileSystem();
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
-            installCommand.Arguments = new List<string> { "Foo" };
+            installCommand.Arguments.Add("Foo");
 
             // Act
             installCommand.ExecuteCommand();
 
-            installCommand.Arguments = new List<string> { "Bar" };
+            installCommand.Arguments.Clear();
+            installCommand.Arguments.Add("Bar");
             installCommand.Version = "0.5";
 
             installCommand.ExecuteCommand();
@@ -104,7 +105,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
   <package id=""Baz"" version=""0.7"" />
 </packages>");
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
-            installCommand.Arguments = new List<string> { @"dir\packages.config" };
+            installCommand.Arguments.Add(@"dir\packages.config");
 
             // Act
             installCommand.ExecuteCommand();
@@ -121,7 +122,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             // Arrange
             var fileSystem = new MockFileSystem();
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
-            installCommand.Arguments = new List<string> { @"Baz" };
+            installCommand.Arguments.Add("Baz");
             installCommand.Source.Add("Some Source name");
             installCommand.Source.Add("Some other Source");
 
@@ -147,7 +148,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             installCommand.Version = "0.4";
             installCommand.ExcludeVersion = true;
-            installCommand.Arguments = new List<string> { "Baz" };
+            installCommand.Arguments.Add("Baz");
 
             // Act - 1
             installCommand.ExecuteCommand();
@@ -180,7 +181,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager);
 
             installCommand.ExcludeVersion = true;
-            installCommand.Arguments = new List<string> { "A" };
+            installCommand.Arguments.Add("A");
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => installCommand.ExecuteCommand(), "Unable to find package 'A'.");
@@ -225,12 +226,12 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
                 _packageManager = packageManager;
             }
 
-            protected override IFileSystem GetFileSystem() {
+            protected override IFileSystem CreateFileSystem() {
                 return _fileSystem;
             }
 
-            protected override PackageManager GetPackageManager(IFileSystem fileSystem, bool useMachineCache) {
-                return _packageManager ?? base.GetPackageManager(fileSystem, useMachineCache);
+            protected override PackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache) {
+                return _packageManager ?? base.CreatePackageManager(fileSystem, useMachineCache);
             }
 
             protected override PackageReferenceFile GetPackageReferenceFile(string path) {

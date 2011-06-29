@@ -230,8 +230,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            var packCommand = new PackCommand();
-            packCommand.ExcludeFilesForLibPackage(files);
+            PackCommand.ExcludeFilesForLibPackage(files);
 
             // Assert
             Assert.AreEqual(3, files.Count);
@@ -253,8 +252,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            var packCommand = new PackCommand();
-            packCommand.ExcludeFilesForLibPackage(files);
+            PackCommand.ExcludeFilesForLibPackage(files);
 
             // Assert
             Assert.AreEqual(3, files.Count);
@@ -275,8 +273,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            var packCommand = new PackCommand();
-            packCommand.ExcludeFilesForSymbolPackage(files);
+            PackCommand.ExcludeFilesForSymbolPackage(files);
 
             // Assert
             Assert.AreEqual(3, files.Count);
@@ -298,8 +295,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             );
 
             // Act
-            var packCommand = new PackCommand();
-            packCommand.ExcludeFilesForSymbolPackage(files);
+            PackCommand.ExcludeFilesForSymbolPackage(files);
 
             // Assert
             Assert.AreEqual(4, files.Count);
@@ -311,7 +307,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
         private static IList<IPackageFile> GetPackageFiles(params string[] paths) {
             return (from p in paths
-                    select new PhysicalPackageFile { SourcePath = p, TargetPath = p } as IPackageFile).ToList();
+                    select new PhysicalPackageFile { SourcePath = p, TargetPath = p } as IPackageFile
+            ).ToList();
         }
     }
 }

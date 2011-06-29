@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.Composition;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -29,6 +30,8 @@ namespace NuGet.Commands {
             : this(commandManager, Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Name, "http://docs.nuget.org/docs/reference/command-line-reference") {
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "3#",
+            Justification = "We don't use the Url for anything besides printing, so it's ok to represent it as a string.")]
         public HelpCommand(ICommandManager commandManager, string commandExe, string productName, string helpUrl) {
             _commandManager = commandManager;
             _commandExe = commandExe;
@@ -75,10 +78,10 @@ namespace NuGet.Commands {
             Console.Write(" {0, -" + maxWidth + "}   ", GetCommandText(commandAttribute));
             // Starting index of the description
             int descriptionPadding = maxWidth + 4;
-            Console.PrintJustified(descriptionPadding, commandAttribute.GetDescription());
+            Console.PrintJustified(descriptionPadding, commandAttribute.Description);
         }
 
-        private string GetCommandText(CommandAttribute commandAttribute) {
+        private static string GetCommandText(CommandAttribute commandAttribute) {
             return commandAttribute.CommandName + GetAltText(commandAttribute.AltName);
         }
 
@@ -86,7 +89,7 @@ namespace NuGet.Commands {
             ICommand command = _commandManager.GetCommand(commandName);
             CommandAttribute attribute = command.CommandAttribute;
 
-            Console.WriteLine("usage: {0} {1} {2}", _commandExe, attribute.CommandName, attribute.GetUsageSummary());
+            Console.WriteLine("usage: {0} {1} {2}", _commandExe, attribute.CommandName, attribute.UsageSummary);
             Console.WriteLine();
 
             if (!String.IsNullOrEmpty(attribute.AltName)) {
@@ -94,12 +97,12 @@ namespace NuGet.Commands {
                 Console.WriteLine();
             }
 
-            Console.WriteLine(attribute.GetDescription());
+            Console.WriteLine(attribute.Description);
             Console.WriteLine();
 
-            if (attribute.GetUsageDescription() != null) {
+            if (attribute.UsageDescription != null) {
                 int padding = 5;
-                Console.PrintJustified(padding, attribute.GetUsageDescription());
+                Console.PrintJustified(padding, attribute.UsageDescription);
                 Console.WriteLine();
             }
 
@@ -119,7 +122,7 @@ namespace NuGet.Commands {
                         (TypeHelper.IsMultiValuedProperty(o.Value) ? " +" : String.Empty));
                     Console.Write(" {0, -" + (maxAltOptionWidth + 4) + "}", GetAltText(o.Key.AltName));
 
-                    Console.PrintJustified((10 + maxAltOptionWidth + maxOptionWidth), o.Key.GetDescription());
+                    Console.PrintJustified((10 + maxAltOptionWidth + maxOptionWidth), o.Key.Description);
 
                 }
 

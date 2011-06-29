@@ -37,16 +37,18 @@ namespace NuGet.Commands {
             var settings = Settings.UserSettings;
             settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, source, apiKey);
 
+            string sourceName = CommandLineUtility.GetSourceDisplayName(SourceProvider, source);
+
             // Setup the symbol server key
             if (setSymbolServerKey) {
                 settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, NuGetConstants.DefaultSymbolServerUrl, apiKey);
                 Console.WriteLine(NuGetResources.SetApiKeyCommandDefaultApiKeysSaved,
                                   apiKey,
-                                  SourceProvider.GetDisplayName(source),
-                                  SourceProvider.GetDisplayName(NuGetConstants.DefaultSymbolServerUrl));
+                                  sourceName,
+                                  CommandLineUtility.GetSourceDisplayName(SourceProvider, NuGetConstants.DefaultSymbolServerUrl));
             }
             else {
-                Console.WriteLine(NuGetResources.SetApiKeyCommandApiKeySaved, apiKey, SourceProvider.GetDisplayName(source));
+                Console.WriteLine(NuGetResources.SetApiKeyCommandApiKeySaved, apiKey, sourceName);
             }
         }
     }

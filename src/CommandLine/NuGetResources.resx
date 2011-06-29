@@ -220,7 +220,7 @@
     <value>Specifies the server URL.</value>
   </data>
   <data name="PublishCommandUsageDescription" xml:space="preserve">
-    <value>Specify the id and version of the package that will be publised to the feed.</value>
+    <value>Specify the id and version of the package that will be published to the feed.</value>
   </data>
   <data name="PublishCommandUsageSummary" xml:space="preserve">
     <value>&lt;package id&gt; &lt;package version&gt; &lt;API Key&gt; [options]</value>
@@ -277,7 +277,7 @@
     <value>Currently running NuGet.exe {0}.</value>
   </data>
   <data name="UpdateCommandDescription" xml:space="preserve">
-    <value>Update packages to latest available versions. This command also updates nuget.exe itself.</value>
+    <value>Update packages to latest available versions. This command also updates NuGet.exe itself.</value>
   </data>
   <data name="UpdateCommandNuGetUpToDate" xml:space="preserve">
     <value>NuGet.exe is up to date.</value>
@@ -385,7 +385,7 @@
     <value>Failed to build '{0}'.</value>
   </data>
   <data name="PackageCommandSymbolsDescription" xml:space="preserve">
-    <value>Determines if a package containing sources and symbols should be created. When specified with a nuspec, creates a regular nupkg and the corresponding symbols package.</value>
+    <value>Determines if a package containing sources and symbols should be created. When specified with a nuspec, creates a regular NuGet package file and the corresponding symbols package.</value>
   </data>
   <data name="PackagingFilesFromOutputPath" xml:space="preserve">
     <value>Packing files from '{0}'.</value>
@@ -403,7 +403,7 @@
     <value>{0} was not specified. Using '{1}'.</value>
   </data>
   <data name="PackageCommandNoDefaultExcludes" xml:space="preserve">
-    <value>Prevent default exclusion of .nupkg files and files and folders starting with a dot e.g. .svn.</value>
+    <value>Prevent default exclusion of NuGet package files and files and folders starting with a dot e.g. .svn.</value>
   </data>
   <data name="PackageCommandToolDescription" xml:space="preserve">
     <value>Determines if the output files of the project should be in the tool folder. </value>
@@ -418,7 +418,7 @@
     <value>Attempting to build symbols package for '{0}'.</value>
   </data>
   <data name="Warning_SymbolServerNotConfigured" xml:space="preserve">
-    <value>Found symbols package '{0}', but no API key was specified for the symbol server. To save an API Key, run 'nuget.exe setApiKey [your API key from http://www.nuget.org]'.</value>
+    <value>Found symbols package '{0}', but no API key was specified for the symbol server. To save an API Key, run 'NuGet.exe setApiKey [your API key from http://www.NuGet.org]'.</value>
   </data>
   <data name="SpecCommandUsageSummary" xml:space="preserve">
     <value>[package id]</value>
@@ -521,5 +521,14 @@
   </data>
   <data name="UpdateCommandVerboseDescription" xml:space="preserve">
     <value>Show verbose output while updating.</value>
+  </data>
+  <data name="CommandLine_Warning" xml:space="preserve">
+    <value>WARNING: {0}</value>
+  </data>
+  <data name="Credentials_Password" xml:space="preserve">
+    <value>Password: </value>
+  </data>
+  <data name="Credentials_UserName" xml:space="preserve">
+    <value>UserName: </value>
   </data>
 </root>

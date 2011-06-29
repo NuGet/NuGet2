@@ -3,7 +3,7 @@
 namespace NuGet.Common {
     public interface IConsole : ILogger {
         int CursorLeft { get; set; }
-        TextWriter Error { get; }
+        TextWriter ErrorWriter { get; }
         int WindowWidth { get; set; }
 
         void Write(object value);

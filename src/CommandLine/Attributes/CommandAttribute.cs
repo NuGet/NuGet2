@@ -2,39 +2,57 @@ using System;
 
 namespace NuGet {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-    public class CommandAttribute : Attribute {
+    public sealed class CommandAttribute : Attribute {
+        private string _description;
+        private string _usageSummary;
+        private string _usageDescription;
+
+        public string CommandName { get; private set; }
+        public Type ResourceType { get; private set; }
+        public string DescriptionResourceName { get; private set; }
+
+
         public string AltName { get; set; }
-        public string CommandName { get; set; }
-        public string Description { get; set; }
-        public string DescriptionResourceName { get; set; }
         public int MinArgs { get; set; }
         public int MaxArgs { get; set; }
-        public string UsageSummary { get; set; }
         public string UsageSummaryResourceName { get; set; }
-        public string UsageDescription { get; set; }
         public string UsageDescriptionResourceName { get; set; }
 
-        public Type ResourceType { get; set; }
 
-        public string GetDescription() {
-            if (ResourceType != null && !String.IsNullOrEmpty(DescriptionResourceName)) {
-                return ResourceHelper.GetLocalizedString(ResourceType, DescriptionResourceName);
+        public string Description {
+            get {
+                if (ResourceType != null && !String.IsNullOrEmpty(DescriptionResourceName)) {
+                    return ResourceHelper.GetLocalizedString(ResourceType, DescriptionResourceName);
+                }
+                return _description;
             }
-            return Description;
+            private set {
+                _description = value;
+            }
         }
 
-        public string GetUsageSummary() {
-            if (ResourceType != null && !String.IsNullOrEmpty(UsageSummaryResourceName)) {
-                return ResourceHelper.GetLocalizedString(ResourceType, UsageSummaryResourceName);
+        public string UsageSummary {
+            get {
+                if (ResourceType != null && !String.IsNullOrEmpty(UsageSummaryResourceName)) {
+                    return ResourceHelper.GetLocalizedString(ResourceType, UsageSummaryResourceName);
+                }
+                return _usageSummary;
             }
-            return UsageSummary;
+            set {
+                _usageSummary = value;
+            }
         }
 
-        public string GetUsageDescription() {
-            if (ResourceType != null && !String.IsNullOrEmpty(UsageDescriptionResourceName)) {
-                return ResourceHelper.GetLocalizedString(ResourceType, UsageDescriptionResourceName);
+        public string UsageDescription {
+            get {
+                if (ResourceType != null && !String.IsNullOrEmpty(UsageDescriptionResourceName)) {
+                    return ResourceHelper.GetLocalizedString(ResourceType, UsageDescriptionResourceName);
+                }
+                return _usageDescription;
             }
-            return UsageDescription;
+            set {
+                _usageDescription = value;
+            }
         }
 
         public CommandAttribute(string commandName, string description) {
@@ -52,6 +70,5 @@ namespace NuGet {
             MaxArgs = Int32.MaxValue;
 
         }
-
     }
 }

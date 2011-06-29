@@ -27,12 +27,12 @@ namespace NuGet.Commands {
         public IPackageSourceProvider SourceProvider { get; private set; }
 
         [Option(typeof(NuGetResources), "UpdateCommandSourceDescription")]
-        public List<string> Source {
+        public ICollection<string> Source {
             get { return _sources; }
         }
 
         [Option(typeof(NuGetResources), "UpdateCommandIdDescription")]
-        public List<string> Id {
+        public ICollection<string> Id {
             get { return _ids; }
         }
 
@@ -74,6 +74,7 @@ namespace NuGet.Commands {
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage ("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void UpdateAllPackages(string solutionDir) {
             Console.WriteLine(NuGetResources.ScanningForProjects);
 
@@ -97,7 +98,6 @@ namespace NuGet.Commands {
             }
 
             string repositoryPath = GetRepositoryPathFromSolution(solutionDir);
-            var pathResolver = new DefaultPackagePathResolver(repositoryPath);
             IPackageRepository sourceRepository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
 
             foreach (var project in projects) {
@@ -113,32 +113,29 @@ namespace NuGet.Commands {
             }
         }
 
-        private ProjectPair GetProject(string packagesConfigPath) {
+        private static ProjectPair GetProject(string packagesConfigPath) {
+            IMSBuildProjectSystem msBuildProjectSystem = null;
             try {
-                return new ProjectPair {
-                    PackagesConfigPath = packagesConfigPath,
-                    Project = GetMSBuildProject(packagesConfigPath)
-                };
+                msBuildProjectSystem = GetMSBuildProject(packagesConfigPath);
+            } catch (CommandLineException) {
+
             }
-            catch (Exception) {
-                return new ProjectPair {
-                    PackagesConfigPath = packagesConfigPath
-                };
-            }
+            return new ProjectPair { 
+                PackagesConfigPath = packagesConfigPath,
+                Project = msBuildProjectSystem
+            };
         }
 
         private string GetInputFile() {
             if (Arguments.Any()) {
                 string path = Arguments[0];
-                string extension = Path.GetExtension(path).ToLowerInvariant();
+                string extension = Path.GetExtension(path);
 
-                switch (extension) {
-                    case ".config":
-                        return GetPackagesConfigPath(path);
-                    case ".sln":
-                        return Path.GetFullPath(path);
-                    default:
-                        break;
+                if (extension.Equals(".config", StringComparison.OrdinalIgnoreCase)) {
+                    return GetPackagesConfigPath(path);
+                }
+                else if (extension.Equals(".sln", StringComparison.OrdinalIgnoreCase)) {
+                    return Path.GetFullPath(path);
                 }
             }
 
@@ -214,7 +211,7 @@ namespace NuGet.Commands {
             throw new CommandLineException(NuGetResources.UnableToLocatePackagesFolder);
         }
 
-        private IMSBuildProjectSystem GetMSBuildProject(string packageReferenceFilePath) {
+        private static IMSBuildProjectSystem GetMSBuildProject(string packageReferenceFilePath) {
             // Try to locate the project file associated with this packages.config file
             string directory = Path.GetDirectoryName(packageReferenceFilePath);
             string projectFile;
@@ -248,7 +245,7 @@ namespace NuGet.Commands {
                             projectManager.UpdatePackageReference(package.Id, version: null, updateDependencies: true);
                         }
                     }
-                    catch (Exception e) {
+                    catch (InvalidOperationException e) {
                         Console.WriteWarning(e.Message);
                     }
                 }

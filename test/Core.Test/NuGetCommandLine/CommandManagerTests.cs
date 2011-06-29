@@ -118,9 +118,13 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         private class MockCommand : ICommand {
+            private readonly List<string> _arguments = new List<string>();
             private readonly CommandAttribute _attribute;
 
-            public System.Collections.Generic.List<string> Arguments { get; set; }
+            public IList<string> Arguments {
+                get { return _arguments; }
+            }
+
             [Option("A Option")]
             public string Message { get; set; }
             [Option("A Option Two")]
@@ -148,7 +152,12 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         private class MockCommandBadOption : ICommand {
-            public System.Collections.Generic.List<string> Arguments { get; set; }
+            private readonly List<string> _arguments = new List<string>();
+
+            public IList<string> Arguments {
+                get { return _arguments; }
+            }
+
             [Option("A Option")]
             public string Message { get { return "Bad"; } }
             public void Execute() { }
@@ -166,11 +175,11 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         private class MockCommandEmptyAttributes : ICommand {
-            public System.Collections.Generic.List<string> Arguments { get; set; }
             [Option("A Option")]
             public string Message { get { return "Bad"; } }
             public void Execute() { }
 
+            public IList<string> Arguments { get; set; }
 
             public CommandAttribute CommandAttribute {
                 get {

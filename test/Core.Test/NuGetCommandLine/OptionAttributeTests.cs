@@ -6,9 +6,11 @@ namespace NuGet.Test.NuGetCommandLine {
         [TestMethod]
         public void GetDescription_ReturnsResourceIfTypeSet() {
             // Arrange
-            OptionAttribute cmd = new OptionAttribute(typeof(MockResourceType), "ResourceName") { Description = "Not a string from a resouce." };
+            OptionAttribute cmd = new OptionAttribute(typeof(MockResourceType), "ResourceName");
+            
             // Act
-            var actual = cmd.GetDescription();
+            var actual = cmd.Description;
+            
             // Assert
             Assert.AreEqual("This is a Resource String.", actual);
         }
@@ -17,8 +19,10 @@ namespace NuGet.Test.NuGetCommandLine {
         public void GetDescription_ReturnsDescriptionIfTypeNotSet() {
             // Arrange
             OptionAttribute cmd = new OptionAttribute("ResourceName");
+            
             // Act
-            var actual = cmd.GetDescription();
+            var actual = cmd.Description;
+            
             // Assert
             Assert.AreEqual("ResourceName", actual);
         }

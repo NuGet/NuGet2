@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.IO;
 
 namespace NuGet.Common {
@@ -33,7 +34,7 @@ namespace NuGet.Common {
             }
         }
 
-        public TextWriter Error {
+        public TextWriter ErrorWriter {
             get { return System.Console.Error; }
         }
 
@@ -82,10 +83,11 @@ namespace NuGet.Common {
         }
 
         public void WriteWarning(string value, params object[] args) {
-            WriteColor(System.Console.Out, ConsoleColor.Yellow, String.Format("WARNING: {0}", value), args);
+            string message = String.Format(CultureInfo.CurrentCulture, NuGetResources.CommandLine_Warning, value);
+            WriteColor(System.Console.Out, ConsoleColor.Yellow, message, args);
         }
 
-        private void WriteColor(TextWriter writer, ConsoleColor color, string value, params object[] args) {
+        private static void WriteColor(TextWriter writer, ConsoleColor color, string value, params object[] args) {
             var currentColor = System.Console.ForegroundColor;
             try {
                 currentColor = System.Console.ForegroundColor;
@@ -115,20 +117,20 @@ namespace NuGet.Common {
                 string content = text.Substring(0, length);
                 int leftPadding = startIndex + length - CursorLeft;
                 // Print it with the correct padding
-                System.Console.WriteLine("{0," + leftPadding + "}", content);
+                System.Console.WriteLine(content.PadLeft(leftPadding));
                 // Get the next substring to be printed
                 text = text.Substring(content.Length);
             }
         }
 
-        public bool Confirm(string message) {
+        public bool Confirm(string description) {
             var currentColor = System.ConsoleColor.Gray;
             try {
                 currentColor = System.Console.ForegroundColor;
                 System.Console.ForegroundColor = System.ConsoleColor.Yellow;
-                System.Console.Write(String.Format(NuGetResources.ConsoleConfirmMessage, message));
+                System.Console.Write(String.Format(CultureInfo.CurrentCulture, NuGetResources.ConsoleConfirmMessage, description));
                 var result = System.Console.ReadLine();
-                return result.StartsWith(NuGetResources.ConsoleConfirmMessageAccept, StringComparison.InvariantCultureIgnoreCase);
+                return result.StartsWith(NuGetResources.ConsoleConfirmMessageAccept, StringComparison.OrdinalIgnoreCase);
             }
             finally {
                 System.Console.ForegroundColor = currentColor;

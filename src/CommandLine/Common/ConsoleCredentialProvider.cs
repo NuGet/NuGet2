@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Security;
 
@@ -12,10 +13,10 @@ namespace NuGet {
             return proxy;
         }
 
-        private NetworkCredential GetCredentials() {
-            Console.Write("Username: ");
+        private static NetworkCredential GetCredentials() {
+            Console.Write(NuGetResources.Credentials_UserName);
             string username = Console.ReadLine();
-            Console.Write("Password: ");
+            Console.Write(NuGetResources.Credentials_Password);
             SecureString password = ReadLineAsSecureString();
             return new NetworkCredential {
                 UserName = username,
@@ -23,10 +24,7 @@ namespace NuGet {
             };
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Reliability",
-            "CA2000:Dispose objects before losing scope",
-            Justification = "Caller's responsibility to dispose.")]
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller's responsibility to dispose.")]
         public static SecureString ReadLineAsSecureString() {
             try {
                 var secureString = new SecureString();
@@ -37,13 +35,13 @@ namespace NuGet {
                             continue;
                         }
                         Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-                        Console.Write(" ");
+                        Console.Write(' ');
                         Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
                         secureString.RemoveAt(secureString.Length - 1);
                     }
                     else {
                         secureString.AppendChar(keyInfo.KeyChar);
-                        Console.Write("*");
+                        Console.Write('*');
                     }
                 }
                 secureString.MakeReadOnly();

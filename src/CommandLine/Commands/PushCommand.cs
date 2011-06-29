@@ -73,7 +73,7 @@ namespace NuGet.Commands {
         /// <summary>
         /// Get the symbols package from the original package. Removes the .nupkg and adds .symbols.nupkg
         /// </summary>
-        private string GetSymbolsPath(string packagePath) {
+        private static string GetSymbolsPath(string packagePath) {
             string symbolPath = Path.GetFileNameWithoutExtension(packagePath) + PackCommand.SymbolsExtension;
             string packageDir = Path.GetDirectoryName(packagePath);
             return Path.Combine(packageDir, symbolPath);
@@ -97,7 +97,8 @@ namespace NuGet.Commands {
                 }
             };
 
-            Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), SourceProvider.GetDisplayName(source));
+            string sourceName = CommandLineUtility.GetSourceDisplayName(SourceProvider, Source); ;
+            Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), sourceName);
 
             try {
                 using (Stream stream = package.GetStream()) {
@@ -116,7 +117,7 @@ namespace NuGet.Commands {
                 var cmd = new PublishCommand(SourceProvider);
                 cmd.Console = Console;
                 cmd.Source = source;
-                cmd.Arguments = new List<string> { package.Id, package.Version.ToString(), apiKey };
+                cmd.Arguments.AddRange(new[] { package.Id, package.Version.ToString(), apiKey });
                 cmd.Execute();
             }
             else {
@@ -134,7 +135,7 @@ namespace NuGet.Commands {
 
             // If the user did not pass an API Key look in the config file
             if (String.IsNullOrEmpty(apiKey)) {
-                apiKey = CommandLineUtility.GetApiKey(SourceProvider, Settings.UserSettings, source, throwIfNotFound);
+                apiKey = CommandLineUtility.GetApiKey(Settings.UserSettings, SourceProvider, source, throwIfNotFound);
             }
 
             return apiKey;

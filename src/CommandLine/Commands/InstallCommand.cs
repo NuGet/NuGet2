@@ -13,7 +13,7 @@ namespace NuGet.Commands {
         private readonly List<string> _sources = new List<string>();
 
         [Option(typeof(NuGetResources), "InstallCommandSourceDescription")]
-        public List<string> Source {
+        public ICollection<string> Source {
             get { return _sources; }
         }
 
@@ -49,7 +49,7 @@ namespace NuGet.Commands {
         }
 
         public override void ExecuteCommand() {
-            IFileSystem fileSystem = GetFileSystem();
+            IFileSystem fileSystem = CreateFileSystem();
 
             // If the first argument is a packages.config file, install everything it lists
             // Otherwise, treat the first argument as a package Id
@@ -57,7 +57,7 @@ namespace NuGet.Commands {
                 InstallPackagesFromConfigFile(fileSystem, GetPackageReferenceFile(Arguments[0]));
             }
             else {
-                PackageManager packageManager = GetPackageManager(fileSystem);
+                PackageManager packageManager = CreatePackageManager(fileSystem);
 
                 string packageId = Arguments[0];
 
@@ -88,7 +88,7 @@ namespace NuGet.Commands {
 
         private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile file) {
             var packageReferences = file.GetPackageReferences().ToList();
-            PackageManager packageManager = GetPackageManager(fileSystem, useMachineCache: true);
+            PackageManager packageManager = CreatePackageManager(fileSystem, useMachineCache: true);
 
             bool installedAny = false;
             foreach (var package in packageReferences) {
@@ -104,7 +104,7 @@ namespace NuGet.Commands {
             }
         }
 
-        protected virtual PackageManager GetPackageManager(IFileSystem fileSystem, bool useMachineCache = false) {
+        protected virtual PackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache = false) {
             var repository = GetRepository();
 
             if (useMachineCache) {
@@ -118,7 +118,7 @@ namespace NuGet.Commands {
             return packageManager;
         }
 
-        protected virtual IFileSystem GetFileSystem() {
+        protected virtual IFileSystem CreateFileSystem() {
             // Use the passed in install path if any, and default to the current dir
             string installPath = OutputDirectory ?? Directory.GetCurrentDirectory();
 
@@ -126,7 +126,7 @@ namespace NuGet.Commands {
         }
 
         // Do a very quick check of whether a package in installed by checked whether the nupkg file exists
-        private bool IsPackageInstalled(string packageId, Version version, PackageManager packageManager, IFileSystem fileSystem) {
+        private static bool IsPackageInstalled(string packageId, Version version, PackageManager packageManager, IFileSystem fileSystem) {
             var packageDir = packageManager.PathResolver.GetPackageDirectory(packageId, version);
             var packageFile = packageManager.PathResolver.GetPackageFileName(packageId, version);
 

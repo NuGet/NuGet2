@@ -44,5 +44,11 @@ namespace NuGet {
 
             return resolvedSource ?? value;
         }
+
+        public static string GetSourceDisplayName(this IPackageSourceProvider sourceProvider, string source) {
+            return (from item in sourceProvider.LoadPackageSources()
+                    where source.Equals(item.Source, StringComparison.OrdinalIgnoreCase)
+                    select item.Name).DefaultIfEmpty(source).FirstOrDefault();
+        }
     }
 }

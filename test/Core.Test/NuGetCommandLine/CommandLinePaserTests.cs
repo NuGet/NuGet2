@@ -330,8 +330,13 @@ namespace NuGet.Test.NuGetCommandLine {
 
 
         private class MockCommand : ICommand {
+            private readonly List<string> _arguments = new List<string>();
 
-            public List<string> Arguments { get; set; }
+            public IList<string> Arguments {
+                get {
+                    return _arguments;
+                }
+            }
 
             public string Message { get; set; }
 

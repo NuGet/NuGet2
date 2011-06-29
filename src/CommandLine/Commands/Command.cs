@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using NuGet.Common;
 
@@ -9,11 +10,11 @@ namespace NuGet.Commands {
         private const string CommandSuffix = "Command";
         private CommandAttribute _commandAttribute;
 
-        public Command() {
+        protected Command() {
             Arguments = new List<string>();
         }
 
-        public List<string> Arguments { get; set; }
+        public IList<string> Arguments { get; private set; }
 
         [Import]
         public IConsole Console { get; set; }
@@ -36,13 +37,9 @@ namespace NuGet.Commands {
             }
         }
 
-        public string GetCurrentCommandName() {
-            return CommandAttribute.CommandName;
-        }
-
         public void Execute() {
             if (Help) {
-                HelpCommand.ViewHelpForCommand(GetCurrentCommandName());
+                HelpCommand.ViewHelpForCommand(CommandAttribute.CommandName);
             }
             else {
                 ExecuteCommand();
@@ -51,6 +48,7 @@ namespace NuGet.Commands {
 
         public abstract void ExecuteCommand();
 
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This method does quite a bit of processing.")]
         public virtual CommandAttribute GetCommandAttribute() {
             var attributes = GetType().GetCustomAttributes(typeof(CommandAttribute), true);
             if (attributes.Any()) {

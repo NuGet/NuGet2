@@ -25,16 +25,15 @@ namespace NuGet {
                     break;
                 }
 
-                if (!option.StartsWith("/") && !option.StartsWith("-")) {
+                if (!option.StartsWith("/", StringComparison.OrdinalIgnoreCase) && !option.StartsWith("-", StringComparison.OrdinalIgnoreCase)) {
                     arguments.Add(option);
                     continue;
                 }
 
-
                 string optionText = option.Substring(1);
                 string value = null;
 
-                if (optionText.EndsWith("-")) {
+                if (optionText.EndsWith("-", StringComparison.OrdinalIgnoreCase)) {
                     optionText = optionText.TrimEnd('-');
                     value = "false";
                 }
@@ -75,7 +74,7 @@ namespace NuGet {
                 AssignValue(propInfo, command, option, value);
             }
 
-            command.Arguments = arguments;
+            command.Arguments.AddRange(arguments);
 
             return command;
         }
@@ -116,8 +115,8 @@ namespace NuGet {
             }
         }
 
-        public ICommand ParseCommandLine(IEnumerable<string> commandlineArgs) {
-            IEnumerator<string> argsEnumerator = commandlineArgs.GetEnumerator();
+        public ICommand ParseCommandLine(IEnumerable<string> commandLineArgs) {
+            IEnumerator<string> argsEnumerator = commandLineArgs.GetEnumerator();
 
             // Get the desired command name
             string cmdName = GetNextCommandLineItem(argsEnumerator);

@@ -112,7 +112,6 @@ namespace NuGet.Commands {
                 PrintVerbose(outputPath);
             }
 
-
             Console.WriteLine(NuGetResources.PackageCommandSuccess, outputPath);
         }
 
@@ -196,15 +195,13 @@ namespace NuGet.Commands {
         }
 
         private void BuildPackage(string path) {
-            string extension = Path.GetExtension(path).ToLowerInvariant();
+            string extension = Path.GetExtension(path);
 
-            switch (extension) {
-                case ".nuspec":
-                    BuildFromNuspec(path);
-                    break;
-                default:
-                    BuildFromProjectFile(path);
-                    break;
+            if (extension.Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase)) {
+                BuildFromNuspec(path);
+            }
+            else {
+                BuildFromProjectFile(path);
             }
         }
 
@@ -232,11 +229,11 @@ namespace NuGet.Commands {
             BuildPackage(path, symbolsBuilder, outputPath);
         }
 
-        internal void ExcludeFilesForLibPackage(ICollection<IPackageFile> files) {
+        internal static void ExcludeFilesForLibPackage(ICollection<IPackageFile> files) {
             PathResolver.FilterPackageFiles(files, file => file.Path, _libPackageExcludes);
         }
 
-        internal void ExcludeFilesForSymbolPackage(ICollection<IPackageFile> files) {
+        internal static void ExcludeFilesForSymbolPackage(ICollection<IPackageFile> files) {
             PathResolver.FilterPackageFiles(files, file => file.Path, _symbolPackageExcludes);
         }
 

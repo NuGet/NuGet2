@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using NuGet.Commands;
 
@@ -13,7 +14,7 @@ namespace NuGet {
         public HelpCommand HelpCommand { get; set; }
 
         [ImportMany]
-        public List<ICommand> Commands { get; set; }
+        public IEnumerable<ICommand> Commands { get; set; }
 
         [Import]
         public ICommandManager Manager { get; set; }
@@ -63,12 +64,12 @@ namespace NuGet {
                 ICommand command = parser.ParseCommandLine(args) ?? p.HelpCommand;
 
                 // Fallback on the help command if we failed to parse a valid command
-                if (!p.ArgumentCountValid(command)) {
+                if (!ArgumentCountValid(command)) {
                     // Get the command name and add it to the argumet list of the help command
                     string commandName = command.CommandAttribute.CommandName;
 
                     // Print invalid command then show help
-                    Console.WriteLine(NuGet.Common.NuGetResources.InvalidArguments, commandName);
+                    Console.WriteLine(NuGetResources.InvalidArguments, commandName);
 
                     p.HelpCommand.ViewHelpForCommand(commandName);
                 }
@@ -91,6 +92,7 @@ namespace NuGet {
             return 0;
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want to block the exe from usage if anything failed")]
         private static void RemoveOldFile() {
             string oldFile = typeof(Program).Assembly.Location + ".old";
             try {
@@ -103,7 +105,7 @@ namespace NuGet {
             }
         }
 
-        public bool ArgumentCountValid(ICommand command) {
+        public static bool ArgumentCountValid(ICommand command) {
             CommandAttribute attribute = command.CommandAttribute;
             return command.Arguments.Count >= attribute.MinArgs &&
                    command.Arguments.Count <= attribute.MaxArgs;

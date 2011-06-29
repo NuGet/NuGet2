@@ -37,9 +37,9 @@ namespace NuGet.Commands {
             var gallery = new PackageServer(source, CommandLineConstants.UserAgent);
 
             //If the user did not pass an API Key look in the config file
-            string apiKey = String.IsNullOrEmpty(userSetApiKey) ? CommandLineUtility.GetApiKey(SourceProvider, Settings.UserSettings, source) : userSetApiKey;
+            string apiKey = String.IsNullOrEmpty(userSetApiKey) ? CommandLineUtility.GetApiKey(Settings.UserSettings, SourceProvider, source) : userSetApiKey;
 
-            string sourceDisplayName = SourceProvider.GetDisplayName(source);
+            string sourceDisplayName = CommandLineUtility.GetSourceDisplayName(SourceProvider, source);
 
             if (NoPrompt || Console.Confirm(String.Format(CultureInfo.CurrentCulture, NuGetResources.DeleteCommandConfirm, packageId, packageVersion, sourceDisplayName))) {
                 Console.WriteLine(NuGetResources.DeleteCommandDeletingPackage, packageId, packageVersion, sourceDisplayName);
