@@ -726,11 +726,18 @@ function Test-UpdateOnePackageInAllProjectsExecutesInstallPs1OnAllProjects {
         $context
     )
 
+    # Arrange
+    $p1 = New-ClassLibrary
+    $p2 = New-ClassLibrary
+
+    # Act
+    $p1 | Install-Package nugetpackageupdatetest -Source $context.RepositoryRoot
+
+    # Assert
 }
 
 function Test-UpdateAllPackagesInAllProjectsExecutesInstallPs1OnAllProjects {
     param(
         $context
     )
-
 }

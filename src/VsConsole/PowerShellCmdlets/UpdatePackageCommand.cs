@@ -117,7 +117,7 @@ namespace NuGet.PowerShell.Commands {
                             if (String.IsNullOrEmpty(ProjectName)) {
                                 PackageManager.SafeUpdatePackages(!IgnoreDependencies.IsPresent, this, this);
                             }
-                            else if(projectManager != null) {
+                            else if (projectManager != null) {
                                 PackageManager.SafeUpdatePackages(projectManager, !IgnoreDependencies.IsPresent, this);
                             }
                         }
@@ -125,7 +125,7 @@ namespace NuGet.PowerShell.Commands {
                             if (String.IsNullOrEmpty(ProjectName)) {
                                 PackageManager.UpdatePackages(!IgnoreDependencies.IsPresent, this, this);
                             }
-                            else if(projectManager != null) {
+                            else if (projectManager != null) {
                                 PackageManager.UpdatePackages(projectManager, !IgnoreDependencies.IsPresent, this);
                             }
                         }
@@ -151,7 +151,7 @@ namespace NuGet.PowerShell.Commands {
         }
 
         public void OnBeforeAddPackageReference(Project project) {
-            // RegisterProjectEvents(project);
+            RegisterProjectEvents(project);
         }
 
         public void OnAfterAddPackageReference(Project project) {

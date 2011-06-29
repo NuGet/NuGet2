@@ -724,7 +724,6 @@ namespace NuGet.VisualStudio {
                         eventListener.OnBeforeAddPackageReference(project);
                         try {
                             RunSolutionAction(() => projectAction(projectManager));
-                            }
                         }
                         catch (Exception e) {
                             logger.Log(MessageLevel.Error, e.Message);
