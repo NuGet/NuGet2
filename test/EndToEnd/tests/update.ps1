@@ -733,6 +733,7 @@ function Test-UpdateOnePackageInAllProjectsExecutesInstallPs1OnAllProjects {
     $p1, $p2 | Install-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot
 
     $global:InstallPackageMessages = @()
+    $global:UninstallPackageMessages = @()
 
     # Act
     Update-Package TestUpdatePackage -Source $context.RepositoryRoot
@@ -744,8 +745,13 @@ function Test-UpdateOnePackageInAllProjectsExecutesInstallPs1OnAllProjects {
     Assert-AreEqual 'Project1' $global:InstallPackageMessages[0]
     Assert-AreEqual 'Project2' $global:InstallPackageMessages[1]
 
+    Assert-AreEqual 2 $global:UnInstallPackageMessages.Count
+    Assert-AreEqual 'UninstallProject1' $global:UnInstallPackageMessages[0]
+    Assert-AreEqual 'UninstallProject2' $global:UnInstallPackageMessages[1]
+
     #clean up
-    Remove-Variable InstallPackageMessages
+    Remove-Variable InstallPackageMessages -Scope Global
+    Remove-Variable UninstallPackageMessages -Scope Global
 }
 
 function Test-SafeUpdateOnePackageInAllProjectsExecutesInstallPs1OnAllProjects {
@@ -760,6 +766,7 @@ function Test-SafeUpdateOnePackageInAllProjectsExecutesInstallPs1OnAllProjects {
     $p1, $p2 | Install-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot
 
     $global:InstallPackageMessages = @()
+    $global:UninstallPackageMessages = @()
 
     # Act
     Update-Package TestUpdatePackage -Safe -Source $context.RepositoryRoot
@@ -771,8 +778,13 @@ function Test-SafeUpdateOnePackageInAllProjectsExecutesInstallPs1OnAllProjects {
     Assert-AreEqual 'Project1 safe' $global:InstallPackageMessages[0]
     Assert-AreEqual 'Project2 safe' $global:InstallPackageMessages[1]
 
+    Assert-AreEqual 2 $global:UnInstallPackageMessages.Count
+    Assert-AreEqual 'UninstallProject1' $global:UnInstallPackageMessages[0]
+    Assert-AreEqual 'UninstallProject2' $global:UnInstallPackageMessages[1]
+
     #clean up
-    Remove-Variable InstallPackageMessages
+    Remove-Variable InstallPackageMessages -Scope Global
+    Remove-Variable UninstallPackageMessages -Scope Global
 }
 
 function Test-UpdateAllPackagesInAllProjectsExecutesInstallPs1OnAllProjects {
@@ -788,6 +800,7 @@ function Test-UpdateAllPackagesInAllProjectsExecutesInstallPs1OnAllProjects {
     $p1, $p2 | Install-Package TestUpdateSecondPackage -Version 1.0.0.0 -Source $context.RepositoryRoot
 
     $global:InstallPackageMessages = @()
+    $global:UninstallPackageMessages = @()
 
     # Act
     Update-Package -Source $context.RepositoryRoot
@@ -802,6 +815,13 @@ function Test-UpdateAllPackagesInAllProjectsExecutesInstallPs1OnAllProjects {
     Assert-AreEqual 'Project1' $global:InstallPackageMessages[2]
     Assert-AreEqual 'Project2' $global:InstallPackageMessages[3]
 
+    Assert-AreEqual 4 $global:UninstallPackageMessages.Count
+    Assert-AreEqual 'uninstallProject1second' $global:UnInstallPackageMessages[0]
+    Assert-AreEqual 'uninstallProject2second' $global:UnInstallPackageMessages[1]
+    Assert-AreEqual 'uninstallProject1' $global:UnInstallPackageMessages[2]
+    Assert-AreEqual 'uninstallProject2' $global:UnInstallPackageMessages[3]
+
     #clean up
-    Remove-Variable InstallPackageMessages
+    Remove-Variable InstallPackageMessages -Scope Global
+    Remove-Variable UninstallPackageMessages -Scope Global
 }
