@@ -288,18 +288,20 @@ public class Cl_{0} {{
 
         [TestMethod]
         public void PackageCommand_SpecifyingProjectFileWithNuSpecWithTokensSubstitutesMetadataFromProject() {
-            // Arrange                        
+            // Arrange
             string expectedPackage = "ProjectWithNuSpec.1.2.nupkg";
             WriteAssemblyInfo("ProjectWithNuSpec",
                                "1.2.0.0",
                                "David",
-                               "Project with content");
+                               "Project with content",
+                               "Title of Package");
 
             WriteProjectFile("foo.cs", "public class Foo { }");
             WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
     <id>$id$</id>
+    <title>$title$</title>
     <version>$version$</version>
     <authors>$author$</authors>
     <description>Description from nuspec</description>
@@ -331,6 +333,7 @@ public class Cl_{0} {{
             var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpec.dll" });
             Assert.AreEqual("ProjectWithNuSpec", package.Id);
             Assert.AreEqual(new Version("1.2"), package.Version);
+            Assert.AreEqual("Title of Package", package.Title);
             Assert.AreEqual("David", package.Authors.First());
             Assert.AreEqual("Description from nuspec", package.Description);
             var dependencies = package.Dependencies.ToList();
@@ -760,15 +763,19 @@ public class Cl_{0} {{
         }
 
         private static void WriteAssemblyInfo(string assemblyName, string version, string author, string description) {
-            WriteProjectFile(@"Properties\AssemblyInfo.cs", GetAssemblyInfoContent(assemblyName, version, author, description));
+            WriteAssemblyInfo(assemblyName, version, author, description, null);
         }
 
-        private static string GetAssemblyInfoContent(string assemblyName, string version, string author, string description) {
+        private static void WriteAssemblyInfo(string assemblyName, string version, string author, string description, string title) {
+            WriteProjectFile(@"Properties\AssemblyInfo.cs", GetAssemblyInfoContent(assemblyName, version, author, description, title));
+        }
+
+        private static string GetAssemblyInfoContent(string assemblyName, string version, string author, string description, string title) {
             return String.Format(@"using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle(""{0}"")]
+[assembly: AssemblyTitle(""{4}"")]
 [assembly: AssemblyDescription(""{3}"")]
 [assembly: AssemblyConfiguration("""")]
 [assembly: AssemblyCompany(""{2}"")]
@@ -779,7 +786,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 [assembly: AssemblyVersion(""{1}"")]
 [assembly: AssemblyFileVersion(""{1}"")]
-", assemblyName, version, author, description);
+", assemblyName, version, author, description, title);
         }
 
         private static void DeleteDirs() {

@@ -41,6 +41,7 @@ namespace NuGet.Commands {
                 else {
                     fileName = Path.GetFileNameWithoutExtension(projectFile);
                     manifest.Metadata.Id = "$id$";
+                    manifest.Metadata.Title = "$title$";
                     manifest.Metadata.Version = "$version$";
                     manifest.Metadata.Description = "$description$";
                     manifest.Metadata.Authors = "$author$";
