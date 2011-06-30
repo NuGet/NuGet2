@@ -727,17 +727,81 @@ function Test-UpdateOnePackageInAllProjectsExecutesInstallPs1OnAllProjects {
     )
 
     # Arrange
-    $p1 = New-ClassLibrary
-    $p2 = New-ClassLibrary
+    $p1 = New-ClassLibrary 'Project1'
+    $p2 = New-ClassLibrary 'Project2'
+
+    $p1, $p2 | Install-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot
+
+    $global:InstallPackageMessages = @()
 
     # Act
-    $p1 | Install-Package nugetpackageupdatetest -Source $context.RepositoryRoot
+    Update-Package TestUpdatePackage -Source $context.RepositoryRoot
 
     # Assert
+    # The install.ps1 in the TestUpdatePackage package will add the project name to $global:InstallPackageMessages collection
+
+    Assert-AreEqual 2 $global:InstallPackageMessages.Count
+    Assert-AreEqual 'Project1' $global:InstallPackageMessages[0]
+    Assert-AreEqual 'Project2' $global:InstallPackageMessages[1]
+
+    #clean up
+    Remove-Variable InstallPackageMessages
+}
+
+function Test-SafeUpdateOnePackageInAllProjectsExecutesInstallPs1OnAllProjects {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p1 = New-ClassLibrary 'Project1'
+    $p2 = New-ClassLibrary 'Project2'
+
+    $p1, $p2 | Install-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot
+
+    $global:InstallPackageMessages = @()
+
+    # Act
+    Update-Package TestUpdatePackage -Safe -Source $context.RepositoryRoot
+
+    # Assert
+    # The install.ps1 in the TestUpdatePackage package will add the (project name + ' safe') to $global:InstallPackageMessages collection
+
+    Assert-AreEqual 2 $global:InstallPackageMessages.Count
+    Assert-AreEqual 'Project1 safe' $global:InstallPackageMessages[0]
+    Assert-AreEqual 'Project2 safe' $global:InstallPackageMessages[1]
+
+    #clean up
+    Remove-Variable InstallPackageMessages
 }
 
 function Test-UpdateAllPackagesInAllProjectsExecutesInstallPs1OnAllProjects {
     param(
         $context
     )
+
+    # Arrange
+    $p1 = New-ClassLibrary 'Project1'
+    $p2 = New-ClassLibrary 'Project2'
+
+    $p1, $p2 | Install-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot
+    $p1, $p2 | Install-Package TestUpdateSecondPackage -Version 1.0.0.0 -Source $context.RepositoryRoot
+
+    $global:InstallPackageMessages = @()
+
+    # Act
+    Update-Package -Source $context.RepositoryRoot
+
+    # Assert
+    # The install.ps1 in the TestUpdatePackage package will add the project name to $global:InstallPackageMessages collection
+    # The install.ps1 in the TestUpdateSecondPackage package will add the (project name + ' second') to $global:InstallPackageMessages collection
+
+    Assert-AreEqual 4 $global:InstallPackageMessages.Count
+    Assert-AreEqual 'Project1second' $global:InstallPackageMessages[0]
+    Assert-AreEqual 'Project2second' $global:InstallPackageMessages[1]
+    Assert-AreEqual 'Project1' $global:InstallPackageMessages[2]
+    Assert-AreEqual 'Project2' $global:InstallPackageMessages[3]
+
+    #clean up
+    Remove-Variable InstallPackageMessages
 }
