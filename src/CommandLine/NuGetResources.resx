@@ -531,4 +531,10 @@
   <data name="Credentials_UserName" xml:space="preserve">
     <value>UserName: </value>
   </data>
+  <data name="HelpCommandAll" xml:space="preserve">
+    <value>Print detailed help for all available commands.</value>
+  </data>
+  <data name="HelpCommandMarkdown" xml:space="preserve">
+    <value>Print detailed all help in markdown format.</value>
+  </data>
 </root>

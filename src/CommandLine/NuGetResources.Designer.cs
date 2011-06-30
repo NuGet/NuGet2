@@ -277,11 +277,29 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Print detailed help for all available commands..
+        /// </summary>
+        internal static string HelpCommandAll {
+            get {
+                return ResourceManager.GetString("HelpCommandAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Displays general help information and help information about other commands..
         /// </summary>
         internal static string HelpCommandDescription {
             get {
                 return ResourceManager.GetString("HelpCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Print detailed all help in markdown format..
+        /// </summary>
+        internal static string HelpCommandMarkdown {
+            get {
+                return ResourceManager.GetString("HelpCommandMarkdown", resourceCulture);
             }
         }
         

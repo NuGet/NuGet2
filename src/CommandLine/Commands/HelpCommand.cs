@@ -171,17 +171,17 @@ namespace NuGet.Commands {
             foreach (var command in commands) {
                 var attrib = command.CommandAttribute;
                 Console.WriteLine("##" + info.ToTitleCase(attrib.CommandName) + " Command");
-                Console.WriteLine(attrib.GetDescription());
+                Console.WriteLine(attrib.Description);
                 Console.WriteLine("### Usage");
-                Console.WriteLine(attrib.GetUsageDescription());
-                Console.WriteLine("    " + attrib.GetUsageSummary());
+                Console.WriteLine(attrib.UsageDescription);
+                Console.WriteLine("    " + attrib.UsageSummary);
                 Console.WriteLine("### Options");
                 Console.WriteLine("<table>");
                 foreach (var option in _commandManager.GetCommandOptions(command)) {
                     Console.WriteLine("<tr>");
                     Console.WriteLine("<td>" + option.Value.Name + "</td>");
                     Console.WriteLine("<td>" + GetAltText(option.Key.AltName) + "</td>");
-                    Console.WriteLine("<td>" + option.Key.GetDescription() + "</td>");
+                    Console.WriteLine("<td>" + option.Key.Description + "</td>");
                 }
                 Console.WriteLine("</table>");
                 Console.WriteLine();
