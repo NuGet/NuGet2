@@ -141,7 +141,8 @@ namespace NuGet.VisualStudio {
                 } 
                 else {
                     // assume the Extension Manager dialog is not available, open the visual studio gallery page of nuget
-                    System.Diagnostics.Process.Start("http://go.microsoft.com/fwlink/?LinkID=223391");
+                    const string NuGetGalleryPage = "http://go.microsoft.com/fwlink/?LinkID=223391";
+                    System.Diagnostics.Process.Start(NuGetGalleryPage);
                 }
             }
         }
