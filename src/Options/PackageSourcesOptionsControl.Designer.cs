@@ -1,6 +1,6 @@
 using System.Windows.Forms;
 namespace NuGet.Options {
-    partial class ToolsOptionsControl {
+    partial class PackageSourcesOptionsControl {
         /// <summary> 
         /// Required designer variable.
         /// </summary>
@@ -25,7 +25,7 @@ namespace NuGet.Options {
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ToolsOptionsControl));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PackageSourcesOptionsControl));
             this.HeaderLabel = new System.Windows.Forms.Label();
             this.NewPackageSource = new System.Windows.Forms.TextBox();
             this.addButton = new System.Windows.Forms.Button();

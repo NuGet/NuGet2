@@ -18,7 +18,7 @@ namespace NuGet.Options {
     /// The code in this class assumes that while the dialog is open, noone is modifying the VSPackageSourceProvider directly.
     /// Otherwise, we have a problem with synchronization with the package source provider.
     /// </remarks>
-    public partial class ToolsOptionsControl : UserControl {
+    public partial class PackageSourcesOptionsControl : UserControl {
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private PackageSource _aggregateSource;
         private PackageSource _activeSource;
@@ -26,11 +26,11 @@ namespace NuGet.Options {
         private readonly IServiceProvider _serviceProvider;
         private bool _initialized;
 
-        public ToolsOptionsControl(IServiceProvider serviceProvider)
+        public PackageSourcesOptionsControl(IServiceProvider serviceProvider)
             : this(ServiceLocator.GetInstance<IVsPackageSourceProvider>(), serviceProvider) {
         }
 
-        public ToolsOptionsControl(IVsPackageSourceProvider packageSourceProvider, IServiceProvider serviceProvider) {
+        public PackageSourcesOptionsControl(IVsPackageSourceProvider packageSourceProvider, IServiceProvider serviceProvider) {
             InitializeComponent();
 
             _serviceProvider = serviceProvider;

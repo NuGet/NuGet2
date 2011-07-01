@@ -11,36 +11,28 @@ namespace NuGet.Options {
     [Guid("0F052CF7-BF62-4743-B190-87FA4D49421E")]
     [ComVisible(true)]
     [ClassInterface(ClassInterfaceType.AutoDual)]
-    public class GeneralOptionPage : DialogPage, IServiceProvider {
+    public class GeneralOptionPage : OptionsPageBase {
         private GeneralOptionControl _optionsWindow;
-
-        //We override the base implementation of LoadSettingsFromStorage and SaveSettingsToStorage
-        //since we already provide settings persistance using the SettingsManager. These two APIs
-        //will read/write the tools/options properties to an alternate location, which can cause
-        //incorrect behavior if the two copies of the data are out of sync.
-        public override void LoadSettingsFromStorage() { }
-
-        public override void SaveSettingsToStorage() { }
 
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         protected override System.Windows.Forms.IWin32Window Window {
             get {
-                return this.OptionsControl;
+                return GeneralControl;
             }
         }
 
         protected override void OnActivate(CancelEventArgs e) {
             base.OnActivate(e);
-            OptionsControl.Font = VsShellUtilities.GetEnvironmentFont(this);
-            OptionsControl.OnActivated();
+            GeneralControl.Font = VsShellUtilities.GetEnvironmentFont(this);
+            GeneralControl.OnActivated();
         }
 
         protected override void OnApply(PageApplyEventArgs e) {
             base.OnApply(e);
-            OptionsControl.OnApply();
+            GeneralControl.OnApply();
         }
 
-        private GeneralOptionControl OptionsControl {
+        private GeneralOptionControl GeneralControl {
             get {
                 if (_optionsWindow == null) {
                     _optionsWindow = new GeneralOptionControl();
@@ -49,10 +41,6 @@ namespace NuGet.Options {
 
                 return _optionsWindow;
             }
-        }
-
-        object IServiceProvider.GetService(Type serviceType) {
-            return this.GetService(serviceType);
         }
     }
 }

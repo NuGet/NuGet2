@@ -9,7 +9,7 @@ using NuGet.VisualStudio;
 namespace NuGet.TestUI {
     public partial class TestForm : Form {
         private MockPackageSourceProvider _packageSourceProvider = new MockPackageSourceProvider();
-        private ToolsOptionsControl _optionsControl;
+        private PackageSourcesOptionsControl _optionsControl;
         private bool _isClosing;
         public TestForm() {
             InitializeComponent();
@@ -27,7 +27,7 @@ namespace NuGet.TestUI {
                                                };
             _packageSourceProvider.SavePackageSources(list);
             _packageSourceProvider.ActivePackageSource = list[1];
-            _optionsControl = new ToolsOptionsControl(_packageSourceProvider, null);
+            _optionsControl = new PackageSourcesOptionsControl(_packageSourceProvider, null);
             _optionsControl.Dock = DockStyle.Fill;
 
             panel1.Controls.Add(_optionsControl);

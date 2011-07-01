@@ -5,7 +5,6 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using EnvDTE;
-using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -26,6 +25,7 @@ namespace NuGet.Dialog.PackageManagerUI {
         private readonly IVsUIShell _vsUIShell;
         private readonly ISelectedProviderSettings _selectedProviderSettings;
         private readonly IProductUpdateService _productUpdateService;
+        private readonly IOptionsPageActivator _optionsPageActivator;
 
         public PackageManagerWindow(Project project) :
             this(project,
@@ -39,7 +39,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                  ServiceLocator.GetInstance<IHttpClientEvents>(),
                  ServiceLocator.GetInstance<ISelectedProviderSettings>(),
                  ServiceLocator.GetInstance<IProductUpdateService>(),
-                 ServiceLocator.GetInstance<ISolutionManager>()) {
+                 ServiceLocator.GetInstance<ISolutionManager>(),
+                 ServiceLocator.GetInstance<IOptionsPageActivator>()) {
         }
 
         public PackageManagerWindow(Project project,
@@ -53,7 +54,8 @@ namespace NuGet.Dialog.PackageManagerUI {
                                     IHttpClientEvents httpClientEvents,
                                     ISelectedProviderSettings selectedProviderSettings,
                                     IProductUpdateService productUpdateService,
-                                    ISolutionManager solutionManager)
+                                    ISolutionManager solutionManager,
+                                    IOptionsPageActivator optionPageActivator)
             : base(F1Keyword) {
 
             InitializeComponent();
@@ -68,6 +70,7 @@ namespace NuGet.Dialog.PackageManagerUI {
             _vsUIShell = vsUIShell;
             _selectedProviderSettings = selectedProviderSettings;
             _productUpdateService = productUpdateService;
+            _optionsPageActivator = optionPageActivator;
 
             InsertDisclaimerElement();
             AdjustSortComboBoxWidth();
@@ -301,15 +304,11 @@ namespace NuGet.Dialog.PackageManagerUI {
         }
 
         private void ExecutedShowOptionsPage(object sender, ExecutedRoutedEventArgs e) {
-            Close();
-            ShowOptionsPage();
-        }
+            Hide();
 
-        private void ShowOptionsPage() {
-            // GUID of our options page, defined in ToolsOptionsPage.cs
-            object targetGUID = "2819C3B6-FC75-4CD5-8C77-877903DE864C";
-            Guid toolsGroupGuid = VSConstants.GUID_VSStandardCommandSet97;
-            _vsUIShell.PostExecCommand(ref toolsGroupGuid, VSConstants.cmdidToolsOptions, 0, ref targetGUID);
+            _optionsPageActivator.ActivatePage(
+                OptionsPage.PackageSources,
+                () => ShowDialog());
         }
 
         private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e) {

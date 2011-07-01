@@ -47,19 +47,22 @@
     <Compile Include="GeneralOptionPage.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="OptionsPageBase.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ToolsOptionsControl.cs">
+    <Compile Include="PackageSourcesOptionsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ToolsOptionsControl.Designer.cs">
-      <DependentUpon>ToolsOptionsControl.cs</DependentUpon>
+    <Compile Include="PackageSourcesOptionsControl.Designer.cs">
+      <DependentUpon>PackageSourcesOptionsControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="ToolsOptionsPage.cs">
+    <Compile Include="PackageSourceOptionsPage.cs">
       <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
@@ -73,8 +76,8 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="ToolsOptionsControl.resx">
-      <DependentUpon>ToolsOptionsControl.cs</DependentUpon>
+    <EmbeddedResource Include="PackageSourcesOptionsControl.resx">
+      <DependentUpon>PackageSourcesOptionsControl.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
