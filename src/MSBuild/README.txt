@@ -3,13 +3,11 @@ Getting started 101:
 
 1. Put the .targets file in your MSBuildExtensions directory, which is normally %Program Files%\MSBuild
 
-2. Edit this file and specify the location of the NuGet.MSBuild.dll
-
-3. Edit the Microsoft.Common.Targets file adding the line
+2. Edit the Microsoft.Common.Targets file adding the line
    <Import Project="$(MSBuildExtensionsPath)\nuget.targets" />
    at the end of the file.  This will enable the custom targets in *all* projects (though they are disabled by default)
 
-4. Then, to automatically create a nuget package as part of the build, add this property to your .proj file:
+3. Then, to automatically create a nuget package as part of the build, add this property to your .proj file:
 
     <CreateNuGetPackage>true</CreateNuGetPackage>
 
@@ -18,9 +16,9 @@ Getting started 101:
     <SetupNuGetPackages>true</SetupNuGetPackages>
 	(By default, the list of feeds is taken from the standard nuget.config file.  See below for customisation options)
 
-5. Save your nuspec file as package.nuspec in your project
+4. Save your nuspec file as package.nuspec in your project
 
-6. You're good to go.
+5. You're good to go.
 
 Alternatively, you can add the import line into a specific .proj file, and the targets will then only be active for that project.
 
@@ -72,11 +70,11 @@ Detailed control can be achieved by setting the following properties:
  SetupNuGetPackages
    Set to true if you want to attempt to install packages from the packages.config file at the start of the build.  Default is false.
 
+ PackBaseDir
+   The working directory that the pack task should use.  Certain file paths are resolved relative to this directory.
+
  PublishDir
    The directory to publish to, as calculated by Microsoft.  Default is app.publish. 
-
-ItemGroups
-==========
 
  NuGetFeedUrls
    Specify this if you want to use a list of alternative feeds when installing packages before build.
