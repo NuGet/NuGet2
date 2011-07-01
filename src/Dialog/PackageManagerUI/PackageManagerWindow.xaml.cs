@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -26,6 +27,7 @@ namespace NuGet.Dialog.PackageManagerUI {
         private readonly ISelectedProviderSettings _selectedProviderSettings;
         private readonly IProductUpdateService _productUpdateService;
         private readonly IOptionsPageActivator _optionsPageActivator;
+        private readonly Project _activeProject;
 
         public PackageManagerWindow(Project project) :
             this(project,
@@ -43,7 +45,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                  ServiceLocator.GetInstance<IOptionsPageActivator>()) {
         }
 
-        public PackageManagerWindow(Project project,
+        private PackageManagerWindow(Project project,
                                     DTE dte,
                                     IVsUIShell vsUIShell,
                                     IVsPackageManagerFactory packageManagerFactory,
@@ -71,6 +73,7 @@ namespace NuGet.Dialog.PackageManagerUI {
             _selectedProviderSettings = selectedProviderSettings;
             _productUpdateService = productUpdateService;
             _optionsPageActivator = optionPageActivator;
+            _activeProject = project;
 
             InsertDisclaimerElement();
             AdjustSortComboBoxWidth();
@@ -141,7 +144,6 @@ namespace NuGet.Dialog.PackageManagerUI {
                     NuGet.Dialog.Resources.Dialog_Title,
                     dte.Solution.GetName() + ".sln");
 
-                activeProject = null;
                 localRepository = packageManager.LocalRepository;
 
                 onlineProvider = new SolutionOnlineProvider(
@@ -304,11 +306,25 @@ namespace NuGet.Dialog.PackageManagerUI {
         }
 
         private void ExecutedShowOptionsPage(object sender, ExecutedRoutedEventArgs e) {
-            Hide();
+            Close();
 
             _optionsPageActivator.ActivatePage(
-                OptionsPage.PackageSources,
-                () => ShowDialog());
+                OptionsPage.PackageSources, 
+                () => OnActivated(_activeProject));
+        }
+
+        /// <summary>
+        /// Called when coming back from the Options dialog
+        /// </summary>
+        private static void OnActivated(Project project) {
+            var window = new PackageManagerWindow(project);
+            try {
+                window.ShowModal();
+            } 
+            catch (TargetInvocationException exception) {
+                MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
+                ExceptionHelper.WriteToActivityLog(exception);
+            }
         }
 
         private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e) {
