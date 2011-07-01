@@ -58,10 +58,19 @@ namespace NuGet.MSBuild {
 
             Log.LogMessage(NuGetResources.StartingFetch);
 
-            bool installedAny = InstallPackages(packageManager, fileSystem, packageReferences);
+            bool installedAny;
+            try {
+                installedAny = InstallPackages(packageManager, fileSystem, packageReferences);
+            }
+            catch (InvalidOperationException ex) {
+                Log.LogError(ex.Message);
+                return false;
+            }
+
             if (!installedAny) {
                 Log.LogMessage(NuGetResources.NoPackagesFound);
             }
+
             return true;
         }
 

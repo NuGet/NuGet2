@@ -18,6 +18,36 @@ namespace NuGet.Test.MSBuild {
         public TestContext TestContext { get; set; }
 
         [TestMethod]
+        public void WillUseCurrentDirectoryIfBaseDirNotSet() {
+            var fileSystemProviderStub = new Mock<IFileSystemProvider>();
+            var currentDir = Directory.GetCurrentDirectory();
+            fileSystemProviderStub.Setup(c => c.CreateFileSystem(currentDir)).Returns(new MockFileSystem()).Verifiable();
+
+            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(fileSystemProviderStub: fileSystemProviderStub);
+            task.SpecFile = string.Empty;
+
+            task.Execute();
+
+            fileSystemProviderStub.Verify();
+        }
+
+        [TestMethod]
+        public void WillUseBaseDirectoryIfBaseDirSet()
+        {
+            var fileSystemProviderStub = new Mock<IFileSystemProvider>();
+            var baseDir = "/a/b/c";
+            fileSystemProviderStub.Setup(c => c.CreateFileSystem(baseDir)).Returns(new MockFileSystem()).Verifiable();
+
+            NuGet.MSBuild.NuGet task = CreateTaskWithDefaultStubs(fileSystemProviderStub: fileSystemProviderStub);
+            task.SpecFile = string.Empty;
+            task.BaseDir = baseDir;
+
+            task.Execute();
+
+            fileSystemProviderStub.Verify();
+        }
+
+        [TestMethod]
         public void WillLogAnErrorWhenTheSpecFileIsEmpty() {
             string actualMessage = null;
             var buildEngineStub = new Mock<IBuildEngine>();
@@ -173,7 +203,7 @@ namespace NuGet.Test.MSBuild {
                 buildEngineStub = new Mock<IBuildEngine>();
             }
 
-            var task = new NuGet.MSBuild.NuGet(fileSystemProviderStub.Object, fileSystemRoot);
+            var task = new NuGet.MSBuild.NuGet(fileSystemProviderStub.Object);
 
             task.BuildEngine = buildEngineStub.Object;
             task.SpecFile = fileSystemRoot + "thePackageId.nuspec";

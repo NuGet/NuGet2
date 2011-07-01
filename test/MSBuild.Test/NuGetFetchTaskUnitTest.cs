@@ -148,6 +148,29 @@ namespace NuGet.Test.MSBuild {
         }
 
         [TestMethod]
+        public void WillErrorGracefullyIfPackageNotFound() {
+            const string notFoundMessage = "Package not found";
+            var packageManagerStub = new Mock<IPackageManager>();
+            packageManagerStub
+                .Setup(x => x.InstallPackage(It.IsAny<string>(), It.IsAny<Version>(), true))
+                .Throws(new InvalidOperationException(notFoundMessage)).Verifiable();
+
+            string actualMessage = null;
+            var buildEngineStub = new Mock<IBuildEngine>();
+            buildEngineStub
+                .Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
+                .Callback<BuildErrorEventArgs>(e => actualMessage = e.Message);
+
+            NuGetFetch task = CreateTaskWithDefaultStubs(packageManagerStub: packageManagerStub, buildEngineStub: buildEngineStub);
+
+            var result = task.Execute();
+
+            Assert.AreEqual(false, result);
+            Assert.AreEqual(actualMessage, notFoundMessage);
+            packageManagerStub.Verify();
+        }
+
+        [TestMethod]
         public void WillInstallPackagesFromPackagesDotConfig() {
             var installed = 0;
             var packageManagerStub = new Mock<IPackageManager>();

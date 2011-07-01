@@ -9,7 +9,7 @@ namespace NuGet.MSBuild {
     public class NuGet : Task {
         private static readonly string SymbolsExtension = ".symbols" + Constants.PackageExtension;
         private readonly IFileSystemProvider _fileSystemProvider;
-        private readonly string _workingDirectory;
+        private string _workingDirectory;
 
         private static readonly string[] _defaultExcludes = new[] {
             // Exclude previous package files
@@ -32,13 +32,14 @@ namespace NuGet.MSBuild {
 
 
         public NuGet()
-            : this(new FileSystemProvider(), Directory.GetCurrentDirectory()) {
+            : this(new FileSystemProvider()) {
         }
 
-        public NuGet(IFileSystemProvider fileSystemProvider, string workingDirectory) {
+        public NuGet(IFileSystemProvider fileSystemProvider) {
             _fileSystemProvider = fileSystemProvider;
-            _workingDirectory = workingDirectory;
         }
+
+        public string BaseDir { get; set; }
 
         public string PackageDir { get; set; }
 
@@ -53,12 +54,18 @@ namespace NuGet.MSBuild {
         public bool Symbols { get; set; }
 
         public override bool Execute() {
+
+            _workingDirectory = Directory.GetCurrentDirectory();
+            if (!string.IsNullOrWhiteSpace(BaseDir)) {
+                _workingDirectory = BaseDir;
+            }
+
+            var fileSystem = _fileSystemProvider.CreateFileSystem(_workingDirectory);
+
             if (string.IsNullOrWhiteSpace(SpecFile)) {
                 Log.LogError(Resources.NuGetResources.SpecFileMustNotBeEmpty);
                 return false;
             }
-
-            var fileSystem = _fileSystemProvider.CreateFileSystem(_workingDirectory);
 
             if (!fileSystem.FileExists(SpecFile)) {
                 Log.LogError(Resources.NuGetResources.SpecFileDoesNotExist);
