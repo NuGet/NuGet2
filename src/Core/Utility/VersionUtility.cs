@@ -8,6 +8,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using NuGet.Resources;
 
+using CompatibilityMapping = System.Collections.Generic.Dictionary<string, string[]>;
+
 namespace NuGet {
     public static class VersionUtility {
         private const string NetFrameworkIdentifier = ".NETFramework";
@@ -31,6 +33,7 @@ namespace NuGet {
         private static readonly Dictionary<string, string> _knownProfiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             { "Client", "Client" },
             { "WP", "WindowsPhone" },
+            { "WP71", "WindowsPhone71" },
             { "CF", "CompactFramework" },
             { "Full", String.Empty }
         };
@@ -43,7 +46,23 @@ namespace NuGet {
 
         private static readonly Dictionary<string, string> _identifierToProfileFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             { "WindowsPhone", "wp" },
+            { "WindowsPhone71", "wp71" },
             { "CompactFramework", "cf" }
+        };
+        
+        private static readonly Dictionary<string, CompatibilityMapping> _compatibiltyMapping = new Dictionary<string, CompatibilityMapping>(StringComparer.OrdinalIgnoreCase) {
+            { 
+                // Client profile is compatible with the full framework (empty string is full)
+                NetFrameworkIdentifier, new CompatibilityMapping(StringComparer.OrdinalIgnoreCase) {
+                    { "", new [] { "Client" } },
+                    { "Client", new [] { "" } }
+                }
+            },
+            {
+                "Silverlight", new CompatibilityMapping(StringComparer.OrdinalIgnoreCase) {
+                    { "WindowsPhone", new[] { "WindowsPhone71" } }
+                }
+            }
         };
 
         public static Version DefaultTargetFrameworkVersion {
@@ -428,16 +447,23 @@ namespace NuGet {
                 return false;
             }
 
-            string targetProfile = frameworkName.Profile;
-
-            // BUG 938: Only do this fallback for the netframework, since we can't assume that different framworks are valid supersets
-            if (targetFrameworkName.Identifier.Equals(VersionUtility.NetFrameworkIdentifier, StringComparison.OrdinalIgnoreCase)) {
-                // We consider net40 to mean net40-full which is a superset of any specific profile.
-                // This means that a dll that is net40 will work for a project targeting net40-client.
-                targetProfile = targetFrameworkName.Profile;
+            // If the profile names are equal then they're compatible
+            if (String.Equals(frameworkName.Profile, targetFrameworkName.Profile, StringComparison.OrdinalIgnoreCase)) {
+                return true;
             }
 
-            return targetFrameworkName.Profile.Equals(targetProfile, StringComparison.OrdinalIgnoreCase);
+            // Get the compatibility mapping for this framework identifier
+            CompatibilityMapping mapping;
+            if (_compatibiltyMapping.TryGetValue(frameworkName.Identifier, out mapping)) {
+                // Get all compatible profiles for the target profile
+                string[] compatibleProfiles;
+                if (mapping.TryGetValue(targetFrameworkName.Profile, out compatibleProfiles)) {
+                    // See if this profile is in the list of compatible profiles
+                    return compatibleProfiles.Contains(frameworkName.Profile, StringComparer.OrdinalIgnoreCase);
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
