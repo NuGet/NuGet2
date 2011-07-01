@@ -5,20 +5,18 @@
         <SetupNuGetPackages Condition="'$(SetupNuGetPackages)'==''">false</SetupNuGetPackages>
         <CreateNuGetPackage Condition="'$(CreateNuGetPackage)'==''">false</CreateNuGetPackage>
 
-        <NuSpecFileName Condition="'$(NuSpecFileName)'==''">package.nuspec</NuSpecFileName>
-        <NuSpecFilePath Condition="'$(NuSpecFilePath)'==''">$(MSBuildProjectDirectory)\$(NuSpecFileName)</NuSpecFilePath>
+        <PackBaseDir Condition="'$(PackBaseDir)'==''">$(OutDir)</PackBaseDir>
+        <NuSpecFilePath Condition="'$(NuSpecFilePath)'==''">package.nuspec</NuSpecFilePath>
+        <PublishPackageDir Condition=" '$(PublishPackageDir)' == '' ">publish</PublishPackageDir>
 
         <PackageDirName Condition="'$(PackageDirName)'==''">Packages</PackageDirName>
         <PackageDir Condition="'$(PackageDir)'==''">$(MSBuildProjectDirectory)\..\$(PackageDirName)</PackageDir>
-
-        <PublishPackageDir Condition=" '$(PublishPackageDir)' == '' ">$(OutputPath)</PublishPackageDir>
 
         <PackageConfigName Condition="'$(PackageConfigName)'==''">packages.config</PackageConfigName>
         <PackageConfigPath Condition="'$(PackageConfigPath)'==''">$(MSBuildProjectDirectory)\$(PackageConfigName)</PackageConfigPath>
 
         <CreateOnly Condition="'$(CreateOnly)'==''">false</CreateOnly>
     </PropertyGroup>
-
 
     <!-- ======================================================
        Dependencies and wiring
@@ -122,7 +120,10 @@
 
         <!-- create the package from the spec file and return the path to the created package -->
         <!-- the working directory is the output directory for the build, so the spec file needs to be copied to output directory -->
-        <NuGet SpecFile="$(NuspecFilePath)" PackageDir="$(PublishPackageDir)" Symbols="true" BaseDir="$(PackBaseDir)">
+        <NuGet SpecFile="$(NuspecFilePath)" 
+               PackageDir="$(PublishPackageDir)" 
+               Symbols="true" 
+               BaseDir="$(PackBaseDir)">
             <Output TaskParameter="OutputPackage"
                   PropertyName="OutputPackagePath" />
         </NuGet>
