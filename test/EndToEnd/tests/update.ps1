@@ -720,3 +720,108 @@ function Test-BindingRedirectShouldNotBeAddedForNonStrongNamedAssemblies {
     # Assert
     Assert-Null (Get-ProjectItem $p app.config)
 }
+
+function Test-UpdateOnePackageInAllProjectsExecutesInstallPs1OnAllProjects {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p1 = New-ClassLibrary 'Project1'
+    $p2 = New-ClassLibrary 'Project2'
+
+    $p1, $p2 | Install-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot
+
+    $global:InstallPackageMessages = @()
+    $global:UninstallPackageMessages = @()
+
+    # Act
+    Update-Package TestUpdatePackage -Source $context.RepositoryRoot
+
+    # Assert
+    # The install.ps1 in the TestUpdatePackage package will add the project name to $global:InstallPackageMessages collection
+
+    Assert-AreEqual 2 $global:InstallPackageMessages.Count
+    Assert-AreEqual 'Project1' $global:InstallPackageMessages[0]
+    Assert-AreEqual 'Project2' $global:InstallPackageMessages[1]
+
+    Assert-AreEqual 2 $global:UnInstallPackageMessages.Count
+    Assert-AreEqual 'UninstallProject1' $global:UnInstallPackageMessages[0]
+    Assert-AreEqual 'UninstallProject2' $global:UnInstallPackageMessages[1]
+
+    #clean up
+    Remove-Variable InstallPackageMessages -Scope Global
+    Remove-Variable UninstallPackageMessages -Scope Global
+}
+
+function Test-SafeUpdateOnePackageInAllProjectsExecutesInstallPs1OnAllProjects {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p1 = New-ClassLibrary 'Project1'
+    $p2 = New-ClassLibrary 'Project2'
+
+    $p1, $p2 | Install-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot
+
+    $global:InstallPackageMessages = @()
+    $global:UninstallPackageMessages = @()
+
+    # Act
+    Update-Package TestUpdatePackage -Safe -Source $context.RepositoryRoot
+
+    # Assert
+    # The install.ps1 in the TestUpdatePackage package will add the (project name + ' safe') to $global:InstallPackageMessages collection
+
+    Assert-AreEqual 2 $global:InstallPackageMessages.Count
+    Assert-AreEqual 'Project1 safe' $global:InstallPackageMessages[0]
+    Assert-AreEqual 'Project2 safe' $global:InstallPackageMessages[1]
+
+    Assert-AreEqual 2 $global:UnInstallPackageMessages.Count
+    Assert-AreEqual 'UninstallProject1' $global:UnInstallPackageMessages[0]
+    Assert-AreEqual 'UninstallProject2' $global:UnInstallPackageMessages[1]
+
+    #clean up
+    Remove-Variable InstallPackageMessages -Scope Global
+    Remove-Variable UninstallPackageMessages -Scope Global
+}
+
+function Test-UpdateAllPackagesInAllProjectsExecutesInstallPs1OnAllProjects {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p1 = New-ClassLibrary 'Project1'
+    $p2 = New-ClassLibrary 'Project2'
+
+    $p1, $p2 | Install-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot
+    $p1, $p2 | Install-Package TestUpdateSecondPackage -Version 1.0.0.0 -Source $context.RepositoryRoot
+
+    $global:InstallPackageMessages = @()
+    $global:UninstallPackageMessages = @()
+
+    # Act
+    Update-Package -Source $context.RepositoryRoot
+
+    # Assert
+    # The install.ps1 in the TestUpdatePackage package will add the project name to $global:InstallPackageMessages collection
+    # The install.ps1 in the TestUpdateSecondPackage package will add the (project name + ' second') to $global:InstallPackageMessages collection
+
+    Assert-AreEqual 4 $global:InstallPackageMessages.Count
+    Assert-AreEqual 'Project1second' $global:InstallPackageMessages[0]
+    Assert-AreEqual 'Project2second' $global:InstallPackageMessages[1]
+    Assert-AreEqual 'Project1' $global:InstallPackageMessages[2]
+    Assert-AreEqual 'Project2' $global:InstallPackageMessages[3]
+
+    Assert-AreEqual 4 $global:UninstallPackageMessages.Count
+    Assert-AreEqual 'uninstallProject1second' $global:UnInstallPackageMessages[0]
+    Assert-AreEqual 'uninstallProject2second' $global:UnInstallPackageMessages[1]
+    Assert-AreEqual 'uninstallProject1' $global:UnInstallPackageMessages[2]
+    Assert-AreEqual 'uninstallProject2' $global:UnInstallPackageMessages[3]
+
+    #clean up
+    Remove-Variable InstallPackageMessages -Scope Global
+    Remove-Variable UninstallPackageMessages -Scope Global
+}

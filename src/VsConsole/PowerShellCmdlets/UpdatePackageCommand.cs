@@ -1,5 +1,6 @@
 using System;
 using System.Management.Automation;
+using EnvDTE;
 using NuGet.VisualStudio;
 
 namespace NuGet.PowerShell.Commands {
@@ -7,7 +8,7 @@ namespace NuGet.PowerShell.Commands {
     /// This project updates the specfied package to the specfied project.
     /// </summary>
     [Cmdlet(VerbsData.Update, "Package", DefaultParameterSetName = "All")]
-    public class UpdatePackageCommand : ProcessPackageBaseCommand {
+    public class UpdatePackageCommand : ProcessPackageBaseCommand, IPackageOperationEventListener {
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IProductUpdateService _productUpdateService;
@@ -94,10 +95,10 @@ namespace NuGet.PowerShell.Commands {
                         // If a package id was specified, but no project was specified, then update this package in all projects
                         if (String.IsNullOrEmpty(ProjectName)) {
                             if (Safe.IsPresent) {
-                                PackageManager.SafeUpdatePackage(Id, !IgnoreDependencies.IsPresent, this);
+                                PackageManager.SafeUpdatePackage(Id, !IgnoreDependencies.IsPresent, this, this);
                             }
                             else {
-                                PackageManager.UpdatePackage(Id, Version, !IgnoreDependencies.IsPresent, this);
+                                PackageManager.UpdatePackage(Id, Version, !IgnoreDependencies.IsPresent, this, this);
                             }
                         }
                         else if (projectManager != null) {
@@ -114,7 +115,7 @@ namespace NuGet.PowerShell.Commands {
                         // if no id was specified then update all packges in the solution
                         if (Safe.IsPresent) {
                             if (String.IsNullOrEmpty(ProjectName)) {
-                                PackageManager.SafeUpdatePackages(!IgnoreDependencies.IsPresent, this);
+                                PackageManager.SafeUpdatePackages(!IgnoreDependencies.IsPresent, this, this);
                             }
                             else if (projectManager != null) {
                                 PackageManager.SafeUpdatePackages(projectManager, !IgnoreDependencies.IsPresent, this);
@@ -122,7 +123,7 @@ namespace NuGet.PowerShell.Commands {
                         }
                         else {
                             if (String.IsNullOrEmpty(ProjectName)) {
-                                PackageManager.UpdatePackages(!IgnoreDependencies.IsPresent, this);
+                                PackageManager.UpdatePackages(!IgnoreDependencies.IsPresent, this, this);
                             }
                             else if (projectManager != null) {
                                 PackageManager.UpdatePackages(projectManager, !IgnoreDependencies.IsPresent, this);
@@ -147,6 +148,18 @@ namespace NuGet.PowerShell.Commands {
             if (_productUpdateService != null && _hasConnectedToHttpSource) {
                 _productUpdateService.CheckForAvailableUpdateAsync();
             }
+        }
+
+        public void OnBeforeAddPackageReference(Project project) {
+            RegisterProjectEvents(project);
+        }
+
+        public void OnAfterAddPackageReference(Project project) {
+            // No-op
+        }
+
+        public void OnAddPackageReferenceError(Project project, Exception exception) {
+            // No-op
         }
     }
 }

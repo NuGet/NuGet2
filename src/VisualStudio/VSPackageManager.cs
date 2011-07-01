@@ -229,13 +229,13 @@ namespace NuGet.VisualStudio {
             ExecuteOperationsWithPackage(projectManager, package, operations, () => UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies), logger);
         }
 
-        public void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, ILogger logger) {
+        public void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, ILogger logger, IPackageOperationEventListener eventListener) {
             UpdatePackage(packageId,
                           projectManager => UpdatePackageReference(projectManager, packageId, versionSpec, updateDependencies),
                           () => SourceRepository.FindPackage(packageId, versionSpec),
                           updateDependencies,
                           logger,
-                          NullPackageOperationEventListener.Instance);
+                          eventListener);
         }
 
         public void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger, IPackageOperationEventListener eventListener) {
@@ -247,17 +247,8 @@ namespace NuGet.VisualStudio {
                           eventListener);
         }
 
-        public void UpdatePackage(string packageId, Version version, bool updateDependencies, ILogger logger) {
-            UpdatePackage(packageId,
-                          projectManager => UpdatePackageReference(projectManager, packageId, version, updateDependencies),
-                          () => SourceRepository.FindPackage(packageId, version),
-                          updateDependencies,
-                          logger,
-                          NullPackageOperationEventListener.Instance);
-        }
-
-        public void UpdatePackages(bool updateDependencies, ILogger logger) {
-            UpdatePackages(updateDependencies, safeUpdate: false, logger: logger);
+        public void UpdatePackages(bool updateDependencies, ILogger logger, IPackageOperationEventListener eventListener) {
+            UpdatePackages(updateDependencies, safeUpdate: false, logger: logger, eventListener: eventListener);
         }
 
         public void UpdatePackages(IProjectManager projectManager, bool updateDependencies, ILogger logger) {
@@ -268,13 +259,13 @@ namespace NuGet.VisualStudio {
             UpdatePackages(projectManager, updateDependencies, safeUpdate: true, logger: logger);
         }
 
-        public void SafeUpdatePackage(string packageId, bool updateDependencies, ILogger logger) {
+        public void SafeUpdatePackage(string packageId, bool updateDependencies, ILogger logger, IPackageOperationEventListener eventListener) {
             UpdatePackage(packageId,
                           projectManager => UpdatePackageReference(projectManager, packageId, GetSafeRange(projectManager, packageId), updateDependencies),
                           () => SourceRepository.FindPackage(packageId, GetSafeRange(packageId)),
                           updateDependencies,
                           logger,
-                          NullPackageOperationEventListener.Instance);
+                          eventListener);
         }
 
         public void SafeUpdatePackage(IProjectManager projectManager, string packageId, bool updateDependencies, ILogger logger) {
@@ -286,8 +277,8 @@ namespace NuGet.VisualStudio {
                           logger);
         }
 
-        public void SafeUpdatePackages(bool updateDependencies, ILogger logger) {
-            UpdatePackages(updateDependencies, safeUpdate: true, logger: logger);
+        public void SafeUpdatePackages(bool updateDependencies, ILogger logger, IPackageOperationEventListener eventListener) {
+            UpdatePackages(updateDependencies, safeUpdate: true, logger: logger, eventListener: eventListener);
         }
 
         protected override void ExecuteUninstall(IPackage package) {
@@ -472,9 +463,9 @@ namespace NuGet.VisualStudio {
             RunProjectAction(projectManager, () => projectManager.AddPackageReference(packageId, version, ignoreDependencies));
         }
 
-        private void ExecuteOperationsWithPackage(IEnumerable<Project> projects, IPackage package, IEnumerable<PackageOperation> operations, Action<IProjectManager> projectAction, ILogger logger, IPackageOperationEventListener packageOperationEventListener) {
-            if (packageOperationEventListener == null) {
-                packageOperationEventListener = NullPackageOperationEventListener.Instance;
+        private void ExecuteOperationsWithPackage(IEnumerable<Project> projects, IPackage package, IEnumerable<PackageOperation> operations, Action<IProjectManager> projectAction, ILogger logger, IPackageOperationEventListener eventListener) {
+            if (eventListener == null) {
+                eventListener = NullPackageOperationEventListener.Instance;
             }
 
             ExecuteOperationsWithPackage(
@@ -486,7 +477,7 @@ namespace NuGet.VisualStudio {
 
                     foreach (var project in projects) {
                         try {
-                            packageOperationEventListener.OnBeforeAddPackageReference(project);
+                            eventListener.OnBeforeAddPackageReference(project);
 
                             IProjectManager projectManager = GetProjectManager(project);
                             InitializeLogger(logger, projectManager);
@@ -495,10 +486,10 @@ namespace NuGet.VisualStudio {
                             success |= true;
                         }
                         catch (Exception ex) {
-                            packageOperationEventListener.OnAddPackageReferenceError(project, ex);
+                            eventListener.OnAddPackageReferenceError(project, ex);
                         }
                         finally {
-                            packageOperationEventListener.OnAfterAddPackageReference(project);
+                            eventListener.OnAfterAddPackageReference(project);
                         }
                     }
 
@@ -789,15 +780,16 @@ namespace NuGet.VisualStudio {
             }, logger);
         }
 
-        private void UpdatePackages(bool updateDependencies, bool safeUpdate, ILogger logger) {
+        private void UpdatePackages(bool updateDependencies, bool safeUpdate, ILogger logger, IPackageOperationEventListener eventListener) {
             UpdatePackages(LocalRepository, package => {
                 if (safeUpdate) {
-                    SafeUpdatePackage(package.Id, updateDependencies, logger: logger);
+                    SafeUpdatePackage(package.Id, updateDependencies, logger: logger, eventListener: eventListener);
                 }
                 else {
-                    UpdatePackage(package.Id, version: null, updateDependencies: updateDependencies, logger: logger);
+                    UpdatePackage(package.Id, version: null, updateDependencies: updateDependencies, logger: logger, eventListener: eventListener);
                 }
-            }, logger);
+            },
+            logger);
         }
 
         private void UpdatePackages(IPackageRepository localRepository, Action<IPackage> updateAction, ILogger logger) {

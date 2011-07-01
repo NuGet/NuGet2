@@ -83,7 +83,7 @@ namespace NuGet.Dialog.Providers {
                 operations,
                 updateDependencies: true,
                 logger: this,
-                packageOperationEventListener: this);
+                eventListener: this);
 
             return true;
         }

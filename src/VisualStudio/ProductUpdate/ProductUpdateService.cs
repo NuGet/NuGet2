@@ -115,7 +115,7 @@ namespace NuGet.VisualStudio {
                 // The Extension Manager dialog may take a while to load. Use dispatcher timer to poll it until it shows up.
                 DispatcherTimer timer = new DispatcherTimer() {
                     Interval = TimeSpan.FromMilliseconds(100),
-                    Tag = 0     // store the number of pollings completed
+                    Tag = 0     // store the number of polls completed
                 };
                 timer.Tick += OnTimerTick;
                 timer.Start();
@@ -138,6 +138,11 @@ namespace NuGet.VisualStudio {
                 if (times < 10) {
                     timer.Tag = times + 1;
                     timer.Start();
+                } 
+                else {
+                    // assume the Extension Manager dialog is not available, open the visual studio gallery page of nuget
+                    const string NuGetGalleryPage = "http://go.microsoft.com/fwlink/?LinkID=223391";
+                    System.Diagnostics.Process.Start(NuGetGalleryPage);
                 }
             }
         }

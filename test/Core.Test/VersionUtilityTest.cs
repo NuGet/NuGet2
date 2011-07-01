@@ -227,6 +227,7 @@ namespace NuGet.Test {
             var sl3 = new FrameworkName("Silverlight", new Version(3, 0));
             var sl4 = new FrameworkName("Silverlight", new Version(4, 0));
             var wp7 = new FrameworkName("Silverlight", new Version(4, 0), "WindowsPhone");
+            var wp7Mango = new FrameworkName("Silverlight", new Version(4, 0), "WindowsPhone71");
             var netMicro41 = new FrameworkName(".NETMicroFramework", new Version(4, 1));
 
             // Act
@@ -235,6 +236,7 @@ namespace NuGet.Test {
             string sl3Value = VersionUtility.GetFrameworkString(sl3);
             string sl4Value = VersionUtility.GetFrameworkString(sl4);
             string wp7Value = VersionUtility.GetFrameworkString(wp7);
+            string wp7MangoValue = VersionUtility.GetFrameworkString(wp7Mango);
             string netMicro41Value = VersionUtility.GetFrameworkString(netMicro41);
 
             // Assert
@@ -243,6 +245,7 @@ namespace NuGet.Test {
             Assert.AreEqual("Silverlight3.0", sl3Value);
             Assert.AreEqual("Silverlight4.0", sl4Value);
             Assert.AreEqual("Silverlight4.0-WindowsPhone", wp7Value);
+            Assert.AreEqual("Silverlight4.0-WindowsPhone71", wp7MangoValue);
             Assert.AreEqual(".NETMicroFramework4.1", netMicro41Value);
         }
 
@@ -438,12 +441,27 @@ namespace NuGet.Test {
             FrameworkName wp7 = VersionUtility.ParseFrameworkName("sl3-wp");
 
             // Act
-            bool slCompatibleWithWp7 = VersionUtility.IsCompatible(sl3, wp7);
-            bool wp7CompatibleWithSl = VersionUtility.IsCompatible(wp7, sl3);
+            bool wp7CompatibleWithSl = VersionUtility.IsCompatible(sl3, wp7);
+            bool slCompatibleWithWp7 = VersionUtility.IsCompatible(wp7, sl3);
 
             // Assert
             Assert.IsFalse(slCompatibleWithWp7);
             Assert.IsFalse(wp7CompatibleWithSl);
+        }
+
+        [TestMethod]
+        public void IsCompatibleWindowsPhoneVersions() {
+            // Arrange
+            FrameworkName wp7 = VersionUtility.ParseFrameworkName("sl3-wp");
+            FrameworkName wp7Mango = VersionUtility.ParseFrameworkName("sl4-wp71");
+
+            // Act
+            bool wp7MangoCompatibleWithwp7 = VersionUtility.IsCompatible(wp7, wp7Mango);
+            bool wp7CompatibleWithwp7Mango = VersionUtility.IsCompatible(wp7Mango, wp7);
+
+            // Assert
+            Assert.IsFalse(wp7MangoCompatibleWithwp7);
+            Assert.IsTrue(wp7CompatibleWithwp7Mango);
         }
 
         [TestMethod]
@@ -453,12 +471,12 @@ namespace NuGet.Test {
             FrameworkName net40Client = VersionUtility.ParseFrameworkName("net40-client");
 
             // Act
-            bool netCompatibleWithClient = VersionUtility.IsCompatible(net40, net40Client);
-            bool netClientCompatibleWithNet = VersionUtility.IsCompatible(net40Client, net40);
+            bool netClientCompatibleWithNet = VersionUtility.IsCompatible(net40, net40Client);
+            bool netCompatibleWithClient = VersionUtility.IsCompatible(net40Client, net40);
 
             // Assert
-            Assert.IsTrue(netCompatibleWithClient);
             Assert.IsTrue(netClientCompatibleWithNet);
+            Assert.IsTrue(netCompatibleWithClient);
         }
 
         [TestMethod]
@@ -468,12 +486,12 @@ namespace NuGet.Test {
             FrameworkName net20 = VersionUtility.ParseFrameworkName("net20");
 
             // Act
-            bool net20CompatibleWithNet40 = VersionUtility.IsCompatible(net20, net40);
-            bool net40CompatibleWithNet20 = VersionUtility.IsCompatible(net40, net20);
+            bool net40CompatibleWithNet20 = VersionUtility.IsCompatible(net20, net40);
+            bool net20CompatibleWithNet40 = VersionUtility.IsCompatible(net40, net20);
 
             // Assert
-            Assert.IsFalse(net20CompatibleWithNet40);
-            Assert.IsTrue(net40CompatibleWithNet20);
+            Assert.IsFalse(net40CompatibleWithNet20);
+            Assert.IsTrue(net20CompatibleWithNet40);
         }
     }
 }
