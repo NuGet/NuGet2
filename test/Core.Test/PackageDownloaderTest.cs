@@ -7,6 +7,7 @@ using Moq;
 namespace NuGet.Test {
     [TestClass]
     public class PackageDownloaderTest {
+        [Ignore]
         [TestMethod]
         public void DownloadPackageWithUnverifiedPackageThrowsInvalidDataException() {
             // Arrange
