@@ -78,32 +78,27 @@ namespace NuGet {
             }
 
             foreach (var provider in RegisteredProviders) {
-                var credentials = ExecuteProvider(provider, uri, proxy);
-                if (credentials != null) {
-                    result = credentials;
-                    break;
+                ICredentials credentials = null;
+                var credentialState = provider.GetCredentials(uri, proxy, out credentials);
+                if (credentialState == CredentialState.Abort) {
+                    // return so that we don't cache null if the user has cancelled the credentials prompt.
+                    return null;
+                }
+                else {
+                    if (AreCredentialsValid(credentials, uri, proxy)) {
+                        result = credentials;
+                        _credentialCache.TryAdd(uri, result);
+                        break;
+                    }
+                    else {
+                        result = null;
+                    }
                 }
             }
 
-            _credentialCache.TryAdd(uri, result);
             return result;
         }
 
-        /// <summary>
-        /// This method is responsible for executing the given ICredentialProvider and validate
-        /// if the returned credentials are valid before continuing.
-        /// </summary>
-        /// <param name="provider"></param>
-        /// <param name="uri"></param>
-        /// <param name="proxy"></param>
-        /// <returns></returns>
-        protected virtual ICredentials ExecuteProvider(ICredentialProvider provider, Uri uri, IWebProxy proxy) {
-            var credentials = provider.GetCredentials(uri, proxy);
-            if (AreCredentialsValid(credentials, uri, proxy)) {
-                return credentials;
-            }
-            return null;
-        }
         /// <summary>
         /// This method is responsible for checking to see if the provided url requires
         /// authentication.
@@ -127,11 +122,14 @@ namespace NuGet {
             bool result = true;
             var webRequest = WebRequest.Create(uri);
             WebResponse webResponse = null;
-
             webRequest.Credentials = credentials;
-            // If the provided proxy is null then keep the original proxy on the request.
             webRequest.Proxy = proxy;
             try {
+                var httpRequest = webRequest as HttpWebRequest;
+                if (httpRequest != null) {
+                    httpRequest.KeepAlive = true;
+                    httpRequest.ProtocolVersion = HttpVersion.Version10;
+                }
                 webResponse = webRequest.GetResponse();
             }
             catch (WebException webException) {

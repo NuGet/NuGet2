@@ -86,6 +86,7 @@
     <Compile Include="Repositories\NullConstraintProvider.cs" />
     <Compile Include="Repositories\PackageReference.cs" />
     <Compile Include="Repositories\PackageReferenceFile.cs" />
+    <Compile Include="Utility\CredentialState.cs" />
     <Compile Include="Utility\ExceptionUtility.cs" />
     <Compile Include="Utility\HttpUtility.cs" />
     <Compile Include="Utility\ICredentialProvider.cs" />

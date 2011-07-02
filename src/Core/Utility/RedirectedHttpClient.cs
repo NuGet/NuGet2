@@ -21,15 +21,33 @@ namespace NuGet {
         }
 
         public override WebRequest CreateRequest() {
-            return _cachedClient.Value.CreateRequest();
+            return CachedClient.CreateRequest();
         }
 
         public override Uri Uri {
             get {
-                return _cachedClient.Value.Uri;
+                return CachedClient.Uri;
             }
         }
 
+        private IHttpClient CachedClient {
+            get {
+                // Reset the Lazy IHttpClient instance if we catch an Exception so that
+                // subsequent requests are able to try and create it again in case there
+                // was some issue with authentication or some other request related configuration
+                // If we don't do it this here then the exception is always thrown as soon as we
+                // try to access _cachedClient.Value property.
+                try {
+                    return _cachedClient.Value;
+                }
+                catch (Exception) {
+                    // Re-initialize the lazy object and throw the exception so that we can
+                    // see what happened.
+                    _cachedClient = new Lazy<IHttpClient>(EnsureClient);
+                    throw;
+                }
+            }
+        }
         private IHttpClient EnsureClient() {
             IHttpClient originalClient = new HttpClient(_originalUri);
             WebRequest request = originalClient.CreateRequest();

@@ -17,7 +17,15 @@ namespace NuGet {
         /// for the same Uri again.
         /// </summary>
         private readonly ConcurrentDictionary<Uri, IWebProxy> _proxyCache = new ConcurrentDictionary<Uri, IWebProxy>();
-        
+        /// <summary>
+        /// Capture the default System Proxy so that it can be re-used by the IProxyFinder
+        /// because we can't rely on WebRequest.DefaultWebProxy since someone can modify the DefaultWebProxy
+        /// property and we can't tell if it was modified and if we are still using System Proxy Settings or not.
+        /// One limitation of this method is that it does not look at the config file to get the defined proxy
+        /// settings.
+        /// </summary>
+        private static readonly IWebProxy _originalSystemProxy = WebRequest.GetSystemWebProxy();
+
         /// <summary>
         /// Returns a list of already registered ICredentialProvider instances that one can enumerate
         /// </summary>
@@ -74,45 +82,38 @@ namespace NuGet {
         private IWebProxy GetProxyInternal(Uri uri) {
             WebProxy systemProxy = GetSystemProxy(uri);
 
-            IWebProxy cachedProxy;
-            if (_proxyCache.TryGetValue(systemProxy.Address, out cachedProxy)) {
-                return cachedProxy;
+            IWebProxy result;
+            if (_proxyCache.TryGetValue(systemProxy.Address, out result)) {
+                return result;
             }
-
-            systemProxy.Credentials = GetProxyCredentials(uri);
-
-            // TODO: If the proxy that is returned is null do we really want to cache this?
-            // PRO: Subsequent requests for the given Uri should automatically return a null
-            //      proxy instance without going through the proxy detection logic.
-            // CON: If the user incorrectly types the password or an invalid proxy instance
-            //      is cached then the user has to re-start the "Client" to be able to re-try
-            //      connecting to a valid proxy.
-            _proxyCache.TryAdd(systemProxy.Address, systemProxy);
-
-            return systemProxy;
-        }
-
-        private ICredentials GetProxyCredentials(Uri uri) {
-            ICredentials result = null;
 
             foreach (var provider in RegisteredProviders) {
-                var credentials = ExecuteProvider(provider, uri);
-                if (credentials != null) {
-                    result = credentials;
-                    break;
+                ICredentials credentials = null;
+                var credentialState = provider.GetCredentials(uri, GetSystemProxy(uri), out credentials);
+                // The discovery process was aborted so stop the process and return null;
+                if (credentialState == CredentialState.Abort) {
+                    return null;
+                }
+                // Some sort of credentials were returned so lets validate them.
+                else {
+                    systemProxy.Credentials = credentials;
+                    // If the proxy with the new credentials are valid then
+                    // set the result to the valid proxy and break out of the discovery process.
+                    if (IsProxyValid(systemProxy, uri)) {
+                        result = systemProxy;
+                        // Cache the valid proxy result so that we can use it next time without having to go through
+                        // the discovery process.
+                        _proxyCache.TryAdd(systemProxy.Address, result);
+                        break;
+                    }
+                    // The credentials were not valid so continue the discovery process.
+                    else {
+                        result = null;
+                    }
                 }
             }
+            
             return result;
-        }
-
-        protected virtual ICredentials ExecuteProvider(ICredentialProvider provider, Uri uri) {
-            var credentials = provider.GetCredentials(uri);
-            if (credentials != null) {
-                var systemProxy = GetSystemProxy(uri);
-                systemProxy.Credentials = credentials;
-                return IsProxyValid(systemProxy, uri) ? credentials : null;
-            }
-            return null;
         }
 
         /// <summary>
@@ -123,8 +124,9 @@ namespace NuGet {
         private static WebProxy GetSystemProxy(Uri uri) {
             // WebRequest.DefaultWebProxy seems to be more capable in terms of getting the default
             // proxy settings instead of the WebRequest.GetSystemProxy()
-            IWebProxy proxy = WebRequest.DefaultWebProxy;
-            string proxyUrl = proxy.GetProxy(uri).OriginalString;
+            //IWebProxy proxy = WebRequest.DefaultWebProxy;
+            //string proxyUrl = proxy.GetProxy(uri).OriginalString;
+            var proxyUrl = _originalSystemProxy.GetProxy(uri).OriginalString;
             return new WebProxy(proxyUrl);
         }
 
@@ -138,23 +140,28 @@ namespace NuGet {
         /// <returns></returns>
         private static bool IsProxyValid(IWebProxy proxy, Uri uri) {
             bool result = true;
-            WebRequest request = WebRequest.Create(uri);
+            WebRequest webRequest = WebRequest.Create(uri);
             WebResponse response = null;
             // if we get a null proxy from the caller then don't use it and just re-set the same proxy that we
             // already have because I am seeing a strange performance hit when a new instance of a proxy is set
             // and it can take a few seconds to be changed before the method call continues.
-            request.Proxy = proxy ?? request.Proxy;
+            webRequest.Proxy = proxy ?? webRequest.Proxy;
             try {
                 // During testing we have observed that some proxy setups will return a 200/OK response
                 // even though the subsequent calls are not going to be valid for the same proxy
                 // and the set of credentials thus giving the user a 407 error.
                 // However having to cache the proxy when this service first get's a call and using
                 // a cached proxy instance seemed to resolve this issue.
-                response = request.GetResponse();
+                var httpRequest = webRequest as HttpWebRequest;
+                if (httpRequest != null) {
+                    httpRequest.KeepAlive = true;
+                    httpRequest.ProtocolVersion = HttpVersion.Version10;
+                }
+                response = webRequest.GetResponse();
             }
             catch (WebException webException) {
                 HttpWebResponse webResponse = webException.Response as HttpWebResponse;
-                if (webResponse == null || webResponse.StatusCode == HttpStatusCode.ProxyAuthenticationRequired) {
+                if (webResponse != null && webResponse.StatusCode == HttpStatusCode.ProxyAuthenticationRequired) {
                     result = false;
                 }
             }

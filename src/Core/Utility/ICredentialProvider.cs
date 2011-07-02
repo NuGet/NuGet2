@@ -7,15 +7,24 @@ namespace NuGet {
     /// support repository authentication. 
     /// </summary>
     public interface ICredentialProvider {
-
-        ICredentials GetCredentials(Uri uri);
         /// <summary>
-        /// Returns an ICredentials instance that the consumer would need in order
-        /// to properly authenticate to the given Uri.
+        /// Returns CredentialState state that let's the consumer know if ICredentials
+        /// were discovered by the ICredentialProvider. The credentials argument is then
+        /// populated with the discovered valid credentials that can be used for the given Uri.
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        CredentialState GetCredentials(Uri uri, out ICredentials credentials);
+        /// <summary>
+        /// Returns CredentialState state that let's the consumer know if ICredentials
+        /// were discovered by the ICredentialProvider. The credentials argument is then
+        /// populated with the discovered valid credentials that can be used for the given Uri.
+        /// The proxy instance if passed will be used to ensure that the request goes through the proxy
+        /// to ensure successfull connection to the destination Uri.
         /// </summary>
         /// <param name="uri"></param>
         /// <param name="proxy"></param>
         /// <returns></returns>
-        ICredentials GetCredentials(Uri uri, IWebProxy proxy);
+        CredentialState GetCredentials(Uri uri, IWebProxy proxy, out ICredentials credentials);
     }
 }

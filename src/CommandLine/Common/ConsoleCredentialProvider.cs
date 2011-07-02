@@ -5,19 +5,20 @@ using Console = System.Console;
 
 namespace NuGet {
     public class ConsoleCredentialProvider : ICredentialProvider {
-        public ICredentials GetCredentials(Uri uri) {
-            return GetCredentials(uri, null);
+        public CredentialState GetCredentials(Uri uri, out ICredentials credentials) {
+            return GetCredentials(uri, null, out credentials);
         }
-        public ICredentials GetCredentials(Uri uri, IWebProxy proxy) {
+        public CredentialState GetCredentials(Uri uri, IWebProxy proxy, out ICredentials credentials) {
             Console.WriteLine("Please provide credentials for: {0}", uri.OriginalString);
             Console.Write("Username: ");
             string username = Console.ReadLine();
             Console.Write("Password: ");
             SecureString password = ReadLineAsSecureString();
-            return new NetworkCredential {
+            credentials = new NetworkCredential {
                 UserName = username,
                 SecurePassword = password
             };
+            return CredentialState.HasCredentials;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
