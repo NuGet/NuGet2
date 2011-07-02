@@ -1191,3 +1191,25 @@ function Test-InstallPackageThrowsWhenSourceIsInvalid {
     # Act & Assert
     Assert-Throws { Install-Package jQuery -source "d:package" } "Invalid URI: A Dos path must be rooted, for example, 'c:\'."
 }
+
+function Test-InstallPackageInvokeInstallScriptWhenProjectNameHasApostrophe {
+    param(
+        $context
+    )
+    
+    # Arrange
+    New-Solution "Gun 'n Roses"
+    $p = New-ConsoleApplication
+
+    $global:InstallPackageMessages = @()
+
+    # Act
+    Install-Package TestUpdatePackage -Version 2.0.0.0 -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-AreEqual 1 $global:InstallPackageMessages.Count
+    Assert-AreEqual $p.Name $global:InstallPackageMessages[0]
+
+    # Clean up
+    Remove-Variable InstallPackageMessages -Scope Global
+}

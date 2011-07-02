@@ -47,5 +47,18 @@ namespace NuGet.VisualStudio {
                     folder);
             }
         }
+
+        public static string EscapePSPath(string path) {
+            if (path.Contains("'")) {
+                // if the path has an apostrophe, then use double quotes to enclose it.
+                // however, in that case, if the path also has $ characters in it, they
+                // will be inteprested as variables. Thus we escape the $ characters too.
+                return "\"" + path.Replace("$", "`$") + "\"";
+            } 
+            else {
+                // if the path doesn't have apostrophe, then it's safe to enclose it with aspostrophes
+                return "'" + path + "'";
+            }
+        }
     }
 }

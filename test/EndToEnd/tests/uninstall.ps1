@@ -463,3 +463,29 @@ function Test-UninstallPackageSwallowExceptionThrownByUninstallScript {
    Assert-Null (Get-ProjectPackage $p TestUninstallThrowPackage)
 
 }
+
+function Test-UninstallPackageInvokeInstallScriptWhenProjectNameHasApostrophe {
+    param(
+        $context
+    )
+    
+    # Arrange
+    New-Solution "Gun 'n Roses"
+    $p = New-ConsoleApplication
+
+    Install-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot
+
+    $global:UninstallPackageMessages = @()
+
+    $expectedMessage = "uninstall" + $p.Name
+
+    # Act
+    Uninstall-Package TestUpdatePackage -Version 1.0.0.0
+
+    # Assert
+    Assert-AreEqual 1 $global:UninstallPackageMessages.Count
+    Assert-AreEqual $expectedMessage $global:UninstallPackageMessages[0]
+
+    # Clean up
+    Remove-Variable UninstallPackageMessages -Scope Global
+}

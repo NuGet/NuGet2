@@ -6,6 +6,7 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using Microsoft.PowerShell;
 using NuGet;
+using NuGet.VisualStudio;
 
 namespace NuGetConsole.Host.PowerShell.Implementation {
     internal static class RunspaceExtensions {
@@ -119,19 +120,19 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 string folderPath = Path.GetDirectoryName(fullPath);
 
                 runspace.Invoke(
-                   "$__pc_args=@(); $input|%{$__pc_args+=$_}; & '" + fullPath + "' $__pc_args[0] $__pc_args[1] $__pc_args[2]; Remove-Variable __pc_args -Scope 0",
+                   "$__pc_args=@(); $input|%{$__pc_args+=$_}; & " + PathHelper.EscapePSPath(fullPath) + " $__pc_args[0] $__pc_args[1] $__pc_args[2]; Remove-Variable __pc_args -Scope 0",
                    new object[] { installPath, folderPath, package },
                    outputResults: true);
             }
         }
 
         public static void ImportModule(this Runspace runspace, string modulePath) {
-            runspace.Invoke("Import-Module '" + modulePath + "'", null, false);
+            runspace.Invoke("Import-Module " + PathHelper.EscapePSPath(modulePath), null, false);
         }
 
         public static void ChangePSDirectory(this Runspace runspace, string directory) {
             if (!String.IsNullOrWhiteSpace(directory)) {
-                runspace.Invoke("Set-Location " + directory, null, false);
+                runspace.Invoke("Set-Location " + PathHelper.EscapePSPath(directory), null, false);
             }
         }
     }

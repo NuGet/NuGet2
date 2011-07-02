@@ -191,7 +191,7 @@ namespace NuGet.PowerShell.Commands {
                 psVariable.Set("__package", package);
                 psVariable.Set("__project", project);
 
-                string command = "& '" + fullPath + "' $__rootPath $__toolsPath $__package $__project";
+                string command = "& " + PathHelper.EscapePSPath(fullPath) + " $__rootPath $__toolsPath $__package $__project";
                 WriteVerbose(String.Format(CultureInfo.CurrentCulture, VsResources.ExecutingScript, fullPath));
                 InvokeCommand.InvokeScript(command, false, PipelineResultTypes.Error, null, null);
 

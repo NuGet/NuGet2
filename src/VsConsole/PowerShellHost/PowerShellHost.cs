@@ -143,7 +143,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
 
                     _initialized = true;
 
-                    // when initializing host from the dialog, we don't want to execute existing init scripts in the solution, if any.
                     if (console.ShowDisclaimerHeader) {
                         DisplayDisclaimerAndHelpText();
                     }
@@ -172,7 +171,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private void UpdateWorkingDirectory() {
             string targetDir;
             if (_solutionManager.IsSolutionOpen) {
-                targetDir = "'" + _solutionManager.SolutionDirectory + "'";
+                targetDir = _solutionManager.SolutionDirectory;
             }
             else {
                 // if there is no solution open, we set the active directory to be user profile folder

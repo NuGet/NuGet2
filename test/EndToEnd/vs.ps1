@@ -34,8 +34,18 @@ function Ensure-Dir {
 }
 
 function New-Solution {
-    $id = New-Guid
-    $name = "Solution_$id"
+    param(
+        [string]$solutionName
+    )
+
+    if ($solutionName) {
+        $name = $solutionName 
+    }
+    else {
+        $id = New-Guid
+        $name = "Solution_$id"
+    }
+
     $solutionDir = Join-Path $OutputPath $name
     $solutionPath = Join-Path $solutionDir $name
     

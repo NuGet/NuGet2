@@ -38,7 +38,7 @@ namespace NuGet.VisualStudio {
 
                 IConsole console = OutputConsoleProvider.CreateOutputConsole(requirePowerShellHost: true);
                 Host.Execute(console,
-                    "$__pc_args=@(); $input|%{$__pc_args+=$_}; & '" + fullPath + "' $__pc_args[0] $__pc_args[1] $__pc_args[2] $__pc_args[3]; Remove-Variable __pc_args -Scope 0",
+                    "$__pc_args=@(); $input|%{$__pc_args+=$_}; & " + PathHelper.EscapePSPath(fullPath) + " $__pc_args[0] $__pc_args[1] $__pc_args[2] $__pc_args[3]; Remove-Variable __pc_args -Scope 0",
                     new object[] { installPath, toolsPath, package, project });
 
                 return true;
