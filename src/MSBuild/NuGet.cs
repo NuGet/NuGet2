@@ -56,13 +56,13 @@ namespace NuGet.MSBuild {
         public override bool Execute() {
 
             _workingDirectory = Directory.GetCurrentDirectory();
-            if (!string.IsNullOrWhiteSpace(BaseDir)) {
+            if (!String.IsNullOrWhiteSpace(BaseDir)) {
                 _workingDirectory = BaseDir;
             }
 
             var fileSystem = _fileSystemProvider.CreateFileSystem(_workingDirectory);
 
-            if (string.IsNullOrWhiteSpace(SpecFile)) {
+            if (String.IsNullOrWhiteSpace(SpecFile)) {
                 Log.LogError(Resources.NuGetResources.SpecFileMustNotBeEmpty);
                 return false;
             }
