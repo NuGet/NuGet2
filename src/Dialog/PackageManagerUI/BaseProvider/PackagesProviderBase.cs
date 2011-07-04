@@ -157,7 +157,8 @@ namespace NuGet.Dialog.Providers {
                 return null;
             }
 
-            if (!String.IsNullOrEmpty(searchText) && SelectedNode != null) {
+            if (!String.IsNullOrWhiteSpace(searchText) && SelectedNode != null) {
+                searchText = searchText.Trim();
                 if (_searchNode != null) {
                     _searchNode.SetSearchText(searchText);
                 }
