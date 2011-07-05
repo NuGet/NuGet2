@@ -1213,3 +1213,25 @@ function Test-InstallPackageInvokeInstallScriptWhenProjectNameHasApostrophe {
     # Clean up
     Remove-Variable InstallPackageMessages -Scope Global
 }
+
+function Test-InstallPackageInvokeInstallScriptWhenProjectNameHasBrakets {
+    param(
+        $context
+    )
+    
+    # Arrange
+    New-Solution "Gun [] Roses"
+    $p = New-ConsoleApplication
+
+    $global:InstallPackageMessages = @()
+
+    # Act
+    Install-Package TestUpdatePackage -Version 2.0.0.0 -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-AreEqual 1 $global:InstallPackageMessages.Count
+    Assert-AreEqual $p.Name $global:InstallPackageMessages[0]
+
+    # Clean up
+    Remove-Variable InstallPackageMessages -Scope Global
+}

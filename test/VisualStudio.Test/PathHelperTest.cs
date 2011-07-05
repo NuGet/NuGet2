@@ -92,6 +92,12 @@ namespace NuGet.VisualStudio.Test {
             TestEscapePSPath("'a$$'b", "\"'a`$`$'b\"");
             TestEscapePSPath("hello world", "'hello world'");
             TestEscapePSPath("Gun 'n Roses", "\"Gun 'n Roses\"");
+            TestEscapePSPath("Hello [ Kitty ]", "'Hello `[ Kitty `]'");
+            TestEscapePSPath("Foo []", "'Foo `[`]'");
+            TestEscapePSPath("Fo'o []", "\"Fo'o `[`]\"");
+            TestEscapePSPath("Bar [", "'Bar `['");
+            TestEscapePSPath("Bar ]", "'Bar `]'");
+            TestEscapePSPath(@"c:\users\name\Foo]\Console.sln", @"'c:\users\name\Foo`]\Console.sln'");
         }
 
         private static void TestEscapePSPath(string input, string expectedOutput) {

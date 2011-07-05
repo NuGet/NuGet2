@@ -49,10 +49,17 @@ namespace NuGet.VisualStudio {
         }
 
         public static string EscapePSPath(string path) {
+            if (path == null) {
+                throw new ArgumentNullException("path");
+            }
+
+            // The and [ the ] characters are interpreted as wildcard delimiters. Escape them first.
+            path = path.Replace("[", "`[").Replace("]", "`]");
+
             if (path.Contains("'")) {
-                // if the path has an apostrophe, then use double quotes to enclose it.
-                // however, in that case, if the path also has $ characters in it, they
-                // will be inteprested as variables. Thus we escape the $ characters too.
+                // If the path has an apostrophe, then use double quotes to enclose it.
+                // However, in that case, if the path also has $ characters in it, they
+                // will be inteprested as variables. Thus we escape the $ characters.
                 return "\"" + path.Replace("$", "`$") + "\"";
             } 
             else {
