@@ -83,5 +83,20 @@ namespace NuGet.VisualStudio.Test {
             Assert.IsTrue(output.Length == maxWidth);
             Assert.AreEqual(@"c:\...ame\", output);
         }
+
+        [TestMethod]
+        public void EscapePSPathTest() {
+            TestEscapePSPath("", "''");
+            TestEscapePSPath("abc", "'abc'");
+            TestEscapePSPath("a$$b", "'a$$b'");
+            TestEscapePSPath("'a$$'b", "\"'a`$`$'b\"");
+            TestEscapePSPath("hello world", "'hello world'");
+            TestEscapePSPath("Gun 'n Roses", "\"Gun 'n Roses\"");
+        }
+
+        private static void TestEscapePSPath(string input, string expectedOutput) {
+            string output = PathHelper.EscapePSPath(input);
+            Assert.AreEqual(expectedOutput, output);
+        }
     }
 }
