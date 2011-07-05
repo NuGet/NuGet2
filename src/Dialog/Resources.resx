@@ -315,4 +315,7 @@
   <data name="Dialog_RemoveDependencyMessage" xml:space="preserve">
     <value>Package '{0}' depends on the following packages. Do you want to uninstall them too?</value>
   </data>
+  <data name="PackageHasDependents" xml:space="preserve">
+    <value>Unable to uninstall '{0}' because '{1}' depend(s) on it.</value>
+  </data>
 </root>

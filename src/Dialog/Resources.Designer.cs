@@ -653,5 +653,14 @@ namespace NuGet.Dialog {
                 return ResourceManager.GetString("License_ViewLicense", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to uninstall &apos;{0}&apos; because &apos;{1}&apos; depend(s) on it..
+        /// </summary>
+        public static string PackageHasDependents {
+            get {
+                return ResourceManager.GetString("PackageHasDependents", resourceCulture);
+            }
+        }
     }
 }
