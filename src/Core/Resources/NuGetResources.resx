@@ -262,7 +262,7 @@
     <value>Package id '{0}' is invalid.</value>
   </data>
   <data name="InvalidFeed" xml:space="preserve">
-    <value>There was an error while processing the request. Please verify that '{0}' is a valid feed.</value>
+    <value>Could not connect to the feed specified at '{0}'. Please verify that the package source (located in the Package Manager Settings) is valid and ensure your network connectivity.</value>
   </data>
   <data name="UnavailablePackageSource" xml:space="preserve">
     <value>The package source named '{0}' is either invalid or not available and thus is currently unreachable.</value>

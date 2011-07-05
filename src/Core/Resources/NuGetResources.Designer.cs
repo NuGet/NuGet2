@@ -259,7 +259,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There was an error while processing the request. Please verify that &apos;{0}&apos; is a valid feed..
+        ///   Looks up a localized string similar to Could not connect to the feed specified at &apos;{0}&apos;. Please verify that the package source (located in the Package Manager Settings) is valid and ensure your network connectivity..
         /// </summary>
         internal static string InvalidFeed {
             get {
