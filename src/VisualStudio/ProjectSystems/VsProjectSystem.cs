@@ -121,8 +121,31 @@ namespace NuGet.VisualStudio {
                 // Get the full path to the reference
                 string fullPath = PathUtility.GetAbsolutePath(Root, referencePath);
 
+                string assemblyPath = fullPath;
+                bool useTempFile = false;
+                
+                // There is a bug in Visual Studio whereby if the fullPath contains a comma, 
+                // then calling Project.Object.References.Add() on it will throw a COM exception.
+                // To work around it, we copy the assembly into temp folder and add reference to the copied assembly
+                if (fullPath.Contains(",")) {
+                    string tempFile = Path.Combine(Path.GetTempPath(), Path.GetFileName(fullPath));
+                    File.Copy(fullPath, tempFile, true);
+                    assemblyPath = tempFile;
+                    useTempFile = true;
+                }
+
                 // Add a reference to the project
-                Reference reference = Project.Object.References.Add(fullPath);
+                Reference reference = Project.Object.References.Add(assemblyPath);
+
+                // if we copied the assembly to temp folder earlier, delete it now since we no longer need it.
+                if (useTempFile) {
+                    try {
+                        File.Delete(assemblyPath);
+                    } 
+                    catch (Exception) {
+                        // don't care if we fail to delete a temp file
+                    }
+                }
 
                 // Always set copy local to true for references that we add
                 reference.CopyLocal = true;
