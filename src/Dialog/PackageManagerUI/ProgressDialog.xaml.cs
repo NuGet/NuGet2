@@ -23,16 +23,11 @@ namespace NuGet.Dialog.PackageManagerUI {
             NativeMethods.RemoveMenu(hMenu, menuItemCount - 1, NativeMethods.MF_BYPOSITION);
         }
 
-        internal void SetCompleted(bool successful) {
-            if (successful) {
-                ForceClose();
-            }
-            else {
-                OkButton.IsEnabled = true;
-                ProgressBar.IsIndeterminate = false;
-                ProgressBar.Value = ProgressBar.Maximum;
-                StatusText.Text = NuGet.Dialog.Resources.Dialog_OperationFailed;
-            }
+        internal void SetErrorState() {
+            OkButton.IsEnabled = true;
+            ProgressBar.IsIndeterminate = false;
+            ProgressBar.Value = ProgressBar.Maximum;
+            StatusText.Text = NuGet.Dialog.Resources.Dialog_OperationFailed;
         }
 
         private void OkButton_Click(object sender, System.Windows.RoutedEventArgs e) {

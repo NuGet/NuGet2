@@ -4,12 +4,15 @@ using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace NuGet.Dialog.PackageManagerUI {
-
     [Export(typeof(IProgressWindowOpener))]
     public sealed class ProgressWindowOpener : IProgressWindowOpener {
+        private static readonly TimeSpan DelayInterval = TimeSpan.FromMilliseconds(500);
+
         private ProgressDialog _currentWindow;
         private readonly Dispatcher _uiDispatcher;
+        private DateTime _lastShowTime = DateTime.MinValue;
 
+        private Lazy<DispatcherTimer> _closeTimer;
         private Lazy<DispatcherTimer> _showTimer;
 
         public ProgressWindowOpener() {
@@ -17,11 +20,23 @@ namespace NuGet.Dialog.PackageManagerUI {
 
             _showTimer = new Lazy<DispatcherTimer>(() => {
                 var timer = new DispatcherTimer {
-                    Interval = TimeSpan.FromMilliseconds(500)
+                    Interval = DelayInterval
                 };
                 timer.Tick += new EventHandler(OnShowTimerTick);
                 return timer;
             });
+
+            _closeTimer = new Lazy<DispatcherTimer>(() => {
+                var timer = new DispatcherTimer();
+                timer.Tick += new EventHandler(OnCloseTimerTick);
+                return timer;
+            });
+        }
+
+        private DispatcherTimer CloseTimer {
+            get {
+                return _closeTimer.Value;
+            }
         }
 
         private bool IsPendingShow {
@@ -46,7 +61,19 @@ namespace NuGet.Dialog.PackageManagerUI {
                 else {
                     _currentWindow.ShowModal();
                 }
+                _lastShowTime = DateTime.Now;
             }
+        }
+
+        private void CancelPendingClose() {
+            if (_closeTimer.IsValueCreated) {
+                CloseTimer.Stop();
+            }
+        }
+
+        private void OnCloseTimerTick(object sender, EventArgs e) {
+            CancelPendingClose();
+            HandleClose(hideOnly: (bool)CloseTimer.Tag);
         }
 
         /// <summary>
@@ -64,6 +91,8 @@ namespace NuGet.Dialog.PackageManagerUI {
             }
 
             if (!IsPendingShow) {
+                CancelPendingClose();
+
                 if (_currentWindow == null) {
                     _currentWindow = new ProgressDialog();
                     _currentWindow.Closed += OnWindowClosed;
@@ -96,7 +125,7 @@ namespace NuGet.Dialog.PackageManagerUI {
 
             if (IsOpen) {
                 CancelPendingShow();
-                _currentWindow.Hide();
+                HandleClose(hideOnly: true);
             }
         }
 
@@ -113,9 +142,7 @@ namespace NuGet.Dialog.PackageManagerUI {
         public bool Close() {
             if (IsOpen) {
                 CancelPendingShow();
-
-                _currentWindow.ForceClose();
-                _currentWindow = null;
+                HandleClose(hideOnly: false);
                 return true;
             }
             else {
@@ -123,15 +150,33 @@ namespace NuGet.Dialog.PackageManagerUI {
             }
         }
 
-        public void SetCompleted(bool successful) {
-            if (IsOpen) {
-                if (successful) {
-                    // if successful, we are going to close the dialog automatically.
-                    // so cancel any pending show operation.
-                    CancelPendingShow();
+        private void HandleClose(bool hideOnly) {
+            TimeSpan elapsed = DateTime.Now - _lastShowTime;
+            if (elapsed >= DelayInterval) {
+                // if the dialog has been shown for more than 500ms, just close it
+                if (_currentWindow.IsVisible) {
+                    if (hideOnly) {
+                        _currentWindow.Hide();
+                    }
+                    else {
+                        _currentWindow.ForceClose();
+                    }
                 }
+            } 
+            else {
+                CloseTimer.Tag = hideOnly;
+                // otherwise, set a timer so that we close it after it has been shown for 500ms
+                CloseTimer.Interval = DelayInterval - elapsed;
+                CloseTimer.Start();
+            }
+        }
 
-                _currentWindow.SetCompleted(successful);
+        public void SetCompleted(bool successful) {
+            if (successful) {
+                Close();
+            }
+            else {
+                _currentWindow.SetErrorState();
             }
         }
 
