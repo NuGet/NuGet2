@@ -59,21 +59,13 @@ namespace NuGet.Commands {
             }
             else {
                 PackageManager packageManager = CreatePackageManager(fileSystem);
-
                 string packageId = Arguments[0];
-
                 Version version = Version != null ? new Version(Version) : null;
 
-                if (!AllowMultipleVersions) {
-                    // If side-by-side is turned off, we need to try and update the package.
-                    var installedPackage = packageManager.LocalRepository.FindPackage(packageId);
-                    var sourcePackage = packageManager.SourceRepository.FindPackage(packageId, version);
-                    if (installedPackage != null && sourcePackage != null && installedPackage.Version != sourcePackage.Version) {
-                        packageManager.UninstallPackage(installedPackage);
-                    }
+                bool result = InstallPackage(packageManager, packageId, version, uninstallDependencies: true);
+                if (!result) {
+                    Console.WriteLine(NuGetResources.InstallCommandPackageAlreadyExists, packageId);
                 }
-
-                packageManager.InstallPackage(packageId, version);
             }
         }
 
@@ -93,16 +85,32 @@ namespace NuGet.Commands {
 
             bool installedAny = false;
             foreach (var package in packageReferences) {
-                if (!IsPackageInstalled(package.Id, package.Version, packageManager, fileSystem)) {
-                    // Note that we ignore dependencies here because packages.config already contains the full closure
-                    packageManager.InstallPackage(package.Id, package.Version, ignoreDependencies: true);
-                    installedAny = true;
-                }
+                // Note that we ignore dependencies here because packages.config already contains the full closure
+                installedAny |= InstallPackage(packageManager, package.Id, package.Version, uninstallDependencies: false);
             }
 
             if (!installedAny && packageReferences.Any()) {
                 Console.WriteLine(NuGetResources.InstallCommandNothingToInstall, PackageReferenceRepository.PackageReferenceFile);
             }
+        }
+
+        private bool InstallPackage(PackageManager packageManager, string packageId, Version version, bool uninstallDependencies) {
+            var installedPackage = packageManager.LocalRepository.FindPackage(packageId);
+            if (installedPackage != null) {
+                if (installedPackage.Version >= version) {
+                    // If the package is already installed (or the version being installed is lower), then we do not need to do anything. 
+                    return false;
+                }
+                else if (!AllowMultipleVersions) {
+                    // If the package is already installed, but
+                    // (a) the version we require is different from the one that is installed, 
+                    // (b) side-by-side is disabled
+                    // we need to uninstall it.
+                    packageManager.UninstallPackage(installedPackage, forceRemove: true, removeDependencies: uninstallDependencies);
+                }
+            }
+            packageManager.InstallPackage(packageId, version);
+            return true;
         }
 
         protected virtual PackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache = false) {
@@ -124,16 +132,6 @@ namespace NuGet.Commands {
             string installPath = OutputDirectory ?? Directory.GetCurrentDirectory();
 
             return new PhysicalFileSystem(installPath);
-        }
-
-        // Do a very quick check of whether a package in installed by checked whether the nupkg file exists
-        private static bool IsPackageInstalled(string packageId, Version version, PackageManager packageManager, IFileSystem fileSystem) {
-            var packageDir = packageManager.PathResolver.GetPackageDirectory(packageId, version);
-            var packageFile = packageManager.PathResolver.GetPackageFileName(packageId, version);
-
-            string packagePath = Path.Combine(packageDir, packageFile);
-
-            return fileSystem.FileExists(packagePath);
         }
     }
 }

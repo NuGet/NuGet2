@@ -393,6 +393,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Package &quot;{0}&quot; is already installed..
+        /// </summary>
+        internal static string InstallCommandPackageAlreadyExists {
+            get {
+                return ResourceManager.GetString("InstallCommandPackageAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A list of packages sources to use for the install..
         /// </summary>
         internal static string InstallCommandSourceDescription {
