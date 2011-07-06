@@ -45,19 +45,6 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void TransformFileThrowsIfTokenValueIsNull() {
-            // Arrange
-            var processor = new Preprocessor();
-            var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
-            var mockFile = new Mock<IPackageFile>();
-            mockFile.Setup(m => m.Path).Returns("foo.bar.pp");
-            mockFile.Setup(m => m.GetStream()).Returns(() => GetStream("test $token$"));
-
-            // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => processor.TransformFile(mockFile.Object, "foo.bar", mockProjectSystem.Object), "The replacement token 'token' has no value.");
-        }
-
-        [TestMethod]
         public void RevertFileRemovesFileIfContentIsTheSame() {
             // Arrange
             var processor = new Preprocessor();

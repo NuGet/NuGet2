@@ -102,10 +102,12 @@ function Test-FailedInstallRollsBackInstall {
     # Arrange
     $p = New-ClassLibrary
 
-    # Act & Assert
-    Assert-Throws { Install-Package haack.metaweblog -Project $p.Name -Source $context.RepositoryRoot } "The replacement token 'namespace' has no value."
-    Assert-Null (Get-ProjectPackage $p haack.metaweblog 0.1.0)
-    Assert-Null (Get-SolutionPackage haack.metaweblog 0.1.0)
+    # Act
+    Install-Package haack.metaweblog -Project $p.Name -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-NotNull (Get-ProjectPackage $p haack.metaweblog 0.1.0)
+    Assert-NotNull (Get-SolutionPackage haack.metaweblog 0.1.0)
 }
 
 function Test-PackageWithIncompatibleAssembliesRollsInstallBack {

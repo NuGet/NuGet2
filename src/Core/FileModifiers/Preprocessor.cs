@@ -26,18 +26,18 @@ namespace NuGet {
         }
 
         internal static string Process(IPackageFile file, IPropertyProvider propertyProvider) {
-            return Process(file.GetStream(), propertyProvider);
+            return Process(file.GetStream(), propertyProvider, throwIfNotFound: false);
         }
 
-        internal static string Process(Stream stream, IPropertyProvider propertyProvider) {
+        internal static string Process(Stream stream, IPropertyProvider propertyProvider, bool throwIfNotFound = true) {
             string text = stream.ReadToEnd();
-            return _tokenRegex.Replace(text, match => ReplaceToken(match, propertyProvider));
+            return _tokenRegex.Replace(text, match => ReplaceToken(match, propertyProvider, throwIfNotFound));
         }
 
-        private static string ReplaceToken(Match match, IPropertyProvider propertyProvider) {
+        private static string ReplaceToken(Match match, IPropertyProvider propertyProvider, bool throwIfNotFound) {
             string propertyName = match.Groups["propertyName"].Value;
             var value = propertyProvider.GetPropertyValue(propertyName);
-            if (value == null) {
+            if (value == null && throwIfNotFound) {
                 throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.TokenHasNoValue, propertyName));
             }
             return value;
