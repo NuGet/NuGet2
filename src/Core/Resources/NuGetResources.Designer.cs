@@ -277,7 +277,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Package id &apos;{0}&apos; is invalid..
+        ///   Looks up a localized string similar to The package ID &apos;{0}&apos; contains invalid characters. Examples of valid package IDs include &apos;MyPackage&apos; and &apos;MyPackage.Sample&apos;..
         /// </summary>
         internal static string InvalidPackageId {
             get {

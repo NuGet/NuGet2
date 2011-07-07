@@ -644,8 +644,8 @@ Enabling license acceptance requires a license url.");
             };
             builder.Authors.Add("Me");
 
-            // Act & Assert
-            ExceptionAssert.ThrowsArgumentException(() => builder.Save(new MemoryStream()), "Package id '  a.  b' is invalid.");
+            // Act & Assert            
+            ExceptionAssert.ThrowsArgumentException(() => builder.Save(new MemoryStream()), "The package ID '  a.  b' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.");
         }
 
         [TestMethod]

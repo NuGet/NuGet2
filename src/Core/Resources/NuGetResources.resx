@@ -259,7 +259,7 @@
     <value>File not found: '{0}'.</value>
   </data>
   <data name="InvalidPackageId" xml:space="preserve">
-    <value>Package id '{0}' is invalid.</value>
+    <value>The package ID '{0}' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.</value>
   </data>
   <data name="InvalidFeed" xml:space="preserve">
     <value>Could not connect to the feed specified at '{0}'. Please verify that the package source (located in the Package Manager Settings) is valid and ensure your network connectivity.</value>

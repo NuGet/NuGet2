@@ -9,7 +9,7 @@ namespace NuGet.Test {
             string packageId = "  Invalid  . Woo   .";
 
             // Act & Assert
-            ExceptionAssert.ThrowsArgumentException(() => PackageIdValidator.ValidatePackageId(packageId), "Package id '  Invalid  . Woo   .' is invalid.");
+            ExceptionAssert.ThrowsArgumentException(() => PackageIdValidator.ValidatePackageId(packageId), "The package ID '  Invalid  . Woo   .' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.");
         }
 
         [TestMethod]
