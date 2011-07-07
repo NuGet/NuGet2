@@ -383,6 +383,28 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void ParseVersionSpecRangeIntegerRanges() {
+            // Act
+            var versionInfo = VersionUtility.ParseVersionSpec("   [1, 2]  ");
+
+            // Assert
+            Assert.AreEqual("1.0", versionInfo.MinVersion.ToString());
+            Assert.IsTrue(versionInfo.IsMinInclusive);
+            Assert.AreEqual("2.0", versionInfo.MaxVersion.ToString());
+            Assert.IsTrue(versionInfo.IsMaxInclusive);
+        }
+
+        [TestMethod]
+        public void ParseVersionSpecRangeNegativeIntegerRanges() {
+            // Act
+            IVersionSpec versionInfo;
+            bool parsed = VersionUtility.TryParseVersionSpec("   [-1, 2]  ", out versionInfo);
+
+            Assert.IsFalse(parsed);
+            Assert.IsNull(versionInfo);
+        }
+
+        [TestMethod]
         public void TrimVersionTrimsRevisionIfZero() {
             // Act
             var version = VersionUtility.TrimVersion(new Version("1.2.3.0"));

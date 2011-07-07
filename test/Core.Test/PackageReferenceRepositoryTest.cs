@@ -220,13 +220,13 @@ namespace NuGet.Test {
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
-  <package id=""A"" version=""1.0"" allowedVersions=""[1, 3)"" />
+  <package id=""A"" version=""1.0"" allowedVersions=""[-1.3, 3)"" />
 </packages>");
             var referenceRepository = new PackageReferenceRepository(fileSystem, repository.Object);
 
 
             // Act & Assert
-            ExceptionAssert.ThrowsArgumentException(() => referenceRepository.GetConstraint("A"), "'[1, 3)' is not a valid version string.");
+            ExceptionAssert.ThrowsArgumentException(() => referenceRepository.GetConstraint("A"), "'[-1.3, 3)' is not a valid version string.");
         }
 
         [TestMethod]

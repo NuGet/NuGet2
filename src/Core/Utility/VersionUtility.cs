@@ -49,7 +49,7 @@ namespace NuGet {
             { "WindowsPhone71", "wp71" },
             { "CompactFramework", "cf" }
         };
-        
+
         private static readonly Dictionary<string, CompatibilityMapping> _compatibiltyMapping = new Dictionary<string, CompatibilityMapping>(StringComparer.OrdinalIgnoreCase) {
             { 
                 // Client profile is compatible with the full framework (empty string is full)
@@ -283,7 +283,7 @@ namespace NuGet {
 
             // Only parse the min version if it's non-empty
             if (!String.IsNullOrWhiteSpace(minVersionString)) {
-                if (!Version.TryParse(minVersionString, out version)) {
+                if (!TryParseVersion(minVersionString, out version)) {
                     return false;
                 }
                 versionSpec.MinVersion = version;
@@ -291,7 +291,7 @@ namespace NuGet {
 
             // Same deal for max
             if (!String.IsNullOrWhiteSpace(maxVersionString)) {
-                if (!Version.TryParse(maxVersionString, out version)) {
+                if (!TryParseVersion(maxVersionString, out version)) {
                     return false;
                 }
                 versionSpec.MaxVersion = version;
@@ -486,6 +486,18 @@ namespace NuGet {
             }
 
             return compatibility;
+        }
+
+        private static bool TryParseVersion(string versionString, out Version version) {
+            version = null;
+            if (!Version.TryParse(versionString, out version)) {
+                // Support integer version numbers (i.e 1 -> 1.0)
+                int versionNumber;
+                if (Int32.TryParse(versionString, out versionNumber) && versionNumber > 0) {
+                    version = new Version(versionNumber, 0);
+                }
+            }
+            return version != null;
         }
     }
 }
