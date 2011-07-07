@@ -2,6 +2,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:c="clr-namespace:Microsoft.VisualStudio.ExtensionsExplorer.UI;assembly=Microsoft.VisualStudio.ExtensionsExplorer.UI"
     xmlns:shared="clr-namespace:Microsoft.VisualStudio.ExtensionsExplorer.UI;assembly=Microsoft.VisualStudio.ExtensionsExplorer.UI"
+    xmlns:eml="clr-namespace:Microsoft.VisualStudio.ExtensionManager.UI;assembly=Microsoft.VisualStudio.ExtensionManager.Implementation"                     
     xmlns:self="clr-namespace:NuGet.Dialog.PackageManagerUI">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="CommonStyles.xaml" />
@@ -18,12 +19,12 @@
         <Setter Property="StretchDirection" Value="DownOnly" />
         <Setter Property="Stretch" Value="Uniform" />
     </Style>
-    <Style  x:Key="TileTitleTextBoxStyle" TargetType="{x:Type self:TextBlockControl}">
+    <Style  x:Key="TileTitleTextBoxStyle" TargetType="{x:Type eml:TextBlockControl}">
         <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="TextTrimming" Value="CharacterEllipsis" />
     </Style>
-    <Style  x:Key="TileDescriptionTextBoxStyle" TargetType="{x:Type self:TextBlockControl}">
+    <Style  x:Key="TileDescriptionTextBoxStyle" TargetType="{x:Type eml:TextBlockControl}">
         <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
         <Setter Property="MaxHeight" Value="44" />
         <Setter Property="TextWrapping" Value="Wrap" />
@@ -48,7 +49,7 @@
         <Setter Property="Margin" Value="6,3" />
         <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
     </Style>
-    <Style TargetType="{x:Type self:TextBlockControl}">
+    <Style TargetType="{x:Type eml:TextBlockControl}">
         <Style.Triggers>
             <Trigger Property="UIElement.IsEnabled" Value="False">
                 <Setter Property="TextElement.Foreground">
@@ -70,15 +71,15 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <Style x:Key="DetailDescriptionTextBoxStyle" TargetType="{x:Type self:TextBlockControl}">
+    <Style x:Key="DetailDescriptionTextBoxStyle" TargetType="{x:Type eml:TextBlockControl}">
         <Setter Property="Margin" Value="0,8,0,8" />
         <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="TextTrimming" Value="CharacterEllipsis" />
     </Style>
-    <Style x:Key="NoDependencyTextBoxStyle" TargetType="{x:Type self:TextBlockControl}" BasedOn="{StaticResource DetailDescriptionTextBoxStyle}">
+    <Style x:Key="NoDependencyTextBoxStyle" TargetType="{x:Type eml:TextBlockControl}" BasedOn="{StaticResource DetailDescriptionTextBoxStyle}">
         <Setter Property="FontStyle" Value="Italic" />
     </Style>
-    <Style x:Key="DetailDependenciesTextBoxStyle" TargetType="{x:Type self:TextBlockControl}" BasedOn="{StaticResource DetailDescriptionTextBoxStyle}">
+    <Style x:Key="DetailDependenciesTextBoxStyle" TargetType="{x:Type eml:TextBlockControl}" BasedOn="{StaticResource DetailDescriptionTextBoxStyle}">
     </Style>
     <Style x:Key="DetailImageStyle" TargetType="{x:Type Image}">
         <Setter Property="Width" Value="200" />
@@ -88,14 +89,14 @@
         <Setter Property="Margin" Value="0,3,0,0" />
         <Setter Property="Orientation" Value="Horizontal" />
     </Style>
-    <Style x:Key="DetailHyperlinkTextBlockStyle" TargetType="{x:Type self:TextBlockControl}">
+    <Style x:Key="DetailHyperlinkTextBlockStyle" TargetType="{x:Type eml:TextBlockControl}">
         <Setter Property="Margin" Value="0,3,0,0" />
     </Style>
-    <Style x:Key="DetailMetadataLabelStyle" TargetType="{x:Type self:TextBlockControl}">
+    <Style x:Key="DetailMetadataLabelStyle" TargetType="{x:Type eml:TextBlockControl}">
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Margin" Value="0,0,0,0" />
     </Style>
-    <Style x:Key="DetailMetadataValueStyle" TargetType="{x:Type self:TextBlockControl}">
+    <Style x:Key="DetailMetadataValueStyle" TargetType="{x:Type eml:TextBlockControl}">
         <Setter Property="Margin" Value="3,0,0,0" />
     </Style>
 

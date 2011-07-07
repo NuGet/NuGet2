@@ -12,6 +12,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualStudio.ExtensionManager" />
+    <Reference Include="Microsoft.VisualStudio.ExtensionManager.Implementation" />
     <Reference Include="Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -118,8 +120,6 @@
     <Compile Include="PackageManagerUI\BaseProvider\LazyRepository.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\PackageSortDescriptor.cs" />
     <Compile Include="PackageManagerUI\BaseProvider\ProviderServices.cs" />
-    <Compile Include="PackageManagerUI\Controls\RatingControl.cs" />
-    <Compile Include="PackageManagerUI\Controls\StarControl.cs" />
     <Compile Include="PackageManagerUI\Converters\BooleanToVisibilityConverter.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -152,9 +152,6 @@
     <Compile Include="PackageManagerUI\BaseProvider\PackagesTreeNodeBase.cs" />
     <Compile Include="PackageManagerUI\PackageManagerWindow.xaml.cs">
       <DependentUpon>PackageManagerWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="PackageManagerUI\Controls\TextBlockControl.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
@@ -234,10 +231,6 @@
     <Page Include="PackageManagerUI\TemplateStyles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="themes\generic.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>

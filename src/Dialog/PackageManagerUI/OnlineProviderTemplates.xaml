@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:self="clr-namespace:NuGet.Dialog.PackageManagerUI"
     xmlns:resources="clr-namespace:NuGet.Dialog"
+    xmlns:eml="clr-namespace:Microsoft.VisualStudio.ExtensionManager.UI;assembly=Microsoft.VisualStudio.ExtensionManager.Implementation"
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     
     <ResourceDictionary.MergedDictionaries>
@@ -30,22 +31,22 @@
             </Image>
 
             <StackPanel Grid.Column="1" Style="{StaticResource TileMiddleStackPanelStyle}">
-                <self:TextBlockControl  
+                <eml:TextBlockControl  
                     Text="{Binding Name}" 
                     Style="{StaticResource TileTitleTextBoxStyle}">
                     <TextBlock.ToolTip>
                         <TextBlock Text="{Binding Name}" Style="{StaticResource TileToolTipStyle}"/>
                     </TextBlock.ToolTip>
-                </self:TextBlockControl>
+                </eml:TextBlockControl>
 
-                <self:TextBlockControl
+                <eml:TextBlockControl
                     x:Name="SummaryText"
                     Text="{Binding Summary, Converter={StaticResource NormalizeTextConverter}}" 
                     Style="{StaticResource TileDescriptionTextBoxStyle}">
-                    <TextBlock.ToolTip>
+                    <eml:TextBlockControl.ToolTip>
                         <TextBlock Text="{Binding Summary, Converter={StaticResource NormalizeTextConverter}}" Style="{StaticResource TileToolTipStyle}"/>
-                    </TextBlock.ToolTip>
-                </self:TextBlockControl>
+                    </eml:TextBlockControl.ToolTip>
+                </eml:TextBlockControl>
             </StackPanel>
             
             <StackPanel 
@@ -94,52 +95,52 @@
             <StackPanel Margin="8">                
                 <!-- Authors -->
                 <DockPanel>
-                    <self:TextBlockControl DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_CreatedByLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl Text="{Binding Authors, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
+                    <eml:TextBlockControl DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_CreatedByLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <eml:TextBlockControl Text="{Binding Authors, Converter={StaticResource authorNamesConverter}}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
                 </DockPanel>
 
                 <!-- Id -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
-                    <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_IdLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl Style="{StaticResource DetailMetadataValueStyle}">                            
+                    <eml:TextBlockControl Text="{x:Static resources:Resources.Dialog_IdLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <eml:TextBlockControl Style="{StaticResource DetailMetadataValueStyle}">                            
                         <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.GalleryDetailsUrl, Mode=OneTime, FallbackValue={x:Null}}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                             <Run Text="{Binding Id, Mode=OneWay}" />
                         </Hyperlink>
-                    </self:TextBlockControl>
+                    </eml:TextBlockControl>
                 </StackPanel>
 
                 <!-- Version -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
-                    <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl Text="{Binding Version}" Style="{StaticResource DetailMetadataValueStyle}"  />
+                    <eml:TextBlockControl Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <eml:TextBlockControl Text="{Binding Version}" Style="{StaticResource DetailMetadataValueStyle}"  />
                 </StackPanel>
 
                 <!-- Last Updated -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding PackageIdentity.LastUpdated, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
-                    <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_LastUpdatedLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl Text="{Binding PackageIdentity.LastUpdated, StringFormat='{}{0:d}'}" Style="{StaticResource DetailMetadataValueStyle}"  />
+                    <eml:TextBlockControl Text="{x:Static resources:Resources.Dialog_LastUpdatedLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <eml:TextBlockControl Text="{Binding PackageIdentity.LastUpdated, StringFormat='{}{0:d}'}" Style="{StaticResource DetailMetadataValueStyle}"  />
                 </StackPanel>
 
                 <!-- Download count -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding PackageIdentity.DownloadCount, Converter={StaticResource countConverter}, ConverterParameter=-1}">
-                    <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_DownloadsLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl Text="{Binding PackageIdentity.DownloadCount}" Style="{StaticResource DetailMetadataValueStyle}"  />
+                    <eml:TextBlockControl Text="{x:Static resources:Resources.Dialog_DownloadsLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <eml:TextBlockControl Text="{Binding PackageIdentity.DownloadCount}" Style="{StaticResource DetailMetadataValueStyle}"  />
                 </StackPanel>
 
                 <!-- Rating count -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding PackageIdentity.Rating, Converter={StaticResource countConverter}, ConverterParameter=-1}">
-                    <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_RatingLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:RatingControl Height="12" Value="{Binding PackageIdentity.Rating, Mode=OneWay}" Margin="3,0,3,0">
+                    <eml:TextBlockControl Text="{x:Static resources:Resources.Dialog_RatingLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <eml:MultiStarControl Height="12" Value="{Binding PackageIdentity.Rating, Mode=OneWay}" Margin="3,0,3,0">
                         <FrameworkElement.ToolTip>
                             <TextBlock Text="{Binding PackageIdentity.Rating, StringFormat={x:Static resources:Resources.Dialog_RatingTooltip}}" Style="{StaticResource TileToolTipStyle}"/>
                         </FrameworkElement.ToolTip>
-                    </self:RatingControl>
-                    <self:TextBlockControl Text="{Binding PackageIdentity.RatingsCount, StringFormat={x:Static resources:Resources.Dialog_VotesCount}}" Style="{StaticResource DetailMetadataValueStyle}" />
-                    <self:TextBlockControl Margin="4,0,0,0" Visibility="{Binding PackageIdentity.GalleryDetailsUrl, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
+                    </eml:MultiStarControl>
+                    <eml:TextBlockControl Text="{Binding PackageIdentity.RatingsCount, StringFormat={x:Static resources:Resources.Dialog_VotesCount}}" Style="{StaticResource DetailMetadataValueStyle}" />
+                    <eml:TextBlockControl Margin="4,0,0,0" Visibility="{Binding PackageIdentity.GalleryDetailsUrl, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
                         <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.GalleryDetailsUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                             <Run Text="{x:Static resources:Resources.Dialog_RateItLabel}" />
                         </Hyperlink>
-                    </self:TextBlockControl>
+                    </eml:TextBlockControl>
                 </StackPanel>
 
                 <!-- View License link -->
@@ -174,12 +175,12 @@
 
                 <!-- Tags -->
                 <DockPanel Margin="0,3,0,0" Visibility="{Binding PackageIdentity.Tags, Converter={StaticResource NullToVisibilityConverter}}">
-                    <self:TextBlockControl DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_TagLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl Text="{Binding PackageIdentity.Tags}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
+                    <eml:TextBlockControl DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_TagLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <eml:TextBlockControl Text="{Binding PackageIdentity.Tags}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
                 </DockPanel>
 
                 <!-- Dependencies list -->
-                <self:TextBlockControl Margin="0,3,0,0" Text="{x:Static resources:Resources.Dialog_DependenciesLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                <eml:TextBlockControl Margin="0,3,0,0" Text="{x:Static resources:Resources.Dialog_DependenciesLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
                                         
                 <ItemsControl
                     x:Name="DependencyItems"
@@ -192,25 +193,25 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <self:TextBlockControl 
+                <eml:TextBlockControl 
                     Margin="25,5,0,0"
                     Visibility="{Binding Items.Count, ElementName=DependencyItems, Converter={StaticResource invertedCountConverter}}"
                     Style="{StaticResource NoDependencyTextBoxStyle}" 
                     Text="{x:Static resources:Resources.Dialog_NoDependencyLabel}">
-                </self:TextBlockControl>
+                </eml:TextBlockControl>
 
                 <!-- Disclaimer text -->
-                <self:TextBlockControl 
+                <eml:TextBlockControl 
                     x:Name="Disclaimer"
                     FontStyle="Italic"
                     Visibility="{Binding Items.Count, ElementName=DependencyItems, Converter={StaticResource countConverter}}"
                     Style="{StaticResource DetailDescriptionTextBoxStyle}" 
                     Text="{x:Static resources:Resources.Dialog_PackageDisclaimer}"
                     TextWrapping="Wrap">
-                </self:TextBlockControl>
+                </eml:TextBlockControl>
                 
                 <!-- Installed Project list -->
-                <self:TextBlockControl 
+                <eml:TextBlockControl 
                     Margin="0,10,0,0" 
                     Text="{x:Static resources:Resources.Dialog_ProjectListLabel}" 
                     Style="{StaticResource DetailMetadataLabelStyle}"
