@@ -78,15 +78,14 @@ namespace NuGet {
             }
 
             foreach (var provider in RegisteredProviders) {
-                ICredentials credentials = null;
-                var credentialState = provider.GetCredentials(uri, proxy, out credentials);
-                if (credentialState == CredentialState.Abort) {
+                var credentials = provider.GetCredentials(uri, proxy);
+                if (credentials.Item1 == CredentialState.Abort) {
                     // return so that we don't cache null if the user has cancelled the credentials prompt.
                     return null;
                 }
                 else {
-                    if (AreCredentialsValid(credentials, uri, proxy)) {
-                        result = credentials;
+                    if (AreCredentialsValid(credentials.Item2, uri, proxy)) {
+                        result = credentials.Item2;
                         _credentialCache.TryAdd(uri, result);
                         break;
                     }

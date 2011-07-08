@@ -88,15 +88,14 @@ namespace NuGet {
             }
 
             foreach (var provider in RegisteredProviders) {
-                ICredentials credentials = null;
-                var credentialState = provider.GetCredentials(uri, GetSystemProxy(uri), out credentials);
+                var credentials = provider.GetCredentials(uri, GetSystemProxy(uri));
                 // The discovery process was aborted so stop the process and return null;
-                if (credentialState == CredentialState.Abort) {
+                if (credentials.Item1 == CredentialState.Abort) {
                     return null;
                 }
                 // Some sort of credentials were returned so lets validate them.
                 else {
-                    systemProxy.Credentials = credentials;
+                    systemProxy.Credentials = credentials.Item2;
                     // If the proxy with the new credentials are valid then
                     // set the result to the valid proxy and break out of the discovery process.
                     if (IsProxyValid(systemProxy, uri)) {

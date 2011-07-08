@@ -14,7 +14,7 @@ namespace NuGet {
         /// </summary>
         /// <param name="uri"></param>
         /// <returns></returns>
-        CredentialState GetCredentials(Uri uri, out ICredentials credentials);
+        Tuple<CredentialState, ICredentials> GetCredentials(Uri uri);
         /// <summary>
         /// Returns CredentialState state that let's the consumer know if ICredentials
         /// were discovered by the ICredentialProvider. The credentials argument is then
@@ -25,6 +25,6 @@ namespace NuGet {
         /// <param name="uri"></param>
         /// <param name="proxy"></param>
         /// <returns></returns>
-        CredentialState GetCredentials(Uri uri, IWebProxy proxy, out ICredentials credentials);
+        Tuple<CredentialState, ICredentials> GetCredentials(Uri uri, IWebProxy proxy);
     }
 }

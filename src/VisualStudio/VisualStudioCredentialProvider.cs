@@ -6,7 +6,6 @@ using Microsoft.VisualStudio.Shell.Interop;
 namespace NuGet.VisualStudio {
     public abstract class VisualStudioCredentialProvider: ICredentialProvider {
         private IVsWebProxy _webProxyService;
-        //private IWebProxy _originalProxy;
 
         public VisualStudioCredentialProvider()
             : this(ServiceLocator.GetGlobalService<SVsWebProxy, IVsWebProxy>()) {
@@ -19,8 +18,8 @@ namespace NuGet.VisualStudio {
             _webProxyService = webProxyService;
         }
 
-        public CredentialState GetCredentials(Uri uri, out ICredentials credentials) {
-            return GetCredentials(uri, null, out credentials);
+        public Tuple<CredentialState, ICredentials> GetCredentials(Uri uri) {
+            return GetCredentials(uri, null);
         }
 
         /// <summary>
@@ -31,8 +30,9 @@ namespace NuGet.VisualStudio {
         /// <param name="proxy"></param>
         /// <param name="credentials"></param>
         /// <returns></returns>
-        public CredentialState GetCredentials(Uri uri, IWebProxy proxy, out ICredentials credentials) {
+        public Tuple<CredentialState, ICredentials> GetCredentials(Uri uri, IWebProxy proxy) {
             IWebProxy originalProxy = null;
+            ICredentials credentials = null;
             if (proxy != null) {
                 originalProxy = new WebProxy(proxy.GetProxy(uri));
                 originalProxy.Credentials = proxy.Credentials == null
@@ -43,7 +43,7 @@ namespace NuGet.VisualStudio {
             var hasCachedCredentials = HasSavedCredentials(uri, out credentials);
             if (hasCachedCredentials && AreCredentialsValid(uri, credentials, proxy)) {
                 WebRequest.DefaultWebProxy = originalProxy;
-                return CredentialState.HasCredentials;
+                return new Tuple<CredentialState, ICredentials>(CredentialState.HasCredentials, credentials);
             }
             // The cached credentials that we found are not valid so let's ask the user
             // until they abort or give us valid credentials.
@@ -56,7 +56,7 @@ namespace NuGet.VisualStudio {
                 // If the discovery process was aborted then reset the original proxy and exit the process.
                 if (credentialState == CredentialState.Abort) {
                     WebRequest.DefaultWebProxy = originalProxy;
-                    return CredentialState.Abort;
+                    return new Tuple<CredentialState, ICredentials>(credentialState, credentials);
                 }
                 // Validate credentials and if they are valid then exit the discovery process
                 // otherwise continue asking the user for valid credentials until they give us something
@@ -64,7 +64,7 @@ namespace NuGet.VisualStudio {
                 if (AreCredentialsValid(uri, credentials, proxy)) {
                     // Reset the original WebRequest.DefaultWebProxy to what it was when we started credential discovery.
                     WebRequest.DefaultWebProxy = originalProxy;
-                    return credentialState;
+                    return new Tuple<CredentialState, ICredentials>(credentialState, credentials);
                 }
             }
         }
