@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using NuGet.Common;
@@ -7,7 +6,7 @@ using NuGet.Common;
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "push", "PushCommandDescription",
         MinArgs = 1, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
-        UsageSummaryResourceName = "PushCommandUsageSummary")]
+        UsageSummaryResourceName = "PushCommandUsageSummary", UsageExampleResourceName = "PushCommandUsageExamples")]
     public class PushCommand : Command {
         [Option(typeof(NuGetResources), "PushCommandCreateOnlyDescription", AltName = "co")]
         public bool CreateOnly { get; set; }

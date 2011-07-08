@@ -47,6 +47,11 @@
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="CommandManager.cs" />
     <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\HelpCommandMarkdownTemplate.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>HelpCommandMarkdownTemplate.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Commands\InstallCommand.cs" />
     <Compile Include="Commands\ProjectFactory.cs" />
     <Compile Include="Commands\SetApiKeyCommand.cs" />
@@ -75,6 +80,7 @@
     <Compile Include="Common\IConsole.cs" />
     <Compile Include="Common\IMSBuildProjectSystem.cs" />
     <Compile Include="Common\MSBuildProjectSystem.cs" />
+    <Compile Include="Properties\GlobalSuppressions.cs" />
     <Compile Include="NuGetResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -117,6 +123,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\NuGet.CommandLine.nuspec" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Commands\HelpCommandMarkdownTemplate.cshtml">
+      <SubType>Code</SubType>
+      <Generator>RazorGenerator</Generator>
+      <LastGenOutput>HelpCommandMarkdownTemplate.cs</LastGenOutput>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="MergeExecutable">

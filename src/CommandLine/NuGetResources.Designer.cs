@@ -376,6 +376,19 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to nuget install elmah
+        ///
+        ///nuget install packages.config
+        ///
+        ///nuget install ninject -o c:\foo.
+        /// </summary>
+        internal static string InstallCommandUsageExamples {
+            get {
+                return ResourceManager.GetString("InstallCommandUsageExamples", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to packageId|pathToPackagesConfig [options].
         /// </summary>
         internal static string InstallCommandUsageSummary {
@@ -736,6 +749,21 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to nuget pack
+        ///
+        ///nuget pack foo.nuspec
+        ///
+        ///nuget pack foo.csproj
+        ///
+        ///nuget pack foo.nuspec -Version 2.1.0.
+        /// </summary>
+        internal static string PackCommandUsageExamples {
+            get {
+                return ResourceManager.GetString("PackCommandUsageExamples", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Publishes a package that was uploaded to the server but not added to the feed..
         /// </summary>
         internal static string PublishCommandDescription {
@@ -862,6 +890,21 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
+        ///
+        ///nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -s http://customsource/
+        ///
+        ///nuget push foo.nupkg
+        ///
+        ///nuget push foo.nupkg.symbols.
+        /// </summary>
+        internal static string PushCommandUsageExamples {
+            get {
+                return ResourceManager.GetString("PushCommandUsageExamples", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;package path&gt; [API key] [options].
         /// </summary>
         internal static string PushCommandUsageSummary {
@@ -979,6 +1022,17 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
+        ///
+        ///nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -s http://customsource/.
+        /// </summary>
+        internal static string SetApiKeyCommandUsageExamples {
+            get {
+                return ResourceManager.GetString("SetApiKeyCommandUsageExamples", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;API key&gt; [options].
         /// </summary>
         internal static string SetApiKeyCommandUsageSummary {
@@ -1038,6 +1092,19 @@ namespace NuGet {
         internal static string SpecCommandForceDescription {
             get {
                 return ResourceManager.GetString("SpecCommandForceDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to nuget spec
+        ///
+        ///nuget spec MyPackage
+        ///
+        ///nuget spec -a MyAssembly.dll.
+        /// </summary>
+        internal static string SpecCommandUsageExamples {
+            get {
+                return ResourceManager.GetString("SpecCommandUsageExamples", resourceCulture);
             }
         }
         

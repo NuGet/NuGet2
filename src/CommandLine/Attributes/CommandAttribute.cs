@@ -6,6 +6,7 @@ namespace NuGet {
         private string _description;
         private string _usageSummary;
         private string _usageDescription;
+        private string _example;
 
         public string CommandName { get; private set; }
         public Type ResourceType { get; private set; }
@@ -17,7 +18,7 @@ namespace NuGet {
         public int MaxArgs { get; set; }
         public string UsageSummaryResourceName { get; set; }
         public string UsageDescriptionResourceName { get; set; }
-
+        public string UsageExampleResourceName { get; set; }
 
         public string Description {
             get {
@@ -55,6 +56,18 @@ namespace NuGet {
             }
         }
 
+        public string UsageExample {
+            get {
+                if (ResourceType != null && !String.IsNullOrEmpty(UsageExampleResourceName)) {
+                    return ResourceHelper.GetLocalizedString(ResourceType, UsageExampleResourceName);
+                }
+                return _example;
+            }
+            set {
+                _example = value;
+            }
+        }
+
         public CommandAttribute(string commandName, string description) {
             CommandName = commandName;
             Description = description;
@@ -68,7 +81,6 @@ namespace NuGet {
             DescriptionResourceName = descriptionResourceName;
             MinArgs = 0;
             MaxArgs = Int32.MaxValue;
-
         }
     }
 }

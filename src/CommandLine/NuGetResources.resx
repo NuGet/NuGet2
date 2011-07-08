@@ -537,4 +537,41 @@
   <data name="HelpCommandMarkdown" xml:space="preserve">
     <value>Print detailed all help in markdown format.</value>
   </data>
+  <data name="InstallCommandUsageExamples" xml:space="preserve">
+    <value>nuget install elmah
+
+nuget install packages.config
+
+nuget install ninject -o c:\foo</value>
+  </data>
+  <data name="PackCommandUsageExamples" xml:space="preserve">
+    <value>nuget pack
+
+nuget pack foo.nuspec
+
+nuget pack foo.csproj
+
+nuget pack foo.nuspec -Version 2.1.0</value>
+  </data>
+  <data name="PushCommandUsageExamples" xml:space="preserve">
+    <value>nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
+
+nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -s http://customsource/
+
+nuget push foo.nupkg
+
+nuget push foo.nupkg.symbols</value>
+  </data>
+  <data name="SetApiKeyCommandUsageExamples" xml:space="preserve">
+    <value>nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
+
+nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -s http://customsource/</value>
+  </data>
+  <data name="SpecCommandUsageExamples" xml:space="preserve">
+    <value>nuget spec
+
+nuget spec MyPackage
+
+nuget spec -a MyAssembly.dll</value>
+  </data>
 </root>

@@ -5,8 +5,8 @@ using System.Linq;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", MaxArgs = 1,
-        UsageSummaryResourceName = "PackageCommandUsageSummary", UsageDescriptionResourceName = "PackageCommandUsageDescription")]
+    [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", MaxArgs = 1, UsageSummaryResourceName = "PackageCommandUsageSummary",
+            UsageDescriptionResourceName = "PackageCommandUsageDescription", UsageExampleResourceName = "PackCommandUsageExamples")]
     public class PackCommand : Command {
         internal static readonly string SymbolsExtension = ".symbols" + Constants.PackageExtension;
 

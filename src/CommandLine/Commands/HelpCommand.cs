@@ -166,25 +166,13 @@ namespace NuGet.Commands {
             var commands = from c in _commandManager.GetCommands()
                            orderby c.CommandAttribute.CommandName
                            select c;
-            TextInfo info = CultureInfo.CurrentCulture.TextInfo;
-
             foreach (var command in commands) {
-                var attrib = command.CommandAttribute;
-                Console.WriteLine("##" + info.ToTitleCase(attrib.CommandName) + " Command");
-                Console.WriteLine(attrib.Description);
-                Console.WriteLine("### Usage");
-                Console.WriteLine(attrib.UsageDescription);
-                Console.WriteLine("    " + attrib.UsageSummary);
-                Console.WriteLine("### Options");
-                Console.WriteLine("<table>");
-                foreach (var option in _commandManager.GetCommandOptions(command)) {
-                    Console.WriteLine("<tr>");
-                    Console.WriteLine("<td>" + option.Value.Name + "</td>");
-                    Console.WriteLine("<td>" + GetAltText(option.Key.AltName) + "</td>");
-                    Console.WriteLine("<td>" + option.Key.Description + "</td>");
-                }
-                Console.WriteLine("</table>");
-                Console.WriteLine();
+                var template = new HelpCommandMarkdownTemplate {
+                    CommandAttribute = command.CommandAttribute,
+                    Options = from item in _commandManager.GetCommandOptions(command)
+                                   select new { Name = item.Value.Name, Description = item.Key.Description }
+                };
+                Console.WriteLine(template.TransformText());
             }
         }
 
