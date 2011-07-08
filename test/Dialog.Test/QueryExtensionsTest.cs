@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NuGet.Dialog.Extensions;
+using NuGet.Dialog;
 using NuGet.Dialog.Providers;
 
 namespace NuGet.Dialog.Test {
@@ -17,7 +17,7 @@ namespace NuGet.Dialog.Test {
             }).AsQueryable();
 
             // Act
-            var result = list.SortBy(new PackageSortDescriptor(null, "Id", ListSortDirection.Ascending));
+            var result = list.SortBy(new [] { "Id" }, ListSortDirection.Ascending);
 
             // Assert
             Assert.AreEqual(result.ElementAt(0).Id, "A");
@@ -33,7 +33,7 @@ namespace NuGet.Dialog.Test {
             }).AsQueryable();
 
             // Act
-            var result = list.SortBy(new PackageSortDescriptor(null, "Id", ListSortDirection.Descending));
+            var result = list.SortBy(new [] { "Id" }, ListSortDirection.Descending);
 
             // Assert
             Assert.AreEqual(result.ElementAt(0).Id, "C");
@@ -52,7 +52,7 @@ namespace NuGet.Dialog.Test {
             }).AsQueryable();
 
             // Act
-            var result = list.SortBy(new PackageSortDescriptor(null, new[] { "Name", "Id" }, ListSortDirection.Ascending));
+            var result = list.SortBy(new[] { "Name", "Id" }, ListSortDirection.Ascending);
 
             // Assert
             Assert.AreEqual(result.ElementAt(0).Id, "X");
@@ -72,7 +72,7 @@ namespace NuGet.Dialog.Test {
             }).AsQueryable();
 
             // Act
-            var result = list.SortBy(new PackageSortDescriptor(null, new[] { "Name", "Id" }, ListSortDirection.Descending));
+            var result = list.SortBy(new[] { "Name", "Id" }, ListSortDirection.Descending);
 
             // Assert
             Assert.AreEqual(result.ElementAt(0).Id, "Z");
@@ -92,7 +92,7 @@ namespace NuGet.Dialog.Test {
             }).AsQueryable();
 
             // Act
-            var result = list.SortBy(new PackageSortDescriptor(null, new[] { "Description", "Name", "Id" }, ListSortDirection.Ascending));
+            var result = list.SortBy(new[] { "Description", "Name", "Id" }, ListSortDirection.Ascending);
 
             // Assert
             Assert.AreEqual(result.ElementAt(0).Id, "X");

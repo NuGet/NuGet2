@@ -1,3 +1,5 @@
+extern alias dialog10;
+
 using System;
 using System.ComponentModel.Design;
 using System.Globalization;
@@ -6,15 +8,16 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using EnvDTE;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using NuGet.Dialog;
-using NuGet.Dialog.PackageManagerUI;
 using NuGet.Options;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 using NuGetConsole;
 using NuGetConsole.Implementation;
+
+using VS10ManagePackageDialog = dialog10::NuGet.Dialog.PackageManagerWindow;
 
 namespace NuGet.Tools {
     /// <summary>
@@ -72,10 +75,13 @@ namespace NuGet.Tools {
             ErrorHandler.ThrowOnFailure(windowFrame.Show());
         }
 
+        /// <summary>
         /// Executes the NuGet Visualizer.
         /// </summary>
         private void ExecuteVisualizer(object sender, EventArgs e) {
-            var visualizer = ServiceLocator.GetInstance<Visualizer>();
+            var visualizer = new NuGet.Dialog.Visualizer(
+                ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
+                ServiceLocator.GetInstance<ISolutionManager>());
             string outputFile = visualizer.CreateGraph();
             _dte.ItemOperations.OpenFile(outputFile);
         }
@@ -110,14 +116,13 @@ namespace NuGet.Tools {
         }
 
         private static void ShowManageLibraryPackageDialog(Project project) {
-            var window = new PackageManagerWindow(project);
+            DialogWindow window = new VS10ManagePackageDialog(project);
             try {
                 window.ShowModal();
             }
             catch (TargetInvocationException exception) {
                 MessageHelper.ShowErrorMessage(exception,
                                                NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
-
                 ExceptionHelper.WriteToActivityLog(exception);
             }
         }

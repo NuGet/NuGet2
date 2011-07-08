@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -8,14 +7,11 @@ using System.Xml.Linq;
 using NuGet.VisualStudio;
 
 namespace NuGet.Dialog {
-    [PartCreationPolicy(CreationPolicy.Shared)]
-    [Export(typeof(Visualizer))]
     public class Visualizer {
         private const string dgmlNS = "http://schemas.microsoft.com/vs/2009/dgml";
         private readonly IVsPackageManagerFactory _packageManagerFactory;
         private readonly ISolutionManager _solutionManager;
 
-        [ImportingConstructor]
         public Visualizer(IVsPackageManagerFactory packageManagerFactory, ISolutionManager solutionManager) {
             _packageManagerFactory = packageManagerFactory;
             _solutionManager = solutionManager;

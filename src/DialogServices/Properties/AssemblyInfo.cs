@@ -2,8 +2,8 @@ using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-[assembly: AssemblyTitle("NuGet.Dialog")]
-[assembly: AssemblyDescription("Add Package Dialog For Installing NuGet Packages")]
+[assembly: AssemblyTitle("NuGet.DialogServices")]
+[assembly: AssemblyDescription("Contains common service classes for NuGet.Dialog and NuGet.Dialog10")]
 [assembly: CLSCompliant(false)]
 
 [assembly: InternalsVisibleTo("NuGet.TestUI")]

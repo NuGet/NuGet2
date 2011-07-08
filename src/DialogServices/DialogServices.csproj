@@ -6,30 +6,19 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuGet.Dialog</RootNamespace>
-    <AssemblyName>NuGet.Dialog</AssemblyName>
+    <AssemblyName>NuGet.DialogServices</AssemblyName>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\..\NuGet.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.VisualStudio.ExtensionManager" />
-    <Reference Include="Microsoft.VisualStudio.ExtensionManager.Implementation" />
     <Reference Include="Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PrivateAssemblies\Microsoft.VisualStudio.ExtensionsExplorer.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE\PrivateAssemblies\Microsoft.VisualStudio.ExtensionsExplorer.UI.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.VisualStudio.OLE.Interop" />
     <Reference Include="Microsoft.VisualStudio.Settings, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=x86" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.9.0" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.10.0" />
-    <Reference Include="Microsoft.VisualStudio.TextManager.Interop" />
     <Reference Include="Microsoft.VisualStudio.Shell.10.0">
       <Private>false</Private>
     </Reference>
@@ -108,18 +97,13 @@
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\..\Common\CommonResources.cs">
-      <Link>CommonResources.cs</Link>
-    </Compile>
-    <Compile Include="..\VsConsole\PowerShellHostProvider\RegistryHelper.cs">
-      <Link>RegistryHelper.cs</Link>
-    </Compile>
-    <Compile Include="Extensions\QueryExtensions.cs" />
-    <Compile Include="ISelectedProviderSettings.cs" />
+    <Compile Include="QueryExtensions.cs" />
+    <Compile Include="PackageManagerUI\ISelectedProviderSettings.cs" />
     <Compile Include="NativeMethods.cs" />
-    <Compile Include="PackageManagerUI\BaseProvider\LazyRepository.cs" />
-    <Compile Include="PackageManagerUI\BaseProvider\PackageSortDescriptor.cs" />
-    <Compile Include="PackageManagerUI\BaseProvider\ProviderServices.cs" />
+    <Compile Include="PackageManagerUI\LazyRepository.cs" />
+    <Compile Include="PackageManagerUI\OperationCoordinator.cs" />
+    <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs" />
+    <Compile Include="PackageManagerUI\ProviderServices.cs" />
     <Compile Include="PackageManagerUI\Converters\BooleanToVisibilityConverter.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -129,70 +113,41 @@
     <Compile Include="PackageManagerUI\Converters\NullToVisibilityConverter.cs" />
     <Compile Include="PackageManagerUI\Converters\ProjectToDisplayNameConverter.cs" />
     <Compile Include="PackageManagerUI\Converters\StringCollectionsToStringConverter.cs" />
-    <Compile Include="PackageManagerUI\BaseProvider\LoadPageResult.cs" />
-    <Compile Include="PackageManagerUI\BaseProvider\OperationCoordinator.cs" />
-    <Compile Include="PackageManagerUI\BaseProvider\PackagesProviderBase.cs" />
-    <Compile Include="PackageManagerUI\InstalledProvider\SolutionInstalledProvider.cs" />
     <Compile Include="PackageManagerUI\IProgressWindowOpener.cs" />
     <Compile Include="PackageManagerUI\IUserNotifierServices.cs" />
-    <Compile Include="PackageManagerUI\OnlineProvider\EmptyTreeNode.cs" />
-    <Compile Include="PackageManagerUI\OnlineProvider\SolutionOnlineProvider.cs" />
-    <Compile Include="PackageManagerUI\PackageManagerWindowCommands.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="PackageManagerUI\InstalledProvider\InstalledProvider.cs" />
     <Compile Include="PackageManagerUI\LicenseAcceptanceWindow.xaml.cs">
       <DependentUpon>LicenseAcceptanceWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="PackageManagerUI\BaseProvider\RootTreeNode.cs" />
-    <Compile Include="PackageManagerUI\BaseProvider\PackageItem.cs" />
-    <Compile Include="PackageManagerUI\OnlineProvider\OnlineProvider.cs" />
-    <Compile Include="PackageManagerUI\BaseProvider\PackagesSearchNode.cs" />
-    <Compile Include="PackageManagerUI\BaseProvider\SimpleTreeNode.cs" />
-    <Compile Include="PackageManagerUI\BaseProvider\PackagesTreeNodeBase.cs" />
-    <Compile Include="PackageManagerUI\PackageManagerWindow.xaml.cs">
-      <DependentUpon>PackageManagerWindow.xaml</DependentUpon>
-      <SubType>Code</SubType>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="PackageManagerUI\ProgressDialog.xaml.cs">
       <DependentUpon>ProgressDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PackageManagerUI\RecentProvider\SolutionRecentProvider.cs" />
     <Compile Include="PackageManagerUI\SummaryWindow.xaml.cs">
       <DependentUpon>SummaryWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PackageManagerUI\UpdatesProvider\SolutionUpdatesProvider.cs" />
     <Compile Include="PackageManagerUI\UserNotifierServices.cs" />
-    <Compile Include="PackageManagerUI\RecentProvider\RecentProvider.cs" />
     <Compile Include="SolutionExplorer\ProjectToIconConverter.cs" />
     <Compile Include="SolutionExplorer\ProjectUtilities.cs" />
     <Compile Include="SolutionExplorer\SolutionExplorer.xaml.cs">
       <DependentUpon>SolutionExplorer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesTreeNode.cs" />
     <Compile Include="PackageManagerUI\ProgressWindowOpener.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="PackageManagerUI\UpdatesProvider\UpdatesProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SelectedProviderSettingsManager.cs" />
-    <Compile Include="Visualizer\Visualizer.cs" />
+    <Compile Include="PackageManagerUI\SelectedProviderSettingsManager.cs" />
     <Compile Include="SolutionExplorer\FolderNode.cs" />
     <Compile Include="SolutionExplorer\ProjectNodeBase.cs" />
     <Compile Include="SolutionExplorer\ProjectNode.cs" />
     <Compile Include="SolutionExplorer\SolutionExplorerViewModel.cs" />
     <Compile Include="SolutionExplorer\SolutionWalker.cs" />
+    <Compile Include="Visualizer\Visualizer.cs" />
     <Compile Include="WindowSizePersistenceHelper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\..\Common\CommonResources.resx">
-      <Link>CommonResources.resx</Link>
-      <DependentUpon>CommonResources.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -200,19 +155,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="PackageManagerUI\CommonStyles.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="PackageManagerUI\LicenseAcceptanceWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="PackageManagerUI\OnlineProviderTemplates.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="PackageManagerUI\PackageManagerWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -227,10 +170,6 @@
     <Page Include="SolutionExplorer\SolutionExplorer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="PackageManagerUI\TemplateStyles.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -256,14 +195,12 @@
     <Resource Include="PackageManagerUI\packageicon.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="PackageManagerUI\PackagesProvider.cd" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="SolutionExplorer\Images\folderopen.png" />
     <Resource Include="SolutionExplorer\Images\folderclose.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="SolutionExplorer\Images\solution.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -2,7 +2,7 @@
 using System.Linq;
 
 namespace NuGet.Dialog.Providers {
-    internal class LazyRepository : IPackageRepository {
+    public class LazyRepository : IPackageRepository {
 
         private readonly Lazy<IPackageRepository> _repository;
 

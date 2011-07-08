@@ -91,9 +91,13 @@
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\Dialog\Dialog.csproj">
+    <ProjectReference Include="..\..\src\Dialog10\Dialog10.csproj">
+      <Project>{5984731D-613C-440A-833A-F92A3E3CF793}</Project>
+      <Name>Dialog10</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\DialogServices\DialogServices.csproj">
       <Project>{05497432-8899-4ED4-BB97-7B5EA3E911DB}</Project>
-      <Name>Dialog</Name>
+      <Name>DialogServices</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\VsConsole\Console.Types\Console.Types.csproj">
       <Project>{6FD11460-39A3-4A10-BA63-7541B0A7D053}</Project>

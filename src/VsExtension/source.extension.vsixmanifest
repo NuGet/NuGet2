@@ -27,7 +27,7 @@
         <MefComponent>|Console|</MefComponent>
         <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
         <MefComponent>|VisualStudio|</MefComponent>
-        <MefComponent>|Dialog|</MefComponent>
         <Assembly AssemblyName="|VisualStudio.Interop;AssemblyName|">|VisualStudio.Interop|</Assembly>
+        <MefComponent>|DialogServices|</MefComponent>
     </Content>
 </Vsix>

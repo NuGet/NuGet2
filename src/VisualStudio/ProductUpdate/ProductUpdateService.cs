@@ -47,7 +47,7 @@ namespace NuGet.VisualStudio {
         private IUpdateWorker UpdateWorker {
             get {
                 if (_updateWorker == null) {
-                    if (IsVisualStudio2010()) {
+                    if (VsVersionHelper.IsVisualStudio2010) {
                         _updateWorker = new VS2010UpdateWorker();
                     }
                     else {
@@ -57,11 +57,6 @@ namespace NuGet.VisualStudio {
 
                 return _updateWorker;
             }
-        }
-
-        private bool IsVisualStudio2010() {
-            string vsVersion = _dte.Version;
-            return vsVersion.StartsWith("10", StringComparison.InvariantCultureIgnoreCase);
         }
 
         public void CheckForAvailableUpdateAsync() {

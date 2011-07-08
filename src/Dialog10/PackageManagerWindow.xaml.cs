@@ -11,8 +11,9 @@ using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
+using NuGet.Dialog.PackageManagerUI;
 
-namespace NuGet.Dialog.PackageManagerUI {
+namespace NuGet.Dialog {
     public partial class PackageManagerWindow : DialogWindow {
         private const string DialogUserAgentClient = "NuGet Add Package Dialog";
         private Lazy<string> _dialogUserAgent = new Lazy<string>(() => HttpUtility.CreateUserAgentString(DialogUserAgentClient));

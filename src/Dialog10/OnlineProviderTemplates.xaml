@@ -1,8 +1,8 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:self="clr-namespace:NuGet.Dialog.PackageManagerUI"
-    xmlns:resources="clr-namespace:NuGet.Dialog"
+    xmlns:self="clr-namespace:NuGet.Dialog.PackageManagerUI;assembly=NuGet.DialogServices"
+    xmlns:resources="clr-namespace:NuGet.Dialog;assembly=NuGet.DialogServices"
     xmlns:eml="clr-namespace:Microsoft.VisualStudio.ExtensionManager.UI;assembly=Microsoft.VisualStudio.ExtensionManager.Implementation"
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
     

@@ -7,10 +7,10 @@ using System.Linq.Expressions;
 using System.Reflection;
 using NuGet.Dialog.Providers;
 
-namespace NuGet.Dialog.Extensions {
-    internal static class QueryExtensions {
-        internal static IOrderedQueryable<T> SortBy<T>(this IQueryable<T> source, PackageSortDescriptor descriptor, params Type[] knownTypes) {
-            var sortExpression = GetSortExpression(source, descriptor.SortProperties, descriptor.Direction, knownTypes);
+namespace NuGet.Dialog {
+    public static class QueryExtensions {
+        public static IOrderedQueryable<T> SortBy<T>(this IQueryable<T> source, IEnumerable<string> sortProperties, ListSortDirection direction, params Type[] knownTypes) {
+            var sortExpression = GetSortExpression(source, sortProperties, direction, knownTypes);
             return (IOrderedQueryable<T>)source.Provider.CreateQuery<T>(sortExpression);
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -7,9 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Internal.Web.Utils;
 using Microsoft.VisualStudio.ExtensionsExplorer;
-using NuGet.Dialog.Extensions;
 using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Providers {
@@ -23,7 +22,12 @@ namespace NuGet.Dialog.Providers {
         private IEnumerable<IPackage> _query;
         private int _totalCount;
 
+#if VS10
         private IList<IVsExtension> _extensions;
+#else
+        private IList _extensions;
+#endif
+
         private IList<IVsExtensionsTreeNode> _nodes;
         private int _totalPages = 1, _currentPage = 1;
         private bool _progressPaneActive;
@@ -114,7 +118,11 @@ namespace NuGet.Dialog.Providers {
         /// <summary>
         /// List of templates at this node
         /// </summary>
+#if VS10
         public IList<IVsExtension> Extensions {
+#else
+        public IList Extensions {
+#endif
             get {
                 if (_extensions == null) {
                     EnsureExtensionCollection();
@@ -208,7 +216,9 @@ namespace NuGet.Dialog.Providers {
         /// <param name="pageNumber"></param>
         public void LoadPage(int pageNumber) {
             if (pageNumber < 1) {
-                throw new ArgumentOutOfRangeException("pageNumber", String.Format(CultureInfo.CurrentCulture, CommonResources.Argument_Must_Be_GreaterThanOrEqualTo, 1));
+                throw new ArgumentOutOfRangeException(
+                    "pageNumber", 
+                    String.Format(CultureInfo.CurrentCulture, CommonResources.Argument_Must_Be_GreaterThanOrEqualTo, 1));
             }
 
             Trace.WriteLine("Dialog loading page: " + pageNumber);
@@ -309,7 +319,7 @@ namespace NuGet.Dialog.Providers {
             }
 
             // Order by the current descriptor
-            return query.SortBy<IPackage>(Provider.CurrentSort, typeof(RecentPackage));
+            return query.SortBy<IPackage>(Provider.CurrentSort.SortProperties, Provider.CurrentSort.Direction, typeof(RecentPackage));
         }
 
         public IList<IVsSortDescriptor> GetSortDescriptors() {
@@ -368,7 +378,7 @@ namespace NuGet.Dialog.Providers {
                     }
 
                     if (_extensions.Count > 0) {
-                        _extensions[0].IsSelected = true;
+                        ((IVsExtension)_extensions[0]).IsSelected = true;
                     }
 
                     int totalPages = (result.TotalCount + PageSize - 1) / PageSize;

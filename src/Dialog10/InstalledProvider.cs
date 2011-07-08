@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -199,9 +200,15 @@ namespace NuGet.Dialog.Providers {
             base.OnExecuteCompleted(item);
 
             if (SelectedNode != null) {
+#if VS10
                 IList<IVsExtension> allExtensions = SelectedNode.Extensions;
                 // if a package has been uninstalled, remove it from the Installed tab
                 allExtensions.RemoveAll(extension => !LocalRepository.Exists(((PackageItem)extension).PackageIdentity));
+#else
+                IList allExtensions = SelectedNode.Extensions;
+                // if a package has been uninstalled, remove it from the Installed tab
+                allExtensions.Cast<PackageItem>().ToList().RemoveAll(extension => !LocalRepository.Exists(((PackageItem)extension).PackageIdentity));
+#endif
 
                 // the PackagesTreeNodeBase caches the list of packages in each tree node. For this provider,
                 // we don't want it to do so, because after every uninstall, we remove uninstalled packages.

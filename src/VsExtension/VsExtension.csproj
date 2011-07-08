@@ -98,6 +98,17 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Dialog10\Dialog10.csproj">
+      <Project>{5984731D-613C-440A-833A-F92A3E3CF793}</Project>
+      <Name>Dialog10</Name>
+      <Aliases>dialog10</Aliases>
+    </ProjectReference>
+    <ProjectReference Include="..\DialogServices\DialogServices.csproj">
+      <Project>{05497432-8899-4ED4-BB97-7B5EA3E911DB}</Project>
+      <Name>DialogServices</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
     <ProjectReference Include="..\Options\Options.csproj">
       <Project>{53AB7187-CDF3-48B5-B90E-8919D3CB904D}</Project>
       <Name>Options</Name>
@@ -135,12 +146,6 @@
     <ProjectReference Include="..\Core\Core.csproj">
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Dialog\Dialog.csproj">
-      <Project>{05497432-8899-4ED4-BB97-7B5EA3E911DB}</Project>
-      <Name>Dialog</Name>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
     <ProjectReference Include="..\TeamFoundationServer\TeamFoundationServer.csproj">
       <Project>{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}</Project>

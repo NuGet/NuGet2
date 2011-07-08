@@ -47,6 +47,7 @@
     <Compile Include="RecentRepository\RecentPackage.cs" />
     <Compile Include="Utility\PathHelper.cs" />
     <Compile Include="Utility\UriHelper.cs" />
+    <Compile Include="Utility\VsVersionHelper.cs" />
     <Compile Include="VisualStudioCredentialProvider.cs" />
     <Compile Include="VsTemplateWizard.cs" />
     <Compile Include="VsTemplateWizardInstallerConfiguration.cs" />

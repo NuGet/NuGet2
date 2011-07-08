@@ -1,12 +1,13 @@
 <pfui:DialogWindow
-    x:Class="NuGet.Dialog.PackageManagerUI.PackageManagerWindow"
+    x:Class="NuGet.Dialog.PackageManagerWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:shared="clr-namespace:Microsoft.VisualStudio.ExtensionsExplorer.UI;assembly=Microsoft.VisualStudio.ExtensionsExplorer.UI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:self="clr-namespace:NuGet.Dialog.PackageManagerUI"
-    xmlns:resources="clr-namespace:NuGet.Dialog"
+    xmlns:resources="clr-namespace:NuGet.Dialog;assembly=NuGet.DialogServices"
+    xmlns:dialogServices="clr-namespace:NuGet.Dialog;assembly=NuGet.DialogServices"
+    xmlns:dialogCommands="clr-namespace:NuGet.Dialog.PackageManagerUI;assembly=NuGet.DialogServices"
     xmlns:resx="clr-namespace:NuGet.VisualStudio.Resources;assembly=NuGet.VisualStudio"
     xmlns:pfui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.10.0"
     xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
@@ -24,7 +25,7 @@
     Height="600"
     MinWidth="800" 
     MinHeight="450"
-    resources:WindowSizePersistenceHelper.WindowToken="MainWindow"
+    dialogServices:WindowSizePersistenceHelper.WindowToken="MainWindow"
     Closed="OnDialogWindowClosed">
     
     <Window.Resources>
@@ -39,7 +40,7 @@
 
     <Window.CommandBindings>
         <CommandBinding 
-            Command="{x:Static self:PackageManagerWindowCommands.PackageOperationCommand}"
+            Command="{x:Static dialogCommands:PackageManagerWindowCommands.PackageOperationCommand}"
             CanExecute="CanExecuteCommandOnPackage"
             Executed="ExecutedPackageCommand" />
         
@@ -48,20 +49,20 @@
             Executed="ExecutedClose" />
         
         <CommandBinding 
-            Command="{x:Static self:PackageManagerWindowCommands.ShowOptionsPage}"
+            Command="{x:Static dialogCommands:PackageManagerWindowCommands.ShowOptionsPage}"
             Executed="ExecutedShowOptionsPage" />
         
         <CommandBinding 
-            Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}"
+            Command="{x:Static dialogCommands:PackageManagerWindowCommands.OpenExternalLink}"
             Executed="ExecuteOpenLicenseLink" />
         
         <CommandBinding
-            Command="{x:Static self:PackageManagerWindowCommands.FocusOnSearchBox}"
+            Command="{x:Static dialogCommands:PackageManagerWindowCommands.FocusOnSearchBox}"
             Executed="ExecuteSetFocusOnSearchBox" />
     </Window.CommandBindings>
 
     <Window.InputBindings>
-        <KeyBinding Command="{x:Static self:PackageManagerWindowCommands.FocusOnSearchBox}" Gesture="CTRL+E" />
+        <KeyBinding Command="{x:Static dialogCommands:PackageManagerWindowCommands.FocusOnSearchBox}" Gesture="CTRL+E" />
     </Window.InputBindings>
 
     <Grid x:Name="LayoutRoot">
@@ -115,7 +116,7 @@
                 MinWidth="75" 
                 MinHeight="23"
                 Padding="4,0,4,0"
-                Command="{x:Static self:PackageManagerWindowCommands.ShowOptionsPage}" 
+                Command="{x:Static dialogCommands:PackageManagerWindowCommands.ShowOptionsPage}" 
                 Content="{x:Static resources:Resources.Dialog_Settings}" />
 
             <Button 
