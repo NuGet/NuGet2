@@ -138,7 +138,7 @@
   <data name="HelpCommandDescription" xml:space="preserve">
     <value>Displays general help information and help information about other commands.</value>
   </data>
-  <data name="HelpCommandUsageDecription" xml:space="preserve">
+  <data name="HelpCommandUsageDescription" xml:space="preserve">
     <value>Pass a command name to display help information for that command.</value>
   </data>
   <data name="HelpCommandUsageSummary" xml:space="preserve">
@@ -565,7 +565,7 @@ nuget push foo.nupkg.symbols</value>
   <data name="SetApiKeyCommandUsageExamples" xml:space="preserve">
     <value>nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
 
-nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -s http://customsource/</value>
+nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -Source http://example.com/nugetfeed</value>
   </data>
   <data name="SpecCommandUsageExamples" xml:space="preserve">
     <value>nuget spec
@@ -583,11 +583,6 @@ nuget delete MyPackage 1.0 -NoPrompt</value>
     <value>nuget list
 
 nuget list -verbose -allversions</value>
-  </data>
-  <data name="SetApiKeyCommandUsageExamples" xml:space="preserve">
-    <value>nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
-
-nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -Source http://example.com/nugetfeed</value>
   </data>
   <data name="HelpCommandUsageExamples" xml:space="preserve">
     <value>nuget help

@@ -317,9 +317,9 @@ namespace NuGet {
         /// <summary>
         ///   Looks up a localized string similar to Pass a command name to display help information for that command..
         /// </summary>
-        internal static string HelpCommandUsageDecription {
+        internal static string HelpCommandUsageDescription {
             get {
-                return ResourceManager.GetString("HelpCommandUsageDecription", resourceCulture);
+                return ResourceManager.GetString("HelpCommandUsageDescription", resourceCulture);
             }
         }
         
