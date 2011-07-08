@@ -38,6 +38,10 @@ namespace NuGet.Commands
     public NuGet.CommandAttribute CommandAttribute { get; set; }
 
     public IEnumerable<dynamic> Options { get; set; } 
+    
+    private TextInfo TextInfo {
+        get { return CultureInfo.CurrentCulture.TextInfo; }
+    }
 
         #line default
         #line hidden
@@ -51,12 +55,12 @@ WriteLiteral("\r\n");
 
 
 
-WriteLiteral("\r\n\r\n## ");
+WriteLiteral("\r\n\r\n##  ");
 
 
             
-            #line 10 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
-Write(CultureInfo.CurrentCulture.TextInfo.ToTitleCase(CommandAttribute.CommandName));
+            #line 14 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+Write(TextInfo.ToTitleCase(CommandAttribute.CommandName));
 
             
             #line default
@@ -65,7 +69,7 @@ WriteLiteral(" Command\r\n\r\n");
 
 
             
-            #line 12 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            #line 16 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
 Write(CommandAttribute.Description);
 
             
@@ -75,8 +79,18 @@ WriteLiteral("\r\n\r\n### Usage\r\n    nuget ");
 
 
             
-            #line 15 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
-     Write(CommandAttribute.UsageSummary);
+            #line 19 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+     Write(TextInfo.ToLower(CommandAttribute.CommandName));
+
+            
+            #line default
+            #line hidden
+WriteLiteral(" ");
+
+
+            
+            #line 19 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+                                                     Write(CommandAttribute.UsageSummary);
 
             
             #line default
@@ -85,7 +99,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 16 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            #line 20 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
  if(!String.IsNullOrEmpty(CommandAttribute.UsageDescription)) {
 
             
@@ -95,20 +109,20 @@ WriteLiteral("\r\n");
 
 
             
-            #line 18 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            #line 22 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
     
             
             #line default
             #line hidden
             
-            #line 18 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            #line 22 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
 Write(CommandAttribute.UsageDescription ?? "");
 
             
             #line default
             #line hidden
             
-            #line 18 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            #line 22 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
                                                     
 }
 
@@ -119,7 +133,7 @@ WriteLiteral("\r\n### Options\r\n<table>\r\n");
 
 
             
-            #line 23 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            #line 27 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
  foreach (var option in Options) {
 
             
@@ -129,7 +143,7 @@ WriteLiteral("    <tr>\r\n        <td>");
 
 
             
-            #line 25 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            #line 29 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
        Write(option.Name);
 
             
@@ -139,7 +153,7 @@ WriteLiteral("</td>\r\n        <td>");
 
 
             
-            #line 26 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            #line 30 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
        Write(option.Description);
 
             
@@ -149,7 +163,7 @@ WriteLiteral("</td>\r\n    </tr>\r\n");
 
 
             
-            #line 28 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            #line 32 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
 }
 
             
@@ -159,7 +173,7 @@ WriteLiteral("</table>\r\n");
 
 
             
-            #line 30 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            #line 34 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
  if (!String.IsNullOrEmpty(CommandAttribute.UsageExample)) {
 
             
@@ -169,7 +183,7 @@ WriteLiteral("\r\n### Examples\r\n\r\n    ");
 
 
             
-            #line 34 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            #line 38 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
 Write(CommandAttribute.UsageExample.Replace(Environment.NewLine, Environment.NewLine + "    "));
 
             
@@ -181,7 +195,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 36 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            #line 40 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
 }
             
             #line default

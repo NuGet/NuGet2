@@ -5,14 +5,18 @@
     public NuGet.CommandAttribute CommandAttribute { get; set; }
 
     public IEnumerable<dynamic> Options { get; set; } 
+    
+    private TextInfo TextInfo {
+        get { return CultureInfo.CurrentCulture.TextInfo; }
+    }
 }
 
-## @CultureInfo.CurrentCulture.TextInfo.ToTitleCase(CommandAttribute.CommandName) Command
+##  @TextInfo.ToTitleCase(CommandAttribute.CommandName) Command
 
 @CommandAttribute.Description
 
 ### Usage
-    nuget @CommandAttribute.UsageSummary
+    nuget @TextInfo.ToLower(CommandAttribute.CommandName) @CommandAttribute.UsageSummary
 @if(!String.IsNullOrEmpty(CommandAttribute.UsageDescription)) {
 @:
     @(CommandAttribute.UsageDescription ?? "")      
