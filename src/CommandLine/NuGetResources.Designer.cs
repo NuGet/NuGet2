@@ -241,6 +241,17 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to nuget delete MyPackage 1.0
+        ///    
+        ///nuget delete MyPackage 1.0 -NoPrompt.
+        /// </summary>
+        internal static string DeleteCommandUsageExamples {
+            get {
+                return ResourceManager.GetString("DeleteCommandUsageExamples", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;package Id&gt; &lt;package version&gt; [API Key] [options].
         /// </summary>
         internal static string DeleteCommandUsageSummary {
@@ -309,6 +320,21 @@ namespace NuGet {
         internal static string HelpCommandUsageDecription {
             get {
                 return ResourceManager.GetString("HelpCommandUsageDecription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to nuget help
+        ///
+        ///nuget help push
+        ///
+        ///nuget ?
+        ///
+        ///nuget push -?.
+        /// </summary>
+        internal static string HelpCommandUsageExamples {
+            get {
+                return ResourceManager.GetString("HelpCommandUsageExamples", resourceCulture);
             }
         }
         
@@ -484,6 +510,17 @@ namespace NuGet {
         internal static string ListCommandUsageDescription {
             get {
                 return ResourceManager.GetString("ListCommandUsageDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to nuget list
+        ///
+        ///nuget list -verbose -allversions.
+        /// </summary>
+        internal static string ListCommandUsageExamples {
+            get {
+                return ResourceManager.GetString("ListCommandUsageExamples", resourceCulture);
             }
         }
         
@@ -809,6 +846,21 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
+        ///
+        ///nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -s http://example.com/nuget-publish-endpoint
+        ///
+        ///nuget push foo.nupkg
+        ///
+        ///nuget push foo.nupkg.symbols.
+        /// </summary>
+        internal static string PublishCommandUsageExamples {
+            get {
+                return ResourceManager.GetString("PublishCommandUsageExamples", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;package id&gt; &lt;package version&gt; &lt;API Key&gt; [options].
         /// </summary>
         internal static string PublishCommandUsageSummary {
@@ -1024,7 +1076,7 @@ namespace NuGet {
         /// <summary>
         ///   Looks up a localized string similar to nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
         ///
-        ///nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -s http://customsource/.
+        ///nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -Source http://example.com/nugetfeed.
         /// </summary>
         internal static string SetApiKeyCommandUsageExamples {
             get {
@@ -1312,6 +1364,19 @@ namespace NuGet {
         internal static string UpdateCommandUpdatingNuGet {
             get {
                 return ResourceManager.GetString("UpdateCommandUpdatingNuGet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to nuget update
+        ///    
+        ///nuget update -Safe
+        ///
+        ///nuget update -Self.
+        /// </summary>
+        internal static string UpdateCommandUsageExamples {
+            get {
+                return ResourceManager.GetString("UpdateCommandUsageExamples", resourceCulture);
             }
         }
         

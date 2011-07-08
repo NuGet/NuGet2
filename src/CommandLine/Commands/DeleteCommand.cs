@@ -6,7 +6,7 @@ using NuGet.Common;
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "delete", "DeleteCommandDescription",
         MinArgs = 2, MaxArgs = 3, UsageDescriptionResourceName = "DeleteCommandUsageDescription",
-        UsageSummaryResourceName = "DeleteCommandUsageSummary")]
+        UsageSummaryResourceName = "DeleteCommandUsageSummary", UsageExampleResourceName = "DeleteCommandUsageExamples")]
     public class DeleteCommand : Command {
         [Option(typeof(NuGetResources), "DeleteCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }

@@ -7,7 +7,8 @@ using NuGet.Common;
 
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "list", "ListCommandDescription",
-        UsageSummaryResourceName = "ListCommandUsageSummary", UsageDescriptionResourceName = "ListCommandUsageDescription")]
+        UsageSummaryResourceName = "ListCommandUsageSummary", UsageDescriptionResourceName = "ListCommandUsageDescription",
+        UsageExampleResourceName = "ListCommandUsageExamples")]
     public class ListCommand : Command {
         private readonly List<string> _sources = new List<string>();
 
