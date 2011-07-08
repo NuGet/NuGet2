@@ -11,10 +11,6 @@ namespace NuGet {
             get;
             set;
         }
-        IWebProxy Proxy {
-            get;
-            set;
-        }
 
         IProxyFinder ProxyFinder {
             get;

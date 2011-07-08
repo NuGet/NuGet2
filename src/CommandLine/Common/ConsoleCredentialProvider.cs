@@ -1,30 +1,30 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Security;
+using Console = System.Console;
 
 namespace NuGet {
-    public class ConsoleCredentialProvider : IProxyProvider {
-        public IWebProxy GetProxy(Uri uri) {
-            Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(uri);
-            IWebProxy proxy = new WebProxy(proxyUri);
-
-            proxy.Credentials = GetCredentials();
-            return proxy;
+    public class ConsoleCredentialProvider : ICredentialProvider {
+        public Tuple<CredentialState, ICredentials> GetCredentials(Uri uri) {
+            return GetCredentials(uri, null);
         }
-
-        private static NetworkCredential GetCredentials() {
-            Console.Write(NuGetResources.Credentials_UserName);
+        public Tuple<CredentialState, ICredentials> GetCredentials(Uri uri, IWebProxy proxy) {
+            Console.WriteLine("Please provide credentials for: {0}", uri.OriginalString);
+            Console.Write("Username: ");
             string username = Console.ReadLine();
-            Console.Write(NuGetResources.Credentials_Password);
+            Console.Write("Password: ");
             SecureString password = ReadLineAsSecureString();
-            return new NetworkCredential {
+            var credentials = new NetworkCredential {
                 UserName = username,
                 SecurePassword = password
             };
+            return new Tuple<CredentialState, ICredentials>(CredentialState.HasCredentials, credentials);
         }
 
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller's responsibility to dispose.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Reliability",
+            "CA2000:Dispose objects before losing scope",
+            Justification = "Caller's responsibility to dispose.")]
         public static SecureString ReadLineAsSecureString() {
             try {
                 var secureString = new SecureString();
@@ -35,13 +35,13 @@ namespace NuGet {
                             continue;
                         }
                         Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-                        Console.Write(' ');
+                        Console.Write(" ");
                         Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
                         secureString.RemoveAt(secureString.Length - 1);
                     }
                     else {
                         secureString.AppendChar(keyInfo.KeyChar);
-                        Console.Write('*');
+                        Console.Write("*");
                     }
                 }
                 secureString.MakeReadOnly();

@@ -1,13 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net;
 
 namespace NuGet {
-    /// <summary>
-    /// This interface represents the basic interface that one needs to implement to
-    /// be able to provide support to the consumer for when a proxy object is required.
-    /// </summary>
-    public interface IProxyFinder {
+    public interface IRequestCredentialService {
         /// <summary>
         /// Returns a list of already registered ICredentialProvider instances that one can enumerate
         /// </summary>
@@ -24,12 +20,20 @@ namespace NuGet {
         /// </summary>
         /// <param name="provider"></param>
         void UnregisterProvider(ICredentialProvider provider);
+        ///// <summary>
+        /// Returns an ICredentials object instance that represents a valid credential
+        /// object that can be used for request authentication.
+        ///// </summary>
+        ///// <param name="uri"></param>
+        ///// <returns></returns>
+        ICredentials GetCredentials(Uri uri);
         /// <summary>
-        /// Returns an IWebProxy object instance that represents a valid
-        /// proxy object that should be used for communicating.
+        /// Returns an ICredentials object instance that represents a valid credential
+        /// object that can be used for request authentication.
         /// </summary>
-        /// <param name="uri">The given Uri to get a proxy for.</param>
+        /// <param name="uri"></param>
+        /// <param name="proxy"></param>
         /// <returns></returns>
-        IWebProxy GetProxy(Uri uri);
+        ICredentials GetCredentials(Uri uri, IWebProxy proxy);
     }
 }
