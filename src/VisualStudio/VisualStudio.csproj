@@ -49,6 +49,8 @@
     <Compile Include="Utility\UriHelper.cs" />
     <Compile Include="Utility\VsVersionHelper.cs" />
     <Compile Include="VisualStudioCredentialProvider.cs" />
+    <Compile Include="VSProxyCredentialProvider.cs" />
+    <Compile Include="VSRequestCredentialProvider.cs" />
     <Compile Include="VsTemplateWizard.cs" />
     <Compile Include="VsTemplateWizardInstallerConfiguration.cs" />
     <Compile Include="VsTemplateWizardPackageInfo.cs" />

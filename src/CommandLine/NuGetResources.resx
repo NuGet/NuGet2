@@ -138,7 +138,7 @@
   <data name="HelpCommandDescription" xml:space="preserve">
     <value>Displays general help information and help information about other commands.</value>
   </data>
-  <data name="HelpCommandUsageDescription" xml:space="preserve">
+  <data name="HelpCommandUsageDecription" xml:space="preserve">
     <value>Pass a command name to display help information for that command.</value>
   </data>
   <data name="HelpCommandUsageSummary" xml:space="preserve">
@@ -537,76 +537,7 @@
   <data name="HelpCommandMarkdown" xml:space="preserve">
     <value>Print detailed all help in markdown format.</value>
   </data>
-  <data name="InstallCommandUsageExamples" xml:space="preserve">
-    <value>nuget install elmah
-
-nuget install packages.config
-
-nuget install ninject -o c:\foo</value>
-  </data>
-  <data name="PackCommandUsageExamples" xml:space="preserve">
-    <value>nuget pack
-
-nuget pack foo.nuspec
-
-nuget pack foo.csproj
-
-nuget pack foo.nuspec -Version 2.1.0</value>
-  </data>
-  <data name="PushCommandUsageExamples" xml:space="preserve">
-    <value>nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
-
-nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -s http://customsource/
-
-nuget push foo.nupkg
-
-nuget push foo.nupkg.symbols</value>
-  </data>
-  <data name="SetApiKeyCommandUsageExamples" xml:space="preserve">
-    <value>nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
-
-nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -Source http://example.com/nugetfeed</value>
-  </data>
-  <data name="SpecCommandUsageExamples" xml:space="preserve">
-    <value>nuget spec
-
-nuget spec MyPackage
-
-nuget spec -a MyAssembly.dll</value>
-  </data>
-  <data name="DeleteCommandUsageExamples" xml:space="preserve">
-    <value>nuget delete MyPackage 1.0
-    
-nuget delete MyPackage 1.0 -NoPrompt</value>
-  </data>
-  <data name="ListCommandUsageExamples" xml:space="preserve">
-    <value>nuget list
-
-nuget list -verbose -allversions</value>
-  </data>
-  <data name="HelpCommandUsageExamples" xml:space="preserve">
-    <value>nuget help
-
-nuget help push
-
-nuget ?
-
-nuget push -?</value>
-  </data>
-  <data name="PublishCommandUsageExamples" xml:space="preserve">
-    <value>nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
-
-nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -s http://example.com/nuget-publish-endpoint
-
-nuget push foo.nupkg
-
-nuget push foo.nupkg.symbols</value>
-  </data>
-  <data name="UpdateCommandUsageExamples" xml:space="preserve">
-    <value>nuget update
-    
-nuget update -Safe
-
-nuget update -Self</value>
+  <data name="Credentials_ConsolePromptMessage" xml:space="preserve">
+    <value>Please provide credentials for: {0}</value>
   </data>
 </root>

@@ -1,30 +1,30 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Security;
+using Console = System.Console;
 
 namespace NuGet {
-    public class ConsoleCredentialProvider : IProxyProvider {
-        public IWebProxy GetProxy(Uri uri) {
-            Uri proxyUri = WebRequest.DefaultWebProxy.GetProxy(uri);
-            IWebProxy proxy = new WebProxy(proxyUri);
-
-            proxy.Credentials = GetCredentials();
-            return proxy;
-        }
-
-        private static NetworkCredential GetCredentials() {
+    public class ConsoleCredentialProvider : ICredentialProvider {
+        public CredentialResult GetCredentials(Uri uri, IWebProxy proxy) {
+            if (uri == null) {
+                throw new ArgumentNullException("uri");
+            }
+            Console.WriteLine(NuGetResources.Credentials_ConsolePromptMessage, uri.OriginalString);
             Console.Write(NuGetResources.Credentials_UserName);
             string username = Console.ReadLine();
             Console.Write(NuGetResources.Credentials_Password);
             SecureString password = ReadLineAsSecureString();
-            return new NetworkCredential {
+            ICredentials credentials = new NetworkCredential {
                 UserName = username,
                 SecurePassword = password
             };
+            return CredentialResult.Create(CredentialState.HasCredentials, credentials);
         }
 
-        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller's responsibility to dispose.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Reliability",
+            "CA2000:Dispose objects before losing scope",
+            Justification = "Caller's responsibility to dispose.")]
         public static SecureString ReadLineAsSecureString() {
             try {
                 var secureString = new SecureString();

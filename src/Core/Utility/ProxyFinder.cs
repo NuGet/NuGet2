@@ -6,16 +6,55 @@ using System.Net;
 namespace NuGet {
     public class ProxyFinder : IProxyFinder {
         /// <summary>
+        /// Local cache of registered proxy providers to use when locating a valid proxy
+        /// to use for the given Uri.
+        /// </summary>
+        private readonly HashSet<ICredentialProvider> _providerCache = new HashSet<ICredentialProvider>();
+        /// <summary>
         /// Local Cache of Proxy objects that will store the Proxy that was discovered during the session
         /// and will return the cached proxy object instead of trying to perform proxy detection logic
         /// for the same Uri again.
         /// </summary>
         private readonly ConcurrentDictionary<Uri, IWebProxy> _proxyCache = new ConcurrentDictionary<Uri, IWebProxy>();
         /// <summary>
-        /// Local cache of registered proxy providers to use when locating a valid proxy
-        /// to use for the given Uri.
+        /// Capture the default System Proxy so that it can be re-used by the IProxyFinder
+        /// because we can't rely on WebRequest.DefaultWebProxy since someone can modify the DefaultWebProxy
+        /// property and we can't tell if it was modified and if we are still using System Proxy Settings or not.
+        /// One limitation of this method is that it does not look at the config file to get the defined proxy
+        /// settings.
         /// </summary>
-        private readonly ISet<IProxyProvider> _providerCache = new HashSet<IProxyProvider>();
+        private static readonly IWebProxy _originalSystemProxy = WebRequest.GetSystemWebProxy();
+
+        /// <summary>
+        /// Returns a list of already registered ICredentialProvider instances that one can enumerate
+        /// </summary>
+        public ICollection<ICredentialProvider> RegisteredProviders {
+            get {
+                return _providerCache;
+            }
+        }
+
+        /// <summary>
+        /// Allows the consumer to provide a list of credential providers to use
+        /// for locating of different ICredentials instances.
+        /// </summary>
+        public void RegisterProvider(ICredentialProvider provider) {
+            if (provider == null) {
+                throw new ArgumentNullException("provider");
+            }
+            _providerCache.Add(provider);
+        }
+
+        /// <summary>
+        /// Unregisters the specified credential provider from the proxy finder.
+        /// </summary>
+        /// <param name="provider"></param>
+        public void UnregisterProvider(ICredentialProvider provider) {
+            if (provider == null) {
+                throw new ArgumentNullException("provider");
+            }
+            _providerCache.Remove(provider);
+        }
         /// <summary>
         /// Returns an instance of a IWebProxy interface that is to be used for creating requests to the given Uri
         /// </summary>
@@ -31,80 +70,45 @@ namespace NuGet {
         }
 
         /// <summary>
-        /// Allows the consumer to provide a list of proxy providers to use
-        /// for locating of different IWebProxy instances.
-        /// </summary>
-        /// <param name="provider"></param>
-        public void RegisterProvider(IProxyProvider provider) {
-            if (provider == null) {
-                throw new ArgumentNullException("provider");
-            }
-            _providerCache.Add(provider);
-        }
-
-        /// <summary>
-        /// Unregisters the specified proxy provider from the proxy finder.
-        /// </summary>
-        /// <param name="provider"></param>
-        public void UnregisterProvider(IProxyProvider provider) {
-            if (provider == null) {
-                throw new ArgumentNullException("provider");
-            }
-            if (!_providerCache.Contains(provider)) {
-                return;
-            }
-            _providerCache.Remove(provider);
-        }
-
-        /// <summary>
-        /// Returns a list of already registered IProxyProvider instances that one can enumerate
-        /// </summary>
-        public ICollection<IProxyProvider> RegisteredProviders {
-            get {
-                return _providerCache;
-            }
-        }
-
-        /// <summary>
         /// Internal method that handles the logic of going through the Proxy detection logic and returns the
         /// correct instance of the IWebProxy object.
         /// </summary>
         /// <param name="uri">The Uri object that the proxy is to be used for.</param>
         /// <returns></returns>
         private IWebProxy GetProxyInternal(Uri uri) {
-            IWebProxy result = null;
             WebProxy systemProxy = GetSystemProxy(uri);
 
-            IWebProxy cachedProxy;
-            if (_proxyCache.TryGetValue(systemProxy.Address, out cachedProxy)) {
-                return cachedProxy;
+            IWebProxy result;
+            if (_proxyCache.TryGetValue(systemProxy.Address, out result)) {
+                return result;
             }
 
-            foreach (var provider in _providerCache) {
-                var proxy = ExecuteProvider(provider, uri);
-                if (proxy != null) {
-                    result = proxy;
-                    break;
+            foreach (var provider in RegisteredProviders) {
+                var credentialResult = provider.GetCredentials(uri, GetSystemProxy(uri));
+                // The discovery process was aborted so stop the process and return null;
+                if (credentialResult.State == CredentialState.Abort) {
+                    return null;
+                }
+                // Some sort of credentials were returned so lets validate them.
+                else {
+                    systemProxy.Credentials = credentialResult.Credentials;
+                    // If the proxy with the new credentials are valid then
+                    // set the result to the valid proxy and break out of the discovery process.
+                    if (IsProxyValid(systemProxy, uri)) {
+                        result = systemProxy;
+                        // Cache the valid proxy result so that we can use it next time without having to go through
+                        // the discovery process.
+                        _proxyCache.TryAdd(systemProxy.Address, result);
+                        break;
+                    }
+                    // The credentials were not valid so continue the discovery process.
+                    else {
+                        result = null;
+                    }
                 }
             }
-
-            // TODO: If the proxy that is returned is null do we really want to cache this?
-            // PRO: Subsequent requests for the given Uri should automatically return a null
-            //      proxy instance without going through the proxy detection logic.
-            // CON: If the user incorrectly types the password or an invalid proxy instance
-            //      is cached then the user has to re-start the "Client" to be able to re-try
-            //      connecting to a valid proxy.
-            _proxyCache.TryAdd(systemProxy.Address, result);
-
+            
             return result;
-        }
-
-        protected virtual IWebProxy ExecuteProvider(IProxyProvider provider, Uri uri) {
-            var proxy = provider.GetProxy(uri);
-            if (IsProxyValid(proxy, uri)) {
-                return proxy;
-            }
-            return null;
         }
 
         /// <summary>
@@ -115,9 +119,8 @@ namespace NuGet {
         private static WebProxy GetSystemProxy(Uri uri) {
             // WebRequest.DefaultWebProxy seems to be more capable in terms of getting the default
             // proxy settings instead of the WebRequest.GetSystemProxy()
-            IWebProxy proxy = WebRequest.DefaultWebProxy;
-            string proxyUrl = proxy.GetProxy(uri).OriginalString;
-            return new WebProxy(proxyUrl);
+            var proxyUri = _originalSystemProxy.GetProxy(uri);
+            return new WebProxy(proxyUri);
         }
 
         /// <summary>
@@ -130,23 +133,28 @@ namespace NuGet {
         /// <returns></returns>
         private static bool IsProxyValid(IWebProxy proxy, Uri uri) {
             bool result = true;
-            WebRequest request = WebRequest.Create(uri);
+            WebRequest webRequest = WebRequest.Create(uri);
             WebResponse response = null;
             // if we get a null proxy from the caller then don't use it and just re-set the same proxy that we
             // already have because I am seeing a strange performance hit when a new instance of a proxy is set
             // and it can take a few seconds to be changed before the method call continues.
-            request.Proxy = proxy ?? request.Proxy;
+            webRequest.Proxy = proxy ?? webRequest.Proxy;
             try {
                 // During testing we have observed that some proxy setups will return a 200/OK response
                 // even though the subsequent calls are not going to be valid for the same proxy
                 // and the set of credentials thus giving the user a 407 error.
                 // However having to cache the proxy when this service first get's a call and using
                 // a cached proxy instance seemed to resolve this issue.
-                response = request.GetResponse();
+                var httpRequest = webRequest as HttpWebRequest;
+                if (httpRequest != null) {
+                    httpRequest.KeepAlive = true;
+                    httpRequest.ProtocolVersion = HttpVersion.Version10;
+                }
+                response = webRequest.GetResponse();
             }
             catch (WebException webException) {
                 HttpWebResponse webResponse = webException.Response as HttpWebResponse;
-                if (webResponse == null || webResponse.StatusCode == HttpStatusCode.ProxyAuthenticationRequired) {
+                if (webResponse != null && webResponse.StatusCode == HttpStatusCode.ProxyAuthenticationRequired) {
                     result = false;
                 }
             }

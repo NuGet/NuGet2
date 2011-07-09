@@ -48,16 +48,17 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void EmptyProviderListReturnsNullProxy() {
+        public void EmptyProviderListReturnsDefaultProxy() {
             // Arrange
             var httpClient = new HttpClient(new Uri("http://example.com"));
+            var defaultProxy = WebRequest.DefaultWebProxy;
 
             // Act
             httpClient.ProxyFinder = null;
             var request = httpClient.CreateRequest();
 
             // Assert
-            Assert.IsNull(request.Proxy);
+            Assert.AreEqual(request.Proxy, defaultProxy);
         }
 
     }

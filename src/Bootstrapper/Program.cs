@@ -18,8 +18,9 @@ namespace Bootstrapper {
 
             // Register a console based credentials provider so that the user get's prompted if a password
             // is required for the proxy
-            HttpClient.DefaultProxyFinder.RegisterProvider(new ConsoleCredentialProvider());
-
+            var consoleCredentialProvider = new ConsoleCredentialProvider();
+            HttpClient.DefaultProxyFinder.RegisterProvider(consoleCredentialProvider);
+            HttpClient.DefaultRequestCredentialService.RegisterProvider(consoleCredentialProvider);
             // Setup IHttpClient for the Gallery to locate packages
             var httpClient = new HttpClient(galleryUri);
 

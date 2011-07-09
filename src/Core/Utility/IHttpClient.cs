@@ -7,16 +7,18 @@ namespace NuGet {
             get;
             set;
         }
+
         Uri Uri {
-            get;
-            set;
-        }
-        IWebProxy Proxy {
             get;
             set;
         }
 
         IProxyFinder ProxyFinder {
+            get;
+            set;
+        }
+
+        IRequestCredentialService RequestCredentialService {
             get;
             set;
         }
