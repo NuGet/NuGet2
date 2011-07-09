@@ -57,7 +57,7 @@ namespace NuGet.Commands {
             Console.WriteLine(NuGetResources.SourcesCommandSourceRemovedSuccessfully, name);
         }
 
-        private private void AddNewSource(string name, string source) {
+        private void AddNewSource(string name, string source) {
             if (String.IsNullOrWhiteSpace(name)) {
                 throw new CommandLineException(NuGetResources.SourcesCommandNameRequired);
             }
