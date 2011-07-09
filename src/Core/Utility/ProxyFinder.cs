@@ -5,12 +5,11 @@ using System.Net;
 
 namespace NuGet {
     public class ProxyFinder : IProxyFinder {
-
-        ///// <summary>
-        ///// Local cache of registered proxy providers to use when locating a valid proxy
-        ///// to use for the given Uri.
-        ///// </summary>
-        private readonly ISet<ICredentialProvider> _providerCache = new HashSet<ICredentialProvider>();
+        /// <summary>
+        /// Local cache of registered proxy providers to use when locating a valid proxy
+        /// to use for the given Uri.
+        /// </summary>
+        private readonly HashSet<ICredentialProvider> _providerCache = new HashSet<ICredentialProvider>();
         /// <summary>
         /// Local Cache of Proxy objects that will store the Proxy that was discovered during the session
         /// and will return the cached proxy object instead of trying to perform proxy detection logic
@@ -54,9 +53,6 @@ namespace NuGet {
             if (provider == null) {
                 throw new ArgumentNullException("provider");
             }
-            if (!_providerCache.Contains(provider)) {
-                return;
-            }
             _providerCache.Remove(provider);
         }
         /// <summary>
@@ -88,14 +84,14 @@ namespace NuGet {
             }
 
             foreach (var provider in RegisteredProviders) {
-                var credentials = provider.GetCredentials(uri, GetSystemProxy(uri));
+                var credentialResult = provider.GetCredentials(uri, GetSystemProxy(uri));
                 // The discovery process was aborted so stop the process and return null;
-                if (credentials.Item1 == CredentialState.Abort) {
+                if (credentialResult.State == CredentialState.Abort) {
                     return null;
                 }
                 // Some sort of credentials were returned so lets validate them.
                 else {
-                    systemProxy.Credentials = credentials.Item2;
+                    systemProxy.Credentials = credentialResult.Credentials;
                     // If the proxy with the new credentials are valid then
                     // set the result to the valid proxy and break out of the discovery process.
                     if (IsProxyValid(systemProxy, uri)) {
@@ -123,10 +119,8 @@ namespace NuGet {
         private static WebProxy GetSystemProxy(Uri uri) {
             // WebRequest.DefaultWebProxy seems to be more capable in terms of getting the default
             // proxy settings instead of the WebRequest.GetSystemProxy()
-            //IWebProxy proxy = WebRequest.DefaultWebProxy;
-            //string proxyUrl = proxy.GetProxy(uri).OriginalString;
-            var proxyUrl = _originalSystemProxy.GetProxy(uri).OriginalString;
-            return new WebProxy(proxyUrl);
+            var proxyUri = _originalSystemProxy.GetProxy(uri);
+            return new WebProxy(proxyUri);
         }
 
         /// <summary>

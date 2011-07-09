@@ -47,6 +47,7 @@
     <Compile Include="Configuration\ISettings.cs" />
     <Compile Include="Configuration\Settings.cs" />
     <Compile Include="Configuration\UserSettings.cs" />
+    <Compile Include="Extensions\CredentialExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
     <Compile Include="Extensions\QueryableExtensions.cs" />
@@ -86,6 +87,7 @@
     <Compile Include="Repositories\NullConstraintProvider.cs" />
     <Compile Include="Repositories\PackageReference.cs" />
     <Compile Include="Repositories\PackageReferenceFile.cs" />
+    <Compile Include="Utility\CredentialResult.cs" />
     <Compile Include="Utility\CredentialState.cs" />
     <Compile Include="Utility\ExceptionUtility.cs" />
     <Compile Include="Utility\HttpUtility.cs" />

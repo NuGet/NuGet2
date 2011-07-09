@@ -11,20 +11,12 @@ namespace NuGet {
         /// Returns CredentialState state that let's the consumer know if ICredentials
         /// were discovered by the ICredentialProvider. The credentials argument is then
         /// populated with the discovered valid credentials that can be used for the given Uri.
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <returns></returns>
-        Tuple<CredentialState, ICredentials> GetCredentials(Uri uri);
-        /// <summary>
-        /// Returns CredentialState state that let's the consumer know if ICredentials
-        /// were discovered by the ICredentialProvider. The credentials argument is then
-        /// populated with the discovered valid credentials that can be used for the given Uri.
         /// The proxy instance if passed will be used to ensure that the request goes through the proxy
         /// to ensure successfull connection to the destination Uri.
         /// </summary>
         /// <param name="uri"></param>
         /// <param name="proxy"></param>
         /// <returns></returns>
-        Tuple<CredentialState, ICredentials> GetCredentials(Uri uri, IWebProxy proxy);
+        CredentialResult GetCredentials(Uri uri, IWebProxy proxy);
     }
 }

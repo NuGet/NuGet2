@@ -48,9 +48,8 @@ namespace NuGet.Tools {
         private bool? _isVisualizerSupported;
 
         public NuGetPackage() {
-            //var vsCredentialProvider = new VisualStudioCredentialProvider();
             HttpClient.DefaultProxyFinder.RegisterProvider(new VSProxyCredentialProvider());
-            HttpClient.DefaultCredentialService.RegisterProvider(new VSRequestCredentialProvider());
+            HttpClient.DefaultRequestCredentialService.RegisterProvider(new VSRequestCredentialProvider());
         }
 
         private bool IsVisualizerSupported {

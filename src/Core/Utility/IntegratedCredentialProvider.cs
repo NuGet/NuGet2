@@ -7,12 +7,8 @@ namespace NuGet {
     /// type of proxy.
     /// </summary>
     public class IntegratedCredentialProvider : ICredentialProvider {
-        public Tuple<CredentialState, ICredentials> GetCredentials(Uri uri) {
-            return GetCredentials(uri, null);
-        }
-        public Tuple<CredentialState, ICredentials> GetCredentials(Uri uri, IWebProxy proxy) {
-            return new Tuple<CredentialState, ICredentials>(CredentialState.HasCredentials,
-                                                            CredentialCache.DefaultCredentials);
+        public CredentialResult GetCredentials(Uri uri, IWebProxy proxy) {
+            return CredentialResult.Create(CredentialState.HasCredentials, CredentialCache.DefaultCredentials);
         }
     }
 }

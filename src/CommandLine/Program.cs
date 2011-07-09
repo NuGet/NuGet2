@@ -53,7 +53,7 @@ namespace NuGet {
                 // will be prompted if a proxy is set and credentials are required
                 var consoleCredentialProvider = new ConsoleCredentialProvider();
                 HttpClient.DefaultProxyFinder.RegisterProvider(consoleCredentialProvider);
-                HttpClient.DefaultCredentialService.RegisterProvider(consoleCredentialProvider);
+                HttpClient.DefaultRequestCredentialService.RegisterProvider(consoleCredentialProvider);
 
                 // Add commands to the manager
                 foreach (ICommand cmd in p.Commands) {

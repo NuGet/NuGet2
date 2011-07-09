@@ -18,53 +18,58 @@ namespace NuGet.VisualStudio {
             _webProxyService = webProxyService;
         }
 
-        public Tuple<CredentialState, ICredentials> GetCredentials(Uri uri) {
-            return GetCredentials(uri, null);
-        }
-
         /// <summary>
         /// Returns an ICredentials instance that the consumer would need in order
         /// to properly authenticate to the given Uri.
         /// </summary>
         /// <param name="uri"></param>
         /// <param name="proxy"></param>
-        /// <param name="credentials"></param>
         /// <returns></returns>
-        public Tuple<CredentialState, ICredentials> GetCredentials(Uri uri, IWebProxy proxy) {
-            IWebProxy originalProxy = null;
-            ICredentials credentials = null;
-            if (proxy != null) {
-                originalProxy = new WebProxy(proxy.GetProxy(uri));
-                originalProxy.Credentials = proxy.Credentials == null
-                                                ? null
-                                                : proxy.Credentials.GetCredential(uri, null);
+        public CredentialResult GetCredentials(Uri uri, IWebProxy proxy) {
+            if (uri == null) {
+                throw new ArgumentNullException("uri");
             }
+            // Capture the original proxy before we do anything 
+            // so that we can re-set it once we get the credentials for the given Uri.
+            IWebProxy originalProxy = null;
+            if (proxy != null) {
+                // If the current Uri should be bypassed then don't try to get the specific
+                // proxy but simply capture the one that is given to us
+                if (proxy.IsBypassed(uri)) {
+                    originalProxy = proxy;
+                }
+                // If the current Uri is not bypassed then get a valid proxy for the Uri
+                // and make sure that we have the credentials also.
+                else {
+                    originalProxy = new WebProxy(proxy.GetProxy(uri));
+                    originalProxy.Credentials = proxy.Credentials == null
+                                                    ? null : proxy.Credentials.GetCredential(uri, null);
+                }
+            }
+
             InitializeCredentialProxy(uri, originalProxy);
-            var hasCachedCredentials = HasSavedCredentials(uri, out credentials);
-            if (hasCachedCredentials && AreCredentialsValid(uri, credentials, proxy)) {
+            var savedCredentials = GetCredentials(uri, false);
+            if (savedCredentials.Item1 == CredentialState.HasCredentials && AreCredentialsValid(uri, savedCredentials.Item2, proxy)) {
                 WebRequest.DefaultWebProxy = originalProxy;
-                return new Tuple<CredentialState, ICredentials>(CredentialState.HasCredentials, credentials);
+                return CredentialResult.Create(CredentialState.HasCredentials, savedCredentials.Item2);
             }
             // The cached credentials that we found are not valid so let's ask the user
             // until they abort or give us valid credentials.
             while (true) {
                 InitializeCredentialProxy(uri, originalProxy);
-                var credentialState = GetCredentials(uri, true, out credentials);
-                // Set credentials based on the returned VsWebProxyState
-                // Null if the user aborted otherwise HasCredentials
-                credentials = credentialState == CredentialState.Abort ? null : credentials;
+                var credentialState = GetCredentials(uri, true);
                 // If the discovery process was aborted then reset the original proxy and exit the process.
-                if (credentialState == CredentialState.Abort) {
+                if (credentialState.Item1 == CredentialState.Abort) {
                     WebRequest.DefaultWebProxy = originalProxy;
-                    return new Tuple<CredentialState, ICredentials>(credentialState, credentials);
+                    return CredentialResult.Create(CredentialState.Abort, null);
                 }
                 // Validate credentials and if they are valid then exit the discovery process
                 // otherwise continue asking the user for valid credentials until they give us something
                 // valid to send back.
-                if (AreCredentialsValid(uri, credentials, proxy)) {
+                if (AreCredentialsValid(uri, credentialState.Item2, proxy)) {
                     // Reset the original WebRequest.DefaultWebProxy to what it was when we started credential discovery.
                     WebRequest.DefaultWebProxy = originalProxy;
-                    return new Tuple<CredentialState, ICredentials>(credentialState, credentials);
+                    return CredentialResult.Create(CredentialState.HasCredentials, credentialState.Item2);
                 }
             }
         }
@@ -88,29 +93,16 @@ namespace NuGet.VisualStudio {
         protected abstract bool AreCredentialsValid(Uri uri, ICredentials credentials, IWebProxy proxy);
 
         /// <summary>
-        /// This method checks to see if the user has already saved credentials for the given Url.
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="credentials1"></param>
-        /// <returns></returns>
-        private bool HasSavedCredentials(Uri uri, out ICredentials credentials) {
-            GetCredentials(uri, false, out credentials);
-            return credentials != null;
-        }
-
-        /// <summary>
         /// This method is responsible for retrieving either cached credentials
         /// or forcing a prompt if we need the user to give us new credentials.
         /// </summary>
         /// <param name="uri"></param>
         /// <param name="forcePrompt"></param>
-        /// <param name="credentials"></param>
         /// <returns></returns>
-        private CredentialState GetCredentials(Uri uri, bool forcePrompt, out ICredentials credentials) {
-            __VsWebProxyState oldState;
-            oldState = forcePrompt 
-                ? __VsWebProxyState.VsWebProxyState_PromptForCredentials 
-                : __VsWebProxyState.VsWebProxyState_DefaultCredentials;
+        private Tuple<CredentialState,ICredentials> GetCredentials(Uri uri, bool forcePrompt) {
+            __VsWebProxyState oldState = forcePrompt 
+                                             ? __VsWebProxyState.VsWebProxyState_PromptForCredentials 
+                                             : __VsWebProxyState.VsWebProxyState_DefaultCredentials;
             var newState = (uint)__VsWebProxyState.VsWebProxyState_NoCredentials;
             int result = 0;
             ThreadHelper.Generic.Invoke(() => {
@@ -125,12 +117,10 @@ namespace NuGet.VisualStudio {
             if (result != 0 || newState == (uint)__VsWebProxyState.VsWebProxyState_Abort) {
                 // Clear out the current credentials because the user might have clicked cancel
                 // and we don't want to use the currently set credentials if they are wrong.
-                credentials = null;
-                return CredentialState.Abort;
+                return Tuple.Create<CredentialState, ICredentials>(CredentialState.Abort, null);
             }
             // Get the new credentials from the proxy instance
-            credentials = WebRequest.DefaultWebProxy.Credentials;
-            return CredentialState.HasCredentials;
+            return Tuple.Create(CredentialState.HasCredentials, WebRequest.DefaultWebProxy.Credentials);
         }
     }
 }

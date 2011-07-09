@@ -20,7 +20,7 @@ namespace Bootstrapper {
             // is required for the proxy
             var consoleCredentialProvider = new ConsoleCredentialProvider();
             HttpClient.DefaultProxyFinder.RegisterProvider(consoleCredentialProvider);
-            HttpClient.DefaultCredentialService.RegisterProvider(consoleCredentialProvider);
+            HttpClient.DefaultRequestCredentialService.RegisterProvider(consoleCredentialProvider);
             // Setup IHttpClient for the Gallery to locate packages
             var httpClient = new HttpClient(galleryUri);
 

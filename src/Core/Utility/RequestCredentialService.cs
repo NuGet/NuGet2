@@ -9,7 +9,7 @@ namespace NuGet {
         ///// Local cache of registered proxy providers to use when locating a valid proxy
         ///// to use for the given Uri.
         ///// </summary>
-        private readonly ISet<ICredentialProvider> _providerCache = new HashSet<ICredentialProvider>();
+        private readonly HashSet<ICredentialProvider> _providerCache = new HashSet<ICredentialProvider>();
         /// <summary>
         /// Local cache of credential objects that is used to prevent the subsequent look ups of credentials
         /// for the already discovered credentials based on the Uri.
@@ -44,15 +44,15 @@ namespace NuGet {
             if (provider == null) {
                 throw new ArgumentNullException("provider");
             }
-            if (!_providerCache.Contains(provider)) {
-                return;
-            }
             _providerCache.Remove(provider);
         }
-
-        public ICredentials GetCredentials(Uri uri) {
-            return GetCredentials(uri, null);
-        }
+        /// <summary>
+        /// Returns an ICredentials object instance that represents a valid credential
+        /// object that can be used for request authentication.
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <param name="proxy"></param>
+        /// <returns></returns>
         public ICredentials GetCredentials(Uri uri, IWebProxy proxy) {
             if (uri == null) {
                 throw new ArgumentNullException("uri");
@@ -78,14 +78,14 @@ namespace NuGet {
             }
 
             foreach (var provider in RegisteredProviders) {
-                var credentials = provider.GetCredentials(uri, proxy);
-                if (credentials.Item1 == CredentialState.Abort) {
+                var credentialResult = provider.GetCredentials(uri, proxy);
+                if (credentialResult.State == CredentialState.Abort) {
                     // return so that we don't cache null if the user has cancelled the credentials prompt.
                     return null;
                 }
                 else {
-                    if (AreCredentialsValid(credentials.Item2, uri, proxy)) {
-                        result = credentials.Item2;
+                    if (AreCredentialsValid(credentialResult.Credentials, uri, proxy)) {
+                        result = credentialResult.Credentials;
                         _credentialCache.TryAdd(uri, result);
                         break;
                     }

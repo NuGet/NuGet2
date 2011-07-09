@@ -20,13 +20,6 @@ namespace NuGet {
         /// </summary>
         /// <param name="provider"></param>
         void UnregisterProvider(ICredentialProvider provider);
-        ///// <summary>
-        /// Returns an ICredentials object instance that represents a valid credential
-        /// object that can be used for request authentication.
-        ///// </summary>
-        ///// <param name="uri"></param>
-        ///// <returns></returns>
-        ICredentials GetCredentials(Uri uri);
         /// <summary>
         /// Returns an ICredentials object instance that represents a valid credential
         /// object that can be used for request authentication.

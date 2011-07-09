@@ -5,20 +5,20 @@ using Console = System.Console;
 
 namespace NuGet {
     public class ConsoleCredentialProvider : ICredentialProvider {
-        public Tuple<CredentialState, ICredentials> GetCredentials(Uri uri) {
-            return GetCredentials(uri, null);
-        }
-        public Tuple<CredentialState, ICredentials> GetCredentials(Uri uri, IWebProxy proxy) {
-            Console.WriteLine("Please provide credentials for: {0}", uri.OriginalString);
-            Console.Write("Username: ");
+        public CredentialResult GetCredentials(Uri uri, IWebProxy proxy) {
+            if (uri == null) {
+                throw new ArgumentNullException("uri");
+            }
+            Console.WriteLine(NuGetResources.Credentials_ConsolePromptMessage, uri.OriginalString);
+            Console.Write(NuGetResources.Credentials_UserName);
             string username = Console.ReadLine();
-            Console.Write("Password: ");
+            Console.Write(NuGetResources.Credentials_Password);
             SecureString password = ReadLineAsSecureString();
-            var credentials = new NetworkCredential {
+            ICredentials credentials = new NetworkCredential {
                 UserName = username,
                 SecurePassword = password
             };
-            return new Tuple<CredentialState, ICredentials>(CredentialState.HasCredentials, credentials);
+            return CredentialResult.Create(CredentialState.HasCredentials, credentials);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -35,13 +35,13 @@ namespace NuGet {
                             continue;
                         }
                         Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-                        Console.Write(" ");
+                        Console.Write(' ');
                         Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
                         secureString.RemoveAt(secureString.Length - 1);
                     }
                     else {
                         secureString.AppendChar(keyInfo.KeyChar);
-                        Console.Write("*");
+                        Console.Write('*');
                     }
                 }
                 secureString.MakeReadOnly();

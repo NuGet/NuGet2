@@ -537,4 +537,7 @@
   <data name="HelpCommandMarkdown" xml:space="preserve">
     <value>Print detailed all help in markdown format.</value>
   </data>
+  <data name="Credentials_ConsolePromptMessage" xml:space="preserve">
+    <value>Please provide credentials for: {0}</value>
+  </data>
 </root>
