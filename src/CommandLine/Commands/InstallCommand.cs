@@ -62,7 +62,7 @@ namespace NuGet.Commands {
                 string packageId = Arguments[0];
                 Version version = Version != null ? new Version(Version) : null;
 
-                bool result = InstallPackage(packageManager, packageId, version, uninstallDependencies: true);
+                bool result = InstallPackage(packageManager, fileSystem, packageId, version);
                 if (!result) {
                     Console.WriteLine(NuGetResources.InstallCommandPackageAlreadyExists, packageId);
                 }
@@ -86,7 +86,7 @@ namespace NuGet.Commands {
             bool installedAny = false;
             foreach (var package in packageReferences) {
                 // Note that we ignore dependencies here because packages.config already contains the full closure
-                installedAny |= InstallPackage(packageManager, package.Id, package.Version, uninstallDependencies: false);
+                installedAny |= InstallPackage(packageManager, fileSystem, package.Id, package.Version);
             }
 
             if (!installedAny && packageReferences.Any()) {
@@ -94,19 +94,26 @@ namespace NuGet.Commands {
             }
         }
 
-        private bool InstallPackage(PackageManager packageManager, string packageId, Version version, bool uninstallDependencies) {
-            var installedPackage = packageManager.LocalRepository.FindPackage(packageId);
-            if (installedPackage != null) {
-                if (installedPackage.Version >= version) {
-                    // If the package is already installed (or the version being installed is lower), then we do not need to do anything. 
-                    return false;
-                }
-                else if (!AllowMultipleVersions) {
-                    // If the package is already installed, but
-                    // (a) the version we require is different from the one that is installed, 
-                    // (b) side-by-side is disabled
-                    // we need to uninstall it.
-                    packageManager.UninstallPackage(installedPackage, forceRemove: true, removeDependencies: uninstallDependencies);
+        private bool InstallPackage(PackageManager packageManager, IFileSystem fileSystem, string packageId, Version version) {
+            if (AllowMultipleVersions && IsPackageInstalled(packageId, version, packageManager, fileSystem)) {
+                // Use a fast check to verify if the package is already installed. We'll do this by checking if the package directory exists on disk.
+                return false;
+            }
+            else if (!AllowMultipleVersions) {
+                var installedPackage = packageManager.LocalRepository.FindPackage(packageId);
+                if (installedPackage != null) {
+                    if (version != null && installedPackage.Version >= version) {
+                        // If the package is already installed (or the version being installed is lower), then we do not need to do anything. 
+                        return false;
+                    }
+                    else if (packageManager.SourceRepository.Exists(packageId, version)) {
+                        // If the package is already installed, but
+                        // (a) the version we require is different from the one that is installed, 
+                        // (b) side-by-side is disabled
+                        // we need to uninstall it.
+                        // However, before uninstalling, make sure the package exists in the source repository. 
+                        packageManager.UninstallPackage(installedPackage, forceRemove: false, removeDependencies: true);
+                    }
                 }
             }
             packageManager.InstallPackage(packageId, version);
@@ -132,6 +139,16 @@ namespace NuGet.Commands {
             string installPath = OutputDirectory ?? Directory.GetCurrentDirectory();
 
             return new PhysicalFileSystem(installPath);
+        }
+
+        // Do a very quick check of whether a package in installed by checked whether the nupkg file exists
+        private static bool IsPackageInstalled(string packageId, Version version, PackageManager packageManager, IFileSystem fileSystem) {
+            var packageDir = packageManager.PathResolver.GetPackageDirectory(packageId, version);
+            var packageFile = packageManager.PathResolver.GetPackageFileName(packageId, version);
+
+            string packagePath = Path.Combine(packageDir, packageFile);
+
+            return fileSystem.FileExists(packagePath);
         }
     }
 }
