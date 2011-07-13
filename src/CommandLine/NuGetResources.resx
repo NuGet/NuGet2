@@ -612,4 +612,7 @@ nuget update -Self</value>
   <data name="Credentials_ConsolePromptMessage" xml:space="preserve">
     <value>Please provide credentials for: {0}</value>
   </data>
+  <data name="InstallCommandPackageAlreadyExists" xml:space="preserve">
+    <value>Package "{0}" is already installed.</value>
+  </data>
 </root>
