@@ -84,7 +84,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 object result = _uiDispatcher.Invoke(
                     new Func<string, bool?>(ShowRemoveDependenciesWindow),
                     message);
-                return (bool)result;
+                return (bool?)result;
             }
 
             return MessageHelper.ShowQueryMessage(message, null);
