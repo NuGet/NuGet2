@@ -34,7 +34,7 @@ namespace NuGet.Commands {
 
         [ImportingConstructor]
         public HelpCommand(ICommandManager commandManager)
-            : this(commandManager, Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Name, "http://docs.nuget.org/docs/reference/command-line-reference") {
+            : this(commandManager, Assembly.GetExecutingAssembly().GetName().Name, Assembly.GetExecutingAssembly().GetName().Name, CommandLineConstants.NuGetDocsCommandLineReference) {
         }
 
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "3#",

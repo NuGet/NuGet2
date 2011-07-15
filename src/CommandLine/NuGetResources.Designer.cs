@@ -696,6 +696,24 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to build package. Ensure &apos;{0}&apos; includes assembly files. For help on building symbols package, visit {1}..
+        /// </summary>
+        internal static string PackageCommandNoFilesForLibPackage {
+            get {
+                return ResourceManager.GetString("PackageCommandNoFilesForLibPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to build package. Ensure &apos;{0}&apos; includes source and symbol files. For help on building symbols package, visit {1}..
+        /// </summary>
+        internal static string PackageCommandNoFilesForSymbolsPackage {
+            get {
+                return ResourceManager.GetString("PackageCommandNoFilesForSymbolsPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Specifies the directory for the created NuGet package file. If not specified, uses the current directory..
         /// </summary>
         internal static string PackageCommandOutputDirDescription {

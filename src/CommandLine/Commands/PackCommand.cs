@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using NuGet.Common;
@@ -211,19 +212,29 @@ namespace NuGet.Commands {
             if (Symbols) {
                 // remove source related files when building the lib package
                 ExcludeFilesForLibPackage(packageBuilder.Files);
+
+                if (!packageBuilder.Files.Any()) {
+                    throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageCommandNoFilesForLibPackage, 
+                        path, CommandLineConstants.NuGetDocs));
+                }
             }
 
             BuildPackage(path, packageBuilder);
 
             if (Symbols) {
-                BuildSymbolsPackage(path, packageBuilder);
+                BuildSymbolsPackage(path);
             }
         }
 
-        private void BuildSymbolsPackage(string path, PackageBuilder mainPackageBuilder) {
+        private void BuildSymbolsPackage(string path) {
             PackageBuilder symbolsBuilder = CreatePackageBuilderFromNuspec(path);
             // remove unnecessary files when building the symbols package
-            ExcludeFilesForSymbolPackage(mainPackageBuilder.Files);
+            ExcludeFilesForSymbolPackage(symbolsBuilder.Files);
+
+            if (!symbolsBuilder.Files.Any()) {
+                throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageCommandNoFilesForSymbolsPackage,
+                        path, CommandLineConstants.NuGetDocs));
+            }
 
             string outputPath = GetOutputPath(symbolsBuilder, symbols: true);
             BuildPackage(path, symbolsBuilder, outputPath);
