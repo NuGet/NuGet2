@@ -309,7 +309,8 @@ namespace NuGet.Commands {
 
             // Collect all packages
             var packages = new List<IPackage>();
-            foreach (PackageReference reference in file.GetPackageReferences()) {
+            IEnumerable<PackageReference> packageReferences = file.GetPackageReferences();
+            foreach (PackageReference reference in packageReferences){
                 if (repository != null) {
                     IPackage package = repository.FindPackage(reference.Id, reference.Version);
                     if (package != null) {
@@ -332,7 +333,7 @@ namespace NuGet.Commands {
                     continue;
                 }
 
-                IVersionSpec spec = VersionUtility.ParseVersionSpec(package.Version.ToString());
+                IVersionSpec spec = GetVersionConstraint(packageReferences, package);
                 var dependency = new PackageDependency(package.Id, spec);
                 dependencies[dependency.Id] = dependency;
             }
@@ -342,6 +343,12 @@ namespace NuGet.Commands {
             foreach (var d in dependencies.Values) {
                 builder.Dependencies.Add(d);
             }
+        }
+
+        private static IVersionSpec GetVersionConstraint(IEnumerable<PackageReference> packageReferences, IPackage package)
+        {
+            PackageReference packageReference = packageReferences.First(r => r.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase));
+            return packageReference.VersionConstraint ?? VersionUtility.ParseVersionSpec(package.Version.ToString());
         }
 
         private static IEnumerable<IPackage> GetMinimumSet(List<IPackage> packages) {
