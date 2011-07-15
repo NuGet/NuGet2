@@ -1011,6 +1011,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to All.
+        /// </summary>
+        internal static string ReservedPackageNameAll {
+            get {
+                return ResourceManager.GetString("ReservedPackageNameAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The resource type &apos;{0}&apos; does not have an accessible get for the &apos;{1}&apos; property..
         /// </summary>
         internal static string ResourcePropertyDoesNotHaveAccessibleGet {
@@ -1117,6 +1126,141 @@ namespace NuGet {
         internal static string SkippingUpdateCheck {
             get {
                 return ResourceManager.GetString("SkippingUpdateCheck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package source name &apos;All&apos; is a reserved name..
+        /// </summary>
+        internal static string SourcesCommandAllNameIsReserved {
+            get {
+                return ResourceManager.GetString("SourcesCommandAllNameIsReserved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provides the ability to manage list of sources located in  %AppData%\NuGet\NuGet.config.
+        /// </summary>
+        internal static string SourcesCommandDescription {
+            get {
+                return ResourceManager.GetString("SourcesCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The source specified is invalid. Please provide a valid source..
+        /// </summary>
+        internal static string SourcesCommandInvalidSource {
+            get {
+                return ResourceManager.GetString("SourcesCommandInvalidSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name of the source..
+        /// </summary>
+        internal static string SourcesCommandNameDescription {
+            get {
+                return ResourceManager.GetString("SourcesCommandNameDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The name specified cannot be empty. Please provide a valid name..
+        /// </summary>
+        internal static string SourcesCommandNameRequired {
+            get {
+                return ResourceManager.GetString("SourcesCommandNameRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to find any package source(s) matching name: {0}..
+        /// </summary>
+        internal static string SourcesCommandNoMatchingSourcesFound {
+            get {
+                return ResourceManager.GetString("SourcesCommandNoMatchingSourcesFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No sources found..
+        /// </summary>
+        internal static string SourcesCommandNoSources {
+            get {
+                return ResourceManager.GetString("SourcesCommandNoSources", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Registered Sources:.
+        /// </summary>
+        internal static string SourcesCommandRegisteredSources {
+            get {
+                return ResourceManager.GetString("SourcesCommandRegisteredSources", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package Source with Name: {0} added successfully..
+        /// </summary>
+        internal static string SourcesCommandSourceAddedSuccessfully {
+            get {
+                return ResourceManager.GetString("SourcesCommandSourceAddedSuccessfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Path to the package(s) source..
+        /// </summary>
+        internal static string SourcesCommandSourceDescription {
+            get {
+                return ResourceManager.GetString("SourcesCommandSourceDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package source with Name: {0} removed successfully..
+        /// </summary>
+        internal static string SourcesCommandSourceRemovedSuccessfully {
+            get {
+                return ResourceManager.GetString("SourcesCommandSourceRemovedSuccessfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The source specified cannot be empty. Please provide a valid source..
+        /// </summary>
+        internal static string SourcesCommandSourceRequired {
+            get {
+                return ResourceManager.GetString("SourcesCommandSourceRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The name specified has already been added to the list of available package sources. Please provide a unique name..
+        /// </summary>
+        internal static string SourcesCommandUniqueName {
+            get {
+                return ResourceManager.GetString("SourcesCommandUniqueName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The source specified has already been added to the list of available package sources. Please provide a unique source..
+        /// </summary>
+        internal static string SourcesCommandUniqueSource {
+            get {
+                return ResourceManager.GetString("SourcesCommandUniqueSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;List|Add|Remove&gt; -Name [name] -Source [source].
+        /// </summary>
+        internal static string SourcesCommandUsageSummary {
+            get {
+                return ResourceManager.GetString("SourcesCommandUsageSummary", resourceCulture);
             }
         }
         
