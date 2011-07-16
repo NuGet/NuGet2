@@ -810,6 +810,8 @@ namespace NuGet {
         ///
         ///nuget pack foo.csproj
         ///
+        ///nuget pack foo.csproj -Build -Symbols -Properties Configuration=Release
+        ///
         ///nuget pack foo.nuspec -Version 2.1.0.
         /// </summary>
         internal static string PackCommandUsageExamples {

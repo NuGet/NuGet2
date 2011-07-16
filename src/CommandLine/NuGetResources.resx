@@ -551,6 +551,8 @@ nuget pack foo.nuspec
 
 nuget pack foo.csproj
 
+nuget pack foo.csproj -Build -Symbols -Properties Configuration=Release
+
 nuget pack foo.nuspec -Version 2.1.0</value>
   </data>
   <data name="PushCommandUsageExamples" xml:space="preserve">
