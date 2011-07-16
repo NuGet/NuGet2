@@ -148,7 +148,7 @@
     <value>Invalid option value: '{0} {1}'</value>
   </data>
   <data name="ListCommandDescription" xml:space="preserve">
-    <value>Displays a list of packages from a given source. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used.</value>
+    <value>Displays a list of packages from a given source. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used. If NuGet.config specifies no sources, uses the default NuGet feed.</value>
   </data>
   <data name="ListCommandNoPackages" xml:space="preserve">
     <value>No packages found.</value>
@@ -615,7 +615,7 @@ nuget update -Self</value>
   <data name="InstallCommandPackageAlreadyExists" xml:space="preserve">
     <value>Package "{0}" is already installed.</value>
   </data>
-    <data name="SourcesCommandNoSources" xml:space="preserve">
+  <data name="SourcesCommandNoSources" xml:space="preserve">
     <value>No sources found.</value>
   </data>
   <data name="SourcesCommandRegisteredSources" xml:space="preserve">
