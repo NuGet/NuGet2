@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Management.Automation;
+using EnvDTE;
 using NuGet.VisualStudio;
 
 namespace NuGet.PowerShell.Commands {
@@ -13,6 +15,7 @@ namespace NuGet.PowerShell.Commands {
     [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
     [OutputType(typeof(IPackage))]
     public class GetPackageCommand : NuGetBaseCommand {
+        private readonly Dictionary<string, IProjectManager> _projectManagers = new Dictionary<string, IProjectManager>();
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepository _recentPackagesRepository;
@@ -60,6 +63,15 @@ namespace NuGet.PowerShell.Commands {
         [ValidateNotNullOrEmpty]
         public string Filter { get; set; }
 
+        [Parameter(Position = 1, ParameterSetName = "Remote")]
+        [Parameter(Position = 1, ParameterSetName = "Updates")]
+        [ValidateNotNullOrEmpty]
+        public string Source { get; set; }
+
+        [Parameter(Position = 1, Mandatory = true, ValueFromPipelineByPropertyName = true, ParameterSetName="Project")]
+        [ValidateNotNullOrEmpty]
+        public string ProjectName { get; set; }
+
         [Parameter(Mandatory = true, ParameterSetName = "Remote")]
         [Alias("Online", "Remote")]
         public SwitchParameter ListAvailable { get; set; }
@@ -69,11 +81,6 @@ namespace NuGet.PowerShell.Commands {
 
         [Parameter(Mandatory = true, ParameterSetName = "Recent")]
         public SwitchParameter Recent { get; set; }
-
-        [Parameter(Position = 1, ParameterSetName = "Remote")]
-        [Parameter(Position = 1, ParameterSetName = "Updates")]
-        [ValidateNotNullOrEmpty]
-        public string Source { get; set; }
 
         [Parameter(ParameterSetName = "Remote")]
         [Parameter(ParameterSetName = "Recent")]
@@ -119,6 +126,22 @@ namespace NuGet.PowerShell.Commands {
             }
         }
 
+        private IProjectManager GetProjectManager(string projectName) {
+            IProjectManager _projectManager;
+            if (!_projectManagers.TryGetValue(projectName, out _projectManager)) {
+                Project project = SolutionManager.GetProject(projectName);
+                if (project == null) {
+                    ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
+                }
+                _projectManager = PackageManager.GetProjectManager(project);
+                Debug.Assert(_projectManager != null);
+
+                _projectManagers.Add(projectName, _projectManager);
+            }
+
+            return _projectManager;
+        }
+
         protected override void ProcessRecordCore() {
             if (!UseRemoteSourceOnly && !SolutionManager.IsSolutionOpen) {
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
@@ -128,8 +151,12 @@ namespace NuGet.PowerShell.Commands {
             if (UseRemoteSource) {
                 repository = GetRemoteRepository();
             }
-            else {
+            else if (String.IsNullOrEmpty(ProjectName)) {
                 repository = PackageManager.LocalRepository;
+            }
+            else {
+                // use project repository when ProjectName is specified
+                repository = GetProjectManager(ProjectName).LocalRepository;
             }
 
             IQueryable<IPackage> packages;
@@ -173,7 +200,6 @@ namespace NuGet.PowerShell.Commands {
         /// </summary>
         private IPackageRepository GetRemoteRepository() {
             if (!String.IsNullOrEmpty(Source)) {
-
                 _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source);
                 // If a Source parameter is explicitly specified, use it
                 return CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, Source);

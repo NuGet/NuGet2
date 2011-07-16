@@ -36,6 +36,9 @@ Register-TabExpansion 'Get-Package' @{
     'Source' = {
         GetPackageSources
     }
+    'ProjectName' = {
+        GetProjectNames
+    }
 }
 
 Register-TabExpansion 'Install-Package' @{

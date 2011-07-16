@@ -204,3 +204,86 @@ function Test-UpdatedPackageAppearInRecentPackageList {
     Assert-AreEqual "jQuery" $result[0].Id
     Assert-AreEqual "1.6" $result[0].Version
 }
+
+function Test-GetPackageForProjectReturnsEmptyProjectIfItHasNoInstalledPackage {
+    # Arrange
+    $p = New-ConsoleApplication
+
+    # Act
+    $result = @(Get-Package -ProjectName $p.Name)
+
+    # Assert
+    Assert-AreEqual 0 $result.Count
+}
+
+function Test-GetPackageForProjectReturnsCorrectPackages {
+    # Arrange
+    $p = New-ConsoleApplication
+    Install-Package jQuery -Version 1.5 -Source $context.RepositoryRoot
+
+    # Act
+    $result = @(Get-Package -ProjectName $p.Name)
+
+    # Assert
+    Assert-AreEqual 1 $result.Count
+    Assert-AreEqual "jQuery" $result[0].Id
+    Assert-AreEqual "1.5" $result[0].Version
+}
+
+function Test-GetPackageForProjectReturnsCorrectPackages2 {
+    # Arrange
+    $p1 = New-ConsoleApplication
+    $p2 = New-ClassLibrary
+
+    Install-Package jQuery -Version 1.5 -Source $context.RepositoryRoot -ProjectName $p1.Name
+    Install-Package MyAwesomeLibrary -Version 1.0 -Source $context.RepositoryRoot -ProjectName $p2.Name
+
+    # Act
+    $result = @(Get-Package -ProjectName $p1.Name)
+
+    # Assert
+    Assert-AreEqual 1 $result.Count
+    Assert-AreEqual "jQuery" $result[0].Id
+    Assert-AreEqual "1.5" $result[0].Version
+}
+
+function Test-GetPackageForProjectReturnsEmptyIfItHasNoInstalledPackage {
+    # Arrange
+    $p = New-ConsoleApplication
+
+    # Act
+    $result = @(Get-Package -ProjectName $p.Name)
+
+    # Assert
+    Assert-AreEqual 0 $result.Count
+}
+
+function Test-GetPackageForProjectReturnsEmptyIfItHasNoInstalledPackage2 {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p1 = New-ConsoleApplication
+    $p2 = New-ClassLibrary
+
+    Install-Package jQuery -Source $context.RepositoryRoot -Project $p1.Name
+ 
+    # Act
+    $result = @(Get-Package -ProjectName $p2.Name)
+
+    # Assert
+    Assert-AreEqual 0 $result.Count
+}
+
+function Test-GetPackageForProjectThrowIfProjectNameIsInvalid {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p1 = New-ConsoleApplication
+ 
+    # Act & Assert
+    Assert-Throws { Get-Package -ProjectName "invalidname" } "No compatible project(s) found in the active solution."
+}

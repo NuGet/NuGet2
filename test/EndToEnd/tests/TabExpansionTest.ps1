@@ -353,3 +353,19 @@ function Test-UpdatePackageCommandShowTabExpansionForSourceParameter {
     # Assert
     Assert-True ($suggestions.Count -gt 0)
 }
+
+function Test-GetPackageCommandShowTabExpansioinForProjectNameParameter {
+    # Arrange
+    $p1 = New-ClassLibrary "Project1"
+    $p2 = New-ClassLibrary "Project2"
+
+    # Act
+    $suggestions = @(TabExpansion 'Get-Package -ProjectName ')
+
+    # Assert
+    Assert-AreEqual 2 $suggestions.Count
+
+    Assert-AreEqual "Project1" $suggestions[0]
+    Assert-AreEqual "Project2" $suggestions[1]
+}
+
