@@ -9,7 +9,6 @@ namespace NuGet.MSBuild {
     public class NuGet : Task {
         private static readonly string SymbolsExtension = ".symbols" + Constants.PackageExtension;
         private readonly IFileSystemProvider _fileSystemProvider;
-        private string _workingDirectory;
 
         private static readonly string[] _defaultExcludes = new[] {
             // Exclude previous package files
@@ -54,15 +53,13 @@ namespace NuGet.MSBuild {
         public bool Symbols { get; set; }
 
         public override bool Execute() {
-
-            _workingDirectory = Directory.GetCurrentDirectory();
-            if (!String.IsNullOrWhiteSpace(BaseDir)) {
-                _workingDirectory = BaseDir;
+            if (String.IsNullOrEmpty(BaseDir)) {
+                BaseDir = Directory.GetCurrentDirectory();
             }
 
-            var fileSystem = _fileSystemProvider.CreateFileSystem(_workingDirectory);
+            var fileSystem = _fileSystemProvider.CreateFileSystem(BaseDir);
 
-            if (String.IsNullOrWhiteSpace(SpecFile)) {
+            if (String.IsNullOrEmpty(SpecFile)) {
                 Log.LogError(Resources.NuGetResources.SpecFileMustNotBeEmpty);
                 return false;
             }
@@ -80,10 +77,10 @@ namespace NuGet.MSBuild {
             string packageDir = PackageDir;
 
             if (String.IsNullOrEmpty(packageDir)) {
-                packageDir = _workingDirectory;
+                packageDir = BaseDir;
             }
 
-            string specFilePath = Path.Combine(_workingDirectory, SpecFile);
+            string specFilePath = Path.Combine(BaseDir, SpecFile);
 
             try {
                 string packageFilePath = BuildPackage(fileSystem, packageDir, specFilePath);
@@ -106,7 +103,7 @@ namespace NuGet.MSBuild {
         private string BuildPackage(IFileSystem fileSystem, string packageDir, string specFilePath) {
             PackageBuilder packageBuilder;
             using (Stream stream = fileSystem.OpenFile(specFilePath)) {
-                packageBuilder = new PackageBuilder(fileSystem.OpenFile(specFilePath), _workingDirectory);
+                packageBuilder = new PackageBuilder(fileSystem.OpenFile(specFilePath), BaseDir);
             }
 
             if (Symbols) {
@@ -123,7 +120,7 @@ namespace NuGet.MSBuild {
             BuildPackage(fileSystem, packageBuilder, packageFilePath);
 
             if (Symbols) {
-                BuildSymbolsPackage(fileSystem, specFilePath, packageBuilder);
+                BuildSymbolsPackage(fileSystem, specFilePath);
             }
 
             return packageFilePath;
@@ -156,14 +153,14 @@ namespace NuGet.MSBuild {
             }
         }
 
-        private void BuildSymbolsPackage(IFileSystem fileSystem, string specFilePath, PackageBuilder mainPackageBuilder) {
+        private void BuildSymbolsPackage(IFileSystem fileSystem, string specFilePath) {
             PackageBuilder symbolsBuilder;
             using (Stream stream = fileSystem.OpenFile(specFilePath)) {
-                symbolsBuilder = new PackageBuilder(stream, _workingDirectory);   
+                symbolsBuilder = new PackageBuilder(stream, BaseDir);   
             }
 
             // remove unnecessary files when building the symbols package
-            ExcludeFilesForSymbolPackage(mainPackageBuilder.Files);
+            ExcludeFilesForSymbolPackage(symbolsBuilder.Files);
 
             string outputPath = GetOutputPath(symbolsBuilder, symbols: true);
             BuildPackage(fileSystem, symbolsBuilder, specFilePath, outputPath);
@@ -212,11 +209,11 @@ namespace NuGet.MSBuild {
                 return packageFile.Path;
             }
             var path = physicalPackageFile.SourcePath;
-            int index = path.IndexOf(_workingDirectory, StringComparison.OrdinalIgnoreCase);
+            int index = path.IndexOf(BaseDir, StringComparison.OrdinalIgnoreCase);
             if (index != -1) {
-                // Since wildcards are going to be relative to the base path, remove the _workingDirectory portion of the file's source path. 
+                // Since wildcards are going to be relative to the base path, remove the BaseDir portion of the file's source path. 
                 // Also remove any leading path separator slashes
-                path = path.Substring(index + _workingDirectory.Length).TrimStart(Path.DirectorySeparatorChar);
+                path = path.Substring(index + BaseDir.Length).TrimStart(Path.DirectorySeparatorChar);
             }
             return path;
         }

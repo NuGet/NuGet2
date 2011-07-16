@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
@@ -32,8 +31,7 @@ namespace NuGet.Test.MSBuild {
         }
 
         [TestMethod]
-        public void WillUseBaseDirectoryIfBaseDirSet()
-        {
+        public void WillUseBaseDirectoryIfBaseDirSet() {
             var fileSystemProviderStub = new Mock<IFileSystemProvider>();
             var baseDir = "/a/b/c";
             fileSystemProviderStub.Setup(c => c.CreateFileSystem(baseDir)).Returns(new MockFileSystem()).Verifiable();
@@ -126,8 +124,9 @@ namespace NuGet.Test.MSBuild {
 
             // Act
             var task = CreateTaskWithDefaultStubs(fileSystemRoot: @"C:\");
+            task.BaseDir = @"C:\";
             task.ExcludeFiles(packageFiles);
-            
+
             // Assert
             Assert.AreEqual(1, packageFiles.Count);
             Assert.AreEqual(regularFile, packageFiles.Single());
@@ -144,6 +143,7 @@ namespace NuGet.Test.MSBuild {
 
             // Act
             var task = CreateTaskWithDefaultStubs(fileSystemRoot: @"C:\");
+            task.BaseDir = @"C:\";
             task.ExcludeFiles(packageFiles);
 
             // Assert
@@ -161,6 +161,7 @@ namespace NuGet.Test.MSBuild {
 
             // Act
             var task = CreateTaskWithDefaultStubs(fileSystemRoot: @"C:\");
+            task.BaseDir = @"C:\";
             task.ExcludeFiles(packageFiles);
 
             // Assert
