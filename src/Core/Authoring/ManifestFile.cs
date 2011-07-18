@@ -20,6 +20,9 @@ namespace NuGet {
         [XmlAttribute("target")]
         public string Target { get; set; }
 
+        [XmlAttribute("exclude")]
+        public string Exclude { get; set; }
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) {
             if (!String.IsNullOrEmpty(Source) && Source.IndexOfAny(_invalidSourceCharacters) != -1) {
                 yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_SourceContainsInvalidCharacters, Source));
@@ -27,6 +30,10 @@ namespace NuGet {
 
             if (!String.IsNullOrEmpty(Target) && Target.IndexOfAny(_invalidTargetChars) != -1) {
                 yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_TargetContainsInvalidCharacters, Target));
+            }
+
+            if (!String.IsNullOrEmpty(Exclude) && Exclude.IndexOfAny(_invalidSourceCharacters) != -1) {
+                yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_ExcludeContainsInvalidCharacters, Exclude));
             }
         }
      }

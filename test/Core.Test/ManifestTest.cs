@@ -61,13 +61,17 @@ namespace NuGet.Test {
                     new ManifestFile { 
                         Source = @"foo\bar\|>",
                         Target = "lib"
+                    },
+                    new ManifestFile {
+                        Source = @"foo\**\*.cs",
+                        Exclude = "Exclude|"
                     }
                 }
             };
 
             // Act and Assert
             ExceptionAssert.Throws<ValidationException>(() => Manifest.Validate(manifest),
-                "Source path '|' contains invalid characters.\r\nTarget path '<' contains invalid characters.\r\nSource path 'foo\\bar\\|>' contains invalid characters.");
+                "Source path '|' contains invalid characters.\r\nTarget path '<' contains invalid characters.\r\nSource path 'foo\\bar\\|>' contains invalid characters.\r\nExclude path 'Exclude|' contains invalid characters.");
         }
 
         [TestMethod]

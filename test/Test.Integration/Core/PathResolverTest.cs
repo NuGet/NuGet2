@@ -971,7 +971,99 @@ namespace NuGet.Test.Integration.PathResolver {
             Assert.AreEqual(expectedContent, actualContents);
         }
 
-        private Stream GetManifest(string search, string target) {
+        [TestMethod]
+        public void ExclusionWithSimpleExtensions() {
+            // Arrange
+            var root = CreateExclusionProject();
+            var manifest = GetExclusionManifest(@"**\*.*", "", @"**\*.pdb");
+ 
+            // Act
+            var package = new PackageBuilder(manifest, root);
+            
+            // Assert
+            Assert.AreEqual(6, package.Files.Count);
+            Assert.AreEqual("Main.cs", package.Files[0].Path);
+            Assert.AreEqual("MainCore.cs", package.Files[1].Path);
+            Assert.AreEqual("MyProject.csproj", package.Files[2].Path);
+            Assert.AreEqual(@"bin\debug\MyProject.dll", package.Files[3].Path);
+            Assert.AreEqual(@"bin\release\MyProject.dll", package.Files[4].Path);
+            Assert.AreEqual(@"Properties\AssemblyInfo.cs", package.Files[5].Path);
+        }
+
+        [TestMethod]
+        public void ExclusionWithPath() {
+            // Arrange
+            var root = CreateExclusionProject();
+            var manifest = GetExclusionManifest(@"**\*.*", "", @"bin\**");
+
+            // Act
+            var package = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.AreEqual(4, package.Files.Count);
+            Assert.AreEqual("Main.cs", package.Files[0].Path);
+            Assert.AreEqual("MainCore.cs", package.Files[1].Path);
+            Assert.AreEqual("MyProject.csproj", package.Files[2].Path);
+            Assert.AreEqual(@"Properties\AssemblyInfo.cs", package.Files[3].Path);
+        }
+
+        [TestMethod]
+        public void MultipleExclusionsForSearchPath() {
+            // Arrange
+            var root = CreateExclusionProject();
+            var manifest = GetExclusionManifest(@"**\*.*", "", @"**\*.pdb;*.csproj;Properties\*;*\Debug\*");
+
+            // Act
+            var package = new PackageBuilder(manifest, root);
+
+            // Assert
+            Assert.AreEqual(3, package.Files.Count);
+            Assert.AreEqual("Main.cs", package.Files[0].Path);
+            Assert.AreEqual("MainCore.cs", package.Files[1].Path);
+            Assert.AreEqual(@"bin\release\MyProject.dll", package.Files[2].Path);
+        }
+
+        [TestMethod]
+        public void ExclusionsWithRelativePaths() {
+            // Arrange
+            var root = CreateExclusionProject();
+            var manifest = GetExclusionManifest(@"..\bin\*\*.*", "lib", @"..\bin\debug\*");
+
+            // Act
+            var package = new PackageBuilder(manifest, Path.Combine(root, "Properties"));
+
+            // Assert
+            Assert.AreEqual(1, package.Files.Count);
+            Assert.AreEqual(@"lib\MyProject.dll", package.Files[0].Path);
+        }
+
+        private string CreateExclusionProject() {
+            return CreateFileSystem(new File("MyProject.csproj"),
+                                    new File("Main.cs"),
+                                    new File("MainCore.cs"),
+                                    new Dir("Properties",
+                                        new File("AssemblyInfo.cs")),
+                                    new Dir("bin",
+                                        new Dir("debug",
+                                            new File("MyProject.dll"),
+                                            new File("MyProject.pdb")),
+                                        new Dir("release",
+                                            new File("MyProject.dll"))));
+
+        }
+
+        private static Stream GetExclusionManifest(string search, string target, string exclusion) {
+            return String.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<package><metadata>
+    <id>Artem.XmlProviders</id>
+    <version>2.5</version>
+    <authors>Velio Ivanov</authors>
+    <language>en-us</language>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+  </metadata><files><file src=""{0}"" target=""{1}"" exclude=""{2}"" /></files></package>", search, target, exclusion).AsStream();
+        }
+
+        private static Stream GetManifest(string search, string target) {
             return String.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>

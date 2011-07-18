@@ -60,6 +60,7 @@
                                 <xs:complexType>
                                     <xs:attribute name="src" use="required" type="xs:string" />
                                     <xs:attribute name="target" use="optional" type="xs:string" />
+                                    <xs:attribute name="exclude" use="optional" type="xs:string" />
                                 </xs:complexType>
                             </xs:element>
                         </xs:sequence>

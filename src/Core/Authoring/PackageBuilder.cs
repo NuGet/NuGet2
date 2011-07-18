@@ -233,7 +233,7 @@ namespace NuGet {
 
         public void PopulateFiles(string basePath, IEnumerable<ManifestFile> files) {
             foreach (var file in files) {
-                AddFiles(basePath, file.Source, file.Target);
+                AddFiles(basePath, file.Source, file.Target, file.Exclude);
             }
         }
 
@@ -261,13 +261,28 @@ namespace NuGet {
             }
         }
 
-        private void AddFiles(string basePath, string source, string destination) {
-            IEnumerable<PhysicalPackageFile> searchFiles = PathResolver.ResolveSearchPattern(basePath, source, destination);
-            if (!PathResolver.IsWildCardSearch(source) && !searchFiles.Any()) {
+        private void AddFiles(string basePath, string source, string destination, string exclude = null) {
+            List<PhysicalPackageFile> searchFiles = PathResolver.ResolveSearchPattern(basePath, source, destination).ToList();
+            ExcludeFiles(searchFiles, basePath, exclude);
+
+            if (!PathResolver.IsWildcardSearch(source) && !searchFiles.Any()) {
                 throw new FileNotFoundException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageAuthoring_FileNotFound,
                     source));
             }
             Files.AddRange(searchFiles);
+        }
+
+        private static void ExcludeFiles(List<PhysicalPackageFile> searchFiles, string basePath, string exclude) {
+            if (String.IsNullOrEmpty(exclude)) {
+                return;
+            }
+
+            // One or more exclusions may be specified in the file. Split it and prepend the base path to the wildcard provided.
+            var exclusions = exclude.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var item in exclusions) {
+                string wildCard = PathResolver.NormalizeWildcard(basePath, item);
+                PathResolver.FilterPackageFiles(searchFiles, p => p.SourcePath, new[] { wildCard });
+            }
         }
 
         private static void CreatePart(Package package, string path, Stream sourceStream) {

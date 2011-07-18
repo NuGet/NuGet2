@@ -312,6 +312,9 @@
   <data name="Manifest_SourceContainsInvalidCharacters" xml:space="preserve">
     <value>Source path '{0}' contains invalid characters.</value>
   </data>
+  <data name="Manifest_ExcludeContainsInvalidCharacters" xml:space="preserve">
+    <value>Exclude path '{0}' contains invalid characters.</value>
+  </data>
   <data name="Manifest_TargetContainsInvalidCharacters" xml:space="preserve">
     <value>Target path '{0}' contains invalid characters.</value>
   </data>

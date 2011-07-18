@@ -421,6 +421,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Exclude path &apos;{0}&apos; contains invalid characters..
+        /// </summary>
+        internal static string Manifest_ExcludeContainsInvalidCharacters {
+            get {
+                return ResourceManager.GetString("Manifest_ExcludeContainsInvalidCharacters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} is required..
         /// </summary>
         internal static string Manifest_RequiredMetadataMissing {
