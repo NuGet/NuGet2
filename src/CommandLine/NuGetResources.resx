@@ -665,4 +665,10 @@ nuget update -Self</value>
   <data name="SourcesCommandDescription" xml:space="preserve">
     <value>Provides the ability to manage list of sources located in  %AppData%\NuGet\NuGet.config</value>
   </data>
+  <data name="PackageCommandNoFilesForLibPackage" xml:space="preserve">
+    <value>Failed to build package. Ensure '{0}' includes assembly files. For help on building symbols package, visit {1}.</value>
+  </data>
+  <data name="PackageCommandNoFilesForSymbolsPackage" xml:space="preserve">
+    <value>Failed to build package. Ensure '{0}' includes source and symbol files. For help on building symbols package, visit {1}.</value>
+  </data>
 </root>
