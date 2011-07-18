@@ -287,3 +287,24 @@ function Test-GetPackageForProjectThrowIfProjectNameIsInvalid {
     # Act & Assert
     Assert-Throws { Get-Package -ProjectName "invalidname" } "No compatible project(s) found in the active solution."
 }
+
+function Test-GetPackageWithoutProjectNameReturnsInstalledPackagesInTheSolution {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p1 = New-ConsoleApplication
+    $p2 = New-ClassLibrary
+
+    Install-Package jQuery -Source $context.RepositoryRoot -Project $p1.Name
+    Install-Package netfx-Guard -Source $context.RepositoryRoot -Project $p2.Name
+ 
+    # Act
+    $result = @(Get-Package)
+
+    # Assert
+    Assert-AreEqual 2 $result.Count
+    Assert-AreEqual "jQuery" $result[0].Id
+    Assert-AreEqual "netfx-Guard" $result[1].Id
+}

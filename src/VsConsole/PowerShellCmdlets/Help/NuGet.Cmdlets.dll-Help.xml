@@ -285,7 +285,7 @@ c:\temp\packages to find the package.
           <maml:para>
 Description
 ------------------------------------------------------------------
-Returns the packages installed in the current solution.
+Returns packages installed in the current solution.
           </maml:para>
           <maml:para></maml:para>
           <maml:para></maml:para>
@@ -298,7 +298,7 @@ Returns the packages installed in the current solution.
             <maml:para>
 Description
 ------------------------------------------------------------------
-Returns the packages installed in the "MyProject" project.
+Returns packages installed in the "MyProject" project.
             </maml:para>
             <maml:para></maml:para>
             <maml:para></maml:para>

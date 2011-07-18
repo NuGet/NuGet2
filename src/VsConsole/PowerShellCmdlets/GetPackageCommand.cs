@@ -15,7 +15,6 @@ namespace NuGet.PowerShell.Commands {
     [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
     [OutputType(typeof(IPackage))]
     public class GetPackageCommand : NuGetBaseCommand {
-        private readonly Dictionary<string, IProjectManager> _projectManagers = new Dictionary<string, IProjectManager>();
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepository _recentPackagesRepository;
@@ -127,19 +126,14 @@ namespace NuGet.PowerShell.Commands {
         }
 
         private IProjectManager GetProjectManager(string projectName) {
-            IProjectManager _projectManager;
-            if (!_projectManagers.TryGetValue(projectName, out _projectManager)) {
-                Project project = SolutionManager.GetProject(projectName);
-                if (project == null) {
-                    ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
-                }
-                _projectManager = PackageManager.GetProjectManager(project);
-                Debug.Assert(_projectManager != null);
-
-                _projectManagers.Add(projectName, _projectManager);
+            Project project = SolutionManager.GetProject(projectName);
+            if (project == null) {
+                ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
             }
-
-            return _projectManager;
+            IProjectManager projectManager = PackageManager.GetProjectManager(project);
+            Debug.Assert(projectManager != null);
+            
+            return projectManager;
         }
 
         protected override void ProcessRecordCore() {
@@ -151,12 +145,12 @@ namespace NuGet.PowerShell.Commands {
             if (UseRemoteSource) {
                 repository = GetRemoteRepository();
             }
-            else if (String.IsNullOrEmpty(ProjectName)) {
-                repository = PackageManager.LocalRepository;
-            }
-            else {
+            else if (!String.IsNullOrEmpty(ProjectName)) {
                 // use project repository when ProjectName is specified
                 repository = GetProjectManager(ProjectName).LocalRepository;
+            }
+            else {
+                repository = PackageManager.LocalRepository;
             }
 
             IQueryable<IPackage> packages;
