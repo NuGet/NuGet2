@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using NuGet.Commands;
 
 namespace NuGet {
@@ -111,15 +112,37 @@ namespace NuGet {
                    command.Arguments.Count <= attribute.MaxArgs;
         }
 
-        private static void AddExtensionsToCatalog(AggregateCatalog catalog) {
-            if (!Directory.Exists(ExtensionsDirectoryRoot)) {
-                return;
+        private static void AddExtensionsToCatalog(AggregateCatalog catalog)
+        {
+            var customExtensions = Environment.GetEnvironmentVariable("NUGET_EXTENSIONS");
+            if (!string.IsNullOrWhiteSpace(customExtensions))
+            {
+                var files = customExtensions
+                    .Split(Path.PathSeparator)
+                    .Select(x => x.Trim())
+                    .Where(x => x.Length > 0)
+                    .Where(File.Exists);
+
+                RegisterExtensions(catalog, files);
             }
-            foreach (var item in Directory.EnumerateFiles(ExtensionsDirectoryRoot, "*.dll", SearchOption.AllDirectories)) {
-                try {
+
+            if (Directory.Exists(ExtensionsDirectoryRoot))
+            {
+                var files = Directory.EnumerateFiles(ExtensionsDirectoryRoot, "*.dll", SearchOption.AllDirectories);
+                RegisterExtensions(catalog,files);
+            }
+        }
+
+        private static void RegisterExtensions(AggregateCatalog catalog, IEnumerable<string> enumerateFiles)
+        {
+            foreach (var item in enumerateFiles)
+            {
+                try
+                {
                     catalog.Catalogs.Add(new AssemblyCatalog(item));
                 }
-                catch (BadImageFormatException) {
+                catch (BadImageFormatException)
+                {
                     // Ignore if the dll wasn't a valid assembly
                 }
             }
