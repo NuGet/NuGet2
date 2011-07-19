@@ -40,6 +40,37 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void ReleaseNotesAttributeIsRecognized() {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder() {
+                Id = "A",
+                Version = new Version("1.0"),
+                Description = "Description",
+                ReleaseNotes = "Release Notes"
+            };
+            builder.Authors.Add("David");
+            var ms = new MemoryStream();
+
+            // Act
+            Manifest.Create(builder).Save(ms);
+            ms.Seek(0, SeekOrigin.Begin);
+
+            // Assert
+            Assert.AreEqual(@"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>David</authors>
+    <owners>David</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Description</description>
+    <releaseNotes>Release Notes</releaseNotes>
+  </metadata>
+</package>", ms.ReadToEnd());
+        }
+
+        [TestMethod]
         public void CreatePackageAddsVersionStampIfFrameworkAssembliesAreUsed() {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
@@ -386,7 +417,7 @@ Description is required.");
 </package>";
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has invalid child element 'files' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'. List of possible elements expected: 'iconUrl, requireLicenseAcceptance, frameworkAssemblies, licenseUrl, projectUrl, title, tags, summary, owners' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has invalid child element 'files' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'. List of possible elements expected: 'iconUrl, requireLicenseAcceptance, frameworkAssemblies, licenseUrl, projectUrl, title, releaseNotes, summary, tags, owners' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
         [TestMethod]

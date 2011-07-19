@@ -26,6 +26,7 @@ namespace NuGet.Test {
             builder.Version = new Version("1.0");
             builder.Authors.Add("David");
             builder.Description = "This is a test package";
+            builder.ReleaseNotes = "This is a release note.";
             builder.Files.AddRange(PackageUtility.CreateFiles(new[] { @"lib\40\A.dll", @"content\foo" }));
 
             var ms = new MemoryStream();
@@ -47,6 +48,7 @@ namespace NuGet.Test {
             Assert.AreEqual(1, assemblyReferences.Count);
             Assert.AreEqual("A.dll", assemblyReferences[0].Name);
             Assert.AreEqual(new FrameworkName(".NETFramework", new Version("4.0")), assemblyReferences[0].TargetFramework);
+            Assert.AreEqual("This is a release note.", package.ReleaseNotes);
         }
     }
 }

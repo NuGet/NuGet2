@@ -308,3 +308,15 @@ function Test-GetPackageWithoutProjectNameReturnsInstalledPackagesInTheSolution 
     Assert-AreEqual "jQuery" $result[0].Id
     Assert-AreEqual "netfx-Guard" $result[1].Id
 }
+
+function Test-ZipPackageLoadsReleaseNotesAttribute {
+    param(
+        $context
+    )
+
+    # Act
+    $p = Get-Package -ListAvailable -Source $context.RepositoryRoot -Filter ReleaseNotesPackage
+
+	# Assert
+	Assert-AreEqual "This is a release note." $p.ReleaseNotes
+}

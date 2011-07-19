@@ -12,20 +12,22 @@ namespace NuGet.Dialog.Providers {
     internal class PackageItem : IVsExtension, INotifyPropertyChanged {
         private readonly PackagesProviderBase _provider;
         private readonly IPackage _packageIdentity;
+        private readonly bool _isUpdateItem;
         private bool _isSelected;
         private readonly ObservableCollection<Project> _referenceProjectNames;
 
-        public PackageItem(PackagesProviderBase provider, IPackage package) :
-            this(provider, package, new Project[0]) {
+        public PackageItem(PackagesProviderBase provider, IPackage package, bool isUpdateItem = false) :
+            this(provider, package, new Project[0], isUpdateItem) {
+        }
+
+        public PackageItem(PackagesProviderBase provider, IPackage package, IEnumerable<Project> referenceProjectNames, bool isUpdateItem = false) {
+            _provider = provider;
+            _packageIdentity = package;
+            _isUpdateItem = isUpdateItem;
+            _referenceProjectNames = new ObservableCollection<Project>(referenceProjectNames);
         }
 
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
-
-        public PackageItem(PackagesProviderBase provider, IPackage package, IEnumerable<Project> referenceProjectNames) {
-            _provider = provider;
-            _packageIdentity = package;
-            _referenceProjectNames = new ObservableCollection<Project>(referenceProjectNames);
-        }
 
         public IPackage PackageIdentity {
             get { return _packageIdentity; }
@@ -49,7 +51,9 @@ namespace NuGet.Dialog.Providers {
 
         public string Description {
             get {
-                return _packageIdentity.Description;
+                return _isUpdateItem ? 
+                    (_packageIdentity.ReleaseNotes ?? _packageIdentity.Description) : 
+                    _packageIdentity.Description;
             }
         }
 

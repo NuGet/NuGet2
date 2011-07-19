@@ -105,6 +105,12 @@ namespace NuGet.VisualStudio {
             }
         }
 
+        public string ReleaseNotes {
+            get {
+                return _basePackage.ReleaseNotes;
+            }
+        }
+
         public string Language {
             get {
                 return _basePackage.Language;

@@ -28,6 +28,7 @@ namespace NuGet.Server.DataServices {
             RequireLicenseAcceptance = package.RequireLicenseAcceptance;
             Description = package.Description;
             Summary = package.Summary;
+            ReleaseNotes = package.ReleaseNotes;
             Language = package.Language;
             Tags = package.Tags;
             Dependencies = String.Join("|", from d in package.Dependencies
@@ -131,6 +132,11 @@ namespace NuGet.Server.DataServices {
         }
 
         public string Summary {
+            get;
+            set;
+        }
+
+        public string ReleaseNotes {
             get;
             set;
         }
