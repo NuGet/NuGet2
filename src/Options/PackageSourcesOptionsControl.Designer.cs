@@ -155,13 +155,13 @@ namespace NuGet.Options {
             this.BrowseButton.UseVisualStyleBackColor = true;
             this.BrowseButton.Click += new System.EventHandler(this.OnBrowseButtonClicked);
             // 
-            // ToolsOptionsControl
+            // PackageSourcesOptionsControl
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.HeaderLabel);
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Name = "ToolsOptionsControl";
+            this.Name = "PackageSourcesOptionsControl";
             this.PackageSourcesContextMenu.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();

@@ -126,14 +126,14 @@
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="HeaderLabel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>1, 7</value>
+    <value>1, 9</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="HeaderLabel.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 0, 2, 0</value>
+    <value>4, 0, 3, 0</value>
   </data>
   <data name="HeaderLabel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>138, 13</value>
+    <value>181, 17</value>
   </data>
   <data name="HeaderLabel.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -160,13 +160,16 @@
     <value>Left, Right</value>
   </data>
   <data name="NewPackageSource.Location" type="System.Drawing.Point, System.Drawing">
-    <value>51, 189</value>
+    <value>67, 236</value>
+  </data>
+  <data name="NewPackageSource.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="NewPackageSource.MaxLength" type="System.Int32, mscorlib">
     <value>1000</value>
   </data>
   <data name="NewPackageSource.Size" type="System.Drawing.Size, System.Drawing">
-    <value>266, 20</value>
+    <value>370, 22</value>
   </data>
   <data name="NewPackageSource.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -196,13 +199,13 @@
     <value>GrowAndShrink</value>
   </data>
   <data name="addButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>356, 187</value>
+    <value>484, 234</value>
   </data>
   <data name="addButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>2, 2, 0, 2</value>
+    <value>3, 2, 0, 2</value>
   </data>
   <data name="addButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>78, 23</value>
+    <value>95, 27</value>
   </data>
   <data name="addButton.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
@@ -253,13 +256,13 @@
     <value>GrowAndShrink</value>
   </data>
   <data name="removeButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>2, 70</value>
+    <value>3, 85</value>
   </data>
   <data name="removeButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>2, 12, 0, 2</value>
+    <value>3, 15, 0, 2</value>
   </data>
   <data name="removeButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>76, 23</value>
+    <value>92, 27</value>
   </data>
   <data name="removeButton.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -307,10 +310,13 @@
     <value>34</value>
   </data>
   <data name="PackageSourcesListBox.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 3</value>
+    <value>4, 4</value>
+  </data>
+  <data name="PackageSourcesListBox.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="PackageSourcesListBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>348, 152</value>
+    <value>473, 194</value>
   </data>
   <data name="PackageSourcesListBox.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -373,16 +379,16 @@
     <value>1</value>
   </data>
   <data name="tableLayoutPanel2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>356, 0</value>
+    <value>484, 0</value>
   </data>
   <data name="tableLayoutPanel2.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>2, 0, 0, 0</value>
+    <value>3, 0, 0, 0</value>
   </data>
   <data name="tableLayoutPanel2.RowCount" type="System.Int32, mscorlib">
     <value>3</value>
   </data>
   <data name="tableLayoutPanel2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>78, 95</value>
+    <value>95, 114</value>
   </data>
   <data name="tableLayoutPanel2.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -412,13 +418,10 @@
     <value>True</value>
   </data>
   <data name="NewPackageNameLabel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>2, 164</value>
-  </data>
-  <data name="NewPackageNameLabel.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>2, 0, 2, 0</value>
+    <value>3, 208</value>
   </data>
   <data name="NewPackageNameLabel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>38, 13</value>
+    <value>49, 17</value>
   </data>
   <data name="NewPackageNameLabel.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -448,13 +451,10 @@
     <value>True</value>
   </data>
   <data name="NewPackageSourceLabel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>2, 192</value>
-  </data>
-  <data name="NewPackageSourceLabel.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>2, 0, 2, 0</value>
+    <value>3, 239</value>
   </data>
   <data name="NewPackageSourceLabel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>44, 13</value>
+    <value>57, 17</value>
   </data>
   <data name="NewPackageSourceLabel.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -486,17 +486,17 @@
   <data name="BrowseButton.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
     <value>GrowAndShrink</value>
   </data>
-  <data name="BrowseButton.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Arial, 10pt, style=Bold</value>
-  </data>
   <data name="BrowseButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>322, 186</value>
+    <value>444, 234</value>
   </data>
   <data name="BrowseButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>2, 2, 2, 2</value>
+    <value>3, 2, 3, 2</value>
+  </data>
+  <data name="BrowseButton.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>2, 0, 2, 0</value>
   </data>
   <data name="BrowseButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>30, 26</value>
+    <value>34, 27</value>
   </data>
   <data name="BrowseButton.TabIndex" type="System.Int32, mscorlib">
     <value>7</value>
@@ -517,16 +517,16 @@
     <value>6</value>
   </data>
   <data name="tableLayoutPanel1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 24</value>
+    <value>0, 30</value>
   </data>
   <data name="tableLayoutPanel1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>2, 2, 2, 2</value>
+    <value>3, 2, 3, 2</value>
   </data>
   <data name="tableLayoutPanel1.RowCount" type="System.Int32, mscorlib">
     <value>3</value>
   </data>
   <data name="tableLayoutPanel1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>434, 214</value>
+    <value>579, 263</value>
   </data>
   <data name="tableLayoutPanel1.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -547,16 +547,16 @@
     <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;TableLayoutSettings&gt;&lt;Controls&gt;&lt;Control Name="PackageSourcesListBox" Row="0" RowSpan="1" Column="0" ColumnSpan="3" /&gt;&lt;Control Name="tableLayoutPanel2" Row="0" RowSpan="1" Column="3" ColumnSpan="1" /&gt;&lt;Control Name="NewPackageNameLabel" Row="1" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="NewPackageName" Row="1" RowSpan="1" Column="1" ColumnSpan="2" /&gt;&lt;Control Name="NewPackageSourceLabel" Row="2" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="NewPackageSource" Row="2" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="BrowseButton" Row="2" RowSpan="1" Column="2" ColumnSpan="1" /&gt;&lt;Control Name="addButton" Row="2" RowSpan="1" Column="3" ColumnSpan="1" /&gt;&lt;/Controls&gt;&lt;Columns Styles="AutoSize,0,Percent,100,AutoSize,0,AutoSize,0" /&gt;&lt;Rows Styles="Percent,100,AutoSize,0,AutoSize,0" /&gt;&lt;/TableLayoutSettings&gt;</value>
   </data>
   <data name="NewPackageName.Location" type="System.Drawing.Point, System.Drawing">
-    <value>51, 161</value>
+    <value>67, 206</value>
   </data>
   <data name="NewPackageName.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 2, 3</value>
+    <value>4, 4, 3, 4</value>
   </data>
   <data name="NewPackageName.MaxLength" type="System.Int32, mscorlib">
     <value>50</value>
   </data>
   <data name="NewPackageName.Size" type="System.Drawing.Size, System.Drawing">
-    <value>301, 20</value>
+    <value>411, 22</value>
   </data>
   <data name="NewPackageName.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -586,13 +586,13 @@
     <value>GrowAndShrink</value>
   </data>
   <data name="MoveUpButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 3</value>
+    <value>4, 4</value>
   </data>
   <data name="MoveUpButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 0, 3</value>
+    <value>4, 4, 0, 4</value>
   </data>
   <data name="MoveUpButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>75, 23</value>
+    <value>91, 27</value>
   </data>
   <data name="MoveUpButton.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -628,13 +628,13 @@
     <value>NoControl</value>
   </data>
   <data name="MoveDownButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 32</value>
+    <value>4, 39</value>
   </data>
   <data name="MoveDownButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 0, 3</value>
+    <value>4, 4, 0, 4</value>
   </data>
   <data name="MoveDownButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>75, 23</value>
+    <value>91, 27</value>
   </data>
   <data name="MoveDownButton.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -664,10 +664,13 @@
     <value>True</value>
   </metadata>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
-    <value>6, 13</value>
+    <value>8, 16</value>
+  </data>
+  <data name="$this.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="$this.Size" type="System.Drawing.Size, System.Drawing">
-    <value>434, 247</value>
+    <value>579, 304</value>
   </data>
   <data name="&gt;&gt;CopyPackageSourceStripMenuItem.Name" xml:space="preserve">
     <value>CopyPackageSourceStripMenuItem</value>
@@ -682,7 +685,7 @@
     <value>System.Windows.Forms.ToolTip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
-    <value>ToolsOptionsControl</value>
+    <value>PackageSourcesOptionsControl</value>
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
     <value>System.Windows.Forms.UserControl, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
