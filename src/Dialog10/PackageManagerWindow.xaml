@@ -26,6 +26,7 @@
     MinWidth="800" 
     MinHeight="450"
     dialogServices:WindowSizePersistenceHelper.WindowToken="MainWindow"
+    Closing="OnDialogWindowClosing"
     Closed="OnDialogWindowClosed">
     
     <Window.Resources>
@@ -46,10 +47,12 @@
         
         <CommandBinding
             Command="ApplicationCommands.Close"
+            CanExecute="CanExecuteClose"
             Executed="ExecutedClose" />
         
         <CommandBinding 
             Command="{x:Static dialogCommands:PackageManagerWindowCommands.ShowOptionsPage}"
+            CanExecute="CanExecuteClose"
             Executed="ExecutedShowOptionsPage" />
         
         <CommandBinding 
@@ -127,7 +130,7 @@
                 MinWidth="75" 
                 MinHeight="23" 
                 Padding="4,0,4,0"
-                Command="ApplicationCommands.Close" 
+                Command="ApplicationCommands.Close"
                 Content="{x:Static resources:Resources.Dialog_Close}" 
                 IsCancel="True" />
         </Grid>

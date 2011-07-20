@@ -348,6 +348,13 @@ namespace NuGet.Dialog {
             }
         }
 
+        private void OnDialogWindowClosing(object sender, System.ComponentModel.CancelEventArgs e) {
+            // don't allow the dialog to be closed if an operation is pending
+            if (OperationCoordinator.IsBusy) {
+                e.Cancel = true;
+            }
+        }
+
         private void OnDialogWindowClosed(object sender, EventArgs e) {
             explorer.Providers.Clear();
 
@@ -431,6 +438,11 @@ namespace NuGet.Dialog {
 
         private void OnSendingRequest(object sender, WebRequestEventArgs e) {
             HttpUtility.SetUserAgent(e.Request, _dialogUserAgent.Value);
+        }
+
+        private void CanExecuteClose(object sender, CanExecuteRoutedEventArgs e) {
+            e.CanExecute = !OperationCoordinator.IsBusy;
+            e.Handled = true;
         }
     }
 }
