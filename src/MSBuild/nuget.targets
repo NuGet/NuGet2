@@ -5,9 +5,9 @@
         <SetupNuGetPackages Condition="'$(SetupNuGetPackages)'==''">false</SetupNuGetPackages>
         <CreateNuGetPackage Condition="'$(CreateNuGetPackage)'==''">false</CreateNuGetPackage>
 
-        <PackBaseDir Condition="'$(PackBaseDir)'==''">$(OutDir)</PackBaseDir>
-        <NuSpecFilePath Condition="'$(NuSpecFilePath)'==''">package.nuspec</NuSpecFilePath>
-        <PublishPackageDir Condition=" '$(PublishPackageDir)' == '' ">publish</PublishPackageDir>
+        <PackBaseDir Condition="'$(PackBaseDir)'==''">$(MsBuildProjectDirectory)</PackBaseDir>
+        <NuSpecFilePath Condition="'$(NuSpecFilePath)'==''">$(MSBuildProjectDirectory)\package.nuspec</NuSpecFilePath>
+        <PublishPackageDir Condition=" '$(PublishPackageDir)' == '' ">$(OutputPath)</PublishPackageDir>
 
         <PackageDirName Condition="'$(PackageDirName)'==''">Packages</PackageDirName>
         <PackageDir Condition="'$(PackageDir)'==''">$(MSBuildProjectDirectory)\..\$(PackageDirName)</PackageDir>

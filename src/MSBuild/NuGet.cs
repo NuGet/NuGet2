@@ -38,13 +38,25 @@ namespace NuGet.MSBuild {
             _fileSystemProvider = fileSystemProvider;
         }
 
+        /// <summary>
+        /// Base path to be used when building the package.
+        /// </summary>
         public string BaseDir { get; set; }
 
-        public string PackageDir { get; set; }
-
+        /// <summary>
+        /// Path to the nuspec file used to build the package.
+        /// </summary>
         [Required]
         public string SpecFile { get; set; }
 
+        /// <summary>
+        /// Directory to output nupack files to.
+        /// </summary>
+        public string PackageDir { get; set; }
+
+        /// <summary>
+        /// Path 
+        /// </summary>
         [Output]
         public string OutputPackage { get; set; }
 
@@ -69,27 +81,20 @@ namespace NuGet.MSBuild {
                 return false;
             }
 
-            if (!String.IsNullOrEmpty(PackageDir) && !fileSystem.DirectoryExists(PackageDir)) {
+            PackageDir = Path.Combine(Directory.GetCurrentDirectory(), PackageDir ?? String.Empty);
+            if (!fileSystem.DirectoryExists(PackageDir)) {
                 Log.LogError(Resources.NuGetResources.PackageDirDoesNotExist);
                 return false;
             }
 
-            string packageDir = PackageDir;
-
-            if (String.IsNullOrEmpty(packageDir)) {
-                packageDir = BaseDir;
-            }
-
-            string specFilePath = Path.Combine(BaseDir, SpecFile);
-
             try {
-                string packageFilePath = BuildPackage(fileSystem, packageDir, specFilePath);
+                string packageFilePath = BuildPackage(fileSystem, SpecFile);
 
                 OutputPackage = packageFilePath;
 
                 Log.LogMessage(String.Format(
                     Resources.NuGetResources.CreatedPackage,
-                    fileSystem.GetFullPath(specFilePath),
+                    fileSystem.GetFullPath(SpecFile),
                     fileSystem.GetFullPath(packageFilePath)));
             }
             catch (Exception ex) {
@@ -100,7 +105,7 @@ namespace NuGet.MSBuild {
             return true;
         }
 
-        private string BuildPackage(IFileSystem fileSystem, string packageDir, string specFilePath) {
+        private string BuildPackage(IFileSystem fileSystem, string specFilePath) {
             PackageBuilder packageBuilder;
             using (Stream stream = fileSystem.OpenFile(specFilePath)) {
                 packageBuilder = new PackageBuilder(fileSystem.OpenFile(specFilePath), BaseDir);
@@ -125,7 +130,6 @@ namespace NuGet.MSBuild {
 
             return packageFilePath;
         }
-
 
         private void BuildPackage(IFileSystem fileSystem, PackageBuilder builder, string path, string outputPath = null) {
             if (Version != null) {
