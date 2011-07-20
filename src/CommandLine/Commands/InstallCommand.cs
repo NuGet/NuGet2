@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using NuGet.Common;
@@ -85,6 +86,15 @@ namespace NuGet.Commands {
 
             bool installedAny = false;
             foreach (var package in packageReferences) {
+                if (String.IsNullOrEmpty(package.Id)) {
+                    // GetPackageReferences returns all records without validating values. We'll throw if we encounter packages
+                    // with malformed ids / Versions.
+                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InstallCommandInvalidPackageReference, Arguments[0]));
+                }
+                else if (package.Version == null) {
+                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InstallCommandPackageReferenceInvalidVersion, package.Id));
+                }
+
                 // Note that we ignore dependencies here because packages.config already contains the full closure
                 installedAny |= InstallPackage(packageManager, fileSystem, package.Id, package.Version);
             }

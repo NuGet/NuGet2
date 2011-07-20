@@ -671,4 +671,10 @@ nuget update -Self</value>
   <data name="PackageCommandNoFilesForSymbolsPackage" xml:space="preserve">
     <value>Failed to build package. Ensure '{0}' includes source and symbol files. For help on building symbols package, visit {1}.</value>
   </data>
+  <data name="InstallCommandInvalidPackageReference" xml:space="preserve">
+    <value>'{0}' contains invalid package references. </value>
+  </data>
+  <data name="InstallCommandPackageReferenceInvalidVersion" xml:space="preserve">
+    <value>Version string specified for package reference '{0}' is invalid.</value>
+  </data>
 </root>

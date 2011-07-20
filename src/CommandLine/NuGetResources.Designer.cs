@@ -375,6 +375,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; contains invalid package references. .
+        /// </summary>
+        internal static string InstallCommandInvalidPackageReference {
+            get {
+                return ResourceManager.GetString("InstallCommandInvalidPackageReference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to All packages listed in {0} are already installed..
         /// </summary>
         internal static string InstallCommandNothingToInstall {
@@ -398,6 +407,15 @@ namespace NuGet {
         internal static string InstallCommandPackageAlreadyExists {
             get {
                 return ResourceManager.GetString("InstallCommandPackageAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Version string specified for package reference &apos;{0}&apos; is invalid..
+        /// </summary>
+        internal static string InstallCommandPackageReferenceInvalidVersion {
+            get {
+                return ResourceManager.GetString("InstallCommandPackageReferenceInvalidVersion", resourceCulture);
             }
         }
         
