@@ -175,9 +175,10 @@ namespace NuGet.Test.MSBuild {
             var fileSystemProvider = new Mock<IFileSystemProvider>();
             var fileSystem = new Mock<IFileSystem>();
             fileSystem.Setup(c => c.FileExists(It.IsAny<string>())).Returns(true);
+            fileSystem.Setup(c => c.DirectoryExists(It.IsAny<string>())).Returns(true);
             fileSystem.Setup(c => c.OpenFile("package.nuspec")).Returns(@"<xml version=""1.0"">".AsStream());
             fileSystemProvider.Setup(c => c.CreateFileSystem(It.IsAny<string>())).Returns(fileSystem.Object);
-            var task = CreateTaskWithDefaultStubs(buildEngineStub: buildEngineStub);
+            var task = CreateTaskWithDefaultStubs(buildEngineStub: buildEngineStub, fileSystemProviderStub: fileSystemProvider);
 
             buildEngineStub
                 .Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
