@@ -556,7 +556,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to find {0} that are compatible with the target framework &apos;{1}&apos;..
+        ///   Looks up a localized string similar to Could not install package &apos;{0}&apos;. You are trying to install this package into a project that targets &apos;{1}&apos;, but the package does not contain any {2} that are compatible with that framework. For more information, contact the package author..
         /// </summary>
         internal static string UnableToFindCompatibleItems {
             get {

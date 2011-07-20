@@ -193,8 +193,8 @@ namespace NuGet {
         protected virtual void ExtractPackageFilesToProject(IPackage package) {
             // BUG 491: Installing a package with incompatible binaries still does a partial install.
             // Resolve assembly references first so that if this fails we never do anything to the project
-            IEnumerable<IPackageAssemblyReference> assemblyReferences = Project.GetCompatibleItems(package.AssemblyReferences, NuGetResources.AssemblyReferences);
-            IEnumerable<FrameworkAssemblyReference> frameworkReferences = Project.GetCompatibleItems(package.FrameworkAssemblies, NuGetResources.FrameworkAssemblies);
+            IEnumerable<IPackageAssemblyReference> assemblyReferences = GetCompatibleItems(Project, package.AssemblyReferences, package.GetFullName(), NuGetResources.AssemblyReferences);
+            IEnumerable<FrameworkAssemblyReference> frameworkReferences = GetCompatibleItems(Project, package.FrameworkAssemblies, package.GetFullName(), NuGetResources.FrameworkAssemblies);
 
             try {
                 // Add content files
@@ -405,6 +405,20 @@ namespace NuGet {
             return new Dictionary<XName, Action<XElement, XElement>>() {
                 { "configSections" , (parent, element) => parent.AddFirst(element) }
             };
+        }
+
+        private static IEnumerable<T> GetCompatibleItems<T>(IProjectSystem project, IEnumerable<T> items, string package, string itemType) where T : IFrameworkTargetable {
+            // A package might have references that target a specific version of the framework (.net/silverlight etc)
+            // so we try to get the highest version that satifies the target framework i.e.
+            // if a package has 1.0, 2.0, 4.0 and the target framework is 3.5 we'd pick the 2.0 references.
+            IEnumerable<T> compatibleItems;
+            if (!project.TryGetCompatibleItems(items, out compatibleItems)) {
+                throw new InvalidOperationException(
+                           String.Format(CultureInfo.CurrentCulture,
+                           NuGetResources.UnableToFindCompatibleItems, package, project.TargetFramework, itemType));
+            }
+
+            return compatibleItems;
         }
 
         private class PackageFileComparer : IEqualityComparer<IPackageFile> {

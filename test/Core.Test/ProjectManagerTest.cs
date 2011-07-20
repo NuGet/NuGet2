@@ -1265,7 +1265,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(mockPackage.Object);
 
             // Act & Assert            
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), "Unable to find assembly references that are compatible with the target framework '.NETFramework,Version=v2.0'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), "Could not install package 'A 1.0'. You are trying to install this package into a project that targets '.NETFramework,Version=v2.0', but the package does not contain any assembly references that are compatible with that framework. For more information, contact the package author.");
             Assert.IsFalse(localRepository.Exists(mockPackage.Object));
         }
 
@@ -1285,7 +1285,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(mockPackage.Object);
 
             // Act & Assert            
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), "Unable to find framework assemblies that are compatible with the target framework '.NETFramework,Version=v2.0'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), "Could not install package 'A 1.0'. You are trying to install this package into a project that targets '.NETFramework,Version=v2.0', but the package does not contain any framework assemblies that are compatible with that framework. For more information, contact the package author.");
             Assert.IsFalse(localRepository.Exists(mockPackage.Object));
         }
 

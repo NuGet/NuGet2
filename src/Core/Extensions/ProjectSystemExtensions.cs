@@ -98,20 +98,6 @@ namespace NuGet {
             }
         }
 
-        public static IEnumerable<T> GetCompatibleItems<T>(this IProjectSystem project, IEnumerable<T> items, string itemType) where T : IFrameworkTargetable {
-            // A package might have references that target a specific version of the framework (.net/silverlight etc)
-            // so we try to get the highest version that satifies the target framework i.e.
-            // if a package has 1.0, 2.0, 4.0 and the target framework is 3.5 we'd pick the 2.0 references.
-            IEnumerable<T> compatibleItems;
-            if (!project.TryGetCompatibleItems(items, out compatibleItems)) {
-                throw new InvalidOperationException(
-                           String.Format(CultureInfo.CurrentCulture,
-                           NuGetResources.UnableToFindCompatibleItems, itemType, project.TargetFramework));
-            }
-
-            return compatibleItems;
-        }
-
         public static bool TryGetCompatibleItems<T>(this IProjectSystem projectSystem, IEnumerable<T> items, out IEnumerable<T> compatibleItems) where T : IFrameworkTargetable {
             if (projectSystem == null) {
                 throw new ArgumentNullException("projectSystem");
