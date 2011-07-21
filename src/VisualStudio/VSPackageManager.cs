@@ -14,13 +14,20 @@ namespace NuGet.VisualStudio {
         private readonly IDictionary<string, IProjectManager> _projects;
         private readonly ISolutionManager _solutionManager;
         private readonly IPackageRepository _recentPackagesRepository;
+        private readonly VsPackageInstallerEvents _packageEvents;
 
-        public VsPackageManager(ISolutionManager solutionManager, IPackageRepository sourceRepository, IFileSystem fileSystem, ISharedPackageRepository sharedRepository, IPackageRepository recentPackagesRepository) :
+        public VsPackageManager(ISolutionManager solutionManager,
+                                IPackageRepository sourceRepository,
+                                IFileSystem fileSystem,
+                                ISharedPackageRepository sharedRepository,
+                                IPackageRepository recentPackagesRepository,
+                                VsPackageInstallerEvents packageEvents) :
             base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository) {
 
             _solutionManager = solutionManager;
             _sharedRepository = sharedRepository;
             _recentPackagesRepository = recentPackagesRepository;
+            _packageEvents = packageEvents;
 
             _projects = new Dictionary<string, IProjectManager>(StringComparer.OrdinalIgnoreCase);
         }
@@ -136,20 +143,37 @@ namespace NuGet.VisualStudio {
         }
 
         public virtual void UninstallPackage(IProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies, ILogger logger) {
-            InitializeLogger(logger, projectManager);
+            EventHandler<PackageOperationEventArgs> uninstallingHandler = (sender, e) => {
+                _packageEvents.NotifyUninstalling(e);
+            };
 
-            bool appliesToProject;
-            IPackage package = FindLocalPackage(projectManager,
-                                                packageId,
-                                                version,
-                                                CreateAmbiguousUninstallException,
-                                                out appliesToProject);
+            EventHandler<PackageOperationEventArgs> uninstalledHandler = (sender, e) => {
+                _packageEvents.NotifyUninstalled(e);
+            };
 
-            if (appliesToProject) {
-                RemovePackageReference(projectManager, packageId, forceRemove, removeDependencies);
+            try {
+                InitializeLogger(logger, projectManager);
+
+                bool appliesToProject;
+                IPackage package = FindLocalPackage(projectManager,
+                                                    packageId,
+                                                    version,
+                                                    CreateAmbiguousUninstallException,
+                                                    out appliesToProject);
+
+                PackageUninstalling += uninstallingHandler;
+                PackageUninstalled += uninstalledHandler;
+
+                if (appliesToProject) {
+                    RemovePackageReference(projectManager, packageId, forceRemove, removeDependencies);
+                }
+                else {
+                    UninstallPackage(package, forceRemove, removeDependencies);
+                }
             }
-            else {
-                UninstallPackage(package, forceRemove, removeDependencies);
+            finally {
+                PackageUninstalling -= uninstallingHandler;
+                PackageUninstalled -= uninstalledHandler;
             }
         }
 
@@ -583,9 +607,15 @@ namespace NuGet.VisualStudio {
             EventHandler<PackageOperationEventArgs> installHandler = (sender, e) => {
                 // Record packages that we are installing so that if one fails, we can rollback
                 packagesAdded.Add(e.Package);
+                _packageEvents.NotifyInstalling(e);
+            };
+
+            EventHandler<PackageOperationEventArgs> installedHandler = (sender, e) => {
+                _packageEvents.NotifyInstalled(e);
             };
 
             PackageInstalling += installHandler;
+            PackageInstalled += installedHandler;
 
             try {
                 // Execute the action
@@ -607,6 +637,7 @@ namespace NuGet.VisualStudio {
             finally {
                 // Remove the event handler
                 PackageInstalling -= installHandler;
+                PackageInstalled -= installedHandler;
             }
         }
 
@@ -732,7 +763,7 @@ namespace NuGet.VisualStudio {
                         eventListener.OnBeforeAddPackageReference(project);
                         try {
                             RunSolutionAction(() => projectAction(projectManager));
-                            
+
                             if (newPackage == null) {
                                 // after the update, get the new version to add to the recent package repository
                                 newPackage = projectManager.LocalRepository.FindPackage(packageId);

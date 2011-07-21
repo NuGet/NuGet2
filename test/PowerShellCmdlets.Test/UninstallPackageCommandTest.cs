@@ -87,7 +87,7 @@ namespace NuGet.PowerShell.Commands.Test {
 
         private class MockVsPackageManager : VsPackageManager {
             public MockVsPackageManager()
-                : base(new Mock<ISolutionManager>().Object, new Mock<IPackageRepository>().Object, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IRecentPackageRepository>().Object) {
+                : base(new Mock<ISolutionManager>().Object, new Mock<IPackageRepository>().Object, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object) {
             }
 
             public IProjectManager ProjectManager { get; set; }

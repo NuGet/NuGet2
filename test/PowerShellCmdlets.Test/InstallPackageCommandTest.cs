@@ -217,7 +217,7 @@ namespace NuGet.PowerShell.Commands.Test {
             repositorySettings.Setup(c => c.RepositoryPath).Returns(String.Empty);
 
             var solutionManager = new Mock<ISolutionManager>();
-            var packageManagerFactory = new VsPackageManagerFactory(solutionManager.Object, repositoryFactory.Object, sourceProvider, fileSystemProvider.Object, repositorySettings.Object, null);
+            var packageManagerFactory = new VsPackageManagerFactory(solutionManager.Object, repositoryFactory.Object, sourceProvider, fileSystemProvider.Object, repositorySettings.Object, null, new Mock<VsPackageInstallerEvents>().Object);
 
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory, repositoryFactory.Object, sourceProvider, null, productUpdateService.Object);
             cmdlet.Id = "P1";
@@ -267,7 +267,7 @@ namespace NuGet.PowerShell.Commands.Test {
             }
 
             public MockVsPackageManager(IPackageRepository sourceRepository)
-                : base(new Mock<ISolutionManager>().Object, sourceRepository, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IRecentPackageRepository>().Object) {
+                : base(new Mock<ISolutionManager>().Object, sourceRepository, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object) {
             }
 
             public IProjectManager ProjectManager { get; set; }

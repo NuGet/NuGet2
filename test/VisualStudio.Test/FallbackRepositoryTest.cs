@@ -36,7 +36,7 @@ namespace NuGet.VisualStudio.Test {
                 }
             });
 
-            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, null);
+            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, null, new Mock<VsPackageInstallerEvents>().Object);
 
             // Act
             var packageManager = packageManagerFactory.CreatePackageManager(mockRepository1, useFallbackForDependencies: false);
@@ -71,7 +71,7 @@ namespace NuGet.VisualStudio.Test {
                 }
             });
 
-            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, null);
+            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, null, new Mock<VsPackageInstallerEvents>().Object);
 
             // Act
             var packageManager = packageManagerFactory.CreatePackageManager(mockRepository1, useFallbackForDependencies: true);
@@ -111,7 +111,7 @@ namespace NuGet.VisualStudio.Test {
                     default: return null;
                 }
             });
-            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, new Mock<IFileSystemProvider>().Object, new Mock<IRepositorySettings>().Object, null);
+            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, new Mock<IFileSystemProvider>().Object, new Mock<IRepositorySettings>().Object, null, new Mock<VsPackageInstallerEvents>().Object);
 
             // Act
             var repository = packageManagerFactory.CreateFallbackRepository(mockRepository1);
@@ -159,7 +159,7 @@ namespace NuGet.VisualStudio.Test {
                     default: return null;
                 }
             });
-            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, new Mock<IFileSystemProvider>().Object, new Mock<IRepositorySettings>().Object, null);
+            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, new Mock<IFileSystemProvider>().Object, new Mock<IRepositorySettings>().Object, null, new Mock<VsPackageInstallerEvents>().Object);
 
             // Act
             var repository = packageManagerFactory.CreateFallbackRepository(aggregateRepo);
@@ -193,7 +193,7 @@ namespace NuGet.VisualStudio.Test {
                     default: return null;
                 }
             });
-            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, new Mock<IFileSystemProvider>().Object, new Mock<IRepositorySettings>().Object, null);
+            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, new Mock<IFileSystemProvider>().Object, new Mock<IRepositorySettings>().Object, null, new Mock<VsPackageInstallerEvents>().Object);
 
             // Act
             FallbackRepository repository = (FallbackRepository)packageManagerFactory.CreateFallbackRepository(mockRepository2);
@@ -226,7 +226,7 @@ namespace NuGet.VisualStudio.Test {
                     default: return null;
                 }
             });
-            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, new Mock<IFileSystemProvider>().Object, new Mock<IRepositorySettings>().Object, null);
+            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, new Mock<IFileSystemProvider>().Object, new Mock<IRepositorySettings>().Object, null, new Mock<VsPackageInstallerEvents>().Object);
 
             // Act
             FallbackRepository repository = (FallbackRepository)packageManagerFactory.CreateFallbackRepository(mockRepository2);
@@ -259,7 +259,7 @@ namespace NuGet.VisualStudio.Test {
                     default: return null;
                 }
             });
-            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, new Mock<IFileSystemProvider>().Object, new Mock<IRepositorySettings>().Object, null);
+            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, new Mock<IFileSystemProvider>().Object, new Mock<IRepositorySettings>().Object, null, new Mock<VsPackageInstallerEvents>().Object);
 
             // Act
             var repository = packageManagerFactory.CreateFallbackRepository(mockRepository1);

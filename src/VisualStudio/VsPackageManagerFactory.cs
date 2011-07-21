@@ -12,16 +12,18 @@ namespace NuGet.VisualStudio {
         private readonly IRepositorySettings _repositorySettings;
         private readonly IRecentPackageRepository _recentPackageRepository;
         private readonly IVsPackageSourceProvider _packageSourceProvider;
+        private readonly VsPackageInstallerEvents _packageEvents;
 
         private RepositoryInfo _repositoryInfo;
-
+        
         [ImportingConstructor]
         public VsPackageManagerFactory(ISolutionManager solutionManager,
                                        IPackageRepositoryFactory repositoryFactory,
                                        IVsPackageSourceProvider packageSourceProvider,
                                        IFileSystemProvider fileSystemProvider,
                                        IRepositorySettings repositorySettings,
-                                       IRecentPackageRepository recentPackagesRepository) {
+                                       IRecentPackageRepository recentPackagesRepository,
+                                       VsPackageInstallerEvents packageEvents) {
             if (solutionManager == null) {
                 throw new ArgumentNullException("solutionManager");
             }
@@ -38,12 +40,17 @@ namespace NuGet.VisualStudio {
                 throw new ArgumentNullException("repositorySettings");
             }
 
+            if (packageEvents == null) {
+                throw new ArgumentNullException("packageEvents");
+            }
+
             _fileSystemProvider = fileSystemProvider;
             _repositorySettings = repositorySettings;
             _solutionManager = solutionManager;
             _repositoryFactory = repositoryFactory;
             _recentPackageRepository = recentPackagesRepository;
             _packageSourceProvider = packageSourceProvider;
+            _packageEvents = packageEvents;
 
             _solutionManager.SolutionClosing += (sender, e) => {
                 _repositoryInfo = null;
@@ -66,9 +73,14 @@ namespace NuGet.VisualStudio {
                 repository = CreateFallbackRepository(repository);
             }
             RepositoryInfo info = GetRepositoryInfo();
-            return new VsPackageManager(_solutionManager, repository, info.FileSystem, info.Repository, _recentPackageRepository) {
-                AddToRecent = addToRecent
-            };
+            return new VsPackageManager(_solutionManager,
+                                        repository,
+                                        info.FileSystem,
+                                        info.Repository,
+                                        _recentPackageRepository,
+                                        _packageEvents) {
+                                            AddToRecent = addToRecent
+                                        };
         }
 
         /// <summary>

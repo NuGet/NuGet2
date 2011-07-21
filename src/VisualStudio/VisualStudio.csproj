@@ -16,8 +16,12 @@
   <ItemGroup>
     <Compile Include="ActivityLogEntryType.cs" />
     <Compile Include="ExceptionHelper.cs" />
+    <Compile Include="Extensibility\IVsPackageMetadata.cs" />
+    <Compile Include="Extensibility\VsPackageMetadata.cs" />
     <Compile Include="FallbackRepository.cs" />
     <Compile Include="IOptionsPageActivator.cs" />
+    <Compile Include="Extensibility\IVsPackageInstallerEvents.cs" />
+    <Compile Include="Extensibility\IVsPackageInstallerServices.cs" />
     <Compile Include="IVsTemplateWizard.cs" />
     <Compile Include="IWindowSettingsManager.cs" />
     <Compile Include="MessageHelper.cs" />
@@ -49,6 +53,8 @@
     <Compile Include="Utility\UriHelper.cs" />
     <Compile Include="Utility\VsVersionHelper.cs" />
     <Compile Include="VisualStudioCredentialProvider.cs" />
+    <Compile Include="Extensibility\VsPackageInstallerEvents.cs" />
+    <Compile Include="Extensibility\VsPackageInstallerServices.cs" />
     <Compile Include="VSProxyCredentialProvider.cs" />
     <Compile Include="VSRequestCredentialProvider.cs" />
     <Compile Include="VsTemplateWizard.cs" />
@@ -129,7 +135,7 @@
     <Compile Include="IFileSystemProvider.cs" />
     <Compile Include="IScriptExecutor.cs" />
     <Compile Include="Extensions\MSBuildProjectExtensions.cs" />
-    <Compile Include="IVsPackageInstaller.cs" />
+    <Compile Include="Extensibility\IVsPackageInstaller.cs" />
     <Compile Include="OutputConsole\IOutputConsoleProvider.cs" />
     <Compile Include="OutputConsole\OutputConsole.cs" />
     <Compile Include="OutputConsole\OutputConsoleProvider.cs" />
@@ -147,7 +153,7 @@
     <Compile Include="SettingsManagerBase.cs" />
     <Compile Include="SmartOutputConsoleProvider.cs" />
     <Compile Include="VsFileSystemProvider.cs" />
-    <Compile Include="VsPackageInstaller.cs" />
+    <Compile Include="Extensibility\VsPackageInstaller.cs" />
     <Compile Include="VsPackageManagerFactory.cs" />
     <Compile Include="Extensions\DTEExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />

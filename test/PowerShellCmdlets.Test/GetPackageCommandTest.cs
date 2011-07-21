@@ -638,7 +638,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var localPackages = new[] { PackageUtility.CreatePackage("P1", "0.9"), PackageUtility.CreatePackage("P2") };
             localRepo.Setup(c => c.GetPackages()).Returns(localPackages.AsQueryable());
 
-            return new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(), fileSystem.Object, localRepo.Object, new Mock<IRecentPackageRepository>().Object);
+            return new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(), fileSystem.Object, localRepo.Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
         }
 
         private static IVsPackageManagerFactory GetPackageManagerForMultipleVersions() {
@@ -647,7 +647,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var localPackages = new[] { PackageUtility.CreatePackage("jQuery", "1.2"), PackageUtility.CreatePackage("TestPack", "0.1") };
             localRepo.Setup(c => c.GetPackages()).Returns(localPackages.AsQueryable());
 
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(), fileSystem.Object, localRepo.Object, new Mock<IRecentPackageRepository>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(), fileSystem.Object, localRepo.Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
 
             var factory = new Mock<IVsPackageManagerFactory>();
             factory.Setup(c => c.CreatePackageManager()).Returns(packageManager);
