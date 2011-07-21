@@ -140,6 +140,130 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [TestMethod]
+        public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID1() {
+            // Arrange            
+            string nuspecFile = Path.Combine(SpecificFilesFolder, "InvalidId.nuspec");
+            string expectedPackage = "InvalidId.nupkg";
+            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>test\id</id>
+    <version>1.0</version>
+    <authors>Terence Parr</authors>
+    <description>ANother Tool for Language Recognition, is a language tool that provides a framework for constructing recognizers, interpreters, compilers, and translators from grammatical descriptions containing actions in a variety of target languages.</description>
+    <language>en-US</language>
+  </metadata>
+  <files>
+    <file src=""file1.txt"" target=""content"" />
+  </files>
+</package>");
+
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory(SpecificFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(1, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nThe package ID 'test\\id' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.\r\n"));
+            Assert.IsFalse(File.Exists(expectedPackage));
+        }
+
+        [TestMethod]
+        public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID2() {
+            // Arrange            
+            string nuspecFile = Path.Combine(SpecificFilesFolder, "InvalidId.nuspec");
+            string expectedPackage = "InvalidId.nupkg";
+            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>test:id</id>
+    <version>1.0</version>
+    <authors>Terence Parr</authors>
+    <description>ANother Tool for Language Recognition, is a language tool that provides a framework for constructing recognizers, interpreters, compilers, and translators from grammatical descriptions containing actions in a variety of target languages.</description>
+    <language>en-US</language>
+  </metadata>
+  <files>
+    <file src=""file1.txt"" target=""content"" />
+  </files>
+</package>");
+
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory(SpecificFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(1, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nThe package ID 'test:id' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.\r\n"));
+            Assert.IsFalse(File.Exists(expectedPackage));
+        }
+
+        [TestMethod]
+        public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID3() {
+            // Arrange            
+            string nuspecFile = Path.Combine(SpecificFilesFolder, "InvalidId.nuspec");
+            string expectedPackage = "InvalidId.nupkg";
+            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>test|id</id>
+    <version>1.0</version>
+    <authors>Terence Parr</authors>
+    <description>ANother Tool for Language Recognition, is a language tool that provides a framework for constructing recognizers, interpreters, compilers, and translators from grammatical descriptions containing actions in a variety of target languages.</description>
+    <language>en-US</language>
+  </metadata>
+  <files>
+    <file src=""file1.txt"" target=""content"" />
+  </files>
+</package>");
+
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory(SpecificFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(1, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nThe package ID 'test|id' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.\r\n"));
+            Assert.IsFalse(File.Exists(expectedPackage));
+        }
+
+        [TestMethod]
+        public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID4() {
+            // Arrange            
+            string nuspecFile = Path.Combine(SpecificFilesFolder, "InvalidId.nuspec");
+            string expectedPackage = "InvalidId.nupkg";
+            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>test/id</id>
+    <version>1.0</version>
+    <authors>Terence Parr</authors>
+    <description>ANother Tool for Language Recognition, is a language tool that provides a framework for constructing recognizers, interpreters, compilers, and translators from grammatical descriptions containing actions in a variety of target languages.</description>
+    <language>en-US</language>
+  </metadata>
+  <files>
+    <file src=""file1.txt"" target=""content"" />
+  </files>
+</package>");
+
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory(SpecificFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(1, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nThe package ID 'test/id' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.\r\n"));
+            Assert.IsFalse(File.Exists(expectedPackage));
+        }
+
+        [TestMethod]
         public void PackageCommand_SpecifyingFilesInNuspecOnlyPackagesSpecifiedFiles() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
