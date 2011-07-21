@@ -166,7 +166,7 @@
     <value>Displays a detailed list of information for each package.</value>
   </data>
   <data name="InstallCommandDescription" xml:space="preserve">
-    <value>Installs a package using the specified sources. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used.</value>
+    <value>Installs a package using the specified sources. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used.  If NuGet.config specifies no sources, uses the default NuGet feed.</value>
   </data>
   <data name="InstallCommandVersionDescription" xml:space="preserve">
     <value>The version of the package to install.</value>
