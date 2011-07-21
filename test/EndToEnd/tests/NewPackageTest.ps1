@@ -134,3 +134,19 @@ function Test-CallNewPackageWhenThereAreTwoSpecFileInProject {
     Assert-Throws $action "More than one .nuspec files were found."
     
 }
+
+function Test-NewPackageThrowsIfPackageIdIsInvalid {
+    param(
+        $context
+    )
+
+    # Arrange
+    $project = New-WebApplication
+    Add-File $project "$($context.RepositoryRoot)\invalidIdpackage.nuspec"
+    
+    # Act
+    $action = { New-Package -ProjectName $project.Name }
+    
+    # Act    
+    Assert-Throws $action "The package ID 'cool/package' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'."
+}
