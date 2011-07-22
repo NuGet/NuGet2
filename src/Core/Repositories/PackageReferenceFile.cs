@@ -108,6 +108,10 @@ namespace NuGet {
         }
 
         private static XElement FindEntry(XDocument document, string id, Version version) {
+            if (String.IsNullOrEmpty(id)) {
+                return null;
+            }
+
             return (from e in document.Root.Elements("package")
                     let entryId = e.GetOptionalAttributeValue("id")
                     let entryVersion = VersionUtility.ParseOptionalVersion(e.GetOptionalAttributeValue("version"))
@@ -118,6 +122,20 @@ namespace NuGet {
         }
 
         private void SaveDocument(XDocument document) {
+            // Sort the elements by package id and only take valid entries (one with both id and version)
+            var packageElements = (from e in document.Root.Elements("package")
+                                   let id = e.GetOptionalAttributeValue("id")
+                                   let version = e.GetOptionalAttributeValue("version")
+                                   where !String.IsNullOrEmpty(id) && !String.IsNullOrEmpty(version)
+                                   orderby id
+                                   select e).ToList();
+
+            // Remove all elements
+            document.Root.RemoveAll();
+
+            // Re-add them sorted
+            packageElements.ForEach(e => document.Root.Add(e));
+
             FileSystem.AddFile(_path, document.Save);
         }
 

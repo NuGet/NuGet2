@@ -235,11 +235,14 @@ namespace NuGet.Test {
             var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
             var packageA = PackageUtility.CreatePackage("A");
             repository.Object.AddPackage(packageA);
+            var packageC = PackageUtility.CreatePackage("C", "2.0");
+            repository.Object.AddPackage(packageC);
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
-  <package id=""A"" version=""1.0"" />
+  <package id=""C"" version=""2.0"" />
   <package id=""B"" version=""1.0"" />
+  <package id=""A"" version=""1.0"" />
   <package id="""" version=""1.0"" />
   <package id=""G"" version="""" />
   <package />
@@ -251,15 +254,13 @@ namespace NuGet.Test {
             var packages = referenceRepository.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(1, packages.Count);
-            Assert.AreSame(packageA, packages[0]);
+            Assert.AreEqual(2, packages.Count);
+            Assert.AreSame(packageC, packages[0]);
+            Assert.AreSame(packageA, packages[1]);
             Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""A"" version=""1.0"" />
-  <package id=""B"" version=""1.0"" />
-  <package id="""" version=""1.0"" />
-  <package id=""G"" version="""" />
-  <package />
+  <package id=""C"" version=""2.0"" />
 </packages>", fileSystem.ReadAllText("packages.config"));
         }
 

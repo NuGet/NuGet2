@@ -53,7 +53,9 @@ namespace NuGet {
                 if (String.IsNullOrEmpty(reference.Id) ||
                     reference.Version == null ||
                     !SourceRepository.TryFindPackage(reference.Id, reference.Version, out package)) {
-                    // Skip bad entries
+
+                    // Skip and remove bad entries
+                    _packageReferenceFile.DeleteEntry(reference.Id, reference.Version);
                     continue;
                 }
                 else {
