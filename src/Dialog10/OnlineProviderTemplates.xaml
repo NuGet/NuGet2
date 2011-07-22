@@ -10,6 +10,7 @@
         <ResourceDictionary Source="TemplateStyles.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
+    <self:DescriptionLabelConverter x:Key="DescriptionLabelConverter" />
     <self:NormalizeTextConverter x:Key="NormalizeTextConverter" />
     <self:FixUrlConverter x:Key="urlConverter" />
     <self:BooleanToVisibilityConverter Inverted="True" x:Key="boolToVis" />
@@ -17,6 +18,17 @@
     <self:CountToVisibilityConverter Inverted="True" x:Key="invertedCountConverter" />
     <self:ProjectToDisplayNameConverter x:Key="ProjectToNameConverter" />
     <BitmapImage x:Key="BitmapImage_AlreadyInstalled" UriSource="pack://application:,,,/Microsoft.VisualStudio.ExtensionManager.Implementation;Component/UI/AlreadyInstalled.png" />
+
+    <Style x:Key="DescriptionLabelStyle" BasedOn="{StaticResource DetailMetadataLabelStyle}" TargetType="{x:Type eml:TextBlockControl}">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsUpdateItem, Mode=OneTime}" Value="true">
+                <Setter Property="Text" Value="{Binding PackageIdentity.ReleaseNotes, Mode=OneTime, Converter={StaticResource DescriptionLabelConverter}}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsUpdateItem, Mode=OneTime}" Value="false">
+                <Setter Property="Text" Value="{x:Static resources:Resources.Dialog_DescriptionLabel}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
 
     <!-- data template for the package extension item -->
     <DataTemplate x:Key="PackageItemTemplate">
@@ -165,12 +177,16 @@
                 </TextBlock>
 
                 <!-- Description -->
-                <TextBox 
+                <eml:TextBlockControl Margin="0,3,0,0" Style="{StaticResource DescriptionLabelStyle}">
+                </eml:TextBlockControl>
+                
+                <TextBox
                     Text="{Binding Description, Converter={StaticResource NormalizeTextConverter}, Mode=OneWay}"
                     BorderThickness="0"
                     IsReadOnly="True"
                     TextWrapping="Wrap"
-                    Margin="0,8">
+                    Padding="0"
+                    Margin="0,5">
                 </TextBox>
 
                 <!-- Tags -->

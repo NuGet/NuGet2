@@ -49,11 +49,19 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
+        public bool IsUpdateItem {
+            get {
+                return _isUpdateItem;
+            }
+        }
+
         public string Description {
             get {
-                return _isUpdateItem ? 
-                    (_packageIdentity.ReleaseNotes ?? _packageIdentity.Description) : 
-                    _packageIdentity.Description;
+                if (_isUpdateItem && !String.IsNullOrEmpty(_packageIdentity.ReleaseNotes)) {
+                    return _packageIdentity.ReleaseNotes;
+                }
+
+                return _packageIdentity.Description;
             }
         }
 

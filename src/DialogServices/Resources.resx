@@ -318,4 +318,10 @@
   <data name="PackageHasDependents" xml:space="preserve">
     <value>Unable to uninstall '{0}' because '{1}' depend(s) on it.</value>
   </data>
+  <data name="Dialog_DescriptionLabel" xml:space="preserve">
+    <value>Description:</value>
+  </data>
+  <data name="Dialog_ReleaseNotesLabel" xml:space="preserve">
+    <value>Release notes:</value>
+  </data>
 </root>
