@@ -81,6 +81,10 @@ namespace NuGet.VisualStudio {
             AddRecentPackage(ConvertToRecentPackage(package, GetUniqueTime()));
         }
 
+        public void UpdatePackage(IPackage package) {
+            AddRecentPackage(ConvertToRecentPackage(package, GetUniqueTime()), updateOnly: true);
+        }
+
         private DateTime GetUniqueTime() {
             // This guarantees all the DateTime values are unique. We don't care what the actual value is.
             _latestTime = _latestTime.AddSeconds(1);
@@ -90,7 +94,7 @@ namespace NuGet.VisualStudio {
         /// <summary>
         /// Add the specified package to the list.
         /// </summary>
-        private void AddRecentPackage(RecentPackage package) {
+        private void AddRecentPackage(RecentPackage package, bool updateOnly = false) {
             var index = _packagesCache.FindIndex(p => p.Id == package.Id);
             if (index != -1) {
                 var cachedPackage = _packagesCache[index];
@@ -100,7 +104,7 @@ namespace NuGet.VisualStudio {
                 _packagesCache[index].LastUsedDate = (package.LastUsedDate > cachedPackage.LastUsedDate) ?
                     package.LastUsedDate : cachedPackage.LastUsedDate;
             }
-            else {
+            else if (!updateOnly) {
                 _packagesCache.Add(package);
             }
         }

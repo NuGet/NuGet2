@@ -13,14 +13,14 @@ namespace NuGet.VisualStudio {
         private readonly ISharedPackageRepository _sharedRepository;
         private readonly IDictionary<string, IProjectManager> _projects;
         private readonly ISolutionManager _solutionManager;
-        private readonly IPackageRepository _recentPackagesRepository;
+        private readonly IRecentPackageRepository _recentPackagesRepository;
         private readonly VsPackageInstallerEvents _packageEvents;
 
         public VsPackageManager(ISolutionManager solutionManager,
                                 IPackageRepository sourceRepository,
                                 IFileSystem fileSystem,
                                 ISharedPackageRepository sharedRepository,
-                                IPackageRepository recentPackagesRepository,
+                                IRecentPackageRepository recentPackagesRepository,
                                 VsPackageInstallerEvents packageEvents) :
             base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository) {
 
@@ -312,6 +312,12 @@ namespace NuGet.VisualStudio {
             }
         }
 
+        protected override void OnInstalled(PackageOperationEventArgs e) {
+            base.OnInstalled(e);
+
+            AddPackageToRecentRepository(e.Package, updateOnly: true);
+        }
+
         private IPackage FindLocalPackageForUpdate(IProjectManager projectManager, string packageId, out bool appliesToProject) {
             return FindLocalPackage(projectManager, packageId, null /* version */, CreateAmbiguousUpdateException, out appliesToProject);
         }
@@ -577,14 +583,19 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        private void AddPackageToRecentRepository(IPackage package) {
+        private void AddPackageToRecentRepository(IPackage package, bool updateOnly = false) {
             if (!AddToRecent) {
                 return;
             }
 
             // add the installed package to the recent repository
             if (_recentPackagesRepository != null) {
-                _recentPackagesRepository.AddPackage(package);
+                if (updateOnly) {
+                    _recentPackagesRepository.UpdatePackage(package);
+                }
+                else {
+                    _recentPackagesRepository.AddPackage(package);
+                }
             }
         }
 

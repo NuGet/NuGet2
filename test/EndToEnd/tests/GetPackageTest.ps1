@@ -205,6 +205,63 @@ function Test-UpdatedPackageAppearInRecentPackageList {
     Assert-AreEqual "1.6" $result[0].Version
 }
 
+function Test-DependentPackagesAreAddedToRecentIfOlderVersionsAlreadyInRecent {
+    # Arrange
+    Clear-RecentPackageRepository
+    $p = New-ClassLibrary
+
+    # install jQuery.Validation 1.8 will also install jQuery 1.4.4 as dependency
+    Install-Package jQuery.Validation -version 1.8 -ProjectName $p.Name
+
+    $result = @(Get-Package -Recent)
+    Assert-AreEqual 1 $result.Count
+    
+    Assert-AreEqual "jQuery.Validation" $result[0].Id
+    Assert-AreEqual "1.8" $result[0].Version
+
+    # Act
+    Update-Package jQuery -Version 1.6.2 -ProjectName $p.Name
+
+    # Assert
+    $result = @(Get-Package -Recent)
+    Assert-AreEqual 2 $result.Count
+
+    Assert-AreEqual "jQuery" $result[0].Id
+    Assert-AreEqual "1.6.2" $result[0].Version
+
+    Assert-AreEqual "jQuery.Validation" $result[1].Id
+    Assert-AreEqual "1.8.1" $result[1].Version
+}
+
+function Test-DependencyPackagesAreAddedToRecentIfOlderVersionsAlreadyInRecent {
+    # Arrange
+    Clear-RecentPackageRepository
+    $p = New-ClassLibrary
+
+    Install-Package jQuery -version 1.4.1 -ProjectName $p.Name
+
+    $result = @(Get-Package -Recent)
+    Assert-AreEqual 1 $result.Count
+    
+    Assert-AreEqual "jQuery" $result[0].Id
+    Assert-AreEqual "1.4.1" $result[0].Version
+
+    # Act
+
+    # install jQuery.UI.Combined version 1.8.14 will force updating jQuery to 1.4.4
+    Install-Package jQuery.UI.Combined -Version 1.8.14 -ProjectName $p.Name
+
+    # Assert
+    $result = @(Get-Package -Recent)
+    Assert-AreEqual 2 $result.Count
+
+    Assert-AreEqual "jQuery.UI.Combined" $result[0].Id
+    Assert-AreEqual "1.8.14" $result[0].Version
+
+    Assert-AreEqual "jQuery" $result[1].Id
+    Assert-AreEqual "1.4.4" $result[1].Version
+}
+
 function Test-GetPackageForProjectReturnsEmptyProjectIfItHasNoInstalledPackage {
     # Arrange
     $p = New-ConsoleApplication
@@ -317,6 +374,6 @@ function Test-ZipPackageLoadsReleaseNotesAttribute {
     # Act
     $p = Get-Package -ListAvailable -Source $context.RepositoryRoot -Filter ReleaseNotesPackage
 
-	# Assert
-	Assert-AreEqual "This is a release note." $p.ReleaseNotes
+    # Assert
+    Assert-AreEqual "This is a release note." $p.ReleaseNotes
 }
