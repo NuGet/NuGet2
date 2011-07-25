@@ -27,23 +27,37 @@ $msbuildPath = Join-Path $env:windir Microsoft.NET\Framework\v4.0.30319\msbuild
 # Add intellisense for the test parameter
 Register-TabExpansion 'Run-Test' @{ 
     'Test' = { 
+        param($context)
+
+        if ($context.File) {
+            $filter = $context.File
+        }
+        else {
+            $filter = "*.ps1"
+        }
+
         # Load all of the test scripts
-        Get-ChildItem $testPath -Filter *.ps1 | %{ 
+        Get-ChildItem $testPath -Filter $filter | %{ 
             . $_.FullName
         }
     
-        # Get all of the the tests functions
+        # Get all of the tests functions
         Get-ChildItem function:\Test* | %{ $_.Name.Substring(5) }
+    }
+    'File' = { 
+        # Get all of the tests files
+        Get-ChildItem $testPath -Filter *.ps1 | Select-Object -ExpandProperty Name
     }
 }
 
 function global:Run-Test {
     [CmdletBinding()]
     param(
-        [string]$Test
+        [parameter(Position=0)]
+        [string]$Test,
+        [parameter(Position=1)]
+        [string]$File
     )
-
-
     
     if(!(Test-Path $generatePackagesExePath)) {
         & $msbuildPath $generatePackagesProject /v:quiet
@@ -73,8 +87,12 @@ function global:Run-Test {
     
     Write-Verbose "Loading scripts from `"$testPath`""
     
+    if (!$File) {
+        $File = "*.ps1"
+    }
+
     # Load all of the test scripts
-    Get-ChildItem $testPath -Filter *.ps1 | %{ 
+    Get-ChildItem $testPath -Filter $File | %{ 
         . $_.FullName
     } 
     
