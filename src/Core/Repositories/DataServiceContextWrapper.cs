@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Services.Client;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -10,7 +11,7 @@ namespace NuGet {
     public class DataServiceContextWrapper : IDataServiceContext {
         private static readonly MethodInfo _executeMethodInfo = typeof(DataServiceContext).GetMethod("Execute", new[] { typeof(Uri) });
         private readonly DataServiceContext _context;
-        private readonly HashSet<string> _methodNames;
+        private readonly HashSet<string> _supportedMethodNames;
 
         public DataServiceContextWrapper(Uri serviceRoot) {
             if (serviceRoot == null) {
@@ -18,7 +19,7 @@ namespace NuGet {
             }
             _context = new DataServiceContext(serviceRoot);
             _context.MergeOption = MergeOption.OverwriteChanges;
-            _methodNames = new HashSet<string>(GetSupportedMethodNames(), StringComparer.OrdinalIgnoreCase);
+            _supportedMethodNames = new HashSet<string>(GetSupportedMethodNames(), StringComparer.OrdinalIgnoreCase);
         }
 
         private IEnumerable<string> GetSupportedMethodNames() {
@@ -30,13 +31,32 @@ namespace NuGet {
 
             // Make a request to the metadata uri and get the schema
             var client = new HttpClient(metadataUri);
-            string schema = Encoding.UTF8.GetString(client.DownloadData());
+            byte[] data = client.DownloadData();
+
+            if (data == null) {
+                return Enumerable.Empty<string>();
+            }
+
+            string schema = Encoding.UTF8.GetString(data);
 
             return ExtractMethodNamesFromSchema(schema);
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "If the docuument is in fails to parse in any way, we want to not fail.")]
         internal static IEnumerable<string> ExtractMethodNamesFromSchema(string schema) {
-            var schemaDocument = XDocument.Parse(schema);
+            if (String.IsNullOrEmpty(schema)) {
+                return Enumerable.Empty<string>();
+            }
+
+            XDocument schemaDocument = null;
+
+            try {
+                schemaDocument = XDocument.Parse(schema);
+            }
+            catch {
+                // If the schema is malformed (for some reason) then just return empty list
+                return Enumerable.Empty<string>();
+            }
 
             // Get all entity containers
             var entityContainers = from e in schemaDocument.Descendants()
@@ -121,7 +141,7 @@ namespace NuGet {
         }
 
         public bool SupportsServiceMethod(string methodName) {
-            return _methodNames.Contains(methodName);
+            return _supportedMethodNames.Contains(methodName);
         }
     }
 }

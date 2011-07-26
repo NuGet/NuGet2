@@ -515,5 +515,17 @@ namespace NuGet.Test {
             Assert.IsFalse(net40CompatibleWithNet20);
             Assert.IsTrue(net20CompatibleWithNet40);
         }
+
+        [TestMethod]
+        public void IsCompatibleReturnsTrueIfSupportedFrameworkListIsEmpty() {
+            // Arrange
+            FrameworkName net40Client = VersionUtility.ParseFrameworkName("net40-client");
+
+            // Act
+            var result = VersionUtility.IsCompatible(net40Client, Enumerable.Empty<FrameworkName>());
+
+            // Assert
+            Assert.IsTrue(result);
+        }
     }
 }

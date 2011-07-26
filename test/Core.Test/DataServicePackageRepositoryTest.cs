@@ -111,11 +111,17 @@ namespace NuGet.Test {
             // Act
             var schemaNoMethods = DataServiceContextWrapper.ExtractMethodNamesFromSchema(NuGetFeedSchema.SchemaWithNoMethods).ToList();
             var schemaWithMethods = DataServiceContextWrapper.ExtractMethodNamesFromSchema(NuGetFeedSchema.SchemaWithMethod).ToList();
+            var emptySchema = DataServiceContextWrapper.ExtractMethodNamesFromSchema("").ToList();
+            var nullSchema = DataServiceContextWrapper.ExtractMethodNamesFromSchema(null).ToList();
+            var badSchema = DataServiceContextWrapper.ExtractMethodNamesFromSchema("<xml>DEADBEEF").ToList();
 
             // Assert
             Assert.AreEqual(0, schemaNoMethods.Count);
             Assert.AreEqual(1, schemaWithMethods.Count);
             Assert.AreEqual("Search", schemaWithMethods[0]);
+            Assert.AreEqual(0, emptySchema.Count);
+            Assert.AreEqual(0, nullSchema.Count);
+            Assert.AreEqual(0, badSchema.Count);
         }
 
 

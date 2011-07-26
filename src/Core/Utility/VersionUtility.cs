@@ -443,6 +443,7 @@ namespace NuGet {
                 return supportedFrameworks.Any(supportedFramework => IsCompatible(frameworkName, supportedFramework));
             }
 
+            // No supported frameworks means that everything is supported.
             return true;
         }
 
