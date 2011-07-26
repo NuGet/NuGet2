@@ -195,6 +195,10 @@ namespace NuGet.VisualStudio {
             return project.GetPropertyValue<string>("FullPath");
         }
 
+        public static string GetTargetFramework(this Project project) {
+            return project.GetPropertyValue<string>("TargetFrameworkMoniker");
+        }
+
         public static T GetPropertyValue<T>(this Project project, string propertyName) {
             try {
                 Property property = project.Properties.Item(propertyName);

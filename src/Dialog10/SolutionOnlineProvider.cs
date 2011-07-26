@@ -35,6 +35,13 @@ namespace NuGet.Dialog.Providers {
             _solutionManager = solutionManager;
         }
 
+        public override IEnumerable<string> SupportedFrameworks {
+            get {
+                return from p in _solutionManager.GetProjects()
+                       select p.GetTargetFramework();
+            }
+        }
+
         protected override bool ExecuteCore(PackageItem item) {
             _activePackageManager = GetActivePackageManager();
             IList<Project> selectedProjectsList;

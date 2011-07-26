@@ -33,6 +33,18 @@ namespace NuGet {
             _query = context.CreateQuery<T>(entitySetName);
             Expression = Expression.Constant(this);
         }
+        
+        public SmartDataServiceQuery(IDataServiceContext context, IDataServiceQuery query) {
+            if (context == null) {
+                throw new ArgumentNullException("context");
+            }
+            if (query == null) {
+                throw new ArgumentNullException("query");
+            }
+            _context = context;
+            _query = query;
+            Expression = Expression.Constant(this);
+        }
 
         private SmartDataServiceQuery(IDataServiceContext context, IDataServiceQuery query, Expression expression) {
             _context = context;

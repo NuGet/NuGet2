@@ -155,6 +155,29 @@ namespace NuGet {
                     select dependency).FirstOrDefault();
         }
 
+
+        public static IQueryable<IPackage> GetPackages(this IPackageRepository repository, IEnumerable<string> targetFrameworks) {
+            return Search(repository, searchTerm: null, targetFrameworks: targetFrameworks);
+        }
+
+        public static IQueryable<IPackage> Search(this IPackageRepository repository, string searchTerm) {
+            return Search(repository, searchTerm, targetFrameworks: Enumerable.Empty<string>());
+        }
+
+        public static IQueryable<IPackage> Search(this IPackageRepository repository, string searchTerm, IEnumerable<string> targetFrameworks) {
+            if (targetFrameworks == null) {
+                throw new ArgumentNullException("targetFrameworks");
+            }
+
+            var searchableRepository = repository as ISearchableRepository;            
+            if (searchableRepository != null) {
+                return searchableRepository.Search(searchTerm, targetFrameworks);
+            }
+
+            // Ignore the target framework if the repository doesn't support searching
+            return repository.GetPackages().Find(searchTerm);
+        }
+
         /// <summary>
         /// Returns a set of dependencies ordered by ascending versions while accounting for repositories that implement an IDependencyProvider
         /// </summary>

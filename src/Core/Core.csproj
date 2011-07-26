@@ -53,6 +53,7 @@
     <Compile Include="Extensions\QueryableExtensions.cs" />
     <Compile Include="Extensions\SettingsExtensions.cs" />
     <Compile Include="Extensions\VersionExtensions.cs" />
+    <Compile Include="Repositories\ISearchableRepository.cs" />
     <Compile Include="Server\PublishData.cs" />
     <Compile Include="Server\PackageServer.cs" />
     <Compile Include="Server\IPackageServer.cs" />

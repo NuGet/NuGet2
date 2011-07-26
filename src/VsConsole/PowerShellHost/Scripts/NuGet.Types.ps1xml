@@ -15,11 +15,20 @@
                 <Name>Type</Name>
                 <GetScriptBlock>
                     switch ($this.Kind) {
-                        "{E24C65DC-7377-472B-9ABA-BC803B73C61A}" {"Web Site"}
-                        "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}" {"C#"}
-                        "{F184B08F-C81C-45F6-A57F-5ABD9991F28F}" {"VB.NET"}
-                        "{F2A71F9B-5D33-465A-A702-920D77279786}" {"F#"}
-                        default { "Unknown" }
+                    "{E24C65DC-7377-472B-9ABA-BC803B73C61A}" {"Web Site"}
+                    "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}" {"C#"}
+                    "{F184B08F-C81C-45F6-A57F-5ABD9991F28F}" {"VB.NET"}
+                    "{F2A71F9B-5D33-465A-A702-920D77279786}" {"F#"}
+                    default { "Unknown" }
+                    }
+                </GetScriptBlock>
+            </ScriptProperty>
+            <ScriptProperty>
+                <Name>TargetFramework</Name>
+                <GetScriptBlock>
+                    $property = $this.Properties.Item("TargetFrameworkMoniker")
+                    if($property) {
+                        $property.Value
                     }
                 </GetScriptBlock>
             </ScriptProperty>
@@ -39,11 +48,20 @@
                 <Name>Type</Name>
                 <GetScriptBlock>
                     switch ($this.Kind) {
-                        "{E24C65DC-7377-472B-9ABA-BC803B73C61A}" {"Web Site"}
-                        "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}" {"C#"}
-                        "{F184B08F-C81C-45F6-A57F-5ABD9991F28F}" {"VB.NET"}
-                        "{F2A71F9B-5D33-465A-A702-920D77279786}" {"F#"}
-                        default { "Unknown" }
+                    "{E24C65DC-7377-472B-9ABA-BC803B73C61A}" {"Web Site"}
+                    "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}" {"C#"}
+                    "{F184B08F-C81C-45F6-A57F-5ABD9991F28F}" {"VB.NET"}
+                    "{F2A71F9B-5D33-465A-A702-920D77279786}" {"F#"}
+                    default { "Unknown" }
+                    }
+                </GetScriptBlock>
+            </ScriptProperty>
+            <ScriptProperty>
+                <Name>TargetFramework</Name>
+                <GetScriptBlock>
+                    $property = $this.Properties.Item("TargetFrameworkMoniker")
+                    if($property) {
+                    $property.Value
                     }
                 </GetScriptBlock>
             </ScriptProperty>

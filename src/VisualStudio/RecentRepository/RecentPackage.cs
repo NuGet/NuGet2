@@ -8,7 +8,6 @@ namespace NuGet.VisualStudio {
     /// Represents a Recent package.
     /// </summary>
     public class RecentPackage : IPackage, IPersistencePackageMetadata, IEquatable<RecentPackage> {
-
         private readonly IPackage _basePackage;
 
         /// <summary>
@@ -150,6 +149,12 @@ namespace NuGet.VisualStudio {
         public double Rating {
             get {
                 return _basePackage.Rating;
+            }
+        }
+
+        public bool IsLatestVersion {
+            get {
+                return true;
             }
         }
 

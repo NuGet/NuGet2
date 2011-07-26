@@ -153,6 +153,12 @@ namespace NuGet {
             set;
         }
 
+        public bool IsLatestVersion {
+            get {
+                return true;
+            }
+        }
+
         public IEnumerable<PackageDependency> Dependencies {
             get;
             set;

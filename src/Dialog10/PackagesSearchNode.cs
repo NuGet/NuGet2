@@ -49,6 +49,11 @@ namespace NuGet.Dialog.Providers {
         }
 
         public override IQueryable<IPackage> GetPackages() {
+            var simpleNode = _baseNode as SimpleTreeNode;
+            if (simpleNode != null) {
+                return simpleNode.Repository.Search(_searchText, Provider.SupportedFrameworks);
+            }
+            
             return _baseNode.GetPackages().Find(_searchText);
         }
     }

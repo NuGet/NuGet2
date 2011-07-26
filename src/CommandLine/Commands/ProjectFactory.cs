@@ -281,7 +281,7 @@ namespace NuGet.Commands {
                         targetFolder = ReferenceFolder;
                     }
                     else {
-                        targetFolder = Path.Combine(ReferenceFolder, VersionUtility.GetFrameworkFolder(targetFramework));
+                        targetFolder = Path.Combine(ReferenceFolder, VersionUtility.GetShortFrameworkName(targetFramework));
                     }
                 }
 

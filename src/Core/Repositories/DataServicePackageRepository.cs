@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Services.Client;
 using System.Linq;
+using System.Runtime.Versioning;
 
 namespace NuGet {
-    public class DataServicePackageRepository : PackageRepositoryBase, IHttpClientEvents {
+    public class DataServicePackageRepository : PackageRepositoryBase, IHttpClientEvents, ISearchableRepository {
         private IDataServiceContext _context;
         private readonly IHttpClient _httpClient;
         private readonly PackageDownloader _packageDownloader;
@@ -54,8 +56,8 @@ namespace NuGet {
         // we don't make a web request if we are not gonig to actually use it
         // since getting the Uri property of the RedirectedHttpClient will
         // trigger that functionality.
-        private IDataServiceContext Context {
-            get {
+        internal IDataServiceContext Context {
+            private get {
                 if (_context == null) {
                     _context = new DataServiceContextWrapper(_httpClient.Uri);
                     _context.SendingRequest += OnSendingRequest;
@@ -63,6 +65,9 @@ namespace NuGet {
                     _context.IgnoreMissingProperties = true;
                 }
                 return _context;
+            }
+            set {
+                _context = value;
             }
         }
 
@@ -83,6 +88,37 @@ namespace NuGet {
         public override IQueryable<IPackage> GetPackages() {
             // REVIEW: Is it ok to assume that the package entity set is called packages?
             return new SmartDataServiceQuery<DataServicePackage>(Context, Constants.PackageServiceEntitySetName).AsSafeQueryable();
+        }
+
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks) {
+            if (!Context.SupportsServiceMethod("Search")) {
+                // If there's no search method then we can't filter by target framework
+                return GetPackages().Find(searchTerm);
+            }
+
+            // Convert the list of frameork names into short names
+            var shortFrameworkNames = targetFrameworks.Select(name => new FrameworkName(name))
+                                                      .Select(VersionUtility.GetShortFrameworkName);
+
+            // Create a '|' separated string of framework names
+            string targetFrameworkString = String.Join("|", shortFrameworkNames);
+
+            // Create a query for the search service method
+            var query = Context.CreateQuery<DataServicePackage>("Search", new Dictionary<string, object> {
+                { "searchTerm", "'" + Escape(searchTerm) + "'" },
+                { "targetFramework", "'" + Escape(targetFrameworkString) + "'" }
+            });
+
+            return new SmartDataServiceQuery<DataServicePackage>(Context, query).AsSafeQueryable();
+        }
+
+        private static string Escape(string value) {
+            // REVIEW: Couldn't find another way to do this with odata
+            if (!String.IsNullOrEmpty(value)) {
+                return value.Replace("'", "''");
+            }
+
+            return value;
         }
     }
 }

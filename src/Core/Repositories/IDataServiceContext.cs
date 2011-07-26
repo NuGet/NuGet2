@@ -6,11 +6,13 @@ namespace NuGet {
     public interface IDataServiceContext {
         Uri BaseUri { get; }
         bool IgnoreMissingProperties { get; set; }
+        bool SupportsServiceMethod(string methodName);
 
         event EventHandler<SendingRequestEventArgs> SendingRequest;
         event EventHandler<ReadingWritingEntityEventArgs> ReadingEntity;
 
         IDataServiceQuery<T> CreateQuery<T>(string entitySetName);
+        IDataServiceQuery<T> CreateQuery<T>(string entitySetName, IDictionary<string, object> queryOptions);
         IEnumerable<T> ExecuteBatch<T>(DataServiceRequest request);
 
         Uri GetReadStreamUri(object entity);

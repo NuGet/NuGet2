@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
     [Export(typeof(IPackageRepository))]
-    public class VsPackageSourceRepository : IPackageRepository {
+    public class VsPackageSourceRepository : IPackageRepository, ISearchableRepository {
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepositoryFactory _repositoryFactory;
 
@@ -52,6 +53,10 @@ namespace NuGet.VisualStudio {
 
         public void RemovePackage(IPackage package) {
             ActiveRepository.RemovePackage(package);
+        }
+
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks) {
+            return ActiveRepository.Search(searchTerm, targetFrameworks);
         }
     }
 }

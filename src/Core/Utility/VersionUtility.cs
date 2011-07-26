@@ -365,7 +365,7 @@ namespace NuGet {
             return name + "-" + frameworkName.Profile;
         }
 
-        public static string GetFrameworkFolder(FrameworkName frameworkName) {
+        public static string GetShortFrameworkName(FrameworkName frameworkName) {
             string name;
             if (!_identifierToFrameworkFolder.TryGetValue(frameworkName.Identifier, out name)) {
                 name = frameworkName.Identifier;
@@ -436,6 +436,14 @@ namespace NuGet {
                                select g).FirstOrDefault();
 
             return compatibleItems != null && compatibleItems.Any();
+        }
+
+        public static bool IsCompatible(FrameworkName frameworkName, IEnumerable<FrameworkName> supportedFrameworks) {
+            if (supportedFrameworks.Any()) {
+                return supportedFrameworks.Any(supportedFramework => IsCompatible(frameworkName, supportedFramework));
+            }
+
+            return true;
         }
 
         internal static bool IsCompatible(FrameworkName frameworkName, FrameworkName targetFrameworkName) {

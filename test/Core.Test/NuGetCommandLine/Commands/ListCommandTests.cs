@@ -61,16 +61,14 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             cmd.Source.Add(DefaultRepoUrl);
             cmd.Console = console;
             cmd.Arguments.Add("SearchPackage");
-            cmd.Arguments.Add("AnotherTerm");
              
 
             // Act
             var packages = cmd.GetPackages();
 
             // Assert
-            Assert.AreEqual(2, packages.Count());
-            Assert.AreEqual("AnotherTerm", packages.First().Id);
-            Assert.AreEqual("SearchPackage", packages.Last().Id);
+            Assert.AreEqual(1, packages.Count());
+            Assert.AreEqual("SearchPackage", packages.First().Id);
         }
 
         [TestMethod]

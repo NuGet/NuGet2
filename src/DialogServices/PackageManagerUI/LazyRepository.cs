@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NuGet.Dialog.Providers {
-    public class LazyRepository : IPackageRepository {
-
+    public class LazyRepository : IPackageRepository, ISearchableRepository {
         private readonly Lazy<IPackageRepository> _repository;
 
         private IPackageRepository Repository {
@@ -32,6 +32,10 @@ namespace NuGet.Dialog.Providers {
 
         public void RemovePackage(IPackage package) {
             Repository.RemovePackage(package);
+        }
+
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks) {
+            return Repository.Search(searchTerm, targetFrameworks);
         }
     }
 }

@@ -8,7 +8,6 @@ namespace NuGet.Dialog.Providers {
     /// This tree node lists all packages from a fixed repository.
     /// </summary>
     internal class SimpleTreeNode : PackagesTreeNodeBase {
-
         private readonly IPackageRepository _repository;
         private readonly string _category;
 
@@ -39,7 +38,7 @@ namespace NuGet.Dialog.Providers {
         }
 
         public override IQueryable<IPackage> GetPackages() {
-            return _repository.GetPackages();
+            return Repository.GetPackages(Provider.SupportedFrameworks);
         }
     }
 }

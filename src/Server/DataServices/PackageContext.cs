@@ -10,7 +10,8 @@ namespace NuGet.Server.DataServices {
 
         public IQueryable<Package> Packages {
             get {
-                return _repository.GetPackagesWithDerivedData();
+                return from p in _repository.GetPackages()
+                       select _repository.GetMetadataPackage(p);
             }
         }
     }

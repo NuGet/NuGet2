@@ -67,9 +67,13 @@ namespace NuGet.PowerShell.Commands {
         [ValidateNotNullOrEmpty]
         public string Source { get; set; }
 
-        [Parameter(Position = 1, Mandatory = true, ValueFromPipelineByPropertyName = true, ParameterSetName="Project")]
+        [Parameter(Position = 1, Mandatory = true, ValueFromPipelineByPropertyName = true, ParameterSetName = "Project")]
         [ValidateNotNullOrEmpty]
         public string ProjectName { get; set; }
+
+        [Parameter(ValueFromPipelineByPropertyName = true, ParameterSetName = "Remote")]
+        [ValidateNotNullOrEmpty]
+        public string TargetFramework { get; set; }
 
         [Parameter(Mandatory = true, ParameterSetName = "Remote")]
         [Alias("Online", "Remote")]
@@ -132,7 +136,7 @@ namespace NuGet.PowerShell.Commands {
             }
             IProjectManager projectManager = PackageManager.GetProjectManager(project);
             Debug.Assert(projectManager != null);
-            
+
             return projectManager;
         }
 
@@ -174,10 +178,12 @@ namespace NuGet.PowerShell.Commands {
             }
 
             IEnumerable<IPackage> packagesToDisplay = packages;
+
             // When querying a remote source, collapse versions unless AllVersions is specified.
             // We need to do this as the last step of the Queryable as the filtering occurs on the client.
             if (CollapseVersions) {
-                packagesToDisplay = packagesToDisplay.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
+                packagesToDisplay = packagesToDisplay.Where(p => p.IsLatestVersion)
+                                                     .DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
             }
 
             packagesToDisplay = packagesToDisplay.Skip(Skip);
@@ -228,9 +234,15 @@ namespace NuGet.PowerShell.Commands {
         }
 
         protected virtual IQueryable<IPackage> GetPackages(IPackageRepository sourceRepository) {
-            IQueryable<IPackage> packages = sourceRepository.GetPackages();
-            if (!String.IsNullOrEmpty(Filter)) {
-                packages = packages.Find(Filter.Split());
+            IQueryable<IPackage> packages = null;
+
+            var targetFrameworks = String.IsNullOrEmpty(TargetFramework) ? Enumerable.Empty<string>() : new[] { TargetFramework };
+
+            if (String.IsNullOrEmpty(Filter)) {
+                packages = sourceRepository.GetPackages(targetFrameworks);
+            }
+            else {
+                packages = sourceRepository.Search(Filter, targetFrameworks);
             }
 
             // for recent packages, we want to order by last installed first instead of Id
@@ -244,9 +256,11 @@ namespace NuGet.PowerShell.Commands {
         protected virtual IQueryable<IPackage> GetPackagesForUpdate(IPackageRepository sourceRepository) {
             IPackageRepository localRepository = PackageManager.LocalRepository;
             var packagesToUpdate = localRepository.GetPackages();
+
             if (!String.IsNullOrEmpty(Filter)) {
-                packagesToUpdate = packagesToUpdate.Find(Filter.Split());
+                packagesToUpdate = packagesToUpdate.Find(Filter);
             }
+
             return sourceRepository.GetUpdates(packagesToUpdate).AsQueryable();
         }
 

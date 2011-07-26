@@ -281,6 +281,10 @@ namespace NuGet.Dialog.Providers {
             if (_query == null) {
                 IQueryable<IPackage> query = GetPackages();
 
+                if (CollapseVersions) {
+                    query = query.Where(p => p.IsLatestVersion);
+                }
+
                 token.ThrowIfCancellationRequested();
 
                 // Execute the total count query
@@ -291,10 +295,10 @@ namespace NuGet.Dialog.Providers {
                 // Apply the ordering then sort by id
                 IQueryable<IPackage> orderedQuery = ApplyOrdering(query).ThenBy(p => p.Id);
 
-                // Buffer 3 page sizes
+                // Buffer 3 pages
                 _query = orderedQuery.AsBufferedEnumerable(PageSize * 3);
 
-                if (_collapseVersions) {
+                if (CollapseVersions) {
                     _query = _query.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
                 }
             }

@@ -17,7 +17,6 @@ namespace NuGet.Dialog.Providers {
     /// a list of installed packages which will be shown in the Add Package dialog.
     /// </summary>
     internal class InstalledProvider : PackagesProviderBase {
-
         private readonly IVsPackageManager _packageManager;
         private readonly Project _project;
         private readonly IUserNotifierServices _userNotifierServices;
@@ -62,6 +61,12 @@ namespace NuGet.Dialog.Providers {
         public override bool RefreshOnNodeSelection {
             get {
                 return true;
+            }
+        }
+
+        public override IEnumerable<string> SupportedFrameworks {
+            get {
+                yield return GetTargetFramework(_project);
             }
         }
 

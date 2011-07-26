@@ -4,6 +4,8 @@ using System.IO;
 
 namespace NuGet {
     public interface IPackage : IPackageMetadata, IServerPackageMetadata {
+        bool IsLatestVersion { get; }
+
         IEnumerable<IPackageAssemblyReference> AssemblyReferences { get; }
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This might be expensive")]

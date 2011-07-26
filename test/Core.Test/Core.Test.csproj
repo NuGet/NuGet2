@@ -43,6 +43,7 @@
     </Compile>
     <Compile Include="AggregateQueryTest.cs" />
     <Compile Include="AggregateRepositoryTest.cs" />
+    <Compile Include="DataServicePackageRepositoryTest.cs" />
     <Compile Include="DataServicePackageTest.cs" />
     <Compile Include="DefaultPackagePathResolverTest.cs" />
     <Compile Include="EnumerableExtensionsTest.cs" />

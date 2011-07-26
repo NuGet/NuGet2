@@ -17,7 +17,6 @@ namespace NuGet.Dialog.Providers {
     /// Base class for all tree node types.
     /// </summary>
     internal abstract class PackagesProviderBase : VsExtensionsProvider, ILogger {
-
         private PackagesSearchNode _searchNode;
         private PackagesTreeNodeBase _lastSelectedNode;
         private readonly ResourceDictionary _resources;
@@ -93,6 +92,19 @@ namespace NuGet.Dialog.Providers {
         public PackageSortDescriptor CurrentSort {
             get;
             set;
+        }
+
+        public virtual IEnumerable<string> SupportedFrameworks {
+            get {
+                yield break;
+            }
+        }
+
+        protected static string GetTargetFramework(Project project) {
+            if (project == null) {
+                return null;
+            }
+            return project.GetTargetFramework();
         }
 
         public override IVsExtensionsTreeNode ExtensionsTree {

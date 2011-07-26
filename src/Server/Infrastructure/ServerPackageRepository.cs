@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using Ninject;
 using NuGet.Server.DataServices;
 
@@ -22,7 +23,7 @@ namespace NuGet.Server.Infrastructure {
 
         public IQueryable<Package> GetPackagesWithDerivedData() {
             return from package in base.GetPackages()
-                   select new Package(package, _derivedDataLookup[package]);
+                   select GetMetadataPackage(package);
         }
 
         public override void AddPackage(IPackage package) {
@@ -46,11 +47,34 @@ namespace NuGet.Server.Infrastructure {
 
         protected override IPackage OpenPackage(string path) {
             IPackage package = base.OpenPackage(path);
-            _derivedDataLookup[package] = CalculateDerivedData(path);
+            _derivedDataLookup[package] = CalculateDerivedData(package, path);
             return package;
         }
 
-        private DerivedPackageData CalculateDerivedData(string path) {
+        public Package GetMetadataPackage(IPackage package) {
+            return new Package(package, _derivedDataLookup[package]);
+        }
+
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks) {
+            var packages = GetPackages().Find(searchTerm);
+
+            if (targetFrameworks.Any()) {
+                // Get the list of framework names
+                var frameworkNames = targetFrameworks.Select(frameworkName => VersionUtility.ParseFrameworkName(frameworkName));
+
+                packages = packages.Where(package => frameworkNames.Any(frameworkName => IsCompatible(frameworkName, package)));
+            }
+
+            return packages;
+        }
+
+        private bool IsCompatible(FrameworkName frameworkName, IPackage package) {
+            var packageData = _derivedDataLookup[package];
+
+            return VersionUtility.IsCompatible(frameworkName, packageData.SupportedFrameworks);
+        }
+
+        private DerivedPackageData CalculateDerivedData(IPackage package, string path) {
             byte[] fileBytes;
             using (Stream stream = FileSystem.OpenFile(path)) {
                 fileBytes = stream.ReadAllBytes();
@@ -61,6 +85,7 @@ namespace NuGet.Server.Infrastructure {
                 PackageHash = Convert.ToBase64String(HashProvider.CalculateHash(fileBytes)),
                 LastUpdated = FileSystem.GetLastModified(path),
                 Created = FileSystem.GetCreated(path),
+                SupportedFrameworks = package.GetSupportedFrameworks(),
                 Path = path
             };
         }

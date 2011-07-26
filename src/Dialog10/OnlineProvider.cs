@@ -58,6 +58,12 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
+        public override IEnumerable<string> SupportedFrameworks {
+            get {
+                yield return GetTargetFramework(_project);
+            }
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",

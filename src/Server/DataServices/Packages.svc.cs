@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Services;
 using System.Data.Services.Common;
 using System.Data.Services.Providers;
 using System.IO;
+using System.Linq;
+using System.ServiceModel.Web;
 using Ninject;
 using NuGet.Server.Infrastructure;
 
@@ -21,7 +24,8 @@ namespace NuGet.Server.DataServices {
         // This method is called only once to initialize service-wide policies.
         public static void InitializeService(DataServiceConfiguration config) {
             config.SetEntitySetAccessRule("Packages", EntitySetRights.AllRead);
-            // config.SetServiceOperationAccessRule("MyServiceOperation", ServiceOperationRights.All);
+            config.SetServiceOperationAccessRule("Search", ServiceOperationRights.AllRead);
+
             config.DataServiceBehavior.MaxProtocolVersion = DataServiceProtocolVersion.V2;
             config.UseVerboseErrors = true;
         }
@@ -71,6 +75,14 @@ namespace NuGet.Server.DataServices {
                 return this;
             }
             return null;
+        }
+
+        [WebGet]
+        public IQueryable<Package> Search(string searchTerm, string targetFramework) {
+            IEnumerable<string> targetFrameworks = String.IsNullOrEmpty(targetFramework) ? Enumerable.Empty<string>() : targetFramework.Split('|');
+
+            return from package in Repository.Search(searchTerm, targetFrameworks)
+                   select Repository.GetMetadataPackage(package);
         }
     }
 }

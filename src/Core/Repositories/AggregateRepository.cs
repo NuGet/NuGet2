@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace NuGet {
-    public class AggregateRepository : PackageRepositoryBase, IPackageLookup, IDependencyProvider {
+    public class AggregateRepository : PackageRepositoryBase, IPackageLookup, IDependencyProvider, ISearchableRepository {
         /// <summary>
         /// When the ignore flag is set up, this collection keeps track of failing repositories so that the AggregateRepository 
         /// does not query them again.
@@ -93,8 +93,8 @@ namespace NuGet {
                     }
                 };
             }
-            return new AggregateQuery<IPackage>(Repositories.Select(getPackages),
-                PackageEqualityComparer.IdAndVersion, Logger, IgnoreFailingRepositories);
+
+            return CreateAggregateQuery(Repositories.Select(getPackages));
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]
@@ -169,5 +169,16 @@ namespace NuGet {
             Logger.Log(MessageLevel.Warning, ExceptionUtility.Unwrap(ex).Message);
         }
 
+
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks) {
+            return CreateAggregateQuery(Repositories.Select(r => r.Search(searchTerm, targetFrameworks)));
+        }
+
+        private AggregateQuery<IPackage> CreateAggregateQuery(IEnumerable<IQueryable<IPackage>> queries) {
+            return new AggregateQuery<IPackage>(queries,
+                                                PackageEqualityComparer.IdAndVersion,
+                                                Logger,
+                                                IgnoreFailingRepositories);
+        }
     }
 }

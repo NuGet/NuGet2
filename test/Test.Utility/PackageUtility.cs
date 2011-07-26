@@ -51,6 +51,7 @@ namespace NuGet.Test {
             allFiles.AddRange(assemblyReferences);
 
             var mockPackage = new Mock<IPackage>() { CallBase = true };
+            mockPackage.Setup(m => m.IsLatestVersion).Returns(true);
             mockPackage.Setup(m => m.Id).Returns(id);
             mockPackage.Setup(m => m.Version).Returns(new Version(version));
             mockPackage.Setup(m => m.GetFiles()).Returns(allFiles);

@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test.Mocks;
+using System.Collections.Generic;
 
 namespace NuGet.Test {
     [TestClass]
@@ -112,7 +113,7 @@ namespace NuGet.Test {
             repo.Add(CreateMockPackage("TagCloud", "1.0", "Description"));
 
             // Act
-            var packages = repo.GetPackages().Find(term.Split()).ToList();
+            var packages = repo.GetPackages().Find(term).ToList();
 
             // Assert
             Assert.AreEqual(3, packages.Count);
@@ -128,7 +129,7 @@ namespace NuGet.Test {
             var repo = GetRemoteRepository();
 
             // Act
-            var packages = repo.GetPackages().Find(term.Split());
+            var packages = repo.GetPackages().Find(term);
 
             // Assert
             Assert.AreEqual(packages.Count(), 2);
@@ -144,7 +145,7 @@ namespace NuGet.Test {
             var repo = GetRemoteRepository();
 
             // Act
-            var packages = repo.GetPackages().Find(term.Split());
+            var packages = repo.GetPackages().Find(term);
 
             // Assert
             Assert.IsFalse(packages.Any());
@@ -163,6 +164,22 @@ namespace NuGet.Test {
             // Assert
             CollectionAssert.AreEqual(packages1.ToList(), packages2.ToList());
             CollectionAssert.AreEqual(packages2.ToList(), packages3.ToList());
+        }
+
+        [TestMethod]
+        public void SearchUsesInterfaceIfImplementedByRepository() {
+            // Arrange
+            var repo = new Mock<MockPackageRepository>(MockBehavior.Strict);
+            repo.Setup(m => m.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
+            repo.As<ISearchableRepository>().Setup(m => m.Search(It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+                                            .Returns(new[] { PackageUtility.CreatePackage("A") }.AsQueryable());
+
+            // Act
+            var packages = repo.Object.Search("Hello", new[] { ".NETFramework" }).ToList();
+
+            // Assert
+            Assert.AreEqual(1, packages.Count);
+            Assert.AreEqual("A", packages[0].Id);
         }
 
         [TestMethod]

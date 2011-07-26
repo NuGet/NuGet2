@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.Versioning;
 
 namespace NuGet {
     public static class PackageExtensions {
@@ -46,6 +47,13 @@ namespace NuGet {
             return package.FrameworkAssemblies.Any() ||
                    package.AssemblyReferences.Any() ||
                    package.GetContentFiles().Any();
+        }
+
+        public static IEnumerable<FrameworkName> GetSupportedFrameworks(this IPackage package) {
+            return package.FrameworkAssemblies
+                          .SelectMany(a => a.SupportedFrameworks)
+                          .Concat(package.AssemblyReferences.SelectMany(a => a.SupportedFrameworks))
+                          .Distinct(); 
         }
 
         /// <summary>
@@ -107,8 +115,15 @@ namespace NuGet {
                                 PackageAction.Install, operation.Package.Id, operation.Package.Version);
         }
 
+        public static IQueryable<T> Find<T>(this IQueryable<T> packages, string searchText) where T : IPackage {
+            if (String.IsNullOrEmpty(searchText)) {
+                return packages;
+            }
 
-        public static IQueryable<IPackage> Find(this IQueryable<IPackage> packages, params string[] searchTerms) {
+            return Find(packages, searchText.Split());
+        }
+
+        private static IQueryable<T> Find<T>(this IQueryable<T> packages, params string[] searchTerms) where T : IPackage {
             if (searchTerms == null) {
                 return packages;
             }
@@ -118,20 +133,20 @@ namespace NuGet {
                 return packages;
             }
 
-            return packages.Where(BuildSearchExpression(nonNullTerms));
+            return packages.Where(BuildSearchExpression<T>(nonNullTerms));
         }
 
         /// <summary>
         /// Constructs an expression to search for individual tokens in a search term in the Id and Description of packages
         /// </summary>
-        private static Expression<Func<IPackage, bool>> BuildSearchExpression(IEnumerable<string> searchTerms) {
+        private static Expression<Func<T, bool>> BuildSearchExpression<T>(IEnumerable<string> searchTerms) where T : IPackage {
             Debug.Assert(searchTerms != null);
             var parameterExpression = Expression.Parameter(typeof(IPackageMetadata));
             // package.Id.ToLower().Contains(term1) || package.Id.ToLower().Contains(term2)  ...
             Expression condition = (from term in searchTerms
                                     from property in _packagePropertiesToSearch
                                     select BuildExpressionForTerm(parameterExpression, term, property)).Aggregate(Expression.OrElse);
-            return Expression.Lambda<Func<IPackage, bool>>(condition, parameterExpression);
+            return Expression.Lambda<Func<T, bool>>(condition, parameterExpression);
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "System.String.ToLower",

@@ -44,15 +44,17 @@ namespace NuGet.Commands {
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This call is expensive")]
         public IEnumerable<IPackage> GetPackages() {
             IPackageRepository packageRepository = GetRepository();
-            IQueryable<IPackage> packages = packageRepository.GetPackages().OrderBy(p => p.Id);
-            if (Arguments != null && Arguments.Any()) {
-                packages = packages.Find(Arguments.ToArray());
-            }
+            string searchTerm = Arguments != null ? Arguments.FirstOrDefault() : null;
+
+            IQueryable<IPackage> packages = packageRepository.Search(searchTerm);
+
             if (AllVersions) {
-                // Do not collapse versions
-                return packages;
+                return packages.OrderBy(p => p.Id);
             }
-            return packages.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
+
+            return packages.Where(p => p.IsLatestVersion)
+                           .OrderBy(p => p.Id)
+                           .DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
         }
 
         private IPackageRepository GetRepository() {

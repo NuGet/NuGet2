@@ -5,7 +5,7 @@ namespace NuGet.VisualStudio {
     /// <summary>
     /// Represents a package repository that implements a dependency provider. 
     /// </summary>
-    public class FallbackRepository : IPackageRepository, IDependencyProvider {
+    public class FallbackRepository : IPackageRepository, IDependencyProvider, ISearchableRepository {
         private readonly IPackageRepository _primaryRepository;
         private readonly IPackageRepository _dependencyResolver;
 
@@ -36,6 +36,10 @@ namespace NuGet.VisualStudio {
 
         public IEnumerable<IPackage> GetDependencies(string packageId) {
             return _dependencyResolver.FindPackagesById(packageId);
+        }
+
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks) {
+            return _primaryRepository.Search(searchTerm, targetFrameworks);
         }
     }
 }
