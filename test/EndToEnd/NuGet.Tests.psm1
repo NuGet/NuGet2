@@ -25,19 +25,10 @@ $msbuildPath = Join-Path $env:windir Microsoft.NET\Framework\v4.0.30319\msbuild
 # TODO: Add the ability to rerun failed tests from the previous run
 
 # Add intellisense for the test parameter
-Register-TabExpansion 'Run-Test' @{ 
+Register-TabExpansion 'Run-Test' @{
     'Test' = { 
-        param($context)
-
-        if ($context.File) {
-            $filter = $context.File
-        }
-        else {
-            $filter = "*.ps1"
-        }
-
         # Load all of the test scripts
-        Get-ChildItem $testPath -Filter $filter | %{ 
+        Get-ChildItem $testPath -Filter *.ps1 | %{ 
             . $_.FullName
         }
     
@@ -51,11 +42,11 @@ Register-TabExpansion 'Run-Test' @{
 }
 
 function global:Run-Test {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="Test")]
     param(
-        [parameter(Position=0)]
+        [parameter(ParameterSetName="Test", Position=0)]
         [string]$Test,
-        [parameter(Position=1)]
+        [parameter(ParameterSetName="File", Mandatory=$true, Position=0)]
         [string]$File
     )
     
