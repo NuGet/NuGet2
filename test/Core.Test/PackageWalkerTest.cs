@@ -72,8 +72,9 @@ namespace NuGet.Test {
             IPackage packageB = PackageUtility.CreatePackage("B");
             var repository = new Mock<PackageRepositoryBase>();
             repository.Setup(c => c.GetPackages()).Returns(new[] { packageA }.AsQueryable());
-            var dependencyProvider = repository.As<IDependencyProvider>();
-            dependencyProvider.Setup(c => c.GetDependencies(It.Is<string>(p => p == "B"))).Returns(new[] { packageB }.AsQueryable()).Verifiable();
+            var dependencyProvider = repository.As<IDependencyResolver>();
+            dependencyProvider.Setup(c => c.ResolveDependency(It.Is<PackageDependency>(p => p.Id == "B"), It.IsAny<IPackageConstraintProvider>()))
+                              .Returns(packageB).Verifiable();
             var localRepository = new MockPackageRepository();
 
             IPackageOperationResolver resolver = new InstallWalker(localRepository,
@@ -96,19 +97,18 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void ResolveDependenciesForInstallPackageResolvesDependencyWithConstraintsUsingDependencyProvider() {
+        public void ResolveDependenciesForInstallPackageResolvesDependencyWithConstraintsUsingDependencyResolver() {
             // Arrange            
-            IPackage packageA = PackageUtility.CreatePackage("A",
-                                                            "1.0",
-                                                             dependencies: new List<PackageDependency> {
-                                                                 new PackageDependency("B", new VersionSpec { MinVersion = new Version("1.1") } )
-                                                             });
+            var packageDependency = new PackageDependency("B", new VersionSpec { MinVersion = new Version("1.1") });
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", 
+                                                            dependencies: new List<PackageDependency> { packageDependency });
             IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0");
             IPackage packageB12 = PackageUtility.CreatePackage("B", "1.2");
-            var repository = new Mock<PackageRepositoryBase>();
+            var repository = new Mock<PackageRepositoryBase>(MockBehavior.Strict);
             repository.Setup(c => c.GetPackages()).Returns(new[] { packageA }.AsQueryable());
-            var dependencyProvider = repository.As<IDependencyProvider>();
-            dependencyProvider.Setup(c => c.GetDependencies(It.Is<string>(p => p == "B"))).Returns(new[] { packageB10, packageB12 }.AsQueryable()).Verifiable();
+            var dependencyProvider = repository.As<IDependencyResolver>();
+            dependencyProvider.Setup(c => c.ResolveDependency(packageDependency, It.IsAny<IPackageConstraintProvider>()))
+                              .Returns(packageB12).Verifiable();
             var localRepository = new MockPackageRepository();
 
             IPackageOperationResolver resolver = new InstallWalker(localRepository,

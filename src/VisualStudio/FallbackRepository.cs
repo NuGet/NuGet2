@@ -5,7 +5,7 @@ namespace NuGet.VisualStudio {
     /// <summary>
     /// Represents a package repository that implements a dependency provider. 
     /// </summary>
-    public class FallbackRepository : IPackageRepository, IDependencyProvider, ISearchableRepository {
+    public class FallbackRepository : IPackageRepository, IDependencyResolver, ISearchableRepository {
         private readonly IPackageRepository _primaryRepository;
         private readonly IPackageRepository _dependencyResolver;
 
@@ -34,8 +34,10 @@ namespace NuGet.VisualStudio {
             _primaryRepository.RemovePackage(package);
         }
 
-        public IEnumerable<IPackage> GetDependencies(string packageId) {
-            return _dependencyResolver.FindPackagesById(packageId);
+        public IPackage ResolveDependency(PackageDependency dependency, IPackageConstraintProvider constraintProvider) {
+            // Use the primary repository to look up dependencies. Fallback to the aggregate repository only if we can't find a package here.
+            return _primaryRepository.ResolveDependency(dependency, constraintProvider) ??
+                   _dependencyResolver.ResolveDependency(dependency, constraintProvider);
         }
 
         public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks) {

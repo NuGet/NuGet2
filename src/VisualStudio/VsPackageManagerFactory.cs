@@ -93,13 +93,6 @@ namespace NuGet.VisualStudio {
             }
 
             var aggregateRepository = _packageSourceProvider.GetAggregate(_repositoryFactory, ignoreFailingRepositories: true);
-
-            // We need to ensure that the primary repository is part of the aggregate repository. This could happen if the user
-            // explicitly specifies a source such as by using the -Source parameter.
-            if (!aggregateRepository.Repositories.Any(s => s.Source.Equals(primaryRepository.Source, StringComparison.OrdinalIgnoreCase))) {
-                aggregateRepository = new AggregateRepository(new[] { primaryRepository }.Concat(aggregateRepository.Repositories));
-                aggregateRepository.IgnoreFailingRepositories = true;
-            }
             return new FallbackRepository(primaryRepository, aggregateRepository);
         }
 

@@ -248,8 +248,8 @@ namespace NuGet.Test {
             var mockRepository = new Mock<IPackageRepository>();
             mockRepository.Setup(c => c.GetPackages()).Throws(new InvalidOperationException()).Verifiable();
             var mockRepoWithLookup = new Mock<IPackageRepository>();
-            mockRepository.As<IDependencyProvider>().Setup(c => c.GetDependencies(It.IsAny<string>())).Throws(new Exception());
-
+            mockRepository.As<IDependencyResolver>().Setup(c => c.ResolveDependency(It.IsAny<PackageDependency>(), It.IsAny<IPackageConstraintProvider>()));
+                                                    
             var repository = new AggregateRepository(new[] { 
                 new MockPackageRepository { 
                     PackageUtility.CreatePackage("A"), 
@@ -263,10 +263,10 @@ namespace NuGet.Test {
             repository.IgnoreFailingRepositories = true;
 
             // Act
-            var packages = repository.GetDependencies("C");
+            var package = repository.ResolveDependency(new PackageDependency("C"), null);
 
             // Assert
-            Assert.IsFalse(packages.Any());
+            Assert.IsNull(package);
         }
 
         [TestMethod]
@@ -291,25 +291,6 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(2, packages.Count());
-        }
-
-        [TestMethod]
-        public void SupressErrorWorksForRepositoriesPropertyIfIgnoreFlagIsSet() {
-            // Arrange
-            var repositories = Enumerable.Range(0, 3).Select(e => {
-                if (e == 1) {
-                    throw new InvalidOperationException();
-                }
-                return new MockPackageRepository();
-            });
-
-            var aggregateRepository = new AggregateRepository(repositories) { IgnoreFailingRepositories = true };
-
-            // Act
-            var result = aggregateRepository.Repositories;
-
-            // Assert
-            Assert.AreEqual(2, result.Count());
         }
 
         [TestMethod]

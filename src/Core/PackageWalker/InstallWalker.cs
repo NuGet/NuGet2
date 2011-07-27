@@ -245,10 +245,10 @@ namespace NuGet {
             Logger.Log(MessageLevel.Info, NuGetResources.Log_AttemptingToRetrievePackageFromSource, dependency);
 
             // First try to get a local copy of the package
-            IPackage package = Repository.ResolveDependency(ConstraintProvider, dependency);
+            IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider);
 
             // Next, query the source repo for the same dependency
-            IPackage sourcePackage = SourceRepository.ResolveDependency(ConstraintProvider, dependency);
+            IPackage sourcePackage = SourceRepository.ResolveDependency(dependency, ConstraintProvider);
 
             // We didn't find a copy in the local repository
             if (package == null) {

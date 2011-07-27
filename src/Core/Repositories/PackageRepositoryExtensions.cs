@@ -182,20 +182,22 @@ namespace NuGet {
         /// Returns a set of dependencies ordered by ascending versions while accounting for repositories that implement an IDependencyProvider
         /// </summary>
         public static IEnumerable<IPackage> GetDependencies(this IPackageRepository repository, string packageId) {
-            var dependencyResolver = repository as IDependencyProvider;
-            if (dependencyResolver != null) {
-                // If the repository explicitly provides a way to retrieve dependencies, use it.
-                return dependencyResolver.GetDependencies(packageId);
-            }
-
             return repository.FindPackagesById(packageId);
         }
 
         public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency) {
-            return ResolveDependency(repository, constraintProvider: null, dependency: dependency);
+            return ResolveDependency(repository, dependency: dependency, constraintProvider: null);
         }
 
-        public static IPackage ResolveDependency(this IPackageRepository repository, IPackageConstraintProvider constraintProvider, PackageDependency dependency) {
+        public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency, IPackageConstraintProvider constraintProvider) {
+            IDependencyResolver dependencyResolver = repository as IDependencyResolver;
+            if (dependencyResolver != null) {
+                return dependencyResolver.ResolveDependency(dependency, constraintProvider);
+            }
+            return ResolveDependencyCore(repository, dependency, constraintProvider);
+        }
+
+        private static IPackage ResolveDependencyCore(this IPackageRepository repository, PackageDependency dependency, IPackageConstraintProvider constraintProvider) {
             if (repository == null) {
                 throw new ArgumentNullException("repository");
             }
