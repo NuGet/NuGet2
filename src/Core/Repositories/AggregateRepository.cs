@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace NuGet {
     public class AggregateRepository : PackageRepositoryBase, IPackageLookup, IDependencyResolver, ISearchableRepository {
@@ -89,7 +90,7 @@ namespace NuGet {
 
                 var tasks = Repositories.Select(r => Task.Factory.StartNew(() => resolveDependency(r)))
                                    .ToArray();
-                var completedTask = tasks.WhenAny(t => t != null);
+                var completedTask = tasks.WhenAny(page => page != null);
                 return tasks.WhenAny(t => t != null);
             }
             return this.ResolveDependencyCore(dependency, constraintProvider);

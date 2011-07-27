@@ -197,7 +197,7 @@ namespace NuGet {
             return ResolveDependencyCore(repository, dependency, constraintProvider);
         }
 
-        private static IPackage ResolveDependencyCore(this IPackageRepository repository, PackageDependency dependency, IPackageConstraintProvider constraintProvider) {
+        internal static IPackage ResolveDependencyCore(this IPackageRepository repository, PackageDependency dependency, IPackageConstraintProvider constraintProvider) {
             if (repository == null) {
                 throw new ArgumentNullException("repository");
             }

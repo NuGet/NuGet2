@@ -93,6 +93,7 @@ namespace NuGet.VisualStudio {
             }
 
             var aggregateRepository = _packageSourceProvider.GetAggregate(_repositoryFactory, ignoreFailingRepositories: true);
+            aggregateRepository.ResolveDependenciesVertically = true;
             return new FallbackRepository(primaryRepository, aggregateRepository);
         }
 
