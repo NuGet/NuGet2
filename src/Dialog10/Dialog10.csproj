@@ -118,29 +118,29 @@
     <Compile Include="..\VsConsole\PowerShellHostProvider\RegistryHelper.cs">
       <Link>RegistryHelper.cs</Link>
     </Compile>
-    <Compile Include="EmptyTreeNode.cs" />
+    <Compile Include="Nodes\EmptyTreeNode.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="InstalledProvider.cs" />
+    <Compile Include="Providers\InstalledProvider.cs" />
     <Compile Include="LoadPageResult.cs" />
-    <Compile Include="OnlineProvider.cs" />
+    <Compile Include="Providers\OnlineProvider.cs" />
     <Compile Include="PackageItem.cs" />
     <Compile Include="PackageManagerWindow.xaml.cs">
       <DependentUpon>PackageManagerWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="PackageSortDescriptor.cs" />
-    <Compile Include="PackagesProviderBase.cs" />
-    <Compile Include="PackagesSearchNode.cs" />
-    <Compile Include="PackagesTreeNodeBase.cs" />
+    <Compile Include="Providers\PackagesProviderBase.cs" />
+    <Compile Include="Nodes\PackagesSearchNode.cs" />
+    <Compile Include="Nodes\PackagesTreeNodeBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RecentProvider.cs" />
-    <Compile Include="RootTreeNode.cs" />
-    <Compile Include="SimpleTreeNode.cs" />
-    <Compile Include="SolutionInstalledProvider.cs" />
-    <Compile Include="SolutionOnlineProvider.cs" />
-    <Compile Include="SolutionRecentProvider.cs" />
-    <Compile Include="SolutionUpdatesProvider.cs" />
-    <Compile Include="UpdatesProvider.cs" />
-    <Compile Include="UpdatesTreeNode.cs" />
+    <Compile Include="Providers\RecentProvider.cs" />
+    <Compile Include="Nodes\RootTreeNode.cs" />
+    <Compile Include="Nodes\SimpleTreeNode.cs" />
+    <Compile Include="Providers\SolutionInstalledProvider.cs" />
+    <Compile Include="Providers\SolutionOnlineProvider.cs" />
+    <Compile Include="Providers\SolutionRecentProvider.cs" />
+    <Compile Include="Providers\SolutionUpdatesProvider.cs" />
+    <Compile Include="Providers\UpdatesProvider.cs" />
+    <Compile Include="Nodes\UpdatesTreeNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj">
