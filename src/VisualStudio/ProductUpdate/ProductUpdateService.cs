@@ -22,6 +22,7 @@ namespace NuGet.VisualStudio {
 
         private bool _updateDeclined;
         private bool _updateAccepted;
+        private bool _hasCheckedUpdate;
 
         public ProductUpdateService() :
             this(ServiceLocator.GetGlobalService<SVsUIShell, IVsUIShell>(),
@@ -60,9 +61,11 @@ namespace NuGet.VisualStudio {
         }
 
         public void CheckForAvailableUpdateAsync() {
-            if (_updateDeclined || _updateAccepted || !_productUpdateSettings.ShouldCheckForUpdate) {
+            if (_hasCheckedUpdate || _updateDeclined || _updateAccepted || !_productUpdateSettings.ShouldCheckForUpdate) {
                 return;
             }
+
+            _hasCheckedUpdate = true;
 
             Task.Factory.StartNew(() => {
                 try {
