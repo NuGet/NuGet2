@@ -88,8 +88,7 @@ namespace NuGetConsole.Implementation.Console {
         protected override int InternalExec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut) {
             int hr = OLECMDERR_E_NOTSUPPORTED;
 
-            if (WpfConsole.Host == null)
-            {
+            if (WpfConsole == null || WpfConsole.Host == null || WpfConsole.Dispatcher == null) {
                 return hr;
             }
 
