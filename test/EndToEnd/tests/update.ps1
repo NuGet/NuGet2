@@ -636,10 +636,10 @@ function Test-UpdateAllPackagesInASingleProjectWithMultipleProjects {
 
     # Assert
     Assert-Package $p1 jQuery 1.6.1
-    Assert-Package $p2 jQuery 1.5.1
+    Assert-Package $p2 jQuery 1.5.2
     Assert-Package $p1 jQuery.UI.Combined 1.8.13
     Assert-Package $p2 jQuery.UI.Combined 1.8.11
-    Assert-SolutionPackage jQuery 1.5.1
+    Assert-SolutionPackage jQuery 1.5.2
     Assert-SolutionPackage jQuery 1.6.1
     Assert-SolutionPackage jQuery.UI.Combined 1.8.11
     Assert-SolutionPackage jQuery.UI.Combined 1.8.13
@@ -657,10 +657,9 @@ function Test-UpdateAllPackagesInASingleProjectWithSafeFlagAndMultipleProjects {
 
     # Assert
     Assert-Package $p1 jQuery 1.5.2
-    Assert-Package $p2 jQuery 1.5.1
+    Assert-Package $p2 jQuery 1.5.2
     Assert-Package $p1 jQuery.UI.Combined 1.8.13
     Assert-Package $p2 jQuery.UI.Combined 1.8.11
-    Assert-SolutionPackage jQuery 1.5.1
     Assert-SolutionPackage jQuery 1.5.2
     Assert-SolutionPackage jQuery.UI.Combined 1.8.11
     Assert-SolutionPackage jQuery.UI.Combined 1.8.13

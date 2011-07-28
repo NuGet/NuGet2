@@ -65,7 +65,7 @@ namespace NuGet.VisualStudio {
 
             // The source repository of the project is an aggregate since it might need to look for all
             // available packages to perform updates on dependent packages
-            var sourceRepository = new AggregateRepository(new[] { _sharedRepository, SourceRepository });
+            var sourceRepository = CreateProjectManagerSourceRepository();
 
             var projectManager = new ProjectManager(sourceRepository, PathResolver, projectSystem, repository);
 
@@ -850,6 +850,17 @@ namespace NuGet.VisualStudio {
                     }
                 }
             }
+        }
+
+        private IPackageRepository CreateProjectManagerSourceRepository() {
+            // The source repo for the project manager is the aggregate of the shared repo and the selected repo. 
+            // For dependency resolution, we want VS to look for packages in the selected source and then use the fallback logic
+            var fallbackRepository = SourceRepository as FallbackRepository;
+            if (fallbackRepository != null) {
+                var primaryRepositories = new[] { _sharedRepository, fallbackRepository.SourceRepository };
+                return new FallbackRepository(new AggregateRepository(primaryRepositories), fallbackRepository.DependencyResolver);
+            }
+            return new AggregateRepository(new[] { _sharedRepository, SourceRepository });
         }
 
         private IVersionSpec GetSafeRange(string packageId) {

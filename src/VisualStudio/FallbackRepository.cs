@@ -18,6 +18,10 @@ namespace NuGet.VisualStudio {
             get { return _primaryRepository.Source; }
         }
 
+        internal IPackageRepository SourceRepository {
+            get { return _primaryRepository; }
+        }
+
         internal IPackageRepository DependencyResolver {
             get { return _dependencyResolver; }
         }

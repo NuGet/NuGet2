@@ -44,7 +44,7 @@ namespace NuGet {
             if (repositories == null) {
                 throw new ArgumentNullException("repositories");
             }
-            _repositories = repositories;
+            _repositories = Flatten(repositories);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]
@@ -88,10 +88,9 @@ namespace NuGet {
             if (ResolveDependenciesVertically) {
                 Func<IPackageRepository, IPackage> resolveDependency = Wrap(r => r.ResolveDependency(dependency, constraintProvider));
 
-                var tasks = Repositories.Select(r => Task.Factory.StartNew(() => resolveDependency(r)))
-                                   .ToArray();
-                var completedTask = tasks.WhenAny(page => page != null);
-                return tasks.WhenAny(t => t != null);
+                return Repositories.Select(r => Task.Factory.StartNew(() => resolveDependency(r)))
+                                        .ToArray()
+                                        .WhenAny(package => package != null);
             }
             return this.ResolveDependencyCore(dependency, constraintProvider);
         }
@@ -130,6 +129,16 @@ namespace NuGet {
                                                 PackageEqualityComparer.IdAndVersion,
                                                 Logger,
                                                 IgnoreFailingRepositories);
+        }
+
+        internal static IEnumerable<IPackageRepository> Flatten(IEnumerable<IPackageRepository> repositories) {
+            return repositories.SelectMany(repository => {
+                var aggrgeateRepository = repository as AggregateRepository;
+                if (aggrgeateRepository != null) {
+                    return aggrgeateRepository.Repositories.ToArray();
+                }
+                return new[] { repository };
+            });
         }
     }
 }
