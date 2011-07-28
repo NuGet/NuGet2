@@ -95,6 +95,7 @@ namespace NuGet {
             return this.ResolveDependencyCore(dependency, constraintProvider);
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]
         private Func<IPackageRepository, T> Wrap<T>(Func<IPackageRepository, T> factory, T defaultValue = null) where T : class {
             if (IgnoreFailingRepositories) {
                 return repository => {
