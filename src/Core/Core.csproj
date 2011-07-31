@@ -54,6 +54,7 @@
     <Compile Include="Extensions\SettingsExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Extensions\VersionExtensions.cs" />
+    <Compile Include="ProjectSystem\IBatchProcessor.cs" />
     <Compile Include="Repositories\ISearchableRepository.cs" />
     <Compile Include="Server\PublishData.cs" />
     <Compile Include="Server\PackageServer.cs" />

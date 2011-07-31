@@ -2,10 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using NuGet.Resources;
 
 namespace NuGet {
     // REVIEW: Do we need this class? Should this logic be moved to ProjectManager?
@@ -13,25 +11,49 @@ namespace NuGet {
         public static void AddFiles(this IProjectSystem project,
                                     IEnumerable<IPackageFile> files,
                                     IDictionary<string, IPackageFileTransformer> fileTransformers) {
-            // BUG 636: We add the files with the longest path first so that vs picks up code behind files.
-            // This shouldn't matter for any other scenario.
-            foreach (IPackageFile file in files.OrderByDescending(p => p.Path)) {
-                IPackageFileTransformer transformer;
-                // Resolve the target path
-                string path = ResolvePath(project,
-                                          fileTransformers,
-                                          file.Path,
-                                          out transformer);
 
-                if (project.IsSupportedFile(path)) {
-                    // Try to get the package file modifier for the extension                
-                    if (transformer != null) {
-                        // If the transform was done then continue
-                        transformer.TransformFile(file, path, project);
+            // Convert files to a list
+            List<IPackageFile> fileList = files.ToList();
+
+            // See if the project system knows how to sort the files
+            var fileComparer = project as IComparer<IPackageFile>;
+
+            if (fileComparer != null) {
+                fileList.Sort(fileComparer);
+            }
+
+            var batchProcessor = project as IBatchProcessor<string>;
+
+            try {
+                if (batchProcessor != null) {
+                    var paths = fileList.Select(file => ResolvePath(project, fileTransformers, file.Path));
+                    batchProcessor.Begin(paths);
+                }
+
+                foreach (IPackageFile file in fileList) {
+                    IPackageFileTransformer transformer;
+
+                    // Resolve the target path
+                    string path = ResolveTargetPath(project,
+                                                    fileTransformers,
+                                                    file.Path,
+                                                    out transformer);
+
+                    if (project.IsSupportedFile(path)) {
+                        // Try to get the package file modifier for the extension                
+                        if (transformer != null) {
+                            // If the transform was done then continue
+                            transformer.TransformFile(file, path, project);
+                        }
+                        else {
+                            project.AddFileWithCheck(path, file.GetStream);
+                        }
                     }
-                    else {
-                        project.AddFileWithCheck(path, file.GetStream);
-                    }
+                }
+            }
+            finally {
+                if (batchProcessor != null) {
+                    batchProcessor.End();
                 }
             }
         }
@@ -45,7 +67,7 @@ namespace NuGet {
 
             IPackageFileTransformer transformer;
             // First get all directories that contain files
-            var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(ResolvePath(project, fileTransformers, p.Path, out transformer)));
+            var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(ResolveTargetPath(project, fileTransformers, p.Path, out transformer)));
 
 
             // Get all directories that this package may have added
@@ -61,39 +83,52 @@ namespace NuGet {
                 if (!project.DirectoryExists(directory)) {
                     continue;
                 }
+                var batchProcessor = project as IBatchProcessor<string>;
 
-                foreach (var file in directoryFiles) {
-                    // Resolve the path
-                    string path = ResolvePath(project,
-                                              fileTransformers,
-                                              file.Path,
-                                              out transformer);
+                try {
+                    if (batchProcessor != null) {
+                        var paths = directoryFiles.Select(file => ResolvePath(project, fileTransformers, file.Path));
+                        batchProcessor.Begin(paths);
+                    }
 
-                    if (project.IsSupportedFile(path)) {
-                        if (transformer != null) {
-                            var matchingFiles = from p in otherPackages
-                                                from otherFile in p.GetContentFiles()
-                                                where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
-                                                select otherFile;
+                    foreach (var file in directoryFiles) {                        
+                        // Resolve the path
+                        string path = ResolveTargetPath(project,
+                                                        fileTransformers,
+                                                        file.Path,
+                                                        out transformer);
 
-                            try {
-                                transformer.RevertFile(file, path, matchingFiles, project);
+                        if (project.IsSupportedFile(path)) {
+                            if (transformer != null) {
+                                var matchingFiles = from p in otherPackages
+                                                    from otherFile in p.GetContentFiles()
+                                                    where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
+                                                    select otherFile;
+
+                                try {
+                                    transformer.RevertFile(file, path, matchingFiles, project);
+                                }
+                                catch (Exception e) {
+                                    // Report a warning and move on
+                                    project.Logger.Log(MessageLevel.Warning, e.Message);
+                                }
                             }
-                            catch (Exception e) {
-                                // Report a warning and move on
-                                project.Logger.Log(MessageLevel.Warning, e.Message);
+                            else {
+                                project.DeleteFileSafe(path, file.GetStream);
                             }
-                        }
-                        else {
-                            project.DeleteFileSafe(path, file.GetStream);
                         }
                     }
-                }
 
-                // If the directory is empty then delete it
-                if (!project.GetFilesSafe(directory).Any() &&
-                    !project.GetDirectoriesSafe(directory).Any()) {
-                    project.DeleteDirectorySafe(directory, recursive: false);
+                    // If the directory is empty then delete it
+                    if (!project.GetFilesSafe(directory).Any() &&
+                        !project.GetDirectoriesSafe(directory).Any()) {
+                        project.DeleteDirectorySafe(directory, recursive: false);
+                    }
+                }
+                finally {
+                    if (batchProcessor != null) {
+                        batchProcessor.End();
+                    }
                 }
             }
         }
@@ -120,8 +155,26 @@ namespace NuGet {
 
         private static string ResolvePath(IProjectSystem projectSystem,
                                           IDictionary<string, IPackageFileTransformer> fileTransformers,
-                                          string path,
-                                          out IPackageFileTransformer transformer) {
+                                          string path) {
+            // Remove the content folder
+            path = RemoveContentDirectory(path);
+
+            // Try to get the package file modifier for the extension
+            string extension = Path.GetExtension(path);
+
+            IPackageFileTransformer transformer;
+            if (fileTransformers.TryGetValue(extension, out transformer)) {
+                // Remove the transformer extension (e.g. .pp, .transform)
+                path = RemoveExtension(path);
+            }
+
+            return path;
+        }
+
+        private static string ResolveTargetPath(IProjectSystem projectSystem,
+                                                IDictionary<string, IPackageFileTransformer> fileTransformers,
+                                                string path,
+                                                out IPackageFileTransformer transformer) {
             // Remove the content folder
             path = RemoveContentDirectory(path);
 

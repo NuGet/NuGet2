@@ -8,11 +8,13 @@ using EnvDTE;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
-    public class WebSiteProjectSystem : WebProjectSystem {
+    public class WebSiteProjectSystem : WebProjectSystem, IBatchProcessor<string> {
         private const string RootNamespace = "RootNamespace";
         private const string DefaultNamespace = "ASP";
         private const string AppCodeFolder = "App_Code";
         private const string GeneratedFilesFolder = "Generated___Files";
+
+        private readonly HashSet<string> _excludedCodeFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         private static readonly string[] _sourceFileExtensions = new[] { ".cs", ".vb" };
 
@@ -74,11 +76,33 @@ namespace NuGet.VisualStudio {
             return false;
         }
 
+        public void Begin(IEnumerable<string> batch) {
+            var files = batch.OrderBy(path => path)
+                             .ToList();
+
+            foreach (var path1 in files) {
+                foreach (var path2 in files) {
+                    if (path1.Equals(path2, StringComparison.OrdinalIgnoreCase)) {
+                        continue;
+                    }
+
+                    if (path1.StartsWith(path2, StringComparison.OrdinalIgnoreCase) &&
+                        IsSourceFile(path1)) {
+                        _excludedCodeFiles.Add(path1);
+                    }
+                }
+            }
+        }
+
+        public void End() {
+            _excludedCodeFiles.Clear();
+        }
+
         /// <summary>
         /// Determines if we need a source file to be under the App_Code folder
         /// </summary>
-        private static bool RequiresAppCodeRemapping(string path) {
-            return !IsUnderAppCode(path) && IsSourceFile(path);
+        private bool RequiresAppCodeRemapping(string path) {
+            return !_excludedCodeFiles.Contains(path) && !IsUnderAppCode(path) && IsSourceFile(path);
         }
 
         private static bool IsUnderAppCode(string path) {

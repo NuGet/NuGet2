@@ -417,6 +417,75 @@ function Test-WebSiteUninstallPackageWithNestedSourceFiles {
     Assert-Null (Get-ProjectItem $p App_Code)
 }
 
+function Test-WebSiteUninstallWithNestedAspxPPFiles {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-WebSite    
+    $files = @('About.aspx')
+    $p | Install-Package PackageWithNestedAspxPPFiles -Source $context.RepositoryRoot
+
+    $files | %{ 
+        $item = Get-ProjectItem $p $_
+        Assert-NotNull $item
+        $codeItem = Get-ProjectItem $p "$_.cs"
+        Assert-NotNull $codeItem
+    }
+
+    Assert-Package $p PackageWithNestedAspxPPFiles 1.0
+    Assert-SolutionPackage PackageWithNestedAspxPPFiles 1.0
+
+    # Act
+    $p | Uninstall-Package PackageWithNestedAspxPPFiles
+
+    # Assert
+    $files | %{ 
+        $item = Get-ProjectItem $p $_
+        Assert-Null $item
+        $codeItem = Get-ProjectItem $p "$_.cs"
+        Assert-Null $codeItem
+    }
+
+    Assert-Null (Get-ProjectPackage $p PackageWithNestedAspxPPFiles 1.0)
+    Assert-Null (Get-SolutionPackage PackageWithNestedAspxPPFiles 1.0)
+}
+
+function Test-WebsiteUninstallPackageWithNestedAspxFiles {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-WebSite    
+    $files = @('Global.asax', 'Site.master', 'About.aspx')
+    $p | Install-Package PackageWithNestedAspxFiles -Source $context.RepositoryRoot
+
+    $files | %{ 
+        $item = Get-ProjectItem $p $_
+        Assert-NotNull $item
+        $codeItem = Get-ProjectItem $p "$_.cs"
+        Assert-NotNull $codeItem
+    }
+
+    Assert-Package $p PackageWithNestedAspxFiles 1.0
+    Assert-SolutionPackage PackageWithNestedAspxFiles 1.0
+
+    # Act
+    $p | Uninstall-Package PackageWithNestedAspxFiles
+
+    # Assert
+    $files | %{ 
+        $item = Get-ProjectItem $p $_
+        Assert-Null $item
+        $codeItem = Get-ProjectItem $p "$_.cs"
+        Assert-Null $codeItem
+    }
+    Assert-Null (Get-ProjectPackage $p PackageWithNestedAspxFiles 1.0)
+    Assert-Null (Get-SolutionPackage PackageWithNestedAspxFiles 1.0)
+}
+
 function Test-WebSiteUninstallPackageWithNestedSourceFilesAndAnotherProject {
     param(
         $context

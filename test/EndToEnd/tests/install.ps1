@@ -1254,3 +1254,27 @@ function Test-SinglePackageInstallIntoSingleProjectWhenSolutionPathHasComma {
     Assert-SolutionPackage FakeItEasy
     Assert-SolutionPackage Castle.Core
 }
+
+function Test-WebsiteInstallPackageWithNestedAspxFilesShouldNotGoUnderAppCode {
+    param(
+        $context
+    )
+    # Arrange
+    $p = New-WebSite
+    
+    $files = @('Global.asax', 'Site.master', 'About.aspx')
+
+    # Act
+    $p | Install-Package PackageWithNestedAspxFiles -Source $context.RepositoryRoot
+
+    # Assert
+    $files | %{ 
+        $item = Get-ProjectItem $p $_
+        Assert-NotNull $item
+        $codeItem = Get-ProjectItem $p "$_.cs"
+        Assert-NotNull $codeItem
+    }
+
+    Assert-Package $p PackageWithNestedAspxFiles 1.0
+    Assert-SolutionPackage PackageWithNestedAspxFiles 1.0
+}

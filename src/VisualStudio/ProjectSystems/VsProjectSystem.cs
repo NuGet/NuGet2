@@ -15,7 +15,7 @@ using MsBuildProjectItem = Microsoft.Build.Evaluation.ProjectItem;
 using Project = EnvDTE.Project;
 
 namespace NuGet.VisualStudio {
-    public class VsProjectSystem : PhysicalFileSystem, IProjectSystem, IVsProjectSystem {
+    public class VsProjectSystem : PhysicalFileSystem, IProjectSystem, IVsProjectSystem, IComparer<IPackageFile> {
         private const string BinDir = "bin";
         private static readonly string[] AssemblyReferencesExtensions = new[] { ".dll", ".exe" };
 
@@ -123,7 +123,7 @@ namespace NuGet.VisualStudio {
 
                 string assemblyPath = fullPath;
                 bool usedTempFile = false;
-                
+
                 // There is a bug in Visual Studio whereby if the fullPath contains a comma, 
                 // then calling Project.Object.References.Add() on it will throw a COM exception.
                 // To work around it, we copy the assembly into temp folder and add reference to the copied assembly
@@ -141,7 +141,7 @@ namespace NuGet.VisualStudio {
                 if (usedTempFile) {
                     try {
                         File.Delete(assemblyPath);
-                    } 
+                    }
                     catch {
                         // don't care if we fail to delete a temp file
                     }
@@ -281,6 +281,26 @@ namespace NuGet.VisualStudio {
                 // If the property doesn't exist this will throw an argument exception
             }
             return null;
+        }
+
+        public int Compare(IPackageFile x, IPackageFile y) {
+            // BUG 636: We sort files so that they are added in the correct order
+            // e.g aspx before aspx.cs
+
+            if (x.Path.Equals(y.Path, StringComparison.OrdinalIgnoreCase)) {
+                return 0;
+            }
+
+            // Add files tht are prefixes of other files first
+            if (x.Path.StartsWith(y.Path, StringComparison.OrdinalIgnoreCase)) {
+                return -1;
+            }
+
+            if (y.Path.StartsWith(x.Path, StringComparison.OrdinalIgnoreCase)) {
+                return 1;
+            }
+
+            return y.Path.CompareTo(x.Path);
         }
 
         public virtual bool IsSupportedFile(string path) {
