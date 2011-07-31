@@ -71,10 +71,6 @@ namespace NuGet.PowerShell.Commands {
         [ValidateNotNullOrEmpty]
         public string ProjectName { get; set; }
 
-        [Parameter(ValueFromPipelineByPropertyName = true, ParameterSetName = "Remote")]
-        [ValidateNotNullOrEmpty]
-        public string TargetFramework { get; set; }
-
         [Parameter(Mandatory = true, ParameterSetName = "Remote")]
         [Alias("Online", "Remote")]
         public SwitchParameter ListAvailable { get; set; }
@@ -236,13 +232,11 @@ namespace NuGet.PowerShell.Commands {
         protected virtual IQueryable<IPackage> GetPackages(IPackageRepository sourceRepository) {
             IQueryable<IPackage> packages = null;
 
-            var targetFrameworks = String.IsNullOrEmpty(TargetFramework) ? Enumerable.Empty<string>() : new[] { TargetFramework };
-
             if (String.IsNullOrEmpty(Filter)) {
-                packages = sourceRepository.GetPackages(targetFrameworks);
+                packages = sourceRepository.GetPackages();
             }
             else {
-                packages = sourceRepository.Search(Filter, targetFrameworks);
+                packages = sourceRepository.Search(Filter);
             }
 
             // for recent packages, we want to order by last installed first instead of Id
