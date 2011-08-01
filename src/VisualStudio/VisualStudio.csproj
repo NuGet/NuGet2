@@ -17,6 +17,7 @@
     <Compile Include="ActivityLogEntryType.cs" />
     <Compile Include="ExceptionHelper.cs" />
     <Compile Include="Extensibility\IVsPackageMetadata.cs" />
+    <Compile Include="Extensibility\VsPackageEventHandler.cs" />
     <Compile Include="Extensibility\VsPackageMetadata.cs" />
     <Compile Include="FallbackRepository.cs" />
     <Compile Include="IOptionsPageActivator.cs" />

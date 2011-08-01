@@ -5,13 +5,13 @@ namespace NuGet.VisualStudio {
     [Export(typeof(IVsPackageInstallerEvents))]
     [Export(typeof(VsPackageInstallerEvents))]
     public class VsPackageInstallerEvents : IVsPackageInstallerEvents {
-        public event Action<IVsPackageMetadata> PackageInstalled;
-
-        public event Action<IVsPackageMetadata> PackageUninstalling;
-
-        public event Action<IVsPackageMetadata> PackageInstalling;
-
-        public event Action<IVsPackageMetadata> PackageUninstalled;
+        public event VsPackageEventHandler PackageInstalled;
+                     
+        public event VsPackageEventHandler PackageUninstalling;
+                     
+        public event VsPackageEventHandler PackageInstalling;
+                     
+        public event VsPackageEventHandler PackageUninstalled;
 
         internal void NotifyInstalling(PackageOperationEventArgs e) {
             if (PackageInstalling != null) {
