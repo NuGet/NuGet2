@@ -76,7 +76,7 @@ namespace NuGet.VisualStudio {
             return false;
         }
 
-        public void Begin(IEnumerable<string> batch) {
+        public void BeginProcessing(IEnumerable<string> batch) {
             var files = batch.OrderBy(path => path)
                              .ToList();
 
@@ -94,7 +94,7 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        public void End() {
+        public void EndProcessing() {
             _excludedCodeFiles.Clear();
         }
 

@@ -26,8 +26,8 @@ namespace NuGet {
 
             try {
                 if (batchProcessor != null) {
-                    var paths = fileList.Select(file => ResolvePath(project, fileTransformers, file.Path));
-                    batchProcessor.Begin(paths);
+                    var paths = fileList.Select(file => ResolvePath(fileTransformers, file.Path));
+                    batchProcessor.BeginProcessing(paths);
                 }
 
                 foreach (IPackageFile file in fileList) {
@@ -53,7 +53,7 @@ namespace NuGet {
             }
             finally {
                 if (batchProcessor != null) {
-                    batchProcessor.End();
+                    batchProcessor.EndProcessing();
                 }
             }
         }
@@ -87,8 +87,8 @@ namespace NuGet {
 
                 try {
                     if (batchProcessor != null) {
-                        var paths = directoryFiles.Select(file => ResolvePath(project, fileTransformers, file.Path));
-                        batchProcessor.Begin(paths);
+                        var paths = directoryFiles.Select(file => ResolvePath(fileTransformers, file.Path));
+                        batchProcessor.BeginProcessing(paths);
                     }
 
                     foreach (var file in directoryFiles) {                        
@@ -127,7 +127,7 @@ namespace NuGet {
                 }
                 finally {
                     if (batchProcessor != null) {
-                        batchProcessor.End();
+                        batchProcessor.EndProcessing();
                     }
                 }
             }
@@ -153,9 +153,7 @@ namespace NuGet {
             return Enumerable.Empty<T>();
         }
 
-        private static string ResolvePath(IProjectSystem projectSystem,
-                                          IDictionary<string, IPackageFileTransformer> fileTransformers,
-                                          string path) {
+        private static string ResolvePath(IDictionary<string, IPackageFileTransformer> fileTransformers, string path) {
             // Remove the content folder
             path = RemoveContentDirectory(path);
 
