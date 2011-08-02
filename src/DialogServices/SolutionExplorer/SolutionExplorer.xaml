@@ -22,9 +22,9 @@
     d:DesignHeight="300" d:DesignWidth="300">
     
     <Window.Resources>
-        <BitmapImage x:Key="OpenFolderImage" UriSource="/NuGet.Dialog;component/SolutionExplorer/Images/folderopen.png" />
-        <BitmapImage x:Key="CloseFolderImage" UriSource="/NuGet.Dialog;component/SolutionExplorer/Images/folderclose.png" />
-        <BitmapImage x:Key="SolutionImage" UriSource="/NuGet.Dialog;component/SolutionExplorer/Images/solution.png" />
+        <BitmapImage x:Key="OpenFolderImage" UriSource="/NuGet.DialogServices;component/SolutionExplorer/Images/folderopen.png" />
+        <BitmapImage x:Key="CloseFolderImage" UriSource="/NuGet.DialogServices;component/SolutionExplorer/Images/folderclose.png" />
+        <BitmapImage x:Key="SolutionImage" UriSource="/NuGet.DialogServices;component/SolutionExplorer/Images/solution.png" />
         
         <local:ProjectToIconConverter x:Key="ProjectToIconConverter" />
         
