@@ -66,15 +66,15 @@ namespace NuGet.Dialog.Test {
 
             IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
             MockTreeNode baseTreeNode = new MockTreeNode(
-                parentTreeNode, 
-                provider, 
-                new [] {
+                parentTreeNode,
+                provider,
+                new[] {
                     PackageUtility.CreatePackage("Azo", "1.0"),
                     PackageUtility.CreatePackage("Azo", "2.0"),
                     PackageUtility.CreatePackage("B", "3.0"),
                     PackageUtility.CreatePackage("B", "4.0"),
                     PackageUtility.CreatePackage("C", "5.0"),
-                }, 
+                },
                 collapseVersions: false
             );
 

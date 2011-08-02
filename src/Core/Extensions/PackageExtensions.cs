@@ -53,7 +53,7 @@ namespace NuGet {
             return package.FrameworkAssemblies
                           .SelectMany(a => a.SupportedFrameworks)
                           .Concat(package.AssemblyReferences.SelectMany(a => a.SupportedFrameworks))
-                          .Distinct(); 
+                          .Distinct();
         }
 
         /// <summary>

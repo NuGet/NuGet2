@@ -7,7 +7,7 @@ namespace NuGet {
 
         public string AltName { get; set; }
         public string DescriptionResourceName { get; private set; }
-        
+
         public string Description {
             get {
                 if (ResourceType != null && !String.IsNullOrEmpty(DescriptionResourceName)) {

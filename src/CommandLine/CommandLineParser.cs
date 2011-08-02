@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using NuGet.Common;
 
 namespace NuGet {
     public class CommandLineParser {

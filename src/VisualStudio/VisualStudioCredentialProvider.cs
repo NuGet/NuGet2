@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuGet.VisualStudio {
-    public abstract class VisualStudioCredentialProvider: ICredentialProvider {
+    public abstract class VisualStudioCredentialProvider : ICredentialProvider {
         private IVsWebProxy _webProxyService;
 
         public VisualStudioCredentialProvider()
@@ -99,9 +99,9 @@ namespace NuGet.VisualStudio {
         /// <param name="uri"></param>
         /// <param name="forcePrompt"></param>
         /// <returns></returns>
-        private Tuple<CredentialState,ICredentials> GetCredentials(Uri uri, bool forcePrompt) {
-            __VsWebProxyState oldState = forcePrompt 
-                                             ? __VsWebProxyState.VsWebProxyState_PromptForCredentials 
+        private Tuple<CredentialState, ICredentials> GetCredentials(Uri uri, bool forcePrompt) {
+            __VsWebProxyState oldState = forcePrompt
+                                             ? __VsWebProxyState.VsWebProxyState_PromptForCredentials
                                              : __VsWebProxyState.VsWebProxyState_DefaultCredentials;
             var newState = (uint)__VsWebProxyState.VsWebProxyState_NoCredentials;
             int result = 0;

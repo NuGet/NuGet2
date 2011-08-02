@@ -33,7 +33,7 @@ namespace NuGet {
             _query = context.CreateQuery<T>(entitySetName);
             Expression = Expression.Constant(this);
         }
-        
+
         public SmartDataServiceQuery(IDataServiceContext context, IDataServiceQuery query) {
             if (context == null) {
                 throw new ArgumentNullException("context");

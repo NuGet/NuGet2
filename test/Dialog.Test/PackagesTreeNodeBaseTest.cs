@@ -261,8 +261,8 @@ namespace NuGet.Dialog.Test {
                     PackageUtility.CreatePackage("B", "1.0",rating:2),
                     PackageUtility.CreatePackage("B", "2.0",rating:2),
                     PackageUtility.CreatePackage("C", "4.0",rating:2.3)
-                }, 
-                parentTreeNode: null, 
+                },
+                parentTreeNode: null,
                 collapseVersions: false);
 
             // Act

@@ -8,8 +8,8 @@ using NuGet.Common;
 
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "install", "InstallCommandDescription",
-        MinArgs = 1, MaxArgs = 1, UsageSummaryResourceName = "InstallCommandUsageSummary", 
-        UsageDescriptionResourceName = "InstallCommandUsageDescription", 
+        MinArgs = 1, MaxArgs = 1, UsageSummaryResourceName = "InstallCommandUsageSummary",
+        UsageDescriptionResourceName = "InstallCommandUsageDescription",
         UsageExampleResourceName = "InstallCommandUsageExamples")]
     public class InstallCommand : Command {
         private readonly List<string> _sources = new List<string>();

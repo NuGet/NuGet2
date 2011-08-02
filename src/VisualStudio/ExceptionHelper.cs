@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using Microsoft.VisualStudio.Shell;
 
 namespace NuGet.VisualStudio {

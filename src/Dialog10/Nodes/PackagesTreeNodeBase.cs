@@ -217,7 +217,7 @@ namespace NuGet.Dialog.Providers {
         public void LoadPage(int pageNumber) {
             if (pageNumber < 1) {
                 throw new ArgumentOutOfRangeException(
-                    "pageNumber", 
+                    "pageNumber",
                     String.Format(CultureInfo.CurrentCulture, CommonResources.Argument_Must_Be_GreaterThanOrEqualTo, 1));
             }
 

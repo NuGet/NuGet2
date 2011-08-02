@@ -70,8 +70,10 @@ namespace NuGet {
             var files = Directory.EnumerateFiles(basePathToEnumerate, "*.*", searchOption);
             return from file in files
                    where searchRegex.IsMatch(file)
-                   select new PhysicalPackageFile { SourcePath = file,
-                                                    TargetPath = ResolvePackagePath(basePathToEnumerate, searchPath, file, targetPath) };
+                   select new PhysicalPackageFile {
+                       SourcePath = file,
+                       TargetPath = ResolvePackagePath(basePathToEnumerate, searchPath, file, targetPath)
+                   };
         }
 
         internal static string GetPathToEnumerateFrom(string basePath, string searchPath) {
@@ -109,7 +111,7 @@ namespace NuGet {
             string packagePath;
             bool isWildcardSearch = IsWildcardSearch(searchPattern);
             bool isRecursiveWildcardSearch = isWildcardSearch && searchPattern.IndexOf("**", StringComparison.OrdinalIgnoreCase) != -1;
-            
+
             if (isRecursiveWildcardSearch && fullPath.StartsWith(searchDirectory, StringComparison.OrdinalIgnoreCase)) {
                 // The search pattern is recursive. Preserve the non-wildcard portion of the path.
                 // e.g. Search: X:\foo\**\*.cs results in SearchDirectory: X:\foo and a file path of X:\foo\bar\biz\boz.cs

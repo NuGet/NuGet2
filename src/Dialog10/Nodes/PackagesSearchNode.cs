@@ -53,7 +53,7 @@ namespace NuGet.Dialog.Providers {
             if (simpleNode != null) {
                 return simpleNode.Repository.Search(_searchText, Provider.SupportedFrameworks);
             }
-            
+
             return _baseNode.GetPackages().Find(_searchText);
         }
     }

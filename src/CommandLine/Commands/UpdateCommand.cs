@@ -8,7 +8,7 @@ using NuGet.Common;
 
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "update", "UpdateCommandDescription", UsageSummary = "<packages.config|solution>",
-        UsageExampleResourceName="UpdateCommandUsageExamples")]
+        UsageExampleResourceName = "UpdateCommandUsageExamples")]
     public class UpdateCommand : Command {
         private const string NuGetCommandLinePackageId = "NuGet.CommandLine";
         private const string NuGetExe = "NuGet.exe";
@@ -75,7 +75,7 @@ namespace NuGet.Commands {
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage ("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void UpdateAllPackages(string solutionDir) {
             Console.WriteLine(NuGetResources.ScanningForProjects);
 
@@ -118,10 +118,11 @@ namespace NuGet.Commands {
             IMSBuildProjectSystem msBuildProjectSystem = null;
             try {
                 msBuildProjectSystem = GetMSBuildProject(packagesConfigPath);
-            } catch (CommandLineException) {
+            }
+            catch (CommandLineException) {
 
             }
-            return new ProjectPair { 
+            return new ProjectPair {
                 PackagesConfigPath = packagesConfigPath,
                 Project = msBuildProjectSystem
             };

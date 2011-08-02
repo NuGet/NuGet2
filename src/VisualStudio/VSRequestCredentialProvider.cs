@@ -2,7 +2,7 @@
 using System.Net;
 
 namespace NuGet.VisualStudio {
-    public class VSRequestCredentialProvider: VisualStudioCredentialProvider {
+    public class VSRequestCredentialProvider : VisualStudioCredentialProvider {
         protected override void InitializeCredentialProxy(Uri uri, IWebProxy originalProxy) {
             WebRequest.DefaultWebProxy = new WebProxy(uri);
         }
@@ -24,7 +24,7 @@ namespace NuGet.VisualStudio {
                 // and return false otherwise it might be a server error
                 // and we don't want to be responsible for handling those errors here.
                 var webResponse = webException.Response as HttpWebResponse;
-                if (webException.Status == WebExceptionStatus.ReceiveFailure 
+                if (webException.Status == WebExceptionStatus.ReceiveFailure
                     || (webResponse != null && webResponse.StatusCode == HttpStatusCode.Unauthorized)) {
                     return false;
                 }

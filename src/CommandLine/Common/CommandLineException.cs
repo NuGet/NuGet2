@@ -9,11 +9,11 @@ namespace NuGet {
         }
 
         public CommandLineException(string message)
-            : base(message) { 
+            : base(message) {
         }
 
         public CommandLineException(string format, params object[] args)
-            : base(String.Format(CultureInfo.CurrentCulture, format, args)) { 
+            : base(String.Format(CultureInfo.CurrentCulture, format, args)) {
         }
 
         public CommandLineException(string message, Exception exception)

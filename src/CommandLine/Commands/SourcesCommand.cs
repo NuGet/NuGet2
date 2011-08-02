@@ -6,15 +6,15 @@ using NuGet.Common;
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "sources", "SourcesCommandDescription", UsageSummaryResourceName = "SourcesCommandUsageSummary",
         MinArgs = 0, MaxArgs = 1)]
-    public class SourcesCommand: Command {
+    public class SourcesCommand : Command {
 
         [Option(typeof(NuGetResources), "SourcesCommandNameDescription")]
         public string Name { get; set; }
 
         [Option(typeof(NuGetResources), "SourcesCommandSourceDescription", AltName = "src")]
-        public string Source { get;set; }
+        public string Source { get; set; }
 
-        public IPackageSourceProvider SourceProvider { get;private set; }
+        public IPackageSourceProvider SourceProvider { get; private set; }
 
         [ImportingConstructor]
         public SourcesCommand(IPackageSourceProvider sourceProvider) {

@@ -278,7 +278,7 @@ namespace NuGet.VisualStudio.Test {
             var primaryRepository = new MockPackageRepository();
             primaryRepository.AddPackage(package);
             var fallbackRepository = new FallbackRepository(primaryRepository, dependencyResolver.Object);
-            
+
             // Act
             var resolvedPackage = fallbackRepository.ResolveDependency(new PackageDependency("M1"));
 

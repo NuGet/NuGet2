@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Microsoft.VisualStudio.ExtensionsExplorer;
-using System.Collections;
 
 namespace NuGet.Dialog.Providers {
     /// <summary>

@@ -5,7 +5,7 @@ using System.Linq;
 using NuGet.Common;
 
 namespace NuGet.Commands {
-    [Command(typeof(NuGetResources), "spec", "SpecCommandDescription", MaxArgs = 1, 
+    [Command(typeof(NuGetResources), "spec", "SpecCommandDescription", MaxArgs = 1,
             UsageSummaryResourceName = "SpecCommandUsageSummary", UsageExampleResourceName = "SpecCommandUsageExamples")]
     public class SpecCommand : Command {
         [Option(typeof(NuGetResources), "SpecCommandAssemblyPathDescription")]

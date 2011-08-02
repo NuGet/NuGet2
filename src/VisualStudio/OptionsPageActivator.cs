@@ -38,10 +38,12 @@ namespace NuGet.VisualStudio {
         public void ActivatePage(OptionsPage page, Action closeCallback) {
             _closeCallback = closeCallback;
             if (page == OptionsPage.General) {
-                ShowOptionsPage(_generalGUID);                
-            } else if (page == OptionsPage.PackageSources) {
+                ShowOptionsPage(_generalGUID);
+            }
+            else if (page == OptionsPage.PackageSources) {
                 ShowOptionsPage(_packageSourcesGUID);
-            } else {
+            }
+            else {
                 throw new ArgumentOutOfRangeException("page");
             }
         }

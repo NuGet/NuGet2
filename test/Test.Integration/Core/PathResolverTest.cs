@@ -756,7 +756,7 @@ namespace NuGet.Test.Integration.PathResolver {
 
             // Act
             var package = new PackageBuilder(manifest, root);
-            
+
             // Assert
             Assert.AreEqual(1, package.Files.Count);
             Assert.AreEqual(@"lib\foo.dll\baz.dll", package.Files.First().Path);
@@ -837,7 +837,7 @@ namespace NuGet.Test.Integration.PathResolver {
                                                     new Dir("NuGet.Server",
                                                         new File("NuGet.Server.dll"),
                                                         new File("NuGet.Core.dll")))));
-            
+
             string search = Path.Combine(root, @"output\**\*.dll");
             string target = @"lib";
             Stream manifest = GetManifest(search, target);
@@ -864,7 +864,7 @@ namespace NuGet.Test.Integration.PathResolver {
             string root = CreateFileSystem(new Dir("properties"),
                                            new Dir("bin",
                                                new Dir("release", new File("baz.dll"))));
-                                            
+
             string searchPath = @"..\bin\release\*.dll";
             string target = @"lib";
             Stream manifest = GetManifest(searchPath, target);
@@ -918,7 +918,7 @@ namespace NuGet.Test.Integration.PathResolver {
                                                 new Dir("nuspec")),
                                            new Dir("bin",
                                                new File("Output.dll"),
-                                               new Dir("release", 
+                                               new Dir("release",
                                                    new File("baz.dll"))));
 
             string searchPath = @"..\..\bin\**\*.dll";
@@ -965,7 +965,7 @@ namespace NuGet.Test.Integration.PathResolver {
             // Assert
             Assert.AreEqual(1, package.Files.Count);
             Assert.AreEqual(@"lib\foo.dll", package.Files.First().Path);
-            
+
             // Verify that we picked up the right file
             var actualContents = package.Files.First().GetStream().ReadToEnd();
             Assert.AreEqual(expectedContent, actualContents);
@@ -976,10 +976,10 @@ namespace NuGet.Test.Integration.PathResolver {
             // Arrange
             var root = CreateExclusionProject();
             var manifest = GetExclusionManifest(@"**\*.*", "", @"**\*.pdb");
- 
+
             // Act
             var package = new PackageBuilder(manifest, root);
-            
+
             // Assert
             Assert.AreEqual(6, package.Files.Count);
             Assert.AreEqual("Main.cs", package.Files[0].Path);

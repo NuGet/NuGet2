@@ -249,7 +249,7 @@ namespace NuGet.Test {
             mockRepository.Setup(c => c.GetPackages()).Throws(new InvalidOperationException()).Verifiable();
             var mockRepoWithLookup = new Mock<IPackageRepository>();
             mockRepository.As<IDependencyResolver>().Setup(c => c.ResolveDependency(It.IsAny<PackageDependency>(), It.IsAny<IPackageConstraintProvider>()));
-                                                    
+
             var repository = new AggregateRepository(new[] { 
                 new MockPackageRepository { 
                     PackageUtility.CreatePackage("A"), 

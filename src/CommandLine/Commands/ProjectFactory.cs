@@ -108,7 +108,7 @@ namespace NuGet.Commands {
             _properties.Clear();
             _properties.Add("Id", builder.Id);
             _properties.Add("Version", builder.Version.ToString());
-            
+
             if (!String.IsNullOrEmpty(builder.Title)) {
                 _properties.Add("Title", builder.Title);
             }

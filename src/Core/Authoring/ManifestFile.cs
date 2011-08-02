@@ -36,5 +36,5 @@ namespace NuGet {
                 yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_ExcludeContainsInvalidCharacters, Exclude));
             }
         }
-     }
- }
+    }
+}

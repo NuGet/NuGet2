@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using Microsoft.Internal.Web.Utils;
-using NuGet.Common;
 
 namespace NuGet {
     public static class ResourceHelper {

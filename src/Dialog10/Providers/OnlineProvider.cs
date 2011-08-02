@@ -6,7 +6,6 @@ using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.VisualStudio;
-using NuGetConsole.Host.PowerShellProvider;
 
 namespace NuGet.Dialog.Providers {
     /// <summary>

@@ -100,7 +100,7 @@ namespace NuGet.Test {
         public void ResolveDependenciesForInstallPackageResolvesDependencyWithConstraintsUsingDependencyResolver() {
             // Arrange            
             var packageDependency = new PackageDependency("B", new VersionSpec { MinVersion = new Version("1.1") });
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", 
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> { packageDependency });
             IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0");
             IPackage packageB12 = PackageUtility.CreatePackage("B", "1.2");

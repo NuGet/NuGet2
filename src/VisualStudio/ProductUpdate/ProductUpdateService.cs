@@ -136,7 +136,7 @@ namespace NuGet.VisualStudio {
                 if (times < 10) {
                     timer.Tag = times + 1;
                     timer.Start();
-                } 
+                }
                 else {
                     // assume the Extension Manager dialog is not available, open the visual studio gallery page of nuget
                     const string NuGetGalleryPage = "http://go.microsoft.com/fwlink/?LinkID=223391";

@@ -162,7 +162,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                         _currentWindow.ForceClose();
                     }
                 }
-            } 
+            }
             else {
                 CloseTimer.Tag = hideOnly;
                 // otherwise, set a timer so that we close it after it has been shown for 500ms

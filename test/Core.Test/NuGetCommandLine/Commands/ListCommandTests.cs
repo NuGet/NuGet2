@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -61,7 +60,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             cmd.Source.Add(DefaultRepoUrl);
             cmd.Console = console;
             cmd.Arguments.Add("SearchPackage");
-             
+
 
             // Act
             var packages = cmd.GetPackages();

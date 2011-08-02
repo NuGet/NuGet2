@@ -86,7 +86,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             Assert.AreEqual(@"tools\NuGet.exe", updateCmd.UpdatedFiles[@"c:\NuGet.exe"]);
         }
 
-        
+
         private ConsoleInfo GetConsoleInfo() {
             var lines = new List<string>();
             var console = new Mock<IConsole>();

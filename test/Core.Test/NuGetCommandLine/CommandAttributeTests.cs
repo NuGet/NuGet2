@@ -81,8 +81,8 @@ namespace NuGet.Test.NuGetCommandLine {
 
 
         public class MockResourceType {
-            public static string ResourceName { 
-                get { return "This is a Resource String."; } 
+            public static string ResourceName {
+                get { return "This is a Resource String."; }
             }
         }
     }

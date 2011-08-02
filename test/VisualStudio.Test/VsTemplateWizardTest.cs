@@ -44,7 +44,7 @@ namespace NuGet.VisualStudio.Test {
         public void GetConfigurationFromXmlDocument_WorksWithMissingWizardDataElement() {
             // Arrange
             var document = new XDocument(new XElement(VSTemplateNamespace + "VSTemplate"));
-            var wizard = new VsTemplateWizard(null); 
+            var wizard = new VsTemplateWizard(null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -61,7 +61,7 @@ namespace NuGet.VisualStudio.Test {
                 new XElement(VSTemplateNamespace + "VSTemplate",
                     new XElement(VSTemplateNamespace + "WizardData")
                     ));
-            var wizard = new VsTemplateWizard(null); 
+            var wizard = new VsTemplateWizard(null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -75,7 +75,7 @@ namespace NuGet.VisualStudio.Test {
         public void GetConfigurationFromXmlDocument_WorksWithEmptyPackagesElement() {
             // Arrange
             var document = BuildDocument(null);
-            var wizard = new VsTemplateWizard(null); 
+            var wizard = new VsTemplateWizard(null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -203,7 +203,7 @@ namespace NuGet.VisualStudio.Test {
 
         private static void VerifyParsedPackages(XDocument document, IEnumerable<VsTemplateWizardPackageInfo> expectedPackages) {
             // Arrange
-            var wizard = new VsTemplateWizard(null); 
+            var wizard = new VsTemplateWizard(null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -299,9 +299,9 @@ namespace NuGet.VisualStudio.Test {
             var document = new XDocument(new XElement("VSTemplate"));
             string path = null;
             var wizard = new TestableVsTemplateWizard(loadDocumentCallback: p => {
-                                                                                path = p;
-                                                                                return document;
-                                                                            });
+                path = p;
+                return document;
+            });
             var dte = new Mock<DTE>().Object;
 
             // Act

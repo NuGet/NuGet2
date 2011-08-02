@@ -3,8 +3,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NuGet.Dialog;
-using NuGet.Dialog.Providers;
 
 namespace NuGet.Dialog.Test {
     [TestClass]
@@ -17,7 +15,7 @@ namespace NuGet.Dialog.Test {
             }).AsQueryable();
 
             // Act
-            var result = list.SortBy(new [] { "Id" }, ListSortDirection.Ascending);
+            var result = list.SortBy(new[] { "Id" }, ListSortDirection.Ascending);
 
             // Assert
             Assert.AreEqual(result.ElementAt(0).Id, "A");
@@ -33,7 +31,7 @@ namespace NuGet.Dialog.Test {
             }).AsQueryable();
 
             // Act
-            var result = list.SortBy(new [] { "Id" }, ListSortDirection.Descending);
+            var result = list.SortBy(new[] { "Id" }, ListSortDirection.Descending);
 
             // Assert
             Assert.AreEqual(result.ElementAt(0).Id, "C");

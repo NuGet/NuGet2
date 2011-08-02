@@ -50,7 +50,7 @@ namespace NuGet.MSBuild {
                     source = NuGetConstants.DefaultGalleryServerUrl;
                     pushSymbols = true;
                 }
-            }   
+            }
 
             var fileSystem = _fileSystemProvider.CreateFileSystem(Path.GetDirectoryName(PackagePath));
             if (!fileSystem.FileExists(PackagePath)) {

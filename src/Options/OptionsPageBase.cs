@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.VisualStudio.Shell;
 using NuGet.VisualStudio;
-using System.Runtime.InteropServices;
 
 namespace NuGet.Options {
     [ComVisible(true)]
@@ -11,13 +11,13 @@ namespace NuGet.Options {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Mobility", 
+            "Microsoft.Mobility",
             "CA1601:DoNotUseTimersThatPreventPowerStateChanges",
-            Justification="This is a ridiculous rule.")]
+            Justification = "This is a ridiculous rule.")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Reliability", 
+            "Microsoft.Reliability",
             "CA2000:Dispose objects before losing scope",
-            Justification="The timer is disposed in the Tick event handler.")]
+            Justification = "The timer is disposed in the Tick event handler.")]
         protected override void OnClosed(EventArgs e) {
             base.OnClosed(e);
 

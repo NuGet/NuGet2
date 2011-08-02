@@ -125,7 +125,7 @@ namespace NuGet.Dialog.Providers {
                     ThrowOnConflicts = false
                 };
             IList<PackageOperation> operations = uninstallWalker.ResolveOperations(package).ToList();
-        
+
             var uninstallPackageNames = (from o in operations
                                          where o.Action == PackageAction.Uninstall && !PackageEqualityComparer.IdAndVersion.Equals(o.Package, package)
                                          select o.Package.ToString()).ToList();

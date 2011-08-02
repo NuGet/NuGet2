@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using NuGet.Dialog.Providers;
 
 namespace NuGet.Dialog {
     public static class QueryExtensions {

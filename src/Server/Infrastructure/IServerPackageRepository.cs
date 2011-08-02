@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using NuGet.Server.DataServices;
 
 namespace NuGet.Server.Infrastructure {

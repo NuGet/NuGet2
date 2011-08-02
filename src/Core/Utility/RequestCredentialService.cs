@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 
 namespace NuGet {
-    public class RequestCredentialService: IRequestCredentialService {
+    public class RequestCredentialService : IRequestCredentialService {
         ///// <summary>
         ///// Local cache of registered proxy providers to use when locating a valid proxy
         ///// to use for the given Uri.

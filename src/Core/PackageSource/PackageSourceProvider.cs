@@ -9,7 +9,7 @@ namespace NuGet {
 
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly PackageSourceProvider Default = new PackageSourceProvider(Settings.UserSettings);
-        
+
         private readonly ISettings _settingsManager;
         private readonly IEnumerable<PackageSource> _defaultPackageSources;
 

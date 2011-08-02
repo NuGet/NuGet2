@@ -169,7 +169,7 @@ namespace NuGet {
                 throw new ArgumentNullException("targetFrameworks");
             }
 
-            var searchableRepository = repository as ISearchableRepository;            
+            var searchableRepository = repository as ISearchableRepository;
             if (searchableRepository != null) {
                 return searchableRepository.Search(searchTerm, targetFrameworks);
             }

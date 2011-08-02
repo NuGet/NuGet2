@@ -6,7 +6,6 @@ using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
-using NuGetConsole.Host.PowerShellProvider;
 
 namespace NuGet.Dialog.Providers {
     /// <summary>
@@ -96,16 +95,16 @@ namespace NuGet.Dialog.Providers {
             // in some rare cases, the project instance returned by GetProjects() may be different 
             // than the ones in selectedProjectSet.
             var selectedProjectsSet = new HashSet<string>(
-                selectedProjects.Select(p => p.UniqueName), 
+                selectedProjects.Select(p => p.UniqueName),
                 StringComparer.OrdinalIgnoreCase);
 
             // now determine if user has actually made any change to the checkboxes
             IList<Project> allProjects = _solutionManager.GetProjects().ToList();
-            
-            bool hasInstallWork = allProjects.Any(p => 
+
+            bool hasInstallWork = allProjects.Any(p =>
                 selectedProjectsSet.Contains(p.UniqueName) && !IsPackageInstalledInProject(p, package));
 
-            bool hasUninstallWork = allProjects.Any(p => 
+            bool hasUninstallWork = allProjects.Any(p =>
                 !selectedProjectsSet.Contains(p.UniqueName) && IsPackageInstalledInProject(p, package));
 
             if (!hasInstallWork && !hasUninstallWork) {

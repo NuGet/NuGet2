@@ -214,7 +214,7 @@ namespace NuGet.Commands {
                 ExcludeFilesForLibPackage(packageBuilder.Files);
 
                 if (!packageBuilder.Files.Any()) {
-                    throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageCommandNoFilesForLibPackage, 
+                    throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageCommandNoFilesForLibPackage,
                         path, CommandLineConstants.NuGetDocs));
                 }
             }

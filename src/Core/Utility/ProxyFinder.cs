@@ -107,7 +107,7 @@ namespace NuGet {
                     }
                 }
             }
-            
+
             return result;
         }
 

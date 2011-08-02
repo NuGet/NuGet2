@@ -710,7 +710,7 @@ public class Cl_{0} {{
             Assert.IsFalse(File.Exists(expectedPackage));
         }
 
-        
+
         [TestMethod]
         public void PackCommandAllowsPassingPropertiesFromCommandLine() {
             // Arrange            
@@ -739,7 +739,7 @@ public class Cl_{0} {{
             Assert.AreEqual("foo", package.Id);
             Assert.AreEqual(new Version("1.1"), package.Version);
             Assert.AreEqual("Auth", package.Authors.First());
-            Assert.AreEqual("Desc", package.Description);            
+            Assert.AreEqual("Desc", package.Description);
         }
 
         [TestMethod]

@@ -161,7 +161,7 @@ namespace NuGet {
                     RequireLicenseAcceptance = metadata.RequireLicenseAcceptance,
                     Description = metadata.Description.SafeTrim(),
                     Summary = metadata.Summary.SafeTrim(),
-                    ReleaseNotes = metadata.ReleaseNotes.SafeTrim(), 
+                    ReleaseNotes = metadata.ReleaseNotes.SafeTrim(),
                     Language = metadata.Language.SafeTrim(),
                     Dependencies = metadata.Dependencies == null ||
                                    !metadata.Dependencies.Any() ? null :

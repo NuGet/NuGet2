@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Management.Automation;
-using System.Reflection;
 using EnvDTE;
 using NuGet.VisualStudio;
 

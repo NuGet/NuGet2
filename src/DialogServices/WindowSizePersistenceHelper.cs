@@ -50,7 +50,7 @@ namespace NuGet.Dialog {
                 string windowToken = GetWindowToken(window);
                 // save window size when it closes
                 WindowSettingsManager.Value.SetWindowSize(windowToken, window.RenderSize);
-            } 
+            }
         }
 
         private static void SetWindowSize(Window window, Size size) {

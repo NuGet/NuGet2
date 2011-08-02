@@ -9,9 +9,9 @@ using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell.Interop;
+using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
-using NuGet.Dialog.PackageManagerUI;
 
 namespace NuGet.Dialog {
     public partial class PackageManagerWindow : DialogWindow {
@@ -310,7 +310,7 @@ namespace NuGet.Dialog {
             Close();
 
             _optionsPageActivator.ActivatePage(
-                OptionsPage.PackageSources, 
+                OptionsPage.PackageSources,
                 () => OnActivated(_activeProject));
         }
 
@@ -321,7 +321,7 @@ namespace NuGet.Dialog {
             var window = new PackageManagerWindow(project);
             try {
                 window.ShowModal();
-            } 
+            }
             catch (TargetInvocationException exception) {
                 MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
                 ExceptionHelper.WriteToActivityLog(exception);

@@ -11,7 +11,7 @@ namespace NuGet {
         private readonly XDocument _config;
         private readonly IFileSystem _fileSystem;
 
-        public UserSettings(IFileSystem fileSystem) { 
+        public UserSettings(IFileSystem fileSystem) {
             if (fileSystem == null) {
                 throw new ArgumentNullException("fileSystem");
             }

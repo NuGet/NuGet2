@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel.Composition;
-using System.Linq;
 
 namespace NuGet.VisualStudio {
     [PartCreationPolicy(CreationPolicy.Shared)]
@@ -15,7 +14,7 @@ namespace NuGet.VisualStudio {
         private readonly VsPackageInstallerEvents _packageEvents;
 
         private RepositoryInfo _repositoryInfo;
-        
+
         [ImportingConstructor]
         public VsPackageManagerFactory(ISolutionManager solutionManager,
                                        IPackageRepositoryFactory repositoryFactory,

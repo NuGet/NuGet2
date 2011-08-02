@@ -1,16 +1,15 @@
-﻿using System;
-using System.ComponentModel.Composition;
+﻿using System.ComponentModel.Composition;
 
 namespace NuGet.VisualStudio {
     [Export(typeof(IVsPackageInstallerEvents))]
     [Export(typeof(VsPackageInstallerEvents))]
     public class VsPackageInstallerEvents : IVsPackageInstallerEvents {
         public event VsPackageEventHandler PackageInstalled;
-                     
+
         public event VsPackageEventHandler PackageUninstalling;
-                     
+
         public event VsPackageEventHandler PackageInstalling;
-                     
+
         public event VsPackageEventHandler PackageUninstalled;
 
         internal void NotifyInstalling(PackageOperationEventArgs e) {

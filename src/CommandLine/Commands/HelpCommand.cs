@@ -9,7 +9,7 @@ using NuGet.Common;
 namespace NuGet.Commands {
     [Export(typeof(HelpCommand))]
     [Command(typeof(NuGetResources), "help", "HelpCommandDescription", AltName = "?", MaxArgs = 1,
-        UsageSummaryResourceName = "HelpCommandUsageSummary", UsageDescriptionResourceName = "HelpCommandUsageDescription", 
+        UsageSummaryResourceName = "HelpCommandUsageSummary", UsageDescriptionResourceName = "HelpCommandUsageDescription",
         UsageExampleResourceName = "HelpCommandUsageExamples")]
     public class HelpCommand : Command {
         private readonly string _commandExe;
@@ -171,7 +171,7 @@ namespace NuGet.Commands {
                 var template = new HelpCommandMarkdownTemplate {
                     CommandAttribute = command.CommandAttribute,
                     Options = from item in _commandManager.GetCommandOptions(command)
-                                   select new { Name = item.Value.Name, Description = item.Key.Description }
+                              select new { Name = item.Value.Name, Description = item.Key.Description }
                 };
                 Console.WriteLine(template.TransformText());
             }

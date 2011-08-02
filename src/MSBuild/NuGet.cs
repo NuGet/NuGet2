@@ -134,7 +134,7 @@ namespace NuGet.MSBuild {
         private void BuildPackage(IFileSystem fileSystem, PackageBuilder builder, string path, string outputPath = null) {
             if (Version != null) {
                 builder.Version = Version;
-            }   
+            }
             outputPath = outputPath ?? GetOutputPath(builder);
 
             // If the BasePath is not specified, use the directory of the input file (nuspec / proj) file
@@ -160,7 +160,7 @@ namespace NuGet.MSBuild {
         private void BuildSymbolsPackage(IFileSystem fileSystem, string specFilePath) {
             PackageBuilder symbolsBuilder;
             using (Stream stream = fileSystem.OpenFile(specFilePath)) {
-                symbolsBuilder = new PackageBuilder(stream, BaseDir);   
+                symbolsBuilder = new PackageBuilder(stream, BaseDir);
             }
 
             // remove unnecessary files when building the symbols package

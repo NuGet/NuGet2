@@ -91,7 +91,7 @@ namespace NuGet {
                         batchProcessor.BeginProcessing(paths);
                     }
 
-                    foreach (var file in directoryFiles) {                        
+                    foreach (var file in directoryFiles) {
                         // Resolve the path
                         string path = ResolveTargetPath(project,
                                                         fileTransformers,

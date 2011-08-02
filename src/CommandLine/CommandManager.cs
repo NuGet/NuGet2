@@ -5,7 +5,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Internal.Web.Utils;
-using NuGet.Common;
 
 namespace NuGet {
     [Export(typeof(ICommandManager))]

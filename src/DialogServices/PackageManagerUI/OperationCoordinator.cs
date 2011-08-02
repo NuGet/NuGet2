@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using System.Windows.Input;
 
 namespace NuGet.Dialog.Providers {
