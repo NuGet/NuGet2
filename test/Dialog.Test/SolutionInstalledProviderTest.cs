@@ -182,7 +182,11 @@ namespace NuGet.Dialog.Test {
             solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
 
             var mockWindowService = new Mock<IUserNotifierServices>();
-            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Predicate<Project>>(), It.IsAny<Predicate<Project>>())).Returns(Enumerable.Empty<Project>());
+            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(
+                It.IsAny<string>(),
+                It.IsAny<IPackage>(),
+                It.IsAny<Predicate<Project>>(), 
+                It.IsAny<Predicate<Project>>())).Returns(Enumerable.Empty<Project>());
 
             var provider = CreateSolutionInstalledProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, userNotifierServices: mockWindowService.Object);
             var extensionTree = provider.ExtensionsTree;
@@ -329,7 +333,11 @@ namespace NuGet.Dialog.Test {
             solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
 
             var mockWindowService = new Mock<IUserNotifierServices>();
-            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Predicate<Project>>(), It.IsAny<Predicate<Project>>())).Returns((Func<IEnumerable<Project>>)null);
+            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(
+                It.IsAny<string>(),
+                It.IsAny<IPackage>(),
+                It.IsAny<Predicate<Project>>(), 
+                It.IsAny<Predicate<Project>>())).Returns((Func<IEnumerable<Project>>)null);
 
             var provider = CreateSolutionInstalledProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, userNotifierServices: mockWindowService.Object);
             var extensionTree = provider.ExtensionsTree;
@@ -420,9 +428,12 @@ namespace NuGet.Dialog.Test {
 
             if (userNotifierServices == null) {
                 var mockProjectSelector = new Mock<IUserNotifierServices>();
-                mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Predicate<Project>>(), It.IsAny<Predicate<Project>>())).Returns(
-                        solutionManager.GetProjects()
-                    );
+                mockProjectSelector.Setup(p => p.ShowProjectSelectorWindow(
+                    It.IsAny<string>(),
+                    It.IsAny<IPackage>(),
+                    It.IsAny<Predicate<Project>>(), 
+                    It.IsAny<Predicate<Project>>()))
+                .Returns(solutionManager.GetProjects());
                 userNotifierServices = mockProjectSelector.Object;
             }
 

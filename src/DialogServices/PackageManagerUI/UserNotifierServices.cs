@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Windows.Threading;
+using System.Linq;
 using EnvDTE;
 using NuGet.VisualStudio;
 
@@ -36,12 +37,17 @@ namespace NuGet.Dialog.PackageManagerUI {
             return dialogResult ?? false;
         }
 
-        public IEnumerable<Project> ShowProjectSelectorWindow(string instructionText, Predicate<Project> checkedStateSelector, Predicate<Project> enabledStateSelector) {
+        public IEnumerable<Project> ShowProjectSelectorWindow(
+            string instructionText,
+            IPackage package,
+            Predicate<Project> checkedStateSelector, 
+            Predicate<Project> enabledStateSelector) {
             if (!_uiDispatcher.CheckAccess()) {
                 // Use Invoke() here to block the worker thread
                 object result = _uiDispatcher.Invoke(
-                    new Func<string, Predicate<Project>, Predicate<Project>, IEnumerable<Project>>(ShowProjectSelectorWindow),
+                    new Func<string, IPackage, Predicate<Project>, Predicate<Project>, IEnumerable<Project>>(ShowProjectSelectorWindow),
                     instructionText,
+                    package,
                     checkedStateSelector,
                     enabledStateSelector);
 
@@ -50,18 +56,28 @@ namespace NuGet.Dialog.PackageManagerUI {
 
             var viewModel = new SolutionExplorerViewModel(
                 ServiceLocator.GetInstance<DTE>().Solution,
+                package,
                 checkedStateSelector,
                 enabledStateSelector);
-            var window = new SolutionExplorer() {
-                DataContext = viewModel
-            };
-            window.InstructionText.Text = instructionText;
 
-            bool? dialogResult = window.ShowModal();
-            if (dialogResult ?? false) {
-                return viewModel.GetSelectedProjects();
+            // only show the solution explorer window if there is at least one compatible project
+            if (viewModel.HasProjects) {
+                var window = new SolutionExplorer() {
+                    DataContext = viewModel
+                };
+                window.InstructionText.Text = instructionText;
+
+                bool? dialogResult = window.ShowModal();
+                if (dialogResult ?? false) {
+                    return viewModel.GetSelectedProjects();
+                }
+                else {
+                    return null;
+                }
             }
             else {
+                // if there is no project compatible with the selected package, show an error message and return
+                MessageHelper.ShowWarningMessage(Resources.Dialog_NoCompatibleProject, Resources.Dialog_MessageBoxTitle);
                 return null;
             }
         }

@@ -7,8 +7,9 @@ using NuGet.VisualStudio;
 
 namespace NuGet.Dialog {
     internal static class SolutionWalker {
-        public static ProjectNodeBase Walk(
+        public static FolderNode Walk(
             Solution solution,
+            IPackage package,
             Predicate<Project> checkedStateSelector,
             Predicate<Project> enabledStateSelector) {
             if (solution == null) {
@@ -27,7 +28,7 @@ namespace NuGet.Dialog {
                 enabledStateSelector = p => true;
             }
 
-            var children = CreateProjectNode(solution.Projects.OfType<Project>(), checkedStateSelector, enabledStateSelector).ToArray();
+            var children = CreateProjectNode(solution.Projects.OfType<Project>(), package, checkedStateSelector, enabledStateSelector).ToArray();
             Array.Sort(children, ProjectNodeComparer.Default);
 
             return new FolderNode(
@@ -37,11 +38,12 @@ namespace NuGet.Dialog {
 
         private static IEnumerable<ProjectNodeBase> CreateProjectNode(
             IEnumerable<Project> projects,
+            IPackage package,
             Predicate<Project> checkedStateSelector,
             Predicate<Project> enabledStateSelector) {
 
             foreach (var project in projects) {
-                if (project.IsSupported()) {
+                if (project.IsSupported() && project.IsCompatible(package)) {
                     yield return new ProjectNode(project) {
                         // default checked state of this node will be determined by the passed-in selector
                         IsSelected = checkedStateSelector(project),
@@ -55,6 +57,7 @@ namespace NuGet.Dialog {
                                 OfType<ProjectItem>().
                                 Where(p => p.SubProject != null).
                                 Select(p => p.SubProject),
+                            package,
                             checkedStateSelector,
                             enabledStateSelector
                         ).ToArray();
@@ -68,6 +71,7 @@ namespace NuGet.Dialog {
                 }
             }
         }
+
 
         private class ProjectNodeComparer : IComparer<ProjectNodeBase> {
             public static readonly ProjectNodeComparer Default = new ProjectNodeComparer();

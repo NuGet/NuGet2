@@ -52,7 +52,11 @@ namespace NuGet.Dialog.Test {
             solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
 
             var mockWindowService = new Mock<IUserNotifierServices>();
-            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Predicate<Project>>(), It.IsAny<Predicate<Project>>())).Returns(new Project[] { project1, project2 });
+            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(
+                It.IsAny<string>(),
+                It.IsAny<IPackage>(),
+                It.IsAny<Predicate<Project>>(), 
+                It.IsAny<Predicate<Project>>())).Returns(new Project[] { project1, project2 });
 
             var provider = CreateSolutionUpdatesProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, userNotifierServices: mockWindowService.Object);
             var extensionTree = provider.ExtensionsTree;
@@ -128,7 +132,11 @@ namespace NuGet.Dialog.Test {
             solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
 
             var mockWindowService = new Mock<IUserNotifierServices>();
-            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(It.IsAny<string>(), It.IsAny<Predicate<Project>>(), It.IsAny<Predicate<Project>>())).Returns(new Project[0]);
+            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(
+                It.IsAny<string>(),
+                It.IsAny<IPackage>(),
+                It.IsAny<Predicate<Project>>(), 
+                It.IsAny<Predicate<Project>>())).Returns(new Project[0]);
 
             var provider = CreateSolutionUpdatesProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, userNotifierServices: mockWindowService.Object);
             var extensionTree = provider.ExtensionsTree;

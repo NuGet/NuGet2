@@ -5,18 +5,25 @@ using EnvDTE;
 
 namespace NuGet.Dialog {
     internal class SolutionExplorerViewModel {
-        private Lazy<ProjectNodeBase> _solutionNode;
+        private Lazy<FolderNode> _solutionNode;
 
         public SolutionExplorerViewModel(
             Solution solution,
+            IPackage package,
             Predicate<Project> checkedStateSelector,
             Predicate<Project> enabledStateSelector) {
             if (solution == null) {
                 throw new ArgumentNullException("solution");
             }
 
-            _solutionNode = new Lazy<ProjectNodeBase>(
-                () => SolutionWalker.Walk(solution, checkedStateSelector, enabledStateSelector));
+            _solutionNode = new Lazy<FolderNode>(
+                () => SolutionWalker.Walk(solution, package, checkedStateSelector, enabledStateSelector));
+        }
+
+        public bool HasProjects {
+            get {
+                return _solutionNode.Value.HasProjects;
+            }
         }
 
         public IEnumerable<ProjectNodeBase> ProjectNodes {

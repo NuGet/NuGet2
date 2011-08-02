@@ -46,19 +46,10 @@ namespace NuGet.VisualStudio {
         public FrameworkName TargetFramework {
             get {
                 if (_targetFramework == null) {
-                    _targetFramework = GetTargetFramework() ?? VersionUtility.DefaultTargetFramework;
+                    _targetFramework = Project.GetTargetFrameworkName() ?? VersionUtility.DefaultTargetFramework;
                 }
                 return _targetFramework;
             }
-        }
-
-        private FrameworkName GetTargetFramework() {
-            string targetFrameworkMoniker = Project.GetPropertyValue<string>("TargetFrameworkMoniker");
-            if (targetFrameworkMoniker != null) {
-                return new FrameworkName(targetFrameworkMoniker);
-            }
-
-            return null;
         }
 
         public override void AddFile(string path, Stream stream) {

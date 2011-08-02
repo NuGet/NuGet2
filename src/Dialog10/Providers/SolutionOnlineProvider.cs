@@ -52,6 +52,7 @@ namespace NuGet.Dialog.Providers {
                 HideProgressWindow();
                 var selectedProjects = _userNotifierServices.ShowProjectSelectorWindow(
                     Resources.Dialog_OnlineSolutionInstruction,
+                    item.PackageIdentity,
                     DetermineProjectCheckState,
                     ignored => true);
                 if (selectedProjects == null) {

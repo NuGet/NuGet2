@@ -26,6 +26,12 @@ namespace NuGet.Dialog {
             }
         }
 
+        public bool HasProjects {
+            get {
+                return Children.Any(p => (p is ProjectNode) || (p as FolderNode).HasProjects);
+            }
+        }
+
         public bool IsRootFolder {
             get {
                 return Parent == null;

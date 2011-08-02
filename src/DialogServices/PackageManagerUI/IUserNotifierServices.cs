@@ -5,7 +5,11 @@ using EnvDTE;
 namespace NuGet.Dialog.PackageManagerUI {
     public interface IUserNotifierServices {
         bool ShowLicenseWindow(IEnumerable<IPackage> packages);
-        IEnumerable<Project> ShowProjectSelectorWindow(string instructionText, Predicate<Project> checkedStateSelector, Predicate<Project> enabledStateSelector);
+        IEnumerable<Project> ShowProjectSelectorWindow(
+            string instructionText, 
+            IPackage package, 
+            Predicate<Project> checkedStateSelector, 
+            Predicate<Project> enabledStateSelector);
         void ShowSummaryWindow(object failedProjects);
         bool? ShowRemoveDependenciesWindow(string message);
     }

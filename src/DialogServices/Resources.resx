@@ -324,4 +324,7 @@
   <data name="Dialog_ReleaseNotesLabel" xml:space="preserve">
     <value>Release notes:</value>
   </data>
+  <data name="Dialog_NoCompatibleProject" xml:space="preserve">
+    <value>The selected package is not compatible with any project in the solution.</value>
+  </data>
 </root>

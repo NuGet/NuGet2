@@ -43,6 +43,7 @@ namespace NuGet.Dialog.Providers {
                 HideProgressWindow();
                 var selectedProjects = _userNotifierServices.ShowProjectSelectorWindow(
                     Resources.Dialog_UpdatesSolutionInstruction,
+                    item.PackageIdentity,
                     // Selector function to return the initial checkbox state for a Project.
                     // We check a project if it has the current package installed by Id, but not version
                     project => _activePackageManager.GetProjectManager(project).LocalRepository.Exists(item.Id),

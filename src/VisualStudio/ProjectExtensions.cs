@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using EnvDTE;
 using Microsoft.Build.Evaluation;
@@ -309,6 +310,23 @@ namespace NuGet.VisualStudio {
             }
             // Convert the project to an IVsHierarchy and see if it implements IVsProjectBuildSystem
             return project.ToVsHierarchy() as IVsProjectBuildSystem;
+        }
+
+        public static bool IsCompatible(this Project project, IPackage package) {
+            if (package == null) {
+                return true;
+            }
+            FrameworkName frameworkName = project.GetTargetFrameworkName();
+            return VersionUtility.IsCompatible(frameworkName, package.GetSupportedFrameworks());
+        }
+
+        public static FrameworkName GetTargetFrameworkName(this Project project) {
+            string targetFrameworkMoniker = project.GetPropertyValue<string>("TargetFrameworkMoniker");
+            if (targetFrameworkMoniker != null) {
+                return new FrameworkName(targetFrameworkMoniker);
+            }
+
+            return null;
         }
 
         public static IEnumerable<string> GetProjectTypeGuids(this Project project) {
