@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 
 namespace NuGet.Test {
     [TestClass]
@@ -49,6 +50,73 @@ namespace NuGet.Test {
             Assert.AreEqual("A.dll", assemblyReferences[0].Name);
             Assert.AreEqual(new FrameworkName(".NETFramework", new Version("4.0")), assemblyReferences[0].TargetFramework);
             Assert.AreEqual("This is a release note.", package.ReleaseNotes);
+        }
+
+        [TestMethod]
+        public void IsAssemblyReferenceReturnsFalseIfFileDoesNotStartWithLib() {
+            // Arrange
+            var file = new PhysicalPackageFile { TargetPath = @"content\foo.dll" };
+            IEnumerable<PackageAssemblyReference> references = null;
+
+            // Act and Assert
+            Assert.IsFalse(ZipPackage.IsAssemblyReference(file, references));
+        }
+
+        [TestMethod]
+        public void IsAssemblyReferenceReturnsFalseIfFileExtensionIsNotAReferenceItem() {
+            // Arrange
+            var file = new PhysicalPackageFile { TargetPath = @"lib\foo.txt" };
+            IEnumerable<PackageAssemblyReference> references = null;
+
+            // Act and Assert
+            Assert.IsFalse(ZipPackage.IsAssemblyReference(file, references));
+        }
+
+        [TestMethod]
+        public void IsAssemblyReferenceReturnsFalseIfFileIsAResourceAssembly() {
+            // Arrange
+            var file = new PhysicalPackageFile { TargetPath = @"lib\NuGet.resources.dll" };
+            IEnumerable<PackageAssemblyReference> references = null;
+
+            // Act and Assert
+            Assert.IsFalse(ZipPackage.IsAssemblyReference(file, references));
+        }
+
+        [TestMethod]
+        public void IsAssemblyReferenceReturnsTrueIfFileIsAReferenceItemInLib() {
+            // Arrange
+            var file = new PhysicalPackageFile { TargetPath = @"lib\NuGet.Core.dll" };
+            IEnumerable<PackageAssemblyReference> references = null;
+
+            // Act and Assert
+            Assert.IsTrue(ZipPackage.IsAssemblyReference(file, references));
+        }
+
+        [TestMethod]
+        public void IsAssemblyReferenceReturnsFalseIfFileIsNotListedInReferences() {
+            // Arrange
+            var file = new PhysicalPackageFile { TargetPath = @"lib\NuGet.Core.dll" };
+            IEnumerable<PackageAssemblyReference> references = new[] {
+                new PackageAssemblyReference { File = "NuGet.VisualStudio.dll" },
+                new PackageAssemblyReference { File = "NuGet.CommandLine.dll" }
+            };
+
+            // Act and Assert
+            Assert.IsFalse(ZipPackage.IsAssemblyReference(file, references));
+        }
+
+        [TestMethod]
+        public void IsAssemblyReferenceReturnsTrueIfFileIsListedInReferences() {
+            // Arrange
+            var file = new PhysicalPackageFile { TargetPath = @"lib\NuGet.Core.dll" };
+            IEnumerable<PackageAssemblyReference> references = new[] {
+                new PackageAssemblyReference { File = "NuGet.VisualStudio.dll" },
+                new PackageAssemblyReference { File = "NuGet.CommandLine.dll" },
+                new PackageAssemblyReference { File = "NuGet.Core.dll" },
+            };
+
+            // Act and Assert
+            Assert.IsTrue(ZipPackage.IsAssemblyReference(file, references));
         }
     }
 }

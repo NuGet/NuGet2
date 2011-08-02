@@ -68,6 +68,10 @@ namespace NuGet {
             return result;
         }
 
+        public static bool Empty<T>(this IEnumerable<T> sequence) {
+            return sequence == null || !sequence.Any();
+        }
+
         /// <summary>
         /// The purpose of this method is to mitigate a partial trust issue. We expose
         /// EnumerableQuery (wrapping an enumrable in an IQueryable) throughout the codebase

@@ -52,16 +52,16 @@ namespace NuGet {
 
             // Need to force the namespace here again as the default in order to get the XML output clean
             var serializer = new XmlSerializer(typeof(Manifest), Constants.ManifestSchemaNamespace);
+            var version = GetSchemaVersion();
 
-            // Only stamp the version if there are framework assemblies
-            if (Metadata.FrameworkAssemblies != null && Metadata.FrameworkAssemblies.Any()) {
+            if (version != null) {
                 using (var ms = new MemoryStream()) {
                     serializer.Serialize(ms, this, ns);
 
                     // Reset the stream so we can read the document and add the attribute
                     ms.Seek(0, SeekOrigin.Begin);
                     XDocument document = XDocument.Load(ms);
-                    AddSchemaVersionAttribute(document, stream);
+                    AddSchemaVersionAttribute(document, version, stream);
                 }
             }
             else {
@@ -69,11 +69,26 @@ namespace NuGet {
             }
         }
 
-        private static void AddSchemaVersionAttribute(XDocument document, Stream stream) {
+        /// <summary>
+        /// Only stamp the version if it uses features that were incrementally added to the nuspec. This ensures that packages remain backwards compatible as long 
+        /// as they do not use newer features.
+        /// </summary>
+        /// <returns></returns>
+        private Version GetSchemaVersion() {
+            if (!Metadata.References.Empty()) {
+                return new Version("3.0");
+            }
+            else if (!Metadata.FrameworkAssemblies.Empty()) {
+                return new Version("2.0");
+            }
+            return null;
+        }
+
+        private static void AddSchemaVersionAttribute(XDocument document, Version version, Stream stream) {
             XElement metadata = GetMetadataElement(document);
 
             if (metadata != null) {
-                metadata.SetAttributeValue(SchemaVersionAttributeName, CurrentSchemaVersion);
+                metadata.SetAttributeValue(SchemaVersionAttributeName, version);
             }
 
             document.Save(stream);
@@ -163,22 +178,43 @@ namespace NuGet {
                     Summary = metadata.Summary.SafeTrim(),
                     ReleaseNotes = metadata.ReleaseNotes.SafeTrim(),
                     Language = metadata.Language.SafeTrim(),
-                    Dependencies = metadata.Dependencies == null ||
-                                   !metadata.Dependencies.Any() ? null :
-                                   (from d in metadata.Dependencies
-                                    select new ManifestDependency {
-                                        Id = d.Id.SafeTrim(),
-                                        Version = d.VersionSpec.ToStringSafe()
-                                    }).ToList(),
-                    FrameworkAssemblies = metadata.FrameworkAssemblies == null ||
-                                          !metadata.FrameworkAssemblies.Any() ? null :
-                                          (from reference in metadata.FrameworkAssemblies
-                                           select new ManifestFrameworkAssembly {
-                                               AssemblyName = reference.AssemblyName,
-                                               TargetFramework = String.Join(", ", reference.SupportedFrameworks.Select(VersionUtility.GetFrameworkString))
-                                           }).ToList()
+                    Dependencies = CreateDependencies(metadata),
+                    FrameworkAssemblies = CreateFrameworkAssemblies(metadata),
+                    References = CreateReferenceAssemblies(metadata)
                 }
             };
+        }
+
+        private static List<ManifestReference> CreateReferenceAssemblies(IPackageMetadata metadata) {
+            if (metadata.References.Empty()) {
+                return null;
+            }
+            return (from reference in metadata.References
+                    select new ManifestReference { File = reference.File }).ToList();
+
+        }
+
+        private static List<ManifestDependency> CreateDependencies(IPackageMetadata metadata) {
+            if (metadata.Dependencies.Empty()) {
+                return null;
+            }
+
+            return (from dependency in metadata.Dependencies
+                    select new ManifestDependency {
+                        Id = dependency.Id.SafeTrim(),
+                        Version = dependency.VersionSpec.ToStringSafe()
+                    }).ToList();
+        }
+
+        private static List<ManifestFrameworkAssembly> CreateFrameworkAssemblies(IPackageMetadata metadata) {
+            if (metadata.FrameworkAssemblies.Empty()) {
+                return null;
+            }
+            return (from reference in metadata.FrameworkAssemblies
+                    select new ManifestFrameworkAssembly {
+                        AssemblyName = reference.AssemblyName,
+                        TargetFramework = String.Join(", ", reference.SupportedFrameworks.Select(VersionUtility.GetFrameworkString))
+                    }).ToList();
         }
 
         private static string GetCommaSeparatedString(IEnumerable<string> values) {

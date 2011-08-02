@@ -43,6 +43,7 @@
     <Compile Include="Authoring\ManifestDependency.cs" />
     <Compile Include="Authoring\ManifestFile.cs" />
     <Compile Include="Authoring\ManifestMetadata.cs" />
+    <Compile Include="Authoring\ManifestReferenceAssembly.cs" />
     <Compile Include="Authoring\NullPropertyProvider.cs" />
     <Compile Include="Configuration\ISettings.cs" />
     <Compile Include="Configuration\Settings.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Extensions\VersionExtensions.cs" />
     <Compile Include="ProjectSystem\IBatchProcessor.cs" />
+    <Compile Include="Packages\PackageAssemblyReference.cs" />
     <Compile Include="Repositories\ISearchableRepository.cs" />
     <Compile Include="Server\PublishData.cs" />
     <Compile Include="Server\PackageServer.cs" />

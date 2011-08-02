@@ -17,7 +17,20 @@ namespace NuGet {
         string ReleaseNotes { get; }
         string Language { get; }
         string Tags { get; }
+
+        /// <summary>
+        /// Specifies assemblies from GAC that the package depends on.
+        /// </summary>
         IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies { get; }
+        
+        /// <summary>
+        /// Specifies other packages that the package depends on.
+        /// </summary>
         IEnumerable<PackageDependency> Dependencies { get; }
+
+        /// <summary>
+        /// Specifies assemblies in lib that would actually be added as references.
+        /// </summary>
+        IEnumerable<PackageAssemblyReference> References { get; }
     }
 }

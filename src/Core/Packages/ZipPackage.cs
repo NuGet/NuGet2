@@ -178,6 +178,11 @@ namespace NuGet {
             set;
         }
 
+        public IEnumerable<PackageAssemblyReference> References {
+            get;
+            set;
+        }
+
         public IEnumerable<IPackageFile> GetFiles() {
             if (_enableCaching) {
                 return MemoryCache.Instance.GetOrAdd(GetFilesCacheKey(), GetFilesNoCache, CacheTimeout);
@@ -191,8 +196,9 @@ namespace NuGet {
 
         private List<IPackageAssemblyReference> GetAssembliesNoCache() {
             return (from file in GetFiles()
-                    where IsAssemblyReference(file)
-                    select (IPackageAssemblyReference)new ZipPackageAssemblyReference(file)).ToList();
+                    where IsAssemblyReference(file, References)
+                    select (IPackageAssemblyReference)new ZipPackageAssemblyReference(file)
+                   ).ToList();
         }
 
         private List<IPackageFile> GetFilesNoCache() {
@@ -250,13 +256,16 @@ namespace NuGet {
             }
         }
 
-        private static bool IsAssemblyReference(IPackageFile file) {
+        internal static bool IsAssemblyReference(IPackageFile file, IEnumerable<PackageAssemblyReference> references) {
             // Assembly references are in lib/ and have a .dll/.exe extension
             var path = file.Path;
+            var fileName = Path.GetFileName(path);
+
             return path.StartsWith(AssemblyReferencesDir, StringComparison.OrdinalIgnoreCase) &&
-                // Exclude resource assemblies
+                    // Exclude resource assemblies
                    !path.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
-                   AssemblyReferencesExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase);
+                   AssemblyReferencesExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase) &&
+                   (references.Empty() || references.Any(c => c.File.Equals(fileName, StringComparison.OrdinalIgnoreCase)));
         }
 
         private static bool IsPackageFile(PackagePart part) {

@@ -82,6 +82,12 @@ namespace NuGet {
         [XmlArrayItem("frameworkAssembly")]
         public List<ManifestFrameworkAssembly> FrameworkAssemblies { get; set; }
 
+        [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
+        [XmlArray("references")]
+        [XmlArrayItem("reference")]
+        public List<ManifestReference> References { get; set; }
+
         Version IPackageMetadata.Version {
             get {
                 if (Version == null) {
@@ -143,6 +149,16 @@ namespace NuGet {
                 }
                 return from dependency in Dependencies
                        select new PackageDependency(dependency.Id, String.IsNullOrEmpty(dependency.Version) ? null : VersionUtility.ParseVersionSpec(dependency.Version));
+            }
+        }
+
+        IEnumerable<PackageAssemblyReference> IPackageMetadata.References {
+            get {
+                if (References == null) {
+                    return Enumerable.Empty<PackageAssemblyReference>();
+                }
+                return from assemblyReference in References
+                       select new PackageAssemblyReference { File = assemblyReference.File };
             }
         }
 

@@ -50,6 +50,17 @@
                                     </xs:sequence>
                                 </xs:complexType>
                             </xs:element>
+                            <xs:element name="references" maxOccurs="1" minOccurs="0">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="reference" minOccurs="1" maxOccurs="unbounded">
+                                  <xs:complexType>
+                                    <xs:attribute name="file" type="xs:string" use="required" />
+                                  </xs:complexType>
+                                </xs:element>
+                              </xs:sequence>
+                            </xs:complexType>
+                          </xs:element>
                         </xs:all>
                     </xs:complexType>
                 </xs:element>
