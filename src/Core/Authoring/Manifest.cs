@@ -52,16 +52,16 @@ namespace NuGet {
 
             // Need to force the namespace here again as the default in order to get the XML output clean
             var serializer = new XmlSerializer(typeof(Manifest), Constants.ManifestSchemaNamespace);
-            var version = GetSchemaVersion();
 
-            if (version != null) {
+            // Only stamp the version if there are framework assemblies
+            if (Metadata.FrameworkAssemblies != null && Metadata.FrameworkAssemblies.Any()) {
                 using (var ms = new MemoryStream()) {
                     serializer.Serialize(ms, this, ns);
 
                     // Reset the stream so we can read the document and add the attribute
                     ms.Seek(0, SeekOrigin.Begin);
                     XDocument document = XDocument.Load(ms);
-                    AddSchemaVersionAttribute(document, version, stream);
+                    AddSchemaVersionAttribute(document, stream);
                 }
             }
             else {
@@ -69,26 +69,11 @@ namespace NuGet {
             }
         }
 
-        /// <summary>
-        /// Only stamp the version if it uses features that were incrementally added to the nuspec. This ensures that packages remain backwards compatible as long 
-        /// as they do not use newer features.
-        /// </summary>
-        /// <returns></returns>
-        private Version GetSchemaVersion() {
-            if (!Metadata.References.IsEmpty()) {
-                return new Version("3.0");
-            }
-            else if (!Metadata.FrameworkAssemblies.IsEmpty()) {
-                return new Version("2.0");
-            }
-            return null;
-        }
-
-        private static void AddSchemaVersionAttribute(XDocument document, Version version, Stream stream) {
+        private static void AddSchemaVersionAttribute(XDocument document, Stream stream) {
             XElement metadata = GetMetadataElement(document);
 
             if (metadata != null) {
-                metadata.SetAttributeValue(SchemaVersionAttributeName, version);
+                metadata.SetAttributeValue(SchemaVersionAttributeName, CurrentSchemaVersion);
             }
 
             document.Save(stream);
