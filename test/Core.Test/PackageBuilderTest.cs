@@ -112,7 +112,7 @@ namespace NuGet.Test {
                 Version = new Version("1.0"),
                 Description = "Descriptions",
             };
-            builder.References.Add(new PackageAssemblyReference { File = "foo.dll" });
+            builder.PackageAssemblyReferences.Add("foo.dll");
             builder.Authors.Add("David");
             var ms = new MemoryStream();
 
@@ -802,7 +802,7 @@ Enabling license acceptance requires a license url.");
             Assert.AreEqual("Velio Ivanov", packageBuilder.Authors.Single());
             Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
             Assert.AreEqual("en-US", packageBuilder.Language);
-            Assert.AreEqual("foo.dll", packageBuilder.References.Single().File);
+            Assert.AreEqual("foo.dll", packageBuilder.PackageAssemblyReferences.Single());
         }
 
         [TestMethod]

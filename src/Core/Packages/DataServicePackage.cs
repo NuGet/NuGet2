@@ -209,12 +209,6 @@ namespace NuGet {
             }
         }
 
-        public IEnumerable<PackageAssemblyReference> References {
-            get {
-                return _package.Value.References;
-            }
-        }
-
         public IEnumerable<IPackageFile> GetFiles() {
             return _package.Value.GetFiles();
         }

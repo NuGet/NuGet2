@@ -27,6 +27,7 @@ namespace NuGet {
         // We don't store the steam itself, just a way to open the stream on demand
         // so we don't have to hold on to that resource
         private Func<Stream> _streamFactory;
+        private HashSet<string> _references;
 
         public ZipPackage(string fileName)
             : this(fileName, enableCaching: false) {
@@ -178,11 +179,6 @@ namespace NuGet {
             set;
         }
 
-        public IEnumerable<PackageAssemblyReference> References {
-            get;
-            set;
-        }
-
         public IEnumerable<IPackageFile> GetFiles() {
             if (_enableCaching) {
                 return MemoryCache.Instance.GetOrAdd(GetFilesCacheKey(), GetFilesNoCache, CacheTimeout);
@@ -196,7 +192,7 @@ namespace NuGet {
 
         private List<IPackageAssemblyReference> GetAssembliesNoCache() {
             return (from file in GetFiles()
-                    where IsAssemblyReference(file, References)
+                    where IsAssemblyReference(file, _references)
                     select (IPackageAssemblyReference)new ZipPackageAssemblyReference(file)
                    ).ToList();
         }
@@ -248,6 +244,9 @@ namespace NuGet {
                     Dependencies = metadata.Dependencies;
                     FrameworkAssemblies = metadata.FrameworkAssemblies;
 
+                    IEnumerable<string> references = (manifest.Metadata.References ?? Enumerable.Empty<ManifestReference>()).Select(c => c.File);
+                    _references = new HashSet<string>(references, StringComparer.OrdinalIgnoreCase);
+
                     // Ensure tags start and end with an empty " " so we can do contains filtering reliably
                     if (!String.IsNullOrEmpty(Tags)) {
                         Tags = " " + Tags + " ";
@@ -256,16 +255,17 @@ namespace NuGet {
             }
         }
 
-        internal static bool IsAssemblyReference(IPackageFile file, IEnumerable<PackageAssemblyReference> references) {
+        internal static bool IsAssemblyReference(IPackageFile file, IEnumerable<string> references) {
             // Assembly references are in lib/ and have a .dll/.exe extension
             var path = file.Path;
             var fileName = Path.GetFileName(path);
 
             return path.StartsWith(AssemblyReferencesDir, StringComparison.OrdinalIgnoreCase) &&
-                    // Exclude resource assemblies
+                // Exclude resource assemblies
                    !path.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
                    AssemblyReferencesExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase) &&
-                   (references.Empty() || references.Any(c => c.File.Equals(fileName, StringComparison.OrdinalIgnoreCase)));
+                // If references are listed, ensure that the file is listed in it.
+                   (references.IsEmpty() || references.Contains(fileName));
         }
 
         private static bool IsPackageFile(PackagePart part) {

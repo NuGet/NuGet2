@@ -45,7 +45,7 @@ namespace NuGet {
             Files = new Collection<IPackageFile>();
             Dependencies = new Collection<PackageDependency>();
             FrameworkReferences = new Collection<FrameworkAssemblyReference>();
-            References = new Collection<PackageAssemblyReference>();
+            PackageAssemblyReferences = new Collection<string>();
             Authors = new HashSet<string>();
             Owners = new HashSet<string>();
             Tags = new HashSet<string>();
@@ -136,7 +136,7 @@ namespace NuGet {
             private set;
         }
 
-        public Collection<PackageAssemblyReference> References {
+        public Collection<string> PackageAssemblyReferences {
             get;
             private set;
         }
@@ -168,12 +168,6 @@ namespace NuGet {
         IEnumerable<FrameworkAssemblyReference> IPackageMetadata.FrameworkAssemblies {
             get {
                 return FrameworkReferences;
-            }
-        }
-
-        IEnumerable<PackageAssemblyReference> IPackageMetadata.References {
-            get {
-                return References;
             }
         }
 
@@ -220,7 +214,8 @@ namespace NuGet {
             }
         }
 
-        public void Populate(IPackageMetadata metadata) {
+        public void Populate(ManifestMetadata manifestMetadata) {
+            IPackageMetadata metadata = manifestMetadata;
             Id = metadata.Id;
             Version = metadata.Version;
             Title = metadata.Title;
@@ -241,7 +236,7 @@ namespace NuGet {
 
             Dependencies.AddRange(metadata.Dependencies);
             FrameworkReferences.AddRange(metadata.FrameworkAssemblies);
-            References.AddRange(metadata.References);
+            PackageAssemblyReferences.AddRange(manifestMetadata.References.Select(reference => reference.File));
         }
 
         public void PopulateFiles(string basePath, IEnumerable<ManifestFile> files) {
@@ -261,6 +256,9 @@ namespace NuGet {
 
             using (Stream stream = packagePart.GetStream()) {
                 Manifest manifest = Manifest.Create(this);
+                if (!PackageAssemblyReferences.IsEmpty()) {
+                    manifest.Metadata.References = new List<ManifestReference>(PackageAssemblyReferences.Select(reference => new ManifestReference { File = reference }));
+                }
                 manifest.Save(stream);
             }
         }

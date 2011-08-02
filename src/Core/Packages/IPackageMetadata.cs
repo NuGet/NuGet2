@@ -27,10 +27,5 @@ namespace NuGet {
         /// Specifies other packages that the package depends on.
         /// </summary>
         IEnumerable<PackageDependency> Dependencies { get; }
-
-        /// <summary>
-        /// Specifies assemblies in lib that would actually be added as references.
-        /// </summary>
-        IEnumerable<PackageAssemblyReference> References { get; }
     }
 }

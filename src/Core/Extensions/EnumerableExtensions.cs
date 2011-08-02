@@ -68,7 +68,7 @@ namespace NuGet {
             return result;
         }
 
-        public static bool Empty<T>(this IEnumerable<T> sequence) {
+        public static bool IsEmpty<T>(this IEnumerable<T> sequence) {
             return sequence == null || !sequence.Any();
         }
 

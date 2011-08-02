@@ -53,7 +53,7 @@
                             <xs:element name="references" maxOccurs="1" minOccurs="0">
                             <xs:complexType>
                               <xs:sequence>
-                                <xs:element name="reference" minOccurs="1" maxOccurs="unbounded">
+                                <xs:element name="reference" minOccurs="0" maxOccurs="unbounded">
                                   <xs:complexType>
                                     <xs:attribute name="file" type="xs:string" use="required" />
                                   </xs:complexType>

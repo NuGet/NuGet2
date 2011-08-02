@@ -128,12 +128,6 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        public IEnumerable<PackageAssemblyReference> References {
-            get {
-                return _basePackage.References;
-            }
-        }
-
         public Uri ReportAbuseUrl {
             get {
                 return _basePackage.ReportAbuseUrl;

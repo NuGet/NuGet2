@@ -75,10 +75,10 @@ namespace NuGet {
         /// </summary>
         /// <returns></returns>
         private Version GetSchemaVersion() {
-            if (!Metadata.References.Empty()) {
+            if (!Metadata.References.IsEmpty()) {
                 return new Version("3.0");
             }
-            else if (!Metadata.FrameworkAssemblies.Empty()) {
+            else if (!Metadata.FrameworkAssemblies.IsEmpty()) {
                 return new Version("2.0");
             }
             return null;
@@ -140,7 +140,6 @@ namespace NuGet {
             manifest.Metadata.Language = manifest.Metadata.Language.SafeTrim();
             manifest.Metadata.Tags = manifest.Metadata.Tags.SafeTrim();
 
-
             return manifest;
         }
 
@@ -180,22 +179,23 @@ namespace NuGet {
                     Language = metadata.Language.SafeTrim(),
                     Dependencies = CreateDependencies(metadata),
                     FrameworkAssemblies = CreateFrameworkAssemblies(metadata),
-                    References = CreateReferenceAssemblies(metadata)
+                    References = CreateReferences(metadata)
                 }
             };
         }
 
-        private static List<ManifestReference> CreateReferenceAssemblies(IPackageMetadata metadata) {
-            if (metadata.References.Empty()) {
+        private static List<ManifestReference> CreateReferences(IPackageMetadata metadata) {
+            IPackageBuilder packageBuilder = metadata as IPackageBuilder;
+
+            if (packageBuilder == null || packageBuilder.PackageAssemblyReferences.IsEmpty()) {
                 return null;
             }
-            return (from reference in metadata.References
-                    select new ManifestReference { File = reference.File }).ToList();
-
+            return (from reference in packageBuilder.PackageAssemblyReferences
+                    select new ManifestReference { File = reference.SafeTrim() }).ToList();
         }
 
         private static List<ManifestDependency> CreateDependencies(IPackageMetadata metadata) {
-            if (metadata.Dependencies.Empty()) {
+            if (metadata.Dependencies.IsEmpty()) {
                 return null;
             }
 
@@ -207,7 +207,7 @@ namespace NuGet {
         }
 
         private static List<ManifestFrameworkAssembly> CreateFrameworkAssemblies(IPackageMetadata metadata) {
-            if (metadata.FrameworkAssemblies.Empty()) {
+            if (metadata.FrameworkAssemblies.IsEmpty()) {
                 return null;
             }
             return (from reference in metadata.FrameworkAssemblies

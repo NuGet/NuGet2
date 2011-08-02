@@ -56,7 +56,7 @@ namespace NuGet.Test {
         public void IsAssemblyReferenceReturnsFalseIfFileDoesNotStartWithLib() {
             // Arrange
             var file = new PhysicalPackageFile { TargetPath = @"content\foo.dll" };
-            IEnumerable<PackageAssemblyReference> references = null;
+            IEnumerable<string> references = null;
 
             // Act and Assert
             Assert.IsFalse(ZipPackage.IsAssemblyReference(file, references));
@@ -66,7 +66,7 @@ namespace NuGet.Test {
         public void IsAssemblyReferenceReturnsFalseIfFileExtensionIsNotAReferenceItem() {
             // Arrange
             var file = new PhysicalPackageFile { TargetPath = @"lib\foo.txt" };
-            IEnumerable<PackageAssemblyReference> references = null;
+            IEnumerable<string> references = null;
 
             // Act and Assert
             Assert.IsFalse(ZipPackage.IsAssemblyReference(file, references));
@@ -76,7 +76,7 @@ namespace NuGet.Test {
         public void IsAssemblyReferenceReturnsFalseIfFileIsAResourceAssembly() {
             // Arrange
             var file = new PhysicalPackageFile { TargetPath = @"lib\NuGet.resources.dll" };
-            IEnumerable<PackageAssemblyReference> references = null;
+            IEnumerable<string> references = null;
 
             // Act and Assert
             Assert.IsFalse(ZipPackage.IsAssemblyReference(file, references));
@@ -86,7 +86,7 @@ namespace NuGet.Test {
         public void IsAssemblyReferenceReturnsTrueIfFileIsAReferenceItemInLib() {
             // Arrange
             var file = new PhysicalPackageFile { TargetPath = @"lib\NuGet.Core.dll" };
-            IEnumerable<PackageAssemblyReference> references = null;
+            IEnumerable<string> references = null;
 
             // Act and Assert
             Assert.IsTrue(ZipPackage.IsAssemblyReference(file, references));
@@ -96,9 +96,9 @@ namespace NuGet.Test {
         public void IsAssemblyReferenceReturnsFalseIfFileIsNotListedInReferences() {
             // Arrange
             var file = new PhysicalPackageFile { TargetPath = @"lib\NuGet.Core.dll" };
-            IEnumerable<PackageAssemblyReference> references = new[] {
-                new PackageAssemblyReference { File = "NuGet.VisualStudio.dll" },
-                new PackageAssemblyReference { File = "NuGet.CommandLine.dll" }
+            IEnumerable<string> references = new[] {
+                "NuGet.VisualStudio.dll",
+                "NuGet.CommandLine.dll"
             };
 
             // Act and Assert
@@ -109,10 +109,10 @@ namespace NuGet.Test {
         public void IsAssemblyReferenceReturnsTrueIfFileIsListedInReferences() {
             // Arrange
             var file = new PhysicalPackageFile { TargetPath = @"lib\NuGet.Core.dll" };
-            IEnumerable<PackageAssemblyReference> references = new[] {
-                new PackageAssemblyReference { File = "NuGet.VisualStudio.dll" },
-                new PackageAssemblyReference { File = "NuGet.CommandLine.dll" },
-                new PackageAssemblyReference { File = "NuGet.Core.dll" },
+            IEnumerable<string> references = new[] {
+                "NuGet.VisualStudio.dll",
+                "NuGet.CommandLine.dll",
+                "NuGet.Core.dll",
             };
 
             // Act and Assert

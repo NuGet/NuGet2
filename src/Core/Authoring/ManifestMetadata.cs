@@ -152,16 +152,6 @@ namespace NuGet {
             }
         }
 
-        IEnumerable<PackageAssemblyReference> IPackageMetadata.References {
-            get {
-                if (References == null) {
-                    return Enumerable.Empty<PackageAssemblyReference>();
-                }
-                return from assemblyReference in References
-                       select new PackageAssemblyReference { File = assemblyReference.File };
-            }
-        }
-
         IEnumerable<FrameworkAssemblyReference> IPackageMetadata.FrameworkAssemblies {
             get {
                 if (FrameworkAssemblies == null) {
