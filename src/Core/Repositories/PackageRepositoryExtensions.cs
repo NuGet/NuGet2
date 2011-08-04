@@ -62,7 +62,8 @@ namespace NuGet {
                                                        .OrderByDescending(p => p.Version);
 
             if (version != null) {
-                packages = packages.Where(p => p.Version == version);
+                packages = packages.Where(p => VersionUtility.NormalizeVersion(p.Version) == 
+                                               VersionUtility.NormalizeVersion(version));
             }
             else if (constraintProvider != null) {
                 packages = FilterPackagesByConstraints(constraintProvider, packages, packageId);
@@ -247,7 +248,8 @@ namespace NuGet {
             foreach (IPackage package in packageList) {
                 IPackage newestAvailablePackage;
                 if (sourcePackages.TryGetValue(package.Id, out newestAvailablePackage) &&
-                    newestAvailablePackage.Version > package.Version) {
+                    VersionUtility.NormalizeVersion(newestAvailablePackage.Version) > 
+                    VersionUtility.NormalizeVersion(package.Version)) {
                     yield return newestAvailablePackage;
                 }
             }

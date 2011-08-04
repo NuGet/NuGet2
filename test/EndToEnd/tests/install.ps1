@@ -1280,7 +1280,7 @@ function Test-WebsiteInstallPackageWithNestedAspxFilesShouldNotGoUnderAppCode {
 }
 
 function Test-InstallPackageWithReferences {
-        param(
+    param(
         $context
     )
     
@@ -1302,4 +1302,20 @@ function Test-InstallPackageWithReferences {
 
     # Assert - 2
     Assert-Reference $p2 B
+}
+
+function Test-InstallPackageNormalizesVersionBeforeCompare {
+    param(
+        $context
+    )
+    
+    # Arrange
+    $p = New-ClassLibrary
+    
+    # Act
+    $p | Install-Package PackageWithContentFileAndDependency -Source $context.RepositoryRoot -Version 1.0.0.0
+
+    # Assert
+    Assert-Package $p PackageWithContentFileAndDependency 1.0
+    Assert-Package $p PackageWithContentFile 1.0
 }

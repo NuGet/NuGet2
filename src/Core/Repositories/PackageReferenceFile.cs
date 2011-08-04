@@ -117,7 +117,7 @@ namespace NuGet {
                     let entryVersion = VersionUtility.ParseOptionalVersion(e.GetOptionalAttributeValue("version"))
                     where entryId != null && entryVersion != null
                     where id.Equals(entryId, StringComparison.OrdinalIgnoreCase) &&
-                          version.Equals(entryVersion)
+                          VersionUtility.NormalizeVersion(version).Equals(VersionUtility.NormalizeVersion(entryVersion))
                     select e).FirstOrDefault();
         }
 

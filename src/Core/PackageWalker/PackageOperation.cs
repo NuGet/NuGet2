@@ -25,13 +25,13 @@ namespace NuGet {
             return operation != null &&
                    operation.Action == Action &&
                    operation.Package.Id.Equals(Package.Id, StringComparison.OrdinalIgnoreCase) &&
-                   operation.Package.Version.Equals(Package.Version);
+                   VersionUtility.NormalizeVersion(operation.Package.Version).Equals(VersionUtility.NormalizeVersion(Package.Version));
         }
 
         public override int GetHashCode() {
             var combiner = new HashCodeCombiner();
             combiner.AddObject(Package.Id);
-            combiner.AddObject(Package.Version);
+            combiner.AddObject(VersionUtility.NormalizeVersion(Package.Version));
             combiner.AddObject(Action);
 
             return combiner.CombinedHash;

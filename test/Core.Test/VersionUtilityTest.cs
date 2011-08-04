@@ -383,6 +383,15 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void NormalizeVersionFillsInZerosForUnsetVersionParts() {
+            // Act
+            Version version = VersionUtility.NormalizeVersion(new Version("1.5"));
+
+            // Assert
+            Assert.AreEqual(new Version("1.5.0.0"), version);
+        }
+
+        [TestMethod]
         public void ParseVersionSpecRangeIntegerRanges() {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("   [1, 2]  ");
@@ -429,6 +438,95 @@ namespace NuGet.Test {
 
             // Assert
             Assert.AreEqual(new Version("1.2.0.5"), version);
+        }
+
+        [TestMethod]
+        public void GetAllPossibleVersionsTwoDigits() {
+            // Arrange
+            var expectedVersions = new[] { 
+                new Version("1.0"), 
+                new Version("1.0.0"),
+                new Version("1.0.0.0")
+            };
+
+            // Act
+            var versions = VersionUtility.GetPossibleVersions(new Version("1.0")).ToList();
+
+            // Assert
+            foreach (var v in expectedVersions) {
+                Assert.IsTrue(versions.Contains(v));
+            }
+        }
+
+        [TestMethod]
+        public void GetAllPossibleVersionsThreeDigits() {
+            // Arrange
+            var expectedVersions = new[] { 
+                new Version("1.0"), 
+                new Version("1.0.0"),
+                new Version("1.0.0.0")
+            };
+
+            // Act
+            var versions = VersionUtility.GetPossibleVersions(new Version("1.0.0")).ToList();
+
+            // Assert
+            foreach (var v in expectedVersions) {
+                Assert.IsTrue(versions.Contains(v));
+            }
+        }
+
+        [TestMethod]
+        public void GetAllPossibleVersionsFourDigits() {
+            // Arrange
+            var expectedVersions = new[] { 
+                new Version("1.0"), 
+                new Version("1.0.0"),
+                new Version("1.0.0.0")
+            };
+
+            // Act
+            var versions = VersionUtility.GetPossibleVersions(new Version("1.0.0.0")).ToList();
+
+            // Assert
+            foreach (var v in expectedVersions) {
+                Assert.IsTrue(versions.Contains(v));
+            }
+        }
+
+        [TestMethod]
+        public void GetAllPossibleVersionsThreeDigitsWithZeroBetween() {
+            // Arrange
+            var expectedVersions = new[] { 
+                new Version("1.0.1"), 
+                new Version("1.0.1.0")
+            };
+
+            // Act
+            var versions = VersionUtility.GetPossibleVersions(new Version("1.0.1")).ToList();
+
+            // Assert
+            foreach (var v in expectedVersions) {
+                Assert.IsTrue(versions.Contains(v));
+            }
+        }
+
+        [TestMethod]
+        public void GetAllPossibleVersionsFourDigitsWithTrailingZeros() {
+            // Arrange
+            var expectedVersions = new[] { 
+                new Version("1.1.0.0"), 
+                new Version("1.1.0"),
+                new Version("1.1")
+            };
+
+            // Act
+            var versions = VersionUtility.GetPossibleVersions(new Version("1.1.0.0")).ToList();
+
+            // Assert
+            foreach (var v in expectedVersions) {
+                Assert.IsTrue(versions.Contains(v));
+            }
         }
 
         [TestMethod]

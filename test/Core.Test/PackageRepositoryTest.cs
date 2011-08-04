@@ -232,6 +232,22 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void FindPackageNormalizesVersionBeforeComparing() {
+            // Arrange
+            var repository = new MockPackageRepository() {
+                PackageUtility.CreatePackage("B", "1.0.0"),
+                PackageUtility.CreatePackage("B", "1.0.0.1")
+            };
+
+            // Act
+            IPackage package = repository.FindPackage("B", new Version("1.0"));
+
+            // Assert
+            Assert.AreEqual("B", package.Id);
+            Assert.AreEqual(new Version("1.0.0"), package.Version);
+        }
+
+        [TestMethod]
         public void FindDependencyPicksLowestMajorAndMinorVersionButHighestBuildAndRevision() {
             // Arrange
             var repository = new MockPackageRepository() {

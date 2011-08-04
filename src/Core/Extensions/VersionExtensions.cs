@@ -8,23 +8,23 @@ namespace NuGet {
 
         public static Func<T, bool> ToDelegate<T>(this IVersionSpec versionInfo, Func<T, Version> extractor) {
             return p => {
-                Version version = extractor(p);
+                Version version = VersionUtility.NormalizeVersion(extractor(p));
                 bool condition = true;
                 if (versionInfo.MinVersion != null) {
                     if (versionInfo.IsMinInclusive) {
-                        condition = condition && version >= versionInfo.MinVersion;
+                        condition = condition && version >= VersionUtility.NormalizeVersion(versionInfo.MinVersion);
                     }
                     else {
-                        condition = condition && version > versionInfo.MinVersion;
+                        condition = condition && version > VersionUtility.NormalizeVersion(versionInfo.MinVersion);
                     }
                 }
 
                 if (versionInfo.MaxVersion != null) {
                     if (versionInfo.IsMaxInclusive) {
-                        condition = condition && version <= versionInfo.MaxVersion;
+                        condition = condition && version <= VersionUtility.NormalizeVersion(versionInfo.MaxVersion);
                     }
                     else {
-                        condition = condition && version < versionInfo.MaxVersion;
+                        condition = condition && version < VersionUtility.NormalizeVersion(versionInfo.MaxVersion);
                     }
                 }
 

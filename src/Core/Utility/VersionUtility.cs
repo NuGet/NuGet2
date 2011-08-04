@@ -183,6 +183,8 @@ namespace NuGet {
                 throw new ArgumentNullException("version");
             }
 
+            version = NormalizeVersion(version);
+
             if (version.Build == 0 && version.Revision == 0) {
                 version = new Version(version.Major, version.Minor);
             }
@@ -438,6 +440,38 @@ namespace NuGet {
             return compatibleItems != null && compatibleItems.Any();
         }
 
+        internal static Version NormalizeVersion(Version verison) {
+            return new Version(GetValueOrZero(verison.Major),
+                               GetValueOrZero(verison.Minor),
+                               GetValueOrZero(verison.Build),
+                               GetValueOrZero(verison.Revision));
+        }
+
+        /// <summary>
+        /// Returns all possible versions for a version. i.e. 1.0 would return 1.0, 1.0.0, 1.0.0.0
+        /// </summary>
+        internal static IEnumerable<Version> GetPossibleVersions(Version version) {
+            // Trim the version so things like 1.0.0.0 end up being 1.0
+            version = TrimVersion(version);
+
+            var versions = new List<Version> {
+                version
+            };
+
+            if (version.Build == -1 && version.Revision == -1) {
+                versions.Add(new Version(version.Major, version.Minor, 0));
+                versions.Add(new Version(version.Major, version.Minor, 0, 0));
+            }
+            else if (version.Revision == -1) {
+                versions.Add(new Version(version.Major, version.Minor, version.Build, 0));
+            }
+
+            return versions;
+        }
+
+        private static int GetValueOrZero(int value) {
+            return Math.Max(value, 0);
+        }
         public static bool IsCompatible(FrameworkName frameworkName, IEnumerable<FrameworkName> supportedFrameworks) {
             if (supportedFrameworks.Any()) {
                 return supportedFrameworks.Any(supportedFramework => IsCompatible(frameworkName, supportedFramework));
@@ -452,7 +486,8 @@ namespace NuGet {
                 return false;
             }
 
-            if (frameworkName.Version < targetFrameworkName.Version) {
+            if (NormalizeVersion(frameworkName.Version) <
+                NormalizeVersion(targetFrameworkName.Version)) {
                 return false;
             }
 
@@ -482,7 +517,7 @@ namespace NuGet {
         private static int GetProfileCompatibility(FrameworkName frameworkName, FrameworkName targetFrameworkName) {
             int compatibility = 0;
 
-            if (frameworkName.Version == targetFrameworkName.Version) {
+            if (NormalizeVersion(frameworkName.Version) == NormalizeVersion(targetFrameworkName.Version)) {
                 compatibility++;
             }
 
