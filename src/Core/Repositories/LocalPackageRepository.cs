@@ -163,6 +163,9 @@ namespace NuGet {
         protected virtual IPackage OpenPackage(string path) {
             var package = new ZipPackage(() => FileSystem.OpenFile(path), _enableCaching);
 
+            // Set the last modified date on the package
+            package.Published = FileSystem.GetLastModified(path);
+
             // Clear the cache whenever we open a new package file
             ZipPackage.ClearCache(package);
             return package;

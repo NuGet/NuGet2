@@ -54,7 +54,9 @@ namespace NuGet.Commands {
 
             return packages.Where(p => p.IsLatestVersion)
                            .OrderBy(p => p.Id)
-                           .DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
+                           .AsEnumerable()
+                           .Where(p => p.Published > NuGetConstants.Unpublished)
+                           .AsCollapsed();
         }
 
         private IPackageRepository GetRepository() {

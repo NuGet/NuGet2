@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 
 namespace NuGet.VisualStudio {
-
     /// <summary>
     /// Represents a Recent package.
     /// </summary>
@@ -155,6 +154,12 @@ namespace NuGet.VisualStudio {
         public bool IsLatestVersion {
             get {
                 return true;
+            }
+        }
+
+        public DateTimeOffset? Published {
+            get {
+                return _basePackage.Published;
             }
         }
 

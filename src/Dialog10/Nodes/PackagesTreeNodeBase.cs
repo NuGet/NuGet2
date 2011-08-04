@@ -297,9 +297,10 @@ namespace NuGet.Dialog.Providers {
 
                 // Buffer 3 pages
                 _query = orderedQuery.AsBufferedEnumerable(PageSize * 3);
-
+                
                 if (CollapseVersions) {
-                    _query = _query.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
+                    _query = _query.Where(p => p.Published > NuGetConstants.Unpublished)
+                                   .AsCollapsed();
                 }
             }
 

@@ -168,6 +168,10 @@ namespace NuGet.PowerShell.Commands {
         }
 
         protected virtual IEnumerable<IPackage> FilterPackages(IQueryable<IPackage> packages) {
+            if (CollapseVersions) {
+                packages = packages.Where(p => p.IsLatestVersion);
+            }
+
             if (UseRemoteSourceOnly && _firstValueSpecified) {
                 // Optimization: If First parameter is specified, we'll wrap the IQueryable in a BufferedEnumerable to prevent consuming the entire result set.
                 packages = packages.AsBufferedEnumerable(First * 3).AsQueryable();
@@ -178,8 +182,9 @@ namespace NuGet.PowerShell.Commands {
             // When querying a remote source, collapse versions unless AllVersions is specified.
             // We need to do this as the last step of the Queryable as the filtering occurs on the client.
             if (CollapseVersions) {
-                packagesToDisplay = packagesToDisplay.Where(p => p.IsLatestVersion)
-                                                     .DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
+                packagesToDisplay = packages.AsEnumerable()
+                                            .Where(p => p.Published > NuGetConstants.Unpublished)
+                                            .AsCollapsed();
             }
 
             packagesToDisplay = packagesToDisplay.Skip(Skip);

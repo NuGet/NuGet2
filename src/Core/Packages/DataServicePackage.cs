@@ -157,6 +157,12 @@ namespace NuGet {
         }
 
         internal PackageDownloader Downloader { get; set; }
+        
+        DateTimeOffset? IPackage.Published {
+            get {
+                return Published;
+            }
+        }
 
         IEnumerable<string> IPackageMetadata.Authors {
             get {

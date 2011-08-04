@@ -179,6 +179,11 @@ namespace NuGet {
             set;
         }
 
+        public DateTimeOffset? Published {
+            get;
+            set;
+        }
+
         public IEnumerable<IPackageFile> GetFiles() {
             if (_enableCaching) {
                 return MemoryCache.Instance.GetOrAdd(GetFilesCacheKey(), GetFilesNoCache, CacheTimeout);

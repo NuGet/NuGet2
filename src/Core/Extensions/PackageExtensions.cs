@@ -115,6 +115,14 @@ namespace NuGet {
                                 PackageAction.Install, operation.Package.Id, operation.Package.Version);
         }
 
+        /// <summary>
+        /// Returns a distinct set of elements using the comparer specified. This implementation will pick the last occurence
+        /// of each element instead of picking the first. This method assumes that similar items occur in order.
+        /// </summary>
+        public static IEnumerable<IPackage> AsCollapsed(this IEnumerable<IPackage> source) {
+            return source.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
+        }
+
         public static IQueryable<T> Find<T>(this IQueryable<T> packages, string searchText) where T : IPackage {
             if (String.IsNullOrEmpty(searchText)) {
                 return packages;
