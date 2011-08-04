@@ -124,14 +124,25 @@ namespace NuGet.Dialog.Providers {
 
             ShowProgressWindow();
 
-            // now install or uninstall the package depending on the checked states.
-            foreach (Project project in _solutionManager.GetProjects()) {
+            // now install the packages that are checked
+            // Bug 1357: It's crucial that we perform all installs before uninstalls
+            // to avoid the package file being deleted before an install.
+            foreach (Project project in allProjects) {
                 try {
                     if (selectedProjectsSet.Contains(project.UniqueName)) {
                         // if the project is checked, install package into it  
                         InstallPackageToProject(project, item);
                     }
-                    else {
+                }
+                catch (Exception ex) {
+                    AddFailedProject(project, ex);
+                }
+            }
+
+            // now uninstall the packages that are unchecked.            
+            foreach (Project project in allProjects) {
+                try {
+                    if (!selectedProjectsSet.Contains(project.UniqueName)) {
                         // if the project is unchecked, uninstall package from it
                         UninstallPackageFromProject(project, item, (bool)removeDepedencies);
                     }
