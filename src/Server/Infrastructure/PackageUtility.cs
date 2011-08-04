@@ -2,6 +2,7 @@ using System;
 using System.Web;
 using System.Web.Hosting;
 using System.Configuration;
+using System.IO;
 
 namespace NuGet.Server.Infrastructure
 {
@@ -21,7 +22,14 @@ namespace NuGet.Server.Infrastructure
             }
             else
             {
-                PackagePhysicalPath = packagePath;
+                if (Path.IsPathRooted(packagePath))
+                {
+                    PackagePhysicalPath = packagePath;
+                }
+                else
+                {
+                    PackagePhysicalPath = HostingEnvironment.MapPath(packagePath);
+                }
             }
         }
 
