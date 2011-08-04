@@ -39,6 +39,7 @@
     <Compile Include="Authoring\AssemblyMetadataExtractor.cs" />
     <Compile Include="Authoring\IPackageBuilder.cs" />
     <Compile Include="Authoring\IPropertyProvider.cs" />
+    <Compile Include="Authoring\ManifestFileList.cs" />
     <Compile Include="Authoring\ManifestFrameworkAssembly.cs" />
     <Compile Include="Authoring\ManifestDependency.cs" />
     <Compile Include="Authoring\ManifestFile.cs" />

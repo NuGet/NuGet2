@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -30,11 +31,33 @@ namespace NuGet {
         [XmlElement("metadata", IsNullable = false)]
         public ManifestMetadata Metadata { get; set; }
 
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [XmlElement("files", IsNullable = true)]
+        public ManifestFileList FilesList { get; set; }
+
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeFilesList() {
+            // This is to prevent the XML serializer from serializing 'null' value of FilesList as 
+            // <files xsi:nil="true" />
+            return FilesList != null;
+        }
+
         [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
-        [XmlArray("files")]
-        [XmlArrayItem("file", IsNullable = false)]
-        public List<ManifestFile> Files { get; set; }
+        [XmlIgnore]
+        public List<ManifestFile> Files {
+            get {
+                return FilesList != null ? FilesList.Items : null;
+            }
+            set {
+                if (FilesList == null) {
+                    FilesList = new ManifestFileList();
+                }
+                FilesList.Items = value;
+            }
+        }
 
         public void Save(Stream stream) {
             Save(stream, validate: true);
