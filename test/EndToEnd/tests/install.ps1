@@ -1319,3 +1319,19 @@ function Test-InstallPackageNormalizesVersionBeforeCompare {
     Assert-Package $p PackageWithContentFileAndDependency 1.0
     Assert-Package $p PackageWithContentFile 1.0
 }
+
+function Test-InstallPackageWithFrameworkRefsOnlyRequiredForSL {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package PackageWithNet40AndSLLibButOnlySLGacRefs -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p PackageWithNet40AndSLLibButOnlySLGacRefs
+    Assert-SolutionPackage PackageWithNet40AndSLLibButOnlySLGacRefs
+}

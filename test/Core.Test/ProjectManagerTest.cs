@@ -1270,23 +1270,23 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void AddPackageReferenceWithAnyNonCompatibleFrameworkReferenceThrowsAndPackageIsNotReferenced() {
+        public void AddPackageReferenceWithAnyNonCompatibleFrameworkReferenceDoesNotThrow() {
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(mockProjectSystem.Object), mockProjectSystem.Object, localRepository);
-            mockProjectSystem.Setup(m => m.TargetFramework).Returns(new FrameworkName(".NETFramework", new Version("2.0")));
+            mockProjectSystem.Setup(m => m.TargetFramework).Returns(VersionUtility.ParseFrameworkName("net20"));
             var mockPackage = new Mock<IPackage>();
             mockPackage.Setup(m => m.Id).Returns("A");
             mockPackage.Setup(m => m.Version).Returns(new Version("1.0"));
-            var frameworkReference = new FrameworkAssemblyReference("System.Web", new[] { new FrameworkName(".NETFramework", new Version("5.0")) });
+            var frameworkReference = new FrameworkAssemblyReference("System.Web", new[] { VersionUtility.ParseFrameworkName("net50") });
             mockPackage.Setup(m => m.FrameworkAssemblies).Returns(new[] { frameworkReference });
             sourceRepository.AddPackage(mockPackage.Object);
 
             // Act & Assert            
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), "Could not install package 'A 1.0'. You are trying to install this package into a project that targets '.NETFramework,Version=v2.0', but the package does not contain any framework assemblies that are compatible with that framework. For more information, contact the package author.");
-            Assert.IsFalse(localRepository.Exists(mockPackage.Object));
+            projectManager.AddPackageReference("A");
+            Assert.IsTrue(localRepository.Exists(mockPackage.Object));
         }
 
         private ProjectManager CreateProjectManager() {

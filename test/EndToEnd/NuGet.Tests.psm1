@@ -103,6 +103,10 @@ function global:Run-Test {
     }
     
     $results = @()
+    
+    # Add a reference to the msbuild assembly in case it isn't there
+    Add-Type -AssemblyName "Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
+
     # The vshost that VS launches caues the functional tests to freeze sometimes so disable it
     [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "false")
     
