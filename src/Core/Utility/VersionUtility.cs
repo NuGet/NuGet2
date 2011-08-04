@@ -441,10 +441,10 @@ namespace NuGet {
         }
 
         internal static Version NormalizeVersion(Version verison) {
-            return new Version(GetValueOrZero(verison.Major),
-                               GetValueOrZero(verison.Minor),
-                               GetValueOrZero(verison.Build),
-                               GetValueOrZero(verison.Revision));
+            return new Version(verison.Major,
+                               verison.Minor,
+                               Math.Max(verison.Build, 0),
+                               Math.Max(verison.Revision, 0));
         }
 
         /// <summary>
@@ -454,24 +454,17 @@ namespace NuGet {
             // Trim the version so things like 1.0.0.0 end up being 1.0
             version = TrimVersion(version);
 
-            var versions = new List<Version> {
-                version
-            };
+            yield return version;
 
             if (version.Build == -1 && version.Revision == -1) {
-                versions.Add(new Version(version.Major, version.Minor, 0));
-                versions.Add(new Version(version.Major, version.Minor, 0, 0));
+                yield return new Version(version.Major, version.Minor, 0);
+                yield return new Version(version.Major, version.Minor, 0, 0);
             }
             else if (version.Revision == -1) {
-                versions.Add(new Version(version.Major, version.Minor, version.Build, 0));
+                yield return new Version(version.Major, version.Minor, version.Build, 0);
             }
-
-            return versions;
         }
 
-        private static int GetValueOrZero(int value) {
-            return Math.Max(value, 0);
-        }
         public static bool IsCompatible(FrameworkName frameworkName, IEnumerable<FrameworkName> supportedFrameworks) {
             if (supportedFrameworks.Any()) {
                 return supportedFrameworks.Any(supportedFramework => IsCompatible(frameworkName, supportedFramework));

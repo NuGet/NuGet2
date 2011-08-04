@@ -112,12 +112,14 @@ namespace NuGet {
                 return null;
             }
 
+            version = version != null ? VersionUtility.NormalizeVersion(version) : null;
+
             return (from e in document.Root.Elements("package")
                     let entryId = e.GetOptionalAttributeValue("id")
                     let entryVersion = VersionUtility.ParseOptionalVersion(e.GetOptionalAttributeValue("version"))
                     where entryId != null && entryVersion != null
                     where id.Equals(entryId, StringComparison.OrdinalIgnoreCase) &&
-                          VersionUtility.NormalizeVersion(version).Equals(VersionUtility.NormalizeVersion(entryVersion))
+                          VersionUtility.NormalizeVersion(entryVersion).Equals(version)
                     select e).FirstOrDefault();
         }
 
