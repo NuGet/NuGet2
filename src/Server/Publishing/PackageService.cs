@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Web;
 using System.Web.Routing;
+using Ninject;
 using NuGet.Server.Infrastructure;
 
 namespace NuGet.Server {
@@ -49,6 +51,15 @@ namespace NuGet.Server {
             // Make sure they can access this package
             Authenticate(context, apiKey, packageId,
                          () => _serverRepository.RemovePackage(packageId, version));
+        }
+		
+        public void GetPackage(HttpContextBase context) {
+            RouteData routeData = GetRouteData(context);
+            // Get the package file name from the route
+            string packageFileName = routeData.GetRequiredString("packageFileName");
+			
+            IServerPackageRepository packageRepository = NinjectBootstrapper.Kernel.Get<IServerPackageRepository>();
+            context.Response.WriteFile(Path.Combine(packageRepository.PackageFileSystem.Root, packageFileName + ".nupkg"));
         }
 
         private void Authenticate(HttpContextBase context, string apiKey, string packageId, Action action) {

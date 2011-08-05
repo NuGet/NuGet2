@@ -5,5 +5,6 @@ namespace NuGet.Server.Infrastructure {
     public interface IServerPackageRepository : IPackageRepository, ISearchableRepository {
         void RemovePackage(string packageId, Version version);
         Package GetMetadataPackage(IPackage package);
+		IFileSystem PackageFileSystem { get; }
     }
 }
