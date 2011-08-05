@@ -26,6 +26,10 @@ namespace NuGet.VisualStudio {
                 if (project.IsSupported()) {
                     yield return project;
                 }
+                else if (project.IsExplicitlyUnsupported()) {
+                    // do not drill down further if this project is explicitly unsupported, e.g. LightSwitch projects
+                    continue;
+                }
 
                 ProjectItems projectItems = null;
                 try {

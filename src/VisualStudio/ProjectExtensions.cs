@@ -33,6 +33,10 @@ namespace NuGet.VisualStudio {
                                                                           VsConstants.FsharpProjectTypeGuid,
                                                                           VsConstants.WixProjectTypeGuid };
 
+        private static readonly HashSet<string> _unsupportedProjectTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+                                                                            VsConstants.LightSwitchProjectTypeGuid
+                                                                        };
+
         // List of project types that cannot have references added to them
         private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[] { VsConstants.WixProjectTypeGuid };
         // List of project types that cannot have binding redirects added
@@ -264,6 +268,10 @@ namespace NuGet.VisualStudio {
 
         public static bool IsSupported(this Project project) {
             return project.Kind != null && _supportedProjectTypes.Contains(project.Kind);
+        }
+
+        public static bool IsExplicitlyUnsupported(this Project project) {
+            return project.Kind == null || _unsupportedProjectTypes.Contains(project.Kind);
         }
 
         public static bool IsSolutionFolder(this Project project) {
