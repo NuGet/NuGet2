@@ -70,6 +70,10 @@ namespace NuGet {
                                           where name != null && name.Equals("Packages", StringComparison.OrdinalIgnoreCase)
                                           select e).FirstOrDefault();
 
+            if (packageEntityContainer == null) {
+                return Enumerable.Empty<string>();
+            }
+
             // Get all functions
             return from e in packageEntityContainer.Elements()
                    where e.Name.LocalName == "FunctionImport"
