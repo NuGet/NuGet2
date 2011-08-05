@@ -23,7 +23,11 @@
             </blockquote>
         </fieldset>
         <p style="font-size:1.1em">
-            To add packages to the feed put package files (.nupkg files) in a folder named "Packages" under the site root (i.e. ~/Packages).
+        <%
+            NuGet.Server.Infrastructure.IServerPackageRepository packageRepository = NuGet.Server.Infrastructure.NinjectBootstrapper.Kernel.Get<NuGet.Server.Infrastructure.IServerPackageRepository>();
+            
+             %>
+            To add packages to the feed put package files (.nupkg files) in the folder "<% = packageRepository.PackageFileSystem.Root %>".
         </p>
     </div>
 </body>
