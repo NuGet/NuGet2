@@ -35,15 +35,7 @@ namespace NuGet {
         [EditorBrowsable(EditorBrowsableState.Never)]
         [XmlElement("files", IsNullable = true)]
         public ManifestFileList FilesList { get; set; }
-
-        [Browsable(false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public bool ShouldSerializeFilesList() {
-            // This is to prevent the XML serializer from serializing 'null' value of FilesList as 
-            // <files xsi:nil="true" />
-            return FilesList != null;
-        }
-
+        
         [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
         [XmlIgnore]
@@ -90,6 +82,15 @@ namespace NuGet {
             else {
                 serializer.Serialize(stream, this, ns);
             }
+        }
+
+        // http://msdn.microsoft.com/en-us/library/53b8022e(VS.71).aspx
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeFilesList() {
+            // This is to prevent the XML serializer from serializing 'null' value of FilesList as 
+            // <files xsi:nil="true" /> 
+            return FilesList != null;
         }
 
         private static void AddSchemaVersionAttribute(XDocument document, Stream stream) {
