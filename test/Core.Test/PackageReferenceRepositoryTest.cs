@@ -259,8 +259,12 @@ namespace NuGet.Test {
             Assert.AreSame(packageA, packages[1]);
             Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
-  <package id=""A"" version=""1.0"" />
   <package id=""C"" version=""2.0"" />
+  <package id=""B"" version=""1.0"" />
+  <package id=""A"" version=""1.0"" />
+  <package id="""" version=""1.0"" />
+  <package id=""G"" version="""" />
+  <package />
 </packages>", fileSystem.ReadAllText("packages.config"));
         }
 

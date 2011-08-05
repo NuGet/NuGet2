@@ -54,8 +54,7 @@ namespace NuGet {
                     reference.Version == null ||
                     !SourceRepository.TryFindPackage(reference.Id, reference.Version, out package)) {
 
-                    // Skip and remove bad entries
-                    _packageReferenceFile.DeleteEntry(reference.Id, reference.Version);
+                    // Skip bad entries
                     continue;
                 }
                 else {
