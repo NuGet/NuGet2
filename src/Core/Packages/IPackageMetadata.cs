@@ -17,6 +17,7 @@ namespace NuGet {
         string ReleaseNotes { get; }
         string Language { get; }
         string Tags { get; }
+        string Copyright { get; }
 
         /// <summary>
         /// Specifies assemblies from GAC that the package depends on.

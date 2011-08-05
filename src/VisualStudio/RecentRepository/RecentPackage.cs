@@ -150,6 +150,12 @@ namespace NuGet.VisualStudio {
                 return _basePackage.Rating;
             }
         }
+        
+        public string Copyright {
+            get {
+                return _basePackage.Copyright;
+            }
+        }
 
         public bool IsLatestVersion {
             get {

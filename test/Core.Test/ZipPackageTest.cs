@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 
 namespace NuGet.Test {
     [TestClass]
@@ -28,6 +28,7 @@ namespace NuGet.Test {
             builder.Authors.Add("David");
             builder.Description = "This is a test package";
             builder.ReleaseNotes = "This is a release note.";
+            builder.Copyright = "Copyright";
             builder.Files.AddRange(PackageUtility.CreateFiles(new[] { @"lib\40\A.dll", @"content\foo" }));
 
             var ms = new MemoryStream();
@@ -41,6 +42,7 @@ namespace NuGet.Test {
             Assert.AreEqual("Package", package.Id);
             Assert.AreEqual(new Version("1.0"), package.Version);
             Assert.AreEqual("David", package.Authors.First());
+            Assert.AreEqual("Copyright", package.Copyright);
             var files = package.GetFiles().ToList();
             Assert.AreEqual(2, files.Count);
             Assert.AreEqual(@"content\foo", files[0].Path);

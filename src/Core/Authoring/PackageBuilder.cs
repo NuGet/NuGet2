@@ -121,6 +121,11 @@ namespace NuGet {
             private set;
         }
 
+        public string Copyright {
+            get;
+            set;
+        }
+
         public Collection<PackageDependency> Dependencies {
             get;
             private set;
@@ -229,6 +234,7 @@ namespace NuGet {
             Summary = metadata.Summary;
             ReleaseNotes = metadata.ReleaseNotes;
             Language = metadata.Language;
+            Copyright = metadata.Copyright;
 
             if (metadata.Tags != null) {
                 Tags.AddRange(ParseTags(metadata.Tags));

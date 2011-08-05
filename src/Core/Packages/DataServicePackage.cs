@@ -157,7 +157,12 @@ namespace NuGet {
         }
 
         internal PackageDownloader Downloader { get; set; }
-        
+
+        public string Copyright {
+            get;
+            set;
+        }
+
         DateTimeOffset? IPackage.Published {
             get {
                 return Published;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -146,6 +145,7 @@ namespace NuGet.Test {
                 Description = "Descriptions                                         ",
                 Summary = "                            Summary",
                 Language = "     en-us   ",
+                Copyright = "            Copyright 2012                "
             };
             builder.Authors.Add("David");
             builder.Owners.Add("John");
@@ -170,6 +170,7 @@ namespace NuGet.Test {
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Descriptions</description>
     <summary>Summary</summary>
+    <copyright>Copyright 2012</copyright>
     <language>en-us</language>
     <tags>t1 t2 t3</tags>
     <dependencies>
@@ -326,7 +327,7 @@ Description is required.");
             ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec1.AsStream(), null), "Data at the root level is invalid. Line 1, position 1.");
             ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec2.AsStream(), null), "Root element is missing.");
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec3.AsStream(), null), @"The element 'package' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec4.AsStream(), null), @"The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'authors, description, id, version' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec4.AsStream(), null), @"The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'id, version, authors, description' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
         [TestMethod]
@@ -452,9 +453,7 @@ Description is required.");
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), 
-                "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has invalid child element 'files' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'. "
-               + "List of possible elements expected: 'owners, projectUrl, summary, frameworkAssemblies, releaseNotes, licenseUrl, title, iconUrl, references, requireLicenseAcceptance, tags' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'."
-            );
+            "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has invalid child element 'files' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'. List of possible elements expected: 'frameworkAssemblies, releaseNotes, copyright, summary, iconUrl, references, owners, requireLicenseAcceptance, licenseUrl, tags, title, projectUrl' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
         [TestMethod]
@@ -472,6 +471,7 @@ Description is required.");
     <licenseUrl>http://somesite/somelicense.txt</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <tags>t1      t2    foo-bar</tags>
+    <copyright>David Fowler 2011</copyright>
   </metadata>
 </package>";
 
@@ -493,6 +493,7 @@ Description is required.");
             Assert.AreEqual("t2", tags[1]);
             Assert.AreEqual("foo-bar", tags[2]);
             Assert.AreEqual("en-US", builder.Language);
+            Assert.AreEqual("David Fowler 2011", builder.Copyright);
             Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
             Assert.AreEqual(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
             Assert.IsTrue(builder.RequireLicenseAcceptance);
@@ -586,6 +587,7 @@ Description is required.");
     <language>en-US</language>
     <licenseUrl>http://somesite/somelicense.txt</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <copyright>2010</copyright>
     <dependencies>
         <dependency id=""A"" version=""[1.0]"" />
         <dependency id=""B"" version=""[1.0, 2.5)"" />
@@ -604,6 +606,7 @@ Description is required.");
             Assert.AreEqual(1, builder.Authors.Count);
             Assert.AreEqual("Velio Ivanov", authors[0]);
             Assert.AreEqual("en-US", builder.Language);
+            Assert.AreEqual("2010", builder.Copyright);
             Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
             Assert.AreEqual(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
             Assert.IsTrue(builder.RequireLicenseAcceptance);

@@ -137,6 +137,7 @@ namespace NuGet {
 
             // Trim fields in case they have extra whitespace
             manifest.Metadata.Id = manifest.Metadata.Id.SafeTrim();
+
             // validate the package Id early to avoid any further processing
             PackageIdValidator.ValidatePackageId(manifest.Metadata.Id);
             manifest.Metadata.Title = manifest.Metadata.Title.SafeTrim();
@@ -147,6 +148,7 @@ namespace NuGet {
             manifest.Metadata.ReleaseNotes = manifest.Metadata.ReleaseNotes.SafeTrim();
             manifest.Metadata.Language = manifest.Metadata.Language.SafeTrim();
             manifest.Metadata.Tags = manifest.Metadata.Tags.SafeTrim();
+            manifest.Metadata.Copyright = manifest.Metadata.Copyright.SafeTrim();
 
             return manifest;
         }
@@ -182,6 +184,7 @@ namespace NuGet {
                     IconUrl = metadata.IconUrl != null ? metadata.IconUrl.OriginalString.SafeTrim() : null,
                     RequireLicenseAcceptance = metadata.RequireLicenseAcceptance,
                     Description = metadata.Description.SafeTrim(),
+                    Copyright = metadata.Copyright.SafeTrim(),
                     Summary = metadata.Summary.SafeTrim(),
                     ReleaseNotes = metadata.ReleaseNotes.SafeTrim(),
                     Language = metadata.Language.SafeTrim(),

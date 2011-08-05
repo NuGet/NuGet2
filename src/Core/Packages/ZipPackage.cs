@@ -160,6 +160,16 @@ namespace NuGet {
             }
         }
 
+        public DateTimeOffset? Published {
+            get;
+            set;
+        }
+
+        public string Copyright {
+            get;
+            set;
+        }
+
         public IEnumerable<PackageDependency> Dependencies {
             get;
             set;
@@ -175,11 +185,6 @@ namespace NuGet {
         }
 
         public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies {
-            get;
-            set;
-        }
-
-        public DateTimeOffset? Published {
             get;
             set;
         }
@@ -248,6 +253,7 @@ namespace NuGet {
                     Tags = metadata.Tags;
                     Dependencies = metadata.Dependencies;
                     FrameworkAssemblies = metadata.FrameworkAssemblies;
+                    Copyright = metadata.Copyright;
 
                     IEnumerable<string> references = (manifest.Metadata.References ?? Enumerable.Empty<ManifestReference>()).Select(c => c.File);
                     _references = new HashSet<string>(references, StringComparer.OrdinalIgnoreCase);
