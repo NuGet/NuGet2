@@ -150,12 +150,30 @@ namespace NuGet.VisualStudio {
                 return;
             }
 
-            // find the packages based on metadata from the Aggregate repository based on Id only
-            IEnumerable<IPackage> newPackages = repository.FindPackages(packagesMetadata.Select(p => p.Id));
+            // look up the package metadata in the machine cache first before searching the aggregate repository
+
+            // this will contain the package metadata that are not found in the machine cache
+            var remainingMetadata = new List<IPersistencePackageMetadata>();
+
+            foreach (var metadata in packagesMetadata) {
+                var cachedPackage = MachineCache.Default.FindPackage(metadata.Id, metadata.Version);
+                if (cachedPackage != null) {
+                    // found a package with the same Id and Version, use it
+                    RecentPackage package = ConvertToRecentPackage(cachedPackage, metadata.LastUsedDate);
+                    AddRecentPackage(package);
+                }
+                else {
+                    // if not, put it in the remaining queue to be searched from aggregate repository
+                    remainingMetadata.Add(metadata);
+                }
+            }
+
+            // for the remaining metadata, find packages from the Aggregate repository based on Id only
+            IEnumerable<IPackage> newPackages = repository.FindPackages(remainingMetadata.Select(p => p.Id));
 
             // newPackages contains all versions of a package Id. Filter out the versions that we don't care.
-            IEnumerable<RecentPackage> filterPackages = FilterPackages(packagesMetadata, newPackages);
-            foreach (var package in filterPackages) {
+            IEnumerable<RecentPackage> filteredPackages = FilterPackages(remainingMetadata, newPackages);
+            foreach (var package in filteredPackages) {
                 AddRecentPackage(package);
             }
         }
@@ -185,9 +203,8 @@ namespace NuGet.VisualStudio {
             _packagesCache.RemoveAll(p => !lookup.Contains(p.Id));
         }
 
-
         private void SavePackagesToSettingsStore() {
-            // only save if there are new package added
+            // only save if there are new packages added
             if (_packagesCache.Count > 0) {
 
                 // IMPORTANT: call ToList() here. Otherwise, we may read and write to the settings store at the same time
