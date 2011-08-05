@@ -78,13 +78,26 @@ namespace NuGet.Dialog.Providers {
                 return false;
             }
 
-            _activePackageManager.UpdatePackage(
-                selectedProjectsList,
-                item.PackageIdentity,
-                operations,
-                updateDependencies: true,
-                logger: this,
-                eventListener: this);
+            try {
+                // solution level package, need to hook up to PackageInstalled event on the VsPackageManager
+                if (selectedProjectsList.Count == 0) {
+                    RegisterPackageOperationEvents(_activePackageManager, null);
+                }
+
+                _activePackageManager.UpdatePackage(
+                    selectedProjectsList,
+                    item.PackageIdentity,
+                    operations,
+                    updateDependencies: true,
+                    logger: this,
+                    eventListener: this);
+            }
+            finally {
+                // solution level package, need to unhook from the PackageInstalled event on the VsPackageManager
+                if (selectedProjectsList.Count == 0) {
+                    UnregisterPackageOperationEvents(_activePackageManager, null);
+                }
+            }
 
             return true;
         }

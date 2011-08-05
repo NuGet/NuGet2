@@ -48,7 +48,6 @@ namespace NuGet.Dialog.Providers {
 
             ShowProgressWindow();
             if (_activePackageManager.IsProjectLevel(item.PackageIdentity)) {
-
                 HideProgressWindow();
                 var selectedProjects = _userNotifierServices.ShowProjectSelectorWindow(
                     Resources.Dialog_OnlineSolutionInstruction,
@@ -79,13 +78,26 @@ namespace NuGet.Dialog.Providers {
                 return false;
             }
 
-            _activePackageManager.InstallPackage(
-                selectedProjectsList,
-                item.PackageIdentity,
-                operations,
-                ignoreDependencies: false,
-                logger: this,
-                eventListener: this);
+            try {
+                // solution level package, need to hook up to PackageInstalled event on the VsPackageManager
+                if (selectedProjectsList.Count == 0) {
+                    RegisterPackageOperationEvents(_activePackageManager, null);
+                }
+
+                _activePackageManager.InstallPackage(
+                    selectedProjectsList,
+                    item.PackageIdentity,
+                    operations,
+                    ignoreDependencies: false,
+                    logger: this,
+                    eventListener: this);
+            }
+            finally {
+                // solution level package, need to unhook from the PackageInstalled event on the VsPackageManager
+                if (selectedProjectsList.Count == 0) {
+                    UnregisterPackageOperationEvents(_activePackageManager, null);
+                }
+            }
 
             return true;
         }
