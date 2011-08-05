@@ -31,9 +31,9 @@ namespace NuGet.Server {
                                context => CreatePackageService().DeletePackage(context.HttpContext));
  
             // Route to get packages
-            routes.MapDelegate("GetPackage",
-                               "Packages/{packageFileName}.nupkg",
-                               context => CreatePackageService().GetPackage(context.HttpContext));
+            routes.MapDelegate("DownloadPackage",
+                               "DownloadPackage/{packageId}/{version}",
+                               context => CreatePackageService().DownloadPackage(context.HttpContext));
 
 #if DEBUG
             // The default route is http://{root}/nuget/Packages

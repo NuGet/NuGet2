@@ -17,12 +17,6 @@ namespace NuGet.Server.Infrastructure {
         public ServerPackageRepository(IPackagePathResolver pathResolver, IFileSystem fileSystem)
             : base(pathResolver, fileSystem) {
         }
-		
-        public IFileSystem PackageFileSystem {
-            get {
-                return FileSystem;
-            }
-        }
 		 
         [Inject]
         public IHashProvider HashProvider { get; set; }

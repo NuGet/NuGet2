@@ -6,6 +6,7 @@ using System.Data.Services.Providers;
 using System.IO;
 using System.Linq;
 using System.ServiceModel.Web;
+using System.Web;
 using Ninject;
 using NuGet.Server.Infrastructure;
 
@@ -44,8 +45,8 @@ namespace NuGet.Server.DataServices {
 
         public Uri GetReadStreamUri(object entity, DataServiceOperationContext operationContext) {
             var package = (Package)entity;
-
-            return PackageUtility.GetPackageUrl(package.Path, operationContext.AbsoluteServiceUri);
+            Uri baseUri = new Uri(string.Format("{0}://{1}{2}", HttpContext.Current.Request.Url.Scheme, HttpContext.Current.Request.Url.Authority, HttpContext.Current.Request.ApplicationPath));
+            return PackageUtility.GetPackageUrl(package, baseUri);
         }
 
         public string GetStreamContentType(object entity, DataServiceOperationContext operationContext) {

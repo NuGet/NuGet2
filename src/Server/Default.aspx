@@ -23,11 +23,7 @@
             </blockquote>
         </fieldset>
         <p style="font-size:1.1em">
-        <%
-            NuGet.Server.Infrastructure.IServerPackageRepository packageRepository = NuGet.Server.Infrastructure.NinjectBootstrapper.Kernel.Get<NuGet.Server.Infrastructure.IServerPackageRepository>();
-            
-             %>
-            To add packages to the feed put package files (.nupkg files) in the folder "<% = packageRepository.PackageFileSystem.Root %>".
+            To add packages to the feed put package files (.nupkg files) in the folder "<% = NuGet.Server.Infrastructure.PackageUtility.PackagePhysicalPath %>".
         </p>
     </div>
 </body>

@@ -53,13 +53,22 @@ namespace NuGet.Server {
                          () => _serverRepository.RemovePackage(packageId, version));
         }
 		
-        public void GetPackage(HttpContextBase context) {
+        public void DownloadPackage(HttpContextBase context) {
             RouteData routeData = GetRouteData(context);
             // Get the package file name from the route
-            string packageFileName = routeData.GetRequiredString("packageFileName");
-			
-            IServerPackageRepository packageRepository = NinjectBootstrapper.Kernel.Get<IServerPackageRepository>();
-            context.Response.WriteFile(Path.Combine(packageRepository.PackageFileSystem.Root, packageFileName + ".nupkg"));
+            string packageId = routeData.GetRequiredString("packageId");
+            string version = routeData.GetRequiredString("version").Replace('_', '.');
+            IPackage requestedPackage = _serverRepository.FindPackage(packageId, version);
+            if (requestedPackage != null)
+            {
+                context.Response.AddHeader("content-disposition", string.Format("attachment; filename={0}.{1}.nupkg", packageId, version));
+                context.Response.ContentType = "application/zip";
+                context.Response.Write(requestedPackage.GetStream().ReadToEnd());
+            }
+            else {
+                // package not found
+                context.Response.StatusCode = 404;
+            }
         }
 
         private void Authenticate(HttpContextBase context, string apiKey, string packageId, Action action) {
