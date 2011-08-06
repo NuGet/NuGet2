@@ -335,6 +335,74 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [TestMethod]
+        public void PackageCommand_AcceptEmptyDependenciesElement() {
+            // Arrange            
+            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
+            string expectedPackage = "dep.2.2.2.nupkg";
+            File.WriteAllText(Path.Combine(SpecificFilesFolder, "file1.txt"), "file 1");
+            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>dep</id>
+    <version>2.2.2</version>
+    <authors>Terence Parr</authors>
+    <description>ANother Tool for Language Recognition, is a language tool that provides a framework for constructing recognizers, interpreters, compilers, and translators from grammatical descriptions containing actions in a variety of target languages.</description>
+    <language>en-US</language>
+    <dependencies>
+    </dependencies>
+  </metadata>
+</package>");
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory(SpecificFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(0, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.IsTrue(File.Exists(expectedPackage));
+
+            ZipPackage package = VerifyPackageContents(expectedPackage, new[] { @"file1.txt" });
+
+            Assert.IsFalse(package.Dependencies.Any());
+        }
+
+        [TestMethod]
+        public void PackageCommand_AcceptEmptyFrameworkAssemblyElement() {
+            // Arrange            
+            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
+            string expectedPackage = "framework.2.2.2.nupkg";
+            File.WriteAllText(Path.Combine(SpecificFilesFolder, "file1.txt"), "file 1");
+            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>framework</id>
+    <version>2.2.2</version>
+    <authors>Terence Parr</authors>
+    <description>ANother Tool for Language Recognition, is a language tool that provides a framework for constructing recognizers, interpreters, compilers, and translators from grammatical descriptions containing actions in a variety of target languages.</description>
+    <language>en-US</language>
+    <frameworkAssemblies>
+    </frameworkAssemblies>
+  </metadata>
+</package>");
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory(SpecificFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(0, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.IsTrue(File.Exists(expectedPackage));
+
+            ZipPackage package = VerifyPackageContents(expectedPackage, new[] { @"file1.txt" });
+
+            Assert.IsFalse(package.FrameworkAssemblies.Any());
+        }
+
+        [TestMethod]
         public void PackageCommand_SpecifyingProjectFileCreatesPackageAndSymbolsPackge() {
             // Arrange            
             string expectedPackage = "FakeProject.1.2.nupkg";

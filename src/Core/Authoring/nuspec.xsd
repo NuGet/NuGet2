@@ -30,7 +30,7 @@
                             <xs:element name="dependencies" maxOccurs="1" minOccurs="0">
                                 <xs:complexType>
                                     <xs:sequence>
-                                        <xs:element name="dependency" minOccurs="1" maxOccurs="unbounded">
+                                        <xs:element name="dependency" minOccurs="0" maxOccurs="unbounded">
                                             <xs:complexType>
                                                 <xs:attribute name="id" type="xs:string" use="required" />
                                                 <xs:attribute name="version" type="xs:string" use="optional" />
@@ -42,7 +42,7 @@
                             <xs:element name="frameworkAssemblies" maxOccurs="1" minOccurs="0">
                                 <xs:complexType>
                                     <xs:sequence>
-                                        <xs:element name="frameworkAssembly" minOccurs="1" maxOccurs="unbounded">
+                                        <xs:element name="frameworkAssembly" minOccurs="0" maxOccurs="unbounded">
                                             <xs:complexType>
                                                 <xs:attribute name="assemblyName" type="xs:string" use="required" />
                                                 <xs:attribute name="targetFramework" type="xs:string" use="optional" />
