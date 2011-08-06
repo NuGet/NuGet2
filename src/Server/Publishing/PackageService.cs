@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Web;
 using System.Web.Routing;
 using Ninject;
@@ -59,11 +60,11 @@ namespace NuGet.Server {
             string packageId = routeData.GetRequiredString("packageId");
             string version = routeData.GetRequiredString("version").Replace('_', '.');
             IPackage requestedPackage = _serverRepository.FindPackage(packageId, version);
-            if (requestedPackage != null)
-            {
-                context.Response.AddHeader("content-disposition", string.Format("attachment; filename={0}.{1}.nupkg", packageId, version));
+            if (requestedPackage != null) {
+                string fileName = _serverRepository.GetMetadataPackage(requestedPackage).Path;
+                context.Response.AddHeader("content-disposition", String.Format("attachment; filename={0}", fileName));
                 context.Response.ContentType = "application/zip";
-                context.Response.Write(requestedPackage.GetStream().ReadToEnd());
+                context.Response.TransmitFile(Path.Combine(PackageUtility.PackagePhysicalPath, fileName));
             }
             else {
                 // package not found

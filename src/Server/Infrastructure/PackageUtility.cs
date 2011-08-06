@@ -12,8 +12,10 @@ namespace NuGet.Server.Infrastructure {
         private static string DefaultPackagePhysicalPath = HostingEnvironment.MapPath("~/Packages");
 		
         static PackageUtility() {
+            // The NuGetPackagePath could be an absolute path (rooted and use as is)
+            // or a relative path (and use as a virtual path)
             string packagePath = ConfigurationManager.AppSettings["NuGetPackagePath"];
-            if (string.IsNullOrEmpty(packagePath)) {
+            if (String.IsNullOrEmpty(packagePath)) {
                 _packagePhysicalPath = DefaultPackagePhysicalPath;
             }
             else {
@@ -33,11 +35,14 @@ namespace NuGet.Server.Infrastructure {
         }
 
         public static Uri GetPackageUrl(Package package, Uri baseUri) {
-            return new Uri(baseUri, GetPackageDownloadUrl(package));
+            Uri packageUri = new Uri(baseUri, GetPackageDownloadUrl(package));
+            return packageUri;
         }
 
         private static string GetPackageDownloadUrl(Package package) {
-            return RouteTable.Routes["DownloadPackage"].GetVirtualPath(HttpContext.Current.Request.RequestContext, new RouteValueDictionary { { "packageId", package.Id }, { "version", package.Version.ToString().Replace('.', '_') } }).VirtualPath;
+            var routesValues = new RouteValueDictionary { { "packageId", package.Id }, { "version", package.Version.ToString().Replace('.', '_') } };
+            string packageDownloadUrl = RouteTable.Routes["DownloadPackage"].GetVirtualPath(HttpContext.Current.Request.RequestContext, routesValues).VirtualPath;
+            return packageDownloadUrl;
         }
     }
 }
