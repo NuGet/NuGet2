@@ -75,6 +75,54 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void ManifestEnsuresManifestReferencesDoNotContainInvalidCharacters() {
+            // Arrange
+            var manifest = new Manifest {
+                Metadata = new ManifestMetadata {
+                    Id = "Foobar",
+                    Version = "1.0",
+                    Authors = "test-author",
+                    Description = "desc",
+                    References = new List<ManifestReference> {
+                        new ManifestReference { File = "Foo?.dll" },
+                        new ManifestReference { File = "Bar*.dll" },
+                        new ManifestReference { File = @"net40\baz.dll" }
+                    }
+                },
+                Files = new List<ManifestFile> {
+                    new ManifestFile { Source = "Foo.dll", Target = "lib" }
+                }
+            };
+
+            // Act and Assert
+            ExceptionAssert.Throws<ValidationException>(() => Manifest.Validate(manifest),
+                "Assembly reference 'Foo?.dll' contains invalid characters.\r\nAssembly reference 'Bar*.dll' contains invalid characters.\r\nAssembly reference 'net40\\baz.dll' contains invalid characters.");
+        }
+
+        [TestMethod]
+        public void ManifestValidatesManifestReference() {
+            // Arrange
+            var manifest = new Manifest {
+                Metadata = new ManifestMetadata {
+                    Id = "Foobar",
+                    Version = "1.0",
+                    Authors = "test-author",
+                    Description = "desc",
+                    References = new List<ManifestReference> {
+                        new ManifestReference { File = "Foo.dll" },
+                    }
+                },
+                Files = new List<ManifestFile> {
+                    new ManifestFile { Source = "Bar.dll", Target = "lib" }
+                }
+            };
+
+            // Act and Assert
+            ExceptionAssert.Throws<ValidationException>(() => Manifest.Validate(manifest), 
+                "Invalid assembly reference &apos;Foo.dll&apos;. Ensure that a file named &apos;Foo.dll&apos; exists in the lib directory.");
+        }
+
+        [TestMethod]
         public void ManifestValidatesDependencies() {
             // Arrange
             var manifest = new Manifest {

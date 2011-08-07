@@ -44,7 +44,7 @@
     <Compile Include="Authoring\ManifestDependency.cs" />
     <Compile Include="Authoring\ManifestFile.cs" />
     <Compile Include="Authoring\ManifestMetadata.cs" />
-    <Compile Include="Authoring\ManifestReferenceAssembly.cs" />
+    <Compile Include="Authoring\ManifestReference.cs" />
     <Compile Include="Authoring\NullPropertyProvider.cs" />
     <Compile Include="Configuration\ISettings.cs" />
     <Compile Include="Configuration\Settings.cs" />

@@ -66,7 +66,7 @@ namespace NuGet.Commands {
             manifest.Metadata.LicenseUrl = "http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE";
             manifest.Metadata.IconUrl = "http://ICON_URL_HERE_OR_DELETE_THIS_LINE";
             manifest.Metadata.Tags = "Tag1 Tag2";
-            manifest.Metadata.Copyright = "Copyright " + DateTime.Now.Year;
+            manifest.Metadata.Copyright = "Copyright " + DateTime.Now.Year + "";
             string nuspecFile = fileName + Constants.ManifestExtension;
 
             // Skip the creation if the file exists and force wasn't specified

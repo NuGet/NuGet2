@@ -430,6 +430,24 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid assembly reference &apos;{0}&apos;. Ensure that a file named &apos;{0}&apos; exists in the lib directory..
+        /// </summary>
+        internal static string Manifest_InvalidReference {
+            get {
+                return ResourceManager.GetString("Manifest_InvalidReference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assembly reference &apos;{0}&apos; contains invalid characters..
+        /// </summary>
+        internal static string Manifest_InvalidReferenceFile {
+            get {
+                return ResourceManager.GetString("Manifest_InvalidReferenceFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} is required..
         /// </summary>
         internal static string Manifest_RequiredMetadataMissing {

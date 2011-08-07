@@ -314,6 +314,7 @@ namespace NuGet {
             TryValidate(manifest.Metadata, results);
             TryValidate(manifest.Files, results);
             TryValidate(manifest.Metadata.Dependencies, results);
+            TryValidate(manifest.Metadata.References, results);
 
             if (results.Any()) {
                 string message = String.Join(Environment.NewLine, results.Select(r => r.ErrorMessage));
@@ -336,6 +337,7 @@ namespace NuGet {
                 ValidateDependencyVersion(dependency);
             }
         }
+
         private static void ValidateDependencyVersion(PackageDependency dependency) {
             if (dependency.VersionSpec != null) {
                 if (dependency.VersionSpec.MinVersion != null &&

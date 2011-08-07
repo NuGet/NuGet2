@@ -271,6 +271,22 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
+        public void SavingPackageValidatesReferences() {
+            // Arrange
+            var builder = new PackageBuilder {
+                Id = "A",
+                Version = new Version("1.0"),
+                Description = "Test",
+            };
+            builder.Authors.Add("Test");
+            builder.Files.Add(new PhysicalPackageFile { TargetPath = @"lib\Foo.dll" });
+            builder.PackageAssemblyReferences.Add("Bar.dll");
+
+            ExceptionAssert.Throws<InvalidDataException>(() => builder.Save(new MemoryStream()),
+                "Invalid assembly reference 'Bar.dll'. Ensure that a file named 'Bar.dll' exists in the lib directory.");
+        }
+
+        [TestMethod]
         public void SavingPackageWithInvalidDependencyVersionMaxLessThanMinThrows() {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {

@@ -318,4 +318,10 @@
   <data name="Manifest_TargetContainsInvalidCharacters" xml:space="preserve">
     <value>Target path '{0}' contains invalid characters.</value>
   </data>
+  <data name="Manifest_InvalidReference" xml:space="preserve">
+    <value>Invalid assembly reference '{0}'. Ensure that a file named '{0}' exists in the lib directory.</value>
+  </data>
+  <data name="Manifest_InvalidReferenceFile" xml:space="preserve">
+    <value>Assembly reference '{0}' contains invalid characters.</value>
+  </data>
 </root>

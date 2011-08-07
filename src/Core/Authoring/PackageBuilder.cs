@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -185,6 +186,8 @@ namespace NuGet {
                 throw new InvalidOperationException(NuGetResources.CannotCreateEmptyPackage);
             }
 
+            ValidateReferenceAssemblies();
+
             using (Package package = Package.Open(stream, FileMode.Create)) {
                 // Validate and write the manifest
                 WriteManifest(package);
@@ -199,6 +202,18 @@ namespace NuGet {
                 package.PackageProperties.Version = Version.ToString();
                 package.PackageProperties.Language = Language;
                 package.PackageProperties.Keywords = ((IPackageMetadata)this).Tags;
+            }
+        }
+
+        private void ValidateReferenceAssemblies() {
+            var libFiles = new HashSet<string>(from file in Files
+                                               where file.Path.StartsWith("lib", StringComparison.OrdinalIgnoreCase)
+                                               select Path.GetFileName(file.Path), StringComparer.OrdinalIgnoreCase);
+
+            foreach (var reference in PackageAssemblyReferences) {
+                if (!libFiles.Contains(reference) && !libFiles.Contains(reference + ".dll") && !libFiles.Contains(reference + ".dll")) {
+                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_InvalidReference, reference));
+                }
             }
         }
 
