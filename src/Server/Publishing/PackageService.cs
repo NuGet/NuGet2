@@ -58,7 +58,7 @@ namespace NuGet.Server {
             RouteData routeData = GetRouteData(context);
             // Get the package file name from the route
             string packageId = routeData.GetRequiredString("packageId");
-            string version = routeData.GetRequiredString("version").Replace('_', '.');
+            string version = routeData.GetRequiredString("version");
             IPackage requestedPackage = _serverRepository.FindPackage(packageId, version);
             if (requestedPackage != null) {
                 string fileName = _serverRepository.GetMetadataPackage(requestedPackage).Path;

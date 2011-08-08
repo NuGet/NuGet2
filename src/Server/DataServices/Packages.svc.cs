@@ -46,7 +46,10 @@ namespace NuGet.Server.DataServices {
         public Uri GetReadStreamUri(object entity, DataServiceOperationContext operationContext) {
             var package = (Package)entity;
             var rootUrl = HttpContext.Current.Request.Url.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
-            Uri baseUri = new Uri(string.Format("{0}{1}/", rootUrl, HttpContext.Current.Request.ApplicationPath));
+            // the URI need to ends with a '/' to be correctly merged so we add it to the application if it exists
+            string applicationPath = HttpContext.Current.Request.ApplicationPath.EndsWith("/") ? HttpContext.Current.Request.ApplicationPath :
+                HttpContext.Current.Request.ApplicationPath + "/";
+            Uri baseUri = new Uri(string.Format("{0}{1}", rootUrl, applicationPath));
             return PackageUtility.GetPackageUrl(package, baseUri);
         }
 

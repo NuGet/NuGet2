@@ -10,7 +10,7 @@ namespace NuGet.Server.Infrastructure {
     public class PackageUtility {
         private static string _packagePhysicalPath;
         private static string DefaultPackagePhysicalPath = HostingEnvironment.MapPath("~/Packages");
-		
+        
         static PackageUtility() {
             // The NuGetPackagePath could be an absolute path (rooted and use as is)
             // or a relative path (and use as a virtual path)
@@ -40,7 +40,7 @@ namespace NuGet.Server.Infrastructure {
         }
 
         private static string GetPackageDownloadUrl(Package package) {
-            var routesValues = new RouteValueDictionary { { "packageId", package.Id }, { "version", package.Version.ToString().Replace('.', '_') } };
+            var routesValues = new RouteValueDictionary { { "packageId", package.Id }, { "version", package.Version.ToString() } };
             string packageDownloadUrl = RouteTable.Routes["DownloadPackage"].GetVirtualPath(HttpContext.Current.Request.RequestContext, routesValues).VirtualPath;
             return packageDownloadUrl;
         }
