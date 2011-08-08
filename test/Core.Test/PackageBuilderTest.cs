@@ -468,7 +468,7 @@ Description is required.");
 </package>";
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), 
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null),
             "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has invalid child element 'files' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'. List of possible elements expected: 'frameworkAssemblies, releaseNotes, copyright, summary, iconUrl, references, owners, requireLicenseAcceptance, licenseUrl, tags, title, projectUrl' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
@@ -678,6 +678,41 @@ Description is required.");
 
             // Act
             ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec.AsStream(), null), "LicenseUrl cannot be empty.");
+        }
+
+        [TestMethod]
+        public void ValidateReferencesAllowsPartialFileNames() {
+            // Arrange
+            var files = new[] {
+                new PhysicalPackageFile { TargetPath = @"lib\net40\foo.dll" },
+                new PhysicalPackageFile { TargetPath = @"lib\net40\bar.dll" },
+                new PhysicalPackageFile { TargetPath = @"lib\net40\baz.exe" },
+            };
+            var packageAssemblyReferences = new[] { "foo.dll", "bar", "baz" };
+
+            // Act and Assert
+            PackageBuilder.ValidateReferenceAssemblies(files, packageAssemblyReferences);
+
+            // If we've got this far, no exceptions were thrown.
+            Assert.IsTrue(true);
+        }
+
+        [TestMethod]
+        public void ValidateReferencesThrowsForPartialNamesThatDoNotHaveAKnownExtension() {
+            // Arrange
+            var files = new[] {
+                new PhysicalPackageFile { TargetPath = @"lib\net20\foo.dll" },
+                new PhysicalPackageFile { TargetPath = @"lib\net20\bar.dll" },
+                new PhysicalPackageFile { TargetPath = @"lib\net20\baz.qux" },
+            };
+            var packageAssemblyReferences = new[] { "foo.dll", "bar", "baz" };
+
+            // Act and Assert
+            ExceptionAssert.Throws<InvalidDataException>(() => PackageBuilder.ValidateReferenceAssemblies(files, packageAssemblyReferences),
+                "Invalid assembly reference 'baz'. Ensure that a file named 'baz' exists in the lib directory.");
+
+            // If we've got this far, no exceptions were thrown.
+            Assert.IsTrue(true);
         }
 
         [TestMethod]

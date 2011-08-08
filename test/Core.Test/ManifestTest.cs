@@ -100,29 +100,6 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void ManifestValidatesManifestReference() {
-            // Arrange
-            var manifest = new Manifest {
-                Metadata = new ManifestMetadata {
-                    Id = "Foobar",
-                    Version = "1.0",
-                    Authors = "test-author",
-                    Description = "desc",
-                    References = new List<ManifestReference> {
-                        new ManifestReference { File = "Foo.dll" },
-                    }
-                },
-                Files = new List<ManifestFile> {
-                    new ManifestFile { Source = "Bar.dll", Target = "lib" }
-                }
-            };
-
-            // Act and Assert
-            ExceptionAssert.Throws<ValidationException>(() => Manifest.Validate(manifest), 
-                "Invalid assembly reference &apos;Foo.dll&apos;. Ensure that a file named &apos;Foo.dll&apos; exists in the lib directory.");
-        }
-
-        [TestMethod]
         public void ManifestValidatesDependencies() {
             // Arrange
             var manifest = new Manifest {

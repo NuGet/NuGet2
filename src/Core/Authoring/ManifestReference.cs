@@ -10,6 +10,7 @@ namespace NuGet {
     [XmlType("reference")]
     public class ManifestReference : IValidatableObject {
         private static readonly char[] _referenceFileInvalidCharacters = Path.GetInvalidFileNameChars();
+
         [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_RequiredMetadataMissing")]
         [XmlAttribute("file")]
         public string File { get; set; }

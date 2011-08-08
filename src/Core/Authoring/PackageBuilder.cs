@@ -186,7 +186,7 @@ namespace NuGet {
                 throw new InvalidOperationException(NuGetResources.CannotCreateEmptyPackage);
             }
 
-            ValidateReferenceAssemblies();
+            ValidateReferenceAssemblies(Files, PackageAssemblyReferences);
 
             using (Package package = Package.Open(stream, FileMode.Create)) {
                 // Validate and write the manifest
@@ -205,13 +205,13 @@ namespace NuGet {
             }
         }
 
-        private void ValidateReferenceAssemblies() {
-            var libFiles = new HashSet<string>(from file in Files
-                                               where file.Path.StartsWith("lib", StringComparison.OrdinalIgnoreCase)
+        internal static void ValidateReferenceAssemblies(IEnumerable<IPackageFile> files, IEnumerable<string> packageAssemblyReferences) {
+            var libFiles = new HashSet<string>(from file in files
+                                               where !String.IsNullOrEmpty(file.Path) && file.Path.StartsWith("lib", StringComparison.OrdinalIgnoreCase)
                                                select Path.GetFileName(file.Path), StringComparer.OrdinalIgnoreCase);
 
-            foreach (var reference in PackageAssemblyReferences) {
-                if (!libFiles.Contains(reference) && !libFiles.Contains(reference + ".dll") && !libFiles.Contains(reference + ".dll")) {
+            foreach (var reference in packageAssemblyReferences) {
+                if (!libFiles.Contains(reference) && !libFiles.Contains(reference + ".dll") && !libFiles.Contains(reference + ".exe")) {
                     throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_InvalidReference, reference));
                 }
             }
