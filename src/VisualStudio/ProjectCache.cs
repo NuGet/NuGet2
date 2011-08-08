@@ -56,6 +56,10 @@ namespace NuGet.VisualStudio {
         }
 
         public bool Contains(string name) {
+            if (name == null) {
+                return false;
+            }
+
             return _projectNamesCache.ContainsKey(name) ||
                    _shortNameCache.ContainsKey(name);
         }

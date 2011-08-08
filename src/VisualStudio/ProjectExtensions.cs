@@ -456,6 +456,16 @@ namespace NuGet.VisualStudio {
             }
         }
 
+        public static bool IsParentProjectExplicitlyUnsupported(this Project project) {
+            if (project.ParentProjectItem == null || project.ParentProjectItem.ContainingProject == null) {
+                // this project is not a child of another project
+                return false;
+            }
+
+            Project parentProject = project.ParentProjectItem.ContainingProject;
+            return parentProject.IsExplicitlyUnsupported();
+        }
+
         /// <summary>
         /// This method truncates Website projects into the VS-format, e.g. C:\..\WebSite1
         /// This is used for displaying in the projects combo box.

@@ -175,7 +175,7 @@ namespace NuGet.VisualStudio {
         }
 
         private void OnProjectAdded(Project project) {
-            if (project.IsSupported()) {
+            if (project.IsSupported() && !project.IsParentProjectExplicitlyUnsupported()) {
                 EnsureProjectCache();
                 AddProjectToCache(project);
             }
@@ -233,7 +233,10 @@ namespace NuGet.VisualStudio {
                 DefaultProjectName = null;
             }
 
-            if (projectName.CustomUniqueName.Equals(DefaultProjectName, StringComparison.OrdinalIgnoreCase) &&
+            // for LightSwitch project, the main project is not added to _projectCache, but it is called on removal. 
+            // in that case, projectName is null.
+            if (projectName != null && 
+                projectName.CustomUniqueName.Equals(DefaultProjectName, StringComparison.OrdinalIgnoreCase) &&
                 !_projectCache.IsAmbiguous(projectName.ShortName)) {
                 DefaultProjectName = projectName.ShortName;
             }
