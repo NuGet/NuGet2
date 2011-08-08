@@ -277,9 +277,6 @@ namespace NuGet {
 
             using (Stream stream = packagePart.GetStream()) {
                 Manifest manifest = Manifest.Create(this);
-                if (!PackageAssemblyReferences.IsEmpty()) {
-                    manifest.Metadata.References = new List<ManifestReference>(PackageAssemblyReferences.Select(reference => new ManifestReference { File = reference }));
-                }
                 manifest.Save(stream);
             }
         }
