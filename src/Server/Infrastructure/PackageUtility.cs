@@ -13,7 +13,7 @@ namespace NuGet.Server.Infrastructure {
         
         static PackageUtility() {
             // The NuGetPackagePath could be an absolute path (rooted and use as is)
-            // or a relative path (and use as a virtual path)
+            // or a virtual path (and use as a virtual path)
             string packagePath = ConfigurationManager.AppSettings["NuGetPackagePath"];
             if (String.IsNullOrEmpty(packagePath)) {
                 _packagePhysicalPath = DefaultPackagePhysicalPath;

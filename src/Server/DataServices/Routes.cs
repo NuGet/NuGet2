@@ -32,7 +32,7 @@ namespace NuGet.Server {
  
             // Route to get packages
             routes.MapDelegate("DownloadPackage",
-                               "DownloadPackage/{packageId}/{version}",
+                               "download/{packageId}/{version}",
                                context => CreatePackageService().DownloadPackage(context.HttpContext));
 
 #if DEBUG
