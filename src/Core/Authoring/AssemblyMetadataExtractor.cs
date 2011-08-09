@@ -27,6 +27,7 @@ namespace NuGet {
             builder.Version = assemblyMetadata.Version;
             builder.Title = assemblyMetadata.Title;
             builder.Description = assemblyMetadata.Description;
+            builder.Copyright = assemblyMetadata.Copyright;
 
             if (!builder.Authors.Any() && !String.IsNullOrEmpty(assemblyMetadata.Company)) {
                 builder.Authors.Add(assemblyMetadata.Company);
@@ -46,7 +47,8 @@ namespace NuGet {
                     Version = assemblyName.Version,
                     Title = GetAttributeValueOrDefault<AssemblyTitleAttribute>(assembly, a => a.Title),
                     Company = GetAttributeValueOrDefault<AssemblyCompanyAttribute>(assembly, a => a.Company),
-                    Description = GetAttributeValueOrDefault<AssemblyDescriptionAttribute>(assembly, a => a.Description)
+                    Description = GetAttributeValueOrDefault<AssemblyDescriptionAttribute>(assembly, a => a.Description),
+                    Copyright = GetAttributeValueOrDefault<AssemblyCopyrightAttribute>(assembly, a => a.Copyright)
                 };
             }
 
