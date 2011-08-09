@@ -325,6 +325,6 @@
     <value>Release notes:</value>
   </data>
   <data name="Dialog_NoCompatibleProject" xml:space="preserve">
-    <value>The selected package is not compatible with any project in the solution.</value>
+    <value>'{0}' could not be installed because it is not compatible with any project in the solution. The package targets the following frameworks: {1}</value>
   </data>
 </root>

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.Windows.Threading;
-using System.Linq;
 using EnvDTE;
 using NuGet.VisualStudio;
 
@@ -77,7 +77,13 @@ namespace NuGet.Dialog.PackageManagerUI {
             }
             else {
                 // if there is no project compatible with the selected package, show an error message and return
-                MessageHelper.ShowWarningMessage(Resources.Dialog_NoCompatibleProject, Resources.Dialog_MessageBoxTitle);
+                MessageHelper.ShowWarningMessage(
+                    String.Format(
+                        CultureInfo.CurrentCulture, 
+                        Resources.Dialog_NoCompatibleProject,
+                        package.Id,
+                        Environment.NewLine + String.Join(Environment.NewLine, package.GetSupportedFrameworks())),
+                    title: null);
                 return null;
             }
         }
