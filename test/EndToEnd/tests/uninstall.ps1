@@ -565,7 +565,7 @@ function Test-UninstallPackageInvokeInstallScriptWhenProjectNameHasBrackets {
     )
     
     # Arrange
-    New-Solution "Gun [] Roses"
+    New-Solution "Gun [] Roses 2"
     $p = New-ConsoleApplication
 
     Install-Package TestUpdatePackage -Version 1.0.0.0 -Source $context.RepositoryRoot

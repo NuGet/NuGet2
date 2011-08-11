@@ -53,14 +53,18 @@ namespace NuGet.VisualStudio {
         }
 
         public override void AddFile(string path, Stream stream) {
+            bool fileExistsInProject = FileExistsInProject(path);
+
             // If the file exists on disk but not in the project then skip it
-            if (base.FileExists(path) && !FileExistsInProject(path)) {
+            if (base.FileExists(path) && !fileExistsInProject) {
                 Logger.Log(MessageLevel.Warning, VsResources.Warning_FileAlreadyExists, path);
             }
             else {
                 EnsureCheckedOutIfExists(path);
                 base.AddFile(path, stream);
-                AddFileToProject(path);
+                if (!fileExistsInProject) {
+                    AddFileToProject(path);
+                }
             }
         }
 
