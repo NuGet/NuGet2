@@ -14,11 +14,15 @@ $utilityPath = Join-Path $currentPath utility.ps1
 # Directory where the test packages are (This is passed to each test method)
 $testRepositoryPath = Join-Path $currentPath Packages
 
-$toolsPath = Join-Path $currentPath ..\..\Tools
+$nugetRoot = Join-Path $currentPath "..\.."
+
+$toolsPath = "$nugetRoot\Tools"
 
 $generatePackagesProject = Join-Path $toolsPath NuGet\GenerateTestPackages\GenerateTestPackages.csproj
 
 $generatePackagesExePath = Join-Path $toolsPath NuGet\GenerateTestPackages\bin\Debug\GenerateTestPackages.exe
+
+$nugetExePath = "$nugetRoot\src\CommandLine\bin\Debug\NuGet.exe"
 
 $msbuildPath = Join-Path $env:windir Microsoft.NET\Framework\v4.0.30319\msbuild
 
@@ -127,6 +131,7 @@ function global:Run-Test {
                 RepositoryRoot = $testRepositoryPath
                 TestRoot = $repositoryPath
                 RepositoryPath = Join-Path $repositoryPath Packages
+                NuGetExe = $nugetExePath
             }
             
             if(Test-Path $repositoryPath) {            

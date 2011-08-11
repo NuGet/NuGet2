@@ -309,7 +309,11 @@ namespace NuGet.Commands {
 
             // Collect all packages
             var packages = new List<IPackage>();
-            foreach (PackageReference reference in file.GetPackageReferences()) {
+
+            IDictionary<Tuple<string, Version>, PackageReference> packageReferences = file.GetPackageReferences()
+                                                                                          .ToDictionary(r => Tuple.Create(r.Id, r.Version));
+
+            foreach (PackageReference reference in packageReferences.Values) {
                 if (repository != null) {
                     IPackage package = repository.FindPackage(reference.Id, reference.Version);
                     if (package != null) {
@@ -332,7 +336,7 @@ namespace NuGet.Commands {
                     continue;
                 }
 
-                IVersionSpec spec = VersionUtility.ParseVersionSpec(package.Version.ToString());
+                IVersionSpec spec = GetVersionConstraint(packageReferences, package);
                 var dependency = new PackageDependency(package.Id, spec);
                 dependencies[dependency.Id] = dependency;
             }
@@ -342,6 +346,18 @@ namespace NuGet.Commands {
             foreach (var d in dependencies.Values) {
                 builder.Dependencies.Add(d);
             }
+        }
+
+        private static IVersionSpec GetVersionConstraint(IDictionary<Tuple<string, Version>, PackageReference> packageReferences, IPackage package) {
+            IVersionSpec defaultVersionConstraint = VersionUtility.ParseVersionSpec(package.Version.ToString());
+
+            PackageReference packageReference;
+            var key = Tuple.Create(package.Id, package.Version);
+            if (!packageReferences.TryGetValue(key, out packageReference)) {
+                return defaultVersionConstraint;
+            }
+
+            return packageReference.VersionConstraint ?? defaultVersionConstraint;
         }
 
         private static IEnumerable<IPackage> GetMinimumSet(List<IPackage> packages) {
