@@ -175,7 +175,7 @@ namespace NuGet.Dialog.PackageManagerUI {
             if (successful) {
                 Close();
             }
-            else {
+            else if (_currentWindow != null) {
                 _currentWindow.SetErrorState();
             }
         }
