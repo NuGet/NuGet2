@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -14,14 +15,21 @@ using System.Xml.Serialization;
 using NuGet.Resources;
 
 namespace NuGet {
-    [XmlType("package", Namespace = Constants.ManifestSchemaNamespace)]
+    [XmlType("package")]
     public class Manifest {
+        private const string SchemaNamespaceToken = "!!Schema version!!";
         private const string SchemaVersionAttributeName = "schemaVersion";
-        private const string CurrentSchemaVersion = "2";
+        private const string DefaultSchemaNamespace = "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd";
+
+        private static readonly Dictionary<int, string> VersionToSchemaMappings = new Dictionary<int, string> {
+            { 1, DefaultSchemaNamespace },
+            { 2, "http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd" }
+        };
 
         // Mapping from schema to resource name
-        private static readonly Dictionary<string, string> Schemas = new Dictionary<string, string> {
-            { "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd" , "NuGet.Authoring.nuspec.xsd" }
+        private static readonly Dictionary<string, string> SchemaToResourceMappings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
+            { DefaultSchemaNamespace, "NuGet.Authoring.nuspec.xsd" },
+            { "http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd", "NuGet.Authoring.nuspec.xsd" }
         };
 
         public Manifest() {
@@ -35,7 +43,7 @@ namespace NuGet {
         [EditorBrowsable(EditorBrowsableState.Never)]
         [XmlElement("files", IsNullable = true)]
         public ManifestFileList FilesList { get; set; }
-        
+
         [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
         [XmlIgnore]
@@ -61,27 +69,17 @@ namespace NuGet {
                 Validate(this);
             }
 
+            int version = ManifestVersionUtility.GetManifestVersion(Metadata);
+            Debug.Assert(VersionToSchemaMappings.ContainsKey(version), "Add an entry to the VersionToSchemeMappings dictionary for the key " + version);
+            var schemaNamespace = VersionToSchemaMappings[version];
+
             // Define the namespaces to use when serializing
             var ns = new XmlSerializerNamespaces();
-            ns.Add("", Constants.ManifestSchemaNamespace);
+            ns.Add("", schemaNamespace);
 
             // Need to force the namespace here again as the default in order to get the XML output clean
-            var serializer = new XmlSerializer(typeof(Manifest), Constants.ManifestSchemaNamespace);
-
-            // Only stamp the version if there are framework assemblies
-            if (Metadata.FrameworkAssemblies != null && Metadata.FrameworkAssemblies.Any()) {
-                using (var ms = new MemoryStream()) {
-                    serializer.Serialize(ms, this, ns);
-
-                    // Reset the stream so we can read the document and add the attribute
-                    ms.Seek(0, SeekOrigin.Begin);
-                    XDocument document = XDocument.Load(ms);
-                    AddSchemaVersionAttribute(document, stream);
-                }
-            }
-            else {
-                serializer.Serialize(stream, this, ns);
-            }
+            var serializer = new XmlSerializer(typeof(Manifest), schemaNamespace);
+            serializer.Serialize(stream, this, ns);
         }
 
         // http://msdn.microsoft.com/en-us/library/53b8022e(VS.71).aspx
@@ -93,16 +91,6 @@ namespace NuGet {
             return FilesList != null;
         }
 
-        private static void AddSchemaVersionAttribute(XDocument document, Stream stream) {
-            XElement metadata = GetMetadataElement(document);
-
-            if (metadata != null) {
-                metadata.SetAttributeValue(SchemaVersionAttributeName, CurrentSchemaVersion);
-            }
-
-            document.Save(stream);
-        }
-
         public static Manifest ReadFrom(Stream stream) {
             return ReadFrom(stream, NullPropertyProvider.Instance);
         }
@@ -112,21 +100,17 @@ namespace NuGet {
 
             // Read the document
             XDocument document = XDocument.Parse(content);
+            string schemeNamespace = GetSchemaNamespace(document);
 
-            // Add the schema namespace if it isn't there
             foreach (var e in document.Descendants()) {
-                if (e.Name.Namespace == null || String.IsNullOrEmpty(e.Name.Namespace.NamespaceName)) {
-                    e.Name = XName.Get(e.Name.LocalName, Constants.ManifestSchemaNamespace);
-                }
+                // Assign the schema namespace derived to all nodes in the document.
+                e.Name = XName.Get(e.Name.LocalName, schemeNamespace);
             }
 
             // Validate the schema
-            ValidateManifestSchema(document);
+            ValidateManifestSchema(document, schemeNamespace);
 
-            // Remove the namespace from the outer tag to match CTP2 expectations
-            document.Root.Name = document.Root.Name.LocalName;
-
-            var serializer = new XmlSerializer(typeof(Manifest));
+            var serializer = new XmlSerializer(typeof(Manifest), schemeNamespace);
             var manifest = (Manifest)serializer.Deserialize(document.CreateReader());
 
             // Convert <file source="Foo.cs;.\src\bar.cs" target="content" /> to multiple individual items.
@@ -152,6 +136,15 @@ namespace NuGet {
             manifest.Metadata.Copyright = manifest.Metadata.Copyright.SafeTrim();
 
             return manifest;
+        }
+
+        private static string GetSchemaNamespace(XDocument document) {
+            string schemaNamespace = DefaultSchemaNamespace;
+            var rootNameSpace = document.Root.Name.Namespace;
+            if (rootNameSpace != null && !String.IsNullOrEmpty(rootNameSpace.NamespaceName)) {
+                schemaNamespace = rootNameSpace.NamespaceName;
+            }
+            return schemaNamespace;
         }
 
         private void SplitManifestFiles() {
@@ -236,13 +229,13 @@ namespace NuGet {
             return String.Join(",", values);
         }
 
-        private static void ValidateManifestSchema(XDocument document) {
+        private static void ValidateManifestSchema(XDocument document, string schemaNamespace) {
             CheckSchemaVersion(document);
 
             // Create the schema set
             var schemaSet = new XmlSchemaSet();
             using (Stream schemaStream = GetSchemaStream(document)) {
-                schemaSet.Add(Constants.ManifestSchemaNamespace, XmlReader.Create(schemaStream));
+                schemaSet.Add(schemaNamespace, XmlReader.Create(schemaStream));
             }
 
             // Validate the document
@@ -270,7 +263,7 @@ namespace NuGet {
                 string packageId = GetPackageId(metadata);
 
                 // If the schema of the document doesn't match any of our known schemas
-                if (!Schemas.ContainsKey(document.Root.Name.Namespace.NamespaceName)) {
+                if (!SchemaToResourceMappings.ContainsKey(document.Root.Name.Namespace.NamespaceName)) {
                     throw new InvalidOperationException(
                             String.Format(CultureInfo.CurrentCulture,
                                           NuGetResources.IncompatibleSchema,
@@ -299,11 +292,18 @@ namespace NuGet {
         }
 
         private static Stream GetSchemaStream(XDocument document) {
+            string schemaNamespace = document.Root.Name.NamespaceName;
             string schemaResourceName;
-            if (Schemas.TryGetValue(document.Root.Name.NamespaceName, out schemaResourceName)) {
-                return typeof(Manifest).Assembly.GetManifestResourceStream(schemaResourceName);
+            if (SchemaToResourceMappings.TryGetValue(schemaNamespace, out schemaResourceName)) {
+                // Update the xsd with the right schema namespace
+                var assembly = typeof(Manifest).Assembly;
+                string content;
+                using (var reader = new StreamReader(assembly.GetManifestResourceStream(schemaResourceName))) {
+                    content = reader.ReadToEnd();
+                }
+                return content.Replace(SchemaNamespaceToken, schemaNamespace)
+                              .AsStream();
             }
-
             return null;
         }
 

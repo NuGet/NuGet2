@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema id="nuspec"
-    targetNamespace="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+    targetNamespace="!!Schema version!!"
     elementFormDefault="qualified"
-    xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
-    xmlns:mstns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"
+    xmlns="!!Schema version!!"
+    xmlns:mstns="!!Schema version!!"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
 >
     <xs:element name="package">
@@ -52,16 +52,16 @@
                                 </xs:complexType>
                             </xs:element>
                             <xs:element name="references" maxOccurs="1" minOccurs="0">
-                            <xs:complexType>
-                              <xs:sequence>
-                                <xs:element name="reference" minOccurs="0" maxOccurs="unbounded">
-                                  <xs:complexType>
-                                    <xs:attribute name="file" type="xs:string" use="required" />
-                                  </xs:complexType>
-                                </xs:element>
-                              </xs:sequence>
-                            </xs:complexType>
-                          </xs:element>
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="reference" minOccurs="0" maxOccurs="unbounded">
+                                            <xs:complexType>
+                                                <xs:attribute name="file" type="xs:string" use="required" />
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
                         </xs:all>
                     </xs:complexType>
                 </xs:element>

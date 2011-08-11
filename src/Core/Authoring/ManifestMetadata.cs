@@ -62,9 +62,11 @@ namespace NuGet {
         public string Summary { get; set; }
 
         [XmlElement("releaseNotes")]
+        [ManifestVersion(2)]
         public string ReleaseNotes { get; set; }
 
         [XmlElement("copyright")]
+        [ManifestVersion(2)]
         public string Copyright { get; set; }
 
         [XmlElement("language")]
@@ -89,6 +91,7 @@ namespace NuGet {
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
         [XmlArray("references")]
         [XmlArrayItem("reference")]
+        [ManifestVersion(2)]
         public List<ManifestReference> References { get; set; }
 
         Version IPackageMetadata.Version {
