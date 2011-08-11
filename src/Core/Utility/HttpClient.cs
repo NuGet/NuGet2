@@ -13,16 +13,18 @@ namespace NuGet {
 
         private Uri _uri;
 
-        private HttpClient() {
-            ProxyFinder = DefaultProxyFinder;
-            RequestCredentialService = DefaultRequestCredentialService;
-        }
-
-        public HttpClient(Uri uri)
-            : this() {
+        internal HttpClient(Uri uri, IProxyFinder proxyFinder, IRequestCredentialService requestCredentialService) {
             if (uri == null) {
                 throw new ArgumentNullException("uri");
             }
+
+            _uri = uri;
+            ProxyFinder = proxyFinder;
+            RequestCredentialService = requestCredentialService;
+        }
+
+        public HttpClient(Uri uri)
+            : this(uri, DefaultProxyFinder, DefaultRequestCredentialService) {
 
             _uri = uri;
         }

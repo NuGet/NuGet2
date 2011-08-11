@@ -48,9 +48,20 @@ namespace NuGet {
                 }
             }
         }
+
         private IHttpClient EnsureClient() {
-            IHttpClient originalClient = new HttpClient(_originalUri);
+            var originalClient = new HttpClient(_originalUri);
             WebRequest request = originalClient.CreateRequest();
+            return new HttpClient(GetResponseUri(request));
+        }
+
+        private Uri GetResponseUri(WebRequest request) {
+            HttpResponseData responseData = HttpRequestHelper.GetCachedResponse(_originalUri, request.Proxy, request.Credentials);
+
+            if (responseData != null) {
+                return responseData.ResponseUri;
+            }
+
             using (WebResponse response = request.GetResponse()) {
                 if (response == null) {
                     throw new InvalidOperationException(
@@ -58,7 +69,8 @@ namespace NuGet {
                                       NuGetResources.UnableToResolveUri,
                                       Uri));
                 }
-                return new HttpClient(response.ResponseUri);
+
+                return response.ResponseUri;
             }
         }
     }

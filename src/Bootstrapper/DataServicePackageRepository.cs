@@ -9,10 +9,6 @@ namespace NuGet {
         private DataServiceContext _context;
         private readonly IHttpClient _httpClient;
 
-        public DataServicePackageRepository(Uri serviceRoot)
-            : this(new HttpClient(serviceRoot)) {
-        }
-
         public DataServicePackageRepository(IHttpClient client) {
             if (client == null) {
                 throw new ArgumentNullException("client");

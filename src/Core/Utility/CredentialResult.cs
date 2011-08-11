@@ -23,7 +23,10 @@ namespace NuGet {
         /// <param name="credentials"></param>
         /// <returns></returns>
         public static CredentialResult Create(CredentialState state, ICredentials credentials) {
-            return new CredentialResult { State = state, Credentials = credentials };
+            return new CredentialResult {
+                State = state,
+                Credentials = credentials
+            };
         }
     }
 }

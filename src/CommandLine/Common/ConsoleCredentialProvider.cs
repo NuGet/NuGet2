@@ -5,6 +5,12 @@ using Console = System.Console;
 
 namespace NuGet {
     public class ConsoleCredentialProvider : ICredentialProvider {
+        public bool AllowRetry {
+            get {
+                return false;
+            }
+        }
+
         public CredentialResult GetCredentials(Uri uri, IWebProxy proxy) {
             if (uri == null) {
                 throw new ArgumentNullException("uri");
@@ -14,7 +20,7 @@ namespace NuGet {
             string username = Console.ReadLine();
             Console.Write(NuGetResources.Credentials_Password);
             SecureString password = ReadLineAsSecureString();
-            ICredentials credentials = new NetworkCredential {
+            var credentials = new NetworkCredential {
                 UserName = username,
                 SecurePassword = password
             };

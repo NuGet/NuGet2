@@ -1,20 +1,18 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Json;
 using Microsoft.Internal.Web.Utils;
 
 namespace NuGet {
-    public class PackageServer : IPackageServer, IProgressProvider {
+    public class PackageServer : IPackageServer {
         private const string CreatePackageService = "PackageFiles";
         private const string PackageService = "Packages";
         private const string PublishPackageService = "PublishedPackages/Publish";
-        private readonly Lazy<IHttpClient> _galleryClient;
+
+        private readonly Lazy<Uri> _baseUri;
         private readonly string _source;
         private readonly string _userAgent;
-
-        public event EventHandler<ProgressEventArgs> ProgressAvailable;
 
         public PackageServer(string source, string userAgent) {
             if (String.IsNullOrEmpty(source)) {
@@ -22,7 +20,7 @@ namespace NuGet {
             }
             _source = source;
             _userAgent = userAgent;
-            _galleryClient = new Lazy<IHttpClient>(() => EnsureClient(source));
+            _baseUri = new Lazy<Uri>(ResolveBaseUrl);
         }
 
         public string Source {
@@ -30,38 +28,22 @@ namespace NuGet {
         }
 
         public void CreatePackage(string apiKey, Stream packageStream) {
-            const int chunkSize = 1024 * 4; // 4KB
-
-            var action = String.Join("/", CreatePackageService, apiKey, "nupkg");
-            var request = CreateRequest(action, "POST", "application/octet-stream");
+            var url = String.Join("/", CreatePackageService, apiKey, "nupkg");
+            HttpWebRequest request = CreateRequest(url, "POST", "application/octet-stream");
 
             // Set the timeout to the same as the read write timeout (5 mins is the default)
             request.Timeout = request.ReadWriteTimeout;
+            request.ContentLength = packageStream.Length;
 
-            byte[] buffer = packageStream.ReadAllBytes();
-            request.ContentLength = buffer.Length;
-
-            OnProgressAvailable(0);
-            int offset = 0;
-            using (var requestStream = request.GetRequestStream()) {
-                while (offset < buffer.Length) {
-                    int count = Math.Min(buffer.Length - offset, chunkSize);
-                    requestStream.Write(buffer, offset, count);
-                    offset += count;
-                    int percentage = (offset * 100) / buffer.Length;
-                    if (percentage < 100) {
-                        OnProgressAvailable(percentage);
-                    }
-                }
+            using (Stream requestStream = request.GetRequestStream()) {
+                packageStream.CopyTo(requestStream);
             }
-
-            OnProgressAvailable(100);
 
             GetResponse(request);
         }
 
         public void PublishPackage(string apiKey, string packageId, string packageVersion) {
-            var request = CreateRequest(PublishPackageService, "POST", "application/json");
+            HttpWebRequest request = CreateRequest(PublishPackageService, "POST", "application/json");
 
             using (Stream requestStream = request.GetRequestStream()) {
                 var data = new PublishData {
@@ -78,24 +60,17 @@ namespace NuGet {
         }
 
         public void DeletePackage(string apiKey, string packageId, string packageVersion) {
-            var action = String.Join("/", PackageService, apiKey, packageId, packageVersion);
-            var request = CreateRequest(action, "DELETE", "text/html");
+            var url = String.Join("/", PackageService, apiKey, packageId, packageVersion);
+            var request = CreateRequest(url, "DELETE", "text/html");
             request.ContentLength = 0;
 
             GetResponse(request);
         }
-
-        private void OnProgressAvailable(int percentage) {
-            if (ProgressAvailable != null) {
-                ProgressAvailable(this, new ProgressEventArgs(percentage));
-            }
-        }
-
-        private HttpWebRequest CreateRequest(string action, string method, string contentType) {
-            Uri baseUri = EnsureTrailingSlash(_galleryClient.Value.Uri);
-            var actionUrl = new Uri(baseUri, action);
-            var actionClient = new HttpClient(actionUrl);
-            var request = actionClient.CreateRequest() as HttpWebRequest;
+ 
+        private HttpWebRequest CreateRequest(string url, string method, string contentType) {
+            var uri = new Uri(_baseUri.Value, url);
+            var client = new HttpClient(uri);
+            var request = client.CreateRequest() as HttpWebRequest;
             request.ContentType = contentType;
             request.Method = method;
 
@@ -104,14 +79,6 @@ namespace NuGet {
             }
 
             return request;
-        }
-
-        private static Uri EnsureTrailingSlash(Uri uri) {
-            string value = uri.AbsoluteUri;
-            if (!value.EndsWith("/", StringComparison.OrdinalIgnoreCase)) {
-                value += "/";
-            }
-            return new Uri(value);
         }
 
         private static WebResponse GetResponse(WebRequest request) {
@@ -126,35 +93,24 @@ namespace NuGet {
                 var response = (HttpWebResponse)e.Response;
                 string errorMessage = String.Empty;
                 using (var stream = response.GetResponseStream()) {
-                    errorMessage = stream.ReadToEnd();
+                    errorMessage = stream.ReadToEnd().Trim();
                 }
 
                 throw new WebException(errorMessage, e, e.Status, e.Response);
             }
         }
 
-        [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "uri", Justification = "Reading the Uri property causes a 403 if something failed.")]
-        private static IHttpClient EnsureClient(string source) {
-            IHttpClient client = null;
-            try {
-                client = new RedirectedHttpClient(new Uri(source));
-                // force the client to load the Uri so that we can catch the 403 - Forbidden: exception from the
-                // server and just return the proper IHttpClient.
-                var uri = client.Uri;
+        private Uri ResolveBaseUrl() {
+            var client = new RedirectedHttpClient(new Uri(Source));
+            return EnsureTrailingSlash(client.Uri);
+        }
+
+        private static Uri EnsureTrailingSlash(Uri uri) {
+            string value = uri.OriginalString;
+            if (!value.EndsWith("/", StringComparison.OrdinalIgnoreCase)) {
+                value += "/";
             }
-            catch (WebException e) {
-                if (e.Status == WebExceptionStatus.Timeout || e.Response == null) {
-                    // If we got a timeout error then throw it up to the consumer
-                    // because we are not able to connect to the gallery server.
-                    throw;
-                }
-                // Since we did not time out then it must be that we are getting the 403 error
-                // which is valid since this Url is going to be used for Post and Delete actions
-                // and we are simply trying to perform a GET to retrieve the server Url from the fw link.
-                // So let's create a new IHttpClient that is going to against this new Url
-                client = new HttpClient(e.Response.ResponseUri);
-            }
-            return client;
+            return new Uri(value);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace NuGet {
         private static readonly TimeSpan _cleanupInterval = TimeSpan.FromSeconds(10);
 
         // Cache keys are case-sensitive
-        private readonly ConcurrentDictionary<string, CacheItem> _cache = new ConcurrentDictionary<string, CacheItem>();
+        private readonly ConcurrentDictionary<object, CacheItem> _cache = new ConcurrentDictionary<object, CacheItem>();
         private readonly Timer _timer;
 
         private MemoryCache() {
@@ -23,7 +23,7 @@ namespace NuGet {
             }
         }
 
-        internal T GetOrAdd<T>(string cacheKey, Func<T> factory, TimeSpan slidingExpiration) where T : class {
+        internal T GetOrAdd<T>(object cacheKey, Func<T> factory, TimeSpan slidingExpiration) where T : class {
             CacheItem cachedItem;
             if (!_cache.TryGetValue(cacheKey, out cachedItem) || cachedItem.Expired) {
                 // Recreate the item if it's expired or doesn't exit
@@ -37,7 +37,16 @@ namespace NuGet {
             return (T)cachedItem.Value;
         }
 
-        internal void Remove(string cacheKey) {
+        internal T Get<T>(object cacheKey) {
+            CacheItem cachedItem;
+            if (_cache.TryGetValue(cacheKey, out cachedItem) && !cachedItem.Expired) {
+                return (T)cachedItem.Value;
+            }
+
+            return default(T);
+        }
+
+        internal void Remove(object cacheKey) {
             CacheItem item;
             _cache.TryRemove(cacheKey, out item);
         }

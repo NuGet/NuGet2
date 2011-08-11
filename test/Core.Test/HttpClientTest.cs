@@ -23,7 +23,7 @@ namespace NuGet.Test {
             // Arrange
             var mockProxyFinder = new Mock<IProxyFinder>();
             HttpClient.DefaultProxyFinder = mockProxyFinder.Object;
-            var httpClient = new HttpClient(new Uri("http://example.com"));
+            var httpClient = new HttpClient(new Uri("http://example.com"), mockProxyFinder.Object, requestCredentialService: null);
 
             // Act
 
@@ -33,12 +33,11 @@ namespace NuGet.Test {
 
         [TestMethod]
         public void CreateRequestProxyFinderReturnsValidProxyForUri() {
-            // Arrange
-            var httpClient = new HttpClient(new Uri("http://example.com"));
+            // Arrange            
             var proxyFinderMock = new Mock<IProxyFinder>();
             var validProxy = new WebProxy("http://someproxy");
             proxyFinderMock.Setup(finder => finder.GetProxy(It.IsAny<Uri>())).Returns(validProxy);
-            httpClient.ProxyFinder = proxyFinderMock.Object;
+            var httpClient = new HttpClient(new Uri("http://example.com"), proxyFinderMock.Object, requestCredentialService: null);
 
             // Act
             var request = httpClient.CreateRequest();
@@ -50,11 +49,10 @@ namespace NuGet.Test {
         [TestMethod]
         public void EmptyProviderListReturnsDefaultProxy() {
             // Arrange
-            var httpClient = new HttpClient(new Uri("http://example.com"));
+            var httpClient = new HttpClient(new Uri("http://example.com"), proxyFinder: null, requestCredentialService: null);
             var defaultProxy = WebRequest.DefaultWebProxy;
 
             // Act
-            httpClient.ProxyFinder = null;
             var request = httpClient.CreateRequest();
 
             // Assert

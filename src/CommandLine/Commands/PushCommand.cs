@@ -86,29 +86,11 @@ namespace NuGet.Commands {
             // Push the package to the server
             var package = new ZipPackage(packagePath);
 
-            bool complete = false;
-            packageServer.ProgressAvailable += (sender, e) => {
-                Console.Write("\r" + NuGetResources.PushingPackage, e.PercentComplete);
-
-                if (e.PercentComplete == 100) {
-                    Console.WriteLine();
-                    complete = true;
-                }
-            };
-
-            string sourceName = CommandLineUtility.GetSourceDisplayName(Source); ;
+            string sourceName = CommandLineUtility.GetSourceDisplayName(Source);
             Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), sourceName);
 
-            try {
-                using (Stream stream = package.GetStream()) {
-                    packageServer.CreatePackage(apiKey, stream);
-                }
-            }
-            catch {
-                if (!complete) {
-                    Console.WriteLine();
-                }
-                throw;
+            using (Stream stream = package.GetStream()) {
+                packageServer.CreatePackage(apiKey, stream);
             }
 
             // Publish the package on the server

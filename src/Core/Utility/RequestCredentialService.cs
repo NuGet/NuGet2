@@ -1,20 +1,27 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 
 namespace NuGet {
     public class RequestCredentialService : IRequestCredentialService {
-        ///// <summary>
-        ///// Local cache of registered proxy providers to use when locating a valid proxy
-        ///// to use for the given Uri.
-        ///// </summary>
+        private const int MaxRetries = 3;
+
+        //// <summary>
+        //// Local cache of registered proxy providers to use when locating a valid proxy
+        //// to use for the given Uri.
+        //// </summary>
         private readonly HashSet<ICredentialProvider> _providerCache = new HashSet<ICredentialProvider>();
         /// <summary>
         /// Local cache of credential objects that is used to prevent the subsequent look ups of credentials
         /// for the already discovered credentials based on the Uri.
         /// </summary>
         private readonly ConcurrentDictionary<Uri, ICredentials> _credentialCache = new ConcurrentDictionary<Uri, ICredentials>();
+
+        public RequestCredentialService() {
+            RegisterProvider(new PrefixCredentialsProvider(_credentialCache));
+        }
 
         /// <summary>
         /// Returns a list of already registered ICredentialProvider instances that one can enumerate
@@ -39,7 +46,6 @@ namespace NuGet {
         /// <summary>
         /// Unregisters the specified credential provider from the proxy finder.
         /// </summary>
-        /// <param name="provider"></param>
         public void UnregisterProvider(ICredentialProvider provider) {
             if (provider == null) {
                 throw new ArgumentNullException("provider");
@@ -50,16 +56,12 @@ namespace NuGet {
         /// Returns an ICredentials object instance that represents a valid credential
         /// object that can be used for request authentication.
         /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="proxy"></param>
-        /// <returns></returns>
         public ICredentials GetCredentials(Uri uri, IWebProxy proxy) {
             if (uri == null) {
                 throw new ArgumentNullException("uri");
             }
 
-            var isAuthenticationRequired = IsAuthenticationRequired(uri, proxy);
-            return isAuthenticationRequired ? GetCredentialsInternal(uri, proxy) : null;
+            return GetCredentialsInternal(uri, proxy);
         }
 
         /// <summary>
@@ -67,82 +69,88 @@ namespace NuGet {
         /// and ask for valid credentials until the first instance is found and
         /// then cache them for subsequent requests.
         /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="proxy"></param>
-        /// <returns></returns>
         private ICredentials GetCredentialsInternal(Uri uri, IWebProxy proxy) {
-            ICredentials result = null;
+            ICredentials credentials;
 
-            if (_credentialCache.TryGetValue(uri, out result)) {
-                return result;
+            if (_credentialCache.TryGetValue(uri, out credentials)) {
+                return credentials;
             }
 
             foreach (var provider in RegisteredProviders) {
-                var credentialResult = provider.GetCredentials(uri, proxy);
-                if (credentialResult.State == CredentialState.Abort) {
-                    // return so that we don't cache null if the user has cancelled the credentials prompt.
-                    return null;
+                CredentialResult credentialResult = provider.GetCredentials(uri, proxy);
+
+                if (credentialResult == null) {
+                    continue;
                 }
-                else {
-                    if (AreCredentialsValid(credentialResult.Credentials, uri, proxy)) {
-                        result = credentialResult.Credentials;
-                        _credentialCache.TryAdd(uri, result);
-                        break;
+
+                int tries = provider.AllowRetry ? MaxRetries : 1;
+
+                while (tries > 0) {
+                    // No credentials, move to the next provider
+                    if (credentialResult.State == CredentialState.Abort) {
+                        // Return so that we don't cache null if the user has cancelled the credentials prompt.
+                        return null;
                     }
-                    else {
-                        result = null;
+                    else if (AreCredentialsValid(credentialResult.Credentials, uri, proxy)) {
+                        return credentialResult.Credentials;
+                    }
+
+                    tries--;
+
+                    if (tries > 0) {
+                        credentialResult = provider.GetCredentials(uri, proxy);
                     }
                 }
             }
 
-            return result;
-        }
-
-        /// <summary>
-        /// This method is responsible for checking to see if the provided url requires
-        /// authentication.
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="proxy"></param>
-        /// <returns></returns>
-        private bool IsAuthenticationRequired(Uri uri, IWebProxy proxy) {
-            var request = WebRequest.Create(uri);
-            return !AreCredentialsValid(request.Credentials, uri, proxy);
+            return credentials;
         }
 
         /// <summary>
         /// This method is responsible for checking if the given credentials are valid for the given Uri.
         /// </summary>
-        /// <param name="credentials"></param>
-        /// <param name="uri"></param>
-        /// <param name="proxy"></param>
-        /// <returns></returns>
         protected virtual bool AreCredentialsValid(ICredentials credentials, Uri uri, IWebProxy proxy) {
-            bool result = true;
-            var webRequest = WebRequest.Create(uri);
-            WebResponse webResponse = null;
-            webRequest.Credentials = credentials;
-            webRequest.Proxy = proxy;
-            try {
-                var httpRequest = webRequest as HttpWebRequest;
-                if (httpRequest != null) {
-                    httpRequest.KeepAlive = true;
-                    httpRequest.ProtocolVersion = HttpVersion.Version10;
-                }
-                webResponse = webRequest.GetResponse();
+            HttpResponseData responseData = HttpRequestHelper.GetResponse(uri, proxy, credentials);
+
+
+            if (responseData.StatusCode == HttpStatusCode.Unauthorized) {
+                return false;
             }
-            catch (WebException webException) {
-                var httpResponse = webException.Response as HttpWebResponse;
-                if (httpResponse == null || httpResponse.StatusCode == HttpStatusCode.Unauthorized) {
-                    result = false;
+
+            // Cache the credentials for this uri and the response uri
+            _credentialCache.TryAdd(uri, credentials);
+            _credentialCache.TryAdd(responseData.ResponseUri, credentials);
+            return true;
+        }
+
+        /// <summary>
+        /// This provider tries to use cached credentials (if any) for some matching prefix.
+        /// e.g. if the url is http://foo/bar and we have credentials for http://foo, try those first
+        /// </summary>
+        private class PrefixCredentialsProvider : ICredentialProvider {
+            private readonly IDictionary<Uri, ICredentials> _credentialCache;
+
+            public PrefixCredentialsProvider(IDictionary<Uri, ICredentials> credentialCache) {
+                _credentialCache = credentialCache;
+            }
+
+            public bool AllowRetry {
+                get {
+                    return false;
                 }
             }
-            finally {
-                if (webResponse != null) {
-                    ((IDisposable)webResponse).Dispose();
+
+            public CredentialResult GetCredentials(Uri uri, IWebProxy proxy) {
+                ICredentials credentials = _credentialCache.Where(pair => uri.OriginalString.StartsWith(pair.Key.OriginalString, StringComparison.OrdinalIgnoreCase))
+                                                           .Select(pair => pair.Value)
+                                                           .FirstOrDefault();
+
+                if (credentials == null) {
+                    return null;
                 }
+
+                return CredentialResult.Create(CredentialState.HasCredentials, credentials);
             }
-            return result;
         }
     }
 }

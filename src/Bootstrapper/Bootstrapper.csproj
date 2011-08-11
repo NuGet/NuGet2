@@ -5,13 +5,17 @@
     <DebugSymbols>true</DebugSymbols>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Coverage|x86'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <Import Project="..\..\Build\NuGet.Settings.targets" />
   <PropertyGroup>
@@ -50,6 +54,12 @@
     <Compile Include="..\Core\Utility\HttpClient.cs">
       <Link>HttpClient.cs</Link>
     </Compile>
+    <Compile Include="..\Core\Utility\HttpRequestHelper.cs">
+      <Link>HttpRequestHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\HttpResponseData.cs">
+      <Link>HttpResponseData.cs</Link>
+    </Compile>
     <Compile Include="..\Core\Utility\ICredentialProvider.cs">
       <Link>ICredentialProvider.cs</Link>
     </Compile>
@@ -70,6 +80,9 @@
     </Compile>
     <Compile Include="..\Core\Utility\IRequestCredentialService.cs">
       <Link>IRequestCredentialService.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Utility\MemoryCache.cs">
+      <Link>MemoryCache.cs</Link>
     </Compile>
     <Compile Include="..\Core\Utility\ProxyFinder.cs">
       <Link>ProxyFinder.cs</Link>

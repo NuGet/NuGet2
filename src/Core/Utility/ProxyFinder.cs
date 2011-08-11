@@ -5,6 +5,8 @@ using System.Net;
 
 namespace NuGet {
     public class ProxyFinder : IProxyFinder {
+        private const int MaxRetries = 3;
+
         /// <summary>
         /// Local cache of registered proxy providers to use when locating a valid proxy
         /// to use for the given Uri.
@@ -84,31 +86,33 @@ namespace NuGet {
             }
 
             foreach (var provider in RegisteredProviders) {
-                var credentialResult = provider.GetCredentials(uri, GetSystemProxy(uri));
-                // The discovery process was aborted so stop the process and return null;
-                if (credentialResult.State == CredentialState.Abort) {
-                    return null;
-                }
-                // Some sort of credentials were returned so lets validate them.
-                else {
-                    systemProxy.Credentials = credentialResult.Credentials;
-                    // If the proxy with the new credentials are valid then
-                    // set the result to the valid proxy and break out of the discovery process.
-                    if (IsProxyValid(systemProxy, uri)) {
-                        result = systemProxy;
-                        // Cache the valid proxy result so that we can use it next time without having to go through
-                        // the discovery process.
-                        _proxyCache.TryAdd(systemProxy.Address, result);
-                        break;
+                int tries = provider.AllowRetry ? MaxRetries : 1;
+
+                while (tries > 0) {
+                    CredentialResult credentialResult = provider.GetCredentials(uri, systemProxy);
+
+                    // The discovery process was aborted so stop the process and return null;
+                    if (credentialResult.State == CredentialState.Abort) {
+                        return null;
                     }
-                    // The credentials were not valid so continue the discovery process.
                     else {
-                        result = null;
+                        // Some sort of credentials were returned so lets validate them.
+                        systemProxy.Credentials = credentialResult.Credentials;
+                        // If the proxy with the new credentials are valid then
+                        // set the result to the valid proxy and break out of the discovery process.
+                        if (IsProxyValid(systemProxy, uri)) {
+                            // Cache the valid proxy result so that we can use it next time without having to go through
+                            // the discovery process.
+                            _proxyCache.TryAdd(systemProxy.Address, systemProxy);
+                            return systemProxy;
+                        }
                     }
+
+                    tries--;
                 }
             }
 
-            return result;
+            return null;
         }
 
         /// <summary>
@@ -128,42 +132,15 @@ namespace NuGet {
         /// This is done by creating a WebRequest and asking for a response. Based on the response
         /// a True or False indicates if the proxy is valid for the given Uri.
         /// </summary>
-        /// <param name="proxy">IWebProxy object instance to validate against the Uri</param>
-        /// <param name="uri">The Uri to test the IWebProxy against.</param>
-        /// <returns></returns>
         private static bool IsProxyValid(IWebProxy proxy, Uri uri) {
-            bool result = true;
-            WebRequest webRequest = WebRequest.Create(uri);
-            WebResponse response = null;
-            // if we get a null proxy from the caller then don't use it and just re-set the same proxy that we
-            // already have because I am seeing a strange performance hit when a new instance of a proxy is set
-            // and it can take a few seconds to be changed before the method call continues.
-            webRequest.Proxy = proxy ?? webRequest.Proxy;
-            try {
-                // During testing we have observed that some proxy setups will return a 200/OK response
-                // even though the subsequent calls are not going to be valid for the same proxy
-                // and the set of credentials thus giving the user a 407 error.
-                // However having to cache the proxy when this service first get's a call and using
-                // a cached proxy instance seemed to resolve this issue.
-                var httpRequest = webRequest as HttpWebRequest;
-                if (httpRequest != null) {
-                    httpRequest.KeepAlive = true;
-                    httpRequest.ProtocolVersion = HttpVersion.Version10;
-                }
-                response = webRequest.GetResponse();
-            }
-            catch (WebException webException) {
-                HttpWebResponse webResponse = webException.Response as HttpWebResponse;
-                if (webResponse != null && webResponse.StatusCode == HttpStatusCode.ProxyAuthenticationRequired) {
-                    result = false;
-                }
-            }
-            finally {
-                if (response != null) {
-                    ((IDisposable)response).Dispose();
-                }
-            }
-            return result;
+            // During testing we have observed that some proxy setups will return a 200/OK response
+            // even though the subsequent calls are not going to be valid for the same proxy
+            // and the set of credentials thus giving the user a 407 error.
+            // However having to cache the proxy when this service first get's a call and using
+            // a cached proxy instance seemed to resolve this issue.            
+            HttpResponseData responseData = HttpRequestHelper.GetResponse(uri, proxy);
+
+            return responseData.StatusCode != HttpStatusCode.ProxyAuthenticationRequired;
         }
 
         /// <summary>

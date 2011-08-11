@@ -10,5 +10,9 @@ namespace NuGet {
         public CredentialResult GetCredentials(Uri uri, IWebProxy proxy) {
             return CredentialResult.Create(CredentialState.HasCredentials, CredentialCache.DefaultCredentials);
         }
+
+        public bool AllowRetry {
+            get { return false; }
+        }
     }
 }

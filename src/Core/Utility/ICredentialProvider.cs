@@ -7,6 +7,8 @@ namespace NuGet {
     /// support repository authentication. 
     /// </summary>
     public interface ICredentialProvider {
+        bool AllowRetry { get; }
+
         /// <summary>
         /// Returns CredentialState state that let's the consumer know if ICredentials
         /// were discovered by the ICredentialProvider. The credentials argument is then
