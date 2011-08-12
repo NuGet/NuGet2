@@ -88,7 +88,7 @@ namespace NuGet {
             foreach (var provider in RegisteredProviders) {
                 int tries = provider.AllowRetry ? MaxRetries : 1;
 
-                while (tries > 0) {
+                for (; tries > 0; tries--) {
                     CredentialResult credentialResult = provider.GetCredentials(uri, systemProxy);
 
                     // The discovery process was aborted so stop the process and return null;
@@ -107,8 +107,6 @@ namespace NuGet {
                             return systemProxy;
                         }
                     }
-
-                    tries--;
                 }
             }
 

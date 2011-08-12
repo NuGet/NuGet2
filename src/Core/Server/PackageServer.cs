@@ -70,7 +70,7 @@ namespace NuGet {
         private HttpWebRequest CreateRequest(string url, string method, string contentType) {
             var uri = new Uri(_baseUri.Value, url);
             var client = new HttpClient(uri);
-            var request = client.CreateRequest() as HttpWebRequest;
+            var request = (HttpWebRequest)client.CreateRequest();
             request.ContentType = contentType;
             request.Method = method;
 

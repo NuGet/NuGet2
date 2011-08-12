@@ -76,29 +76,22 @@ namespace NuGet {
                 return credentials;
             }
 
-            foreach (var provider in RegisteredProviders) {
-                CredentialResult credentialResult = provider.GetCredentials(uri, proxy);
-
-                if (credentialResult == null) {
-                    continue;
-                }
-
+            foreach (var provider in RegisteredProviders) {                                
                 int tries = provider.AllowRetry ? MaxRetries : 1;
 
-                while (tries > 0) {
-                    // No credentials, move to the next provider
-                    if (credentialResult.State == CredentialState.Abort) {
+                for (; tries > 0; tries--) {
+                    CredentialResult credentialResult = provider.GetCredentials(uri, proxy);
+
+                    if (credentialResult == null) {
+                        // No credentials, move to the next provider
+                        tries = 0;
+                    }
+                    else if (credentialResult.State == CredentialState.Abort) {
                         // Return so that we don't cache null if the user has cancelled the credentials prompt.
                         return null;
                     }
                     else if (AreCredentialsValid(credentialResult.Credentials, uri, proxy)) {
                         return credentialResult.Credentials;
-                    }
-
-                    tries--;
-
-                    if (tries > 0) {
-                        credentialResult = provider.GetCredentials(uri, proxy);
                     }
                 }
             }
