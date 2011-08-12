@@ -13,13 +13,9 @@ namespace NuGet {
             }
 
             // Always return the inner exception from a target invocation exception
-            if (exception.GetType() == typeof(TargetInvocationException)) {
-                return exception.InnerException;
-            }
-
-            // Flatten the aggregate before getting the inner exception
-            if (exception.GetType() == typeof(AggregateException)) {
-                return ((AggregateException)exception).Flatten().InnerException;
+            if (exception is AggregateException || 
+                exception is TargetInvocationException) {
+                return exception.GetBaseException();
             }
 
             return exception;
