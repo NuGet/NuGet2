@@ -38,6 +38,8 @@ namespace NuGetConsole.Implementation.Console {
         /// </summary>
         private Dispatcher _dispatcher;
 
+        private readonly object _lockObj = new object();
+
         public event EventHandler StartCompleted;
 
         public event EventHandler StartWaitingKey;
@@ -113,39 +115,41 @@ namespace NuGetConsole.Implementation.Console {
 
         public void Start() {
             // Only Start once
-            if (_dispatcher == null) {
-                IHost host = WpfConsole.Host;
+            lock (_lockObj) {
+                if (_dispatcher == null) {
+                    IHost host = WpfConsole.Host;
 
-                if (host == null) {
-                    throw new InvalidOperationException("Can't start Console dispatcher. Host is null.");
+                    if (host == null) {
+                        throw new InvalidOperationException("Can't start Console dispatcher. Host is null.");
+                    }
+
+                    if (host is IAsyncHost) {
+                        _dispatcher = new AsyncHostConsoleDispatcher(this);
+                    }
+                    else {
+                        _dispatcher = new SyncHostConsoleDispatcher(this);
+                    }
+
+                    Task.Factory.StartNew(
+                        // gives the host a chance to do initialization works before the console starts accepting user inputs
+                        () => host.Initialize(WpfConsole)
+                    ).ContinueWith(
+                        task => {
+                            if (task.IsFaulted) {
+                                var exception = ExceptionUtility.Unwrap(task.Exception);
+                                WriteError(exception.Message);
+                            }
+
+                            if (host.IsCommandEnabled) {
+                                Microsoft.VisualStudio.Shell.ThreadHelper.Generic.Invoke(_dispatcher.Start);
+                            }
+
+                            RaiseEventSafe(StartCompleted);
+                            IsStartCompleted = true;
+                        },
+                        TaskContinuationOptions.NotOnCanceled
+                    );
                 }
-
-                if (host is IAsyncHost) {
-                    _dispatcher = new AsyncHostConsoleDispatcher(this);
-                }
-                else {
-                    _dispatcher = new SyncHostConsoleDispatcher(this);
-                }
-
-                Task.Factory.StartNew(
-                    // gives the host a chance to do initialization works before the console starts accepting user inputs
-                    () => host.Initialize(WpfConsole)
-                ).ContinueWith(
-                    task => {
-                        if (task.IsFaulted) {
-                            var exception = ExceptionUtility.Unwrap(task.Exception);
-                            WriteError(exception.Message);
-                        }
-
-                        if (host.IsCommandEnabled) {
-                            Microsoft.VisualStudio.Shell.ThreadHelper.Generic.Invoke(_dispatcher.Start);
-                        }
-
-                        RaiseEventSafe(StartCompleted);
-                        IsStartCompleted = true;
-                    },
-                    TaskContinuationOptions.NotOnCanceled
-                );
             }
         }
 
