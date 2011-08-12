@@ -1,3 +1,4 @@
+extern alias dialog;
 extern alias dialog10;
 
 using System;
@@ -5,6 +6,7 @@ using System.ComponentModel.Design;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using EnvDTE;
 using Microsoft.VisualStudio;
@@ -17,6 +19,7 @@ using NuGet.VisualStudio.Resources;
 using NuGetConsole;
 using NuGetConsole.Implementation;
 
+using ManagePackageDialog = dialog::NuGet.Dialog.PackageManagerWindow;
 using VS10ManagePackageDialog = dialog10::NuGet.Dialog.PackageManagerWindow;
 
 namespace NuGet.Tools {
@@ -119,7 +122,9 @@ namespace NuGet.Tools {
         }
 
         private static void ShowManageLibraryPackageDialog(Project project) {
-            DialogWindow window = new VS10ManagePackageDialog(project);
+            DialogWindow window = VsVersionHelper.IsVisualStudio2010 ?
+                GetVS10PackageManagerWindow(project) :
+                GetPackageManagerWindow(project);
             try {
                 window.ShowModal();
             }
@@ -127,6 +132,16 @@ namespace NuGet.Tools {
                 MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
                 ExceptionHelper.WriteToActivityLog(exception);
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static DialogWindow GetVS10PackageManagerWindow(Project project) {
+            return new VS10ManagePackageDialog(project);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static DialogWindow GetPackageManagerWindow(Project project) {
+            return new ManagePackageDialog(project);
         }
 
         private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args) {

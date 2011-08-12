@@ -213,9 +213,13 @@ namespace NuGet.Dialog.Providers {
                 // if a package has been uninstalled, remove it from the Installed tab
                 allExtensions.RemoveAll(extension => !LocalRepository.Exists(((PackageItem)extension).PackageIdentity));
 #else
-                IList allExtensions = SelectedNode.Extensions;
                 // if a package has been uninstalled, remove it from the Installed tab
-                allExtensions.Cast<PackageItem>().ToList().RemoveAll(extension => !LocalRepository.Exists(((PackageItem)extension).PackageIdentity));
+                IList<PackageItem> allExtensions = SelectedNode.Extensions.Cast<PackageItem>().ToList();
+                foreach (var extension in allExtensions) {
+                    if (!LocalRepository.Exists(extension.PackageIdentity)) {
+                        SelectedNode.Extensions.Remove(extension);
+                    }
+                }
 #endif
 
                 // the PackagesTreeNodeBase caches the list of packages in each tree node. For this provider,

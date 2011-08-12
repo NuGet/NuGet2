@@ -104,6 +104,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dialog10", "src\Dialog10\Dialog10.csproj", "{5984731D-613C-440A-833A-F92A3E3CF793}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandLine.Test", "test\CommandLine.Test\CommandLine.Test.csproj", "{5376E601-D111-4198-8BC2-F1118433CC83}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dialog", "src\Dialog\Dialog.csproj", "{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
@@ -451,6 +452,18 @@ Global
 		{5376E601-D111-4198-8BC2-F1118433CC83}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5376E601-D111-4198-8BC2-F1118433CC83}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{5376E601-D111-4198-8BC2-F1118433CC83}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
+		{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
+		{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}.Coverage|Mixed Platforms.ActiveCfg = Coverage|Any CPU
+		{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}.Coverage|Mixed Platforms.Build.0 = Coverage|Any CPU
+		{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

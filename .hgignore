@@ -18,5 +18,3 @@ glob:[Tt]humbs.db
 glob:src/Server/Packages/*.nupkg
 glob:src/Server/Server.Publish.xml
 DebugConstants.cs
-Microsoft.VisualStudio.ExtensionsExplorer.dll
-Microsoft.VisualStudio.ExtensionsExplorer.UI.dll

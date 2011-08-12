@@ -1,0 +1,244 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\Build\NuGet.Settings.targets" />
+  <PropertyGroup>
+    <ProjectGuid>{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NuGet.Dialog</RootNamespace>
+    <AssemblyName>NuGet.Dialog</AssemblyName>
+    <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>..\..\NuGet.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualStudio.ExtensionManager" />
+    <Reference Include="Microsoft.VisualStudio.ExtensionManager.Implementation" />
+    <Reference Include="Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Microsoft.VisualStudio.ExtensionsExplorer.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Microsoft.VisualStudio.ExtensionsExplorer.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.OLE.Interop" />
+    <Reference Include="Microsoft.VisualStudio.Settings, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=x86" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.9.0" />
+    <Reference Include="Microsoft.VisualStudio.Shell.Interop.10.0" />
+    <Reference Include="Microsoft.VisualStudio.TextManager.Interop" />
+    <Reference Include="Microsoft.VisualStudio.Shell.10.0">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.Shell.Immutable.10.0" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="UIAutomationProvider" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="EnvDTE">
+      <Guid>{80CC9F66-E7D8-4DDD-85B6-D9E6CD0E93E2}</Guid>
+      <VersionMajor>8</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="EnvDTE100">
+      <Guid>{26AD1324-4B7C-44BC-84F8-B86AED45729F}</Guid>
+      <VersionMajor>10</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="EnvDTE80">
+      <Guid>{1A31287A-4D7D-413E-8E32-3B374931BD89}</Guid>
+      <VersionMajor>8</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="EnvDTE90">
+      <Guid>{2CE2370E-D744-4936-A090-3FFFE667B0E1}</Guid>
+      <VersionMajor>9</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="Microsoft.VisualStudio.CommandBars">
+      <Guid>{1CBA492E-7263-47BB-87FE-639000619B15}</Guid>
+      <VersionMajor>8</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="stdole">
+      <Guid>{00020430-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\..\Common\CommonResources.Designer.cs">
+      <Link>CommonResources.Designer.cs</Link>
+      <DependentUpon>CommonResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="..\Dialog10\GlobalSuppressions.cs">
+      <Link>GlobalSuppressions.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\LoadPageResult.cs">
+      <Link>LoadPageResult.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\Nodes\EmptyTreeNode.cs">
+      <Link>Nodes\EmptyTreeNode.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\Nodes\PackagesSearchNode.cs">
+      <Link>Nodes\PackagesSearchNode.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\Nodes\PackagesTreeNodeBase.cs">
+      <Link>Nodes\PackagesTreeNodeBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\Nodes\RootTreeNode.cs">
+      <Link>Nodes\RootTreeNode.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\Nodes\SimpleTreeNode.cs">
+      <Link>Nodes\SimpleTreeNode.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\Nodes\UpdatesTreeNode.cs">
+      <Link>Nodes\UpdatesTreeNode.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\PackageItem.cs">
+      <Link>PackageItem.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\PackageManagerWindow.xaml.cs">
+      <Link>PackageManagerWindow.xaml.cs</Link>
+      <DependentUpon>PackageManagerWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="..\Dialog10\PackageSortDescriptor.cs">
+      <Link>PackageSortDescriptor.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\Providers\InstalledProvider.cs">
+      <Link>Providers\InstalledProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\Providers\OnlineProvider.cs">
+      <Link>Providers\OnlineProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\Providers\PackagesProviderBase.cs">
+      <Link>Providers\PackagesProviderBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\Providers\RecentProvider.cs">
+      <Link>Providers\RecentProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\Providers\SolutionInstalledProvider.cs">
+      <Link>Providers\SolutionInstalledProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\Providers\SolutionOnlineProvider.cs">
+      <Link>Providers\SolutionOnlineProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\Providers\SolutionRecentProvider.cs">
+      <Link>Providers\SolutionRecentProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\Providers\SolutionUpdatesProvider.cs">
+      <Link>Providers\SolutionUpdatesProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Dialog10\Providers\UpdatesProvider.cs">
+      <Link>Providers\UpdatesProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\VsConsole\PowerShellHostProvider\RegistryHelper.cs">
+      <Link>RegistryHelper.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj">
+      <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
+      <Name>Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DialogServices\DialogServices.csproj">
+      <Project>{05497432-8899-4ED4-BB97-7B5EA3E911DB}</Project>
+      <Name>DialogServices</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VisualStudio\VisualStudio.csproj">
+      <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
+      <Name>VisualStudio</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\VsConsole\Console.Types\Console.Types.csproj">
+      <Project>{6FD11460-39A3-4A10-BA63-7541B0A7D053}</Project>
+      <Name>Console.Types</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">
+      <Link>Properties\CodeAnalysisDictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\Common\CommonResources.resx">
+      <Link>CommonResources.resx</Link>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>CommonResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="..\Dialog10\CommonStyles.xaml">
+      <Link>CommonStyles.xaml</Link>
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="..\Dialog10\OnlineProviderTemplates.xaml">
+      <Link>OnlineProviderTemplates.xaml</Link>
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="..\Dialog10\PackageManagerWindow.xaml">
+      <Link>PackageManagerWindow.xaml</Link>
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="..\Dialog10\TemplateStyles.xaml">
+      <Link>TemplateStyles.xaml</Link>
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
