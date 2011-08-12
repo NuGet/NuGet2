@@ -45,6 +45,7 @@
     <Compile Include="Authoring\ManifestFile.cs" />
     <Compile Include="Authoring\ManifestMetadata.cs" />
     <Compile Include="Authoring\ManifestReference.cs" />
+    <Compile Include="Authoring\ManifestSchemaUtility.cs" />
     <Compile Include="Authoring\ManifestVersionAttribute.cs" />
     <Compile Include="Authoring\ManifestVersionUtility.cs" />
     <Compile Include="Authoring\NullPropertyProvider.cs" />
@@ -96,6 +97,7 @@
     <Compile Include="Repositories\PackageReferenceFile.cs" />
     <Compile Include="Utility\CredentialResult.cs" />
     <Compile Include="Utility\CredentialState.cs" />
+    <Compile Include="Utility\CustomAttributeProviderExtensions.cs" />
     <Compile Include="Utility\ExceptionUtility.cs" />
     <Compile Include="Utility\HttpRequestHelper.cs" />
     <Compile Include="Utility\HttpResponseData.cs" />

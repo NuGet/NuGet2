@@ -54,7 +54,7 @@ namespace NuGet {
 
             private static string GetAttributeValueOrDefault<T>(Assembly assembly, Func<T, string> selector) where T : Attribute {
                 // Get the attribute
-                T attribute = assembly.GetCustomAttributes(typeof(T), inherit: false).Cast<T>().FirstOrDefault();
+                T attribute = assembly.GetCustomAttribute<T>();
 
                 if (attribute != null) {
                     string value = selector(attribute);

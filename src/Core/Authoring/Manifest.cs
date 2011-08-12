@@ -17,20 +17,7 @@ using NuGet.Resources;
 namespace NuGet {
     [XmlType("package")]
     public class Manifest {
-        private const string SchemaNamespaceToken = "!!Schema version!!";
         private const string SchemaVersionAttributeName = "schemaVersion";
-        private const string DefaultSchemaNamespace = "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd";
-
-        private static readonly Dictionary<int, string> VersionToSchemaMappings = new Dictionary<int, string> {
-            { 1, DefaultSchemaNamespace },
-            { 2, "http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd" }
-        };
-
-        // Mapping from schema to resource name
-        private static readonly Dictionary<string, string> SchemaToResourceMappings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
-            { DefaultSchemaNamespace, "NuGet.Authoring.nuspec.xsd" },
-            { "http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd", "NuGet.Authoring.nuspec.xsd" }
-        };
 
         public Manifest() {
             Metadata = new ManifestMetadata();
@@ -70,8 +57,7 @@ namespace NuGet {
             }
 
             int version = ManifestVersionUtility.GetManifestVersion(Metadata);
-            Debug.Assert(VersionToSchemaMappings.ContainsKey(version), "Add an entry to the VersionToSchemeMappings dictionary for the key " + version);
-            var schemaNamespace = VersionToSchemaMappings[version];
+            string schemaNamespace = ManifestSchemaUtility.GetSchemaNamespace(version);
 
             // Define the namespaces to use when serializing
             var ns = new XmlSerializerNamespaces();
@@ -139,7 +125,7 @@ namespace NuGet {
         }
 
         private static string GetSchemaNamespace(XDocument document) {
-            string schemaNamespace = DefaultSchemaNamespace;
+            string schemaNamespace = ManifestSchemaUtility.SchemaVersionV1;
             var rootNameSpace = document.Root.Name.Namespace;
             if (rootNameSpace != null && !String.IsNullOrEmpty(rootNameSpace.NamespaceName)) {
                 schemaNamespace = rootNameSpace.NamespaceName;
@@ -234,7 +220,7 @@ namespace NuGet {
 
             // Create the schema set
             var schemaSet = new XmlSchemaSet();
-            using (Stream schemaStream = GetSchemaStream(document)) {
+            using (Stream schemaStream = ManifestSchemaUtility.GetSchemaStream(schemaNamespace)) {
                 schemaSet.Add(schemaNamespace, XmlReader.Create(schemaStream));
             }
 
@@ -263,7 +249,7 @@ namespace NuGet {
                 string packageId = GetPackageId(metadata);
 
                 // If the schema of the document doesn't match any of our known schemas
-                if (!SchemaToResourceMappings.ContainsKey(document.Root.Name.Namespace.NamespaceName)) {
+                if (!ManifestSchemaUtility.IsKnownSchema(document.Root.Name.Namespace.NamespaceName)) {
                     throw new InvalidOperationException(
                             String.Format(CultureInfo.CurrentCulture,
                                           NuGetResources.IncompatibleSchema,
@@ -289,22 +275,6 @@ namespace NuGet {
             XName metadataName = XName.Get("metadata", document.Root.Name.Namespace.NamespaceName);
 
             return document.Root.Element(metadataName);
-        }
-
-        private static Stream GetSchemaStream(XDocument document) {
-            string schemaNamespace = document.Root.Name.NamespaceName;
-            string schemaResourceName;
-            if (SchemaToResourceMappings.TryGetValue(schemaNamespace, out schemaResourceName)) {
-                // Update the xsd with the right schema namespace
-                var assembly = typeof(Manifest).Assembly;
-                string content;
-                using (var reader = new StreamReader(assembly.GetManifestResourceStream(schemaResourceName))) {
-                    content = reader.ReadToEnd();
-                }
-                return content.Replace(SchemaNamespaceToken, schemaNamespace)
-                              .AsStream();
-            }
-            return null;
         }
 
         internal static void Validate(Manifest manifest) {

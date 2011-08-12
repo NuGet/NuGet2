@@ -6,24 +6,28 @@ using System.Xml.Serialization;
 
 namespace NuGet {
     internal class ManifestVersionUtility {
+        private const int DefaultVersion = 1;
         private static readonly Type[] _xmlAttributes = new[] { typeof(XmlElementAttribute), typeof(XmlAttributeAttribute), typeof(XmlArrayAttribute) };
 
-        private const int DefaultVersion = 1;
         public static int GetManifestVersion(ManifestMetadata metadata) {
             return VisitObject(metadata);
         }
 
-        private static int VisitObject(object o) {
-            return (from item in o.GetType().GetProperties()
-                    select VisitProperty(o, item)).Max();
+        private static int VisitObject(object obj) {
+            if (obj == null) {
+                return DefaultVersion;
+            }
+            var properties = obj.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            return (from property in properties
+                    select VisitProperty(obj, property)).Max();
         }
 
-        public static int VisitProperty(object o, PropertyInfo property) {
+        private static int VisitProperty(object obj, PropertyInfo property) {
             if (!IsManifestMetadata(property)) {
                 return DefaultVersion;
             }
 
-            var value = property.GetValue(o, index: null);
+            var value = property.GetValue(obj, index: null);
             if (value == null) {
                 return DefaultVersion;
             }
@@ -32,8 +36,11 @@ namespace NuGet {
 
             if (typeof(IList).IsAssignableFrom(property.PropertyType)) {
                 var list = (IList)value;
-                if (list != null && list.Count > 0) {
-                    return Math.Max(version, VisitList(list));
+                if (list != null) {
+                    if (list.Count > 0) {
+                        return Math.Max(version, VisitList(list));
+                    }
+                    return version;
                 }
                 return DefaultVersion;
             }
@@ -61,21 +68,12 @@ namespace NuGet {
         }
 
         private static int GetPropertyVersion(PropertyInfo property) {
-            var attribute = GetAttribute<ManifestVersionAttribute>(property);
+            var attribute = property.GetCustomAttribute<ManifestVersionAttribute>();
             return attribute != null ? attribute.Version : DefaultVersion;
         }
 
         private static bool IsManifestMetadata(PropertyInfo property) {
-            return _xmlAttributes.Any(c => GetAttribute(property, c) != null);
-        }
-
-        private static T GetAttribute<T>(ICustomAttributeProvider attributeProvider) {
-            return (T)GetAttribute(attributeProvider, typeof(T));
-        }
-
-        private static object GetAttribute(ICustomAttributeProvider attributeProvider, Type type) {
-            return attributeProvider.GetCustomAttributes(type, inherit: false)
-                                       .FirstOrDefault();
+            return _xmlAttributes.Any(attr => property.GetCustomAttribute(attr) != null);
         }
     }
 }

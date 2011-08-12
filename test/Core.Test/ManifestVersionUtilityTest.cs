@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NuGet.Test {
@@ -86,7 +83,7 @@ namespace NuGet.Test {
         }
 
         [TestMethod]
-        public void GetManifestVersionDoesNotConsiderEmptyLists() {
+        public void GetManifestVersionConsidersEmptyLists() {
             // Arrange
             var metadata = new ManifestMetadata {
                 Id = "Foo",
@@ -103,7 +100,7 @@ namespace NuGet.Test {
             var version = ManifestVersionUtility.GetManifestVersion(metadata);
 
             // Assert
-            Assert.AreEqual(1, version);
+            Assert.AreEqual(2, version);
         }
 
         [TestMethod]

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema id="nuspec"
-    targetNamespace="!!Schema version!!"
+    targetNamespace="{0}"
     elementFormDefault="qualified"
-    xmlns="!!Schema version!!"
-    xmlns:mstns="!!Schema version!!"
+    xmlns="{0}"
+    xmlns:mstns="{0}"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
 >
     <xs:element name="package">

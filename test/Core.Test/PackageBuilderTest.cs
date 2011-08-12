@@ -87,9 +87,9 @@ namespace NuGet.Test {
             ms.Seek(0, SeekOrigin.Begin);
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.AreEqual(@"<?xml version=""1.0""?>
 <package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
-  <metadata schemaVersion=""2"">
+  <metadata>
     <id>A</id>
     <version>1.0</version>
     <authors>David</authors>

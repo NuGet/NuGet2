@@ -448,6 +448,24 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid schema namespace &apos;{0}&apos;..
+        /// </summary>
+        internal static string Manifest_InvalidSchemaNamespace {
+            get {
+                return ResourceManager.GetString("Manifest_InvalidSchemaNamespace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No namespace was found corresponding to the schema version &apos;{0}&apos;. Add an entry to the VersionToSchemaMappings dictionary in &apos;{1}&apos;..
+        /// </summary>
+        internal static string Manifest_InvalidVersion {
+            get {
+                return ResourceManager.GetString("Manifest_InvalidVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} is required..
         /// </summary>
         internal static string Manifest_RequiredMetadataMissing {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NuGet.Common;
 
 namespace NuGet.Commands {
@@ -75,8 +76,11 @@ namespace NuGet.Commands {
             }
             else {
                 try {
-                    using (Stream stream = File.Create(nuspecFile)) {
+                    using (var stream = new MemoryStream()) {
                         manifest.Save(stream, validate: false);
+                        stream.Seek(0, SeekOrigin.Begin);
+                        string content = stream.ReadToEnd();
+                        File.WriteAllText(nuspecFile, RemoveSchemaNamespace(content));
                     }
 
                     Console.WriteLine(NuGetResources.SpecCommandCreatedNuSpec, nuspecFile);
@@ -87,6 +91,11 @@ namespace NuGet.Commands {
                     throw;
                 }
             }
+        }
+
+        private static string RemoveSchemaNamespace(string content) {
+            // This seems to be the only way to clear out xml namepsaces.
+            return Regex.Replace(content, @"(xmlns:?[^=]*=[""][^""]*[""])", String.Empty, RegexOptions.IgnoreCase | RegexOptions.Multiline);
         }
     }
 }
