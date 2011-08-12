@@ -55,7 +55,7 @@ namespace NuGet.Dialog.Providers {
 
             // treat solution-level packages specially
             if (!PackageManager.IsProjectLevel(item.PackageIdentity)) {
-                removeDepedencies = AskRemoveDependencyAndCheckUninstallPSScript(package);
+                removeDepedencies = AskRemoveDependencyAndCheckUninstallPSScript(package, checkDependents: true);
                 if (removeDepedencies == null) {
                     // user presses Cancel
                     return false;
@@ -119,7 +119,11 @@ namespace NuGet.Dialog.Providers {
             }
 
             if (hasUninstallWork) {
-                removeDepedencies = AskRemoveDependencyAndCheckUninstallPSScript(package);
+                removeDepedencies = AskRemoveDependencyAndCheckUninstallPSScript(package, checkDependents: false);
+                if (removeDepedencies == null) {
+                    // user cancels the operation.
+                    return false;
+                }
             }
 
             ShowProgressWindow();

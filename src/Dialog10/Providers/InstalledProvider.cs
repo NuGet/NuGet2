@@ -88,7 +88,7 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected override bool ExecuteCore(PackageItem item) {
-            bool? removeDependencies = AskRemoveDependencyAndCheckUninstallPSScript(item.PackageIdentity);
+            bool? removeDependencies = AskRemoveDependencyAndCheckUninstallPSScript(item.PackageIdentity, checkDependents: true);
             if (removeDependencies == null) {
                 // user presses Cancel
                 return false;
@@ -99,21 +99,23 @@ namespace NuGet.Dialog.Providers {
             return true;
         }
 
-        protected bool? AskRemoveDependencyAndCheckUninstallPSScript(IPackage package) {
-            // check if there is any other package depends on this package.
-            // if there is, throw to cancel the uninstallation
-            var dependentsWalker = new DependentsWalker(LocalRepository);
-            IList<IPackage> dependents = dependentsWalker.GetDependents(package).ToList();
-            if (dependents.Count > 0) {
-                ShowProgressWindow();
-                throw new InvalidOperationException(
-                    String.Format(
-                        CultureInfo.CurrentCulture,
-                        Resources.PackageHasDependents,
-                        package.GetFullName(),
-                        String.Join(", ", dependents.Select(d => d.GetFullName()))
-                    )
-                );
+        protected bool? AskRemoveDependencyAndCheckUninstallPSScript(IPackage package, bool checkDependents) {
+            if (checkDependents) {
+                // check if there is any other package depends on this package.
+                // if there is, throw to cancel the uninstallation
+                var dependentsWalker = new DependentsWalker(LocalRepository);
+                IList<IPackage> dependents = dependentsWalker.GetDependents(package).ToList();
+                if (dependents.Count > 0) {
+                    ShowProgressWindow();
+                    throw new InvalidOperationException(
+                        String.Format(
+                            CultureInfo.CurrentCulture,
+                            Resources.PackageHasDependents,
+                            package.GetFullName(),
+                            String.Join(", ", dependents.Select(d => d.GetFullName()))
+                        )
+                    );
+                }
             }
 
             var uninstallWalker = new UninstallWalker(
