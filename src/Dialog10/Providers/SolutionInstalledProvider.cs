@@ -44,7 +44,7 @@ namespace NuGet.Dialog.Providers {
             RootNode.Nodes.Add(allNode);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity"), System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification = "We don't want one failed project to affect the other projects.")]
