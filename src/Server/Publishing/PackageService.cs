@@ -95,7 +95,6 @@ namespace NuGet.Server {
         }
 
         private static void WriteAccessDenied(HttpContextBase context, string packageId) {
-            context.Response.StatusCode = 401;
             WriteStatus(context, HttpStatusCode.Unauthorized, String.Format("Access denied for package '{0}'.", packageId));
         }
 
