@@ -17,7 +17,7 @@ namespace NuGet.Server.Infrastructure {
         public ServerPackageRepository(IPackagePathResolver pathResolver, IFileSystem fileSystem)
             : base(pathResolver, fileSystem) {
         }
-
+         
         [Inject]
         public IHashProvider HashProvider { get; set; }
 
@@ -58,12 +58,13 @@ namespace NuGet.Server.Infrastructure {
         public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks) {
             var packages = GetPackages().Find(searchTerm);
 
-            if (targetFrameworks.Any()) {
-                // Get the list of framework names
-                var frameworkNames = targetFrameworks.Select(frameworkName => VersionUtility.ParseFrameworkName(frameworkName));
+            // TODO: Enable this when we can make it faster
+            //if (targetFrameworks.Any()) {
+            //    // Get the list of framework names
+            //    var frameworkNames = targetFrameworks.Select(frameworkName => VersionUtility.ParseFrameworkName(frameworkName));
 
-                packages = packages.Where(package => frameworkNames.Any(frameworkName => IsCompatible(frameworkName, package)));
-            }
+            //    packages = packages.Where(package => frameworkNames.Any(frameworkName => IsCompatible(frameworkName, package)));
+            //}
 
             return packages;
         }
@@ -85,8 +86,10 @@ namespace NuGet.Server.Infrastructure {
                 PackageHash = Convert.ToBase64String(HashProvider.CalculateHash(fileBytes)),
                 LastUpdated = FileSystem.GetLastModified(path),
                 Created = FileSystem.GetCreated(path),
-                SupportedFrameworks = package.GetSupportedFrameworks(),
-                Path = path
+                // TODO: Add support when we can make this faster
+                // SupportedFrameworks = package.GetSupportedFrameworks(),
+                Path = path,
+                FullPath = FileSystem.GetFullPath(path)
             };
         }
     }

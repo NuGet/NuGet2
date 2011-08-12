@@ -3,7 +3,7 @@ using NuGet.Server.Infrastructure;
 
 namespace NuGet.Server.DataServices {
     public class PackageContext {
-        private IServerPackageRepository _repository;
+        private readonly IServerPackageRepository _repository;
         public PackageContext(IServerPackageRepository repository) {
             _repository = repository;
         }

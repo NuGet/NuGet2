@@ -44,6 +44,12 @@ namespace NuGet.Server.DataServices {
             VersionRatingsCount = -1;
             IsLatestVersion = true;
             Path = derivedData.Path;
+            FullPath = derivedData.FullPath;
+        }
+
+        internal string FullPath {
+            get;
+            set;
         }
 
         internal string Path {
@@ -205,7 +211,6 @@ namespace NuGet.Server.DataServices {
             get;
             set;
         }
-
 
         private string ConvertDependency(PackageDependency dependency) {
             return String.Format("{0}:{1}", dependency.Id, dependency.VersionSpec);

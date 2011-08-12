@@ -6,6 +6,7 @@ using System.Data.Services.Providers;
 using System.IO;
 using System.Linq;
 using System.ServiceModel.Web;
+using System.Web;
 using Ninject;
 using NuGet.Server.Infrastructure;
 
@@ -24,6 +25,7 @@ namespace NuGet.Server.DataServices {
         // This method is called only once to initialize service-wide policies.
         public static void InitializeService(DataServiceConfiguration config) {
             config.SetEntitySetAccessRule("Packages", EntitySetRights.AllRead);
+            config.SetEntitySetPageSize("Packages", 100);
             config.SetServiceOperationAccessRule("Search", ServiceOperationRights.AllRead);
 
             config.DataServiceBehavior.MaxProtocolVersion = DataServiceProtocolVersion.V2;
@@ -45,7 +47,12 @@ namespace NuGet.Server.DataServices {
         public Uri GetReadStreamUri(object entity, DataServiceOperationContext operationContext) {
             var package = (Package)entity;
 
-            return PackageUtility.GetPackageUrl(package.Path, operationContext.AbsoluteServiceUri);
+            var context = HttpContext.Current;
+            var rootUrl = context.Request.Url.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
+
+            // the URI need to ends with a '/' to be correctly merged so we add it to the application if it 
+            string downloadUrl = PackageUtility.GetPackageDownloadUrl(package);
+            return new Uri(new Uri(rootUrl), downloadUrl);
         }
 
         public string GetStreamContentType(object entity, DataServiceOperationContext operationContext) {

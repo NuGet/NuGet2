@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Net;
 using System.Web;
 using System.Web.Routing;
+using NuGet.Server.DataServices;
 using NuGet.Server.Infrastructure;
 
 namespace NuGet.Server {
@@ -46,9 +48,41 @@ namespace NuGet.Server {
             string packageId = routeData.GetRequiredString("packageId");
             var version = new Version(routeData.GetRequiredString("version"));
 
-            // Make sure they can access this package
-            Authenticate(context, apiKey, packageId,
-                         () => _serverRepository.RemovePackage(packageId, version));
+            IPackage requestedPackage = _serverRepository.FindPackage(packageId, version);
+
+            if (requestedPackage != null) {
+                // Make sure they can access this package
+                Authenticate(context, apiKey, packageId,
+                             () => _serverRepository.RemovePackage(packageId, version));
+            }
+            else {
+                // Package not found
+                WritePackageNotFound(context, packageId, version);
+            }
+        }
+
+        public void DownloadPackage(HttpContextBase context) {
+            RouteData routeData = GetRouteData(context);
+            // Get the package file name from the route
+            string packageId = routeData.GetRequiredString("packageId");
+            var version = new Version(routeData.GetRequiredString("version"));
+
+            IPackage requestedPackage = _serverRepository.FindPackage(packageId, version);
+
+            if (requestedPackage != null) {
+                Package packageMetatada = _serverRepository.GetMetadataPackage(requestedPackage);
+                context.Response.AddHeader("content-disposition", String.Format("attachment; filename={0}", packageMetatada.Path));
+                context.Response.ContentType = "application/zip";
+                context.Response.TransmitFile(packageMetatada.FullPath);
+            }
+            else {
+                // Package not found
+                WritePackageNotFound(context, packageId, version);
+            }
+        }
+
+        private static void WritePackageNotFound(HttpContextBase context, string packageId, Version version) {
+            WriteStatus(context, HttpStatusCode.NotFound, String.Format("'Package {0} {1}' Not found.", packageId, version));
         }
 
         private void Authenticate(HttpContextBase context, string apiKey, string packageId, Action action) {
@@ -62,7 +96,14 @@ namespace NuGet.Server {
 
         private static void WriteAccessDenied(HttpContextBase context, string packageId) {
             context.Response.StatusCode = 401;
-            context.Response.Write(String.Format("Access denied for package '{0}'.", packageId));
+            WriteStatus(context, HttpStatusCode.Unauthorized, String.Format("Access denied for package '{0}'.", packageId));
+        }
+
+        private static void WriteStatus(HttpContextBase context, HttpStatusCode statusCode, string body = null) {
+            context.Response.StatusCode = (int)statusCode;
+            if (!String.IsNullOrEmpty(body)) {
+                context.Response.Write(body);
+            }
         }
 
         private RouteData GetRouteData(HttpContextBase context) {
