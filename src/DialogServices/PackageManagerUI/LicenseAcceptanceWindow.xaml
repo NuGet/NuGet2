@@ -12,6 +12,7 @@
     MinWidth="350"
     MinHeight="300"
     Width="400"
+    Height="450"
     ShowInTaskbar="False"
     WindowStyle="SingleBorderWindow"
     WindowStartupLocation="CenterOwner"
