@@ -134,7 +134,7 @@ namespace NuGet {
             }
 
             public CredentialResult GetCredentials(Uri uri, IWebProxy proxy) {
-                ICredentials credentials = _credentialCache.Where(pair => uri.OriginalString.StartsWith(pair.Key.OriginalString, StringComparison.OrdinalIgnoreCase))
+                ICredentials credentials = _credentialCache.Where(pair => GetSchemeAndServer(pair.Key).Equals(GetSchemeAndServer(uri), StringComparison.OrdinalIgnoreCase))
                                                            .Select(pair => pair.Value)
                                                            .FirstOrDefault();
 
@@ -143,6 +143,10 @@ namespace NuGet {
                 }
 
                 return CredentialResult.Create(CredentialState.HasCredentials, credentials);
+            }
+
+            private static string GetSchemeAndServer(Uri uri) {
+                return uri.GetComponents(UriComponents.SchemeAndServer, UriFormat.SafeUnescaped);
             }
         }
     }
