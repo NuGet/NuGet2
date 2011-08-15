@@ -304,6 +304,10 @@ namespace NuGet.Dialog.Providers {
             }
 
             if (_failedProjects != null && _failedProjects.Count > 0) {
+                // BUG 1401: if we are going to show the Summary window,
+                // then hide the progress window.
+                _providerServices.ProgressWindow.Close();
+
                 _providerServices.WindowServices.ShowSummaryWindow(_failedProjects);
             }
 
