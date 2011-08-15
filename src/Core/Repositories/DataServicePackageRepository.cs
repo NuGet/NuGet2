@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.Versioning;
 
 namespace NuGet {
-    public class DataServicePackageRepository : PackageRepositoryBase, IHttpClientEvents, ISearchableRepository {
+    public class DataServicePackageRepository : PackageRepositoryBase, IHttpClientEvents, ISearchableRepository, ICloneableRepository {
         private IDataServiceContext _context;
         private readonly IHttpClient _httpClient;
         private readonly PackageDownloader _packageDownloader;
@@ -110,6 +110,10 @@ namespace NuGet {
             });
 
             return new SmartDataServiceQuery<DataServicePackage>(Context, query).AsSafeQueryable();
+        }
+
+        public IPackageRepository Clone() {
+            return new DataServicePackageRepository(_httpClient);
         }
 
         private static string Escape(string value) {

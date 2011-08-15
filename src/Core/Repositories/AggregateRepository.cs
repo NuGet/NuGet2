@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace NuGet {
-    public class AggregateRepository : PackageRepositoryBase, IPackageLookup, IDependencyResolver, ISearchableRepository {
+    public class AggregateRepository : PackageRepositoryBase, IPackageLookup, IDependencyResolver, ISearchableRepository, ICloneableRepository {
         /// <summary>
         /// When the ignore flag is set up, this collection keeps track of failing repositories so that the AggregateRepository 
         /// does not query them again.
@@ -123,6 +123,10 @@ namespace NuGet {
 
         public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks) {
             return CreateAggregateQuery(Repositories.Select(r => r.Search(searchTerm, targetFrameworks)));
+        }
+        
+        public IPackageRepository Clone() {
+            return new AggregateRepository(Repositories.Select(PackageRepositoryExtensions.Clone));
         }
 
         private AggregateQuery<IPackage> CreateAggregateQuery(IEnumerable<IQueryable<IPackage>> queries) {

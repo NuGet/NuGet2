@@ -62,7 +62,7 @@ namespace NuGet {
                                                        .OrderByDescending(p => p.Version);
 
             if (version != null) {
-                packages = packages.Where(p => VersionUtility.NormalizeVersion(p.Version) == 
+                packages = packages.Where(p => VersionUtility.NormalizeVersion(p.Version) ==
                                                VersionUtility.NormalizeVersion(version));
             }
             else if (constraintProvider != null) {
@@ -101,7 +101,8 @@ namespace NuGet {
         /// Since Odata dies when our query for updates is too big. We query for updates 10 packages at a time
         /// and return the full list of packages.
         /// </summary>
-        private static IEnumerable<IPackage> FindPackages<T>(this IPackageRepository repository, IEnumerable<T> items, Func<IEnumerable<T>, Expression<Func<IPackage, bool>>> filterSelector) {
+        private static IEnumerable<IPackage> FindPackages<T>(this IPackageRepository repository, IEnumerable<T> items, Func<IEnumerable<T>,
+                Expression<Func<IPackage, bool>>> filterSelector) {
             const int batchSize = 10;
 
             while (items.Any()) {
@@ -140,7 +141,10 @@ namespace NuGet {
             return repository.FindPackages(packageId, versionSpec).FirstOrDefault();
         }
 
-        public static IEnumerable<IPackage> FindCompatiblePackages(this IPackageRepository repository, IPackageConstraintProvider constraintProvider, IEnumerable<string> packageIds, IPackage package) {
+        public static IEnumerable<IPackage> FindCompatiblePackages(this IPackageRepository repository, 
+                                                                   IPackageConstraintProvider constraintProvider, 
+                                                                   IEnumerable<string> packageIds, 
+                                                                   IPackage package) {
             return (from p in repository.FindPackages(packageIds)
                     let dependency = p.FindDependency(package.Id)
                     let otherConstaint = constraintProvider.GetConstraint(p.Id)
@@ -248,13 +252,21 @@ namespace NuGet {
             foreach (IPackage package in packageList) {
                 IPackage newestAvailablePackage;
                 if (sourcePackages.TryGetValue(package.Id, out newestAvailablePackage) &&
-                    VersionUtility.NormalizeVersion(newestAvailablePackage.Version) > 
+                    VersionUtility.NormalizeVersion(newestAvailablePackage.Version) >
                     VersionUtility.NormalizeVersion(package.Version)) {
                     yield return newestAvailablePackage;
                 }
             }
         }
-        
+
+        public static IPackageRepository Clone(this IPackageRepository repository) {
+            var cloneableRepository = repository as ICloneableRepository;
+            if (cloneableRepository != null) {
+                return cloneableRepository.Clone();
+            }
+            return repository;
+        }
+
         /// <summary>
         /// Since odata dies when our query for updates is too big. We query for updates 10 packages at a time
         /// and return the full list of candidates for updates.

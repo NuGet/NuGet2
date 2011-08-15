@@ -6,7 +6,7 @@ using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio {
     [Export(typeof(IPackageRepository))]
-    public class VsPackageSourceRepository : IPackageRepository, ISearchableRepository {
+    public class VsPackageSourceRepository : IPackageRepository, ISearchableRepository, ICloneableRepository {
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepositoryFactory _repositoryFactory;
 
@@ -30,7 +30,7 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        internal IPackageRepository ActiveRepository {
+        private IPackageRepository ActiveRepository {
             get {
                 if (_packageSourceProvider.ActivePackageSource == null) {
                     throw new InvalidOperationException(VsResources.NoActivePackageSource);
@@ -57,6 +57,10 @@ namespace NuGet.VisualStudio {
 
         public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks) {
             return ActiveRepository.Search(searchTerm, targetFrameworks);
+        }
+
+        public IPackageRepository Clone() {
+            return ActiveRepository.Clone();
         }
     }
 }

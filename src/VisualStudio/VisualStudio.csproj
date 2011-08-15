@@ -52,7 +52,6 @@
     <Compile Include="RecentRepository\RecentPackage.cs" />
     <Compile Include="Utility\PathHelper.cs" />
     <Compile Include="Utility\UriHelper.cs" />
-    <Compile Include="Utility\VsPackageRepositoryExtensions.cs" />
     <Compile Include="Utility\VsVersionHelper.cs" />
     <Compile Include="VisualStudioCredentialProvider.cs" />
     <Compile Include="Extensibility\VsPackageInstallerEvents.cs" />
