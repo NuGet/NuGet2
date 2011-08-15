@@ -184,7 +184,7 @@
         </PropertyGroup>
         <Exec Command="&quot;$(NuGetExe)&quot; pack" WorkingDirectory="$(ExeDropDirectory)" />
         <Exec Command="&quot;$(NuGetExe)&quot; pack -o $(ServerDropDirectory) -Build -p Configuration=Release -Symbols -exclude **\NuGet.Core.*" WorkingDirectory="$(ServerBuildDirectory)" />
-        <Exec Command="&quot;$(NuGetExe)&quot; pack -o $(NuGetCoreDropDirectory) -Build" WorkingDirectory="$(NuGetCoreBuildDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -o $(NuGetCoreDropDirectory) -Build -Symbols" WorkingDirectory="$(NuGetCoreBuildDirectory)" />
     </Target>
     
     <Target Name="RunIntegrationTests">
