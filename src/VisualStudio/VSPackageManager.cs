@@ -857,10 +857,10 @@ namespace NuGet.VisualStudio {
             // For dependency resolution, we want VS to look for packages in the selected source and then use the fallback logic
             var fallbackRepository = SourceRepository as FallbackRepository;
             if (fallbackRepository != null) {
-                var primaryRepositories = new[] { _sharedRepository, fallbackRepository.SourceRepository };
+                var primaryRepositories = new[] { _sharedRepository, fallbackRepository.SourceRepository.Clone() };
                 return new FallbackRepository(new AggregateRepository(primaryRepositories), fallbackRepository.DependencyResolver);
             }
-            return new AggregateRepository(new[] { _sharedRepository, SourceRepository });
+            return new AggregateRepository(new[] { _sharedRepository, SourceRepository.Clone() });
         }
 
         private IVersionSpec GetSafeRange(string packageId) {

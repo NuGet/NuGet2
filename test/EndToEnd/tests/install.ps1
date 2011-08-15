@@ -1335,3 +1335,19 @@ function Test-InstallPackageWithFrameworkRefsOnlyRequiredForSL {
     Assert-Package $p PackageWithNet40AndSLLibButOnlySLGacRefs
     Assert-SolutionPackage PackageWithNet40AndSLLibButOnlySLGacRefs
 }
+
+
+function Test-InstallPackageWithValuesFromPipe {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    Get-Package -ListAvailable -Source "https://go.microsoft.com/fwlink/?LinkID=206669" -Filter "Microsoft-web-helpers" | Install-Package
+
+    # Assert
+    Assert-Package $p Microsoft-web-helpers
+}

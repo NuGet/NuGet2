@@ -254,7 +254,7 @@ namespace NuGet {
                 }
             }
         }
-
+        
         /// <summary>
         /// Since odata dies when our query for updates is too big. We query for updates 10 packages at a time
         /// and return the full list of candidates for updates.
