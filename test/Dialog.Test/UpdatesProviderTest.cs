@@ -44,17 +44,23 @@ namespace NuGet.Dialog.Test {
             var descriptors = provider.SortDescriptors.Cast<PackageSortDescriptor>().ToList();
 
             // Assert
-            Assert.AreEqual(4, descriptors.Count);
+            Assert.AreEqual(5, descriptors.Count);
             Assert.AreEqual("DownloadCount", descriptors[0].SortProperties.First());
             Assert.AreEqual(ListSortDirection.Descending, descriptors[0].Direction);
+
             Assert.AreEqual("Rating", descriptors[1].SortProperties.First());
             Assert.AreEqual(ListSortDirection.Descending, descriptors[1].Direction);
-            Assert.AreEqual("Title", descriptors[2].SortProperties.First());
-            Assert.AreEqual("Id", descriptors[2].SortProperties.Last());
-            Assert.AreEqual(ListSortDirection.Ascending, descriptors[2].Direction);
+
+            Assert.AreEqual("Published", descriptors[2].SortProperties.First());
+            Assert.AreEqual(ListSortDirection.Descending, descriptors[2].Direction);
+
             Assert.AreEqual("Title", descriptors[3].SortProperties.First());
             Assert.AreEqual("Id", descriptors[3].SortProperties.Last());
-            Assert.AreEqual(ListSortDirection.Descending, descriptors[3].Direction);
+            Assert.AreEqual(ListSortDirection.Ascending, descriptors[3].Direction);
+
+            Assert.AreEqual("Title", descriptors[4].SortProperties.First());
+            Assert.AreEqual("Id", descriptors[4].SortProperties.Last());
+            Assert.AreEqual(ListSortDirection.Descending, descriptors[4].Direction);
         }
 
         [TestMethod]

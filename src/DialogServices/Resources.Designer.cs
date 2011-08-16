@@ -493,6 +493,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Published Date.
+        /// </summary>
+        public static string Dialog_SortOption_PublishedDate {
+            get {
+                return ResourceManager.GetString("Dialog_SortOption_PublishedDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to NuGet failed to install or uninstall the selected package in the following project(s)..
         /// </summary>
         public static string Dialog_SummaryErrorMessage {
