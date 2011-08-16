@@ -90,12 +90,12 @@ namespace NuGet.Server {
                 action();
             }
             else {
-                WriteAccessDenied(context, packageId);
+                WriteForbidden(context, packageId);
             }
         }
 
-        private static void WriteAccessDenied(HttpContextBase context, string packageId) {
-            WriteStatus(context, HttpStatusCode.Unauthorized, String.Format("Access denied for package '{0}'.", packageId));
+        private static void WriteForbidden(HttpContextBase context, string packageId) {
+            WriteStatus(context, HttpStatusCode.Forbidden, String.Format("Access denied for package '{0}'.", packageId));
         }
 
         private static void WriteStatus(HttpContextBase context, HttpStatusCode statusCode, string body = null) {
