@@ -17,22 +17,22 @@ namespace NuGet.Server {
         private static void MapRoutes(RouteCollection routes) {
             // Route to create a new package
             routes.MapDelegate("CreatePackage",
-                               "api/PackageFiles/{apiKey}/nupkg",
+                               "PackageFiles/{apiKey}/nupkg",
                                context => CreatePackageService().CreatePackage(context.HttpContext));
 
             // Route to publish a package
             routes.MapDelegate("PublishPackage",
-                               "api/PublishedPackages/Publish",
+                               "PublishedPackages/Publish",
                                context => CreatePackageService().PublishPackage(context.HttpContext));
 
             // Route to delete packages
             routes.MapDelegate("DeletePackage",
-                               "api/Packages/{apiKey}/{packageId}/{version}",
+                               "Packages/{apiKey}/{packageId}/{version}",
                                context => CreatePackageService().DeletePackage(context.HttpContext));
  
             // Route to get packages
             routes.MapDelegate("DownloadPackage",
-                               "packages/download/{packageId}/{version}",
+                               "download/{packageId}/{version}",
                                context => CreatePackageService().DownloadPackage(context.HttpContext));
 
 #if DEBUG
