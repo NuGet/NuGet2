@@ -35,15 +35,22 @@ namespace NuGet {
             : this(new HttpClient(serviceRoot)) {
         }
 
-        public DataServicePackageRepository(IHttpClient client) {
+        public DataServicePackageRepository(IHttpClient client)
+            : this(client, new PackageDownloader()) {
+        }
+
+        public DataServicePackageRepository(IHttpClient client, PackageDownloader packageDownloader) {
             if (client == null) {
                 throw new ArgumentNullException("client");
+            }
+            if (packageDownloader == null) {
+                throw new ArgumentNullException("packageDownloader");
             }
 
             _httpClient = client;
             _httpClient.AcceptCompression = true;
 
-            _packageDownloader = new PackageDownloader();
+            _packageDownloader = packageDownloader;
         }
 
         public override string Source {
@@ -113,7 +120,7 @@ namespace NuGet {
         }
 
         public IPackageRepository Clone() {
-            return new DataServicePackageRepository(_httpClient);
+            return new DataServicePackageRepository(_httpClient, _packageDownloader);
         }
 
         private static string Escape(string value) {
