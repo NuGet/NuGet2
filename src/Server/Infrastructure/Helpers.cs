@@ -7,7 +7,7 @@ public static class Helpers {
     }
 
     public static string GetPushUrl(Uri currentUrl, string applicationPath) {
-        return GetBaseUrl(currentUrl, applicationPath) + "api";
+        return GetBaseUrl(currentUrl, applicationPath);
     }
 
     public static string GetBaseUrl(Uri currentUrl, string applicationPath) {
