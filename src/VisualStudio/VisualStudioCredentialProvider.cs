@@ -18,12 +18,6 @@ namespace NuGet.VisualStudio {
             _webProxyService = webProxyService;
         }
 
-        public bool AllowRetry {
-            get {
-                return true;
-            }
-        }
-
         /// <summary>
         /// Returns an ICredentials instance that the consumer would need in order
         /// to properly authenticate to the given Uri.
@@ -31,7 +25,7 @@ namespace NuGet.VisualStudio {
         /// <param name="uri"></param>
         /// <param name="proxy"></param>
         /// <returns></returns>
-        public CredentialResult GetCredentials(Uri uri, IWebProxy proxy) {
+        public ICredentials GetCredentials(Uri uri, IWebProxy proxy) {
             if (uri == null) {
                 throw new ArgumentNullException("uri");
             }
@@ -58,15 +52,7 @@ namespace NuGet.VisualStudio {
                 // until they abort or give us valid credentials.
                 InitializeCredentialProxy(uri, originalProxy);
 
-                var credentialState = GetCredentials(uri, forcePrompt: true);
-
-                // If the discovery process was aborted then reset the original proxy and exit the process.
-                if (credentialState.State == CredentialState.Abort) {
-                    return CredentialResult.Create(CredentialState.Abort, null);
-                }
-
-                return CredentialResult.Create(CredentialState.HasCredentials, credentialState.Credentials);
-
+                return PromptForCredentials(uri);
             }
             finally {
                 // Reset the original WebRequest.DefaultWebProxy to what it was when we started credential discovery.
@@ -91,17 +77,16 @@ namespace NuGet.VisualStudio {
         /// <param name="uri"></param>
         /// <param name="forcePrompt"></param>
         /// <returns></returns>
-        private CredentialResult GetCredentials(Uri uri, bool forcePrompt) {
-            __VsWebProxyState oldState = forcePrompt
-                                             ? __VsWebProxyState.VsWebProxyState_PromptForCredentials
-                                             : __VsWebProxyState.VsWebProxyState_DefaultCredentials;
+        private ICredentials PromptForCredentials(Uri uri) {
+            __VsWebProxyState oldState = __VsWebProxyState.VsWebProxyState_PromptForCredentials;
+
             var newState = (uint)__VsWebProxyState.VsWebProxyState_NoCredentials;
             int result = 0;
             ThreadHelper.Generic.Invoke(() => {
                 result = _webProxyService.PrepareWebProxy(uri.OriginalString,
                                                       (uint)oldState,
                                                       out newState,
-                                                      Convert.ToInt32(forcePrompt));
+                                                      fOkToPrompt: 1);
             });
             // If result is anything but 0 that most likely means that there was an error
             // so we will null out the DefaultWebProxy.Credentials so that we don't get
@@ -109,10 +94,10 @@ namespace NuGet.VisualStudio {
             if (result != 0 || newState == (uint)__VsWebProxyState.VsWebProxyState_Abort) {
                 // Clear out the current credentials because the user might have clicked cancel
                 // and we don't want to use the currently set credentials if they are wrong.
-                return CredentialResult.Create(CredentialState.Abort, null);
+                return null;
             }
             // Get the new credentials from the proxy instance
-            return CredentialResult.Create(CredentialState.HasCredentials, WebRequest.DefaultWebProxy.Credentials);
+            return WebRequest.DefaultWebProxy.Credentials;
         }
     }
 }

@@ -67,7 +67,6 @@
     <Compile Include="PathUtilityTest.cs" />
     <Compile Include="PathValidatorTest.cs" />
     <Compile Include="ProjectSystemExtensionsTest.cs" />
-    <Compile Include="ProxyFinderTest.cs" />
     <Compile Include="SharedRepositoryTest.cs" />
     <Compile Include="SmartDataServiceQueryTest.cs" />
     <Compile Include="BindingRedirectManagerTest.cs" />
@@ -76,7 +75,6 @@
     <Compile Include="BufferedEnumerableTest.cs" />
     <Compile Include="ClosureEvaluatorTest.cs" />
     <Compile Include="CryptoHashProviderTest.cs" />
-    <Compile Include="HttpClientTest.cs" />
     <Compile Include="PackageDownloaderTest.cs" />
     <Compile Include="PackageWalkerTest.cs" />
     <Compile Include="Mocks\MockAssembly.cs" />

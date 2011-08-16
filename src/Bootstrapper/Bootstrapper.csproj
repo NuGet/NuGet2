@@ -42,6 +42,42 @@
     <Compile Include="..\CommandLine\Common\ConsoleCredentialProvider.cs">
       <Link>ConsoleCredentialProvider.cs</Link>
     </Compile>
+    <Compile Include="..\Core\Extensions\CredentialProviderExtensions.cs">
+      <Link>CredentialProviderExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\CredentialStore.cs">
+      <Link>CredentialStore.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\HttpClient.cs">
+      <Link>HttpClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\ICredentialCache.cs">
+      <Link>ICredentialCache.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\ICredentialProvider.cs">
+      <Link>ICredentialProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\IHttpClient.cs">
+      <Link>IHttpClient.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\IHttpClientEvents.cs">
+      <Link>IHttpClientEvents.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\IHttpWebResponse.cs">
+      <Link>IHttpWebResponse.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\IProxyCache.cs">
+      <Link>IProxyCache.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\NullCredentialProvider.cs">
+      <Link>NullCredentialProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\ProxyCache.cs">
+      <Link>ProxyCache.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Http\RequestHelper.cs">
+      <Link>RequestHelper.cs</Link>
+    </Compile>
     <Compile Include="..\Core\Repositories\ProgressEventArgs.cs">
       <Link>ProgressEventArgs.cs</Link>
     </Compile>
@@ -51,44 +87,14 @@
     <Compile Include="..\Core\Utility\CredentialState.cs">
       <Link>CredentialState.cs</Link>
     </Compile>
-    <Compile Include="..\Core\Utility\HttpClient.cs">
-      <Link>HttpClient.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Utility\HttpRequestHelper.cs">
-      <Link>HttpRequestHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Utility\HttpResponseData.cs">
-      <Link>HttpResponseData.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Utility\ICredentialProvider.cs">
-      <Link>ICredentialProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Utility\IHttpClient.cs">
-      <Link>IHttpClient.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Utility\IHttpClientEvents.cs">
-      <Link>IHttpClientEvents.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Utility\IntegratedCredentialProvider.cs">
-      <Link>IntegratedCredentialProvider.cs</Link>
-    </Compile>
     <Compile Include="..\Core\Utility\IProgressProvider.cs">
       <Link>IProgressProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Utility\IProxyFinder.cs">
-      <Link>IProxyFinder.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Utility\IRequestCredentialService.cs">
-      <Link>IRequestCredentialService.cs</Link>
     </Compile>
     <Compile Include="..\Core\Utility\MemoryCache.cs">
       <Link>MemoryCache.cs</Link>
     </Compile>
-    <Compile Include="..\Core\Utility\ProxyFinder.cs">
-      <Link>ProxyFinder.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Utility\RequestCredentialService.cs">
-      <Link>RequestCredentialService.cs</Link>
+    <Compile Include="..\Core\Utility\UriUtility.cs">
+      <Link>UriUtility.cs</Link>
     </Compile>
     <Compile Include="..\Core\Utility\WebRequestEventArgs.cs">
       <Link>WebRequestEventArgs.cs</Link>

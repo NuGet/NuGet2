@@ -20,8 +20,8 @@ namespace NuGet {
             _cachedClient = new Lazy<IHttpClient>(EnsureClient);
         }
 
-        public override WebRequest CreateRequest() {
-            return CachedClient.CreateRequest();
+        public override WebResponse GetResponse() {
+            return CachedClient.GetResponse();
         }
 
         public override Uri Uri {
@@ -51,18 +51,11 @@ namespace NuGet {
 
         private IHttpClient EnsureClient() {
             var originalClient = new HttpClient(_originalUri);
-            WebRequest request = originalClient.CreateRequest();
-            return new HttpClient(GetResponseUri(request));
+            return new HttpClient(GetResponseUri(originalClient));
         }
 
-        private Uri GetResponseUri(WebRequest request) {
-            HttpResponseData responseData = HttpRequestHelper.GetCachedResponse(_originalUri, request.Proxy, request.Credentials);
-
-            if (responseData != null) {
-                return responseData.ResponseUri;
-            }
-
-            using (WebResponse response = request.GetResponse()) {
+        private Uri GetResponseUri(HttpClient client) {
+            using (WebResponse response = client.GetResponse()) {
                 if (response == null) {
                     throw new InvalidOperationException(
                         String.Format(CultureInfo.CurrentCulture,

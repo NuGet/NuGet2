@@ -5,13 +5,7 @@ using Console = System.Console;
 
 namespace NuGet {
     public class ConsoleCredentialProvider : ICredentialProvider {
-        public bool AllowRetry {
-            get {
-                return false;
-            }
-        }
-
-        public CredentialResult GetCredentials(Uri uri, IWebProxy proxy) {
+        public ICredentials GetCredentials(Uri uri, IWebProxy proxy) {
             if (uri == null) {
                 throw new ArgumentNullException("uri");
             }
@@ -24,7 +18,8 @@ namespace NuGet {
                 UserName = username,
                 SecurePassword = password
             };
-            return CredentialResult.Create(CredentialState.HasCredentials, credentials);
+
+            return credentials;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(

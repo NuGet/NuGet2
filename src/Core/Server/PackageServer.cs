@@ -29,74 +29,93 @@ namespace NuGet {
 
         public void CreatePackage(string apiKey, Stream packageStream) {
             var url = String.Join("/", CreatePackageService, apiKey, "nupkg");
-            HttpWebRequest request = CreateRequest(url, "POST", "application/octet-stream");
 
-            // Set the timeout to the same as the read write timeout (5 mins is the default)
-            request.Timeout = request.ReadWriteTimeout;
-            request.ContentLength = packageStream.Length;
+            HttpClient client = GetClient(url, "POST", "application/octet-stream");
 
-            using (Stream requestStream = request.GetRequestStream()) {
-                packageStream.CopyTo(requestStream);
-            }
+            client.SendingRequest += (sender, e) => {
+                var request = (HttpWebRequest)e.Request;
 
-            GetResponse(request);
+                // Set the timeout to the same as the read write timeout (5 mins is the default)
+                request.Timeout = request.ReadWriteTimeout;
+                request.ContentLength = packageStream.Length;
+
+                using (Stream requestStream = request.GetRequestStream()) {
+                    packageStream.CopyTo(requestStream);
+                }
+            };
+
+            EnsureSuccessfulResponse(client);
         }
 
         public void PublishPackage(string apiKey, string packageId, string packageVersion) {
-            HttpWebRequest request = CreateRequest(PublishPackageService, "POST", "application/json");
+            HttpClient client = GetClient(PublishPackageService, "POST", "application/json");
 
-            using (Stream requestStream = request.GetRequestStream()) {
-                var data = new PublishData {
-                    Key = apiKey,
-                    Id = packageId,
-                    Version = packageVersion
-                };
+            client.SendingRequest += (sender, e) => {
+                using (Stream requestStream = e.Request.GetRequestStream()) {
+                    var data = new PublishData {
+                        Key = apiKey,
+                        Id = packageId,
+                        Version = packageVersion
+                    };
 
-                var jsonSerializer = new DataContractJsonSerializer(typeof(PublishData));
-                jsonSerializer.WriteObject(requestStream, data);
-            }
+                    var jsonSerializer = new DataContractJsonSerializer(typeof(PublishData));
+                    jsonSerializer.WriteObject(requestStream, data);
+                }
+            };
 
-            GetResponse(request);
+            EnsureSuccessfulResponse(client);
         }
 
         public void DeletePackage(string apiKey, string packageId, string packageVersion) {
             var url = String.Join("/", PackageService, apiKey, packageId, packageVersion);
-            var request = CreateRequest(url, "DELETE", "text/html");
-            request.ContentLength = 0;
 
-            GetResponse(request);
+            HttpClient client = GetClient(url, "DELETE", "text/html");
+
+            client.SendingRequest += (sender, e) => {
+                e.Request.ContentLength = 0;
+            };
+
+            EnsureSuccessfulResponse(client);
         }
- 
-        private HttpWebRequest CreateRequest(string url, string method, string contentType) {
+
+        private HttpClient GetClient(string url, string method, string contentType) {
             var uri = new Uri(_baseUri.Value, url);
             var client = new HttpClient(uri);
-            var request = (HttpWebRequest)client.CreateRequest();
-            request.ContentType = contentType;
-            request.Method = method;
+            client.ContentType = contentType;
+            client.Method = method;
 
             if (!String.IsNullOrEmpty(_userAgent)) {
-                request.UserAgent = HttpUtility.CreateUserAgentString(_userAgent);
+                client.UserAgent = HttpUtility.CreateUserAgentString(_userAgent);
             }
 
-            return request;
+            return client;
         }
 
-        private static WebResponse GetResponse(WebRequest request) {
+        private static void EnsureSuccessfulResponse(HttpClient client) {
+            WebResponse response = null;
             try {
-                return request.GetResponse();
+                response = client.GetResponse();
             }
             catch (WebException e) {
                 if (e.Response == null) {
                     throw;
                 }
 
-                var response = (HttpWebResponse)e.Response;
+                response = e.Response;
+
+                var httpResponse = (HttpWebResponse)e.Response;
                 string errorMessage = String.Empty;
-                using (var stream = response.GetResponseStream()) {
+                using (var stream = httpResponse.GetResponseStream()) {
                     errorMessage = stream.ReadToEnd().Trim();
                 }
 
                 throw new WebException(errorMessage, e, e.Status, e.Response);
+            }
+            finally {
+                if (response != null) {
+                    response.Close();
+                    response = null;
+                }
             }
         }
 

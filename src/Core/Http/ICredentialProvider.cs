@@ -7,8 +7,6 @@ namespace NuGet {
     /// support repository authentication. 
     /// </summary>
     public interface ICredentialProvider {
-        bool AllowRetry { get; }
-
         /// <summary>
         /// Returns CredentialState state that let's the consumer know if ICredentials
         /// were discovered by the ICredentialProvider. The credentials argument is then
@@ -19,6 +17,6 @@ namespace NuGet {
         /// <param name="uri"></param>
         /// <param name="proxy"></param>
         /// <returns></returns>
-        CredentialResult GetCredentials(Uri uri, IWebProxy proxy);
+        ICredentials GetCredentials(Uri uri, IWebProxy proxy);
     }
 }
