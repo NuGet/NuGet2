@@ -13,6 +13,7 @@ namespace NuGet {
                                                 ICredentialCache credentialCache,
                                                 ICredentialProvider credentialProvider) {
             HttpStatusCode? previousStatusCode = null;
+            string authType = null;
             bool continueIfFailed = true;
 
             while (true) {
@@ -43,8 +44,10 @@ namespace NuGet {
                 try {
                     ICredentials credentials = request.Credentials;
 
-                    // Note: KeepAlive is required for NTLM and Kerberos authentication.
-                    if (credentials != CredentialCache.DefaultCredentials) {
+                    // KeepAlive is required for NTLM and Kerberos authentication.
+                    // REVIEW: The WWW-Autenticate header is tricky to parse so a Equals might not be correct
+                    if (!String.Equals(authType, "NTLM", StringComparison.OrdinalIgnoreCase) &&
+                        !String.Equals(authType, "Kerberos", StringComparison.OrdinalIgnoreCase)) {
                         // This is to work around the "The underlying connection was closed: An unexpected error occurred on a receive."
                         // exception.
                         ((HttpWebRequest)request).KeepAlive = false;
@@ -68,7 +71,7 @@ namespace NuGet {
 
                     return response;
                 }
-                catch (WebException ex) {                    
+                catch (WebException ex) {
                     IHttpWebResponse response = GetResponse(ex.Response);
                     if (response == null) {
                         // No response, someting went wrong so just rethrow
@@ -94,6 +97,7 @@ namespace NuGet {
 
                     using (response) {
                         previousStatusCode = response.StatusCode;
+                        authType = response.AuthType;
                     }
                 }
             }
@@ -121,6 +125,12 @@ namespace NuGet {
             private readonly HttpWebResponse _response;
             public HttpWebResponseWrapper(HttpWebResponse response) {
                 _response = response;
+            }
+
+            public string AuthType {
+                get {
+                    return _response.Headers[HttpResponseHeader.WwwAuthenticate];
+                }
             }
 
             public HttpStatusCode StatusCode {

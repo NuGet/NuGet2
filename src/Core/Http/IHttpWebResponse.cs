@@ -6,5 +6,6 @@ namespace NuGet {
     public interface IHttpWebResponse : IDisposable {
         HttpStatusCode StatusCode { get; }
         Uri ResponseUri { get; }
+        string AuthType { get; }
     }
 }
