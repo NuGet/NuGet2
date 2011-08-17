@@ -30,7 +30,7 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        private IPackageRepository ActiveRepository {
+        internal IPackageRepository ActiveRepository {
             get {
                 if (_packageSourceProvider.ActivePackageSource == null) {
                     throw new InvalidOperationException(VsResources.NoActivePackageSource);
