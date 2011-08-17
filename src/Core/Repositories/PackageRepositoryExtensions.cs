@@ -183,13 +183,6 @@ namespace NuGet {
             return repository.GetPackages().Find(searchTerm);
         }
 
-        /// <summary>
-        /// Returns a set of dependencies ordered by ascending versions while accounting for repositories that implement an IDependencyProvider
-        /// </summary>
-        public static IEnumerable<IPackage> GetDependencies(this IPackageRepository repository, string packageId) {
-            return repository.FindPackagesById(packageId);
-        }
-
         public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency) {
             return ResolveDependency(repository, dependency: dependency, constraintProvider: null);
         }
@@ -211,7 +204,7 @@ namespace NuGet {
                 throw new ArgumentNullException("dependency");
             }
 
-            IEnumerable<IPackage> packages = repository.GetDependencies(dependency.Id).ToList();
+            IEnumerable<IPackage> packages = repository.FindPackagesById(dependency.Id).ToList();
 
             // Always filter by constraints when looking for dependencies
             packages = FilterPackagesByConstraints(constraintProvider, packages, dependency.Id);
