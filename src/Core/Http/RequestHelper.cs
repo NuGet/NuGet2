@@ -23,9 +23,14 @@ namespace NuGet {
                 if (previousStatusCode == null) {
                     // Try to use the cached credentials (if any, for the first request)
                     request.Credentials = credentialCache.GetCredentials(request.RequestUri);
+
+                    if (request.Credentials == null) {
+                        // If there are no cached credentials, use the default ones
+                        request.UseDefaultCredentials = true;
+                    }
                 }
                 else if (previousStatusCode == HttpStatusCode.ProxyAuthenticationRequired) {
-                    request.Proxy.Credentials = credentialProvider.GetCredentials(request, useCredentialCache: false);
+                    request.Proxy.Credentials = credentialProvider.GetCredentials(request);
 
                     continueIfFailed = request.Proxy.Credentials != null;
                 }
@@ -36,21 +41,34 @@ namespace NuGet {
                 }
 
                 try {
+                    ICredentials credentials = request.Credentials;
+
+                    // Note: KeepAlive is required for NTLM and Kerberos authentication.
+                    if (credentials != CredentialCache.DefaultCredentials) {
+                        // This is to work around the "The underlying connection was closed: An unexpected error occurred on a receive."
+                        // exception.
+                        ((HttpWebRequest)request).KeepAlive = false;
+                    }
+
                     // Prepare the request, we do something like write to the request stream
                     // which needs to happen last before the request goes out
                     prepareRequest(request);
+
+                    // Wrap the credentials in a CredentialCache incase there is a redirect
+                    // and credentials need to be kept around.
+                    request.Credentials = request.Credentials.AsCredentialCache(request.RequestUri);
 
                     WebResponse response = request.GetResponse();
 
                     // Cache the proxy and credentials
                     proxyCache.Add(request.Proxy);
 
-                    credentialCache.Add(request.RequestUri, request.Credentials);
-                    credentialCache.Add(response.ResponseUri, request.Credentials);
+                    credentialCache.Add(request.RequestUri, credentials);
+                    credentialCache.Add(response.ResponseUri, credentials);
 
                     return response;
                 }
-                catch (WebException ex) {
+                catch (WebException ex) {                    
                     IHttpWebResponse response = GetResponse(ex.Response);
                     if (response == null) {
                         // No response, someting went wrong so just rethrow
@@ -60,6 +78,7 @@ namespace NuGet {
                     // If we were trying to authenticate the proxy or the request and succeeded, cache the result.
                     if (previousStatusCode == HttpStatusCode.ProxyAuthenticationRequired &&
                         response.StatusCode != HttpStatusCode.ProxyAuthenticationRequired) {
+
                         proxyCache.Add(request.Proxy);
                     }
                     else if (previousStatusCode == HttpStatusCode.Unauthorized &&

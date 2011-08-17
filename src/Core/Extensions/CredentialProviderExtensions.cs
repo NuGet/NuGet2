@@ -3,23 +3,13 @@ using System.Net;
 
 namespace NuGet {
     internal static class CredentialProviderExtensions {
-        private static readonly string[] _authenticationSchemes = new[] { "Basic", "NTLM" };
+        private static readonly string[] _authenticationSchemes = new[] { "Basic", "NTLM", "Negotiate" };
 
-        internal static ICredentials GetCredentials(this ICredentialProvider provider, WebRequest request, bool useCredentialCache = true) {
-            ICredentials credentials = provider.GetCredentials(request.RequestUri, request.Proxy);
-
-            if (credentials == null) {
-                return null;
-            }
-
-            if (!useCredentialCache) {
-                return credentials;
-            }
-
-            return WrapCredentials(request.RequestUri, credentials);
+        internal static ICredentials GetCredentials(this ICredentialProvider provider, WebRequest request) {
+            return provider.GetCredentials(request.RequestUri, request.Proxy);
         }
 
-        private static ICredentials WrapCredentials(Uri uri, ICredentials credentials) {
+        internal static ICredentials AsCredentialCache(this ICredentials credentials, Uri uri) {
             // No credentials then bail
             if (credentials == null) {
                 return null;

@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Net;
 
 namespace NuGet {
-    internal class CredentialStore : ICredentialCache {        
+    internal class CredentialStore : ICredentialCache {
         private readonly ConcurrentDictionary<Uri, ICredentials> _credentialCache = new ConcurrentDictionary<Uri, ICredentials>();
 
         private static readonly CredentialStore _instance = new CredentialStore();
@@ -29,7 +29,7 @@ namespace NuGet {
         public void Add(Uri uri, ICredentials credentials) {
             Uri rootUri = UriUtility.GetRootUri(uri);
             _credentialCache.TryAdd(uri, credentials);
-            _credentialCache.TryAdd(rootUri, credentials);
+            _credentialCache.AddOrUpdate(rootUri, credentials, (u, c) => credentials);
         }
     }
 }
