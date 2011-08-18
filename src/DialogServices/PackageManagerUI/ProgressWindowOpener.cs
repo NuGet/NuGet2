@@ -222,6 +222,17 @@ namespace NuGet.Dialog.PackageManagerUI {
             }
         }
 
+        public void ClearMessages() {
+            if (!_uiDispatcher.CheckAccess()) {
+                _uiDispatcher.Invoke(new Action(ClearMessages));
+                return;
+            }
+
+            if (_currentWindow != null) {
+                _currentWindow.ClearMessages();
+            }
+        }
+
         public void ShowProgress(string operation, int percentComplete) {
             if (!_uiDispatcher.CheckAccess()) {
                 _uiDispatcher.BeginInvoke(new Action<string, int>(ShowProgress), operation, percentComplete);

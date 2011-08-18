@@ -1,12 +1,13 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace NuGet {
     public class LocalPackageRepository : PackageRepositoryBase, IPackageLookup {
-        private Dictionary<string, PackageCacheEntry> _packageCache = new Dictionary<string, PackageCacheEntry>(StringComparer.OrdinalIgnoreCase);
-        private Dictionary<PackageName, string> _packagePathLookup = new Dictionary<PackageName, string>();
+        private readonly ConcurrentDictionary<string, PackageCacheEntry> _packageCache = new ConcurrentDictionary<string, PackageCacheEntry>(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<PackageName, string> _packagePathLookup = new ConcurrentDictionary<PackageName, string>();
         private readonly bool _enableCaching;
 
         public LocalPackageRepository(string physicalPath)

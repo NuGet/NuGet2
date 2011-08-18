@@ -351,10 +351,23 @@ namespace NuGet.Dialog.Providers {
             return false;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", 
+            "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification="We don't want it to crash VS.")]
         private void QueryExecutionCompleted(Task<LoadPageResult> task) {
             // If a task throws, the exception must be handled or the Exception
             // property must be accessed or the exception will tear down the process when finalized
             Exception exception = task.Exception;
+
+            if (task.IsFaulted) {
+                try {
+                    ExceptionHelper.WriteToActivityLog(exception);
+                }
+                catch { 
+                    // don't let this crash VS
+                }
+            }
 
             var cancellationSource = (CancellationTokenSource)task.AsyncState;
             if (cancellationSource != _currentCancellationSource) {

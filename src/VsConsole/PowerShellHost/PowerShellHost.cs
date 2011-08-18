@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
-
+using System.Threading;
 using NuGet;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
@@ -15,6 +15,7 @@ using NuGet.VisualStudio.Resources;
 namespace NuGetConsole.Host.PowerShell.Implementation {
     internal abstract class PowerShellHost : IHost, IPathExpansion, IDisposable {
         private static readonly object _lockObject = new object();
+        private static readonly object _initScriptsLock = new object();
         private readonly string _name;
         private readonly IRunspaceManager _runspaceManager;
         private readonly IVsPackageSourceProvider _packageSourceProvider;
@@ -147,14 +148,14 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                         DisplayDisclaimerAndHelpText();
                     }
 
+                    UpdateWorkingDirectory();
+                    ExecuteInitScripts();
+
+                    // Hook up solution events
                     _solutionManager.SolutionOpened += (o, e) => {
                         UpdateWorkingDirectory();
                         ExecuteInitScripts();
                     };
-
-                    UpdateWorkingDirectory();
-                    ExecuteInitScripts();
-
                     _solutionManager.SolutionClosed += (o, e) => UpdateWorkingDirectory();
                 }
                 catch (Exception ex) {
@@ -195,7 +196,11 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification = "We don't want execution of init scripts to crash our console.")]
         private void ExecuteInitScripts() {
-            if (!String.IsNullOrEmpty(_solutionManager.SolutionDirectory)) {
+            // Fix for Bug 1426 Disallow ExecuteInitScripts from being executed concurrently by multiple threads.
+            lock (_initScriptsLock) {
+                if (String.IsNullOrEmpty(_solutionManager.SolutionDirectory)) {
+                    return;
+                }
                 try {
                     var packageManager = (VsPackageManager)_packageManagerFactory.CreatePackageManager(ServiceLocator.GetInstance<IPackageRepository>(), useFallbackForDependencies: false);
                     var localRepository = packageManager.LocalRepository;

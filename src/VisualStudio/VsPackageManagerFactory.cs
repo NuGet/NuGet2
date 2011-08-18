@@ -86,7 +86,7 @@ namespace NuGet.VisualStudio {
         /// Creates a FallbackRepository with an aggregate repository that also constains the primaryRepository.
         /// </summary>
         internal IPackageRepository CreateFallbackRepository(IPackageRepository primaryRepository) {
-            if (AggregatePackageSource.Instance.Source.Equals(primaryRepository.Source, StringComparison.OrdinalIgnoreCase)) {
+            if (IsAggregateRepository(primaryRepository)) {
                 // If we're using the aggregate repository, we don't need to create a fall back repo.
                 return primaryRepository;
             }
@@ -94,6 +94,19 @@ namespace NuGet.VisualStudio {
             var aggregateRepository = _packageSourceProvider.GetAggregate(_repositoryFactory, ignoreFailingRepositories: true);
             aggregateRepository.ResolveDependenciesVertically = true;
             return new FallbackRepository(primaryRepository, aggregateRepository);
+        }
+
+        private static bool IsAggregateRepository(IPackageRepository repository) {
+            if (repository is AggregateRepository) {
+                // This test should be ok as long as any aggregate repository that we encounter here means the true Aggregate repository of all repositories in the package source
+                // Since the repository created here comes from the UI, this holds true.
+                return true;
+            }
+            var vsPackageSourceRepository = repository as VsPackageSourceRepository;
+            if (vsPackageSourceRepository != null) {
+                return IsAggregateRepository(vsPackageSourceRepository.ActiveRepository);
+            }
+            return false;
         }
 
         private RepositoryInfo GetRepositoryInfo() {

@@ -77,6 +77,12 @@ namespace NuGet.Dialog.PackageManagerUI {
             MessagePane.ScrollToEnd();
         }
 
+        public void ClearMessages() {
+            if (MessagePane.Document != null && MessagePane.Document.Blocks.LastBlock != null) {
+                ((Paragraph)MessagePane.Document.Blocks.LastBlock).Inlines.Clear();
+            }
+        }
+
         public void ShowProgress(string operation, int percentComplete) {
             if (percentComplete == ProgressBar.Maximum) {
                 // the progress complete, reverts back to indeterminate state

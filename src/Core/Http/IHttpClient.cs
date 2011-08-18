@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
 namespace NuGet {
@@ -13,22 +14,13 @@ namespace NuGet {
             set;
         }
 
-        IProxyFinder ProxyFinder {
-            get;
-            set;
-        }
-
-        IRequestCredentialService RequestCredentialService {
-            get;
-            set;
-        }
-
         bool AcceptCompression {
             get;
             set;
         }
 
-        WebRequest CreateRequest();
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This is expensive")]
+        WebResponse GetResponse();
         void InitializeRequest(WebRequest request);
         byte[] DownloadData();
     }

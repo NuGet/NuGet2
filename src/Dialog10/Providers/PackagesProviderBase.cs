@@ -259,6 +259,8 @@ namespace NuGet.Dialog.Providers {
 
             _failedProjects = new Dictionary<Project, Exception>();
 
+            ClearProgressMessages();
+
             var worker = new BackgroundWorker();
             worker.DoWork += OnRunWorkerDoWork;
             worker.RunWorkerCompleted += OnRunWorkerCompleted;
@@ -319,6 +321,10 @@ namespace NuGet.Dialog.Providers {
             if (ExecuteCompletedCallback != null) {
                 ExecuteCompletedCallback();
             }
+        }
+
+        private void ClearProgressMessages() {
+            _providerServices.ProgressWindow.ClearMessages();
         }
 
         protected void ShowProgressWindow() {
