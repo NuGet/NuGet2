@@ -52,7 +52,7 @@ namespace NuGet {
                         // exception.
                         ((HttpWebRequest)request).KeepAlive = false;
                     }
-
+                    
                     // Prepare the request, we do something like write to the request stream
                     // which needs to happen last before the request goes out
                     prepareRequest(request);
@@ -73,8 +73,19 @@ namespace NuGet {
                 }
                 catch (WebException ex) {
                     IHttpWebResponse response = GetResponse(ex.Response);
-                    if (response == null) {
+                    if (response == null && 
+                        ex.Status != WebExceptionStatus.SecureChannelFailure) {
                         // No response, someting went wrong so just rethrow
+                        throw;
+                    }
+
+                    // Special case https connections that might require authentication
+                    if (ex.Status == WebExceptionStatus.SecureChannelFailure) {
+                        if (continueIfFailed) {
+                            // Act like we got a 401 so that we prompt for credentials on the next request
+                            previousStatusCode = HttpStatusCode.Unauthorized;
+                            continue;
+                        }
                         throw;
                     }
 
