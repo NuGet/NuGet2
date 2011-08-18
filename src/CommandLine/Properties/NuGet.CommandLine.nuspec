@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+<package>
   <metadata>
     <id>NuGet.CommandLine</id>
-    <version>1.5.0.0</version>
+    <version>1.6.0.0</version>
     <authors>Outercurve Foundation</authors>
     <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
     <projectUrl>http://nuget.codeplex.com</projectUrl>
     <description>NuGet Command Line Tool</description>
   </metadata>
   <files>
-      <file src="NuGet.exe" target="tools" />      
+      <file src="NuGet.exe" target="tools" />
   </files>
 </package>
