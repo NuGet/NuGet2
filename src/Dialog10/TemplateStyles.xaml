@@ -11,14 +11,6 @@
         <Setter Property="Margin" Value="0,0,-10,0" />
         <Setter Property="MinHeight" Value="62" />
     </Style>
-    <Style  x:Key="TileImageStyle" TargetType="{x:Type Image}">
-        <Setter Property="Margin" Value="0,4,4,4" />
-        <Setter Property="Height" Value="32" />
-        <Setter Property="Width" Value="32" />
-        <Setter Property="VerticalAlignment" Value="Top" />
-        <Setter Property="StretchDirection" Value="DownOnly" />
-        <Setter Property="Stretch" Value="Uniform" />
-    </Style>
     <Style  x:Key="TileTitleTextBoxStyle" TargetType="{x:Type eml:TextBlockControl}">
         <Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
         <Setter Property="FontWeight" Value="Bold" />

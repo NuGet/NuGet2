@@ -30,6 +30,27 @@
         </Style.Triggers>
     </Style>
 
+    <Style x:Key="TileImageStyle" TargetType="{x:Type Image}">
+        <Setter Property="Margin" Value="0,4,4,4" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Width" Value="32" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="StretchDirection" Value="DownOnly" />
+        <Setter Property="Stretch" Value="Uniform" />
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="ImageFailed">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Source" FillBehavior="HoldEnd">
+                            <DiscreteObjectKeyFrame KeyTime="0:0:0" Value="{StaticResource BitmapImage_DefaultIcon}">
+                            </DiscreteObjectKeyFrame>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
     <!-- data template for the package extension item -->
     <DataTemplate x:Key="PackageItemTemplate">
         <Grid Style="{StaticResource TileTemplateGridStyle}">
