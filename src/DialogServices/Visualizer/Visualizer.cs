@@ -54,9 +54,11 @@ namespace NuGet.Dialog {
                 nodes.Add(new DGMLNode { Name = packageName, Label = packageName, Category = "Package" });
 
                 foreach (var dependency in package.Dependencies) {
-                    IPackage dependentPackage = mapping[dependency.Id];
-                    dependencies.Add(dependentPackage);
-                    links.Add(new DGMLLink { SourceName = packageName, DestName = dependentPackage.GetFullName(), Category = "Package Dependency" });
+                    IPackage dependentPackage;
+                    if (mapping.TryGetValue(dependency.Id, out dependentPackage)) {
+                        dependencies.Add(dependentPackage);
+                        links.Add(new DGMLLink { SourceName = packageName, DestName = dependentPackage.GetFullName(), Category = "Package Dependency" });
+                    }
                 }
             }
             return dependencies;
