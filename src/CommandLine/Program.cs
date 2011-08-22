@@ -9,6 +9,7 @@ using NuGet.Commands;
 
 namespace NuGet {
     public class Program {
+        private const string NuGetExtensionsKey = "NUGET_EXTENSIONS_PATH";
         private static readonly string ExtensionsDirectoryRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NuGet", "Commands");
 
         [Import]
@@ -112,37 +113,29 @@ namespace NuGet {
                    command.Arguments.Count <= attribute.MaxArgs;
         }
 
-        private static void AddExtensionsToCatalog(AggregateCatalog catalog)
-        {
-            var customExtensions = Environment.GetEnvironmentVariable("NUGET_EXTENSIONS");
-            if (!string.IsNullOrWhiteSpace(customExtensions))
-            {
-                var files = customExtensions
-                    .Split(Path.PathSeparator)
-                    .Select(x => x.Trim())
-                    .Where(x => x.Length > 0)
-                    .Where(File.Exists);
+        private static void AddExtensionsToCatalog(AggregateCatalog catalog) {
+            IEnumerable<string> directories = new[] { ExtensionsDirectoryRoot };
 
-                RegisterExtensions(catalog, files);
+            var customExtensions = Environment.GetEnvironmentVariable(NuGetExtensionsKey);
+            if (!String.IsNullOrEmpty(customExtensions)) {
+                // Add all directories from the environment variable if available.
+                directories = directories.Concat(customExtensions.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
             }
 
-            if (Directory.Exists(ExtensionsDirectoryRoot))
-            {
-                var files = Directory.EnumerateFiles(ExtensionsDirectoryRoot, "*.dll", SearchOption.AllDirectories);
-                RegisterExtensions(catalog,files);
+            foreach (var directory in directories) {
+                if (Directory.Exists(directory)) {
+                    var files = Directory.EnumerateFiles(directory, "*.dll", SearchOption.AllDirectories);
+                    RegisterExtensions(catalog, files);
+                }
             }
         }
 
-        private static void RegisterExtensions(AggregateCatalog catalog, IEnumerable<string> enumerateFiles)
-        {
-            foreach (var item in enumerateFiles)
-            {
-                try
-                {
+        private static void RegisterExtensions(AggregateCatalog catalog, IEnumerable<string> enumerateFiles) {
+            foreach (var item in enumerateFiles) {
+                try {
                     catalog.Catalogs.Add(new AssemblyCatalog(item));
                 }
-                catch (BadImageFormatException)
-                {
+                catch (BadImageFormatException) {
                     // Ignore if the dll wasn't a valid assembly
                 }
             }
