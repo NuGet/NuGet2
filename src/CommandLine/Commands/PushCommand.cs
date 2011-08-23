@@ -86,7 +86,7 @@ namespace NuGet.Commands {
             // Push the package to the server
             var package = new ZipPackage(packagePath);
 
-            string sourceName = CommandLineUtility.GetSourceDisplayName(Source);
+            string sourceName = CommandLineUtility.GetSourceDisplayName(source);
             Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), sourceName);
 
             using (Stream stream = package.GetStream()) {

@@ -4,10 +4,12 @@ using System.ComponentModel.Composition;
 using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using NuGet.Commands;
 
 namespace NuGet {
     public class Program {
+        private const string NuGetExtensionsKey = "NUGET_EXTENSIONS_PATH";
         private static readonly string ExtensionsDirectoryRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NuGet", "Commands");
 
         [Import]
@@ -112,10 +114,24 @@ namespace NuGet {
         }
 
         private static void AddExtensionsToCatalog(AggregateCatalog catalog) {
-            if (!Directory.Exists(ExtensionsDirectoryRoot)) {
-                return;
+            IEnumerable<string> directories = new[] { ExtensionsDirectoryRoot };
+
+            var customExtensions = Environment.GetEnvironmentVariable(NuGetExtensionsKey);
+            if (!String.IsNullOrEmpty(customExtensions)) {
+                // Add all directories from the environment variable if available.
+                directories = directories.Concat(customExtensions.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
             }
-            foreach (var item in Directory.EnumerateFiles(ExtensionsDirectoryRoot, "*.dll", SearchOption.AllDirectories)) {
+
+            foreach (var directory in directories) {
+                if (Directory.Exists(directory)) {
+                    var files = Directory.EnumerateFiles(directory, "*.dll", SearchOption.AllDirectories);
+                    RegisterExtensions(catalog, files);
+                }
+            }
+        }
+
+        private static void RegisterExtensions(AggregateCatalog catalog, IEnumerable<string> enumerateFiles) {
+            foreach (var item in enumerateFiles) {
                 try {
                     catalog.Catalogs.Add(new AssemblyCatalog(item));
                 }

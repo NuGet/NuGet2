@@ -120,8 +120,22 @@ namespace NuGet {
         }
 
         private Uri ResolveBaseUrl() {
-            var client = new RedirectedHttpClient(new Uri(Source));
-            return EnsureTrailingSlash(client.Uri);
+            Uri uri = null;
+
+            try {
+                var client = new RedirectedHttpClient(new Uri(Source));
+                uri = client.Uri;
+            }
+            catch (WebException ex) {
+                var response = (HttpWebResponse)ex.Response;
+                if (response == null) {
+                    throw;
+                }
+
+                uri = response.ResponseUri;
+            }
+
+            return EnsureTrailingSlash(uri);
         }
 
         private static Uri EnsureTrailingSlash(Uri uri) {
