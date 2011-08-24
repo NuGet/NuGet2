@@ -135,7 +135,7 @@
                 <!-- Id -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
                     <eml:TextBlockControl Text="{x:Static resources:Resources.Dialog_IdLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <eml:TextBlockControl Style="{StaticResource DetailMetadataValueStyle}">                            
+                    <eml:TextBlockControl x:Name="IdTextBlock" Style="{StaticResource DetailMetadataValueStyle}">                            
                         <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.GalleryDetailsUrl, Mode=OneTime, FallbackValue={x:Null}}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                             <Run Text="{Binding Id, Mode=OneWay}" />
                         </Hyperlink>
@@ -267,5 +267,11 @@
                 </ItemsControl>
             </StackPanel>
         </ScrollViewer>
+
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding PackageIdentity.GalleryDetailsUrl, Mode=OneTime, FallbackValue={x:Null}}" Value="{x:Null}">
+                <Setter TargetName="IdTextBlock" Property="Text" Value="{Binding Id, Mode=OneWay}" />
+            </DataTrigger>
+        </DataTemplate.Triggers>
     </DataTemplate>
 </ResourceDictionary>
