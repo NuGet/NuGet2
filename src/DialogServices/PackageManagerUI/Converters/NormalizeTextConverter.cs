@@ -13,7 +13,7 @@ namespace NuGet.Dialog.PackageManagerUI {
 
             // replace a series of whitepaces with a single whitespace
             // REVIEW: Should we avoid regex and just do this manually?
-            return Regex.Replace(stringValue, @"\s+", " ");
+            return Regex.Replace(stringValue, @"[\f\t\v\x85\p{Z}]+", " ");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
