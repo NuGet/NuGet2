@@ -34,7 +34,12 @@
                             </TableColumnItem>
                             <TableColumnItem>
                                 <ScriptBlock>
-                                    $description = if ($_.IsUpdate -and $_.ReleaseNotes) { $_.ReleaseNotes } else { $_.Description }
+                                    $description = if ($_.IsUpdate -and $_.ReleaseNotes) { 
+                                        $_.ReleaseNotes 
+                                    } 
+                                    else { 
+                                        $_.Description 
+                                    }
                                     return $description
                                 </ScriptBlock>
                             </TableColumnItem>
@@ -71,7 +76,12 @@
                             <ListItem>
                                 <Label>Description/Release Notes</Label>
                                 <ScriptBlock>
-                                    $description = if ($_.IsUpdate -and $_.ReleaseNotes) { $_.ReleaseNotes } else { $_.Description }
+                                    $description = if ($_.IsUpdate -and $_.ReleaseNotes) {
+                                        $_.ReleaseNotes
+                                    }
+                                    else {
+                                        $_.Description
+                                    }
                                     return $description
                                 </ScriptBlock>
                             </ListItem>
@@ -114,7 +124,12 @@
                             <ListItem>
                                 <Label>Description/Release Notes</Label>
                                 <ScriptBlock>
-                                    $description = if ($_.IsUpdate -and $_.ReleaseNotes) { $_.ReleaseNotes } else { $_.Description }
+                                    $description = if ($_.IsUpdate -and $_.ReleaseNotes) {
+                                        $_.ReleaseNotes
+                                    }
+                                    else {
+                                        $_.Description
+                                    }
                                     return $description
                                 </ScriptBlock>
                             </ListItem>

@@ -246,6 +246,14 @@ namespace NuGet.PowerShell.Commands.Test {
 
 
         private static void AssertPackageResultsEqual(dynamic a, dynamic b) {
+            if (a is PSObject) {
+                a = (a as PSObject).BaseObject;
+            }
+
+            if (b is PSObject) {
+                b = (b as PSObject).BaseObject;
+            }
+
             Assert.AreEqual(a.Id, b.Id);
             Assert.AreEqual(a.Version, b.Version);
         }

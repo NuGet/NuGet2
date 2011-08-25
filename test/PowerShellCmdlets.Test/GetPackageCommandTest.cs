@@ -454,7 +454,7 @@ namespace NuGet.PowerShell.Commands.Test {
             cmdlet.Recent = true;
 
             // Act
-            var packages = cmdlet.GetResults().OfType<IPackage>().ToList();
+            var packages = cmdlet.GetResults().OfType<PSObject>().Select(p => (IPackage)p.BaseObject).ToList();
 
             // Assert
             Assert.AreEqual(3, packages.Count);
@@ -563,6 +563,14 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         private static void AssertPackageResultsEqual(dynamic a, dynamic b) {
+            if (a is PSObject) {
+                a = (a as PSObject).BaseObject;
+            }
+
+            if (b is PSObject) {
+                b = (b as PSObject).BaseObject;
+            }
+
             Assert.AreEqual(a.Id, b.Id);
             Assert.AreEqual(a.Version, b.Version);
         }
