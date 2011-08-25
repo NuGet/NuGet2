@@ -69,7 +69,11 @@
                                 </ScriptBlock>
                             </ListItem>
                             <ListItem>
-                                <PropertyName>Description</PropertyName>
+                                <Label>Description/Release Notes</Label>
+                                <ScriptBlock>
+                                    $description = if ($_.IsUpdate -and $_.ReleaseNotes) { $_.ReleaseNotes } else { $_.Description }
+                                    return $description
+                                </ScriptBlock>
                             </ListItem>
                             <ListItem>
                                 <Label>Dependencies</Label>
@@ -108,7 +112,11 @@
                                 </ScriptBlock>
                             </ListItem>
                             <ListItem>
-                                <PropertyName>Description</PropertyName>
+                                <Label>Description/Release Notes</Label>
+                                <ScriptBlock>
+                                    $description = if ($_.IsUpdate -and $_.ReleaseNotes) { $_.ReleaseNotes } else { $_.Description }
+                                    return $description
+                                </ScriptBlock>
                             </ListItem>
                             <ListItem>
                                 <Label>Dependencies</Label>

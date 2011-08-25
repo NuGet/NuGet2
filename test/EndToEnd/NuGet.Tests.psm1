@@ -214,6 +214,9 @@ function Write-TestResults {
         $Results,
         $Path
     )
+
+    # Show failed tests first
+    $Results = $Results | Sort-Object -Property Error -Descending
     
     $resultsTemplate = "<html>
     <head>
