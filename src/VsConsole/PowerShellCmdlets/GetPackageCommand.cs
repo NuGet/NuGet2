@@ -271,7 +271,11 @@ namespace NuGet.PowerShell.Commands {
                     break;
                 }
                 hasPackage = true;
-                WriteObject(package);
+
+                var pso = new PSObject(package);
+                pso.Properties.Add(new PSNoteProperty("IsUpdate", Updates.IsPresent));
+
+                WriteObject(pso);
             }
 
             if (!hasPackage) {

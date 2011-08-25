@@ -20,7 +20,7 @@
                         <Width>20</Width>
                     </TableColumnHeader>
                     <TableColumnHeader>
-                        <Label>Description</Label>
+                        <Label>Description/Release Notes</Label>
                     </TableColumnHeader>
                 </TableHeaders>
                 <TableRowEntries>
@@ -33,7 +33,10 @@
                                 <PropertyName>Version</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
-                                <PropertyName>Description</PropertyName>
+                                <ScriptBlock>
+                                    $description = if ($_.IsUpdate -and $_.ReleaseNotes) { $_.ReleaseNotes } else { $_.Description }
+                                    return $description
+                                </ScriptBlock>
                             </TableColumnItem>
                         </TableColumnItems>
                     </TableRowEntry>
