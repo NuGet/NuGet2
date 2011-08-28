@@ -43,6 +43,13 @@
     </Compile>
     <Compile Include="AggregateQueryTest.cs" />
     <Compile Include="AggregateRepositoryTest.cs" />
+    <Compile Include="Analysis\InvalidFrameworkFolderRuleTest.cs" />
+    <Compile Include="Analysis\MisplacedAssemblyRuleTest.cs" />
+    <Compile Include="Analysis\MisplacedScriptFileRuleTest.cs" />
+    <Compile Include="Analysis\MisplacedTransformFileRuleTest.cs" />
+    <Compile Include="Analysis\MissingSummaryRuleTest.cs" />
+    <Compile Include="Analysis\NoneAssemblyInsideLibRuleTest.cs" />
+    <Compile Include="Analysis\PackageIssueTestHelper.cs" />
     <Compile Include="DataServicePackageRepositoryTest.cs" />
     <Compile Include="DataServicePackageTest.cs" />
     <Compile Include="DefaultPackagePathResolverTest.cs" />
@@ -121,6 +128,7 @@
   <ItemGroup>
     <Compile Include="NuGetCommandLine\Commands\InstallCommandTest.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\..\Build\NuGet.Test.targets" />
 </Project>

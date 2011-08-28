@@ -35,6 +35,15 @@
     <Compile Include="..\..\Common\GlobalSuppressions.cs">
       <Link>Common\GlobalSuppressions.cs</Link>
     </Compile>
+    <Compile Include="Analysis\IPackageRule.cs" />
+    <Compile Include="Analysis\PackageIssue.cs" />
+    <Compile Include="Analysis\DefaultPackageRuleSet.cs" />
+    <Compile Include="Analysis\Rules\InvalidFrameworkFolderRule.cs" />
+    <Compile Include="Analysis\Rules\MisplacedAssemblyRule.cs" />
+    <Compile Include="Analysis\Rules\MisplacedScriptFileRule.cs" />
+    <Compile Include="Analysis\Rules\MisplacedTransformFileRule.cs" />
+    <Compile Include="Analysis\Rules\MissingSummaryRule.cs" />
+    <Compile Include="Analysis\Rules\NonAssemblyInsideLibRule.cs" />
     <Compile Include="Authoring\AssemblyMetadata.cs" />
     <Compile Include="Authoring\AssemblyMetadataExtractor.cs" />
     <Compile Include="Authoring\IPackageBuilder.cs" />

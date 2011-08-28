@@ -515,6 +515,59 @@ public class Cl_{0} {{
         }
 
         [TestMethod]
+        public void PackageCommand_TestDefaultPackageIssueRules() {
+            //Arrange
+            string nuspecFile = Path.Combine(OneSpecfolder, "beta.nuspec");
+            File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
+            
+            // violated rule: Invalid Framework Folder
+            Directory.CreateDirectory(Path.Combine(OneSpecfolder, "lib"));
+            Directory.CreateDirectory(Path.Combine(OneSpecfolder, "lib", "unknown"));
+            File.WriteAllText(Path.Combine(OneSpecfolder, "lib\\unknown\\abc.dll"), "assembly");
+
+            // violated rule: Assembly placed directly under lib
+            File.WriteAllText(Path.Combine(OneSpecfolder, "lib\\def.dll"), "assembly");
+
+            // violated rule: Assembly placed directly under lib
+            Directory.CreateDirectory(Path.Combine(OneSpecfolder, "content"));
+            File.WriteAllText(Path.Combine(OneSpecfolder, "content\\hello.dll"), "assembly");
+
+            // violated rule: Script file placed outside tools
+            File.WriteAllText(Path.Combine(OneSpecfolder, "install.ps1"), "script");
+
+            // violated rule: Unrecognized script file
+            Directory.CreateDirectory(Path.Combine(OneSpecfolder, "tools"));
+            File.WriteAllText(Path.Combine(OneSpecfolder, "tools\\myscript.ps1"), "script");
+
+            // violated rule: transform file outside content folder
+            File.WriteAllText(Path.Combine(OneSpecfolder, "tools\\web.config.transform"), "transform");
+
+            // violated rule: non-assembly inside lib
+            File.WriteAllText(Path.Combine(OneSpecfolder, "lib\\mylibrary.xml"), "xml");
+
+            string[] args = new string[] { "pack", "-RunPackageAnalysis" };
+            Directory.SetCurrentDirectory(OneSpecfolder);
+
+            //Act
+            int result = Program.Main(args);
+
+            //Assert
+            Assert.AreEqual(0, result);
+            string output = consoleOutput.ToString();
+            Assert.IsTrue(output.Contains("Successfully created package"));
+
+            // Asserts for package issues
+            Assert.IsTrue(output.Contains("7 issue(s) found with the generated package."));
+            Assert.IsTrue(output.Contains("Incompatible files in lib folder"));
+            Assert.IsTrue(output.Contains("Invalid framework folder"));
+            Assert.IsTrue(output.Contains("Assembly not inside a framework folder"));
+            Assert.IsTrue(output.Contains("Assembly outside lib folder"));
+            Assert.IsTrue(output.Contains("PowerScript file outside tools folder"));
+            Assert.IsTrue(output.Contains("Unrecognized PowerScript file"));
+            Assert.IsTrue(output.Contains("Incompatible files in lib folder"));
+        }
+
+        [TestMethod]
         public void PackageCommand_SpecifyingProjectFileWithNuSpecWithTokensSubstitutesMetadataFromProject() {
             // Arrange
             string expectedPackage = "ProjectWithNuSpec.1.2.nupkg";

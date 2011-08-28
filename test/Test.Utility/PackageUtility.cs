@@ -19,7 +19,8 @@ namespace NuGet.Test {
                                               IEnumerable<string> tools = null,
                                               IEnumerable<PackageDependency> dependencies = null,
                                               double? rating = null,
-                                              string description = null) {
+                                              string description = null,
+                                              string summary = null) {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
             return CreatePackage(id,
                                  version,
@@ -28,7 +29,8 @@ namespace NuGet.Test {
                                  tools,
                                  dependencies,
                                  rating,
-                                 description);
+                                 description,
+                                 summary);
         }
 
         public static IPackage CreatePackage(string id,
@@ -38,7 +40,8 @@ namespace NuGet.Test {
                                               IEnumerable<string> tools,
                                               IEnumerable<PackageDependency> dependencies,
                                               double? rating,
-                                              string description) {
+                                              string description,
+                                              string summary) {
             content = content ?? Enumerable.Empty<string>();
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>();
             dependencies = dependencies ?? Enumerable.Empty<PackageDependency>();
@@ -64,6 +67,7 @@ namespace NuGet.Test {
             mockPackage.Setup(m => m.GetStream()).Returns(() => new MemoryStream());
             mockPackage.Setup(m => m.LicenseUrl).Returns(new Uri("ftp://test/somelicense.txts"));
             mockPackage.Setup(m => m.Rating).Returns(rating ?? -1);
+            mockPackage.Setup(m => m.Summary).Returns(summary);
             return mockPackage.Object;
         }
 

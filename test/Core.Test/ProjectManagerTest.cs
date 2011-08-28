@@ -113,7 +113,8 @@ namespace NuGet.Test {
                                                         tools: null,
                                                         dependencies: null,
                                                         rating: null,
-                                                        description: null);
+                                                        description: null,
+                                                        summary: null);
             projectManager.LocalRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageA);
             projectManager.LocalRepository.AddPackage(packageB);
@@ -1195,7 +1196,8 @@ namespace NuGet.Test {
                 tools: null,
                 dependencies: null,
                 rating: null,
-                description: null);
+                description: null,
+                summary: null);
 
             projectManager.LocalRepository.AddPackage(packageA);
 
