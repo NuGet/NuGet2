@@ -97,7 +97,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Move it into a framework-specific folder..
+        ///   Looks up a localized string similar to Move it into a framework-specific folder. If this assembly is targeted for multiple frameworks, ignore this warning..
         /// </summary>
         internal static string AssemblyUnderLibSolution {
             get {

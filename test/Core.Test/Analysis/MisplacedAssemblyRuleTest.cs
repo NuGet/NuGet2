@@ -50,7 +50,7 @@ namespace NuGet.Test.Analysis {
                 issues[0],
                 "Assembly not inside a framework folder.",
                 "The assembly 'lib\\abc.exe' is placed directly under 'lib' folder. It is recommended that assemblies be placed inside a framework-specific folder.",
-                "Move it into a framework-specific folder."
+                "Move it into a framework-specific folder. If this assembly is targeted for multiple frameworks, ignore this warning."
                 );
         }
 
@@ -69,14 +69,14 @@ namespace NuGet.Test.Analysis {
                 issues[0],
                 "Assembly not inside a framework folder.",
                 "The assembly 'lib\\abc.exe' is placed directly under 'lib' folder. It is recommended that assemblies be placed inside a framework-specific folder.",
-                "Move it into a framework-specific folder."
+                "Move it into a framework-specific folder. If this assembly is targeted for multiple frameworks, ignore this warning."
                 );
 
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[1],
                 "Assembly not inside a framework folder.",
                 "The assembly 'lib\\def.dll' is placed directly under 'lib' folder. It is recommended that assemblies be placed inside a framework-specific folder.",
-                "Move it into a framework-specific folder."
+                "Move it into a framework-specific folder. If this assembly is targeted for multiple frameworks, ignore this warning."
                 );
         }
 

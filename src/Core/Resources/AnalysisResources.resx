@@ -130,7 +130,7 @@
     <value>The assembly '{0}' is placed directly under 'lib' folder. It is recommended that assemblies be placed inside a framework-specific folder.</value>
   </data>
   <data name="AssemblyUnderLibSolution" xml:space="preserve">
-    <value>Move it into a framework-specific folder.</value>
+    <value>Move it into a framework-specific folder. If this assembly is targeted for multiple frameworks, ignore this warning.</value>
   </data>
   <data name="AssemblyUnderLibTitle" xml:space="preserve">
     <value>Assembly not inside a framework folder.</value>
