@@ -692,4 +692,13 @@ nuget update -Self</value>
   <data name="PackageCommandIssueTitle" xml:space="preserve">
     <value>Issue: {0}</value>
   </data>
+  <data name="Warning_DefaultSpecValue" xml:space="preserve">
+    <value>The value "{0}" for {1} is a sample value and should be removed.</value>
+  </data>
+  <data name="Warning_DefaultSpecValueSolution" xml:space="preserve">
+    <value>Remove this value from the nuspec and rebuild your package.</value>
+  </data>
+  <data name="Warning_DefaultSpecValueTitle" xml:space="preserve">
+    <value>Remove sample nuspec values.</value>
+  </data>
 </root>
