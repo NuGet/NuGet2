@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using NuGet.Resources;
 
 namespace NuGet.Analysis.Rules {
     
@@ -27,9 +29,10 @@ namespace NuGet.Analysis.Rules {
 
         private static PackageIssue CreatePackageIssueForMisplacedContent(string path) {
             return new PackageIssue(
-                "Transform file outside content folder",
-                "The transform file '" + path + "' is outside the 'content' folder and hence will not be transformed during installation of this package.",
-                "Move it into the 'content' folder.");
+                AnalysisResources.MisplacedTransformFileTitle,
+                String.Format(CultureInfo.CurrentCulture, AnalysisResources.MisplacedTransformFileDescription, path),
+                AnalysisResources.MisplacedTransformFileSolution
+            );
         }
     }
 }

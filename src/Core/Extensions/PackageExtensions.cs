@@ -35,8 +35,11 @@ namespace NuGet {
                 return null;
             }
 
-            return rules.SelectMany(r => r.Validate(package))
-                        .OrderBy(p => p.Title, StringComparer.CurrentCulture);
+            if (rules == null) {
+                throw new ArgumentNullException("rules");
+            }
+
+            return rules.Where(r => r != null).SelectMany(r => r.Validate(package));
         }
 
         public static string GetHash(this IPackage package) {

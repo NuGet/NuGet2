@@ -71,8 +71,8 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "PackageCommandNoDefaultExcludes")]
         public bool NoDefaultExcludes { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandRunAnalysis")]
-        public bool RunPackageAnalysis { get; set; }
+        [Option(typeof(NuGetResources), "PackageCommandNoRunAnalysis")]
+        public bool NoPackageAnalysis { get; set; }
 
         [Option(typeof(NuGetResources), "PackageCommandPropertiesDescription")]
         public Dictionary<string, string> Properties {
@@ -91,7 +91,7 @@ namespace NuGet.Commands {
             Console.WriteLine(NuGetResources.PackageCommandAttemptingToBuildPackage, Path.GetFileName(path));
 
             IPackage package = BuildPackage(path);
-            if (package != null && RunPackageAnalysis) {
+            if (package != null && !NoPackageAnalysis) {
                 AnalyzePackage(package);
             }
         }
@@ -315,11 +315,12 @@ namespace NuGet.Commands {
         }
 
         private void AnalyzePackage(IPackage package) {
-            IList<PackageIssue> issues = package.Validate(Rules).ToList();
+            IList<PackageIssue> issues = 
+                package.Validate(Rules).OrderBy(p => p.Title, StringComparer.CurrentCulture).ToList();
 
             if (issues.Count > 0) {
                 Console.WriteLine();
-                Console.WriteWarning(NuGetResources.PackageCommandPackageIssueSummary, issues.Count);
+                Console.WriteWarning(NuGetResources.PackageCommandPackageIssueSummary, issues.Count, package.Id);
                 foreach (var issue in issues) {
                     PrintPackageIssue(issue);
                 }

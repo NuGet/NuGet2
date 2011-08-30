@@ -43,7 +43,7 @@ namespace NuGet.Test.Analysis {
             var package = PackageUtility.CreatePackage(
                 "A",
                 content: new[] { "one", "two" },
-                assemblyReferences: new[] { "lib\\coyot ugly\\abc.dll" });
+                assemblyReferences: new[] { "lib\\coyote ugly\\abc.dll" });
             var rule = new InvalidFrameworkFolderRule();
 
             // Act
@@ -53,8 +53,8 @@ namespace NuGet.Test.Analysis {
             Assert.AreEqual(1, issues.Count);
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[0],
-                "Invalid framework folder",
-                "The folder 'coyot ugly' under 'lib' is not recognized as a valid framework name.",
+                "Invalid framework folder.",
+                "The folder 'coyote ugly' under 'lib' is not recognized as a valid framework name.",
                 "Rename it to a valid framework name.");
         }
     }

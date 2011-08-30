@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NuGet.Resources;
+using System.Globalization;
 
 namespace NuGet.Analysis.Rules {
     internal class InvalidFrameworkFolderRule : IPackageRule {
@@ -10,7 +12,7 @@ namespace NuGet.Analysis.Rules {
             foreach (var file in package.GetFiles()) {
                 string path = file.Path;
                 string[] parts = path.Split(Path.DirectorySeparatorChar);
-                if (parts.Length >= 3 && parts[0].Equals("lib", StringComparison.OrdinalIgnoreCase)) {
+                if (parts.Length >= 3 && parts[0].Equals(Constants.LibDirectory, StringComparison.OrdinalIgnoreCase)) {
                     set.Add(parts[1]);
                 }
             }
@@ -24,9 +26,9 @@ namespace NuGet.Analysis.Rules {
 
         private PackageIssue CreatePackageIssue(string target) {
             return new PackageIssue(
-                "Invalid framework folder",
-                "The folder '" + target + "' under 'lib' is not recognized as a valid framework name.",
-                "Rename it to a valid framework name."
+                AnalysisResources.InvalidFrameworkTitle,
+                String.Format(CultureInfo.CurrentCulture, AnalysisResources.InvalidFrameworkDescription, target),
+                AnalysisResources.InvalidFrameworkSolution
             );
         }
     }

@@ -39,13 +39,13 @@ namespace NuGet.Test.Analysis {
 
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[0],
-                "PowerScript file outside tools folder",
+                "PowerScript file outside tools folder.",
                 "The script file 'content\\install.ps1' is outside the 'tools' folder and hence will not be executed during installation of this package.",
                 "Move it into the 'tools' folder.");
 
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[1],
-                "PowerScript file outside tools folder",
+                "PowerScript file outside tools folder.",
                 "The script file 'init.ps1' is outside the 'tools' folder and hence will not be executed during installation of this package.",
                 "Move it into the 'tools' folder.");
         }
@@ -66,13 +66,13 @@ namespace NuGet.Test.Analysis {
 
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[0],
-                "Unrecognized PowerScript file",
+                "Unrecognized PowerScript file.",
                 "The script file 'tools\\hello.ps1' is not recognized by NuGet and hence will not be executed during installation of this package.",
                 "Rename it to install.ps1, uninstall.ps1 or init.ps1 and place it directly under 'tools'.");
 
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[1],
-                "Unrecognized PowerScript file",
+                "Unrecognized PowerScript file.",
                 "The script file 'tools\\abc.ps1' is not recognized by NuGet and hence will not be executed during installation of this package.",
                 "Rename it to install.ps1, uninstall.ps1 or init.ps1 and place it directly under 'tools'.");
         }

@@ -545,7 +545,7 @@ public class Cl_{0} {{
             // violated rule: non-assembly inside lib
             File.WriteAllText(Path.Combine(OneSpecfolder, "lib\\mylibrary.xml"), "xml");
 
-            string[] args = new string[] { "pack", "-RunPackageAnalysis" };
+            string[] args = new string[] { "pack" };
             Directory.SetCurrentDirectory(OneSpecfolder);
 
             //Act
@@ -557,7 +557,7 @@ public class Cl_{0} {{
             Assert.IsTrue(output.Contains("Successfully created package"));
 
             // Asserts for package issues
-            Assert.IsTrue(output.Contains("7 issue(s) found with the generated package."));
+            Assert.IsTrue(output.Contains("7 issue(s) found with package 'Antlr'."));
             Assert.IsTrue(output.Contains("Incompatible files in lib folder"));
             Assert.IsTrue(output.Contains("Invalid framework folder"));
             Assert.IsTrue(output.Contains("Assembly not inside a framework folder"));

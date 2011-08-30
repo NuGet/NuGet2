@@ -19,6 +19,10 @@
       <LastGenOutput>CommonResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\AnalysisResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>AnalysisResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\NuGetResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>NuGetResources.Designer.cs</LastGenOutput>
@@ -78,6 +82,11 @@
     <Compile Include="ProjectSystem\IBatchProcessor.cs" />
     <Compile Include="Repositories\ICloneableRepository.cs" />
     <Compile Include="Repositories\ISearchableRepository.cs" />
+    <Compile Include="Resources\AnalysisResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AnalysisResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Server\PublishData.cs" />
     <Compile Include="Server\PackageServer.cs" />
     <Compile Include="Server\IPackageServer.cs" />

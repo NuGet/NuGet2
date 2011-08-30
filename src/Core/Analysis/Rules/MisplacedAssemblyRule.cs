@@ -1,46 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using NuGet.Resources;
 
 namespace NuGet.Analysis.Rules {
 
     internal class MisplacedAssemblyRule : IPackageRule {
-        const string LibFolder = "lib";
-
         public IEnumerable<PackageIssue> Validate(IPackage package) {
             foreach (IPackageFile file in package.GetFiles()) {
                 string path = file.Path;
-                if (IsAssembly(path)) {
-                    string directory = Path.GetDirectoryName(path);
+                string directory = Path.GetDirectoryName(path);
 
-                    if (directory.Equals(LibFolder, StringComparison.OrdinalIgnoreCase)) {
+                // if under 'lib' directly
+                if (directory.Equals(Constants.LibDirectory, StringComparison.OrdinalIgnoreCase)) {
+                    if (PackageUtility.IsAssembly(path)) {
                         yield return CreatePackageIssueForAssembliesUnderLib(path);
                     }
-                    else if (!directory.StartsWith(LibFolder, StringComparison.OrdinalIgnoreCase)) {
+                }
+                else if (!directory.StartsWith(Constants.LibDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) {
+                    // when checking for assemblies outside 'lib' folder, only check .dll files.
+                    // .exe files are often legitimate outside 'lib'.
+                    if (path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)) {
                         yield return CreatePackageIssueForAssembliesOutsideLib(path);
                     }
                 }
             }
         }
 
-        private static bool IsAssembly(string path) {
-            return path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ||
-                   path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
-        }
-
         private static PackageIssue CreatePackageIssueForAssembliesUnderLib(string target) {
             return new PackageIssue(
-                "Assembly not inside a framework folder",
-                "The assembly '" + target + "' is placed directly under 'lib' folder. It is recommended that assemblies be placed inside a framework-specific folder.",
-                "Move it into a framework-specific folder."
+                AnalysisResources.AssemblyUnderLibTitle,
+                String.Format(CultureInfo.CurrentCulture, AnalysisResources.AssemblyUnderLibDescription, target),
+                AnalysisResources.AssemblyUnderLibSolution
             );
         }
 
         private static PackageIssue CreatePackageIssueForAssembliesOutsideLib(string target) {
             return new PackageIssue(
-                "Assembly outside lib folder",
-                "The assembly '" + target + "' is not inside the 'lib' folder and hence it won't be added as reference when the package is installed into a project",
-                "Move it into 'lib' folder."
+                AnalysisResources.AssemblyOutsideLibTitle,
+                String.Format(CultureInfo.CurrentCulture, AnalysisResources.AssemblyOutsideLibDescription, target),
+                AnalysisResources.AssemblyOutsideLibSolution
             );
         }
     }

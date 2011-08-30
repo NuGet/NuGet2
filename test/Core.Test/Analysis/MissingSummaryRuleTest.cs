@@ -33,7 +33,7 @@ namespace NuGet.Test.Analysis {
             Assert.AreEqual(1, issues.Count);
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[0],
-                "Consider providing Summary text",
+                "Consider providing Summary text.",
                 "The Description text is long but the Summary text is empty. This means the Description text will be truncated in the 'Manage NuGet packages' dialog.",
                 "Provide a brief summary of the package in the Summary field.");
         }

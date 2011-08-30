@@ -759,6 +759,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Specify if the command should not run package analysis after building the package..
+        /// </summary>
+        internal static string PackageCommandNoRunAnalysis {
+            get {
+                return ResourceManager.GetString("PackageCommandNoRunAnalysis", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Specifies the directory for the created NuGet package file. If not specified, uses the current directory..
         /// </summary>
         internal static string PackageCommandOutputDirDescription {
@@ -768,7 +777,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} issue(s) found with the generated package..
+        ///   Looks up a localized string similar to {0} issue(s) found with package &apos;{1}&apos;..
         /// </summary>
         internal static string PackageCommandPackageIssueSummary {
             get {
@@ -782,15 +791,6 @@ namespace NuGet {
         internal static string PackageCommandPropertiesDescription {
             get {
                 return ResourceManager.GetString("PackageCommandPropertiesDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specify if the command should run package analysis after building the package..
-        /// </summary>
-        internal static string PackageCommandRunAnalysis {
-            get {
-                return ResourceManager.GetString("PackageCommandRunAnalysis", resourceCulture);
             }
         }
         

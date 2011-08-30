@@ -53,15 +53,15 @@ namespace NuGet.Test.Analysis {
 
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[0],
-                "Transform file outside content folder",
+                "Transform file outside content folder.",
                 "The transform file 'tools\\web.config.transform' is outside the 'content' folder and hence will not be transformed during installation of this package.",
-                "Move it into the 'contents' folder.");
+                "Move it into the 'content' folder.");
 
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[1],
-                "Transform file outside content folder",
+                "Transform file outside content folder.",
                 "The transform file 'one.cs.pp' is outside the 'content' folder and hence will not be transformed during installation of this package.",
-                "Move it into the 'contents' folder.");
+                "Move it into the 'content' folder.");
         }
     }
 }

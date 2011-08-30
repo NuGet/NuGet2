@@ -4,11 +4,11 @@ using Microsoft.Internal.Web.Utils;
 namespace NuGet {
     public class PackageIssue {
         public PackageIssue(string title, string description, string solution) {
-            if (string.IsNullOrEmpty(title)) {
+            if (String.IsNullOrEmpty(title)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "title");
             }
 
-            if (string.IsNullOrEmpty(description)) {
+            if (String.IsNullOrEmpty(description)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "description");
             }
 

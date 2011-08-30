@@ -71,7 +71,7 @@ namespace NuGet.Test.Analysis {
         private void AssertPackageIssueWithPath(PackageIssue issue, string target) {
             PackageIssueTestHelper.AssertPackageIssue(
                 issue,
-                "Incompatible files in lib folder",
+                "Incompatible files in lib folder.",
                 "The file '" + target + "' is not a valid assembly. If it is a XML documentation file or a .pdb file, there is no matching .dll file specified in the same folder.",
                 "Either remove this file from 'lib' folder or add a matching .dll for it.");
         }

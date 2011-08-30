@@ -48,7 +48,7 @@ namespace NuGet.Test.Analysis {
             Assert.AreEqual(1, issues.Count);
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[0],
-                "Assembly not inside a framework folder",
+                "Assembly not inside a framework folder.",
                 "The assembly 'lib\\abc.exe' is placed directly under 'lib' folder. It is recommended that assemblies be placed inside a framework-specific folder.",
                 "Move it into a framework-specific folder."
                 );
@@ -67,21 +67,21 @@ namespace NuGet.Test.Analysis {
             Assert.AreEqual(2, issues.Count);
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[0],
-                "Assembly not inside a framework folder",
+                "Assembly not inside a framework folder.",
                 "The assembly 'lib\\abc.exe' is placed directly under 'lib' folder. It is recommended that assemblies be placed inside a framework-specific folder.",
                 "Move it into a framework-specific folder."
                 );
 
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[1],
-                "Assembly not inside a framework folder",
+                "Assembly not inside a framework folder.",
                 "The assembly 'lib\\def.dll' is placed directly under 'lib' folder. It is recommended that assemblies be placed inside a framework-specific folder.",
                 "Move it into a framework-specific folder."
                 );
         }
 
         [TestMethod]
-        public void TwoAssembliesPlacedOutsideLibHasTwoIssues() {
+        public void TwoAssembliesPlacedOutsideLibHasOneIssues() {
             // Arrange
             var package = PackageUtility.CreatePackage("A", assemblyReferences: new[] { "content\\abc.exe", "tools\\def.dll" });
             var rule = new MisplacedAssemblyRule();
@@ -90,18 +90,12 @@ namespace NuGet.Test.Analysis {
             IList<PackageIssue> issues = rule.Validate(package).ToList();
 
             // Assert
-            Assert.AreEqual(2, issues.Count);
-            PackageIssueTestHelper.AssertPackageIssue(
-                issues[0],
-                "Assembly outside lib folder",
-                "The assembly 'content\\abc.exe' is not inside the 'lib' folder and hence it won't be added as reference when the package is installed into a project",
-                "Move it into 'lib' folder."
-                );
+            Assert.AreEqual(1, issues.Count);
 
             PackageIssueTestHelper.AssertPackageIssue(
-                issues[1],
-                "Assembly outside lib folder",
-                "The assembly 'tools\\def.dll' is not inside the 'lib' folder and hence it won't be added as reference when the package is installed into a project",
+                issues[0],
+                "Assembly outside lib folder.",
+                "The assembly 'tools\\def.dll' is not inside the 'lib' folder and hence it won't be added as reference when the package is installed into a project.",
                 "Move it into 'lib' folder."
                 );
         }
