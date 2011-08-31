@@ -18,7 +18,7 @@ namespace NuGet {
 
         }
 
-        public ICredentials GetCredentials(Uri uri, System.Net.IWebProxy proxy) {
+        public ICredentials GetCredentials(Uri uri, IWebProxy proxy, CredentialType credentialType) {
             return null;
         }
     }

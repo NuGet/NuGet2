@@ -611,7 +611,7 @@ nuget update -Safe
 
 nuget update -Self</value>
   </data>
-  <data name="Credentials_ConsolePromptMessage" xml:space="preserve">
+  <data name="Credentials_RequestCredentials" xml:space="preserve">
     <value>Please provide credentials for: {0}</value>
   </data>
   <data name="InstallCommandPackageAlreadyExists" xml:space="preserve">
@@ -700,5 +700,8 @@ nuget update -Self</value>
   </data>
   <data name="Warning_DefaultSpecValueTitle" xml:space="preserve">
     <value>Remove sample nuspec values.</value>
+  </data>
+  <data name="Credentials_ProxyCredentials" xml:space="preserve">
+    <value>Please provide proxy credentials:</value>
   </data>
 </root>

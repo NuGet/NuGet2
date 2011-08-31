@@ -73,6 +73,7 @@
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Extensions\VersionExtensions.cs" />
     <Compile Include="Http\CredentialStore.cs" />
+    <Compile Include="Http\CredentialType.cs" />
     <Compile Include="Http\ICredentialCache.cs" />
     <Compile Include="Http\IHttpWebResponse.cs" />
     <Compile Include="Http\IProxyCache.cs" />

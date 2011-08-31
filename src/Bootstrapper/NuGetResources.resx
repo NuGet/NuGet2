@@ -117,11 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Credentials_ConsolePromptMessage" xml:space="preserve">
-    <value>Please provide credentials for: {0}</value>
-  </data>
   <data name="Credentials_Password" xml:space="preserve">
     <value>Password: </value>
+  </data>
+  <data name="Credentials_ProxyCredentials" xml:space="preserve">
+    <value>Please provide proxy credentials:</value>
+  </data>
+  <data name="Credentials_RequestCredentials" xml:space="preserve">
+    <value>Please provide credentials for {0}:</value>
   </data>
   <data name="Credentials_UserName" xml:space="preserve">
     <value>UserName: </value>

@@ -5,11 +5,13 @@ using Console = System.Console;
 
 namespace NuGet {
     public class ConsoleCredentialProvider : ICredentialProvider {
-        public ICredentials GetCredentials(Uri uri, IWebProxy proxy) {
+        public ICredentials GetCredentials(Uri uri, IWebProxy proxy, CredentialType credentialType) {
             if (uri == null) {
                 throw new ArgumentNullException("uri");
             }
-            Console.WriteLine(NuGetResources.Credentials_ConsolePromptMessage, uri.OriginalString);
+
+            string message = credentialType == CredentialType.ProxyCredentials ? NuGetResources.Credentials_ProxyCredentials : NuGetResources.Credentials_RequestCredentials;
+            Console.WriteLine(message, uri.OriginalString);
             Console.Write(NuGetResources.Credentials_UserName);
             string username = Console.ReadLine();
             Console.Write(NuGetResources.Credentials_Password);

@@ -69,6 +69,9 @@
     <Compile Include="..\Core\Http\IProxyCache.cs">
       <Link>IProxyCache.cs</Link>
     </Compile>
+    <Compile Include="..\Core\Http\CredentialType.cs">
+      <Link>CredentialType.cs</Link>
+    </Compile>
     <Compile Include="..\Core\Http\NullCredentialProvider.cs">
       <Link>NullCredentialProvider.cs</Link>
     </Compile>
