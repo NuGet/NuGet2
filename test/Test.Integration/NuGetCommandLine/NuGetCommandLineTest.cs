@@ -625,6 +625,51 @@ public class Cl_{0} {{
         }
 
         [TestMethod]
+        public void PackageCommand_SpecifyingProjectFileWithNuSpecWithEmptyFilesElementDoNotIncludeContentFiles() {
+            // Arrange
+            string expectedPackage = "ProjectWithNuSpecEmptyFiles.1.0.nupkg";
+            WriteAssemblyInfo("ProjectWithNuSpecEmptyFiles",
+                               "1.0.0.0",
+                               "Luan",
+                               "Project with content",
+                               "Title of Package");
+
+            WriteProjectFile("foo.cs", "public class Foo { }");
+            WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>$id$</id>
+    <title>$title$</title>
+    <version>$version$</version>
+    <authors>$author$</authors>
+    <description>Description from nuspec</description>
+    <tags>t1 t2</tags>
+    <dependencies>
+        <dependency id=""elmah"" version=""1.5"" />
+    </dependencies>
+  </metadata>
+  <files />
+</package>");
+            WriteProjectFile("readme.txt", "This is so fun.");
+            CreateProject("ProjectWithNuSpecEmptyFiles", content: new[] { "package.nuspec", "readme.txt" },
+                                               compile: new[] { "foo.cs" });
+
+            string[] args = new string[] { "pack", "ProjectWithNuSpecEmptyFiles.csproj", "-Build" };
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.AreEqual(0, result);
+            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.IsTrue(File.Exists(expectedPackage));
+
+            var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpecEmptyFiles.dll" });
+            Assert.IsFalse(package.GetFiles("content").Any());
+        }
+
+        [TestMethod]
         public void PackageCommand_SpecifyingProjectFileWithNuSpecNamedAfterProjectUsesNuSpecForMetadata() {
             // Arrange                        
             string expectedPackage = "Test.1.2.nupkg";

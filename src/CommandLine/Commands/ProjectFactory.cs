@@ -123,7 +123,7 @@ namespace NuGet.Commands {
             }
 
             // If the package contains a nuspec file then use it for metadata
-            ProcessNuspec(builder);
+            Manifest manifest = ProcessNuspec(builder);
 
             // Remove the extra author
             if (builder.Authors.Count > 1) {
@@ -135,8 +135,11 @@ namespace NuGet.Commands {
             // Add output files
             AddOutputFiles(builder);
 
-            // Add content files
-            AddFiles(builder, ContentItemType, ContentFolder);
+            // if there is a .nuspec file, only add content files if the <files /> element is not empty.
+            if (manifest == null || manifest.Files == null || manifest.Files.Count > 0) {
+                // Add content files
+                AddFiles(builder, ContentItemType, ContentFolder);
+            }
 
             // Add sources if this is a symbol package
             if (IncludeSymbols) {
@@ -438,11 +441,11 @@ namespace NuGet.Commands {
             return PackagesFolder;
         }
 
-        private void ProcessNuspec(PackageBuilder builder) {
+        private Manifest ProcessNuspec(PackageBuilder builder) {
             string nuspecFile = GetNuspec();
 
             if (String.IsNullOrEmpty(nuspecFile)) {
-                return;
+                return null;
             }
 
             Logger.Log(MessageLevel.Info, NuGetResources.UsingNuspecForMetadata, Path.GetFileName(nuspecFile));
@@ -457,6 +460,8 @@ namespace NuGet.Commands {
                     string basePath = Path.GetDirectoryName(nuspecFile);
                     builder.PopulateFiles(basePath, manifest.Files);
                 }
+
+                return manifest;
             }
         }
 
