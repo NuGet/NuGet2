@@ -3,7 +3,8 @@ namespace NuGet {
         public static readonly string PackageExtension = ".nupkg";
         public static readonly string ManifestExtension = ".nuspec";
         public static readonly string ContentDirectory = "content";
-
+        public static readonly string LibDirectory = "lib";
+        public static readonly string ToolsDirectory = "tools";
 
         internal const string PackageServiceEntitySetName = "Packages";
         internal const string PackageRelationshipNamespace = "http://schemas.microsoft.com/packaging/2010/07/";

@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using NuGet.Analysis;
 using NuGet.Common;
-
+  
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", MaxArgs = 1, UsageSummaryResourceName = "PackageCommandUsageSummary",
             UsageDescriptionResourceName = "PackageCommandUsageDescription", UsageExampleResourceName = "PackCommandUsageExamples")]
@@ -69,6 +71,9 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "PackageCommandNoDefaultExcludes")]
         public bool NoDefaultExcludes { get; set; }
 
+        [Option(typeof(NuGetResources), "PackageCommandNoRunAnalysis")]
+        public bool NoPackageAnalysis { get; set; }
+
         [Option(typeof(NuGetResources), "PackageCommandPropertiesDescription")]
         public Dictionary<string, string> Properties {
             get {
@@ -76,16 +81,22 @@ namespace NuGet.Commands {
             }
         }
 
+        [ImportMany]
+        public IEnumerable<IPackageRule> Rules { get; set; }
+
         public override void ExecuteCommand() {
             // Get the input file
             string path = GetInputFile();
 
             Console.WriteLine(NuGetResources.PackageCommandAttemptingToBuildPackage, Path.GetFileName(path));
 
-            BuildPackage(path);
+            IPackage package = BuildPackage(path);
+            if (package != null && !NoPackageAnalysis) {
+                AnalyzePackage(package);
+            }
         }
 
-        private void BuildPackage(string path, PackageBuilder builder, string outputPath = null) {
+        private IPackage BuildPackage(string path, PackageBuilder builder, string outputPath = null) {
             if (!String.IsNullOrEmpty(Version)) {
                 builder.Version = new Version(Version);
             }
@@ -114,6 +125,8 @@ namespace NuGet.Commands {
             }
 
             Console.WriteLine(NuGetResources.PackageCommandSuccess, outputPath);
+
+            return new ZipPackage(outputPath);
         }
 
         private void PrintVerbose(string outputPath) {
@@ -195,18 +208,18 @@ namespace NuGet.Commands {
             return Path.Combine(outputDirectory, outputFile);
         }
 
-        private void BuildPackage(string path) {
+        private IPackage BuildPackage(string path) {
             string extension = Path.GetExtension(path);
 
             if (extension.Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase)) {
-                BuildFromNuspec(path);
+                return BuildFromNuspec(path);
             }
             else {
-                BuildFromProjectFile(path);
+                return BuildFromProjectFile(path);
             }
         }
 
-        private void BuildFromNuspec(string path) {
+        private IPackage BuildFromNuspec(string path) {
             PackageBuilder packageBuilder = CreatePackageBuilderFromNuspec(path);
 
             if (Symbols) {
@@ -219,11 +232,13 @@ namespace NuGet.Commands {
                 }
             }
 
-            BuildPackage(path, packageBuilder);
+            IPackage package = BuildPackage(path, packageBuilder);
 
             if (Symbols) {
                 BuildSymbolsPackage(path);
             }
+
+            return package;
         }
 
         private void BuildSymbolsPackage(string path) {
@@ -263,7 +278,7 @@ namespace NuGet.Commands {
             return new PackageBuilder(path, BasePath, propertyProvider);
         }
 
-        private void BuildFromProjectFile(string path) {
+        private IPackage BuildFromProjectFile(string path) {
             var factory = new ProjectFactory(path) {
                 IsTool = Tool,
                 Logger = Console,
@@ -278,12 +293,12 @@ namespace NuGet.Commands {
             // Create a builder for the main package as well as the sources/symbols package
             PackageBuilder mainPackageBuilder = factory.CreateBuilder();
             // Build the main package
-            BuildPackage(path, mainPackageBuilder);
+            IPackage package = BuildPackage(path, mainPackageBuilder);
 
 
             // If we're excluding symbols then do nothing else
             if (!Symbols) {
-                return;
+                return package;
             }
 
             Console.WriteLine();
@@ -294,6 +309,42 @@ namespace NuGet.Commands {
             // Get the file name for the sources package and build it
             string outputPath = GetOutputPath(symbolsBuilder, symbols: true);
             BuildPackage(path, symbolsBuilder, outputPath);
+
+            // this is the real package, not the symbol package
+            return package;
+        }
+
+        private void AnalyzePackage(IPackage package) {
+            IList<PackageIssue> issues = 
+                package.Validate(Rules).OrderBy(p => p.Title, StringComparer.CurrentCulture).ToList();
+
+            if (issues.Count > 0) {
+                Console.WriteLine();
+                Console.WriteWarning(NuGetResources.PackageCommandPackageIssueSummary, issues.Count, package.Id);
+                foreach (var issue in issues) {
+                    PrintPackageIssue(issue);
+                }
+            }
+        }
+
+        private void PrintPackageIssue(PackageIssue issue) {
+            Console.WriteLine();
+            Console.WriteWarning(
+                prependWarningText: false, 
+                value: NuGetResources.PackageCommandIssueTitle, 
+                args: issue.Title);
+
+            Console.WriteWarning(
+                prependWarningText: false, 
+                value: NuGetResources.PackageCommandIssueDescription, 
+                args: issue.Description);
+
+            if (!String.IsNullOrEmpty(issue.Solution)) {
+                Console.WriteWarning(
+                    prependWarningText: false, 
+                    value: NuGetResources.PackageCommandIssueSolution, 
+                    args: issue.Solution);
+            }
         }
 
         private string GetInputFile() {

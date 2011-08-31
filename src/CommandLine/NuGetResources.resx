@@ -677,4 +677,19 @@ nuget update -Self</value>
   <data name="InstallCommandPackageReferenceInvalidVersion" xml:space="preserve">
     <value>Version string specified for package reference '{0}' is invalid.</value>
   </data>
+  <data name="PackageCommandNoRunAnalysis" xml:space="preserve">
+    <value>Specify if the command should not run package analysis after building the package.</value>
+  </data>
+  <data name="PackageCommandPackageIssueSummary" xml:space="preserve">
+    <value>{0} issue(s) found with package '{1}'.</value>
+  </data>
+  <data name="PackageCommandIssueDescription" xml:space="preserve">
+    <value>Description: {0}</value>
+  </data>
+  <data name="PackageCommandIssueSolution" xml:space="preserve">
+    <value>Solution: {0}</value>
+  </data>
+  <data name="PackageCommandIssueTitle" xml:space="preserve">
+    <value>Issue: {0}</value>
+  </data>
 </root>

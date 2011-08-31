@@ -86,8 +86,9 @@
     <!-- override this for custom actions after building the nuget package -->
     <Target Name="AfterPublishNuGetPackage" />
 
-    <Target Name="PublishNuGetPackageToFeed"
-            Condition="Exists('$(OutputPackagePath)')">
+    <Target Name="PublishNuGetPackageToFeed">
+      <Error Text="OutputPackagePath is empty. Ensure that the &lt;CreateNuGetPackage&gt; property is set in your project."
+               Condition=" '$(OutputPackagePath)' == '' " />
 
         <!-- publish the package to the main nuget feed -->
         <NuGetPush CreateOnly="$(CreateOnly)"

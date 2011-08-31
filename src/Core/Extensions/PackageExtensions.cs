@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Versioning;
+using NuGet.Analysis;
 
 namespace NuGet {
     public static class PackageExtensions {
@@ -22,11 +23,23 @@ namespace NuGet {
         }
 
         public static IEnumerable<IPackageFile> GetFiles(this IPackage package, string directory) {
-            return package.GetFiles().Where(file => file.Path.StartsWith(directory, StringComparison.OrdinalIgnoreCase));
+            return package.GetFiles().Where(file => file.Path.StartsWith(directory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
         }
 
         public static IEnumerable<IPackageFile> GetContentFiles(this IPackage package) {
             return package.GetFiles(Constants.ContentDirectory);
+        }
+
+        public static IEnumerable<PackageIssue> Validate(this IPackage package, IEnumerable<IPackageRule> rules) {
+            if (package == null) {
+                return null;
+            }
+
+            if (rules == null) {
+                throw new ArgumentNullException("rules");
+            }
+
+            return rules.Where(r => r != null).SelectMany(r => r.Validate(package));
         }
 
         public static string GetHash(this IPackage package) {

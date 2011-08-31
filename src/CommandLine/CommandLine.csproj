@@ -81,6 +81,7 @@
     <Compile Include="Common\IConsole.cs" />
     <Compile Include="Common\IMSBuildProjectSystem.cs" />
     <Compile Include="Common\MSBuildProjectSystem.cs" />
+    <Compile Include="DefaultPackageRules.cs" />
     <Compile Include="Properties\GlobalSuppressions.cs" />
     <Compile Include="NuGetResources.Designer.cs">
       <AutoGen>True</AutoGen>

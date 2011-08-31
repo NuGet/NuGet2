@@ -79,11 +79,27 @@ namespace NuGet.Common {
         }
 
         public void WriteWarning(string value) {
-            WriteWarning(value, new object[0]);
+            WriteWarning(prependWarningText: true, value: value, args: new object[0]);
+        }
+
+        public void WriteWarning(bool prependWarningText, string value) {
+            WriteWarning(prependWarningText, value, new object[0]);
         }
 
         public void WriteWarning(string value, params object[] args) {
-            string message = String.Format(CultureInfo.CurrentCulture, NuGetResources.CommandLine_Warning, value);
+            WriteWarning(prependWarningText: true, value: value, args: args);
+        }
+
+        public void WriteWarning(bool prependWarningText, string value, params object[] args) {
+            string message;
+
+            if (prependWarningText) {
+                message = String.Format(CultureInfo.CurrentCulture, NuGetResources.CommandLine_Warning, value);
+            }
+            else {
+                message = value;
+            }
+
             WriteColor(System.Console.Out, ConsoleColor.Yellow, message, args);
         }
 
