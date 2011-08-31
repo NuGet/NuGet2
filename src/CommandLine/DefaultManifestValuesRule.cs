@@ -22,7 +22,7 @@ namespace NuGet {
 
             var dependency = package.Dependencies.FirstOrDefault();
             if (dependency != null && dependency.Id.Equals(SpecCommand.SampleManifestDependency.Id, StringComparison.Ordinal)
-                                   && dependency.VersionSpec.Equals(SpecCommand.SampleManifestDependency.Version)) {
+                                   && dependency.VersionSpec.ToString().Equals("[" + SpecCommand.SampleManifestDependency.Version + "]", StringComparison.Ordinal)) {
                 yield return CreateIssueFor("Dependency", dependency.ToString());
             }
         }

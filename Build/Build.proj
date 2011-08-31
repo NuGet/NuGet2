@@ -87,6 +87,7 @@
 
     <Target Name="RunTests">
         <MSBuild Projects="$(NuGetTestRoot)\Dialog.Test\Dialog.Test.csproj" Targets="RunTests" />
+        <MSBuild Projects="$(NuGetTestRoot)\CommandLine.Test\CommandLine.Test.csproj" Targets="RunTests" />
         <MSBuild Projects="$(NuGetTestRoot)\Core.Test\Core.Test.csproj" Targets="RunTests" />
         <MSBuild Projects="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Targets="RunTests" />
         <MSBuild Projects="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" Targets="RunTests" />
