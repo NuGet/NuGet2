@@ -1,9 +1,10 @@
 
+using System;
 namespace NuGetConsole {
     /// <summary>
     /// Interface to access more properties of wpf console.
     /// </summary>
-    public interface IWpfConsole : IConsole {
+    public interface IWpfConsole : IConsole, IDisposable {
         /// <summary>
         /// Get the console UIElement to be used as Content for a VS tool window.
         /// </summary>

@@ -129,6 +129,12 @@ namespace NuGetConsole.Implementation {
             base.OnToolWindowCreated();
         }
 
+        protected override void OnClose() {
+            base.OnClose();
+
+            WpfConsole.Dispose();
+        }
+
         /// <summary>
         /// This override allows us to forward these messages to the editor instance as well
         /// </summary>

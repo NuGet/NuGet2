@@ -370,8 +370,13 @@ namespace NuGetConsole.Implementation.Console {
 
         protected virtual void Dispose(bool disposing) {
             if (disposing) {
-                _keyBuffer.Dispose();
-                _cancelWaitKeySource.Dispose();
+                if (_keyBuffer != null) {
+                    _keyBuffer.Dispose();
+                }
+
+                if (_cancelWaitKeySource != null) {
+                    _cancelWaitKeySource.Dispose();
+                }
             }
         }
 

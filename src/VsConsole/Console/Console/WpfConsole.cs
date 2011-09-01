@@ -503,13 +503,36 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Usage", 
+            "CA2213:DisposableFieldsShouldBeDisposed", 
+            MessageId = "_marshaler",
+            Justification="The Dispose() method on _marshaler is called when the tool window is closed."), 
+        System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Design", 
+            "CA1031:DoNotCatchGeneralExceptionTypes",
+            Justification="We don't want to crash VS when it exits.")]
         protected virtual void Dispose(bool disposing) {
             if (disposing) {
+                if (_bufferAdapter != null) {
+                    var docData = _bufferAdapter as IVsPersistDocData;
+                    if (docData != null) {
+                        try {
+                            docData.Close();
+                        }
+                        catch {
+                            // swallow possible COM exceptions
+                        }
+
+                        _bufferAdapter = null;
+                    }
+                }
+
                 var disposable = _dispatcher as IDisposable;
                 if (disposable != null) {
                     disposable.Dispose();
                 }
-            }
+            }   
         }
 
         ~WpfConsole() {
@@ -599,6 +622,10 @@ namespace NuGetConsole.Implementation.Console {
             }
 
             #endregion
+
+            public void Dispose() {
+                _impl.Dispose(disposing: true);
+            }
         }
 
         #endregion
