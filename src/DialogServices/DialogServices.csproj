@@ -127,7 +127,7 @@
       <DependentUpon>SummaryWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="PackageManagerUI\UserNotifierServices.cs" />
-    <Compile Include="SolutionExplorer\ProjectToIconConverter.cs" />
+    <Compile Include="PackageManagerUI\Converters\ProjectToIconConverter.cs" />
     <Compile Include="SolutionExplorer\ProjectUtilities.cs" />
     <Compile Include="SolutionExplorer\SolutionExplorer.xaml.cs">
       <DependentUpon>SolutionExplorer.xaml</DependentUpon>

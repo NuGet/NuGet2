@@ -4,7 +4,7 @@ using System.Windows.Data;
 using System.Windows.Media;
 using EnvDTE;
 
-namespace NuGet.Dialog {
+namespace NuGet.Dialog.PackageManagerUI {
     public class ProjectToIconConverter : IValueConverter {
         private static readonly Dictionary<string, ImageSource> _imageCache = new Dictionary<string, ImageSource>();
 

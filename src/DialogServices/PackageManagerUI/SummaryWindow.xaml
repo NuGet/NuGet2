@@ -3,7 +3,6 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:self="clr-namespace:NuGet.Dialog.PackageManagerUI"
-    xmlns:local="clr-namespace:NuGet.Dialog"
     xmlns:resources="clr-namespace:NuGet.Dialog"
     xmlns:pfui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.10.0"
     MinWidth="350"
@@ -16,7 +15,8 @@
     Title="{x:Static resources:Resources.Dialog_SummaryWindowTitle}">
     
     <Window.Resources>
-        <local:ProjectToIconConverter x:Key="ProjectToIconConverter" />        
+        <self:ProjectToIconConverter x:Key="ProjectToIconConverter" />
+        <self:ProjectToDisplayNameConverter x:Key="ProjectToNameConverter" />
     </Window.Resources>
     
     <DockPanel Margin="10">
@@ -36,7 +36,7 @@
                                 <Expander.Header>
                                     <DockPanel>
                                         <Image DockPanel.Dock="Left" Stretch="None" Source="{Binding Key, Converter={StaticResource ProjectToIconConverter}}" Margin="0,0,3,0" />
-                                        <TextBlock Text="{Binding Key.Name}" FontWeight="SemiBold" />
+                                        <TextBlock Text="{Binding Key, Converter={StaticResource ProjectToNameConverter}}" FontWeight="SemiBold" />
                                     </DockPanel>
                                 </Expander.Header>
                                 <TextBlock Margin="10,0,0,0" Text="{Binding Value.Message, StringFormat={x:Static resources:Resources.ErrorStringFormat}}" TextWrapping="Wrap" Foreground="Red" />
