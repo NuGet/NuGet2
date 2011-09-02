@@ -123,7 +123,7 @@ namespace NuGet.Dialog.Test {
 
             var mre = new ManualResetEventSlim(false);
 
-            firstTreeNode.QueryExecutionCallback += () => {
+            firstTreeNode.PackageLoadCompleted += delegate {
                 var allExtensions = firstTreeNode.Extensions;
 
                 // Assert

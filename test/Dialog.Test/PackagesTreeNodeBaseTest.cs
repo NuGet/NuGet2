@@ -302,7 +302,7 @@ namespace NuGet.Dialog.Test {
 
             Exception exception = null;
 
-            node.QueryExecutionCallback = delegate {
+            node.PackageLoadCompleted += delegate {
                 try {
                     // Callback for assertion
                     callback(node);

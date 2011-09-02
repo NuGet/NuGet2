@@ -172,11 +172,10 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
-        // this is for unit testing
-        internal Action QueryExecutionCallback {
-            get;
-            set;
-        }
+        /// <summary>
+        /// Raised when the current node completes loading packages.
+        /// </summary>
+        internal event EventHandler PackageLoadCompleted = delegate { };
 
         internal int PageSize {
             get;
@@ -409,9 +408,7 @@ namespace NuGet.Dialog.Providers {
                 }
             }
 
-            if (QueryExecutionCallback != null) {
-                QueryExecutionCallback();
-            }
+            PackageLoadCompleted(this, EventArgs.Empty);
         }
 
         protected void OnNotifyPropertyChanged(string propertyName) {

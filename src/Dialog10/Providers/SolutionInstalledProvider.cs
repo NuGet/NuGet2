@@ -16,6 +16,7 @@ namespace NuGet.Dialog.Providers {
 
         private readonly ISolutionManager _solutionManager;
         private readonly IUserNotifierServices _userNotifierServices;
+        private PackageItem _lastExecutionItem;
 
         public SolutionInstalledProvider(
             IVsPackageManager packageManager,
@@ -176,16 +177,30 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected override void OnExecuteCompleted(PackageItem item) {
-            item.ReferenceProjects.Clear();
+            _lastExecutionItem = item;
+            SelectedNode.PackageLoadCompleted += SelectedNode_PackageLoadCompleted;
 
-            // only remove the item if it is no longer installed into the solution
-            if (!LocalRepository.Exists(item.PackageIdentity)) {
-                base.OnExecuteCompleted(item);
+            // For the solution Installed provider, packages can be installed and uninstalled.
+            // It's cumbersome to update the packages incrementally, so we just refresh everything.
+            SelectedNode.ResetQuery();
+            SelectedNode.Refresh();
+        }
+
+        private void SelectedNode_PackageLoadCompleted(object sender, EventArgs e) {
+            ((PackagesTreeNodeBase)sender).PackageLoadCompleted -= SelectedNode_PackageLoadCompleted;
+            
+            if (SelectedNode == null || _lastExecutionItem == null) {
+                return;
             }
-            else {
-                // repopulate the list of projects that reference this package after every operation
-                item.ReferenceProjects.AddRange(GetReferenceProjects(item.PackageIdentity));
+
+            // find a new PackageItem that represents the same package as _lastExecutionItem does;
+            PackageItem foundItem = SelectedNode.Extensions.OfType<PackageItem>().FirstOrDefault(
+                p => PackageEqualityComparer.IdAndVersion.Equals(p.PackageIdentity, _lastExecutionItem.PackageIdentity));
+            if (foundItem != null) {
+                foundItem.IsSelected = true;
             }
+
+            _lastExecutionItem = null;
         }
 
         protected override string GetProgressMessage(IPackage package) {
