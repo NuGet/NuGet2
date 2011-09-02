@@ -12,9 +12,19 @@ namespace NuGet.Commands {
 
         public IPackageSourceProvider SourceProvider { get; private set; }
 
+        public ISettings Settings { get; private set; }
+
         [ImportingConstructor]
-        public SetApiKeyCommand(IPackageSourceProvider packageSourceProvider) {
+        public SetApiKeyCommand(IPackageSourceProvider packageSourceProvider, ISettings settings) {
+            if (packageSourceProvider == null) {
+                throw new ArgumentNullException("packageSourceProvider");
+            }
+            if (settings == null) {
+                throw new ArgumentNullException("settings");
+            }
+
             SourceProvider = packageSourceProvider;
+            Settings = settings;
         }
 
         public override void ExecuteCommand() {
@@ -34,14 +44,13 @@ namespace NuGet.Commands {
                 source = SourceProvider.ResolveAndValidateSource(Source);
             }
 
-            var settings = Settings.UserSettings;
-            settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, source, apiKey);
+            Settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, source, apiKey);
 
             string sourceName = CommandLineUtility.GetSourceDisplayName(source);
 
             // Setup the symbol server key
             if (setSymbolServerKey) {
-                settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, NuGetConstants.DefaultSymbolServerUrl, apiKey);
+                Settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, NuGetConstants.DefaultSymbolServerUrl, apiKey);
                 Console.WriteLine(NuGetResources.SetApiKeyCommandDefaultApiKeysSaved,
                                   apiKey,
                                   sourceName,

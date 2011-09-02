@@ -26,30 +26,16 @@ namespace NuGet {
         /// </summary>
         public static bool IgnoreExtensions { get; set; }
 
-        public void Initialize() {
-            using (var catalog = new AggregateCatalog(new AssemblyCatalog(GetType().Assembly))) {
-                if (!IgnoreExtensions) {
-                    AddExtensionsToCatalog(catalog);
-                }
-                using (var container = new CompositionContainer(catalog)) {
-                    var defaultPackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl);
-                    var packageSourceProvider = new PackageSourceProvider(Settings.UserSettings, new[] { defaultPackageSource });
-
-                    container.ComposeExportedValue<IPackageRepositoryFactory>(new NuGet.Common.CommandLineRepositoryFactory());
-                    container.ComposeExportedValue<IPackageSourceProvider>(packageSourceProvider);
-                    container.ComposeParts(this);
-                }
-            }
-        }
-
         public static int Main(string[] args) {
+            var console = new NuGet.Common.Console();
+            var fileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
             try {
                 // Remove NuGet.exe.old
-                RemoveOldFile();
+                RemoveOldFile(fileSystem);
 
                 // Import Dependecies  
                 var p = new Program();
-                p.Initialize();
+                p.Initialize(fileSystem);
 
                 // Register an additional provider for the console specific application so that the user
                 // will be prompted if a proxy is set and credentials are required
@@ -80,26 +66,36 @@ namespace NuGet {
                 }
             }
             catch (Exception e) {
-                var currentColor = ConsoleColor.Gray;
-                try {
-                    currentColor = Console.ForegroundColor;
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Error.WriteLine(e.Message);
-                }
-                finally {
-                    Console.ForegroundColor = currentColor;
-                }
+                console.WriteError(e.Message);
                 return 1;
             }
             return 0;
         }
 
+        private void Initialize(IFileSystem fileSystem) {
+            using (var catalog = new AggregateCatalog(new AssemblyCatalog(GetType().Assembly))) {
+                if (!IgnoreExtensions) {
+                    AddExtensionsToCatalog(catalog);
+                }
+                using (var container = new CompositionContainer(catalog)) {
+                    var settings = GetCommandLineSettings(fileSystem);
+                    var defaultPackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl);
+                    var packageSourceProvider = new PackageSourceProvider(settings, new[] { defaultPackageSource });
+
+                    container.ComposeExportedValue<ISettings>(settings);
+                    container.ComposeExportedValue<IPackageRepositoryFactory>(new NuGet.Common.CommandLineRepositoryFactory());
+                    container.ComposeExportedValue<IPackageSourceProvider>(packageSourceProvider);
+                    container.ComposeParts(this);
+                }
+            }
+        }
+
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want to block the exe from usage if anything failed")]
-        private static void RemoveOldFile() {
+        internal static void RemoveOldFile(IFileSystem fileSystem) {
             string oldFile = typeof(Program).Assembly.Location + ".old";
             try {
-                if (File.Exists(oldFile)) {
-                    File.Delete(oldFile);
+                if (fileSystem.FileExists(oldFile)) {
+                    fileSystem.DeleteFile(oldFile);
                 }
             }
             catch {
@@ -139,6 +135,13 @@ namespace NuGet {
                     // Ignore if the dll wasn't a valid assembly
                 }
             }
+        }
+
+        internal static ISettings GetCommandLineSettings(IFileSystem workingDirectory) {
+            if (workingDirectory.FileExists(Constants.SettingsFileName)) {
+                return new Settings(workingDirectory);
+            }
+            return Settings.DefaultSettings;
         }
     }
 }

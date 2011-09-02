@@ -20,7 +20,7 @@ namespace NuGet.VisualStudio {
 
         [ImportingConstructor]
         public VsPackageSourceProvider(IPackageSourceSettingsManager registrySettingsManager) :
-            this(registrySettingsManager, Settings.UserSettings, PackageSourceProvider.Default) {
+            this(registrySettingsManager, Settings.DefaultSettings, PackageSourceProvider.Default) {
         }
 
         internal VsPackageSourceProvider(

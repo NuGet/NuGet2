@@ -16,9 +16,12 @@ namespace NuGet.Commands {
 
         public IPackageSourceProvider SourceProvider { get; private set; }
 
+        public ISettings Settings { get; private set; }
+
         [ImportingConstructor]
-        public PushCommand(IPackageSourceProvider packageSourceProvider) {
+        public PushCommand(IPackageSourceProvider packageSourceProvider, ISettings settings) {
             SourceProvider = packageSourceProvider;
+            Settings = settings;
         }
 
         public override void ExecuteCommand() {
@@ -95,7 +98,7 @@ namespace NuGet.Commands {
 
             // Publish the package on the server
             if (!CreateOnly) {
-                var cmd = new PublishCommand(SourceProvider);
+                var cmd = new PublishCommand(SourceProvider, Settings);
                 cmd.Console = Console;
                 cmd.Source = source;
                 cmd.Arguments.AddRange(new[] { package.Id, package.Version.ToString(), apiKey });
@@ -116,7 +119,7 @@ namespace NuGet.Commands {
 
             // If the user did not pass an API Key look in the config file
             if (String.IsNullOrEmpty(apiKey)) {
-                apiKey = CommandLineUtility.GetApiKey(Settings.UserSettings, source, throwIfNotFound);
+                apiKey = CommandLineUtility.GetApiKey(Settings, source, throwIfNotFound);
             }
 
             return apiKey;
