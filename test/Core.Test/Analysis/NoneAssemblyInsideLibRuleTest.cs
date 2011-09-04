@@ -2,14 +2,14 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using NuGet.Analysis.Rules;
 
 namespace NuGet.Test.Analysis {
-    [TestClass]
+    
     public class NoneAssemblyInsideLibRuleTest {
 
-        [TestMethod]
+        [Fact]
         public void NormalPackageHasNoIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage("A", content: new[] { "one.js" });
@@ -19,10 +19,10 @@ namespace NuGet.Test.Analysis {
             IEnumerable<PackageIssue> issues = rule.Validate(package);
 
             // Assert
-            Assert.IsFalse(issues.Any());
+            Assert.False(issues.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void AssemblyInsideLibHasNoIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage("A", assemblyReferences: new[] { "lib\\abc.dll" });
@@ -32,10 +32,10 @@ namespace NuGet.Test.Analysis {
             IEnumerable<PackageIssue> issues = rule.Validate(package);
 
             // Assert
-            Assert.IsFalse(issues.Any());
+            Assert.False(issues.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void NonAssemblyInsideLibHasIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage(
@@ -47,13 +47,13 @@ namespace NuGet.Test.Analysis {
             IList<PackageIssue> issues = rule.Validate(package).ToList();
 
             // Assert
-            Assert.AreEqual(3, issues.Count);
+            Assert.Equal(3, issues.Count);
             AssertPackageIssueWithPath(issues[0], "lib\\abc.xml");
             AssertPackageIssueWithPath(issues[1], "lib\\sl4\\wow.pdb");
             AssertPackageIssueWithPath(issues[2], "lib\\net\\4.0\\kac.txt");
         }
 
-        [TestMethod]
+        [Fact]
         public void PdbFileAndXmlFilesAreNotWarned() {
             // Arrange
             var package = PackageUtility.CreatePackage(
@@ -65,7 +65,7 @@ namespace NuGet.Test.Analysis {
             IEnumerable<PackageIssue> issues = rule.Validate(package);
 
             // Assert
-            Assert.IsFalse(issues.Any());
+            Assert.False(issues.Any());
         }
 
         private void AssertPackageIssueWithPath(PackageIssue issue, string target) {

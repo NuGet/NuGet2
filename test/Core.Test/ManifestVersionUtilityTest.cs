@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class ManifestVersionUtilityTest {
-        [TestMethod]
+        [Fact]
         public void GetManifestVersionReturns1IfNoNewPropertiesAreSet() {
             // Arrange
             var metadata = new ManifestMetadata {
@@ -18,10 +18,10 @@ namespace NuGet.Test {
             var version = ManifestVersionUtility.GetManifestVersion(metadata);
            
             // Assert
-            Assert.AreEqual(1, version);
+            Assert.Equal(1, version);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetManifestVersionReturns1IfFrameworkAssemblyHasValues() {
             // Arrange
             var metadata = new ManifestMetadata {
@@ -38,10 +38,10 @@ namespace NuGet.Test {
             var version = ManifestVersionUtility.GetManifestVersion(metadata);
 
             // Assert
-            Assert.AreEqual(1, version);
+            Assert.Equal(1, version);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetManifestVersionReturns2IfCopyrightIsSet() {
             // Arrange
             var metadata = new ManifestMetadata {
@@ -56,10 +56,10 @@ namespace NuGet.Test {
             var version = ManifestVersionUtility.GetManifestVersion(metadata);
 
             // Assert
-            Assert.AreEqual(2, version);
+            Assert.Equal(2, version);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetManifestVersionReturns2IfFrameworkAssemblyAndReferencesAreSet() {
             // Arrange
             var metadata = new ManifestMetadata {
@@ -79,10 +79,10 @@ namespace NuGet.Test {
             var version = ManifestVersionUtility.GetManifestVersion(metadata);
 
             // Assert
-            Assert.AreEqual(2, version);
+            Assert.Equal(2, version);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetManifestVersionConsidersEmptyLists() {
             // Arrange
             var metadata = new ManifestMetadata {
@@ -100,10 +100,10 @@ namespace NuGet.Test {
             var version = ManifestVersionUtility.GetManifestVersion(metadata);
 
             // Assert
-            Assert.AreEqual(2, version);
+            Assert.Equal(2, version);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetManifestVersionReturns2IfReleaseNotesIsPresent() {
             // Arrange
             var metadata = new ManifestMetadata {
@@ -118,10 +118,10 @@ namespace NuGet.Test {
             var version = ManifestVersionUtility.GetManifestVersion(metadata);
 
             // Assert
-            Assert.AreEqual(2, version);
+            Assert.Equal(2, version);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetManifestVersionIgnoresEmptyStrings() {
             // Arrange
             var metadata = new ManifestMetadata {
@@ -136,7 +136,7 @@ namespace NuGet.Test {
             var version = ManifestVersionUtility.GetManifestVersion(metadata);
 
             // Assert
-            Assert.AreEqual(1, version);
+            Assert.Equal(1, version);
         }
 
     }

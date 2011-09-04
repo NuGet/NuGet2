@@ -1,10 +1,10 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class DefaultPackagePathResolverTest {
-        [TestMethod]
+        [Fact]
         public void GetInstallPathPrependsFileSystemRootToPackageDirectory() {
             // Arrange
             MockFileSystem fs = new MockFileSystem();
@@ -15,10 +15,10 @@ namespace NuGet.Test {
             string installPath = resolver.GetInstallPath(testPackage);
 
             // Assert
-            Assert.AreEqual(fs.Root + "Test.1.0", installPath);
+            Assert.Equal(fs.Root + "Test.1.0", installPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageDirectoryWithSideBySideOnAppendsVersionToEndOfPackageDirectory() {
             // Arrange
             MockFileSystem fs = new MockFileSystem();
@@ -29,10 +29,10 @@ namespace NuGet.Test {
             string packageDir = resolver.GetPackageDirectory(testPackage);
 
             // Assert
-            Assert.AreEqual("Test.1.0", packageDir);
+            Assert.Equal("Test.1.0", packageDir);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageDirectoryWithSideBySideOffDoesNotAppendVersionToEndOfPackageDirectory() {
             // Arrange
             MockFileSystem fs = new MockFileSystem();
@@ -43,10 +43,10 @@ namespace NuGet.Test {
             string packageDir = resolver.GetPackageDirectory(testPackage);
 
             // Assert
-            Assert.AreEqual("Test", packageDir);
+            Assert.Equal("Test", packageDir);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageFileNameWithSideBySideOnAppendsVersionToEndOfPackageDirectory() {
             // Arrange
             MockFileSystem fs = new MockFileSystem();
@@ -57,10 +57,10 @@ namespace NuGet.Test {
             string packageDir = resolver.GetPackageFileName(testPackage);
 
             // Assert
-            Assert.AreEqual("Test.1.0" + Constants.PackageExtension, packageDir);
+            Assert.Equal("Test.1.0" + Constants.PackageExtension, packageDir);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageFileNameWithSideBySideOffDoesNotAppendVersionToEndOfPackageDirectory() {
             // Arrange
             MockFileSystem fs = new MockFileSystem();
@@ -71,7 +71,7 @@ namespace NuGet.Test {
             string packageDir = resolver.GetPackageFileName(testPackage);
 
             // Assert
-            Assert.AreEqual("Test" + Constants.PackageExtension, packageDir);
+            Assert.Equal("Test" + Constants.PackageExtension, packageDir);
         }
     }
 }

@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class AggregateRepositoryTest {
-        [TestMethod]
+        [Fact]
         public void GetPackagesNoOrderByExpressionThrows() {
             // Arrange
             var repository = new AggregateRepository(new[] { 
@@ -24,7 +24,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => repository.GetPackages().ToList(), "Aggregate queries require at least one OrderBy.");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesRemoveDuplicates() {
             // Arrange
             var r1 = new MockPackageRepository() {
@@ -46,16 +46,16 @@ namespace NuGet.Test {
             var packages = repository.GetPackages().OrderBy(p => p.Id).ToList();
 
             // Assert
-            Assert.AreEqual(6, packages.Count);
-            Assert.AreEqual("A", packages[0].Id);
-            Assert.AreEqual("B", packages[1].Id);
-            Assert.AreEqual("C", packages[2].Id);
-            Assert.AreEqual("D", packages[3].Id);
-            Assert.AreEqual("E", packages[4].Id);
-            Assert.AreEqual("F", packages[5].Id);
+            Assert.Equal(6, packages.Count);
+            Assert.Equal("A", packages[0].Id);
+            Assert.Equal("B", packages[1].Id);
+            Assert.Equal("C", packages[2].Id);
+            Assert.Equal("D", packages[3].Id);
+            Assert.Equal("E", packages[4].Id);
+            Assert.Equal("F", packages[5].Id);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesWithPagingTakesLowestNElements() {
             // Arrange
             var r1 = new MockPackageRepository() {
@@ -76,16 +76,16 @@ namespace NuGet.Test {
             var packages = repository.GetPackages().OrderBy(p => p.Id).Take(5).ToList();
 
             // Assert
-            Assert.AreEqual(5, packages.Count);
-            Assert.AreEqual("A", packages[0].Id);
-            Assert.AreEqual("B", packages[1].Id);
-            Assert.AreEqual("C", packages[2].Id);
-            Assert.AreEqual("D", packages[3].Id);
-            Assert.AreEqual("E", packages[4].Id);
+            Assert.Equal(5, packages.Count);
+            Assert.Equal("A", packages[0].Id);
+            Assert.Equal("B", packages[1].Id);
+            Assert.Equal("C", packages[2].Id);
+            Assert.Equal("D", packages[3].Id);
+            Assert.Equal("E", packages[4].Id);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesRemoveDuplicatesIfTheyAreTheSameVersion() {
             // Arrange
             var r1 = new MockPackageRepository() {
@@ -110,17 +110,17 @@ namespace NuGet.Test {
             var packages = repository.GetPackages().OrderBy(p => p.Id).ToList();
 
             // Assert
-            Assert.AreEqual(4, packages.Count);
-            Assert.AreEqual("A", packages[0].Id);
-            Assert.AreEqual(new Version("2.0"), packages[0].Version);
-            Assert.AreEqual("A", packages[1].Id);
-            Assert.AreEqual(new Version("1.0"), packages[1].Version);
-            Assert.AreEqual("A", packages[2].Id);
-            Assert.AreEqual(new Version("3.0"), packages[2].Version);
-            Assert.AreEqual("B", packages[3].Id);
+            Assert.Equal(4, packages.Count);
+            Assert.Equal("A", packages[0].Id);
+            Assert.Equal(new Version("2.0"), packages[0].Version);
+            Assert.Equal("A", packages[1].Id);
+            Assert.Equal(new Version("1.0"), packages[1].Version);
+            Assert.Equal("A", packages[2].Id);
+            Assert.Equal(new Version("3.0"), packages[2].Version);
+            Assert.Equal("B", packages[3].Id);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesComplexOrderByAndDuplicatesRemovesDuplicatesAndMaintainsOrder() {
             // Arrange
             var r1 = new MockPackageRepository() {
@@ -147,17 +147,17 @@ namespace NuGet.Test {
                                                    .ToList();
 
             // Assert
-            Assert.AreEqual(4, packages.Count);
-            Assert.AreEqual("A", packages[0].Id);
-            Assert.AreEqual(new Version("1.0"), packages[0].Version);
-            Assert.AreEqual("A", packages[1].Id);
-            Assert.AreEqual(new Version("2.0"), packages[1].Version);
-            Assert.AreEqual("A", packages[2].Id);
-            Assert.AreEqual(new Version("3.0"), packages[2].Version);
-            Assert.AreEqual("B", packages[3].Id);
+            Assert.Equal(4, packages.Count);
+            Assert.Equal("A", packages[0].Id);
+            Assert.Equal(new Version("1.0"), packages[0].Version);
+            Assert.Equal("A", packages[1].Id);
+            Assert.Equal(new Version("2.0"), packages[1].Version);
+            Assert.Equal("A", packages[2].Id);
+            Assert.Equal(new Version("3.0"), packages[2].Version);
+            Assert.Equal("B", packages[3].Id);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetUpdates() {
             // Arrange
             var r1 = new MockPackageRepository() {
@@ -183,12 +183,12 @@ namespace NuGet.Test {
             var updates = repository.GetUpdates(new[] { PackageUtility.CreatePackage("A", "1.0") }).ToList();
 
             // Assert
-            Assert.AreEqual(1, updates.Count);
-            Assert.AreEqual("A", updates[0].Id);
-            Assert.AreEqual(new Version("3.0"), updates[0].Version);
+            Assert.Equal(1, updates.Count);
+            Assert.Equal("A", updates[0].Id);
+            Assert.Equal(new Version("3.0"), updates[0].Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void SupressErrorWorksForGetPackagesForRepositoriesThatThrowWhenInvoked() {
             // Arrange
             var mockRepository = new Mock<IPackageRepository>();
@@ -209,10 +209,10 @@ namespace NuGet.Test {
             var packages = repository.GetPackages().OrderBy(p => p.Id).ToList();
 
             // Assert
-            Assert.AreEqual(2, packages.Count);
+            Assert.Equal(2, packages.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void SupressErrorWorksForFindPackagesForRepositoriesThatThrowWhenInvoked() {
             // Arrange
             var mockRepository = new Mock<IPackageRepository>();
@@ -239,10 +239,10 @@ namespace NuGet.Test {
             var package = repository.FindPackage("C", new Version("1.0"));
 
             // Assert
-            Assert.IsNull(package);
+            Assert.Null(package);
         }
 
-        [TestMethod]
+        [Fact]
         public void SupressErrorWorksForGetDependenciesForRepositoriesThatThrowWhenInvoked() {
             // Arrange
             var mockRepository = new Mock<IPackageRepository>();
@@ -266,10 +266,10 @@ namespace NuGet.Test {
             var package = repository.ResolveDependency(new PackageDependency("C"), null);
 
             // Assert
-            Assert.IsNull(package);
+            Assert.Null(package);
         }
 
-        [TestMethod]
+        [Fact]
         public void SupressErrorWorksForGetPackagesForRepositoriesThatThrowDuringEnumeration() {
             // Arrange
             var mockRepository = new Mock<IPackageRepository>();
@@ -290,10 +290,10 @@ namespace NuGet.Test {
             var packages = repository.GetPackages();
 
             // Assert
-            Assert.AreEqual(2, packages.Count());
+            Assert.Equal(2, packages.Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void RepositoriesPropertyThrowsIfIgnoreFlagIsNotSet() {
             // Arrange
             var repositories = Enumerable.Range(0, 3).Select(e => {
@@ -309,7 +309,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => aggregateRepository.Repositories.Select(c => c.Source).ToList(), "Repository exception");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesSupressesExceptionForConsecutiveCalls() {
             // Arrange
             var repo1 = new Mock<IPackageRepository>();

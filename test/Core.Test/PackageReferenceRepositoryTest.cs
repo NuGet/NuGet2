@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class PackageReferenceRepositoryTest {
-        [TestMethod]
+        [Fact]
         public void RegisterIfNecessaryDoesNotRegistersWithSharedRepositoryIfRepositoryDoesNotContainsPackages() {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
@@ -21,10 +21,10 @@ namespace NuGet.Test {
             referenceRepository.RegisterIfNecessary();
 
             // Assert
-            Assert.IsNull(path);
+            Assert.Null(path);
         }
 
-        [TestMethod]
+        [Fact]
         public void RegisterIfNecessaryRegistersWithSharedRepositoryIfRepositoryContainsPackages() {
             // Arrange
             var sharedRepository = new Mock<MockPackageRepository>().As<ISharedPackageRepository>();
@@ -41,10 +41,10 @@ namespace NuGet.Test {
             referenceRepository.RegisterIfNecessary();
 
             // Assert
-            Assert.AreEqual(@"C:\MockFileSystem\packages.config", path);
+            Assert.Equal(@"C:\MockFileSystem\packages.config", path);
         }
 
-        [TestMethod]
+        [Fact]
         public void AddPackageAddsEntryToPackagesConfig() {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
@@ -59,15 +59,15 @@ namespace NuGet.Test {
             referenceRepository.AddPackage(package);
 
             // Assert
-            Assert.AreEqual(@"C:\MockFileSystem\packages.config", path);
-            Assert.IsTrue(fileSystem.FileExists("packages.config"));
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"C:\MockFileSystem\packages.config", path);
+            Assert.True(fileSystem.FileExists("packages.config"));
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""A"" version=""1.0"" />
 </packages>", fileSystem.ReadAllText("packages.config"));
         }
 
-        [TestMethod]
+        [Fact]
         public void AddPackageDoesNotAddEntryToPackagesConfigIfExists() {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
@@ -83,14 +83,14 @@ namespace NuGet.Test {
             referenceRepository.AddPackage(package);
 
             // Assert
-            Assert.IsTrue(fileSystem.FileExists("packages.config"));
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.True(fileSystem.FileExists("packages.config"));
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""A"" version=""1.0"" />
 </packages>", fileSystem.ReadAllText("packages.config"));
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovingAndAddingPackageReferenceWithSameIdPreservesConstraint() {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
@@ -108,14 +108,14 @@ namespace NuGet.Test {
             referenceRepository.AddPackage(A20);
 
             // Assert
-            Assert.IsTrue(fileSystem.FileExists("packages.config"));
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.True(fileSystem.FileExists("packages.config"));
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""A"" version=""2.0"" allowedVersions=""[1.0, 5.0)"" />
 </packages>", fileSystem.ReadAllText("packages.config"));
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovePackageRemovesEntryFromPackagesConfig() {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
@@ -132,14 +132,14 @@ namespace NuGet.Test {
             referenceRepository.RemovePackage(package);
 
             // Assert
-            Assert.IsTrue(fileSystem.FileExists("packages.config"));
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.True(fileSystem.FileExists("packages.config"));
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""B"" version=""1.0"" />
 </packages>", fileSystem.ReadAllText("packages.config"));
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovePackageRemovesEntryFromPackagesConfigDeletesFileAndUnregistersRepositoryIfLastEntry() {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
@@ -158,13 +158,13 @@ namespace NuGet.Test {
             referenceRepository.RemovePackage(package);
 
             // Assert
-            Assert.IsFalse(fileSystem.FileExists("packages.config"));
-            Assert.IsNotNull(path);
-            Assert.AreEqual(@"C:\MockFileSystem\packages.config", path);
+            Assert.False(fileSystem.FileExists("packages.config"));
+            Assert.NotNull(path);
+            Assert.Equal(@"C:\MockFileSystem\packages.config", path);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesReturnsPackagesFromSourceRepositoryListedInPackagesConfig() {
             // Arrange
             var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
@@ -182,11 +182,11 @@ namespace NuGet.Test {
             var packages = referenceRepository.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(1, packages.Count);
-            Assert.AreSame(packageA, packages[0]);
+            Assert.Equal(1, packages.Count);
+            Assert.Same(packageA, packages[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConstraintReturnsConstraintListedForPackageIdInPackagesConfig() {
             // Arrange
             var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
@@ -204,14 +204,14 @@ namespace NuGet.Test {
             IVersionSpec constraint = referenceRepository.GetConstraint("A");
 
             // Assert
-            Assert.IsNotNull(constraint);
-            Assert.IsTrue(constraint.IsMinInclusive);
-            Assert.IsFalse(constraint.IsMaxInclusive);
-            Assert.AreEqual(new Version("1.0"), constraint.MinVersion);
-            Assert.AreEqual(new Version("3.0"), constraint.MaxVersion);
+            Assert.NotNull(constraint);
+            Assert.True(constraint.IsMinInclusive);
+            Assert.False(constraint.IsMaxInclusive);
+            Assert.Equal(new Version("1.0"), constraint.MinVersion);
+            Assert.Equal(new Version("3.0"), constraint.MaxVersion);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConstraintThrowsIfConstrainInvalid() {
             // Arrange
             var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
@@ -229,7 +229,7 @@ namespace NuGet.Test {
             ExceptionAssert.ThrowsArgumentException(() => referenceRepository.GetConstraint("A"), "'[-1.3, 3)' is not a valid version string.");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesReturnsOnlyValidPackagesFromSourceRepositoryListedInPackagesConfig() {
             // Arrange
             var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
@@ -254,10 +254,10 @@ namespace NuGet.Test {
             var packages = referenceRepository.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(2, packages.Count);
-            Assert.AreSame(packageC, packages[0]);
-            Assert.AreSame(packageA, packages[1]);
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(2, packages.Count);
+            Assert.Same(packageC, packages[0]);
+            Assert.Same(packageA, packages[1]);
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""C"" version=""2.0"" />
   <package id=""B"" version=""1.0"" />
@@ -268,7 +268,7 @@ namespace NuGet.Test {
 </packages>", fileSystem.ReadAllText("packages.config"));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesWithMalformedPackagesConfigThrows() {
             // Arrange
             var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
@@ -285,7 +285,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => referenceRepository.GetPackages().ToList(), @"Error reading 'C:\MockFileSystem\packages.config'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesNoPackagesConfigReturnsEmptyList() {
             // Arrange
             var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
@@ -298,7 +298,7 @@ namespace NuGet.Test {
             var packages = referenceRepository.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(0, packages.Count);
+            Assert.Equal(0, packages.Count);
         }
     }
 }

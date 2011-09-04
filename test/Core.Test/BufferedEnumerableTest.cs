@@ -1,15 +1,15 @@
 ﻿using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class BufferedEnumerableTest {
         public void CtorThrowsIfSourceIsNull() {
             // Act & Assert
             ExceptionAssert.ThrowsArgNull(() => new BufferedEnumerable<object>(null, 100), "source");
         }
 
-        [TestMethod]
+        [Fact]
         public void TakingMoreThanBufferSizesReturnsItems() {
             // Arrange
             var e = new BufferedEnumerable<int>(Enumerable.Range(0, 10000).AsQueryable(), 5);
@@ -18,10 +18,10 @@ namespace NuGet.Test {
             var items = e.Take(20).ToList();
 
             // Assert
-            Assert.AreEqual(20, items.Count);
+            Assert.Equal(20, items.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void BufferedEnumeratorTakingLessThanBufferSizeOnlyQueriesSourceOnce() {
             // Arrange
             var state = new BufferedEnumerable<int>.QueryState<int>(5);
@@ -35,10 +35,10 @@ namespace NuGet.Test {
             }
 
             // Assert
-            Assert.AreEqual(5, state.Cache.Count);
+            Assert.Equal(5, state.Cache.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void BufferedEnumeratorTakingMoreThanBufferSizeQueriesSourceMoreThanOnce() {
             // Arrange
             var state = new BufferedEnumerable<int>.QueryState<int>(5);
@@ -52,11 +52,11 @@ namespace NuGet.Test {
             }
 
             // Assert
-            Assert.AreEqual(10, state.Cache.Count);
+            Assert.Equal(10, state.Cache.Count);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void IfNoMoreItemsInSourceSetsIsEmpty() {
             // Arrange
             var state = new BufferedEnumerable<int>.QueryState<int>(5);
@@ -70,8 +70,8 @@ namespace NuGet.Test {
             }
 
             // Assert
-            Assert.IsTrue(e.IsEmpty);
-            Assert.AreEqual(5, state.Cache.Count);
+            Assert.True(e.IsEmpty);
+            Assert.Equal(5, state.Cache.Count);
         }
     }
 }

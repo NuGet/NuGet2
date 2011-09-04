@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test.Analysis {
     internal static class PackageIssueTestHelper {
@@ -12,9 +12,9 @@ namespace NuGet.Test.Analysis {
             string expectedDescription,
             string expectedSolution) {
 
-            Assert.AreEqual(expectedTitle, issue.Title);
-            Assert.AreEqual(expectedDescription, issue.Description);
-            Assert.AreEqual(expectedSolution, issue.Solution);
+            Assert.Equal(expectedTitle, issue.Title);
+            Assert.Equal(expectedDescription, issue.Description);
+            Assert.Equal(expectedSolution, issue.Solution);
         }
     }
 }

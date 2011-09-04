@@ -1,29 +1,29 @@
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test.NuGetCommandLine {
-    [TestClass]
+    
     public class ResourceHelperTests {
 
-        [TestMethod]
+        [Fact]
         public void GetLocalizedString_ThrowsArgumentExceptionForNullType() {
             // Act & Assert
             ExceptionAssert.ThrowsArgNull(() => ResourceHelper.GetLocalizedString(null, "foo"), "resourceType");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetLocalizedString_ThrowsArgumentExceptionForNullName() {
             // Act & Assert
             ExceptionAssert.ThrowsArgNullOrEmpty(() => ResourceHelper.GetLocalizedString(typeof(string), null), "resourceName");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetLocalizedString_ThrowsArgumentExceptionForEmptyName() {
             // Act & Assert
             ExceptionAssert.ThrowsArgNullOrEmpty(() => ResourceHelper.GetLocalizedString(typeof(string), ""), "resourceName");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetLocalizedString_ThrowsIfNoPropteryByResourceName() {
             // Arrage 
             Type resourceType = typeof(MockResourceType);
@@ -32,7 +32,7 @@ namespace NuGet.Test.NuGetCommandLine {
                 "The resource type 'NuGet.Test.NuGetCommandLine.ResourceHelperTests+MockResourceType' does not have an accessible static property named 'DoesntExist'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetLocalizedString_ThrowsIfPropertyIsNotOfStringType() {
             // Arrage 
             Type resourceType = typeof(MockResourceType);
@@ -41,7 +41,7 @@ namespace NuGet.Test.NuGetCommandLine {
                 "The property 'NotValid' on resource type 'NuGet.Test.NuGetCommandLine.ResourceHelperTests+MockResourceType' is not a string type.");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetLocalizedString_ThrowsIfGetPropertyIsNotAvalible() {
             // Arrage 
             Type resourceType = typeof(MockResourceType);
@@ -50,14 +50,14 @@ namespace NuGet.Test.NuGetCommandLine {
                 "The resource type 'NuGet.Test.NuGetCommandLine.ResourceHelperTests+MockResourceType' does not have an accessible get for the 'NoGet' property.");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetLocalizedString_ReturnsResourceWithValidName() {
             // Arrange
             Type resourceType = typeof(MockResourceType);
             // Act
             var actual = ResourceHelper.GetLocalizedString(resourceType, "Message");
             // Assert
-            Assert.AreEqual("This is a Message.", actual);
+            Assert.Equal("This is a Message.", actual);
         }
 
         private class MockResourceType {

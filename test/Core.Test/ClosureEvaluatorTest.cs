@@ -1,11 +1,11 @@
 ﻿using System.Linq;
 using System.Linq.Expressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class ClosureEvaluatorQueryTest {
-        [TestMethod]
+        [Fact]
         public void ClosureEvaluatorReplacesClosureVariablesWithTheirValue() {
             // Arrange
             int value = 2;
@@ -15,7 +15,7 @@ namespace NuGet.Test {
 
             Expression expression = new ClosureEvaluator(checkAssembly: false).Visit(query.Expression);
             // Assert
-            Assert.AreEqual("System.Int32[].Where(i => (i > 2))", expression.ToString());
+            Assert.Equal("System.Int32[].Where(i => (i > 2))", expression.ToString());
         }
     }
 }

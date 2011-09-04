@@ -1,10 +1,10 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class VersionSpecTest {
-        [TestMethod]
+        [Fact]
         public void ToStringExactVersion() {
             // Arrange
             var spec = new VersionSpec {
@@ -18,10 +18,10 @@ namespace NuGet.Test {
             string value = spec.ToString();
 
             // Assert
-            Assert.AreEqual("[1.0]", value);
+            Assert.Equal("[1.0]", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMinVersionInclusive() {
             // Arrange
             var spec = new VersionSpec {
@@ -33,10 +33,10 @@ namespace NuGet.Test {
             string value = spec.ToString();
 
             // Assert
-            Assert.AreEqual("1.0", value);
+            Assert.Equal("1.0", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMinVersionExclusive() {
             // Arrange
             var spec = new VersionSpec {
@@ -48,10 +48,10 @@ namespace NuGet.Test {
             string value = spec.ToString();
 
             // Assert
-            Assert.AreEqual("(1.0, )", value);
+            Assert.Equal("(1.0, )", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMaxVersionInclusive() {
             // Arrange
             var spec = new VersionSpec {
@@ -63,10 +63,10 @@ namespace NuGet.Test {
             string value = spec.ToString();
 
             // Assert
-            Assert.AreEqual("(, 1.0]", value);
+            Assert.Equal("(, 1.0]", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMaxVersionExclusive() {
             // Arrange
             var spec = new VersionSpec {
@@ -78,10 +78,10 @@ namespace NuGet.Test {
             string value = spec.ToString();
 
             // Assert
-            Assert.AreEqual("(, 1.0)", value);
+            Assert.Equal("(, 1.0)", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMinVersionExclusiveMaxInclusive() {
             // Arrange
             var spec = new VersionSpec {
@@ -95,10 +95,10 @@ namespace NuGet.Test {
             string value = spec.ToString();
 
             // Assert
-            Assert.AreEqual("(1.0, 3.0]", value);
+            Assert.Equal("(1.0, 3.0]", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMinVersionInclusiveMaxExclusive() {
             // Arrange
             var spec = new VersionSpec {
@@ -112,10 +112,10 @@ namespace NuGet.Test {
             string value = spec.ToString();
 
             // Assert
-            Assert.AreEqual("[1.0, 4.0)", value);
+            Assert.Equal("[1.0, 4.0)", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMinVersionInclusiveMaxInclusive() {
             // Arrange
             var spec = new VersionSpec {
@@ -129,10 +129,10 @@ namespace NuGet.Test {
             string value = spec.ToString();
 
             // Assert
-            Assert.AreEqual("[1.0, 5.0]", value);
+            Assert.Equal("[1.0, 5.0]", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMinVersionExclusiveMaxExclusive() {
             // Arrange
             var spec = new VersionSpec {
@@ -146,7 +146,7 @@ namespace NuGet.Test {
             string value = spec.ToString();
 
             // Assert
-            Assert.AreEqual("(1.0, 5.0)", value);
+            Assert.Equal("(1.0, 5.0)", value);
         }
     }
 }

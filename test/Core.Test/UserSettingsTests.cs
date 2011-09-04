@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class UserSettingsTests {
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingCtroWithNullFileSystemWithThrowException() {
             // Act & Assert
             ExceptionAssert.Throws<ArgumentNullException>(() => new Settings(null));
 
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_WillGetConfigurationFromSpecifiedPath() {
             // Arrange 
             const string configFile = "NuGet.Config";
@@ -37,7 +37,7 @@ namespace NuGet.Test {
             mockFileSystem.Verify(x => x.OpenFile(configFile), Times.Once(), "File was not read");
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingGetValuesWithNullSectionWillThrowException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
@@ -46,7 +46,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<ArgumentException>(() => settings.GetValues(null));
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingGetValueWithNullSectionWillThrowException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
@@ -55,7 +55,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<ArgumentException>(() => settings.GetValue(null, "SomeKey"));
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingGetValueWithNullKeyWillThrowException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
@@ -64,7 +64,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<ArgumentException>(() => settings.GetValue("SomeSection", null));
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingCtorWithMalformedConfigThrowsException() {
             var mockFileSystem = new Mock<IFileSystem>();
             var nugetConfigPath = "NuGet.Config";
@@ -77,7 +77,7 @@ namespace NuGet.Test {
 
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSetting_CallingGetValuesWithNonExistantSectionReturnsNull() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -91,10 +91,10 @@ namespace NuGet.Test {
             var result = settings.GetValues("DoesNotExisit");
 
             // Assert 
-            Assert.IsNull(result);
+            Assert.Null(result);
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingGetValuesWithSectionButNoValidValuesReturnsEmptyDictionary() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -114,11 +114,11 @@ namespace NuGet.Test {
             var result = settings.GetValues("SectionName");
 
             // Assert 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Count);
+            Assert.NotNull(result);
+            Assert.Equal(0, result.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingGetValuesWithoutSectionReturnsNull() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -138,10 +138,10 @@ namespace NuGet.Test {
             var result = settings.GetValues("NotTheSectionName");
 
             // Arrange 
-            Assert.IsNull(result);
+            Assert.Null(result);
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingGetValueWithoutSectionReturnsNull() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -161,10 +161,10 @@ namespace NuGet.Test {
             var result = settings.GetValue("NotTheSectionName", "key1");
 
             // Arrange 
-            Assert.IsNull(result);
+            Assert.Null(result);
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingGetValueWithSectionButNoValidKeyReturnsNull() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -184,10 +184,10 @@ namespace NuGet.Test {
             var result = settings.GetValue("SectionName", "key3");
 
             // Assert 
-            Assert.IsNull(result);
+            Assert.Null(result);
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingGetValuesWithSectionReturnsDictionary() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -207,11 +207,11 @@ namespace NuGet.Test {
             var result = settings.GetValues("SectionName");
 
             // Assert 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(2, result.Count);
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingGetValueWithSectionAndKeyReturnsValue() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -234,11 +234,11 @@ namespace NuGet.Test {
             var result2 = settings.GetValue("SectionNameTwo", "key2");
 
             // Assert 
-            Assert.AreEqual("value1", result1);
-            Assert.AreEqual("value2", result2);
+            Assert.Equal("value1", result1);
+            Assert.Equal("value2", result2);
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingSetValueWithEmptySectionNameThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
@@ -247,7 +247,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<ArgumentException>(() => settings.SetValue("", "SomeKey", "SomeValue"));
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingSetValueWithEmptyKeyThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
@@ -256,7 +256,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<ArgumentException>(() => settings.SetValue("SomeKey", "", "SomeValue"));
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingSetValueWillAddSectionIfItDoesNotExist() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -280,7 +280,7 @@ namespace NuGet.Test {
             settings.SetValue("NewSectionName", "key", "value");
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
     <add key=""key"" value=""value"" />
@@ -291,7 +291,7 @@ namespace NuGet.Test {
 </configuration>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingSetValueWillAddToSectionIfItExist() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -315,7 +315,7 @@ namespace NuGet.Test {
             settings.SetValue("SectionName", "keyTwo", "valueTwo");
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
     <add key=""key"" value=""value"" />
@@ -324,7 +324,7 @@ namespace NuGet.Test {
 </configuration>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingSetValueWillOverrideValueIfKeyExists() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -348,7 +348,7 @@ namespace NuGet.Test {
             settings.SetValue("SectionName", "key", "NewValue");
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
     <add key=""key"" value=""NewValue"" />
@@ -356,7 +356,7 @@ namespace NuGet.Test {
 </configuration>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingSetValuesWithEmptySectionThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
@@ -367,7 +367,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<ArgumentException>(() => settings.SetValues("", values));
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingSetValuesWithNullValuesThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
@@ -376,7 +376,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<ArgumentNullException>(() => settings.SetValues("Section", null));
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingSetValuesWithEmptyKeyThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
@@ -387,7 +387,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<ArgumentException>(() => settings.SetValues("Section", values));
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingSetValuseWillAddSectionIfItDoesNotExist() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -412,7 +412,7 @@ namespace NuGet.Test {
             settings.SetValues("NewSectionName", values);
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
     <add key=""key"" value=""value"" />
@@ -423,7 +423,7 @@ namespace NuGet.Test {
 </configuration>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingSetValuesWillAddToSectionIfItExist() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -448,7 +448,7 @@ namespace NuGet.Test {
             settings.SetValues("SectionName", values);
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
     <add key=""key"" value=""value"" />
@@ -457,7 +457,7 @@ namespace NuGet.Test {
 </configuration>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingSetValuesWillOverrideValueIfKeyExists() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -482,7 +482,7 @@ namespace NuGet.Test {
             settings.SetValues("SectionName", values);
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
     <add key=""key"" value=""NewValue"" />
@@ -490,7 +490,7 @@ namespace NuGet.Test {
 </configuration>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingSetValuesWilladdValuesInOrder() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -516,7 +516,7 @@ namespace NuGet.Test {
             settings.SetValues("SectionName", values);
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
     <add key=""key"" value=""Value"" />
@@ -526,7 +526,7 @@ namespace NuGet.Test {
 </configuration>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingDeleteValueWithEmptyKeyThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
@@ -535,7 +535,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<ArgumentException>(() => settings.DeleteValue("SomeSection", ""));
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingDeleteValueWithEmptySectionThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
@@ -544,7 +544,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<ArgumentException>(() => settings.DeleteValue("", "SomeKey"));
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingDeleteValueWhenSectionNameDoesntExistReturnsFalse() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -559,10 +559,10 @@ namespace NuGet.Test {
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
             Settings settings = new Settings(mockFileSystem.Object);
             // Act & Assert
-            Assert.IsFalse(settings.DeleteValue("SectionDoesNotExists", "SomeKey"));
+            Assert.False(settings.DeleteValue("SectionDoesNotExists", "SomeKey"));
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingDeleteValueWhenKeyDoesntExistThrowsException() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -577,10 +577,10 @@ namespace NuGet.Test {
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
             Settings settings = new Settings(mockFileSystem.Object);
             // Act & Assert
-            Assert.IsFalse(settings.DeleteValue("SectionName", "KeyDoesNotExist"));
+            Assert.False(settings.DeleteValue("SectionName", "KeyDoesNotExist"));
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingDeleteValueWithValidSectionAndKeyDeletesTheEntryAndReturnsTrue() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -607,8 +607,8 @@ namespace NuGet.Test {
 
 
             // Act & Assert
-            Assert.IsTrue(settings.DeleteValue("SectionName", "DeleteMe"));
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.True(settings.DeleteValue("SectionName", "DeleteMe"));
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
     <add key=""keyNotToDelete"" value=""value"" />
@@ -619,7 +619,7 @@ namespace NuGet.Test {
 </configuration>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingDeleteSectionWithEmptySectionThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
@@ -628,7 +628,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<ArgumentException>(() => settings.DeleteSection(""));
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingDeleteSectionWhenSectionNameDoesntExistReturnsFalse() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -643,10 +643,10 @@ namespace NuGet.Test {
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
             Settings settings = new Settings(mockFileSystem.Object);
             // Act & Assert
-            Assert.IsFalse(settings.DeleteSection("SectionDoesNotExists"));
+            Assert.False(settings.DeleteSection("SectionDoesNotExists"));
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettings_CallingDeleteSectionWithValidSectionDeletesTheSectionAndReturnsTrue() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -671,8 +671,8 @@ namespace NuGet.Test {
             Settings settings = new Settings(mockFileSystem.Object);
 
             // Act & Assert
-            Assert.IsTrue(settings.DeleteSection("SectionName"));
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.True(settings.DeleteSection("SectionName"));
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName2>
     <add key=""key"" value=""value"" />
@@ -682,7 +682,7 @@ namespace NuGet.Test {
 
 
         /* Extension Methods for Settings Class */
-        [TestMethod]
+        [Fact]
         public void UserSettingsExtentions_SetEncryptedValue() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -706,10 +706,10 @@ namespace NuGet.Test {
             settings.SetEncryptedValue("SectionName", "key", "NewValue");
 
             // Assert
-            Assert.IsFalse(ms.ReadToEnd().Contains("NewValue"), "Value Should Be Ecrypted and Base64 encoded.");
+            Assert.False(ms.ReadToEnd().Contains("NewValue"), "Value Should Be Ecrypted and Base64 encoded.");
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettingsExtentions_GetEncryptedValue() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -727,10 +727,10 @@ namespace NuGet.Test {
             var result = settings.GetDecryptedValue("SectionName", "key");
 
             // Assert
-            Assert.AreEqual("value", result);
+            Assert.Equal("value", result);
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettingsExtentions_GetDecryptedValueWithEmptyValueReturnsEmptyString() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -749,10 +749,10 @@ namespace NuGet.Test {
             var result = settings.GetDecryptedValue("SectionName", "key");
 
             // Assert
-            Assert.AreEqual(String.Empty, result);
+            Assert.Equal(String.Empty, result);
         }
 
-        [TestMethod]
+        [Fact]
         public void UserSettingsExtentions_GetDecryptedValueWithNoKeyReturnsNull() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
@@ -771,7 +771,7 @@ namespace NuGet.Test {
             var result = settings.GetDecryptedValue("SectionName", "NoKeyByThatName");
 
             // Assert
-            Assert.IsNull(result);
+            Assert.Null(result);
         }
 
     }

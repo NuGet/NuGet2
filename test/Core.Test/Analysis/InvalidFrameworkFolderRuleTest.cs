@@ -2,13 +2,12 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NuGet.Analysis.Rules;
+using Xunit;
 
 namespace NuGet.Test.Analysis {
-    [TestClass]
     public class InvalidFrameworkFolderRuleTest {
-        [TestMethod]
+        [Fact]
         public void PackageWithNoLibFolderHasNoIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage("A", content: new[] { "one", "two" });
@@ -18,10 +17,10 @@ namespace NuGet.Test.Analysis {
             IEnumerable<PackageIssue> issues = rule.Validate(package);
 
             // Assert
-            Assert.IsFalse(issues.Any());
+            Assert.False(issues.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageWithValidFrameworkNamesHasNoIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage(
@@ -34,10 +33,10 @@ namespace NuGet.Test.Analysis {
             IEnumerable<PackageIssue> issues = rule.Validate(package);
 
             // Assert
-            Assert.IsFalse(issues.Any());
+            Assert.False(issues.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageWithInvalidFrameworkNamesHasOneIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage(
@@ -50,7 +49,7 @@ namespace NuGet.Test.Analysis {
             IList<PackageIssue> issues = rule.Validate(package).ToList();
 
             // Assert
-            Assert.AreEqual(1, issues.Count);
+            Assert.Equal(1, issues.Count);
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[0],
                 "Invalid framework folder.",

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class CryptoHashProviderTest {
-        [TestMethod]
+        [Fact]
         public void DefaultCryptoHashProviderUsesSHA512() {
             // Arrange
             byte[] testBytes = Encoding.UTF8.GetBytes("There is no butter knife");
@@ -16,10 +16,10 @@ namespace NuGet.Test {
             byte[] actualHash = hashProvider.CalculateHash(testBytes);
 
             // Assert
-            CollectionAssert.AreEqual(actualHash, Convert.FromBase64String(expectedHash));
+            Assert.Equal(actualHash, Convert.FromBase64String(expectedHash));
         }
 
-        [TestMethod]
+        [Fact]
         public void CryptoHashProviderReturnsTrueIfHashAreEqual() {
             // Arrange
             byte[] testBytes = Encoding.UTF8.GetBytes("There is no butter knife");
@@ -30,10 +30,10 @@ namespace NuGet.Test {
             bool result = hashProvider.VerifyHash(testBytes, Convert.FromBase64String(expectedHash));
 
             // Assert
-            Assert.IsTrue(result);
+            Assert.True(result);
         }
 
-        [TestMethod]
+        [Fact]
         public void CryptoHashProviderReturnsFalseIfHashValuesAreUnequal() {
             // Arrange
             byte[] testBytes = Encoding.UTF8.GetBytes("There is no butter knife");
@@ -47,7 +47,7 @@ namespace NuGet.Test {
             bool result = hashProvider.VerifyHash(testHash, badHash);
 
             // Assert
-            Assert.IsFalse(result);
+            Assert.False(result);
         }
     }
 }

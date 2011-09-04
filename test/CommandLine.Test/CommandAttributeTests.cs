@@ -1,9 +1,9 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test.NuGetCommandLine {
-    [TestClass]
+    
     public class CommandAttributeTests {
-        [TestMethod]
+        [Fact]
         public void GetDescription_ReturnsResourceIfTypeSet() {
             // Arrange
             CommandAttribute cmd = new CommandAttribute(typeof(MockResourceType), "MockCommand", "ResourceName");
@@ -12,10 +12,10 @@ namespace NuGet.Test.NuGetCommandLine {
             var actual = cmd.Description;
 
             // Assert
-            Assert.AreEqual("This is a Resource String.", actual);
+            Assert.Equal("This is a Resource String.", actual);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetDescription_ReturnsDescriptionIfTypeNotSet() {
             // Arrange
             CommandAttribute cmd = new CommandAttribute("MockCommand", "ResourceName");
@@ -24,10 +24,10 @@ namespace NuGet.Test.NuGetCommandLine {
             var actual = cmd.Description;
 
             // Assert
-            Assert.AreEqual("ResourceName", actual);
+            Assert.Equal("ResourceName", actual);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetUsageSummary_ReturnsResourceIfTypeSet() {
             // Arrange
             CommandAttribute cmd = new CommandAttribute(typeof(MockResourceType),
@@ -37,10 +37,10 @@ namespace NuGet.Test.NuGetCommandLine {
             var actual = cmd.UsageSummary;
 
             // Assert
-            Assert.AreEqual("This is a Resource String.", actual);
+            Assert.Equal("This is a Resource String.", actual);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetUsageSummary_ReturnsUsageSummaryIfTypeNotSet() {
             // Arrange
             CommandAttribute cmd = new CommandAttribute(
@@ -50,10 +50,10 @@ namespace NuGet.Test.NuGetCommandLine {
             var actual = cmd.UsageSummary;
 
             // Assert
-            Assert.AreEqual("Not a Resource", actual);
+            Assert.Equal("Not a Resource", actual);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetUsageDescription_ReturnsResourceIfTypeSet() {
             // Arrange
             CommandAttribute cmd = new CommandAttribute(typeof(MockResourceType),
@@ -63,10 +63,10 @@ namespace NuGet.Test.NuGetCommandLine {
             var actual = cmd.UsageDescription;
 
             // Assert
-            Assert.AreEqual("This is a Resource String.", actual);
+            Assert.Equal("This is a Resource String.", actual);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetUsageDescription_ReturnsUsageDescriptionIfTypeNotSet() {
             // Arrange
             CommandAttribute cmd = new CommandAttribute(
@@ -76,7 +76,7 @@ namespace NuGet.Test.NuGetCommandLine {
             var actual = cmd.UsageDescription;
 
             // Assert
-            Assert.AreEqual("Not a Resource", actual);
+            Assert.Equal("Not a Resource", actual);
         }
 
 

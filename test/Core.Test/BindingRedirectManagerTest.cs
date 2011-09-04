@@ -1,13 +1,13 @@
 ﻿using System;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Runtime;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class BindingRedirectManagerTest {
-        [TestMethod]
+        [Fact]
         public void AddingBindingRedirectToEmptyConfig() {
             // Arrange            
             var mockFileSystem = new Mock<IFileSystem>();
@@ -26,7 +26,7 @@ namespace NuGet.Test {
             bindingRedirectManager.AddBindingRedirects(new[] { assemblyBinding });
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
@@ -39,7 +39,7 @@ namespace NuGet.Test {
 </configuration>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void AddingBindingRedirectWithMultipleAssemblyBindingSectionsAddsToFirstOne() {
             // Arrange            
             var mockFileSystem = new Mock<IFileSystem>();
@@ -74,7 +74,7 @@ namespace NuGet.Test {
             bindingRedirectManager.AddBindingRedirects(new[] { assemblyBinding });
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
@@ -97,7 +97,7 @@ namespace NuGet.Test {
 </configuration>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void AddingBindingRedirectsDoesNotAddDuplicates() {
             // Arrange            
             var mockFileSystem = new Mock<IFileSystem>();
@@ -126,7 +126,7 @@ namespace NuGet.Test {
             bindingRedirectManager.AddBindingRedirects(new[] { assemblyBinding });
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
@@ -139,7 +139,7 @@ namespace NuGet.Test {
 </configuration>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void AddingBindingRedirectsOverwritesAssemblyBindingIfBindingForAssemblyExists() {
             // Arrange            
             var mockFileSystem = new Mock<IFileSystem>();
@@ -168,7 +168,7 @@ namespace NuGet.Test {
             bindingRedirectManager.AddBindingRedirects(new[] { assemblyBinding });
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
@@ -181,7 +181,7 @@ namespace NuGet.Test {
 </configuration>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void AddingBindingRedirectsFileWithDuplicateAssemblyIdentitiesOverwritesAssemblyBindingIfBindingForAssemblyExists() {
             // Arrange            
             var mockFileSystem = new Mock<IFileSystem>();
@@ -214,7 +214,7 @@ namespace NuGet.Test {
             bindingRedirectManager.AddBindingRedirects(new[] { assemblyBinding });
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
@@ -227,7 +227,7 @@ namespace NuGet.Test {
 </configuration>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveBindingRedirectsRemovesParentNodeIfLastElement() {
             // Arrange            
             var mockFileSystem = new Mock<IFileSystem>();
@@ -258,7 +258,7 @@ namespace NuGet.Test {
             bindingRedirectManager.RemoveBindingRedirects(new[] { assemblyBinding });
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1""></assemblyBinding>
@@ -266,7 +266,7 @@ namespace NuGet.Test {
 </configuration>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveBindingRedirectsDoesNotRemoveParentNodeIfNotLastElement() {
             // Arrange            
             var mockFileSystem = new Mock<IFileSystem>();
@@ -299,7 +299,7 @@ namespace NuGet.Test {
             bindingRedirectManager.RemoveBindingRedirects(new[] { assemblyBinding });
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">

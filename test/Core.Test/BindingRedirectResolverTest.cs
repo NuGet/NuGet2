@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using NuGet.Runtime;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class BindingRedirectResolverTest {
-        [TestMethod]
+        [Fact]
         public void GetBindingRedirectsTest() {
             // A, B, C2, G
             // A -> C1
@@ -60,12 +60,12 @@ namespace NuGet.Test {
             var redirectAssemblies = BindingRedirectResolver.GetBindingRedirects(assemblies).ToList();
 
             // Assert
-            Assert.AreEqual(1, redirectAssemblies.Count);
-            Assert.AreEqual("C", redirectAssemblies[0].Name);
-            Assert.AreEqual("2.0.0.0", redirectAssemblies[0].NewVersion);
+            Assert.Equal(1, redirectAssemblies.Count);
+            Assert.Equal("C", redirectAssemblies[0].Name);
+            Assert.Equal("2.0.0.0", redirectAssemblies[0].NewVersion);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetBindingRedirectsOnlyRedirectsStrongNamedAssemblies() {
             // A, B2
             // A -> B1
@@ -94,7 +94,7 @@ namespace NuGet.Test {
             var redirectAssemblies = BindingRedirectResolver.GetBindingRedirects(assemblies).ToList();
 
             // Assert
-            Assert.AreEqual(0, redirectAssemblies.Count);
+            Assert.Equal(0, redirectAssemblies.Count);
         }
     }
 }

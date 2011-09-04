@@ -2,14 +2,14 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using NuGet.Analysis.Rules;
 
 namespace NuGet.Test.Analysis {
-    [TestClass]
+    
     public class MisplacedTransformFileRuleTest {
 
-        [TestMethod]
+        [Fact]
         public void NoTransformFileHasNoIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage("A", content: new[] { "one.js" });
@@ -19,10 +19,10 @@ namespace NuGet.Test.Analysis {
             IEnumerable<PackageIssue> issues = rule.Validate(package);
 
             // Assert
-            Assert.IsFalse(issues.Any());
+            Assert.False(issues.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void TransformFileInsideContentFolderHasNoIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage("A", content: new[] { "one.js.pp", "web.config.transform" });
@@ -32,10 +32,10 @@ namespace NuGet.Test.Analysis {
             IEnumerable<PackageIssue> issues = rule.Validate(package);
 
             // Assert
-            Assert.IsFalse(issues.Any());
+            Assert.False(issues.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void TransformFileOutsideContentFolderHasIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage(
@@ -49,7 +49,7 @@ namespace NuGet.Test.Analysis {
             IList<PackageIssue> issues = rule.Validate(package).ToList();
 
             // Assert
-            Assert.AreEqual(2, issues.Count);
+            Assert.Equal(2, issues.Count);
 
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[0],

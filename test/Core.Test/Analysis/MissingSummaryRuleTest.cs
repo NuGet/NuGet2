@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using NuGet.Analysis.Rules;
 
 namespace NuGet.Test.Analysis {
-    [TestClass]
+    
     public class MissingSummaryRuleTest {
 
-        [TestMethod]
+        [Fact]
         public void PackageWithShortDescriptionHasNoIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage("A", description: new string('a', 300));
@@ -17,10 +17,10 @@ namespace NuGet.Test.Analysis {
             IEnumerable<PackageIssue> issues = rule.Validate(package);
 
             // Assert
-            Assert.IsFalse(issues.Any());
+            Assert.False(issues.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageWithLongDescriptionYieldOneIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage("A", description: new string('a', 301));
@@ -30,7 +30,7 @@ namespace NuGet.Test.Analysis {
             IList<PackageIssue> issues = rule.Validate(package).ToList();
 
             // Assert
-            Assert.AreEqual(1, issues.Count);
+            Assert.Equal(1, issues.Count);
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[0],
                 "Consider providing Summary text.",
@@ -38,7 +38,7 @@ namespace NuGet.Test.Analysis {
                 "Provide a brief summary of the package in the Summary field.");
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageWithLongDescriptionAndSummaryHasNoIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage("A", description: new string('a', 301), summary: "summary");
@@ -48,7 +48,7 @@ namespace NuGet.Test.Analysis {
             IEnumerable<PackageIssue> issues = rule.Validate(package);
 
             // Assert
-            Assert.IsFalse(issues.Any());
+            Assert.False(issues.Any());
         }
     }
 }

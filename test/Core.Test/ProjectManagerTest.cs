@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Versioning;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class ProjectManagerTest {
-        [TestMethod]
+        [Fact]
         public void AddingPackageReferenceNullOrEmptyPackageIdThrows() {
             // Arrange
             ProjectManager projectManager = CreateProjectManager();
@@ -19,7 +19,7 @@ namespace NuGet.Test {
             ExceptionAssert.ThrowsArgNullOrEmpty(() => projectManager.AddPackageReference(String.Empty), "packageId");
         }
 
-        [TestMethod]
+        [Fact]
         public void AddingUnknownPackageReferenceThrows() {
             // Arrange
             ProjectManager projectManager = CreateProjectManager();
@@ -28,7 +28,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("unknown"), "Unable to find package 'unknown'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void AddingPackageReferenceThrowsExceptionPackageReferenceIsAdded() {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
@@ -43,10 +43,10 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<UnauthorizedAccessException>(() => projectManager.AddPackageReference("A"));
 
             // Assert
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA));
+            Assert.True(projectManager.LocalRepository.Exists(packageA));
         }
 
-        [TestMethod]
+        [Fact]
         public void AddingPackageReferenceAddsPreprocessedFileToTargetPathWithRemovedExtension() {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
@@ -59,11 +59,11 @@ namespace NuGet.Test {
             projectManager.AddPackageReference("A");
 
             // Assert
-            Assert.IsFalse(projectSystem.FileExists(@"foo\bar\file.pp"));
-            Assert.IsTrue(projectSystem.FileExists(@"foo\bar\file"));
+            Assert.False(projectSystem.FileExists(@"foo\bar\file.pp"));
+            Assert.True(projectSystem.FileExists(@"foo\bar\file"));
         }
 
-        [TestMethod]
+        [Fact]
         public void AddPackageReferenceWhenNewVersionOfPackageAlreadyReferencedThrows() {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
@@ -91,7 +91,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A", Version.Parse("1.0")), @"Already referencing a newer version of 'A'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovingUnknownPackageReferenceThrows() {
             // Arrange
             var projectManager = CreateProjectManager();
@@ -100,7 +100,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.RemovePackageReference("foo"), "Unable to find package 'foo'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovingPackageReferenceWithOtherProjectWithReferencesThatWereNotCopiedToProject() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -124,10 +124,10 @@ namespace NuGet.Test {
             projectManager.RemovePackageReference("A");
 
             // Assert
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA));
+            Assert.False(projectManager.LocalRepository.Exists(packageA));
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovingUnknownPackageReferenceNullOrEmptyPackageIdThrows() {
             // Arrange
             var projectManager = CreateProjectManager();
@@ -137,7 +137,7 @@ namespace NuGet.Test {
             ExceptionAssert.ThrowsArgNullOrEmpty(() => projectManager.RemovePackageReference(String.Empty), "packageId");
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovingPackageReferenceWithNoDependents() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -151,10 +151,10 @@ namespace NuGet.Test {
             projectManager.RemovePackageReference("foo");
 
             // Assert
-            Assert.IsFalse(projectManager.LocalRepository.Exists(package));
+            Assert.False(projectManager.LocalRepository.Exists(package));
         }
 
-        [TestMethod]
+        [Fact]
         public void AddPackageReferenceAddsContentAndReferencesProjectSystem() {
             // Arrange
             var projectSystem = new MockProjectSystem();
@@ -172,14 +172,14 @@ namespace NuGet.Test {
             projectManager.AddPackageReference("A");
 
             // Assert
-            Assert.AreEqual(1, projectSystem.Paths.Count);
-            Assert.AreEqual(1, projectSystem.References.Count);
-            Assert.IsTrue(projectSystem.References.ContainsKey(@"reference.dll"));
-            Assert.IsTrue(projectSystem.FileExists(@"contentFile"));
-            Assert.IsTrue(localRepository.Exists("A"));
+            Assert.Equal(1, projectSystem.Paths.Count);
+            Assert.Equal(1, projectSystem.References.Count);
+            Assert.True(projectSystem.References.ContainsKey(@"reference.dll"));
+            Assert.True(projectSystem.FileExists(@"contentFile"));
+            Assert.True(localRepository.Exists("A"));
         }
 
-        [TestMethod]
+        [Fact]
         public void AddPackageReferenceAddingPackageWithDuplicateReferenceOverwritesReference() {
             // Arrange
             var projectSystem = new MockProjectSystem();
@@ -199,15 +199,15 @@ namespace NuGet.Test {
             projectManager.AddPackageReference("B");
 
             // Assert
-            Assert.AreEqual(0, projectSystem.Paths.Count);
-            Assert.AreEqual(1, projectSystem.References.Count);
-            Assert.IsTrue(projectSystem.References.ContainsKey(@"reference.dll"));
-            Assert.IsTrue(projectSystem.References.ContainsValue(@"B.1.0\reference.dll"));
-            Assert.IsTrue(localRepository.Exists("A"));
-            Assert.IsTrue(localRepository.Exists("B"));
+            Assert.Equal(0, projectSystem.Paths.Count);
+            Assert.Equal(1, projectSystem.References.Count);
+            Assert.True(projectSystem.References.ContainsKey(@"reference.dll"));
+            Assert.True(projectSystem.References.ContainsValue(@"B.1.0\reference.dll"));
+            Assert.True(localRepository.Exists("A"));
+            Assert.True(localRepository.Exists("B"));
         }
 
-        [TestMethod]
+        [Fact]
         public void AddPackageReferenceRaisesOnBeforeInstallAndOnAfterInstall() {
             // Arrange
             var projectSystem = new MockProjectSystem();
@@ -219,14 +219,14 @@ namespace NuGet.Test {
                                                         new[] { "tool" });
             projectManager.PackageReferenceAdding += (sender, e) => {
                 // Assert
-                Assert.AreEqual(e.InstallPath, @"C:\MockFileSystem\A.1.0");
-                Assert.AreSame(e.Package, packageA);
+                Assert.Equal(e.InstallPath, @"C:\MockFileSystem\A.1.0");
+                Assert.Same(e.Package, packageA);
             };
 
             projectManager.PackageReferenceAdded += (sender, e) => {
                 // Assert
-                Assert.AreEqual(e.InstallPath, @"C:\MockFileSystem\A.1.0");
-                Assert.AreSame(e.Package, packageA);
+                Assert.Equal(e.InstallPath, @"C:\MockFileSystem\A.1.0");
+                Assert.Same(e.Package, packageA);
             };
 
             mockRepository.AddPackage(packageA);
@@ -235,7 +235,7 @@ namespace NuGet.Test {
             projectManager.AddPackageReference("A");
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovePackageReferenceRaisesOnBeforeUninstallAndOnAfterUninstall() {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
@@ -245,14 +245,14 @@ namespace NuGet.Test {
                                                              new[] { @"sub\file1", @"sub\file2" });
             projectManager.PackageReferenceRemoving += (sender, e) => {
                 // Assert
-                Assert.AreEqual(e.InstallPath, @"C:\MockFileSystem\A.1.0");
-                Assert.AreSame(e.Package, packageA);
+                Assert.Equal(e.InstallPath, @"C:\MockFileSystem\A.1.0");
+                Assert.Same(e.Package, packageA);
             };
 
             projectManager.PackageReferenceRemoved += (sender, e) => {
                 // Assert
-                Assert.AreEqual(e.InstallPath, @"C:\MockFileSystem\A.1.0");
-                Assert.AreSame(e.Package, packageA);
+                Assert.Equal(e.InstallPath, @"C:\MockFileSystem\A.1.0");
+                Assert.Same(e.Package, packageA);
             };
 
             mockRepository.AddPackage(packageA);
@@ -262,7 +262,7 @@ namespace NuGet.Test {
             projectManager.RemovePackageReference("A");
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovePackageReferenceExcludesFileIfAnotherPackageUsesThem() {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
@@ -284,11 +284,11 @@ namespace NuGet.Test {
             projectManager.RemovePackageReference("A");
 
             // Assert
-            Assert.IsTrue(mockProjectSystem.Deleted.Contains(@"fileA"));
-            Assert.IsTrue(mockProjectSystem.FileExists(@"commonFile"));
+            Assert.True(mockProjectSystem.Deleted.Contains(@"fileA"));
+            Assert.True(mockProjectSystem.FileExists(@"commonFile"));
         }
 
-        [TestMethod]
+        [Fact]
         public void AddPackageWithUnsupportedFilesSkipsUnsupportedFiles() {
             // Arrange            
             var localRepository = new MockPackageRepository();
@@ -303,14 +303,14 @@ namespace NuGet.Test {
             projectManager.AddPackageReference("A");
 
             // Assert
-            Assert.AreEqual(2, projectSystem.Object.Paths.Count);
-            Assert.IsTrue(projectSystem.Object.FileExists("a"));
-            Assert.IsTrue(projectSystem.Object.FileExists("b"));
-            Assert.IsTrue(localRepository.Exists("A"));
-            Assert.IsFalse(projectSystem.Object.FileExists("unsupported"));
+            Assert.Equal(2, projectSystem.Object.Paths.Count);
+            Assert.True(projectSystem.Object.FileExists("a"));
+            Assert.True(projectSystem.Object.FileExists("b"));
+            Assert.True(localRepository.Exists("A"));
+            Assert.False(projectSystem.Object.FileExists("unsupported"));
         }
 
-        [TestMethod]
+        [Fact]
         public void AddPackageWithUnsupportedTransformFileSkipsUnsupportedFile() {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
@@ -325,14 +325,14 @@ namespace NuGet.Test {
             projectManager.AddPackageReference("A");
 
             // Assert
-            Assert.AreEqual(2, projectSystem.Object.Paths.Count);
-            Assert.IsTrue(projectSystem.Object.FileExists("a"));
-            Assert.IsTrue(projectSystem.Object.FileExists("b"));
-            Assert.IsTrue(localRepository.Exists("A"));
-            Assert.IsFalse(projectSystem.Object.FileExists("unsupported"));
+            Assert.Equal(2, projectSystem.Object.Paths.Count);
+            Assert.True(projectSystem.Object.FileExists("a"));
+            Assert.True(projectSystem.Object.FileExists("b"));
+            Assert.True(localRepository.Exists("A"));
+            Assert.False(projectSystem.Object.FileExists("unsupported"));
         }
 
-        [TestMethod]
+        [Fact]
         public void AddPackageWithTransformFile() {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
@@ -364,7 +364,7 @@ namespace NuGet.Test {
             projectManager.AddPackageReference("A");
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <configSections>
     <add a=""n"" />
@@ -375,7 +375,7 @@ namespace NuGet.Test {
 </configuration>", mockProjectSystem.OpenFile("web.config").ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovePackageWithTransformFile() {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
@@ -408,7 +408,7 @@ namespace NuGet.Test {
             projectManager.RemovePackageReference("A");
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <system.web>
     <compilation baz=""test"" />
@@ -416,7 +416,7 @@ namespace NuGet.Test {
 </configuration>", mockProjectSystem.OpenFile("web.config").ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovePackageWithTransformFileThatThrowsContinuesRemovingPackage() {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
@@ -448,11 +448,11 @@ namespace NuGet.Test {
             projectManager.RemovePackageReference("A");
 
             // Assert
-            Assert.IsFalse(mockProjectSystem.FileExists("foo.txt"));
-            Assert.IsFalse(localRepository.Exists(package.Object));
+            Assert.False(mockProjectSystem.FileExists("foo.txt"));
+            Assert.False(localRepository.Exists(package.Object));
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovePackageWithUnsupportedTransformFileDoesNothing() {
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
@@ -479,10 +479,10 @@ namespace NuGet.Test {
             projectManager.RemovePackageReference("A");
 
             // Assert
-            Assert.IsFalse(mockProjectSystem.Object.FileExists("web.config"));
+            Assert.False(mockProjectSystem.Object.FileExists("web.config"));
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovePackageRemovesDirectoriesAddedByPackageFilesIfEmpty() {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
@@ -498,12 +498,12 @@ namespace NuGet.Test {
             projectManager.RemovePackageReference("A");
 
             // Assert
-            Assert.IsTrue(mockProjectSystem.Deleted.Contains(@"sub\file1"));
-            Assert.IsTrue(mockProjectSystem.Deleted.Contains(@"sub\file2"));
-            Assert.IsTrue(mockProjectSystem.Deleted.Contains("sub"));
+            Assert.True(mockProjectSystem.Deleted.Contains(@"sub\file1"));
+            Assert.True(mockProjectSystem.Deleted.Contains(@"sub\file2"));
+            Assert.True(mockProjectSystem.Deleted.Contains("sub"));
         }
 
-        [TestMethod]
+        [Fact]
         public void AddPackageReferenceWhenOlderVersionOfPackageInstalledDoesAnUpgrade() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -535,13 +535,13 @@ namespace NuGet.Test {
             projectManager.AddPackageReference("A");
 
             // Assert
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA10));
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageB10));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA20));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB20));
+            Assert.False(projectManager.LocalRepository.Exists(packageA10));
+            Assert.False(projectManager.LocalRepository.Exists(packageB10));
+            Assert.True(projectManager.LocalRepository.Exists(packageA20));
+            Assert.True(projectManager.LocalRepository.Exists(packageB20));
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageNullOrEmptyPackageIdThrows() {
             // Arrange
             ProjectManager packageManager = CreateProjectManager();
@@ -551,7 +551,7 @@ namespace NuGet.Test {
             ExceptionAssert.ThrowsArgNullOrEmpty(() => packageManager.UpdatePackageReference(String.Empty), "packageId");
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageReferenceWithMixedDependenciesUpdatesPackageAndDependenciesIfUnused() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -598,15 +598,15 @@ namespace NuGet.Test {
             projectManager.UpdatePackageReference("A");
 
             // Assert
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA20));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB10));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageC20));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageD10));
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA10));
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageC10));
+            Assert.True(projectManager.LocalRepository.Exists(packageA20));
+            Assert.True(projectManager.LocalRepository.Exists(packageB10));
+            Assert.True(projectManager.LocalRepository.Exists(packageC20));
+            Assert.True(projectManager.LocalRepository.Exists(packageD10));
+            Assert.False(projectManager.LocalRepository.Exists(packageA10));
+            Assert.False(projectManager.LocalRepository.Exists(packageC10));
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageReferenceIfPackageNotReferencedThrows() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -617,7 +617,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), @"C:\MockFileSystem\ does not reference 'A'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageReferenceToOlderVersionThrows() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -639,7 +639,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A", version: Version.Parse("1.0")), @"Already referencing a newer version of 'A'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageReferenceWithUnresolvedDependencyThrows() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -671,7 +671,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), "Unable to resolve dependency 'B (= 2.0)'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageReferenceWithUpdateDependenciesSetToFalseIgnoresDependencies() {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
@@ -707,13 +707,13 @@ namespace NuGet.Test {
             projectManager.UpdatePackageReference("A", version: null, updateDependencies: false);
 
             // Assert
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA20));
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA10));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB10));
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageB20));
+            Assert.True(projectManager.LocalRepository.Exists(packageA20));
+            Assert.False(projectManager.LocalRepository.Exists(packageA10));
+            Assert.True(projectManager.LocalRepository.Exists(packageB10));
+            Assert.False(projectManager.LocalRepository.Exists(packageB20));
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageHasNoEffectIfConstaintsDefinedDontAllowForUpdates() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -734,11 +734,11 @@ namespace NuGet.Test {
             projectManager.UpdatePackageReference("A");
 
             // Assert
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA10));
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA20));
+            Assert.True(projectManager.LocalRepository.Exists(packageA10));
+            Assert.False(projectManager.LocalRepository.Exists(packageA20));
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateDependencyDependentsHaveSatisfyableDependencies() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -778,13 +778,13 @@ namespace NuGet.Test {
             projectManager.UpdatePackageReference("C");
 
             // Assert
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA10));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB10));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageC20));
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageC10));
+            Assert.True(projectManager.LocalRepository.Exists(packageA10));
+            Assert.True(projectManager.LocalRepository.Exists(packageB10));
+            Assert.True(projectManager.LocalRepository.Exists(packageC20));
+            Assert.False(projectManager.LocalRepository.Exists(packageC10));
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageReferenceWithSatisfyableDependencies() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -838,17 +838,17 @@ namespace NuGet.Test {
             projectManager.UpdatePackageReference("A");
 
             // Assert
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA20));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB10));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageC20));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageD10));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageG10));
+            Assert.True(projectManager.LocalRepository.Exists(packageA20));
+            Assert.True(projectManager.LocalRepository.Exists(packageB10));
+            Assert.True(projectManager.LocalRepository.Exists(packageC20));
+            Assert.True(projectManager.LocalRepository.Exists(packageD10));
+            Assert.True(projectManager.LocalRepository.Exists(packageG10));
 
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageC10));
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA10));
+            Assert.False(projectManager.LocalRepository.Exists(packageC10));
+            Assert.False(projectManager.LocalRepository.Exists(packageA10));
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageReferenceWithDependenciesInUseThrowsConflictError() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -902,7 +902,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), "Updating 'C 1.0' to 'C 2.0' failed. Unable to find a version of 'G' that is compatible with 'C 2.0'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageReferenceFromRepositorySuccesfullyUpdatesDependentsIfDependentsAreResolvable() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -933,13 +933,13 @@ namespace NuGet.Test {
             projectManager.UpdatePackageReference("B");
 
             // Assert
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA10));
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageB10));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA20));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB30));
+            Assert.False(projectManager.LocalRepository.Exists(packageA10));
+            Assert.False(projectManager.LocalRepository.Exists(packageB10));
+            Assert.True(projectManager.LocalRepository.Exists(packageA20));
+            Assert.True(projectManager.LocalRepository.Exists(packageB30));
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageReferenceFromRepositoryFailsIfPackageHasUnresolvableDependents() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -962,7 +962,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("B"), "Updating 'B 1.0' to 'B 2.0' failed. Unable to find a version of 'A' that is compatible with 'B 2.0'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageReferenceFromRepositoryFailsIfPackageHasAnyUnresolvableDependents() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -1003,7 +1003,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("B"), "Updating 'B 1.0' to 'B 2.0' failed. Unable to find a version of 'C' that is compatible with 'B 2.0'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageReferenceFromRepositoryOverlappingDependencies() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -1045,15 +1045,15 @@ namespace NuGet.Test {
             projectManager.UpdatePackageReference("B");
 
             // Assert
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA10));
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageB10));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA20));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB20));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageC20));
+            Assert.False(projectManager.LocalRepository.Exists(packageA10));
+            Assert.False(projectManager.LocalRepository.Exists(packageB10));
+            Assert.True(projectManager.LocalRepository.Exists(packageA20));
+            Assert.True(projectManager.LocalRepository.Exists(packageB20));
+            Assert.True(projectManager.LocalRepository.Exists(packageC20));
         }
 
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageReferenceFromRepositoryChainedIncompatibleDependents() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -1101,7 +1101,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("C"), "Updating 'C 1.0' to 'C 2.0' failed. Unable to find a version of 'B' that is compatible with 'C 2.0'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageReferenceNoVersionSpecifiedShouldUpdateToLatest() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -1124,11 +1124,11 @@ namespace NuGet.Test {
             projectManager.UpdatePackageReference("NetFramework");
 
             // Assert
-            Assert.IsFalse(projectManager.LocalRepository.Exists(package10));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(package35));
+            Assert.False(projectManager.LocalRepository.Exists(package10));
+            Assert.True(projectManager.LocalRepository.Exists(package35));
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageReferenceVersionSpeciedShouldUpdateToSpecifiedVersion() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -1148,11 +1148,11 @@ namespace NuGet.Test {
             projectManager.UpdatePackageReference("NetFramework", new Version("1.1"));
 
             // Assert
-            Assert.IsFalse(projectManager.LocalRepository.Exists(package10));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(package11));
+            Assert.False(projectManager.LocalRepository.Exists(package10));
+            Assert.True(projectManager.LocalRepository.Exists(package11));
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovingPackageReferenceRemovesPackageButNotDependencies() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -1175,11 +1175,11 @@ namespace NuGet.Test {
             projectManager.RemovePackageReference("A");
 
             // Assert            
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB));
+            Assert.False(projectManager.LocalRepository.Exists(packageA));
+            Assert.True(projectManager.LocalRepository.Exists(packageB));
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovePackageReferenceOnlyRemovedAssembliesFromTheTargetFramework() {
             // Arrange
             var net20 = new FrameworkName(".NETFramework", new Version("2.0"));
@@ -1209,12 +1209,12 @@ namespace NuGet.Test {
 
 
             // Assert
-            Assert.IsFalse(projectManager.LocalRepository.Exists(packageA));
-            Assert.AreEqual(1, projectSystem.Deleted.Count);
-            Assert.IsTrue(projectSystem.Deleted.Contains("foo.dll"));
+            Assert.False(projectManager.LocalRepository.Exists(packageA));
+            Assert.Equal(1, projectSystem.Deleted.Count);
+            Assert.True(projectSystem.Deleted.Contains("foo.dll"));
         }
 
-        [TestMethod]
+        [Fact]
         public void ReAddingAPackageReferenceAfterRemovingADependencyShouldReReferenceAllDependencies() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
@@ -1246,12 +1246,12 @@ namespace NuGet.Test {
             projectManager.AddPackageReference("A");
 
             // Assert            
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageA));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageB));
-            Assert.IsTrue(projectManager.LocalRepository.Exists(packageC));
+            Assert.True(projectManager.LocalRepository.Exists(packageA));
+            Assert.True(projectManager.LocalRepository.Exists(packageB));
+            Assert.True(projectManager.LocalRepository.Exists(packageC));
         }
 
-        [TestMethod]
+        [Fact]
         public void AddPackageReferenceWithAnyNonCompatibleReferenceThrowsAndPackageIsNotReferenced() {
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
@@ -1268,10 +1268,10 @@ namespace NuGet.Test {
 
             // Act & Assert            
             ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), "Could not install package 'A 1.0'. You are trying to install this package into a project that targets '.NETFramework,Version=v2.0', but the package does not contain any assembly references that are compatible with that framework. For more information, contact the package author.");
-            Assert.IsFalse(localRepository.Exists(mockPackage.Object));
+            Assert.False(localRepository.Exists(mockPackage.Object));
         }
 
-        [TestMethod]
+        [Fact]
         public void AddPackageReferenceWithAnyNonCompatibleFrameworkReferenceDoesNotThrow() {
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
@@ -1288,7 +1288,7 @@ namespace NuGet.Test {
 
             // Act & Assert            
             projectManager.AddPackageReference("A");
-            Assert.IsTrue(localRepository.Exists(mockPackage.Object));
+            Assert.True(localRepository.Exists(mockPackage.Object));
         }
 
         private ProjectManager CreateProjectManager() {

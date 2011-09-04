@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class ManifestFileTest {
-        [TestMethod]
+        [Fact]
         public void ManifestFileReturnsNoValidationResultsIfSourceAndTargetPathAreValid() {
             // Arrange
             var manifestFile = new ManifestFile { Source = @"bin\release\MyLib.dll", Target = @"lib" };
@@ -15,10 +15,10 @@ namespace NuGet.Test {
             var result = manifestFile.Validate(validationContext);
 
             // Assert
-            Assert.IsFalse(result.Any());
+            Assert.False(result.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void ManifestFileReturnsNoValidationResultIfSourceContainsWildCardCharacters() {
             // Arrange
             var manifestFile = new ManifestFile { Source = @"b?n\**\*.dll", Target = @"lib" };
@@ -28,10 +28,10 @@ namespace NuGet.Test {
             var result = manifestFile.Validate(validationContext);
 
             // Assert
-            Assert.IsFalse(result.Any());
+            Assert.False(result.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void ManifestFileReturnsValidationResultIfSourceContainsInvalidCharacters() {
             // Arrange
             var manifestFile = new ManifestFile { Source = @"bin\\|\\*.dll", Target = @"lib" };
@@ -41,11 +41,11 @@ namespace NuGet.Test {
             var result = manifestFile.Validate(validationContext).ToList();
 
             // Assert
-            Assert.AreEqual(1, result.Count);
-            Assert.AreEqual(@"Source path 'bin\\|\\*.dll' contains invalid characters.", result.Single().ErrorMessage);
+            Assert.Equal(1, result.Count);
+            Assert.Equal(@"Source path 'bin\\|\\*.dll' contains invalid characters.", result.Single().ErrorMessage);
         }
 
-        [TestMethod]
+        [Fact]
         public void ManifestFileReturnsValidationResultIfTargetContainsInvalidCharacters() {
             // Arrange
             var manifestFile = new ManifestFile { Source = @"bin\\**\\*.dll", Target = @"lib\\|\\net40" };
@@ -55,11 +55,11 @@ namespace NuGet.Test {
             var result = manifestFile.Validate(validationContext).ToList();
 
             // Assert
-            Assert.AreEqual(1, result.Count);
-            Assert.AreEqual(@"Target path 'lib\\|\\net40' contains invalid characters.", result.Single().ErrorMessage);
+            Assert.Equal(1, result.Count);
+            Assert.Equal(@"Target path 'lib\\|\\net40' contains invalid characters.", result.Single().ErrorMessage);
         }
 
-        [TestMethod]
+        [Fact]
         public void ManifestFileReturnsValidationResultsIfSourceAndTargetContainsInvalidCharacters() {
             // Arrange
             var manifestFile = new ManifestFile { Source = @"bin|\\**\\*.dll", Target = @"lib\\|\\net40" };
@@ -69,12 +69,12 @@ namespace NuGet.Test {
             var result = manifestFile.Validate(validationContext).ToList();
 
             // Assert
-            Assert.AreEqual(2, result.Count);
-            Assert.AreEqual(@"Source path 'bin|\\**\\*.dll' contains invalid characters.", result.First().ErrorMessage);
-            Assert.AreEqual(@"Target path 'lib\\|\\net40' contains invalid characters.", result.Last().ErrorMessage);
+            Assert.Equal(2, result.Count);
+            Assert.Equal(@"Source path 'bin|\\**\\*.dll' contains invalid characters.", result.First().ErrorMessage);
+            Assert.Equal(@"Target path 'lib\\|\\net40' contains invalid characters.", result.Last().ErrorMessage);
         }
 
-        [TestMethod]
+        [Fact]
         public void ManifestFileReturnsValidationResultsIfTargetPathContainsWildCardCharacters() {
             // Arrange
             var manifestFile = new ManifestFile { Source = @"bin\\**\\*.dll", Target = @"lib\\**\\net40" };
@@ -84,8 +84,8 @@ namespace NuGet.Test {
             var result = manifestFile.Validate(validationContext).ToList();
 
             // Assert
-            Assert.AreEqual(1, result.Count);
-            Assert.AreEqual(@"Target path 'lib\\**\\net40' contains invalid characters.", result.Single().ErrorMessage);
+            Assert.Equal(1, result.Count);
+            Assert.Equal(@"Target path 'lib\\**\\net40' contains invalid characters.", result.Single().ErrorMessage);
         }
     }
 }

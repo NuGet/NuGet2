@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class SharedRepositoryTest {
-        [TestMethod]
+        [Fact]
         public void RegisterRepositoryAddsRelativePathToRepositoriesConfig() {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
@@ -18,13 +18,13 @@ namespace NuGet.Test {
             repository.RegisterRepository(@"c:\foo\packages\packages.config");
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <repositories>
   <repository path=""packages\packages.config"" />
 </repositories>", fileSystem.Object.ReadAllText("repositories.config"));
         }
 
-        [TestMethod]
+        [Fact]
         public void RegisterRepositoryDoesNotAddRelativePathToRepositoriesConfigIfExists() {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
@@ -40,14 +40,14 @@ namespace NuGet.Test {
             repository.RegisterRepository(@"c:\foo\A\packages.config");
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <repositories>
   <repository path=""A\packages.config"" />
   <repository path=""B\packages.config"" />
 </repositories>", fileSystem.Object.ReadAllText("repositories.config"));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetRepositoryPathsRemovesInvalidOrNonExistantPathsAndReturnsRelativePaths() {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
@@ -70,17 +70,17 @@ namespace NuGet.Test {
             var paths = repository.GetRepositoryPaths().ToList();
 
             // Assert
-            Assert.AreEqual(2, paths.Count);
-            Assert.AreEqual(@"A\packages.config", paths[0]);
-            Assert.AreEqual(@"..\..\packages.config", paths[1]);
-            Assert.AreEqual(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            Assert.Equal(2, paths.Count);
+            Assert.Equal(@"A\packages.config", paths[0]);
+            Assert.Equal(@"..\..\packages.config", paths[1]);
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <repositories>
   <repository path=""A\packages.config"" />
   <repository path=""c:\foo\packages.config"" />
 </repositories>", fileSystem.Object.ReadAllText("repositories.config"));
         }
 
-        [TestMethod]
+        [Fact]
         public void IsReferencedReturnsTrueIfAnyOtherRepositoryReferencesAPackage() {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
@@ -106,9 +106,9 @@ namespace NuGet.Test {
 
 
             // Act && Assert
-            Assert.IsTrue(repository.Object.IsReferenced("A", new Version("1.0")));
-            Assert.IsTrue(repository.Object.IsReferenced("B", new Version("1.0")));
-            Assert.IsFalse(repository.Object.IsReferenced("C", new Version("1.0")));
+            Assert.True(repository.Object.IsReferenced("A", new Version("1.0")));
+            Assert.True(repository.Object.IsReferenced("B", new Version("1.0")));
+            Assert.False(repository.Object.IsReferenced("C", new Version("1.0")));
         }
 
         public class MockSharedRepository : SharedPackageRepository {

@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class PathResolverTest {
-        [TestMethod]
+        [Fact]
         public void GetPathToEnumerateReturnsSearchPathIfSearchPathIsNotUnderBasePath() {
             // Arrange
             var basePath = @"c:\packages\bin";
@@ -15,10 +15,10 @@ namespace NuGet.Test {
             var result = PathResolver.GetPathToEnumerateFrom(basePath, searchPath);
 
             // Assert
-            Assert.AreEqual(@"d:\work\projects\project1\bin", result);
+            Assert.Equal(@"d:\work\projects\project1\bin", result);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPathToEnumerateReturnsSearchPathIfSearchPathIsUnderBasePath() {
             // Arrange
             var basePath = @"d:\work";
@@ -28,10 +28,10 @@ namespace NuGet.Test {
             var result = PathResolver.GetPathToEnumerateFrom(basePath, searchPath);
 
             // Assert
-            Assert.AreEqual(@"d:\work\projects\project1\bin", result);
+            Assert.Equal(@"d:\work\projects\project1\bin", result);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPathToEnumerateReturnsSearchPathIfItIsANetworkPath() {
             // Arrange
             var basePath = @"c:\work";
@@ -41,10 +41,10 @@ namespace NuGet.Test {
             var result = PathResolver.GetPathToEnumerateFrom(basePath, searchPath);
 
             // Assert
-            Assert.AreEqual(@"\\build-vm\shared\drops", result);
+            Assert.Equal(@"\\build-vm\shared\drops", result);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPathToEnumerateReturnsCombinedPathFromBaseForSearchWithWildcardFileName() {
             // Arrange
             var basePath = @"c:\work\projects\my-project";
@@ -54,10 +54,10 @@ namespace NuGet.Test {
             var result = PathResolver.GetPathToEnumerateFrom(basePath, searchPath);
 
             // Assert
-            Assert.AreEqual(@"c:\work\projects\my-project\bin\debug", result);
+            Assert.Equal(@"c:\work\projects\my-project\bin\debug", result);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPathToEnumerateReturnsCombinedPathFromBaseForSearchWithWildcardInPath() {
             // Arrange
             var basePath = @"c:\work\projects\my-project";
@@ -67,10 +67,10 @@ namespace NuGet.Test {
             var result = PathResolver.GetPathToEnumerateFrom(basePath, searchPath);
 
             // Assert
-            Assert.AreEqual(@"c:\work\projects\my-project\output", result);
+            Assert.Equal(@"c:\work\projects\my-project\output", result);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPathToEnumerateReturnsBasePathIfSearchPathStartsWithRecursiveWildcard() {
             // Arrange
             var basePath = @"c:\work\projects\my-project";
@@ -80,10 +80,10 @@ namespace NuGet.Test {
             var result = PathResolver.GetPathToEnumerateFrom(basePath, searchPath);
 
             // Assert
-            Assert.AreEqual(@"c:\work\projects\my-project", result);
+            Assert.Equal(@"c:\work\projects\my-project", result);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPathToEnumerateReturnsBasePathIfSearchPathStartsWithWildcard() {
             // Arrange
             var basePath = @"c:\work\projects\my-project\bin";
@@ -93,10 +93,10 @@ namespace NuGet.Test {
             var result = PathResolver.GetPathToEnumerateFrom(basePath, searchPath);
 
             // Assert
-            Assert.AreEqual(@"c:\work\projects\my-project\bin", result);
+            Assert.Equal(@"c:\work\projects\my-project\bin", result);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPathToEnumerateReturnsFullPathIfSearchPathDoesNotContainWildCards() {
             // Arrange
             var basePath = @"c:\work\projects\my-project\";
@@ -106,10 +106,10 @@ namespace NuGet.Test {
             var result = PathResolver.GetPathToEnumerateFrom(basePath, searchPath);
 
             // Assert
-            Assert.AreEqual(@"c:\work\projects\my-project\bin\release", result);
+            Assert.Equal(@"c:\work\projects\my-project\bin\release", result);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolvePackagePathPreservesPortionOfWildCardInPackagePath() {
             // Arrange
             var basePath = @"c:\work\projects\my-project\";
@@ -122,10 +122,10 @@ namespace NuGet.Test {
             var result = PathResolver.ResolvePackagePath(basePathToEnumerate, searchPattern, fullPath, targetPath);
 
             // Assert
-            Assert.AreEqual(@"lib\net40\foo.dll", result);
+            Assert.Equal(@"lib\net40\foo.dll", result);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolvePackagePathAppendsFullTargetPathToPortionOfWildCardInPackagePath() {
             // Arrange
             var basePath = @"c:\work\projects\my-project\";
@@ -138,10 +138,10 @@ namespace NuGet.Test {
             var result = PathResolver.ResolvePackagePath(basePathToEnumerate, searchPattern, fullPath, targetPath);
 
             // Assert
-            Assert.AreEqual(@"lib\assemblies\net40\foo.dll", result);
+            Assert.Equal(@"lib\assemblies\net40\foo.dll", result);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolvePackagePathAppendsFileNameToTargetForWildCardInExtension() {
             // Arrange
             var basePath = @"c:\work\projects\my-project\";
@@ -154,10 +154,10 @@ namespace NuGet.Test {
             var result = PathResolver.ResolvePackagePath(basePathToEnumerate, searchPattern, fullPath, targetPath);
 
             // Assert
-            Assert.AreEqual(@"lib\NuGet.pdb", result);
+            Assert.Equal(@"lib\NuGet.pdb", result);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolvePackagePathAppendsFileNameToTargetForWildCardInFileName() {
             // Arrange
             var basePath = @"c:\work\projects\my-project\";
@@ -170,10 +170,10 @@ namespace NuGet.Test {
             var result = PathResolver.ResolvePackagePath(basePathToEnumerate, searchPattern, fullPath, targetPath);
 
             // Assert
-            Assert.AreEqual(@"lib\net40\NuGet.dll", result);
+            Assert.Equal(@"lib\net40\NuGet.dll", result);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolvePackagePathAppendsFileNameToTargetForWildCardInPath() {
             // Arrange
             var basePath = @"c:\work\projects\my-project\";
@@ -186,10 +186,10 @@ namespace NuGet.Test {
             var result = PathResolver.ResolvePackagePath(basePathToEnumerate, searchPattern, fullPath, targetPath);
 
             // Assert
-            Assert.AreEqual(@"lib\net35\NuGet.dll", result);
+            Assert.Equal(@"lib\net35\NuGet.dll", result);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolvePackagePathAppendsFileNameToTargetForMultipleWildCardInPath() {
             // Arrange
             var basePath = @"c:\work\";
@@ -202,11 +202,11 @@ namespace NuGet.Test {
             var result = PathResolver.ResolvePackagePath(basePathToEnumerate, searchPattern, fullPath, targetPath);
 
             // Assert
-            Assert.AreEqual(@"lib\NuGet.dll", result);
+            Assert.Equal(@"lib\NuGet.dll", result);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void ResolvePackagePathReturnsTargetPathIfNoWildCardIsPresentInSearchPatternAndTargetPathHasSameExtension() {
             // Arrange
             var basePath = @"c:\work\";
@@ -219,11 +219,11 @@ namespace NuGet.Test {
             var result = PathResolver.ResolvePackagePath(basePathToEnumerate, searchPattern, fullPath, targetPath);
 
             // Assert
-            Assert.AreEqual(@"content\css\site.css", result);
+            Assert.Equal(@"content\css\site.css", result);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void GetMatchesFiltersByWildCards() {
             // Arrange
             var files = new[] { 
@@ -236,12 +236,12 @@ namespace NuGet.Test {
             var matches = PathResolver.GetMatches(files, f => f.SourcePath, new[] { @"content\*.txt", "*.pdb" });
 
             // Assert
-            Assert.AreEqual(2, matches.Count());
-            Assert.AreEqual(@"content\1.txt", matches.ElementAt(0).SourcePath);
-            Assert.AreEqual(@"baz.pdb", matches.ElementAt(1).SourcePath);
+            Assert.Equal(2, matches.Count());
+            Assert.Equal(@"content\1.txt", matches.ElementAt(0).SourcePath);
+            Assert.Equal(@"baz.pdb", matches.ElementAt(1).SourcePath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetMatchesAllowsRecursiveWildcardMatches() {
             // Arrange
             var files = new[] { 
@@ -255,13 +255,13 @@ namespace NuGet.Test {
             var matches = PathResolver.GetMatches(files, f => f.SourcePath, new[] { @"content\**\.txt", "**.pdb" });
 
             // Assert
-            Assert.AreEqual(3, matches.Count());
-            Assert.AreEqual(@"content\1.txt", matches.ElementAt(0).SourcePath);
-            Assert.AreEqual(@"content\foo\bar.txt", matches.ElementAt(1).SourcePath);
-            Assert.AreEqual(@"lib\baz.pdb", matches.ElementAt(2).SourcePath);
+            Assert.Equal(3, matches.Count());
+            Assert.Equal(@"content\1.txt", matches.ElementAt(0).SourcePath);
+            Assert.Equal(@"content\foo\bar.txt", matches.ElementAt(1).SourcePath);
+            Assert.Equal(@"lib\baz.pdb", matches.ElementAt(2).SourcePath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetMatchesPerformsRecursiveWildcardSearch() {
             // Arrange
             var files = new[] { 
@@ -275,13 +275,13 @@ namespace NuGet.Test {
             var matches = PathResolver.GetMatches(files, f => f.SourcePath, new[] { @"content\**\.txt", "**.pdb" });
 
             // Assert
-            Assert.AreEqual(3, matches.Count());
-            Assert.AreEqual(@"content\1.txt", matches.ElementAt(0).SourcePath);
-            Assert.AreEqual(@"content\foo\bar.txt", matches.ElementAt(1).SourcePath);
-            Assert.AreEqual(@"lib\baz.pdb", matches.ElementAt(2).SourcePath);
+            Assert.Equal(3, matches.Count());
+            Assert.Equal(@"content\1.txt", matches.ElementAt(0).SourcePath);
+            Assert.Equal(@"content\foo\bar.txt", matches.ElementAt(1).SourcePath);
+            Assert.Equal(@"lib\baz.pdb", matches.ElementAt(2).SourcePath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetMatchesPerformsExactMatches() {
             // Arrange
             var files = new[] { 
@@ -295,12 +295,12 @@ namespace NuGet.Test {
             var matches = PathResolver.GetMatches(files, f => f.SourcePath, new[] { @"foo.dll", @"bin\*\b*.dll" });
 
             // Assert
-            Assert.AreEqual(2, matches.Count());
-            Assert.AreEqual(@"foo.dll", matches.ElementAt(0).SourcePath);
-            Assert.AreEqual(@"bin\debug\baz.dll", matches.ElementAt(1).SourcePath);
+            Assert.Equal(2, matches.Count());
+            Assert.Equal(@"foo.dll", matches.ElementAt(0).SourcePath);
+            Assert.Equal(@"bin\debug\baz.dll", matches.ElementAt(1).SourcePath);
         }
 
-        [TestMethod]
+        [Fact]
         public void FilterPathRemovesItemsThatMatchWildcard() {
             // Arrange
             var files = new List<IPackageFile>(new[] { 
@@ -316,9 +316,9 @@ namespace NuGet.Test {
             PathResolver.FilterPackageFiles(files, f => f.Path, new[] { @"**\f*.dll", @"**\*.pdb" });
 
             // Assert
-            Assert.AreEqual(2, files.Count());
-            Assert.AreEqual(@"bin\debug\baz.dll", files[0].Path);
-            Assert.AreEqual(@"bin\debug\notbaz.dll", files[1].Path);
+            Assert.Equal(2, files.Count());
+            Assert.Equal(@"bin\debug\baz.dll", files[0].Path);
+            Assert.Equal(@"bin\debug\notbaz.dll", files[1].Path);
         }
     }
 }

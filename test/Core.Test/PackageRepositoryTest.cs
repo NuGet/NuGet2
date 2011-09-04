@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class PackageRepositoryTest {
-        [TestMethod]
+        [Fact]
         public void FindByIdReturnsPackage() {
             // Arrange
             var repo = GetLocalRepository();
@@ -17,11 +17,11 @@ namespace NuGet.Test {
             var package = repo.FindPackage(packageId: "A");
 
             // Assert
-            Assert.IsNotNull(package);
-            Assert.AreEqual("A", package.Id);
+            Assert.NotNull(package);
+            Assert.Equal("A", package.Id);
         }
 
-        [TestMethod]
+        [Fact]
         public void FindByIdReturnsNullWhenPackageNotFound() {
             // Arrange
             var repo = GetLocalRepository();
@@ -30,10 +30,10 @@ namespace NuGet.Test {
             var package = repo.FindPackage(packageId: "X");
 
             // Assert
-            Assert.IsNull(package);
+            Assert.Null(package);
         }
 
-        [TestMethod]
+        [Fact]
         public void FindByIdAndVersionReturnsPackage() {
             // Arrange
             var repo = GetRemoteRepository();
@@ -42,12 +42,12 @@ namespace NuGet.Test {
             var package = repo.FindPackage(packageId: "A", version: Version.Parse("1.0"));
 
             // Assert
-            Assert.IsNotNull(package);
-            Assert.AreEqual("A", package.Id);
-            Assert.AreEqual(Version.Parse("1.0"), package.Version);
+            Assert.NotNull(package);
+            Assert.Equal("A", package.Id);
+            Assert.Equal(Version.Parse("1.0"), package.Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void FindByIdAndVersionReturnsNullWhenPackageNotFound() {
             // Arrange
             var repo = GetLocalRepository();
@@ -57,10 +57,10 @@ namespace NuGet.Test {
             var package2 = repo.FindPackage(packageId: "A", version: Version.Parse("1.1"));
 
             // Assert
-            Assert.IsNull(package1 ?? package2);
+            Assert.Null(package1 ?? package2);
         }
 
-        [TestMethod]
+        [Fact]
         public void FindByIdAndVersionRangeReturnsPackage() {
             // Arrange
             var repo = GetRemoteRepository();
@@ -69,12 +69,12 @@ namespace NuGet.Test {
             var package = repo.FindPackage("A", "[0.9, 1.1]");
 
             // Assert
-            Assert.IsNotNull(package);
-            Assert.AreEqual("A", package.Id);
-            Assert.AreEqual(Version.Parse("1.0"), package.Version);
+            Assert.NotNull(package);
+            Assert.Equal("A", package.Id);
+            Assert.Equal(Version.Parse("1.0"), package.Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void FindByIdAndVersionRangeReturnsNullWhenPackageNotFound() {
             // Arrange
             var repo = GetLocalRepository();
@@ -84,10 +84,10 @@ namespace NuGet.Test {
             var package2 = repo.FindPackage("A", "[1.4, 1.5]");
 
             // Assert
-            Assert.IsNull(package1 ?? package2);
+            Assert.Null(package1 ?? package2);
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackageByIdVersionAndVersionRangesUsesRangeIfExactVersionIsNull() {
             // Arrange
             var repo = GetRemoteRepository();
@@ -96,12 +96,12 @@ namespace NuGet.Test {
             var package = repo.FindPackage("A", "[0.6, 1.1.5]");
 
             // Assert
-            Assert.IsNotNull(package);
-            Assert.AreEqual("A", package.Id);
-            Assert.AreEqual(Version.Parse("1.0"), package.Version);
+            Assert.NotNull(package);
+            Assert.Equal("A", package.Id);
+            Assert.Equal(Version.Parse("1.0"), package.Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackagesReturnsPackagesWithTermInPackageTagOrDescriptionOrId() {
             // Arrange
             var term = "TAG";
@@ -116,13 +116,13 @@ namespace NuGet.Test {
             var packages = repo.GetPackages().Find(term).ToList();
 
             // Assert
-            Assert.AreEqual(3, packages.Count);
-            Assert.AreEqual("A", packages[0].Id);
-            Assert.AreEqual("C", packages[1].Id);
-            Assert.AreEqual("TagCloud", packages[2].Id);
+            Assert.Equal(3, packages.Count);
+            Assert.Equal("A", packages[0].Id);
+            Assert.Equal("C", packages[1].Id);
+            Assert.Equal("TagCloud", packages[2].Id);
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackagesReturnsPackagesWithTerm() {
             // Arrange
             var term = "B xaml";
@@ -132,13 +132,13 @@ namespace NuGet.Test {
             var packages = repo.GetPackages().Find(term);
 
             // Assert
-            Assert.AreEqual(packages.Count(), 2);
+            Assert.Equal(packages.Count(), 2);
             packages = packages.OrderBy(p => p.Id);
-            Assert.AreEqual(packages.ElementAt(0).Id, "B");
-            Assert.AreEqual(packages.ElementAt(1).Id, "C");
+            Assert.Equal(packages.ElementAt(0).Id, "B");
+            Assert.Equal(packages.ElementAt(1).Id, "C");
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackagesReturnsEmptyCollectionWhenNoPackageContainsTerm() {
             // Arrange
             var term = "does-not-exist";
@@ -148,10 +148,10 @@ namespace NuGet.Test {
             var packages = repo.GetPackages().Find(term);
 
             // Assert
-            Assert.IsFalse(packages.Any());
+            Assert.False(packages.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackagesReturnsAllPackagesWhenSearchTermIsNullOrEmpty() {
             // Arrange
             var repo = GetLocalRepository();
@@ -162,11 +162,11 @@ namespace NuGet.Test {
             var packages3 = repo.GetPackages();
 
             // Assert
-            CollectionAssert.AreEqual(packages1.ToList(), packages2.ToList());
-            CollectionAssert.AreEqual(packages2.ToList(), packages3.ToList());
+            Assert.Equal(packages1.ToList(), packages2.ToList());
+            Assert.Equal(packages2.ToList(), packages3.ToList());
         }
 
-        [TestMethod]
+        [Fact]
         public void SearchUsesInterfaceIfImplementedByRepository() {
             // Arrange
             var repo = new Mock<MockPackageRepository>(MockBehavior.Strict);
@@ -178,11 +178,11 @@ namespace NuGet.Test {
             var packages = repo.Object.Search("Hello", new[] { ".NETFramework" }).ToList();
 
             // Assert
-            Assert.AreEqual(1, packages.Count);
-            Assert.AreEqual("A", packages[0].Id);
+            Assert.Equal(1, packages.Count);
+            Assert.Equal("A", packages[0].Id);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetUpdatesReturnsPackagesWithUpdates() {
             // Arrange 
             var localRepo = GetLocalRepository();
@@ -192,12 +192,12 @@ namespace NuGet.Test {
             var packages = remoteRepo.GetUpdates(localRepo.GetPackages());
 
             // Assert
-            Assert.IsTrue(packages.Any());
-            Assert.AreEqual(packages.First().Id, "A");
-            Assert.AreEqual(packages.First().Version, Version.Parse("1.2"));
+            Assert.True(packages.Any());
+            Assert.Equal(packages.First().Id, "A");
+            Assert.Equal(packages.First().Version, Version.Parse("1.2"));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetUpdatesReturnsEmptyCollectionWhenSourceRepositoryIsEmpty() {
             // Arrange 
             var localRepo = GetLocalRepository();
@@ -207,10 +207,10 @@ namespace NuGet.Test {
             var packages = remoteRepo.GetUpdates(localRepo.GetPackages());
 
             // Assert
-            Assert.IsFalse(packages.Any());
+            Assert.False(packages.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void FindDependencyPicksHighestVersionIfNotSpecified() {
             // Arrange
             var repository = new MockPackageRepository() {
@@ -227,11 +227,11 @@ namespace NuGet.Test {
             IPackage package = repository.ResolveDependency(dependency);
 
             // Assert
-            Assert.AreEqual("B", package.Id);
-            Assert.AreEqual(new Version("2.0"), package.Version);
+            Assert.Equal("B", package.Id);
+            Assert.Equal(new Version("2.0"), package.Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackageNormalizesVersionBeforeComparing() {
             // Arrange
             var repository = new MockPackageRepository() {
@@ -243,11 +243,11 @@ namespace NuGet.Test {
             IPackage package = repository.FindPackage("B", new Version("1.0"));
 
             // Assert
-            Assert.AreEqual("B", package.Id);
-            Assert.AreEqual(new Version("1.0.0"), package.Version);
+            Assert.Equal("B", package.Id);
+            Assert.Equal(new Version("1.0.0"), package.Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void FindDependencyPicksLowestMajorAndMinorVersionButHighestBuildAndRevision() {
             // Arrange
             var repository = new MockPackageRepository() {
@@ -281,37 +281,37 @@ namespace NuGet.Test {
             IPackage package5 = repository.ResolveDependency(dependency5);
 
             // Assert
-            Assert.AreEqual("B", package1.Id);
-            Assert.AreEqual(new Version("1.0.9"), package1.Version);
-            Assert.AreEqual("B", package2.Id);
-            Assert.AreEqual(new Version("1.0.9"), package2.Version);
-            Assert.AreEqual("B", package3.Id);
-            Assert.AreEqual(new Version("1.0.9"), package3.Version);
-            Assert.AreEqual("B", package4.Id);
-            Assert.AreEqual(new Version("1.0"), package4.Version);
-            Assert.AreEqual("B", package5.Id);
-            Assert.AreEqual(new Version("1.0.1"), package5.Version);
+            Assert.Equal("B", package1.Id);
+            Assert.Equal(new Version("1.0.9"), package1.Version);
+            Assert.Equal("B", package2.Id);
+            Assert.Equal(new Version("1.0.9"), package2.Version);
+            Assert.Equal("B", package3.Id);
+            Assert.Equal(new Version("1.0.9"), package3.Version);
+            Assert.Equal("B", package4.Id);
+            Assert.Equal(new Version("1.0"), package4.Version);
+            Assert.Equal("B", package5.Id);
+            Assert.Equal(new Version("1.0.1"), package5.Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveSafeVersionReturnsNullIfPackagesNull() {
             // Act
             var package = PackageRepositoryExtensions.ResolveSafeVersion(null);
 
             // Assert
-            Assert.IsNull(package);
+            Assert.Null(package);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveSafeVersionReturnsNullIfEmptyPackages() {
             // Act
             var package = PackageRepositoryExtensions.ResolveSafeVersion(Enumerable.Empty<IPackage>());
 
             // Assert
-            Assert.IsNull(package);
+            Assert.Null(package);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveSafeVersionReturnsHighestBuildAndRevisionWithLowestMajorAndMinor() {
             var packages = new[] { 
                 PackageUtility.CreatePackage("A", "0.9"),
@@ -326,9 +326,9 @@ namespace NuGet.Test {
             var package = PackageRepositoryExtensions.ResolveSafeVersion(packages);
 
             // Assert
-            Assert.IsNotNull(package);
-            Assert.AreEqual("A", package.Id);
-            Assert.AreEqual(new Version("0.9.3"), package.Version);
+            Assert.NotNull(package);
+            Assert.Equal("A", package.Id);
+            Assert.Equal(new Version("0.9.3"), package.Version);
         }
 
         private static IPackageRepository GetEmptyRepository() {

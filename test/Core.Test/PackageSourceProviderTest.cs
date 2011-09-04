@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class PackageSourceProviderTest {
-        [TestMethod]
+        [Fact]
         public void TestNoPackageSourcesAreReturnedIfUserSettingsIsEmpty() {
             // Arrange
             var provider = CreatePackageSourceProvider();
@@ -16,10 +16,10 @@ namespace NuGet.Test {
             var values = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.AreEqual(0, values.Count);
+            Assert.Equal(0, values.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void LoadPackageSourcesReturnsEmptySequenceIfDefaultPackageSourceIsNull() {
             // Arrange
             var settings = new MockUserSettingsManager();
@@ -29,10 +29,10 @@ namespace NuGet.Test {
             var values = provider.LoadPackageSources();
 
             // Assert
-            Assert.IsFalse(values.Any());
+            Assert.False(values.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void LoadPackageSourcesReturnsEmptySequenceIfDefaultPackageSourceIsEmpty() {
             // Arrange
             var settings = new MockUserSettingsManager();
@@ -42,10 +42,10 @@ namespace NuGet.Test {
             var values = provider.LoadPackageSources();
 
             // Assert
-            Assert.IsFalse(values.Any());
+            Assert.False(values.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void LoadPackageSourcesReturnsDefaultSourcesIfSpecified() {
             // Arrange
             var settings = new MockUserSettingsManager();
@@ -55,12 +55,12 @@ namespace NuGet.Test {
             var values = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.AreEqual(2, values.Count);
-            Assert.AreEqual("A", values.First().Source);
-            Assert.AreEqual("B", values.Last().Source);
+            Assert.Equal(2, values.Count);
+            Assert.Equal("A", values.First().Source);
+            Assert.Equal("B", values.Last().Source);
         }
 
-        [TestMethod]
+        [Fact]
         public void CallSaveMethodAndLoadMethodShouldReturnTheSamePackageSet() {
             // Arrange
             var provider = CreatePackageSourceProvider();
@@ -72,13 +72,13 @@ namespace NuGet.Test {
             var values = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.AreEqual(sources.Length, values.Count);
+            Assert.Equal(sources.Length, values.Count);
             for (int i = 0; i < sources.Length; i++) {
                 AssertPackageSource(values[i], sources[i].Name, sources[i].Source);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void LoadPackageSourcesReturnCorrectDataFromSettings() {
             // Arrange
             var settings = new MockUserSettingsManager();
@@ -95,13 +95,13 @@ namespace NuGet.Test {
             var values = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.AreEqual(3, values.Count);
+            Assert.Equal(3, values.Count);
             AssertPackageSource(values[0], "one", "onesource");
             AssertPackageSource(values[1], "two", "twosource");
             AssertPackageSource(values[2], "three", "threesource");
         }
 
-        [TestMethod]
+        [Fact]
         public void SavePackageSourcesSaveCorrectDataToSettings() {
             // Arrange
             var settings = new MockUserSettingsManager();
@@ -114,13 +114,13 @@ namespace NuGet.Test {
 
             // Assert
             var values = settings.GetValues(PackageSourceProvider.FileSettingsSectionName);
-            Assert.AreEqual(3, values.Count);
-            Assert.AreEqual("one", values[0].Key);
-            Assert.AreEqual("two", values[1].Key);
-            Assert.AreEqual("three", values[2].Key);
+            Assert.Equal(3, values.Count);
+            Assert.Equal("one", values[0].Key);
+            Assert.Equal("two", values[1].Key);
+            Assert.Equal("three", values[2].Key);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetAggregateReturnsAggregateRepositoryForAllSources() {
             // Arrange
             var repositoryA = new Mock<IPackageRepository>();
@@ -135,12 +135,12 @@ namespace NuGet.Test {
             var repo = (AggregateRepository)sources.Object.GetAggregate(factory.Object);
 
             // Assert
-            Assert.AreEqual(2, repo.Repositories.Count());
-            Assert.AreEqual(repositoryA.Object, repo.Repositories.First());
-            Assert.AreEqual(repositoryB.Object, repo.Repositories.Last());
+            Assert.Equal(2, repo.Repositories.Count());
+            Assert.Equal(repositoryA.Object, repo.Repositories.First());
+            Assert.Equal(repositoryB.Object, repo.Repositories.Last());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetAggregateSkipsInvalidSources() {
             // Arrange
             var repositoryA = new Mock<IPackageRepository>();
@@ -157,12 +157,12 @@ namespace NuGet.Test {
             var repo = (AggregateRepository)sources.Object.GetAggregate(factory.Object, ignoreFailingRepositories: true);
 
             // Assert
-            Assert.AreEqual(2, repo.Repositories.Count());
-            Assert.AreEqual(repositoryA.Object, repo.Repositories.First());
-            Assert.AreEqual(repositoryC.Object, repo.Repositories.Last());
+            Assert.Equal(2, repo.Repositories.Count());
+            Assert.Equal(repositoryA.Object, repo.Repositories.First());
+            Assert.Equal(repositoryC.Object, repo.Repositories.Last());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetAggregateHandlesInvalidUriSources() {
             // Arrange
             var factory = PackageRepositoryFactory.Default;
@@ -177,10 +177,10 @@ namespace NuGet.Test {
             var repo = (AggregateRepository)sources.Object.GetAggregate(factory, ignoreFailingRepositories: true);
 
             // Assert
-            Assert.IsFalse(repo.Repositories.Any());
+            Assert.False(repo.Repositories.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetAggregateSetsIgnoreInvalidRepositoryProperty() {
             // Arrange
             var repositoryA = new Mock<IPackageRepository>();
@@ -195,10 +195,10 @@ namespace NuGet.Test {
             var repo = (AggregateRepository)sources.Object.GetAggregate(factory.Object, ignoreFailingRepositories: ignoreRepository);
 
             // Assert
-            Assert.IsTrue(repo.IgnoreFailingRepositories);
+            Assert.True(repo.IgnoreFailingRepositories);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetAggregateWithInvalidSourcesThrows() {
             // Arrange
             var repositoryA = new Mock<IPackageRepository>();
@@ -215,7 +215,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => sources.Object.GetAggregate(factory.Object, ignoreFailingRepositories: false));
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveSourceLooksUpNameAndSource() {
             // Arrange
             var sources = new Mock<IPackageSourceProvider>();
@@ -228,12 +228,12 @@ namespace NuGet.Test {
             var result3 = sources.Object.ResolveSource("SourceName");
 
             // Assert
-            Assert.AreEqual(source2.Source, result1);
-            Assert.AreEqual(source2.Source, result2);
-            Assert.AreEqual(source1.Source, result3);
+            Assert.Equal(source2.Source, result1);
+            Assert.Equal(source2.Source, result2);
+            Assert.Equal(source1.Source, result3);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveSourceReturnsOriginalValueIfNotFoundInSources() {
             // Arrange
             var sources = new Mock<IPackageSourceProvider>();
@@ -245,12 +245,12 @@ namespace NuGet.Test {
             var result = sources.Object.ResolveSource(source);
 
             // Assert
-            Assert.AreEqual(source, result);
+            Assert.Equal(source, result);
         }
 
         private void AssertPackageSource(PackageSource ps, string name, string source) {
-            Assert.AreEqual(name, ps.Name);
-            Assert.AreEqual(source, ps.Source);
+            Assert.Equal(name, ps.Name);
+            Assert.Equal(source, ps.Source);
         }
 
         private IPackageSourceProvider CreatePackageSourceProvider(ISettings settings = null) {

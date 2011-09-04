@@ -2,33 +2,33 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Commands;
 
 namespace NuGet.Test.NuGetCommandLine {
-    [TestClass]
+    
     public class CommandLinePaserTests {
 
-        [TestMethod]
+        [Fact]
         public void GetNextCommandLineItem_ReturnsNullWithNullInput() {
             // Act
             string actualItem = CommandLineParser.GetNextCommandLineItem(null);
             // Assert
-            Assert.IsNull(actualItem);
+            Assert.Null(actualItem);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetNextCommandLineItem_ReturnsNullWithEmptyInput() {
             // Arrange
             var argsEnumerator = new List<string>().GetEnumerator();
             // Act
             string actualItem = CommandLineParser.GetNextCommandLineItem(argsEnumerator);
             // Assert
-            Assert.IsNull(actualItem);
+            Assert.Null(actualItem);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseCommandLine_ThrowsCommandLineExpectionWhenUnknownCommand() {
             // Arrange 
             var cmdMgr = new Mock<ICommandManager>();
@@ -40,7 +40,7 @@ namespace NuGet.Test.NuGetCommandLine {
             ExceptionAssert.Throws<CommandLineException>(() => parser.ParseCommandLine(input), expectedExceptionMessage);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractOptions_ReturnsEmptyCommandWhenCommandLineIsEmpty() {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
@@ -55,11 +55,11 @@ namespace NuGet.Test.NuGetCommandLine {
             // Act
             ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
             // Assert
-            Assert.AreEqual(0, actualCommand.Arguments.Count);
-            Assert.IsNull(((MockCommand)actualCommand).Message);
+            Assert.Equal(0, actualCommand.Arguments.Count);
+            Assert.Null(((MockCommand)actualCommand).Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractOptions_AddsArgumentsWhenItemsDoNotStartWithSlashOrDash() {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
@@ -74,13 +74,13 @@ namespace NuGet.Test.NuGetCommandLine {
             // Act
             ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
             // Assert
-            Assert.AreEqual(2, actualCommand.Arguments.Count);
-            Assert.AreEqual("optionOne", actualCommand.Arguments[0]);
-            Assert.AreEqual("optionTwo", actualCommand.Arguments[1]);
-            Assert.IsNull(((MockCommand)actualCommand).Message);
+            Assert.Equal(2, actualCommand.Arguments.Count);
+            Assert.Equal("optionOne", actualCommand.Arguments[0]);
+            Assert.Equal("optionTwo", actualCommand.Arguments[1]);
+            Assert.Null(((MockCommand)actualCommand).Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractOptions_ThrowsCommandLineExpectionWhenOptionUnknow() {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
@@ -97,7 +97,7 @@ namespace NuGet.Test.NuGetCommandLine {
             ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractOptions_ParsesOptionsThatStartWithSlash() {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
@@ -112,10 +112,10 @@ namespace NuGet.Test.NuGetCommandLine {
             // Act
             ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
             // Assert
-            Assert.AreEqual("foo bar", ((MockCommand)actualCommand).Message);
+            Assert.Equal("foo bar", ((MockCommand)actualCommand).Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractOptions_UsesShortenedForm() {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
@@ -130,10 +130,10 @@ namespace NuGet.Test.NuGetCommandLine {
             // Act
             ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
             // Assert
-            Assert.AreEqual("foo bar", ((MockCommand)actualCommand).Message);
+            Assert.Equal("foo bar", ((MockCommand)actualCommand).Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractOptions_ParsesOptionsThatStartWithDash() {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
@@ -148,10 +148,10 @@ namespace NuGet.Test.NuGetCommandLine {
             // Act
             ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
             // Assert
-            Assert.AreEqual("foo bar", ((MockCommand)actualCommand).Message);
+            Assert.Equal("foo bar", ((MockCommand)actualCommand).Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractOptions_ThrowsWhenOptionHasNoValue() {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
@@ -169,7 +169,7 @@ namespace NuGet.Test.NuGetCommandLine {
             ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractOptions_ParsesBoolOptionsAsTrueIfPresent() {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
@@ -184,10 +184,10 @@ namespace NuGet.Test.NuGetCommandLine {
             // Act
             ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
             // Assert
-            Assert.IsTrue(((MockCommand)actualCommand).IsWorking);
+            Assert.True(((MockCommand)actualCommand).IsWorking);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractOptions_ParsesBoolOptionsAsFalseIfFollowedByDash() {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
@@ -202,10 +202,10 @@ namespace NuGet.Test.NuGetCommandLine {
             // Act
             ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
             // Assert
-            Assert.IsFalse(((MockCommand)actualCommand).IsWorking);
+            Assert.False(((MockCommand)actualCommand).IsWorking);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractOptions_ThrowsIfUnableToConvertType() {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
@@ -224,7 +224,7 @@ namespace NuGet.Test.NuGetCommandLine {
             ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractOptions_ThrowsIfCommandHasNoProperties() {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
@@ -240,7 +240,7 @@ namespace NuGet.Test.NuGetCommandLine {
             ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractOptions_ThrowsIfCommandOptionIsAmbigious() {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
@@ -264,7 +264,7 @@ namespace NuGet.Test.NuGetCommandLine {
             ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractOptions_ThrowsIfCommandOptionDoesNotExist() {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
@@ -288,7 +288,7 @@ namespace NuGet.Test.NuGetCommandLine {
             ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractOptionAddsValuesToListCommand() {
             // Arrange
             var cmdMgr = new CommandManager();
@@ -300,14 +300,14 @@ namespace NuGet.Test.NuGetCommandLine {
             parser.ExtractOptions(command, arguments.Split().AsEnumerable().GetEnumerator());
 
             // Assert
-            Assert.AreEqual(command.RegularProp, "RegularPropValue");
-            Assert.AreEqual(command.ListProperty.Count, 3);
-            Assert.AreEqual(command.ListProperty[0], "Val1");
-            Assert.AreEqual(command.ListProperty[1], "Val2");
-            Assert.AreEqual(command.ListProperty[2], "Val3");
+            Assert.Equal(command.RegularProp, "RegularPropValue");
+            Assert.Equal(command.ListProperty.Count, 3);
+            Assert.Equal(command.ListProperty[0], "Val1");
+            Assert.Equal(command.ListProperty[1], "Val2");
+            Assert.Equal(command.ListProperty[2], "Val3");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractOptionsSplitsValueBySemiColorForCollectionOption() {
             // Arrange
             var cmdMgr = new CommandManager();
@@ -319,13 +319,13 @@ namespace NuGet.Test.NuGetCommandLine {
             parser.ExtractOptions(command, arguments.Split().AsEnumerable().GetEnumerator());
 
             // Assert
-            Assert.AreEqual(command.RegularProp, "RegularPropValue");
-            Assert.AreEqual(command.ListProperty.Count, 5);
-            Assert.AreEqual(command.ListProperty[0], "Val1");
-            Assert.AreEqual(command.ListProperty[1], "Val2");
-            Assert.AreEqual(command.ListProperty[2], "Val3");
-            Assert.AreEqual(command.ListProperty[3], "Val4");
-            Assert.AreEqual(command.ListProperty[4], "Val5");
+            Assert.Equal(command.RegularProp, "RegularPropValue");
+            Assert.Equal(command.ListProperty.Count, 5);
+            Assert.Equal(command.ListProperty[0], "Val1");
+            Assert.Equal(command.ListProperty[1], "Val2");
+            Assert.Equal(command.ListProperty[2], "Val3");
+            Assert.Equal(command.ListProperty[3], "Val4");
+            Assert.Equal(command.ListProperty[4], "Val5");
         }
 
 

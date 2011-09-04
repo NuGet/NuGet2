@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class PackageWalkerTest {
-        [TestMethod]
+        [Fact]
         public void ReverseDependencyWalkerUsersVersionAndIdToDetermineVisited() {
             // Arrange
             // A 1.0 -> B 1.0
@@ -37,13 +37,13 @@ namespace NuGet.Test {
             IDependentsResolver lookup = new DependentsWalker(mockRepository);
 
             // Assert
-            Assert.AreEqual(0, lookup.GetDependents(packageA1).Count());
-            Assert.AreEqual(0, lookup.GetDependents(packageA2).Count());
-            Assert.AreEqual(1, lookup.GetDependents(packageB1).Count());
-            Assert.AreEqual(1, lookup.GetDependents(packageB2).Count());
+            Assert.Equal(0, lookup.GetDependents(packageA1).Count());
+            Assert.Equal(0, lookup.GetDependents(packageA2).Count());
+            Assert.Equal(1, lookup.GetDependents(packageB1).Count());
+            Assert.Equal(1, lookup.GetDependents(packageB2).Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependenciesForInstallPackageWithUnknownDependencyThrows() {
             // Arrange            
             IPackage package = PackageUtility.CreatePackage("A",
@@ -61,7 +61,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(package), "Unable to resolve dependency 'B'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependenciesForInstallPackageResolvesDependencyUsingDependencyProvider() {
             // Arrange            
             IPackage packageA = PackageUtility.CreatePackage("A",
@@ -87,16 +87,16 @@ namespace NuGet.Test {
             var operations = resolver.ResolveOperations(packageA).ToList();
 
             // Assert
-            Assert.AreEqual(2, operations.Count);
-            Assert.AreEqual(PackageAction.Install, operations.First().Action);
-            Assert.AreEqual(packageB, operations.First().Package);
-            Assert.AreEqual(PackageAction.Install, operations.Last().Action);
-            Assert.AreEqual(packageA, operations.Last().Package);
+            Assert.Equal(2, operations.Count);
+            Assert.Equal(PackageAction.Install, operations.First().Action);
+            Assert.Equal(packageB, operations.First().Package);
+            Assert.Equal(PackageAction.Install, operations.Last().Action);
+            Assert.Equal(packageA, operations.Last().Package);
 
             dependencyProvider.Verify();
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependenciesForInstallPackageResolvesDependencyWithConstraintsUsingDependencyResolver() {
             // Arrange            
             var packageDependency = new PackageDependency("B", new VersionSpec { MinVersion = new Version("1.1") });
@@ -121,16 +121,16 @@ namespace NuGet.Test {
             var operations = resolver.ResolveOperations(packageA).ToList();
 
             // Assert
-            Assert.AreEqual(2, operations.Count);
-            Assert.AreEqual(PackageAction.Install, operations.First().Action);
-            Assert.AreEqual(packageB12, operations.First().Package);
-            Assert.AreEqual(PackageAction.Install, operations.Last().Action);
-            Assert.AreEqual(packageA, operations.Last().Package);
+            Assert.Equal(2, operations.Count);
+            Assert.Equal(PackageAction.Install, operations.First().Action);
+            Assert.Equal(packageB12, operations.First().Package);
+            Assert.Equal(PackageAction.Install, operations.Last().Action);
+            Assert.Equal(packageA, operations.Last().Package);
 
             dependencyProvider.Verify();
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependenciesForInstallCircularReferenceThrows() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -159,7 +159,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Circular dependency detected 'A 1.0 => B 1.0 => A 1.0'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependenciesForInstallDiamondDependencyGraph() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -207,14 +207,14 @@ namespace NuGet.Test {
 
             // Assert
             var dict = packages.ToDictionary(p => p.Package.Id);
-            Assert.AreEqual(4, packages.Count);
-            Assert.IsNotNull(dict["A"]);
-            Assert.IsNotNull(dict["B"]);
-            Assert.IsNotNull(dict["C"]);
-            Assert.IsNotNull(dict["D"]);
+            Assert.Equal(4, packages.Count);
+            Assert.NotNull(dict["A"]);
+            Assert.NotNull(dict["B"]);
+            Assert.NotNull(dict["C"]);
+            Assert.NotNull(dict["D"]);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependenciesForInstallDiamondDependencyGraphWithDifferntVersionOfSamePackage() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -276,26 +276,26 @@ namespace NuGet.Test {
             var projectOperations = resolver.ResolveOperations(packageA).ToList();
 
             // Assert
-            Assert.AreEqual(5, operations.Count);
-            Assert.AreEqual("E", operations[0].Package.Id);
-            Assert.AreEqual(new Version("2.0"), operations[0].Package.Version);
-            Assert.AreEqual("B", operations[1].Package.Id);
-            Assert.AreEqual("D", operations[2].Package.Id);
-            Assert.AreEqual(new Version("2.0"), operations[2].Package.Version);
-            Assert.AreEqual("C", operations[3].Package.Id);
-            Assert.AreEqual("A", operations[4].Package.Id);
+            Assert.Equal(5, operations.Count);
+            Assert.Equal("E", operations[0].Package.Id);
+            Assert.Equal(new Version("2.0"), operations[0].Package.Version);
+            Assert.Equal("B", operations[1].Package.Id);
+            Assert.Equal("D", operations[2].Package.Id);
+            Assert.Equal(new Version("2.0"), operations[2].Package.Version);
+            Assert.Equal("C", operations[3].Package.Id);
+            Assert.Equal("A", operations[4].Package.Id);
 
-            Assert.AreEqual(5, projectOperations.Count);
-            Assert.AreEqual("E", projectOperations[0].Package.Id);
-            Assert.AreEqual(new Version("2.0"), projectOperations[0].Package.Version);
-            Assert.AreEqual("B", projectOperations[1].Package.Id);
-            Assert.AreEqual("D", projectOperations[2].Package.Id);
-            Assert.AreEqual(new Version("2.0"), projectOperations[2].Package.Version);
-            Assert.AreEqual("C", projectOperations[3].Package.Id);
-            Assert.AreEqual("A", projectOperations[4].Package.Id);
+            Assert.Equal(5, projectOperations.Count);
+            Assert.Equal("E", projectOperations[0].Package.Id);
+            Assert.Equal(new Version("2.0"), projectOperations[0].Package.Version);
+            Assert.Equal("B", projectOperations[1].Package.Id);
+            Assert.Equal("D", projectOperations[2].Package.Id);
+            Assert.Equal(new Version("2.0"), projectOperations[2].Package.Version);
+            Assert.Equal("C", projectOperations[3].Package.Id);
+            Assert.Equal("A", projectOperations[4].Package.Id);
         }
 
-        [TestMethod]
+        [Fact]
         public void UninstallWalkerIgnoresMissingDependencies() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -331,13 +331,13 @@ namespace NuGet.Test {
                                    .ToDictionary(p => p.Package.Id);
 
             // Assert
-            Assert.AreEqual(3, packages.Count);
-            Assert.IsNotNull(packages["A"]);
-            Assert.IsNotNull(packages["C"]);
-            Assert.IsNotNull(packages["D"]);
+            Assert.Equal(3, packages.Count);
+            Assert.NotNull(packages["A"]);
+            Assert.NotNull(packages["C"]);
+            Assert.NotNull(packages["D"]);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependenciesForUninstallDiamondDependencyGraph() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -387,14 +387,14 @@ namespace NuGet.Test {
                                    .ToDictionary(p => p.Package.Id);
 
             // Assert
-            Assert.AreEqual(4, packages.Count);
-            Assert.IsNotNull(packages["A"]);
-            Assert.IsNotNull(packages["B"]);
-            Assert.IsNotNull(packages["C"]);
-            Assert.IsNotNull(packages["D"]);
+            Assert.Equal(4, packages.Count);
+            Assert.NotNull(packages["A"]);
+            Assert.NotNull(packages["B"]);
+            Assert.NotNull(packages["C"]);
+            Assert.NotNull(packages["D"]);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependencyForInstallCircularReferenceWithDifferentVersionOfPackageReferenceThrows() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -430,7 +430,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA10), "Circular dependency detected 'A 1.0 => B 1.0 => A 1.5'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolvingDependencyForUpdateWithConflictingDependents() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -469,14 +469,14 @@ namespace NuGet.Test {
             var packages = resolver.ResolveOperations(B101).ToList();
 
             // Assert
-            Assert.AreEqual(4, packages.Count);
+            Assert.Equal(4, packages.Count);
             AssertOperation("A", "1.0", PackageAction.Uninstall, packages[0]);
             AssertOperation("B", "1.0", PackageAction.Uninstall, packages[1]);
             AssertOperation("A", "2.0", PackageAction.Install, packages[2]);
             AssertOperation("B", "1.0.1", PackageAction.Install, packages[3]);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolvingDependencyForUpdateThatHasAnUnsatisfiedConstraint() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -513,7 +513,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(A20), "Unable to resolve dependency 'B (\u2265 2.0)'.'B' has an additional constraint (= 1.4) defined in foo.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependencyForInstallPackageWithDependencyThatDoesntMeetMinimumVersionThrows() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -536,7 +536,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to resolve dependency 'B (\u2265 1.5)'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependencyForInstallPackageWithDependencyThatDoesntMeetExactVersionThrows() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -561,7 +561,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to resolve dependency 'B (= 1.5)'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveOperationsForInstallSameDependencyAtDifferentLevelsInGraph() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -604,14 +604,14 @@ namespace NuGet.Test {
 
             // Act & Assert
             var packages = resolver.ResolveOperations(packageA).ToList();
-            Assert.AreEqual(4, packages.Count);
-            Assert.AreEqual("B", packages[0].Package.Id);
-            Assert.AreEqual("D", packages[1].Package.Id);
-            Assert.AreEqual("C", packages[2].Package.Id);
-            Assert.AreEqual("A", packages[3].Package.Id);
+            Assert.Equal(4, packages.Count);
+            Assert.Equal("B", packages[0].Package.Id);
+            Assert.Equal("D", packages[1].Package.Id);
+            Assert.Equal("C", packages[2].Package.Id);
+            Assert.Equal("A", packages[3].Package.Id);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependenciesForInstallSameDependencyAtDifferentLevelsInGraphDuringUpdate() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -691,7 +691,7 @@ namespace NuGet.Test {
                                                                           updateDependencies: true);
 
             var operations = resolver.ResolveOperations(packageA2).ToList();
-            Assert.AreEqual(8, operations.Count);
+            Assert.Equal(8, operations.Count);
             AssertOperation("A", "1.0", PackageAction.Uninstall, operations[0]);
             AssertOperation("C", "1.0", PackageAction.Uninstall, operations[1]);
             AssertOperation("D", "1.0", PackageAction.Uninstall, operations[2]);
@@ -702,7 +702,7 @@ namespace NuGet.Test {
             AssertOperation("A", "2.0", PackageAction.Install, operations[7]);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependenciesForInstallPackageWithDependencyReturnsPackageAndDependency() {
             // Arrange            
             var localRepository = new MockPackageRepository();
@@ -728,12 +728,12 @@ namespace NuGet.Test {
                                             .ToDictionary(p => p.Package.Id);
 
             // Assert
-            Assert.AreEqual(2, packages.Count);
-            Assert.IsNotNull(packages["A"]);
-            Assert.IsNotNull(packages["B"]);
+            Assert.Equal(2, packages.Count);
+            Assert.NotNull(packages["A"]);
+            Assert.NotNull(packages["B"]);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependenciesForUninstallPackageWithDependentThrows() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -758,7 +758,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageB), "Unable to uninstall 'B 1.0' because 'A 1.0' depends on it.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependenciesForUninstallPackageWithDependentAndRemoveDependenciesThrows() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -783,7 +783,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageB), "Unable to uninstall 'B 1.0' because 'A 1.0' depends on it.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependenciesForUninstallPackageWithDependentAndForceReturnsPackage() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -809,11 +809,11 @@ namespace NuGet.Test {
                              .ToDictionary(p => p.Package.Id);
 
             // Assert
-            Assert.AreEqual(1, packages.Count);
-            Assert.IsNotNull(packages["B"]);
+            Assert.Equal(1, packages.Count);
+            Assert.NotNull(packages["B"]);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependenciesForUninstallPackageWithRemoveDependenciesExcludesDependencyIfDependencyInUse() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -851,12 +851,12 @@ namespace NuGet.Test {
                                    .ToDictionary(p => p.Package.Id);
 
             // Assert            
-            Assert.AreEqual(2, packages.Count);
-            Assert.IsNotNull(packages["A"]);
-            Assert.IsNotNull(packages["B"]);
+            Assert.Equal(2, packages.Count);
+            Assert.NotNull(packages["A"]);
+            Assert.NotNull(packages["B"]);
         }
 
-        [TestMethod]
+        [Fact]
         public void ResolveDependenciesForUninstallPackageWithRemoveDependenciesSetAndForceReturnsAllDependencies() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -893,12 +893,12 @@ namespace NuGet.Test {
                                    .ToDictionary(p => p.Package.Id);
 
             // Assert            
-            Assert.IsNotNull(packages["A"]);
-            Assert.IsNotNull(packages["B"]);
-            Assert.IsNotNull(packages["C"]);
+            Assert.NotNull(packages["A"]);
+            Assert.NotNull(packages["B"]);
+            Assert.NotNull(packages["C"]);
         }
 
-        [TestMethod]
+        [Fact]
         public void ProjectInstallWalkerIgnoresSolutionLevelPackages() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -925,11 +925,11 @@ namespace NuGet.Test {
                                    .ToDictionary(p => p.Package.Id);
 
             // Assert            
-            Assert.AreEqual(1, packages.Count);
-            Assert.IsNotNull(packages["A"]);
+            Assert.Equal(1, packages.Count);
+            Assert.NotNull(packages["A"]);
         }
 
-        [TestMethod]
+        [Fact]
         public void AfterPackageWalkMetaPackageIsClassifiedTheSameAsDependencies() {
             // Arrange
             var mockRepository = new MockPackageRepository();
@@ -947,16 +947,16 @@ namespace NuGet.Test {
             mockRepository.AddPackage(projectPackageA);
             mockRepository.AddPackage(projectPackageB);
 
-            Assert.AreEqual(PackageTargets.None, walker.GetPackageInfo(metaPackage).Target);
+            Assert.Equal(PackageTargets.None, walker.GetPackageInfo(metaPackage).Target);
 
             // Act
             walker.Walk(metaPackage);
 
             // Assert
-            Assert.AreEqual(PackageTargets.Project, walker.GetPackageInfo(metaPackage).Target);
+            Assert.Equal(PackageTargets.Project, walker.GetPackageInfo(metaPackage).Target);
         }
 
-        [TestMethod]
+        [Fact]
         public void MetaPackageWithMixedTargetsThrows() {
             // Arrange
             var mockRepository = new MockPackageRepository();
@@ -978,7 +978,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => walker.Walk(metaPackage), "Child dependencies of dependency only packages cannot mix external and project packages.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExternalPackagesThatDepdendOnProjectLevelPackagesThrows() {
             // Arrange
             var mockRepository = new MockPackageRepository();
@@ -998,7 +998,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => walker.Walk(solutionPackage), "External packages cannot depend on packages that target projects.");
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallWalkerResolvesLowestMajorAndMinorVersionButHighestBuildAndRevisionForDependencies() {
             // Arrange
 
@@ -1030,21 +1030,21 @@ namespace NuGet.Test {
             var packages = resolver.ResolveOperations(A10).ToList();
 
             // Assert
-            Assert.AreEqual(4, packages.Count);
-            Assert.AreEqual("D", packages[0].Package.Id);
-            Assert.AreEqual(new Version("2.0"), packages[0].Package.Version);
-            Assert.AreEqual("C", packages[1].Package.Id);
-            Assert.AreEqual(new Version("1.1.3"), packages[1].Package.Version);
-            Assert.AreEqual("B", packages[2].Package.Id);
-            Assert.AreEqual(new Version("1.0.9"), packages[2].Package.Version);
-            Assert.AreEqual("A", packages[3].Package.Id);
-            Assert.AreEqual(new Version("1.0"), packages[3].Package.Version);
+            Assert.Equal(4, packages.Count);
+            Assert.Equal("D", packages[0].Package.Id);
+            Assert.Equal(new Version("2.0"), packages[0].Package.Version);
+            Assert.Equal("C", packages[1].Package.Id);
+            Assert.Equal(new Version("1.1.3"), packages[1].Package.Version);
+            Assert.Equal("B", packages[2].Package.Id);
+            Assert.Equal(new Version("1.0.9"), packages[2].Package.Version);
+            Assert.Equal("A", packages[3].Package.Id);
+            Assert.Equal(new Version("1.0"), packages[3].Package.Version);
         }
 
         private void AssertOperation(string expectedId, string expectedVersion, PackageAction expectedAction, PackageOperation operation) {
-            Assert.AreEqual(expectedAction, operation.Action);
-            Assert.AreEqual(expectedId, operation.Package.Id);
-            Assert.AreEqual(new Version(expectedVersion), operation.Package.Version);
+            Assert.Equal(expectedAction, operation.Action);
+            Assert.Equal(expectedId, operation.Package.Id);
+            Assert.Equal(new Version(expectedVersion), operation.Package.Version);
         }
 
         private class TestWalker : PackageWalker {

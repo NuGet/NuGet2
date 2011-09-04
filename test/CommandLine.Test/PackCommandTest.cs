@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Commands;
 
 namespace NuGet.Test.NuGetCommandLine.Commands {
-    [TestClass]
+    
     public class PackCommandTest {
-        [TestMethod]
+        [Fact]
         public void PackCommandDefaultFiltersRemovesManifestAndPackageFiles() {
             // Arrange
             var files = GetPackageFiles(
@@ -24,13 +24,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             packCommand.ExcludeFiles(files);
 
             // Assert
-            Assert.AreEqual(3, files.Count);
-            Assert.AreEqual(files[0].Path, @"x:\packagefiles\some-file\1.txt");
-            Assert.AreEqual(files[1].Path, @"x:\packagefiles\folder\should-not-exclude\test.nupkg.html");
-            Assert.AreEqual(files[2].Path, @"x:\packagefiles\test.nuspec.bkp");
+            Assert.Equal(3, files.Count);
+            Assert.Equal(files[0].Path, @"x:\packagefiles\some-file\1.txt");
+            Assert.Equal(files[1].Path, @"x:\packagefiles\folder\should-not-exclude\test.nupkg.html");
+            Assert.Equal(files[2].Path, @"x:\packagefiles\test.nuspec.bkp");
         }
 
-        [TestMethod]
+        [Fact]
         public void PackCommandDefaultFiltersRemovesRepoFiles() {
             // Arrange
             var files = GetPackageFiles(
@@ -47,12 +47,12 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             packCommand.ExcludeFiles(files);
 
             // Assert
-            Assert.AreEqual(2, files.Count);
-            Assert.AreEqual(files[0].Path, @"x:\packagefiles\some-file\1.txt");
-            Assert.AreEqual(files[1].Path, @"x:\packagefiles\folder\should-not-exclude\hg");
+            Assert.Equal(2, files.Count);
+            Assert.Equal(files[0].Path, @"x:\packagefiles\some-file\1.txt");
+            Assert.Equal(files[1].Path, @"x:\packagefiles\folder\should-not-exclude\hg");
         }
 
-        [TestMethod]
+        [Fact]
         public void PackCommandDefaultFiltersRemovesNugetFiles() {
             // Arrange
             var files = GetPackageFiles(
@@ -66,11 +66,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             packCommand.ExcludeFiles(files);
 
             // Assert
-            Assert.AreEqual(1, files.Count);
-            Assert.AreEqual(files[0].Path, @"x:\packagefiles\some-file\1.txt");
+            Assert.Equal(1, files.Count);
+            Assert.Equal(files[0].Path, @"x:\packagefiles\some-file\1.txt");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExcludeFilesUsesWildCardExtension() {
             // Arrange
             var files = GetPackageFiles(
@@ -85,12 +85,12 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             packCommand.ExcludeFiles(files);
 
             // Assert
-            Assert.AreEqual(2, files.Count);
-            Assert.AreEqual(files[0].Path, @"p:\some-file\should-not-be-removed\ext\sample.txt");
-            Assert.AreEqual(files[1].Path, @"p:\some-file\should-not-be-removed\test.ext\sample3.jpg");
+            Assert.Equal(2, files.Count);
+            Assert.Equal(files[0].Path, @"p:\some-file\should-not-be-removed\ext\sample.txt");
+            Assert.Equal(files[1].Path, @"p:\some-file\should-not-be-removed\test.ext\sample3.jpg");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExcludeFilesExcludesWildCardPaths() {
             // Arrange
             var files = GetPackageFiles(
@@ -106,12 +106,12 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             packCommand.ExcludeFiles(files);
 
             // Assert
-            Assert.AreEqual(2, files.Count);
-            Assert.AreEqual(files[0].Path, @"p:\some-file\should-not-be-removed\ext\sample.txt");
-            Assert.AreEqual(files[1].Path, @"p:\some-file\should-not-be-removed\test.ext\sample3.jpg");
+            Assert.Equal(2, files.Count);
+            Assert.Equal(files[0].Path, @"p:\some-file\should-not-be-removed\ext\sample.txt");
+            Assert.Equal(files[1].Path, @"p:\some-file\should-not-be-removed\test.ext\sample3.jpg");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExcludeFilesDoesNotExcludeDefaultFilesIfExcludeSpecialPathsIsDisabled() {
             // Arrange
             var files = GetPackageFiles(
@@ -127,13 +127,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             packCommand.ExcludeFiles(files);
 
             // Assert
-            Assert.AreEqual(3, files.Count);
-            Assert.AreEqual(files[0].Path, @"p:\some-file\should-not-be-removed\ext\sample.txt");
-            Assert.AreEqual(files[1].Path, @"p:\some-file\should-not-be-removed\.ext\sample2.txt");
-            Assert.AreEqual(files[2].Path, @"p:\some-file\should-not-be-removed\test.ext\sample3.jpg");
+            Assert.Equal(3, files.Count);
+            Assert.Equal(files[0].Path, @"p:\some-file\should-not-be-removed\ext\sample.txt");
+            Assert.Equal(files[1].Path, @"p:\some-file\should-not-be-removed\.ext\sample2.txt");
+            Assert.Equal(files[2].Path, @"p:\some-file\should-not-be-removed\test.ext\sample3.jpg");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExcludeFilesPerformsCaseInsensitiveSearch() {
             // Arrange
             var files = GetPackageFiles(
@@ -149,12 +149,12 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             packCommand.ExcludeFiles(files);
 
             // Assert
-            Assert.AreEqual(2, files.Count);
-            Assert.AreEqual(files[0].Path, @"p:\some-file\should-not-be-removed\ext\sample.txt");
-            Assert.AreEqual(files[1].Path, @"p:\some-file\should-not-be-removed\test.ext\sample3.jpg");
+            Assert.Equal(2, files.Count);
+            Assert.Equal(files[0].Path, @"p:\some-file\should-not-be-removed\ext\sample.txt");
+            Assert.Equal(files[1].Path, @"p:\some-file\should-not-be-removed\test.ext\sample3.jpg");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExcludeFilesDoesNotUseDefaultExcludesIfDisabled() {
             // Arrange
             var files = GetPackageFiles(
@@ -171,13 +171,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             packCommand.ExcludeFiles(files);
 
             // Assert
-            Assert.AreEqual(3, files.Count);
-            Assert.AreEqual(files[0].Path, @"p:\some-file\test.txt");
-            Assert.AreEqual(files[1].Path, @"p:\some-file\should-not-be-removed\ext\sample.nupkg");
-            Assert.AreEqual(files[2].Path, @"p:\some-file\should-not-be-removed\.hgignore");
+            Assert.Equal(3, files.Count);
+            Assert.Equal(files[0].Path, @"p:\some-file\test.txt");
+            Assert.Equal(files[1].Path, @"p:\some-file\should-not-be-removed\ext\sample.nupkg");
+            Assert.Equal(files[2].Path, @"p:\some-file\should-not-be-removed\.hgignore");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExcludeFilesUsesPathIfFileIsNotPhysicalPackageFile() {
             // Arrange
             var mockFile = new Mock<IPackageFile>();
@@ -190,34 +190,34 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             packCommand.ExcludeFiles(files);
 
             // Assert
-            Assert.AreEqual(1, files.Count);
-            Assert.AreEqual(files[0].Path, @"p:\some-file\test.txt");
+            Assert.Equal(1, files.Count);
+            Assert.Equal(files[0].Path, @"p:\some-file\test.txt");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetInputFileThrowsIfNoFiles() {
             ExceptionAssert.Throws<CommandLineException>(() => PackCommand.GetInputFile(Enumerable.Empty<string>()), "Please specify a nuspec or project file to use.");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetInputFileMultipleProjectFilesThrows() {
             ExceptionAssert.Throws<CommandLineException>(() => PackCommand.GetInputFile(new[] { "a.csproj", "b.fsproj" }), "Please specify a nuspec or project file to use.");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetInputFileMultipleNuSpecFilesThrows() {
             ExceptionAssert.Throws<CommandLineException>(() => PackCommand.GetInputFile(new[] { "a.nuspec", "b.NuspeC" }), "Please specify a nuspec or project file to use.");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetInputFileNuSpecAndProjectFilePrefersProjectFile() {
             // Act
             string file = PackCommand.GetInputFile(new[] { "a.nuspec", "foo.csproj" });
 
             // Assert
-            Assert.AreEqual("foo.csproj", file);
+            Assert.Equal("foo.csproj", file);
         }
-        [TestMethod]
+        [Fact]
         public void ExcludeFilesForLibPackageRemovesAllPDBs() {
             // Arrange
             var files = GetPackageFiles(
@@ -233,13 +233,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             PackCommand.ExcludeFilesForLibPackage(files);
 
             // Assert
-            Assert.AreEqual(3, files.Count);
-            Assert.AreEqual(files[0].Path, @"lib\mylib.dll");
-            Assert.AreEqual(files[1].Path, @"content\default.aspx");
-            Assert.AreEqual(files[2].Path, @"tools\mycmd.exe");
+            Assert.Equal(3, files.Count);
+            Assert.Equal(files[0].Path, @"lib\mylib.dll");
+            Assert.Equal(files[1].Path, @"content\default.aspx");
+            Assert.Equal(files[2].Path, @"tools\mycmd.exe");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExcludeFilesForLibPackageRemovesAllFilesFromSrcTargetFolder() {
             // Arrange
             var files = GetPackageFiles(
@@ -255,13 +255,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             PackCommand.ExcludeFilesForLibPackage(files);
 
             // Assert
-            Assert.AreEqual(3, files.Count);
-            Assert.AreEqual(files[0].Path, @"lib\mylib.dll");
-            Assert.AreEqual(files[1].Path, @"content\default.aspx");
-            Assert.AreEqual(files[2].Path, @"content\default.aspx.cs");
+            Assert.Equal(3, files.Count);
+            Assert.Equal(files[0].Path, @"lib\mylib.dll");
+            Assert.Equal(files[1].Path, @"content\default.aspx");
+            Assert.Equal(files[2].Path, @"content\default.aspx.cs");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExcludeFilesForSymbolPackageRemovesAllContentFiles() {
             // Arrange
             var files = GetPackageFiles(
@@ -276,13 +276,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             PackCommand.ExcludeFilesForSymbolPackage(files);
 
             // Assert
-            Assert.AreEqual(3, files.Count);
-            Assert.AreEqual(files[0].Path, @"lib\mylib.dll");
-            Assert.AreEqual(files[1].Path, @"lib\mylib.pdb");
-            Assert.AreEqual(files[2].Path, @"src\mylib.cs");
+            Assert.Equal(3, files.Count);
+            Assert.Equal(files[0].Path, @"lib\mylib.dll");
+            Assert.Equal(files[1].Path, @"lib\mylib.pdb");
+            Assert.Equal(files[2].Path, @"src\mylib.cs");
         }
 
-        [TestMethod]
+        [Fact]
         public void ExcludeFilesForSymbolPackageRemovesScripts() {
             // Arrange
             var files = GetPackageFiles(
@@ -298,11 +298,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             PackCommand.ExcludeFilesForSymbolPackage(files);
 
             // Assert
-            Assert.AreEqual(4, files.Count);
-            Assert.AreEqual(files[0].Path, @"lib\mylib.dll");
-            Assert.AreEqual(files[1].Path, @"lib\mylib.pdb");
-            Assert.AreEqual(files[2].Path, @"tools\mycmd.exe");
-            Assert.AreEqual(files[3].Path, @"src\mylib.cs");
+            Assert.Equal(4, files.Count);
+            Assert.Equal(files[0].Path, @"lib\mylib.dll");
+            Assert.Equal(files[1].Path, @"lib\mylib.pdb");
+            Assert.Equal(files[2].Path, @"tools\mycmd.exe");
+            Assert.Equal(files[3].Path, @"src\mylib.cs");
         }
 
         private static IList<IPackageFile> GetPackageFiles(params string[] paths) {

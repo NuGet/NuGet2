@@ -1,9 +1,9 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test.NuGetCommandLine {
-    [TestClass]
+    
     public class OptionAttributeTests {
-        [TestMethod]
+        [Fact]
         public void GetDescription_ReturnsResourceIfTypeSet() {
             // Arrange
             OptionAttribute cmd = new OptionAttribute(typeof(MockResourceType), "ResourceName");
@@ -12,10 +12,10 @@ namespace NuGet.Test.NuGetCommandLine {
             var actual = cmd.Description;
 
             // Assert
-            Assert.AreEqual("This is a Resource String.", actual);
+            Assert.Equal("This is a Resource String.", actual);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetDescription_ReturnsDescriptionIfTypeNotSet() {
             // Arrange
             OptionAttribute cmd = new OptionAttribute("ResourceName");
@@ -24,7 +24,7 @@ namespace NuGet.Test.NuGetCommandLine {
             var actual = cmd.Description;
 
             // Assert
-            Assert.AreEqual("ResourceName", actual);
+            Assert.Equal("ResourceName", actual);
         }
 
         private class MockResourceType {

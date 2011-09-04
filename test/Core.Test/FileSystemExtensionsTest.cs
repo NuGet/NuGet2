@@ -1,12 +1,12 @@
 namespace NuGet.Test {
     using System.IO;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Xunit;
     using Moq;
     using NuGet.Test.Mocks;
 
-    [TestClass]
+    
     public class FileSystemExtensionsTest {
-        [TestMethod]
+        [Fact]
         public void AddFilesAddFilesToProjectSystem() {
             // Arrange
             var fileSystem = new MockProjectSystem();
@@ -16,12 +16,12 @@ namespace NuGet.Test {
             fileSystem.AddFiles(files);
 
             // Assert
-            Assert.IsTrue(fileSystem.FileExists("A"));
-            Assert.IsTrue(fileSystem.FileExists("B"));
-            Assert.IsTrue(fileSystem.FileExists("C"));
+            Assert.True(fileSystem.FileExists("A"));
+            Assert.True(fileSystem.FileExists("B"));
+            Assert.True(fileSystem.FileExists("C"));
         }
 
-        [TestMethod]
+        [Fact]
         public void AddFilesAddFilesToProjectSystemIfNotExists() {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();

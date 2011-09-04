@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class LocalPackageRepositoryTest {
-        [TestMethod]
+        [Fact]
         public void GetPackageFilesOnlyDetectsFilesWithPackageExtension() {
             // Arrange
             var mockFileSystem = new MockProjectSystem();
@@ -23,11 +23,11 @@ namespace NuGet.Test {
             var files = repository.GetPackageFiles().ToList();
 
             // Assert
-            Assert.AreEqual(1, files.Count);
-            Assert.AreEqual("foo.nupkg", files[0]);
+            Assert.Equal(1, files.Count);
+            Assert.Equal("foo.nupkg", files[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageFilesDetectsFilesInRootOrFirstLevelOfFolders() {
             // Arrange
             var mockFileSystem = new MockProjectSystem();
@@ -43,13 +43,13 @@ namespace NuGet.Test {
             var files = repository.GetPackageFiles().ToList();
 
             // Assert
-            Assert.AreEqual(3, files.Count);
-            Assert.AreEqual(@"baz\P2.nupkg", files[0]);
-            Assert.AreEqual(@"A\P4.nupkg", files[1]);
-            Assert.AreEqual("P1.nupkg", files[2]);
+            Assert.Equal(3, files.Count);
+            Assert.Equal(@"baz\P2.nupkg", files[0]);
+            Assert.Equal(@"A\P4.nupkg", files[1]);
+            Assert.Equal("P1.nupkg", files[2]);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesOnlyRetrievesPackageFilesWhereLastModifiedIsOutOfDate() {
             // Arrange
             var mockFileSystem = new Mock<MockProjectSystem>() { CallBase = true };
@@ -73,7 +73,7 @@ namespace NuGet.Test {
             repository.GetPackages(openPackage).ToList();
 
             // Verify that both packages have been created from the file system
-            Assert.AreEqual(2, results.Count);
+            Assert.Equal(2, results.Count);
             results.Clear();
 
             // Act
@@ -82,11 +82,11 @@ namespace NuGet.Test {
             repository.GetPackages(openPackage).ToList();
 
             // Assert
-            Assert.AreEqual(results.Count, 1);
-            Assert.AreEqual(results[0], "P1.nupkg");
+            Assert.Equal(results.Count, 1);
+            Assert.Equal(results[0], "P1.nupkg");
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackageMatchesExactVersionIfSideBySideIsDisabled() {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -102,21 +102,21 @@ namespace NuGet.Test {
 
             // Act and Assert
             IPackage result = repository.FindPackage(openPackage, "A", new Version("1.0"));
-            Assert.IsNull(result);
-            Assert.AreEqual(@"A\A.nupkg", searchedPaths.Single());
+            Assert.Null(result);
+            Assert.Equal(@"A\A.nupkg", searchedPaths.Single());
 
             searchedPaths.Clear();
             result = repository.FindPackage(openPackage, "A", new Version("0.8"));
-            Assert.IsNull(result);
-            Assert.AreEqual(@"A\A.nupkg", searchedPaths.Single());
+            Assert.Null(result);
+            Assert.Equal(@"A\A.nupkg", searchedPaths.Single());
 
             searchedPaths.Clear();
             result = repository.FindPackage(openPackage, "A", new Version("1.1"));
-            Assert.AreEqual("A", result.Id);
-            Assert.AreEqual(new Version("1.1"), result.Version);
+            Assert.Equal("A", result.Id);
+            Assert.Equal(new Version("1.1"), result.Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackageMatchesExactVersionIfSideBySideIsEnabled() {
             // Arrange
             var fileSystem = new Mock<MockProjectSystem> { CallBase = true };
@@ -134,22 +134,22 @@ namespace NuGet.Test {
 
             // Act and Assert
             IPackage result = repository.FindPackage(openPackage, "A", new Version("1.0"));
-            Assert.IsNull(result);
-            Assert.IsFalse(searchedPaths.Any());
+            Assert.Null(result);
+            Assert.False(searchedPaths.Any());
 
             result = repository.FindPackage(openPackage, "A", new Version("0.8"));
-            Assert.IsNull(result);
-            Assert.IsFalse(searchedPaths.Any());
+            Assert.Null(result);
+            Assert.False(searchedPaths.Any());
 
             result = repository.FindPackage(openPackage, "A", new Version("1.1"));
-            Assert.AreEqual(@"A.1.1\A.1.1.nupkg", searchedPaths.Single());
-            Assert.AreEqual("A", result.Id);
-            Assert.AreEqual(new Version("1.1"), result.Version);
+            Assert.Equal(@"A.1.1\A.1.1.nupkg", searchedPaths.Single());
+            Assert.Equal("A", result.Id);
+            Assert.Equal(new Version("1.1"), result.Version);
 
             fileSystem.Verify();
         }
 
-        [TestMethod]
+        [Fact]
         public void AddPackageAddsFileToFileSystem() {
             // Arrange
             var mockFileSystem = new MockProjectSystem();
@@ -161,10 +161,10 @@ namespace NuGet.Test {
             repository.AddPackage(package);
 
             // Assert
-            Assert.IsTrue(mockFileSystem.FileExists(@"A.1.0\A.1.0.nupkg"));
+            Assert.True(mockFileSystem.FileExists(@"A.1.0\A.1.0.nupkg"));
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovePackageRemovesPackageFileAndDirectoryAndRoot() {
             // Arrange
             var mockFileSystem = new MockProjectSystem();
@@ -177,13 +177,13 @@ namespace NuGet.Test {
             repository.RemovePackage(package);
 
             // Assert
-            Assert.AreEqual(3, mockFileSystem.Deleted.Count);
-            Assert.IsTrue(mockFileSystem.Deleted.Contains(""));
-            Assert.IsTrue(mockFileSystem.Deleted.Contains("A.1.0"));
-            Assert.IsTrue(mockFileSystem.Deleted.Contains(@"A.1.0\A.1.0.nupkg"));
+            Assert.Equal(3, mockFileSystem.Deleted.Count);
+            Assert.True(mockFileSystem.Deleted.Contains(""));
+            Assert.True(mockFileSystem.Deleted.Contains("A.1.0"));
+            Assert.True(mockFileSystem.Deleted.Contains(@"A.1.0\A.1.0.nupkg"));
         }
 
-        [TestMethod]
+        [Fact]
         public void RemovePackageDoesNotRemovesRootIfNotEmpty() {
             // Arrange
             var mockFileSystem = new MockProjectSystem();
@@ -197,9 +197,9 @@ namespace NuGet.Test {
             repository.RemovePackage(package);
 
             // Assert
-            Assert.AreEqual(2, mockFileSystem.Deleted.Count);
-            Assert.IsTrue(mockFileSystem.Deleted.Contains("A.1.0"));
-            Assert.IsTrue(mockFileSystem.Deleted.Contains(@"A.1.0\A.1.0.nupkg"));
+            Assert.Equal(2, mockFileSystem.Deleted.Count);
+            Assert.True(mockFileSystem.Deleted.Contains("A.1.0"));
+            Assert.True(mockFileSystem.Deleted.Contains(@"A.1.0\A.1.0.nupkg"));
         }
 
         private static DateTimeOffset GetDateTimeOffset(int seconds) {

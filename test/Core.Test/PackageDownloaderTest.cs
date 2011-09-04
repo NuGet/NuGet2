@@ -1,12 +1,12 @@
 ﻿using System;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class PackageDownloaderTest {
-        [TestMethod]
+        [Fact]
         public void DownloadPackageWithUnverifiedPackageThrowsInvalidDataException() {
             // Arrange
             var downloadClient = new Mock<IHttpClient>();

@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class DataServicePackageRepositoryTest {
-        [TestMethod]
+        [Fact]
         public void SearchUsesDefaultSearchLogicIfServerDoesnotSupportServiceMethod() {
             // Arrange
             var client = new Mock<IHttpClient>();
@@ -25,11 +25,11 @@ namespace NuGet.Test {
             var results = repository.Object.Search("old").ToList();
 
             // Assert
-            Assert.AreEqual(1, results.Count);
-            Assert.AreEqual("B", results[0].Id);
+            Assert.Equal(1, results.Count);
+            Assert.Equal("B", results[0].Id);
         }
 
-        [TestMethod]
+        [Fact]
         public void SearchUsesServiceMethodIfServerSupportsIt() {
             // Arrange
             var client = new Mock<IHttpClient>();
@@ -46,10 +46,10 @@ namespace NuGet.Test {
             context.Setup(m => m.CreateQuery<DataServicePackage>(It.IsAny<string>(), It.IsAny<IDictionary<string, object>>()))
                    .Callback<string, IDictionary<string, object>>((entitySet, parameters) => {
                        // Assert
-                       Assert.AreEqual("Search", entitySet);
-                       Assert.AreEqual(2, parameters.Count);
-                       Assert.AreEqual("'old'", parameters["searchTerm"]);
-                       Assert.AreEqual("''", parameters["targetFramework"]);
+                       Assert.Equal("Search", entitySet);
+                       Assert.Equal(2, parameters.Count);
+                       Assert.Equal("'old'", parameters["searchTerm"]);
+                       Assert.Equal("''", parameters["targetFramework"]);
                    })
                    .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object);
 
@@ -57,7 +57,7 @@ namespace NuGet.Test {
             repository.Object.Search("old");
         }
 
-        [TestMethod]
+        [Fact]
         public void SearchEscapesSingleQuotesInParameters() {
             // Arrange
             var client = new Mock<IHttpClient>();
@@ -68,10 +68,10 @@ namespace NuGet.Test {
             context.Setup(m => m.CreateQuery<DataServicePackage>(It.IsAny<string>(), It.IsAny<IDictionary<string, object>>()))
                    .Callback<string, IDictionary<string, object>>((entitySet, parameters) => {
                        // Assert
-                       Assert.AreEqual("Search", entitySet);
-                       Assert.AreEqual(2, parameters.Count);
-                       Assert.AreEqual("'dante''s inferno'", parameters["searchTerm"]);
-                       Assert.AreEqual("''", parameters["targetFramework"]);
+                       Assert.Equal("Search", entitySet);
+                       Assert.Equal(2, parameters.Count);
+                       Assert.Equal("'dante''s inferno'", parameters["searchTerm"]);
+                       Assert.Equal("''", parameters["targetFramework"]);
                    })
                    .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object);
 
@@ -79,7 +79,7 @@ namespace NuGet.Test {
             repository.Object.Search("dante's inferno");
         }
 
-        [TestMethod]
+        [Fact]
         public void SearchSendsShortTargetFrameworkNames() {
             // Arrange
             var client = new Mock<IHttpClient>();
@@ -90,10 +90,10 @@ namespace NuGet.Test {
             context.Setup(m => m.CreateQuery<DataServicePackage>(It.IsAny<string>(), It.IsAny<IDictionary<string, object>>()))
                    .Callback<string, IDictionary<string, object>>((entitySet, parameters) => {
                        // Assert
-                       Assert.AreEqual("Search", entitySet);
-                       Assert.AreEqual(2, parameters.Count);
-                       Assert.AreEqual("'dante''s inferno'", parameters["searchTerm"]);
-                       Assert.AreEqual("'net40|sl40|sl30-wp|netmf11'", parameters["targetFramework"]);
+                       Assert.Equal("Search", entitySet);
+                       Assert.Equal(2, parameters.Count);
+                       Assert.Equal("'dante''s inferno'", parameters["searchTerm"]);
+                       Assert.Equal("'net40|sl40|sl30-wp|netmf11'", parameters["targetFramework"]);
                    })
                    .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object);
 
@@ -106,7 +106,7 @@ namespace NuGet.Test {
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtractMethodNamesFromSchemaFindsMethodNames() {
             // Act
             var schemaNoMethods = DataServiceContextWrapper.ExtractMethodNamesFromSchema(NuGetFeedSchema.SchemaWithNoMethods).ToList();
@@ -116,12 +116,12 @@ namespace NuGet.Test {
             var badSchema = DataServiceContextWrapper.ExtractMethodNamesFromSchema("<xml>DEADBEEF").ToList();
 
             // Assert
-            Assert.AreEqual(0, schemaNoMethods.Count);
-            Assert.AreEqual(1, schemaWithMethods.Count);
-            Assert.AreEqual("Search", schemaWithMethods[0]);
-            Assert.AreEqual(0, emptySchema.Count);
-            Assert.AreEqual(0, nullSchema.Count);
-            Assert.AreEqual(0, badSchema.Count);
+            Assert.Equal(0, schemaNoMethods.Count);
+            Assert.Equal(1, schemaWithMethods.Count);
+            Assert.Equal("Search", schemaWithMethods[0]);
+            Assert.Equal(0, emptySchema.Count);
+            Assert.Equal(0, nullSchema.Count);
+            Assert.Equal(0, badSchema.Count);
         }
 
 

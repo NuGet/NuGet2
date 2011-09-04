@@ -2,14 +2,14 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using NuGet.Analysis.Rules;
 
 namespace NuGet.Test.Analysis {
-    [TestClass]
+    
     public class MisplacedAssemblyRuleTest {
 
-        [TestMethod]
+        [Fact]
         public void NoAssemblyHasNoIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage("A", content: new[] { "web.config", "jQuery.js" });
@@ -19,10 +19,10 @@ namespace NuGet.Test.Analysis {
             IEnumerable<PackageIssue> issues = rule.Validate(package);
 
             // Assert
-            Assert.IsFalse(issues.Any());
+            Assert.False(issues.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void AssemblyPlacedInsideFrameworkFolderHasNoIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage("A", assemblyReferences: new[] { "lib\\net\\abc.dll" });
@@ -32,10 +32,10 @@ namespace NuGet.Test.Analysis {
             IEnumerable<PackageIssue> issues = rule.Validate(package);
 
             // Assert
-            Assert.IsFalse(issues.Any());
+            Assert.False(issues.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void AssemblyPlacedUnderLibHasOneIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage("A", assemblyReferences: new[] { "lib\\abc.exe" });
@@ -45,7 +45,7 @@ namespace NuGet.Test.Analysis {
             IList<PackageIssue> issues = rule.Validate(package).ToList();
 
             // Assert
-            Assert.AreEqual(1, issues.Count);
+            Assert.Equal(1, issues.Count);
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[0],
                 "Assembly not inside a framework folder.",
@@ -54,7 +54,7 @@ namespace NuGet.Test.Analysis {
                 );
         }
 
-        [TestMethod]
+        [Fact]
         public void TwoAssembliesPlacedUnderLibHasTwoIssues() {
             // Arrange
             var package = PackageUtility.CreatePackage("A", assemblyReferences: new[] { "lib\\abc.exe", "lib\\def.dll" });
@@ -64,7 +64,7 @@ namespace NuGet.Test.Analysis {
             IList<PackageIssue> issues = rule.Validate(package).ToList();
 
             // Assert
-            Assert.AreEqual(2, issues.Count);
+            Assert.Equal(2, issues.Count);
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[0],
                 "Assembly not inside a framework folder.",
@@ -80,7 +80,7 @@ namespace NuGet.Test.Analysis {
                 );
         }
 
-        [TestMethod]
+        [Fact]
         public void TwoAssembliesPlacedOutsideLibHasOneIssues() {
             // Arrange
             var package = PackageUtility.CreatePackage("A", assemblyReferences: new[] { "content\\abc.exe", "tools\\def.dll" });
@@ -90,7 +90,7 @@ namespace NuGet.Test.Analysis {
             IList<PackageIssue> issues = rule.Validate(package).ToList();
 
             // Assert
-            Assert.AreEqual(1, issues.Count);
+            Assert.Equal(1, issues.Count);
 
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[0],

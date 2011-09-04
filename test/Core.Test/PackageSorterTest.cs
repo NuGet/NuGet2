@@ -1,12 +1,12 @@
 ﻿using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class PackageSorterTest {
 
-        [TestMethod]
+        [Fact]
         public void TestSortByDependencySimple() {
 
             //  A  --> B --> C
@@ -26,13 +26,13 @@ namespace NuGet.Test {
             var sortedPackages = sorter.GetPackagesByDependencyOrder(mockRepository.Object).ToList();
 
             // Assert
-            Assert.AreEqual(3, sortedPackages.Count);
-            Assert.AreSame(packageC, sortedPackages[0]);
-            Assert.AreSame(packageB, sortedPackages[1]);
-            Assert.AreSame(packageA, sortedPackages[2]);
+            Assert.Equal(3, sortedPackages.Count);
+            Assert.Same(packageC, sortedPackages[0]);
+            Assert.Same(packageB, sortedPackages[1]);
+            Assert.Same(packageA, sortedPackages[2]);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestSortByDependencyComplex() {
 
             //      A    
@@ -56,11 +56,11 @@ namespace NuGet.Test {
             var sortedPackages = sorter.GetPackagesByDependencyOrder(mockRepository.Object).ToList();
 
             // Assert
-            Assert.AreEqual(4, sortedPackages.Count);
-            Assert.AreSame(packageD, sortedPackages[0]);
-            Assert.IsTrue((sortedPackages[1] == packageB && sortedPackages[2] == packageC) ||
+            Assert.Equal(4, sortedPackages.Count);
+            Assert.Same(packageD, sortedPackages[0]);
+            Assert.True((sortedPackages[1] == packageB && sortedPackages[2] == packageC) ||
                           (sortedPackages[1] == packageC && sortedPackages[2] == packageB));
-            Assert.AreSame(packageA, sortedPackages[3]);
+            Assert.Same(packageA, sortedPackages[3]);
         }
     }
 }

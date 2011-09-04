@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Commands;
 using NuGet.Common;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test.NuGetCommandLine.Commands {
-    [TestClass]
+    
     public class ListCommandTests {
         private const string DefaultRepoUrl = "https://go.microsoft.com/fwlink/?LinkID=206669";
         private const string NonDefaultRepoUrl1 = "http://NotDefault1";
         private const string NonDefaultRepoUrl2 = "http://NotDefault2";
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesUsesSourceIfDefined() {
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
@@ -26,11 +26,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var packages = cmd.GetPackages();
 
             // Assert
-            Assert.AreEqual("CustomUrlUsed", packages.Single().Id);
+            Assert.Equal("CustomUrlUsed", packages.Single().Id);
 
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesUsesAggregateSourceIfNoSourceDefined() {
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
@@ -42,7 +42,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var packages = cmd.GetPackages();
 
             // Assert
-            Assert.AreEqual(6, packages.Count());
+            Assert.Equal(6, packages.Count());
             AssertPackage(new { Id = "AnotherTerm", Ver = "1.0" }, packages.ElementAt(0));
             AssertPackage(new { Id = "CustomUrlUsed", Ver = "1.0" }, packages.ElementAt(1));
             AssertPackage(new { Id = "DefaultUrlUsed", Ver = "1.0" }, packages.ElementAt(2));
@@ -51,7 +51,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             AssertPackage(new { Id = "SearchPackage", Ver = "1.0" }, packages.ElementAt(5));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageUsesSearchTermsIfPresent() {
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
@@ -66,11 +66,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var packages = cmd.GetPackages();
 
             // Assert
-            Assert.AreEqual(1, packages.Count());
-            Assert.AreEqual("SearchPackage", packages.First().Id);
+            Assert.Equal(1, packages.Count());
+            Assert.Equal("SearchPackage", packages.First().Id);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageCollapsesVersionsByDefault() {
             // Arrange
             var factory = CreatePackageRepositoryFactory();
@@ -83,12 +83,12 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var packages = cmd.GetPackages();
 
             // Assert
-            Assert.AreEqual(2, packages.Count());
+            Assert.Equal(2, packages.Count());
             AssertPackage(new { Id = "jQuery", Ver = "1.50" }, packages.ElementAt(0));
             AssertPackage(new { Id = "NHibernate", Ver = "1.2" }, packages.ElementAt(1));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageFiltersAndCollapsesVersions() {
             // Arrange
             var factory = CreatePackageRepositoryFactory();
@@ -102,11 +102,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var packages = cmd.GetPackages();
 
             // Assert
-            Assert.AreEqual(1, packages.Count());
+            Assert.Equal(1, packages.Count());
             AssertPackage(new { Id = "NHibernate", Ver = "1.2" }, packages.ElementAt(0));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsAllVersionsIfAllVersionsFlagIsSet() {
             // Arrange
             var factory = CreatePackageRepositoryFactory();
@@ -120,7 +120,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var packages = cmd.GetPackages();
 
             // Assert
-            Assert.AreEqual(5, packages.Count());
+            Assert.Equal(5, packages.Count());
             AssertPackage(new { Id = "jQuery", Ver = "1.44" }, packages.ElementAt(0));
             AssertPackage(new { Id = "jQuery", Ver = "1.50" }, packages.ElementAt(1));
             AssertPackage(new { Id = "NHibernate", Ver = "1.0" }, packages.ElementAt(2));
@@ -128,7 +128,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             AssertPackage(new { Id = "NHibernate", Ver = "1.2" }, packages.ElementAt(4));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageResolvesSources() {
             // Arrange
             var factory = CreatePackageRepositoryFactory();
@@ -147,8 +147,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         private static void AssertPackage(dynamic expected, IPackage package) {
-            Assert.AreEqual(expected.Id, package.Id);
-            Assert.AreEqual(new Version(expected.Ver), package.Version);
+            Assert.Equal(expected.Id, package.Id);
+            Assert.Equal(new Version(expected.Ver), package.Version);
         }
 
         private static IPackageRepositoryFactory CreatePackageRepositoryFactory() {

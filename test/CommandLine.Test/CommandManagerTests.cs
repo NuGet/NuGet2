@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test.NuGetCommandLine {
-    [TestClass]
+    
     public class CommandManagerTests {
-        [TestMethod]
+        [Fact]
         public void RegisterCommand_AddsCommandToDictionary() {
             // Arrage
             CommandManager cm = new CommandManager();
@@ -15,10 +15,10 @@ namespace NuGet.Test.NuGetCommandLine {
             // Act
             cm.RegisterCommand(mockCommand);
             // Assert
-            Assert.AreEqual(1, cm.GetCommands().Count());
+            Assert.Equal(1, cm.GetCommands().Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCommand_ThrowsIfNoCommandFound() {
             // Arrange
             CommandManager cm = new CommandManager();
@@ -27,7 +27,7 @@ namespace NuGet.Test.NuGetCommandLine {
             ExceptionAssert.Throws<CommandLineException>(() => cm.GetCommand("NoCommandByThisName"), "Unknown command: 'NoCommandByThisName'");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCommand_ReturnsCorrectCommand() {
             // Arrange
             CommandManager cm = new CommandManager();
@@ -36,10 +36,10 @@ namespace NuGet.Test.NuGetCommandLine {
             // Act
             ICommand actualCommand = cm.GetCommand("MockCommand");
             // Assert
-            Assert.AreEqual(expectedCommand, actualCommand);
+            Assert.Equal(expectedCommand, actualCommand);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCommandOptions_ThrowsWhenOptionHasNoSetter() {
             // Arrange 
             CommandManager cm = new CommandManager();
@@ -50,7 +50,7 @@ namespace NuGet.Test.NuGetCommandLine {
             ExceptionAssert.Throws<InvalidOperationException>(() => cm.GetCommandOptions(cmd), expectedErrorText);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCommandOptions_ReturnsCorrectOpionAttributeAndPropertyInfo() {
             // Arrange 
             CommandManager cm = new CommandManager();
@@ -66,15 +66,15 @@ namespace NuGet.Test.NuGetCommandLine {
             // Act
             IDictionary<OptionAttribute, PropertyInfo> actual = cm.GetCommandOptions(cmd);
             // Assert
-            Assert.AreEqual(2, actual.Count);
-            Assert.AreEqual(expectedOptionAttributeOne, actual.Keys.First());
-            Assert.AreEqual(expectedPropertyInfoOne, actual[expectedOptionAttributeOne]);
-            Assert.AreEqual(expectedOptionAttributeTwo, actual.Keys.Last());
-            Assert.AreEqual(expectedPropertyInfoTwo, actual[expectedOptionAttributeTwo]);
+            Assert.Equal(2, actual.Count);
+            Assert.Equal(expectedOptionAttributeOne, actual.Keys.First());
+            Assert.Equal(expectedPropertyInfoOne, actual[expectedOptionAttributeOne]);
+            Assert.Equal(expectedOptionAttributeTwo, actual.Keys.Last());
+            Assert.Equal(expectedPropertyInfoTwo, actual[expectedOptionAttributeTwo]);
 
         }
 
-        [TestMethod]
+        [Fact]
         public void RegisterCommand_DoesNotRegisterCommandIfNoCommandAttributesArePresent() {
             // Arrange 
             CommandManager cm = new CommandManager();
@@ -85,10 +85,10 @@ namespace NuGet.Test.NuGetCommandLine {
             var registeredCommands = cm.GetCommands();
 
             // Assert
-            Assert.IsFalse(registeredCommands.Any());
+            Assert.False(registeredCommands.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void RegisterCommand_ReturnsExactMatchesEvenIfAmbigious() {
             // Arrange 
             CommandManager cm = new CommandManager();
@@ -101,11 +101,11 @@ namespace NuGet.Test.NuGetCommandLine {
 
             // Assert
             // If we get this far, we've found 'foo'
-            Assert.IsNotNull(result);
-            Assert.AreEqual(result.CommandAttribute.CommandName, "Foo");
+            Assert.NotNull(result);
+            Assert.Equal(result.CommandAttribute.CommandName, "Foo");
         }
 
-        [TestMethod]
+        [Fact]
         public void RegisterCommand_ThrowsIfCommandNamesAreAmbigious() {
             // Arrange 
             CommandManager cm = new CommandManager();

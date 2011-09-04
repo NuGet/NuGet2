@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class ProjectSystemExtensionsTest {
-        [TestMethod]
+        [Fact]
         public void GetCompatibleReferencesPrefersMatchingProfile() {
             // Arrange                                                                                                                       
             var assemblyReference30client = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0"), "client"));
@@ -20,11 +20,11 @@ namespace NuGet.Test {
             var targetAssemblyReferences = GetCompatibleItems(new FrameworkName(".NETFramework", new Version("4.0")), assemblyReferences).ToList();
 
             // Assert
-            Assert.AreEqual(1, targetAssemblyReferences.Count);
-            Assert.AreSame(assemblyReference40, targetAssemblyReferences[0]);
+            Assert.Equal(1, targetAssemblyReferences.Count);
+            Assert.Same(assemblyReference40, targetAssemblyReferences[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCompatibleReferencesPrefersMatchingProfileIfSpecified() {
             // Arrange                                                                                                                       
             var assemblyReferenceSL40phone = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName("Silverlight", new Version("4.0"), "WindowsPhone"));
@@ -36,11 +36,11 @@ namespace NuGet.Test {
                                                          .ToList();
 
             // Assert
-            Assert.AreEqual(1, targetAssemblyReferences.Count);
-            Assert.AreSame(assemblyReferenceSL40phone, targetAssemblyReferences[0]);
+            Assert.Equal(1, targetAssemblyReferences.Count);
+            Assert.Same(assemblyReferenceSL40phone, targetAssemblyReferences[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCompatibleReferencesPicksHigestVersionLessThanTargetVersion() {
             // Arrange                                                                                                                       
             var assemblyReference10 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("1.0")));
@@ -54,11 +54,11 @@ namespace NuGet.Test {
                                                          .ToList();
 
             // Assert
-            Assert.AreEqual(1, targetAssemblyReferences.Count);
-            Assert.AreSame(assemblyReference30, targetAssemblyReferences[0]);
+            Assert.Equal(1, targetAssemblyReferences.Count);
+            Assert.Same(assemblyReference30, targetAssemblyReferences[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCompatibleReferencesReferenceWithUnspecifiedFrameworkName() {
             // Arrange
             var assemblyReference10 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("1.0")));
@@ -72,11 +72,11 @@ namespace NuGet.Test {
             var targetAssemblyReferences = GetCompatibleItems(new FrameworkName(".NETFramework", new Version("3.5")), assemblyReferences).ToList();
 
             // Assert
-            Assert.AreEqual(1, targetAssemblyReferences.Count);
-            Assert.AreSame(assemblyReference30, targetAssemblyReferences[0]);
+            Assert.Equal(1, targetAssemblyReferences.Count);
+            Assert.Same(assemblyReference30, targetAssemblyReferences[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCompatibleReferencesReferenceWithUnspecifiedFrameworkNameWinsIfNoMatchingSpecificFrameworkNames() {
             // Arrange
             var assemblyReference20 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("2.0")));
@@ -89,11 +89,11 @@ namespace NuGet.Test {
             var targetAssemblyReferences = GetCompatibleItems(new FrameworkName(".NETFramework", new Version("1.1")), assemblyReferences).ToList();
 
             // Assert
-            Assert.AreEqual(1, targetAssemblyReferences.Count);
-            Assert.AreSame(assemblyReferenceNoVersion, targetAssemblyReferences[0]);
+            Assert.Equal(1, targetAssemblyReferences.Count);
+            Assert.Same(assemblyReferenceNoVersion, targetAssemblyReferences[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCompatibleReferencesReferenceMostSpecificVersionWins() {
             // Arrange
             var assemblyReference10 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("1.0")));
@@ -107,11 +107,11 @@ namespace NuGet.Test {
             var targetAssemblyReferences = GetCompatibleItems(new FrameworkName(".NETFramework", new Version("4.0")), assemblyReferences).ToList();
 
             // Assert
-            Assert.AreEqual(1, targetAssemblyReferences.Count);
-            Assert.AreSame(assemblyReference40, targetAssemblyReferences[0]);
+            Assert.Equal(1, targetAssemblyReferences.Count);
+            Assert.Same(assemblyReference40, targetAssemblyReferences[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCompatibleReferencesHighestSpecifiedAssemblyLessThanProjectTargetFrameworkWins() {
             // Arrange
             var assemblyReference10 = PackageUtility.CreateAssemblyReference("foo1.dll", new FrameworkName(".NETFramework", new Version("1.0")));
@@ -125,11 +125,11 @@ namespace NuGet.Test {
             var compatibleAssemblyReferences = GetCompatibleItems(new FrameworkName(".NETFramework", new Version("3.5")), assemblyReferences).ToList();
 
             // Assert
-            Assert.AreEqual(1, compatibleAssemblyReferences.Count);
-            Assert.AreEqual(assemblyReference30, compatibleAssemblyReferences[0]);
+            Assert.Equal(1, compatibleAssemblyReferences.Count);
+            Assert.Equal(assemblyReference30, compatibleAssemblyReferences[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCompatibleReferencesReturnsNullIfNoBestMatchFound() {
             // Arrange
             var assemblyReference = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("5.0")));
@@ -139,10 +139,10 @@ namespace NuGet.Test {
             var compatibleAssemblyReferences = GetCompatibleItems(new FrameworkName(".NETFramework", new Version("3.5")), assemblyReferences);
 
             // Assert
-            Assert.IsNull(compatibleAssemblyReferences);
+            Assert.Null(compatibleAssemblyReferences);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCompatibleReferencesMostSpecificFrameworkIfProfileNameSpecified() {
             // Arrange
             var assemblyReference30client = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0"), "Client"));
@@ -154,8 +154,8 @@ namespace NuGet.Test {
             var compatibleAssemblyReferences = GetCompatibleItems(new FrameworkName(".NETFramework", new Version("4.0"), "Client"), assemblyReferences).ToList();
 
             // Assert
-            Assert.AreEqual(1, compatibleAssemblyReferences.Count);
-            Assert.AreEqual(assemblyReference40, compatibleAssemblyReferences[0]);
+            Assert.Equal(1, compatibleAssemblyReferences.Count);
+            Assert.Equal(assemblyReference40, compatibleAssemblyReferences[0]);
         }
 
         private IEnumerable<T> GetCompatibleItems<T>(FrameworkName frameworkName, IEnumerable<T> items) where T : IFrameworkTargetable {

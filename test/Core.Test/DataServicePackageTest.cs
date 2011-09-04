@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class DataServicePackageTest {
-        [TestMethod]
+        [Fact]
         public void EmptyDependenciesStringReturnsEmptyDependenciesCollection() {
             // Arrange
             var servicePackage = new DataServicePackage();
@@ -17,19 +17,19 @@ namespace NuGet.Test {
             servicePackage.Dependencies = "";
 
             // Assert
-            Assert.IsFalse(((IPackage)servicePackage).Dependencies.Any());
+            Assert.False(((IPackage)servicePackage).Dependencies.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void NullDependenciesStringReturnsEmptyDependenciesCollection() {
             // Arrange
             var servicePackage = new DataServicePackage();
 
             // Assert
-            Assert.IsFalse(((IPackage)servicePackage).Dependencies.Any());
+            Assert.False(((IPackage)servicePackage).Dependencies.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void DependenciesStringWithExtraSpaces() {
             // Arrange
             var servicePackage = new DataServicePackage();
@@ -39,18 +39,18 @@ namespace NuGet.Test {
             List<PackageDependency> dependencies = ((IPackage)servicePackage).Dependencies.ToList();
 
             // Assert
-            Assert.AreEqual(2, dependencies.Count);
-            Assert.AreEqual("A", dependencies[0].Id);
-            Assert.IsTrue(dependencies[0].VersionSpec.IsMinInclusive);
-            Assert.AreEqual(new Version("1.3"), dependencies[0].VersionSpec.MinVersion);
-            Assert.AreEqual("B", dependencies[1].Id);
-            Assert.IsTrue(dependencies[1].VersionSpec.IsMinInclusive);
-            Assert.AreEqual(new Version("2.4"), dependencies[1].VersionSpec.MinVersion);
-            Assert.IsFalse(dependencies[1].VersionSpec.IsMaxInclusive);
-            Assert.AreEqual(new Version("5.0"), dependencies[1].VersionSpec.MaxVersion);
+            Assert.Equal(2, dependencies.Count);
+            Assert.Equal("A", dependencies[0].Id);
+            Assert.True(dependencies[0].VersionSpec.IsMinInclusive);
+            Assert.Equal(new Version("1.3"), dependencies[0].VersionSpec.MinVersion);
+            Assert.Equal("B", dependencies[1].Id);
+            Assert.True(dependencies[1].VersionSpec.IsMinInclusive);
+            Assert.Equal(new Version("2.4"), dependencies[1].VersionSpec.MinVersion);
+            Assert.False(dependencies[1].VersionSpec.IsMaxInclusive);
+            Assert.Equal(new Version("5.0"), dependencies[1].VersionSpec.MaxVersion);
         }
 
-        [TestMethod]
+        [Fact]
         public void DownloadAndVerifyThrowsIfPackageHashIsNull() {
             // Arrange
             var servicePackage = new DataServicePackage {
@@ -62,7 +62,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => servicePackage.DownloadAndVerifyPackage(new MockPackageRepository()), "Failed to download package correctly. The contents of the package could not be verified.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldUpdateReturnsTrueIfOldHashAndPackageHashAreDifferent() {
             // Arrange
             var servicePackage = new DataServicePackage {
@@ -75,10 +75,10 @@ namespace NuGet.Test {
             bool shouldUpdate = servicePackage.ShouldUpdatePackage(new MockPackageRepository());
 
             // Assert
-            Assert.IsTrue(shouldUpdate);
+            Assert.True(shouldUpdate);
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldUpdateReturnsTrueIfPackageNotInRepository() {
             // Arrange
             var servicePackage = new DataServicePackage {
@@ -92,10 +92,10 @@ namespace NuGet.Test {
             bool shouldUpdate = servicePackage.ShouldUpdatePackage(new MockPackageRepository());
 
             // Assert
-            Assert.IsTrue(shouldUpdate);
+            Assert.True(shouldUpdate);
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldUpdateReturnsTrueIfRepositoryPackageHashIsDifferentFromPackageHash() {
             // Arrange
             var servicePackage = new DataServicePackage {
@@ -113,10 +113,10 @@ namespace NuGet.Test {
             bool shouldUpdate = servicePackage.ShouldUpdatePackage(repository);
 
             // Assert
-            Assert.IsTrue(shouldUpdate);
+            Assert.True(shouldUpdate);
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldUpdateReturnsTrueIfRepositoryThrows() {
             // Arrange
             var servicePackage = new DataServicePackage {
@@ -133,7 +133,7 @@ namespace NuGet.Test {
             bool shouldUpdate = servicePackage.ShouldUpdatePackage(repository.Object);
 
             // Assert
-            Assert.IsTrue(shouldUpdate);
+            Assert.True(shouldUpdate);
         }
     }
 }

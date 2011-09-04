@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class AggregateQueryTest {
-        [TestMethod]
+        [Fact]
         public void AggregateQueryIgnoresInvalidRepositoriesIfFlagIsSet() {
             // Arrange
             IEnumerable<IQueryable<string>> sources = new[] {
@@ -19,13 +19,13 @@ namespace NuGet.Test {
             var aggregateQuery = new AggregateQuery<string>(sources, StringComparer.Ordinal, NullLogger.Instance, ignoreFailures: true).OrderBy(c => c);
 
             // Assert
-            CollectionAssert.AreEqual(
+            Assert.Equal(
                 new[] { "0A", "0C", "1A", "1C", "2A", "2C" },
                 aggregateQuery.ToArray()
             );
         }
 
-        [TestMethod]
+        [Fact]
         public void AggregateQueryThrowsForInvalidRepositoriesIfFlagIsSet() {
             // Arrange
             IEnumerable<IQueryable<string>> sources = new[] {
@@ -40,7 +40,7 @@ namespace NuGet.Test {
         }
 
 
-        [TestMethod]
+        [Fact]
         public void CountDoesNotThrowIfForInvalidRepositoriesIfFlagIsSet() {
             // Arrange
             IEnumerable<IQueryable<string>> sources = new[] {
@@ -53,7 +53,7 @@ namespace NuGet.Test {
             var aggregateQuery = new AggregateQuery<string>(sources, StringComparer.Ordinal, NullLogger.Instance, ignoreFailures: true).OrderBy(c => c);
 
             // Assert
-            Assert.AreEqual(6, aggregateQuery.Count());
+            Assert.Equal(6, aggregateQuery.Count());
         }
 
         private IQueryable<string> GetInvalidSequence(string suffix) {

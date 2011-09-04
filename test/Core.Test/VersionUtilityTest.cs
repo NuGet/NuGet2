@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
 using System.Runtime.Versioning;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class VersionUtilityTest {
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkNameNormalizesSupportedNetFrameworkNames() {
             // Arrange
             var knownNameFormats = new[] { ".net", ".netframework", "net", "netframework" };
@@ -17,12 +17,12 @@ namespace NuGet.Test {
 
             // Assert
             foreach (var frameworkName in frameworkNames) {
-                Assert.AreEqual(".NETFramework", frameworkName.Identifier);
-                Assert.AreEqual(defaultVersion, frameworkName.Version);
+                Assert.Equal(".NETFramework", frameworkName.Identifier);
+                Assert.Equal(defaultVersion, frameworkName.Version);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkNameNormalizesSupportedNetMicroFrameworkNames() {
             // Arrange
             var knownNameFormats = new[] { "netmf4.1", ".NETMicroFramework4.1" };
@@ -33,12 +33,12 @@ namespace NuGet.Test {
 
             // Assert
             foreach (var frameworkName in frameworkNames) {
-                Assert.AreEqual(".NETMicroFramework", frameworkName.Identifier);
-                Assert.AreEqual(version41, frameworkName.Version);
+                Assert.Equal(".NETMicroFramework", frameworkName.Identifier);
+                Assert.Equal(version41, frameworkName.Version);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkNameNormalizesSupportedSilverlightNames() {
             // Arrange
             var knownNameFormats = new[] { "sl", "SL", "SilVerLight", "Silverlight", "Silverlight " };
@@ -49,12 +49,12 @@ namespace NuGet.Test {
 
             // Assert
             foreach (var frameworkName in frameworkNames) {
-                Assert.AreEqual("Silverlight", frameworkName.Identifier);
-                Assert.AreEqual(defaultVersion, frameworkName.Version);
+                Assert.Equal("Silverlight", frameworkName.Identifier);
+                Assert.Equal(defaultVersion, frameworkName.Version);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkNameReturnsUnsupportedFrameworkNameIfUnrecognized() {
             // Arrange
             Version version20 = new Version("2.0");
@@ -65,12 +65,12 @@ namespace NuGet.Test {
             var frameworkName3 = VersionUtility.ParseFrameworkName("NET40Foo");
 
             // Assert
-            Assert.AreEqual("Unsupported", frameworkName1.Identifier);
-            Assert.AreEqual("Unsupported", frameworkName2.Identifier);
-            Assert.AreEqual("Unsupported", frameworkName3.Identifier);
+            Assert.Equal("Unsupported", frameworkName1.Identifier);
+            Assert.Equal("Unsupported", frameworkName2.Identifier);
+            Assert.Equal("Unsupported", frameworkName3.Identifier);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkNameUsesNetFrameworkIfOnlyVersionSpecified() {
             // Arrange
             Version version20 = new Version("2.0");
@@ -79,11 +79,11 @@ namespace NuGet.Test {
             var frameworkName = VersionUtility.ParseFrameworkName("20");
 
             // Assert
-            Assert.AreEqual(".NETFramework", frameworkName.Identifier);
-            Assert.AreEqual(version20, frameworkName.Version);
+            Assert.Equal(".NETFramework", frameworkName.Identifier);
+            Assert.Equal(version20, frameworkName.Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkNameVersionFormats() {
             // Arrange
             var versionFormats = new[] { "4.0", "40", "4" };
@@ -94,97 +94,97 @@ namespace NuGet.Test {
 
             // Assert
             foreach (var frameworkName in frameworkNames) {
-                Assert.AreEqual(".NETFramework", frameworkName.Identifier);
-                Assert.AreEqual(version40, frameworkName.Version);
+                Assert.Equal(".NETFramework", frameworkName.Identifier);
+                Assert.Equal(version40, frameworkName.Version);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkNameVersionIntegerLongerThan4CharsTrimsExccess() {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("NET41235");
 
             // Assert
-            Assert.AreEqual(".NETFramework", frameworkName.Identifier);
-            Assert.AreEqual(new Version("4.1.2.3"), frameworkName.Version);
+            Assert.Equal(".NETFramework", frameworkName.Identifier);
+            Assert.Equal(new Version("4.1.2.3"), frameworkName.Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkNameInvalidVersionFormatUsesDefaultVersion() {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("NET4.1.4.5.5");
 
             // Assert
-            Assert.AreEqual("Unsupported", frameworkName.Identifier);
+            Assert.Equal("Unsupported", frameworkName.Identifier);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkNameWithProfile() {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("net40-client");
 
             // Assert
-            Assert.AreEqual(".NETFramework", frameworkName.Identifier);
-            Assert.AreEqual(new Version("4.0"), frameworkName.Version);
-            Assert.AreEqual("Client", frameworkName.Profile);
+            Assert.Equal(".NETFramework", frameworkName.Identifier);
+            Assert.Equal(new Version("4.0"), frameworkName.Version);
+            Assert.Equal("Client", frameworkName.Profile);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkNameWithUnknownProfileUsesProfileAsIs() {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("net40-other");
 
             // Assert
-            Assert.AreEqual(".NETFramework", frameworkName.Identifier);
-            Assert.AreEqual(new Version("4.0"), frameworkName.Version);
-            Assert.AreEqual("other", frameworkName.Profile);
+            Assert.Equal(".NETFramework", frameworkName.Identifier);
+            Assert.Equal(new Version("4.0"), frameworkName.Version);
+            Assert.Equal("other", frameworkName.Profile);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkNameWithFullProfileNoamlizesToEmptyProfile() {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("net40-full");
 
             // Assert
-            Assert.AreEqual(".NETFramework", frameworkName.Identifier);
-            Assert.AreEqual(new Version("4.0"), frameworkName.Version);
-            Assert.AreEqual(String.Empty, frameworkName.Profile);
+            Assert.Equal(".NETFramework", frameworkName.Identifier);
+            Assert.Equal(new Version("4.0"), frameworkName.Version);
+            Assert.Equal(String.Empty, frameworkName.Profile);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkNameWithWPProfileGetNormalizedToWindowsPhone() {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("sl4-wp");
 
             // Assert
-            Assert.AreEqual("Silverlight", frameworkName.Identifier);
-            Assert.AreEqual(new Version("4.0"), frameworkName.Version);
-            Assert.AreEqual("WindowsPhone", frameworkName.Profile);
+            Assert.Equal("Silverlight", frameworkName.Identifier);
+            Assert.Equal(new Version("4.0"), frameworkName.Version);
+            Assert.Equal("WindowsPhone", frameworkName.Profile);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkNameWithCFProfileGetNormalizedToCompactFramework() {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("net20-cf");
 
             // Assert
-            Assert.AreEqual(".NETFramework", frameworkName.Identifier);
-            Assert.AreEqual(new Version("2.0"), frameworkName.Version);
-            Assert.AreEqual("CompactFramework", frameworkName.Profile);
+            Assert.Equal(".NETFramework", frameworkName.Identifier);
+            Assert.Equal(new Version("2.0"), frameworkName.Version);
+            Assert.Equal("CompactFramework", frameworkName.Profile);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkNameWithEmptyProfile() {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("sl4-");
 
             // Assert
-            Assert.AreEqual("Silverlight", frameworkName.Identifier);
-            Assert.AreEqual(new Version("4.0"), frameworkName.Version);
-            Assert.AreEqual(String.Empty, frameworkName.Profile);
+            Assert.Equal("Silverlight", frameworkName.Identifier);
+            Assert.Equal(new Version("4.0"), frameworkName.Version);
+            Assert.Equal(String.Empty, frameworkName.Profile);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkNameWithInvalidFrameworkNameThrows() {
             // Act
             ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName("-"), "frameworkName", "Framework name is missing.");
@@ -193,7 +193,7 @@ namespace NuGet.Test {
             ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName("---"), "frameworkName", "Invalid framework name format. Expected {framework}{version}-{profile}.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseFrameworkFolderName() {
             // foo.dll
             // sub\foo.dll -> Unsupported since we can't tell if this was meant to be a framework name or not
@@ -207,19 +207,19 @@ namespace NuGet.Test {
             var f5 = VersionUtility.ParseFrameworkFolderName(@"SL20\sub1\sub2\foo.dll");
             var f6 = VersionUtility.ParseFrameworkFolderName(@"net\foo.dll");
 
-            Assert.IsNull(f1);
-            Assert.AreEqual("Unsupported", f2.Identifier);
-            Assert.AreEqual("Silverlight", f3.Identifier);
-            Assert.AreEqual(new Version("4.0"), f3.Version);
-            Assert.AreEqual("Silverlight", f4.Identifier);
-            Assert.AreEqual(new Version("3.0"), f4.Version);
-            Assert.AreEqual("Silverlight", f5.Identifier);
-            Assert.AreEqual(new Version("2.0"), f5.Version);
-            Assert.AreEqual(".NETFramework", f6.Identifier);
-            Assert.AreEqual(new Version(), f6.Version);
+            Assert.Null(f1);
+            Assert.Equal("Unsupported", f2.Identifier);
+            Assert.Equal("Silverlight", f3.Identifier);
+            Assert.Equal(new Version("4.0"), f3.Version);
+            Assert.Equal("Silverlight", f4.Identifier);
+            Assert.Equal(new Version("3.0"), f4.Version);
+            Assert.Equal("Silverlight", f5.Identifier);
+            Assert.Equal(new Version("2.0"), f5.Version);
+            Assert.Equal(".NETFramework", f6.Identifier);
+            Assert.Equal(new Version(), f6.Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetFrameworkStringFromFrameworkName() {
             // Arrange
             var net40 = new FrameworkName(".NETFramework", new Version(4, 0));
@@ -240,207 +240,207 @@ namespace NuGet.Test {
             string netMicro41Value = VersionUtility.GetFrameworkString(netMicro41);
 
             // Assert
-            Assert.AreEqual(".NETFramework4.0", net40Value);
-            Assert.AreEqual(".NETFramework4.0-Client", net40ClientValue);
-            Assert.AreEqual("Silverlight3.0", sl3Value);
-            Assert.AreEqual("Silverlight4.0", sl4Value);
-            Assert.AreEqual("Silverlight4.0-WindowsPhone", wp7Value);
-            Assert.AreEqual("Silverlight4.0-WindowsPhone71", wp7MangoValue);
-            Assert.AreEqual(".NETMicroFramework4.1", netMicro41Value);
+            Assert.Equal(".NETFramework4.0", net40Value);
+            Assert.Equal(".NETFramework4.0-Client", net40ClientValue);
+            Assert.Equal("Silverlight3.0", sl3Value);
+            Assert.Equal("Silverlight4.0", sl4Value);
+            Assert.Equal("Silverlight4.0-WindowsPhone", wp7Value);
+            Assert.Equal("Silverlight4.0-WindowsPhone71", wp7MangoValue);
+            Assert.Equal(".NETMicroFramework4.1", netMicro41Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseVersionSpecWithNullThrows() {
             // Act & Assert
             ExceptionAssert.ThrowsArgNull(() => VersionUtility.ParseVersionSpec(null), "value");
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseVersionSpecSimpleVersionNoBrackets() {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("1.2");
 
             // Assert
-            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
-            Assert.IsTrue(versionInfo.IsMinInclusive);
-            Assert.AreEqual(null, versionInfo.MaxVersion);
-            Assert.IsFalse(versionInfo.IsMaxInclusive);
+            Assert.Equal("1.2", versionInfo.MinVersion.ToString());
+            Assert.True(versionInfo.IsMinInclusive);
+            Assert.Equal(null, versionInfo.MaxVersion);
+            Assert.False(versionInfo.IsMaxInclusive);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseVersionSpecSimpleVersionNoBracketsExtraSpaces() {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("  1  .   2  ");
 
             // Assert
-            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
-            Assert.IsTrue(versionInfo.IsMinInclusive);
-            Assert.AreEqual(null, versionInfo.MaxVersion);
-            Assert.IsFalse(versionInfo.IsMaxInclusive);
+            Assert.Equal("1.2", versionInfo.MinVersion.ToString());
+            Assert.True(versionInfo.IsMinInclusive);
+            Assert.Equal(null, versionInfo.MaxVersion);
+            Assert.False(versionInfo.IsMaxInclusive);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseVersionSpecMaxOnlyInclusive() {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("(,1.2]");
 
             // Assert
-            Assert.AreEqual(null, versionInfo.MinVersion);
-            Assert.IsFalse(versionInfo.IsMinInclusive);
-            Assert.AreEqual("1.2", versionInfo.MaxVersion.ToString());
-            Assert.IsTrue(versionInfo.IsMaxInclusive);
+            Assert.Equal(null, versionInfo.MinVersion);
+            Assert.False(versionInfo.IsMinInclusive);
+            Assert.Equal("1.2", versionInfo.MaxVersion.ToString());
+            Assert.True(versionInfo.IsMaxInclusive);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseVersionSpecMaxOnlyExclusive() {
             var versionInfo = VersionUtility.ParseVersionSpec("(,1.2)");
-            Assert.AreEqual(null, versionInfo.MinVersion);
-            Assert.IsFalse(versionInfo.IsMinInclusive);
-            Assert.AreEqual("1.2", versionInfo.MaxVersion.ToString());
-            Assert.IsFalse(versionInfo.IsMaxInclusive);
+            Assert.Equal(null, versionInfo.MinVersion);
+            Assert.False(versionInfo.IsMinInclusive);
+            Assert.Equal("1.2", versionInfo.MaxVersion.ToString());
+            Assert.False(versionInfo.IsMaxInclusive);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseVersionSpecExactVersion() {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("[1.2]");
 
             // Assert
-            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
-            Assert.IsTrue(versionInfo.IsMinInclusive);
-            Assert.AreEqual("1.2", versionInfo.MaxVersion.ToString());
-            Assert.IsTrue(versionInfo.IsMaxInclusive);
+            Assert.Equal("1.2", versionInfo.MinVersion.ToString());
+            Assert.True(versionInfo.IsMinInclusive);
+            Assert.Equal("1.2", versionInfo.MaxVersion.ToString());
+            Assert.True(versionInfo.IsMaxInclusive);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseVersionSpecMinOnlyExclusive() {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("(1.2,)");
 
             // Assert
-            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
-            Assert.IsFalse(versionInfo.IsMinInclusive);
-            Assert.AreEqual(null, versionInfo.MaxVersion);
-            Assert.IsFalse(versionInfo.IsMaxInclusive);
+            Assert.Equal("1.2", versionInfo.MinVersion.ToString());
+            Assert.False(versionInfo.IsMinInclusive);
+            Assert.Equal(null, versionInfo.MaxVersion);
+            Assert.False(versionInfo.IsMaxInclusive);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseVersionSpecRangeExclusiveExclusive() {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("(1.2,2.3)");
 
             // Assert
-            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
-            Assert.IsFalse(versionInfo.IsMinInclusive);
-            Assert.AreEqual("2.3", versionInfo.MaxVersion.ToString());
-            Assert.IsFalse(versionInfo.IsMaxInclusive);
+            Assert.Equal("1.2", versionInfo.MinVersion.ToString());
+            Assert.False(versionInfo.IsMinInclusive);
+            Assert.Equal("2.3", versionInfo.MaxVersion.ToString());
+            Assert.False(versionInfo.IsMaxInclusive);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseVersionSpecRangeExclusiveInclusive() {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("(1.2,2.3]");
 
             // Assert
-            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
-            Assert.IsFalse(versionInfo.IsMinInclusive);
-            Assert.AreEqual("2.3", versionInfo.MaxVersion.ToString());
-            Assert.IsTrue(versionInfo.IsMaxInclusive);
+            Assert.Equal("1.2", versionInfo.MinVersion.ToString());
+            Assert.False(versionInfo.IsMinInclusive);
+            Assert.Equal("2.3", versionInfo.MaxVersion.ToString());
+            Assert.True(versionInfo.IsMaxInclusive);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseVersionSpecRangeInclusiveExclusive() {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("[1.2,2.3)");
-            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
-            Assert.IsTrue(versionInfo.IsMinInclusive);
-            Assert.AreEqual("2.3", versionInfo.MaxVersion.ToString());
-            Assert.IsFalse(versionInfo.IsMaxInclusive);
+            Assert.Equal("1.2", versionInfo.MinVersion.ToString());
+            Assert.True(versionInfo.IsMinInclusive);
+            Assert.Equal("2.3", versionInfo.MaxVersion.ToString());
+            Assert.False(versionInfo.IsMaxInclusive);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseVersionSpecRangeInclusiveInclusive() {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("[1.2,2.3]");
 
             // Assert
-            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
-            Assert.IsTrue(versionInfo.IsMinInclusive);
-            Assert.AreEqual("2.3", versionInfo.MaxVersion.ToString());
-            Assert.IsTrue(versionInfo.IsMaxInclusive);
+            Assert.Equal("1.2", versionInfo.MinVersion.ToString());
+            Assert.True(versionInfo.IsMinInclusive);
+            Assert.Equal("2.3", versionInfo.MaxVersion.ToString());
+            Assert.True(versionInfo.IsMaxInclusive);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseVersionSpecRangeInclusiveInclusiveExtraSpaces() {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("   [  1 .2   , 2  .3   ]  ");
 
             // Assert
-            Assert.AreEqual("1.2", versionInfo.MinVersion.ToString());
-            Assert.IsTrue(versionInfo.IsMinInclusive);
-            Assert.AreEqual("2.3", versionInfo.MaxVersion.ToString());
-            Assert.IsTrue(versionInfo.IsMaxInclusive);
+            Assert.Equal("1.2", versionInfo.MinVersion.ToString());
+            Assert.True(versionInfo.IsMinInclusive);
+            Assert.Equal("2.3", versionInfo.MaxVersion.ToString());
+            Assert.True(versionInfo.IsMaxInclusive);
         }
 
-        [TestMethod]
+        [Fact]
         public void NormalizeVersionFillsInZerosForUnsetVersionParts() {
             // Act
             Version version = VersionUtility.NormalizeVersion(new Version("1.5"));
 
             // Assert
-            Assert.AreEqual(new Version("1.5.0.0"), version);
+            Assert.Equal(new Version("1.5.0.0"), version);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseVersionSpecRangeIntegerRanges() {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("   [1, 2]  ");
 
             // Assert
-            Assert.AreEqual("1.0", versionInfo.MinVersion.ToString());
-            Assert.IsTrue(versionInfo.IsMinInclusive);
-            Assert.AreEqual("2.0", versionInfo.MaxVersion.ToString());
-            Assert.IsTrue(versionInfo.IsMaxInclusive);
+            Assert.Equal("1.0", versionInfo.MinVersion.ToString());
+            Assert.True(versionInfo.IsMinInclusive);
+            Assert.Equal("2.0", versionInfo.MaxVersion.ToString());
+            Assert.True(versionInfo.IsMaxInclusive);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseVersionSpecRangeNegativeIntegerRanges() {
             // Act
             IVersionSpec versionInfo;
             bool parsed = VersionUtility.TryParseVersionSpec("   [-1, 2]  ", out versionInfo);
 
-            Assert.IsFalse(parsed);
-            Assert.IsNull(versionInfo);
+            Assert.False(parsed);
+            Assert.Null(versionInfo);
         }
 
-        [TestMethod]
+        [Fact]
         public void TrimVersionTrimsRevisionIfZero() {
             // Act
             var version = VersionUtility.TrimVersion(new Version("1.2.3.0"));
 
             // Assert
-            Assert.AreEqual(new Version("1.2.3"), version);
+            Assert.Equal(new Version("1.2.3"), version);
         }
 
-        [TestMethod]
+        [Fact]
         public void TrimVersionTrimsRevisionAndBuildIfZero() {
             // Act
             var version = VersionUtility.TrimVersion(new Version("1.2.0.0"));
 
             // Assert
-            Assert.AreEqual(new Version("1.2"), version);
+            Assert.Equal(new Version("1.2"), version);
         }
 
-        [TestMethod]
+        [Fact]
         public void TrimVersionTrimsBuildIfRevisionIsNonZero() {
             // Act
             var version = VersionUtility.TrimVersion(new Version("1.2.0.5"));
 
             // Assert
-            Assert.AreEqual(new Version("1.2.0.5"), version);
+            Assert.Equal(new Version("1.2.0.5"), version);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetAllPossibleVersionsTwoDigits() {
             // Arrange
             var expectedVersions = new[] { 
@@ -454,11 +454,11 @@ namespace NuGet.Test {
 
             // Assert
             foreach (var v in expectedVersions) {
-                Assert.IsTrue(versions.Contains(v));
+                Assert.True(versions.Contains(v));
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetAllPossibleVersionsThreeDigits() {
             // Arrange
             var expectedVersions = new[] { 
@@ -472,11 +472,11 @@ namespace NuGet.Test {
 
             // Assert
             foreach (var v in expectedVersions) {
-                Assert.IsTrue(versions.Contains(v));
+                Assert.True(versions.Contains(v));
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetAllPossibleVersionsFourDigits() {
             // Arrange
             var expectedVersions = new[] { 
@@ -490,11 +490,11 @@ namespace NuGet.Test {
 
             // Assert
             foreach (var v in expectedVersions) {
-                Assert.IsTrue(versions.Contains(v));
+                Assert.True(versions.Contains(v));
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetAllPossibleVersionsThreeDigitsWithZeroBetween() {
             // Arrange
             var expectedVersions = new[] { 
@@ -507,11 +507,11 @@ namespace NuGet.Test {
 
             // Assert
             foreach (var v in expectedVersions) {
-                Assert.IsTrue(versions.Contains(v));
+                Assert.True(versions.Contains(v));
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetAllPossibleVersionsFourDigitsWithTrailingZeros() {
             // Arrange
             var expectedVersions = new[] { 
@@ -525,11 +525,11 @@ namespace NuGet.Test {
 
             // Assert
             foreach (var v in expectedVersions) {
-                Assert.IsTrue(versions.Contains(v));
+                Assert.True(versions.Contains(v));
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetSafeVersions() {
             // Act
             IVersionSpec versionSpec1 = VersionUtility.GetSafeRange(new Version("1.3"));
@@ -543,18 +543,18 @@ namespace NuGet.Test {
         }
 
         private void AssertSafeVersion(IVersionSpec versionSpec, Version minVer, Version maxVer) {
-            Assert.IsTrue(versionSpec.IsMinInclusive);
-            Assert.IsFalse(versionSpec.IsMaxInclusive);
-            Assert.AreEqual(versionSpec.MinVersion, minVer);
-            Assert.AreEqual(versionSpec.MaxVersion, maxVer);
+            Assert.True(versionSpec.IsMinInclusive);
+            Assert.False(versionSpec.IsMaxInclusive);
+            Assert.Equal(versionSpec.MinVersion, minVer);
+            Assert.Equal(versionSpec.MaxVersion, maxVer);
         }
 
-        [TestMethod]
+        [Fact]
         public void TrimVersionThrowsIfVersionNull() {
             ExceptionAssert.ThrowsArgNull(() => VersionUtility.TrimVersion(null), "version");
         }
 
-        [TestMethod]
+        [Fact]
         public void IsCompatibleReturnsFalseForSlAndWindowsPhoneFrameworks() {
             // Arrange
             FrameworkName sl3 = VersionUtility.ParseFrameworkName("sl3");
@@ -565,11 +565,11 @@ namespace NuGet.Test {
             bool slCompatibleWithWp7 = VersionUtility.IsCompatible(wp7, sl3);
 
             // Assert
-            Assert.IsFalse(slCompatibleWithWp7);
-            Assert.IsFalse(wp7CompatibleWithSl);
+            Assert.False(slCompatibleWithWp7);
+            Assert.False(wp7CompatibleWithSl);
         }
 
-        [TestMethod]
+        [Fact]
         public void IsCompatibleWindowsPhoneVersions() {
             // Arrange
             FrameworkName wp7 = VersionUtility.ParseFrameworkName("sl3-wp");
@@ -580,11 +580,11 @@ namespace NuGet.Test {
             bool wp7CompatibleWithwp7Mango = VersionUtility.IsCompatible(wp7Mango, wp7);
 
             // Assert
-            Assert.IsFalse(wp7MangoCompatibleWithwp7);
-            Assert.IsTrue(wp7CompatibleWithwp7Mango);
+            Assert.False(wp7MangoCompatibleWithwp7);
+            Assert.True(wp7CompatibleWithwp7Mango);
         }
 
-        [TestMethod]
+        [Fact]
         public void NetFrameworkCompatibiilityIsCompatibleReturns() {
             // Arrange
             FrameworkName net40 = VersionUtility.ParseFrameworkName("net40");
@@ -595,11 +595,11 @@ namespace NuGet.Test {
             bool netCompatibleWithClient = VersionUtility.IsCompatible(net40Client, net40);
 
             // Assert
-            Assert.IsTrue(netClientCompatibleWithNet);
-            Assert.IsTrue(netCompatibleWithClient);
+            Assert.True(netClientCompatibleWithNet);
+            Assert.True(netCompatibleWithClient);
         }
 
-        [TestMethod]
+        [Fact]
         public void LowerFrameworkVersionsAreNotCompatibleWithHigherFrameworkVersionsWithSameFrameworkName() {
             // Arrange
             FrameworkName net40 = VersionUtility.ParseFrameworkName("net40");
@@ -610,11 +610,11 @@ namespace NuGet.Test {
             bool net20CompatibleWithNet40 = VersionUtility.IsCompatible(net40, net20);
 
             // Assert
-            Assert.IsFalse(net40CompatibleWithNet20);
-            Assert.IsTrue(net20CompatibleWithNet40);
+            Assert.False(net40CompatibleWithNet20);
+            Assert.True(net20CompatibleWithNet40);
         }
 
-        [TestMethod]
+        [Fact]
         public void IsCompatibleReturnsTrueIfSupportedFrameworkListIsEmpty() {
             // Arrange
             FrameworkName net40Client = VersionUtility.ParseFrameworkName("net40-client");
@@ -623,7 +623,7 @@ namespace NuGet.Test {
             var result = VersionUtility.IsCompatible(net40Client, Enumerable.Empty<FrameworkName>());
 
             // Assert
-            Assert.IsTrue(result);
+            Assert.True(result);
         }
     }
 }

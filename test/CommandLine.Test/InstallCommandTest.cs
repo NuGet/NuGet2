@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Commands;
 using NuGet.Common;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test.NuGetCommandLine.Commands {
-    [TestClass]
+    
     public class InstallCommandTest {
-        [TestMethod]
+        [Fact]
         public void InstallCommandInstallsPackageIfArgumentIsNotPackageReferenceFile() {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -21,10 +21,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             installCommand.ExecuteCommand();
 
             // Assert
-            Assert.AreEqual(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.Single().Key);
+            Assert.Equal(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.Single().Key);
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallCommandResolvesSourceName() {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -36,10 +36,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             installCommand.ExecuteCommand();
 
             // Assert
-            Assert.AreEqual(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.Single().Key);
+            Assert.Equal(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.Single().Key);
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallCommandLogsWarningsForFailingRepositoriesIfNoSourcesAreSpecified() {
             // Arrange
             MessageLevel? level = null;
@@ -70,11 +70,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             installCommand.ExecuteCommand();
 
             // Assert
-            Assert.AreEqual("Boom", message);
-            Assert.AreEqual(MessageLevel.Warning, level.Value);
+            Assert.Equal("Boom", message);
+            Assert.Equal(MessageLevel.Warning, level.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallCommandInstallsPackageFromAllSourcesIfArgumentIsNotPackageReferenceFile() {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -91,11 +91,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             installCommand.ExecuteCommand();
 
             // Assert
-            Assert.AreEqual(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.First().Key);
-            Assert.AreEqual(@"Bar.0.5\Bar.0.5.nupkg", fileSystem.Paths.Last().Key);
+            Assert.Equal(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.First().Key);
+            Assert.Equal(@"Bar.0.5\Bar.0.5.nupkg", fileSystem.Paths.Last().Key);
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallCommandInstallsAllPackagesFromConfigFileIfSpecifiedAsArgument() {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -111,13 +111,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             installCommand.ExecuteCommand();
 
             // Assert
-            Assert.AreEqual(3, fileSystem.Paths.Count);
-            Assert.AreEqual(@"dir\packages.config", fileSystem.Paths.ElementAt(0).Key);
-            Assert.AreEqual(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.ElementAt(1).Key);
-            Assert.AreEqual(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.ElementAt(2).Key);
+            Assert.Equal(3, fileSystem.Paths.Count);
+            Assert.Equal(@"dir\packages.config", fileSystem.Paths.ElementAt(0).Key);
+            Assert.Equal(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.ElementAt(1).Key);
+            Assert.Equal(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.ElementAt(2).Key);
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallCommandUsesMultipleSourcesIfSpecified() {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -130,10 +130,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             installCommand.ExecuteCommand();
 
             // Assert
-            Assert.AreEqual(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.Single().Key);
+            Assert.Equal(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.Single().Key);
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallCommandUpdatesPackageIfAlreadyPresentAndNotUsingSideBySide() {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -154,20 +154,20 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             installCommand.ExecuteCommand();
 
             // Assert - 1
-            Assert.AreEqual("Baz", packages.Single().Id);
-            Assert.AreEqual(new Version("0.4"), packages.Single().Version);
+            Assert.Equal("Baz", packages.Single().Id);
+            Assert.Equal(new Version("0.4"), packages.Single().Version);
 
             // Act - 2
             installCommand.Version = null;
             installCommand.Execute();
 
             // Assert - 2
-            Assert.AreEqual("Baz", packages.Single().Id);
-            Assert.AreEqual(new Version("0.7"), packages.Single().Version);
+            Assert.Equal("Baz", packages.Single().Id);
+            Assert.Equal(new Version("0.7"), packages.Single().Version);
             repository.Verify();
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallCommandUpdatesPackagesFromPackagesConfigIfAlreadyPresentAndNotUsingSideBySide() {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -187,11 +187,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             installCommand.ExecuteCommand();
 
             // Assert 
-            Assert.AreEqual("Baz", packages.Single().Id);
-            Assert.AreEqual(new Version("0.7"), packages.Single().Version);
+            Assert.Equal("Baz", packages.Single().Id);
+            Assert.Equal(new Version("0.7"), packages.Single().Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallCommandWorksIfExcludedVersionsAndPackageIsNotFoundInRemoteRepository() {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -210,7 +210,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => installCommand.ExecuteCommand(), "Unable to find package 'A'.");
             // Ensure packages were not removed.
-            Assert.AreEqual(1, packages.Count);
+            Assert.Equal(1, packages.Count);
         }
 
         private static IPackageRepositoryFactory GetFactory() {

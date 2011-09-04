@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Commands;
 using NuGet.Common;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test.NuGetCommandLine.Commands {
-    [TestClass]
+    
     public class UpdateCommandTest {
-        [TestMethod]
+        [Fact]
         public void SelfUpdateNoCommandLinePackageOnServerThrows() {
             // Arrange
             var factory = new Mock<IPackageRepositoryFactory>();
@@ -24,7 +24,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             ExceptionAssert.Throws<CommandLineException>(() => updateCmd.SelfUpdate("c:\foo.exe", new Version("2.0")), "Unable to find 'NuGet.CommandLine' package.");
         }
 
-        [TestMethod]
+        [Fact]
         public void SelfUpdateOlderVersionDoesNotUpdate() {
             // Arrange
             var factory = new Mock<IPackageRepositoryFactory>();
@@ -41,10 +41,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             updateCmd.SelfUpdate("c:\foo.exe", new Version("2.0"));
 
             // Assert
-            Assert.AreEqual("NuGet.exe is up to date.", consoleInfo.WrittenLines[0]);
+            Assert.Equal("NuGet.exe is up to date.", consoleInfo.WrittenLines[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void SelfUpdateNoNuGetExeInNuGetExePackageThrows() {
             // Arrange
             var factory = new Mock<IPackageRepositoryFactory>();
@@ -62,7 +62,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             ExceptionAssert.Throws<CommandLineException>(() => updateCmd.SelfUpdate("c:\foo.exe", new Version("2.0")), "Invalid NuGet.CommandLine package. Unable to locate NuGet.exe within the package.");
         }
 
-        [TestMethod]
+        [Fact]
         public void SelfUpdateNewVersionDoesUpdatesExe() {
             // Arrange
             var factory = new Mock<IPackageRepositoryFactory>();
@@ -80,10 +80,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             updateCmd.SelfUpdate(@"c:\NuGet.exe", new Version("2.0"));
 
             // Assert
-            Assert.IsTrue(updateCmd.MovedFiles.ContainsKey(@"c:\NuGet.exe"));
-            Assert.AreEqual(@"c:\NuGet.exe.old", updateCmd.MovedFiles[@"c:\NuGet.exe"]);
-            Assert.IsTrue(updateCmd.UpdatedFiles.ContainsKey(@"c:\NuGet.exe"));
-            Assert.AreEqual(@"tools\NuGet.exe", updateCmd.UpdatedFiles[@"c:\NuGet.exe"]);
+            Assert.True(updateCmd.MovedFiles.ContainsKey(@"c:\NuGet.exe"));
+            Assert.Equal(@"c:\NuGet.exe.old", updateCmd.MovedFiles[@"c:\NuGet.exe"]);
+            Assert.True(updateCmd.UpdatedFiles.ContainsKey(@"c:\NuGet.exe"));
+            Assert.Equal(@"tools\NuGet.exe", updateCmd.UpdatedFiles[@"c:\NuGet.exe"]);
         }
 
 

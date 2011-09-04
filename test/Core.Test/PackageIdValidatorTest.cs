@@ -1,9 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class PackageIdValidatorTest {
-        [TestMethod]
+        [Fact]
         public void ValidatePackageIdInvalidIdThrows() {
             // Arrange
             string packageId = "  Invalid  . Woo   .";
@@ -12,7 +12,7 @@ namespace NuGet.Test {
             ExceptionAssert.ThrowsArgumentException(() => PackageIdValidator.ValidatePackageId(packageId), "The package ID '  Invalid  . Woo   .' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void EmptyIsNotValid() {
             // Arrange
             string packageId = "";
@@ -21,10 +21,10 @@ namespace NuGet.Test {
             bool isValid = PackageIdValidator.IsValidPackageId(packageId);
 
             // Assert
-            Assert.IsFalse(isValid);
+            Assert.False(isValid);
         }
 
-        [TestMethod]
+        [Fact]
         public void NullThrowsException() {
             // Arrange
             string packageId = null;
@@ -33,7 +33,7 @@ namespace NuGet.Test {
             ExceptionAssert.ThrowsArgNull(() => PackageIdValidator.IsValidPackageId(packageId), "packageId");
         }
 
-        [TestMethod]
+        [Fact]
         public void AlphaNumericIsValid() {
             // Arrange
             string packageId = "42This1Is4You";
@@ -42,10 +42,10 @@ namespace NuGet.Test {
             bool isValid = PackageIdValidator.IsValidPackageId(packageId);
 
             // Assert
-            Assert.IsTrue(isValid);
+            Assert.True(isValid);
         }
 
-        [TestMethod]
+        [Fact]
         public void MultipleDotSeparatorsAllowed() {
             // Arrange
             string packageId = "I.Like.Writing.Unit.Tests";
@@ -54,10 +54,10 @@ namespace NuGet.Test {
             bool isValid = PackageIdValidator.IsValidPackageId(packageId);
 
             // Assert
-            Assert.IsTrue(isValid);
+            Assert.True(isValid);
         }
 
-        [TestMethod]
+        [Fact]
         public void NumbersAndWordsDotSeparatedAllowd() {
             // Arrange
             string packageId = "1.2.3.4.Uno.Dos.Tres.Cuatro";
@@ -66,10 +66,10 @@ namespace NuGet.Test {
             bool isValid = PackageIdValidator.IsValidPackageId(packageId);
 
             // Assert
-            Assert.IsTrue(isValid);
+            Assert.True(isValid);
         }
 
-        [TestMethod]
+        [Fact]
         public void UnderscoreDotAndDashSeparatorsAreValid() {
             // Arrange
             string packageId = "Nu_Get.Core-IsCool";
@@ -78,10 +78,10 @@ namespace NuGet.Test {
             bool isValid = PackageIdValidator.IsValidPackageId(packageId);
 
             // Assert
-            Assert.IsTrue(isValid);
+            Assert.True(isValid);
         }
 
-        [TestMethod]
+        [Fact]
         public void NonAlphaNumericUnderscoreDotDashIsInvalid() {
             // Arrange
             string packageId = "ILike*Asterisks";
@@ -90,10 +90,10 @@ namespace NuGet.Test {
             bool isValid = PackageIdValidator.IsValidPackageId(packageId);
 
             // Assert
-            Assert.IsFalse(isValid);
+            Assert.False(isValid);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConsecutiveSeparatorsNotAllowed() {
             // Arrange
             string packageId = "I_.Like.-Separators";
@@ -102,10 +102,10 @@ namespace NuGet.Test {
             bool isValid = PackageIdValidator.IsValidPackageId(packageId);
 
             // Assert
-            Assert.IsFalse(isValid);
+            Assert.False(isValid);
         }
 
-        [TestMethod]
+        [Fact]
         public void StartingWithSeparatorsNotAllowed() {
             // Arrange
             string packageId = "-StartWithSeparator";
@@ -114,10 +114,10 @@ namespace NuGet.Test {
             bool isValid = PackageIdValidator.IsValidPackageId(packageId);
 
             // Assert
-            Assert.IsFalse(isValid);
+            Assert.False(isValid);
         }
 
-        [TestMethod]
+        [Fact]
         public void EndingWithSeparatorsNotAllowed() {
             // Arrange
             string packageId = "StartWithSeparator.";
@@ -126,7 +126,7 @@ namespace NuGet.Test {
             bool isValid = PackageIdValidator.IsValidPackageId(packageId);
 
             // Assert
-            Assert.IsFalse(isValid);
+            Assert.False(isValid);
         }
     }
 }

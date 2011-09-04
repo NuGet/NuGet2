@@ -4,13 +4,13 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Xml;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class PackageBuilderTest {
-        [TestMethod]
+        [Fact]
         public void OwnersFallsBackToAuthorsIfNoneSpecified() {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
@@ -26,7 +26,7 @@ namespace NuGet.Test {
             ms.Seek(0, SeekOrigin.Begin);
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0""?>
+            Assert.Equal(@"<?xml version=""1.0""?>
 <package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
   <metadata>
     <id>A</id>
@@ -39,7 +39,7 @@ namespace NuGet.Test {
 </package>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void ReleaseNotesAttributeIsRecognized() {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
@@ -56,7 +56,7 @@ namespace NuGet.Test {
             ms.Seek(0, SeekOrigin.Begin);
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0""?>
+            Assert.Equal(@"<?xml version=""1.0""?>
 <package xmlns=""http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd"">
   <metadata>
     <id>A</id>
@@ -70,7 +70,7 @@ namespace NuGet.Test {
 </package>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void CreatePackageUsesV1SchemaNamespaceIfFrameworkAssembliesAreUsed() {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
@@ -87,7 +87,7 @@ namespace NuGet.Test {
             ms.Seek(0, SeekOrigin.Begin);
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0""?>
+            Assert.Equal(@"<?xml version=""1.0""?>
 <package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
   <metadata>
     <id>A</id>
@@ -103,7 +103,7 @@ namespace NuGet.Test {
 </package>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void CreatePackageUsesV2SchemaNamespaceIfReferenceAssembliesAreUsed() {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
@@ -120,7 +120,7 @@ namespace NuGet.Test {
             ms.Seek(0, SeekOrigin.Begin);
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0""?>
+            Assert.Equal(@"<?xml version=""1.0""?>
 <package xmlns=""http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd"">
   <metadata>
     <id>A</id>
@@ -136,7 +136,7 @@ namespace NuGet.Test {
 </package>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void CreatePackageTrimsExtraWhitespace() {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
@@ -160,7 +160,7 @@ namespace NuGet.Test {
             ms.Seek(0, SeekOrigin.Begin);
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0""?>
+            Assert.Equal(@"<?xml version=""1.0""?>
 <package xmlns=""http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd"">
   <metadata>
     <id>A</id>
@@ -180,7 +180,7 @@ namespace NuGet.Test {
 </package>", ms.ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void VersionFormatIsPreserved() {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
@@ -206,7 +206,7 @@ namespace NuGet.Test {
             ms.Seek(0, SeekOrigin.Begin);
 
             // Assert
-            Assert.AreEqual(@"<?xml version=""1.0""?>
+            Assert.Equal(@"<?xml version=""1.0""?>
 <package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
   <metadata>
     <id>A</id>
@@ -225,7 +225,7 @@ namespace NuGet.Test {
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SavingPackageWithDuplicateDependenciesThrows() {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
@@ -250,7 +250,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => Manifest.Create(builder).Save(ms), "'A' already has a dependency defined for 'B'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void SavingPackageWithInvalidDependencyRangeThrows() {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
@@ -270,7 +270,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => Manifest.Create(builder).Save(ms), "Dependency 'B' has an invalid version.");
         }
 
-        [TestMethod]
+        [Fact]
         public void SavingPackageValidatesReferences() {
             // Arrange
             var builder = new PackageBuilder {
@@ -286,7 +286,7 @@ namespace NuGet.Test {
                 "Invalid assembly reference 'Bar.dll'. Ensure that a file named 'Bar.dll' exists in the lib directory.");
         }
 
-        [TestMethod]
+        [Fact]
         public void SavingPackageWithInvalidDependencyVersionMaxLessThanMinThrows() {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
@@ -306,7 +306,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => Manifest.Create(builder).Save(ms), "Dependency 'B' has an invalid version.");
         }
 
-        [TestMethod]
+        [Fact]
         public void SaveThrowsIfRequiredPropertiesAreMissing() {
             // Arrange
             var builder = new PackageBuilder();
@@ -319,7 +319,7 @@ Authors is required.
 Description is required.");
         }
 
-        [TestMethod]
+        [Fact]
         public void SaveThrowsIfNoFilesOrDependencies() {
             // Arrange
             var builder = new PackageBuilder();
@@ -331,7 +331,7 @@ Description is required.");
             ExceptionAssert.Throws<InvalidOperationException>(() => builder.Save(new MemoryStream()), "Cannot create a package that has no dependencies nor content.");
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageBuilderThrowsIfXmlIsMalformed() {
             // Arrange
             string spec1 = "kjdkfj";
@@ -346,7 +346,7 @@ Description is required.");
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec4.AsStream(), null), @"The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'id, version, authors, description' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void MissingIdThrows() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -361,7 +361,7 @@ Description is required.");
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'id' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void MissingVersionThrows() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -376,7 +376,7 @@ Description is required.");
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'version' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void MissingAuthorsThrows() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -391,7 +391,7 @@ Description is required.");
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'authors' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void MissingDescriptionThrows() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -406,7 +406,7 @@ Description is required.");
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'description' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void MalformedDependenciesThrows() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -425,7 +425,7 @@ Description is required.");
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The required attribute 'id' is missing.");
         }
 
-        [TestMethod]
+        [Fact]
         public void MissingFileSrcThrows() {
             // Act
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -448,7 +448,7 @@ Description is required.");
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The required attribute 'src' is missing.");
         }
 
-        [TestMethod]
+        [Fact]
         public void MisplacedFileNodeThrows() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -472,7 +472,7 @@ Description is required.");
             "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has invalid child element 'files' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'. List of possible elements expected: 'frameworkAssemblies, releaseNotes, copyright, summary, iconUrl, references, owners, requireLicenseAcceptance, licenseUrl, tags, title, projectUrl' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ReadingManifestWithNamespaceBuilderFromStreamCopiesMetadata() {
             // Arrange
             string spec = @"<?xml version=""1.0""?>
@@ -498,24 +498,24 @@ Description is required.");
             var tags = builder.Tags.ToList();
 
             // Assert
-            Assert.AreEqual("Artem.XmlProviders", builder.Id);
-            Assert.AreEqual(new Version(2, 5), builder.Version);
-            Assert.AreEqual("Some awesome package", builder.Title);
-            Assert.AreEqual(1, builder.Authors.Count);
-            Assert.AreEqual("Velio Ivanov", authors[0]);
-            Assert.AreEqual("Velio Ivanov", owners[0]);
-            Assert.AreEqual(3, builder.Tags.Count);
-            Assert.AreEqual("t1", tags[0]);
-            Assert.AreEqual("t2", tags[1]);
-            Assert.AreEqual("foo-bar", tags[2]);
-            Assert.AreEqual("en-US", builder.Language);
-            Assert.AreEqual("David Fowler 2011", builder.Copyright);
-            Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
-            Assert.AreEqual(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
-            Assert.IsTrue(builder.RequireLicenseAcceptance);
+            Assert.Equal("Artem.XmlProviders", builder.Id);
+            Assert.Equal(new Version(2, 5), builder.Version);
+            Assert.Equal("Some awesome package", builder.Title);
+            Assert.Equal(1, builder.Authors.Count);
+            Assert.Equal("Velio Ivanov", authors[0]);
+            Assert.Equal("Velio Ivanov", owners[0]);
+            Assert.Equal(3, builder.Tags.Count);
+            Assert.Equal("t1", tags[0]);
+            Assert.Equal("t2", tags[1]);
+            Assert.Equal("foo-bar", tags[2]);
+            Assert.Equal("en-US", builder.Language);
+            Assert.Equal("David Fowler 2011", builder.Copyright);
+            Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
+            Assert.Equal(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
+            Assert.True(builder.RequireLicenseAcceptance);
         }
 
-        [TestMethod]
+        [Fact]
         public void ReadingManifestWithSerializationNamespaceBuilderFromStreamCopiesMetadata() {
             // Arrange
             string spec = @"<?xml version=""1.0""?>
@@ -539,20 +539,20 @@ Description is required.");
             var owners = builder.Owners.ToList();
 
             // Assert
-            Assert.AreEqual("Artem.XmlProviders", builder.Id);
-            Assert.AreEqual(new Version(2, 5), builder.Version);
-            Assert.AreEqual("Some awesome package", builder.Title);
-            Assert.AreEqual(1, builder.Authors.Count);
-            Assert.AreEqual("Velio Ivanov", authors[0]);
-            Assert.AreEqual(1, builder.Owners.Count);
-            Assert.AreEqual("John Doe", owners[0]);
-            Assert.AreEqual("en-US", builder.Language);
-            Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
-            Assert.AreEqual(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
-            Assert.IsTrue(builder.RequireLicenseAcceptance);
+            Assert.Equal("Artem.XmlProviders", builder.Id);
+            Assert.Equal(new Version(2, 5), builder.Version);
+            Assert.Equal("Some awesome package", builder.Title);
+            Assert.Equal(1, builder.Authors.Count);
+            Assert.Equal("Velio Ivanov", authors[0]);
+            Assert.Equal(1, builder.Owners.Count);
+            Assert.Equal("John Doe", owners[0]);
+            Assert.Equal("en-US", builder.Language);
+            Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
+            Assert.Equal(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
+            Assert.True(builder.RequireLicenseAcceptance);
         }
 
-        [TestMethod]
+        [Fact]
         public void ReadingManifestWithOldStyleXmlnsDeclaratoinsFromStreamCopiesMetadata() {
             // Arrange
             string spec = @"<?xml version=""1.0""?>
@@ -576,20 +576,20 @@ Description is required.");
             var owners = builder.Owners.ToList();
 
             // Assert
-            Assert.AreEqual("Artem.XmlProviders", builder.Id);
-            Assert.AreEqual(new Version(2, 5), builder.Version);
-            Assert.AreEqual("Some awesome package", builder.Title);
-            Assert.AreEqual(1, builder.Authors.Count);
-            Assert.AreEqual("Velio Ivanov", authors[0]);
-            Assert.AreEqual(1, builder.Owners.Count);
-            Assert.AreEqual("John Doe", owners[0]);
-            Assert.AreEqual("en-US", builder.Language);
-            Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
-            Assert.AreEqual(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
-            Assert.IsTrue(builder.RequireLicenseAcceptance);
+            Assert.Equal("Artem.XmlProviders", builder.Id);
+            Assert.Equal(new Version(2, 5), builder.Version);
+            Assert.Equal("Some awesome package", builder.Title);
+            Assert.Equal(1, builder.Authors.Count);
+            Assert.Equal("Velio Ivanov", authors[0]);
+            Assert.Equal(1, builder.Owners.Count);
+            Assert.Equal("John Doe", owners[0]);
+            Assert.Equal("en-US", builder.Language);
+            Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
+            Assert.Equal(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
+            Assert.True(builder.RequireLicenseAcceptance);
         }
 
-        [TestMethod]
+        [Fact]
         public void ReadingPackageManifestFromStreamCopiesMetadata() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -616,31 +616,31 @@ Description is required.");
             var authors = builder.Authors.ToList();
 
             // Assert
-            Assert.AreEqual("Artem.XmlProviders", builder.Id);
-            Assert.AreEqual(new Version(2, 5), builder.Version);
-            Assert.AreEqual("Some awesome package", builder.Title);
-            Assert.AreEqual(1, builder.Authors.Count);
-            Assert.AreEqual("Velio Ivanov", authors[0]);
-            Assert.AreEqual("en-US", builder.Language);
-            Assert.AreEqual("2010", builder.Copyright);
-            Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
-            Assert.AreEqual(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
-            Assert.IsTrue(builder.RequireLicenseAcceptance);
+            Assert.Equal("Artem.XmlProviders", builder.Id);
+            Assert.Equal(new Version(2, 5), builder.Version);
+            Assert.Equal("Some awesome package", builder.Title);
+            Assert.Equal(1, builder.Authors.Count);
+            Assert.Equal("Velio Ivanov", authors[0]);
+            Assert.Equal("en-US", builder.Language);
+            Assert.Equal("2010", builder.Copyright);
+            Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", builder.Description);
+            Assert.Equal(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
+            Assert.True(builder.RequireLicenseAcceptance);
 
             IDictionary<string, IVersionSpec> dependencies = builder.Dependencies.ToDictionary(p => p.Id, p => p.VersionSpec);
             // <dependency id="A" version="[1.0]" />
-            Assert.IsTrue(dependencies["A"].IsMinInclusive);
-            Assert.IsTrue(dependencies["A"].IsMaxInclusive);
-            Assert.AreEqual(new Version("1.0"), dependencies["A"].MinVersion);
-            Assert.AreEqual(new Version("1.0"), dependencies["A"].MaxVersion);
+            Assert.True(dependencies["A"].IsMinInclusive);
+            Assert.True(dependencies["A"].IsMaxInclusive);
+            Assert.Equal(new Version("1.0"), dependencies["A"].MinVersion);
+            Assert.Equal(new Version("1.0"), dependencies["A"].MaxVersion);
             // <dependency id="B" version="[1.0, 2.5)" />
-            Assert.IsTrue(dependencies["B"].IsMinInclusive);
-            Assert.IsFalse(dependencies["B"].IsMaxInclusive);
-            Assert.AreEqual(new Version("1.0"), dependencies["B"].MinVersion);
-            Assert.AreEqual(new Version("2.5"), dependencies["B"].MaxVersion);
+            Assert.True(dependencies["B"].IsMinInclusive);
+            Assert.False(dependencies["B"].IsMaxInclusive);
+            Assert.Equal(new Version("1.0"), dependencies["B"].MinVersion);
+            Assert.Equal(new Version("2.5"), dependencies["B"].MaxVersion);
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageBuilderThrowsWhenLicenseUrlIsPresentButEmpty() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -660,7 +660,7 @@ Description is required.");
             ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec.AsStream(), null), "LicenseUrl cannot be empty.");
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageBuilderThrowsWhenLicenseUrlIsWhiteSpace() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -680,7 +680,7 @@ Description is required.");
             ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec.AsStream(), null), "LicenseUrl cannot be empty.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ValidateReferencesAllowsPartialFileNames() {
             // Arrange
             var files = new[] {
@@ -694,10 +694,10 @@ Description is required.");
             PackageBuilder.ValidateReferenceAssemblies(files, packageAssemblyReferences);
 
             // If we've got this far, no exceptions were thrown.
-            Assert.IsTrue(true);
+            Assert.True(true);
         }
 
-        [TestMethod]
+        [Fact]
         public void ValidateReferencesThrowsForPartialNamesThatDoNotHaveAKnownExtension() {
             // Arrange
             var files = new[] {
@@ -712,10 +712,10 @@ Description is required.");
                 "Invalid assembly reference 'baz'. Ensure that a file named 'baz' exists in the lib directory.");
 
             // If we've got this far, no exceptions were thrown.
-            Assert.IsTrue(true);
+            Assert.True(true);
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageBuilderRequireLicenseAcceptedWithoutLicenseUrlThrows() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -736,7 +736,7 @@ Description is required.");
 Enabling license acceptance requires a license url.");
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageBuilderThrowsWhenLicenseUrlIsMalformed() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -756,7 +756,7 @@ Enabling license acceptance requires a license url.");
             ExceptionAssert.Throws<UriFormatException>(() => new PackageBuilder(spec.AsStream(), null), "Invalid URI: The format of the URI could not be determined.");
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageBuilderThrowsIfPackageIdInvalid() {
             // Arrange
             var builder = new PackageBuilder {
@@ -770,7 +770,7 @@ Enabling license acceptance requires a license url.");
             ExceptionAssert.ThrowsArgumentException(() => builder.Save(new MemoryStream()), "The package ID '  a.  b' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ReadingPackageWithUnknownSchemaThrows() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -788,7 +788,7 @@ Enabling license acceptance requires a license url.");
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The schema version of 'Artem.XmlProviders' is incompatible with version " + typeof(Manifest).Assembly.GetName().Version + " of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ReadingPackageWithUnknownSchemaAndMissingIdThrows() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -805,7 +805,7 @@ Enabling license acceptance requires a license url.");
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The schema version of '' is incompatible with version " + typeof(Manifest).Assembly.GetName().Version + " of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ReadingPackageWithSchemaWithOlderVersionAttribute() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -823,14 +823,14 @@ Enabling license acceptance requires a license url.");
             var packageBuilder = new PackageBuilder(spec.AsStream(), null);
 
             // Assert
-            Assert.AreEqual("Artem.XmlProviders", packageBuilder.Id);
-            Assert.AreEqual(new Version("2.5"), packageBuilder.Version);
-            Assert.AreEqual("Velio Ivanov", packageBuilder.Authors.Single());
-            Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
-            Assert.AreEqual("en-US", packageBuilder.Language);
+            Assert.Equal("Artem.XmlProviders", packageBuilder.Id);
+            Assert.Equal(new Version("2.5"), packageBuilder.Version);
+            Assert.Equal("Velio Ivanov", packageBuilder.Authors.Single());
+            Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
+            Assert.Equal("en-US", packageBuilder.Language);
         }
 
-        [TestMethod]
+        [Fact]
         public void ReadingPackageWithSchemaVersionAttribute() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -851,15 +851,15 @@ Enabling license acceptance requires a license url.");
             var packageBuilder = new PackageBuilder(spec.AsStream(), null);
 
             // Assert
-            Assert.AreEqual("Artem.XmlProviders", packageBuilder.Id);
-            Assert.AreEqual(new Version("2.5"), packageBuilder.Version);
-            Assert.AreEqual("Velio Ivanov", packageBuilder.Authors.Single());
-            Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
-            Assert.AreEqual("en-US", packageBuilder.Language);
-            Assert.AreEqual("foo.dll", packageBuilder.PackageAssemblyReferences.Single());
+            Assert.Equal("Artem.XmlProviders", packageBuilder.Id);
+            Assert.Equal(new Version("2.5"), packageBuilder.Version);
+            Assert.Equal("Velio Ivanov", packageBuilder.Authors.Single());
+            Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
+            Assert.Equal("en-US", packageBuilder.Language);
+            Assert.Equal("foo.dll", packageBuilder.PackageAssemblyReferences.Single());
         }
 
-        [TestMethod]
+        [Fact]
         public void ReadingPackageWithSchemaVersionAttributeWithNamespace() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -877,14 +877,14 @@ Enabling license acceptance requires a license url.");
             var packageBuilder = new PackageBuilder(spec.AsStream(), null);
 
             // Assert
-            Assert.AreEqual("Artem.XmlProviders", packageBuilder.Id);
-            Assert.AreEqual(new Version("2.5"), packageBuilder.Version);
-            Assert.AreEqual("Velio Ivanov", packageBuilder.Authors.Single());
-            Assert.AreEqual("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
-            Assert.AreEqual("en-US", packageBuilder.Language);
+            Assert.Equal("Artem.XmlProviders", packageBuilder.Id);
+            Assert.Equal(new Version("2.5"), packageBuilder.Version);
+            Assert.Equal("Velio Ivanov", packageBuilder.Authors.Single());
+            Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
+            Assert.Equal("en-US", packageBuilder.Language);
         }
 
-        [TestMethod]
+        [Fact]
         public void MissingMetadataNodeThrows() {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -895,7 +895,7 @@ Enabling license acceptance requires a license url.");
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'package' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageBuilderWorksWithFileNamesContainingSpecialCharacters() {
             // Arrange
             var fileNames = new[] {
@@ -918,11 +918,11 @@ Enabling license acceptance requires a license url.");
                 builder.Save(stream);
 
                 var zipPackage = new ZipPackage(() => new MemoryStream(stream.ToArray()), enableCaching: false);
-                Assert.AreEqual(@"content\images\bread&butter.jpg", zipPackage.GetFiles().ElementAt(0).Path);
-                Assert.AreEqual(@"content\images\logo123?#78.png", zipPackage.GetFiles().ElementAt(1).Path);
-                Assert.AreEqual(@"lib\C#\test.dll", zipPackage.GetFiles().ElementAt(2).Path);
-                Assert.AreEqual(@"lib\name with spaces.dll", zipPackage.GetFiles().ElementAt(3).Path);
-                Assert.AreEqual(@"lib\regular.file.dll", zipPackage.GetFiles().ElementAt(4).Path);
+                Assert.Equal(@"content\images\bread&butter.jpg", zipPackage.GetFiles().ElementAt(0).Path);
+                Assert.Equal(@"content\images\logo123?#78.png", zipPackage.GetFiles().ElementAt(1).Path);
+                Assert.Equal(@"lib\C#\test.dll", zipPackage.GetFiles().ElementAt(2).Path);
+                Assert.Equal(@"lib\name with spaces.dll", zipPackage.GetFiles().ElementAt(3).Path);
+                Assert.Equal(@"lib\regular.file.dll", zipPackage.GetFiles().ElementAt(4).Path);
             }
         }
 

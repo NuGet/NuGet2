@@ -1,11 +1,11 @@
 ﻿using System.IO;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class NullFileSystemTest {
-        [TestMethod]
+        [Fact]
         public void NullFileSystemReturnsNoFilesOrDirectories() {
             // Arrange
             var instance = NullFileSystem.Instance;
@@ -16,31 +16,31 @@ namespace NuGet.Test {
             var filteredFiles = instance.GetFiles("/foo", "*.txt");
 
             // Assert
-            Assert.IsFalse(files.Any());
-            Assert.IsFalse(directories.Any());
-            Assert.IsFalse(filteredFiles.Any());
+            Assert.False(files.Any());
+            Assert.False(directories.Any());
+            Assert.False(filteredFiles.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void NullFileSystemReturnsFalseForExistenceChecks() {
             // Arrange
             var instance = NullFileSystem.Instance;
 
             // Act and Assert
-            Assert.IsFalse(instance.FileExists("foo.txt"));
-            Assert.IsFalse(instance.FileExists("bar.txt"));
+            Assert.False(instance.FileExists("foo.txt"));
+            Assert.False(instance.FileExists("bar.txt"));
         }
 
-        [TestMethod]
+        [Fact]
         public void NullFileSystemReturnsNullStreamForOpen() {
             // Arrange
             var instance = NullFileSystem.Instance;
 
             // Act and Assert
-            Assert.AreEqual(Stream.Null, instance.OpenFile("foo.txt"));
+            Assert.Equal(Stream.Null, instance.OpenFile("foo.txt"));
         }
 
-        [TestMethod]
+        [Fact]
         public void NullFileSystemDoesNotThrowForFileOperations() {
             // Arrange
             var instance = NullFileSystem.Instance;
@@ -52,7 +52,7 @@ namespace NuGet.Test {
             instance.AddFile("foo", "Hello world".AsStream());
 
             // If we've come this far, no exceptions were thrown.
-            Assert.IsTrue(true);
+            Assert.True(true);
         }
     }
 }

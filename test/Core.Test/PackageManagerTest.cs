@@ -2,13 +2,13 @@ namespace NuGet.Test {
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Xunit;
     using Moq;
     using NuGet.Test.Mocks;
 
-    [TestClass]
+    
     public class PackageManagerTest {
-        [TestMethod]
+        [Fact]
         public void CtorThrowsIfDependenciesAreNull() {
             // Act & Assert
             ExceptionAssert.ThrowsArgNull(() => new PackageManager(null, new DefaultPackagePathResolver("foo"), new MockProjectSystem(), new MockPackageRepository()), "sourceRepository");
@@ -17,7 +17,7 @@ namespace NuGet.Test {
             ExceptionAssert.ThrowsArgNull(() => new PackageManager(new MockPackageRepository(), new DefaultPackagePathResolver("foo"), new MockProjectSystem(), null), "localRepository");
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallingPackageWithUnknownDependencyAndIgnoreDepencenciesInstallsPackageWithoutDependencies() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -38,11 +38,11 @@ namespace NuGet.Test {
             packageManager.InstallPackage("A", version: null, ignoreDependencies: true);
 
             // Assert
-            Assert.IsTrue(localRepository.Exists(packageA));
-            Assert.IsFalse(localRepository.Exists(packageC));
+            Assert.True(localRepository.Exists(packageA));
+            Assert.False(localRepository.Exists(packageC));
         }
 
-        [TestMethod]
+        [Fact]
         public void UninstallingUnknownPackageThrows() {
             // Arrange
             PackageManager packageManager = CreatePackageManager();
@@ -51,7 +51,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.UninstallPackage("foo"), "Unable to find package 'foo'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void UninstallingUnknownNullOrEmptyPackageIdThrows() {
             // Arrange
             PackageManager packageManager = CreatePackageManager();
@@ -61,7 +61,7 @@ namespace NuGet.Test {
             ExceptionAssert.ThrowsArgNullOrEmpty(() => packageManager.UninstallPackage(String.Empty), "packageId");
         }
 
-        [TestMethod]
+        [Fact]
         public void UninstallingPackageWithNoDependents() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -75,10 +75,10 @@ namespace NuGet.Test {
             packageManager.UninstallPackage("foo");
 
             // Assert
-            Assert.IsFalse(packageManager.LocalRepository.Exists(package));
+            Assert.False(packageManager.LocalRepository.Exists(package));
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallingUnknownPackageThrows() {
             // Arrange
             PackageManager packageManager = CreatePackageManager();
@@ -88,7 +88,7 @@ namespace NuGet.Test {
                                                               "Unable to find package 'unknown'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallPackageNullOrEmptyPackageIdThrows() {
             // Arrange
             PackageManager packageManager = CreatePackageManager();
@@ -98,7 +98,7 @@ namespace NuGet.Test {
             ExceptionAssert.ThrowsArgNullOrEmpty(() => packageManager.InstallPackage(String.Empty), "packageId");
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallPackageAddsAllFilesToFileSystem() {
             // Arrange
             var projectSystem = new MockProjectSystem();
@@ -116,16 +116,16 @@ namespace NuGet.Test {
             packageManager.InstallPackage("A");
 
             // Assert
-            Assert.AreEqual(0, projectSystem.References.Count);
-            Assert.AreEqual(5, projectSystem.Paths.Count);
-            Assert.IsTrue(projectSystem.FileExists(@"A.1.0\content\contentFile"));
-            Assert.IsTrue(projectSystem.FileExists(@"A.1.0\content\sub\contentFile"));
-            Assert.IsTrue(projectSystem.FileExists(@"A.1.0\lib\reference.dll"));
-            Assert.IsTrue(projectSystem.FileExists(@"A.1.0\tools\readme.txt"));
-            Assert.IsTrue(projectSystem.FileExists(@"A.1.0\A.1.0.nupkg"));
+            Assert.Equal(0, projectSystem.References.Count);
+            Assert.Equal(5, projectSystem.Paths.Count);
+            Assert.True(projectSystem.FileExists(@"A.1.0\content\contentFile"));
+            Assert.True(projectSystem.FileExists(@"A.1.0\content\sub\contentFile"));
+            Assert.True(projectSystem.FileExists(@"A.1.0\lib\reference.dll"));
+            Assert.True(projectSystem.FileExists(@"A.1.0\tools\readme.txt"));
+            Assert.True(projectSystem.FileExists(@"A.1.0\A.1.0.nupkg"));
         }
 
-        [TestMethod]
+        [Fact]
         public void UnInstallingPackageUninstallsPackageButNotDependencies() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -147,11 +147,11 @@ namespace NuGet.Test {
             packageManager.UninstallPackage("A");
 
             // Assert            
-            Assert.IsFalse(localRepository.Exists(packageA));
-            Assert.IsTrue(localRepository.Exists(packageB));
+            Assert.False(localRepository.Exists(packageA));
+            Assert.True(localRepository.Exists(packageB));
         }
 
-        [TestMethod]
+        [Fact]
         public void ReInstallingPackageAfterUninstallingDependencyShouldReinstallAllDependencies() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -182,12 +182,12 @@ namespace NuGet.Test {
             packageManager.InstallPackage("A");
 
             // Assert            
-            Assert.IsTrue(localRepository.Exists(packageA));
-            Assert.IsTrue(localRepository.Exists(packageB));
-            Assert.IsTrue(localRepository.Exists(packageC));
+            Assert.True(localRepository.Exists(packageA));
+            Assert.True(localRepository.Exists(packageB));
+            Assert.True(localRepository.Exists(packageC));
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallPackageThrowsExceptionPackageIsNotInstalled() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -205,10 +205,10 @@ namespace NuGet.Test {
 
 
             // Assert
-            Assert.IsFalse(packageManager.LocalRepository.Exists(packageA));
+            Assert.False(packageManager.LocalRepository.Exists(packageA));
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageUninstallsPackageAndInstallsNewPackage() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -225,11 +225,11 @@ namespace NuGet.Test {
             packageManager.UpdatePackage("A", updateDependencies: true);
 
             // Assert
-            Assert.IsFalse(localRepository.Exists("A", new Version("1.0")));
-            Assert.IsTrue(localRepository.Exists("A", new Version("2.0")));
+            Assert.False(localRepository.Exists("A", new Version("1.0")));
+            Assert.True(localRepository.Exists("A", new Version("2.0")));
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageThrowsIfPackageNotInstalled() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -244,7 +244,7 @@ namespace NuGet.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.UpdatePackage("A", updateDependencies: true), "Unable to find package 'A'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageDoesNothingIfNoUpdatesAvailable() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -259,7 +259,7 @@ namespace NuGet.Test {
             packageManager.UpdatePackage("A", updateDependencies: true);
 
             // Assert
-            Assert.IsTrue(localRepository.Exists("A", new Version("1.0")));
+            Assert.True(localRepository.Exists("A", new Version("1.0")));
         }
 
         private PackageManager CreatePackageManager() {

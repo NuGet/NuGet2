@@ -1,10 +1,10 @@
 ﻿using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class PathUtilityTest {
-        [TestMethod]
+        [Fact]
         public void EnsureTrailingSlashThrowsIfPathIsNull() {
             // Arrange
             string path = null;
@@ -13,7 +13,7 @@ namespace NuGet.Test {
             ExceptionAssert.ThrowsArgNull(() => PathUtility.EnsureTrailingSlash(path), "path");
         }
 
-        [TestMethod]
+        [Fact]
         public void EnsureTrailingSlashReturnsOriginalPathIfEmpty() {
             // Arrange
             string path = "";
@@ -22,10 +22,10 @@ namespace NuGet.Test {
             string output = PathUtility.EnsureTrailingSlash(path);
 
             // Assert
-            Assert.AreEqual(path, output);
+            Assert.Equal(path, output);
         }
 
-        [TestMethod]
+        [Fact]
         public void EnsureTrailingSlashReturnsOriginalStringIfPathTerminatesInSlash() {
             // Arrange
             string path = @"foo\bar\";
@@ -34,10 +34,10 @@ namespace NuGet.Test {
             string output = PathUtility.EnsureTrailingSlash(path);
 
             // Assert
-            Assert.AreEqual(path, output);
+            Assert.Equal(path, output);
         }
 
-        [TestMethod]
+        [Fact]
         public void EnsureTrailingSlashAppendsSlashIfPathDoesNotTerminateInSlash() {
             // Arrange
             string path1 = @"foo\bar";
@@ -48,83 +48,83 @@ namespace NuGet.Test {
             string output2 = PathUtility.EnsureTrailingSlash(path2);
 
             // Assert
-            Assert.AreEqual(path1 + Path.DirectorySeparatorChar, output1);
-            Assert.AreEqual(path2 + Path.DirectorySeparatorChar, output2);
+            Assert.Equal(path1 + Path.DirectorySeparatorChar, output1);
+            Assert.Equal(path2 + Path.DirectorySeparatorChar, output2);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetRelativePathAbsolutePaths() {
             // Act
             string path = PathUtility.GetRelativePath(@"c:\foo\bar\", @"c:\foo\bar\baz");
 
             // Assert
-            Assert.AreEqual("baz", path);
+            Assert.Equal("baz", path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetRelativePathDirectoryWithPeriods() {
             // Act
             string path = PathUtility.GetRelativePath(@"c:\foo\MvcApplication1\MvcApplication1.Tests\", @"c:\foo\MvcApplication1\packages\foo.dll");
 
             // Assert
-            Assert.AreEqual(@"..\packages\foo.dll", path);
+            Assert.Equal(@"..\packages\foo.dll", path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetRelativePathAbsolutePathAndShare() {
             // Act
             string path = PathUtility.GetRelativePath(@"c:\foo\bar", @"\\baz");
 
             // Assert
-            Assert.AreEqual(@"\\baz", path);
+            Assert.Equal(@"\\baz", path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetRelativePathShares() {
             // Act
             string path = PathUtility.GetRelativePath(@"\\baz\a\b\c\", @"\\baz\");
 
             // Assert
-            Assert.AreEqual(@"..\..\..\", path);
+            Assert.Equal(@"..\..\..\", path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetRelativePathFileNames() {
             // Act
             string path = PathUtility.GetRelativePath(@"c:\a\y\x.dll", @"c:\a\b.dll");
 
             // Assert
-            Assert.AreEqual(@"..\b.dll", path);
+            Assert.Equal(@"..\b.dll", path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetRelativePathWithSpaces() {
             // Act
             string path = PathUtility.GetRelativePath(@"c:\foo", @"c:\foo\This is a folder");
 
             // Assert
-            Assert.AreEqual(@"foo\This is a folder", path);
+            Assert.Equal(@"foo\This is a folder", path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetAbsolutePathWithSpaces() {
             // Act
             string path = PathUtility.GetAbsolutePath(@"c:\foo\", @"This is a folder");
 
             // Assert
-            Assert.AreEqual(@"c:\foo\This is a folder", path);
+            Assert.Equal(@"c:\foo\This is a folder", path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetRelativePathUnrelatedAbsolutePaths() {
             // Act
             string path = PathUtility.GetRelativePath(@"c:\foo", @"d:\bar");
 
             // Assert
-            Assert.AreEqual(@"d:\bar", path);
+            Assert.Equal(@"d:\bar", path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetAbsolutePathComplementsGetRelativePath() {
             // Arrange
             string basePath = @"c:\foo\bar\baz";
@@ -135,10 +135,10 @@ namespace NuGet.Test {
             string absolutePath = PathUtility.GetAbsolutePath(basePath, relativePath);
 
             // Assert
-            Assert.AreEqual(targetPath, absolutePath);
+            Assert.Equal(targetPath, absolutePath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCanonicalPathReturnsCorrectLocalPathWithTrailingBackslash() {
             // Arrange
             string basePath = @"c:\foo\bar\baz";
@@ -148,10 +148,10 @@ namespace NuGet.Test {
             string targetPath = PathUtility.GetCanonicalPath(basePath);
 
             // Assert
-            Assert.AreEqual(targetPath, canonicalPath);
+            Assert.Equal(targetPath, canonicalPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCanonicalPathReturnsCorrectLocalPathWithoutMultipleBackslashes() {
             // Arrange
             string basePath = @"c:\\foo\\bar\\baz";
@@ -161,10 +161,10 @@ namespace NuGet.Test {
             string targetPath = PathUtility.GetCanonicalPath(basePath);
 
             // Assert
-            Assert.AreEqual(targetPath, canonicalPath);
+            Assert.Equal(targetPath, canonicalPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCanonicalPathReturnsCorrectUncPathWithTrailingBackslash() {
             // Arrange
             string basePath = @"\\server\share\foo\bar\baz";
@@ -174,10 +174,10 @@ namespace NuGet.Test {
             string targetPath = PathUtility.GetCanonicalPath(basePath);
 
             // Assert
-            Assert.AreEqual(targetPath, canonicalPath);
+            Assert.Equal(targetPath, canonicalPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCanonicalPathReturnsCorrectUncPathWithoutMultipleBackslashes() {
             // Arrange
             string basePath = @"\\server\\share\\foo\\bar\\baz";
@@ -187,10 +187,10 @@ namespace NuGet.Test {
             string targetPath = PathUtility.GetCanonicalPath(basePath);
 
             // Assert
-            Assert.AreEqual(targetPath, canonicalPath);
+            Assert.Equal(targetPath, canonicalPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCanonicalPathReturnsCorrectUrlForDomainOnlyWithTrailingSlash() {
             // Arrange
             string basePath = @"http://www.example.com";
@@ -200,10 +200,10 @@ namespace NuGet.Test {
             string targetPath = PathUtility.GetCanonicalPath(basePath);
 
             // Assert
-            Assert.AreEqual(targetPath, canonicalPath);
+            Assert.Equal(targetPath, canonicalPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCanonicalPathReturnsCorrectUrlForFolderWithoutTrailingSlash() {
             // Arrange
             string basePath = @"http://www.example.com/nuget";
@@ -213,10 +213,10 @@ namespace NuGet.Test {
             string targetPath = PathUtility.GetCanonicalPath(basePath);
 
             // Assert
-            Assert.AreEqual(targetPath, canonicalPath);
+            Assert.Equal(targetPath, canonicalPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCanonicalPathReturnsCorrectUrlForFolderWithTrailingSlash() {
             // Arrange
             string basePath = @"http://www.example.com/nuget/";
@@ -226,10 +226,10 @@ namespace NuGet.Test {
             string targetPath = PathUtility.GetCanonicalPath(basePath);
 
             // Assert
-            Assert.AreEqual(targetPath, canonicalPath);
+            Assert.Equal(targetPath, canonicalPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCanonicalPathReturnsCorrectUrlWithFilename() {
             // Arrange
             string basePath = @"http://www.example.com/nuget/index.html";
@@ -239,10 +239,10 @@ namespace NuGet.Test {
             string targetPath = PathUtility.GetCanonicalPath(basePath);
 
             // Assert
-            Assert.AreEqual(targetPath, canonicalPath);
+            Assert.Equal(targetPath, canonicalPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCanonicalPathReturnsCorrectUrlWithQuerystring() {
             // Arrange
             string basePath = @"http://www.example.com/nuget/index.html?abc=123";
@@ -252,10 +252,10 @@ namespace NuGet.Test {
             string targetPath = PathUtility.GetCanonicalPath(basePath);
 
             // Assert
-            Assert.AreEqual(targetPath, canonicalPath);
+            Assert.Equal(targetPath, canonicalPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCanonicalPathReturnsCorrectUrlWithEncodedQuerystring() {
             // Arrange
             string basePath = @"http://www.example.com/nuget/index.html?abc%3D123";
@@ -265,7 +265,7 @@ namespace NuGet.Test {
             string targetPath = PathUtility.GetCanonicalPath(basePath);
 
             // Assert
-            Assert.AreEqual(targetPath, canonicalPath);
+            Assert.Equal(targetPath, canonicalPath);
         }
     }
 }

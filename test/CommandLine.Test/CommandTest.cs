@@ -1,36 +1,36 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using NuGet.Commands;
 
 namespace NuGet.Test.NuGetCommandLine {
-    [TestClass]
+    
     public class CommandTest {
-        [TestMethod]
+        [Fact]
         public void GetCommandAttributes_ReturnsEmptyIfNoCommandAttributes() {
             // Arrange
             var command = new CommandWithBadName();
 
             // Act and Assert
-            Assert.IsNull(command.CommandAttribute);
+            Assert.Null(command.CommandAttribute);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCommandAttributes_UsesCommandNameAndDefaultDescriptionIfNoCommandAttributesPresent() {
             // Arrange
             var command = new MockWithoutCommandAttributesCommand();
 
             // Act and Assert
-            Assert.AreEqual(command.CommandAttribute.CommandName, "MockWithoutCommandAttributes");
-            Assert.AreEqual(command.CommandAttribute.Description, "No description was provided for this command.");
+            Assert.Equal(command.CommandAttribute.CommandName, "MockWithoutCommandAttributes");
+            Assert.Equal(command.CommandAttribute.Description, "No description was provided for this command.");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCommandAttributes_UsesCommandAttributesIfAvailable() {
             // Arrange
             var command = new MockCommandWithCommandAttributes();
 
             // Act and Assert
-            Assert.AreEqual(command.CommandAttribute.CommandName, "NameFromAttribute");
-            Assert.AreEqual(command.CommandAttribute.Description, "DescFromAttribute");
+            Assert.Equal(command.CommandAttribute.CommandName, "NameFromAttribute");
+            Assert.Equal(command.CommandAttribute.Description, "DescFromAttribute");
         }
 
         private class CommandWithBadName : Command {

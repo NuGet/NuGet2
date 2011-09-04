@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Security;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class MachineCacheTest {
-        [TestMethod]
+        [Fact]
         public void AddingMoreThanPackageLimitClearsCache() {
             // Arrange
             var mockFileSystem = new MockFileSystem();
@@ -20,10 +20,10 @@ namespace NuGet.Test {
             cache.AddPackage(PackageUtility.CreatePackage("B"));
 
             // Assert
-            Assert.AreEqual(1, cache.GetPackageFiles().Count());
+            Assert.Equal(1, cache.GetPackageFiles().Count());
         }
 
-        [TestMethod]
+        [Fact]
         public void ClearRemovesAllPackageFilesFromCache() {
             // Arrange
             var mockFileSystem = new MockFileSystem();
@@ -36,10 +36,10 @@ namespace NuGet.Test {
             cache.Clear();
 
             // Assert
-            Assert.IsFalse(cache.GetPackageFiles().Any());
+            Assert.False(cache.GetPackageFiles().Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void MachineCacheUsesNullFileSystemIfItCannotAccessCachePath() {
             // Arrange
             Func<string> getCachePathDirectory = () => { throw new SecurityException("Boo"); };
@@ -49,24 +49,24 @@ namespace NuGet.Test {
             MachineCache cache = MachineCache.CreateDefault(getCachePathDirectory);
 
             // Assert
-            Assert.IsNotNull(cache);
-            Assert.IsFalse(cache.GetPackageFiles().Any());
+            Assert.NotNull(cache);
+            Assert.False(cache.GetPackageFiles().Any());
 
             // Ensure operations don't throw
             cache.Clear();
             cache.AddPackage(PackageUtility.CreatePackage("TestPackage"));
-            Assert.IsFalse(cache.Exists("TestPackage"));
-            Assert.IsFalse(cache.Exists(package));
-            Assert.IsFalse(cache.Exists("TestPackage", new Version("1.0")));
-            Assert.IsNull(cache.ResolveDependency(new PackageDependency("Bar")));
-            Assert.IsNull(cache.FindPackage("TestPackage"));
-            Assert.IsFalse(cache.FindPackages(new[] { "TestPackage", "B" }).Any());
-            Assert.IsFalse(cache.FindPackagesById("TestPackage").Any());
-            Assert.IsFalse(cache.GetPackages().Any());
-            Assert.IsFalse(cache.GetUpdates(new[] { package }).Any());
+            Assert.False(cache.Exists("TestPackage"));
+            Assert.False(cache.Exists(package));
+            Assert.False(cache.Exists("TestPackage", new Version("1.0")));
+            Assert.Null(cache.ResolveDependency(new PackageDependency("Bar")));
+            Assert.Null(cache.FindPackage("TestPackage"));
+            Assert.False(cache.FindPackages(new[] { "TestPackage", "B" }).Any());
+            Assert.False(cache.FindPackagesById("TestPackage").Any());
+            Assert.False(cache.GetPackages().Any());
+            Assert.False(cache.GetUpdates(new[] { package }).Any());
             cache.RemovePackage(package);
-            Assert.AreEqual(0, cache.Source.Length);
-            Assert.IsFalse(cache.TryFindPackage("TestPackage", new Version("1.0"), out package));
+            Assert.Equal(0, cache.Source.Length);
+            Assert.False(cache.TryFindPackage("TestPackage", new Version("1.0"), out package));
         }
     }
 }

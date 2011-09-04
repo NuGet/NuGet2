@@ -1,17 +1,17 @@
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class PackageRepositoryFactoryTest {
-        [TestMethod]
+        [Fact]
         public void CreateRepositoryThrowsIfNullSource() {
             // Act & Assert
             ExceptionAssert.ThrowsArgNull(() => new PackageRepositoryFactory().CreateRepository(null), "packageSource");
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateRepositoryReturnsLocalRepositoryIfSourceIsPhysicalPath() {
             // Arrange
             var paths = new[] { @"C:\packages\", 
@@ -20,11 +20,11 @@ namespace NuGet.Test {
             var factory = new PackageRepositoryFactory();
 
             // Act and Assert
-            Assert.IsTrue(paths.Select(factory.CreateRepository)
+            Assert.True(paths.Select(factory.CreateRepository)
                                .All(p => p is LocalPackageRepository));
         }
 
-        [TestMethod]
+        [Fact]
         public void CreateRepositoryReturnsDataServicePackageRepositoryIfSourceIsWebUrl() {
             // Arrange
             var httpClient = new Mock<IHttpClient>();
@@ -35,7 +35,7 @@ namespace NuGet.Test {
             IPackageRepository repository = factory.CreateRepository("http://example.com/");
 
             // Act and Assert
-            Assert.IsInstanceOfType(repository, typeof(DataServicePackageRepository));
+			Assert.IsType(typeof(DataServicePackageRepository), repository);
         }
     }
 }

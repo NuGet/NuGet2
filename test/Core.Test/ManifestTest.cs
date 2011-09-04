@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class ManifestTest {
-        [TestMethod]
+        [Fact]
         public void ManifestValidatesMetadata() {
             // Arrange
             var manifest = new Manifest {
@@ -23,7 +23,7 @@ namespace NuGet.Test {
                 "Id is required.\r\nVersion is required.\r\nAuthors is required.\r\nDescription is required.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ManifestValidatesMetadataUrlsIfEmpty() {
             // Arrange
             var manifest = new Manifest {
@@ -43,7 +43,7 @@ namespace NuGet.Test {
                 "LicenseUrl cannot be empty.\r\nIconUrl cannot be empty.\r\nProjectUrl cannot be empty.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ManifestValidatesManifestFiles() {
             // Arrange
             var manifest = new Manifest {
@@ -74,7 +74,7 @@ namespace NuGet.Test {
                 "Source path '|' contains invalid characters.\r\nTarget path '<' contains invalid characters.\r\nSource path 'foo\\bar\\|>' contains invalid characters.\r\nExclude path 'Exclude|' contains invalid characters.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ManifestEnsuresManifestReferencesDoNotContainInvalidCharacters() {
             // Arrange
             var manifest = new Manifest {
@@ -99,7 +99,7 @@ namespace NuGet.Test {
                 "Assembly reference 'Foo?.dll' contains invalid characters.\r\nAssembly reference 'Bar*.dll' contains invalid characters.\r\nAssembly reference 'net40\\baz.dll' contains invalid characters.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ManifestValidatesDependencies() {
             // Arrange
             var manifest = new Manifest {

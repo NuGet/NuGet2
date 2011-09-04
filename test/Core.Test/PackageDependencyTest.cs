@@ -1,9 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class PackageDependencyTest {
-        [TestMethod]
+        [Fact]
         public void ToStringExactVersion() {
             // Arrange
             PackageDependency dependency = PackageDependency.CreateDependency("A", "[1.0]");
@@ -12,10 +12,10 @@ namespace NuGet.Test {
             string value = dependency.ToString();
 
             // Assert
-            Assert.AreEqual("A (= 1.0)", value);
+            Assert.Equal("A (= 1.0)", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMinVersionInclusive() {
             // Arrange
             PackageDependency dependency = PackageDependency.CreateDependency("A", "1.0");
@@ -24,10 +24,10 @@ namespace NuGet.Test {
             string value = dependency.ToString();
 
             // Assert
-            Assert.AreEqual("A (\u2265 1.0)", value);
+            Assert.Equal("A (\u2265 1.0)", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMinVersionExclusive() {
             // Arrange
             PackageDependency dependency = PackageDependency.CreateDependency("A", "(1.0,)");
@@ -36,10 +36,10 @@ namespace NuGet.Test {
             string value = dependency.ToString();
 
             // Assert
-            Assert.AreEqual("A (> 1.0)", value);
+            Assert.Equal("A (> 1.0)", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMaxVersionInclusive() {
             // Arrange
             PackageDependency dependency = PackageDependency.CreateDependency("A", "[,1.0]");
@@ -48,10 +48,10 @@ namespace NuGet.Test {
             string value = dependency.ToString();
 
             // Assert
-            Assert.AreEqual("A (\u2264 1.0)", value);
+            Assert.Equal("A (\u2264 1.0)", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMaxVersionExclusive() {
             // Arrange
             PackageDependency dependency = PackageDependency.CreateDependency("A", "[,1.0)");
@@ -60,10 +60,10 @@ namespace NuGet.Test {
             string value = dependency.ToString();
 
             // Assert
-            Assert.AreEqual("A (< 1.0)", value);
+            Assert.Equal("A (< 1.0)", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMinVersionExclusiveMaxInclusive() {
             // Arrange
             PackageDependency dependency = PackageDependency.CreateDependency("A", "(1.0,5.0]");
@@ -72,10 +72,10 @@ namespace NuGet.Test {
             string value = dependency.ToString();
 
             // Assert
-            Assert.AreEqual("A (> 1.0 && \u2264 5.0)", value);
+            Assert.Equal("A (> 1.0 && \u2264 5.0)", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMinVersionInclusiveMaxExclusive() {
             // Arrange
             PackageDependency dependency = PackageDependency.CreateDependency("A", "[1.0,5.0)");
@@ -84,10 +84,10 @@ namespace NuGet.Test {
             string value = dependency.ToString();
 
             // Assert
-            Assert.AreEqual("A (\u2265 1.0 && < 5.0)", value);
+            Assert.Equal("A (\u2265 1.0 && < 5.0)", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMinVersionInclusiveMaxInclusive() {
             // Arrange
             PackageDependency dependency = PackageDependency.CreateDependency("A", "[1.0,5.0]");
@@ -96,10 +96,10 @@ namespace NuGet.Test {
             string value = dependency.ToString();
 
             // Assert
-            Assert.AreEqual("A (\u2265 1.0 && \u2264 5.0)", value);
+            Assert.Equal("A (\u2265 1.0 && \u2264 5.0)", value);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMinVersionExclusiveMaxExclusive() {
             // Arrange
             PackageDependency dependency = PackageDependency.CreateDependency("A", "(1.0,5.0)");
@@ -108,7 +108,7 @@ namespace NuGet.Test {
             string value = dependency.ToString();
 
             // Assert
-            Assert.AreEqual("A (> 1.0 && < 5.0)", value);
+            Assert.Equal("A (> 1.0 && < 5.0)", value);
         }
     }
 }

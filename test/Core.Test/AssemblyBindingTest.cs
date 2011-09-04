@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Runtime;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class AssemblyBindingTest {
-        [TestMethod]
+        [Fact]
         public void CtorCopiesAssemblyProperties() {
             // Arrange
             var assembly = new Mock<IAssembly>();
@@ -21,14 +21,14 @@ namespace NuGet.Test {
             var binding = new AssemblyBinding(assembly.Object);
 
             // Assert
-            Assert.AreEqual("AssemblyName", binding.Name);
-            Assert.AreEqual("en-GB", binding.Culture);
-            Assert.AreEqual("token", binding.PublicKeyToken);
-            Assert.AreEqual("1.0.0.0", binding.NewVersion);
-            Assert.AreEqual("0.0.0.0-1.0.0.0", binding.OldVersion);
+            Assert.Equal("AssemblyName", binding.Name);
+            Assert.Equal("en-GB", binding.Culture);
+            Assert.Equal("token", binding.PublicKeyToken);
+            Assert.Equal("1.0.0.0", binding.NewVersion);
+            Assert.Equal("0.0.0.0-1.0.0.0", binding.OldVersion);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParseAssemblyBindingConfigSectionPreservesContent() {
             // Arrange
             string assemblyBindingXml = @"<assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
@@ -50,16 +50,16 @@ namespace NuGet.Test {
             var binding = AssemblyBinding.Parse(dependentAssembly);
 
             // Assert
-            Assert.AreEqual("myAssembly", binding.Name);
-            Assert.AreEqual("32ab4ba45e0a69a1", binding.PublicKeyToken);
-            Assert.AreEqual("neutral", binding.Culture);
-            Assert.AreEqual("x86", binding.ProcessorArchitecture);
-            Assert.AreEqual("0.0.0.1-1.0.0.0", binding.OldVersion);
-            Assert.AreEqual("2.0.0.0", binding.NewVersion);
-            Assert.AreEqual("2.0.0.0", binding.CodeBaseVersion);
-            Assert.AreEqual("http://www.litwareinc.com/myAssembly.dll", binding.CodeBaseHref);
-            Assert.AreEqual("no", binding.PublisherPolicy);
-            Assert.AreEqual(@"<dependentAssembly xmlns=""urn:schemas-microsoft-com:asm.v1"">
+            Assert.Equal("myAssembly", binding.Name);
+            Assert.Equal("32ab4ba45e0a69a1", binding.PublicKeyToken);
+            Assert.Equal("neutral", binding.Culture);
+            Assert.Equal("x86", binding.ProcessorArchitecture);
+            Assert.Equal("0.0.0.1-1.0.0.0", binding.OldVersion);
+            Assert.Equal("2.0.0.0", binding.NewVersion);
+            Assert.Equal("2.0.0.0", binding.CodeBaseVersion);
+            Assert.Equal("http://www.litwareinc.com/myAssembly.dll", binding.CodeBaseHref);
+            Assert.Equal("no", binding.PublisherPolicy);
+            Assert.Equal(@"<dependentAssembly xmlns=""urn:schemas-microsoft-com:asm.v1"">
   <assemblyIdentity name=""myAssembly"" publicKeyToken=""32ab4ba45e0a69a1"" culture=""neutral"" processorArchitecture=""x86"" />
   <bindingRedirect oldVersion=""0.0.0.1-1.0.0.0"" newVersion=""2.0.0.0"" />
   <publisherPolicy apply=""no"" />

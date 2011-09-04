@@ -2,13 +2,13 @@
 using System.Data.Services.Client;
 using System.Linq;
 using System.Linq.Expressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class SmartDataServiceQueryTest {
-        [TestMethod]
+        [Fact]
         public void GetEnumeratorExecutesBatchIfRequiresBatchTrue() {
             // Arrange
             var mockContext = new Mock<IDataServiceContext>();
@@ -25,7 +25,7 @@ namespace NuGet.Test {
             mockContext.VerifyAll();
         }
 
-        [TestMethod]
+        [Fact]
         public void ProjectionTest() {
             // Arrange
             var mockContext = new Mock<IDataServiceContext>();

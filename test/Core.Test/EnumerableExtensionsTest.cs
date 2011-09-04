@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class EnumerableExtensionsTest {
-        [TestMethod]
+        [Fact]
         public void DistinctLastNoElements() {
             // Arrange
             var items = Enumerable.Empty<Item>();
@@ -15,10 +15,10 @@ namespace NuGet.Test {
             var result = items.DistinctLast(new ItemNameComparer(), new ItemAgeComparer()).ToList();
 
             // Assert
-            Assert.AreEqual(0, result.Count);
+            Assert.Equal(0, result.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void DistinctLastOneElement() {
             // Arrange
             var items = new Item[] { new Item { Name = "John", Age = 10 } };
@@ -27,12 +27,12 @@ namespace NuGet.Test {
             var result = items.DistinctLast(new ItemNameComparer(), new ItemAgeComparer()).ToList();
 
             // Assert
-            Assert.AreEqual(1, result.Count);
-            Assert.AreEqual("John", result[0].Name);
-            Assert.AreEqual(10, result[0].Age);
+            Assert.Equal(1, result.Count);
+            Assert.Equal("John", result[0].Name);
+            Assert.Equal(10, result[0].Age);
         }
 
-        [TestMethod]
+        [Fact]
         public void DistinctLastThreeSimilarElements() {
             // Arrange
             var items = new Item[] { new Item { Name = "John", Age = 410 },
@@ -43,12 +43,12 @@ namespace NuGet.Test {
             var result = items.DistinctLast(new ItemNameComparer(), new ItemAgeComparer()).ToList();
 
             // Assert
-            Assert.AreEqual(1, result.Count);
-            Assert.AreEqual("John", result[0].Name);
-            Assert.AreEqual(550, result[0].Age);
+            Assert.Equal(1, result.Count);
+            Assert.Equal("John", result[0].Name);
+            Assert.Equal(550, result[0].Age);
         }
 
-        [TestMethod]
+        [Fact]
         public void DistinctLastMultipleSimilarElements() {
             // Arrange
             var items = new Item[] { new Item { Name = "Phil", Age = 1 },
@@ -62,17 +62,17 @@ namespace NuGet.Test {
             var result = items.DistinctLast(new ItemNameComparer(), new ItemAgeComparer()).ToList();
 
             // Assert
-            Assert.AreEqual(3, result.Count);
-            Assert.AreEqual("Phil", result[0].Name);
-            Assert.AreEqual(1, result[0].Age);
-            Assert.AreEqual("John", result[1].Name);
-            Assert.AreEqual(40, result[1].Age);
-            Assert.AreEqual("David", result[2].Name);
-            Assert.AreEqual(20, result[2].Age);
+            Assert.Equal(3, result.Count);
+            Assert.Equal("Phil", result[0].Name);
+            Assert.Equal(1, result[0].Age);
+            Assert.Equal("John", result[1].Name);
+            Assert.Equal(40, result[1].Age);
+            Assert.Equal("David", result[2].Name);
+            Assert.Equal(20, result[2].Age);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void SafeQueryableThrowsIfSourceIsNull() {
             // Arrange
             IEnumerable<int> source = null;
@@ -81,7 +81,7 @@ namespace NuGet.Test {
             ExceptionAssert.ThrowsArgNull(() => source.AsSafeQueryable(), "source");
         }
 
-        [TestMethod]
+        [Fact]
         public void SafeQueryableReturnsOriginalIQueryableWhenNotRewritingQueries() {
             // Arrange
             IQueryable<int> source = Enumerable.Range(0, 4).AsQueryable();
@@ -90,10 +90,10 @@ namespace NuGet.Test {
             IQueryable<int> result = source.AsSafeQueryable(rewriteQuery: false);
 
             // Assert
-            Assert.AreEqual(result, source);
+            Assert.Equal(result, source);
         }
 
-        [TestMethod]
+        [Fact]
         public void SafeQueryableWrapsIEnumerableWhenNotRewritingQueries() {
             // Arrange
             IEnumerable<int> source = Enumerable.Range(0, 4);
@@ -102,10 +102,10 @@ namespace NuGet.Test {
             IQueryable<int> result = source.AsSafeQueryable(rewriteQuery: false);
 
             // Assert
-            Assert.AreEqual(result.GetType(), typeof(EnumerableQuery<int>));
+            Assert.Equal(result.GetType(), typeof(EnumerableQuery<int>));
         }
 
-        [TestMethod]
+        [Fact]
         public void SafeQueryableReturnsSafeEnumerableQueryWhenRewriting() {
             // Arrange
             IEnumerable<int> source = Enumerable.Range(0, 4);
@@ -114,10 +114,10 @@ namespace NuGet.Test {
             IQueryable<int> result = source.AsSafeQueryable(rewriteQuery: true);
 
             // Assert
-            Assert.AreEqual(result.GetType(), typeof(SafeEnumerableQuery<int>));
+            Assert.Equal(result.GetType(), typeof(SafeEnumerableQuery<int>));
         }
 
-        [TestMethod]
+        [Fact]
         public void SafeIterateWithFailingElementAtTheBeginningOfSequence() {
             // Arrange
             var enumerable = Enumerable.Range(0, 4).Select(e => {
@@ -131,10 +131,10 @@ namespace NuGet.Test {
             var result = EnumerableExtensions.SafeIterate(enumerable);
 
             // Assert
-            CollectionAssert.AreEqual(new[] { 1, 4, 9 }, result.ToList());
+            Assert.Equal(new [] { 1, 4, 9 }, result.ToArray());
         }
 
-        [TestMethod]
+        [Fact]
         public void SafeIterateWithFailingElementInMiddleOfSequence() {
             // Arrange
             var enumerable = Enumerable.Range(0, 4).Select(e => {
@@ -148,10 +148,10 @@ namespace NuGet.Test {
             var result = EnumerableExtensions.SafeIterate(enumerable);
 
             // Assert
-            CollectionAssert.AreEqual(new[] { 0, 4 }, result.ToList());
+            Assert.Equal(new[] { 0, 4 }, result.ToArray());
         }
 
-        [TestMethod]
+        [Fact]
         public void SafeIterateWithFailingElementAtEndOfSequence() {
             // Arrange
             var enumerable = Enumerable.Range(0, 4).Select(e => {
@@ -165,7 +165,7 @@ namespace NuGet.Test {
             var result = EnumerableExtensions.SafeIterate(enumerable);
 
             // Assert
-            CollectionAssert.AreEqual(new[] { 0, 1, 4 }, result.ToList());
+            Assert.Equal(new[] { 0, 1, 4 }, result.ToArray());
         }
 
         private class Item {

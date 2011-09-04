@@ -1,13 +1,13 @@
 using System.IO;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
 
 namespace NuGet.Test {
-    [TestClass]
+    
     public class PreprocessorTest {
-        [TestMethod]
+        [Fact]
         public void TransformFileReplacesTokensWithValueAndReturnsModifiedStream() {
             // Arrange
             var processor = new Preprocessor();
@@ -21,11 +21,11 @@ namespace NuGet.Test {
             processor.TransformFile(mockFile.Object, "foo.bar", mockProjectSystem.Object);
 
             // Assert
-            Assert.IsTrue(mockProjectSystem.Object.FileExists("foo.bar"));
-            Assert.AreEqual("test token value", mockProjectSystem.Object.OpenFile("foo.bar").ReadToEnd());
+            Assert.True(mockProjectSystem.Object.FileExists("foo.bar"));
+            Assert.Equal("test token value", mockProjectSystem.Object.OpenFile("foo.bar").ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void TransformFileDoesNothingIfFileExists() {
             // Arrange
             var processor = new Preprocessor();
@@ -40,10 +40,10 @@ namespace NuGet.Test {
             processor.TransformFile(mockFile.Object, "foo.bar", mockProjectSystem.Object);
 
             // Assert            
-            Assert.AreEqual("hello", mockProjectSystem.Object.OpenFile("foo.bar").ReadToEnd());
+            Assert.Equal("hello", mockProjectSystem.Object.OpenFile("foo.bar").ReadToEnd());
         }
 
-        [TestMethod]
+        [Fact]
         public void RevertFileRemovesFileIfContentIsTheSame() {
             // Arrange
             var processor = new Preprocessor();
@@ -58,7 +58,7 @@ namespace NuGet.Test {
             processor.RevertFile(mockFile.Object, "foo.bar", Enumerable.Empty<IPackageFile>(), mockProjectSystem.Object);
 
             // Assert            
-            Assert.IsTrue(mockProjectSystem.Object.Deleted.Contains("foo.bar"));
+            Assert.True(mockProjectSystem.Object.Deleted.Contains("foo.bar"));
         }
 
         private Stream GetStream(string content) {
