@@ -1,15 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Server.Infrastructure;
 using NuGet.Test.Mocks;
+using Xunit;
 
 namespace NuGet.Test.Server.Infrastructure {
-    [TestClass]
     public class ServerPackageRepositoryTest {
-        [TestMethod]
+        [Fact]
         public void ServerPackageRepositoryReadsDerivedData() {
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
@@ -32,9 +32,11 @@ namespace NuGet.Test.Server.Infrastructure {
 
             // Assert
             byte[] data = memoryStream.ToArray();
-            Assert.AreEqual(data.Length, packages.Single().PackageSize);
-            CollectionAssert.AreEquivalent(data.Select(Invert).ToArray(), Convert.FromBase64String(packages.Single().PackageHash));
-            Assert.AreEqual(data.Length, packages.Single().PackageSize);
+            Assert.Equal(data.Length, packages.Single().PackageSize);
+        	Assert.Equal(data.Select(Invert).ToArray(), Convert.FromBase64String(packages.Single().PackageHash).ToArray());
+
+            //CollectionAssert.AreEquivalent(data.Select(Invert).ToArray(), Convert.FromBase64String(packages.Single().PackageHash));
+            Assert.Equal(data.Length, packages.Single().PackageSize);
         }
 
         private static IHashProvider GetHashProvider() {

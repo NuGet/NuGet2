@@ -1,10 +1,10 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test.Server.Infrastructure {
-    [TestClass]
-    public class HelpersTest {
-        [TestMethod]
+
+	public class HelpersTest {
+        [Fact]
         public void GetRepositoryUrlCreatesProperUrlWithRootWebApp() {
             // Arrange
             Uri url = new Uri("http://example.com/default.aspx");
@@ -14,10 +14,10 @@ namespace NuGet.Test.Server.Infrastructure {
             string repositoryUrl = Helpers.GetRepositoryUrl(url, applicationPath);
 
             // Assert
-            Assert.AreEqual("http://example.com/nuget", repositoryUrl);
+            Assert.Equal("http://example.com/nuget", repositoryUrl);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetRepositoryUrlCreatesProperUrlWithVirtualApp() {
             // Arrange
             Uri url = new Uri("http://example.com/Foo/default.aspx");
@@ -27,10 +27,10 @@ namespace NuGet.Test.Server.Infrastructure {
             string repositoryUrl = Helpers.GetRepositoryUrl(url, applicationPath);
 
             // Assert
-            Assert.AreEqual("http://example.com/Foo/nuget", repositoryUrl);
+            Assert.Equal("http://example.com/Foo/nuget", repositoryUrl);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetRepositoryUrlWithNonStandardPortCreatesProperUrlWithRootWebApp() {
             // Arrange
             Uri url = new Uri("http://example.com:1337/default.aspx");
@@ -40,10 +40,10 @@ namespace NuGet.Test.Server.Infrastructure {
             string repositoryUrl = Helpers.GetRepositoryUrl(url, applicationPath);
 
             // Assert
-            Assert.AreEqual("http://example.com:1337/nuget", repositoryUrl);
+            Assert.Equal("http://example.com:1337/nuget", repositoryUrl);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetRepositoryUrlWithNonStandardPortCreatesProperUrlWithVirtualApp() {
             // Arrange
             Uri url = new Uri("http://example.com:1337/Foo/default.aspx");
@@ -53,7 +53,7 @@ namespace NuGet.Test.Server.Infrastructure {
             string repositoryUrl = Helpers.GetRepositoryUrl(url, applicationPath);
 
             // Assert
-            Assert.AreEqual("http://example.com:1337/Foo/nuget", repositoryUrl);
+            Assert.Equal("http://example.com:1337/Foo/nuget", repositoryUrl);
         }
     }
 }
