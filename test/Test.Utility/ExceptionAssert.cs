@@ -1,6 +1,6 @@
 using System;
 using Microsoft.Internal.Web.Utils;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test {
     public static class ExceptionAssert {
@@ -12,9 +12,9 @@ namespace NuGet.Test {
 
         public static void Throws<TException>(Action act, Func<TException, bool> condition) where TException : Exception {
             Exception ex = Capture.Exception(act);
-            Assert.IsNotNull(ex, "The expected exception was not thrown");
-            Assert.IsInstanceOfType(ex, typeof(TException), "The exception thrown was not of the expected type");
-            Assert.IsTrue(condition((TException)ex), String.Format(@"Exception did not match the specified condition
+            Assert.NotNull(ex);
+            Assert.IsType(typeof(TException), ex);
+            Assert.True(condition((TException)ex), String.Format(@"Exception did not match the specified condition
 Actual Exception: {0}", ex));
         }
 
