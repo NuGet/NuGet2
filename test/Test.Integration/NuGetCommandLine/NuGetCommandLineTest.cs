@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test.Integration.NuGetCommandLine {
-    [TestClass]
-    public class NuGetCommandLineTest {
+	public class NuGetCommandLineTest : IDisposable, IUseFixture<NugetProgramStatic>
+	{
         private const string NoSpecsfolder = @".\nospecs\";
         private const string OneSpecfolder = @".\onespec\";
         private const string TwoSpecsFolder = @".\twospecs\";
@@ -20,18 +20,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         private TextWriter originalErrorConsoleOutput;
         private string startingDirectory;
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context) {
-            Program.IgnoreExtensions = true;
-        }
-
-        [ClassCleanup]
-        public static void ClassCleanup() {
-            Program.IgnoreExtensions = false;
-        }
-
-        [TestInitialize]
-        public void Initialize() {
+    	public NuGetCommandLineTest()
+    	{
             DeleteDirs();
 
             Directory.CreateDirectory(NoSpecsfolder);
@@ -49,8 +39,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             startingDirectory = Directory.GetCurrentDirectory();
         }
 
-        [TestCleanup]
-        public void Cleanup() {
+        public void Dispose() {
             DeleteDirs();
             System.Console.SetOut(originalConsoleOutput);
             System.Console.SetError(originalErrorConsoleOutput);
@@ -58,7 +47,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
 
-        [TestMethod]
+        [Fact]
         public void NuGetCommandLine_ShowsHelpIfThereIsNoCommand() {
             // Arrange 
             string[] args = new string[0];
@@ -67,11 +56,11 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("usage: NuGet <command> [args] [options]"));
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("usage: NuGet <command> [args] [options]"));
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_ThrowsWhenPassingNoArgsAndThereAreNoNuSpecFiles() {
             // Arrange 
             string[] args = new string[] { "pack" };
@@ -81,11 +70,11 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(1, result);
-            Assert.AreEqual("Please specify a nuspec or project file to use.", consoleOutput.ToString().Trim());
+            Assert.Equal(1, result);
+            Assert.Equal("Please specify a nuspec or project file to use.", consoleOutput.ToString().Trim());
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_ThrowsWhenPassingNoArgsAndThereIsMoreThanOneNuSpecFile() {
             // Arrange
             string nuspecFile = Path.Combine(TwoSpecsFolder, "antlr.nuspec");
@@ -99,11 +88,11 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(1, result);
-            Assert.AreEqual("Please specify a nuspec or project file to use.", consoleOutput.ToString().Trim());
+            Assert.Equal(1, result);
+            Assert.Equal("Please specify a nuspec or project file to use.", consoleOutput.ToString().Trim());
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_CreatesPackageWhenPassingNoArgsAndThereOneNuSpecFile() {
             //Arrange
             string nuspecFile = Path.Combine(OneSpecfolder, "antlr.nuspec");
@@ -116,11 +105,11 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             int result = Program.Main(args);
 
             //Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_CreatesPackageWhenPassingBasePath() {
             //Arrange
             string nuspecFile = Path.Combine(OneSpecfolder, "Antlr.nuspec");
@@ -134,12 +123,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             int result = Program.Main(args);
 
             //Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID1() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "InvalidId.nuspec");
@@ -165,12 +154,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(1, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nThe package ID 'test\\id' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.\r\n"));
-            Assert.IsFalse(File.Exists(expectedPackage));
+            Assert.Equal(1, result);
+            Assert.True(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nThe package ID 'test\\id' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.\r\n"));
+            Assert.False(File.Exists(expectedPackage));
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID2() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "InvalidId.nuspec");
@@ -196,12 +185,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(1, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nThe package ID 'test:id' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.\r\n"));
-            Assert.IsFalse(File.Exists(expectedPackage));
+            Assert.Equal(1, result);
+            Assert.True(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nThe package ID 'test:id' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.\r\n"));
+            Assert.False(File.Exists(expectedPackage));
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID3() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "InvalidId.nuspec");
@@ -227,12 +216,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(1, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nThe package ID 'test|id' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.\r\n"));
-            Assert.IsFalse(File.Exists(expectedPackage));
+            Assert.Equal(1, result);
+            Assert.True(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nThe package ID 'test|id' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.\r\n"));
+            Assert.False(File.Exists(expectedPackage));
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID4() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "InvalidId.nuspec");
@@ -258,12 +247,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(1, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nThe package ID 'test/id' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.\r\n"));
-            Assert.IsFalse(File.Exists(expectedPackage));
+            Assert.Equal(1, result);
+            Assert.True(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nThe package ID 'test/id' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.\r\n"));
+            Assert.False(File.Exists(expectedPackage));
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_SpecifyingFilesInNuspecOnlyPackagesSpecifiedFiles() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
@@ -291,14 +280,14 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
 
             VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt" });
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_SpecifyingEmptyFilesElementInNuspecPackagesNoFiles() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
@@ -327,14 +316,14 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
 
             VerifyPackageContents(expectedPackage, new string[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_AcceptEmptyDependenciesElement() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
@@ -359,16 +348,16 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
 
             ZipPackage package = VerifyPackageContents(expectedPackage, new[] { @"file1.txt" });
 
-            Assert.IsFalse(package.Dependencies.Any());
+            Assert.False(package.Dependencies.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_AcceptEmptyFrameworkAssemblyElement() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
@@ -393,16 +382,16 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
 
             ZipPackage package = VerifyPackageContents(expectedPackage, new[] { @"file1.txt" });
 
-            Assert.IsFalse(package.FrameworkAssemblies.Any());
+            Assert.False(package.FrameworkAssemblies.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_SpecifyingProjectFileCreatesPackageAndSymbolsPackge() {
             // Arrange            
             string expectedPackage = "FakeProject.1.2.nupkg";
@@ -448,15 +437,15 @@ public class Baz {
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
             var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\FakeProject.dll" });
-            Assert.AreEqual("FakeProject", package.Id);
-            Assert.AreEqual(new Version("1.2"), package.Version);
-            Assert.AreEqual("David Inc", package.Authors.First());
-            Assert.AreEqual("This is a test. Ignore me", package.Description);
-            Assert.IsTrue(File.Exists(expectedSymbolsPackage));
+            Assert.Equal("FakeProject", package.Id);
+            Assert.Equal(new Version("1.2"), package.Version);
+            Assert.Equal("David Inc", package.Authors.First());
+            Assert.Equal("This is a test. Ignore me", package.Description);
+            Assert.True(File.Exists(expectedSymbolsPackage));
             VerifyPackageContents(expectedSymbolsPackage, new[] { @"src\Foo.cs",
                                                                   @"src\Runner.cs",
                                                                   @"src\Folder\Baz.cs",
@@ -467,7 +456,7 @@ public class Baz {
         }
 
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_SpecifyingProjectFilePacksContentAndOutput() {
             // Arrange                        
             string expectedPackage = "ProjectWithCotent.1.5.nupkg";
@@ -501,20 +490,20 @@ public class Cl_{0} {{
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
 
             var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithCotent.dll",
                                                                          @"content\Foo.xml",
                                                                          @"content\Bar.txt" });
-            Assert.AreEqual("ProjectWithCotent", package.Id);
-            Assert.AreEqual(new Version("1.5"), package.Version);
-            Assert.AreEqual("David", package.Authors.First());
-            Assert.AreEqual("Project with content", package.Description);
+            Assert.Equal("ProjectWithCotent", package.Id);
+            Assert.Equal(new Version("1.5"), package.Version);
+            Assert.Equal("David", package.Authors.First());
+            Assert.Equal("Project with content", package.Description);
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_TestDefaultPackageIssueRules() {
             //Arrange
             string nuspecFile = Path.Combine(OneSpecfolder, "beta.nuspec");
@@ -552,22 +541,22 @@ public class Cl_{0} {{
             int result = Program.Main(args);
 
             //Assert
-            Assert.AreEqual(0, result);
+            Assert.Equal(0, result);
             string output = consoleOutput.ToString();
-            Assert.IsTrue(output.Contains("Successfully created package"));
+            Assert.True(output.Contains("Successfully created package"));
 
             // Asserts for package issues
-            Assert.IsTrue(output.Contains("7 issue(s) found with package 'Antlr'."));
-            Assert.IsTrue(output.Contains("Incompatible files in lib folder"));
-            Assert.IsTrue(output.Contains("Invalid framework folder"));
-            Assert.IsTrue(output.Contains("Assembly not inside a framework folder"));
-            Assert.IsTrue(output.Contains("Assembly outside lib folder"));
-            Assert.IsTrue(output.Contains("PowerScript file outside tools folder"));
-            Assert.IsTrue(output.Contains("Unrecognized PowerScript file"));
-            Assert.IsTrue(output.Contains("Incompatible files in lib folder"));
+            Assert.True(output.Contains("7 issue(s) found with package 'Antlr'."));
+            Assert.True(output.Contains("Incompatible files in lib folder"));
+            Assert.True(output.Contains("Invalid framework folder"));
+            Assert.True(output.Contains("Assembly not inside a framework folder"));
+            Assert.True(output.Contains("Assembly outside lib folder"));
+            Assert.True(output.Contains("PowerScript file outside tools folder"));
+            Assert.True(output.Contains("Unrecognized PowerScript file"));
+            Assert.True(output.Contains("Incompatible files in lib folder"));
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_SpecifyingProjectFileWithNuSpecWithTokensSubstitutesMetadataFromProject() {
             // Arrange
             string expectedPackage = "ProjectWithNuSpec.1.2.nupkg";
@@ -607,24 +596,24 @@ public class Cl_{0} {{
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
 
             var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpec.dll" });
-            Assert.AreEqual("ProjectWithNuSpec", package.Id);
-            Assert.AreEqual(new Version("1.2"), package.Version);
-            Assert.AreEqual("Title of Package", package.Title);
-            Assert.AreEqual("David", package.Authors.First());
-            Assert.AreEqual("Description from nuspec", package.Description);
+            Assert.Equal("ProjectWithNuSpec", package.Id);
+            Assert.Equal(new Version("1.2"), package.Version);
+            Assert.Equal("Title of Package", package.Title);
+            Assert.Equal("David", package.Authors.First());
+            Assert.Equal("Description from nuspec", package.Description);
             var dependencies = package.Dependencies.ToList();
-            Assert.AreEqual(1, dependencies.Count);
-            Assert.AreEqual("elmah", dependencies[0].Id);
+            Assert.Equal(1, dependencies.Count);
+            Assert.Equal("elmah", dependencies[0].Id);
             var frameworkAssemblies = package.FrameworkAssemblies.ToList();
-            Assert.AreEqual("System.Web", frameworkAssemblies[0].AssemblyName);
+            Assert.Equal("System.Web", frameworkAssemblies[0].AssemblyName);
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_SpecifyingProjectFileWithNuSpecWithEmptyFilesElementDoNotIncludeContentFiles() {
             // Arrange
             string expectedPackage = "ProjectWithNuSpecEmptyFiles.1.0.nupkg";
@@ -661,15 +650,15 @@ public class Cl_{0} {{
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
 
             var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpecEmptyFiles.dll" });
-            Assert.IsFalse(package.GetFiles("content").Any());
+            Assert.False(package.GetFiles("content").Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_SpecifyingProjectFileWithNuSpecNamedAfterProjectUsesNuSpecForMetadata() {
             // Arrange                        
             string expectedPackage = "Test.1.2.nupkg";
@@ -698,18 +687,18 @@ public class Cl_{0} {{
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
 
             var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\FooProject.dll" });
-            Assert.AreEqual("Test", package.Id);
-            Assert.AreEqual(new Version("1.2"), package.Version);
-            Assert.AreEqual("Description from nuspec", package.Description);
-            Assert.AreEqual("John", package.Authors.First());
+            Assert.Equal("Test", package.Id);
+            Assert.Equal(new Version("1.2"), package.Version);
+            Assert.Equal("Description from nuspec", package.Description);
+            Assert.Equal("John", package.Authors.First());
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_SpecifyingProjectFileWithNoBuildThrowsIfProjectNotBuilt() {
             // Arrange                        
             WriteAssemblyInfo("ProjectNoBuild",
@@ -727,11 +716,11 @@ public class Cl_{0} {{
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(1, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Make sure the project has been built."));
+            Assert.Equal(1, result);
+            Assert.True(consoleOutput.ToString().Contains("Make sure the project has been built."));
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_SpecifyingProjectFileWithNuSpecWithUnsupportedTokensThrows() {
             // Arrange                        
             string expectedPackage = "ProjectWithBrokenNuSpec.1.2.nupkg";
@@ -761,12 +750,12 @@ public class Cl_{0} {{
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(1, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("The replacement token 'id2' has no value."));
-            Assert.IsFalse(File.Exists(expectedPackage));
+            Assert.Equal(1, result);
+            Assert.True(consoleOutput.ToString().Contains("The replacement token 'id2' has no value."));
+            Assert.False(File.Exists(expectedPackage));
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_SpecifyingProjectFileAndNuSpecWithFilesMergesFiles() {
             // Arrange                        
             string expectedPackage = "ProjectWithNuSpecAndFiles.1.3.nupkg";
@@ -801,19 +790,19 @@ public class Cl_{0} {{
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
 
             var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpecAndFiles.dll", 
                                                                          @"lib\net40\ProjectWithNuSpecAndFiles.pdb" });
-            Assert.AreEqual("ProjectWithNuSpecAndFiles", package.Id);
-            Assert.AreEqual(new Version("1.3"), package.Version);
-            Assert.AreEqual("David2", package.Authors.First());
-            Assert.AreEqual("Project with nuspec that has files", package.Description);
+            Assert.Equal("ProjectWithNuSpecAndFiles", package.Id);
+            Assert.Equal(new Version("1.3"), package.Version);
+            Assert.Equal("David2", package.Authors.First());
+            Assert.Equal("Project with nuspec that has files", package.Description);
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_PrefersProjectFileIfNuSpecAndProjectFileAreInTheSameDirectory() {
             // Arrange                        
             string expectedPackage = "ProjectWithNuSpecProjectWins.1.2.nupkg";
@@ -843,18 +832,18 @@ public class Cl_{0} {{
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
 
             var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithNuSpecProjectWins.dll" });
-            Assert.AreEqual("ProjectWithNuSpecProjectWins", package.Id);
-            Assert.AreEqual(new Version("1.2"), package.Version);
-            Assert.AreEqual("David2", package.Authors.First());
-            Assert.AreEqual("Project with nuspec", package.Description);
+            Assert.Equal("ProjectWithNuSpecProjectWins", package.Id);
+            Assert.Equal(new Version("1.2"), package.Version);
+            Assert.Equal("David2", package.Authors.First());
+            Assert.Equal("Project with nuspec", package.Description);
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_SpecifyingProjectOnlyPacksAssemblyThatProjectProduced() {
             // Arrange                        
             string expectedPackage = "ProjectWithAssembliesInOutputPath.1.3.nupkg";
@@ -875,18 +864,18 @@ public class Cl_{0} {{
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
 
             var package = VerifyPackageContents(expectedPackage, new[] { @"lib\net40\ProjectWithAssembliesInOutputPath.dll" });
-            Assert.AreEqual("ProjectWithAssembliesInOutputPath", package.Id);
-            Assert.AreEqual(new Version("1.3"), package.Version);
-            Assert.AreEqual("David2", package.Authors.First());
-            Assert.AreEqual("Project with nuspec that has files", package.Description);
+            Assert.Equal("ProjectWithAssembliesInOutputPath", package.Id);
+            Assert.Equal(new Version("1.3"), package.Version);
+            Assert.Equal("David2", package.Authors.First());
+            Assert.Equal("Project with nuspec that has files", package.Description);
         }
 
-        [TestMethod]
+        [Fact]
         public void PackageCommand_WhenErrorIsThrownPackageFileIsDeleted() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithErrors.nuspec");
@@ -908,12 +897,12 @@ public class Cl_{0} {{
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(1, result);
-            Assert.IsFalse(File.Exists(expectedPackage));
+            Assert.Equal(1, result);
+            Assert.False(File.Exists(expectedPackage));
         }
 
 
-        [TestMethod]
+        [Fact]
         public void PackCommandAllowsPassingPropertiesFromCommandLine() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithProperties.nuspec");
@@ -935,16 +924,16 @@ public class Cl_{0} {{
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.Equal(0, result);
+            Assert.True(File.Exists(expectedPackage));
             var package = VerifyPackageContents(expectedPackage, new[] { @"foo.txt" });
-            Assert.AreEqual("foo", package.Id);
-            Assert.AreEqual(new Version("1.1"), package.Version);
-            Assert.AreEqual("Auth", package.Authors.First());
-            Assert.AreEqual("Desc", package.Description);
+            Assert.Equal("foo", package.Id);
+            Assert.Equal(new Version("1.1"), package.Version);
+            Assert.Equal("Auth", package.Authors.First());
+            Assert.Equal("Desc", package.Description);
         }
 
-        [TestMethod]
+        [Fact]
         public void PackCommandAllowsPassingVersionSetsVersionProperty() {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithProperties.nuspec");
@@ -966,16 +955,16 @@ public class Cl_{0} {{
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(0, result);
-            Assert.IsTrue(File.Exists(expectedPackage));
+            Assert.Equal(0, result);
+            Assert.True(File.Exists(expectedPackage));
             var package = VerifyPackageContents(expectedPackage, new[] { @"foo.txt" });
-            Assert.AreEqual("MyPackage", package.Id);
-            Assert.AreEqual(new Version("2.5"), package.Version);
-            Assert.AreEqual("Auth", package.Authors.First());
-            Assert.AreEqual("Desc", package.Description);
+            Assert.Equal("MyPackage", package.Id);
+            Assert.Equal(new Version("2.5"), package.Version);
+            Assert.Equal("Auth", package.Authors.First());
+            Assert.Equal("Desc", package.Description);
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateCommandThrowsWithNoArguments() {
             // Arrange            
             var args = new string[] { "update" };
@@ -984,11 +973,11 @@ public class Cl_{0} {{
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(1, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("No packages.config or solution file specified. Use the -self switch to update NuGet.exe."));
+            Assert.Equal(1, result);
+            Assert.True(consoleOutput.ToString().Contains("No packages.config or solution file specified. Use the -self switch to update NuGet.exe."));
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdateCommandWithInvalidFileThrows() {
             // Arrange            
             var args = new string[] { "update", "lolz.txt" };
@@ -997,14 +986,14 @@ public class Cl_{0} {{
             int result = Program.Main(args);
 
             // Assert
-            Assert.AreEqual(1, result);
-            Assert.IsTrue(consoleOutput.ToString().Contains("No packages.config or solution file specified."));
+            Assert.Equal(1, result);
+            Assert.True(consoleOutput.ToString().Contains("No packages.config or solution file specified."));
         }
 
         private ZipPackage VerifyPackageContents(string packageFile, IEnumerable<string> expectedFiles) {
             var package = new ZipPackage(packageFile);
-            var files = package.GetFiles().Select(f => f.Path).OrderBy(f => f).ToList();
-            CollectionAssert.AreEqual(expectedFiles.OrderBy(f => f).ToList(), files);
+            var files = package.GetFiles().Select(f => f.Path).OrderBy(f => f).ToArray();
+            Assert.Equal(expectedFiles.OrderBy(f => f).ToArray(), files);
             return package;
         }
 
@@ -1142,5 +1131,10 @@ using System.Runtime.InteropServices;
 
             }
         }
-    }
+
+    	public void SetFixture(NugetProgramStatic data)
+		{
+			//use fixture sets up / tears down the static (awesome idea! <sarcasm/>) use extensions.
+		}
+	}
 }

@@ -3,22 +3,19 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Test.Integration.PathResolver {
     /// <summary>
     /// Tests based on scenarios specified in http://nuget.codeplex.com/wikipage?title=File%20Element%20Specification
     /// </summary>
-    [TestClass]
     public class PathResolverTest {
-
-        public TestContext TestContext { get; set; }
 
         /// <summary>
         /// Foo.dll at basePath. target="lib"
         /// Expected: \lib\foo.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SingleAssemblyTest() {
             // Arrange
             string search = "foo.dll";
@@ -30,8 +27,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var packageBuilder = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(packageBuilder.Files.Count, 1);
-            Assert.AreEqual(packageBuilder.Files.First().Path, @"lib\foo.dll");
+            Assert.Equal(packageBuilder.Files.Count, 1);
+            Assert.Equal(packageBuilder.Files.First().Path, @"lib\foo.dll");
         }
 
         /// <summary>
@@ -39,7 +36,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Foo.dll in bar\baz\. target="lib"
         /// Expected \lib\foo.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SingleAssemblyInDeepPathTest() {
             // Arrange
             string search = @"bar\baz\foo.dll";
@@ -53,8 +50,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var packageBuilder = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(packageBuilder.Files.Count, 1);
-            Assert.AreEqual(packageBuilder.Files.First().Path, @"lib\foo.dll");
+            Assert.Equal(packageBuilder.Files.Count, 1);
+            Assert.Equal(packageBuilder.Files.First().Path, @"lib\foo.dll");
         }
 
         /// <summary>
@@ -62,7 +59,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Search: bin\release\*.dll target="lib"
         /// Expected \lib\foo.dll, \lib\bar.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SetOfDllsFromBinTest() {
             // Arrange
             string search = @"bin\release\*.dll";
@@ -76,9 +73,9 @@ namespace NuGet.Test.Integration.PathResolver {
             var packageBuilder = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(packageBuilder.Files.Count, 2);
-            Assert.AreEqual(packageBuilder.Files.First().Path, @"lib\bar.dll");
-            Assert.AreEqual(packageBuilder.Files.Last().Path, @"lib\foo.dll");
+            Assert.Equal(packageBuilder.Files.Count, 2);
+            Assert.Equal(packageBuilder.Files.First().Path, @"lib\bar.dll");
+            Assert.Equal(packageBuilder.Files.Last().Path, @"lib\foo.dll");
         }
 
         /// <summary>
@@ -86,7 +83,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Search: lib\** target="lib"
         /// Expected \lib\net40\foo.dll, \lib\net20\foo.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DllFromDifferenFrameworkTest() {
             // Arrange
             string search = @"lib\**";
@@ -100,9 +97,9 @@ namespace NuGet.Test.Integration.PathResolver {
             var packageBuilder = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(packageBuilder.Files.Count, 2);
-            Assert.AreEqual(packageBuilder.Files.First().Path, @"lib\net20\foo.dll");
-            Assert.AreEqual(packageBuilder.Files.Last().Path, @"lib\net40\foo.dll");
+            Assert.Equal(packageBuilder.Files.Count, 2);
+            Assert.Equal(packageBuilder.Files.First().Path, @"lib\net20\foo.dll");
+            Assert.Equal(packageBuilder.Files.Last().Path, @"lib\net40\foo.dll");
         }
 
         /// <summary>
@@ -111,7 +108,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// target: content\css\mobile
         /// Expected \Content\css\mobile\style1.css \Content\css\mobile\style2.css
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ContentFilesTest() {
             // Arrange
             string search = @"css\mobile\*.css";
@@ -125,9 +122,9 @@ namespace NuGet.Test.Integration.PathResolver {
             var packageBuilder = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(packageBuilder.Files.Count, 2);
-            Assert.AreEqual(packageBuilder.Files.First().Path, @"content\css\mobile\style1.css");
-            Assert.AreEqual(packageBuilder.Files.Last().Path, @"content\css\mobile\style2.css");
+            Assert.Equal(packageBuilder.Files.Count, 2);
+            Assert.Equal(packageBuilder.Files.First().Path, @"content\css\mobile\style1.css");
+            Assert.Equal(packageBuilder.Files.Last().Path, @"content\css\mobile\style2.css");
         }
 
         /// <summary>
@@ -136,7 +133,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: content\css
         /// Expected \content\css\mobile\style.css \content\css\mobile\wp7\style.css \content\css\browser\style.css
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ContentFilesWithDirectoryStructureTest() {
             // Arrange
             string search = @"css\**\*.css";
@@ -154,10 +151,10 @@ namespace NuGet.Test.Integration.PathResolver {
             var packageBuilder = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(packageBuilder.Files.Count, 3);
-            Assert.AreEqual(packageBuilder.Files.ElementAt(0).Path, @"content\css\browser\style.css");
-            Assert.AreEqual(packageBuilder.Files.ElementAt(1).Path, @"content\css\mobile\style.css");
-            Assert.AreEqual(packageBuilder.Files.ElementAt(2).Path, @"content\css\mobile\wp7\style.css");
+            Assert.Equal(packageBuilder.Files.Count, 3);
+            Assert.Equal(packageBuilder.Files.ElementAt(0).Path, @"content\css\browser\style.css");
+            Assert.Equal(packageBuilder.Files.ElementAt(1).Path, @"content\css\mobile\style.css");
+            Assert.Equal(packageBuilder.Files.ElementAt(2).Path, @"content\css\mobile\wp7\style.css");
         }
 
         /// <summary>
@@ -166,7 +163,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: content
         /// Expected: \Content\style.css
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ContentFilesWithDeepPath() {
             // Arrange
             string search = @"css\cool\style.css";
@@ -180,8 +177,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var packageBuilder = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(packageBuilder.Files.Count, 1);
-            Assert.AreEqual(packageBuilder.Files.ElementAt(0).Path, @"content\style.css");
+            Assert.Equal(packageBuilder.Files.Count, 1);
+            Assert.Equal(packageBuilder.Files.ElementAt(0).Path, @"content\style.css");
         }
 
         /// <summary>
@@ -190,7 +187,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: Content\images\foo.bar
         /// Expected: \Content\images\foo.bar\Neatpick.png
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ContentFilesCopiedToFolderWithDotInNameTest() {
             // Arrange
             string search = @"images\neatpic.png";
@@ -203,8 +200,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var packageBuilder = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(packageBuilder.Files.Count, 1);
-            Assert.AreEqual(packageBuilder.Files.ElementAt(0).Path, @"content\images\foo.bar\neatpic.png");
+            Assert.Equal(packageBuilder.Files.Count, 1);
+            Assert.Equal(packageBuilder.Files.ElementAt(0).Path, @"content\images\foo.bar\neatpic.png");
         }
 
         /// <summary>
@@ -213,7 +210,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: Content\css\cool
         /// Expected: Content\css\cool\style.css
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ContentFileWithDeepPathAndDeepTargetTest() {
             // Arrange
             string search = @"css\cool\style.css";
@@ -227,8 +224,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var packageBuilder = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(packageBuilder.Files.Count, 1);
-            Assert.AreEqual(packageBuilder.Files.ElementAt(0).Path, @"content\css\cool\style.css");
+            Assert.Equal(packageBuilder.Files.Count, 1);
+            Assert.Equal(packageBuilder.Files.ElementAt(0).Path, @"content\css\cool\style.css");
         }
 
         /// <summary>
@@ -237,7 +234,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: Content\css\cool\style.css
         /// Expected: Content\css\cool\style.css
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ContentFileWithDeepPathAndDeepTargetWithFileNameTest() {
             // Arrange
             string search = @"css\cool\style.css";
@@ -251,8 +248,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var packageBuilder = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(packageBuilder.Files.Count, 1);
-            Assert.AreEqual(packageBuilder.Files.ElementAt(0).Path, @"content\css\cool\style.css");
+            Assert.Equal(packageBuilder.Files.Count, 1);
+            Assert.Equal(packageBuilder.Files.ElementAt(0).Path, @"content\css\cool\style.css");
         }
 
         /// <summary>
@@ -261,7 +258,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: Content\css\ie.css
         /// Expected: Content\css\cool\style.css
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ContentFileCopyAndRename() {
             // Arrange
             string search = @"ie\css\style.css";
@@ -275,8 +272,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var packageBuilder = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(packageBuilder.Files.Count, 1);
-            Assert.AreEqual(packageBuilder.Files.ElementAt(0).Path, @"content\css\ie.css");
+            Assert.Equal(packageBuilder.Files.Count, 1);
+            Assert.Equal(packageBuilder.Files.ElementAt(0).Path, @"content\css\ie.css");
         }
 
         /// <summary>
@@ -285,7 +282,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: content\style\
         /// Expected: No files to be present
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void NoFilesAreCopiedWhenFilterReturnsEmptyResults() {
             // Arrange
             string search = @"ie\**\*.cs";
@@ -300,7 +297,7 @@ namespace NuGet.Test.Integration.PathResolver {
             var packageBuilder = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(packageBuilder.Files.Count, 0);
+            Assert.Equal(packageBuilder.Files.Count, 0);
         }
 
         /// <summary>
@@ -309,7 +306,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: content\styles
         /// Expected: content\styles\style.css, content\styles\css\style\style.css 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DirectoryStructureWithRepeatingTerms() {
             // Arrange
             string search = @"style\**\*.css";
@@ -326,9 +323,9 @@ namespace NuGet.Test.Integration.PathResolver {
             var packageBuilder = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(packageBuilder.Files.Count, 2);
-            Assert.AreEqual(packageBuilder.Files.ElementAt(0).Path, @"content\styles\style.css");
-            Assert.AreEqual(packageBuilder.Files.ElementAt(1).Path, @"content\styles\css\style\style.css");
+            Assert.Equal(packageBuilder.Files.Count, 2);
+            Assert.Equal(packageBuilder.Files.ElementAt(0).Path, @"content\styles\style.css");
+            Assert.Equal(packageBuilder.Files.ElementAt(1).Path, @"content\styles\css\style\style.css");
         }
 
         /// <summary>
@@ -337,7 +334,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: 
         /// Expected: Exception thrown stating file \style\main.css was not found.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MissingFileThrowsAnException() {
             // Arrange
             string search = @"style\main.css";
@@ -356,7 +353,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: 
         /// Expected: Exception thrown stating file main.css was not found.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MissingFileAtRootThrowsAnException() {
             // Arrange
             string search = @"main.css";
@@ -373,7 +370,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Search: css\*.jpg
         /// Target: 
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void WildcardSearchWithNoResultingItemsDoesNotThrow() {
             // Arrange
             string search = @"css\*.jpg";
@@ -387,8 +384,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.IsNotNull(package);
-            Assert.IsFalse(package.Files.Any());
+            Assert.NotNull(package);
+            Assert.False(package.Files.Any());
         }
 
         /// <summary>
@@ -397,7 +394,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: content\css
         /// Expected: \content\css\main.css
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RelativePathsWithNoWildCards() {
             // Arrange
             string search = @"..\static\css\main.css";
@@ -412,8 +409,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, Path.Combine(root, "project-files", "nuget"));
 
             // Assert
-            Assert.AreEqual(1, package.Files.Count);
-            Assert.AreEqual(package.Files.First().Path, @"content\css\main.css");
+            Assert.Equal(1, package.Files.Count);
+            Assert.Equal(package.Files.First().Path, @"content\css\main.css");
         }
 
         /// <summary>
@@ -422,7 +419,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: content\css\style.css
         /// Expected: \content\css\style.css
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RelativePathsWithCopyRename() {
             // Arrange
             string search = @"..\..\static\css\main.css";
@@ -437,8 +434,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, Path.Combine(root, "project-files", "nuget-files", "manifest"));
 
             // Assert
-            Assert.AreEqual(1, package.Files.Count);
-            Assert.AreEqual(package.Files.First().Path, @"content\css\style.css");
+            Assert.Equal(1, package.Files.Count);
+            Assert.Equal(package.Files.First().Path, @"content\css\style.css");
         }
 
         /// <summary>
@@ -447,7 +444,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: lib\net40
         /// Expected: lib\net40\awesomeproj.core.dll, lib\net40\awesomeproj.aux.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RelativePathWithWildCards() {
             // Arrange
             string search = @"..\..\src\awesomeproj\bin\release\*.dll";
@@ -463,9 +460,9 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, Path.Combine(root, "build", "nuget"));
 
             // Assert
-            Assert.AreEqual(2, package.Files.Count);
-            Assert.AreEqual(package.Files.First().Path, @"lib\net40\awesomeproj.aux.dll");
-            Assert.AreEqual(package.Files.Last().Path, @"lib\net40\awesomeproj.core.dll");
+            Assert.Equal(2, package.Files.Count);
+            Assert.Equal(package.Files.First().Path, @"lib\net40\awesomeproj.aux.dll");
+            Assert.Equal(package.Files.Last().Path, @"lib\net40\awesomeproj.core.dll");
         }
 
         /// <summary>
@@ -474,7 +471,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: lib
         /// Expected: lib\foo.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AbsolutePathWithNoWildCards() {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
@@ -488,8 +485,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
 
             // Assert
-            Assert.AreEqual(1, package.Files.Count);
-            Assert.AreEqual(package.Files.First().Path, @"lib\foo.dll");
+            Assert.Equal(1, package.Files.Count);
+            Assert.Equal(package.Files.First().Path, @"lib\foo.dll");
         }
 
         /// <summary>
@@ -498,7 +495,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: lib\bar.dll
         /// Expected: lib\bar.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AbsolutePathWithFileRename() {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
@@ -512,8 +509,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
 
             // Assert
-            Assert.AreEqual(1, package.Files.Count);
-            Assert.AreEqual(package.Files.First().Path, @"lib\bar.dll");
+            Assert.Equal(1, package.Files.Count);
+            Assert.Equal(package.Files.First().Path, @"lib\bar.dll");
         }
 
         /// <summary>
@@ -522,7 +519,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: lib
         /// Expected: lib\foo.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AbsolutePathWithWildcard() {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
@@ -537,8 +534,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
 
             // Assert
-            Assert.AreEqual(1, package.Files.Count);
-            Assert.AreEqual(package.Files.First().Path, @"lib\foo.dll");
+            Assert.Equal(1, package.Files.Count);
+            Assert.Equal(package.Files.First().Path, @"lib\foo.dll");
         }
 
         /// <summary>
@@ -547,7 +544,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: lib
         /// Expected: lib\foo.dll, lib\bar.dll, lib\test.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void MultipleFileSourcesCanBeSpecifiedUsingSemiColonSeparator() {
             // Arrange
             string root = CreateFileSystem(
@@ -566,10 +563,10 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(3, package.Files.Count);
-            Assert.AreEqual(package.Files.ElementAt(0).Path, @"lib\bar.dll");
-            Assert.AreEqual(package.Files.ElementAt(1).Path, @"lib\foo.dll");
-            Assert.AreEqual(package.Files.ElementAt(2).Path, @"lib\test.dll");
+            Assert.Equal(3, package.Files.Count);
+            Assert.Equal(package.Files.ElementAt(0).Path, @"lib\bar.dll");
+            Assert.Equal(package.Files.ElementAt(1).Path, @"lib\foo.dll");
+            Assert.Equal(package.Files.ElementAt(2).Path, @"lib\test.dll");
         }
 
         /// <summary>
@@ -578,7 +575,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: lib
         /// Expected: lib\foo.dll, lib\bar.dll, lib\test.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ManifestThrowsIfFirstFileSourceValuesInSemiColonSeparatedListsAreEmpty() {
             // Arrange
             string root = CreateFileSystem(new Dir("sample", new File("test.dll")));
@@ -597,7 +594,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: lib
         /// Expected: lib\foo.dll, lib\bar.dll, lib\test.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void ManifestIgnoresEmptyItemsInSemiColonSeparatedList() {
             // Arrange
             string root = CreateFileSystem(new Dir("sample", new File("test.dll")));
@@ -610,8 +607,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(1, package.Files.Count);
-            Assert.AreEqual(package.Files.ElementAt(0).Path, @"lib\test.dll");
+            Assert.Equal(1, package.Files.Count);
+            Assert.Equal(package.Files.ElementAt(0).Path, @"lib\test.dll");
         }
 
         /// <summary>
@@ -620,7 +617,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: lib
         /// Expected: Exception stating File not found: bin\release\bar.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void PackageBuilderThrowsIfAnyOneItemOfSemiColonSeparatedListIsNotFound() {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
@@ -642,7 +639,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: lib
         /// Expected: lib\net40\foo.dll, lib\net35\foo.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void AbsolutePathWithRecursiveWildcard() {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
@@ -660,9 +657,9 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, @"x:\nuget-files\some-dir"); //This basePath would never be used, so we're ok.
 
             // Assert
-            Assert.AreEqual(2, package.Files.Count);
-            Assert.AreEqual(package.Files.First().Path, @"lib\net35\foo.dll");
-            Assert.AreEqual(package.Files.Last().Path, @"lib\net40\foo.dll");
+            Assert.Equal(2, package.Files.Count);
+            Assert.Equal(package.Files.First().Path, @"lib\net35\foo.dll");
+            Assert.Equal(package.Files.Last().Path, @"lib\net40\foo.dll");
         }
 
         /// <summary>
@@ -671,7 +668,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: lib
         /// Expected: lib\release\baz.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void PathWithWildCardInDirectoryNameAndFileName() {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
@@ -685,8 +682,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(1, package.Files.Count);
-            Assert.AreEqual(@"lib\baz.dll", package.Files.First().Path);
+            Assert.Equal(1, package.Files.Count);
+            Assert.Equal(@"lib\baz.dll", package.Files.First().Path);
         }
 
         /// <summary>
@@ -695,7 +692,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: lib
         /// Expected: lib\release\baz.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void PathWithWildCardInDirectoryNameAndFileExtension() {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
@@ -709,8 +706,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(1, package.Files.Count);
-            Assert.AreEqual(@"lib\baz.dll", package.Files.First().Path);
+            Assert.Equal(1, package.Files.Count);
+            Assert.Equal(@"lib\baz.dll", package.Files.First().Path);
         }
 
         /// <summary>
@@ -719,7 +716,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: lib
         /// Expected: lib\release\baz.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SourceStructureIsPreservedWithRecursiveWildCard() {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
@@ -733,8 +730,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(1, package.Files.Count);
-            Assert.AreEqual(@"lib\release\baz.dll", package.Files.First().Path);
+            Assert.Equal(1, package.Files.Count);
+            Assert.Equal(@"lib\release\baz.dll", package.Files.First().Path);
         }
 
         /// <summary>
@@ -744,7 +741,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\release\baz.dll
         /// In the case of a path without wildcard characters, we rename the source if the source and target extensions are identical.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void SourceWithWildcardIgnoresExtensionBasedRenameRule() {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
@@ -758,8 +755,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(1, package.Files.Count);
-            Assert.AreEqual(@"lib\foo.dll\baz.dll", package.Files.First().Path);
+            Assert.Equal(1, package.Files.Count);
+            Assert.Equal(@"lib\foo.dll\baz.dll", package.Files.First().Path);
         }
 
         /// <summary>
@@ -769,7 +766,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\release\baz.dll
         /// In the case of a path without wildcard characters, we rename the source if the source and target extensions are identical.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void WildCardInMiddleOfPath() {
             // Arrange
             string root = CreateFileSystem(new Dir("Output",
@@ -787,8 +784,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(1, package.Files.Count);
-            Assert.AreEqual(@"lib\NuGet.Core.dll", package.Files.First().Path);
+            Assert.Equal(1, package.Files.Count);
+            Assert.Equal(@"lib\NuGet.Core.dll", package.Files.First().Path);
         }
 
         /// <summary>
@@ -798,7 +795,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\release\baz.dll
         /// In the case of a path without wildcard characters, we rename the source if the source and target extensions are identical.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void WildCardInMiddleOfPathAndExtension() {
             // Arrange
             string root = CreateFileSystem(new Dir("Output",
@@ -816,9 +813,9 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(2, package.Files.Count);
-            Assert.AreEqual(@"lib\NuGet.Core.dll", package.Files.First().Path);
-            Assert.AreEqual(@"lib\NuGet.Server.dll", package.Files.Last().Path);
+            Assert.Equal(2, package.Files.Count);
+            Assert.Equal(@"lib\NuGet.Core.dll", package.Files.First().Path);
+            Assert.Equal(@"lib\NuGet.Server.dll", package.Files.Last().Path);
         }
 
         /// <summary>
@@ -828,7 +825,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\release\baz.dll
         /// In the case of a path without wildcard characters, we rename the source if the source and target extensions are identical.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RecursiveSearchForPathNotInBaseDirectory() {
             // Arrange
             string root = CreateFileSystem(new Dir("Packages", new Dir("bin")),
@@ -847,9 +844,9 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, builderBase);
 
             // Assert
-            Assert.AreEqual(2, package.Files.Count);
-            Assert.AreEqual(@"lib\NuGet\NuGet.Server\NuGet.Core.dll", package.Files.First().Path);
-            Assert.AreEqual(@"lib\NuGet\NuGet.Server\NuGet.Server.dll", package.Files.Last().Path);
+            Assert.Equal(2, package.Files.Count);
+            Assert.Equal(@"lib\NuGet\NuGet.Server\NuGet.Core.dll", package.Files.First().Path);
+            Assert.Equal(@"lib\NuGet\NuGet.Server\NuGet.Server.dll", package.Files.Last().Path);
         }
 
         /// <summary>
@@ -858,7 +855,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: lib
         /// Expected: lib\release\baz.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RelativePathWithWildCard() {
             // Arrange
             string root = CreateFileSystem(new Dir("properties"),
@@ -874,8 +871,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, builderBase);
 
             // Assert
-            Assert.AreEqual(1, package.Files.Count);
-            Assert.AreEqual(@"lib\baz.dll", package.Files.Single().Path);
+            Assert.Equal(1, package.Files.Count);
+            Assert.Equal(@"lib\baz.dll", package.Files.Single().Path);
         }
 
         /// <summary>
@@ -884,7 +881,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: lib
         /// Expected: lib\release\baz.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void DeepRelativePathWithWildCard() {
             // Arrange
             string root = CreateFileSystem(new Dir("tools",
@@ -901,8 +898,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, builderBase);
 
             // Assert
-            Assert.AreEqual(1, package.Files.Count);
-            Assert.AreEqual(@"lib\baz.dll", package.Files.Single().Path);
+            Assert.Equal(1, package.Files.Count);
+            Assert.Equal(@"lib\baz.dll", package.Files.Single().Path);
         }
 
         /// <summary>
@@ -911,7 +908,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: lib
         /// Expected: lib\release\baz.dll
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void RelativePathWithRecursiveWildCard() {
             // Arrange
             string root = CreateFileSystem(new Dir("tools",
@@ -930,9 +927,9 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, builderBase);
 
             // Assert
-            Assert.AreEqual(2, package.Files.Count);
-            Assert.AreEqual(@"lib\Output.dll", package.Files.First().Path);
-            Assert.AreEqual(@"lib\release\baz.dll", package.Files.Last().Path);
+            Assert.Equal(2, package.Files.Count);
+            Assert.Equal(@"lib\Output.dll", package.Files.First().Path);
+            Assert.Equal(@"lib\release\baz.dll", package.Files.Last().Path);
         }
 
         /// <summary>
@@ -942,7 +939,7 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\release\baz.dll
         /// In the case of a path without wildcard characters, we rename the source if the source and target extensions are identical.
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void WildCardInPathDoesNotPickUpFileInNestedDirectories() {
             // Arrange
             string expectedContent = "this is the right foo";
@@ -963,15 +960,15 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(1, package.Files.Count);
-            Assert.AreEqual(@"lib\foo.dll", package.Files.First().Path);
+            Assert.Equal(1, package.Files.Count);
+            Assert.Equal(@"lib\foo.dll", package.Files.First().Path);
 
             // Verify that we picked up the right file
             var actualContents = package.Files.First().GetStream().ReadToEnd();
-            Assert.AreEqual(expectedContent, actualContents);
+            Assert.Equal(expectedContent, actualContents);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExclusionWithSimpleExtensions() {
             // Arrange
             var root = CreateExclusionProject();
@@ -981,16 +978,16 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(6, package.Files.Count);
-            Assert.AreEqual("Main.cs", package.Files[0].Path);
-            Assert.AreEqual("MainCore.cs", package.Files[1].Path);
-            Assert.AreEqual("MyProject.csproj", package.Files[2].Path);
-            Assert.AreEqual(@"bin\debug\MyProject.dll", package.Files[3].Path);
-            Assert.AreEqual(@"bin\release\MyProject.dll", package.Files[4].Path);
-            Assert.AreEqual(@"Properties\AssemblyInfo.cs", package.Files[5].Path);
+            Assert.Equal(6, package.Files.Count);
+            Assert.Equal("Main.cs", package.Files[0].Path);
+            Assert.Equal("MainCore.cs", package.Files[1].Path);
+            Assert.Equal("MyProject.csproj", package.Files[2].Path);
+            Assert.Equal(@"bin\debug\MyProject.dll", package.Files[3].Path);
+            Assert.Equal(@"bin\release\MyProject.dll", package.Files[4].Path);
+            Assert.Equal(@"Properties\AssemblyInfo.cs", package.Files[5].Path);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExclusionWithPath() {
             // Arrange
             var root = CreateExclusionProject();
@@ -1000,14 +997,14 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(4, package.Files.Count);
-            Assert.AreEqual("Main.cs", package.Files[0].Path);
-            Assert.AreEqual("MainCore.cs", package.Files[1].Path);
-            Assert.AreEqual("MyProject.csproj", package.Files[2].Path);
-            Assert.AreEqual(@"Properties\AssemblyInfo.cs", package.Files[3].Path);
+            Assert.Equal(4, package.Files.Count);
+            Assert.Equal("Main.cs", package.Files[0].Path);
+            Assert.Equal("MainCore.cs", package.Files[1].Path);
+            Assert.Equal("MyProject.csproj", package.Files[2].Path);
+            Assert.Equal(@"Properties\AssemblyInfo.cs", package.Files[3].Path);
         }
 
-        [TestMethod]
+        [Fact]
         public void MultipleExclusionsForSearchPath() {
             // Arrange
             var root = CreateExclusionProject();
@@ -1017,13 +1014,13 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, root);
 
             // Assert
-            Assert.AreEqual(3, package.Files.Count);
-            Assert.AreEqual("Main.cs", package.Files[0].Path);
-            Assert.AreEqual("MainCore.cs", package.Files[1].Path);
-            Assert.AreEqual(@"bin\release\MyProject.dll", package.Files[2].Path);
+            Assert.Equal(3, package.Files.Count);
+            Assert.Equal("Main.cs", package.Files[0].Path);
+            Assert.Equal("MainCore.cs", package.Files[1].Path);
+            Assert.Equal(@"bin\release\MyProject.dll", package.Files[2].Path);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExclusionsWithRelativePaths() {
             // Arrange
             var root = CreateExclusionProject();
@@ -1033,8 +1030,8 @@ namespace NuGet.Test.Integration.PathResolver {
             var package = new PackageBuilder(manifest, Path.Combine(root, "Properties"));
 
             // Assert
-            Assert.AreEqual(1, package.Files.Count);
-            Assert.AreEqual(@"lib\MyProject.dll", package.Files[0].Path);
+            Assert.Equal(1, package.Files.Count);
+            Assert.Equal(@"lib\MyProject.dll", package.Files[0].Path);
         }
 
         private string CreateExclusionProject() {
@@ -1074,8 +1071,12 @@ namespace NuGet.Test.Integration.PathResolver {
   </metadata><files><file src=""{0}"" target=""{1}"" /></files></package>", search, target).AsStream();
         }
 
-        private string CreateFileSystem(params File[] files) {
-            string rootDir = Path.Combine(TestContext.TestDeploymentDir, "PathResolverIntegrationTests", TestContext.TestName);
+		//not as elegant as the mstest version as xUnit does not appear to give similar context about the "context" of the test being invoked
+        private string CreateFileSystem(params File[] files)
+        {
+			var testDir = Path.GetTempPath();
+        	var tempFileName = Path.GetRandomFileName();
+			string rootDir = Path.Combine(testDir, "PathResolverIntegrationTests", tempFileName);
             new Dir(rootDir, files).Create();
             return rootDir;
         }

@@ -1,11 +1,10 @@
 using System;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Win32;
+using Xunit;
 
 namespace NuGet.Test.Integration.MSBuild {
-    [TestClass]
-    public class NuGetTaskIntegrationTest {
+    public class NuGetTaskIntegrationTest : IDisposable {
         static string _absolutePackageDir = Path.GetFullPath(@"..\..\..\_package");
         static string _absolutePackageSourceDir = Path.GetFullPath(@"..\..\..\_package_source");
         static string _msBuildPath;
@@ -14,9 +13,9 @@ namespace NuGet.Test.Integration.MSBuild {
         const string _packageSourceDir = @".\_package_source";
         const string _workingDir = @".\_working";
 
-        [TestInitialize]
-        public void Initialize() {
-            DeleteTestDirs();
+    	public NuGetTaskIntegrationTest()
+    	{
+    		DeleteTestDirs();
 
             Directory.CreateDirectory(_absolutePackageDir);
             Directory.CreateDirectory(_absolutePackageSourceDir);
@@ -25,49 +24,48 @@ namespace NuGet.Test.Integration.MSBuild {
             Directory.CreateDirectory(_workingDir);
         }
 
-        [TestCleanup]
-        public void Cleanup() {
+        public void Dispose() {
             DeleteTestDirs();
         }
 
-        [TestMethod]
+        [Fact]
         public void WillCreateAPackageWhenTheSpecFileIsRelativeToTheWorkingDir() {
             string NuGetTaskXml = CreateTaskXml();
             CreatePackageSourceAndBuildFile(NuGetTaskXml);
 
             string result = ExecuteTask();
 
-            Assert.IsTrue(PackageExists());
+            Assert.True(PackageExists());
         }
 
-        [TestMethod]
+        [Fact]
         public void WillCreateAPackageWhenThePackageDirIsRelativeToTheWorkingDir() {
             string NuGetTaskXml = CreateTaskXml();
             CreatePackageSourceAndBuildFile(NuGetTaskXml);
 
             string result = ExecuteTask();
 
-            Assert.IsTrue(PackageExists());
+            Assert.True(PackageExists());
         }
 
-        [TestMethod]
+        [Fact]
         public void WillCreateAPackageWhenThePackageDirHasAnAbsolutePath() {
             string NuGetTaskXml = CreateTaskXml(packageDir: _absolutePackageDir);
             CreatePackageSourceAndBuildFile(NuGetTaskXml);
 
             string result = ExecuteTask();
 
-            Assert.IsTrue(PackageExists(packageDir: _absolutePackageDir));
+            Assert.True(PackageExists(packageDir: _absolutePackageDir));
         }
 
-        [TestMethod]
+        [Fact]
         public void WillCreateAPackageWhenTheSpecFileHasAnAbsolutePath() {
             string NuGetTask = CreateTaskXml(packageSourceDir: _absolutePackageSourceDir);
             CreatePackageSourceAndBuildFile(NuGetTask, packageSourceDir: _absolutePackageSourceDir);
 
             string result = ExecuteTask();
 
-            Assert.IsTrue(PackageExists());
+            Assert.True(PackageExists());
         }
 
         static string CreatePackageSourceAndBuildFile(string NuGetTaskXml, string packageSourceDir = _packageSourceDir) {
