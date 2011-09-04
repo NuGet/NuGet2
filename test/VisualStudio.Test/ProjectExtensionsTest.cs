@@ -1,10 +1,10 @@
 ﻿using EnvDTE;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.VisualStudio.Test {
-    [TestClass]
+    
     public class ProjectExtensionsTest {
-        [TestMethod]
+        [Fact]
         public void GetOutputPathForWebSite() {
             // Arrange
             Project project = TestUtils.GetProject("WebProject", VsConstants.WebSiteProjectTypeGuid);
@@ -13,7 +13,7 @@ namespace NuGet.VisualStudio.Test {
             string path = project.GetOutputPath();
 
             // Assert
-            Assert.AreEqual(@"WebProject\Bin", path);
+            Assert.Equal(@"WebProject\Bin", path);
         }
     }
 }

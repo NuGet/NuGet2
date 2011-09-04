@@ -1,11 +1,11 @@
 ﻿using System;
 using EnvDTE;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.VisualStudio.Test {
-    [TestClass]
+    
     public class VsProjectSystemTest {
-        [TestMethod]
+        [Fact]
         public void GetPropertyValueUnknownPropertyReturnsNull() {
             // Arrange
             VsProjectSystem projectSystem = new VsProjectSystem(TestUtils.GetProject("Name"));
@@ -14,10 +14,10 @@ namespace NuGet.VisualStudio.Test {
             var value = projectSystem.GetPropertyValue("notexist");
 
             // Assert
-            Assert.IsNull(value);
+            Assert.Null(value);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPropertyValueThrowsArgumentExceptionReturnsNull() {
             // Vs throws an argument exception when trying to index into an invalid property
 
@@ -30,7 +30,7 @@ namespace NuGet.VisualStudio.Test {
             var value = projectSystem.GetPropertyValue("notexist");
 
             // Assert
-            Assert.IsNull(value);
+            Assert.Null(value);
         }
     }
 }

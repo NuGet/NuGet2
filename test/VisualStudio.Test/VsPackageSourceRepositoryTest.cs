@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Test;
 using NuGet.Test.Mocks;
@@ -10,16 +10,16 @@ namespace NuGet.VisualStudio.Test {
 
     using PackageUtility = NuGet.Test.PackageUtility;
 
-    [TestClass]
+    
     public class VsPackageSourceRepositoryTest {
-        [TestMethod]
+        [Fact]
         public void CtorNullSourceProviderOrRepositoryFactoryThrows() {
             // Assert
             ExceptionAssert.ThrowsArgNull(() => new VsPackageSourceRepository(new Mock<IPackageRepositoryFactory>().Object, null), "packageSourceProvider");
             ExceptionAssert.ThrowsArgNull(() => new VsPackageSourceRepository(null, new Mock<IVsPackageSourceProvider>().Object), "repositoryFactory");
         }
 
-        [TestMethod]
+        [Fact]
         public void NullActivePackageSourceThrows() {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
@@ -34,7 +34,7 @@ namespace NuGet.VisualStudio.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => repository.RemovePackage(null), "Unable to retrieve package list because no source was specified.");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesReturnsPackagesFromActiveSource() {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
@@ -50,9 +50,9 @@ namespace NuGet.VisualStudio.Test {
             List<IPackage> packages = repository.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(1, packages.Count);
-            Assert.AreEqual("A", packages[0].Id);
-            Assert.AreEqual(new Version("1.0"), packages[0].Version);
+            Assert.Equal(1, packages.Count);
+            Assert.Equal("A", packages[0].Id);
+            Assert.Equal(new Version("1.0"), packages[0].Version);
         }
     }
 }

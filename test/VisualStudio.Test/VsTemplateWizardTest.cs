@@ -5,12 +5,13 @@ using System.Xml.Linq;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionManager;
 using Microsoft.VisualStudio.TemplateWizard;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Test;
 
+
 namespace NuGet.VisualStudio.Test {
-    [TestClass]
+    
     public class VsTemplateWizardTest {
         private static readonly XNamespace VSTemplateNamespace = "http://schemas.microsoft.com/developer/vstemplate/2005";
 
@@ -40,7 +41,7 @@ namespace NuGet.VisualStudio.Test {
             return packageElement;
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConfigurationFromXmlDocument_WorksWithMissingWizardDataElement() {
             // Arrange
             var document = new XDocument(new XElement(VSTemplateNamespace + "VSTemplate"));
@@ -50,11 +51,11 @@ namespace NuGet.VisualStudio.Test {
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
 
             // Assert
-            Assert.AreEqual(0, result.Packages.Count);
-            Assert.AreEqual(null, result.RepositoryPath);
+            Assert.Equal(0, result.Packages.Count);
+            Assert.Equal(null, result.RepositoryPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConfigurationFromXmlDocument_WorksWithMissingPackagesElement() {
             // Arrange
             var document = new XDocument(
@@ -67,11 +68,11 @@ namespace NuGet.VisualStudio.Test {
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
 
             // Assert
-            Assert.AreEqual(0, result.Packages.Count);
-            Assert.AreEqual(null, result.RepositoryPath);
+            Assert.Equal(0, result.Packages.Count);
+            Assert.Equal(null, result.RepositoryPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConfigurationFromXmlDocument_WorksWithEmptyPackagesElement() {
             // Arrange
             var document = BuildDocument(null);
@@ -81,11 +82,11 @@ namespace NuGet.VisualStudio.Test {
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
 
             // Assert
-            Assert.AreEqual(0, result.Packages.Count);
-            Assert.AreEqual(null, result.RepositoryPath);
+            Assert.Equal(0, result.Packages.Count);
+            Assert.Equal(null, result.RepositoryPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConfigurationFromXmlDocument_WorksWithTemplateRepository() {
             // Arrange
             var document = BuildDocumentWithPackage("template");
@@ -95,11 +96,11 @@ namespace NuGet.VisualStudio.Test {
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
 
             // Assert
-            Assert.AreEqual(1, result.Packages.Count);
-            Assert.AreEqual(@"C:\Some", result.RepositoryPath);
+            Assert.Equal(1, result.Packages.Count);
+            Assert.Equal(@"C:\Some", result.RepositoryPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConfigurationFromXmlDocument_WorksWithExtensionRepository() {
             // Arrange
             var document = BuildDocumentWithPackage("extension", new XAttribute("repositoryId", "myExtensionId"));
@@ -114,11 +115,11 @@ namespace NuGet.VisualStudio.Test {
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate", vsExtensionManager: extensionManagerMock.Object);
 
             // Assert
-            Assert.AreEqual(1, result.Packages.Count);
-            Assert.AreEqual(@"C:\Extension\Dir\Packages", result.RepositoryPath);
+            Assert.Equal(1, result.Packages.Count);
+            Assert.Equal(@"C:\Extension\Dir\Packages", result.RepositoryPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConfigurationFromXmlDocument_ShowErrorForMissingRepositoryIdAttributeWhenInExtensionRepositoryMode() {
             // Arrange
             var document = BuildDocumentWithPackage("extension");
@@ -130,13 +131,13 @@ namespace NuGet.VisualStudio.Test {
                                                                @"C:\Some\file.vstemplate"));
 
             // Assert
-            Assert.AreEqual(
+            Assert.Equal(
                 "The project template is configured to use an Extension-specific package repository but the Extension ID has not been specified. Use the \"repositoryId\" attribute to specify the Extension ID.",
                 wizard.ErrorMessages.Single());
         }
 
 
-        [TestMethod]
+        [Fact]
         public void GetConfigurationFromXmlDocument_ShowErrorForInvalidRepositoryIdAttributeWhenInExtensionRepositoryMode() {
             // Arrange
             var document = BuildDocumentWithPackage("extension", new XAttribute("repositoryId", "myExtensionId"));
@@ -151,12 +152,12 @@ namespace NuGet.VisualStudio.Test {
                 vsExtensionManager: extensionManagerMock.Object));
 
             // Assert
-            Assert.AreEqual(
+            Assert.Equal(
                 "The project template has a reference to a missing Extension. Could not find an Extension with ID 'myExtensionId'.",
                 wizard.ErrorMessages.Single());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConfigurationFromXmlDocument_ShowsErrorForInvalidCacheAttributeValue() {
             // Arrange
             var document = BuildDocumentWithPackage("__invalid__");
@@ -167,12 +168,12 @@ namespace NuGet.VisualStudio.Test {
                 @"C:\Some\file.vstemplate"));
 
             // Assert
-            Assert.AreEqual(
+            Assert.Equal(
                 "The \"repository\" attribute of the package element has an invalid value: '__invalid__'. Valid values are: 'template' or 'extension'.",
                 wizard.ErrorMessages.Single());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConfigurationFromXmlDocument_IncludesValidPackageElements() {
             var content = new[] {
                 BuildPackageElement("MyPackage", "1.0"),
@@ -187,7 +188,7 @@ namespace NuGet.VisualStudio.Test {
             VerifyParsedPackages(document, expectedPackages);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConfigurationFromXmlDocument_WorksWithDocumentWithNoNamespace() {
             var expectedPackages = new[] {
                 new VsTemplateWizardPackageInfo("MyPackage", "1.0"),
@@ -209,15 +210,15 @@ namespace NuGet.VisualStudio.Test {
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
 
             // Assert
-            Assert.AreEqual(expectedPackages.Count(), result.Packages.Count);
+            Assert.Equal(expectedPackages.Count(), result.Packages.Count);
             foreach (var pair in expectedPackages.Zip(result.Packages,
                 (expectedPackage, resultPackage) => new { expectedPackage, resultPackage })) {
-                Assert.AreEqual(pair.expectedPackage.Id, pair.resultPackage.Id);
-                Assert.AreEqual(pair.expectedPackage.Version, pair.resultPackage.Version);
+                Assert.Equal(pair.expectedPackage.Id, pair.resultPackage.Id);
+                Assert.Equal(pair.expectedPackage.Version, pair.resultPackage.Version);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithMissingIdAttribute() {
             var content = new[] {
                 BuildPackageElement(version: "1.0"),
@@ -225,7 +226,7 @@ namespace NuGet.VisualStudio.Test {
             InvalidPackageElementHelper(content);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithEmptyIdAttribute() {
             var content = new[] {
                 BuildPackageElement("  ", "1.0"),
@@ -233,7 +234,7 @@ namespace NuGet.VisualStudio.Test {
             InvalidPackageElementHelper(content);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithMissingVersionAttribute() {
             var content = new[] {
                 BuildPackageElement(id: "MyPackage")
@@ -241,7 +242,7 @@ namespace NuGet.VisualStudio.Test {
             InvalidPackageElementHelper(content);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithEmptyVersionAttribute() {
             var content = new[] {
                 BuildPackageElement("MyPackage", "  ")
@@ -249,7 +250,7 @@ namespace NuGet.VisualStudio.Test {
             InvalidPackageElementHelper(content);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithInvalidVersionAttribute() {
             var content = new[] {
                 BuildPackageElement("MyPackage", "NotAVersionString")
@@ -267,15 +268,15 @@ namespace NuGet.VisualStudio.Test {
                 @"C:\Some\file.vstemplate"));
 
             // Assert
-            Assert.AreEqual("The project template lists one or more packages with missing, empty, or invalid values for the \"id\" or \"version\" attributes. Both attributes are required and must have valid values.", wizard.ErrorMessages.Single());
+            Assert.Equal("The project template lists one or more packages with missing, empty, or invalid values for the \"id\" or \"version\" attributes. Both attributes are required and must have valid values.", wizard.ErrorMessages.Single());
         }
 
-        [TestMethod]
+        [Fact]
         public void RunStarted_NewItemRun_DisplaysErrorMessageAndBacksOut() {
             RunStartedForInvalidTemplateTypeHelper(WizardRunKind.AsNewItem);
         }
 
-        [TestMethod]
+        [Fact]
         public void RunStarted_MultiProjectRun_DisplaysErrorMessageAndBacksOut() {
             RunStartedForInvalidTemplateTypeHelper(WizardRunKind.AsMultiProject);
         }
@@ -289,11 +290,11 @@ namespace NuGet.VisualStudio.Test {
                 () => ((IWizard)wizard).RunStarted(null, null, runKind, null));
 
             // Assert
-            Assert.AreEqual("This template wizard can only be applied to project templates.",
+            Assert.Equal("This template wizard can only be applied to project templates.",
                 wizard.ErrorMessages.Single());
         }
 
-        [TestMethod]
+        [Fact]
         public void RunStarted_LoadsConfigurationFromPath() {
             // Arrange
             var document = new XDocument(new XElement("VSTemplate"));
@@ -309,10 +310,10 @@ namespace NuGet.VisualStudio.Test {
                 new object[] { @"C:\SomePath\ToFile.vstemplate" });
 
             // Assert
-            Assert.AreEqual(@"C:\SomePath\ToFile.vstemplate", path);
+            Assert.Equal(@"C:\SomePath\ToFile.vstemplate", path);
         }
 
-        [TestMethod]
+        [Fact]
         public void RunFinished_InstallsPackages() {
             // Arrange
             var mockProject = new Mock<Project>().Object;
@@ -338,7 +339,7 @@ namespace NuGet.VisualStudio.Test {
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0 to project...");
         }
 
-        [TestMethod]
+        [Fact]
         public void RunFinished_InstallsValidPackages_ReportsInstallationErrors() {
             // Arrange
             var mockProject = new Mock<Project>().Object;
@@ -366,18 +367,18 @@ namespace NuGet.VisualStudio.Test {
                 i => i.InstallPackage(@"C:\Some", mockProject, "MyOtherPackage", new Version(2, 0), true));
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0 to project...");
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0 to project...");
-            Assert.AreEqual(
+            Assert.Equal(
                 "Could not add all required packages to the project. The following packages failed to install from 'C:\\Some':\r\n\r\nMyPackage.1.0",
                 templateWizard.ErrorMessages.Single());
         }
 
-        [TestMethod]
+        [Fact]
         public void ShouldAddProjectItem_AlwaysReturnsTrue() {
             IWizard wizard = new VsTemplateWizard(null);
 
-            Assert.IsTrue(wizard.ShouldAddProjectItem(null));
-            Assert.IsTrue(wizard.ShouldAddProjectItem(""));
-            Assert.IsTrue(wizard.ShouldAddProjectItem("foo"));
+            Assert.True(wizard.ShouldAddProjectItem(null));
+            Assert.True(wizard.ShouldAddProjectItem(""));
+            Assert.True(wizard.ShouldAddProjectItem("foo"));
         }
 
         private sealed class TestableVsTemplateWizard : VsTemplateWizard {

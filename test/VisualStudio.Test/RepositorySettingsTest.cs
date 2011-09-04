@@ -1,19 +1,19 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio.Test.Mocks;
 
 namespace NuGet.VisualStudio.Test {
-    [TestClass]
+    
     public class RepositorySettingsTest {
-        [TestMethod]
+        [Fact]
         public void CtorWithNullSolutionManagerThrows() {
             ExceptionAssert.ThrowsArgNull(() => new RepositorySettings(null, new Mock<IFileSystemProvider>().Object), "solutionManager");
         }
 
-        [TestMethod]
+        [Fact]
         public void RepositoryPathThrowsIfSolutionDirectoryIsNull() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
@@ -23,7 +23,7 @@ namespace NuGet.VisualStudio.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => { string s = repositorySettings.RepositoryPath; }, "Unable to locate the solution directory. Please ensure that the solution has been saved.");
         }
 
-        [TestMethod]
+        [Fact]
         public void RepositoryPathDefaultsToPackagesFolderInSolutionDirectoryIfNoConfigExists() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
@@ -36,10 +36,10 @@ namespace NuGet.VisualStudio.Test {
             string path = repositorySettings.RepositoryPath;
 
             // Assert
-            Assert.AreEqual(@"bar\baz\packages", path);
+            Assert.Equal(@"bar\baz\packages", path);
         }
 
-        [TestMethod]
+        [Fact]
         public void RepositoryPathComesFromConfigFileIfSpecified() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
@@ -58,10 +58,10 @@ namespace NuGet.VisualStudio.Test {
             string path = repositorySettings.RepositoryPath;
 
             // Assert
-            Assert.AreEqual(@"bar\lib", path);
+            Assert.Equal(@"bar\lib", path);
         }
 
-        [TestMethod]
+        [Fact]
         public void RepositoryPathDefaultsToPackagesDirectoryIfConfigFileHasEmptyOrNullRepositoryPath() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
@@ -80,10 +80,10 @@ namespace NuGet.VisualStudio.Test {
             string path = repositorySettings.RepositoryPath;
 
             // Assert
-            Assert.AreEqual(@"bar\baz\packages", path);
+            Assert.Equal(@"bar\baz\packages", path);
         }
 
-        [TestMethod]
+        [Fact]
         public void RepositoryPathMalformedConfigThrows() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
@@ -101,7 +101,7 @@ namespace NuGet.VisualStudio.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => { string s = repositorySettings.RepositoryPath; }, @"Error reading 'bar\nuget.config'.");
         }
 
-        [TestMethod]
+        [Fact]
         public void ConfigFoundInDirectoryHierarchyIsCached() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
@@ -127,11 +127,11 @@ namespace NuGet.VisualStudio.Test {
 
 
             // Assert
-            Assert.AreEqual(@"bar\lib", p1);
-            Assert.AreEqual(@"bar\lib", p2);
+            Assert.Equal(@"bar\lib", p1);
+            Assert.Equal(@"bar\lib", p2);
         }
 
-        [TestMethod]
+        [Fact]
         public void OnlyConfigPathIsCachedNotRepositoryPath() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
@@ -157,11 +157,11 @@ namespace NuGet.VisualStudio.Test {
 
 
             // Assert
-            Assert.AreEqual(@"bar\lib", p1);
-            Assert.AreEqual(@"bar\..\..\lib", p2);
+            Assert.Equal(@"bar\lib", p1);
+            Assert.Equal(@"bar\..\..\lib", p2);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConfigurationCacheIsClearedIfFileRemoved() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
@@ -184,11 +184,11 @@ namespace NuGet.VisualStudio.Test {
 
 
             // Assert
-            Assert.AreEqual(@"bar\lib", p1);
-            Assert.AreEqual(@"bar\baz\packages", p2);
+            Assert.Equal(@"bar\lib", p1);
+            Assert.Equal(@"bar\baz\packages", p2);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConfigurationCacheIsClearedIfSolutionCloses() {
             // Arrange
             var solutionManager = new Mock<MockSolutionManager>();
@@ -215,8 +215,8 @@ namespace NuGet.VisualStudio.Test {
 
 
             // Assert
-            Assert.AreEqual(@"bar\lib", p1);
-            Assert.AreEqual(@"bar\baz\foo", p2);
+            Assert.Equal(@"bar\lib", p1);
+            Assert.Equal(@"bar\baz\foo", p2);
         }
     }
 }

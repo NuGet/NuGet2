@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Test;
 using NuGet.Test.Mocks;
@@ -10,10 +10,10 @@ namespace NuGet.VisualStudio.Test {
 
     using PackageUtility = NuGet.Test.PackageUtility;
 
-    [TestClass]
+    
     public class RecentPackageRepositoryTest {
 
-        [TestMethod]
+        [Fact]
         public void RemovePackageMethodThrow() {
             // Arrange
             var repository = CreateRecentPackageRepository();
@@ -22,7 +22,7 @@ namespace NuGet.VisualStudio.Test {
             ExceptionAssert.Throws<NotSupportedException>(() => repository.RemovePackage(null));
         }
 
-        [TestMethod]
+        [Fact]
         public void TestGetPackagesReturnNoPackageIfThereIsNoPackageMetadata() {
             // Arrange
             var repository = CreateRecentPackageRepository(null, new IPersistencePackageMetadata[0]);
@@ -31,10 +31,10 @@ namespace NuGet.VisualStudio.Test {
             var packages = repository.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(0, packages.Count);
+            Assert.Equal(0, packages.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestGetPackagesReturnCorrectNumberOfPackages() {
             // Scenario: The remote repository contains package A and C
             // Recent settings store contains metadata for A
@@ -47,12 +47,12 @@ namespace NuGet.VisualStudio.Test {
             var packages = repository.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(1, packages.Count);
-            Assert.AreEqual("A", packages[0].Id);
-            Assert.AreEqual(new Version("1.0"), packages[0].Version);
+            Assert.Equal(1, packages.Count);
+            Assert.Equal("A", packages[0].Id);
+            Assert.Equal(new Version("1.0"), packages[0].Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestGetPackagesReturnNothingAfterCallingClear() {
             // Arrange
             var repository = CreateRecentPackageRepository();
@@ -62,10 +62,10 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             var packages = repository.GetPackages();
-            Assert.IsFalse(packages.Any());
+            Assert.False(packages.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void TestGetPackagesReturnPackagesSortedByDateByDefault() {
             // Scenario: The remote repository contains package A, B and C
             // Recent settings store contains metadata for A and B
@@ -83,12 +83,12 @@ namespace NuGet.VisualStudio.Test {
             var packages = repository.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(2, packages.Count);
+            Assert.Equal(2, packages.Count);
             AssertPackage(packages[0], "B", "2.0");
             AssertPackage(packages[1], "A", "1.0");
         }
 
-        [TestMethod]
+        [Fact]
         public void TestGetPackagesReturnCorrectNumberOfPackagesAfterAddingPackage() {
             // Scenario: The remote repository contains package A and C
             // Recent settings store contains metadata for A and B
@@ -106,12 +106,12 @@ namespace NuGet.VisualStudio.Test {
             var packages = repository.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(2, packages.Count);
+            Assert.Equal(2, packages.Count);
             AssertPackage(packages[0], "C", "2.0");
             AssertPackage(packages[1], "A", "1.0");
         }
 
-        [TestMethod]
+        [Fact]
         public void TestGetPackagesReturnCorrectNumberOfPackagesAfterAddingPackageThatAlreadyExists() {
             // Scenario: The remote repository contains package A and B
             // Recent settings store contains metadata for A and B
@@ -128,7 +128,7 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             var packages = repository.GetPackages().ToList();
-            Assert.AreEqual(2, packages.Count);
+            Assert.Equal(2, packages.Count);
             AssertPackage(packages[0], "B", "2.0");
             AssertPackage(packages[1], "A", "1.0");
 
@@ -138,12 +138,12 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             packages = repository.GetPackages().ToList();
-            Assert.AreEqual(2, packages.Count);
+            Assert.Equal(2, packages.Count);
             AssertPackage(packages[0], "A", "1.0");
             AssertPackage(packages[1], "B", "2.0");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesReturnCorrectPackagesAfterAddingManyPackages() {
             // Arrange
             var repository = CreateRecentPackageRepository();
@@ -165,14 +165,14 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             var packages = repository.GetPackages().ToList();
-            Assert.AreEqual(3, packages.Count);
+            Assert.Equal(3, packages.Count);
 
             AssertPackage(packages[0], "C", "2.0");
             AssertPackage(packages[1], "A", "1.0");
             AssertPackage(packages[2], "B", "2.0");
         }
 
-        [TestMethod]
+        [Fact]
         public void RecentPackageRepositoryStoresLatestPackageVersions() {
             // Arrange
             var repository = CreateRecentPackageRepository();
@@ -192,13 +192,13 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             var packages = repository.GetPackages().ToList();
-            Assert.AreEqual(2, packages.Count);
+            Assert.Equal(2, packages.Count);
 
             AssertPackage(packages[0], "B", "3.0");
             AssertPackage(packages[1], "A", "2.0");
         }
 
-        [TestMethod]
+        [Fact]
         public void RecentPackageRepositoryUsesLatestVersionFromStore() {
             // Arrange
             var repository = CreateRecentPackageRepository();
@@ -219,13 +219,13 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             var packages = repository.GetPackages().ToList();
-            Assert.AreEqual(2, packages.Count);
+            Assert.Equal(2, packages.Count);
 
             AssertPackage(packages[0], "B", "3.0");
             AssertPackage(packages[1], "A", "1.0");
         }
 
-        [TestMethod]
+        [Fact]
         public void RecentPackageRepositoryCollapsesVersionsInStore() {
             // Arrange
             var storePackages = new[] {
@@ -241,15 +241,15 @@ namespace NuGet.VisualStudio.Test {
 
             // Act and Assert
             var packages = repository.GetPackages().OfType<RecentPackage>().ToList();
-            Assert.AreEqual(2, packages.Count);
+            Assert.Equal(2, packages.Count);
 
             AssertPackage(packages[0], "A", "2.5");
-            Assert.AreEqual(packages[0].LastUsedDate, new DateTime(2037, 01, 01));
+            Assert.Equal(packages[0].LastUsedDate, new DateTime(2037, 01, 01));
             AssertPackage(packages[1], "C", "2.0");
-            Assert.AreEqual(packages[1].LastUsedDate, new DateTime(2011, 02, 01));
+            Assert.Equal(packages[1].LastUsedDate, new DateTime(2011, 02, 01));
         }
 
-        [TestMethod]
+        [Fact]
         public void CallingClearMethodClearsAllPackagesFromSettingsStore() {
             // Arrange
             var repository = CreateRecentPackageRepository();
@@ -259,11 +259,11 @@ namespace NuGet.VisualStudio.Test {
             var packages = repository.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(0, packages.Count);
+            Assert.Equal(0, packages.Count);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void RecentPackageRepositoryDoesNotReturnPackagesFromSourcesThatAreRemoved() {
             // Arrange
             var sources = new List<PackageSource> { new PackageSource("Source1"), new PackageSource("Source2") };
@@ -297,7 +297,7 @@ namespace NuGet.VisualStudio.Test {
             var packages = repository.GetPackages();
 
             // Assert 
-            Assert.AreEqual(2, packages.Count());
+            Assert.Equal(2, packages.Count());
             AssertPackage(packages.First(), "Pack1", "1.0");
             AssertPackage(packages.Last(), "Pack2", "1.1");
 
@@ -305,7 +305,7 @@ namespace NuGet.VisualStudio.Test {
             sources.Remove(sources.Last());
 
             packages = repository.GetPackages();
-            Assert.AreEqual(1, packages.Count());
+            Assert.Equal(1, packages.Count());
             AssertPackage(packages.First(), "Pack1", "1.0");
 
             // Fin
@@ -341,8 +341,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         private void AssertPackage(IPackage package, string expectedId, string expectedVersion) {
-            Assert.AreEqual(expectedId, package.Id);
-            Assert.AreEqual(new Version(expectedVersion), package.Version);
+            Assert.Equal(expectedId, package.Id);
+            Assert.Equal(new Version(expectedVersion), package.Version);
         }
 
         private class MockSettingsManager : IPersistencePackageSettingsManager {

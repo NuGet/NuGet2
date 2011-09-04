@@ -1,16 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.VisualStudio.Test {
 
     using PackageUtility = NuGet.Test.PackageUtility;
 
-    [TestClass]
+    
     public class RecentPackageTest {
 
-        [TestMethod]
+        [Fact]
         public void TestTheFirstConstructor() {
             // Arrange
             IPackage basePackage = PackageUtility.CreatePackage(
@@ -26,12 +26,12 @@ namespace NuGet.VisualStudio.Test {
             var content2 = ReadStream(contents[1].GetStream());
 
             // Assert
-            Assert.AreEqual("A", package.Id);
-            Assert.AreEqual(new Version("1.2"), package.Version);
-            Assert.AreEqual(2, contents.Count);
-            Assert.AreEqual(1.0, package.Rating);
-            Assert.AreEqual("content\\one", content1);
-            Assert.AreEqual("content\\two", content2);
+            Assert.Equal("A", package.Id);
+            Assert.Equal(new Version("1.2"), package.Version);
+            Assert.Equal(2, contents.Count);
+            Assert.Equal(1.0, package.Rating);
+            Assert.Equal("content\\one", content1);
+            Assert.Equal("content\\two", content2);
         }
 
         private string ReadStream(Stream stream) {

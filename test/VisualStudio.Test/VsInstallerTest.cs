@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq;
 using EnvDTE;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
 
 namespace NuGet.VisualStudio.Test {
-    [TestClass]
+    
     public class VsInstallerTest {
-        [TestMethod]
+        [Fact]
         public void InstallPackageRunsInitAndInstallScripts() {
             // Arrange
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
@@ -37,7 +37,7 @@ namespace NuGet.VisualStudio.Test {
             scriptExecutor.Verify(e => e.Execute(It.IsAny<string>(), PowerShellScripts.Install, It.IsAny<IPackage>(), It.IsAny<Project>(), It.IsAny<ILogger>()), Times.Once());
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallPackageDoesNotUseFallbackRepository() {
             // Arrange
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
@@ -69,7 +69,7 @@ namespace NuGet.VisualStudio.Test {
             packageManagerFactory.Verify(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), true, It.IsAny<bool>()), Times.Never());
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallPackageDoesNotAddToRecentRepository() {
             // Arrange
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;

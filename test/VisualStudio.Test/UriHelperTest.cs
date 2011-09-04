@@ -1,10 +1,10 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace NuGet.VisualStudio.Test {
-    [TestClass]
+    
     public class UriHelperTest {
 
-        [TestMethod]
+        [Fact]
         public void TestInvalidSources() {
             // Arrange
             string[] testValues = new[] { null, "", "link", "c:\\dir", "\\username\folder", "127.0.0.1", "localhost", "crash;\\_andBurn", "ftp://bing.com", "gopher://kill.it", "http://" };
@@ -12,7 +12,7 @@ namespace NuGet.VisualStudio.Test {
             TestValues(testValues, false);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestValidSources() {
             // Arrange
             string[] testValues = new[] { "http://bing.com", "http://microsoft.com", "https://paypal.com", "http://library" };
@@ -26,7 +26,7 @@ namespace NuGet.VisualStudio.Test {
                 bool isValid = UriHelper.IsHttpSource(value);
 
                 // Assert
-                Assert.AreEqual(valid, isValid);
+                Assert.Equal(valid, isValid);
             }
         }
     }
