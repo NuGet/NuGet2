@@ -2,12 +2,12 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace NuGet.Dialog.Test {
-    [TestClass]
+
     public class QueryExtensionsTest {
-        [TestMethod]
+        [Fact]
         public void SortBySortsOnOneItem() {
             // Arrange
             var list = (new[] { 
@@ -18,12 +18,12 @@ namespace NuGet.Dialog.Test {
             var result = list.SortBy(new[] { "Id" }, ListSortDirection.Ascending);
 
             // Assert
-            Assert.AreEqual(result.ElementAt(0).Id, "A");
-            Assert.AreEqual(result.ElementAt(1).Id, "B");
-            Assert.AreEqual(result.ElementAt(2).Id, "C");
+            Assert.Equal(result.ElementAt(0).Id, "A");
+            Assert.Equal(result.ElementAt(1).Id, "B");
+            Assert.Equal(result.ElementAt(2).Id, "C");
         }
 
-        [TestMethod]
+        [Fact]
         public void SortBySortsOnOnePropertyDescending() {
             // Arrange
             var list = (new[] { 
@@ -34,12 +34,12 @@ namespace NuGet.Dialog.Test {
             var result = list.SortBy(new[] { "Id" }, ListSortDirection.Descending);
 
             // Assert
-            Assert.AreEqual(result.ElementAt(0).Id, "C");
-            Assert.AreEqual(result.ElementAt(1).Id, "B");
-            Assert.AreEqual(result.ElementAt(2).Id, "A");
+            Assert.Equal(result.ElementAt(0).Id, "C");
+            Assert.Equal(result.ElementAt(1).Id, "B");
+            Assert.Equal(result.ElementAt(2).Id, "A");
         }
 
-        [TestMethod]
+        [Fact]
         public void SortBySortsOnMultiplePropertyAscending() {
             // Arrange
             var list = (new[] { 
@@ -53,13 +53,13 @@ namespace NuGet.Dialog.Test {
             var result = list.SortBy(new[] { "Name", "Id" }, ListSortDirection.Ascending);
 
             // Assert
-            Assert.AreEqual(result.ElementAt(0).Id, "X");
-            Assert.AreEqual(result.ElementAt(1).Id, "P");
-            Assert.AreEqual(result.ElementAt(2).Id, "Q");
-            Assert.AreEqual(result.ElementAt(3).Id, "Z");
+            Assert.Equal(result.ElementAt(0).Id, "X");
+            Assert.Equal(result.ElementAt(1).Id, "P");
+            Assert.Equal(result.ElementAt(2).Id, "Q");
+            Assert.Equal(result.ElementAt(3).Id, "Z");
         }
 
-        [TestMethod]
+        [Fact]
         public void SortBySortsOnMultiplePropertyDescending() {
             // Arrange
             var list = (new[] { 
@@ -73,13 +73,13 @@ namespace NuGet.Dialog.Test {
             var result = list.SortBy(new[] { "Name", "Id" }, ListSortDirection.Descending);
 
             // Assert
-            Assert.AreEqual(result.ElementAt(0).Id, "Z");
-            Assert.AreEqual(result.ElementAt(1).Id, "Q");
-            Assert.AreEqual(result.ElementAt(2).Id, "P");
-            Assert.AreEqual(result.ElementAt(3).Id, "X");
+            Assert.Equal(result.ElementAt(0).Id, "Z");
+            Assert.Equal(result.ElementAt(1).Id, "Q");
+            Assert.Equal(result.ElementAt(2).Id, "P");
+            Assert.Equal(result.ElementAt(3).Id, "X");
         }
 
-        [TestMethod]
+        [Fact]
         public void SortBySortsOnMoreThanTwoProperties() {
             // Arrange
             var list = (new[] { 
@@ -93,13 +93,13 @@ namespace NuGet.Dialog.Test {
             var result = list.SortBy(new[] { "Description", "Name", "Id" }, ListSortDirection.Ascending);
 
             // Assert
-            Assert.AreEqual(result.ElementAt(0).Id, "X");
-            Assert.AreEqual(result.ElementAt(1).Id, "Q");
-            Assert.AreEqual(result.ElementAt(2).Id, "P");
-            Assert.AreEqual(result.ElementAt(3).Id, "Z");
+            Assert.Equal(result.ElementAt(0).Id, "X");
+            Assert.Equal(result.ElementAt(1).Id, "Q");
+            Assert.Equal(result.ElementAt(2).Id, "P");
+            Assert.Equal(result.ElementAt(3).Id, "Z");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetSortExpressionForSingleParameter() {
             // Arrange
             var source = new[] { new MockQueryClass() }.AsQueryable();
@@ -111,7 +111,7 @@ namespace NuGet.Dialog.Test {
             AreExpressionsEqual(expected, expression);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetSortExpressionForChainedParameter() {
             // Arrange
             var source = new[] { new MockQueryClass() }.AsQueryable();
@@ -123,7 +123,7 @@ namespace NuGet.Dialog.Test {
             AreExpressionsEqual(expected, expression);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetSortExpressionDescendingForChainedParameter() {
             // Arrange
             var source = new[] { new MockQueryClass() }.AsQueryable();
@@ -138,21 +138,21 @@ namespace NuGet.Dialog.Test {
         private static void AreExpressionsEqual(MethodCallExpression a, MethodCallExpression b) {
             // An expression visitor should be the way to do this, but keeping it simple.
 
-            Assert.AreEqual(a.Method, b.Method);
+            Assert.Equal(a.Method, b.Method);
 
             var aLambda = (a.Arguments[1] as UnaryExpression).Operand as LambdaExpression;
             var bLambda = (b.Arguments[1] as UnaryExpression).Operand as LambdaExpression;
 
 
             if (aLambda.Body.NodeType == ExpressionType.MemberAccess) {
-                Assert.AreEqual((aLambda.Body as MemberExpression).Member, (bLambda.Body as MemberExpression).Member);
+                Assert.Equal((aLambda.Body as MemberExpression).Member, (bLambda.Body as MemberExpression).Member);
             }
             else {
                 var aConcatCall = aLambda.Body as MethodCallExpression;
                 var bConcatCall = bLambda.Body as MethodCallExpression;
 
-                Assert.AreEqual((aConcatCall.Arguments[0] as MemberExpression).Member, (bConcatCall.Arguments[0] as MemberExpression).Member);
-                Assert.AreEqual((aConcatCall.Arguments[1] as MemberExpression).Member, (bConcatCall.Arguments[1] as MemberExpression).Member);
+                Assert.Equal((aConcatCall.Arguments[0] as MemberExpression).Member, (bConcatCall.Arguments[0] as MemberExpression).Member);
+                Assert.Equal((aConcatCall.Arguments[1] as MemberExpression).Member, (bConcatCall.Arguments[1] as MemberExpression).Member);
             }
         }
 

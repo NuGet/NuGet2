@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Threading;
 using EnvDTE;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
+using Xunit;
 
 namespace NuGet.Dialog.Test {
-    [TestClass]
+
     public class SolutionOnlineProviderTest {
 
-        [TestMethod]
+        [Fact]
         public void ExecuteMethodCallsInstallPackageMethodOnPackageManager() {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
@@ -85,7 +85,7 @@ namespace NuGet.Dialog.Test {
             manualEvent.Wait();
         }
 
-        [TestMethod]
+        [Fact]
         public void ExecuteMethodDoNotCallInstallPackageIfUserPressCancelOnTheProjectSelectorButton() {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
@@ -163,7 +163,7 @@ namespace NuGet.Dialog.Test {
             manualEvent.Wait();
         }
 
-        [TestMethod]
+        [Fact]
         public void ExecuteMethodDoNotCallInstallPackageIfUserDoesNotSelectAnyProject() {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");

@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.ExtensionsExplorer;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using Moq;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
+using Xunit;
 
 namespace NuGet.Dialog.Test {
-    [TestClass]
+
     public class UpdatesTreeNodeTest {
-        [TestMethod]
+        [Fact]
         public void PropertyNameIsCorrect() {
 
             // Arrange
@@ -21,10 +22,10 @@ namespace NuGet.Dialog.Test {
             UpdatesTreeNode node = CreateSimpleTreeNode(localRepository, sourceRepository, category);
 
             // Act & Assert
-            Assert.AreEqual(category, node.Name);
+            Assert.Equal(category, node.Name);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesReturnsCorrectPackages1() {
 
             // Arrange
@@ -41,11 +42,11 @@ namespace NuGet.Dialog.Test {
             var packages = node.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(1, packages.Count);
+            Assert.Equal(1, packages.Count);
             AssertPackage(packages[0], "A", "1.5");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesReturnsCorrectPackages2() {
 
             // Arrange
@@ -62,10 +63,10 @@ namespace NuGet.Dialog.Test {
             var packages = node.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(0, packages.Count);
+            Assert.Equal(0, packages.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesReturnsCorrectPackages3() {
 
             // Arrange
@@ -83,11 +84,11 @@ namespace NuGet.Dialog.Test {
             var packages = node.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(1, packages.Count);
+            Assert.Equal(1, packages.Count);
             AssertPackage(packages[0], "A", "1.5");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesReturnsCorrectPackages4() {
 
             // Arrange
@@ -107,16 +108,16 @@ namespace NuGet.Dialog.Test {
             var packages = node.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(2, packages.Count);
+            Assert.Equal(2, packages.Count);
             AssertPackage(packages[0], "A", "1.9");
             AssertPackage(packages[1], "B", "2.0");
         }
 
         private static void AssertPackage(IPackage package, string id, string version = null) {
-            Assert.IsNotNull(package);
-            Assert.AreEqual(id, package.Id);
+            Assert.NotNull(package);
+            Assert.Equal(id, package.Id);
             if (version != null) {
-                Assert.AreEqual(new Version(version), package.Version);
+                Assert.Equal(new Version(version), package.Version);
             }
         }
 

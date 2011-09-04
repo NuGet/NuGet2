@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using EnvDTE;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
+using Xunit;
 
 namespace NuGet.Dialog.Test {
-    [TestClass]
+
     public class SolutionInstalledProviderTest {
 
-        [TestMethod]
+        [Fact]
         public void ExecuteMethodCallsInstallPackageMethodOnPackageManager() {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
@@ -88,7 +88,7 @@ namespace NuGet.Dialog.Test {
             manualEvent.Wait();
         }
 
-        [TestMethod]
+        [Fact]
         public void SolutionInstalledProviderShowsAllVersions() {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
@@ -127,13 +127,13 @@ namespace NuGet.Dialog.Test {
                 var allExtensions = firstTreeNode.Extensions;
 
                 // Assert
-                Assert.AreEqual(3, allExtensions.Count);
-                Assert.AreEqual("A", allExtensions[0].Id);
-                Assert.AreEqual("1.0", ((PackageItem)allExtensions[0]).Version);
-                Assert.AreEqual("A", allExtensions[1].Id);
-                Assert.AreEqual("2.0", ((PackageItem)allExtensions[1]).Version);
-                Assert.AreEqual("B", allExtensions[2].Id);
-                Assert.AreEqual("2.0", ((PackageItem)allExtensions[2]).Version);
+                Assert.Equal(3, allExtensions.Count);
+                Assert.Equal("A", allExtensions[0].Id);
+                Assert.Equal("1.0", ((PackageItem)allExtensions[0]).Version);
+                Assert.Equal("A", allExtensions[1].Id);
+                Assert.Equal("2.0", ((PackageItem)allExtensions[1]).Version);
+                Assert.Equal("B", allExtensions[2].Id);
+                Assert.Equal("2.0", ((PackageItem)allExtensions[2]).Version);
 
                 mre.Set();
             };
@@ -144,7 +144,7 @@ namespace NuGet.Dialog.Test {
             mre.Wait();
         }
 
-        [TestMethod]
+        [Fact]
         public void ExecuteMethodCallsUninstallPackageMethodOnPackageManager() {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
@@ -228,7 +228,7 @@ namespace NuGet.Dialog.Test {
             manualEvent.Wait();
         }
 
-        [TestMethod]
+        [Fact]
         public void ExecuteMethodCallsUninstallPackageMethodForSolutionLevelPackage() {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
@@ -295,7 +295,7 @@ namespace NuGet.Dialog.Test {
             manualEvent.Wait();
         }
 
-        [TestMethod]
+        [Fact]
         public void ExecuteMethodDoNotCallInstallPackageIfUserPressCancelOnTheProjectSelectorButton() {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");

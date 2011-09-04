@@ -2,18 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.MSBuild;
 using NuGet.Test.Mocks;
+using Xunit;
 
 namespace NuGet.Test.MSBuild {
-    [TestClass]
-    public class NuGetPushTaskUnitTest {
+
+	public class NuGetPushTaskUnitTest {
         private const string apiKey = "myApiKey";
         private const string server = "server";
 
-        [TestMethod]
+        [Fact]
         public void WillLogAnErrorWhenThePackageDoesNotExist() {
             string actualMessage = null;
             var buildEngineStub = new Mock<IBuildEngine>();
@@ -34,11 +34,11 @@ namespace NuGet.Test.MSBuild {
 
             bool actualResult = task.Execute();
 
-            Assert.AreEqual("The package at 'aPathThatDoesNotExist' does not exist.", actualMessage);
-            Assert.IsFalse(actualResult);
+            Assert.Equal("The package at 'aPathThatDoesNotExist' does not exist.", actualMessage);
+            Assert.False(actualResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void WillGetApiKeyFromConfigFileIfNotSpecified() {
             var packageServerStub = new Mock<IPackageServer>();
             var settingsStub = new Mock<ISettings>();
@@ -57,10 +57,10 @@ namespace NuGet.Test.MSBuild {
 
             bool actualResult = task.Execute();
 
-            Assert.IsTrue(actualResult);
+            Assert.True(actualResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void WillPublishPackageByDefault() {
             var packageServerStub = new Mock<IPackageServer>();
 
@@ -73,10 +73,10 @@ namespace NuGet.Test.MSBuild {
 
             bool actualResult = task.Execute();
 
-            Assert.IsTrue(actualResult);
+            Assert.True(actualResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void WillPushButNotPublishIfCreateOnly() {
             var packageServerStub = new Mock<IPackageServer>();
 
@@ -91,7 +91,7 @@ namespace NuGet.Test.MSBuild {
 
             bool actualResult = task.Execute();
 
-            Assert.IsTrue(actualResult);
+            Assert.True(actualResult);
         }
 
         private static NuGetPush CreateTaskWithDefaultStubs(Mock<IBuildEngine> buildEngineStub = null,

@@ -2,17 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.MSBuild;
 using NuGet.Test.Mocks;
+using Xunit;
 
 namespace NuGet.Test.MSBuild {
-    [TestClass]
+	
     public class NuGetFetchTaskUnitTest {
         private const string createdPackage = "thePackageId.1.0.nupkg";
 
-        [TestMethod]
+		[Fact]
         public void WillErrorIfPackagesDotConfigUnreadable() {
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile("packages.config", "foo bar".AsStream());
@@ -29,11 +29,11 @@ namespace NuGet.Test.MSBuild {
 
             var result = task.Execute();
 
-            Assert.IsFalse(result);
-            Assert.AreEqual("Error parsing packages.config file at 'packages.config'", actualMessage);
+            Assert.False(result);
+            Assert.Equal("Error parsing packages.config file at 'packages.config'", actualMessage);
         }
 
-        [TestMethod]
+		[Fact]
         public void WillGetSettingsFromSpecifiedConfigFileIfFeedsAreNull() {
             var installed = 0;
 
@@ -60,11 +60,11 @@ namespace NuGet.Test.MSBuild {
             task.Sources = null;
             bool actualResult = task.Execute();
 
-            Assert.IsTrue(actualResult);
-            Assert.AreEqual(3, installed);
+            Assert.True(actualResult);
+            Assert.Equal(3, installed);
         }
 
-        [TestMethod]
+        [Fact]
         public void WillGetSettingsFromSpecifiedConfigFileIfFeedsAreNotSpecified() {
             var installed = 0;
 
@@ -83,11 +83,11 @@ namespace NuGet.Test.MSBuild {
 
             bool actualResult = task.Execute();
 
-            Assert.AreEqual(3, installed);
-            Assert.IsTrue(actualResult);
+            Assert.Equal(3, installed);
+            Assert.True(actualResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void WillGetSettingsFromDefaultConfigFileIfFeedsAreNotSpecified() {
             var installed = 0;
 
@@ -106,11 +106,11 @@ namespace NuGet.Test.MSBuild {
 
             bool actualResult = task.Execute();
 
-            Assert.AreEqual(3, installed);
-            Assert.IsTrue(actualResult);
+            Assert.Equal(3, installed);
+            Assert.True(actualResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void WillErrorIfPackagesDotConfigNotFound() {
             string actualMessage = null;
             var buildEngineStub = new Mock<IBuildEngine>();
@@ -123,11 +123,11 @@ namespace NuGet.Test.MSBuild {
 
             var result = task.Execute();
 
-            Assert.AreEqual(false, result);
-            Assert.AreEqual("Package configuration file 'packages.config' does not exist", actualMessage);
+            Assert.Equal(false, result);
+            Assert.Equal("Package configuration file 'packages.config' does not exist", actualMessage);
         }
 
-        [TestMethod]
+        [Fact]
         public void WillErrorIfFeedsInvalid() {
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             repositoryFactory
@@ -143,11 +143,11 @@ namespace NuGet.Test.MSBuild {
             NuGetFetch task = CreateTaskWithDefaultStubs(repositoryFactory: repositoryFactory, buildEngineStub: buildEngineStub);
             var result = task.Execute();
 
-            Assert.AreEqual(false, result);
-            Assert.AreEqual("Problem with feed", actualMessage);
+            Assert.Equal(false, result);
+            Assert.Equal("Problem with feed", actualMessage);
         }
 
-        [TestMethod]
+        [Fact]
         public void WillErrorGracefullyIfPackageNotFound() {
             const string notFoundMessage = "Package not found";
             var packageManagerStub = new Mock<IPackageManager>();
@@ -165,12 +165,12 @@ namespace NuGet.Test.MSBuild {
 
             var result = task.Execute();
 
-            Assert.AreEqual(false, result);
-            Assert.AreEqual(actualMessage, notFoundMessage);
+            Assert.Equal(false, result);
+            Assert.Equal(actualMessage, notFoundMessage);
             packageManagerStub.Verify();
         }
 
-        [TestMethod]
+        [Fact]
         public void WillInstallPackagesFromPackagesDotConfig() {
             var installed = 0;
             var packageManagerStub = new Mock<IPackageManager>();
@@ -183,11 +183,11 @@ namespace NuGet.Test.MSBuild {
 
             bool actualResult = task.Execute();
 
-            Assert.AreEqual(3, installed);
-            Assert.IsTrue(actualResult);
+            Assert.Equal(3, installed);
+            Assert.True(actualResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void WilNotReInstallExistingPackages() {
             var installed = 0;
             var packageManagerStub = new Mock<IPackageManager>();
@@ -204,11 +204,11 @@ namespace NuGet.Test.MSBuild {
 
             bool actualResult = task.Execute();
 
-            Assert.AreEqual(0, installed);
-            Assert.IsTrue(actualResult);
+            Assert.Equal(0, installed);
+            Assert.True(actualResult);
         }
 
-        [TestMethod]
+        [Fact]
         public void WillDoNothingIfNoPackagesNeedToBeInstalled() {
             string actualMessage = string.Empty;
             var buildEngineStub = new Mock<IBuildEngine>();
@@ -230,8 +230,8 @@ namespace NuGet.Test.MSBuild {
 
             bool actualResult = task.Execute();
 
-            Assert.AreEqual("No packages found requiring installation", actualMessage);
-            Assert.IsTrue(actualResult);
+            Assert.Equal("No packages found requiring installation", actualMessage);
+            Assert.True(actualResult);
         }
 
         private static NuGetFetch CreateTaskWithDefaultStubs(Mock<IPackageManager> packageManagerStub = null,

@@ -1,16 +1,16 @@
 ﻿using System.Linq;
 using Microsoft.VisualStudio.ExtensionsExplorer;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
+using Xunit;
 
 namespace NuGet.Dialog.Test {
-    [TestClass]
+
     public class SimpleTreeNodeTest {
 
-        [TestMethod]
+        [Fact]
         public void PropertyNameIsCorrect() {
 
             // Arrange
@@ -20,10 +20,10 @@ namespace NuGet.Dialog.Test {
             SimpleTreeNode node = CreateSimpleTreeNode(repository, category);
 
             // Act & Assert
-            Assert.AreEqual(category, node.Name);
+            Assert.Equal(category, node.Name);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesReturnCorrectPackages() {
             // Arrange
             MockPackageRepository repository = new MockPackageRepository();
@@ -41,10 +41,10 @@ namespace NuGet.Dialog.Test {
             var producedPackages = node.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(packages.Length, producedPackages.Count);
+            Assert.Equal(packages.Length, producedPackages.Count);
 
             for (int i = 0; i < numberOfPackages; i++) {
-                Assert.AreSame(packages[i], producedPackages[i]);
+                Assert.Same(packages[i], producedPackages[i]);
             }
         }
 

@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Threading;
 using EnvDTE;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
+using Xunit;
 
 namespace NuGet.Dialog.Test {
-    [TestClass]
+
     public class SolutionUpdatesProviderTest {
 
-        [TestMethod]
+        [Fact]
         public void ExecuteMethodCallUpdatePackageOnAllProjects() {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
@@ -94,7 +94,7 @@ namespace NuGet.Dialog.Test {
             manualEvent.Wait();
         }
 
-        [TestMethod]
+        [Fact]
         public void ExecuteMethodDoNotCallUpdatePackageIfNoProjectIsChecked() {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");

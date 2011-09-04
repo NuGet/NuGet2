@@ -1,51 +1,52 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
+
 
 namespace NuGet.Dialog.Test.SolutionExplorer {
 
-    [TestClass]
+
     public class FolderNodeTest {
 
-        [TestMethod]
+        [Fact]
         public void PropertyNameIsCorrect() {
             // Arrange
             var node = CreateFolderNode();
 
             // Act && Assert
-            Assert.AreEqual("A", node.Name);
+            Assert.Equal("A", node.Name);
         }
 
-        [TestMethod]
+        [Fact]
         public void IsSelectedSetToFalseByDefault() {
             // Arrange
             var node = CreateFolderNode();
 
             // Act && Assert
-            Assert.IsTrue(node.IsSelected == false);
+            Assert.True(node.IsSelected == false);
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyChildrenIsCorrect() {
             // Arrange
             var node = CreateFolderNode();
 
             // Act && Assert
-            Assert.AreEqual(3, node.Children.Count);
+            Assert.Equal(3, node.Children.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestParentPropertyOfChildrenAreSetToParentFolder() {
             // Arrange
             var node = CreateFolderNode();
 
             // Act && Assert
             foreach (var child in node.Children) {
-                Assert.AreSame(node, child.Parent);
+                Assert.Same(node, child.Parent);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectParentWillSelectAllChildren() {
             // Arrange
             var node = CreateFolderNode();
@@ -55,11 +56,11 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
 
             // Assert
             foreach (var child in node.Children) {
-                Assert.IsTrue(child.IsSelected == true);
+                Assert.True(child.IsSelected == true);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectParentWillSelectAllChildrenExceptTheDisabledOnes() {
             // Arrange
             ProjectNode[] children = new ProjectNode[3];
@@ -79,18 +80,18 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
             folder.IsSelected = true;
 
             // Assert
-            Assert.IsTrue(children[0].IsSelected == true);
-            Assert.IsTrue(children[1].IsSelected == false);
-            Assert.IsTrue(children[2].IsSelected == true);
+            Assert.True(children[0].IsSelected == true);
+            Assert.True(children[1].IsSelected == false);
+            Assert.True(children[2].IsSelected == true);
         }
 
-        [TestMethod]
+        [Fact]
         public void UnselectParentWillUnselectAllChildren() {
             // Arrange
             var node = CreateFolderNode();
             node.IsSelected = true;
             foreach (var child in node.Children) {
-                Assert.IsTrue(child.IsSelected == true);
+                Assert.True(child.IsSelected == true);
             }
 
             // Act
@@ -98,11 +99,11 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
 
             // Assert
             foreach (var child in node.Children) {
-                Assert.IsTrue(child.IsSelected == false);
+                Assert.True(child.IsSelected == false);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void UnselectParentWillUnselectAllChildrenExceptTheDisabledOnes() {
             // Arrange
             ProjectNode[] children = new ProjectNode[3];
@@ -119,20 +120,20 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
 
             var folder = new FolderNode("A", children);
 
-            Assert.IsTrue(children[0].IsSelected == true);
-            Assert.IsTrue(children[1].IsSelected == true);
-            Assert.IsTrue(children[2].IsSelected == true);
+            Assert.True(children[0].IsSelected == true);
+            Assert.True(children[1].IsSelected == true);
+            Assert.True(children[2].IsSelected == true);
 
             // Act
             folder.IsSelected = false;
 
             // Assert
-            Assert.IsTrue(children[0].IsSelected == false);
-            Assert.IsTrue(children[1].IsSelected == true);
-            Assert.IsTrue(children[2].IsSelected == false);
+            Assert.True(children[0].IsSelected == false);
+            Assert.True(children[1].IsSelected == true);
+            Assert.True(children[2].IsSelected == false);
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectAllChildrenWillAlsoSelectParent() {
             // Arrange
             var node = CreateFolderNode();
@@ -143,10 +144,10 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
             }
 
             // Assert
-            Assert.IsTrue(node.IsSelected == true);
+            Assert.True(node.IsSelected == true);
         }
 
-        [TestMethod]
+        [Fact]
         public void UnselectAllChildrenWillAlsoUnselectParent() {
             // Arrange
             var node = CreateFolderNode();
@@ -158,10 +159,10 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
             }
 
             // Assert
-            Assert.IsTrue(node.IsSelected == false);
+            Assert.True(node.IsSelected == false);
         }
 
-        [TestMethod]
+        [Fact]
         public void SelectOneOfTheChildrenWillChangeParentToUnderminateState() {
             // Arrange
             var node = CreateFolderNode();
@@ -171,10 +172,10 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
             firstNode.IsSelected = true;
 
             // Assert
-            Assert.IsTrue(node.IsSelected == null);
+            Assert.True(node.IsSelected == null);
         }
 
-        [TestMethod]
+        [Fact]
         public void UnselectOneOfTheChildrenWillChangeParentToUnderminateState() {
             // Arrange
             var node = CreateFolderNode();
@@ -185,10 +186,10 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
             firstNode.IsSelected = false;
 
             // Assert
-            Assert.IsTrue(node.IsSelected == null);
+            Assert.True(node.IsSelected == null);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParentFolderDoNotPropagateStateBackToChildrenWhenTheyAreFirstAddedToFolder() {
             // Arrange
             ProjectNode[] children = new ProjectNode[3];
@@ -208,15 +209,15 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
             var root = new FolderNode("Root", new[] { folder });
 
             // Assert
-            Assert.IsNull(folder.IsSelected);
+            Assert.Null(folder.IsSelected);
             for (int i = 0; i < 3; i++) {
-                Assert.IsTrue(children[0].IsSelected == true);
-                Assert.IsTrue(children[1].IsSelected == false);
-                Assert.IsTrue(children[2].IsSelected == true);
+                Assert.True(children[0].IsSelected == true);
+                Assert.True(children[1].IsSelected == false);
+                Assert.True(children[2].IsSelected == true);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ParentNodeIsDisabledIfAllChildrenAreDisabled() {
             // Arrange
             var children = new ProjectNode[3];
@@ -234,10 +235,10 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
             var folder = new FolderNode("A", children);
 
             // Assert
-            Assert.IsFalse(folder.IsEnabled);
+            Assert.False(folder.IsEnabled);
         }
 
-        [TestMethod]
+        [Fact]
         public void ParentNodeIsEnabledIfAtLeastOneChildrenIsEnabled() {
             // Arrange
             var children = new ProjectNode[3];
@@ -255,7 +256,7 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
             var folder = new FolderNode("A", children);
 
             // Assert
-            Assert.IsTrue(folder.IsEnabled);
+            Assert.True(folder.IsEnabled);
         }
 
         private FolderNode CreateFolderNode(string name = "A", ICollection<ProjectNodeBase> children = null) {

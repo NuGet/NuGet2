@@ -3,20 +3,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.MSBuild;
 using NuGet.Test.Mocks;
+using Xunit;
 
 namespace NuGet.Test.MSBuild {
-    [TestClass]
-    public class NuGetTaskUnitTest {
+
+	public class NuGetTaskUnitTest {
         private const string createdPackage = "thePackageId.1.0.nupkg";
         private const string NuSpecFile = "thePackageId.nuspec";
 
-        public TestContext TestContext { get; set; }
-
-        [TestMethod]
+        [Fact]
         public void WillUseCurrentDirectoryIfBaseDirNotSet() {
             var fileSystemProviderStub = new Mock<IFileSystemProvider>();
             var currentDir = Directory.GetCurrentDirectory();
@@ -30,7 +28,7 @@ namespace NuGet.Test.MSBuild {
             fileSystemProviderStub.Verify();
         }
 
-        [TestMethod]
+        [Fact]
         public void WillUseBaseDirectoryIfBaseDirSet() {
             var fileSystemProviderStub = new Mock<IFileSystemProvider>();
             var baseDir = "/a/b/c";
@@ -45,7 +43,7 @@ namespace NuGet.Test.MSBuild {
             fileSystemProviderStub.Verify();
         }
 
-        [TestMethod]
+        [Fact]
         public void WillLogAnErrorWhenTheSpecFileIsEmpty() {
             string actualMessage = null;
             var buildEngineStub = new Mock<IBuildEngine>();
@@ -60,11 +58,11 @@ namespace NuGet.Test.MSBuild {
 
             bool actualResut = task.Execute();
 
-            Assert.AreEqual("The spec file must not be empty.", actualMessage);
-            Assert.IsFalse(actualResut);
+            Assert.Equal("The spec file must not be empty.", actualMessage);
+            Assert.False(actualResut);
         }
 
-        [TestMethod]
+        [Fact]
         public void OutputPathUsesPackageIdAndVerion() {
             // Arrange
             var packageBuilder = new PackageBuilder { Id = "Foo", Version = new Version("1.1") };
@@ -75,10 +73,10 @@ namespace NuGet.Test.MSBuild {
             string outputPath = task.GetOutputPath(packageBuilder);
 
             // Assert
-            Assert.AreEqual(@"X:\Foo.1.1.nupkg", outputPath);
+            Assert.Equal(@"X:\Foo.1.1.nupkg", outputPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void OutputPathAppendsSymbolPackageIdentifier() {
             // Arrange
             var packageBuilder = new PackageBuilder { Id = "Foo", Version = new Version("1.1") };
@@ -89,10 +87,10 @@ namespace NuGet.Test.MSBuild {
             var outputPath = task.GetOutputPath(packageBuilder, symbols: true);
 
             // Assert
-            Assert.AreEqual(@"X:\Foo.1.1.symbols.nupkg", outputPath);
+            Assert.Equal(@"X:\Foo.1.1.symbols.nupkg", outputPath);
         }
 
-        [TestMethod]
+        [Fact]
         public void WillErrorWhenTheSpecFileDoesNotExist() {
             // Arrange
             string actualMessage = null;
@@ -109,11 +107,11 @@ namespace NuGet.Test.MSBuild {
             bool actualResut = task.Execute();
 
             // Assert
-            Assert.AreEqual("The spec file does not exist.", actualMessage);
-            Assert.IsFalse(actualResut);
+            Assert.Equal("The spec file does not exist.", actualMessage);
+            Assert.False(actualResut);
         }
 
-        [TestMethod]
+        [Fact]
         public void WillRemoveNuspecFilesFromPackage() {
             // Arrange
             var regularFile = new PhysicalPackageFile { SourcePath = @"C:\readme.txt", TargetPath = @"content\readme.txt" };
@@ -128,11 +126,11 @@ namespace NuGet.Test.MSBuild {
             task.ExcludeFiles(packageFiles);
 
             // Assert
-            Assert.AreEqual(1, packageFiles.Count);
-            Assert.AreEqual(regularFile, packageFiles.Single());
+            Assert.Equal(1, packageFiles.Count);
+            Assert.Equal(regularFile, packageFiles.Single());
         }
 
-        [TestMethod]
+        [Fact]
         public void WillRemoveNupkgFilesFromPackage() {
             // Arrange
             var regularFile = new PhysicalPackageFile { SourcePath = @"C:\readme.txt", TargetPath = @"content\readme.txt" };
@@ -147,11 +145,11 @@ namespace NuGet.Test.MSBuild {
             task.ExcludeFiles(packageFiles);
 
             // Assert
-            Assert.AreEqual(1, packageFiles.Count);
-            Assert.AreEqual(regularFile, packageFiles.Single());
+            Assert.Equal(1, packageFiles.Count);
+            Assert.Equal(regularFile, packageFiles.Single());
         }
 
-        [TestMethod]
+        [Fact]
         public void WillNotRemoveLibraryFilesFromPackage() {
             // Arrange
             var packageFiles = new List<IPackageFile> { 
@@ -165,10 +163,10 @@ namespace NuGet.Test.MSBuild {
             task.ExcludeFiles(packageFiles);
 
             // Assert
-            Assert.AreEqual(2, packageFiles.Count);
+            Assert.Equal(2, packageFiles.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void WillLogAnErrorWhenAnUnexpectedErrorHappens() {
             string actualMessage = null;
             var buildEngineStub = new Mock<IBuildEngine>();
@@ -186,8 +184,8 @@ namespace NuGet.Test.MSBuild {
 
             bool actualResut = task.Execute();
 
-            Assert.IsTrue(actualMessage.Contains("An unexpected error occurred while creating the package:"));
-            Assert.IsFalse(actualResut);
+            Assert.True(actualMessage.Contains("An unexpected error occurred while creating the package:"));
+            Assert.False(actualResut);
         }
 
         private static NuGet.MSBuild.NuGet CreateTaskWithDefaultStubs(

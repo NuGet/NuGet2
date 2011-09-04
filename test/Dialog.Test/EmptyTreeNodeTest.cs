@@ -1,15 +1,15 @@
 ﻿using System.Linq;
 using Microsoft.VisualStudio.ExtensionsExplorer;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Dialog.Providers;
 using NuGet.Test.Mocks;
+using Xunit;
 
 namespace NuGet.Dialog.Test {
-    [TestClass]
+
     public class EmptyTreeNodeTest {
 
-        [TestMethod]
+        [Fact]
         public void PropertyNameIsCorrect() {
 
             // Arrange
@@ -19,10 +19,10 @@ namespace NuGet.Dialog.Test {
             EmptyTreeNode node = CreateEmptyTreeNode(category);
 
             // Act & Assert
-            Assert.AreEqual(category, node.Name);
+            Assert.Equal(category, node.Name);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesReturnCorrectPackages() {
             // Arrange
             EmptyTreeNode node = CreateEmptyTreeNode();
@@ -31,7 +31,7 @@ namespace NuGet.Dialog.Test {
             var producedPackages = node.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(0, producedPackages.Count);
+            Assert.Equal(0, producedPackages.Count);
         }
 
         private static EmptyTreeNode CreateEmptyTreeNode(string category = "Mock node") {

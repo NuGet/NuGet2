@@ -1,34 +1,35 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.ExtensionsExplorer;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using Moq;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
+using Xunit;
 
 namespace NuGet.Dialog.Test {
-    [TestClass]
+
     public class PackagesSearchNodeTest {
 
-        [TestMethod]
+        [Fact]
         public void NamePropertyIsValid() {
             // Arrange
             PackagesSearchNode node = CreatePackagesSearchNode("hello", 1);
 
             // Act && Assert
-            Assert.AreEqual("Search Results", node.Name);
+            Assert.Equal("Search Results", node.Name);
         }
 
-        [TestMethod]
+        [Fact]
         public void IsSearchResultsNodePropertyIsValid() {
             // Arrange
             PackagesSearchNode node = CreatePackagesSearchNode("hello", 1);
 
             // Act && Assert
-            Assert.IsTrue(node.IsSearchResultsNode);
+            Assert.True(node.IsSearchResultsNode);
         }
 
-        [TestMethod]
+        [Fact]
         public void SetSearchTextMethodChangesQuery() {
             // Arrange
             PackagesSearchNode node = CreatePackagesSearchNode("A", 5);
@@ -41,13 +42,13 @@ namespace NuGet.Dialog.Test {
             var packages2 = node.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(0, packages1.Count);
+            Assert.Equal(0, packages1.Count);
 
-            Assert.AreEqual(1, packages2.Count);
-            Assert.AreEqual("A1", packages2[0].Id);
+            Assert.Equal(1, packages2.Count);
+            Assert.Equal("A1", packages2[0].Id);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesReturnsCorrectPackagesBasedOnExtensions() {
             // Arrange
             PackagesSearchNode node = CreatePackagesSearchNode("A", 5);
@@ -56,10 +57,10 @@ namespace NuGet.Dialog.Test {
             var packages = node.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(5, packages.Count);
+            Assert.Equal(5, packages.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesDoNotCollapseVersionsIfBaseNodeDoesNotDoSo() {
             // Arrange
             PackagesProviderBase provider = new MockPackagesProvider();
@@ -84,15 +85,15 @@ namespace NuGet.Dialog.Test {
             var packages = node.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(2, packages.Count);
-            Assert.AreEqual("Azo", packages[0].Id);
-            Assert.AreEqual(new Version("1.0"), packages[0].Version);
+            Assert.Equal(2, packages.Count);
+            Assert.Equal("Azo", packages[0].Id);
+            Assert.Equal(new Version("1.0"), packages[0].Version);
 
-            Assert.AreEqual("Azo", packages[1].Id);
-            Assert.AreEqual(new Version("2.0"), packages[1].Version);
+            Assert.Equal("Azo", packages[1].Id);
+            Assert.Equal(new Version("2.0"), packages[1].Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesReturnsCorrectPackagesBasedOnExtensions2() {
             // Arrange
             PackagesSearchNode node = CreatePackagesSearchNode("B", 5);
@@ -101,7 +102,7 @@ namespace NuGet.Dialog.Test {
             var packages = node.GetPackages().ToList();
 
             // Assert
-            Assert.AreEqual(0, packages.Count);
+            Assert.Equal(0, packages.Count);
         }
 
         private static PackagesSearchNode CreatePackagesSearchNode(string searchTerm, int numberOfPackages = 1, bool collapseVersions = true) {

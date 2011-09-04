@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.VisualStudio;
+using Xunit;
 
 namespace NuGet.Dialog.Test {
 
-    [TestClass]
+
     public class PackageItemTest {
-
-
-        [TestMethod]
+		
+        [Fact]
         public void PackageIdentityPropertyReturnsCorrectObject() {
 
             // Arrange
@@ -21,51 +20,51 @@ namespace NuGet.Dialog.Test {
             var packageItem = CreatePackageItem(package);
 
             // Act && Assert 
-            Assert.AreSame(package, packageItem.PackageIdentity);
+            Assert.Same(package, packageItem.PackageIdentity);
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyNameIsCorrect() {
             // Arrange
             IPackage package = PackageUtility.CreatePackage("A", "1.0", new string[] { "This is a package." });
             var packageItem = CreatePackageItem(package);
 
             // Act && Assert 
-            Assert.AreEqual("A", packageItem.Name);
-            Assert.AreEqual("A", packageItem.Id);
+            Assert.Equal("A", packageItem.Name);
+            Assert.Equal("A", packageItem.Id);
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyVersionIsCorrect() {
             // Arrange
             IPackage package = PackageUtility.CreatePackage("A", "1.0", new string[] { "This is a package." });
             var packageItem = CreatePackageItem(package);
 
             // Act && Assert 
-            Assert.AreEqual("1.0", packageItem.Version);
+            Assert.Equal("1.0", packageItem.Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyIsEnabledIsCorrect() {
             // Arrange
             IPackage package = PackageUtility.CreatePackage("A", "1.0", new string[] { "This is a package." });
             var packageItem = CreatePackageItem(package);
 
             // Act && Assert 
-            Assert.AreEqual(true, packageItem.IsEnabled);
+            Assert.Equal(true, packageItem.IsEnabled);
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyDescriptionIsCorrect() {
             // Arrange
             IPackage package = PackageUtility.CreatePackage("A", "1.0", new string[] { "This is a package." });
             var packageItem = CreatePackageItem(package);
 
             // Act && Assert 
-            Assert.AreEqual(package.Description, packageItem.Description);
+            Assert.Equal(package.Description, packageItem.Description);
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyAuthorsIsCorrect() {
             // Arrange
             IPackage package = PackageUtility.CreatePackage("A", "1.0", new string[] { "This is a package." });
@@ -75,11 +74,11 @@ namespace NuGet.Dialog.Test {
             IList<string> authors = packageItem.Authors.ToList();
 
             // Act && Assert 
-            Assert.AreEqual(1, authors.Count);
-            Assert.AreEqual("Tester", authors[0]);
+            Assert.Equal(1, authors.Count);
+            Assert.Equal("Tester", authors[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyLicenseUrlIsCorrect() {
             // Arrange
             IPackage package = PackageUtility.CreatePackage("A", "1.0", new string[] { "This is a package." });
@@ -89,7 +88,7 @@ namespace NuGet.Dialog.Test {
             Uri licenseUrl = packageItem.LicenseUrl;
 
             // Act && Assert 
-            Assert.AreEqual("ftp://test/somelicense.txts", licenseUrl.AbsoluteUri);
+            Assert.Equal("ftp://test/somelicense.txts", licenseUrl.AbsoluteUri);
         }
 
         private static PackageItem CreatePackageItem(IPackage package) {

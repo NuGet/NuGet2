@@ -1,26 +1,26 @@
 ﻿using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
+using Xunit;
 
 namespace NuGet.Dialog.Test {
 
-    [TestClass]
+
     public class PackagesProviderBaseTest {
 
-        [TestMethod]
+        [Fact]
         public void CtorThrowsIfResourcesArgumentIsNull() {
             ExceptionAssert.ThrowsArgNull(
                 () => new ConcretePackagesProvider(null),
                 "resources");
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMethodReturnsNameValue() {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
@@ -29,39 +29,39 @@ namespace NuGet.Dialog.Test {
             string providerName = provider.ToString();
 
             // Assert
-            Assert.AreEqual("Test Provider", providerName);
+            Assert.Equal("Test Provider", providerName);
         }
 
-        [TestMethod]
+        [Fact]
         public void PropertyRefreshOnNodeSelectionIsFalse() {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
 
             // Act & Assert
-            Assert.IsFalse(provider.RefreshOnNodeSelection);
+            Assert.False(provider.RefreshOnNodeSelection);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtensionsTreeIsNotNull() {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
 
             // Act && Assert
-            Assert.IsNotNull(provider.ExtensionsTree);
+            Assert.NotNull(provider.ExtensionsTree);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtensionsTreeIsPopulatedWithOneNode() {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
 
             // Act && Assert
-            Assert.AreEqual(1, provider.ExtensionsTree.Nodes.Count);
-            Assert.IsInstanceOfType(provider.ExtensionsTree.Nodes[0], typeof(SimpleTreeNode));
-            Assert.AreEqual("All", provider.ExtensionsTree.Nodes[0].Name);
+            Assert.Equal(1, provider.ExtensionsTree.Nodes.Count);
+            Assert.IsType(typeof(SimpleTreeNode), provider.ExtensionsTree.Nodes[0]);
+            Assert.Equal("All", provider.ExtensionsTree.Nodes[0].Name);
         }
 
-        [TestMethod]
+        [Fact]
         public void SearchMethodCreatesNewTreeNode() {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
@@ -71,12 +71,12 @@ namespace NuGet.Dialog.Test {
             IVsExtensionsTreeNode searchNode = provider.Search("hello");
 
             // Assert
-            Assert.IsNotNull(searchNode);
-            Assert.IsInstanceOfType(searchNode, typeof(PackagesSearchNode));
-            Assert.IsTrue(provider.ExtensionsTree.Nodes.Contains(searchNode));
+            Assert.NotNull(searchNode);
+			Assert.IsType(typeof(PackagesSearchNode), searchNode);
+            Assert.True(provider.ExtensionsTree.Nodes.Contains(searchNode));
         }
 
-        [TestMethod]
+        [Fact]
         public void SearchMethodDoNotCreateNewSearchNodeWhenSearchTextChanges() {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
@@ -87,10 +87,10 @@ namespace NuGet.Dialog.Test {
             IVsExtensionsTreeNode secondSearchNode = provider.Search("hellop");
 
             // Assert
-            Assert.AreSame(searchNode, secondSearchNode);
+            Assert.Same(searchNode, secondSearchNode);
         }
 
-        [TestMethod]
+        [Fact]
         public void AfterSearchIsDoneTheOriginalNodeIsResetToTheFirstPage() {
             // Arrage
             PackagesProviderBase provider = CreatePackagesProviderBase();
@@ -100,7 +100,7 @@ namespace NuGet.Dialog.Test {
             provider.SelectedNode.CurrentPage = 2;
 
             // Assert
-            Assert.AreEqual(2, provider.SelectedNode.CurrentPage);
+            Assert.Equal(2, provider.SelectedNode.CurrentPage);
 
             // Act
             provider.Search("hello");
@@ -108,11 +108,11 @@ namespace NuGet.Dialog.Test {
             provider.Search("");
 
             // Assert
-            Assert.IsNotNull(provider.SelectedNode);
-            Assert.AreEqual(1, provider.SelectedNode.CurrentPage);
+            Assert.NotNull(provider.SelectedNode);
+            Assert.Equal(1, provider.SelectedNode.CurrentPage);
         }
 
-        [TestMethod]
+        [Fact]
         public void SearchMethodReturnsNullForNullOrEmptySearchText() {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
@@ -123,26 +123,26 @@ namespace NuGet.Dialog.Test {
             IVsExtensionsTreeNode secondSearchNode = provider.Search("");
 
             // Assert
-            Assert.IsNull(searchNode);
-            Assert.IsNull(secondSearchNode);
+            Assert.Null(searchNode);
+            Assert.Null(secondSearchNode);
         }
 
-        [TestMethod]
+        [Fact]
         public void MediumIconDataTemplate() {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
 
             // Act && Assert
-            Assert.IsNotNull(provider.MediumIconDataTemplate);
+            Assert.NotNull(provider.MediumIconDataTemplate);
         }
 
-        [TestMethod]
+        [Fact]
         public void DetailViewDataTemplate() {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
 
             // Act && Assert
-            Assert.IsNotNull(provider.DetailViewDataTemplate);
+            Assert.NotNull(provider.DetailViewDataTemplate);
         }
 
         private PackagesProviderBase CreatePackagesProviderBase() {

@@ -3,99 +3,99 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using Microsoft.VisualStudio.ExtensionsExplorer;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
+using Xunit;
 
 namespace NuGet.Dialog.Test {
-    [TestClass]
+
     public class PackagesTreeNodeBaseTest {
 
-        [TestMethod]
+        [Fact]
         public void ParentPropertyIsCorrect() {
             // Arrange
             IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(parentTreeNode);
 
             // Act & Assert
-            Assert.AreSame(parentTreeNode, node.Parent);
+            Assert.Same(parentTreeNode, node.Parent);
         }
 
-        [TestMethod]
+        [Fact]
         public void IsSearchResultsNodeIsFalse() {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
             // Act & Assert
-            Assert.IsFalse(node.IsSearchResultsNode);
+            Assert.False(node.IsSearchResultsNode);
         }
 
-        [TestMethod]
+        [Fact]
         public void IsExpandedIsFalseByDefault() {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
             // Act & Assert
-            Assert.IsFalse(node.IsExpanded);
+            Assert.False(node.IsExpanded);
         }
 
-        [TestMethod]
+        [Fact]
         public void IsSelectedIsFalseByDefault() {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
             // Act & Assert
-            Assert.IsFalse(node.IsSelected);
+            Assert.False(node.IsSelected);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExtensionsPropertyIsNotNull() {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
             // Act & Assert
-            Assert.IsNotNull(node.Extensions);
+            Assert.NotNull(node.Extensions);
         }
 
-        [TestMethod]
+        [Fact]
         public void NodesPropertyIsNotNullAndEmpty() {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
             // Act & Assert
-            Assert.IsNotNull(node.Nodes);
-            Assert.AreEqual(0, node.Nodes.Count);
+            Assert.NotNull(node.Nodes);
+            Assert.Equal(0, node.Nodes.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void ToStringMethodReturnsName() {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
             // Act & Assert
-            Assert.AreEqual("Mock Tree Node", node.ToString());
+            Assert.Equal("Mock Tree Node", node.ToString());
         }
 
-        [TestMethod]
+        [Fact]
         public void TotalPagesPropertyIsCorrect() {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
             // Act & Assert
-            Assert.AreEqual(1, node.TotalPages);
+            Assert.Equal(1, node.TotalPages);
         }
 
-        [TestMethod]
+        [Fact]
         public void CurrentPagesPropertyIsCorrect() {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
             // Act & Assert
-            Assert.AreEqual(1, node.CurrentPage);
+            Assert.Equal(1, node.CurrentPage);
         }
 
-        [TestMethod]
+        [Fact]
         public void IsSelectedPropertyWhenChangedRaiseEvent() {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
@@ -113,10 +113,10 @@ namespace NuGet.Dialog.Test {
             node.IsSelected = true;
 
             // Assert
-            Assert.IsTrue(propertyRaised);
+            Assert.True(propertyRaised);
         }
 
-        [TestMethod]
+        [Fact]
         public void IsExpandedPropertyWhenChangedRaiseEvent() {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
@@ -134,10 +134,10 @@ namespace NuGet.Dialog.Test {
             node.IsExpanded = true;
 
             // Assert
-            Assert.IsTrue(propertyRaised);
+            Assert.True(propertyRaised);
         }
 
-        [TestMethod]
+        [Fact]
         public void WhenConstructedLoadPageOneAutomatically() {
             TreeNodeActionTest(node => {
                 // Act
@@ -146,28 +146,28 @@ namespace NuGet.Dialog.Test {
             },
             node => {
                 // Assert
-                Assert.AreEqual(1, node.TotalPages);
-                Assert.AreEqual(10, node.Extensions.Count);
+                Assert.Equal(1, node.TotalPages);
+                Assert.Equal(10, node.Extensions.Count);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void LoadPageMethodLoadTheCorrectExtensions() {
             TreeNodeActionTest(node => node.LoadPage(2),
                                node => {
                                    // Assert
-                                   Assert.AreEqual(5, node.TotalPages);
-                                   Assert.AreEqual(2, node.CurrentPage);
-                                   Assert.AreEqual(2, node.Extensions.Count);
+                                   Assert.Equal(5, node.TotalPages);
+                                   Assert.Equal(2, node.CurrentPage);
+                                   Assert.Equal(2, node.Extensions.Count);
 
-                                   Assert.AreEqual("A7", node.Extensions[0].Name);
-                                   Assert.AreEqual("A6", node.Extensions[1].Name);
+                                   Assert.Equal("A7", node.Extensions[0].Name);
+                                   Assert.Equal("A6", node.Extensions[1].Name);
                                },
                                pageSize: 2,
                                numberOfPackages: 10);
         }
 
-        [TestMethod]
+        [Fact]
         public void LoadPageMethodWithCustomSortLoadsExtensionsInTheCorrectOrder() {
             // Arrange
             var idSortDescriptor = new PackageSortDescriptor("Id", "Id", ListSortDirection.Descending);
@@ -175,20 +175,20 @@ namespace NuGet.Dialog.Test {
             TreeNodeActionTest(node => node.SortSelectionChanged(idSortDescriptor),
                                node => {
                                    // Assert
-                                   Assert.AreEqual(1, node.TotalPages);
-                                   Assert.AreEqual(1, node.CurrentPage);
-                                   Assert.AreEqual(5, node.Extensions.Count);
+                                   Assert.Equal(1, node.TotalPages);
+                                   Assert.Equal(1, node.CurrentPage);
+                                   Assert.Equal(5, node.Extensions.Count);
 
-                                   Assert.AreEqual("A4", node.Extensions[0].Name);
-                                   Assert.AreEqual("A3", node.Extensions[1].Name);
-                                   Assert.AreEqual("A2", node.Extensions[2].Name);
-                                   Assert.AreEqual("A1", node.Extensions[3].Name);
-                                   Assert.AreEqual("A0", node.Extensions[4].Name);
+                                   Assert.Equal("A4", node.Extensions[0].Name);
+                                   Assert.Equal("A3", node.Extensions[1].Name);
+                                   Assert.Equal("A2", node.Extensions[2].Name);
+                                   Assert.Equal("A1", node.Extensions[3].Name);
+                                   Assert.Equal("A0", node.Extensions[4].Name);
                                },
                                numberOfPackages: 5);
         }
 
-        [TestMethod]
+        [Fact]
         public void LoadPageFollowedBySortClearsCacheAndUsesNewSortOrder() {
             // Arrange
             var idSortDescriptor = new PackageSortDescriptor("Id", "Id", ListSortDirection.Ascending);
@@ -200,32 +200,32 @@ namespace NuGet.Dialog.Test {
                                n => n.LoadPage(1),
                                n => {
                                    // Assert
-                                   Assert.AreEqual(1, n.TotalPages);
-                                   Assert.AreEqual(1, n.CurrentPage);
-                                   Assert.AreEqual(5, n.Extensions.Count);
-                                   Assert.AreEqual("A4", n.Extensions[0].Name);
-                                   Assert.AreEqual("A3", n.Extensions[1].Name);
-                                   Assert.AreEqual("A2", n.Extensions[2].Name);
-                                   Assert.AreEqual("A1", n.Extensions[3].Name);
-                                   Assert.AreEqual("A0", n.Extensions[4].Name);
+                                   Assert.Equal(1, n.TotalPages);
+                                   Assert.Equal(1, n.CurrentPage);
+                                   Assert.Equal(5, n.Extensions.Count);
+                                   Assert.Equal("A4", n.Extensions[0].Name);
+                                   Assert.Equal("A3", n.Extensions[1].Name);
+                                   Assert.Equal("A2", n.Extensions[2].Name);
+                                   Assert.Equal("A1", n.Extensions[3].Name);
+                                   Assert.Equal("A0", n.Extensions[4].Name);
                                });
 
             TreeNodeActionTest(node,
                                n => n.SortSelectionChanged(idSortDescriptor),
                                n => {
                                    // Assert
-                                   Assert.AreEqual(1, n.TotalPages);
-                                   Assert.AreEqual(1, n.CurrentPage);
-                                   Assert.AreEqual(5, n.Extensions.Count);
-                                   Assert.AreEqual("A0", n.Extensions[0].Name);
-                                   Assert.AreEqual("A1", n.Extensions[1].Name);
-                                   Assert.AreEqual("A2", n.Extensions[2].Name);
-                                   Assert.AreEqual("A3", n.Extensions[3].Name);
-                                   Assert.AreEqual("A4", n.Extensions[4].Name);
+                                   Assert.Equal(1, n.TotalPages);
+                                   Assert.Equal(1, n.CurrentPage);
+                                   Assert.Equal(5, n.Extensions.Count);
+                                   Assert.Equal("A0", n.Extensions[0].Name);
+                                   Assert.Equal("A1", n.Extensions[1].Name);
+                                   Assert.Equal("A2", n.Extensions[2].Name);
+                                   Assert.Equal("A3", n.Extensions[3].Name);
+                                   Assert.Equal("A4", n.Extensions[4].Name);
                                });
         }
 
-        [TestMethod]
+        [Fact]
         public void DuplicateExtensionsAreRemoved() {
             // Arrange
             var node = CreatePackagesTreeNodeBase(new[]{
@@ -242,16 +242,16 @@ namespace NuGet.Dialog.Test {
                                n => n.LoadPage(1),
                                n => {
                                    // Assert
-                                   Assert.AreEqual(1, n.TotalPages);
-                                   Assert.AreEqual(1, n.CurrentPage);
-                                   Assert.AreEqual(3, n.Extensions.Count);
-                                   Assert.AreEqual("C", n.Extensions[0].Name);
-                                   Assert.AreEqual("B", n.Extensions[1].Name);
-                                   Assert.AreEqual("A", n.Extensions[2].Name);
+                                   Assert.Equal(1, n.TotalPages);
+                                   Assert.Equal(1, n.CurrentPage);
+                                   Assert.Equal(3, n.Extensions.Count);
+                                   Assert.Equal("C", n.Extensions[0].Name);
+                                   Assert.Equal("B", n.Extensions[1].Name);
+                                   Assert.Equal("A", n.Extensions[2].Name);
                                });
         }
 
-        [TestMethod]
+        [Fact]
         public void DuplicateExtensionsAreNotRemovedIfCollapseVersionsPropertyIsFalse() {
             // Arrange
             var node = CreatePackagesTreeNodeBase(new[]{
@@ -270,15 +270,15 @@ namespace NuGet.Dialog.Test {
                                n => n.LoadPage(1),
                                n => {
                                    // Assert
-                                   Assert.AreEqual(1, n.TotalPages);
-                                   Assert.AreEqual(1, n.CurrentPage);
-                                   Assert.AreEqual(6, n.Extensions.Count);
-                                   Assert.AreEqual("C", n.Extensions[0].Name);
-                                   Assert.AreEqual("B", n.Extensions[1].Name);
-                                   Assert.AreEqual("B", n.Extensions[2].Name);
-                                   Assert.AreEqual("A", n.Extensions[3].Name);
-                                   Assert.AreEqual("A", n.Extensions[4].Name);
-                                   Assert.AreEqual("A", n.Extensions[5].Name);
+                                   Assert.Equal(1, n.TotalPages);
+                                   Assert.Equal(1, n.CurrentPage);
+                                   Assert.Equal(6, n.Extensions.Count);
+                                   Assert.Equal("C", n.Extensions[0].Name);
+                                   Assert.Equal("B", n.Extensions[1].Name);
+                                   Assert.Equal("B", n.Extensions[2].Name);
+                                   Assert.Equal("A", n.Extensions[3].Name);
+                                   Assert.Equal("A", n.Extensions[4].Name);
+                                   Assert.Equal("A", n.Extensions[5].Name);
                                });
         }
 
@@ -324,10 +324,10 @@ namespace NuGet.Dialog.Test {
             resetEvent.Wait();
 
             // Make sure there was no exception
-            Assert.IsNull(exception, exception != null ? exception.Message : String.Empty);
+            Assert.Null(exception);
         }
 
-        [TestMethod]
+        [Fact]
         public void SortSelectionChangedReturnsFalseIfCurrentSortDescriptorIsNull() {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(numberOfPackages: 10);
@@ -336,10 +336,10 @@ namespace NuGet.Dialog.Test {
             bool result = node.SortSelectionChanged(null);
 
             // Assert
-            Assert.IsFalse(result);
+            Assert.False(result);
         }
 
-        [TestMethod]
+        [Fact]
         public void LoadPageThrowsIfPageNumberIsLessThanOne() {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();

@@ -3,36 +3,36 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using EnvDTE;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
+using Xunit;
 
 namespace NuGet.Dialog.Test {
-    [TestClass]
+
     public class OnlineProviderTest {
-        [TestMethod]
+        [Fact]
         public void NamePropertyIsCorrect() {
             // Arrange
             var provider = CreateOnlineProvider();
 
             // Act & Assert
-            Assert.AreEqual("Online", provider.Name);
+            Assert.Equal("Online", provider.Name);
         }
 
-        [TestMethod]
+        [Fact]
         public void RefresOnNodeSelectionPropertyIsTrue() {
             // Arrange
             var provider = CreateOnlineProvider();
 
             // Act & Assert
-            Assert.IsTrue(provider.RefreshOnNodeSelection);
+            Assert.True(provider.RefreshOnNodeSelection);
         }
 
-        [TestMethod]
+        [Fact]
         public void VerifySortDescriptors() {
             // Arrange
             var provider = CreateOnlineProvider();
@@ -41,26 +41,26 @@ namespace NuGet.Dialog.Test {
             var descriptors = provider.SortDescriptors.Cast<PackageSortDescriptor>().ToList();
 
             // Assert
-            Assert.AreEqual(5, descriptors.Count);
-            Assert.AreEqual("DownloadCount", descriptors[0].SortProperties.First());
-            Assert.AreEqual(ListSortDirection.Descending, descriptors[0].Direction);
+            Assert.Equal(5, descriptors.Count);
+            Assert.Equal("DownloadCount", descriptors[0].SortProperties.First());
+            Assert.Equal(ListSortDirection.Descending, descriptors[0].Direction);
 
-            Assert.AreEqual("Rating", descriptors[1].SortProperties.First());
-            Assert.AreEqual(ListSortDirection.Descending, descriptors[1].Direction);
+            Assert.Equal("Rating", descriptors[1].SortProperties.First());
+            Assert.Equal(ListSortDirection.Descending, descriptors[1].Direction);
 
-            Assert.AreEqual("Published", descriptors[2].SortProperties.First());
-            Assert.AreEqual(ListSortDirection.Descending, descriptors[2].Direction);
+            Assert.Equal("Published", descriptors[2].SortProperties.First());
+            Assert.Equal(ListSortDirection.Descending, descriptors[2].Direction);
 
-            Assert.AreEqual("Title", descriptors[3].SortProperties.First());
-            Assert.AreEqual("Id", descriptors[3].SortProperties.Last());
-            Assert.AreEqual(ListSortDirection.Ascending, descriptors[3].Direction);
+            Assert.Equal("Title", descriptors[3].SortProperties.First());
+            Assert.Equal("Id", descriptors[3].SortProperties.Last());
+            Assert.Equal(ListSortDirection.Ascending, descriptors[3].Direction);
 
-            Assert.AreEqual("Title", descriptors[4].SortProperties.First());
-            Assert.AreEqual("Id", descriptors[4].SortProperties.Last());
-            Assert.AreEqual(ListSortDirection.Descending, descriptors[4].Direction);
+            Assert.Equal("Title", descriptors[4].SortProperties.First());
+            Assert.Equal("Id", descriptors[4].SortProperties.Last());
+            Assert.Equal(ListSortDirection.Descending, descriptors[4].Direction);
         }
 
-        [TestMethod]
+        [Fact]
         public void RootNodeIsPopulatedWithCorrectNumberOfNodes() {
             // Arrange
             var provider = CreateOnlineProvider();
@@ -69,19 +69,19 @@ namespace NuGet.Dialog.Test {
             var extentionsTree = provider.ExtensionsTree;
 
             // Assert
-            Assert.AreEqual(3, extentionsTree.Nodes.Count);
+            Assert.Equal(3, extentionsTree.Nodes.Count);
 
-            Assert.IsInstanceOfType(extentionsTree.Nodes[0], typeof(SimpleTreeNode));
-            Assert.AreEqual("All", extentionsTree.Nodes[0].Name);
+			Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[0]);
+            Assert.Equal("All", extentionsTree.Nodes[0].Name);
 
-            Assert.IsInstanceOfType(extentionsTree.Nodes[1], typeof(SimpleTreeNode));
-            Assert.AreEqual("One", extentionsTree.Nodes[1].Name);
+			Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[1]);
+            Assert.Equal("One", extentionsTree.Nodes[1].Name);
 
-            Assert.IsInstanceOfType(extentionsTree.Nodes[2], typeof(SimpleTreeNode));
-            Assert.AreEqual("Two", extentionsTree.Nodes[2].Name);
+			Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[2]);
+            Assert.Equal("Two", extentionsTree.Nodes[2].Name);
         }
 
-        [TestMethod]
+        [Fact]
         public void CanExecuteReturnsCorrectResult() {
             // Arrange
 
@@ -112,12 +112,12 @@ namespace NuGet.Dialog.Test {
             bool canExecuteC = provider.CanExecute(extensionC);
 
             // Assert
-            Assert.IsTrue(canExecuteC);
-            Assert.IsTrue(canExecuteB);
-            Assert.IsFalse(canExecuteA);
+            Assert.True(canExecuteC);
+            Assert.True(canExecuteB);
+            Assert.False(canExecuteA);
         }
 
-        [TestMethod]
+        [Fact]
         public void ExecuteMethodCallsInstallPackageMethodOnPackageManager() {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
@@ -175,7 +175,7 @@ namespace NuGet.Dialog.Test {
             manualEvent.WaitOne();
         }
 
-        [TestMethod]
+        [Fact]
         public void ExecuteMethodInvokesScript() {
             // source repo has A, B, C
             // solution repo has A
@@ -250,7 +250,7 @@ namespace NuGet.Dialog.Test {
             manualEvent.WaitOne();
         }
 
-        [TestMethod]
+        [Fact]
         public void ExecuteMethodInstallPackagesWithInitScript() {
             // source repo has A, B, C
             // solution repo has A
