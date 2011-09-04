@@ -8,16 +8,15 @@ using System.Management.Automation.Runspaces;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Windows.Input;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGetConsole;
 using NuGetConsole.Host.PowerShell.Implementation;
 using NuGetConsole.Implementation.Console;
+using Xunit;
 
 namespace PowerShellHost.Test {
-    [TestClass]
     public class KeyProcessingTest {
-        [TestMethod]
+        [Fact]
         public void SimplePostKeyWaitKey() {
 
             var privateWpfConsole = new Mock<IPrivateWpfConsole>();
@@ -27,22 +26,22 @@ namespace PowerShellHost.Test {
             dispatcher.PostKey(postedKey);
 
             // test key available
-            Assert.IsTrue(dispatcher.IsKeyAvailable);
+            Assert.True(dispatcher.IsKeyAvailable);
 
             // queue a cancel operation to prevent test getting "stuck" 
             // should the following WaitKey call fail
             bool cancelWasQueued = InteractiveHelper.TryQueueCancelWaitKey(dispatcher, timeout: TimeSpan.FromSeconds(5));
-            Assert.IsTrue(cancelWasQueued);
+            Assert.True(cancelWasQueued);
 
             // blocking
             VsKeyInfo keyInfo = dispatcher.WaitKey();
-            Assert.AreEqual(keyInfo, postedKey);
+            Assert.Equal(keyInfo, postedKey);
 
             // queue should be empty
-            Assert.IsFalse(dispatcher.IsKeyAvailable);
+            Assert.False(dispatcher.IsKeyAvailable);
         }
 
-        [TestMethod]
+        [Fact]
         public void HostUserInterfaceReadkey() {
 
             Mock<NuGetRawUserInterface> mockRawUI;
@@ -56,16 +55,16 @@ namespace PowerShellHost.Test {
             // queue a cancel operation to prevent test getting "stuck" 
             // should the following ReadKey call fail
             var cancelWasQueued = InteractiveHelper.TryQueueCancelWaitKey(dispatcher, TimeSpan.FromSeconds(5));
-            Assert.IsTrue(cancelWasQueued);
+            Assert.True(cancelWasQueued);
 
             KeyInfo keyInfo = mockRawUI.Object.ReadKey();
 
-            Assert.AreEqual(keyInfo.Character, 'z');
-            Assert.AreEqual(keyInfo.VirtualKeyCode, 90);
-            Assert.AreEqual(keyInfo.ControlKeyState, default(ControlKeyStates));
+            Assert.Equal(keyInfo.Character, 'z');
+            Assert.Equal(keyInfo.VirtualKeyCode, 90);
+            Assert.Equal(keyInfo.ControlKeyState, default(ControlKeyStates));
         }
 
-        [TestMethod]
+        [Fact]
         public void HostUserInterfaceReadLine() {
 
             Mock<NuGetRawUserInterface> mockRawUI;
@@ -78,11 +77,11 @@ namespace PowerShellHost.Test {
 
             string line = mockUI.Object.ReadLine();
 
-            Assert.AreEqual("nuget", line);
+            Assert.Equal("nuget", line);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void HostUserInterfaceReadLineAsSecureString() {
             Mock<NuGetRawUserInterface> mockRawUI;
             Mock<NuGetHostUserInterface> mockUI;
@@ -97,10 +96,10 @@ namespace PowerShellHost.Test {
             string line = Marshal.PtrToStringBSTR(bstr);
             Marshal.FreeBSTR(bstr);
 
-            Assert.AreEqual("nuget", line);
+            Assert.Equal("nuget", line);
         }
 
-        [TestMethod]
+        [Fact]
         public void HostUserInterfacePromptForChoice() {
             Mock<NuGetRawUserInterface> mockRawUI;
             Mock<NuGetHostUserInterface> mockUI;
@@ -117,15 +116,15 @@ namespace PowerShellHost.Test {
                 timeout: TimeSpan.FromSeconds(5));
 
             int chosen = mockUI.Object.PromptForChoice("Test", "Test", descriptions, 0);
-            Assert.AreEqual(1, chosen);
+            Assert.Equal(1, chosen);
 
             // test default choice
             dispatcher.PostKey(VsKeyInfo.Enter);
             chosen = mockUI.Object.PromptForChoice("Test", "Test", descriptions, 0);
-            Assert.AreEqual(0, chosen);
+            Assert.Equal(0, chosen);
         }
 
-        [TestMethod]
+        [Fact]
         public void HostUserInterfacePromptForConfirm() {
             Mock<NuGetRawUserInterface> mockRawUI;
             Mock<NuGetHostUserInterface> mockUI;
@@ -152,10 +151,10 @@ namespace PowerShellHost.Test {
                         .FirstOrDefault();
 
                 // no errors
-                Assert.IsTrue(ps.Streams.Error.Count == 0);
+                Assert.True(ps.Streams.Error.Count == 0);
 
                 // shouldprocess accepted a "y"
-                Assert.IsTrue(result);
+                Assert.True(result);
 
                 // put a "n" on the input queue
                 InteractiveHelper.PostKeys(dispatcher, "n", appendCarriageReturn: true,
@@ -166,14 +165,14 @@ namespace PowerShellHost.Test {
                 result = ps.Invoke<bool>().FirstOrDefault();
 
                 // no errors
-                Assert.IsTrue(ps.Streams.Error.Count == 0);
+                Assert.True(ps.Streams.Error.Count == 0);
 
                 // shouldprocess accepted a "n"
-                Assert.IsFalse(result);
+                Assert.False(result);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void HostUserInterfacePromptForMissingMandatoryParameters() {
             Mock<NuGetRawUserInterface> mockRawUI;
             Mock<NuGetHostUserInterface> mockUI;
@@ -220,12 +219,12 @@ namespace PowerShellHost.Test {
                             .FirstOrDefault();
 
                 // no errors
-                Assert.IsTrue(ps.Streams.Error.Count == 0);
+                Assert.True(ps.Streams.Error.Count == 0);
 
-                Assert.IsNotNull(result);
-                Assert.AreEqual(result["Name"], "foo");
-                Assert.AreEqual(result["Count"], 42);
-                Assert.IsTrue(
+                Assert.NotNull(result);
+                Assert.Equal(result["Name"], "foo");
+                Assert.Equal(result["Count"], 42);
+                Assert.True(
                     ((int[])result["Numbers"])
                         .SequenceEqual(new[] { 1, 2, 3 }));
             }

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading;
 using System.Windows.Input;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGetConsole;
 using NuGetConsole.Host.PowerShell.Implementation;
 using NuGetConsole.Implementation.Console;
+using Xunit;
 
 namespace PowerShellHost.Test {
     internal static class InteractiveHelper {
@@ -67,7 +67,7 @@ namespace PowerShellHost.Test {
             // queue a cancel operation to prevent test getting "stuck"
             if (timeout != TimeSpan.Zero) {
                 var cancelWasQueued = TryQueueCancelWaitKey(dispatcher, timeout);
-                Assert.IsTrue(cancelWasQueued);
+                Assert.True(cancelWasQueued);
             }
         }
     }
