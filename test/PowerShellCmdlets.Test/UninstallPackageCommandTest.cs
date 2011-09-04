@@ -1,16 +1,16 @@
 using System;
 using System.Management.Automation;
 using EnvDTE;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
+using Xunit;
 
 namespace NuGet.PowerShell.Commands.Test {
-    [TestClass]
+    
     public class UninstallPackageCommandTest {
-        [TestMethod]
+        [Fact]
         public void UninstallPackageCmdletThrowsWhenSolutionIsClosed() {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -22,7 +22,7 @@ namespace NuGet.PowerShell.Commands.Test {
                 "The current environment doesn't have a solution open.");
         }
 
-        [TestMethod]
+        [Fact]
         public void UninstallPackageCmdletPassesParametersCorrectlyWhenIdAndVersionAreSpecified() {
             // Arrange
             var id = "my-id";
@@ -38,11 +38,11 @@ namespace NuGet.PowerShell.Commands.Test {
             uninstallCmdlet.Object.Execute();
 
             // Assert
-            Assert.AreEqual("my-id", vsPackageManager.PackageId);
-            Assert.AreEqual(new Version("2.8"), vsPackageManager.Version);
+            Assert.Equal("my-id", vsPackageManager.PackageId);
+            Assert.Equal(new Version("2.8"), vsPackageManager.Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void UninstallPackageCmdletPassesForceSwitchCorrectly() {
             // Arrange
             var id = "my-id";
@@ -60,12 +60,12 @@ namespace NuGet.PowerShell.Commands.Test {
             uninstallCmdlet.Object.Execute();
 
             // Assert
-            Assert.AreEqual("my-id", vsPackageManager.PackageId);
-            Assert.AreEqual(new Version("2.8"), vsPackageManager.Version);
-            Assert.IsTrue(vsPackageManager.ForceRemove);
+            Assert.Equal("my-id", vsPackageManager.PackageId);
+            Assert.Equal(new Version("2.8"), vsPackageManager.Version);
+            Assert.True(vsPackageManager.ForceRemove);
         }
 
-        [TestMethod]
+        [Fact]
         public void UninstallPackageCmdletPassesRemoveDependencyCorrectly() {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
@@ -80,9 +80,9 @@ namespace NuGet.PowerShell.Commands.Test {
             uninstallCmdlet.Object.Execute();
 
             // Assert
-            Assert.AreEqual("my-id", vsPackageManager.PackageId);
-            Assert.AreEqual(new Version("2.8"), vsPackageManager.Version);
-            Assert.IsTrue(vsPackageManager.RemoveDependencies);
+            Assert.Equal("my-id", vsPackageManager.PackageId);
+            Assert.Equal(new Version("2.8"), vsPackageManager.Version);
+            Assert.True(vsPackageManager.RemoveDependencies);
         }
 
         private class MockVsPackageManager : VsPackageManager {

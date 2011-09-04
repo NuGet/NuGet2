@@ -1,13 +1,13 @@
 using System.Linq;
 using System.Management.Automation;
 using EnvDTE;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NuGet.VisualStudio.Test;
+using Xunit;
 
 namespace NuGet.PowerShell.Commands.Test {
-    [TestClass]
+    
     public class GetProjectCommandTest {
-        [TestMethod]
+        [Fact]
         public void GetProjectCmdletReturnsDefaultProjectWhenNoFlagsAreSet() {
             // Arrange
             var cmdlet = BuildCmdlet();
@@ -18,11 +18,11 @@ namespace NuGet.PowerShell.Commands.Test {
             var project = result.SingleOrDefault();
 
             // Assert
-            Assert.IsNotNull(project);
-            Assert.AreEqual(project.Name, "ConsoleApplication1");
+            Assert.NotNull(project);
+            Assert.Equal(project.Name, "ConsoleApplication1");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetProjectCmdletReturnsAllProjectsWhenAllIsSet() {
             // Arrange
             var cmdlet = BuildCmdlet();
@@ -32,7 +32,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<Project>();
 
             // Assert
-            Assert.AreEqual(3, result.Count());
+            Assert.Equal(3, result.Count());
         }
 
         private static GetProjectCommand BuildCmdlet() {

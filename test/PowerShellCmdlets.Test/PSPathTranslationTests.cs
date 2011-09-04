@@ -6,7 +6,8 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Threading;
 using Microsoft.PowerShell.Commands;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
+
 
 namespace NuGet.PowerShell.Commands.Test {
     // use a proxy here to save ourselves having to load the Cmdlets
@@ -16,9 +17,8 @@ namespace NuGet.PowerShell.Commands.Test {
             return PSPathUtility.TryTranslatePSPath(session, psPath, out path, out exists, out errorMessage);
         }
     }
-
-    [TestClass]
-    public class PSPathTranslationTests {
+    
+    public class PSPathTranslationTests : IDisposable {
         private string _tempFilePath;
         private System.Management.Automation.PowerShell _ps;
 
@@ -39,32 +39,32 @@ namespace NuGet.PowerShell.Commands.Test {
               errorMessage = $errorMessage
             }}";
 
-        [TestInitialize]
-        public void InititializePowerShell() {
-            // create temp file
-            _tempFilePath = Path.GetTempFileName();
+    	public PSPathTranslationTests()
+    	{
+			// create temp file
+			_tempFilePath = Path.GetTempFileName();
 
-            // initialize 
-            var state = InitialSessionState.CreateDefault();
-            state.ThreadOptions = PSThreadOptions.UseCurrentThread;
-            state.ApartmentState = ApartmentState.STA;
-            _ps = System.Management.Automation.PowerShell.Create();
-            _ps.Runspace = RunspaceFactory.CreateRunspace(state);
-            _ps.Runspace.Open();
+			// initialize 
+			var state = InitialSessionState.CreateDefault();
+			state.ThreadOptions = PSThreadOptions.UseCurrentThread;
+			state.ApartmentState = ApartmentState.STA;
+			_ps = System.Management.Automation.PowerShell.Create();
+			_ps.Runspace = RunspaceFactory.CreateRunspace(state);
+			_ps.Runspace.Open();
 
-            // create a new PSDrive for translation tests
-            _ps.AddCommand("New-PSDrive")
-               .AddParameter("Name", "mytemp")
-               .AddParameter("PSProvider", FileSystemProvider.ProviderName)
-               .AddParameter("Root", Path.GetTempPath());
-            _ps.Invoke();
-            Assert.IsTrue(_ps.Streams.Error.Count == 0, "Failed to create mytemp psdrive.");
+			// create a new PSDrive for translation tests
+			_ps.AddCommand("New-PSDrive")
+			   .AddParameter("Name", "mytemp")
+			   .AddParameter("PSProvider", FileSystemProvider.ProviderName)
+			   .AddParameter("Root", Path.GetTempPath());
+			_ps.Invoke();
+			Assert.True(_ps.Streams.Error.Count == 0, "Failed to create mytemp psdrive.");
 
-            _ps.Streams.ClearStreams();
-            _ps.Commands.Clear();
-        }
+			_ps.Streams.ClearStreams();
+			_ps.Commands.Clear();
+    	}
 
-        [TestMethod]
+    	[Fact]
         public void TranslatePSPathThatShouldExist() {
 
             string psPath = "mytemp:\\" + Path.GetFileName(_tempFilePath);
@@ -74,14 +74,14 @@ namespace NuGet.PowerShell.Commands.Test {
 
             Hashtable result = _ps.Invoke<Hashtable>().SingleOrDefault();
 
-            Assert.IsNotNull(result);
-            Assert.IsTrue(_ps.Streams.Error.Count == 0);
-            Assert.IsTrue((bool)result["success"]);
-            Assert.IsTrue((bool)result["exists"]);
-            Assert.IsTrue((string)result["path"] == _tempFilePath);
+            Assert.NotNull(result);
+            Assert.True(_ps.Streams.Error.Count == 0);
+            Assert.True((bool)result["success"]);
+            Assert.True((bool)result["exists"]);
+            Assert.True((string)result["path"] == _tempFilePath);
         }
 
-        [TestMethod]
+        [Fact]
         public void TranslatePSPathThatShouldNotExist() {
 
             string randomFile = Path.GetRandomFileName();
@@ -92,15 +92,14 @@ namespace NuGet.PowerShell.Commands.Test {
 
             Hashtable result = _ps.Invoke<Hashtable>().SingleOrDefault();
 
-            Assert.IsNotNull(result);
-            Assert.IsTrue(_ps.Streams.Error.Count == 0);
-            Assert.IsTrue((bool)result["success"]);
-            Assert.IsFalse((bool)result["exists"]);
-            Assert.IsTrue((string)result["path"] == win32Path);
+            Assert.NotNull(result);
+            Assert.True(_ps.Streams.Error.Count == 0);
+            Assert.True((bool)result["success"]);
+            Assert.False((bool)result["exists"]);
+            Assert.True((string)result["path"] == win32Path);
         }
-
-        [TestCleanup]
-        public void CleanupPowerShell() {
+       
+        public void Dispose() {
             _ps.Dispose();
 
             if (File.Exists(_tempFilePath)) {

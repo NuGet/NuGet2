@@ -2,18 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
+using Xunit;
 
 namespace NuGet.PowerShell.Commands.Test {
 
     using PackageUtility = NuGet.Test.PackageUtility;
 
-    [TestClass]
+    
     public class FindPackageCommandTest {
-        [TestMethod]
+        [Fact]
         public void FindPackageFiltersByIdWhenSwitchIsSpecified() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -23,11 +23,11 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(1, result.Count());
+            Assert.Equal(1, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "Pack2", Version = new Version("1.0") });
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackageReturnsMaximumResultsWithFirstAndSkipParametersSet() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -39,13 +39,13 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(3, result.Count());     // FindPackage always sets First = 30
+            Assert.Equal(3, result.Count());     // FindPackage always sets First = 30
             AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P1", Version = new Version("1.1") });
             AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P3", Version = new Version("1.0") });
             AssertPackageResultsEqual(result.ElementAt(2), new { Id = "Pack2", Version = new Version("1.2") });
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackageReturnsMaximumResultsWithFirstParameterSet() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -56,14 +56,14 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(4, result.Count());     // FindPackage always sets First = 30
+            Assert.Equal(4, result.Count());     // FindPackage always sets First = 30
             AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P0", Version = new Version("1.1") });
             AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P1", Version = new Version("1.1") });
             AssertPackageResultsEqual(result.ElementAt(2), new { Id = "P3", Version = new Version("1.0") });
             AssertPackageResultsEqual(result.ElementAt(3), new { Id = "Pack2", Version = new Version("1.2") });
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackageFiltersRemoteByIdWhenSwitchIsSpecified() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -74,11 +74,11 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(1, result.Count());
+            Assert.Equal(1, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "Pack2", Version = new Version("1.2") });
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackageReturnsPackagesFilteredByIdWithUpdates() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -89,11 +89,11 @@ namespace NuGet.PowerShell.Commands.Test {
             var packages = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(packages.Count(), 1);
+            Assert.Equal(packages.Count(), 1);
             AssertPackageResultsEqual(packages.First(), new { Id = "Pack2", Version = new Version("1.2") });
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackageReturnsAllVersionsForSpecificPackage() {
             // Arrange 
             var packages = new[] { 
@@ -112,12 +112,12 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(2, result.Count());
+            Assert.Equal(2, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "Awesome", Version = new Version("0.1") });
             AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new Version("0.4") });
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackageReturnsAllVersionsForSpecificPackageWhenSourceNameisUsed() {
             // Arrange 
             var packages = new[] { 
@@ -136,12 +136,12 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(2, result.Count());
+            Assert.Equal(2, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "Awesome", Version = new Version("0.1") });
             AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new Version("0.4") });
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackageReturnsPerformsPartialSearchesByDefault() {
             // Arrange 
             var packages = new[] { 
@@ -161,13 +161,13 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(3, result.Count());
+            Assert.Equal(3, result.Count());
             AssertPackageResultsEqual(result.ElementAt(0), new { Id = "Awesome", Version = new Version("0.1") });
             AssertPackageResultsEqual(result.ElementAt(1), new { Id = "Awesome", Version = new Version("0.4") });
             AssertPackageResultsEqual(result.ElementAt(2), new { Id = "AwesomeToo", Version = new Version("0.4") });
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackageReturnsPerformsPartialSearchesByDefaultAndSourceNameIsUsed() {
             // Arrange 
             var packages = new[] { 
@@ -187,13 +187,13 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(3, result.Count());
+            Assert.Equal(3, result.Count());
             AssertPackageResultsEqual(result.ElementAt(0), new { Id = "Awesome", Version = new Version("0.1") });
             AssertPackageResultsEqual(result.ElementAt(1), new { Id = "Awesome", Version = new Version("0.4") });
             AssertPackageResultsEqual(result.ElementAt(2), new { Id = "AwesomeToo", Version = new Version("0.4") });
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackagePerformsExactMatchesIfExactMatchIsSpecified() {
             // Arrange 
             var packages = new[] { 
@@ -214,12 +214,12 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(2, result.Count());
+            Assert.Equal(2, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "Awesome", Version = new Version("0.1") });
             AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new Version("0.4") });
         }
 
-        [TestMethod]
+        [Fact]
         public void FindPackagePerformsExactMatchesIfExactMatchIsSpecifiedAndSourceNameIsUsed() {
             // Arrange 
             var packages = new[] { 
@@ -239,7 +239,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(2, result.Count());
+            Assert.Equal(2, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "Awesome", Version = new Version("0.1") });
             AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new Version("0.4") });
         }
@@ -254,8 +254,8 @@ namespace NuGet.PowerShell.Commands.Test {
                 b = (b as PSObject).BaseObject;
             }
 
-            Assert.AreEqual(a.Id, b.Id);
-            Assert.AreEqual(a.Version, b.Version);
+            Assert.Equal(a.Id, b.Id);
+            Assert.Equal(a.Version, b.Version);
         }
 
         private static FindPackageCommand BuildCmdlet(bool isSolutionOpen = true, IEnumerable<IPackage> packages = null) {

@@ -1,17 +1,17 @@
 using System;
 using System.Management.Automation;
 using EnvDTE;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
+using Xunit;
 
 namespace NuGet.PowerShell.Commands.Test {
-    [TestClass]
+    
     public class UpdatePackageCommandTest {
-        [TestMethod]
+        [Fact]
         public void UpdatePackageCmdletThrowsWhenSolutionIsClosed() {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -23,7 +23,7 @@ namespace NuGet.PowerShell.Commands.Test {
                 "The current environment doesn't have a solution open.");
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageCmdletUsesPackageManangerWithSourceIfSpecified() {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -45,10 +45,10 @@ namespace NuGet.PowerShell.Commands.Test {
             cmdlet.Execute();
 
             // Assert
-            Assert.AreSame(sourceVsPackageManager, cmdlet.PackageManager);
+            Assert.Same(sourceVsPackageManager, cmdlet.PackageManager);
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageCmdletPassesParametersCorrectlyWhenIdAndVersionAreSpecified() {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
@@ -67,11 +67,11 @@ namespace NuGet.PowerShell.Commands.Test {
             cmdlet.Execute();
 
             // Assert
-            Assert.AreEqual("my-id", vsPackageManager.PackageId);
-            Assert.AreEqual(new Version("2.8"), vsPackageManager.Version);
+            Assert.Equal("my-id", vsPackageManager.PackageId);
+            Assert.Equal(new Version("2.8"), vsPackageManager.Version);
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageCmdletPassesIgnoreDependencySwitchCorrectly() {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
@@ -90,12 +90,12 @@ namespace NuGet.PowerShell.Commands.Test {
             cmdlet.Execute();
 
             // Assert
-            Assert.AreEqual("my-id", vsPackageManager.PackageId);
-            Assert.AreEqual(new Version("2.8"), vsPackageManager.Version);
-            Assert.IsTrue(vsPackageManager.UpdateDependencies);
+            Assert.Equal("my-id", vsPackageManager.PackageId);
+            Assert.Equal(new Version("2.8"), vsPackageManager.Version);
+            Assert.True(vsPackageManager.UpdateDependencies);
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageCmdletPassesIgnoreDependencySwitchCorrectlyWhenPresent() {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
@@ -115,12 +115,12 @@ namespace NuGet.PowerShell.Commands.Test {
             cmdlet.Execute();
 
             // Assert
-            Assert.AreEqual("my-id", vsPackageManager.PackageId);
-            Assert.AreEqual(new Version("2.8"), vsPackageManager.Version);
-            Assert.IsFalse(vsPackageManager.UpdateDependencies);
+            Assert.Equal("my-id", vsPackageManager.PackageId);
+            Assert.Equal(new Version("2.8"), vsPackageManager.Version);
+            Assert.False(vsPackageManager.UpdateDependencies);
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageCmdletInvokeProductUpdateCheckWhenSourceIsHttpAddress() {
             // Arrange
             string source = "http://bing.com";
@@ -149,7 +149,7 @@ namespace NuGet.PowerShell.Commands.Test {
             productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Once());
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageCmdletInvokeProductUpdateCheckWhenSourceIsHttpAddressAndSourceIsSpecified() {
             // Arrange
             string source = "http://bing.com";
@@ -177,7 +177,7 @@ namespace NuGet.PowerShell.Commands.Test {
             productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Once());
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageCmdletDoNotInvokeProductUpdateCheckWhenSourceIsNotHttpAddress() {
             // Arrange
             string source = "ftp://bing.com";

@@ -1,20 +1,20 @@
 using System;
 using System.Linq;
 using System.Management.Automation;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
+using Xunit;
 
 namespace NuGet.PowerShell.Commands.Test {
 
     using PackageUtility = NuGet.Test.PackageUtility;
 
-    [TestClass]
+    
     public class GetPackageCommandTest {
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsAllInstalledPackagesWhenNoParametersAreSpecified() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -23,12 +23,12 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults().Cast<dynamic>();
 
             // Assert
-            Assert.AreEqual(2, result.Count());
+            Assert.Equal(2, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new Version("0.9") });
             AssertPackageResultsEqual(result.Last(), new { Id = "P2", Version = new Version("1.0") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsCorrectInstalledPackagesWhenNoParametersAreSpecifiedAndSkipAndTakeAreSpecified() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -39,11 +39,11 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults().Cast<dynamic>();
 
             // Assert
-            Assert.AreEqual(1, result.Count());
+            Assert.Equal(1, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "P2", Version = new Version("1.0") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsFilteredPackagesFromInstalledRepo() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -53,11 +53,11 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(1, result.Count());
+            Assert.Equal(1, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "P2", Version = new Version("1.0") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsAllPackagesFromActiveRepositoryWhenRemoteIsPresent() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -67,14 +67,14 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(4, result.Count());
+            Assert.Equal(4, result.Count());
             AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P0", Version = new Version("1.1") });
             AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P1", Version = new Version("1.1") });
             AssertPackageResultsEqual(result.ElementAt(2), new { Id = "P2", Version = new Version("1.2") });
             AssertPackageResultsEqual(result.ElementAt(3), new { Id = "P3", Version = new Version("1.0") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsCorrectPackagesFromActiveRepositoryWhenRemoteAndSkipAndFirstIsPresent() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -86,12 +86,12 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(2, result.Count());
+            Assert.Equal(2, result.Count());
             AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P1", Version = new Version("1.1") });
             AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P2", Version = new Version("1.2") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsFilteredPackagesFromActiveRepositoryWhenRemoteIsPresent() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -102,11 +102,11 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(1, result.Count());
+            Assert.Equal(1, result.Count());
             AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P1", Version = new Version("1.1") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoFilterIsSpecified() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -117,12 +117,12 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(2, result.Count());
+            Assert.Equal(2, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new Version("1.4") });
             AssertPackageResultsEqual(result.Last(), new { Id = "P6", Version = new Version("1.0") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoFilterIsSpecifiedAndSourceNameIsUsed() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -133,12 +133,12 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(2, result.Count());
+            Assert.Equal(2, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new Version("1.4") });
             AssertPackageResultsEqual(result.Last(), new { Id = "P6", Version = new Version("1.0") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoFilterIsSpecifiedAndRemoteIsNotSpecified() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -148,12 +148,12 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(2, result.Count());
+            Assert.Equal(2, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new Version("1.4") });
             AssertPackageResultsEqual(result.Last(), new { Id = "P6", Version = new Version("1.0") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsFilteredPackagesFromSpecifiedSourceWhenNoFilterIsSpecified() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -165,11 +165,11 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(1, result.Count());
+            Assert.Equal(1, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "P6", Version = new Version("1.0") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageThrowsWhenSolutionIsClosedAndRemoteIsNotPresent() {
             // Arrange 
             var cmdlet = BuildCmdlet(isSolutionOpen: false);
@@ -179,7 +179,7 @@ namespace NuGet.PowerShell.Commands.Test {
                 "The current environment doesn't have a solution open.");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsPackagesFromRemoteWhenSolutionIsClosedAndRemoteIsPresent() {
             // Arrange 
             var cmdlet = BuildCmdlet(isSolutionOpen: false);
@@ -189,14 +189,14 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(4, result.Count());
+            Assert.Equal(4, result.Count());
             AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P0", Version = new Version("1.1") });
             AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P1", Version = new Version("1.1") });
             AssertPackageResultsEqual(result.ElementAt(2), new { Id = "P2", Version = new Version("1.2") });
             AssertPackageResultsEqual(result.ElementAt(3), new { Id = "P3", Version = new Version("1.0") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsPackagesFromRemoteWhenSolutionIsClosedAndSourceIsPresent() {
             // Arrange 
             var cmdlet = BuildCmdlet(isSolutionOpen: false);
@@ -206,12 +206,12 @@ namespace NuGet.PowerShell.Commands.Test {
             var result = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(2, result.Count());
+            Assert.Equal(2, result.Count());
             AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new Version("1.4") });
             AssertPackageResultsEqual(result.Last(), new { Id = "P6", Version = new Version("1.0") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageThrowsWhenSolutionIsClosedAndUpdatesIsPresent() {
             // Arrange 
             var cmdlet = BuildCmdlet(isSolutionOpen: false);
@@ -222,7 +222,7 @@ namespace NuGet.PowerShell.Commands.Test {
                 "The current environment doesn't have a solution open.");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageThrowsWhenSolutionIsClosedUpdatesAndSourceArePresent() {
             // Arrange 
             var cmdlet = BuildCmdlet(isSolutionOpen: false);
@@ -234,7 +234,7 @@ namespace NuGet.PowerShell.Commands.Test {
                 "The current environment doesn't have a solution open.");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsListOfPackagesWithUpdates() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -244,12 +244,12 @@ namespace NuGet.PowerShell.Commands.Test {
             var packages = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(packages.Count(), 2);
+            Assert.Equal(packages.Count(), 2);
             AssertPackageResultsEqual(packages.First(), new { Id = "P1", Version = new Version("1.1") });
             AssertPackageResultsEqual(packages.Last(), new { Id = "P2", Version = new Version("1.2") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsFilteredListOfPackagesWithUpdates() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -260,11 +260,11 @@ namespace NuGet.PowerShell.Commands.Test {
             var packages = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(packages.Count(), 1);
+            Assert.Equal(packages.Count(), 1);
             AssertPackageResultsEqual(packages.First(), new { Id = "P1", Version = new Version("1.1") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsAllPackagesFromSourceWithUpdates() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -275,11 +275,11 @@ namespace NuGet.PowerShell.Commands.Test {
             var packages = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(packages.Count(), 1);
+            Assert.Equal(packages.Count(), 1);
             AssertPackageResultsEqual(packages.First(), new { Id = "P1", Version = new Version("1.4") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageReturnsFilteredPackagesFromSourceWithUpdates() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -291,11 +291,11 @@ namespace NuGet.PowerShell.Commands.Test {
             var packages = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(packages.Count(), 1);
+            Assert.Equal(packages.Count(), 1);
             AssertPackageResultsEqual(packages.First(), new { Id = "P1", Version = new Version("1.4") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesThrowsWhenNoSourceIsProvidedAndRemoteIsPresent() {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -309,7 +309,7 @@ namespace NuGet.PowerShell.Commands.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(), "Unable to retrieve package list because no source was specified.");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesReturnsLatestPackageVersionByDefault() {
             // Arrange
             var source = "http://multi-source";
@@ -321,13 +321,13 @@ namespace NuGet.PowerShell.Commands.Test {
             var packages = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(packages.Count(), 3);
+            Assert.Equal(packages.Count(), 3);
             AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "jQuery", Version = new Version("1.52") });
             AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "NHibernate", Version = new Version("1.13") });
             AssertPackageResultsEqual(packages.ElementAt(2), new { Id = "TestPack", Version = new Version("0.7") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesDoesNotCollapseVersionIfAllVersionsIsPresent() {
             // Arrange
             var source = "http://multi-source";
@@ -341,7 +341,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var packages = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(packages.Count(), 6);
+            Assert.Equal(packages.Count(), 6);
             AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "jQuery", Version = new Version("1.44") });
             AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "jQuery", Version = new Version("1.51") });
             AssertPackageResultsEqual(packages.ElementAt(2), new { Id = "jQuery", Version = new Version("1.52") });
@@ -350,7 +350,7 @@ namespace NuGet.PowerShell.Commands.Test {
             AssertPackageResultsEqual(packages.ElementAt(5), new { Id = "TestPack", Version = new Version("0.7") });
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackagesReturnsLatestUpdateVersions() {
             // Arrange
             var source = "http://multi-source";
@@ -363,12 +363,12 @@ namespace NuGet.PowerShell.Commands.Test {
             var packages = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(packages.Count(), 2);
+            Assert.Equal(packages.Count(), 2);
             AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "jQuery", Version = new Version("1.52") });
             AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "TestPack", Version = new Version("0.7") });
         }
 
-        [TestMethod]
+        [Fact]
         public void RecentPackagesCollapsesVersion() {
             // Arrange
             var cmdlet = BuildCmdlet(repositoryFactory: GetDefaultRepositoryFactory(), recentPackageRepository: GetRepositoryWithMultiplePackageVersions());
@@ -378,13 +378,13 @@ namespace NuGet.PowerShell.Commands.Test {
             var packages = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(packages.Count(), 3);
+            Assert.Equal(packages.Count(), 3);
             AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "jQuery", Version = new Version("1.52") });
             AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "NHibernate", Version = new Version("1.13") });
             AssertPackageResultsEqual(packages.ElementAt(2), new { Id = "TestPack", Version = new Version("0.7") });
         }
 
-        [TestMethod]
+        [Fact]
         public void RecentPackagesFiltersAndCollapsesVersion() {
             // Arrange
             var cmdlet = BuildCmdlet(repositoryFactory: GetDefaultRepositoryFactory(), recentPackageRepository: GetRepositoryWithMultiplePackageVersions());
@@ -395,12 +395,12 @@ namespace NuGet.PowerShell.Commands.Test {
             var packages = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(packages.Count(), 2);
+            Assert.Equal(packages.Count(), 2);
             AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "jQuery", Version = new Version("1.52") });
             AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "NHibernate", Version = new Version("1.13") });
         }
 
-        [TestMethod]
+        [Fact]
         public void RecentPackagesShowsAllPackageVersionsIfSwitchIsPresent() {
             // Arrange
             var cmdlet = BuildCmdlet(repositoryFactory: GetDefaultRepositoryFactory(), recentPackageRepository: GetRepositoryWithMultiplePackageVersions());
@@ -411,7 +411,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var packages = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(packages.Count(), 6);
+            Assert.Equal(packages.Count(), 6);
             AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "jQuery", Version = new Version("1.44") });
             AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "jQuery", Version = new Version("1.51") });
             AssertPackageResultsEqual(packages.ElementAt(2), new { Id = "jQuery", Version = new Version("1.52") });
@@ -420,7 +420,7 @@ namespace NuGet.PowerShell.Commands.Test {
             AssertPackageResultsEqual(packages.ElementAt(5), new { Id = "TestPack", Version = new Version("0.7") });
         }
 
-        [TestMethod]
+        [Fact]
         public void RecentPackagesWithShowAllVersionsAppliesFirstAndSkipFilters() {
             // Arrange
             var cmdlet = BuildCmdlet(repositoryFactory: GetDefaultRepositoryFactory(), recentPackageRepository: GetRepositoryWithMultiplePackageVersions());
@@ -433,12 +433,12 @@ namespace NuGet.PowerShell.Commands.Test {
             var packages = cmdlet.GetResults<dynamic>();
 
             // Assert
-            Assert.AreEqual(packages.Count(), 2);
+            Assert.Equal(packages.Count(), 2);
             AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "jQuery", Version = new Version("1.52") });
             AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "NHibernate", Version = new Version("1.1") });
         }
 
-        [TestMethod]
+        [Fact]
         public void TestRecentSwitchWorkCorrectly() {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
@@ -457,13 +457,13 @@ namespace NuGet.PowerShell.Commands.Test {
             var packages = cmdlet.GetResults().OfType<PSObject>().Select(p => (IPackage)p.BaseObject).ToList();
 
             // Assert
-            Assert.AreEqual(3, packages.Count);
-            Assert.AreSame(packageA, packages[0]);
-            Assert.AreSame(packageB, packages[1]);
-            Assert.AreSame(packageC, packages[2]);
+            Assert.Equal(3, packages.Count);
+            Assert.Same(packageA, packages[0]);
+            Assert.Same(packageB, packages[1]);
+            Assert.Same(packageC, packages[2]);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageInvokeProductUpdateCheckWhenSourceIsHttp() {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
@@ -478,7 +478,7 @@ namespace NuGet.PowerShell.Commands.Test {
             productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Once());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageInvokeProductUpdateCheckWhenActiveSourceIsHttp() {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
@@ -492,7 +492,7 @@ namespace NuGet.PowerShell.Commands.Test {
             productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Once());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageDoNotInvokeProductUpdateCheckWhenActiveSourceIsNotHttp() {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
@@ -506,7 +506,7 @@ namespace NuGet.PowerShell.Commands.Test {
             productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Never());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageInvokeProductUpdateCheckWhenSourceIsNotHttp() {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
@@ -521,7 +521,7 @@ namespace NuGet.PowerShell.Commands.Test {
             productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Never());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageDoNotInvokeProductUpdateCheckWhenGetLocalPackages() {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
@@ -534,7 +534,7 @@ namespace NuGet.PowerShell.Commands.Test {
             productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Never());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageDoNotInvokeProductUpdateCheckWhenGetUpdatesPackages() {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
@@ -548,7 +548,7 @@ namespace NuGet.PowerShell.Commands.Test {
             productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Never());
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageDoNotInvokeProductUpdateCheckWhenGetRecentPackages() {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
@@ -571,8 +571,8 @@ namespace NuGet.PowerShell.Commands.Test {
                 b = (b as PSObject).BaseObject;
             }
 
-            Assert.AreEqual(a.Id, b.Id);
-            Assert.AreEqual(a.Version, b.Version);
+            Assert.Equal(a.Id, b.Id);
+            Assert.Equal(a.Version, b.Version);
         }
 
         private static GetPackageCommand BuildCmdlet(

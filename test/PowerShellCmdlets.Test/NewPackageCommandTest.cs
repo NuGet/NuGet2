@@ -2,16 +2,16 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
+using Xunit;
 
 namespace NuGet.PowerShell.Commands.Test {
-    [TestClass]
+    
     public class NewPackageCommandTest {
-        [TestMethod]
+        [Fact]
         public void NewPackageCmdletThrowsIfNoSolutionIsClosed() {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -22,7 +22,7 @@ namespace NuGet.PowerShell.Commands.Test {
             ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.GetResults(), "The current environment doesn't have a solution open.");
         }
 
-        [TestMethod]
+        [Fact]
         public void NewPackageCmdletThrowsIfProjectSpecifiedDoesNotExist() {
             // Arrange
             var project = "does-not-exist";
@@ -37,7 +37,7 @@ namespace NuGet.PowerShell.Commands.Test {
                 String.Format("Project '{0}' is not found.", project));
         }
 
-        [TestMethod]
+        [Fact]
         public void NewPackageCmdletThrowsIfSpecFileDoesNotExistAndSpecParameterDoesNotExist() {
             // Arrange
             var projectName = "test";
@@ -53,7 +53,7 @@ namespace NuGet.PowerShell.Commands.Test {
                 "Unable to locate a .nuspec file in the specified project.");
         }
 
-        [TestMethod]
+        [Fact]
         public void NewPackageCmdletThrowsIfMultipleSpecFilesExistAndSpecParameterDoesNotExist() {
             // Arrange
             var projectName = "test";
@@ -69,7 +69,7 @@ namespace NuGet.PowerShell.Commands.Test {
                 "More than one .nuspec files were found.");
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveExcludedFilesRemovesManifestAndOtherNuGetageFiles() {
             // Arrange
             var packageBuilder = new PackageBuilder();
@@ -81,10 +81,10 @@ namespace NuGet.PowerShell.Commands.Test {
             NewPackageCommand.RemoveExludedFiles(packageBuilder);
 
             // Assert
-            Assert.AreEqual(@"\baz\1.cs", packageBuilder.Files.Single().Path);
+            Assert.Equal(@"\baz\1.cs", packageBuilder.Files.Single().Path);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageFilePathAppendsProjectPathWhenPathIsNotRooted() {
             // Arrange
             var projectPath = @"X:\projects\my-project\";
@@ -96,10 +96,10 @@ namespace NuGet.PowerShell.Commands.Test {
             var packagePath = NewPackageCommand.GetPackageFilePath(outputFile, projectPath, id, version);
 
             // Assert
-            Assert.AreEqual(packagePath, Path.Combine(projectPath, outputFile));
+            Assert.Equal(packagePath, Path.Combine(projectPath, outputFile));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageFilePathUsesOutputFileWhenPathIsRooted() {
             // Arrange
             var projectPath = @"X:\projects\my-project\";
@@ -111,10 +111,10 @@ namespace NuGet.PowerShell.Commands.Test {
             var packagePath = NewPackageCommand.GetPackageFilePath(outputFile, projectPath, id, version);
 
             // Assert
-            Assert.AreEqual(packagePath, outputFile);
+            Assert.Equal(packagePath, outputFile);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPackageFilePathUsesIdAndVersionWhenOutputFileIsNull() {
             // Arrange
             var projectPath = @"X:\projects\my-project\";
@@ -126,7 +126,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var packagePath = NewPackageCommand.GetPackageFilePath(outputFile, projectPath, id, version);
 
             // Assert
-            Assert.AreEqual(packagePath, Path.Combine(projectPath, id + "." + version + ".nupkg"));
+            Assert.Equal(packagePath, Path.Combine(projectPath, id + "." + version + ".nupkg"));
         }
 
     }
