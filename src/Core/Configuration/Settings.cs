@@ -8,7 +8,7 @@ using NuGet.Resources;
 
 namespace NuGet {
     public class Settings : ISettings {
-        private static Settings _defaultSettings;
+        private static Lazy<Settings> _defaultSettings = new Lazy<Settings>(CreateDefaultSettings);
         private readonly XDocument _config;
         private readonly IFileSystem _fileSystem;
 
@@ -20,25 +20,24 @@ namespace NuGet {
             _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, Constants.SettingsFileName);
         }
 
+        private static Settings CreateDefaultSettings() {
+            IFileSystem fileSystem;
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            if (String.IsNullOrEmpty(appDataPath)) {
+                // If there is no AppData folder, use a null file system to make the Settings object do nothing
+                fileSystem = NullFileSystem.Instance;
+            }
+            else {
+                string defaultSettingsPath = Path.Combine(appDataPath, "NuGet");
+                fileSystem = new PhysicalFileSystem(defaultSettingsPath);
+            }
+
+            return new Settings(fileSystem);
+        }
+        
         public static Settings DefaultSettings {
             get {
-                // Deliberately skipping lock, as running this more than once should be harmless
-                if (_defaultSettings == null) {
-                    IFileSystem fileSystem;
-                    string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                    if (String.IsNullOrEmpty(appDataPath)) {
-                        // If there is no AppData folder, use a null file system to make the Settings object do nothing
-                        fileSystem = NullFileSystem.Instance;
-                    }
-                    else {
-                        string defaultSettingsPath = Path.Combine(appDataPath, "NuGet");
-                        fileSystem = new PhysicalFileSystem(defaultSettingsPath);
-                    }
-
-                    _defaultSettings = new Settings(fileSystem);
-                }
-
-                return _defaultSettings;
+                return _defaultSettings.Value;
             }
         }
 
