@@ -29,7 +29,14 @@ namespace NuGet {
             IFileSystem fileSystem;
             try {
                 string path = getCachePath();
-                fileSystem = new PhysicalFileSystem(path);
+                if (String.IsNullOrEmpty(path)) {
+                    // If we don't get a path, use a null file system to make the cache object do nothing
+                    // This can happen when there is no LocalApplicationData folder
+                    fileSystem = NullFileSystem.Instance;
+                }
+                else {
+                    fileSystem = new PhysicalFileSystem(path);
+                }
             }
             catch (SecurityException) {
                 // We are unable to access the special directory. Create a machine cache using an empty file system
@@ -88,7 +95,12 @@ namespace NuGet {
         /// The cache path is %LocalAppData%\NuGet\Cache 
         /// </summary>
         private static string GetCachePath() {
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NuGet", "Cache");
+            string localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            if (String.IsNullOrEmpty(localAppDataPath)) {
+                return null;
+            }
+
+            return Path.Combine(localAppDataPath, "NuGet", "Cache");
         }
     }
 }
