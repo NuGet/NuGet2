@@ -9,6 +9,12 @@ namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "spec", "SpecCommandDescription", MaxArgs = 1,
             UsageSummaryResourceName = "SpecCommandUsageSummary", UsageExampleResourceName = "SpecCommandUsageExamples")]
     public class SpecCommand : Command {
+        internal static readonly string SampleProjectUrl = "http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE";
+        internal static readonly string SampleLicenseUrl = "http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE";
+        internal static readonly string SampleIconUrl = "http://ICON_URL_HERE_OR_DELETE_THIS_LINE";
+        internal static readonly string SampleTags = "Tag1 Tag2";
+        internal static readonly ManifestDependency SampleManifestDependency = new ManifestDependency { Id = "SampleDependency", Version = "1.0" };
+
         [Option(typeof(NuGetResources), "SpecCommandAssemblyPathDescription")]
         public string AssemblyPath {
             get;
@@ -60,13 +66,13 @@ namespace NuGet.Commands {
                     manifest.Metadata.Authors = Environment.UserName;
                 }
                 manifest.Metadata.Dependencies = new List<ManifestDependency>();
-                manifest.Metadata.Dependencies.Add(new ManifestDependency { Id = "SampleDependency", Version = "1.0" });
+                manifest.Metadata.Dependencies.Add(SampleManifestDependency);
             }
 
-            manifest.Metadata.ProjectUrl = "http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE";
-            manifest.Metadata.LicenseUrl = "http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE";
-            manifest.Metadata.IconUrl = "http://ICON_URL_HERE_OR_DELETE_THIS_LINE";
-            manifest.Metadata.Tags = "Tag1 Tag2";
+            manifest.Metadata.ProjectUrl = SampleProjectUrl;
+            manifest.Metadata.LicenseUrl = SampleLicenseUrl;
+            manifest.Metadata.IconUrl = SampleIconUrl;
+            manifest.Metadata.Tags = SampleTags;
             manifest.Metadata.Copyright = "Copyright " + DateTime.Now.Year;
             string nuspecFile = fileName + Constants.ManifestExtension;
 

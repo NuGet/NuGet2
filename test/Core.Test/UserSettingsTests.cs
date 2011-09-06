@@ -11,7 +11,7 @@ namespace NuGet.Test {
         [TestMethod]
         public void UserSettings_CallingCtroWithNullFileSystemWithThrowException() {
             // Act & Assert
-            ExceptionAssert.Throws<ArgumentNullException>(() => new UserSettings(null));
+            ExceptionAssert.Throws<ArgumentNullException>(() => new Settings(null));
 
         }
 
@@ -31,7 +31,7 @@ namespace NuGet.Test {
             mockFileSystem.Setup(m => m.FileExists(configFile)).Returns(true);
 
             // Act
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Assert 
             mockFileSystem.Verify(x => x.OpenFile(configFile), Times.Once(), "File was not read");
@@ -41,7 +41,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingGetValuesWithNullSectionWillThrowException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var settings = new UserSettings(mockFileSystem.Object);
+            var settings = new Settings(mockFileSystem.Object);
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.GetValues(null));
         }
@@ -50,7 +50,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingGetValueWithNullSectionWillThrowException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var settings = new UserSettings(mockFileSystem.Object);
+            var settings = new Settings(mockFileSystem.Object);
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.GetValue(null, "SomeKey"));
         }
@@ -59,7 +59,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingGetValueWithNullKeyWillThrowException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var settings = new UserSettings(mockFileSystem.Object);
+            var settings = new Settings(mockFileSystem.Object);
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.GetValue("SomeSection", null));
         }
@@ -73,7 +73,7 @@ namespace NuGet.Test {
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
 
             // Act & Assert
-            ExceptionAssert.Throws<System.Xml.XmlException>(() => new UserSettings(mockFileSystem.Object));
+            ExceptionAssert.Throws<System.Xml.XmlException>(() => new Settings(mockFileSystem.Object));
 
         }
 
@@ -85,7 +85,7 @@ namespace NuGet.Test {
             mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
             string config = @"<configuration></configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             var result = settings.GetValues("DoesNotExisit");
@@ -108,7 +108,7 @@ namespace NuGet.Test {
     </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             var result = settings.GetValues("SectionName");
@@ -132,7 +132,7 @@ namespace NuGet.Test {
     </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             var result = settings.GetValues("NotTheSectionName");
@@ -155,7 +155,7 @@ namespace NuGet.Test {
     </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             var result = settings.GetValue("NotTheSectionName", "key1");
@@ -178,7 +178,7 @@ namespace NuGet.Test {
     </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             var result = settings.GetValue("SectionName", "key3");
@@ -201,7 +201,7 @@ namespace NuGet.Test {
     </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             var result = settings.GetValues("SectionName");
@@ -227,7 +227,7 @@ namespace NuGet.Test {
     </SectionNameTwo>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             var result1 = settings.GetValue("SectionName", "key1");
@@ -242,7 +242,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingSetValueWithEmptySectionNameThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var settings = new UserSettings(mockFileSystem.Object);
+            var settings = new Settings(mockFileSystem.Object);
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.SetValue("", "SomeKey", "SomeValue"));
         }
@@ -251,7 +251,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingSetValueWithEmptyKeyThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var settings = new UserSettings(mockFileSystem.Object);
+            var settings = new Settings(mockFileSystem.Object);
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.SetValue("SomeKey", "", "SomeValue"));
         }
@@ -274,7 +274,7 @@ namespace NuGet.Test {
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             settings.SetValue("NewSectionName", "key", "value");
@@ -309,7 +309,7 @@ namespace NuGet.Test {
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             settings.SetValue("SectionName", "keyTwo", "valueTwo");
@@ -342,7 +342,7 @@ namespace NuGet.Test {
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             settings.SetValue("SectionName", "key", "NewValue");
@@ -361,7 +361,7 @@ namespace NuGet.Test {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
             var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("key", "value") };
-            var settings = new UserSettings(mockFileSystem.Object);
+            var settings = new Settings(mockFileSystem.Object);
 
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.SetValues("", values));
@@ -371,7 +371,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingSetValuesWithNullValuesThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var settings = new UserSettings(mockFileSystem.Object);
+            var settings = new Settings(mockFileSystem.Object);
             // Act & Assert
             ExceptionAssert.Throws<ArgumentNullException>(() => settings.SetValues("Section", null));
         }
@@ -381,7 +381,7 @@ namespace NuGet.Test {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
             var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("", "value") };
-            var settings = new UserSettings(mockFileSystem.Object);
+            var settings = new Settings(mockFileSystem.Object);
 
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.SetValues("Section", values));
@@ -406,7 +406,7 @@ namespace NuGet.Test {
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
             var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("key", "value") };
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             settings.SetValues("NewSectionName", values);
@@ -442,7 +442,7 @@ namespace NuGet.Test {
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
             var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("keyTwo", "valueTwo") };
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             settings.SetValues("SectionName", values);
@@ -476,7 +476,7 @@ namespace NuGet.Test {
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
             var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("key", "NewValue") };
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             settings.SetValues("SectionName", values);
@@ -510,7 +510,7 @@ namespace NuGet.Test {
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
             var values = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>("key1", "Value1"), 
                                                                     new KeyValuePair<string, string>("key2", "Value2") };
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             settings.SetValues("SectionName", values);
@@ -530,7 +530,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingDeleteValueWithEmptyKeyThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var settings = new UserSettings(mockFileSystem.Object);
+            var settings = new Settings(mockFileSystem.Object);
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.DeleteValue("SomeSection", ""));
         }
@@ -539,7 +539,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingDeleteValueWithEmptySectionThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var settings = new UserSettings(mockFileSystem.Object);
+            var settings = new Settings(mockFileSystem.Object);
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.DeleteValue("", "SomeKey"));
         }
@@ -557,7 +557,7 @@ namespace NuGet.Test {
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
             // Act & Assert
             Assert.IsFalse(settings.DeleteValue("SectionDoesNotExists", "SomeKey"));
         }
@@ -575,7 +575,7 @@ namespace NuGet.Test {
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
             // Act & Assert
             Assert.IsFalse(settings.DeleteValue("SectionName", "KeyDoesNotExist"));
         }
@@ -602,7 +602,7 @@ namespace NuGet.Test {
   </SectionName2>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
 
 
@@ -623,7 +623,7 @@ namespace NuGet.Test {
         public void UserSettings_CallingDeleteSectionWithEmptySectionThrowsException() {
             // Arrange 
             var mockFileSystem = new Mock<IFileSystem>();
-            var settings = new UserSettings(mockFileSystem.Object);
+            var settings = new Settings(mockFileSystem.Object);
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.DeleteSection(""));
         }
@@ -641,7 +641,7 @@ namespace NuGet.Test {
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
             // Act & Assert
             Assert.IsFalse(settings.DeleteSection("SectionDoesNotExists"));
         }
@@ -668,7 +668,7 @@ namespace NuGet.Test {
   </SectionName2>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act & Assert
             Assert.IsTrue(settings.DeleteSection("SectionName"));
@@ -700,7 +700,7 @@ namespace NuGet.Test {
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             settings.SetEncryptedValue("SectionName", "key", "NewValue");
@@ -720,7 +720,7 @@ namespace NuGet.Test {
                 stream.CopyTo(ms);
                 ms.Seek(0, SeekOrigin.Begin);
             });
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
             settings.SetEncryptedValue("SectionName", "key", "value");
 
             // Act
@@ -743,7 +743,7 @@ namespace NuGet.Test {
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             var result = settings.GetDecryptedValue("SectionName", "key");
@@ -765,7 +765,7 @@ namespace NuGet.Test {
   </SectionName>
 </configuration>";
             mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            UserSettings settings = new UserSettings(mockFileSystem.Object);
+            Settings settings = new Settings(mockFileSystem.Object);
 
             // Act
             var result = settings.GetDecryptedValue("SectionName", "NoKeyByThatName");

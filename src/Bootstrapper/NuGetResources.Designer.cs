@@ -61,20 +61,29 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please provide credentials for: {0}.
-        /// </summary>
-        internal static string Credentials_ConsolePromptMessage {
-            get {
-                return ResourceManager.GetString("Credentials_ConsolePromptMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Password: .
         /// </summary>
         internal static string Credentials_Password {
             get {
                 return ResourceManager.GetString("Credentials_Password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please provide proxcy credentials:.
+        /// </summary>
+        internal static string Credentials_ProxyCredentials {
+            get {
+                return ResourceManager.GetString("Credentials_ProxyCredentials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please provide credentials for {0}:.
+        /// </summary>
+        internal static string Credentials_RequestCredentials {
+            get {
+                return ResourceManager.GetString("Credentials_RequestCredentials", resourceCulture);
             }
         }
         

@@ -31,12 +31,12 @@ namespace NuGet {
                     }
                 }
                 else if (previousStatusCode == HttpStatusCode.ProxyAuthenticationRequired) {
-                    request.Proxy.Credentials = credentialProvider.GetCredentials(request);
+                    request.Proxy.Credentials = credentialProvider.GetCredentials(request, CredentialType.ProxyCredentials);
 
                     continueIfFailed = request.Proxy.Credentials != null;
                 }
                 else if (previousStatusCode == HttpStatusCode.Unauthorized) {
-                    request.Credentials = credentialProvider.GetCredentials(request);
+                    request.Credentials = credentialProvider.GetCredentials(request, CredentialType.RequestCredentials);
 
                     continueIfFailed = request.Credentials != null;
                 }

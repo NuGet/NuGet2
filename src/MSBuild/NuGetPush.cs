@@ -24,7 +24,7 @@ namespace NuGet.MSBuild {
         public string ApiKey { get; set; }
 
         public NuGetPush()
-            : this(new PackageServerFactory(), new ZipPackageFactory(), new FileSystemProvider(), Settings.UserSettings) {
+            : this(new PackageServerFactory(), new ZipPackageFactory(), new FileSystemProvider(), Settings.DefaultSettings) {
         }
 
         public NuGetPush(IPackageServerFactory packageServerFactory, IPackageFactory zipPackageFactory, IFileSystemProvider fileSystemProvider, ISettings settings) {

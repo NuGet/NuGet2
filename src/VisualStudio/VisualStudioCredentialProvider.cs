@@ -22,10 +22,7 @@ namespace NuGet.VisualStudio {
         /// Returns an ICredentials instance that the consumer would need in order
         /// to properly authenticate to the given Uri.
         /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="proxy"></param>
-        /// <returns></returns>
-        public ICredentials GetCredentials(Uri uri, IWebProxy proxy) {
+        public ICredentials GetCredentials(Uri uri, IWebProxy proxy, CredentialType credentialType) {
             if (uri == null) {
                 throw new ArgumentNullException("uri");
             }
@@ -66,17 +63,12 @@ namespace NuGet.VisualStudio {
         /// Uri based on the type of request that credentials are needed for before we prompt for credentials
         /// because the VsWebProxy uses that static property as a way to display the Uri that we are connecting to.
         /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="originalProxy"></param>
         protected abstract void InitializeCredentialProxy(Uri uri, IWebProxy originalProxy);
 
         /// <summary>
         /// This method is responsible for retrieving either cached credentials
         /// or forcing a prompt if we need the user to give us new credentials.
         /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="forcePrompt"></param>
-        /// <returns></returns>
         private ICredentials PromptForCredentials(Uri uri) {
             __VsWebProxyState oldState = __VsWebProxyState.VsWebProxyState_PromptForCredentials;
 

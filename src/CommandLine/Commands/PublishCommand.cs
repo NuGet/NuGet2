@@ -12,9 +12,12 @@ namespace NuGet.Commands {
 
         public IPackageSourceProvider SourceProvider { get; private set; }
 
+        public ISettings Settings { get; private set; }
+
         [ImportingConstructor]
-        public PublishCommand(IPackageSourceProvider packageSourceProvider) {
+        public PublishCommand(IPackageSourceProvider packageSourceProvider, ISettings settings) {
             SourceProvider = packageSourceProvider;
+            Settings = settings;
         }
 
         public override void ExecuteCommand() {
@@ -33,7 +36,7 @@ namespace NuGet.Commands {
             var gallery = new PackageServer(source, CommandLineConstants.UserAgent);
 
             //If the user did not pass an API Key look in the config file
-            string apiKey = String.IsNullOrEmpty(userSetApiKey) ? CommandLineUtility.GetApiKey(Settings.UserSettings, source) : userSetApiKey;
+            string apiKey = String.IsNullOrEmpty(userSetApiKey) ? CommandLineUtility.GetApiKey(Settings, source) : userSetApiKey;
             string displayName = CommandLineUtility.GetSourceDisplayName(Source);
 
             Console.WriteLine(NuGetResources.PublishCommandPublishingPackage, packageId, packageVersion, displayName);
