@@ -24,7 +24,7 @@ namespace NuGet.MSBuild {
             : this(new PackageManagerFactory(),
                    new FileSystemProvider(),
                    PackageRepositoryFactory.Default,
-                   PackageSourceProvider.Default) {
+                   new PackageSourceProvider(Settings.DefaultSettings)) {
         }
 
         public NuGetFetch(IPackageManagerFactory packageManagerFactory,
