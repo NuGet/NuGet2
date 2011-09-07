@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Utilities;
 using EditorDefGuidList = Microsoft.VisualStudio.Editor.DefGuidList;
 using IOleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+using NuGet.VisualStudio;
 
 namespace NuGetConsole.Implementation.Console {
     internal interface IPrivateWpfConsole : IWpfConsole {
@@ -18,6 +19,10 @@ namespace NuGetConsole.Implementation.Console {
         SnapshotSpan? EndInputLine(bool isEcho);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Microsoft.Maintainability", 
+        "CA1506:AvoidExcessiveClassCoupling",
+        Justification="We don't have resources to refactor this class.")]
     internal class WpfConsole : ObjectWithFactory<WpfConsoleService>, IDisposable {
         private readonly IPrivateConsoleStatus _consoleStatus;
         private IVsTextBuffer _bufferAdapter;
@@ -520,8 +525,8 @@ namespace NuGetConsole.Implementation.Console {
                         try {
                             docData.Close();
                         }
-                        catch {
-                            // swallow possible COM exceptions
+                        catch (Exception exception) {
+                            ExceptionHelper.WriteToActivityLog(exception);
                         }
 
                         _bufferAdapter = null;
