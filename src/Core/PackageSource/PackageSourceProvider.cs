@@ -6,6 +6,7 @@ using System.Linq;
 namespace NuGet {
     public class PackageSourceProvider : IPackageSourceProvider {
         internal const string FileSettingsSectionName = "packageSources";
+        private static readonly PackageSourceProvider _defaultSourceProvider = new PackageSourceProvider(Settings.DefaultSettings);
         private readonly ISettings _settingsManager;
         private readonly IEnumerable<PackageSource> _defaultPackageSources;
 
@@ -24,6 +25,10 @@ namespace NuGet {
             }
             _settingsManager = settingsManager;
             _defaultPackageSources = defaultSources ?? Enumerable.Empty<PackageSource>();
+        }
+
+        public static IPackageSourceProvider Default {
+            get { return _defaultSourceProvider; }
         }
 
         /// <summary>
