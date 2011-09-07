@@ -59,7 +59,8 @@ namespace NuGet.Dialog.Providers {
 
         public override IEnumerable<string> SupportedFrameworks {
             get {
-                yield return GetTargetFramework(_project);
+                string targetFramework = GetTargetFramework(_project);
+                return targetFramework != null ? new[] { targetFramework } : new string[0];
             }
         }
 
