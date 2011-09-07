@@ -20,6 +20,9 @@ namespace NuGet.Test {
 
             // Assert
             Assert.IsTrue(result.Any());
+            Assert.AreEqual("Remove sample nuspec values.", result.First().Title);
+            Assert.AreEqual("The value \"http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE\" for ProjectUrl is a sample value and should be removed.", result.First().Description);
+            Assert.AreEqual("Remove this value from the nuspec and rebuild your package.", result.First().Solution);
         }
 
         [TestMethod]
@@ -34,6 +37,9 @@ namespace NuGet.Test {
 
             // Assert
             Assert.IsTrue(result.Any());
+            Assert.AreEqual("Remove sample nuspec values.", result.First().Title);
+            Assert.AreEqual("The value \"http://ICON_URL_HERE_OR_DELETE_THIS_LINE\" for IconUrl is a sample value and should be removed.", result.First().Description);
+            Assert.AreEqual("Remove this value from the nuspec and rebuild your package.", result.First().Solution);
         }
 
         [TestMethod]
@@ -48,6 +54,9 @@ namespace NuGet.Test {
 
             // Assert
             Assert.IsTrue(result.Any());
+            Assert.AreEqual("Remove sample nuspec values.", result.First().Title);
+            Assert.AreEqual("The value \"http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE\" for LicenseUrl is a sample value and should be removed.", result.First().Description);
+            Assert.AreEqual("Remove this value from the nuspec and rebuild your package.", result.First().Solution);
         }
 
         [TestMethod]
@@ -62,6 +71,43 @@ namespace NuGet.Test {
 
             // Assert
             Assert.IsTrue(result.Any());
+            Assert.AreEqual("Remove sample nuspec values.", result.First().Title);
+            Assert.AreEqual("The value \"Tag1 Tag2\" for Tags is a sample value and should be removed.", result.First().Description);
+            Assert.AreEqual("Remove this value from the nuspec and rebuild your package.", result.First().Solution);
+        }
+
+        [TestMethod]
+        public void RuleReturnsIssueIfReleaseNotesIsSampleValue() {
+            // Arrange
+            var package = new Mock<IPackage>();
+            package.Setup(c => c.ReleaseNotes).Returns("Summary of changes made in this release of the package.");
+            var rule = new DefaultManifestValuesRule();
+
+            // Act
+            var result = rule.Validate(package.Object);
+
+            // Assert
+            Assert.IsTrue(result.Any());
+            Assert.AreEqual("Remove sample nuspec values.", result.First().Title);
+            Assert.AreEqual("The value \"Summary of changes made in this release of the package.\" for ReleaseNotes is a sample value and should be removed.", result.First().Description);
+            Assert.AreEqual("Remove this value from the nuspec and rebuild your package.", result.First().Solution);
+        }
+
+        [TestMethod]
+        public void RuleReturnsIssueIfDescriptionIsSampleValue() {
+            // Arrange
+            var package = new Mock<IPackage>();
+            package.Setup(c => c.Description).Returns("Package description");
+            var rule = new DefaultManifestValuesRule();
+
+            // Act
+            var result = rule.Validate(package.Object);
+
+            // Assert
+            Assert.IsTrue(result.Any());
+            Assert.AreEqual("Remove sample nuspec values.", result.First().Title);
+            Assert.AreEqual("The value \"Package description\" for Description is a sample value and should be removed.", result.First().Description);
+            Assert.AreEqual("Remove this value from the nuspec and rebuild your package.", result.First().Solution);
         }
 
         [TestMethod]

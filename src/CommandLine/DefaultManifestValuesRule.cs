@@ -19,6 +19,12 @@ namespace NuGet {
             if (SpecCommand.SampleTags.Equals(package.Tags, StringComparison.Ordinal)) {
                 yield return CreateIssueFor("Tags", SpecCommand.SampleTags);
             }
+            if (SpecCommand.SampleReleaseNotes.Equals(package.ReleaseNotes, StringComparison.Ordinal)) {
+                yield return CreateIssueFor("ReleaseNotes", SpecCommand.SampleReleaseNotes);
+            }
+            if (SpecCommand.SampleDescription.Equals(package.Description, StringComparison.Ordinal)) {
+                yield return CreateIssueFor("Description", SpecCommand.SampleDescription);
+            }
 
             var dependency = package.Dependencies.FirstOrDefault();
             if (dependency != null && dependency.Id.Equals(SpecCommand.SampleManifestDependency.Id, StringComparison.Ordinal)
