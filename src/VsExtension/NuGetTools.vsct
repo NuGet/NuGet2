@@ -79,6 +79,17 @@
           </Strings>
       </Button>
 
+        <Button guid="guidDialogCmdSet" id="cmdidAddPackagesForSolution" priority="0x0200" type="Button">
+            <Parent guid="guidReferenceContext" id="cmdAddReferenceGroup" />
+            <Icon guid="guidToolbarImages" id="bmpAddNuGetPackage" />
+            <CommandFlag>DefaultInvisible</CommandFlag>
+            <CommandFlag>DynamicVisibility</CommandFlag>
+            <Strings>
+                <CommandName>cmdidAddPackagesForSolution</CommandName>
+                <ButtonText>Manage &amp;NuGet Packages for Solution...</ButtonText>
+            </Strings>
+        </Button>
+
         <Button guid="guidToolsGroup" id="idGeneralSettings" priority="0xF200" type="Button">
             <Parent guid="guidToolsGroup" id="idToolsGroup"/>
             <Icon guid="guidToolbarImages" id="bmpSourceSettings" />
@@ -88,7 +99,7 @@
             </Strings>
         </Button>
 
-        <Button guid="guidToolsGroup" id="cmdIdVisualizer" priority="0xF400" type="Button">
+        <Button guid="guidToolsGroup" id="cmdIdVisualizer" priority="0xF150" type="Button">
           <Parent guid="guidToolsGroup" id="idToolsGroup" />
           <Icon guid="guidToolbarImages" id="bmpVisualizer" />
           <CommandFlag>DefaultInvisible</CommandFlag>
@@ -126,6 +137,7 @@
 
   <VisibilityConstraints>
     <VisibilityItem guid="guidDialogCmdSet" id="cmdidAddPackages" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
+    <VisibilityItem guid="guidDialogCmdSet" id="cmdidAddPackagesForSolution" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
     <VisibilityItem guid="guidToolsGroup" id="cmdIdVisualizer" context="UICONTEXT_SolutionExists" />
   </VisibilityConstraints>
 
@@ -138,7 +150,7 @@
       <Parent guid="guidToolsGroup" id="idToolsGroup"/>
     </CommandPlacement>
 
-    <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
+    <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackagesForSolution" priority="0xF100">
       <Parent guid="guidToolsGroup" id="idToolsGroup"/>
     </CommandPlacement>
       <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
@@ -194,6 +206,7 @@
 
     <GuidSymbol name="guidDialogCmdSet" value="{25fd982b-8cae-4cbd-a440-e03ffccde106}">
         <IDSymbol name="cmdidAddPackages" value="0x0100" />
+        <IDSymbol name="cmdidAddPackagesForSolution" value="0x0200" />
     </GuidSymbol>
     <GuidSymbol name="guidVenusCmdId" value="{C7547851-4E3A-4E5B-9173-FA6E9C8BD82C}" >
         <IDSymbol name="IDG_VENUS_CTX_REFERENCE" value="27" />

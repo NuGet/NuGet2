@@ -86,7 +86,6 @@ namespace NuGet.Tools {
             _dte.ItemOperations.OpenFile(outputFile);
         }
 
-        /// <summary>
         private void ShowManageLibraryPackageDialog(object sender, EventArgs e) {
             if (_vsMonitorSelection.GetIsSolutionNodeSelected()) {
                 ShowManageLibraryPackageDialog(null);
@@ -115,14 +114,17 @@ namespace NuGet.Tools {
             }
         }
 
+        private void ShowManageLibraryPackageForSolutionDialog(object sender, EventArgs e) {
+            ShowManageLibraryPackageDialog(null);
+        }
+
         private static void ShowManageLibraryPackageDialog(Project project) {
             DialogWindow window = new VS10ManagePackageDialog(project);
             try {
                 window.ShowModal();
             }
             catch (TargetInvocationException exception) {
-                MessageHelper.ShowErrorMessage(exception,
-                                               NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
+                MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
                 ExceptionHelper.WriteToActivityLog(exception);
             }
         }
@@ -130,6 +132,13 @@ namespace NuGet.Tools {
         private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args) {
             OleMenuCommand command = (OleMenuCommand)sender;
             command.Visible = !IsIDEInDebuggingOrBuildingContext() && (_vsMonitorSelection.GetIsSolutionNodeSelected() || HasActiveLoadedSupportedProject);
+            // disable the dialog menu if the console is busy executing a command;
+            command.Enabled = !_consoleStatus.IsBusy;
+        }
+
+        private void BeforeQueryStatusForAddPackageForSolutionDialog(object sender, EventArgs args) {
+            OleMenuCommand command = (OleMenuCommand)sender;
+            command.Visible = !IsIDEInDebuggingOrBuildingContext();
             // disable the dialog menu if the console is busy executing a command;
             command.Enabled = !_consoleStatus.IsBusy;
         }
@@ -207,10 +216,15 @@ namespace NuGet.Tools {
                 MenuCommand menuToolWin = new MenuCommand(ShowToolWindow, toolwndCommandID);
                 mcs.AddCommand(menuToolWin);
 
-                // menu command for opening Add Package Reference dialog
-                CommandID addPackageDialogCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, (int)PkgCmdIDList.cmdidAddPackageDialog);
-                OleMenuCommand addPackageDialogCommand = new OleMenuCommand(ShowManageLibraryPackageDialog, null, BeforeQueryStatusForAddPackageDialog, addPackageDialogCommandID);
-                mcs.AddCommand(addPackageDialogCommand);
+                // menu command for opening Manage NuGet packages dialog
+                CommandID managePackageDialogCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, (int)PkgCmdIDList.cmdidAddPackageDialog);
+                OleMenuCommand managePackageDialogCommand = new OleMenuCommand(ShowManageLibraryPackageDialog, null, BeforeQueryStatusForAddPackageDialog, managePackageDialogCommandID);
+                mcs.AddCommand(managePackageDialogCommand);
+
+                // menu command for opening "Manage NuGet packages for solution" dialog
+                CommandID managePackageForSolutionDialogCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, (int)PkgCmdIDList.cmdidAddPackageDialogForSolution);
+                OleMenuCommand managePackageForSolutionDialogCommand = new OleMenuCommand(ShowManageLibraryPackageForSolutionDialog, null, BeforeQueryStatusForAddPackageForSolutionDialog, managePackageForSolutionDialogCommandID);
+                mcs.AddCommand(managePackageForSolutionDialogCommand);
 
                 // menu command for opening Package Source settings options page
                 CommandID settingsCommandID = new CommandID(GuidList.guidNuGetConsoleCmdSet, (int)PkgCmdIDList.cmdidSourceSettings);
