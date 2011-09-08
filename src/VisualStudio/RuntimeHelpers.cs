@@ -9,16 +9,17 @@ namespace NuGet.VisualStudio {
     public static class RuntimeHelpers {
         public static IEnumerable<AssemblyBinding> AddBindingRedirects(Project project, AppDomain domain) {
             if (project.SupportsBindingRedirects()) {
-                return AddBindingRedirects(project, domain, new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase));
+                // When we're adding binding redirects explicitly, don't check the project type
+                return AddBindingRedirects(project, domain, new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase), checkProjectType: false);
             }
 
             return Enumerable.Empty<AssemblyBinding>();
         }
 
-        private static IEnumerable<AssemblyBinding> AddBindingRedirects(Project project, AppDomain domain, IDictionary<string, HashSet<string>> projectAssembliesCache) {
+        private static IEnumerable<AssemblyBinding> AddBindingRedirects(Project project, AppDomain domain, IDictionary<string, HashSet<string>> projectAssembliesCache, bool checkProjectType = true) {
             var redirects = Enumerable.Empty<AssemblyBinding>();
             // Only add binding redirects to projects that aren't class libraries
-            if (project.SupportsConfig()) {
+            if (!checkProjectType || project.SupportsConfig()) {
                 // Create a project system
                 IFileSystem fileSystem = VsProjectSystemFactory.CreateProjectSystem(project);
 

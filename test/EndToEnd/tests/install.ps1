@@ -650,26 +650,6 @@ function Test-SimpleBindingRedirectsWebsite {
     Assert-BindingRedirect $a web.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
 }
 
-function Test-AddingBindingRedirectsNoOpOnClassLibrary {
-    param(
-        $context
-    )
-    # Arrange
-    $a = New-ClassLibrary
-
-    # Act
-    $a | Install-Package E -Source $context.RepositoryPath
-
-    # Assert
-    Assert-Package $a E;
-    Assert-Null (Get-ProjectItem $a app.config)
-    Assert-Null (Get-ProjectItem $a web.config)
-
-    $a | Add-BindingRedirect
-    Assert-Null (Get-ProjectItem $a app.config)
-    Assert-Null (Get-ProjectItem $a web.config)
-}
-
 function Test-BindingRedirectInstallLargeProject {
     param(
         $context
@@ -897,7 +877,7 @@ function Test-InstallPackageIntoSecondProjectWithIncompatibleAssembliesDoesNotRo
 
     # Act
     $p1 | Install-Package NuGet.Core    
-    Assert-Throws { $p2 | Install-Package NuGet.Core } "Could not install package 'NuGet.Core 1.4.20615.9012'. You are trying to install this package into a project that targets 'Silverlight,Version=v4.0,Profile=WindowsPhone', but the package does not contain any assembly references that are compatible with that framework. For more information, contact the package author."
+    Assert-Throws { $p2 | Install-Package NuGet.Core -Version 1.4.20615.9012 } "Could not install package 'NuGet.Core 1.4.20615.9012'. You are trying to install this package into a project that targets 'Silverlight,Version=v4.0,Profile=WindowsPhone', but the package does not contain any assembly references that are compatible with that framework. For more information, contact the package author."
 
     # Assert    
     Assert-Package $p1 NuGet.Core
@@ -1350,4 +1330,25 @@ function Test-InstallPackageWithValuesFromPipe {
 
     # Assert
     Assert-Package $p Microsoft-web-helpers
+}
+
+function Test-ExplicitCallToAddBindingRedirectAddsBindingRedirectsToClassLibrary {
+    # Arrange
+    $a = New-ClassLibrary
+      
+    # Act
+    $a | Install-Package E -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $a E
+    Assert-Reference $a E 1.0.0.0
+    Assert-Null (Get-ProjectItem $a app.config)
+
+    $redirect = $a | Add-BindingRedirect
+
+    Assert-AreEqual F $redirect.Name
+    Assert-AreEqual '0.0.0.0-1.0.5.0' $redirect.OldVersion
+    Assert-AreEqual '1.0.5.0' $redirect.NewVersion
+    Assert-NotNull (Get-ProjectItem $a app.config)
+    Assert-BindingRedirect $a app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
 }
