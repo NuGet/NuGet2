@@ -41,6 +41,8 @@ namespace NuGetConsole.Implementation.Console {
         private IVsTextView _view;
         private IVsStatusbar _vsStatusBar;
         private IWpfTextView _wpfTextView;
+        private bool _startedWritingOutput;
+        private List<Tuple<string, Color?, Color?>> _outputCache = new List<Tuple<string, Color?, Color?>>();
 
         public WpfConsole(
             WpfConsoleService factory,
@@ -104,6 +106,9 @@ namespace NuGetConsole.Implementation.Console {
         private IVsTextBuffer VsTextBuffer {
             get {
                 if (_bufferAdapter == null) {
+                    // make sure we only create text editor after StartWritingOutput() is called.
+                    Debug.Assert(_startedWritingOutput);
+
                     _bufferAdapter = Factory.VsEditorAdaptersFactoryService.CreateVsTextBufferAdapter(
                         OleServiceProvider, ContentType);
                     _bufferAdapter.InitializeContent(string.Empty, 0);
@@ -116,6 +121,8 @@ namespace NuGetConsole.Implementation.Console {
         public IWpfTextView WpfTextView {
             get {
                 if (_wpfTextView == null) {
+                    // make sure we only create text editor after StartWritingOutput() is called.
+                    Debug.Assert(_startedWritingOutput);
                     _wpfTextView = Factory.VsEditorAdaptersFactoryService.GetWpfTextView(VsTextView);
                 }
 
@@ -293,6 +300,10 @@ namespace NuGetConsole.Implementation.Console {
         public event EventHandler ConsoleCleared;
 
         private void SetReadOnlyRegionType(ReadOnlyRegionType value) {
+            if (!_startedWritingOutput) {
+                return;
+            }
+
             ITextBuffer buffer = WpfTextView.TextBuffer;
             ITextSnapshot snapshot = buffer.CurrentSnapshot;
 
@@ -331,6 +342,10 @@ namespace NuGetConsole.Implementation.Console {
         }
 
         public void BeginInputLine() {
+            if (!_startedWritingOutput) {
+                return;
+            }
+
             if (_inputLineStart == null) {
                 SetReadOnlyRegionType(ReadOnlyRegionType.BeginAndBody);
                 _inputLineStart = WpfTextView.TextSnapshot.GetEnd();
@@ -338,6 +353,10 @@ namespace NuGetConsole.Implementation.Console {
         }
 
         public SnapshotSpan? EndInputLine(bool isEcho = false) {
+            if (!_startedWritingOutput) {
+                return null;
+            }
+
             // Reset history navigation upon end of a command line
             ResetNavigateHistory();
 
@@ -361,6 +380,11 @@ namespace NuGetConsole.Implementation.Console {
         }
 
         public void Write(string text) {
+            if (!_startedWritingOutput) {
+                _outputCache.Add(Tuple.Create<string, Color?, Color?>(text, null, null));
+                return;
+            }
+
             if (_inputLineStart == null) // If not in input mode, need unlock to enable output
             {
                 SetReadOnlyRegionType(ReadOnlyRegionType.None);
@@ -406,6 +430,11 @@ namespace NuGetConsole.Implementation.Console {
         }
 
         public void Write(string text, Color? foreground, Color? background) {
+            if (!_startedWritingOutput) {
+                _outputCache.Add(Tuple.Create(text, foreground, background));
+                return;
+            }
+
             int begin = WpfTextView.TextSnapshot.Length;
             Write(text);
             int end = WpfTextView.TextSnapshot.Length;
@@ -414,6 +443,20 @@ namespace NuGetConsole.Implementation.Console {
                 var span = new SnapshotSpan(WpfTextView.TextSnapshot, begin, end - begin);
                 NewColorSpan.Raise(this, Tuple.Create(span, foreground, background));
             }
+        }
+
+        public void StartWritingOutput() {
+            _startedWritingOutput = true;
+            FlushOutput();
+        }
+
+        private void FlushOutput() {
+            foreach (var tuple in _outputCache) {
+                Write(tuple.Item1, tuple.Item2, tuple.Item3);
+            }
+
+            _outputCache.Clear();
+            _outputCache = null;
         }
 
         private void ResetNavigateHistory() {
@@ -490,6 +533,11 @@ namespace NuGetConsole.Implementation.Console {
         }
 
         public void Clear() {
+            if (!_startedWritingOutput) {
+                _outputCache.Clear();
+                return;
+            }
+
             SetReadOnlyRegionType(ReadOnlyRegionType.None);
 
             ITextBuffer textBuffer = WpfTextView.TextBuffer;
@@ -595,7 +643,7 @@ namespace NuGetConsole.Implementation.Console {
             }
 
             public void WriteBackspace() {
-                Invoke(() => _impl.WriteBackspace());
+                Invoke(_impl.WriteBackspace);
             }
 
             public void Write(string text, Color? foreground, Color? background) {
@@ -624,6 +672,10 @@ namespace NuGetConsole.Implementation.Console {
 
             public bool ShowDisclaimerHeader {
                 get { return true; }
+            }
+
+            public void StartWritingOutput() {
+                Invoke(_impl.StartWritingOutput);
             }
 
             #endregion

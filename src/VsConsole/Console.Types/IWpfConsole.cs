@@ -16,6 +16,14 @@ namespace NuGetConsole {
         void SetExecutionMode(bool isExecuting);
 
         /// <summary>
+        /// Tells the Wpf console to start writing output.
+        /// Before this method is called, the console shouldn't write out the output.
+        /// If Write() is called before this method, the console should cache the
+        /// text. Then when this method is finally called, it will flush all the cached text.
+        /// </summary>
+        void StartWritingOutput();
+
+        /// <summary>
         /// Get the editor's IVsTextView for further direct interaction.
         /// </summary>
         object VsTextView { get; }

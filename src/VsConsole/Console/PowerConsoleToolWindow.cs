@@ -124,8 +124,6 @@ namespace NuGetConsole.Implementation {
             };
             timer.Start();
 
-
-
             base.OnToolWindowCreated();
         }
 
@@ -306,6 +304,9 @@ namespace NuGetConsole.Implementation {
 
         private void LoadConsoleEditor() {
             if (WpfConsole != null) {
+                // allow the console to start writing output
+                WpfConsole.StartWritingOutput();
+
                 FrameworkElement consolePane = WpfConsole.Content as FrameworkElement;
                 ConsoleParentPane.AddConsoleEditor(consolePane);
 
