@@ -99,6 +99,87 @@ namespace NuGet.Test {
         }
 
         [Fact]
+        public void InstallPackageAddPackageToCache1() {
+            // Arrange
+            var cacheRepository = new Mock<IPackageRepository>();
+            var projectSystem = new MockProjectSystem();
+            var sourceRepository = new MockPackageRepository();
+            var packageManager = new PackageManager(
+                sourceRepository, 
+                new DefaultPackagePathResolver(projectSystem), 
+                projectSystem, 
+                new MockPackageRepository(), 
+                cacheRepository: cacheRepository.Object);
+
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
+                                                             new[] { "contentFile", @"sub\contentFile" },
+                                                             new[] { @"lib\reference.dll" },
+                                                             new[] { @"readme.txt" });
+
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            packageManager.InstallPackage("A");
+
+            // Assert
+            cacheRepository.Verify(p => p.AddPackage(packageA), Times.Once());
+        }
+
+        [TestMethod]
+        public void InstallPackageAddPackageToCache2() {
+            // Arrange
+            var cacheRepository = new Mock<IPackageRepository>();
+            var projectSystem = new MockProjectSystem();
+            var sourceRepository = new MockPackageRepository();
+            var packageManager = new PackageManager(
+                sourceRepository,
+                new DefaultPackagePathResolver(projectSystem),
+                projectSystem,
+                new MockPackageRepository(),
+                cacheRepository: cacheRepository.Object);
+
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
+                                                             new[] { "contentFile", @"sub\contentFile" },
+                                                             new[] { @"lib\reference.dll" },
+                                                             new[] { @"readme.txt" });
+
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            packageManager.InstallPackage("A", new Version("1.0"));
+
+            // Assert
+            cacheRepository.Verify(p => p.AddPackage(packageA), Times.Once());
+        }
+
+        [TestMethod]
+        public void InstallPackageAddPackageToCache3() {
+            // Arrange
+            var cacheRepository = new Mock<IPackageRepository>();
+            var projectSystem = new MockProjectSystem();
+            var sourceRepository = new MockPackageRepository();
+            var packageManager = new PackageManager(
+                sourceRepository,
+                new DefaultPackagePathResolver(projectSystem),
+                projectSystem,
+                new MockPackageRepository(),
+                cacheRepository: cacheRepository.Object);
+
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
+                                                             new[] { "contentFile", @"sub\contentFile" },
+                                                             new[] { @"lib\reference.dll" },
+                                                             new[] { @"readme.txt" });
+
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            packageManager.InstallPackage("A", new Version("1.0"), ignoreDependencies: true);
+
+            // Assert
+            cacheRepository.Verify(p => p.AddPackage(packageA), Times.Once());
+        }
+
+        [TestMethod]
         public void InstallPackageAddsAllFilesToFileSystem() {
             // Arrange
             var projectSystem = new MockProjectSystem();
@@ -230,6 +311,33 @@ namespace NuGet.Test {
         }
 
         [Fact]
+        public void UpdatePackageAddNewPackageToCache() {
+            // Arrange
+            var cacheRepository = new Mock<IPackageRepository>();
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            PackageManager packageManager = new PackageManager(
+                sourceRepository, 
+                new DefaultPackagePathResolver(projectSystem), 
+                projectSystem, 
+                localRepository,
+                cacheRepository: cacheRepository.Object);
+
+            IPackage A10 = PackageUtility.CreatePackage("A", "1.0");
+            IPackage A20 = PackageUtility.CreatePackage("A", "2.0");
+            localRepository.Add(A10);
+            sourceRepository.Add(A20);
+
+            // Act
+            packageManager.UpdatePackage("A", updateDependencies: true);
+
+            // Assert
+            cacheRepository.Verify(p => p.AddPackage(A20), Times.Once());
+            cacheRepository.Verify(p => p.AddPackage(A10), Times.Never());
+        }
+
+        [TestMethod]
         public void UpdatePackageThrowsIfPackageNotInstalled() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -262,9 +370,17 @@ namespace NuGet.Test {
             Assert.True(localRepository.Exists("A", new Version("1.0")));
         }
 
+        [TestCleanup]
+        public void CleanUp() {
+            MachineCache.Default.Clear();
+        }
+        
         private PackageManager CreatePackageManager() {
             var projectSystem = new MockProjectSystem();
-            return new PackageManager(new MockPackageRepository(), new DefaultPackagePathResolver(projectSystem), projectSystem);
+            return new PackageManager(
+                new MockPackageRepository(), 
+                new DefaultPackagePathResolver(projectSystem), 
+                projectSystem);
         }
 
     }

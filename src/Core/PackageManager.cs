@@ -7,6 +7,7 @@ using NuGet.Resources;
 namespace NuGet {
     public class PackageManager : IPackageManager {
         private ILogger _logger;
+        private readonly IPackageRepository _cacheRepository;
 
         private event EventHandler<PackageOperationEventArgs> _packageInstalling;
         private event EventHandler<PackageOperationEventArgs> _packageInstalled;
@@ -21,7 +22,16 @@ namespace NuGet {
             this(sourceRepository, pathResolver, fileSystem, new LocalPackageRepository(pathResolver, fileSystem)) {
         }
 
-        public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem, IPackageRepository localRepository) {
+        public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem, IPackageRepository localRepository) :
+            this(sourceRepository, pathResolver, fileSystem, localRepository, MachineCache.Default) {
+        }
+
+        public PackageManager(
+            IPackageRepository sourceRepository, 
+            IPackagePathResolver pathResolver, 
+            IFileSystem fileSystem, 
+            IPackageRepository localRepository,
+            IPackageRepository cacheRepository) {
             if (sourceRepository == null) {
                 throw new ArgumentNullException("sourceRepository");
             }
@@ -34,11 +44,12 @@ namespace NuGet {
             if (localRepository == null) {
                 throw new ArgumentNullException("localRepository");
             }
-
+            
             SourceRepository = sourceRepository;
             PathResolver = pathResolver;
             FileSystem = fileSystem;
             LocalRepository = localRepository;
+            _cacheRepository = cacheRepository;
         }
 
         public event EventHandler<PackageOperationEventArgs> PackageInstalled {
@@ -125,6 +136,10 @@ namespace NuGet {
                                                SourceRepository,
                                                Logger,
                                                ignoreDependencies));
+
+            if (_cacheRepository != null) {
+                _cacheRepository.AddPackage(package);
+            }
         }
 
         private void Execute(IPackage package, IPackageOperationResolver resolver) {
@@ -322,6 +337,10 @@ namespace NuGet {
                                                 new DependentsWalker(LocalRepository),
                                                 Logger,
                                                 updateDependencies));
+
+            if (_cacheRepository != null) {
+                _cacheRepository.AddPackage(newPackage);
+            }
         }
     }
 }
