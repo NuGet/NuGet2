@@ -1,16 +1,15 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test.Mocks;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
     public class ProgramTest {
         public TestContext TestContext { get; set; }
 
-        [TestMethod]
+        [Fact]
         public void RemoveOldFileDeletesNuGetFileWithExtensionOldIfExist() {
             // Arrange
             var oldFilePath = Path.Combine(TestContext.TestDeploymentDir, "NuGet.exe.old");
@@ -21,10 +20,10 @@ namespace NuGet.Test {
             Program.RemoveOldFile(fileSystem);
 
             // Assert
-            Assert.AreEqual(oldFilePath, fileSystem.Deleted.SingleOrDefault());
+            Assert.Equal(oldFilePath, fileSystem.Deleted.SingleOrDefault());
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveOldFileDoesNotDeletesOldNuGetFileIfItDoesNotExistUnderWorkingDirectory() {
             // Arrange
             var oldFilePath = Path.Combine(TestContext.TestDeploymentDir, "foo", "NuGet.exe.old");
@@ -35,10 +34,10 @@ namespace NuGet.Test {
             Program.RemoveOldFile(fileSystem);
 
             // Assert
-            Assert.IsFalse(fileSystem.Deleted.Any());
+            Assert.False(fileSystem.Deleted.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void RemoveOldDoesNotThrow() {
             // Arrange
             var oldFilePath = Path.Combine(TestContext.TestDeploymentDir, "foo", "NuGet.exe.old");
@@ -51,10 +50,10 @@ namespace NuGet.Test {
 
             // Assert
             // If we've got this far, we have not thrown.
-            Assert.IsTrue(true);
+            Assert.True(true);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetCommandLineSettingsReturnsSettingsFromLocalFileIfExists() {
             // Arrange
             var fileContent = @"<?xml version=""1.0""?><configuration><fooSection><add key=""barValue"" value=""qux"" /></fooSection></configuration>";
@@ -66,7 +65,7 @@ namespace NuGet.Test {
             var value = settings.GetValue("fooSection", "barValue");
 
             // Assert
-            Assert.AreEqual("qux", value);
+            Assert.Equal("qux", value);
         }
     }
 }

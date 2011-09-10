@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
     public class DefaultSpecValuesRuleTest {
-        [TestMethod]
+        [Fact]
         public void RuleReturnsIssueIfProjectUrlIsSampleValue() {
             // Arrange
             var package = new Mock<IPackage>();
@@ -19,10 +17,10 @@ namespace NuGet.Test {
             var result = rule.Validate(package.Object);
 
             // Assert
-            Assert.IsTrue(result.Any());
+            Assert.True(result.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void RuleReturnsIssueIfIconUrlIsSampleValue() {
             // Arrange
             var package = new Mock<IPackage>();
@@ -33,10 +31,10 @@ namespace NuGet.Test {
             var result = rule.Validate(package.Object);
 
             // Assert
-            Assert.IsTrue(result.Any());
+            Assert.True(result.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void RuleReturnsIssueIfLicenseUrlIsSampleValue() {
             // Arrange
             var package = new Mock<IPackage>();
@@ -47,10 +45,10 @@ namespace NuGet.Test {
             var result = rule.Validate(package.Object);
 
             // Assert
-            Assert.IsTrue(result.Any());
+            Assert.True(result.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void RuleReturnsIssueIfTagIsSampleValue() {
             // Arrange
             var package = new Mock<IPackage>();
@@ -61,10 +59,10 @@ namespace NuGet.Test {
             var result = rule.Validate(package.Object);
 
             // Assert
-            Assert.IsTrue(result.Any());
+            Assert.True(result.Any());
         }
 
-        [TestMethod]
+        [Fact]
         public void RuleReturnsIssueIfDependencyIsSampleValue() {
             // Arrange
             var package = new Mock<IPackage>();
@@ -78,7 +76,7 @@ namespace NuGet.Test {
             var result = rule.Validate(package.Object);
 
             // Assert
-            Assert.IsTrue(result.Any());
+            Assert.True(result.Any());
         }
     }
 }

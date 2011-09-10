@@ -115,9 +115,6 @@ namespace NuGet.VisualStudio.Test {
             for (int i = 0; i < 10; i++) {
                 AssertPackageSource(values[i + 1], "name" + i, "source" + i);
             }
-
-            Assert.Null(registrySettingsManager.ActivePackageSourceString);
-            Assert.Null(registrySettingsManager.PackageSourcesString);
         }
 
         [Fact]
@@ -137,8 +134,6 @@ namespace NuGet.VisualStudio.Test {
 
             var invalidActiveValue = userSettingsManager.GetValue(VsPackageSourceProvider.FileSettingsActiveSectionName, "invalidName");
             Assert.Null(invalidActiveValue);
-
-            Assert.Null(registrySettingsManager.ActivePackageSourceString);
         }
 
         [Fact]

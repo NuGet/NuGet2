@@ -1,7 +1,6 @@
 using Xunit;
 
 namespace NuGet.Test.NuGetCommandLine {
-    
     public class CommandAttributeTests {
         [Fact]
         public void GetDescription_ReturnsResourceIfTypeSet() {

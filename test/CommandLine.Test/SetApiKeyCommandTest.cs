@@ -1,18 +1,17 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
+﻿using Moq;
 using NuGet.Commands;
 using NuGet.Common;
+using Xunit;
 
 namespace NuGet.Test {
-    [TestClass]
     public class SetApiKeyCommandTest {
-        [TestMethod]
+        [Fact]
         public void SetApiKeyThrowsIfPackageSourceProviderIsNull() {
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(() => new SetApiKeyCommand(packageSourceProvider: null, settings: null), "packageSourceProvider");
         }
 
-        [TestMethod]
+        [Fact]
         public void SetApiKeyThrowsIfSettingsFileIsNull() {
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
@@ -21,7 +20,7 @@ namespace NuGet.Test {
             ExceptionAssert.ThrowsArgNull(() => new SetApiKeyCommand(packageSourceProvider.Object, settings: null), "settings");
         }
 
-        [TestMethod]
+        [Fact]
         public void SetApiKeyCommandUsesSettingsFile() {
             // Arrange
             var apiKey = "A";

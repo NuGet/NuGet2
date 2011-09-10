@@ -5,7 +5,6 @@ using System.Reflection;
 using Xunit;
 
 namespace NuGet.Test.NuGetCommandLine {
-    
     public class CommandManagerTests {
         [Fact]
         public void RegisterCommand_AddsCommandToDictionary() {

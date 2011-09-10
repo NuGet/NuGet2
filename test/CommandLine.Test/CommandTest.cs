@@ -1,8 +1,7 @@
-﻿using Xunit;
-using NuGet.Commands;
+﻿using NuGet.Commands;
+using Xunit;
 
 namespace NuGet.Test.NuGetCommandLine {
-    
     public class CommandTest {
         [Fact]
         public void GetCommandAttributes_ReturnsEmptyIfNoCommandAttributes() {

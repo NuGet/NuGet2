@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Xunit;
 using Moq;
 using NuGet.Commands;
+using Xunit;
 
 namespace NuGet.Test.NuGetCommandLine {
-    
     public class CommandLinePaserTests {
-
         [Fact]
         public void GetNextCommandLineItem_ReturnsNullWithNullInput() {
             // Act
