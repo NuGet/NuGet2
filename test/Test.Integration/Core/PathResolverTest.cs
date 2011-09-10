@@ -1071,12 +1071,9 @@ namespace NuGet.Test.Integration.PathResolver {
   </metadata><files><file src=""{0}"" target=""{1}"" /></files></package>", search, target).AsStream();
         }
 
-		//not as elegant as the mstest version as xUnit does not appear to give similar context about the "context" of the test being invoked
-        private string CreateFileSystem(params File[] files)
-        {
-			var testDir = Path.GetTempPath();
-        	var tempFileName = Path.GetRandomFileName();
-			string rootDir = Path.Combine(testDir, "PathResolverIntegrationTests", tempFileName);
+        //not as elegant as the mstest version as xUnit does not appear to give similar context about the "context" of the test being invoked
+        private string CreateFileSystem(params File[] files) {
+            string rootDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             new Dir(rootDir, files).Create();
             return rootDir;
         }

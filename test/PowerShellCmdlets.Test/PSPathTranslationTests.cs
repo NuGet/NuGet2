@@ -8,7 +8,6 @@ using System.Threading;
 using Microsoft.PowerShell.Commands;
 using Xunit;
 
-
 namespace NuGet.PowerShell.Commands.Test {
     // use a proxy here to save ourselves having to load the Cmdlets
     // assembly into the ps harness.
@@ -17,7 +16,7 @@ namespace NuGet.PowerShell.Commands.Test {
             return PSPathUtility.TryTranslatePSPath(session, psPath, out path, out exists, out errorMessage);
         }
     }
-    
+
     public class PSPathTranslationTests : IDisposable {
         private string _tempFilePath;
         private System.Management.Automation.PowerShell _ps;
@@ -39,32 +38,31 @@ namespace NuGet.PowerShell.Commands.Test {
               errorMessage = $errorMessage
             }}";
 
-    	public PSPathTranslationTests()
-    	{
-			// create temp file
-			_tempFilePath = Path.GetTempFileName();
+        public PSPathTranslationTests() {
+            // create temp file
+            _tempFilePath = Path.GetTempFileName();
 
-			// initialize 
-			var state = InitialSessionState.CreateDefault();
-			state.ThreadOptions = PSThreadOptions.UseCurrentThread;
-			state.ApartmentState = ApartmentState.STA;
-			_ps = System.Management.Automation.PowerShell.Create();
-			_ps.Runspace = RunspaceFactory.CreateRunspace(state);
-			_ps.Runspace.Open();
+            // initialize 
+            var state = InitialSessionState.CreateDefault();
+            state.ThreadOptions = PSThreadOptions.UseCurrentThread;
+            state.ApartmentState = ApartmentState.STA;
+            _ps = System.Management.Automation.PowerShell.Create();
+            _ps.Runspace = RunspaceFactory.CreateRunspace(state);
+            _ps.Runspace.Open();
 
-			// create a new PSDrive for translation tests
-			_ps.AddCommand("New-PSDrive")
-			   .AddParameter("Name", "mytemp")
-			   .AddParameter("PSProvider", FileSystemProvider.ProviderName)
-			   .AddParameter("Root", Path.GetTempPath());
-			_ps.Invoke();
-			Assert.True(_ps.Streams.Error.Count == 0, "Failed to create mytemp psdrive.");
+            // create a new PSDrive for translation tests
+            _ps.AddCommand("New-PSDrive")
+               .AddParameter("Name", "mytemp")
+               .AddParameter("PSProvider", FileSystemProvider.ProviderName)
+               .AddParameter("Root", Path.GetTempPath());
+            _ps.Invoke();
+            Assert.True(_ps.Streams.Error.Count == 0, "Failed to create mytemp psdrive.");
 
-			_ps.Streams.ClearStreams();
-			_ps.Commands.Clear();
-    	}
+            _ps.Streams.ClearStreams();
+            _ps.Commands.Clear();
+        }
 
-    	[Fact]
+        [Fact]
         public void TranslatePSPathThatShouldExist() {
 
             string psPath = "mytemp:\\" + Path.GetFileName(_tempFilePath);
@@ -78,7 +76,7 @@ namespace NuGet.PowerShell.Commands.Test {
             Assert.True(_ps.Streams.Error.Count == 0);
             Assert.True((bool)result["success"]);
             Assert.True((bool)result["exists"]);
-            Assert.True((string)result["path"] == _tempFilePath);
+            Assert.Equal(_tempFilePath, (string)result["path"], StringComparer.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -96,9 +94,9 @@ namespace NuGet.PowerShell.Commands.Test {
             Assert.True(_ps.Streams.Error.Count == 0);
             Assert.True((bool)result["success"]);
             Assert.False((bool)result["exists"]);
-            Assert.True((string)result["path"] == win32Path);
+            Assert.Equal(win32Path, (string)result["path"], StringComparer.OrdinalIgnoreCase);
         }
-       
+
         public void Dispose() {
             _ps.Dispose();
 

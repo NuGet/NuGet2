@@ -7,12 +7,10 @@ using Xunit;
 
 namespace NuGet.Test {
     public class ProgramTest {
-        public TestContext TestContext { get; set; }
-
         [Fact]
         public void RemoveOldFileDeletesNuGetFileWithExtensionOldIfExist() {
             // Arrange
-            var oldFilePath = Path.Combine(TestContext.TestDeploymentDir, "NuGet.exe.old");
+            var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "NuGet.exe.old");
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile(oldFilePath);
 
@@ -26,7 +24,7 @@ namespace NuGet.Test {
         [Fact]
         public void RemoveOldFileDoesNotDeletesOldNuGetFileIfItDoesNotExistUnderWorkingDirectory() {
             // Arrange
-            var oldFilePath = Path.Combine(TestContext.TestDeploymentDir, "foo", "NuGet.exe.old");
+            var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "foo", "NuGet.exe.old");
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile(oldFilePath);
 
@@ -40,7 +38,7 @@ namespace NuGet.Test {
         [Fact]
         public void RemoveOldDoesNotThrow() {
             // Arrange
-            var oldFilePath = Path.Combine(TestContext.TestDeploymentDir, "foo", "NuGet.exe.old");
+            var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "foo", "NuGet.exe.old");
             var fileSystem = new Mock<IFileSystem>(MockBehavior.Strict);
             fileSystem.Setup(c => c.FileExists(oldFilePath)).Returns(true);
             fileSystem.Setup(c => c.DeleteFile(oldFilePath)).Throws(new Exception("Can't touch this."));
