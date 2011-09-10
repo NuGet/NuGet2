@@ -68,7 +68,7 @@
         </RegexTransform>
     </ItemGroup>
     
-    <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyBootStrapperOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeMSBuild; BuildPackages; RunIntegrationTests">
+    <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyBootStrapperOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeMSBuild; BuildPackages">
     </Target>
     
     <Target Name="CheckFxCop">
@@ -186,9 +186,5 @@
         <Exec Command="&quot;$(NuGetExe)&quot; pack" WorkingDirectory="$(ExeDropDirectory)" />
         <Exec Command="&quot;$(NuGetExe)&quot; pack -o $(ServerDropDirectory) -Build -p Configuration=Release -Symbols -exclude **\NuGet.Core.*" WorkingDirectory="$(ServerBuildDirectory)" />
         <Exec Command="&quot;$(NuGetExe)&quot; pack -o $(NuGetCoreDropDirectory) -Build -Symbols" WorkingDirectory="$(NuGetCoreBuildDirectory)" />
-    </Target>
-    
-    <Target Name="RunIntegrationTests">
-        <MSBuild Projects="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" Targets="RunIntegrationTests" />
     </Target>
 </Project>

@@ -1,23 +1,9 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<UsingTask AssemblyFile="$(NuGetRoot)\tools\xunit\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
 <PropertyGroup>
-    <ProgramFilesDir>$(ProgramFiles)</ProgramFilesDir>
-    <ProgramFilesDir Condition="Exists('$(ProgramFiles) %28x86%29')">$(ProgramFiles) (x86)</ProgramFilesDir>
-    <VsDir>$(ProgramFilesDir)\Microsoft Visual Studio 10.0</VsDir>
-    <DevEnvDir>$(VsDir)\Common7\IDE</DevEnvDir>
-    <TestResultsFile>$(TargetDir)$(AssemblyName).trx</TestResultsFile>
     <TestAssembly>$(TargetDir)$(AssemblyName).dll</TestAssembly>
-    <IntegrationTestSettings>test\Test.Integration\NuGet.Test.Integration.testsettings</IntegrationTestSettings>
 </PropertyGroup>
-
 <Target Name="RunTests">
-    <Delete Files="$(TestResultsFile)" />
-    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:&quot;$(TestAssembly)&quot; /resultsfile:&quot;$(TestResultsFile)&quot;" WorkingDirectory="$(NuGetRoot)" ContinueOnError="false" />
-    <Message Text="##teamcity[importData type='mstest' path='$(TestResultsFile)']"/>
-</Target>
-
-<Target Name="RunIntegrationTests">
-    <Delete Files="$(TestResultsFile)" />
-    <Exec Command="&quot;$(DevEnvDir)\MsTest.exe&quot; /testcontainer:&quot;$(TestAssembly)&quot; /resultsfile:&quot;$(TestResultsFile)&quot; /testsettings:$(IntegrationTestSettings)" WorkingDirectory="$(NuGetRoot)" ContinueOnError="false" />
-    <Message Text="##teamcity[importData type='mstest' path='$(TestResultsFile)']"/>
+    <xunit Assembly="$(TestAssembly)" />
 </Target>
 </Project>
