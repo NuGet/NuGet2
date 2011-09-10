@@ -9,15 +9,19 @@ using Microsoft.VisualStudio.ComponentModelHost;
 namespace NuGet.VisualStudio {
     [Export(typeof(IFileSystemProvider))]
     public class VsFileSystemProvider : IFileSystemProvider {
+        private const string SolutionSection = "solution";
+        private const string DisableSourceControlIntegerationKey = "disableSourceControlIntegration";
         private readonly DTE _dte;
         private readonly IComponentModel _componentModel;
+        private readonly ISettings _settings;
 
         public VsFileSystemProvider()
             : this(ServiceLocator.GetInstance<DTE>(),
-                   ServiceLocator.GetGlobalService<SComponentModel, IComponentModel>()) {
+                   ServiceLocator.GetGlobalService<SComponentModel, IComponentModel>(),
+                   ServiceLocator.GetInstance<ISettings>()) {
         }
 
-        public VsFileSystemProvider(DTE dte, IComponentModel componentModel) {
+        public VsFileSystemProvider(DTE dte, IComponentModel componentModel, ISettings settings) {
             if (dte == null) {
                 throw new ArgumentNullException("dte");
             }
@@ -26,12 +30,22 @@ namespace NuGet.VisualStudio {
                 throw new ArgumentNullException("componentModel");
             }
 
+            if (settings == null) {
+                throw new ArgumentNullException("settings");
+            }
+
             _componentModel = componentModel;
             _dte = dte;
+            _settings = settings;
         }
 
         public IFileSystem GetFileSystem(string path) {
             // Get the source control providers
+            var physicalFileSystem = new PhysicalFileSystem(path);
+            if (!IsSourceControlDisabled(_settings)) {
+                return physicalFileSystem;
+            }
+
             var providers = _componentModel.GetExtensions<ISourceControlFileSystemProvider>();
 
             // Get the repository path
@@ -56,7 +70,13 @@ namespace NuGet.VisualStudio {
                 }
             }
 
-            return fileSystem ?? new PhysicalFileSystem(path);
+            return fileSystem ?? physicalFileSystem;
+        }
+
+        private static bool IsSourceControlDisabled(ISettings _settings) {
+            var value = _settings.GetValue(SolutionSection, DisableSourceControlIntegerationKey);
+            bool disableSourceControlIntegration;
+            return !String.IsNullOrEmpty(value) && Boolean.TryParse(value, out disableSourceControlIntegration) && disableSourceControlIntegration;
         }
 
 

@@ -267,4 +267,7 @@
   <data name="TemplateWizard_InvalidPackageElementAttributes" xml:space="preserve">
     <value>The project template lists one or more packages with missing, empty, or invalid values for the "id" or "version" attributes. Both attributes are required and must have valid values.</value>
   </data>
+  <data name="SolutionNotAvailable" xml:space="preserve">
+    <value>No solution available for this operation to be performed.</value>
+  </data>
 </root>

@@ -14,6 +14,7 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.ExtensionManager, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.VisualStudio.TemplateWizardInterface, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -50,12 +51,14 @@
     <Compile Include="RecentPackageTest.cs" />
     <Compile Include="RepositorySettingsTest.cs" />
     <Compile Include="UriHelperTest.cs" />
+    <Compile Include="VsFileSystemProviderTest.cs" />
     <Compile Include="VsInstallerTest.cs" />
     <Compile Include="VsPackageManagerTest.cs" />
     <Compile Include="VsPackageSourceProviderTest.cs" />
     <Compile Include="VsPackageSourceRepositoryTest.cs" />
     <Compile Include="TestUtils.cs" />
     <Compile Include="VsProjectSystemTest.cs" />
+    <Compile Include="VsSettingsTest.cs" />
     <Compile Include="VsTemplateWizardTest.cs" />
   </ItemGroup>
   <ItemGroup>

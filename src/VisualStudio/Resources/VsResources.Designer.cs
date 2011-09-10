@@ -376,6 +376,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No solution available for this operation to be performed..
+        /// </summary>
+        public static string SolutionNotAvailable {
+            get {
+                return ResourceManager.GetString("SolutionNotAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Package Installation Error.
         /// </summary>
         public static string TemplateWizard_ErrorDialogTitle {

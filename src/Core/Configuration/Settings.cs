@@ -8,7 +8,7 @@ using NuGet.Resources;
 
 namespace NuGet {
     public class Settings : ISettings {
-        private static Lazy<Settings> _defaultSettings = new Lazy<Settings>(CreateDefaultSettings);
+        private static Lazy<ISettings> _defaultSettings = new Lazy<ISettings>(CreateDefaultSettings);
         private readonly XDocument _config;
         private readonly IFileSystem _fileSystem;
 
@@ -20,22 +20,7 @@ namespace NuGet {
             _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, Constants.SettingsFileName);
         }
 
-        private static Settings CreateDefaultSettings() {
-            IFileSystem fileSystem;
-            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            if (String.IsNullOrEmpty(appDataPath)) {
-                // If there is no AppData folder, use a null file system to make the Settings object do nothing
-                fileSystem = NullFileSystem.Instance;
-            }
-            else {
-                string defaultSettingsPath = Path.Combine(appDataPath, "NuGet");
-                fileSystem = new PhysicalFileSystem(defaultSettingsPath);
-            }
-
-            return new Settings(fileSystem);
-        }
-        
-        public static Settings DefaultSettings {
+        public static ISettings DefaultSettings {
             get {
                 return _defaultSettings.Value;
             }
@@ -193,6 +178,21 @@ namespace NuGet {
 
         private void Save(XDocument document) {
             _fileSystem.AddFile(Constants.SettingsFileName, document.Save);
+        }
+
+        private static ISettings CreateDefaultSettings() {
+            IFileSystem fileSystem;
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            if (String.IsNullOrEmpty(appDataPath)) {
+                // If there is no AppData folder, use a null file system to make the Settings object do nothing
+                return NullSettings.Instance;
+            }
+            else {
+                string defaultSettingsPath = Path.Combine(appDataPath, "NuGet");
+                fileSystem = new PhysicalFileSystem(defaultSettingsPath);
+            }
+
+            return new Settings(fileSystem);
         }
     }
 }

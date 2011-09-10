@@ -18,8 +18,8 @@ namespace NuGet.VisualStudio {
         private PackageSource _activePackageSource;
 
         [ImportingConstructor]
-        public VsPackageSourceProvider() :
-            this(Settings.DefaultSettings, new PackageSourceProvider(Settings.DefaultSettings)) {
+        public VsPackageSourceProvider(ISettings settings) :
+            this(settings, new PackageSourceProvider(settings)) {
         }
 
         internal VsPackageSourceProvider(ISettings fileSettingsManager, IPackageSourceProvider packageSourceProvider) {

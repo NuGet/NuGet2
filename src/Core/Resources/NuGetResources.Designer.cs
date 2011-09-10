@@ -277,6 +277,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &quot;{0}&quot; cannot be called on a NullSettings..
+        /// </summary>
+        internal static string InvalidNullSettingsOperation {
+            get {
+                return ResourceManager.GetString("InvalidNullSettingsOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The package ID &apos;{0}&apos; contains invalid characters. Examples of valid package IDs include &apos;MyPackage&apos; and &apos;MyPackage.Sample&apos;..
         /// </summary>
         internal static string InvalidPackageId {

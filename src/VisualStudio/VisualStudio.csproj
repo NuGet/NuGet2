@@ -56,6 +56,7 @@
     <Compile Include="VisualStudioCredentialProvider.cs" />
     <Compile Include="Extensibility\VsPackageInstallerEvents.cs" />
     <Compile Include="Extensibility\VsPackageInstallerServices.cs" />
+    <Compile Include="VsSettings.cs" />
     <Compile Include="VSRequestCredentialProvider.cs" />
     <Compile Include="VsTemplateWizard.cs" />
     <Compile Include="VsTemplateWizardInstallerConfiguration.cs" />

@@ -63,6 +63,7 @@
     <Compile Include="Authoring\ManifestVersionUtility.cs" />
     <Compile Include="Authoring\NullPropertyProvider.cs" />
     <Compile Include="Configuration\ISettings.cs" />
+    <Compile Include="Configuration\NullSettings.cs" />
     <Compile Include="Configuration\Settings.cs" />
     <Compile Include="Extensions\CredentialProviderExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
