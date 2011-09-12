@@ -1,33 +1,32 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio.Test.Mocks;
+using Xunit;
 
 namespace NuGet.VisualStudio.Test {
-    [TestClass]
     public class VsSettingsTest {
-        [TestMethod]
+        [Fact]
         public void VsSettingsThrowsIfSolutionManagerIsNull() {
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(() => new VsSettings(solutionManager: null), "solutionManager");
         }
 
-        [TestMethod]
+        [Fact]
         public void VsSettingsThrowsIfDefaultSettingsIsNull() {
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(() => new VsSettings(solutionManager: new Mock<ISolutionManager>().Object, defaultSettings: null, fileSystemProvider: null), "defaultSettings");
         }
 
-        [TestMethod]
+        [Fact]
         public void VsSettingsThrowsIfFileSystemProviderIsNull() {
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(
                 () => new VsSettings(solutionManager: new Mock<ISolutionManager>().Object, defaultSettings: NullSettings.Instance, fileSystemProvider: null), "fileSystemProvider");
         }
 
-        [TestMethod]
+        [Fact]
         public void VsSettingUsesNullSettingsIfSolutionIsUnavailable() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>(MockBehavior.Strict);
@@ -41,11 +40,11 @@ namespace NuGet.VisualStudio.Test {
             var value = vsSettings.GetValue("Solution", "Foo");
 
             // Assert
-            Assert.AreEqual("", value);
+            Assert.Equal("", value);
             solutionManager.VerifyAll();
         }
 
-        [TestMethod]
+        [Fact]
         public void VsSettingUsesNullSettingsIfSolutionDirectoryDoesNotExist() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>(MockBehavior.Strict);
@@ -60,11 +59,11 @@ namespace NuGet.VisualStudio.Test {
             var value = vsSettings.GetValue("Solution", "Foo");
 
             // Assert
-            Assert.AreEqual("", value);
+            Assert.Equal("", value);
             solutionManager.VerifyAll();
         }
 
-        [TestMethod]
+        [Fact]
         public void VsSettingUsesNullSettingsIfConfigFileDoesNotExistInRootOfSolution() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>(MockBehavior.Strict);
@@ -79,11 +78,11 @@ namespace NuGet.VisualStudio.Test {
             var value = vsSettings.GetValue("Solution", "Foo");
 
             // Assert
-            Assert.AreEqual("", value);
+            Assert.Equal("", value);
             solutionManager.VerifyAll();
         }
 
-        [TestMethod]
+        [Fact]
         public void VsSettingUsesSettingsFileFromSolutionRootIfExists() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>(MockBehavior.Strict);
@@ -101,12 +100,12 @@ namespace NuGet.VisualStudio.Test {
             var value = vsSettings.GetValue("solution", "foo");
 
             // Assert
-            Assert.AreEqual("bar", value);
+            Assert.Equal("bar", value);
             solutionManager.VerifyAll();
             fileSystemProvider.VerifyAll();
         }
 
-        [TestMethod]
+        [Fact]
         public void VsSettingUsesValuesFromDefaultSettingsForNonSolutionProperties() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>(MockBehavior.Strict);
@@ -125,11 +124,11 @@ namespace NuGet.VisualStudio.Test {
             var value = vsSettings.GetValue("PackageSources", "foo");
 
             // Assert
-            Assert.AreEqual("qux", value);
+            Assert.Equal("qux", value);
             defaultSettings.Verify();
         }
 
-        [TestMethod]
+        [Fact]
         public void VsSettingSwitchesSettingsIfSolutionChanges() {
             // Arrange
             var solutionManager = new Mock<MockSolutionManager>();
@@ -157,8 +156,8 @@ namespace NuGet.VisualStudio.Test {
             var valueB = vsSettings.GetValue("solution", "foo");
 
             // Assert
-            Assert.AreEqual("barA", valueA);
-            Assert.AreEqual("barB", valueB);
+            Assert.Equal("barA", valueA);
+            Assert.Equal("barB", valueB);
         }
     }
 }

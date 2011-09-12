@@ -1,8 +1,7 @@
-namespace NuGet.Test {
-    using System;
-    using Xunit;
+using System;
+using Xunit;
 
-    
+namespace NuGet.Test {
     public class UriHelperTest {
         [Fact]
         public void CreatePartUriCreatesUriFromPath() {

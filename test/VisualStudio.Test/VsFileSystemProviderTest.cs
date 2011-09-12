@@ -1,31 +1,30 @@
 ﻿using EnvDTE;
 using Microsoft.VisualStudio.ComponentModelHost;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using NuGet.Test;
+using Xunit;
 
 namespace NuGet.VisualStudio.Test {
-    [TestClass]
     public class VsFileSystemProviderTest {
-        [TestMethod]
+        [Fact]
         public void VsFileSystemProviderThrowsIfDteIsNull() {
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(() => new VsFileSystemProvider(dte: null, componentModel: null, settings: null), "dte");
         }
 
-        [TestMethod]
+        [Fact]
         public void VsFileSystemProviderThrowsIfComponentModelIsNull() {
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(() => new VsFileSystemProvider(dte: new Mock<DTE>().Object, componentModel: null, settings: null), "componentModel");
         }
 
-        [TestMethod]
+        [Fact]
         public void VsFileSystemProviderThrowsIfSettingsIsNull() {
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(() => new VsFileSystemProvider(dte: new Mock<DTE>().Object, componentModel: new Mock<IComponentModel>().Object, settings: null), "settings");
         }
 
-        [TestMethod]
+        [Fact]
         public void VsFileSystemProviderReturnsPhysialFileSystemIfSourceControlSupportIsDisabled() {
             // Arrange
             var dte = new Mock<DTE>();
@@ -38,8 +37,8 @@ namespace NuGet.VisualStudio.Test {
             var fileSystem = vsFileSystemProvider.GetFileSystem(@"x:\test-path");
 
             // Assert
-            Assert.IsInstanceOfType(fileSystem, typeof(PhysicalFileSystem));
-            Assert.AreEqual(@"x:\test-path", fileSystem.Root);
+            Assert.IsType<PhysicalFileSystem>(fileSystem);
+            Assert.Equal(@"x:\test-path", fileSystem.Root);
             settings.Verify();
         }
     }
