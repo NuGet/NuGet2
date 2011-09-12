@@ -9,7 +9,7 @@ using NuGet.Test.Mocks;
 
 namespace NuGet.Test.NuGetCommandLine.Commands {
     
-    public class InstallCommandTest {
+    public class InstallCommandTest : IDisposable {
         [Fact]
         public void InstallCommandInstallsPackageIfArgumentIsNotPackageReferenceFile() {
             // Arrange
@@ -261,6 +261,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             protected override PackageReferenceFile GetPackageReferenceFile(string path) {
                 return new PackageReferenceFile(_fileSystem, path);
             }
+        }
+
+        public void Dispose() {
+            MachineCache.Default.Clear();
         }
     }
 }

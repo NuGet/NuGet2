@@ -5,9 +5,8 @@ namespace NuGet.Test {
     using Xunit;
     using Moq;
     using NuGet.Test.Mocks;
-
     
-    public class PackageManagerTest {
+    public class PackageManagerTest : IDisposable {
         [Fact]
         public void CtorThrowsIfDependenciesAreNull() {
             // Act & Assert
@@ -125,7 +124,7 @@ namespace NuGet.Test {
             cacheRepository.Verify(p => p.AddPackage(packageA), Times.Once());
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallPackageAddPackageToCache2() {
             // Arrange
             var cacheRepository = new Mock<IPackageRepository>();
@@ -152,7 +151,7 @@ namespace NuGet.Test {
             cacheRepository.Verify(p => p.AddPackage(packageA), Times.Once());
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallPackageAddPackageToCache3() {
             // Arrange
             var cacheRepository = new Mock<IPackageRepository>();
@@ -179,7 +178,7 @@ namespace NuGet.Test {
             cacheRepository.Verify(p => p.AddPackage(packageA), Times.Once());
         }
 
-        [TestMethod]
+        [Fact]
         public void InstallPackageAddsAllFilesToFileSystem() {
             // Arrange
             var projectSystem = new MockProjectSystem();
@@ -337,7 +336,7 @@ namespace NuGet.Test {
             cacheRepository.Verify(p => p.AddPackage(A10), Times.Never());
         }
 
-        [TestMethod]
+        [Fact]
         public void UpdatePackageThrowsIfPackageNotInstalled() {
             // Arrange
             var localRepository = new MockPackageRepository();
@@ -370,8 +369,7 @@ namespace NuGet.Test {
             Assert.True(localRepository.Exists("A", new Version("1.0")));
         }
 
-        [TestCleanup]
-        public void CleanUp() {
+        public void Dispose() {
             MachineCache.Default.Clear();
         }
         
