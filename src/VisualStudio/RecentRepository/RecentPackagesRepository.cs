@@ -25,25 +25,30 @@ namespace NuGet.VisualStudio {
         private bool _hasLoadedSettingsStore;
         private HashSet<PackageSource> _currentSources;
         private DateTime _latestTime = DateTime.UtcNow;
+        private IPackageRepository _cacheRepository;
 
         [ImportingConstructor]
-        public RecentPackageRepository(IPackageRepositoryFactory repositoryFactory,
-                                        IPersistencePackageSettingsManager settingsManager)
+        public RecentPackageRepository(
+            IPackageRepositoryFactory repositoryFactory,
+            IPersistencePackageSettingsManager settingsManager)
             : this(ServiceLocator.GetInstance<DTE>(),
                    repositoryFactory,
                    ServiceLocator.GetInstance<IPackageSourceProvider>(),
-                   settingsManager) {
+                   settingsManager,
+                   MachineCache.Default) {
         }
 
-        public RecentPackageRepository(
+        internal RecentPackageRepository(
             DTE dte,
             IPackageRepositoryFactory repositoryFactory,
             IPackageSourceProvider packageSourceProvider,
-            IPersistencePackageSettingsManager settingsManager) {
+            IPersistencePackageSettingsManager settingsManager,
+            IPackageRepository cacheRepository) {
 
             _packageSourceProvider = packageSourceProvider;
             _repositoryFactory = repositoryFactory;
             _settingsManager = settingsManager;
+            _cacheRepository = cacheRepository;
 
             if (dte != null) {
                 _dteEvents = dte.Events.DTEEvents;
@@ -156,7 +161,7 @@ namespace NuGet.VisualStudio {
             var remainingMetadata = new List<IPersistencePackageMetadata>();
 
             foreach (var metadata in packagesMetadata) {
-                var cachedPackage = MachineCache.Default.FindPackage(metadata.Id, metadata.Version);
+                var cachedPackage = _cacheRepository.FindPackage(metadata.Id, metadata.Version);
                 if (cachedPackage != null) {
                     // found a package with the same Id and Version, use it
                     RecentPackage package = ConvertToRecentPackage(cachedPackage, metadata.LastUsedDate);

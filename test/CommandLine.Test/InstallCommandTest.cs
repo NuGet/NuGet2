@@ -9,7 +9,7 @@ using NuGet.Test.Mocks;
 
 namespace NuGet.Test.NuGetCommandLine.Commands {
     
-    public class InstallCommandTest : IDisposable {
+    public class InstallCommandTest {
         [Fact]
         public void InstallCommandInstallsPackageIfArgumentIsNotPackageReferenceFile() {
             // Arrange
@@ -143,7 +143,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Add(c)).Verifiable();
             repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Remove(c)).Verifiable();
 
-            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object);
+            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object, new MockPackageRepository());
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager);
 
             installCommand.Version = "0.4";
@@ -177,7 +177,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Add(c)).Verifiable();
             repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Remove(c)).Verifiable();
 
-            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object);
+            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object, new MockPackageRepository());
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager);
 
             installCommand.ExcludeVersion = true;
@@ -201,7 +201,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Throws(new Exception("Method should not be called"));
             repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Throws(new Exception("Method should not be called"));
 
-            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object);
+            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object, new MockPackageRepository());
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager);
 
             installCommand.ExcludeVersion = true;
@@ -254,17 +254,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
                 return _fileSystem;
             }
 
-            protected override PackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache) {
-                return _packageManager ?? base.CreatePackageManager(fileSystem, useMachineCache);
+            protected override PackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache, IPackageRepository repository = null) {
+                return _packageManager ?? base.CreatePackageManager(fileSystem, useMachineCache, new MockPackageRepository());
             }
 
             protected override PackageReferenceFile GetPackageReferenceFile(string path) {
                 return new PackageReferenceFile(_fileSystem, path);
             }
-        }
-
-        public void Dispose() {
-            MachineCache.Default.Clear();
         }
     }
 }

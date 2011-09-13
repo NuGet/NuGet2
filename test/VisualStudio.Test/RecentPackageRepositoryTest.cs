@@ -291,7 +291,12 @@ namespace NuGet.VisualStudio.Test {
 
             var sourceProvider = new Mock<IPackageSourceProvider>();
             sourceProvider.Setup(c => c.LoadPackageSources()).Returns(sources);
-            var repository = new RecentPackageRepository(null, factory.Object, sourceProvider.Object, settingsManager);
+            var repository = new RecentPackageRepository(
+                null, 
+                factory.Object, 
+                sourceProvider.Object, 
+                settingsManager,
+                new MockPackageRepository());
 
             // Act - 1, Scene - 1
             var packages = repository.GetPackages();
@@ -311,7 +316,10 @@ namespace NuGet.VisualStudio.Test {
             // Fin
         }
 
-        private RecentPackageRepository CreateRecentPackageRepository(IEnumerable<IPackage> packagesList = null, IEnumerable<IPersistencePackageMetadata> settingsMetadata = null) {
+        private RecentPackageRepository CreateRecentPackageRepository(
+            IEnumerable<IPackage> packagesList = null, 
+            IEnumerable<IPersistencePackageMetadata> settingsMetadata = null,
+            IPackageRepository cacheRepository = null) {
             if (packagesList == null) {
                 var packageA = PackageUtility.CreatePackage("A", "1.0");
                 var packageC = PackageUtility.CreatePackage("C", "2.0");
@@ -337,7 +345,16 @@ namespace NuGet.VisualStudio.Test {
 
             var mockPackageSourceProvider = new MockPackageSourceProvider();
             mockPackageSourceProvider.SavePackageSources(new[] { new PackageSource("source") });
-            return new RecentPackageRepository(null, mockRepositoryFactory.Object, mockPackageSourceProvider, mockSettingsManager);
+
+            if (cacheRepository == null) {
+                cacheRepository = new MockPackageRepository();
+            }
+            return new RecentPackageRepository(
+                /* dte */ null, 
+                mockRepositoryFactory.Object, 
+                mockPackageSourceProvider, 
+                mockSettingsManager,
+                cacheRepository);
         }
 
         private void AssertPackage(IPackage package, string expectedId, string expectedVersion) {

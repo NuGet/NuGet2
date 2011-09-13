@@ -21,6 +21,10 @@ namespace NuGet {
             get { return _instance.Value; }
         }
 
+        public override IQueryable<IPackage> GetPackages() {
+            return base.GetPackages();
+        }
+
         /// <summary>
         /// Creates a Machine Cache instance, assigns it to the instance variable and returns it.
         /// </summary>

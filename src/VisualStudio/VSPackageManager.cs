@@ -22,7 +22,17 @@ namespace NuGet.VisualStudio {
                                 ISharedPackageRepository sharedRepository,
                                 IRecentPackageRepository recentPackagesRepository,
                                 VsPackageInstallerEvents packageEvents) :
-            base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository) {
+            this(solutionManager, sourceRepository, fileSystem, sharedRepository, recentPackagesRepository, packageEvents, MachineCache.Default) {
+        }
+
+        public VsPackageManager(ISolutionManager solutionManager,
+                                IPackageRepository sourceRepository,
+                                IFileSystem fileSystem,
+                                ISharedPackageRepository sharedRepository,
+                                IRecentPackageRepository recentPackagesRepository,
+                                VsPackageInstallerEvents packageEvents,
+                                IPackageRepository cacheRepository) :
+            base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository, cacheRepository) {
 
             _solutionManager = solutionManager;
             _sharedRepository = sharedRepository;

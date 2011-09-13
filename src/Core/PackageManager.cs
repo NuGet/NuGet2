@@ -44,6 +44,9 @@ namespace NuGet {
             if (localRepository == null) {
                 throw new ArgumentNullException("localRepository");
             }
+            if (cacheRepository == null) {
+                throw new ArgumentNullException("cacheRepository");
+            }
             
             SourceRepository = sourceRepository;
             PathResolver = pathResolver;
