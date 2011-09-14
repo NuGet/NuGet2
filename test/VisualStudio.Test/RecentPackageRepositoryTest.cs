@@ -316,6 +316,50 @@ namespace NuGet.VisualStudio.Test {
             // Fin
         }
 
+        [Fact]
+        public void RecentPackageRepositoryDoesNotReturnPackagesFromSourcesThatAreDisabled() {
+            // Arrange
+            var sources = new List<PackageSource> { new PackageSource("Source1"), new PackageSource("Source2", "Source2", isEnabled: false) };
+            var factory = new Mock<IPackageRepositoryFactory>();
+            factory.Setup(c => c.CreateRepository(It.IsAny<string>())).Returns<string>(c => {
+                switch (c) {
+                    case "Source1":
+                        var repo1 = new MockPackageRepository();
+                        repo1.AddRange(new[] { PackageUtility.CreatePackage("Pack1") });
+                        return repo1;
+                    case "Source2":
+                        var repo2 = new MockPackageRepository();
+                        repo2.AddRange(new[] { PackageUtility.CreatePackage("Pack2", "1.1") });
+                        return repo2;
+                }
+                return null;
+            });
+
+            var settingsManager = new MockSettingsManager();
+            settingsManager.SavePackageMetadata(new[] {
+                new PersistencePackageMetadata("Pack1", "1.0", new DateTime(2011, 01, 01)),
+                new PersistencePackageMetadata("Pack2", "1.1", new DateTime(2011, 01, 01)),
+                new PersistencePackageMetadata("Pack3", "1.0", new DateTime(2011, 01, 01)),
+            });
+
+            var sourceProvider = new Mock<IPackageSourceProvider>();
+            sourceProvider.Setup(c => c.LoadPackageSources()).Returns(sources);
+            var repository = new RecentPackageRepository(
+                null,
+                factory.Object,
+                sourceProvider.Object,
+                settingsManager,
+                new MockPackageRepository());
+
+            // Act
+            var packages = repository.GetPackages();
+
+            // Assert 
+            Assert.Equal(1, packages.Count());
+            AssertPackage(packages.First(), "Pack1", "1.0");
+            //AssertPackage(packages.Last(), "Pack2", "1.1");
+        }
+
         private RecentPackageRepository CreateRecentPackageRepository(
             IEnumerable<IPackage> packagesList = null, 
             IEnumerable<IPersistencePackageMetadata> settingsMetadata = null,

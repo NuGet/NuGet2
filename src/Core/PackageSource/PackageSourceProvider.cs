@@ -5,7 +5,8 @@ using System.Linq;
 
 namespace NuGet {
     public class PackageSourceProvider : IPackageSourceProvider {
-        internal const string FileSettingsSectionName = "packageSources";
+        internal const string PackageSourcesSectionName = "packageSources";
+        internal const string DisabledPackageSourcesSectionName = "disabledPackageSources";
         private readonly ISettings _settingsManager;
         private readonly IEnumerable<PackageSource> _defaultPackageSources;
 
@@ -31,21 +32,39 @@ namespace NuGet {
         /// If no default values were specified, returns an empty sequence.
         /// </summary>
         public IEnumerable<PackageSource> LoadPackageSources() {
-            IList<KeyValuePair<string, string>> settingsValue = _settingsManager.GetValues(FileSettingsSectionName);
+            IList<KeyValuePair<string, string>> settingsValue = _settingsManager.GetValues(PackageSourcesSectionName);
             if (settingsValue != null && settingsValue.Any()) {
-                return settingsValue.Select(p => new PackageSource(p.Value, p.Key)).ToList();
+                // put disabled package source names into the hash set
+                var disabledSources = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+                IList<KeyValuePair<string, string>> disabledSourcesValues = _settingsManager.GetValues(DisabledPackageSourcesSectionName);
+                if (disabledSourcesValues != null) {
+                    foreach (var pair in disabledSourcesValues) {
+                        disabledSources.Add(pair.Key);
+                    }
+                }
+
+                return settingsValue.
+                    Select(p => new PackageSource(p.Value, p.Key, isEnabled: !disabledSources.Contains(p.Key))).
+                    ToList();
             }
             return _defaultPackageSources;
         }
 
         public void SavePackageSources(IEnumerable<PackageSource> sources) {
             // clear the old values
-            _settingsManager.DeleteSection(FileSettingsSectionName);
+            _settingsManager.DeleteSection(PackageSourcesSectionName);
 
             // and write the new ones
             _settingsManager.SetValues(
-                FileSettingsSectionName,
+                PackageSourcesSectionName,
                 sources.Select(p => new KeyValuePair<string, string>(p.Name, p.Source)).ToList());
+
+            // overwrite new values for the <disabledPackageSources> section
+            _settingsManager.DeleteSection(DisabledPackageSourcesSectionName);
+
+            _settingsManager.SetValues(
+                DisabledPackageSourcesSectionName,
+                sources.Where(p => !p.IsEnabled).Select(p => new KeyValuePair<string, string>(p.Name, "true")).ToList());
         }
     }
 }

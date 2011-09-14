@@ -139,6 +139,30 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
+        public void GetPackageDoesNotReturnPackageFromDisabledSources() {
+            // Arrange
+            var packageSourceProvider = new Mock<IVsPackageSourceProvider>();
+            packageSourceProvider.Setup(p => p.LoadPackageSources()).Returns(
+                new[] { new PackageSource("bing"), 
+                        new PackageSource("awesomesource", "awesomesource", isEnabled: false) }
+            );
+
+            var cmdlet = BuildCmdlet(
+                repositoryFactory: new CachedRepositoryFactory(GetDefaultRepositoryFactory("All"), packageSourceProvider.Object), 
+                activeSourceName: "All");
+            cmdlet.ListAvailable = new SwitchParameter(true);
+            cmdlet.Source = "All";
+
+            // Act
+            var result = cmdlet.GetResults<dynamic>();
+
+            // Assert
+            Assert.Equal(2, result.Count());
+            AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new Version("1.4") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "P6", Version = new Version("1.0") });
+        }
+
+        [Fact]
         public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoFilterIsSpecifiedAndRemoteIsNotSpecified() {
             // Arrange 
             var cmdlet = BuildCmdlet();
@@ -615,6 +639,10 @@ namespace NuGet.PowerShell.Commands.Test {
             repositoryFactory.Setup(c => c.CreateRepository("foo")).Returns(repository.Object);
             repositoryFactory.Setup(c => c.CreateRepository("bing")).Returns(repository.Object);
             repositoryFactory.Setup(c => c.CreateRepository("foosource")).Returns(repository.Object);
+
+            var extraRepository = new MockPackageRepository();
+            extraRepository.AddPackage(PackageUtility.CreatePackage("awesome", "1.0"));
+            repositoryFactory.Setup(c => c.CreateRepository("awesomesource")).Returns(extraRepository);
 
             return repositoryFactory.Object;
         }

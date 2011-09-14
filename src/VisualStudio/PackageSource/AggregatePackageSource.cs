@@ -9,12 +9,12 @@ namespace NuGet.VisualStudio {
             return source == Instance;
         }
 
-        public static IEnumerable<PackageSource> GetPackageSourcesWithAggregate(this IPackageSourceProvider provider) {
-            return new[] { Instance }.Concat(provider.LoadPackageSources());
+        public static IEnumerable<PackageSource> GetEnabledPackageSourcesWithAggregate(this IPackageSourceProvider provider) {
+            return new[] { Instance }.Concat(provider.GetEnabledPackageSources());
         }
 
-        public static IEnumerable<PackageSource> GetPackageSourcesWithAggregate() {
-            return GetPackageSourcesWithAggregate(ServiceLocator.GetInstance<IVsPackageSourceProvider>());
+        public static IEnumerable<PackageSource> GetEnabledPackageSourcesWithAggregate() {
+            return GetEnabledPackageSourcesWithAggregate(ServiceLocator.GetInstance<IVsPackageSourceProvider>());
         }
     }
 }

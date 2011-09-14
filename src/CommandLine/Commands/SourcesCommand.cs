@@ -101,7 +101,12 @@ namespace NuGet.Commands {
                 var source = sourcesList[i];
                 var indexNumber = i + 1;
                 var namePadding = new String(' ', i >= 9 ? 1 : 2);
-                Console.WriteLine("  {0}.{1}{2}", indexNumber, namePadding, source.Name);
+                Console.WriteLine(
+                    "  {0}.{1}{2} [{3}]", 
+                    indexNumber, 
+                    namePadding, 
+                    source.Name,
+                    source.IsEnabled ? NuGetResources.SourcesCommandEnabled : NuGetResources.SourcesCommandDisabled);
                 Console.WriteLine("{0}{1}", sourcePadding, source.Source);
             }
 

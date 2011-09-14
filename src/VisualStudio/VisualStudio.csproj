@@ -164,7 +164,6 @@
     <Compile Include="IVsPackageManager.cs" />
     <Compile Include="IVsPackageManagerFactory.cs" />
     <Compile Include="PackageSource\CachedRepositoryFactory.cs" />
-    <Compile Include="PackageSource\SerializationHelper.cs" />
     <Compile Include="PackageSource\VsPackageSourceRepository.cs" />
     <Compile Include="PackageSource\VsPackageSourceProvider.cs" />
     <Compile Include="SolutionExtensions.cs" />

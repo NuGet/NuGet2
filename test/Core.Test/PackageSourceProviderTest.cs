@@ -74,7 +74,7 @@ namespace NuGet.Test {
             // Assert
             Assert.Equal(sources.Length, values.Count);
             for (int i = 0; i < sources.Length; i++) {
-                AssertPackageSource(values[i], sources[i].Name, sources[i].Source);
+                AssertPackageSource(values[i], sources[i].Name, sources[i].Source, true);
             }
         }
 
@@ -82,7 +82,7 @@ namespace NuGet.Test {
         public void LoadPackageSourcesReturnCorrectDataFromSettings() {
             // Arrange
             var settings = new MockUserSettingsManager();
-            settings.SetValues(PackageSourceProvider.FileSettingsSectionName,
+            settings.SetValues(PackageSourceProvider.PackageSourcesSectionName,
                 new[] {
                     new KeyValuePair<string, string>("one", "onesource"),
                     new KeyValuePair<string, string>("two", "twosource"),
@@ -96,9 +96,36 @@ namespace NuGet.Test {
 
             // Assert
             Assert.Equal(3, values.Count);
-            AssertPackageSource(values[0], "one", "onesource");
-            AssertPackageSource(values[1], "two", "twosource");
-            AssertPackageSource(values[2], "three", "threesource");
+            AssertPackageSource(values[0], "one", "onesource", true);
+            AssertPackageSource(values[1], "two", "twosource", true);
+            AssertPackageSource(values[2], "three", "threesource", true);
+        }
+
+        [Fact]
+        public void LoadPackageSourcesReturnCorrectDataFromSettingsWhenSomePackageSourceIsDisabled() {
+            // Arrange
+            var settings = new MockUserSettingsManager();
+            settings.SetValues(PackageSourceProvider.PackageSourcesSectionName,
+                new[] {
+                    new KeyValuePair<string, string>("one", "onesource"),
+                    new KeyValuePair<string, string>("two", "twosource"),
+                    new KeyValuePair<string, string>("three", "threesource")
+                });
+            settings.SetValues(PackageSourceProvider.DisabledPackageSourcesSectionName,
+                new[] {
+                    new KeyValuePair<string, string>("two", "true")
+                });
+
+            var provider = CreatePackageSourceProvider(settings);
+
+            // Act
+            var values = provider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.Equal(3, values.Count);
+            AssertPackageSource(values[0], "one", "onesource", true);
+            AssertPackageSource(values[1], "two", "twosource", false);
+            AssertPackageSource(values[2], "three", "threesource", true);
         }
 
         [Fact]
@@ -113,11 +140,35 @@ namespace NuGet.Test {
             provider.SavePackageSources(sources);
 
             // Assert
-            var values = settings.GetValues(PackageSourceProvider.FileSettingsSectionName);
+            var values = settings.GetValues(PackageSourceProvider.PackageSourcesSectionName);
             Assert.Equal(3, values.Count);
             Assert.Equal("one", values[0].Key);
             Assert.Equal("two", values[1].Key);
             Assert.Equal("three", values[2].Key);
+        }
+
+        [Fact]
+        public void SavePackageSourcesSaveCorrectDataToSettingsWhenSomePackgeSourceIsDisabled() {
+            // Arrange
+            var settings = new MockUserSettingsManager();
+            var provider = CreatePackageSourceProvider(settings);
+
+            var sources = new[] { new PackageSource("one"), new PackageSource("two"), new PackageSource("three", "three", isEnabled: false) };
+
+            // Act
+            provider.SavePackageSources(sources);
+
+            // Assert
+            var values = settings.GetValues(PackageSourceProvider.PackageSourcesSectionName);
+            Assert.Equal(3, values.Count);
+            Assert.Equal("one", values[0].Key);
+            Assert.Equal("two", values[1].Key);
+            Assert.Equal("three", values[2].Key);
+
+            var disabledValues = settings.GetValues(PackageSourceProvider.DisabledPackageSourcesSectionName);
+            Assert.NotNull(disabledValues);
+            Assert.Equal(1, disabledValues.Count);
+            Assert.Equal("three", disabledValues[0].Key);
         }
 
         [Fact]
@@ -160,6 +211,27 @@ namespace NuGet.Test {
             Assert.Equal(2, repo.Repositories.Count());
             Assert.Equal(repositoryA.Object, repo.Repositories.First());
             Assert.Equal(repositoryC.Object, repo.Repositories.Last());
+        }
+
+        [Fact]
+        public void GetAggregateSkipsDisabledSources() {
+            // Arrange
+            var repositoryA = new Mock<IPackageRepository>();
+            var repositoryB = new Mock<IPackageRepository>();
+            var factory = new Mock<IPackageRepositoryFactory>();
+            factory.Setup(c => c.CreateRepository(It.Is<string>(a => a.Equals("A")))).Returns(repositoryA.Object);
+            factory.Setup(c => c.CreateRepository(It.Is<string>(a => a.Equals("B")))).Returns(repositoryB.Object);
+            factory.Setup(c => c.CreateRepository(It.Is<string>(a => a.Equals("C")))).Throws(new Exception());
+            var sources = new Mock<IPackageSourceProvider>();
+            sources.Setup(c => c.LoadPackageSources()).Returns(new[] { 
+                new PackageSource("A"), new PackageSource("B", "B", isEnabled: false), new PackageSource("C", "C", isEnabled: false) });
+
+            // Act
+            var repo = (AggregateRepository)sources.Object.GetAggregate(factory.Object);
+
+            // Assert
+            Assert.Equal(1, repo.Repositories.Count());
+            Assert.Equal(repositoryA.Object, repo.Repositories.First());
         }
 
         [Fact]
@@ -234,6 +306,28 @@ namespace NuGet.Test {
         }
 
         [Fact]
+        public void ResolveSourceIgnoreDisabledSources() {
+            // Arrange
+            var sources = new Mock<IPackageSourceProvider>();
+            PackageSource source1 = new PackageSource("Source", "SourceName");
+            PackageSource source2 = new PackageSource("http://www.test.com", "Baz", isEnabled: false);
+            PackageSource source3 = new PackageSource("http://www.bing.com", "Foo", isEnabled: false);
+            sources.Setup(c => c.LoadPackageSources()).Returns(new[] { source1, source2, source3 });
+
+            // Act
+            var result1 = sources.Object.ResolveSource("http://www.test.com");
+            var result2 = sources.Object.ResolveSource("Baz");
+            var result3 = sources.Object.ResolveSource("Foo");
+            var result4 = sources.Object.ResolveSource("SourceName");
+
+            // Assert
+            Assert.Equal("http://www.test.com", result1);
+            Assert.Equal("Baz", result2);
+            Assert.Equal("Foo", result3);
+            Assert.Equal("Source", result4);
+        }
+
+        [Fact]
         public void ResolveSourceReturnsOriginalValueIfNotFoundInSources() {
             // Arrange
             var sources = new Mock<IPackageSourceProvider>();
@@ -248,9 +342,10 @@ namespace NuGet.Test {
             Assert.Equal(source, result);
         }
 
-        private void AssertPackageSource(PackageSource ps, string name, string source) {
+        private void AssertPackageSource(PackageSource ps, string name, string source, bool isEnabled) {
             Assert.Equal(name, ps.Name);
             Assert.Equal(source, ps.Source);
+            Assert.True(ps.IsEnabled == isEnabled);
         }
 
         private IPackageSourceProvider CreatePackageSourceProvider(ISettings settings = null) {

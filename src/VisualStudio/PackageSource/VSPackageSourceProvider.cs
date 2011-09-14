@@ -10,10 +10,10 @@ namespace NuGet.VisualStudio {
     [Export(typeof(IVsPackageSourceProvider))]
     [Export(typeof(IPackageSourceProvider))]
     public class VsPackageSourceProvider : IVsPackageSourceProvider {
-        internal const string FileSettingsActiveSectionName = "activePackageSource";
+        internal const string ActivePackageSourceSectionName = "activePackageSource";
         internal static readonly string OfficialFeedName = Resources.VsResources.OfficialSourceName;
         private readonly IPackageSourceProvider _packageSourceProvider;
-        private readonly ISettings _fileSettingsManager;
+        private readonly ISettings _settings;
         private List<PackageSource> _packageSources;
         private PackageSource _activePackageSource;
 
@@ -22,10 +22,10 @@ namespace NuGet.VisualStudio {
             this(settings, new PackageSourceProvider(settings)) {
         }
 
-        internal VsPackageSourceProvider(ISettings fileSettingsManager, IPackageSourceProvider packageSourceProvider) {
+        internal VsPackageSourceProvider(ISettings settings, IPackageSourceProvider packageSourceProvider) {
 
-            if (fileSettingsManager == null) {
-                throw new ArgumentNullException("fileSettingsManager");
+            if (settings == null) {
+                throw new ArgumentNullException("settings");
             }
 
             if (packageSourceProvider == null) {
@@ -33,7 +33,7 @@ namespace NuGet.VisualStudio {
             }
 
             _packageSourceProvider = packageSourceProvider;
-            _fileSettingsManager = fileSettingsManager;
+            _settings = settings;
             _packageSources = _packageSourceProvider.LoadPackageSources().ToList();
             
             DeserializeActivePackageSource();
@@ -117,16 +117,15 @@ namespace NuGet.VisualStudio {
 
         private void PersistActivePackageSource() {
             // Starting from version 1.3, we persist the package sources to the nuget.config file instead of VS registry.
-            _fileSettingsManager.DeleteSection(FileSettingsActiveSectionName);
+            _settings.DeleteSection(ActivePackageSourceSectionName);
 
             if (_activePackageSource != null) {
-                _fileSettingsManager.SetValue(FileSettingsActiveSectionName, _activePackageSource.Name, _activePackageSource.Source);
+                _settings.SetValue(ActivePackageSourceSectionName, _activePackageSource.Name, _activePackageSource.Source);
             }
         }
 
         private void DeserializeActivePackageSource() {
-            // try reading from the nuget.config file first
-            var settingValues = _fileSettingsManager.GetValues(FileSettingsActiveSectionName);
+            var settingValues = _settings.GetValues(ActivePackageSourceSectionName);
 
             PackageSource packageSource = null;
             if (settingValues != null && settingValues.Any()) {
@@ -143,6 +142,12 @@ namespace NuGet.VisualStudio {
                 // this is to guard against corrupted VS user settings store
                 AddPackageSource(packageSource);
 
+                // active package source must be enabled. 
+                Debug.Assert(packageSource.IsEnabled);
+
+                // guard against corrupted data if the active package source is not enabled
+                packageSource.IsEnabled = true;
+
                 ActivePackageSource = packageSource;
             }
         }
@@ -152,7 +157,6 @@ namespace NuGet.VisualStudio {
             PackageSource officialFeed = LoadPackageSources().FirstOrDefault(ps => ps.Name == OfficialFeedName);
 
             if (officialFeed == null) {
-
                 // There is no official feed currently registered
 
                 // Don't register our feed unless the list is empty (other than the aggregate). This is the first-run scenario.

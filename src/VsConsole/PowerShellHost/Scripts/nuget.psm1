@@ -179,7 +179,7 @@ function GetPackageIds($packages) {
 }
 
 function GetPackageSources() {
-    $allSources = [NuGet.VisualStudio.AggregatePackageSource]::GetPackageSourcesWithAggregate()
+    $allSources = [NuGet.VisualStudio.AggregatePackageSource]::GetEnabledPackageSourcesWithAggregate()
     $allSources | Select-Object -ExpandProperty Name
 }
 

@@ -129,10 +129,10 @@ namespace NuGet.VisualStudio.Test {
             provider.ActivePackageSource = new PackageSource("source", "name");
 
             // Assert
-            var activeValue = userSettingsManager.GetValue(VsPackageSourceProvider.FileSettingsActiveSectionName, "name");
+            var activeValue = userSettingsManager.GetValue(VsPackageSourceProvider.ActivePackageSourceSectionName, "name");
             Assert.Equal("source", activeValue);
 
-            var invalidActiveValue = userSettingsManager.GetValue(VsPackageSourceProvider.FileSettingsActiveSectionName, "invalidName");
+            var invalidActiveValue = userSettingsManager.GetValue(VsPackageSourceProvider.ActivePackageSourceSectionName, "invalidName");
             Assert.Null(invalidActiveValue);
         }
 
@@ -177,7 +177,7 @@ namespace NuGet.VisualStudio.Test {
             Assert.True(result);
 
             // values should be null because we don't persist aggregate source into user settings file
-            var values = userSettingsManager.GetValues(PackageSourceProvider.FileSettingsSectionName);
+            var values = userSettingsManager.GetValues(PackageSourceProvider.PackageSourcesSectionName);
             Assert.Null(values);
         }
 
@@ -199,7 +199,7 @@ namespace NuGet.VisualStudio.Test {
             Assert.Null(provider.ActivePackageSource);
 
             // values should be null because we don't persist aggregate source into user settings file
-            var values = userSettingsManager.GetValues(PackageSourceProvider.FileSettingsSectionName);
+            var values = userSettingsManager.GetValues(PackageSourceProvider.PackageSourcesSectionName);
             Assert.Null(values);
         }
 

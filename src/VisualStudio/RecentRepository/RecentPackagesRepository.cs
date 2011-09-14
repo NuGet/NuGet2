@@ -240,7 +240,7 @@ namespace NuGet.VisualStudio {
         /// Determines if package sources have changed since the last time we queried.
         /// </summary>
         private bool PackageSourcesChanged() {
-            var sources = new HashSet<PackageSource>(_packageSourceProvider.LoadPackageSources());
+            var sources = new HashSet<PackageSource>(_packageSourceProvider.GetEnabledPackageSources());
 
             if (_currentSources == null) {
                 // The package cache has just been read from settings and is in sync with the sources. 

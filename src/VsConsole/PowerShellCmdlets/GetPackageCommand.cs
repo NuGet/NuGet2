@@ -227,7 +227,7 @@ namespace NuGet.PowerShell.Commands {
         private static bool IsHttpSource(IVsPackageSourceProvider packageSourceProvider) {
             var activeSource = packageSourceProvider.ActivePackageSource;
             if (activeSource.IsAggregate()) {
-                return packageSourceProvider.LoadPackageSources().Any(s => UriHelper.IsHttpSource(s.Source));
+                return packageSourceProvider.GetEnabledPackageSources().Any(s => UriHelper.IsHttpSource(s.Source));
             }
             else {
                 return UriHelper.IsHttpSource(activeSource.Source);

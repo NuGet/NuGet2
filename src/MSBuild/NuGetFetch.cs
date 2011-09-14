@@ -89,7 +89,7 @@ namespace NuGet.MSBuild {
         private bool TryCreateRepository(out IPackageRepository repository) {
             var feedsSpecified = Sources != null && Sources.Any();
             // If the user specifies a source, use that. If not fall back to the default package sources.
-            var sources = feedsSpecified ? Sources : _sourceProvider.LoadPackageSources().Select(s => s.Source);
+            var sources = feedsSpecified ? Sources : _sourceProvider.GetEnabledPackageSources().Select(s => s.Source);
 
             Log.LogMessage(MessageImportance.Normal, NuGetResources.BuildSpecificFeeds);
             try {

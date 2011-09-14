@@ -9,7 +9,7 @@ namespace NuGet {
         }
 
         public static AggregateRepository GetAggregate(this IPackageSourceProvider provider, IPackageRepositoryFactory factory, bool ignoreFailingRepositories) {
-            return new AggregateRepository(factory, provider.LoadPackageSources().Select(s => s.Source), ignoreFailingRepositories);
+            return new AggregateRepository(factory, provider.GetEnabledPackageSources().Select(s => s.Source), ignoreFailingRepositories);
         }
 
         public static IPackageRepository GetAggregate(this IPackageSourceProvider provider, IPackageRepositoryFactory factory, bool ignoreFailingRepositories, IEnumerable<string> feeds) {
@@ -37,12 +37,16 @@ namespace NuGet {
         /// Resolves a package source by either Name or Source.
         /// </summary>
         public static string ResolveSource(this IPackageSourceProvider provider, string value) {
-            var resolvedSource = (from source in provider.LoadPackageSources()
+            var resolvedSource = (from source in provider.GetEnabledPackageSources()
                                   where source.Name.Equals(value, StringComparison.CurrentCultureIgnoreCase) || source.Source.Equals(value, StringComparison.OrdinalIgnoreCase)
                                   select source.Source
-                                   ).FirstOrDefault();
+                                  ).FirstOrDefault();
 
             return resolvedSource ?? value;
+        }
+
+        public static IEnumerable<PackageSource> GetEnabledPackageSources(this IPackageSourceProvider provider) {
+            return provider.LoadPackageSources().Where(p => p.IsEnabled);
         }
     }
 }

@@ -11,11 +11,17 @@ namespace NuGet {
         [DataMember]
         public string Source { get; private set; }
 
-        public PackageSource(string source)
-            : this(source, source) {
+        public bool IsEnabled { get; set; }
+
+        public PackageSource(string source) :
+            this(source, source, isEnabled: true) {
         }
 
-        public PackageSource(string source, string name) {
+        public PackageSource(string source, string name) :
+            this(source, name, isEnabled: true) {
+        }
+
+        public PackageSource(string source, string name, bool isEnabled) {
             if (source == null) {
                 throw new ArgumentNullException("source");
             }
@@ -26,6 +32,7 @@ namespace NuGet {
 
             Name = name;
             Source = source;
+            IsEnabled = isEnabled;
         }
 
         public bool Equals(PackageSource other) {
@@ -51,6 +58,10 @@ namespace NuGet {
 
         public override int GetHashCode() {
             return Name.GetHashCode() * 3137 + Source.GetHashCode();
+        }
+
+        public PackageSource Clone() {
+            return new PackageSource(Source, Name, IsEnabled);
         }
     }
 }

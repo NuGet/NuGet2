@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio;
@@ -25,6 +26,7 @@ namespace NuGet.Options {
         private BindingSource _allPackageSources;
         private readonly IServiceProvider _serviceProvider;
         private bool _initialized;
+        private Size _checkBoxSize;
 
         public PackageSourcesOptionsControl(IServiceProvider serviceProvider)
             : this(ServiceLocator.GetInstance<IVsPackageSourceProvider>(), serviceProvider) {
@@ -87,7 +89,7 @@ namespace NuGet.Options {
             _activeSource = _packageSourceProvider.ActivePackageSource;
 
             // bind to the package sources, excluding Aggregate
-            _allPackageSources = new BindingSource(packageSources.ToList(), null);
+            _allPackageSources = new BindingSource(packageSources.Select(ps => ps.Clone()).ToList(), null);
             PackageSourcesListBox.DataSource = _allPackageSources;
         }
 
@@ -236,7 +238,31 @@ namespace NuGet.Options {
             if (e.Button == MouseButtons.Right) {
                 PackageSourcesListBox.SelectedIndex = PackageSourcesListBox.IndexFromPoint(e.Location);
             }
+            else if (e.Button == MouseButtons.Left) {
+                int itemIndex = PackageSourcesListBox.IndexFromPoint(e.Location);
+                if (itemIndex >= 0 && itemIndex < PackageSourcesListBox.Items.Count) {
+                    const int margin = 8;
 
+                    // this is the bound of the whole package source item
+                    Rectangle itemRect = PackageSourcesListBox.GetItemRectangle(itemIndex);
+
+                    // this is the bound of the checkbox
+                    var checkBoxRectangle = new Rectangle(
+                        itemRect.Right - _checkBoxSize.Width - margin + 2,
+                        itemRect.Top + margin,
+                        _checkBoxSize.Width,
+                        _checkBoxSize.Height);
+
+                    // if the mouse click position is inside the checkbox, toggle the IsEnabled property
+                    if (checkBoxRectangle.Contains(e.Location)) {
+                        PackageSource clickItem = (PackageSource)PackageSourcesListBox.Items[itemIndex];
+                        clickItem.IsEnabled = !clickItem.IsEnabled;
+
+                        // redraw the checkBox
+                        PackageSourcesListBox.Invalidate(checkBoxRectangle);
+                    }
+                }
+            }
         }
 
         private readonly Color SelectionFocusGradientLightColor = Color.FromArgb(0xF9, 0xFC, 0xFF);
@@ -253,7 +279,6 @@ namespace NuGet.Options {
                 using (var borderPen = new Pen(SelectionFocusBorderColor)) {
                     e.Graphics.DrawRectangle(borderPen, e.Bounds.Left, e.Bounds.Top, e.Bounds.Width - 1, e.Bounds.Height - 1);
                 }
-
             }
             else {
                 // alternate background color for even/odd rows
@@ -278,14 +303,39 @@ namespace NuGet.Options {
                 drawFormat.Trimming = StringTrimming.EllipsisCharacter;
                 drawFormat.LineAlignment = StringAlignment.Near;
 
+                const int margin = 8;
+
+                // draw the enabled/disabled checkbox
+                CheckBoxState checkBoxState = currentItem.IsEnabled ? CheckBoxState.CheckedNormal : CheckBoxState.UncheckedNormal;
+                Size checkBoxSize = CheckBoxRenderer.GetGlyphSize(e.Graphics, checkBoxState);
+                CheckBoxRenderer.DrawCheckBox(
+                    e.Graphics,
+                    new Point(e.Bounds.Right - checkBoxSize.Width - margin, e.Bounds.Top + margin),
+                    checkBoxState);
+
+                if (_checkBoxSize.IsEmpty) {
+                    // save the checkbox size so that we can detect mouse click on the 
+                    // checkbox in the MouseUp event handler.
+                    // here we assume that all checkboxes have the same size, which is reasonable. 
+                    _checkBoxSize = checkBoxSize;
+                }
+
                 // draw package source as
                 // 1. Name
                 //    Source (italics)
-                string ordinal = (e.Index + 1) + ". ";
-                e.Graphics.DrawString(ordinal, e.Font, foreBrush, e.Bounds, drawFormat);
-                SizeF ordinalSize = e.Graphics.MeasureString(ordinal, e.Font, e.Bounds.Width, drawFormat);
 
-                var nameBounds = NewBounds(e.Bounds, (int)ordinalSize.Width, 0);
+                // resize the bound rectangle to make room for the checkbox above
+                var textBounds = new Rectangle(
+                    e.Bounds.Left, 
+                    e.Bounds.Top, 
+                    e.Bounds.Width - checkBoxSize.Width - margin,
+                    e.Bounds.Height);
+                
+                string ordinal = (e.Index + 1) + ". ";
+                e.Graphics.DrawString(ordinal, e.Font, foreBrush, textBounds, drawFormat);
+                SizeF ordinalSize = e.Graphics.MeasureString(ordinal, e.Font, textBounds.Width, drawFormat);
+
+                var nameBounds = NewBounds(textBounds, (int)ordinalSize.Width, 0);
                 e.Graphics.DrawString(currentItem.Name, e.Font, foreBrush, nameBounds, drawFormat);
                 SizeF nameSize = e.Graphics.MeasureString(ordinal, e.Font, nameBounds.Width, drawFormat);
 
@@ -293,7 +343,7 @@ namespace NuGet.Options {
                 e.Graphics.DrawString(currentItem.Source, italicFont, foreBrush, sourceBounds, drawFormat);
 
                 // If the ListBox has focus, draw a focus rectangle around the selected item.
-                e.DrawFocusRectangle();
+                e.DrawFocusRectangle();                
             }
         }
 
