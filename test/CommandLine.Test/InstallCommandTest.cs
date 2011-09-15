@@ -254,7 +254,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
                 return _fileSystem;
             }
 
-            protected override PackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache, IPackageRepository repository = null) {
+            protected override PackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache, IPackageRepository repository) {
                 return _packageManager ?? base.CreatePackageManager(fileSystem, useMachineCache, new MockPackageRepository());
             }
 

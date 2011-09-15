@@ -137,6 +137,7 @@ namespace NuGet.Commands {
                 repository = new AggregateRepository(new[] { machineCacheRepository ?? MachineCache.Default, repository });
             }
 
+            machineCacheRepository = machineCacheRepository ?? MachineCache.Default;
             var pathResolver = new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions);
             var packageManager = new PackageManager(repository, pathResolver, fileSystem, new LocalPackageRepository(pathResolver, fileSystem), machineCacheRepository);
             packageManager.Logger = Console;
