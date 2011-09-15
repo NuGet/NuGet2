@@ -660,7 +660,7 @@ nuget update -Self</value>
     <value>Path to the package(s) source.</value>
   </data>
   <data name="SourcesCommandUsageSummary" xml:space="preserve">
-    <value>&lt;List|Add|Remove&gt; -Name [name] -Source [source]</value>
+    <value>&lt;List|Add|Remove|Enable|Disable&gt; -Name [name] -Source [source]</value>
   </data>
   <data name="SourcesCommandDescription" xml:space="preserve">
     <value>Provides the ability to manage list of sources located in  %AppData%\NuGet\NuGet.config</value>
@@ -709,5 +709,11 @@ nuget update -Self</value>
   </data>
   <data name="SourcesCommandEnabled" xml:space="preserve">
     <value>Enabled</value>
+  </data>
+  <data name="SourcesCommandSourceDisabledSuccessfully" xml:space="preserve">
+    <value>Package source with Name: {0} disabled successfully.</value>
+  </data>
+  <data name="SourcesCommandSourceEnabledSuccessfully" xml:space="preserve">
+    <value>Package source with Name: {0} enabled successfully.</value>
   </data>
 </root>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using NuGet.Common;
@@ -38,7 +39,32 @@ namespace NuGet.Commands {
                 case "REMOVE":
                     RemoveSource(Name);
                     break;
+                case "ENABLE":
+                    EnableOrDisableSource(Name, enabled: true);
+                    break;
+                case "DISABLE":
+                    EnableOrDisableSource(Name, enabled: false);
+                    break;
             }
+        }
+
+        private void EnableOrDisableSource(string name, bool enabled) {
+            if (String.IsNullOrWhiteSpace(name)) {
+                throw new CommandLineException(NuGetResources.SourcesCommandNameRequired);
+            }
+
+            List<PackageSource> sourceList = SourceProvider.LoadPackageSources().ToList();
+            List<PackageSource> existingSource = sourceList.Where(ps => String.Equals(name, ps.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (!existingSource.Any()) {
+                throw new CommandLineException(NuGetResources.SourcesCommandNoMatchingSourcesFound, name);
+            }
+
+            existingSource.ForEach(p => p.IsEnabled = enabled);
+
+            SourceProvider.SavePackageSources(sourceList);
+            Console.WriteLine(
+                enabled ? NuGetResources.SourcesCommandSourceEnabledSuccessfully : NuGetResources.SourcesCommandSourceDisabledSuccessfully,
+                name);
         }
 
         private void RemoveSource(string name) {

@@ -1330,6 +1330,24 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Package source with Name: {0} disabled successfully..
+        /// </summary>
+        internal static string SourcesCommandSourceDisabledSuccessfully {
+            get {
+                return ResourceManager.GetString("SourcesCommandSourceDisabledSuccessfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package source with Name: {0} enabled successfully..
+        /// </summary>
+        internal static string SourcesCommandSourceEnabledSuccessfully {
+            get {
+                return ResourceManager.GetString("SourcesCommandSourceEnabledSuccessfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Package source with Name: {0} removed successfully..
         /// </summary>
         internal static string SourcesCommandSourceRemovedSuccessfully {
@@ -1366,7 +1384,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;List|Add|Remove&gt; -Name [name] -Source [source].
+        ///   Looks up a localized string similar to &lt;List|Add|Remove|Enable|Disable&gt; -Name [name] -Source [source].
         /// </summary>
         internal static string SourcesCommandUsageSummary {
             get {

@@ -43,6 +43,9 @@
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\Core.Test\Mocks\MockUserSettingsManager.cs">
+      <Link>MockUserSettingsManager.cs</Link>
+    </Compile>
     <Compile Include="CommandAttributeTests.cs" />
     <Compile Include="CommandLinePaserTests.cs" />
     <Compile Include="CommandManagerTests.cs" />
@@ -55,6 +58,7 @@
     <Compile Include="ProgramTest.cs" />
     <Compile Include="ResourceHelperTests.cs" />
     <Compile Include="SetApiKeyCommandTest.cs" />
+    <Compile Include="SourcesCommandTest.cs" />
     <Compile Include="TypeHelperTest.cs" />
     <Compile Include="UpdateCommandTest.cs" />
   </ItemGroup>
