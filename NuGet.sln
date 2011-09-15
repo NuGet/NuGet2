@@ -104,6 +104,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dialog10", "src\Dialog10\Dialog10.csproj", "{5984731D-613C-440A-833A-F92A3E3CF793}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandLine.Test", "test\CommandLine.Test\CommandLine.Test.csproj", "{5376E601-D111-4198-8BC2-F1118433CC83}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dialog", "src\Dialog\Dialog.csproj", "{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}"
 EndProject
 Global
