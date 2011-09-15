@@ -25,6 +25,21 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
+        public void InstallCommandInstallsPackageSuccessfullyIfCacheRepositoryIsNotSet() {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
+            installCommand.Arguments.Add("Foo");
+            installCommand.UseMockForCacheRepository = false;
+
+            // Act
+            installCommand.ExecuteCommand();
+
+            // Assert
+            Assert.Equal(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.Single().Key);
+        }
+
+        [Fact]
         public void InstallCommandResolvesSourceName() {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -248,6 +263,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
                 : base(factory, sourceProvider) {
                 _fileSystem = fileSystem;
                 _packageManager = packageManager;
+                UseMockForCacheRepository = true;
             }
 
             protected override IFileSystem CreateFileSystem() {
@@ -255,12 +271,18 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             }
 
             protected override PackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache, IPackageRepository repository) {
-                return _packageManager ?? base.CreatePackageManager(fileSystem, useMachineCache, new MockPackageRepository());
+                return _packageManager ?? 
+                    base.CreatePackageManager(
+                        fileSystem, 
+                        useMachineCache, 
+                        UseMockForCacheRepository ? new MockPackageRepository() : null);
             }
 
             protected override PackageReferenceFile GetPackageReferenceFile(string path) {
                 return new PackageReferenceFile(_fileSystem, path);
             }
+
+            public bool UseMockForCacheRepository { get; set; }
         }
     }
 }

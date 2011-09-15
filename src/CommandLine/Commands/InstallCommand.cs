@@ -133,11 +133,12 @@ namespace NuGet.Commands {
         protected virtual PackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache = false, IPackageRepository machineCacheRepository = null) {
             var repository = GetRepository();
 
-            if (useMachineCache) {
-                repository = new AggregateRepository(new[] { machineCacheRepository ?? MachineCache.Default, repository });
-            }
-
             machineCacheRepository = machineCacheRepository ?? MachineCache.Default;
+
+            if (useMachineCache) {
+                repository = new AggregateRepository(new[] { machineCacheRepository, repository });
+            }
+            
             var pathResolver = new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions);
             var packageManager = new PackageManager(repository, pathResolver, fileSystem, new LocalPackageRepository(pathResolver, fileSystem), machineCacheRepository);
             packageManager.Logger = Console;
