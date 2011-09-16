@@ -47,6 +47,7 @@
     <Compile Include="GeneralOptionPage.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="OptionsPageBase.cs">
       <SubType>Component</SubType>
     </Compile>
