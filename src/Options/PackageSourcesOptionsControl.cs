@@ -271,13 +271,15 @@ namespace NuGet.Options {
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Drawing.Graphics.MeasureString(System.String,System.Drawing.Font,System.Int32,System.Drawing.StringFormat)")]
         private void PackageSourcesListBox_DrawItem(object sender, DrawItemEventArgs e) {
+            Graphics graphics = e.Graphics;
+
             // Draw the background of the ListBox control for each item.
             if (e.BackColor.Name == KnownColor.Highlight.ToString()) {
                 using (var gradientBrush = new LinearGradientBrush(e.Bounds, SelectionFocusGradientLightColor, SelectionFocusGradientDarkColor, 90.0F)) {
-                    e.Graphics.FillRectangle(gradientBrush, e.Bounds);
+                    graphics.FillRectangle(gradientBrush, e.Bounds);
                 }
                 using (var borderPen = new Pen(SelectionFocusBorderColor)) {
-                    e.Graphics.DrawRectangle(borderPen, e.Bounds.Left, e.Bounds.Top, e.Bounds.Width - 1, e.Bounds.Height - 1);
+                    graphics.DrawRectangle(borderPen, e.Bounds.Left, e.Bounds.Top, e.Bounds.Width - 1, e.Bounds.Height - 1);
                 }
             }
             else {
@@ -286,7 +288,7 @@ namespace NuGet.Options {
                                       ? Color.FromKnownColor(KnownColor.Window)
                                       : Color.FromArgb(0xF6, 0xF6, 0xF6);
                 using (Brush backBrush = new SolidBrush(backColor)) {
-                    e.Graphics.FillRectangle(backBrush, e.Bounds);
+                    graphics.FillRectangle(backBrush, e.Bounds);
                 }
             }
 
@@ -311,9 +313,9 @@ namespace NuGet.Options {
 
                 // draw the enabled/disabled checkbox
                 CheckBoxState checkBoxState = currentItem.IsEnabled ? CheckBoxState.CheckedNormal : CheckBoxState.UncheckedNormal;
-                Size checkBoxSize = CheckBoxRenderer.GetGlyphSize(e.Graphics, checkBoxState);
+                Size checkBoxSize = CheckBoxRenderer.GetGlyphSize(graphics, checkBoxState);
                 CheckBoxRenderer.DrawCheckBox(
-                    e.Graphics,
+                    graphics,
                     new Point(edgeMargin, e.Bounds.Top + edgeMargin),
                     checkBoxState);
 
@@ -324,26 +326,35 @@ namespace NuGet.Options {
                     _checkBoxSize = checkBoxSize;
                 }
 
-                // draw each package source as
-                // 
-                // [checkbox] Name
-                //            Source (italics)
+                GraphicsState oldState = graphics.Save();
+                try {
+                    // turn on high quality text rendering mode
+                    graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-                // resize the bound rectangle to make room for the checkbox above
-                var textBounds = new Rectangle(
-                    e.Bounds.Left + checkBoxSize.Width + edgeMargin + textMargin, 
-                    e.Bounds.Top,
-                    e.Bounds.Width - checkBoxSize.Width - edgeMargin - textMargin,
-                    e.Bounds.Height);
+                    // draw each package source as
+                    // 
+                    // [checkbox] Name
+                    //            Source (italics)
 
-                e.Graphics.DrawString(currentItem.Name, e.Font, foreBrush, textBounds, drawFormat);
-                SizeF nameSize = e.Graphics.MeasureString(currentItem.Name, e.Font, textBounds.Width, drawFormat);
+                    // resize the bound rectangle to make room for the checkbox above
+                    var textBounds = new Rectangle(
+                        e.Bounds.Left + checkBoxSize.Width + edgeMargin + textMargin,
+                        e.Bounds.Top,
+                        e.Bounds.Width - checkBoxSize.Width - edgeMargin - textMargin,
+                        e.Bounds.Height);
 
-                var sourceBounds = NewBounds(textBounds, 0, (int)nameSize.Height);
-                e.Graphics.DrawString(currentItem.Source, italicFont, sourceBrush, sourceBounds, drawFormat);
+                    graphics.DrawString(currentItem.Name, e.Font, foreBrush, textBounds, drawFormat);
+                    SizeF nameSize = graphics.MeasureString(currentItem.Name, e.Font, textBounds.Width, drawFormat);
+
+                    var sourceBounds = NewBounds(textBounds, 0, (int)nameSize.Height);
+                    graphics.DrawString(currentItem.Source, italicFont, sourceBrush, sourceBounds, drawFormat);
+                }
+                finally {
+                    graphics.Restore(oldState);
+                }
 
                 // If the ListBox has focus, draw a focus rectangle around the selected item.
-                e.DrawFocusRectangle();                
+                e.DrawFocusRectangle();
             }
         }
 
