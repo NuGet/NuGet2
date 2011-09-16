@@ -241,15 +241,15 @@ namespace NuGet.Options {
             else if (e.Button == MouseButtons.Left) {
                 int itemIndex = PackageSourcesListBox.IndexFromPoint(e.Location);
                 if (itemIndex >= 0 && itemIndex < PackageSourcesListBox.Items.Count) {
-                    const int margin = 8;
+                    const int edgeMargin = 8;
 
                     // this is the bound of the whole package source item
                     Rectangle itemRect = PackageSourcesListBox.GetItemRectangle(itemIndex);
 
                     // this is the bound of the checkbox
                     var checkBoxRectangle = new Rectangle(
-                        itemRect.Right - _checkBoxSize.Width - margin + 2,
-                        itemRect.Top + margin,
+                        itemRect.Left + edgeMargin + 2,
+                        itemRect.Top + edgeMargin,
                         _checkBoxSize.Width,
                         _checkBoxSize.Height);
 
@@ -298,19 +298,23 @@ namespace NuGet.Options {
 
             using (StringFormat drawFormat = new StringFormat())
             using (Brush foreBrush = new SolidBrush(Color.FromKnownColor(KnownColor.WindowText)))
+            using (Brush sourceBrush = new SolidBrush(Color.FromKnownColor(KnownColor.Navy)))
             using (Font italicFont = new Font(e.Font, FontStyle.Italic)) {
                 drawFormat.Alignment = StringAlignment.Near;
                 drawFormat.Trimming = StringTrimming.EllipsisCharacter;
                 drawFormat.LineAlignment = StringAlignment.Near;
 
-                const int margin = 8;
+                // the margin between the checkbox and the edge of the list box
+                const int edgeMargin = 8;
+                // the margin between the checkbox and the text
+                const int textMargin = 4;
 
                 // draw the enabled/disabled checkbox
                 CheckBoxState checkBoxState = currentItem.IsEnabled ? CheckBoxState.CheckedNormal : CheckBoxState.UncheckedNormal;
                 Size checkBoxSize = CheckBoxRenderer.GetGlyphSize(e.Graphics, checkBoxState);
                 CheckBoxRenderer.DrawCheckBox(
                     e.Graphics,
-                    new Point(e.Bounds.Right - checkBoxSize.Width - margin, e.Bounds.Top + margin),
+                    new Point(edgeMargin, e.Bounds.Top + edgeMargin),
                     checkBoxState);
 
                 if (_checkBoxSize.IsEmpty) {
@@ -320,27 +324,23 @@ namespace NuGet.Options {
                     _checkBoxSize = checkBoxSize;
                 }
 
-                // draw package source as
-                // 1. Name
-                //    Source (italics)
+                // draw each package source as
+                // 
+                // [checkbox] Name
+                //            Source (italics)
 
                 // resize the bound rectangle to make room for the checkbox above
                 var textBounds = new Rectangle(
-                    e.Bounds.Left, 
-                    e.Bounds.Top, 
-                    e.Bounds.Width - checkBoxSize.Width - margin,
+                    e.Bounds.Left + checkBoxSize.Width + edgeMargin + textMargin, 
+                    e.Bounds.Top,
+                    e.Bounds.Width - checkBoxSize.Width - edgeMargin - textMargin,
                     e.Bounds.Height);
-                
-                string ordinal = (e.Index + 1) + ". ";
-                e.Graphics.DrawString(ordinal, e.Font, foreBrush, textBounds, drawFormat);
-                SizeF ordinalSize = e.Graphics.MeasureString(ordinal, e.Font, textBounds.Width, drawFormat);
 
-                var nameBounds = NewBounds(textBounds, (int)ordinalSize.Width, 0);
-                e.Graphics.DrawString(currentItem.Name, e.Font, foreBrush, nameBounds, drawFormat);
-                SizeF nameSize = e.Graphics.MeasureString(ordinal, e.Font, nameBounds.Width, drawFormat);
+                e.Graphics.DrawString(currentItem.Name, e.Font, foreBrush, textBounds, drawFormat);
+                SizeF nameSize = e.Graphics.MeasureString(currentItem.Name, e.Font, textBounds.Width, drawFormat);
 
-                var sourceBounds = NewBounds(nameBounds, 0, (int)nameSize.Height);
-                e.Graphics.DrawString(currentItem.Source, italicFont, foreBrush, sourceBounds, drawFormat);
+                var sourceBounds = NewBounds(textBounds, 0, (int)nameSize.Height);
+                e.Graphics.DrawString(currentItem.Source, italicFont, sourceBrush, sourceBounds, drawFormat);
 
                 // If the ListBox has focus, draw a focus rectangle around the selected item.
                 e.DrawFocusRectangle();                
