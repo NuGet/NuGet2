@@ -120,18 +120,15 @@
   <metadata name="HeaderLabel.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="HeaderLabel.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Bottom, Left</value>
-  </data>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="HeaderLabel.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="HeaderLabel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 13</value>
+    <value>1, 10</value>
   </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="HeaderLabel.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>4, 0, 3, 0</value>
   </data>
@@ -151,10 +148,10 @@
     <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;HeaderLabel.Parent" xml:space="preserve">
-    <value>tableLayoutPanel2</value>
+    <value>$this</value>
   </data>
   <data name="&gt;&gt;HeaderLabel.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>3</value>
   </data>
   <metadata name="PackageSourcesContextMenu.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>173, 17</value>
@@ -177,8 +174,14 @@
   <metadata name="removeButton.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
+  <data name="removeButton.AccessibleDescription" xml:space="preserve">
+    <value>Delete the selected package source</value>
+  </data>
+  <data name="removeButton.AccessibleName" xml:space="preserve">
+    <value>Delete Button</value>
+  </data>
   <data name="removeButton.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Bottom, Left, Right</value>
+    <value>Top, Left, Right</value>
   </data>
   <data name="removeButton.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -196,67 +199,62 @@
     <value>
         AAEAAAD/////AQAAAAAAAAAMAgAAAFdTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj00LjAuMC4w
         LCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZTeXN0
-        ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAADo
-        DAAAAk1TRnQBSQFMAgEBAwEAAQgBAAEIAQABGAEAARgBAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFg
-        AwABGAMAAQEBAAEgBgABJP8A/wD/AP8A/wAnAAEVAhQBGv8AEQAB6QGdAXYB/wHAAXoBWAH/AacBWwE2
-        Af8BpwFbATYB/wGkAVEBKQH/AaQBUwEtAf8BkwFHASMB/0wAARUCFAEaAeUBlwFxAf4BKAElASMBMf8A
-        DQAB6AGbAXQC/wGsAX4C/wGXAWAB/wHkAX4BTAH/AbwBZQE8Af8BpgFXATIB/wGYAUsBJgH/SAABFQIU
-        ARoB4wGYAXEB/wH+AbcBkgH+AZ0BTwEpAf8BKAElASMBMUAAASIBIwErATIBOQFEAYYBkQEnASoBNgE+
-        AwoBDQMAAQEUAAMDAQQDCAEKmAAB6AGbAXQC/wGwAYUC/wGbAWUB/wHrAYQBUQH/AcQBaQE+Af8BpgFX
-        ATIB/wGfAU4BJwH/RAABFQIUARoB4gGXAXIB/gH/AcABnwL/AbIBiQL/AaABbAH/AZ0BTwEpAf8BKAEl
-        ASMBMTgAAwQBBgE5AUMBegGFAQsBJwHhAf8BIgE0AbIB1wEbARwBIAEmAwEBAhAAAwIBAwE2AUMBjQGe
-        ASMBJQEtATUDAQEClAAB6AGbAXQC/wGzAYsC/wGfAWsB/wHyAYkBVAH/AcsBbwFBAf8BqgFaATQB/wGf
-        AU4BJwH/QAABFQIUARoB4wGYAXEB/wH+AcEBoQH+Af8BuwGYAv8BqwF9Av8BmAFiAf8B6wGEAVAB/wGi
-        AVABKgH/ASgBJQEjATE4AAEtATABQQFLARUBNgH2Af8BCAEhAdEB/wExAT0BkAGvAggBCQELDAADAQEC
-        AhoBHgEkAQwBIQG4AfUBIwEkASwBNgMBAQKUAAHoAZsBdAL/AbcBkQL/AaQBcQH/AfcBjgFYAf8B1AFz
-        AUUB/wGvAV0BNgH/AZ8BTgEnAf88AAEVAhQBGgHjAZgBcQH/Af4BwQGhAf4B/wHCAaIC/wG2AY4C/wGj
-        AXEB/wH6AZABWwH/AdwBeQFJAf8BuQFjAToB/wGiAVABKgH/ASgBJQEjATE0AAMGAQgBOAFIAaEBqwEd
-        AT0B8gH0ARIBJwHDAfIBLwExAUMBUwgAAwYBCAEKAgsBDgEiATcBwQHbAS8BPAGZAbgCFQEXAR0DBwEJ
-        lAAB6AGbAXQC/wG7AZYC/wGoAXgB/wH8AZIBXQH/AdwBeQFIAf8BtQFgATkB/wGfAU4BJwH/OAABFQIU
-        ARoB4gGXAXIB/gH5Ab4BoAH6Af8BwgGiAv8BvgGbAv8BrgGDAv8BnAFnAf8B8AGIAVMB/wHOAXABQwH/
-        Aa4BXAE1Af8BpgFXATQB/QGbAUsBJQH/ASgBJQEjATE0AAISARQBGAEuAUUByAHPAR8BQAH0Af8BIQE0
-        AbcB2wEoASkBMwFAAggBCQELAggBCQELATkBRQGMAZcBCwEjAcwB+wEiASMBKwE0nAAB6AGbAXQC/wG+
-        AZoC/wGsAX4C/wGWAWAB/wHjAX4BTQH/Ab0BZQE7Af8BoAFOAScB/zQAARUCFAEaAd0BjwFoAf8B5wGk
-        AYEB/wHnAaQBgQH/AecBpAGBAv8BuQGTAv8BqAF3Af8B/gGUAV4B/wHjAX4BTAH/AcABZwE9Af8BpgFV
-        ATAB/wGmAVUBMAH/AaYBVQEwAf8BmwFLASUB/wEoASUBIwExMAADAQECARYBFwEaAR8BKQFBAc8B1QEZ
-        ATsB+wH8AS8BPwGmAbwBIwEkASwBNAEzAUUBrAG2AQ0BKwHpAf8BNgE8AV4BaQMAAQGcAAHnAZwBdQL/
-        AcABngL/AbABhQL/AZsBZgH/AesBhAFQAf8BxAFqAT8B/wGmAVEBKQH/RAAB5AGYAXEC/wHCAaIC/wG0
-        AYsC/wGfAWsB/wHxAYkBVAH/AcwBbgFBAf8BrAFTASgB/0gAARcBGAEbASABKgFCAcsB0gESATUC/gEP
-        ATAB9gH/AQ0BMAHzAf8BJwFAAdQB2qQAAeQBmAFxAv8BwgGiAv8BtAGLAv8BnwFrAf8B8QGJAVQB/wHM
-        AW4BQQH/AawBUwEoAf9EAAHnAZwBdQL/AcABngL/AbABhQL/AZsBZgH/AesBhAFQAf8BxAFqAT8B/wGm
-        AVEBKQH/TAABKQErATcBQAE1AVMB+QH7ASwBTAH+Af8BJQE/AdgB3gENAQ4BDwESlAABFQIUARoB3QGP
-        AWgB/wHnAaQBgQH/AecBpAGBAf8B5wGkAYEC/wG5AZMC/wGoAXcB/wH+AZQBXgH/AeMBfgFMAf8BwAFn
-        AT0B/wGmAVUBMAH/AaYBVQEwAf8BpgFVATAB/wGbAUsBJQH/ASgBJQEjATE0AAHoAZsBdAL/Ab4BmgL/
-        AawBfgL/AZYBYAH/AeMBfgFNAf8BvQFlATsB/wGgAU4BJwH/RwABAQEcAR0BIwEpASwBQwHIAc8BRQFh
-        Af4B/wEvAU0B+AH6ATMBTgHwAfMBNQFGAaQBrgMHAQmUAAEVAhQBGgHiAZcBcgH+AfkBvgGgAfoB/wHC
-        AaIC/wG+AZsC/wGuAYMC/wGcAWcB/wHwAYgBUwH/Ac4BcAFDAf8BrgFcATUB/wGmAVcBNAH9AZsBSwEl
-        Af8BKAElASMBMTgAAegBmwF0Av8BuwGWAv8BqAF4Af8B/AGSAV0B/wHcAXkBSAH/AbUBYAE5Af8BnwFO
-        AScB/0AAAwQBBgE3AT4BZQFwASYBRgH5AfsBMwFSAf4B/wE3AUYBnAGmAR8BIQEnAS4BOAFEAYgBkwE6
-        AVgB/gH/ATgBRAGIAZMCCwEMAQ+UAAEVAhQBGgHjAZgBcQH/Af4BwQGhAf4B/wHCAaIC/wG2AY4C/wGj
-        AXEB/wH6AZABWwH/AdwBeQFJAf8BuQFjAToB/wGiAVABKgH/ASgBJQEjATE8AAHoAZsBdAL/AbcBkQL/
-        AaQBcQH/AfcBjgFYAf8B1AFzAUUB/wGvAV0BNgH/AZ8BTgEnAf84AAESARMBFQEZASUBJgEwATgBMwFF
-        AawBtgEzAVIB/gH/AToBWAH+Af8BNQFGAagBsQIIAQkBCwQAAwcBCQE8AUwBpwGxATQBUwH5AfsBOQFD
-        AYABiwIJAQoBDJQAARUCFAEaAeMBmAFxAf8B/gHBAaEB/gH/AbsBmAL/AasBfQL/AZgBYgH/AesBhAFQ
-        Af8BogFQASoB/wEoASUBIwExQAAB6AGbAXQC/wGzAYsC/wGfAWsB/wHyAYkBVAH/AcsBbwFBAf8BqgFa
-        ATQB/wGfAU4BJwH/NAADAwEEATQBOQFXAWIBMwFFAawBtgFFAWEB/gH/AUUBYQH6AfwBOAFAAW8BegMC
-        AQMMAAMGAQgBKQEsATkCQgFeAfkB+wE4AUUBkQGcmAABFQIUARoB4gGXAXIB/gH/AcABnwL/AbIBiQL/
-        AaABbAH/AZ0BTwEpAf8BKAElASMBMUQAAegBmwF0Av8BsAGFAv8BmwFlAf8B6wGEAVEB/wHEAWkBPgH/
-        AaYBVwEyAf8BnwFOAScB/zQAAwIBAwE1ATsBXAFnAUoBZQH+Af8BQwFeAfkB+wEvATMBRwFRAwIBAxQA
-        AwMBBAEYARkBHAEiATcBPQFjAW6cAAEVAhQBGgHjAZgBcQH/Af4BtwGSAf4BnQFPASkB/wEoASUBIwEx
-        SAAB6AGbAXQC/wGsAX4C/wGXAWAB/wHkAX4BTAH/AbwBZQE8Af8BpgFXATIB/wGYAUsBJgH/OAABIAEi
-        ASkBMAExAUUBswG8ASkBLAE5AUIDAQECxAABFQIUARoB5QGXAXEB/gEoASUBIwExTAAB6QGdAXYB/wHA
-        AXoBWAH/AacBWwE2Af8BpwFbATYB/wGkAVEBKQH/AaQBUwEtAf8BkwFHASMB//8AEQABFQIUARr/AP8A
-        /wD/AP8A0QABQgFNAT4HAAE+AwABKAMAAWADAAEYAwABAQEAAQEFAAEgAQEWAAP/AQAJ/wMACf8DAAn/
-        AwAE/wH3BP8DAAH/AYAC/wHjBP8DAAH/AYAC/wHBAf8B/gEPAZ8DAAH/AYAC/wGAAf8B/AIPAwAB/wGA
-        Av8BAAF/Af4BDgEPAwAB/wGAAf8B/gEAAT8B/gEMAQ8DAAH/AYAB/wH8AQABHwH/AQABPwMAAf8BgAH/
-        AfgBAAEPAf8BAAE/AwAB/wGAAv8BgAL/AcAB/wMAAf8BgAL/AYAC/wHgAf8DAAH4AQABDwH/AYAC/wGA
-        AX8DAAH8AQABHwH/AYAC/wEAAT8DAAH+AQABPwH/AYAB/wH8AQQBHwMAAf8BAAF/Af8BgAH/AfgBDgEf
-        AwAB/wGAAv8BgAH/AfgCHwMAAf8BwQL/AYAB/wH8AT8B/wMAAf8B4wL/AYAE/wMAAf8B9wf/AwAJ/wMA
-        Cf8DAAn/AwAL
+        ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMAAADk
+        CwAAAk1TRnQBSQFMAgEBAwEAATgBAAE4AQABGAEAARgBAAT/ASEBAAj/AUIBTQE2BwABNgMAASgDAAFg
+        AwABGAMAAQEBAAEgBgABJP8A/wD/AP8A/wAnAAMTARr/ABEAAekBnQFwAf8BwAF0AVIB/wGnAVUBMAH/
+        AacBVQEwAf8BpAFLASMB/wGkAU0BJwH/AZMBQQEdAf9MAAMTARoB2QGLAXEB/gMiATH/AA0AAegBmwFu
+        Av8BrAF4Av8BlwFaAf8B5AF4AUYB/wG8AV8BNgH/AaYBUQEsAf8BmAFFASAB/0gAAxMBGgHjAZgBawH/
+        AfIBqwGGAf4BnQFJASMB/wMiATFAAAMiATICTAFNAZEDKQE+AwoBDQMAAQEUAAMDAQQDBwEKmAAB6AGb
+        AW4C/wGwAYUC/wGbAV8B/wHrAYQBSwH/AcQBYwE4Af8BpgFRASwB/wGfAUgBIQH/RAADEwEaAdYBiwFy
+        Af4B/wHAAZ8C/wGyAYkC/wGgAWYB/wGdAUkBIwH/AyIBMTgAAwQBBgNIAYUBBQEhAeEB/wFWAVkBaQHX
+        AxsBJgMBAQIQAAMCAQMDUAGeAyQBNQMBAQKUAAHoAZsBbgL/AbMBiwL/AZ8BZQH/AfIBiQFOAf8BywFp
+        ATsB/wGqAVQBLgH/AZ8BSAEhAf9AAAMTARoB4wGYAWsB/wHyAbUBlQH+Af8BuwGYAv8BqwF3Av8BmAFc
+        Af8B6wGEAUoB/wGiAUoBJAH/AyIBMTgAAzABSwEPATAB9gH/AQIBGwHRAf8DVAGvAwgBCwwAAwEBAgMa
+        ASQBKgEzAZcB9QMkATYDAQEClAAB6AGbAW4C/wG3AZEC/wGkAWsB/wH3AY4BUgH/AdQBbQE/Af8BrwFX
+        ATAB/wGfAUgBIQH/PAADEwEaAeMBmAFrAf8B8gG1AZUB/gH/AcIBogL/AbYBjgL/AaMBawH/AfoBkAFV
+        Af8B3AFzAUMB/wG5AV0BNAH/AaIBSgEkAf8DIgExNAADBgEIAlQBVgGrATUBQwG2AfQBNgFAAZYB8gMz
+        AVMIAAMGAQgDCgEOAVQBVwFwAdsCVgFXAbgDFQEdAwcBCZQAAegBmwFuAv8BuwGWAv8BqAFyAf8B/AGS
+        AVcB/wHcAXMBQgH/AbUBWgEzAf8BnwFIASEB/zgAAxMBGgHWAYsBcgH+AdUBpgGSAfoB/wHCAaIC/wG+
+        AZsC/wGuAYMC/wGcAWEB/wHwAYgBTQH/Ac4BagE9Af8BrgFWAS8B/wGmAVABOgH9AZsBRQEfAf8DIgEx
+        NAADEgEYAVgBWQFoAc8BGQE6AfQB/wFUAVcBcAHbAyoBQAMIAQsDCAELAk4BTwGXARcBIwG3AfsDIwE0
+        nAAB6AGbAW4C/wG+AZoC/wGsAXgC/wGWAVoB/wHjAXgBRwH/Ab0BXwE1Af8BoAFIASEB/zQAAxMBGgHd
+        AY8BYgH/AecBpAGBAf8B5wGkAYEB/wHnAaQBgQL/AbkBkwL/AagBcQH/Af4BlAFYAf8B4wF4AUYB/wHA
+        AWEBNwH/AaYBTwEqAf8BpgFPASoB/wGmAU8BKgH/AZsBRQEfAf8DIgExMAADAQECAxYBHwFXAVoBbAHV
+        AR8BNQHdAfwBVQFWAVgBvAMjATQBVQFWAVgBtgEHASUB6QH/Az0BaQMAAQGcAAHnAZwBbwL/AcABngL/
+        AbABhQL/AZsBYAH/AesBhAFKAf8BxAFkATkB/wGmAUsBIwH/RAAB5AGYAWsC/wHCAaIC/wG0AYsC/wGf
+        AWUB/wHxAYkBTgH/AcwBaAE7Af8BrAFNASIB/0gAAxcBIAFYAVkBaAHSARIBNQHyAf4BCQEqAfYB/wEH
+        ASoB8wH/AVcBWgFyAdqkAAHkAZgBawL/AcIBogL/AbQBiwL/AZ8BZQH/AfEBiQFOAf8BzAFoATsB/wGs
+        AU0BIgH/RAAB5wGcAW8C/wHAAZ4C/wGwAYUC/wGbAWAB/wHrAYQBSgH/AcQBZAE5Af8BpgFLASMB/0wA
+        AyoBQAEyAVMB1wH7ASYBRgH+Af8BUgFWAXcB3gMNARKUAAMTARoB3QGPAWIB/wHnAaQBgQH/AecBpAGB
+        Af8B5wGkAYEC/wG5AZMC/wGoAXEB/wH+AZQBWAH/AeMBeAFGAf8BwAFhATcB/wGmAU8BKgH/AaYBTwEq
+        Af8BpgFPASoB/wGbAUUBHwH/AyIBMTQAAegBmwFuAv8BvgGaAv8BrAF4Av8BlgFaAf8B4wF4AUcB/wG9
+        AV8BNQH/AaABSAEhAf9HAAEBAx0BKQFYAVkBaAHPAT8BWwH+Af8BLwFNAdQB+gFDAU4BsAHzAlQBVQGu
+        AwcBCZQAAxMBGgHWAYsBcgH+AdUBpgGSAfoB/wHCAaIC/wG+AZsC/wGuAYMC/wGcAWEB/wHwAYgBTQH/
+        Ac4BagE9Af8BrgFWAS8B/wGmAVABOgH9AZsBRQEfAf8DIgExOAAB6AGbAW4C/wG7AZYC/wGoAXIB/wH8
+        AZIBVwH/AdwBcwFCAf8BtQFaATMB/wGfAUgBIQH/QAADBAEGA0ABcAEmAUYB1wH7AS0BTAH+Af8CUgFU
+        AaYDIAEuA0wBkwE0AVIB/gH/A0wBkwMLAQ+UAAMTARoB4wGYAWsB/wHyAbUBlQH+Af8BwgGiAv8BtgGO
+        Av8BowFrAf8B+gGQAVUB/wHcAXMBQwH/AbkBXQE0Af8BogFKASQB/wMiATE8AAHoAZsBbgL/AbcBkQL/
+        AaQBawH/AfcBjgFSAf8B1AFtAT8B/wGvAVcBMAH/AZ8BSAEhAf84AAMSARkDJgE4AVUBVgFYAbYBLQFM
+        Af4B/wE0AVIB/gH/AlUBVgGxAwgBCwQAAwcBCQJVAVYBsQEyAVMB1wH7A0oBiwMJAQyUAAMTARoB4wGY
+        AWsB/wHyAbUBlQH+Af8BuwGYAv8BqwF3Av8BmAFcAf8B6wGEAUoB/wGiAUoBJAH/AyIBMUAAAegBmwFu
+        Av8BswGLAv8BnwFlAf8B8gGJAU4B/wHLAWkBOwH/AaoBVAEuAf8BnwFIASEB/zQAAwMBBAM6AWIBVQFW
+        AVgBtgE/AVsB/gH/ATwBWwHcAfwDRAF6AwIBAwwAAwYBCAMrAkIBXgHXAfsCTwFRAZyYAAMTARoB1gGL
+        AXIB/gH/AcABnwL/AbIBiQL/AaABZgH/AZ0BSQEjAf8DIgExRAAB6AGbAW4C/wGwAYUC/wGbAV8B/wHr
+        AYQBSwH/AcQBYwE4Af8BpgFRASwB/wGfAUgBIQH/NAADAgEDAjwBPQFnAUQBXwH+Af8BQwFeAdcB+wMy
+        AVEDAgEDFAADAwEEAxgBIgI/AUABbpwAAxMBGgHjAZgBawH/AfIBqwGGAf4BnQFJASMB/wMiATFIAAHo
+        AZsBbgL/AawBeAL/AZcBWgH/AeQBeAFGAf8BvAFfATYB/wGmAVEBLAH/AZgBRQEgAf84AAMhATABVQFW
+        AVsBvAMrAUIDAQECxAADEwEaAdkBiwFxAf4DIgExTAAB6QGdAXAB/wHAAXQBUgH/AacBVQEwAf8BpwFV
+        ATAB/wGkAUsBIwH/AaQBTQEnAf8BkwFBAR0B//8AEQADEwEa/wD/AP8A/wD/ANEAAUIBTQE+BwABPgMA
+        ASgDAAFgAwABGAMAAQEBAAEBBQABIAEBFgAD/wEACf8DAAn/AwAJ/wMABP8B9wT/AwAB/wGAAv8B4wT/
+        AwAB/wGAAv8BwQH/Af4BDwGfAwAB/wGAAv8BgAH/AfwCDwMAAf8BgAL/AQABfwH+AQ4BDwMAAf8BgAH/
+        Af4BAAE/Af4BDAEPAwAB/wGAAf8B/AEAAR8B/wEAAT8DAAH/AYAB/wH4AQABDwH/AQABPwMAAf8BgAL/
+        AYAC/wHAAf8DAAH/AYAC/wGAAv8B4AH/AwAB+AEAAQ8B/wGAAv8BgAF/AwAB/AEAAR8B/wGAAv8BAAE/
+        AwAB/gEAAT8B/wGAAf8B/AEEAR8DAAH/AQABfwH/AYAB/wH4AQ4BHwMAAf8BgAL/AYAB/wH4Ah8DAAH/
+        AcEC/wGAAf8B/AE/Af8DAAH/AeMC/wGABP8DAAH/AfcH/wMACf8DAAn/AwAJ/wMACw==
 </value>
   </data>
   <data name="removeButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>543, 0</value>
+    <value>0, 0</value>
   </data>
   <data name="removeButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>0, 0, 4, 0</value>
@@ -277,13 +275,19 @@
     <value>tableLayoutPanel2</value>
   </data>
   <data name="&gt;&gt;removeButton.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>0</value>
   </data>
   <metadata name="MoveUpButton.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
+  <data name="MoveUpButton.AccessibleDescription" xml:space="preserve">
+    <value>Move the selected source up</value>
+  </data>
+  <data name="MoveUpButton.AccessibleName" xml:space="preserve">
+    <value>Move Up Button</value>
+  </data>
   <data name="MoveUpButton.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Bottom, Left, Right</value>
+    <value>Top, Left, Right</value>
   </data>
   <data name="MoveUpButton.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -295,7 +299,7 @@
     <value>uparrow.png</value>
   </data>
   <data name="MoveUpButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>577, 0</value>
+    <value>34, 0</value>
   </data>
   <data name="MoveUpButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>0, 0, 4, 0</value>
@@ -316,13 +320,19 @@
     <value>tableLayoutPanel2</value>
   </data>
   <data name="&gt;&gt;MoveUpButton.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>1</value>
   </data>
   <metadata name="MoveDownButton.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
+  <data name="MoveDownButton.AccessibleDescription" xml:space="preserve">
+    <value>Move the selected source down</value>
+  </data>
+  <data name="MoveDownButton.AccessibleName" xml:space="preserve">
+    <value>Move Down Button</value>
+  </data>
   <data name="MoveDownButton.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Bottom, Left, Right</value>
+    <value>Top, Left, Right</value>
   </data>
   <data name="MoveDownButton.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -337,7 +347,7 @@
     <value>NoControl</value>
   </data>
   <data name="MoveDownButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>611, 0</value>
+    <value>68, 0</value>
   </data>
   <data name="MoveDownButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>0, 0, 4, 0</value>
@@ -358,7 +368,7 @@
     <value>tableLayoutPanel2</value>
   </data>
   <data name="&gt;&gt;MoveDownButton.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>2</value>
   </data>
   <metadata name="packageListToolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
@@ -379,7 +389,7 @@
     <value>NoControl</value>
   </data>
   <data name="addButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>572, 358</value>
+    <value>572, 323</value>
   </data>
   <data name="addButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 2, 0, 2</value>
@@ -406,7 +416,7 @@
     <value>tableLayoutPanel1</value>
   </data>
   <data name="&gt;&gt;addButton.ZOrder" xml:space="preserve">
-    <value>7</value>
+    <value>6</value>
   </data>
   <metadata name="BrowseButton.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -424,7 +434,7 @@
     <value>NoControl</value>
   </data>
   <data name="BrowseButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>532, 358</value>
+    <value>532, 323</value>
   </data>
   <data name="BrowseButton.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 2, 3, 2</value>
@@ -451,7 +461,7 @@
     <value>tableLayoutPanel1</value>
   </data>
   <data name="&gt;&gt;BrowseButton.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>5</value>
   </data>
   <metadata name="NewPackageSource.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -460,16 +470,13 @@
     <value>Left, Right</value>
   </data>
   <data name="NewPackageSource.Location" type="System.Drawing.Point, System.Drawing">
-    <value>67, 360</value>
-  </data>
-  <data name="NewPackageSource.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>4, 4, 4, 4</value>
+    <value>66, 325</value>
   </data>
   <data name="NewPackageSource.MaxLength" type="System.Int32, mscorlib">
     <value>1000</value>
   </data>
   <data name="NewPackageSource.Size" type="System.Drawing.Size, System.Drawing">
-    <value>458, 22</value>
+    <value>460, 22</value>
   </data>
   <data name="NewPackageSource.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -484,7 +491,7 @@
     <value>tableLayoutPanel1</value>
   </data>
   <data name="&gt;&gt;NewPackageSource.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>4</value>
   </data>
   <metadata name="NewPackageSourceLabel.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -499,7 +506,7 @@
     <value>NoControl</value>
   </data>
   <data name="NewPackageSourceLabel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 363</value>
+    <value>3, 328</value>
   </data>
   <data name="NewPackageSourceLabel.Size" type="System.Drawing.Size, System.Drawing">
     <value>57, 17</value>
@@ -520,7 +527,7 @@
     <value>tableLayoutPanel1</value>
   </data>
   <data name="&gt;&gt;NewPackageSourceLabel.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>3</value>
   </data>
   <metadata name="NewPackageName.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -528,95 +535,26 @@
   <data name="NewPackageName.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Left, Right</value>
   </data>
-  <metadata name="tableLayoutPanel1.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
-  <data name="tableLayoutPanel1.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Top, Bottom, Left, Right</value>
+  <data name="NewPackageName.Location" type="System.Drawing.Point, System.Drawing">
+    <value>66, 296</value>
   </data>
-  <data name="tableLayoutPanel1.ColumnCount" type="System.Int32, mscorlib">
-    <value>4</value>
+  <data name="NewPackageName.Size" type="System.Drawing.Size, System.Drawing">
+    <value>460, 22</value>
   </data>
-  <metadata name="tableLayoutPanel2.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
-  <data name="tableLayoutPanel2.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
+  <data name="NewPackageName.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
   </data>
-  <data name="tableLayoutPanel2.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
-    <value>GrowAndShrink</value>
+  <data name="&gt;&gt;NewPackageName.Name" xml:space="preserve">
+    <value>NewPackageName</value>
   </data>
-  <data name="tableLayoutPanel2.ColumnCount" type="System.Int32, mscorlib">
-    <value>4</value>
+  <data name="&gt;&gt;NewPackageName.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="tableLayoutPanel2.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
-    <value>Fill</value>
-  </data>
-  <data name="tableLayoutPanel2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 0</value>
-  </data>
-  <data name="tableLayoutPanel2.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>0, 0, 0, 0</value>
-  </data>
-  <data name="tableLayoutPanel2.RowCount" type="System.Int32, mscorlib">
-    <value>1</value>
-  </data>
-  <data name="tableLayoutPanel2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>645, 30</value>
-  </data>
-  <data name="tableLayoutPanel2.TabIndex" type="System.Int32, mscorlib">
-    <value>3</value>
-  </data>
-  <data name="&gt;&gt;tableLayoutPanel2.Name" xml:space="preserve">
-    <value>tableLayoutPanel2</value>
-  </data>
-  <data name="&gt;&gt;tableLayoutPanel2.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TableLayoutPanel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;tableLayoutPanel2.Parent" xml:space="preserve">
+  <data name="&gt;&gt;NewPackageName.Parent" xml:space="preserve">
     <value>tableLayoutPanel1</value>
   </data>
-  <data name="&gt;&gt;tableLayoutPanel2.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="tableLayoutPanel2.LayoutSettings" type="System.Windows.Forms.TableLayoutSettings, System.Windows.Forms">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;TableLayoutSettings&gt;&lt;Controls&gt;&lt;Control Name="MoveUpButton" Row="0" RowSpan="1" Column="2" ColumnSpan="1" /&gt;&lt;Control Name="MoveDownButton" Row="0" RowSpan="1" Column="3" ColumnSpan="1" /&gt;&lt;Control Name="HeaderLabel" Row="0" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="removeButton" Row="0" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;/Controls&gt;&lt;Columns Styles="Percent,100,AutoSize,0,AutoSize,0,AutoSize,0" /&gt;&lt;Rows Styles="Percent,100" /&gt;&lt;/TableLayoutSettings&gt;</value>
-  </data>
-  <metadata name="PackageSourcesListBox.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
-  <data name="PackageSourcesListBox.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
-    <value>Top, Bottom, Left, Right</value>
-  </data>
-  <data name="PackageSourcesListBox.IntegralHeight" type="System.Boolean, mscorlib">
-    <value>False</value>
-  </data>
-  <data name="PackageSourcesListBox.ItemHeight" type="System.Int32, mscorlib">
-    <value>34</value>
-  </data>
-  <data name="PackageSourcesListBox.Location" type="System.Drawing.Point, System.Drawing">
-    <value>4, 34</value>
-  </data>
-  <data name="PackageSourcesListBox.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>4, 4, 4, 4</value>
-  </data>
-  <data name="PackageSourcesListBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>637, 288</value>
-  </data>
-  <data name="PackageSourcesListBox.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
-  </data>
-  <data name="&gt;&gt;PackageSourcesListBox.Name" xml:space="preserve">
-    <value>PackageSourcesListBox</value>
-  </data>
-  <data name="&gt;&gt;PackageSourcesListBox.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ListBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;PackageSourcesListBox.Parent" xml:space="preserve">
-    <value>tableLayoutPanel1</value>
-  </data>
-  <data name="&gt;&gt;PackageSourcesListBox.ZOrder" xml:space="preserve">
-    <value>1</value>
+  <data name="&gt;&gt;NewPackageName.ZOrder" xml:space="preserve">
+    <value>2</value>
   </data>
   <metadata name="NewPackageNameLabel.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -631,7 +569,7 @@
     <value>NoControl</value>
   </data>
   <data name="NewPackageNameLabel.Location" type="System.Drawing.Point, System.Drawing">
-    <value>3, 332</value>
+    <value>3, 298</value>
   </data>
   <data name="NewPackageNameLabel.Size" type="System.Drawing.Size, System.Drawing">
     <value>49, 17</value>
@@ -652,19 +590,34 @@
     <value>tableLayoutPanel1</value>
   </data>
   <data name="&gt;&gt;NewPackageNameLabel.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>1</value>
+  </data>
+  <metadata name="PackageSourcesListBox.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <data name="PackageSourcesListBox.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
+  </data>
+  <metadata name="tableLayoutPanel1.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <data name="tableLayoutPanel1.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="tableLayoutPanel1.ColumnCount" type="System.Int32, mscorlib">
+    <value>4</value>
   </data>
   <data name="tableLayoutPanel1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 0</value>
+    <value>0, 35</value>
   </data>
   <data name="tableLayoutPanel1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 2, 3, 2</value>
   </data>
   <data name="tableLayoutPanel1.RowCount" type="System.Int32, mscorlib">
-    <value>4</value>
+    <value>3</value>
   </data>
   <data name="tableLayoutPanel1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>645, 387</value>
+    <value>645, 352</value>
   </data>
   <data name="tableLayoutPanel1.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -679,37 +632,85 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;tableLayoutPanel1.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
-  <data name="tableLayoutPanel1.LayoutSettings" type="System.Windows.Forms.TableLayoutSettings, System.Windows.Forms">
-    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;TableLayoutSettings&gt;&lt;Controls&gt;&lt;Control Name="tableLayoutPanel2" Row="0" RowSpan="1" Column="0" ColumnSpan="4" /&gt;&lt;Control Name="PackageSourcesListBox" Row="1" RowSpan="1" Column="0" ColumnSpan="4" /&gt;&lt;Control Name="NewPackageNameLabel" Row="2" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="NewPackageName" Row="2" RowSpan="1" Column="1" ColumnSpan="2" /&gt;&lt;Control Name="NewPackageSourceLabel" Row="3" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="NewPackageSource" Row="3" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="BrowseButton" Row="3" RowSpan="1" Column="2" ColumnSpan="1" /&gt;&lt;Control Name="addButton" Row="3" RowSpan="1" Column="3" ColumnSpan="1" /&gt;&lt;/Controls&gt;&lt;Columns Styles="AutoSize,0,Percent,100,AutoSize,0,AutoSize,0" /&gt;&lt;Rows Styles="AutoSize,0,Percent,100,AutoSize,0,AutoSize,0" /&gt;&lt;/TableLayoutSettings&gt;</value>
-  </data>
-  <data name="NewPackageName.Location" type="System.Drawing.Point, System.Drawing">
-    <value>67, 330</value>
-  </data>
-  <data name="NewPackageName.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>4, 4, 3, 4</value>
-  </data>
-  <data name="NewPackageName.MaxLength" type="System.Int32, mscorlib">
-    <value>50</value>
-  </data>
-  <data name="NewPackageName.Size" type="System.Drawing.Size, System.Drawing">
-    <value>499, 22</value>
-  </data>
-  <data name="NewPackageName.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
   </data>
-  <data name="&gt;&gt;NewPackageName.Name" xml:space="preserve">
-    <value>NewPackageName</value>
+  <data name="tableLayoutPanel1.LayoutSettings" type="System.Windows.Forms.TableLayoutSettings, System.Windows.Forms">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;TableLayoutSettings&gt;&lt;Controls&gt;&lt;Control Name="PackageSourcesListBox" Row="0" RowSpan="1" Column="0" ColumnSpan="4" /&gt;&lt;Control Name="NewPackageNameLabel" Row="1" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="NewPackageName" Row="1" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="NewPackageSourceLabel" Row="2" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="NewPackageSource" Row="2" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="BrowseButton" Row="2" RowSpan="1" Column="2" ColumnSpan="1" /&gt;&lt;Control Name="addButton" Row="2" RowSpan="1" Column="3" ColumnSpan="1" /&gt;&lt;/Controls&gt;&lt;Columns Styles="AutoSize,0,Percent,100,AutoSize,0,AutoSize,0" /&gt;&lt;Rows Styles="Percent,100,AutoSize,0,AutoSize,0,Absolute,20" /&gt;&lt;/TableLayoutSettings&gt;</value>
   </data>
-  <data name="&gt;&gt;NewPackageName.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PackageSourcesListBox.IntegralHeight" type="System.Boolean, mscorlib">
+    <value>False</value>
   </data>
-  <data name="&gt;&gt;NewPackageName.Parent" xml:space="preserve">
+  <data name="PackageSourcesListBox.ItemHeight" type="System.Int32, mscorlib">
+    <value>34</value>
+  </data>
+  <data name="PackageSourcesListBox.Location" type="System.Drawing.Point, System.Drawing">
+    <value>4, 0</value>
+  </data>
+  <data name="PackageSourcesListBox.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 4</value>
+  </data>
+  <data name="PackageSourcesListBox.Size" type="System.Drawing.Size, System.Drawing">
+    <value>637, 289</value>
+  </data>
+  <data name="PackageSourcesListBox.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;PackageSourcesListBox.Name" xml:space="preserve">
+    <value>PackageSourcesListBox</value>
+  </data>
+  <data name="&gt;&gt;PackageSourcesListBox.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ListBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;PackageSourcesListBox.Parent" xml:space="preserve">
     <value>tableLayoutPanel1</value>
   </data>
-  <data name="&gt;&gt;NewPackageName.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;PackageSourcesListBox.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <metadata name="tableLayoutPanel2.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <data name="tableLayoutPanel2.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Right</value>
+  </data>
+  <data name="tableLayoutPanel2.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="tableLayoutPanel2.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
+    <value>GrowAndShrink</value>
+  </data>
+  <data name="tableLayoutPanel2.ColumnCount" type="System.Int32, mscorlib">
     <value>3</value>
+  </data>
+  <data name="tableLayoutPanel2.Location" type="System.Drawing.Point, System.Drawing">
+    <value>543, 3</value>
+  </data>
+  <data name="tableLayoutPanel2.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>0, 0, 0, 0</value>
+  </data>
+  <data name="tableLayoutPanel2.RowCount" type="System.Int32, mscorlib">
+    <value>1</value>
+  </data>
+  <data name="tableLayoutPanel2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>102, 30</value>
+  </data>
+  <data name="tableLayoutPanel2.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="&gt;&gt;tableLayoutPanel2.Name" xml:space="preserve">
+    <value>tableLayoutPanel2</value>
+  </data>
+  <data name="&gt;&gt;tableLayoutPanel2.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TableLayoutPanel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tableLayoutPanel2.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;tableLayoutPanel2.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="tableLayoutPanel2.LayoutSettings" type="System.Windows.Forms.TableLayoutSettings, System.Windows.Forms">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;TableLayoutSettings&gt;&lt;Controls&gt;&lt;Control Name="removeButton" Row="0" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="MoveUpButton" Row="0" RowSpan="1" Column="1" ColumnSpan="1" /&gt;&lt;Control Name="MoveDownButton" Row="0" RowSpan="1" Column="2" ColumnSpan="1" /&gt;&lt;/Controls&gt;&lt;Columns Styles="AutoSize,0,AutoSize,0,AutoSize,0,Absolute,20" /&gt;&lt;Rows Styles="Percent,100" /&gt;&lt;/TableLayoutSettings&gt;</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -732,17 +733,17 @@
   <data name="&gt;&gt;CopyPackageSourceStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;packageListToolTip.Name" xml:space="preserve">
-    <value>packageListToolTip</value>
-  </data>
-  <data name="&gt;&gt;packageListToolTip.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolTip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;imageList1.Name" xml:space="preserve">
     <value>imageList1</value>
   </data>
   <data name="&gt;&gt;imageList1.Type" xml:space="preserve">
     <value>System.Windows.Forms.ImageList, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;packageListToolTip.Name" xml:space="preserve">
+    <value>packageListToolTip</value>
+  </data>
+  <data name="&gt;&gt;packageListToolTip.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolTip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>PackageSourcesOptionsControl</value>

@@ -226,7 +226,38 @@ namespace NuGet.Options {
         private void PackageSourcesListBox_KeyUp(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.C && e.Control) {
                 CopySelectedItem((PackageSource)PackageSourcesListBox.SelectedItem);
+                e.Handled = true;
             }
+            else if (e.KeyCode == Keys.Space) {
+                TogglePackageSourceEnabled(PackageSourcesListBox.SelectedIndex);
+                e.Handled = true;
+            }
+        }
+
+        private void TogglePackageSourceEnabled(int itemIndex) {
+            if (itemIndex < 0 || itemIndex >= PackageSourcesListBox.Items.Count) {
+                return;
+            }
+
+            var item = (PackageSource)PackageSourcesListBox.Items[itemIndex];
+            item.IsEnabled = !item.IsEnabled;
+            
+            PackageSourcesListBox.Invalidate(GetCheckBoxRectangleForListBoxItem(itemIndex));
+        }
+
+        private Rectangle GetCheckBoxRectangleForListBoxItem(int itemIndex) {
+            const int edgeMargin = 8;
+
+            Rectangle itemRectangle = PackageSourcesListBox.GetItemRectangle(itemIndex);
+
+            // this is the bound of the checkbox
+            var checkBoxRectangle = new Rectangle(
+                itemRectangle.Left + edgeMargin + 2,
+                itemRectangle.Top + edgeMargin,
+                _checkBoxSize.Width,
+                _checkBoxSize.Height);
+
+            return checkBoxRectangle;
         }
 
         private static void CopySelectedItem(PackageSource selectedPackageSource) {
@@ -241,25 +272,10 @@ namespace NuGet.Options {
             else if (e.Button == MouseButtons.Left) {
                 int itemIndex = PackageSourcesListBox.IndexFromPoint(e.Location);
                 if (itemIndex >= 0 && itemIndex < PackageSourcesListBox.Items.Count) {
-                    const int edgeMargin = 8;
-
-                    // this is the bound of the whole package source item
-                    Rectangle itemRect = PackageSourcesListBox.GetItemRectangle(itemIndex);
-
-                    // this is the bound of the checkbox
-                    var checkBoxRectangle = new Rectangle(
-                        itemRect.Left + edgeMargin + 2,
-                        itemRect.Top + edgeMargin,
-                        _checkBoxSize.Width,
-                        _checkBoxSize.Height);
-
+                    Rectangle checkBoxRectangle = GetCheckBoxRectangleForListBoxItem(itemIndex);
                     // if the mouse click position is inside the checkbox, toggle the IsEnabled property
                     if (checkBoxRectangle.Contains(e.Location)) {
-                        PackageSource clickItem = (PackageSource)PackageSourcesListBox.Items[itemIndex];
-                        clickItem.IsEnabled = !clickItem.IsEnabled;
-
-                        // redraw the checkBox
-                        PackageSourcesListBox.Invalidate(checkBoxRectangle);
+                        TogglePackageSourceEnabled(itemIndex);
                     }
                 }
             }
