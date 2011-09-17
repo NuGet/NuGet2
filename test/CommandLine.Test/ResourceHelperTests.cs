@@ -25,7 +25,7 @@ namespace NuGet.Test.NuGetCommandLine {
 
         [Fact]
         public void GetLocalizedString_ThrowsIfNoPropteryByResourceName() {
-            // Arrage 
+            // Arrange 
             Type resourceType = typeof(MockResourceType);
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => ResourceHelper.GetLocalizedString(resourceType, "DoesntExist"),
@@ -34,7 +34,7 @@ namespace NuGet.Test.NuGetCommandLine {
 
         [Fact]
         public void GetLocalizedString_ThrowsIfPropertyIsNotOfStringType() {
-            // Arrage 
+            // Arrange 
             Type resourceType = typeof(MockResourceType);
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => ResourceHelper.GetLocalizedString(resourceType, "NotValid"),
@@ -43,7 +43,7 @@ namespace NuGet.Test.NuGetCommandLine {
 
         [Fact]
         public void GetLocalizedString_ThrowsIfGetPropertyIsNotAvalible() {
-            // Arrage 
+            // Arrange 
             Type resourceType = typeof(MockResourceType);
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => ResourceHelper.GetLocalizedString(resourceType, "NoGet"),

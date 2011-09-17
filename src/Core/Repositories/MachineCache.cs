@@ -52,7 +52,7 @@ namespace NuGet {
                 Clear(files);
             }
 
-            // We don't want to call RemovePackage here since that does alot more than we need to
+            // We don't want to call RemovePackage here since that does a lot more than we need to
             DeletePackage(package);
             base.AddPackage(package);
         }

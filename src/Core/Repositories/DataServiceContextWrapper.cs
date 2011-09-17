@@ -126,7 +126,7 @@ namespace NuGet {
         }
 
         public IEnumerable<T> Execute<T>(Type elementType, DataServiceQueryContinuation continuation) {
-            // Get the generic execute method method
+            // Get the generic execute method
             MethodInfo executeMethod = _executeMethodInfo.MakeGenericMethod(elementType);
 
             // Get the results from the continuation

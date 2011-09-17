@@ -141,8 +141,8 @@ namespace NuGet.Dialog.Test {
         public void WhenConstructedLoadPageOneAutomatically() {
             TreeNodeActionTest(node => {
                 // Act
-                // Simply accessing the Extentions property will trigger loadding the first page
-                IList<IVsExtension> extentions = node.Extensions;
+                // Simply accessing the Extensions property will trigger loading the first page
+                IList<IVsExtension> extensions = node.Extensions;
             },
             node => {
                 // Assert

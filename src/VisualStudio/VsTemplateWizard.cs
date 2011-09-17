@@ -128,7 +128,7 @@ namespace NuGet.VisualStudio {
                 try {
                     DTE.StatusBar.Text = String.Format(CultureInfo.CurrentCulture, VsResources.TemplateWizard_PackageInstallStatus, package.Id, package.Version);
                     // TODO review parameters and installer call
-                    // REVIEW is it OK to ignoreDependencies? The expectation is that the vstemplate will list all the required packagesr
+                    // REVIEW is it OK to ignoreDependencies? The expectation is that the vstemplate will list all the required packages
                     packageInstaller.InstallPackage(packageRepositoryPath, project, package.Id, package.Version, ignoreDependencies: true);
                 }
                 catch (InvalidOperationException) {

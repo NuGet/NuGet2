@@ -92,7 +92,7 @@ namespace NuGet.Dialog.Test {
 
         [Fact]
         public void AfterSearchIsDoneTheOriginalNodeIsResetToTheFirstPage() {
-            // Arrage
+            // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
             provider.SelectedNode = (PackagesTreeNodeBase)provider.ExtensionsTree.Nodes[0];
 

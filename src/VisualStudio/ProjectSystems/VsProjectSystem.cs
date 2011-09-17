@@ -146,7 +146,7 @@ namespace NuGet.VisualStudio {
                 reference.CopyLocal = true;
 
                 // This happens if the assembly appears in any of the search paths that VS uses to locate assembly references.
-                // Most commmonly, it happens if this assembly is in the GAC or in the output path.
+                // Most commonly, it happens if this assembly is in the GAC or in the output path.
                 if (!reference.Path.Equals(fullPath, StringComparison.OrdinalIgnoreCase)) {
                     // Get the msbuild project for this project
                     MsBuildProject buildProject = Project.AsMSBuildProject();
@@ -286,7 +286,7 @@ namespace NuGet.VisualStudio {
                 return 0;
             }
 
-            // Add files tht are prefixes of other files first
+            // Add files that are prefixes of other files first
             if (x.Path.StartsWith(y.Path, StringComparison.OrdinalIgnoreCase)) {
                 return -1;
             }

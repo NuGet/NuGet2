@@ -291,7 +291,7 @@ namespace NuGet {
                 throw new ValidationException(message);
             }
 
-            // Validate additonal dependency rules dependencies
+            // Validate additional dependency rules dependencies
             ValidateDependencies(manifest.Metadata);
         }
 

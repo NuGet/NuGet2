@@ -100,7 +100,7 @@ namespace NuGet.Commands {
         }
 
         private static string RemoveSchemaNamespace(string content) {
-            // This seems to be the only way to clear out xml namepsaces.
+            // This seems to be the only way to clear out xml namespaces.
             return Regex.Replace(content, @"(xmlns:?[^=]*=[""][^""]*[""])", String.Empty, RegexOptions.IgnoreCase | RegexOptions.Multiline);
         }
     }

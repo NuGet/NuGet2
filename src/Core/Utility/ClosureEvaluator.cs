@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 
 namespace NuGet {
     /// <summary>
-    /// This class walks an expression tree and replaces compiler generated closure member accesses with thier value.
+    /// This class walks an expression tree and replaces compiler generated closure member accesses with their value.
     /// </summary>
     internal class ClosureEvaluator : ExpressionVisitor {
         // For unit testing. We want to circumvent the assembly check during unit testing since

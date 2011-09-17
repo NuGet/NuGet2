@@ -332,7 +332,7 @@ namespace NuGet.Commands {
 
             // Reduce the set of packages we want to include as dependencies to the minimal set.
             // Normally, packages.config has the full closure included, we to only add top level
-            // packages, i.e packages with in-degree 0
+            // packages, i.e. packages with in-degree 0
             foreach (var package in GetMinimumSet(packages)) {
                 // Don't add duplicate dependencies
                 if (dependencies.ContainsKey(package.Id)) {

@@ -21,7 +21,7 @@ namespace NuGet.Options {
         protected override void OnClosed(EventArgs e) {
             base.OnClosed(e);
 
-            // delay 5 miliseconds to give the Options dialog a chance to close itself
+            // delay 5 milliseconds to give the Options dialog a chance to close itself
             var timer = new Timer {
                 Interval = 5
             };

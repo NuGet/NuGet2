@@ -70,7 +70,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please provide proxcy credentials:.
+        ///   Looks up a localized string similar to Please provide proxy credentials:.
         /// </summary>
         internal static string Credentials_ProxyCredentials {
             get {

@@ -62,7 +62,7 @@ namespace NuGet {
 
                     if (resolvedDependency == null) {
                         OnDependencyResolveError(dependency);
-                        // If we're skipping dependency resolve errros then move on to the next
+                        // If we're skipping dependency resolve errors then move on to the next
                         // dependency
                         if (SkipDependencyResolveError) {
                             continue;
@@ -131,7 +131,7 @@ namespace NuGet {
                     // Update the parent target type
                     parentInfo.Target |= info.Target;
 
-                    // If we ended up with both that means we found a dependency only packges
+                    // If we ended up with both that means we found a dependency only packages
                     // that has a mix of solution and project level packages
                     if (parentInfo.Target == PackageTargets.All) {
                         throw new InvalidOperationException(NuGetResources.DependencyOnlyCannotMixDependencies);

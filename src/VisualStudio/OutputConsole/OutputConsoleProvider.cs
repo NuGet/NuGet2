@@ -32,7 +32,7 @@ namespace NuGet.VisualStudio {
         private static IHostProvider GetPowerShellHostProvider() {
             // The PowerConsole design enables multiple hosts (PowerShell, Python, Ruby)
             // For the Output window console, we're only interested in the PowerShell host. 
-            // Here we filter out the the PowerShell host provider based on its name.
+            // Here we filter out the PowerShell host provider based on its name.
 
             // The PowerShell host provider name is defined in PowerShellHostProvider.cs
             const string PowerShellHostProviderName = "NuGetConsole.Host.PowerShell";

@@ -109,7 +109,7 @@ namespace NuGet.VisualStudio.Test {
             // Assert
             var values = packageSourceProvider.LoadPackageSources().ToList();
 
-            // 11 = 10 package sources that we added + NuGet offical source
+            // 11 = 10 package sources that we added + NuGet official source
             Assert.Equal(11, values.Count);
             Assert.Equal(Resources.VsResources.OfficialSourceName, values[0].Name);
             for (int i = 0; i < 10; i++) {

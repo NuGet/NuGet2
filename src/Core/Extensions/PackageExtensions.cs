@@ -101,7 +101,7 @@ namespace NuGet {
                 // We can't use TryGetValue since the value of the dictionary entry
                 // is a List of an anonymous type.
                 if (operationLookup.ContainsKey(opposingKey)) {
-                    // We we find an opposing entry, we remove it from the list of candidates
+                    // If we find an opposing entry, we remove it from the list of candidates
                     var opposingOperations = operationLookup[opposingKey];
                     opposingOperations.RemoveAt(0);
 
@@ -129,7 +129,7 @@ namespace NuGet {
         }
 
         /// <summary>
-        /// Returns a distinct set of elements using the comparer specified. This implementation will pick the last occurence
+        /// Returns a distinct set of elements using the comparer specified. This implementation will pick the last occurrence
         /// of each element instead of picking the first. This method assumes that similar items occur in order.
         /// </summary>
         public static IEnumerable<IPackage> AsCollapsed(this IEnumerable<IPackage> source) {

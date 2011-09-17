@@ -62,7 +62,7 @@ namespace NuGet {
             // The reason for not calling the GetSystemProxy is because the object
             // that will be returned is no longer going to be the proxy that is set by the settings
             // on the users machine only the Address is going to be the same.
-            // Not sure why the .NET team did not want to expose all of the usefull settings like
+            // Not sure why the .NET team did not want to expose all of the useful settings like
             // ByPass list and other settings that we can't get because of it.
             // Anyway the reason why we need the DefaultWebProxy is to see if the uri that we are
             // getting the proxy for to should be bypassed or not. If it should be bypassed then

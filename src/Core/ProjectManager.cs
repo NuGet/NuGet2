@@ -409,7 +409,7 @@ namespace NuGet {
 
         private static IEnumerable<T> GetCompatibleItems<T>(IProjectSystem project, IEnumerable<T> items, string package) where T : IFrameworkTargetable {
             // A package might have references that target a specific version of the framework (.net/silverlight etc)
-            // so we try to get the highest version that satifies the target framework i.e.
+            // so we try to get the highest version that satisfies the target framework i.e.
             // if a package has 1.0, 2.0, 4.0 and the target framework is 3.5 we'd pick the 2.0 references.
             IEnumerable<T> compatibleItems;
             if (!project.TryGetCompatibleItems(items, out compatibleItems)) {

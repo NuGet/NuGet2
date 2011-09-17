@@ -244,7 +244,7 @@ namespace NuGet {
         }
 
         private static Expression Rewrite(IQueryable queryable, Expression expression) {
-            // Remove all take an skip andtake expression from individual linq providers
+            // Remove all take an skip and take expression from individual linq providers
             return new ExpressionRewriter(queryable, new[] { "Skip", 
                                                              "Take" }).Visit(expression);
         }

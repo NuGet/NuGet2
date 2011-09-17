@@ -33,7 +33,7 @@ namespace NuGet {
                 // Remove NuGet.exe.old
                 RemoveOldFile(fileSystem);
 
-                // Import Dependecies  
+                // Import Dependencies  
                 var p = new Program();
                 p.Initialize(fileSystem);
 
@@ -53,7 +53,7 @@ namespace NuGet {
 
                 // Fallback on the help command if we failed to parse a valid command
                 if (!ArgumentCountValid(command)) {
-                    // Get the command name and add it to the argumet list of the help command
+                    // Get the command name and add it to the argument list of the help command
                     string commandName = command.CommandAttribute.CommandName;
 
                     // Print invalid command then show help

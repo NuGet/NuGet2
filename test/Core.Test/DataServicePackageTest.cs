@@ -58,7 +58,7 @@ namespace NuGet.Test {
                 Version = "1.2"
             };
 
-            // Act & Asert
+            // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => servicePackage.DownloadAndVerifyPackage(new MockPackageRepository()), "Failed to download package correctly. The contents of the package could not be verified.");
         }
 

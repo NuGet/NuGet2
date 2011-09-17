@@ -85,7 +85,7 @@ namespace NuGet.VisualStudio {
         }
 
         /// <summary>
-        /// Add a project to to the cache.
+        /// Add a project to the cache.
         /// </summary>
         /// <param name="project">project to add to the cache.</param>
         /// <returns>The project name of the added project.</returns>

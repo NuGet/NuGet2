@@ -64,7 +64,7 @@ namespace NuGet.Dialog {
             }
 
             bool? isSelected = IsSelected;
-            // propagate the IsSelected value down to all childrens, recursively
+            // propagate the IsSelected value down to all children, recursively
             foreach (ProjectNodeBase child in _children) {
                 child.OnParentIsSelectedChange(isSelected);
             }

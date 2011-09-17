@@ -5,7 +5,7 @@ namespace NuGet {
     internal static class RequestHelper {
         /// <summary>
         /// Keeps sending requests until a response code that doesn't require authentication happens or if
-        /// the request requires authentication and the user has stopped trying to enter them (i.e they hit cancel when they are prompted).
+        /// the request requires authentication and the user has stopped trying to enter them (i.e. they hit cancel when they are prompted).
         /// </summary>
         internal static WebResponse GetResponse(Func<WebRequest> createRequest,
                                                 Action<WebRequest> prepareRequest,
@@ -48,7 +48,7 @@ namespace NuGet {
                     ICredentials credentials = request.Credentials;
 
                     // KeepAlive is required for NTLM and Kerberos authentication.
-                    // REVIEW: The WWW-Autenticate header is tricky to parse so a Equals might not be correct
+                    // REVIEW: The WWW-Authenticate header is tricky to parse so a Equals might not be correct
                     if (!String.Equals(authType, "NTLM", StringComparison.OrdinalIgnoreCase) &&
                         !String.Equals(authType, "Kerberos", StringComparison.OrdinalIgnoreCase)) {
                         // This is to work around the "The underlying connection was closed: An unexpected error occurred on a receive."
@@ -60,7 +60,7 @@ namespace NuGet {
                     // which needs to happen last before the request goes out
                     prepareRequest(request);
 
-                    // Wrap the credentials in a CredentialCache incase there is a redirect
+                    // Wrap the credentials in a CredentialCache in case there is a redirect
                     // and credentials need to be kept around.
                     request.Credentials = request.Credentials.AsCredentialCache(request.RequestUri);
 
@@ -78,7 +78,7 @@ namespace NuGet {
                     IHttpWebResponse response = GetResponse(ex.Response);
                     if (response == null && 
                         ex.Status != WebExceptionStatus.SecureChannelFailure) {
-                        // No response, someting went wrong so just rethrow
+                        // No response, something went wrong so just rethrow
                         throw;
                     }
 

@@ -61,7 +61,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 paragraph = (Paragraph)MessagePane.Document.Blocks.LastBlock;
             }
 
-            // each message is reprepseted by a Run element
+            // each message is represented by a Run element
             var run = new Run(message) {
                 Foreground = messageColor
             };

@@ -7,7 +7,7 @@ namespace NuGetConsole {
     public interface IConsoleDispatcher {
 
         /// <summary>
-        /// Start dispatching console command line inputs. This method can execute asynchronouly.
+        /// Start dispatching console command line inputs. This method can execute asynchronously.
         /// </summary>
         void Start();
 

@@ -21,7 +21,7 @@ namespace NuGet {
                 return credentials;
             }
 
-            // If this isn't a NetworkCredential then leave it alove
+            // If this isn't a NetworkCredential then leave it alone
             var networkCredentials = credentials as NetworkCredential;
             if (networkCredentials == null) {
                 return credentials;

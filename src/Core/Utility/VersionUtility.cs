@@ -128,7 +128,7 @@ namespace NuGet {
             }
 
             if (!String.IsNullOrEmpty(identifierPart)) {
-                // Try to nomalize the identifier to a known identifier
+                // Try to normalize the identifier to a known identifier
                 if (!_knownIdentifiers.TryGetValue(identifierPart, out identifierPart)) {
                     return UnsupportedFrameworkName;
                 }
@@ -528,7 +528,7 @@ namespace NuGet {
         private static bool TryParseVersion(string versionString, out Version version) {
             version = null;
             if (!Version.TryParse(versionString, out version)) {
-                // Support integer version numbers (i.e 1 -> 1.0)
+                // Support integer version numbers (i.e. 1 -> 1.0)
                 int versionNumber;
                 if (Int32.TryParse(versionString, out versionNumber) && versionNumber > 0) {
                     version = new Version(versionNumber, 0);

@@ -9,7 +9,7 @@ namespace NuGet {
         private static readonly bool _isRewritingRequired = IsRewritingRequired();
 
         /// <summary>
-        /// Returns a distinct set of elements using the comparer specified. This implementation will pick the last occurence
+        /// Returns a distinct set of elements using the comparer specified. This implementation will pick the last occurrence
         /// of each element instead of picking the first. This method assumes that similar items occur in order.
         /// </summary>        
         public static IEnumerable<TElement> DistinctLast<TElement>(this IEnumerable<TElement> source,
@@ -74,7 +74,7 @@ namespace NuGet {
 
         /// <summary>
         /// The purpose of this method is to mitigate a partial trust issue. We expose
-        /// EnumerableQuery (wrapping an enumrable in an IQueryable) throughout the codebase
+        /// EnumerableQuery (wrapping an enumerable in an IQueryable) throughout the codebase
         /// and expression compilation doesn't work in some cases. See SafeEnumerableQuery for more details.
         /// </summary>
         internal static IQueryable<T> AsSafeQueryable<T>(this IEnumerable<T> source) {

@@ -77,7 +77,7 @@ namespace NuGet {
         };
 
         /// <summary>
-        /// Caclulate the CRC (Cyclic Reduncancy Check) for a buffer of bytes 
+        /// Calculate the CRC (Cyclic Redundancy Check) for a buffer of bytes 
         /// See RFC1952 for details.
         /// </summary>
         static internal uint Calculate(byte[] buffer) {
@@ -85,7 +85,7 @@ namespace NuGet {
         }
 
         /// <summary>
-        /// Caclulate the CRC (Cyclic Reduncancy Check) for a range of bytes.
+        /// Calculate the CRC (Cyclic Redundancy Check) for a range of bytes.
         /// See RFC1952 for details.
         /// </summary>
         /// <param name="buffer">The buffer of bytes where the range of bytes to checksum exist</param>
@@ -97,10 +97,10 @@ namespace NuGet {
         }
 
         /// <summary>
-        /// Caclulate the CRC (Cyclic Reduncancy Check) for a range of bytes 
+        /// Calculate the CRC (Cyclic Redundancy Check) for a range of bytes 
         /// See RFC1952 for details.
         /// 
-        /// CRCs can be computed in chunks, where you take the CRC of the preceeding block of data and use
+        /// CRCs can be computed in chunks, where you take the CRC of the preceding block of data and use
         /// this as the 'crc32' to compute the next chunk.  
         /// </summary>  
         static internal uint Calculate(uint crc32, byte[] buffer, int offset, int length) {
@@ -118,7 +118,7 @@ namespace NuGet {
         }
 
         internal static uint Calculate(Stream stream) {
-            // Copy the stream to a memory steam and get get the CRC32 of the bytes
+            // Copy the stream to a memory steam and get the CRC32 of the bytes
             using (var memoryStream = new MemoryStream()) {
                 stream.CopyTo(memoryStream);
                 return Crc32.Calculate(memoryStream.ToArray());

@@ -5,7 +5,7 @@ using NuGet.VisualStudio;
 
 namespace NuGet.PowerShell.Commands {
     /// <summary>
-    /// This project updates the specfied package to the specfied project.
+    /// This project updates the specified package to the specified project.
     /// </summary>
     [Cmdlet(VerbsData.Update, "Package", DefaultParameterSetName = "All")]
     public class UpdatePackageCommand : ProcessPackageBaseCommand, IPackageOperationEventListener {
@@ -112,7 +112,7 @@ namespace NuGet.PowerShell.Commands {
                         }
                     }
                     else {
-                        // if no id was specified then update all packges in the solution
+                        // if no id was specified then update all packages in the solution
                         if (Safe.IsPresent) {
                             if (String.IsNullOrEmpty(ProjectName)) {
                                 PackageManager.SafeUpdatePackages(!IgnoreDependencies.IsPresent, this, this);

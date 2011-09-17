@@ -23,8 +23,8 @@ namespace NuGetConsole.Host.PowerShell {
         /// </summary>
         /// <param name="allUsersAllHosts">The profile file name for all users and all hosts.</param>
         /// <param name="allUsersCurrentHost">The profile file name for all users and current host.</param>
-        /// <param name="currentUserAllHosts">The profile file name for cuurrent user and all hosts.</param>
-        /// <param name="currentUserCurrentHost">The profile  name for cuurrent user and current host.</param>
+        /// <param name="currentUserAllHosts">The profile file name for current user and all hosts.</param>
+        /// <param name="currentUserCurrentHost">The profile  name for current user and current host.</param>
         /// <returns>A PSObject whose base object is currentUserCurrentHost and with notes for the other 4 parameters.</returns>
         internal static PSObject GetDollarProfile(string allUsersAllHosts, string allUsersCurrentHost, string currentUserAllHosts, string currentUserCurrentHost) {
             PSObject returnValue = new PSObject(currentUserCurrentHost);
@@ -154,7 +154,7 @@ namespace NuGetConsole.Host.PowerShell {
             // use it's location as the application base...
             assem = Assembly.GetAssembly(typeof(System.Management.Automation.PSObject));
             if (assem != null) {
-                // For for other hosts. 
+                // For other hosts. 
                 return Path.GetDirectoryName(assem.Location);
             }
 

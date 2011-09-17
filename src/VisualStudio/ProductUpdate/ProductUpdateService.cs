@@ -130,7 +130,7 @@ namespace NuGet.VisualStudio {
                 ActivateUpdatesTab(extensionManager);
             }
             else {
-                // if we didn't find it, try again after 100 miliseconds
+                // if we didn't find it, try again after 100 milliseconds
                 int times = (int)timer.Tag;
                 // but only try maximum of 10 times.
                 if (times < 10) {

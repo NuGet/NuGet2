@@ -69,7 +69,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 throw new ArgumentNullException("descriptions");
             }
             if (descriptions.Count == 0) {
-                // emulate pwoershell.exe behaviour for empty collection.
+                // emulate powershell.exe behavior for empty collection.
                 throw new ArgumentException(
                     Resources.ZeroLengthCollection, "descriptions");
             }

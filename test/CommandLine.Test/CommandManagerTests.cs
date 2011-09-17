@@ -8,7 +8,7 @@ namespace NuGet.Test.NuGetCommandLine {
     public class CommandManagerTests {
         [Fact]
         public void RegisterCommand_AddsCommandToDictionary() {
-            // Arrage
+            // Arrange
             CommandManager cm = new CommandManager();
             ICommand mockCommand = new MockCommand();
             // Act

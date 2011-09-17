@@ -36,13 +36,13 @@ namespace NuGet {
             }
 
             try {
-                // Get the section and return null if it doesnt exist
+                // Get the section and return null if it doesn't exist
                 var sectionElement = _config.Root.Element(section);
                 if (sectionElement == null) {
                     return null;
                 }
 
-                // Get the add element that matches the key and return null if it doesnt exist
+                // Get the add element that matches the key and return null if it doesn't exist
                 var element = sectionElement.Elements("add").Where(s => s.GetOptionalAttributeValue("key") == key).FirstOrDefault();
                 if (element == null) {
                     return null;

@@ -22,7 +22,7 @@ Getting started 101:
 
 Alternatively, you can add the import line into a specific .proj file, and the targets will then only be active for that project.
 
-Detailed behaviour can be customised by setting properties (see below).
+Detailed behavior can be customised by setting properties (see below).
 
 In a CI build, the properties can be set when calling msbuild, e.g. msbuild /p:CreateNuGetPackage=true will build as normal with the
 steps to create the nuget package inserted into the process.

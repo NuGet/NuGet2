@@ -241,7 +241,7 @@ function NugetTabExpansion($line, $lastWord) {
             }
 
             if($argument) {                
-                # Populate the arguments dictionary with the the name and value of the 
+                # Populate the arguments dictionary with the name and value of the 
                 # associated index. i.e. for the command "Install-Package elmah" arguments should have
                 # an entries with { 0, "elmah" } and { "Id", "elmah" }
                 $arguments = @{}

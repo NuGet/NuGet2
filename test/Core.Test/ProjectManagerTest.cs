@@ -714,7 +714,7 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageHasNoEffectIfConstaintsDefinedDontAllowForUpdates() {
+        public void UpdatePackageHasNoEffectIfConstraintsDefinedDontAllowForUpdates() {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();

@@ -44,13 +44,13 @@ namespace NuGet {
             foreach (var e in document.Root.Elements("package")) {
                 string id = e.GetOptionalAttributeValue("id");
                 string versionString = e.GetOptionalAttributeValue("version");
-                string versionConstaintString = e.GetOptionalAttributeValue("allowedVersions");
+                string versionConstraintString = e.GetOptionalAttributeValue("allowedVersions");
                 Version version = VersionUtility.ParseOptionalVersion(versionString);
 
                 IVersionSpec versionConstaint = null;
-                if (!String.IsNullOrEmpty(versionConstaintString)) {
-                    versionConstaint = VersionUtility.ParseVersionSpec(versionConstaintString);
-                    _constraints[id] = versionConstaintString;
+                if (!String.IsNullOrEmpty(versionConstraintString)) {
+                    versionConstaint = VersionUtility.ParseVersionSpec(versionConstraintString);
+                    _constraints[id] = versionConstraintString;
                 }
 
                 yield return new PackageReference(id, version, versionConstaint);

@@ -26,7 +26,7 @@ namespace NuGet.TeamFoundationServer {
 
         public IEnumerable<string> GetItems(string fullPath, ItemType itemType) {
             // REVIEW: We should pass the filter to this method so it happens on the server
-            // REVIEW: Can we do some smart caching so we don't hit the server everytime this is called?
+            // REVIEW: Can we do some smart caching so we don't hit the server every time this is called?
             var itemSet = _workspace.VersionControlServer.GetItems(fullPath, TFS.VersionSpec.Latest, RecursionType.OneLevel, DeletedState.NonDeleted, itemType);
 
             // Get the local files for the server files

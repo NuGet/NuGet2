@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace NuGet {
     /// <summary>
-    /// There are some seurity issues around evaluating queries over EnumerableQuery with clousures.
+    /// There are some security issues around evaluating queries over EnumerableQuery with closures.
     /// The compiler generates an internal type that can't be causes expression compilation to fail, when the 
     /// calling assembly is in the GAC and is SecurityTransparent. We wrap the underlying enumerable query and 
     /// then remove all compiler generated closures from the expression before compilation.

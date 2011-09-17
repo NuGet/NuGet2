@@ -61,7 +61,7 @@ namespace NuGet.VisualStudio {
         }
 
         private IProjectManager CreateProjectManager(Project project) {
-            // Create the projet system
+            // Create the project system
             IProjectSystem projectSystem = VsProjectSystemFactory.CreateProjectSystem(project);
 
             var repository = new PackageReferenceRepository(projectSystem, _sharedRepository);

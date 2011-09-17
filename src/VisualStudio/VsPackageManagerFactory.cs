@@ -100,7 +100,7 @@ namespace NuGet.VisualStudio {
         }
 
         /// <summary>
-        /// Creates a FallbackRepository with an aggregate repository that also constains the primaryRepository.
+        /// Creates a FallbackRepository with an aggregate repository that also contains the primaryRepository.
         /// </summary>
         internal IPackageRepository CreateFallbackRepository(IPackageRepository primaryRepository) {
             if (IsAggregateRepository(primaryRepository)) {

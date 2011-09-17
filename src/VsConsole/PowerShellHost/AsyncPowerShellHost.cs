@@ -42,7 +42,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 ExceptionHelper.WriteToActivityLog(e);
             }
 
-            return false; // Error occured, command not executing
+            return false; // Error occurred, command not executing
         }
     }
 }

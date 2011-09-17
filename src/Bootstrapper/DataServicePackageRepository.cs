@@ -19,7 +19,7 @@ namespace NuGet {
         }
 
         // Don't initialize the Context at the constructor time so that
-        // we don't make a web request if we are not gonig to actually use it
+        // we don't make a web request if we are not going to actually use it
         // since getting the Uri property of the RedirectedHttpClient will
         // trigger that functionality.
         private DataServiceContext Context {

@@ -183,7 +183,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 Runspace.ChangePSDirectory(targetDir);
             }
             else {
-                // If we are in the middle of executing some other scripts, which triggerred the solution to be opened/closed, then we 
+                // If we are in the middle of executing some other scripts, which triggered the solution to be opened/closed, then we 
                 // can't execute Set-Location here because of reentrancy policy. So we save the location and change it later when the 
                 // executing command finishes running.
                 _targetDir = targetDir;

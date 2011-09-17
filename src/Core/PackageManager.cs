@@ -196,7 +196,7 @@ namespace NuGet {
         private void ExpandFiles(IPackage package) {
             string packageDirectory = PathResolver.GetPackageDirectory(package);
 
-            // Add files files
+            // Add files
             FileSystem.AddFiles(package.GetFiles(), packageDirectory);
         }
 

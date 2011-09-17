@@ -60,7 +60,7 @@ namespace NuGet.Dialog.Providers {
         }
 
         /// <summary>
-        /// Returns either the solution repository or the active project repository, depending on wherether we are targeting solution.
+        /// Returns either the solution repository or the active project repository, depending on whether we are targeting solution.
         /// </summary>
         protected IPackageRepository LocalRepository {
             get {

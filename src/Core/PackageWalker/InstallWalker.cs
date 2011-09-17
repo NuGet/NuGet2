@@ -98,9 +98,9 @@ namespace NuGet {
             // First we get a list of dependents for the installed package.
             // Then we find the dependency in the foreach dependent that this installed package used to satisfy.
             // We then check if the resolved package also meets that dependency and if it doesn't it's added to the list
-            // i.e A1 -> C >= 1
-            //     B1 -> C >= 1
-            //     C2 -> []
+            // i.e. A1 -> C >= 1
+            //      B1 -> C >= 1
+            //      C2 -> []
             // Given the above graph, if we upgrade from C1 to C2, we need to see if A and B can work with the new C
             var incompatiblePackages = from dependentPackage in GetDependents(conflictResult)
                                        let dependency = dependentPackage.FindDependency(package.Id)
@@ -189,7 +189,7 @@ namespace NuGet {
                 // to find a version of A that works with B 1.0.1. The version in the above case is A 2.0.
                 // When we go to install A 2.0 we need to make sure that when we resolve it's dependencies that we stay within bounds
                 // i.e. when we resolve B for A 2.0 we want to keep the B 1.0.1 we've already chosen instead of trying to grab
-                // B 1.5 or B 2.0. In order to achieve this, we add a contraint for version of B 1.0.1 so we stay within those bounds for B.
+                // B 1.5 or B 2.0. In order to achieve this, we add a constraint for version of B 1.0.1 so we stay within those bounds for B.
 
                 // Respect all existing constraints plus an additional one that we specify based on the incoming package
                 var constraintProvider = new DefaultConstraintProvider();
@@ -200,7 +200,7 @@ namespace NuGet {
                 Marker.MarkVisited(package);
 
                 var failedPackages = new List<IPackage>();
-                // Update each of the exising packages to more compatible one
+                // Update each of the existing packages to more compatible one
                 foreach (var pair in compatiblePackages) {
                     try {
                         // Remove the old package
