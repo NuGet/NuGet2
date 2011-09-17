@@ -30,6 +30,7 @@ namespace NuGet.Options {
             this.PackageSourcesContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.CopyPackageSourceStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeButton = new System.Windows.Forms.Button();
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.MoveUpButton = new System.Windows.Forms.Button();
             this.MoveDownButton = new System.Windows.Forms.Button();
             this.packageListToolTip = new System.Windows.Forms.ToolTip(this.components);
@@ -42,7 +43,6 @@ namespace NuGet.Options {
             this.PackageSourcesListBox = new System.Windows.Forms.ListBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.PackageSourcesContextMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -73,6 +73,14 @@ namespace NuGet.Options {
             this.removeButton.Name = "removeButton";
             this.removeButton.UseVisualStyleBackColor = true;
             this.removeButton.Click += new System.EventHandler(this.OnRemoveButtonClick);
+            // 
+            // imageList1
+            // 
+            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList1.Images.SetKeyName(0, "uparrow.png");
+            this.imageList1.Images.SetKeyName(1, "downarrow.png");
+            this.imageList1.Images.SetKeyName(2, "Delete.png");
             // 
             // MoveUpButton
             // 
@@ -115,7 +123,6 @@ namespace NuGet.Options {
             // NewPackageName
             // 
             resources.ApplyResources(this.NewPackageName, "NewPackageName");
-            this.tableLayoutPanel1.SetColumnSpan(this.NewPackageName, 2);
             this.NewPackageName.Name = "NewPackageName";
             // 
             // NewPackageNameLabel
@@ -141,38 +148,29 @@ namespace NuGet.Options {
             // tableLayoutPanel1
             // 
             resources.ApplyResources(this.tableLayoutPanel1, "tableLayoutPanel1");
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.PackageSourcesListBox, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.NewPackageNameLabel, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.NewPackageName, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.NewPackageSourceLabel, 0, 3);
-            this.tableLayoutPanel1.Controls.Add(this.NewPackageSource, 1, 3);
-            this.tableLayoutPanel1.Controls.Add(this.BrowseButton, 2, 3);
-            this.tableLayoutPanel1.Controls.Add(this.addButton, 3, 3);
+            this.tableLayoutPanel1.Controls.Add(this.PackageSourcesListBox, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageNameLabel, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageName, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageSourceLabel, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageSource, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.BrowseButton, 2, 2);
+            this.tableLayoutPanel1.Controls.Add(this.addButton, 3, 2);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             // 
             // tableLayoutPanel2
             // 
             resources.ApplyResources(this.tableLayoutPanel2, "tableLayoutPanel2");
-            this.tableLayoutPanel1.SetColumnSpan(this.tableLayoutPanel2, 4);
-            this.tableLayoutPanel2.Controls.Add(this.HeaderLabel, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.removeButton, 1, 0);
-            this.tableLayoutPanel2.Controls.Add(this.MoveUpButton, 2, 0);
-            this.tableLayoutPanel2.Controls.Add(this.MoveDownButton, 3, 0);
+            this.tableLayoutPanel2.Controls.Add(this.removeButton, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.MoveUpButton, 1, 0);
+            this.tableLayoutPanel2.Controls.Add(this.MoveDownButton, 2, 0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            // 
-            // imageList1
-            // 
-            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
-            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageList1.Images.SetKeyName(0, "uparrow.png");
-            this.imageList1.Images.SetKeyName(1, "downarrow.png");
-            this.imageList1.Images.SetKeyName(2, "Delete.png");
             // 
             // PackageSourcesOptionsControl
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.tableLayoutPanel2);
+            this.Controls.Add(this.HeaderLabel);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "PackageSourcesOptionsControl";
             this.PackageSourcesContextMenu.ResumeLayout(false);
@@ -181,6 +179,7 @@ namespace NuGet.Options {
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
