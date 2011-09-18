@@ -16,7 +16,7 @@ namespace NuGet {
             if (package.IconUrl != null && package.IconUrl.OriginalString.Equals(SpecCommand.SampleIconUrl, StringComparison.Ordinal)) {
                 yield return CreateIssueFor("IconUrl", package.IconUrl.OriginalString);
             }
-            if (SpecCommand.SampleTags.Equals(package.Tags, StringComparison.Ordinal)) {
+            if (!String.IsNullOrEmpty(package.Tags) && package.Tags.Trim().Equals(SpecCommand.SampleTags, StringComparison.Ordinal)) {
                 yield return CreateIssueFor("Tags", SpecCommand.SampleTags);
             }
             if (SpecCommand.SampleReleaseNotes.Equals(package.ReleaseNotes, StringComparison.Ordinal)) {
