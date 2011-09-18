@@ -13,6 +13,8 @@ namespace NuGet.Commands {
         internal static readonly string SampleLicenseUrl = "http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE";
         internal static readonly string SampleIconUrl = "http://ICON_URL_HERE_OR_DELETE_THIS_LINE";
         internal static readonly string SampleTags = "Tag1 Tag2";
+        internal static readonly string SampleReleaseNotes = "Summary of changes made in this release of the package.";
+        internal static readonly string SampleDescription = "Package description";
         internal static readonly ManifestDependency SampleManifestDependency = new ManifestDependency { Id = "SampleDependency", Version = "1.0" };
 
         [Option(typeof(NuGetResources), "SpecCommandAssemblyPathDescription")]
@@ -61,7 +63,7 @@ namespace NuGet.Commands {
 
             // If we're using a project file then we want the a minimal nuspec
             if (String.IsNullOrEmpty(projectFile)) {
-                manifest.Metadata.Description = manifest.Metadata.Description ?? "Package description";
+                manifest.Metadata.Description = manifest.Metadata.Description ?? SampleDescription;
                 if (String.IsNullOrEmpty(manifest.Metadata.Authors)) {
                     manifest.Metadata.Authors = Environment.UserName;
                 }
@@ -74,6 +76,7 @@ namespace NuGet.Commands {
             manifest.Metadata.IconUrl = SampleIconUrl;
             manifest.Metadata.Tags = SampleTags;
             manifest.Metadata.Copyright = "Copyright " + DateTime.Now.Year;
+            manifest.Metadata.ReleaseNotes = SampleReleaseNotes;
             string nuspecFile = fileName + Constants.ManifestExtension;
 
             // Skip the creation if the file exists and force wasn't specified
