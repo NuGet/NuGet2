@@ -10,6 +10,7 @@ using System.Windows.Forms.VisualStyles;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio;
+using NuGet.VisualStudio.Resources;
 
 namespace NuGet.Options {
     /// <summary>
@@ -20,8 +21,8 @@ namespace NuGet.Options {
     /// Otherwise, we have a problem with synchronization with the package source provider.
     /// </remarks>
     public partial class PackageSourcesOptionsControl : UserControl {
+        private readonly PackageSource OfficialSource = new PackageSource(NuGetConstants.DefaultFeedUrl, VsResources.OfficialSourceName);
         private readonly IVsPackageSourceProvider _packageSourceProvider;
-        private PackageSource _aggregateSource;
         private PackageSource _activeSource;
         private BindingSource _allPackageSources;
         private readonly IServiceProvider _serviceProvider;
@@ -51,11 +52,13 @@ namespace NuGet.Options {
         }
 
         private void UpdateUI() {
-            MoveUpButton.Enabled = PackageSourcesListBox.SelectedItem != null &&
-                                    PackageSourcesListBox.SelectedIndex > 0;
-            MoveDownButton.Enabled = PackageSourcesListBox.SelectedItem != null &&
-                                    PackageSourcesListBox.SelectedIndex < PackageSourcesListBox.Items.Count - 1;
-            removeButton.Enabled = PackageSourcesListBox.SelectedItem != null;
+            var selectedSource = (PackageSource)PackageSourcesListBox.SelectedItem;
+
+            MoveUpButton.Enabled = selectedSource != null && PackageSourcesListBox.SelectedIndex > 0;
+            MoveDownButton.Enabled = selectedSource != null &&
+                                     PackageSourcesListBox.SelectedIndex < PackageSourcesListBox.Items.Count - 1;
+            // do not allow deleting the official NuGet source
+            removeButton.Enabled = selectedSource != null && !selectedSource.Equals(OfficialSource);
         }
 
         private void MoveSelectedItem(int offset) {
@@ -85,7 +88,6 @@ namespace NuGet.Options {
             _initialized = true;
             // get packages sources
             IList<PackageSource> packageSources = _packageSourceProvider.LoadPackageSources().ToList();
-            _aggregateSource = AggregatePackageSource.Instance;
             _activeSource = _packageSourceProvider.ActivePackageSource;
 
             // bind to the package sources, excluding Aggregate
@@ -114,7 +116,7 @@ namespace NuGet.Options {
                 _packageSourceProvider.ActivePackageSource = _activeSource;
             }
             else {
-                _packageSourceProvider.ActivePackageSource = _aggregateSource;
+                _packageSourceProvider.ActivePackageSource = AggregatePackageSource.Instance;
             }
             return true;
         }
@@ -179,8 +181,8 @@ namespace NuGet.Options {
 
             // check to see if name has already been added
             // also make sure it's not the same as the aggregate source ('All')
-            bool hasName = sourcesList.Any(ps => String.Equals(name, ps.Name, StringComparison.OrdinalIgnoreCase)
-                || String.Equals(name, _aggregateSource.Name, StringComparison.OrdinalIgnoreCase));
+            bool hasName = sourcesList.Any(ps => String.Equals(name, ps.Name, StringComparison.CurrentCultureIgnoreCase)
+                || String.Equals(name, AggregatePackageSource.Instance.Name, StringComparison.CurrentCultureIgnoreCase));
             if (hasName) {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueName, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageName);
