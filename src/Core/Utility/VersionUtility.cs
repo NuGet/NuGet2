@@ -242,7 +242,8 @@ namespace NuGet {
             result = null;
 
             // Fail early if the string is too short to be valid
-            if (value.Length < 3) {
+            var regex = new Regex(@"^([[(]\d+(\.\d+){0,3}[\])])|([([]\d+(\.\d+){0,3},(\d+(\.\d+)?)?[)\]])|([([](\d+(\.\d+){0,3})?,\d+(\.\d+){0,3}[)\]])$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
+            if (value.Length < 3 || !regex.IsMatch(value.Replace(" ", ""))) {
                 return false;
             }
 

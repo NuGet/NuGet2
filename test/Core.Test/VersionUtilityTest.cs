@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test {
     
@@ -624,6 +626,92 @@ namespace NuGet.Test {
 
             // Assert
             Assert.True(result);
+        }
+
+        [Fact]
+        public void ParseVersionThrowsIfExclusiveMinAndMaxVersionSpecContainsNoValues() {
+            // Arrange
+            var versionString = "(,)";
+
+            // Assert
+            var exception = Assert.Throws<ArgumentException>(() => VersionUtility.ParseVersionSpec(versionString));
+            Assert.Equal("'(,)' is not a valid version string.", exception.Message);
+        }
+
+        [Fact]
+        public void ParseVersionThrowsIfInclusiveMinAndMaxVersionSpecContainsNoValues() {
+            // Arrange
+            var versionString = "[,]";
+
+            // Assert
+            var exception = Assert.Throws<ArgumentException>(() => VersionUtility.ParseVersionSpec(versionString));
+            Assert.Equal("'[,]' is not a valid version string.", exception.Message);
+        }
+
+        [Fact]
+        public void ParseVersionThrowsIfInclusiveMinAndExclusiveMaxVersionSpecContainsNoValues() {
+            // Arrange
+            var versionString = "[,)";
+
+            // Assert
+            var exception = Assert.Throws<ArgumentException>(() => VersionUtility.ParseVersionSpec(versionString));
+            Assert.Equal("'[,)' is not a valid version string.", exception.Message);
+        }
+
+        [Fact]
+        public void ParseVersionThrowsIfExclusiveMinAndInclusiveMaxVersionSpecContainsNoValues() {
+            // Arrange
+            var versionString = "(,]";
+
+            // Assert
+            var exception = Assert.Throws<ArgumentException>(() => VersionUtility.ParseVersionSpec(versionString));
+            Assert.Equal("'(,]' is not a valid version string.", exception.Message);
+        }
+
+        [Fact]
+        public void ParseVersionThrowsIfVersionSpecIsMissingVersionComponent() {
+            // Arrange
+            var versionString = "(,1.3..2]";
+
+            // Assert
+            var exception = Assert.Throws<ArgumentException>(() => VersionUtility.ParseVersionSpec(versionString));
+            Assert.Equal("'(,1.3..2]' is not a valid version string.", exception.Message);
+        }
+
+        [Fact]
+        public void ParseVersionThrowsIfVersionSpecContainsMoreThen4VersionComponents() {
+            // Arrange
+            var versionString = "(1.2.3.4.5,1.2]";
+
+            // Assert
+            var exception = Assert.Throws<ArgumentException>(() => VersionUtility.ParseVersionSpec(versionString));
+            Assert.Equal("'(1.2.3.4.5,1.2]' is not a valid version string.", exception.Message);
+        }
+
+        [Theory]
+        [PropertyData("VersionSpecData")]
+        public void ParseVersionParsesTokensVersionsCorrectly(string versionString, VersionSpec versionSpec) {
+            // Act
+            var actual = VersionUtility.ParseVersionSpec(versionString);
+
+            // Assert
+            Assert.Equal(versionSpec.IsMinInclusive, actual.IsMinInclusive);
+            Assert.Equal(versionSpec.IsMaxInclusive, actual.IsMaxInclusive);
+            Assert.Equal(versionSpec.MinVersion, actual.MinVersion);
+            Assert.Equal(versionSpec.MaxVersion, actual.MaxVersion);
+        }
+
+        public static IEnumerable<object[]> VersionSpecData {
+            get {
+                yield return new object[] { "(1.2.3.4, 3.2)", new VersionSpec { MinVersion = new Version("1.2.3.4"), MaxVersion = new Version("3.2"), IsMinInclusive = false, IsMaxInclusive = false } };
+                yield return new object[] { "(1.2.3.4, 3.2]", new VersionSpec { MinVersion = new Version("1.2.3.4"), MaxVersion = new Version("3.2"), IsMinInclusive = false, IsMaxInclusive = true } };
+                yield return new object[] { "[1.2, 3.2.4.5)", new VersionSpec { MinVersion = new Version("1.2"), MaxVersion = new Version("3.2.4.5"), IsMinInclusive = true, IsMaxInclusive = false } };
+                yield return new object[] { "[2.3, 3.2.4.5]", new VersionSpec { MinVersion = new Version("2.3"), MaxVersion = new Version("3.2.4.5"), IsMinInclusive = true, IsMaxInclusive = true } };
+                yield return new object[] { "(, 3.2.4.5]", new VersionSpec { MinVersion = null, MaxVersion = new Version("3.2.4.5"), IsMinInclusive = false, IsMaxInclusive = true } };
+                yield return new object[] { "(1.6, ]", new VersionSpec { MinVersion = new Version("1.6"), MaxVersion = null, IsMinInclusive = false, IsMaxInclusive = true } };
+                yield return new object[] { "(1.6)", new VersionSpec { MinVersion = new Version("1.6"), MaxVersion = new Version("1.6"), IsMinInclusive = false, IsMaxInclusive = false } };
+                yield return new object[] { "[2.7]", new VersionSpec { MinVersion = new Version("2.7"), MaxVersion = new Version("2.7"), IsMinInclusive = true, IsMaxInclusive = true} };
+            }
         }
     }
 }
