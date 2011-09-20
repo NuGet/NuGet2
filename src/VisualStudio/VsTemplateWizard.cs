@@ -214,22 +214,22 @@ namespace NuGet.VisualStudio {
         }
 
         private class ExtensionManagerShim {
-            private static Type s_iInstalledExtensionType;
-            private static Type s_iVsExtensionManagerType;
-            private static MethodInfo s_installPathPropertyGetMethod;
-            private static Type s_sVsExtensionManagerType;
-            private static MethodInfo s_tryGetInstalledExtensionMethod;
-            private static bool s_typesInitialized;
+            private static Type _iInstalledExtensionType;
+            private static Type _iVsExtensionManagerType;
+            private static PropertyInfo _installPathProperty;
+            private static Type _sVsExtensionManagerType;
+            private static MethodInfo _tryGetInstalledExtensionMethod;
+            private static bool _typesInitialized;
 
             private readonly object _extensionManager;
 
             public ExtensionManagerShim(object extensionManager) {
                 InitializeTypes();
-                _extensionManager = extensionManager ?? Package.GetGlobalService(s_sVsExtensionManagerType);
+                _extensionManager = extensionManager ?? Package.GetGlobalService(_sVsExtensionManagerType);
             }
 
             private static void InitializeTypes() {
-                if (s_typesInitialized) {
+                if (_typesInitialized) {
                     return;
                 }
 
@@ -237,22 +237,21 @@ namespace NuGet.VisualStudio {
                     Assembly extensionManagerAssembly = AppDomain.CurrentDomain.GetAssemblies()
                         .Where(a => a.FullName.StartsWith("Microsoft.VisualStudio.ExtensionManager,"))
                         .First();
-                    s_sVsExtensionManagerType =
+                    _sVsExtensionManagerType =
                         extensionManagerAssembly.GetType("Microsoft.VisualStudio.ExtensionManager.SVsExtensionManager");
-                    s_iVsExtensionManagerType =
+                    _iVsExtensionManagerType =
                         extensionManagerAssembly.GetType("Microsoft.VisualStudio.ExtensionManager.IVsExtensionManager");
-                    s_iInstalledExtensionType =
+                    _iInstalledExtensionType =
                         extensionManagerAssembly.GetType("Microsoft.VisualStudio.ExtensionManager.IInstalledExtension");
-                    s_tryGetInstalledExtensionMethod = s_iVsExtensionManagerType.GetMethod("TryGetInstalledExtension",
-                        new[] { typeof(string), s_iInstalledExtensionType.MakeByRefType() });
-                    s_installPathPropertyGetMethod = s_iInstalledExtensionType.GetProperty("InstallPath",
-                        typeof(string)).GetGetMethod();
-                    if (s_installPathPropertyGetMethod == null || s_tryGetInstalledExtensionMethod == null ||
-                        s_sVsExtensionManagerType == null) {
+                    _tryGetInstalledExtensionMethod = _iVsExtensionManagerType.GetMethod("TryGetInstalledExtension",
+                        new[] { typeof(string), _iInstalledExtensionType.MakeByRefType() });
+                    _installPathProperty = _iInstalledExtensionType.GetProperty("InstallPath", typeof(string));
+                    if (_installPathProperty == null || _tryGetInstalledExtensionMethod == null ||
+                        _sVsExtensionManagerType == null) {
                         throw new Exception();
                     }
 
-                    s_typesInitialized = true;
+                    _typesInitialized = true;
                 }
                 catch {
                     // if any of the types or methods cannot be loaded throw an error. this indicates that some API in
@@ -264,12 +263,12 @@ namespace NuGet.VisualStudio {
             public bool TryGetExtensionInstallPath(string extensionId, out string installPath) {
                 installPath = null;
                 object[] parameters = new object[] { extensionId, null };
-                bool result = (bool)s_tryGetInstalledExtensionMethod.Invoke(_extensionManager, parameters);
+                bool result = (bool)_tryGetInstalledExtensionMethod.Invoke(_extensionManager, parameters);
                 if (!result) {
                     return false;
                 }
                 object extension = parameters[1];
-                installPath = s_installPathPropertyGetMethod.Invoke(extension, new object[0]) as string;
+                installPath = _installPathProperty.GetValue(extension, index: null) as string;
                 return true;
             }
         }
