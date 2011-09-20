@@ -242,8 +242,7 @@ namespace NuGet {
             result = null;
 
             // Fail early if the string is too short to be valid
-            var regex = new Regex(@"^([[(]\d+(\.\d+){0,3}[\])])|([([]\d+(\.\d+){0,3},(\d+(\.\d+)?)?[)\]])|([([](\d+(\.\d+){0,3})?,\d+(\.\d+){0,3}[)\]])$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
-            if (value.Length < 3 || !regex.IsMatch(value.Replace(" ", ""))) {
+            if (value.Length < 3) {
                 return false;
             }
 
@@ -279,6 +278,11 @@ namespace NuGet {
             if (parts.Length > 2) {
                 return false;
             }
+            else if (parts.All(String.IsNullOrEmpty)) {
+                // If all parts are empty, then neither of upper or lower bounds were specified. Version spec is of the format (,]
+                return false;
+            }
+            
 
             // If there is only one piece, we use it for both min and max
             string minVersionString = parts[0];

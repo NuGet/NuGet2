@@ -705,8 +705,8 @@ namespace NuGet.Test {
             get {
                 yield return new object[] { "(1.2.3.4, 3.2)", new VersionSpec { MinVersion = new Version("1.2.3.4"), MaxVersion = new Version("3.2"), IsMinInclusive = false, IsMaxInclusive = false } };
                 yield return new object[] { "(1.2.3.4, 3.2]", new VersionSpec { MinVersion = new Version("1.2.3.4"), MaxVersion = new Version("3.2"), IsMinInclusive = false, IsMaxInclusive = true } };
-                yield return new object[] { "[1.2, 3.2.4.5)", new VersionSpec { MinVersion = new Version("1.2"), MaxVersion = new Version("3.2.4.5"), IsMinInclusive = true, IsMaxInclusive = false } };
-                yield return new object[] { "[2.3, 3.2.4.5]", new VersionSpec { MinVersion = new Version("2.3"), MaxVersion = new Version("3.2.4.5"), IsMinInclusive = true, IsMaxInclusive = true } };
+                yield return new object[] { "[1.2, 3.2.5)", new VersionSpec { MinVersion = new Version("1.2"), MaxVersion = new Version("3.2.5"), IsMinInclusive = true, IsMaxInclusive = false } };
+                yield return new object[] { "[2.3.7, 3.2.4.5]", new VersionSpec { MinVersion = new Version("2.3.7"), MaxVersion = new Version("3.2.4.5"), IsMinInclusive = true, IsMaxInclusive = true } };
                 yield return new object[] { "(, 3.2.4.5]", new VersionSpec { MinVersion = null, MaxVersion = new Version("3.2.4.5"), IsMinInclusive = false, IsMaxInclusive = true } };
                 yield return new object[] { "(1.6, ]", new VersionSpec { MinVersion = new Version("1.6"), MaxVersion = null, IsMinInclusive = false, IsMaxInclusive = true } };
                 yield return new object[] { "(1.6)", new VersionSpec { MinVersion = new Version("1.6"), MaxVersion = new Version("1.6"), IsMinInclusive = false, IsMaxInclusive = false } };
