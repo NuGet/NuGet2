@@ -270,4 +270,7 @@
   <data name="SolutionNotAvailable" xml:space="preserve">
     <value>No solution available for this operation to be performed.</value>
   </data>
+  <data name="TemplateWizard_ExtensionManagerError" xml:space="preserve">
+    <value>Error accessing Extension Manager.</value>
+  </data>
 </root>
