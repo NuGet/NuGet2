@@ -21,7 +21,7 @@ namespace NuGet.Options {
     /// Otherwise, we have a problem with synchronization with the package source provider.
     /// </remarks>
     public partial class PackageSourcesOptionsControl : UserControl {
-        private readonly PackageSource OfficialSource = new PackageSource(NuGetConstants.DefaultFeedUrl, VsResources.OfficialSourceName);
+        private readonly PackageSource _officialSource = new PackageSource(NuGetConstants.DefaultFeedUrl, VsResources.OfficialSourceName);
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private PackageSource _activeSource;
         private BindingSource _allPackageSources;
@@ -58,7 +58,7 @@ namespace NuGet.Options {
             MoveDownButton.Enabled = selectedSource != null &&
                                      PackageSourcesListBox.SelectedIndex < PackageSourcesListBox.Items.Count - 1;
             // do not allow deleting the official NuGet source
-            removeButton.Enabled = selectedSource != null && !selectedSource.Equals(OfficialSource);
+            removeButton.Enabled = selectedSource != null && !selectedSource.Equals(_officialSource);
         }
 
         private void MoveSelectedItem(int offset) {
