@@ -439,7 +439,7 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This template wizard can only be applied to project templates..
+        ///   Looks up a localized string similar to This template wizard can only be applied to single-project or project-item templates..
         /// </summary>
         public static string TemplateWizard_InvalidWizardRunKind {
             get {

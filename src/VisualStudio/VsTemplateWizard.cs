@@ -19,6 +19,7 @@ namespace NuGet.VisualStudio {
         private readonly IVsPackageInstaller _installer;
         private VsTemplateWizardInstallerConfiguration _configuration;
         private Project _project;
+        private ProjectItem _projectItem;
 
         private DTE DTE { get; set; }
 
@@ -152,7 +153,15 @@ namespace NuGet.VisualStudio {
             _project = project;
         }
 
+        private void ProjectItemFinishedGenerating(ProjectItem projectItem) {
+            _projectItem = projectItem;
+        }
+
         private void RunFinished() {
+            if (_projectItem != null && _project == null) {
+                _project = _projectItem.ContainingProject;
+            }
+
             Debug.Assert(_project != null);
             Debug.Assert(_configuration != null);
             if (_configuration.Packages.Any()) {
@@ -162,7 +171,7 @@ namespace NuGet.VisualStudio {
         }
 
         private void RunStarted(object automationObject, WizardRunKind runKind, object[] customParams) {
-            if (runKind != WizardRunKind.AsNewProject) {
+            if (runKind != WizardRunKind.AsNewProject && runKind != WizardRunKind.AsNewItem) {
                 ShowErrorMessage(VsResources.TemplateWizard_InvalidWizardRunKind);
                 throw new WizardBackoutException();
             }
@@ -185,7 +194,7 @@ namespace NuGet.VisualStudio {
         }
 
         void IWizard.ProjectItemFinishedGenerating(ProjectItem projectItem) {
-            // do nothing
+            ProjectItemFinishedGenerating(projectItem);
         }
 
         void IWizard.RunFinished() {

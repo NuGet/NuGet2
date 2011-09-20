@@ -250,7 +250,7 @@
     <value>The "repository" attribute of the package element has an invalid value: '{0}'. Valid values are: 'template' or 'extension'.</value>
   </data>
   <data name="TemplateWizard_InvalidWizardRunKind" xml:space="preserve">
-    <value>This template wizard can only be applied to project templates.</value>
+    <value>This template wizard can only be applied to single-project or project-item templates.</value>
   </data>
   <data name="TemplateWizard_FailedToInstallPackage" xml:space="preserve">
     <value>Could not add all required packages to the project. The following packages failed to install from '{0}':</value>

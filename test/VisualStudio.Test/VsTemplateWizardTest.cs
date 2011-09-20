@@ -5,13 +5,11 @@ using System.Xml.Linq;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionManager;
 using Microsoft.VisualStudio.TemplateWizard;
-using Xunit;
 using Moq;
 using NuGet.Test;
-
+using Xunit;
 
 namespace NuGet.VisualStudio.Test {
-    
     public class VsTemplateWizardTest {
         private static readonly XNamespace VSTemplateNamespace = "http://schemas.microsoft.com/developer/vstemplate/2005";
 
@@ -272,11 +270,6 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RunStarted_NewItemRun_DisplaysErrorMessageAndBacksOut() {
-            RunStartedForInvalidTemplateTypeHelper(WizardRunKind.AsNewItem);
-        }
-
-        [Fact]
         public void RunStarted_MultiProjectRun_DisplaysErrorMessageAndBacksOut() {
             RunStartedForInvalidTemplateTypeHelper(WizardRunKind.AsMultiProject);
         }
@@ -290,7 +283,7 @@ namespace NuGet.VisualStudio.Test {
                 () => ((IWizard)wizard).RunStarted(null, null, runKind, null));
 
             // Assert
-            Assert.Equal("This template wizard can only be applied to project templates.",
+            Assert.Equal("This template wizard can only be applied to single-project or project-item templates.",
                 wizard.ErrorMessages.Single());
         }
 
@@ -314,7 +307,7 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RunFinished_InstallsPackages() {
+        public void RunFinished_ForProject_InstallsPackages() {
             // Arrange
             var mockProject = new Mock<Project>().Object;
             var installerMock = new Mock<IVsPackageInstaller>();
@@ -328,6 +321,34 @@ namespace NuGet.VisualStudio.Test {
             wizard.RunStarted(dteMock.Object, null, WizardRunKind.AsNewProject,
                 new object[] { @"C:\Some\file.vstemplate" });
             wizard.ProjectFinishedGenerating(mockProject);
+
+            // Act
+            wizard.RunFinished();
+
+            // Assert
+            installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyPackage", new Version(1, 0), true));
+            installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyOtherPackage", new Version(2, 0), true));
+            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0 to project...");
+            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0 to project...");
+        }
+
+        [Fact]
+        public void RunFinished_ForItem_InstallsPackages() {
+            // Arrange
+            var mockProject = new Mock<Project>().Object;
+            var projectItemMock = new Mock<ProjectItem>();
+            projectItemMock.Setup(i => i.ContainingProject).Returns(mockProject);
+            var installerMock = new Mock<IVsPackageInstaller>();
+            var document = BuildDocument("template",
+                BuildPackageElement("MyPackage", "1.0"),
+                BuildPackageElement("MyOtherPackage", "2.0"));
+            var templateWizard = new TestableVsTemplateWizard(installerMock.Object, loadDocumentCallback: p => document);
+            var wizard = (IWizard)templateWizard;
+            var dteMock = new Mock<DTE>();
+            dteMock.SetupProperty(dte => dte.StatusBar.Text);
+            wizard.RunStarted(dteMock.Object, null, WizardRunKind.AsNewProject,
+                new object[] { @"C:\Some\file.vstemplate" });
+            wizard.ProjectItemFinishedGenerating(projectItemMock.Object);
 
             // Act
             wizard.RunFinished();
