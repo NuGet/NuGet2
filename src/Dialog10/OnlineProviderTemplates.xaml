@@ -135,11 +135,12 @@
                 <!-- Id -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
                     <eml:TextBlockControl Text="{x:Static resources:Resources.Dialog_IdLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <eml:TextBlockControl x:Name="IdTextBlock" Style="{StaticResource DetailMetadataValueStyle}">                            
+                    <eml:TextBlockControl x:Name="IdTextBlock" Style="{StaticResource DetailMetadataValueStyle}">
                         <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.GalleryDetailsUrl, Mode=OneTime, FallbackValue={x:Null}}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
-                            <Run x:Name="IdHyperlinkText" Text="{Binding Id, Mode=OneWay}" />
+                            <Run Text="{Binding Id, Mode=OneWay}" />
                         </Hyperlink>
                     </eml:TextBlockControl>
+                    <eml:TextBlockControl x:Name="IdTextOnlyBlock" Text="{Binding Id, Mode=OneWay}" Style="{StaticResource DetailMetadataValueStyle}" Visibility="Collapsed" />
                 </StackPanel>
 
                 <!-- Version -->
@@ -270,9 +271,8 @@
 
         <DataTemplate.Triggers>
             <DataTrigger Binding="{Binding PackageIdentity.GalleryDetailsUrl, Mode=OneTime, FallbackValue={x:Null}}" Value="{x:Null}">
-                <Setter TargetName="IdTextBlock" Property="Text" Value="{Binding Id, Mode=OneWay}" />
-                <!-- erase the hyperlink -->
-                <Setter TargetName="IdHyperlinkText" Property="Text" Value="" />
+                <Setter TargetName="IdTextOnlyBlock" Property="Visibility" Value="Visible" />
+                <Setter TargetName="IdTextBlock" Property="Visibility" Value="Collapsed" />
             </DataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
