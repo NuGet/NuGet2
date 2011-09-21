@@ -145,10 +145,15 @@ namespace NuGet.Tools {
         }
 
         private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args) {
+            bool isSolutionSelected = _vsMonitorSelection.GetIsSolutionNodeSelected();
+
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = !IsIDEInDebuggingOrBuildingContext() && (_vsMonitorSelection.GetIsSolutionNodeSelected() || HasActiveLoadedSupportedProject);
+            command.Visible = !IsIDEInDebuggingOrBuildingContext() && (isSolutionSelected || HasActiveLoadedSupportedProject);
             // disable the dialog menu if the console is busy executing a command;
             command.Enabled = !_consoleStatus.IsBusy;
+            if (command.Visible) {
+                command.Text = isSolutionSelected ? Resources.ManagePackageForSolutionLabel : Resources.ManagePackageLabel;
+            }
         }
 
         private void BeforeQueryStatusForAddPackageForSolutionDialog(object sender, EventArgs args) {
@@ -192,9 +197,7 @@ namespace NuGet.Tools {
                 ShowOptionPage(optionPageType);
             }
             catch (Exception exception) {
-                MessageHelper.ShowErrorMessage(exception,
-                                               NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
-
+                MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
                 ExceptionHelper.WriteToActivityLog(exception);
             }
         }
