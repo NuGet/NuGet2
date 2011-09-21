@@ -244,7 +244,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             public TestInstallCommand(IPackageRepositoryFactory factory,
                                       IPackageSourceProvider sourceProvider,
                                       IFileSystem fileSystem,
-                                      PackageManager packageManager = null)
+                                      PackageManager packageManager = null) 
                 : base(factory, sourceProvider) {
                 _fileSystem = fileSystem;
                 _packageManager = packageManager;
@@ -254,8 +254,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
                 return _fileSystem;
             }
 
-            protected override PackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache) {
-                return _packageManager ?? base.CreatePackageManager(fileSystem, useMachineCache);
+            protected override PackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache, IPackageRepository machineCacheRepository = null) {
+                return _packageManager ?? base.CreatePackageManager(fileSystem, useMachineCache, new MockPackageRepository());
             }
 
             protected override PackageReferenceFile GetPackageReferenceFile(string path) {

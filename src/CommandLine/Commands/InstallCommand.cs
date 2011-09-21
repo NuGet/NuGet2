@@ -130,11 +130,12 @@ namespace NuGet.Commands {
             return true;
         }
 
-        protected virtual PackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache = false) {
+        protected virtual PackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache = false, IPackageRepository machineCacheRepository = null) {
             var repository = GetRepository();
 
+            machineCacheRepository = machineCacheRepository ?? MachineCache.Default;
             if (useMachineCache) {
-                repository = new AggregateRepository(new[] { MachineCache.Default, repository });
+                repository = new AggregateRepository(new[] { machineCacheRepository, repository });
             }
 
             var pathResolver = new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions);
