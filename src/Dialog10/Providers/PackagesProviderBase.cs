@@ -173,6 +173,7 @@ namespace NuGet.Dialog.Providers {
             if (!String.IsNullOrWhiteSpace(searchText) && SelectedNode != null) {
                 searchText = searchText.Trim();
                 if (_searchNode != null) {
+                    _searchNode.Extensions.Clear();
                     _searchNode.SetSearchText(searchText);
                 }
                 else {
