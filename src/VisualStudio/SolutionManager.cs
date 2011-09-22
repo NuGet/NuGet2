@@ -64,6 +64,8 @@ namespace NuGet.VisualStudio {
 
         public event EventHandler SolutionClosed;
 
+        public event EventHandler<ProjectEventArgs> ProjectAdded;
+
         /// <summary>
         /// Gets a value indicating whether there is a solution open in the IDE.
         /// </summary>
@@ -178,6 +180,10 @@ namespace NuGet.VisualStudio {
             if (project.IsSupported() && !project.IsParentProjectExplicitlyUnsupported()) {
                 EnsureProjectCache();
                 AddProjectToCache(project);
+
+                if (ProjectAdded != null) {
+                    ProjectAdded(this, new ProjectEventArgs(project));
+                }
             }
         }
 

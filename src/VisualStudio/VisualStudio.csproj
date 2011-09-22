@@ -23,6 +23,7 @@
     <Compile Include="IOptionsPageActivator.cs" />
     <Compile Include="Extensibility\IVsPackageInstallerEvents.cs" />
     <Compile Include="Extensibility\IVsPackageInstallerServices.cs" />
+    <Compile Include="IPackageRestoreManager.cs" />
     <Compile Include="IVsTemplateWizard.cs" />
     <Compile Include="IWindowSettingsManager.cs" />
     <Compile Include="MessageHelper.cs" />
@@ -31,6 +32,7 @@
     <Compile Include="IPackageOperationEventListener.cs" />
     <Compile Include="OptionsPage.cs" />
     <Compile Include="OptionsPageActivator.cs" />
+    <Compile Include="PackageRestoreManager.cs" />
     <Compile Include="PackageSource\AggregatePackageSource.cs" />
     <Compile Include="PackageSource\IVsPackageSourceProvider.cs" />
     <Compile Include="ProductUpdate\IProductUpdateService.cs" />
@@ -45,12 +47,15 @@
     <Compile Include="ProductUpdate\VS2010UpdateWorker.cs" />
     <Compile Include="ProductUpdate\VsProductUpdateSettings.cs" />
     <Compile Include="ProjectCache.cs" />
+    <Compile Include="ProjectEventArgs.cs" />
     <Compile Include="ProjectName.cs" />
     <Compile Include="ProjectSystems\IVsProjectSystem.cs" />
     <Compile Include="ProjectSystems\WixProjectSystem.cs" />
     <Compile Include="RecentRepository\IPersistencePackageMetadata.cs" />
     <Compile Include="RecentRepository\RecentPackage.cs" />
+    <Compile Include="Utility\FileHelper.cs" />
     <Compile Include="Utility\PathHelper.cs" />
+    <Compile Include="Utility\SourceControlHelper.cs" />
     <Compile Include="Utility\UriHelper.cs" />
     <Compile Include="Utility\VsVersionHelper.cs" />
     <Compile Include="VisualStudioCredentialProvider.cs" />

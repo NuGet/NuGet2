@@ -9,8 +9,6 @@ using Microsoft.VisualStudio.ComponentModelHost;
 namespace NuGet.VisualStudio {
     [Export(typeof(IFileSystemProvider))]
     public class VsFileSystemProvider : IFileSystemProvider {
-        private const string SolutionSection = "solution";
-        private const string DisableSourceControlIntegerationKey = "disableSourceControlIntegration";
         private readonly DTE _dte;
         private readonly IComponentModel _componentModel;
         private readonly ISettings _settings;
@@ -42,7 +40,7 @@ namespace NuGet.VisualStudio {
         public IFileSystem GetFileSystem(string path) {
             // Get the source control providers
             var physicalFileSystem = new PhysicalFileSystem(path);
-            if (!IsSourceControlDisabled(_settings)) {
+            if (!_settings.IsSourceControlDisabled()) {
                 return physicalFileSystem;
             }
 
@@ -72,13 +70,6 @@ namespace NuGet.VisualStudio {
 
             return fileSystem ?? physicalFileSystem;
         }
-
-        private static bool IsSourceControlDisabled(ISettings _settings) {
-            var value = _settings.GetValue(SolutionSection, DisableSourceControlIntegerationKey);
-            bool disableSourceControlIntegration;
-            return !String.IsNullOrEmpty(value) && Boolean.TryParse(value, out disableSourceControlIntegration) && disableSourceControlIntegration;
-        }
-
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We should never fail")]
         private static IFileSystem GetFileSystemFromProvider(ISourceControlFileSystemProvider provider, string path, SourceControlBindings binding) {

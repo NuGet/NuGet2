@@ -7,6 +7,7 @@ namespace NuGet.VisualStudio {
         event EventHandler SolutionOpened;
         event EventHandler SolutionClosing;
         event EventHandler SolutionClosed;
+        event EventHandler<ProjectEventArgs> ProjectAdded;
 
         string SolutionDirectory { get; }
 

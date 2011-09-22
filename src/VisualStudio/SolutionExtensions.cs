@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using EnvDTE;
+using EnvDTE80;
 
 namespace NuGet.VisualStudio {
 
@@ -53,6 +55,23 @@ namespace NuGet.VisualStudio {
 
         public static string GetName(this Solution solution) {
             return solution.Properties.Item("Name").Value;
+        }
+
+        public static void AddFolderToSolution(this Solution solution, string solutionFolderName, string physicalFolderPath) {
+            Solution2 solution2 = (Solution2)solution;
+
+            Project project = solution2.Projects
+                                       .OfType<Project>()
+                                       .FirstOrDefault(p => p.Name.Equals(solutionFolderName, StringComparison.OrdinalIgnoreCase));
+            if (project == null) {
+                project = solution2.AddSolutionFolder(solutionFolderName);
+            }
+
+            if (project != null) {
+                foreach (string file in Directory.EnumerateFiles(physicalFolderPath)) {
+                    project.ProjectItems.AddFromFile(file);
+                }
+            }
         }
     }
 }

@@ -10,6 +10,8 @@ namespace NuGet.VisualStudio.Test.Mocks {
 
         public event EventHandler SolutionClosed;
 
+        public event EventHandler<ProjectEventArgs> ProjectAdded;
+
         public abstract string SolutionDirectory {
             get;
         }
@@ -44,6 +46,12 @@ namespace NuGet.VisualStudio.Test.Mocks {
         public void OpenSolution() {
             if (SolutionOpened != null) {
                 SolutionOpened(this, EventArgs.Empty);
+            }
+        }
+
+        public void AddProject(Project project) {
+            if (ProjectAdded != null) {
+                ProjectAdded(this, new ProjectEventArgs(project));
             }
         }
 
