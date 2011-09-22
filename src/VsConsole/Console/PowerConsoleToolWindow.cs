@@ -388,7 +388,11 @@ namespace NuGetConsole.Implementation {
                     ConsoleParentPane.NotifyInitializationCompleted();
 
                     WpfConsole.WriteLine(x.ToString());
+                    ExceptionHelper.WriteToActivityLog(x);
                 }
+            }
+            else {
+                ConsoleParentPane.NotifyInitializationCompleted();
             }
         }
 
