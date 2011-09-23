@@ -121,7 +121,7 @@
     <value>The assembly '{0}' is not inside the 'lib' folder and hence it won't be added as reference when the package is installed into a project.</value>
   </data>
   <data name="AssemblyOutsideLibSolution" xml:space="preserve">
-    <value>Move it into 'lib' folder.</value>
+    <value>Move it into the 'lib' folder if it should be referenced.</value>
   </data>
   <data name="AssemblyOutsideLibTitle" xml:space="preserve">
     <value>Assembly outside lib folder.</value>
@@ -154,7 +154,7 @@
     <value>Transform file outside content folder.</value>
   </data>
   <data name="MissingSummaryDescription" xml:space="preserve">
-    <value>The Description text is long but the Summary text is empty. This means the Description text will be truncated in the 'Manage NuGet packages' dialog.</value>
+    <value>The Description text is long but the Summary text is empty. This means the Description text will be truncated in the 'Manage NuGet Packages' dialog.</value>
   </data>
   <data name="MissingSummarySolution" xml:space="preserve">
     <value>Provide a brief summary of the package in the Summary field.</value>
@@ -163,7 +163,7 @@
     <value>Consider providing Summary text.</value>
   </data>
   <data name="NonAssemblyInLibDescription" xml:space="preserve">
-    <value>The file '{0}' is not a valid assembly. If it is a XML documentation file or a .pdb file, there is no matching .dll file specified in the same folder.</value>
+    <value>The file '{0}' is not a valid assembly. If it is an XML documentation file or a .pdb file, there is no matching assembly specified in the same folder.</value>
   </data>
   <data name="NonAssemblyInLibSolution" xml:space="preserve">
     <value>Either remove this file from 'lib' folder or add a matching .dll for it.</value>
