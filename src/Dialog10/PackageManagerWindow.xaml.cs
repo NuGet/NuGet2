@@ -15,6 +15,7 @@ using NuGet.VisualStudio;
 
 namespace NuGet.Dialog {
     public partial class PackageManagerWindow : DialogWindow {
+        internal static PackageManagerWindow CurrentInstance;
         private const string DialogUserAgentClient = "NuGet Add Package Dialog";
         private Lazy<string> _dialogUserAgent = new Lazy<string>(() => HttpUtility.CreateUserAgentString(DialogUserAgentClient));
 
@@ -360,6 +361,8 @@ namespace NuGet.Dialog {
 
             // flush output messages to the Output console at once when the dialog is closed.
             _smartOutputConsoleProvider.Flush();
+
+            CurrentInstance = null;
         }
 
         /// <summary>
@@ -443,6 +446,11 @@ namespace NuGet.Dialog {
         private void CanExecuteClose(object sender, CanExecuteRoutedEventArgs e) {
             e.CanExecute = !OperationCoordinator.IsBusy;
             e.Handled = true;
+        }
+
+        private void OnDialogWindowLoaded(object sender, RoutedEventArgs e) {
+            // HACK: Keep track of the currently open instance of this class.
+            CurrentInstance = this;
         }
     }
 }

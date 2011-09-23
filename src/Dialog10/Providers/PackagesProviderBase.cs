@@ -329,7 +329,7 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected void ShowProgressWindow() {
-            _providerServices.ProgressWindow.Show(ProgressWindowTitle);
+            _providerServices.ProgressWindow.Show(ProgressWindowTitle, PackageManagerWindow.CurrentInstance);
         }
 
         protected void HideProgressWindow() {

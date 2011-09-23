@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -55,12 +56,7 @@ namespace NuGet.Dialog.PackageManagerUI {
             CancelPendingShow();
 
             if (!_currentWindow.IsVisible) {
-                if (_currentWindow.IsLoaded) {
-                    _currentWindow.ShowDialog();
-                }
-                else {
-                    _currentWindow.ShowModal();
-                }
+                _currentWindow.Show();
                 _lastShowTime = DateTime.Now;
             }
         }
@@ -83,10 +79,10 @@ namespace NuGet.Dialog.PackageManagerUI {
         /// <remarks>
         /// This method can be called from worker thread.
         /// </remarks>
-        public void Show(string title) {
+        public void Show(string title, Window owner) {
             if (!_uiDispatcher.CheckAccess()) {
                 // must use BeginInvoke() here to avoid blocking the worker thread
-                _uiDispatcher.BeginInvoke(new Action<string>(Show), title);
+                _uiDispatcher.BeginInvoke(new Action<string, Window>(Show), title, owner);
                 return;
             }
 
@@ -94,7 +90,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 CancelPendingClose();
 
                 if (_currentWindow == null) {
-                    _currentWindow = new ProgressDialog();
+                    _currentWindow = new ProgressDialog() { Owner = owner };
                     _currentWindow.Closed += OnWindowClosed;
                 }
                 _currentWindow.Title = title;
