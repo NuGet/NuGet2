@@ -23,13 +23,14 @@ namespace NuGet.Server {
             // Route to publish a package
             routes.MapDelegate("PublishPackage",
                                "PublishedPackages/Publish",
+                               new { stub = new IncomingOnlyRouteConstraint() },
                                context => CreatePackageService().PublishPackage(context.HttpContext));
 
             // Route to delete packages
             routes.MapDelegate("DeletePackage",
                                "Packages/{apiKey}/{packageId}/{version}",
                                context => CreatePackageService().DeletePackage(context.HttpContext));
- 
+
             // Route to get packages
             routes.MapDelegate("DownloadPackage",
                                "download/{packageId}/{version}",
