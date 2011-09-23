@@ -1,12 +1,10 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 using NuGet.Analysis.Rules;
+using Xunit;
 
 namespace NuGet.Test.Analysis {
-    
+
     public class NoneAssemblyInsideLibRuleTest {
 
         [Fact]
@@ -39,7 +37,7 @@ namespace NuGet.Test.Analysis {
         public void NonAssemblyInsideLibHasIssue() {
             // Arrange
             var package = PackageUtility.CreatePackage(
-                "A", 
+                "A",
                 assemblyReferences: new[] { "lib\\one.dll", "lib\\abc.xml", "lib\\sl4\\wow.pdb", "lib\\net\\4.0\\kac.txt" });
             var rule = new NonAssemblyInsideLibRule();
 
@@ -72,7 +70,7 @@ namespace NuGet.Test.Analysis {
             PackageIssueTestHelper.AssertPackageIssue(
                 issue,
                 "Incompatible files in lib folder.",
-                "The file '" + target + "' is not a valid assembly. If it is a XML documentation file or a .pdb file, there is no matching .dll file specified in the same folder.",
+                "The file '" + target + "' is not a valid assembly. If it is an XML documentation file or a .pdb file, there is no matching assembly specified in the same folder.",
                 "Either remove this file from 'lib' folder or add a matching .dll for it.");
         }
     }

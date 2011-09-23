@@ -34,7 +34,7 @@ namespace NuGet.Test.Analysis {
             PackageIssueTestHelper.AssertPackageIssue(
                 issues[0],
                 "Consider providing Summary text.",
-                "The Description text is long but the Summary text is empty. This means the Description text will be truncated in the 'Manage NuGet packages' dialog.",
+                "The Description text is long but the Summary text is empty. This means the Description text will be truncated in the 'Manage NuGet Packages' dialog.",
                 "Provide a brief summary of the package in the Summary field.");
         }
 

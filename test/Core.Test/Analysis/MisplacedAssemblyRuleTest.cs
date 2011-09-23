@@ -1,12 +1,10 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 using NuGet.Analysis.Rules;
+using Xunit;
 
 namespace NuGet.Test.Analysis {
-    
+
     public class MisplacedAssemblyRuleTest {
 
         [Fact]
@@ -96,7 +94,7 @@ namespace NuGet.Test.Analysis {
                 issues[0],
                 "Assembly outside lib folder.",
                 "The assembly 'tools\\def.dll' is not inside the 'lib' folder and hence it won't be added as reference when the package is installed into a project.",
-                "Move it into 'lib' folder."
+                "Move it into the 'lib' folder if it should be referenced."
                 );
         }
     }
