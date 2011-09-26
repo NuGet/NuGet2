@@ -235,15 +235,14 @@ namespace NuGet.Tools {
 
         private void BeforeQueryStatusForAddPackageForSolutionDialog(object sender, EventArgs args) {
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = !IsIDEInDebuggingOrBuildingContext();
+            command.Visible = IsSolutionOpen && !IsIDEInDebuggingOrBuildingContext();
             // disable the dialog menu if the console is busy executing a command;
             command.Enabled = !_consoleStatus.IsBusy;
         }
 
         private void QueryStatusForVisualizer(object sender, EventArgs args) {
             OleMenuCommand command = (OleMenuCommand)sender;
-            var solutionManager = ServiceLocator.GetInstance<ISolutionManager>();
-            command.Visible = solutionManager.IsSolutionOpen && IsVisualizerSupported;
+            command.Visible = IsSolutionOpen && IsVisualizerSupported;
         }
 
         private bool IsIDEInDebuggingOrBuildingContext() {
