@@ -42,6 +42,7 @@
     <Compile Include="Analysis\IPackageRule.cs" />
     <Compile Include="Analysis\PackageIssue.cs" />
     <Compile Include="Analysis\DefaultPackageRuleSet.cs" />
+    <Compile Include="Analysis\PackageIssueLevel.cs" />
     <Compile Include="Analysis\Rules\InvalidFrameworkFolderRule.cs" />
     <Compile Include="Analysis\Rules\MisplacedAssemblyRule.cs" />
     <Compile Include="Analysis\Rules\MisplacedScriptFileRule.cs" />
