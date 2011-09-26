@@ -89,6 +89,7 @@ namespace NuGet.Dialog.Providers {
                     item.PackageIdentity,
                     operations,
                     updateDependencies: true,
+                    allowPrereleaseVersions: false,
                     logger: this,
                     eventListener: this);
             }

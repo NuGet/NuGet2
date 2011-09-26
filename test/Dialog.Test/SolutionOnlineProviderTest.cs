@@ -70,6 +70,7 @@ namespace NuGet.Dialog.Test {
                     packageB,
                     It.IsAny<IEnumerable<PackageOperation>>(),
                     false,
+                    false,
                     provider,
                     provider), Times.Once());
 
@@ -148,6 +149,7 @@ namespace NuGet.Dialog.Test {
                     packageB,
                     It.IsAny<IEnumerable<PackageOperation>>(),
                     false,
+                    false,
                     provider,
                     provider), Times.Never());
 
@@ -225,6 +227,7 @@ namespace NuGet.Dialog.Test {
                     It.IsAny<IEnumerable<Project>>(),
                     packageB,
                     It.IsAny<IEnumerable<PackageOperation>>(),
+                    false,
                     false,
                     provider,
                     provider), Times.Never());

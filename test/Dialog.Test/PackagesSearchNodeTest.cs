@@ -88,10 +88,10 @@ namespace NuGet.Dialog.Test {
             // Assert
             Assert.Equal(2, packages.Count);
             Assert.Equal("Azo", packages[0].Id);
-            Assert.Equal(new Version("1.0"), packages[0].Version);
+            Assert.Equal(new SemVer("1.0"), packages[0].Version);
 
             Assert.Equal("Azo", packages[1].Id);
-            Assert.Equal(new Version("2.0"), packages[1].Version);
+            Assert.Equal(new SemVer("2.0"), packages[1].Version);
         }
 
         [Fact]
@@ -129,7 +129,7 @@ namespace NuGet.Dialog.Test {
             // Assert
             Assert.Equal(1, packages.Count);
             Assert.Equal("B1", packages[0].Id);
-            Assert.Equal(new Version("2.0"), packages[0].Version);
+            Assert.Equal(new SemVer("2.0"), packages[0].Version);
         }
 
         private static PackagesSearchNode CreatePackagesSearchNode(string searchTerm, int numberOfPackages = 1, bool collapseVersions = true, PackagesTreeNodeBase baseNode = null) {

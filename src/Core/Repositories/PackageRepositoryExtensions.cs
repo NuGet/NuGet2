@@ -16,11 +16,11 @@ namespace NuGet {
             return Exists(repository, packageId, version: null);
         }
 
-        public static bool Exists(this IPackageRepository repository, string packageId, Version version) {
+        public static bool Exists(this IPackageRepository repository, string packageId, SemVer version) {
             return repository.FindPackage(packageId, version) != null;
         }
 
-        public static bool TryFindPackage(this IPackageRepository repository, string packageId, Version version, out IPackage package) {
+        public static bool TryFindPackage(this IPackageRepository repository, string packageId, SemVer version, out IPackage package) {
             package = repository.FindPackage(packageId, version);
             return package != null;
         }
@@ -29,18 +29,15 @@ namespace NuGet {
             return repository.FindPackage(packageId, version: null);
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, string packageId, string versionSpec) {
-            if (versionSpec == null) {
-                throw new ArgumentNullException("versionSpec");
-            }
-            return repository.FindPackage(packageId, VersionUtility.ParseVersionSpec(versionSpec));
+        public static IPackage FindPackage(this IPackageRepository repository, string packageId, SemVer version) {
+            return FindPackage(repository, packageId, version, constraintProvider: NullConstraintProvider.Instance, allowPrereleaseVersions: true);
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, string packageId, Version version) {
-            return FindPackage(repository, packageId, version, constraintProvider: null);
+        public static IPackage FindPackage(this IPackageRepository repository, string packageId, SemVer version, bool allowPrereleaseVersions) {
+            return FindPackage(repository, packageId, version, constraintProvider: NullConstraintProvider.Instance, allowPrereleaseVersions: allowPrereleaseVersions);
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, string packageId, Version version, IPackageConstraintProvider constraintProvider) {
+        public static IPackage FindPackage(this IPackageRepository repository, string packageId, SemVer version, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions) {
             if (repository == null) {
                 throw new ArgumentNullException("repository");
             }
@@ -57,26 +54,27 @@ namespace NuGet {
                 return packageLookup.FindPackage(packageId, version);
             }
 
-            IEnumerable<IPackage> packages = repository.FindPackagesById(packageId)
-                                                       .ToList()
-                                                       .OrderByDescending(p => p.Version);
+            IEnumerable<IPackage> packages = repository.FindPackagesById(packageId);
+
+            packages = packages.ToList()
+                               .OrderByDescending(p => p.Version);
 
             if (version != null) {
-                packages = packages.Where(p => VersionUtility.NormalizeVersion(p.Version) ==
-                                               VersionUtility.NormalizeVersion(version));
+                packages = packages.Where(p => p.Version == version);
             }
             else if (constraintProvider != null) {
-                packages = FilterPackagesByConstraints(constraintProvider, packages, packageId);
+                packages = FilterPackagesByConstraints(constraintProvider, packages, packageId, allowPrereleaseVersions);
             }
 
             return packages.FirstOrDefault();
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, string packageId, IVersionSpec versionSpec, IPackageConstraintProvider constraintProvider) {
-            var packages = repository.FindPackages(packageId, versionSpec);
+        public static IPackage FindPackage(this IPackageRepository repository, string packageId, IVersionSpec versionSpec,
+                IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions) {
+            var packages = repository.FindPackages(packageId, versionSpec, allowPrereleaseVersions);
 
             if (constraintProvider != null) {
-                packages = FilterPackagesByConstraints(constraintProvider, packages, packageId);
+                packages = FilterPackagesByConstraints(constraintProvider, packages, packageId, allowPrereleaseVersions);
             }
 
             return packages.FirstOrDefault();
@@ -118,7 +116,7 @@ namespace NuGet {
             }
         }
 
-        public static IEnumerable<IPackage> FindPackages(this IPackageRepository repository, string packageId, IVersionSpec versionSpec) {
+        public static IEnumerable<IPackage> FindPackages(this IPackageRepository repository, string packageId, IVersionSpec versionSpec, bool allowPrereleaseVersions) {
             if (repository == null) {
                 throw new ArgumentNullException("repository");
             }
@@ -134,16 +132,18 @@ namespace NuGet {
                 packages = packages.FindByVersion(versionSpec);
             }
 
+            packages = FilterPackagesByConstraints(NullConstraintProvider.Instance, packages, packageId, allowPrereleaseVersions);
+
             return packages;
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, string packageId, IVersionSpec versionSpec) {
-            return repository.FindPackages(packageId, versionSpec).FirstOrDefault();
+        public static IPackage FindPackage(this IPackageRepository repository, string packageId, IVersionSpec versionSpec, bool allowPrereleaseVersions) {
+            return repository.FindPackages(packageId, versionSpec, allowPrereleaseVersions).FirstOrDefault();
         }
 
-        public static IEnumerable<IPackage> FindCompatiblePackages(this IPackageRepository repository, 
-                                                                   IPackageConstraintProvider constraintProvider, 
-                                                                   IEnumerable<string> packageIds, 
+        public static IEnumerable<IPackage> FindCompatiblePackages(this IPackageRepository repository,
+                                                                   IPackageConstraintProvider constraintProvider,
+                                                                   IEnumerable<string> packageIds,
                                                                    IPackage package) {
             return (from p in repository.FindPackages(packageIds)
                     let dependency = p.FindDependency(package.Id)
@@ -183,19 +183,19 @@ namespace NuGet {
             return repository.GetPackages().Find(searchTerm);
         }
 
-        public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency) {
-            return ResolveDependency(repository, dependency: dependency, constraintProvider: null);
+        public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency, bool allowPrereleaseVersions) {
+            return ResolveDependency(repository, dependency: dependency, constraintProvider: null, allowPrereleaseVersions: allowPrereleaseVersions);
         }
 
-        public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency, IPackageConstraintProvider constraintProvider) {
+        public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions) {
             IDependencyResolver dependencyResolver = repository as IDependencyResolver;
             if (dependencyResolver != null) {
-                return dependencyResolver.ResolveDependency(dependency, constraintProvider);
+                return dependencyResolver.ResolveDependency(dependency, constraintProvider, allowPrereleaseVersions);
             }
-            return ResolveDependencyCore(repository, dependency, constraintProvider);
+            return ResolveDependencyCore(repository, dependency, constraintProvider, allowPrereleaseVersions);
         }
 
-        internal static IPackage ResolveDependencyCore(this IPackageRepository repository, PackageDependency dependency, IPackageConstraintProvider constraintProvider) {
+        internal static IPackage ResolveDependencyCore(this IPackageRepository repository, PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions) {
             if (repository == null) {
                 throw new ArgumentNullException("repository");
             }
@@ -207,7 +207,7 @@ namespace NuGet {
             IEnumerable<IPackage> packages = repository.FindPackagesById(dependency.Id).ToList();
 
             // Always filter by constraints when looking for dependencies
-            packages = FilterPackagesByConstraints(constraintProvider, packages, dependency.Id);
+            packages = FilterPackagesByConstraints(constraintProvider, packages, dependency.Id, allowPrereleaseVersions);
 
             // If version info was specified then use it
             if (dependency.VersionSpec != null) {
@@ -245,8 +245,7 @@ namespace NuGet {
             foreach (IPackage package in packageList) {
                 IPackage newestAvailablePackage;
                 if (sourcePackages.TryGetValue(package.Id, out newestAvailablePackage) &&
-                    VersionUtility.NormalizeVersion(newestAvailablePackage.Version) >
-                    VersionUtility.NormalizeVersion(package.Version)) {
+                    newestAvailablePackage.Version > package.Version) {
                     yield return newestAvailablePackage;
                 }
             }
@@ -297,15 +296,17 @@ namespace NuGet {
             return Expression.Equal(toLowerExpression, Expression.Constant(value));
         }
 
-        private static IEnumerable<IPackage> FilterPackagesByConstraints(IPackageConstraintProvider constraintProvider, IEnumerable<IPackage> packages, string packageId) {
-            if (constraintProvider == null) {
-                return packages;
-            }
+        private static IEnumerable<IPackage> FilterPackagesByConstraints(IPackageConstraintProvider constraintProvider, IEnumerable<IPackage> packages, string packageId,
+                bool allowPrereleaseVersions) {
+            constraintProvider = constraintProvider ?? NullConstraintProvider.Instance;
 
             // Filter packages by this constraint
             IVersionSpec constraint = constraintProvider.GetConstraint(packageId);
             if (constraint != null) {
-                return packages.FindByVersion(constraint);
+                packages = packages.FindByVersion(constraint);
+            }
+            if (!allowPrereleaseVersions) {
+                packages = packages.Where(p => p.IsReleaseVersion());
             }
 
             return packages;
@@ -324,7 +325,7 @@ namespace NuGet {
             // If we don't do this, A will always end up getting the 'buggy' 1.0.0, 
             // unless someone explicitly changes it to ask for 1.0.1, which is very painful if many packages are using B 1.0.0.
             var groups = from p in packages
-                         group p by new { p.Version.Major, p.Version.Minor } into g
+                         group p by new { p.Version.Version.Major, p.Version.Version.Minor } into g
                          orderby g.Key.Major, g.Key.Minor
                          select g;
 

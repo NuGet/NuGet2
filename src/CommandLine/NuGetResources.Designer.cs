@@ -1752,6 +1752,33 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Version &quot;{0}&quot; does not follow SemVer guidelines..
+        /// </summary>
+        internal static string Warning_SemVer {
+            get {
+                return ResourceManager.GetString("Warning_SemVer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update your version number to follow the SemVer scheme as described at http://semver.org..
+        /// </summary>
+        internal static string Warning_SemVerSolution {
+            get {
+                return ResourceManager.GetString("Warning_SemVerSolution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Semantic versioning.
+        /// </summary>
+        internal static string Warning_SemVerTitle {
+            get {
+                return ResourceManager.GetString("Warning_SemVerTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Found symbols package &apos;{0}&apos;, but no API key was specified for the symbol server. To save an API Key, run &apos;NuGet.exe setApiKey [your API key from http://www.NuGet.org]&apos;..
         /// </summary>
         internal static string Warning_SymbolServerNotConfigured {

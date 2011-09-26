@@ -1,15 +1,11 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using Xunit;
 
 namespace NuGet.VisualStudio.Test {
-
     using PackageUtility = NuGet.Test.PackageUtility;
 
-    
     public class RecentPackageTest {
-
         [Fact]
         public void TestTheFirstConstructor() {
             // Arrange
@@ -27,7 +23,7 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             Assert.Equal("A", package.Id);
-            Assert.Equal(new Version("1.2"), package.Version);
+            Assert.Equal(new SemVer("1.2"), package.Version);
             Assert.Equal(2, contents.Count);
             Assert.Equal(1.0, package.Rating);
             Assert.Equal("content\\one", content1);

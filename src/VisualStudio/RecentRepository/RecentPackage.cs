@@ -43,7 +43,7 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        public Version Version {
+        public SemVer Version {
             get {
                 return _basePackage.Version;
             }
@@ -157,7 +157,19 @@ namespace NuGet.VisualStudio {
             }
         }
 
+        /// <remarks>
+        /// This flag is not of relevance to RecentPackages. It is ok to have it always return true.
+        /// </remarks>
         public bool IsLatestVersion {
+            get {
+                return true;
+            }
+        }
+
+        /// <remarks>
+        /// This flag is not of relevance to RecentPackages. It is ok to have it always return true.
+        /// </remarks>
+        public bool IsAbsoluteLatestVersion {
             get {
                 return true;
             }

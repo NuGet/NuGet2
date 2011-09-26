@@ -12,7 +12,7 @@ namespace NuGet.Test.Server.Infrastructure {
         public void ServerPackageRepositoryReadsDerivedData() {
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
-            var package = new PackageBuilder() { Id = "Test", Version = new System.Version("1.0"), Description = "Description" };
+            var package = new PackageBuilder() { Id = "Test", Version = new SemVer("1.0"), Description = "Description" };
             var mockFile = new Mock<IPackageFile>();
             mockFile.Setup(m => m.Path).Returns("foo");
             mockFile.Setup(m => m.GetStream()).Returns(new MemoryStream());

@@ -6,7 +6,9 @@ namespace NuGet {
     [Export(typeof(IPackageRule))]
     internal sealed class DefaultPackageRules : IPackageRule {
         public IEnumerable<PackageIssue> Validate(IPackage package) {
-            return DefaultPackageRuleSet.Rules.Concat(new[] { new DefaultManifestValuesRule() })
+            var commandLineRules = new IPackageRule[] { new DefaultManifestValuesRule(), new SemVerValidationRule() };
+            return DefaultPackageRuleSet.Rules
+                                        .Concat(commandLineRules)
                                         .SelectMany(p => p.Validate(package));
         }
     }

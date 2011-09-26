@@ -48,7 +48,7 @@ namespace NuGet.VisualStudio {
                 projectManager.PackageReferenceAdded += addedHandler;
                 packageManager.PackageInstalled += installedHandler;
 
-                packageManager.InstallPackage(projectManager, packageId, version, ignoreDependencies, NullLogger.Instance);
+                packageManager.InstallPackage(projectManager, packageId, new SemVer(version), ignoreDependencies, allowPrereleaseVersions: false, logger: NullLogger.Instance);
             }
             finally {
                 projectManager.PackageReferenceAdded -= addedHandler;

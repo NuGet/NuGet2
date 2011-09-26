@@ -10,8 +10,8 @@ namespace NuGet.Test {
             var spec = new VersionSpec {
                 IsMaxInclusive = true,
                 IsMinInclusive = true,
-                MaxVersion = new Version("1.0"),
-                MinVersion = new Version("1.0"),
+                MaxVersion = new SemVer("1.0"),
+                MinVersion = new SemVer("1.0"),
             };
 
             // Act
@@ -26,7 +26,7 @@ namespace NuGet.Test {
             // Arrange
             var spec = new VersionSpec {
                 IsMinInclusive = true,
-                MinVersion = new Version("1.0"),
+                MinVersion = new SemVer("1.0"),
             };
 
             // Act
@@ -41,7 +41,7 @@ namespace NuGet.Test {
             // Arrange
             var spec = new VersionSpec {
                 IsMinInclusive = false,
-                MinVersion = new Version("1.0"),
+                MinVersion = new SemVer("1.0"),
             };
 
             // Act
@@ -56,7 +56,7 @@ namespace NuGet.Test {
             // Arrange
             var spec = new VersionSpec {
                 IsMaxInclusive = true,
-                MaxVersion = new Version("1.0"),
+                MaxVersion = new SemVer("1.0"),
             };
 
             // Act
@@ -71,7 +71,7 @@ namespace NuGet.Test {
             // Arrange
             var spec = new VersionSpec {
                 IsMaxInclusive = false,
-                MaxVersion = new Version("1.0"),
+                MaxVersion = new SemVer("1.0"),
             };
 
             // Act
@@ -87,8 +87,8 @@ namespace NuGet.Test {
             var spec = new VersionSpec {
                 IsMaxInclusive = true,
                 IsMinInclusive = false,
-                MaxVersion = new Version("3.0"),
-                MinVersion = new Version("1.0"),
+                MaxVersion = new SemVer("3.0"),
+                MinVersion = new SemVer("1.0"),
             };
 
             // Act
@@ -104,8 +104,8 @@ namespace NuGet.Test {
             var spec = new VersionSpec {
                 IsMaxInclusive = false,
                 IsMinInclusive = true,
-                MaxVersion = new Version("4.0"),
-                MinVersion = new Version("1.0"),
+                MaxVersion = new SemVer("4.0"),
+                MinVersion = new SemVer("1.0"),
             };
 
             // Act
@@ -121,8 +121,8 @@ namespace NuGet.Test {
             var spec = new VersionSpec {
                 IsMaxInclusive = true,
                 IsMinInclusive = true,
-                MaxVersion = new Version("5.0"),
-                MinVersion = new Version("1.0"),
+                MaxVersion = new SemVer("5.0"),
+                MinVersion = new SemVer("1.0"),
             };
 
             // Act
@@ -138,8 +138,8 @@ namespace NuGet.Test {
             var spec = new VersionSpec {
                 IsMaxInclusive = false,
                 IsMinInclusive = false,
-                MaxVersion = new Version("5.0"),
-                MinVersion = new Version("1.0"),
+                MaxVersion = new SemVer("5.0"),
+                MinVersion = new SemVer("1.0"),
             };
 
             // Act

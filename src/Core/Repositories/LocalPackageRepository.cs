@@ -79,11 +79,11 @@ namespace NuGet {
             }
         }
 
-        public IPackage FindPackage(string packageId, Version version) {
+        public IPackage FindPackage(string packageId, SemVer version) {
             return FindPackage(OpenPackage, packageId, version);
         }
 
-        internal IPackage FindPackage(Func<string, IPackage> openPackage, string packageId, Version version) {
+        internal IPackage FindPackage(Func<string, IPackage> openPackage, string packageId, SemVer version) {
             return (from path in GetAllPackagePaths(packageId, version)
                     where FileSystem.FileExists(path)
                     let package = GetPackage(openPackage, path)
@@ -91,7 +91,7 @@ namespace NuGet {
                     select package).FirstOrDefault();
         }
 
-        private IEnumerable<string> GetAllPackagePaths(string packageId, Version version) {
+        private IEnumerable<string> GetAllPackagePaths(string packageId, SemVer version) {
             // Since we look at the file system to determine if a package is installed,
             // we need to enumerate the list of possible versions and check the path for
             // each one
@@ -100,7 +100,7 @@ namespace NuGet {
                     select path).Distinct();
         }
 
-        private IEnumerable<string> GetPackagePaths(string packageId, Version version) {
+        private IEnumerable<string> GetPackagePaths(string packageId, SemVer version) {
             var packageName = new PackageName(packageId, version);
             string packagePath;
             if (_packagePathLookup.TryGetValue(packageName, out packagePath)) {
@@ -177,7 +177,7 @@ namespace NuGet {
                                 PathResolver.GetPackageFileName(package));
         }
 
-        protected virtual string GetPackageFilePath(string id, Version version) {
+        protected virtual string GetPackageFilePath(string id, SemVer version) {
             return Path.Combine(PathResolver.GetPackageDirectory(id, version),
                                 PathResolver.GetPackageFileName(id, version));
         }
@@ -193,13 +193,13 @@ namespace NuGet {
         }
 
         private class PackageName : IEquatable<PackageName> {
-            public PackageName(string packageId, Version version) {
+            public PackageName(string packageId, SemVer version) {
                 PackageId = packageId;
                 Version = version;
             }
 
             public string PackageId { get; private set; }
-            public Version Version { get; private set; }
+            public SemVer Version { get; private set; }
 
             public bool Equals(PackageName other) {
                 return PackageId.Equals(other.PackageId, StringComparison.OrdinalIgnoreCase) &&

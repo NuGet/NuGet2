@@ -55,7 +55,8 @@ namespace NuGet.Test {
             IPackageOperationResolver resolver = new InstallWalker(new MockPackageRepository(),
                                                              new MockPackageRepository(),
                                                              NullLogger.Instance,
-                                                             ignoreDependencies: false);
+                                                             ignoreDependencies: false,
+                                                             allowPrereleaseVersions: false);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(package), "Unable to resolve dependency 'B'.");
@@ -73,14 +74,15 @@ namespace NuGet.Test {
             var repository = new Mock<PackageRepositoryBase>();
             repository.Setup(c => c.GetPackages()).Returns(new[] { packageA }.AsQueryable());
             var dependencyProvider = repository.As<IDependencyResolver>();
-            dependencyProvider.Setup(c => c.ResolveDependency(It.Is<PackageDependency>(p => p.Id == "B"), It.IsAny<IPackageConstraintProvider>()))
+            dependencyProvider.Setup(c => c.ResolveDependency(It.Is<PackageDependency>(p => p.Id == "B"), It.IsAny<IPackageConstraintProvider>(), false))
                               .Returns(packageB).Verifiable();
             var localRepository = new MockPackageRepository();
 
             IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                              repository.Object,
                                                              NullLogger.Instance,
-                                                             ignoreDependencies: false);
+                                                             ignoreDependencies: false, 
+                                                             allowPrereleaseVersions: false);
 
 
             // Act
@@ -99,7 +101,7 @@ namespace NuGet.Test {
         [Fact]
         public void ResolveDependenciesForInstallPackageResolvesDependencyWithConstraintsUsingDependencyResolver() {
             // Arrange            
-            var packageDependency = new PackageDependency("B", new VersionSpec { MinVersion = new Version("1.1") });
+            var packageDependency = new PackageDependency("B", new VersionSpec { MinVersion = new SemVer("1.1") });
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> { packageDependency });
             IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0");
@@ -107,14 +109,15 @@ namespace NuGet.Test {
             var repository = new Mock<PackageRepositoryBase>(MockBehavior.Strict);
             repository.Setup(c => c.GetPackages()).Returns(new[] { packageA }.AsQueryable());
             var dependencyProvider = repository.As<IDependencyResolver>();
-            dependencyProvider.Setup(c => c.ResolveDependency(packageDependency, It.IsAny<IPackageConstraintProvider>()))
+            dependencyProvider.Setup(c => c.ResolveDependency(packageDependency, It.IsAny<IPackageConstraintProvider>(), false))
                               .Returns(packageB12).Verifiable();
             var localRepository = new MockPackageRepository();
 
             IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                              repository.Object,
                                                              NullLogger.Instance,
-                                                             ignoreDependencies: false);
+                                                             ignoreDependencies: false,
+                                                             allowPrereleaseVersions: false);
 
 
             // Act
@@ -153,7 +156,8 @@ namespace NuGet.Test {
             IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                              sourceRepository,
                                                              NullLogger.Instance,
-                                                             ignoreDependencies: false);
+                                                             ignoreDependencies: false,
+                                                             allowPrereleaseVersions: false);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Circular dependency detected 'A 1.0 => B 1.0 => A 1.0'.");
@@ -200,7 +204,8 @@ namespace NuGet.Test {
             IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                              sourceRepository,
                                                              NullLogger.Instance,
-                                                             ignoreDependencies: false);
+                                                             ignoreDependencies: false,
+                                                             allowPrereleaseVersions: false);
 
             // Act
             var packages = resolver.ResolveOperations(packageA).ToList();
@@ -263,13 +268,16 @@ namespace NuGet.Test {
             IPackageOperationResolver projectResolver = new UpdateWalker(localRepository,
                                                                                 sourceRepository,
                                                                                 new DependentsWalker(localRepository),
+                                                                                NullConstraintProvider.Instance,
                                                                                 NullLogger.Instance,
-                                                                                updateDependencies: true);
+                                                                                updateDependencies: true,
+                                                                                allowPrereleaseVersions: false);
 
             IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                                    sourceRepository,
                                                                    NullLogger.Instance,
-                                                                   ignoreDependencies: false);
+                                                                   ignoreDependencies: false,
+                                                                   allowPrereleaseVersions: false);
 
             // Act
             var operations = resolver.ResolveOperations(packageA).ToList();
@@ -278,19 +286,19 @@ namespace NuGet.Test {
             // Assert
             Assert.Equal(5, operations.Count);
             Assert.Equal("E", operations[0].Package.Id);
-            Assert.Equal(new Version("2.0"), operations[0].Package.Version);
+            Assert.Equal(new SemVer("2.0"), operations[0].Package.Version);
             Assert.Equal("B", operations[1].Package.Id);
             Assert.Equal("D", operations[2].Package.Id);
-            Assert.Equal(new Version("2.0"), operations[2].Package.Version);
+            Assert.Equal(new SemVer("2.0"), operations[2].Package.Version);
             Assert.Equal("C", operations[3].Package.Id);
             Assert.Equal("A", operations[4].Package.Id);
 
             Assert.Equal(5, projectOperations.Count);
             Assert.Equal("E", projectOperations[0].Package.Id);
-            Assert.Equal(new Version("2.0"), projectOperations[0].Package.Version);
+            Assert.Equal(new SemVer("2.0"), projectOperations[0].Package.Version);
             Assert.Equal("B", projectOperations[1].Package.Id);
             Assert.Equal("D", projectOperations[2].Package.Id);
-            Assert.Equal(new Version("2.0"), projectOperations[2].Package.Version);
+            Assert.Equal(new SemVer("2.0"), projectOperations[2].Package.Version);
             Assert.Equal("C", projectOperations[3].Package.Id);
             Assert.Equal("A", projectOperations[4].Package.Id);
         }
@@ -423,7 +431,8 @@ namespace NuGet.Test {
             IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                              sourceRepository,
                                                              NullLogger.Instance,
-                                                             ignoreDependencies: false);
+                                                             ignoreDependencies: false,
+                                                             allowPrereleaseVersions: false);
 
 
             // Act & Assert
@@ -462,8 +471,10 @@ namespace NuGet.Test {
             IPackageOperationResolver resolver = new UpdateWalker(localRepository,
                                                                   sourceRepository,
                                                                   new DependentsWalker(localRepository),
+                                                                  NullConstraintProvider.Instance,
                                                                   NullLogger.Instance,
-                                                                  updateDependencies: true) { AcceptedTargets = PackageTargets.Project };
+                                                                  updateDependencies: true,
+                                                                  allowPrereleaseVersions: false) { AcceptedTargets = PackageTargets.Project };
 
             // Act
             var packages = resolver.ResolveOperations(B101).ToList();
@@ -507,7 +518,8 @@ namespace NuGet.Test {
                                                                    sourceRepository,
                                                                    constraintProvider.Object,
                                                                    NullLogger.Instance,
-                                                                   ignoreDependencies: false);
+                                                                   ignoreDependencies: false, 
+                                                                   allowPrereleaseVersions: false);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(A20), "Unable to resolve dependency 'B (\u2265 2.0)'.'B' has an additional constraint (= 1.4) defined in foo.");
@@ -530,7 +542,8 @@ namespace NuGet.Test {
             IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                              sourceRepository,
                                                              NullLogger.Instance,
-                                                             ignoreDependencies: false);
+                                                             ignoreDependencies: false,
+                                                             allowPrereleaseVersions: false);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to resolve dependency 'B (\u2265 1.5)'.");
@@ -555,7 +568,8 @@ namespace NuGet.Test {
             IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                              sourceRepository,
                                                              NullLogger.Instance,
-                                                             ignoreDependencies: false);
+                                                             ignoreDependencies: false,
+                                                             allowPrereleaseVersions: false);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => resolver.ResolveOperations(packageA), "Unable to resolve dependency 'B (= 1.5)'.");
@@ -600,7 +614,8 @@ namespace NuGet.Test {
             IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                                    sourceRepository,
                                                                    NullLogger.Instance,
-                                                                   ignoreDependencies: false);
+                                                                   ignoreDependencies: false,
+                                                                   allowPrereleaseVersions: false);
 
             // Act & Assert
             var packages = resolver.ResolveOperations(packageA).ToList();
@@ -687,8 +702,10 @@ namespace NuGet.Test {
             IPackageOperationResolver resolver = new UpdateWalker(localRepository,
                                                                           sourceRepository,
                                                                           new DependentsWalker(localRepository),
+                                                                          NullConstraintProvider.Instance,
                                                                           NullLogger.Instance,
-                                                                          updateDependencies: true);
+                                                                          updateDependencies: true,
+                                                                          allowPrereleaseVersions: false);
 
             var operations = resolver.ResolveOperations(packageA2).ToList();
             Assert.Equal(8, operations.Count);
@@ -917,8 +934,10 @@ namespace NuGet.Test {
             IPackageOperationResolver resolver = new UpdateWalker(localRepository,
                                                                    sourceRepository,
                                                                    new DependentsWalker(localRepository),
+                                                                   NullConstraintProvider.Instance,
                                                                    NullLogger.Instance,
-                                                                   updateDependencies: true) { AcceptedTargets = PackageTargets.Project };
+                                                                   updateDependencies: true,
+                                                                   allowPrereleaseVersions: false) { AcceptedTargets = PackageTargets.Project };
 
             // Act
             var packages = resolver.ResolveOperations(projectPackage)
@@ -1025,26 +1044,27 @@ namespace NuGet.Test {
             IPackageOperationResolver resolver = new InstallWalker(new MockPackageRepository(),
                                                                    repository,
                                                                    NullLogger.Instance,
-                                                                   ignoreDependencies: false);
+                                                                   ignoreDependencies: false,
+                                                                   allowPrereleaseVersions: false);
             // Act
             var packages = resolver.ResolveOperations(A10).ToList();
 
             // Assert
             Assert.Equal(4, packages.Count);
             Assert.Equal("D", packages[0].Package.Id);
-            Assert.Equal(new Version("2.0"), packages[0].Package.Version);
+            Assert.Equal(new SemVer("2.0"), packages[0].Package.Version);
             Assert.Equal("C", packages[1].Package.Id);
-            Assert.Equal(new Version("1.1.3"), packages[1].Package.Version);
+            Assert.Equal(new SemVer("1.1.3"), packages[1].Package.Version);
             Assert.Equal("B", packages[2].Package.Id);
-            Assert.Equal(new Version("1.0.9"), packages[2].Package.Version);
+            Assert.Equal(new SemVer("1.0.9"), packages[2].Package.Version);
             Assert.Equal("A", packages[3].Package.Id);
-            Assert.Equal(new Version("1.0"), packages[3].Package.Version);
+            Assert.Equal(new SemVer("1.0"), packages[3].Package.Version);
         }
 
         private void AssertOperation(string expectedId, string expectedVersion, PackageAction expectedAction, PackageOperation operation) {
             Assert.Equal(expectedAction, operation.Action);
             Assert.Equal(expectedId, operation.Package.Id);
-            Assert.Equal(new Version(expectedVersion), operation.Package.Version);
+            Assert.Equal(new SemVer(expectedVersion), operation.Package.Version);
         }
 
         private class TestWalker : PackageWalker {
@@ -1054,7 +1074,7 @@ namespace NuGet.Test {
             }
 
             protected override IPackage ResolveDependency(PackageDependency dependency) {
-                return _repository.ResolveDependency(dependency);
+                return _repository.ResolveDependency(dependency, AllowPrereleaseVersions);
             }
         }
     }

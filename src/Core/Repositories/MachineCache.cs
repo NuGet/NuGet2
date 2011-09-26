@@ -87,7 +87,7 @@ namespace NuGet {
             return Path.GetFileName(base.GetPackageFilePath(package));
         }
 
-        protected override string GetPackageFilePath(string id, Version version) {
+        protected override string GetPackageFilePath(string id, SemVer version) {
             return Path.GetFileName(base.GetPackageFilePath(id, version));
         }
 

@@ -57,7 +57,7 @@ namespace NuGet {
             set;
         }
 
-        public Version Version {
+        public SemVer Version {
             get;
             set;
         }

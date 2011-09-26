@@ -53,11 +53,11 @@ namespace NuGet.Test {
             allFiles.AddRange(CreateFiles(tools, "tools"));
             allFiles.AddRange(assemblyReferences);
 
-            var mockPackage = new Mock<IPackage>() { CallBase = true };
+            var mockPackage = new Mock<IPackage>(MockBehavior.Strict) { CallBase = true };
             mockPackage.Setup(m => m.IsLatestVersion).Returns(true);
             mockPackage.Setup(m => m.Id).Returns(id);
             mockPackage.Setup(m => m.Published).Returns(DateTimeOffset.Now);
-            mockPackage.Setup(m => m.Version).Returns(new Version(version));
+            mockPackage.Setup(m => m.Version).Returns(new SemVer(version));
             mockPackage.Setup(m => m.GetFiles()).Returns(allFiles);
             mockPackage.Setup(m => m.AssemblyReferences).Returns(assemblyReferences);
             mockPackage.Setup(m => m.Dependencies).Returns(dependencies);
@@ -68,6 +68,11 @@ namespace NuGet.Test {
             mockPackage.Setup(m => m.LicenseUrl).Returns(new Uri("ftp://test/somelicense.txts"));
             mockPackage.Setup(m => m.Rating).Returns(rating ?? -1);
             mockPackage.Setup(m => m.Summary).Returns(summary);
+            mockPackage.Setup(m => m.FrameworkAssemblies).Returns(Enumerable.Empty<FrameworkAssemblyReference>());
+            mockPackage.Setup(m => m.Tags).Returns(String.Empty);
+            mockPackage.Setup(m => m.Title).Returns(String.Empty);
+            mockPackage.Setup(m => m.DownloadCount).Returns(0);
+            mockPackage.Setup(m => m.RequireLicenseAcceptance).Returns(false);
             return mockPackage.Object;
         }
 

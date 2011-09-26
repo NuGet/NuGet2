@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
+using Xunit;
 
 namespace NuGet.VisualStudio.Test {
     using NuGet.Test;
 
-    
     public class FallbackRepositoryTest {
         [Fact]
         public void CreatePackageManagerUsesPrimaryRepositoryAsdependencyResolverIfUseFallbackIsFalse() {
@@ -77,9 +76,9 @@ namespace NuGet.VisualStudio.Test {
             var packageManager = packageManagerFactory.CreatePackageManager(mockRepository1, useFallbackForDependencies: true);
 
             // Assert
-			Assert.IsType(typeof(FallbackRepository), packageManager.SourceRepository);
+            Assert.IsType(typeof(FallbackRepository), packageManager.SourceRepository);
             var fallbackRepo = (FallbackRepository)packageManager.SourceRepository;
-			Assert.IsType(typeof(AggregateRepository), fallbackRepo.DependencyResolver);
+            Assert.IsType(typeof(AggregateRepository), fallbackRepo.DependencyResolver);
             var dependencyResolver = (AggregateRepository)fallbackRepo.DependencyResolver;
             Assert.Equal(2, dependencyResolver.Repositories.Count());
             Assert.Equal(mockRepository1, dependencyResolver.Repositories.First());
@@ -116,17 +115,17 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             var dependencyResolver = repository as IDependencyResolver;
-            IPackage dependency = dependencyResolver.ResolveDependency(new PackageDependency("A", new VersionSpec { MinVersion = new Version("1.0.0.0") }), null);
+            IPackage dependency = dependencyResolver.ResolveDependency(new PackageDependency("A", new VersionSpec { MinVersion = new SemVer("1.0.0.0") }), null, allowPrereleaseVersions: false);
             List<IPackage> packages = repository.GetPackages().ToList();
 
             // Assert
             Assert.Equal(1, packages.Count());
             Assert.Equal("A", packages[0].Id);
-            Assert.Equal(new Version("1.0"), packages[0].Version);
+            Assert.Equal(new SemVer("1.0"), packages[0].Version);
 
             Assert.NotNull(dependency);
             Assert.Equal("A", dependency.Id);
-            Assert.Equal(new Version("1.2"), dependency.Version);
+            Assert.Equal(new SemVer("1.2"), dependency.Version);
         }
 
         [Fact]
@@ -273,14 +272,14 @@ namespace NuGet.VisualStudio.Test {
             var package = PackageUtility.CreatePackage("M1", "1.0");
             var dependencyResolver = new Mock<IPackageRepository>(MockBehavior.Strict);
             dependencyResolver.As<IDependencyResolver>()
-                              .Setup(c => c.ResolveDependency(It.IsAny<PackageDependency>(), It.IsAny<IPackageConstraintProvider>()))
+                              .Setup(c => c.ResolveDependency(It.IsAny<PackageDependency>(), It.IsAny<IPackageConstraintProvider>(), false))
                               .Throws(new Exception("This method should not be called."));
             var primaryRepository = new MockPackageRepository();
             primaryRepository.AddPackage(package);
             var fallbackRepository = new FallbackRepository(primaryRepository, dependencyResolver.Object);
 
             // Act
-            var resolvedPackage = fallbackRepository.ResolveDependency(new PackageDependency("M1"));
+            var resolvedPackage = fallbackRepository.ResolveDependency(new PackageDependency("M1"), false);
 
             // Assert
             Assert.Same(package, resolvedPackage);
@@ -292,7 +291,7 @@ namespace NuGet.VisualStudio.Test {
             var package = PackageUtility.CreatePackage("M1", "1.0");
             var dependencyResolver = new Mock<IPackageRepository>(MockBehavior.Strict);
             dependencyResolver.As<IDependencyResolver>()
-                              .Setup(c => c.ResolveDependency(It.IsAny<PackageDependency>(), It.IsAny<IPackageConstraintProvider>()))
+                              .Setup(c => c.ResolveDependency(It.IsAny<PackageDependency>(), It.IsAny<IPackageConstraintProvider>(), false))
                               .Throws(new Exception("Connection failure."));
             var aggregateRepository = new AggregateRepository(new[] { dependencyResolver.Object }) { IgnoreFailingRepositories = true };
             var primaryRepository = new MockPackageRepository();
@@ -300,7 +299,7 @@ namespace NuGet.VisualStudio.Test {
             var fallbackRepository = new FallbackRepository(primaryRepository, aggregateRepository);
 
             // Act
-            var resolvedPackage = fallbackRepository.ResolveDependency(new PackageDependency("M2", new VersionSpec { MinVersion = new Version("1.0.1") }));
+            var resolvedPackage = fallbackRepository.ResolveDependency(new PackageDependency("M2", new VersionSpec { MinVersion = new SemVer("1.0.1") }), false);
 
             // Assert
             Assert.Null(resolvedPackage);
@@ -318,7 +317,7 @@ namespace NuGet.VisualStudio.Test {
             var fallbackRepository = new FallbackRepository(primaryRepository, dependencyResolver);
 
             // Act
-            var resolvedPackage = fallbackRepository.ResolveDependency(new PackageDependency("M2", new VersionSpec { MinVersion = new Version("1.0.1") }));
+            var resolvedPackage = fallbackRepository.ResolveDependency(new PackageDependency("M2", new VersionSpec { MinVersion = new SemVer("1.0.1") }), false);
 
             // Assert
             Assert.Same(resolvedPackage, packageA11);

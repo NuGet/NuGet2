@@ -132,7 +132,8 @@ namespace NuGet.VisualStudio {
                     DTE.StatusBar.Text = String.Format(CultureInfo.CurrentCulture, VsResources.TemplateWizard_PackageInstallStatus, package.Id, package.Version);
                     // TODO review parameters and installer call
                     // REVIEW is it OK to ignoreDependencies? The expectation is that the vstemplate will list all the required packages
-                    packageInstaller.InstallPackage(packageRepositoryPath, project, package.Id, package.Version, ignoreDependencies: true);
+                    // REVIEW We need to figure out if we can break IVsPackageInstaller interface by modifying it to accept a SemVer and still allow MVC 3 projects to work
+                    packageInstaller.InstallPackage(packageRepositoryPath, project, package.Id, package.Version.Version, ignoreDependencies: true);
                 }
                 catch (InvalidOperationException) {
                     failedPackages.Add(package);

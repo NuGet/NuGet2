@@ -1,4 +1,4 @@
-function Test-SinglePackageInstallIntoSingleProject {
+﻿function Test-SinglePackageInstallIntoSingleProject {
     # Arrange
     $project = New-ConsoleApplication
     
@@ -1351,4 +1351,57 @@ function Test-ExplicitCallToAddBindingRedirectAddsBindingRedirectsToClassLibrary
     Assert-AreEqual '1.0.5.0' $redirect.NewVersion
     Assert-NotNull (Get-ProjectItem $a app.config)
     Assert-BindingRedirect $a app.config F '0.0.0.0-1.0.5.0' '1.0.5.0'
+}
+
+function Test-InstallPackageInstallsHighestReleasedPackageIfPreReleaseFlagIsNotSet {
+    # Arrange
+    $a = New-ClassLibrary
+
+    # Act
+    $a | Install-Package -Source $context.RepositoryRoot PreReleaseTestPackage
+
+    Assert-Package $a 'PreReleaseTestPackage' '1.0.0'
+}
+
+function Test-InstallPackageInstallsHighestPackageIfPreReleaseFlagIsSet {
+    # Arrange
+    $a = New-ClassLibrary
+
+    # Act
+    $a | Install-Package -Source $context.RepositoryRoot PreReleaseTestPackage -PreRelease
+
+    Assert-Package $a 'PreReleaseTestPackage' '1.0.1a'
+}
+
+function Test-InstallPackageInstallsHighestPackageIfItIsReleaseWhenPreReleaseFlagIsSet {
+    # Arrange
+    $a = New-ClassLibrary
+
+    # Act
+    $a | Install-Package -Source $context.RepositoryRoot PreReleaseTestPackage.A -PreRelease
+
+    Assert-Package $a 'PreReleaseTestPackage.A' '1.0.0'
+}
+
+function Test-InstallPackageDoesNotInstallIfIndirectDependencyIsPrerelease {
+    # Arrange
+    $a = New-ClassLibrary
+
+    # Act and Assert
+	Assert-Throws { $a | Install-Package -Source $context.RepositoryPath A } "Unable to resolve dependency 'C (≥ 0.6 && < 1.0)'."
+}
+
+
+function Test-InstallPackageInstallsIfIndirectDependencyIsPrereleaseAndFlagIsSet {
+    # Arrange
+    $a = New-ClassLibrary
+
+	Read-Host
+    # Act 
+	$a | Install-Package -Source $context.RepositoryPath A  -Prerelease
+
+	# Assert
+	Assert-Package $a 'A' '1.0'
+	Assert-Package $a 'B' '1.0'
+	Assert-Package $a 'B' '0.8b'
 }

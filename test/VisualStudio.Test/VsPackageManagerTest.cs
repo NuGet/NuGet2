@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using EnvDTE;
 using Xunit;
@@ -31,7 +31,7 @@ namespace NuGet.Test.VisualStudio {
             sourceRepository.AddPackage(package);
 
             // Act
-            packageManager.InstallPackage(projectManager, "foo", new Version("1.0"), ignoreDependencies: false, logger: NullLogger.Instance);
+            packageManager.InstallPackage(projectManager, "foo", new SemVer("1.0"), ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance);
 
             // Assert
             Assert.True(packageManager.LocalRepository.Exists(package));
@@ -71,7 +71,7 @@ namespace NuGet.Test.VisualStudio {
              };
 
             // Act 
-            packageManager.InstallPackage(projectManager, package, operations, ignoreDependencies: false, logger: NullLogger.Instance);
+            packageManager.InstallPackage(projectManager, package, operations, ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance);
 
             // Assert 
             Assert.True(packageManager.LocalRepository.Exists(package));
@@ -101,7 +101,7 @@ namespace NuGet.Test.VisualStudio {
             sourceRepository.AddPackage(package);
 
             // Act
-            packageManager.InstallPackage((IProjectManager)null, "foo", new Version("1.0"), ignoreDependencies: false, logger: NullLogger.Instance);
+            packageManager.InstallPackage((IProjectManager)null, "foo", new SemVer("1.0"), ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance);
 
             // Assert
             Assert.True(packageManager.LocalRepository.Exists(package));
@@ -111,7 +111,7 @@ namespace NuGet.Test.VisualStudio {
         public void UninstallProjectLevelPackageThrowsIfPackageIsReferenced() {
             // Arrange            
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
-            localRepository.Setup(m => m.IsReferenced("foo", It.IsAny<Version>())).Returns(true);
+            localRepository.Setup(m => m.IsReferenced("foo", It.IsAny<SemVer>())).Returns(true);
             var sourceRepository = new MockPackageRepository();
             var fileSystem = new MockFileSystem();
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
@@ -136,7 +136,7 @@ namespace NuGet.Test.VisualStudio {
         public void UninstallProjectLevelPackageWithNoProjectManagerThrows() {
             // Arrange            
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
-            localRepository.Setup(m => m.IsReferenced("foo", It.IsAny<Version>())).Returns(true);
+            localRepository.Setup(m => m.IsReferenced("foo", It.IsAny<SemVer>())).Returns(true);
             var sourceRepository = new MockPackageRepository();
             var fileSystem = new MockFileSystem();
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
@@ -160,7 +160,7 @@ namespace NuGet.Test.VisualStudio {
         public void UninstallPackageRemovesPackageIfPackageIsNotReferenced() {
             // Arrange            
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
-            localRepository.Setup(m => m.IsReferenced("foo", It.IsAny<Version>())).Returns(false);
+            localRepository.Setup(m => m.IsReferenced("foo", It.IsAny<SemVer>())).Returns(false);
             var sourceRepository = new MockPackageRepository();
             var fileSystem = new MockFileSystem();
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
@@ -187,7 +187,7 @@ namespace NuGet.Test.VisualStudio {
         public void UpdatePackageRemovesPackageIfPackageIsNotReferenced() {
             // Arrange            
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
-            localRepository.Setup(m => m.IsReferenced("A", new Version("1.0"))).Returns(false);
+            localRepository.Setup(m => m.IsReferenced("A", new SemVer("1.0"))).Returns(false);
             var projectRepository = new MockProjectPackageRepository(localRepository.Object);
             var sourceRepository = new MockPackageRepository();
             var fileSystem = new MockFileSystem();
@@ -210,7 +210,7 @@ namespace NuGet.Test.VisualStudio {
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, new MockProjectSystem(), projectRepository);
 
             // Act
-            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, logger: NullLogger.Instance);
+            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance);
 
             // Assert
             Assert.False(packageManager.LocalRepository.Exists(A10));
@@ -220,7 +220,7 @@ namespace NuGet.Test.VisualStudio {
         public void UpdatePackageDoesNotRemovesPackageIfPackageIsReferenced() {
             // Arrange            
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
-            localRepository.Setup(m => m.IsReferenced("A", new Version("1.0"))).Returns(true);
+            localRepository.Setup(m => m.IsReferenced("A", new SemVer("1.0"))).Returns(true);
             var projectRepository = new MockProjectPackageRepository(localRepository.Object);
             var sourceRepository = new MockPackageRepository();
             var fileSystem = new MockFileSystem();
@@ -243,7 +243,7 @@ namespace NuGet.Test.VisualStudio {
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, new MockProjectSystem(), projectRepository);
 
             // Act
-            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, logger: NullLogger.Instance);
+            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance);
 
             // Assert
             Assert.True(packageManager.LocalRepository.Exists(A10));
@@ -292,7 +292,7 @@ namespace NuGet.Test.VisualStudio {
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, new MockProjectSystem(), projectRepository);
 
             // Act
-            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, logger: NullLogger.Instance);
+            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance);
 
             // Assert
             Assert.False(packageManager.LocalRepository.Exists(A10));
@@ -332,10 +332,10 @@ namespace NuGet.Test.VisualStudio {
                 new Mock<VsPackageInstallerEvents>().Object,
                 new MockPackageRepository());
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
-            projectManager.AddPackageReference("A", new Version("1.0"));
+            projectManager.AddPackageReference("A", new SemVer("1.0"));
 
             // Act
-            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, logger: NullLogger.Instance);
+            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance);
 
             // Assert
             Assert.False(packageManager.LocalRepository.Exists(A10));
@@ -375,10 +375,10 @@ namespace NuGet.Test.VisualStudio {
                 new Mock<VsPackageInstallerEvents>().Object,
                 new MockPackageRepository());
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
-            projectManager.AddPackageReference("A", new Version("1.0"));
+            projectManager.AddPackageReference("A", new SemVer("1.0"));
 
             // Act
-            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, logger: NullLogger.Instance);
+            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance);
 
             // Assert
             Assert.False(packageManager.LocalRepository.Exists(A10));
@@ -426,10 +426,10 @@ namespace NuGet.Test.VisualStudio {
                 new Mock<VsPackageInstallerEvents>().Object,
                 new MockPackageRepository());
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
-            projectManager.AddPackageReference("A", new Version("1.0"));
+            projectManager.AddPackageReference("A", new SemVer("1.0"));
 
             // Act
-            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, logger: NullLogger.Instance);
+            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance);
 
             // Assert
             Assert.False(packageManager.LocalRepository.Exists(A10));
@@ -478,6 +478,7 @@ namespace NuGet.Test.VisualStudio {
                                          package,
                                          operations,
                                          updateDependencies: true,
+                                         allowPrereleaseVersions: false,
                                          logger: NullLogger.Instance,
                                          packageOperationEventListener: null);
 
@@ -485,6 +486,148 @@ namespace NuGet.Test.VisualStudio {
             Assert.True(packageManager.LocalRepository.Exists(package));
             Assert.True(packageManager.LocalRepository.Exists(package2));
             Assert.True(!packageManager.LocalRepository.Exists(package3));
+        }
+
+        [Fact]
+        public void InstallPackageDoesNotInstallPackageWithIndirectDependencyThatIsPrerelease() {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                projectSystem,
+                localRepository,
+                new Mock<IRecentPackageRepository>().Object,
+                new Mock<VsPackageInstallerEvents>().Object,
+                new MockPackageRepository());
+
+            var package = PackageUtility.CreatePackage("foo", "1.0.0", dependencies: new [] { new PackageDependency("bar") });
+            sourceRepository.AddPackage(package);
+
+            var versionSpec = VersionUtility.ParseVersionSpec("[0.6, 1.0)");
+            var package2 = PackageUtility.CreatePackage("bar", "2.0.0", dependencies: new []{ new PackageDependency("qux", versionSpec) });
+            sourceRepository.AddPackage(package2);
+
+            var package3A = PackageUtility.CreatePackage("qux", "1.0alpha");
+            var package3B = PackageUtility.CreatePackage("qux", "1.0beta");
+            var package3 = PackageUtility.CreatePackage("qux", "1.0");
+            localRepository.AddPackage(package3);
+            localRepository.AddPackage(package3A);
+            localRepository.AddPackage(package3B);
+
+            // Act and Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.InstallPackage(package, ignoreDependencies: false, allowPrereleaseVersions: false),
+                "Unable to resolve dependency 'qux (≥ 0.6 && < 1.0)'.");
+        }
+
+        [Fact]
+        public void InstallPackageInstallsIndirectPrereleaseDependency() {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                projectSystem,
+                localRepository,
+                new Mock<IRecentPackageRepository>().Object,
+                new Mock<VsPackageInstallerEvents>().Object,
+                new MockPackageRepository());
+
+            var package = PackageUtility.CreatePackage("foo", "1.0.0", dependencies: new[] { new PackageDependency("bar") });
+            sourceRepository.AddPackage(package);
+
+            var versionSpec = VersionUtility.ParseVersionSpec("[0.6, 1.0)");
+            var package2 = PackageUtility.CreatePackage("bar", "2.0.0", dependencies: new[] { new PackageDependency("qux", versionSpec) });
+            sourceRepository.AddPackage(package2);
+
+            var package3A = PackageUtility.CreatePackage("qux", "1.0alpha");
+            var package3B = PackageUtility.CreatePackage("qux", "1.0beta");
+            var package3 = PackageUtility.CreatePackage("qux", "1.0");
+            localRepository.AddPackage(package3);
+            localRepository.AddPackage(package3A);
+            localRepository.AddPackage(package3B);
+
+            // Act
+            packageManager.InstallPackage(package, ignoreDependencies: false, allowPrereleaseVersions: true);
+            
+            // Assert
+            Assert.True(packageManager.LocalRepository.Exists(package));
+            Assert.True(packageManager.LocalRepository.Exists(package2));
+            Assert.True(packageManager.LocalRepository.Exists(package3B));
+        }
+
+        [Fact]
+        public void UpdatePackageUpdatesToTheHighestReleasePackageIfPrereleaseFlagIsSetToFalse() {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                projectSystem,
+                localRepository,
+                new Mock<IRecentPackageRepository>().Object,
+                new Mock<VsPackageInstallerEvents>().Object,
+                new MockPackageRepository());
+
+            var package3_1A = PackageUtility.CreatePackage("qux", "1.0alpha");
+            var package3_1B = PackageUtility.CreatePackage("qux", "1.1alpha");
+            var package3_10 = PackageUtility.CreatePackage("qux", "1.0");
+            var package3_09 = PackageUtility.CreatePackage("qux", "0.9");
+            localRepository.AddPackage(package3_10);
+            localRepository.AddPackage(package3_1A);
+            localRepository.AddPackage(package3_1B);
+            localRepository.AddPackage(package3_09);
+
+            // Act
+            packageManager.InstallPackage(package3_09, ignoreDependencies: false, allowPrereleaseVersions: false);
+            Assert.True(packageManager.LocalRepository.Exists(package3_09));
+            packageManager.UpdatePackage("qux", updateDependencies: true, allowPrereleaseVersions: false);
+            
+            // Assert
+            Assert.True(packageManager.LocalRepository.Exists(package3_10));
+        }
+
+        [Fact]
+        public void UpdatePackageUpdatesToTheHighestPackageIfPrereleaseFlagIsSetToTrue() {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                projectSystem,
+                localRepository,
+                new Mock<IRecentPackageRepository>().Object,
+                new Mock<VsPackageInstallerEvents>().Object,
+                new MockPackageRepository());
+
+            var package3_10A = PackageUtility.CreatePackage("qux", "1.0alpha");
+            var package3_11B = PackageUtility.CreatePackage("qux", "1.1alpha");
+            var package3_10 = PackageUtility.CreatePackage("qux", "1.0");
+            var package3_09 = PackageUtility.CreatePackage("qux", "0.9");
+            localRepository.AddPackage(package3_10);
+            localRepository.AddPackage(package3_10A);
+            localRepository.AddPackage(package3_11B);
+            localRepository.AddPackage(package3_09);
+
+            // Act
+            packageManager.InstallPackage(package3_09, ignoreDependencies: false, allowPrereleaseVersions: true);
+            Assert.True(packageManager.LocalRepository.Exists(package3_09));
+            packageManager.UpdatePackage("qux", updateDependencies: true, allowPrereleaseVersions: true);
+
+            // Assert
+            Assert.True(packageManager.LocalRepository.Exists(package3_11B));
         }
 
         // This repository better simulates what happens when we're running the package manager in vs

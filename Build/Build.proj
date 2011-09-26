@@ -86,18 +86,15 @@
     </Target>
 
     <Target Name="RunTests">
-        <ItemGroup>
-            <TestProject Include="$(NuGetTestRoot)\Dialog.Test\Dialog.Test.csproj" />
-            <TestProject Include="$(NuGetTestRoot)\CommandLine.Test\CommandLine.Test.csproj" />
-            <TestProject Include="$(NuGetTestRoot)\Core.Test\Core.Test.csproj" />
-            <TestProject Include="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" />
-            <TestProject Include="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" />
-            <TestProject Include="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" />
-            <TestProject Include="$(NuGetTestRoot)\MSBuild.Test\MSBuild.Test.csproj" />
-            <TestProject Include="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" />
-            <TestProject Include="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" />
-        </ItemGroup>
-        <MSBuild Projects="@(TestProject)" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\Dialog.Test\Dialog.Test.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\CommandLine.Test\CommandLine.Test.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\Core.Test\Core.Test.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\MSBuild.Test\MSBuild.Test.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MSBuild Projects="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" Targets="RunTests" BuildInParallel="true" />
     </Target>
     
     <Target Name="ReportFxCopResults">

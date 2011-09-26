@@ -14,6 +14,10 @@ namespace NuGet {
         private const string TagsProperty = "Tags";
         private static readonly string[] _packagePropertiesToSearch = new[] { "Id", "Description", TagsProperty };
 
+        public static bool IsReleaseVersion(this IPackageMetadata packageMetadata) {
+            return String.IsNullOrEmpty(packageMetadata.Version.SpecialVersion);
+        }
+
         public static IEnumerable<IPackage> FindByVersion(this IEnumerable<IPackage> source, IVersionSpec versionSpec) {
             if (versionSpec == null) {
                 throw new ArgumentNullException("versionSpec");
@@ -96,7 +100,7 @@ namespace NuGet {
             foreach (var operation in operations) {
                 // We get the opposing operation for the current operation:
                 // if o is +A 1.0 then the opposing key is - A 1.0
-                Tuple<PackageAction, string, Version> opposingKey = GetOpposingOperationKey(operation);
+                Tuple<PackageAction, string, SemVer> opposingKey = GetOpposingOperationKey(operation);
 
                 // We can't use TryGetValue since the value of the dictionary entry
                 // is a List of an anonymous type.
@@ -118,11 +122,11 @@ namespace NuGet {
                                   .Select(o => o.Operation);
         }
 
-        private static Tuple<PackageAction, string, Version> GetOperationKey(PackageOperation operation) {
+        private static Tuple<PackageAction, string, SemVer> GetOperationKey(PackageOperation operation) {
             return Tuple.Create(operation.Action, operation.Package.Id, operation.Package.Version);
         }
 
-        private static Tuple<PackageAction, string, Version> GetOpposingOperationKey(PackageOperation operation) {
+        private static Tuple<PackageAction, string, SemVer> GetOpposingOperationKey(PackageOperation operation) {
             return Tuple.Create(operation.Action == PackageAction.Install ?
                                 PackageAction.Uninstall :
                                 PackageAction.Install, operation.Package.Id, operation.Package.Version);

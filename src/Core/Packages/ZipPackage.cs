@@ -65,7 +65,7 @@ namespace NuGet {
             set;
         }
 
-        public Version Version {
+        public SemVer Version {
             get;
             set;
         }
@@ -155,6 +155,12 @@ namespace NuGet {
         }
 
         public bool IsLatestVersion {
+            get {
+                return this.IsReleaseVersion();
+            }
+        }
+
+        public bool IsAbsoluteLatestVersion {
             get {
                 return true;
             }

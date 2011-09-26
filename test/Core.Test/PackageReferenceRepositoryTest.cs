@@ -207,8 +207,8 @@ namespace NuGet.Test {
             Assert.NotNull(constraint);
             Assert.True(constraint.IsMinInclusive);
             Assert.False(constraint.IsMaxInclusive);
-            Assert.Equal(new Version("1.0"), constraint.MinVersion);
-            Assert.Equal(new Version("3.0"), constraint.MaxVersion);
+            Assert.Equal(new SemVer("1.0"), constraint.MinVersion);
+            Assert.Equal(new SemVer("3.0"), constraint.MaxVersion);
         }
 
         [Fact]

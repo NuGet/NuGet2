@@ -31,6 +31,12 @@ namespace NuGet {
             }
         }
 
+        protected virtual bool AllowPrereleaseVersions {
+            get {
+                return true;
+            }
+        }
+
         protected PackageMarker Marker {
             get;
             private set;
@@ -57,7 +63,7 @@ namespace NuGet {
             if (!IgnoreDependencies) {
                 foreach (var dependency in package.Dependencies) {
                     // Try to resolve the dependency from the visited packages first
-                    IPackage resolvedDependency = Marker.ResolveDependency(dependency) ??
+                    IPackage resolvedDependency = Marker.ResolveDependency(dependency, AllowPrereleaseVersions) ??
                                                   ResolveDependency(dependency);
 
                     if (resolvedDependency == null) {

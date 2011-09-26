@@ -12,13 +12,13 @@ namespace NuGet {
         /// </summary>
         string GetPackageDirectory(IPackage package);
 
-        string GetPackageDirectory(string packageId, Version version);
+        string GetPackageDirectory(string packageId, SemVer version);
 
         /// <summary>
         /// Gets the package file name
         /// </summary>
         string GetPackageFileName(IPackage package);
 
-        string GetPackageFileName(string packageId, Version version);
+        string GetPackageFileName(string packageId, SemVer version);
     }
 }

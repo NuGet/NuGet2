@@ -26,7 +26,7 @@ namespace NuGet.PowerShell.Commands.Test {
         public void UninstallPackageCmdletPassesParametersCorrectlyWhenIdAndVersionAreSpecified() {
             // Arrange
             var id = "my-id";
-            var version = new Version("2.8");
+            var version = new SemVer("2.8");
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
@@ -39,14 +39,14 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal("my-id", vsPackageManager.PackageId);
-            Assert.Equal(new Version("2.8"), vsPackageManager.Version);
+            Assert.Equal(new SemVer("2.8"), vsPackageManager.Version);
         }
 
         [Fact]
         public void UninstallPackageCmdletPassesForceSwitchCorrectly() {
             // Arrange
             var id = "my-id";
-            var version = new Version("2.8");
+            var version = new SemVer("2.8");
             var forceSwitch = true;
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -61,7 +61,7 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal("my-id", vsPackageManager.PackageId);
-            Assert.Equal(new Version("2.8"), vsPackageManager.Version);
+            Assert.Equal(new SemVer("2.8"), vsPackageManager.Version);
             Assert.True(vsPackageManager.ForceRemove);
         }
 
@@ -73,7 +73,7 @@ namespace NuGet.PowerShell.Commands.Test {
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
             var uninstallCmdlet = new Mock<UninstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null) { CallBase = true };
             uninstallCmdlet.Object.Id = "my-id";
-            uninstallCmdlet.Object.Version = new Version("2.8");
+            uninstallCmdlet.Object.Version = new SemVer("2.8");
             uninstallCmdlet.Object.RemoveDependencies = new SwitchParameter(true);
 
             // Act
@@ -81,7 +81,7 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal("my-id", vsPackageManager.PackageId);
-            Assert.Equal(new Version("2.8"), vsPackageManager.Version);
+            Assert.Equal(new SemVer("2.8"), vsPackageManager.Version);
             Assert.True(vsPackageManager.RemoveDependencies);
         }
 
@@ -94,13 +94,13 @@ namespace NuGet.PowerShell.Commands.Test {
 
             public string PackageId { get; set; }
 
-            public Version Version { get; set; }
+            public SemVer Version { get; set; }
 
             public bool ForceRemove { get; set; }
 
             public bool RemoveDependencies { get; set; }
 
-            public override void UninstallPackage(IProjectManager projectManager, string packageId, Version version, bool forceRemove, bool removeDependencies, ILogger logger) {
+            public override void UninstallPackage(IProjectManager projectManager, string packageId, SemVer version, bool forceRemove, bool removeDependencies, ILogger logger) {
                 ProjectManager = projectManager;
                 PackageId = packageId;
                 Version = version;

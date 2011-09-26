@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Linq;
 using EnvDTE;
-using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
+using Xunit;
 
 namespace NuGet.VisualStudio.Test {
-    
     public class VsInstallerTest {
         [Fact]
         public void InstallPackageRunsInitAndInstallScripts() {

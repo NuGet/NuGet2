@@ -6,7 +6,6 @@ using Xunit;
 using Xunit.Extensions;
 
 namespace NuGet.Test {
-    
     public class VersionUtilityTest {
         [Fact]
         public void ParseFrameworkNameNormalizesSupportedNetFrameworkNames() {
@@ -446,13 +445,13 @@ namespace NuGet.Test {
         public void GetAllPossibleVersionsTwoDigits() {
             // Arrange
             var expectedVersions = new[] { 
-                new Version("1.0"), 
-                new Version("1.0.0"),
-                new Version("1.0.0.0")
+                new SemVer("1.1"), 
+                new SemVer("1.1.0"),
+                new SemVer("1.1.0.0")
             };
 
             // Act
-            var versions = VersionUtility.GetPossibleVersions(new Version("1.0")).ToList();
+            var versions = VersionUtility.GetPossibleVersions(new SemVer("1.1")).ToList();
 
             // Assert
             foreach (var v in expectedVersions) {
@@ -464,13 +463,13 @@ namespace NuGet.Test {
         public void GetAllPossibleVersionsThreeDigits() {
             // Arrange
             var expectedVersions = new[] { 
-                new Version("1.0"), 
-                new Version("1.0.0"),
-                new Version("1.0.0.0")
+                new SemVer("1.0"), 
+                new SemVer("1.0.0"),
+                new SemVer("1.0.0.0")
             };
 
             // Act
-            var versions = VersionUtility.GetPossibleVersions(new Version("1.0.0")).ToList();
+            var versions = VersionUtility.GetPossibleVersions(new SemVer("1.0.0")).ToList();
 
             // Assert
             foreach (var v in expectedVersions) {
@@ -482,13 +481,13 @@ namespace NuGet.Test {
         public void GetAllPossibleVersionsFourDigits() {
             // Arrange
             var expectedVersions = new[] { 
-                new Version("1.0"), 
-                new Version("1.0.0"),
-                new Version("1.0.0.0")
+                new SemVer("1.0"), 
+                new SemVer("1.0.0"),
+                new SemVer("1.0.0.0")
             };
 
             // Act
-            var versions = VersionUtility.GetPossibleVersions(new Version("1.0.0.0")).ToList();
+            var versions = VersionUtility.GetPossibleVersions(new SemVer("1.0.0.0")).ToList();
 
             // Assert
             foreach (var v in expectedVersions) {
@@ -500,12 +499,12 @@ namespace NuGet.Test {
         public void GetAllPossibleVersionsThreeDigitsWithZeroBetween() {
             // Arrange
             var expectedVersions = new[] { 
-                new Version("1.0.1"), 
-                new Version("1.0.1.0")
+                new SemVer("1.0.1"), 
+                new SemVer("1.0.1.0")
             };
 
             // Act
-            var versions = VersionUtility.GetPossibleVersions(new Version("1.0.1")).ToList();
+            var versions = VersionUtility.GetPossibleVersions(new SemVer("1.0.1")).ToList();
 
             // Assert
             foreach (var v in expectedVersions) {
@@ -517,13 +516,13 @@ namespace NuGet.Test {
         public void GetAllPossibleVersionsFourDigitsWithTrailingZeros() {
             // Arrange
             var expectedVersions = new[] { 
-                new Version("1.1.0.0"), 
-                new Version("1.1.0"),
-                new Version("1.1")
+                new SemVer("1.1.0.0"), 
+                new SemVer("1.1.0"),
+                new SemVer("1.1")
             };
 
             // Act
-            var versions = VersionUtility.GetPossibleVersions(new Version("1.1.0.0")).ToList();
+            var versions = VersionUtility.GetPossibleVersions(new SemVer("1.1.0.0")).ToList();
 
             // Assert
             foreach (var v in expectedVersions) {
@@ -534,17 +533,17 @@ namespace NuGet.Test {
         [Fact]
         public void GetSafeVersions() {
             // Act
-            IVersionSpec versionSpec1 = VersionUtility.GetSafeRange(new Version("1.3"));
-            IVersionSpec versionSpec2 = VersionUtility.GetSafeRange(new Version("0.9"));
-            IVersionSpec versionSpec3 = VersionUtility.GetSafeRange(new Version("2.9.45.6"));
+            IVersionSpec versionSpec1 = VersionUtility.GetSafeRange(new SemVer("1.3"));
+            IVersionSpec versionSpec2 = VersionUtility.GetSafeRange(new SemVer("0.9"));
+            IVersionSpec versionSpec3 = VersionUtility.GetSafeRange(new SemVer("2.9.45.6"));
 
             // Assert
-            AssertSafeVersion(versionSpec1, new Version("1.3"), new Version("1.4"));
-            AssertSafeVersion(versionSpec2, new Version("0.9"), new Version("0.10"));
-            AssertSafeVersion(versionSpec3, new Version("2.9.45.6"), new Version("2.10"));
+            AssertSafeVersion(versionSpec1, new SemVer("1.3"), new SemVer("1.4"));
+            AssertSafeVersion(versionSpec2, new SemVer("0.9"), new SemVer("0.10"));
+            AssertSafeVersion(versionSpec3, new SemVer("2.9.45.6"), new SemVer("2.10"));
         }
 
-        private void AssertSafeVersion(IVersionSpec versionSpec, Version minVer, Version maxVer) {
+        private void AssertSafeVersion(IVersionSpec versionSpec, SemVer minVer, SemVer maxVer) {
             Assert.True(versionSpec.IsMinInclusive);
             Assert.False(versionSpec.IsMaxInclusive);
             Assert.Equal(versionSpec.MinVersion, minVer);
@@ -703,14 +702,14 @@ namespace NuGet.Test {
 
         public static IEnumerable<object[]> VersionSpecData {
             get {
-                yield return new object[] { "(1.2.3.4, 3.2)", new VersionSpec { MinVersion = new Version("1.2.3.4"), MaxVersion = new Version("3.2"), IsMinInclusive = false, IsMaxInclusive = false } };
-                yield return new object[] { "(1.2.3.4, 3.2]", new VersionSpec { MinVersion = new Version("1.2.3.4"), MaxVersion = new Version("3.2"), IsMinInclusive = false, IsMaxInclusive = true } };
-                yield return new object[] { "[1.2, 3.2.5)", new VersionSpec { MinVersion = new Version("1.2"), MaxVersion = new Version("3.2.5"), IsMinInclusive = true, IsMaxInclusive = false } };
-                yield return new object[] { "[2.3.7, 3.2.4.5]", new VersionSpec { MinVersion = new Version("2.3.7"), MaxVersion = new Version("3.2.4.5"), IsMinInclusive = true, IsMaxInclusive = true } };
-                yield return new object[] { "(, 3.2.4.5]", new VersionSpec { MinVersion = null, MaxVersion = new Version("3.2.4.5"), IsMinInclusive = false, IsMaxInclusive = true } };
-                yield return new object[] { "(1.6, ]", new VersionSpec { MinVersion = new Version("1.6"), MaxVersion = null, IsMinInclusive = false, IsMaxInclusive = true } };
-                yield return new object[] { "(1.6)", new VersionSpec { MinVersion = new Version("1.6"), MaxVersion = new Version("1.6"), IsMinInclusive = false, IsMaxInclusive = false } };
-                yield return new object[] { "[2.7]", new VersionSpec { MinVersion = new Version("2.7"), MaxVersion = new Version("2.7"), IsMinInclusive = true, IsMaxInclusive = true} };
+                yield return new object[] { "(1.2.3.4, 3.2)", new VersionSpec { MinVersion = new SemVer("1.2.3.4"), MaxVersion = new SemVer("3.2"), IsMinInclusive = false, IsMaxInclusive = false } };
+                yield return new object[] { "(1.2.3.4, 3.2]", new VersionSpec { MinVersion = new SemVer("1.2.3.4"), MaxVersion = new SemVer("3.2"), IsMinInclusive = false, IsMaxInclusive = true } };
+                yield return new object[] { "[1.2, 3.2.5)", new VersionSpec { MinVersion = new SemVer("1.2"), MaxVersion = new SemVer("3.2.5"), IsMinInclusive = true, IsMaxInclusive = false } };
+                yield return new object[] { "[2.3.7, 3.2.4.5]", new VersionSpec { MinVersion = new SemVer("2.3.7"), MaxVersion = new SemVer("3.2.4.5"), IsMinInclusive = true, IsMaxInclusive = true } };
+                yield return new object[] { "(, 3.2.4.5]", new VersionSpec { MinVersion = null, MaxVersion = new SemVer("3.2.4.5"), IsMinInclusive = false, IsMaxInclusive = true } };
+                yield return new object[] { "(1.6, ]", new VersionSpec { MinVersion = new SemVer("1.6"), MaxVersion = null, IsMinInclusive = false, IsMaxInclusive = true } };
+                yield return new object[] { "(1.6)", new VersionSpec { MinVersion = new SemVer("1.6"), MaxVersion = new SemVer("1.6"), IsMinInclusive = false, IsMaxInclusive = false } };
+                yield return new object[] { "[2.7]", new VersionSpec { MinVersion = new SemVer("2.7"), MaxVersion = new SemVer("2.7"), IsMinInclusive = true, IsMaxInclusive = true} };
             }
         }
     }

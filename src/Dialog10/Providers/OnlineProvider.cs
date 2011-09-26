@@ -164,7 +164,7 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected virtual void ExecuteCommand(IProjectManager projectManager, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
-            activePackageManager.InstallPackage(projectManager, item.PackageIdentity, operations, ignoreDependencies: false, logger: this);
+            activePackageManager.InstallPackage(projectManager, item.PackageIdentity, operations, ignoreDependencies: false, allowPrereleaseVersions: false, logger: this);
         }
 
         public override bool CanExecute(PackageItem item) {

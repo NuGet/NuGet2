@@ -184,7 +184,7 @@ namespace NuGet.Dialog.Test {
             provider.ExecuteCompletedCallback = delegate {
                 // Assert
                 mockWindowServices.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
-                packageManager.Verify(p => p.UpdatePackage(projectManager.Object, packageA2, It.IsAny<IEnumerable<PackageOperation>>(), true, provider), Times.Once());
+                packageManager.Verify(p => p.UpdatePackage(projectManager.Object, packageA2, It.IsAny<IEnumerable<PackageOperation>>(), true, false, provider), Times.Once());
 
                 manualEvent.Set();
             };
@@ -223,9 +223,9 @@ namespace NuGet.Dialog.Test {
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
             packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project.Object))).Returns(projectManager);
             packageManager.Setup(p => p.UpdatePackage(
-               projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), true, It.IsAny<ILogger>())).Callback(
+               projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), true, false, It.IsAny<ILogger>())).Callback(
                () => {
-                   projectManager.AddPackageReference("A", new Version("2.0"), false);
+                   projectManager.AddPackageReference("A", new SemVer("2.0"), false, false);
                });
 
             var scriptExecutor = new Mock<IScriptExecutor>();

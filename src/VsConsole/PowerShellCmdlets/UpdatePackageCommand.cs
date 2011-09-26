@@ -61,7 +61,7 @@ namespace NuGet.PowerShell.Commands {
 
         [Parameter(Position = 2, ParameterSetName = "Project")]
         [ValidateNotNull]
-        public Version Version { get; set; }
+        public SemVer Version { get; set; }
 
         [Parameter(Position = 3)]
         [ValidateNotNullOrEmpty]
@@ -72,6 +72,9 @@ namespace NuGet.PowerShell.Commands {
 
         [Parameter]
         public SwitchParameter Safe { get; set; }
+
+        [Parameter]
+        public SwitchParameter Prerelease { get; set; }
 
         protected override IVsPackageManager CreatePackageManager() {
             if (!String.IsNullOrEmpty(Source)) {
@@ -95,19 +98,19 @@ namespace NuGet.PowerShell.Commands {
                         // If a package id was specified, but no project was specified, then update this package in all projects
                         if (String.IsNullOrEmpty(ProjectName)) {
                             if (Safe.IsPresent) {
-                                PackageManager.SafeUpdatePackage(Id, !IgnoreDependencies.IsPresent, this, this);
+                                PackageManager.SafeUpdatePackage(Id, !IgnoreDependencies.IsPresent, Prerelease, this, this);
                             }
                             else {
-                                PackageManager.UpdatePackage(Id, Version, !IgnoreDependencies.IsPresent, this, this);
+                                PackageManager.UpdatePackage(Id, Version, !IgnoreDependencies.IsPresent, Prerelease, this, this);
                             }
                         }
                         else if (projectManager != null) {
                             // If there was a project specified, then update the package in that project
                             if (Safe.IsPresent) {
-                                PackageManager.SafeUpdatePackage(projectManager, Id, !IgnoreDependencies, this);
+                                PackageManager.SafeUpdatePackage(projectManager, Id, !IgnoreDependencies, Prerelease, this);
                             }
                             else {
-                                PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, this);
+                                PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, Prerelease, this);
                             }
                         }
                     }
@@ -115,18 +118,18 @@ namespace NuGet.PowerShell.Commands {
                         // if no id was specified then update all packages in the solution
                         if (Safe.IsPresent) {
                             if (String.IsNullOrEmpty(ProjectName)) {
-                                PackageManager.SafeUpdatePackages(!IgnoreDependencies.IsPresent, this, this);
+                                PackageManager.SafeUpdatePackages(!IgnoreDependencies.IsPresent, Prerelease, this, this);
                             }
                             else if (projectManager != null) {
-                                PackageManager.SafeUpdatePackages(projectManager, !IgnoreDependencies.IsPresent, this);
+                                PackageManager.SafeUpdatePackages(projectManager, !IgnoreDependencies.IsPresent, Prerelease, this);
                             }
                         }
                         else {
                             if (String.IsNullOrEmpty(ProjectName)) {
-                                PackageManager.UpdatePackages(!IgnoreDependencies.IsPresent, this, this);
+                                PackageManager.UpdatePackages(!IgnoreDependencies.IsPresent, Prerelease, this, this);
                             }
                             else if (projectManager != null) {
-                                PackageManager.UpdatePackages(projectManager, !IgnoreDependencies.IsPresent, this);
+                                PackageManager.UpdatePackages(projectManager, !IgnoreDependencies.IsPresent, Prerelease, this);
                             }
                         }
                     }

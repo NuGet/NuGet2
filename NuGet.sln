@@ -38,6 +38,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Build\ilmerge.internalize.ignore.txt = Build\ilmerge.internalize.ignore.txt
 		NuGet.ruleset = NuGet.ruleset
 		Build\NuGet.Settings.targets = Build\NuGet.Settings.targets
+		test\Test.Integration\NuGet.Test.Integration.testsettings = test\Test.Integration\NuGet.Test.Integration.testsettings
+		Build\NuGet.Test.targets = Build\NuGet.Test.targets
+		NuGet.vsmdi = NuGet.vsmdi
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShellHostProvider", "src\VsConsole\PowerShellHostProvider\PowerShellHostProvider.csproj", "{A5E7AEB3-738F-4C39-A459-00F90483B2FE}"
@@ -105,6 +108,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dialog", "src\Dialog\Dialog.csproj", "{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}"
 EndProject
 Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = NuGet.vsmdi
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Coverage|Any CPU = Coverage|Any CPU
 		Coverage|Mixed Platforms = Coverage|Mixed Platforms

@@ -6,23 +6,11 @@ namespace NuGet {
         public UpdateWalker(IPackageRepository localRepository,
                             IPackageRepository sourceRepository,
                             IDependentsResolver dependentsResolver,
-                            ILogger logger,
-                            bool updateDependencies)
-            : base(localRepository,
-                   sourceRepository,
-                   logger: logger,
-                   ignoreDependencies: !updateDependencies) {
-            _dependentsResolver = dependentsResolver;
-            AcceptedTargets = PackageTargets.All;
-        }
-
-        public UpdateWalker(IPackageRepository localRepository,
-                            IPackageRepository sourceRepository,
-                            IDependentsResolver dependentsResolver,
                             IPackageConstraintProvider constraintProvider,
                             ILogger logger,
-                            bool updateDependencies)
-            : base(localRepository, sourceRepository, constraintProvider, logger, !updateDependencies) {
+                            bool updateDependencies,
+                            bool allowPrereleaseVersions)
+            : base(localRepository, sourceRepository, constraintProvider, logger, !updateDependencies, allowPrereleaseVersions) {
             _dependentsResolver = dependentsResolver;
             AcceptedTargets = PackageTargets.All;
         }

@@ -1,6 +1,5 @@
 using System;
 using System.Management.Automation;
-
 using NuGet.VisualStudio;
 
 namespace NuGet.PowerShell.Commands {
@@ -38,7 +37,7 @@ namespace NuGet.PowerShell.Commands {
 
         [Parameter(Position = 2)]
         [ValidateNotNull]
-        public Version Version { get; set; }
+        public SemVer Version { get; set; }
 
         [Parameter(Position = 3)]
         [ValidateNotNullOrEmpty]
@@ -46,6 +45,9 @@ namespace NuGet.PowerShell.Commands {
 
         [Parameter]
         public SwitchParameter IgnoreDependencies { get; set; }
+
+        [Parameter(ParameterSetName = "Remote")]
+        public SwitchParameter Prerelease { get; set; }
 
         protected override IVsPackageManager CreatePackageManager() {
             if (!SolutionManager.IsSolutionOpen) {
@@ -68,7 +70,8 @@ namespace NuGet.PowerShell.Commands {
             try {
                 SubscribeToProgressEvents();
                 if (PackageManager != null) {
-                    PackageManager.InstallPackage(ProjectManager, Id, Version, IgnoreDependencies.IsPresent, this);
+                    PackageManager.InstallPackage(ProjectManager, Id, Version, ignoreDependencies: IgnoreDependencies, allowPrereleaseVersions: Prerelease.IsPresent, 
+                        logger: this);
                     _hasConnectedToHttpSource |= UriHelper.IsHttpSource(PackageManager.SourceRepository.Source);
                 }
             }

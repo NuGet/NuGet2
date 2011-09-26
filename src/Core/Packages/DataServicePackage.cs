@@ -146,6 +146,11 @@ namespace NuGet {
             set;
         }
 
+        public bool IsAbsoluteLatestVersion {
+            get;
+            set;
+        }
+
         internal string OldHash {
             get;
             set;
@@ -199,10 +204,10 @@ namespace NuGet {
             }
         }
 
-        Version IPackageMetadata.Version {
+        SemVer IPackageMetadata.Version {
             get {
                 if (Version != null) {
-                    return new Version(Version);
+                    return new SemVer(Version);
                 }
                 return null;
             }

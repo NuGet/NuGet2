@@ -164,7 +164,7 @@ namespace NuGet.Dialog.Test {
 
             var packageManager = new Mock<IVsPackageManager>();
             packageManager.Setup(p => p.UninstallPackage(
-                projectManager, It.IsAny<string>(), It.IsAny<Version>(), false, false, It.IsAny<ILogger>())).Callback(
+                projectManager, It.IsAny<string>(), It.IsAny<SemVer>(), false, false, It.IsAny<ILogger>())).Callback(
                 () => projectManager.RemovePackageReference("A"));
             packageManager.Setup(p => p.GetProjectManager(It.IsAny<Project>())).Returns(projectManager);
 

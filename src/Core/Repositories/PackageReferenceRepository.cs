@@ -80,7 +80,7 @@ namespace NuGet {
             }
         }
 
-        public IPackage FindPackage(string packageId, Version version) {
+        public IPackage FindPackage(string packageId, SemVer version) {
             if (!_packageReferenceFile.EntryExists(packageId, version)) {
                 return null;
             }
@@ -95,7 +95,7 @@ namespace NuGet {
         }
 
         public IVersionSpec GetConstraint(string packageId) {
-            // Find the refernce entry for this package
+            // Find the reference entry for this package
             PackageReference reference = _packageReferenceFile.GetPackageReferences().FirstOrDefault(p => p.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase));
             if (reference != null) {
                 return reference.VersionConstraint;

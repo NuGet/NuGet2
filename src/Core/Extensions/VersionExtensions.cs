@@ -6,25 +6,25 @@ namespace NuGet {
             return versionInfo.ToDelegate<IPackage>(p => p.Version);
         }
 
-        public static Func<T, bool> ToDelegate<T>(this IVersionSpec versionInfo, Func<T, Version> extractor) {
+        public static Func<T, bool> ToDelegate<T>(this IVersionSpec versionInfo, Func<T, SemVer> extractor) {
             return p => {
-                Version version = VersionUtility.NormalizeVersion(extractor(p));
+                SemVer version = extractor(p);
                 bool condition = true;
                 if (versionInfo.MinVersion != null) {
                     if (versionInfo.IsMinInclusive) {
-                        condition = condition && version >= VersionUtility.NormalizeVersion(versionInfo.MinVersion);
+                        condition = condition && version >= versionInfo.MinVersion;
                     }
                     else {
-                        condition = condition && version > VersionUtility.NormalizeVersion(versionInfo.MinVersion);
+                        condition = condition && version > versionInfo.MinVersion;
                     }
                 }
 
                 if (versionInfo.MaxVersion != null) {
                     if (versionInfo.IsMaxInclusive) {
-                        condition = condition && version <= VersionUtility.NormalizeVersion(versionInfo.MaxVersion);
+                        condition = condition && version <= versionInfo.MaxVersion;
                     }
                     else {
-                        condition = condition && version < VersionUtility.NormalizeVersion(versionInfo.MaxVersion);
+                        condition = condition && version < versionInfo.MaxVersion;
                     }
                 }
 
@@ -35,12 +35,12 @@ namespace NuGet {
         /// <summary>
         /// Determines if the specified version is within the version spec
         /// </summary>
-        public static bool Satisfies(this IVersionSpec versionSpec, Version version) {
+        public static bool Satisfies(this IVersionSpec versionSpec, SemVer version) {
             // The range is unbounded so return true
             if (versionSpec == null) {
                 return true;
             }
-            return versionSpec.ToDelegate<Version>(v => v)(version);
+            return versionSpec.ToDelegate<SemVer>(v => v)(version);
         }
     }
 }

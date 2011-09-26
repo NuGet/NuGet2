@@ -85,6 +85,9 @@ namespace NuGet.PowerShell.Commands {
         [Parameter(ParameterSetName = "Recent")]
         public SwitchParameter AllVersions { get; set; }
 
+        [Parameter(ParameterSetName = "Remote")]
+        public SwitchParameter Prerelease { get; set; }
+
         [Parameter]
         [ValidateRange(0, Int32.MaxValue)]
         public int First {
@@ -169,7 +172,12 @@ namespace NuGet.PowerShell.Commands {
 
         protected virtual IEnumerable<IPackage> FilterPackages(IQueryable<IPackage> packages) {
             if (CollapseVersions) {
-                packages = packages.Where(p => p.IsLatestVersion);
+                if (Prerelease) {
+                    packages = packages.Where(p => p.IsAbsoluteLatestVersion);
+                }
+                else {
+                    packages = packages.Where(p => p.IsLatestVersion);
+                }
             }
 
             if (UseRemoteSourceOnly && _firstValueSpecified) {
@@ -185,6 +193,11 @@ namespace NuGet.PowerShell.Commands {
                 packagesToDisplay = packages.AsEnumerable()
                                             .Where(p => p.Published > NuGetConstants.Unpublished)
                                             .AsCollapsed();
+            }
+            else if (!Prerelease) {
+                // If we aren't collapsing versions, and the pre-release flag is not set, only display release versions.
+                // We'll filter this on the client 
+                packagesToDisplay = packagesToDisplay.Where(p => p.IsReleaseVersion());
             }
 
             packagesToDisplay = packagesToDisplay.Skip(Skip);

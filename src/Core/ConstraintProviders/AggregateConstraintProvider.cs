@@ -6,6 +6,9 @@ namespace NuGet {
     public class AggregateConstraintProvider : IPackageConstraintProvider {
         private readonly IEnumerable<IPackageConstraintProvider> _constraintProviders;
         public AggregateConstraintProvider(params IPackageConstraintProvider[] constraintProviders) {
+            if (constraintProviders.IsEmpty() || constraintProviders.Any(cp => cp == null)) {
+                throw new ArgumentNullException("constraintProviders");
+            }
             _constraintProviders = constraintProviders;
         }
 

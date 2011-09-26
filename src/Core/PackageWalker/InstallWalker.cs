@@ -8,24 +8,28 @@ using NuGet.Resources;
 namespace NuGet {
     public class InstallWalker : PackageWalker, IPackageOperationResolver {
         private readonly bool _ignoreDependencies;
+        private readonly bool _allowPrereleaseVersions;
         private readonly OperationLookup _operations;
 
         public InstallWalker(IPackageRepository localRepository,
                              IPackageRepository sourceRepository,
                              ILogger logger,
-                             bool ignoreDependencies) :
+                             bool ignoreDependencies,
+                             bool allowPrereleaseVersions) :
             this(localRepository,
                  sourceRepository,
                  constraintProvider: NullConstraintProvider.Instance,
                  logger: logger,
-                 ignoreDependencies: ignoreDependencies) {
+                 ignoreDependencies: ignoreDependencies,
+                 allowPrereleaseVersions: allowPrereleaseVersions) {
         }
 
         public InstallWalker(IPackageRepository localRepository,
                              IPackageRepository sourceRepository,
                              IPackageConstraintProvider constraintProvider,
                              ILogger logger,
-                             bool ignoreDependencies) {
+                             bool ignoreDependencies,
+                             bool allowPrereleaseVersions) {
 
             if (sourceRepository == null) {
                 throw new ArgumentNullException("sourceRepository");
@@ -43,6 +47,7 @@ namespace NuGet {
             _ignoreDependencies = ignoreDependencies;
             ConstraintProvider = constraintProvider;
             _operations = new OperationLookup();
+            _allowPrereleaseVersions = allowPrereleaseVersions;
         }
 
         protected ILogger Logger {
@@ -58,6 +63,12 @@ namespace NuGet {
         protected override bool IgnoreDependencies {
             get {
                 return _ignoreDependencies;
+            }
+        }
+
+        protected override bool AllowPrereleaseVersions {
+            get {
+                return _allowPrereleaseVersions;
             }
         }
 
@@ -245,10 +256,10 @@ namespace NuGet {
             Logger.Log(MessageLevel.Info, NuGetResources.Log_AttemptingToRetrievePackageFromSource, dependency);
 
             // First try to get a local copy of the package
-            IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider);
+            IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, AllowPrereleaseVersions);
 
             // Next, query the source repo for the same dependency
-            IPackage sourcePackage = SourceRepository.ResolveDependency(dependency, ConstraintProvider);
+            IPackage sourcePackage = SourceRepository.ResolveDependency(dependency, ConstraintProvider, AllowPrereleaseVersions);
 
             // We didn't find a copy in the local repository
             if (package == null) {

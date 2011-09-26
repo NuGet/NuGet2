@@ -65,6 +65,7 @@ namespace NuGet.Dialog.Test {
                     packageB.Id,
                     packageB.Version,
                     false,
+                    false,
                     provider),
                     Times.Once());
 
@@ -72,6 +73,7 @@ namespace NuGet.Dialog.Test {
                     projectManager2.Object,
                     packageB.Id,
                     packageB.Version,
+                    false,
                     false,
                     provider),
                     Times.Once());
@@ -353,6 +355,7 @@ namespace NuGet.Dialog.Test {
                     projectManager2.Object,
                     packageB.Id,
                     packageB.Version,
+                    false,
                     false,
                     provider),
                     Times.Never());

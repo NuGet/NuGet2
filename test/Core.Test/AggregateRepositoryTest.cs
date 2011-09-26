@@ -112,11 +112,11 @@ namespace NuGet.Test {
             // Assert
             Assert.Equal(4, packages.Count);
             Assert.Equal("A", packages[0].Id);
-            Assert.Equal(new Version("2.0"), packages[0].Version);
+            Assert.Equal(new SemVer("2.0"), packages[0].Version);
             Assert.Equal("A", packages[1].Id);
-            Assert.Equal(new Version("1.0"), packages[1].Version);
+            Assert.Equal(new SemVer("1.0"), packages[1].Version);
             Assert.Equal("A", packages[2].Id);
-            Assert.Equal(new Version("3.0"), packages[2].Version);
+            Assert.Equal(new SemVer("3.0"), packages[2].Version);
             Assert.Equal("B", packages[3].Id);
         }
 
@@ -149,11 +149,11 @@ namespace NuGet.Test {
             // Assert
             Assert.Equal(4, packages.Count);
             Assert.Equal("A", packages[0].Id);
-            Assert.Equal(new Version("1.0"), packages[0].Version);
+            Assert.Equal(new SemVer("1.0"), packages[0].Version);
             Assert.Equal("A", packages[1].Id);
-            Assert.Equal(new Version("2.0"), packages[1].Version);
+            Assert.Equal(new SemVer("2.0"), packages[1].Version);
             Assert.Equal("A", packages[2].Id);
-            Assert.Equal(new Version("3.0"), packages[2].Version);
+            Assert.Equal(new SemVer("3.0"), packages[2].Version);
             Assert.Equal("B", packages[3].Id);
         }
 
@@ -185,7 +185,7 @@ namespace NuGet.Test {
             // Assert
             Assert.Equal(1, updates.Count);
             Assert.Equal("A", updates[0].Id);
-            Assert.Equal(new Version("3.0"), updates[0].Version);
+            Assert.Equal(new SemVer("3.0"), updates[0].Version);
         }
 
         [Fact]
@@ -219,7 +219,7 @@ namespace NuGet.Test {
             mockRepository.Setup(c => c.GetPackages()).Throws(new InvalidOperationException()).Verifiable();
 
             var packageLookup = new Mock<PackageLookupBase>();
-            packageLookup.Setup(c => c.FindPackage(It.IsAny<string>(), It.IsAny<Version>())).Throws(new Exception());
+            packageLookup.Setup(c => c.FindPackage(It.IsAny<string>(), It.IsAny<SemVer>())).Throws(new Exception());
             var mockRepositoryWithLookup = packageLookup.As<IPackageRepository>();
             mockRepositoryWithLookup.Setup(c => c.GetPackages()).Throws(new InvalidOperationException());
 
@@ -236,7 +236,7 @@ namespace NuGet.Test {
             repository.IgnoreFailingRepositories = true;
 
             // Act
-            var package = repository.FindPackage("C", new Version("1.0"));
+            var package = repository.FindPackage("C", new SemVer("1.0"));
 
             // Assert
             Assert.Null(package);
@@ -248,7 +248,7 @@ namespace NuGet.Test {
             var mockRepository = new Mock<IPackageRepository>();
             mockRepository.Setup(c => c.GetPackages()).Throws(new InvalidOperationException()).Verifiable();
             var mockRepoWithLookup = new Mock<IPackageRepository>();
-            mockRepository.As<IDependencyResolver>().Setup(c => c.ResolveDependency(It.IsAny<PackageDependency>(), It.IsAny<IPackageConstraintProvider>()));
+            mockRepository.As<IDependencyResolver>().Setup(c => c.ResolveDependency(It.IsAny<PackageDependency>(), It.IsAny<IPackageConstraintProvider>(), false));
 
             var repository = new AggregateRepository(new[] { 
                 new MockPackageRepository { 
@@ -263,7 +263,7 @@ namespace NuGet.Test {
             repository.IgnoreFailingRepositories = true;
 
             // Act
-            var package = repository.ResolveDependency(new PackageDependency("C"), null);
+            var package = repository.ResolveDependency(new PackageDependency("C"), null, allowPrereleaseVersions: false);
 
             // Assert
             Assert.Null(package);
@@ -335,7 +335,7 @@ namespace NuGet.Test {
         }
 
         public abstract class PackageLookupBase : IPackageLookup {
-            public virtual IPackage FindPackage(string packageId, Version version) {
+            public virtual IPackage FindPackage(string packageId, SemVer version) {
                 throw new NotImplementedException();
             }
         }

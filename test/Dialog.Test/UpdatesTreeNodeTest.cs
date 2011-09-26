@@ -117,7 +117,7 @@ namespace NuGet.Dialog.Test {
             Assert.NotNull(package);
             Assert.Equal(id, package.Id);
             if (version != null) {
-                Assert.Equal(new Version(version), package.Version);
+                Assert.Equal(new SemVer(version), package.Version);
             }
         }
 

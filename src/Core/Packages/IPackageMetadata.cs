@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace NuGet {
     public interface IPackageMetadata {
         string Id { get; }
-        Version Version { get; }
+        SemVer Version { get; }
         string Title { get; }
         IEnumerable<string> Authors { get; }
         IEnumerable<string> Owners { get; }

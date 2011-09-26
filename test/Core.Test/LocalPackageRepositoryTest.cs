@@ -101,19 +101,19 @@ namespace NuGet.Test {
             };
 
             // Act and Assert
-            IPackage result = repository.FindPackage(openPackage, "A", new Version("1.0"));
+            IPackage result = repository.FindPackage(openPackage, "A", new SemVer("1.0"));
             Assert.Null(result);
             Assert.Equal(@"A\A.nupkg", searchedPaths.Single());
 
             searchedPaths.Clear();
-            result = repository.FindPackage(openPackage, "A", new Version("0.8"));
+            result = repository.FindPackage(openPackage, "A", new SemVer("0.8"));
             Assert.Null(result);
             Assert.Equal(@"A\A.nupkg", searchedPaths.Single());
 
             searchedPaths.Clear();
-            result = repository.FindPackage(openPackage, "A", new Version("1.1"));
+            result = repository.FindPackage(openPackage, "A", new SemVer("1.1"));
             Assert.Equal("A", result.Id);
-            Assert.Equal(new Version("1.1"), result.Version);
+            Assert.Equal(new SemVer("1.1"), result.Version);
         }
 
         [Fact]
@@ -133,18 +133,18 @@ namespace NuGet.Test {
             };
 
             // Act and Assert
-            IPackage result = repository.FindPackage(openPackage, "A", new Version("1.0"));
+            IPackage result = repository.FindPackage(openPackage, "A", new SemVer("1.0"));
             Assert.Null(result);
             Assert.False(searchedPaths.Any());
 
-            result = repository.FindPackage(openPackage, "A", new Version("0.8"));
+            result = repository.FindPackage(openPackage, "A", new SemVer("0.8"));
             Assert.Null(result);
             Assert.False(searchedPaths.Any());
 
-            result = repository.FindPackage(openPackage, "A", new Version("1.1"));
+            result = repository.FindPackage(openPackage, "A", new SemVer("1.1"));
             Assert.Equal(@"A.1.1\A.1.1.nupkg", searchedPaths.Single());
             Assert.Equal("A", result.Id);
-            Assert.Equal(new Version("1.1"), result.Version);
+            Assert.Equal(new SemVer("1.1"), result.Version);
 
             fileSystem.Verify();
         }

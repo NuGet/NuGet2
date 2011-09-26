@@ -42,12 +42,12 @@ namespace NuGet.Test {
             Assert.Equal(2, dependencies.Count);
             Assert.Equal("A", dependencies[0].Id);
             Assert.True(dependencies[0].VersionSpec.IsMinInclusive);
-            Assert.Equal(new Version("1.3"), dependencies[0].VersionSpec.MinVersion);
+            Assert.Equal(new SemVer("1.3"), dependencies[0].VersionSpec.MinVersion);
             Assert.Equal("B", dependencies[1].Id);
             Assert.True(dependencies[1].VersionSpec.IsMinInclusive);
-            Assert.Equal(new Version("2.4"), dependencies[1].VersionSpec.MinVersion);
+            Assert.Equal(new SemVer("2.4"), dependencies[1].VersionSpec.MinVersion);
             Assert.False(dependencies[1].VersionSpec.IsMaxInclusive);
-            Assert.Equal(new Version("5.0"), dependencies[1].VersionSpec.MaxVersion);
+            Assert.Equal(new SemVer("5.0"), dependencies[1].VersionSpec.MaxVersion);
         }
 
         [Fact]

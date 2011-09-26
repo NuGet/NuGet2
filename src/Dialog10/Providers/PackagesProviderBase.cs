@@ -466,11 +466,13 @@ namespace NuGet.Dialog.Providers {
         }
 
         protected void CheckInstallPSScripts(IPackage package, IPackageRepository sourceRepository, out IList<PackageOperation> operations) {
+            // Review: Is there any way the user could get into a position that we would need to allow pre release versions here?
             var walker = new InstallWalker(
                 LocalRepository,
                 sourceRepository,
                 this,
-                ignoreDependencies: false);
+                ignoreDependencies: false,
+                allowPrereleaseVersions: false); 
 
             operations = walker.ResolveOperations(package).ToList();
             var scriptPackages = from o in operations

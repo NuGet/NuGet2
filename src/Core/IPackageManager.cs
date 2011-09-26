@@ -12,12 +12,12 @@ namespace NuGet {
         event EventHandler<PackageOperationEventArgs> PackageUninstalled;
         event EventHandler<PackageOperationEventArgs> PackageUninstalling;
 
-        void InstallPackage(IPackage package, bool ignoreDependencies);
-        void InstallPackage(string packageId, Version version, bool ignoreDependencies);
-        void UpdatePackage(IPackage newPackage, bool updateDependencies);
-        void UpdatePackage(string packageId, Version version, bool updateDependencies);
-        void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies);
+        void InstallPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions);
+        void InstallPackage(string packageId, SemVer version, bool ignoreDependencies, bool allowPrereleaseVersions);
+        void UpdatePackage(IPackage newPackage, bool updateDependencies, bool allowPrereleaseVersions);
+        void UpdatePackage(string packageId, SemVer version, bool updateDependencies, bool allowPrereleaseVersions);
+        void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions);
         void UninstallPackage(IPackage package, bool forceRemove, bool removeDependencies);
-        void UninstallPackage(string packageId, Version version, bool forceRemove, bool removeDependencies);
+        void UninstallPackage(string packageId, SemVer version, bool forceRemove, bool removeDependencies);
     }
 }

@@ -161,7 +161,7 @@ namespace NuGet.Dialog.Test {
 
             provider.ExecuteCompletedCallback = delegate {
                 // Assert
-                mockPackageManager.Verify(p => p.InstallPackage(projectManager.Object, packageB, It.IsAny<IEnumerable<PackageOperation>>(), false, provider), Times.Once());
+                mockPackageManager.Verify(p => p.InstallPackage(projectManager.Object, packageB, It.IsAny<IEnumerable<PackageOperation>>(), false, false, provider), Times.Once());
 
                 manualEvent.Set();
             };
@@ -210,7 +210,7 @@ namespace NuGet.Dialog.Test {
             packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project.Object))).Returns(projectManager);
 
             packageManager.Setup(p => p.InstallPackage(
-               projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), false, It.IsAny<ILogger>())).Callback(
+               projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), false, false, It.IsAny<ILogger>())).Callback(
                () => {
                    solutionRepository.AddPackage(packageB);
                    projectManager.AddPackageReference(packageB.Id, packageB.Version);
@@ -282,7 +282,7 @@ namespace NuGet.Dialog.Test {
             var packageManager = new Mock<IVsPackageManager>();
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
             packageManager.Setup(p => p.LocalRepository).Returns(solutionRepository);
-            packageManager.Setup(p => p.InstallPackage(projectManager, packageB, It.IsAny<IEnumerable<PackageOperation>>(), false, It.IsAny<ILogger>())).
+            packageManager.Setup(p => p.InstallPackage(projectManager, packageB, It.IsAny<IEnumerable<PackageOperation>>(), false, false, It.IsAny<ILogger>())).
                 Raises(p => p.PackageInstalled += null, packageManager, new PackageOperationEventArgs(packageB, null, ""));
             packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project.Object))).Returns(projectManager);
 
@@ -310,7 +310,7 @@ namespace NuGet.Dialog.Test {
 
                     // InstallPackage() should get called
                     packageManager.Verify(p => p.InstallPackage(
-                       projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), false, It.IsAny<ILogger>()), Times.Once());
+                       projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), false, false, It.IsAny<ILogger>()), Times.Once());
                 }
                 finally {
                     manualEvent.Set();

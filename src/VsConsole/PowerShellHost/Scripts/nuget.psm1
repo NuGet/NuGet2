@@ -56,6 +56,7 @@ Register-TabExpansion 'Install-Package' @{
 
         if ($context.Id) { $parameters.filter = $context.Id }
         if ($context.Source) { $parameters.source = $context.Source }
+        if ($context.PreRelease) { $parameters.PreRelease = $true }
 
         $parameters.Remote = $true
         $parameters.AllVersions = $true
@@ -187,7 +188,7 @@ function GetPackageVersions($parameters, $context) {
     Find-Package @parameters -ExactMatch -ErrorAction SilentlyContinue | Select -ExpandProperty Version | %{
         # Convert to version if the we're looking at the version as a string
         if($_ -is [string]) { 
-            [Version]::Parse($_) 
+            [NuGet.SemVer]::Parse($_) 
         } else { 
             $_ 
         }  

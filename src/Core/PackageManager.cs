@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
+using System.Diagnostics;
 
 namespace NuGet {
     public class PackageManager : IPackageManager {
@@ -27,9 +28,9 @@ namespace NuGet {
         }
 
         public PackageManager(
-            IPackageRepository sourceRepository, 
-            IPackagePathResolver pathResolver, 
-            IFileSystem fileSystem, 
+            IPackageRepository sourceRepository,
+            IPackagePathResolver pathResolver,
+            IFileSystem fileSystem,
             IPackageRepository localRepository,
             IPackageRepository cacheRepository) {
             if (sourceRepository == null) {
@@ -47,7 +48,7 @@ namespace NuGet {
             if (cacheRepository == null) {
                 throw new ArgumentNullException("cacheRepository");
             }
-            
+
             SourceRepository = sourceRepository;
             PathResolver = pathResolver;
             FileSystem = fileSystem;
@@ -121,24 +122,27 @@ namespace NuGet {
         }
 
         public void InstallPackage(string packageId) {
-            InstallPackage(packageId, version: null, ignoreDependencies: false);
+            InstallPackage(packageId, version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
         }
 
-        public void InstallPackage(string packageId, Version version) {
-            InstallPackage(packageId, version, ignoreDependencies: false);
+        public void InstallPackage(string packageId, SemVer version) {
+            InstallPackage(packageId, version, ignoreDependencies: false, allowPrereleaseVersions: false);
         }
 
-        public virtual void InstallPackage(string packageId, Version version, bool ignoreDependencies) {
-            IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version);
+        public virtual void InstallPackage(string packageId, SemVer version, bool ignoreDependencies, bool allowPrereleaseVersions) {
+            IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
 
-            InstallPackage(package, ignoreDependencies);
+            InstallPackage(package, ignoreDependencies, allowPrereleaseVersions);
         }
 
-        public virtual void InstallPackage(IPackage package, bool ignoreDependencies) {
+        public virtual void InstallPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions) {
+            // We don't have an user interface that would allow this, but you could certainly get into this state via calling the API.
+            Debug.Assert(package.IsReleaseVersion() || allowPrereleaseVersions);
             Execute(package, new InstallWalker(LocalRepository,
                                                SourceRepository,
                                                Logger,
-                                               ignoreDependencies));
+                                               ignoreDependencies,
+                                               allowPrereleaseVersions));
 
             if (_cacheRepository != null) {
                 _cacheRepository.AddPackage(package);
@@ -204,15 +208,15 @@ namespace NuGet {
             UninstallPackage(packageId, version: null, forceRemove: false, removeDependencies: false);
         }
 
-        public void UninstallPackage(string packageId, Version version) {
+        public void UninstallPackage(string packageId, SemVer version) {
             UninstallPackage(packageId, version: version, forceRemove: false, removeDependencies: false);
         }
 
-        public void UninstallPackage(string packageId, Version version, bool forceRemove) {
+        public void UninstallPackage(string packageId, SemVer version, bool forceRemove) {
             UninstallPackage(packageId, version: version, forceRemove: forceRemove, removeDependencies: false);
         }
 
-        public virtual void UninstallPackage(string packageId, Version version, bool forceRemove, bool removeDependencies) {
+        public virtual void UninstallPackage(string packageId, SemVer version, bool forceRemove, bool removeDependencies) {
             if (String.IsNullOrEmpty(packageId)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
@@ -296,19 +300,21 @@ namespace NuGet {
             return new PackageOperationEventArgs(package, FileSystem, PathResolver.GetInstallPath(package));
         }
 
-        public void UpdatePackage(string packageId, bool updateDependencies) {
-            UpdatePackage(packageId, version: null, updateDependencies: updateDependencies);
+        public void UpdatePackage(string packageId, bool updateDependencies, bool allowPrereleaseVersions) {
+            UpdatePackage(packageId, version: null, updateDependencies: updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
         }
 
-        public void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies) {
-            UpdatePackage(packageId, () => SourceRepository.FindPackage(packageId, versionSpec), updateDependencies);
+        public void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions) {
+            UpdatePackage(packageId, () => SourceRepository.FindPackage(packageId, versionSpec, allowPrereleaseVersions),
+                updateDependencies, allowPrereleaseVersions);
         }
 
-        public void UpdatePackage(string packageId, Version version, bool updateDependencies) {
-            UpdatePackage(packageId, () => SourceRepository.FindPackage(packageId, version), updateDependencies);
+        public void UpdatePackage(string packageId, SemVer version, bool updateDependencies, bool allowPrereleaseVersions) {
+            UpdatePackage(packageId, () => SourceRepository.FindPackage(packageId, version, allowPrereleaseVersions),
+                updateDependencies, allowPrereleaseVersions);
         }
 
-        public void UpdatePackage(string packageId, Func<IPackage> resolvePackage, bool updateDependencies) {
+        internal void UpdatePackage(string packageId, Func<IPackage> resolvePackage, bool updateDependencies, bool allowPrereleaseVersions) {
             if (String.IsNullOrEmpty(packageId)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
@@ -327,19 +333,21 @@ namespace NuGet {
             IPackage newPackage = resolvePackage();
 
             if (newPackage != null && oldPackage.Version != newPackage.Version) {
-                UpdatePackage(newPackage, updateDependencies);
+                UpdatePackage(newPackage, updateDependencies, allowPrereleaseVersions);
             }
             else {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_NoUpdatesAvailable, packageId);
             }
         }
 
-        public void UpdatePackage(IPackage newPackage, bool updateDependencies) {
+        public void UpdatePackage(IPackage newPackage, bool updateDependencies, bool allowPrereleaseVersions) {
             Execute(newPackage, new UpdateWalker(LocalRepository,
                                                 SourceRepository,
                                                 new DependentsWalker(LocalRepository),
+                                                NullConstraintProvider.Instance,
                                                 Logger,
-                                                updateDependencies));
+                                                updateDependencies,
+                                                allowPrereleaseVersions));
 
             if (_cacheRepository != null) {
                 _cacheRepository.AddPackage(newPackage);

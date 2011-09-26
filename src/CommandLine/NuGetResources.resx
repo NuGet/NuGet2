@@ -716,4 +716,13 @@ nuget update -Self</value>
   <data name="SourcesCommandSourceEnabledSuccessfully" xml:space="preserve">
     <value>Package source with Name: {0} enabled successfully.</value>
   </data>
+  <data name="Warning_SemVer" xml:space="preserve">
+    <value>Version "{0}" does not follow SemVer guidelines.</value>
+  </data>
+  <data name="Warning_SemVerSolution" xml:space="preserve">
+    <value>Update your version number to follow the SemVer scheme as described at http://semver.org.</value>
+  </data>
+  <data name="Warning_SemVerTitle" xml:space="preserve">
+    <value>Semantic versioning</value>
+  </data>
 </root>

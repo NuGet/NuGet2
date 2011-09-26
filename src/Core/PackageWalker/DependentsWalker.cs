@@ -35,7 +35,7 @@ namespace NuGet {
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
-            return Repository.ResolveDependency(dependency);
+            return Repository.ResolveDependency(dependency, allowPrereleaseVersions: true);
         }
 
         protected override bool OnAfterResolveDependency(IPackage package, IPackage dependency) {

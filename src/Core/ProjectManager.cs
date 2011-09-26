@@ -121,26 +121,27 @@ namespace NuGet {
         }
 
         public virtual void AddPackageReference(string packageId) {
-            AddPackageReference(packageId, version: null, ignoreDependencies: false);
+            AddPackageReference(packageId, version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
         }
 
-        public virtual void AddPackageReference(string packageId, Version version) {
-            AddPackageReference(packageId, version: version, ignoreDependencies: false);
+        public virtual void AddPackageReference(string packageId, SemVer version) {
+            AddPackageReference(packageId, version: version, ignoreDependencies: false, allowPrereleaseVersions: false);
         }
 
-        public virtual void AddPackageReference(string packageId, Version version, bool ignoreDependencies) {
-            IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version);
+        public virtual void AddPackageReference(string packageId, SemVer version, bool ignoreDependencies, bool allowPrereleaseVersions) {
+            IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, NullConstraintProvider.Instance, packageId, version, allowPrereleaseVersions);
 
-            AddPackageReference(package, ignoreDependencies);
+            AddPackageReference(package, ignoreDependencies, allowPrereleaseVersions);
         }
 
-        public virtual void AddPackageReference(IPackage package, bool ignoreDependencies) {
+        public virtual void AddPackageReference(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions) {
             Execute(package, new UpdateWalker(LocalRepository,
                                               SourceRepository,
                                               new DependentsWalker(LocalRepository),
                                               ConstraintProvider,
                                               NullLogger.Instance,
-                                              !ignoreDependencies) {
+                                              !ignoreDependencies,
+                                              allowPrereleaseVersions) {
                                                   AcceptedTargets = PackageTargets.Project
                                               });
         }
@@ -315,22 +316,22 @@ namespace NuGet {
         }
 
         public void UpdatePackageReference(string packageId) {
-            UpdatePackageReference(packageId, version: null, updateDependencies: true);
+            UpdatePackageReference(packageId, version: null, updateDependencies: true, allowPrereleaseVersions: false);
         }
 
-        public void UpdatePackageReference(string packageId, Version version) {
-            UpdatePackageReference(packageId, version: version, updateDependencies: true);
+        public void UpdatePackageReference(string packageId, SemVer version) {
+            UpdatePackageReference(packageId, version: version, updateDependencies: true, allowPrereleaseVersions: false);
         }
 
-        public void UpdatePackageReference(string packageId, IVersionSpec versionSpec, bool updateDependencies) {
-            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, versionSpec, ConstraintProvider), updateDependencies);
+        public void UpdatePackageReference(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions) {
+            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, versionSpec, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions);
         }
 
-        public virtual void UpdatePackageReference(string packageId, Version version, bool updateDependencies) {
-            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, version, ConstraintProvider), updateDependencies);
+        public virtual void UpdatePackageReference(string packageId, SemVer version, bool updateDependencies, bool allowPrereleaseVersions) {
+            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, version, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions);
         }
 
-        private void UpdatePackageReference(string packageId, Func<IPackage> resolvePackage, bool updateDependencies) {
+        private void UpdatePackageReference(string packageId, Func<IPackage> resolvePackage, bool updateDependencies, bool allowPrereleaseVersions) {
             if (String.IsNullOrEmpty(packageId)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
@@ -350,7 +351,7 @@ namespace NuGet {
 
             if (package != null && oldPackage.Version != package.Version) {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_UpdatingPackages, package.Id, oldPackage.Version, package.Version, Project.ProjectName);
-                UpdatePackageReference(package, updateDependencies);
+                UpdatePackageReference(package, updateDependencies, allowPrereleaseVersions);
             }
             else {
                 IVersionSpec constraint = ConstraintProvider.GetConstraint(packageId);
@@ -363,11 +364,11 @@ namespace NuGet {
         }
 
         protected void UpdatePackageReference(IPackage package) {
-            UpdatePackageReference(package, updateDependencies: true);
+            UpdatePackageReference(package, updateDependencies: true, allowPrereleaseVersions: false);
         }
 
-        protected void UpdatePackageReference(IPackage package, bool updateDependencies) {
-            AddPackageReference(package, !updateDependencies);
+        protected void UpdatePackageReference(IPackage package, bool updateDependencies, bool allowPrereleaseVersions) {
+            AddPackageReference(package, !updateDependencies, allowPrereleaseVersions);
         }
 
         private void OnPackageReferenceAdding(PackageOperationEventArgs e) {

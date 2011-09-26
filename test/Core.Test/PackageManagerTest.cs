@@ -40,7 +40,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageC);
 
             // Act
-            packageManager.InstallPackage("A", version: null, ignoreDependencies: true);
+            packageManager.InstallPackage("A", version: null, ignoreDependencies: true, allowPrereleaseVersions: true);
 
             // Assert
             Assert.True(localRepository.Exists(packageA));
@@ -156,7 +156,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageA);
 
             // Act
-            packageManager.InstallPackage("A", new Version("1.0"));
+            packageManager.InstallPackage("A", new SemVer("1.0"));
 
             // Assert
             cacheRepository.Verify(p => p.AddPackage(packageA), Times.Once());
@@ -183,7 +183,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageA);
 
             // Act
-            packageManager.InstallPackage("A", new Version("1.0"), ignoreDependencies: true);
+            packageManager.InstallPackage("A", new SemVer("1.0"), ignoreDependencies: true, allowPrereleaseVersions: true);
 
             // Assert
             cacheRepository.Verify(p => p.AddPackage(packageA), Times.Once());
@@ -339,11 +339,11 @@ namespace NuGet.Test {
             sourceRepository.Add(A20);
 
             // Act
-            packageManager.UpdatePackage("A", updateDependencies: true);
+            packageManager.UpdatePackage("A", updateDependencies: true, allowPrereleaseVersions: false);
 
             // Assert
-            Assert.False(localRepository.Exists("A", new Version("1.0")));
-            Assert.True(localRepository.Exists("A", new Version("2.0")));
+            Assert.False(localRepository.Exists("A", new SemVer("1.0")));
+            Assert.True(localRepository.Exists("A", new SemVer("2.0")));
         }
 
         [Fact]
@@ -366,7 +366,7 @@ namespace NuGet.Test {
             sourceRepository.Add(A20);
 
             // Act
-            packageManager.UpdatePackage("A", updateDependencies: true);
+            packageManager.UpdatePackage("A", updateDependencies: true, allowPrereleaseVersions: false);
 
             // Assert
             cacheRepository.Verify(p => p.AddPackage(A20), Times.Once());
@@ -390,7 +390,8 @@ namespace NuGet.Test {
             sourceRepository.Add(A20);
 
             // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.UpdatePackage("A", updateDependencies: true), "Unable to find package 'A'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.UpdatePackage("A", updateDependencies: true, allowPrereleaseVersions: false), 
+                "Unable to find package 'A'.");
         }
 
         [Fact]
@@ -410,12 +411,132 @@ namespace NuGet.Test {
             localRepository.Add(A10);
 
             // Act
-            packageManager.UpdatePackage("A", updateDependencies: true);
+            packageManager.UpdatePackage("A", updateDependencies: true, allowPrereleaseVersions: false);
 
             // Assert
-            Assert.True(localRepository.Exists("A", new Version("1.0")));
+            Assert.True(localRepository.Exists("A", new SemVer("1.0")));
         }
-        
+
+        [Fact]
+        public void InstallPackageInstallsPrereleasePackages() {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var packageManager = new PackageManager(
+                sourceRepository,
+                new DefaultPackagePathResolver(projectSystem),
+                projectSystem,
+                localRepository,
+                new MockPackageRepository());
+
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0.0beta",
+                                                             dependencies: new [] {
+                                                                 new PackageDependency("C")
+                                                             });
+
+            IPackage packageC = PackageUtility.CreatePackage("C", "1.0.0");
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageC);
+
+            // Act
+            packageManager.InstallPackage("A", version: null, ignoreDependencies: false, allowPrereleaseVersions: true);
+
+            // Assert
+            Assert.True(localRepository.Exists(packageA));
+            Assert.True(localRepository.Exists(packageC));
+        }
+
+        [Fact]
+        public void InstallPackageInstallsPackagesWithPrereleaseDependenciesIfFlagIsSet() {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var packageManager = new PackageManager(
+                sourceRepository,
+                new DefaultPackagePathResolver(projectSystem),
+                projectSystem,
+                localRepository,
+                new MockPackageRepository());
+
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0.0",
+                                                             dependencies: new[] {
+                                                                 new PackageDependency("C")
+                                                             });
+
+            IPackage packageC = PackageUtility.CreatePackage("C", "1.0.0RC-1");
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageC);
+
+            // Act
+            packageManager.InstallPackage("A", version: null, ignoreDependencies: false, allowPrereleaseVersions: true);
+
+            // Assert
+            Assert.True(localRepository.Exists(packageA));
+            Assert.True(localRepository.Exists(packageC));
+        }
+
+        [Fact]
+        public void InstallPackageThrowsIfDependencyIsPrereleaseAndFlagIsNotSet() {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var packageManager = new PackageManager(
+                sourceRepository,
+                new DefaultPackagePathResolver(projectSystem),
+                projectSystem,
+                localRepository,
+                new MockPackageRepository());
+
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0.0",
+                                                             dependencies: new[] {
+                                                                 new PackageDependency("C")
+                                                             });
+
+            IPackage packageC = PackageUtility.CreatePackage("C", "1.0.0RC-1");
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageC);
+
+            // Act and Assert
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => packageManager.InstallPackage("A", version: null, ignoreDependencies: false, allowPrereleaseVersions: false),
+                "Unable to resolve dependency 'C'.");
+        }
+
+        [Fact]
+        public void InstallPackageInstallsLowerReleaseVersionIfPrereleaseFlagIsNotSet() {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var packageManager = new PackageManager(
+                sourceRepository,
+                new DefaultPackagePathResolver(projectSystem),
+                projectSystem,
+                localRepository,
+                new MockPackageRepository());
+
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0.0",
+                                                             dependencies: new[] {
+                                                                 new PackageDependency("C")
+                                                             });
+
+            IPackage packageC_RC = PackageUtility.CreatePackage("C", "1.0.0RC-1");
+            IPackage packageC = PackageUtility.CreatePackage("C", "0.9");
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageC);
+            sourceRepository.AddPackage(packageC_RC);
+
+            // Act 
+            packageManager.InstallPackage("A", version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
+
+            // Assert
+            Assert.True(localRepository.Exists(packageA));
+            Assert.True(localRepository.Exists(packageC));
+        }
+       
         private PackageManager CreatePackageManager() {
             var projectSystem = new MockProjectSystem();
             return new PackageManager(

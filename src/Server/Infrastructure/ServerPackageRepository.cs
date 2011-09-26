@@ -33,7 +33,7 @@ namespace NuGet.Server.Infrastructure {
             }
         }
 
-        public void RemovePackage(string packageId, Version version) {
+        public void RemovePackage(string packageId, SemVer version) {
             IPackage package = FindPackage(packageId, version);
             if (package != null) {
                 RemovePackage(package);

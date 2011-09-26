@@ -76,7 +76,7 @@ namespace NuGet {
             return CreateAggregateQuery(Repositories.Select(getPackages));
         }
 
-        public IPackage FindPackage(string packageId, Version version) {
+        public IPackage FindPackage(string packageId, SemVer version) {
             // When we're looking for an exact package, we can optimize but searching each
             // repository one by one until we find the package that matches.
             Func<IPackageRepository, IPackage> findPackage = Wrap(r => r.FindPackage(packageId, version));
@@ -84,15 +84,15 @@ namespace NuGet {
                                .FirstOrDefault(p => p != null);
         }
 
-        public IPackage ResolveDependency(PackageDependency dependency, IPackageConstraintProvider constraintProvider) {
+        public IPackage ResolveDependency(PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions) {
             if (ResolveDependenciesVertically) {
-                Func<IPackageRepository, IPackage> resolveDependency = Wrap(r => r.ResolveDependency(dependency, constraintProvider));
+                Func<IPackageRepository, IPackage> resolveDependency = Wrap(r => r.ResolveDependency(dependency, constraintProvider, allowPrereleaseVersions));
 
                 return Repositories.Select(r => Task.Factory.StartNew(() => resolveDependency(r)))
                                         .ToArray()
                                         .WhenAny(package => package != null);
             }
-            return this.ResolveDependencyCore(dependency, constraintProvider);
+            return this.ResolveDependencyCore(dependency, constraintProvider, allowPrereleaseVersions);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]

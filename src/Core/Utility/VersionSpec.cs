@@ -7,16 +7,16 @@ namespace NuGet {
         public VersionSpec() {
         }
 
-        public VersionSpec(Version version) {
+        public VersionSpec(SemVer version) {
             IsMinInclusive = true;
             IsMaxInclusive = true;
             MinVersion = version;
             MaxVersion = version;
         }
 
-        public Version MinVersion { get; set; }
+        public SemVer MinVersion { get; set; }
         public bool IsMinInclusive { get; set; }
-        public Version MaxVersion { get; set; }
+        public SemVer MaxVersion { get; set; }
         public bool IsMaxInclusive { get; set; }
 
         public override string ToString() {

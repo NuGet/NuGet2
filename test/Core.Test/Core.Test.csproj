@@ -76,6 +76,7 @@
     <Compile Include="PathUtilityTest.cs" />
     <Compile Include="PathValidatorTest.cs" />
     <Compile Include="ProjectSystemExtensionsTest.cs" />
+    <Compile Include="SemVerTest.cs" />
     <Compile Include="SharedRepositoryTest.cs" />
     <Compile Include="SmartDataServiceQueryTest.cs" />
     <Compile Include="BindingRedirectManagerTest.cs" />

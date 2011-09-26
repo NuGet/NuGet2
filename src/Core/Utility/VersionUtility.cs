@@ -79,13 +79,13 @@ namespace NuGet {
             }
         }
 
-        public static Version ParseOptionalVersion(string version) {
-            Version versionValue;
-            if (!String.IsNullOrEmpty(version) && Version.TryParse(version, out versionValue)) {
-                return versionValue;
-            }
-            return null;
-        }
+        //public static Version ParseOptionalVersion(string version) {
+        //    Version versionValue;
+        //    if (!String.IsNullOrEmpty(version) && Version.TryParse(version, out versionValue)) {
+        //        return versionValue;
+        //    }
+        //    return null;
+        //}
 
         /// <summary>
         /// This function tries to normalize a string that represents framework version names into
@@ -183,8 +183,6 @@ namespace NuGet {
                 throw new ArgumentNullException("version");
             }
 
-            version = NormalizeVersion(version);
-
             if (version.Build == 0 && version.Revision == 0) {
                 version = new Version(version.Major, version.Minor);
             }
@@ -226,8 +224,8 @@ namespace NuGet {
             value = value.Trim();
 
             // First, try to parse it as a plain version string
-            Version version;
-            if (Version.TryParse(value, out version)) {
+            SemVer version;
+            if (SemVer.TryParse(value, out version)) {
                 // A plain version is treated as an inclusive minimum range
                 result = new VersionSpec {
                     MinVersion = version,
@@ -312,11 +310,11 @@ namespace NuGet {
         /// <summary>
         /// The safe range is defined as the highest build and revision for a given major and minor version
         /// </summary>
-        public static IVersionSpec GetSafeRange(Version version) {
+        public static IVersionSpec GetSafeRange(SemVer version) {
             return new VersionSpec {
                 IsMinInclusive = true,
                 MinVersion = version,
-                MaxVersion = new Version(version.Major, version.Minor + 1)
+                MaxVersion = new SemVer(new Version(version.Version.Major, version.Version.Minor + 1))
             };
         }
 
@@ -455,18 +453,17 @@ namespace NuGet {
         /// <summary>
         /// Returns all possible versions for a version. i.e. 1.0 would return 1.0, 1.0.0, 1.0.0.0
         /// </summary>
-        internal static IEnumerable<Version> GetPossibleVersions(Version version) {
+        internal static IEnumerable<SemVer> GetPossibleVersions(SemVer semVer) {
             // Trim the version so things like 1.0.0.0 end up being 1.0
-            version = TrimVersion(version);
-
-            yield return version;
-
+            Version version = TrimVersion(semVer.Version);
+            
+            yield return semVer;
             if (version.Build == -1 && version.Revision == -1) {
-                yield return new Version(version.Major, version.Minor, 0);
-                yield return new Version(version.Major, version.Minor, 0, 0);
+                yield return new SemVer(new Version(version.Major, version.Minor, 0), semVer.SpecialVersion);
+                yield return new SemVer(new Version(version.Major, version.Minor, 0, 0), semVer.SpecialVersion);
             }
             else if (version.Revision == -1) {
-                yield return new Version(version.Major, version.Minor, version.Build, 0);
+                yield return new SemVer(new Version(version.Major, version.Minor, version.Build, 0), semVer.SpecialVersion);
             }
         }
 
@@ -530,13 +527,13 @@ namespace NuGet {
             return compatibility;
         }
 
-        private static bool TryParseVersion(string versionString, out Version version) {
+        private static bool TryParseVersion(string versionString, out SemVer version) {
             version = null;
-            if (!Version.TryParse(versionString, out version)) {
+            if (!SemVer.TryParse(versionString, out version)) {
                 // Support integer version numbers (i.e. 1 -> 1.0)
                 int versionNumber;
                 if (Int32.TryParse(versionString, out versionNumber) && versionNumber > 0) {
-                    version = new Version(versionNumber, 0);
+                    version = new SemVer(new Version(versionNumber, 0));
                 }
             }
             return version != null;

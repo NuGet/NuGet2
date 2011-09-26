@@ -127,7 +127,7 @@ namespace NuGet.Test.MSBuild {
                 .Returns("package");
             packageStub
                 .Setup(x => x.Version)
-                .Returns(new Version(1, 0, 0, 0));
+                .Returns(new SemVer(1, 0, 0, 0));
             packageServerFactory
                 .Setup(x => x.CreateFrom(It.IsAny<string>()))
                 .Returns(packageServerStub.Object);

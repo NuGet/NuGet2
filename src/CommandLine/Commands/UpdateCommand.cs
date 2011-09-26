@@ -52,7 +52,7 @@ namespace NuGet.Commands {
         public override void ExecuteCommand() {
             if (Self) {
                 Assembly assembly = typeof(UpdateCommand).Assembly;
-                SelfUpdate(assembly.Location, assembly.GetName().Version);
+                SelfUpdate(assembly.Location, new SemVer(assembly.GetName().Version));
             }
             else {
                 string inputFile = GetInputFile();
@@ -241,10 +241,10 @@ namespace NuGet.Commands {
                     try {
                         if (Safe) {
                             IVersionSpec safeRange = VersionUtility.GetSafeRange(package.Version);
-                            projectManager.UpdatePackageReference(package.Id, safeRange, updateDependencies: true);
+                            projectManager.UpdatePackageReference(package.Id, safeRange, updateDependencies: true, allowPrereleaseVersions: false);
                         }
                         else {
-                            projectManager.UpdatePackageReference(package.Id, version: null, updateDependencies: true);
+                            projectManager.UpdatePackageReference(package.Id, version: null, updateDependencies: true, allowPrereleaseVersions: false);
                         }
                     }
                     catch (InvalidOperationException e) {
@@ -254,7 +254,7 @@ namespace NuGet.Commands {
             }
         }
 
-        internal void SelfUpdate(string exePath, Version version) {
+        internal void SelfUpdate(string exePath, SemVer version) {
             Console.WriteLine(NuGetResources.UpdateCommandCheckingForUpdates, NuGetConstants.DefaultFeedUrl);
 
             // Get the nuget command line package from the specified repository

@@ -79,7 +79,7 @@ namespace NuGet.MSBuild {
             foreach (var package in packageReferences) {
                 if (!IsPackageInstalled(packageManager, fileSystem, package)) {
                     // Note that we ignore dependencies here because packages.config already contains the full closure
-                    packageManager.InstallPackage(package.Id, package.Version, ignoreDependencies: true);
+                    packageManager.InstallPackage(package.Id, package.Version, ignoreDependencies: true, allowPrereleaseVersions: true);
                     installedAny = true;
                 }
             }

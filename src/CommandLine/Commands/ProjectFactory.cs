@@ -130,7 +130,7 @@ namespace NuGet.Commands {
                 builder.Authors.Remove(projectAuthor);
             }
 
-            builder.Version = VersionUtility.TrimVersion(builder.Version);
+            builder.Version = new SemVer(VersionUtility.TrimVersion(builder.Version.Version));
 
             // Add output files
             AddOutputFiles(builder);
@@ -236,10 +236,10 @@ namespace NuGet.Commands {
                         _project.GetPropertyValue("AssemblyName") ??
                         Path.GetFileNameWithoutExtension(_project.FullPath);
 
-            string version = _project.GetPropertyValue("Version");
+            string version = _project.GetPropertyValue("SemVer");
             builder.Version = builder.Version ??
-                              VersionUtility.ParseOptionalVersion(version) ??
-                              new Version("1.0");
+                              SemVer.ParseOptionalVersion(version) ??
+                              new SemVer("1.0");
         }
 
         private void AddOutputFiles(PackageBuilder builder) {
@@ -313,7 +313,7 @@ namespace NuGet.Commands {
             // Collect all packages
             var packages = new List<IPackage>();
 
-            IDictionary<Tuple<string, Version>, PackageReference> packageReferences = file.GetPackageReferences()
+            IDictionary<Tuple<string, SemVer>, PackageReference> packageReferences = file.GetPackageReferences()
                                                                                           .ToDictionary(r => Tuple.Create(r.Id, r.Version));
 
             foreach (PackageReference reference in packageReferences.Values) {
@@ -351,7 +351,7 @@ namespace NuGet.Commands {
             }
         }
 
-        private static IVersionSpec GetVersionConstraint(IDictionary<Tuple<string, Version>, PackageReference> packageReferences, IPackage package) {
+        private static IVersionSpec GetVersionConstraint(IDictionary<Tuple<string, SemVer>, PackageReference> packageReferences, IPackage package) {
             IVersionSpec defaultVersionConstraint = VersionUtility.ParseVersionSpec(package.Version.ToString());
 
             PackageReference packageReference;
@@ -542,7 +542,7 @@ namespace NuGet.Commands {
             }
 
             protected override IPackage ResolveDependency(PackageDependency dependency) {
-                return _repository.ResolveDependency(dependency);
+                return _repository.ResolveDependency(dependency, allowPrereleaseVersions: false);
             }
 
             protected override bool OnAfterResolveDependency(IPackage package, IPackage dependency) {

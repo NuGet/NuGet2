@@ -127,16 +127,16 @@ namespace NuGet.Test {
 
         private class NuGetFeedSchema {
             public const string SchemaWithMethod = @"<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes""?>
-<edmx:Edmx Version=""1.0"" xmlns:edmx=""http://schemas.microsoft.com/ado/2007/06/edmx"">
+<edmx:Edmx SemVer=""1.0"" xmlns:edmx=""http://schemas.microsoft.com/ado/2007/06/edmx"">
   <edmx:DataServices xmlns:m=""http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"" m:DataServiceVersion=""2.0"">
     <Schema Namespace=""NuGet.Server.DataServices"" xmlns:d=""http://schemas.microsoft.com/ado/2007/08/dataservices"" xmlns:m=""http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"" xmlns=""http://schemas.microsoft.com/ado/2006/04/edm"">
       <EntityType Name=""Package"" m:HasStream=""true"">
         <Key>
           <PropertyRef Name=""Id"" />
-          <PropertyRef Name=""Version"" />
+          <PropertyRef Name=""SemVer"" />
         </Key>
         <Property Name=""Id"" Type=""Edm.String"" Nullable=""false"" m:FC_TargetPath=""SyndicationTitle"" m:FC_ContentKind=""text"" m:FC_KeepInContent=""false"" />
-        <Property Name=""Version"" Type=""Edm.String"" Nullable=""false"" />
+        <Property Name=""SemVer"" Type=""Edm.String"" Nullable=""false"" />
         <Property Name=""Title"" Type=""Edm.String"" Nullable=""true"" />
         <Property Name=""Authors"" Type=""Edm.String"" Nullable=""true"" m:FC_TargetPath=""SyndicationAuthorName"" m:FC_ContentKind=""text"" m:FC_KeepInContent=""false"" />
         <Property Name=""IconUrl"" Type=""Edm.String"" Nullable=""true"" />
@@ -179,16 +179,16 @@ namespace NuGet.Test {
 </edmx:Edmx>";
 
             public const string SchemaWithNoMethods = @"<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes""?>
-<edmx:Edmx Version=""1.0"" xmlns:edmx=""http://schemas.microsoft.com/ado/2007/06/edmx"">
+<edmx:Edmx SemVer=""1.0"" xmlns:edmx=""http://schemas.microsoft.com/ado/2007/06/edmx"">
   <edmx:DataServices xmlns:m=""http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"" m:DataServiceVersion=""1.0"">
     <Schema Namespace=""Gallery.Infrastructure.FeedModels"" xmlns:d=""http://schemas.microsoft.com/ado/2007/08/dataservices"" xmlns:m=""http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"" xmlns=""http://schemas.microsoft.com/ado/2006/04/edm"">
       <EntityType Name=""PublishedPackage"" m:HasStream=""true"">
         <Key>
           <PropertyRef Name=""Id"" />
-          <PropertyRef Name=""Version"" />
+          <PropertyRef Name=""SemVer"" />
         </Key>
         <Property Name=""Id"" Type=""Edm.String"" Nullable=""false"" />
-        <Property Name=""Version"" Type=""Edm.String"" Nullable=""false"" />
+        <Property Name=""SemVer"" Type=""Edm.String"" Nullable=""false"" />
         <Property Name=""Title"" Type=""Edm.String"" Nullable=""true"" m:FC_TargetPath=""SyndicationTitle"" m:FC_ContentKind=""text"" m:FC_KeepInContent=""true"" />
         <Property Name=""Authors"" Type=""Edm.String"" Nullable=""true"" m:FC_TargetPath=""SyndicationAuthorName"" m:FC_ContentKind=""text"" m:FC_KeepInContent=""true"" />
         <Property Name=""PackageType"" Type=""Edm.String"" Nullable=""true"" />

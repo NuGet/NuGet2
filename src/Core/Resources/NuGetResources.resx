@@ -333,4 +333,7 @@
   <data name="InvalidNullSettingsOperation" xml:space="preserve">
     <value>"{0}" cannot be called on a NullSettings.</value>
   </data>
+  <data name="TypeMustBeASemVer" xml:space="preserve">
+    <value>Type to compare must be an instance of SemVer.</value>
+  </data>
 </root>

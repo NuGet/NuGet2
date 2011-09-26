@@ -177,7 +177,7 @@ namespace NuGet.Dialog.Providers {
                 // make sure the package is not installed in this project before proceeding
                 if (!projectManager.IsInstalled(item.PackageIdentity)) {
                     RegisterPackageOperationEvents(PackageManager, projectManager);
-                    PackageManager.InstallPackage(projectManager, item.Id, item.PackageIdentity.Version, ignoreDependencies: false, logger: this);
+                    PackageManager.InstallPackage(projectManager, item.Id, item.PackageIdentity.Version, ignoreDependencies: false, allowPrereleaseVersions: false, logger: this);
                 }
             }
             finally {

@@ -15,7 +15,7 @@ namespace NuGet.Test {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
                 Id = "A",
-                Version = new Version("1.0"),
+                Version = new SemVer("1.0"),
                 Description = "Description"
             };
             builder.Authors.Add("David");
@@ -44,7 +44,7 @@ namespace NuGet.Test {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
                 Id = "A",
-                Version = new Version("1.0"),
+                Version = new SemVer("1.0"),
                 Description = "Description",
                 ReleaseNotes = "Release Notes"
             };
@@ -75,7 +75,7 @@ namespace NuGet.Test {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
                 Id = "A",
-                Version = new Version("1.0"),
+                Version = new SemVer("1.0"),
                 Description = "Descriptions",
             };
             builder.Authors.Add("David");
@@ -108,7 +108,7 @@ namespace NuGet.Test {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
                 Id = "A",
-                Version = new Version("1.0"),
+                Version = new SemVer("1.0"),
                 Description = "Descriptions",
             };
             builder.PackageAssemblyReferences.Add("foo.dll");
@@ -141,7 +141,7 @@ namespace NuGet.Test {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
                 Id = "                 A                 ",
-                Version = new Version("1.0"),
+                Version = new SemVer("1.0"),
                 Description = "Descriptions                                         ",
                 Summary = "                            Summary",
                 Language = "     en-us   ",
@@ -185,18 +185,18 @@ namespace NuGet.Test {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
                 Id = "A",
-                Version = new Version("1.0"),
+                Version = new SemVer("1.0"),
                 Description = "Descriptions",
                 Summary = "Summary",
             };
             builder.Authors.Add("David");
             builder.Dependencies.Add(new PackageDependency("B", new VersionSpec {
-                MinVersion = new Version("1.0"),
+                MinVersion = new SemVer("1.0"),
                 IsMinInclusive = true
             }));
             builder.Dependencies.Add(new PackageDependency("C", new VersionSpec {
-                MinVersion = new Version("1.0"),
-                MaxVersion = new Version("5.0"),
+                MinVersion = new SemVer("1.0"),
+                MaxVersion = new SemVer("5.0"),
                 IsMinInclusive = false
             }));
             var ms = new MemoryStream();
@@ -230,18 +230,18 @@ namespace NuGet.Test {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
                 Id = "A",
-                Version = new Version("1.0"),
+                Version = new SemVer("1.0"),
                 Description = "Descriptions",
                 Summary = "Summary",
             };
             builder.Authors.Add("David");
             builder.Dependencies.Add(new PackageDependency("B", new VersionSpec {
-                MinVersion = new Version("1.0"),
+                MinVersion = new SemVer("1.0"),
                 IsMinInclusive = true
             }));
             builder.Dependencies.Add(new PackageDependency("B", new VersionSpec {
-                MinVersion = new Version("1.0"),
-                MaxVersion = new Version("5.0"),
+                MinVersion = new SemVer("1.0"),
+                MaxVersion = new SemVer("5.0"),
                 IsMinInclusive = false
             }));
             var ms = new MemoryStream();
@@ -255,14 +255,14 @@ namespace NuGet.Test {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
                 Id = "A",
-                Version = new Version("1.0"),
+                Version = new SemVer("1.0"),
                 Description = "Descriptions",
                 Summary = "Summary",
             };
             builder.Authors.Add("David");
             builder.Dependencies.Add(new PackageDependency("B", new VersionSpec {
-                MinVersion = new Version("1.0"),
-                MaxVersion = new Version("1.0")
+                MinVersion = new SemVer("1.0"),
+                MaxVersion = new SemVer("1.0")
             }));
             var ms = new MemoryStream();
 
@@ -275,7 +275,7 @@ namespace NuGet.Test {
             // Arrange
             var builder = new PackageBuilder {
                 Id = "A",
-                Version = new Version("1.0"),
+                Version = new SemVer("1.0"),
                 Description = "Test",
             };
             builder.Authors.Add("Test");
@@ -291,14 +291,14 @@ namespace NuGet.Test {
             // Arrange
             PackageBuilder builder = new PackageBuilder() {
                 Id = "A",
-                Version = new Version("1.0"),
+                Version = new SemVer("1.0"),
                 Description = "Descriptions",
                 Summary = "Summary",
             };
             builder.Authors.Add("David");
             builder.Dependencies.Add(new PackageDependency("B", new VersionSpec {
-                MinVersion = new Version("2.0"),
-                MaxVersion = new Version("1.0")
+                MinVersion = new SemVer("2.0"),
+                MaxVersion = new SemVer("1.0")
             }));
             var ms = new MemoryStream();
 
@@ -324,7 +324,7 @@ Description is required.");
             // Arrange
             var builder = new PackageBuilder();
             builder.Id = "A";
-            builder.Version = new Version("1.0");
+            builder.Version = new SemVer("1.0");
             builder.Description = "Description";
 
             // Act & Assert
@@ -499,7 +499,7 @@ Description is required.");
 
             // Assert
             Assert.Equal("Artem.XmlProviders", builder.Id);
-            Assert.Equal(new Version(2, 5), builder.Version);
+            Assert.Equal(new SemVer(2, 5, 0, 0), builder.Version);
             Assert.Equal("Some awesome package", builder.Title);
             Assert.Equal(1, builder.Authors.Count);
             Assert.Equal("Velio Ivanov", authors[0]);
@@ -540,7 +540,7 @@ Description is required.");
 
             // Assert
             Assert.Equal("Artem.XmlProviders", builder.Id);
-            Assert.Equal(new Version(2, 5), builder.Version);
+            Assert.Equal(new SemVer(2, 5, 0, 0), builder.Version);
             Assert.Equal("Some awesome package", builder.Title);
             Assert.Equal(1, builder.Authors.Count);
             Assert.Equal("Velio Ivanov", authors[0]);
@@ -577,7 +577,7 @@ Description is required.");
 
             // Assert
             Assert.Equal("Artem.XmlProviders", builder.Id);
-            Assert.Equal(new Version(2, 5), builder.Version);
+            Assert.Equal(new SemVer(2, 5, 0, 0), builder.Version);
             Assert.Equal("Some awesome package", builder.Title);
             Assert.Equal(1, builder.Authors.Count);
             Assert.Equal("Velio Ivanov", authors[0]);
@@ -617,7 +617,7 @@ Description is required.");
 
             // Assert
             Assert.Equal("Artem.XmlProviders", builder.Id);
-            Assert.Equal(new Version(2, 5), builder.Version);
+            Assert.Equal(new SemVer(2, 5, 0 ,0), builder.Version);
             Assert.Equal("Some awesome package", builder.Title);
             Assert.Equal(1, builder.Authors.Count);
             Assert.Equal("Velio Ivanov", authors[0]);
@@ -631,13 +631,13 @@ Description is required.");
             // <dependency id="A" version="[1.0]" />
             Assert.True(dependencies["A"].IsMinInclusive);
             Assert.True(dependencies["A"].IsMaxInclusive);
-            Assert.Equal(new Version("1.0"), dependencies["A"].MinVersion);
-            Assert.Equal(new Version("1.0"), dependencies["A"].MaxVersion);
+            Assert.Equal(new SemVer("1.0"), dependencies["A"].MinVersion);
+            Assert.Equal(new SemVer("1.0"), dependencies["A"].MaxVersion);
             // <dependency id="B" version="[1.0, 2.5)" />
             Assert.True(dependencies["B"].IsMinInclusive);
             Assert.False(dependencies["B"].IsMaxInclusive);
-            Assert.Equal(new Version("1.0"), dependencies["B"].MinVersion);
-            Assert.Equal(new Version("2.5"), dependencies["B"].MaxVersion);
+            Assert.Equal(new SemVer("1.0"), dependencies["B"].MinVersion);
+            Assert.Equal(new SemVer("2.5"), dependencies["B"].MaxVersion);
         }
 
         [Fact]
@@ -761,7 +761,7 @@ Enabling license acceptance requires a license url.");
             // Arrange
             var builder = new PackageBuilder {
                 Id = "  a.  b",
-                Version = new Version("1.0"),
+                Version = new SemVer("1.0"),
                 Description = "Description"
             };
             builder.Authors.Add("Me");
@@ -824,7 +824,7 @@ Enabling license acceptance requires a license url.");
 
             // Assert
             Assert.Equal("Artem.XmlProviders", packageBuilder.Id);
-            Assert.Equal(new Version("2.5"), packageBuilder.Version);
+            Assert.Equal(new SemVer("2.5"), packageBuilder.Version);
             Assert.Equal("Velio Ivanov", packageBuilder.Authors.Single());
             Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
             Assert.Equal("en-US", packageBuilder.Language);
@@ -852,7 +852,7 @@ Enabling license acceptance requires a license url.");
 
             // Assert
             Assert.Equal("Artem.XmlProviders", packageBuilder.Id);
-            Assert.Equal(new Version("2.5"), packageBuilder.Version);
+            Assert.Equal(new SemVer("2.5"), packageBuilder.Version);
             Assert.Equal("Velio Ivanov", packageBuilder.Authors.Single());
             Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
             Assert.Equal("en-US", packageBuilder.Language);
@@ -878,7 +878,7 @@ Enabling license acceptance requires a license url.");
 
             // Assert
             Assert.Equal("Artem.XmlProviders", packageBuilder.Id);
-            Assert.Equal(new Version("2.5"), packageBuilder.Version);
+            Assert.Equal(new SemVer("2.5"), packageBuilder.Version);
             Assert.Equal("Velio Ivanov", packageBuilder.Authors.Single());
             Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
             Assert.Equal("en-US", packageBuilder.Language);
@@ -907,7 +907,7 @@ Enabling license acceptance requires a license url.");
             };
 
             // Act
-            var builder = new PackageBuilder { Id = "test", Version = new Version("1.0"), Description = "test" };
+            var builder = new PackageBuilder { Id = "test", Version = new SemVer("1.0"), Description = "test" };
             builder.Authors.Add("test");
             foreach (var name in fileNames) {
                 builder.Files.Add(CreatePackageFile(name));

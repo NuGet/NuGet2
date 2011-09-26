@@ -22,7 +22,7 @@ namespace NuGet.PowerShell.Commands {
 
         [Parameter(Position = 2)]
         [ValidateNotNull]
-        public Version Version { get; set; }
+        public SemVer Version { get; set; }
 
         [Parameter]
         public SwitchParameter Force { get; set; }

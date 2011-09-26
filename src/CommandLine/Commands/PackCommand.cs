@@ -4,9 +4,8 @@ using System.ComponentModel.Composition;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using NuGet.Analysis;
 using NuGet.Common;
-  
+
 namespace NuGet.Commands {
     [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", MaxArgs = 1, UsageSummaryResourceName = "PackageCommandUsageSummary",
             UsageDescriptionResourceName = "PackageCommandUsageDescription", UsageExampleResourceName = "PackCommandUsageExamples")]
@@ -98,7 +97,7 @@ namespace NuGet.Commands {
 
         private IPackage BuildPackage(string path, PackageBuilder builder, string outputPath = null) {
             if (!String.IsNullOrEmpty(Version)) {
-                builder.Version = new Version(Version);
+                builder.Version = new SemVer(Version);
             }
 
             outputPath = outputPath ?? GetOutputPath(builder);

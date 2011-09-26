@@ -110,7 +110,7 @@ namespace NuGet {
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency) {
-            return Repository.ResolveDependency(dependency);
+            return Repository.ResolveDependency(dependency, allowPrereleaseVersions: true);
         }
 
         protected virtual void WarnRemovingPackageBreaksDependents(IPackage package, IEnumerable<IPackage> dependents) {

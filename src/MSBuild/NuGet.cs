@@ -60,7 +60,7 @@ namespace NuGet.MSBuild {
         [Output]
         public string OutputPackage { get; set; }
 
-        public Version Version { get; set; }
+        public SemVer Version { get; set; }
 
         public bool Symbols { get; set; }
 

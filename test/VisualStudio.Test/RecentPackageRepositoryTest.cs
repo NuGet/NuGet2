@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 using Moq;
 using NuGet.Test;
 using NuGet.Test.Mocks;
+using Xunit;
 
 namespace NuGet.VisualStudio.Test {
 
     using PackageUtility = NuGet.Test.PackageUtility;
 
-    
     public class RecentPackageRepositoryTest {
 
         [Fact]
@@ -49,7 +48,7 @@ namespace NuGet.VisualStudio.Test {
             // Assert
             Assert.Equal(1, packages.Count);
             Assert.Equal("A", packages[0].Id);
-            Assert.Equal(new Version("1.0"), packages[0].Version);
+            Assert.Equal(new SemVer("1.0"), packages[0].Version);
         }
 
         [Fact]
@@ -403,7 +402,7 @@ namespace NuGet.VisualStudio.Test {
 
         private void AssertPackage(IPackage package, string expectedId, string expectedVersion) {
             Assert.Equal(expectedId, package.Id);
-            Assert.Equal(new Version(expectedVersion), package.Version);
+            Assert.Equal(new SemVer(expectedVersion), package.Version);
         }
 
         private class MockSettingsManager : IPersistencePackageSettingsManager {

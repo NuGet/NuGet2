@@ -9,7 +9,6 @@ using NuGet.VisualStudio.Test;
 using Xunit;
 
 namespace NuGet.PowerShell.Commands.Test {
-    
     public class NewPackageCommandTest {
         [Fact]
         public void NewPackageCmdletThrowsIfNoSolutionIsClosed() {
@@ -90,7 +89,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var projectPath = @"X:\projects\my-project\";
             var outputFile = "mypk.out";
             var id = "id";
-            var version = new Version("1.1");
+            var version = new SemVer("1.1");
 
             // Act
             var packagePath = NewPackageCommand.GetPackageFilePath(outputFile, projectPath, id, version);
@@ -105,7 +104,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var projectPath = @"X:\projects\my-project\";
             var outputFile = @"X:\outputs\mypk.out";
             var id = "id";
-            var version = new Version("1.1");
+            var version = new SemVer("1.1");
 
             // Act
             var packagePath = NewPackageCommand.GetPackageFilePath(outputFile, projectPath, id, version);
@@ -120,7 +119,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var projectPath = @"X:\projects\my-project\";
             string outputFile = null;
             var id = "id";
-            var version = new Version("1.1");
+            var version = new SemVer("1.1");
 
             // Act
             var packagePath = NewPackageCommand.GetPackageFilePath(outputFile, projectPath, id, version);

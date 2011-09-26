@@ -7,6 +7,8 @@ namespace NuGet {
     public interface IPackage : IPackageMetadata, IServerPackageMetadata {
         bool IsLatestVersion { get; }
 
+        bool IsAbsoluteLatestVersion { get; }
+
         // It's nullable since some package types won't support it (in memory packages)
         DateTimeOffset? Published { get; }
 

@@ -24,7 +24,7 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal(1, result.Count());
-            AssertPackageResultsEqual(result.First(), new { Id = "Pack2", Version = new Version("1.0") });
+            AssertPackageResultsEqual(result.First(), new { Id = "Pack2", Version = new SemVer("1.0") });
         }
 
         [Fact]
@@ -40,9 +40,9 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal(3, result.Count());     // FindPackage always sets First = 30
-            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P1", Version = new Version("1.1") });
-            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P3", Version = new Version("1.0") });
-            AssertPackageResultsEqual(result.ElementAt(2), new { Id = "Pack2", Version = new Version("1.2") });
+            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P1", Version = new SemVer("1.1") });
+            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P3", Version = new SemVer("1.0") });
+            AssertPackageResultsEqual(result.ElementAt(2), new { Id = "Pack2", Version = new SemVer("1.2") });
         }
 
         [Fact]
@@ -57,10 +57,10 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal(4, result.Count());     // FindPackage always sets First = 30
-            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P0", Version = new Version("1.1") });
-            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P1", Version = new Version("1.1") });
-            AssertPackageResultsEqual(result.ElementAt(2), new { Id = "P3", Version = new Version("1.0") });
-            AssertPackageResultsEqual(result.ElementAt(3), new { Id = "Pack2", Version = new Version("1.2") });
+            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P0", Version = new SemVer("1.1") });
+            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P1", Version = new SemVer("1.1") });
+            AssertPackageResultsEqual(result.ElementAt(2), new { Id = "P3", Version = new SemVer("1.0") });
+            AssertPackageResultsEqual(result.ElementAt(3), new { Id = "Pack2", Version = new SemVer("1.2") });
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal(1, result.Count());
-            AssertPackageResultsEqual(result.First(), new { Id = "Pack2", Version = new Version("1.2") });
+            AssertPackageResultsEqual(result.First(), new { Id = "Pack2", Version = new SemVer("1.2") });
         }
 
         [Fact]
@@ -90,7 +90,7 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal(packages.Count(), 1);
-            AssertPackageResultsEqual(packages.First(), new { Id = "Pack2", Version = new Version("1.2") });
+            AssertPackageResultsEqual(packages.First(), new { Id = "Pack2", Version = new SemVer("1.2") });
         }
 
         [Fact]
@@ -113,8 +113,8 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal(2, result.Count());
-            AssertPackageResultsEqual(result.First(), new { Id = "Awesome", Version = new Version("0.1") });
-            AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new Version("0.4") });
+            AssertPackageResultsEqual(result.First(), new { Id = "Awesome", Version = new SemVer("0.1") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new SemVer("0.4") });
         }
 
         [Fact]
@@ -137,8 +137,8 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal(2, result.Count());
-            AssertPackageResultsEqual(result.First(), new { Id = "Awesome", Version = new Version("0.1") });
-            AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new Version("0.4") });
+            AssertPackageResultsEqual(result.First(), new { Id = "Awesome", Version = new SemVer("0.1") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new SemVer("0.4") });
         }
 
         [Fact]
@@ -162,9 +162,9 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal(3, result.Count());
-            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "Awesome", Version = new Version("0.1") });
-            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "Awesome", Version = new Version("0.4") });
-            AssertPackageResultsEqual(result.ElementAt(2), new { Id = "AwesomeToo", Version = new Version("0.4") });
+            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "Awesome", Version = new SemVer("0.1") });
+            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "Awesome", Version = new SemVer("0.4") });
+            AssertPackageResultsEqual(result.ElementAt(2), new { Id = "AwesomeToo", Version = new SemVer("0.4") });
         }
 
         [Fact]
@@ -188,9 +188,9 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal(3, result.Count());
-            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "Awesome", Version = new Version("0.1") });
-            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "Awesome", Version = new Version("0.4") });
-            AssertPackageResultsEqual(result.ElementAt(2), new { Id = "AwesomeToo", Version = new Version("0.4") });
+            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "Awesome", Version = new SemVer("0.1") });
+            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "Awesome", Version = new SemVer("0.4") });
+            AssertPackageResultsEqual(result.ElementAt(2), new { Id = "AwesomeToo", Version = new SemVer("0.4") });
         }
 
         [Fact]
@@ -215,8 +215,8 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal(2, result.Count());
-            AssertPackageResultsEqual(result.First(), new { Id = "Awesome", Version = new Version("0.1") });
-            AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new Version("0.4") });
+            AssertPackageResultsEqual(result.First(), new { Id = "Awesome", Version = new SemVer("0.1") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new SemVer("0.4") });
         }
 
         [Fact]
@@ -240,10 +240,9 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal(2, result.Count());
-            AssertPackageResultsEqual(result.First(), new { Id = "Awesome", Version = new Version("0.1") });
-            AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new Version("0.4") });
+            AssertPackageResultsEqual(result.First(), new { Id = "Awesome", Version = new SemVer("0.1") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new SemVer("0.4") });
         }
-
 
         private static void AssertPackageResultsEqual(dynamic a, dynamic b) {
             if (a is PSObject) {
