@@ -111,9 +111,13 @@ namespace NuGet.Options {
             // get package sources as ordered list
             var packageSources = PackageSourcesListBox.Items.Cast<PackageSource>().ToList();
             _packageSourceProvider.SavePackageSources(packageSources);
+
+            // find the enabled package source 
+            var updatedActiveSource = packageSources.Find(p => p.IsEnabled && p.Equals(_activeSource));
+
             // restore current active source if it still exists, or reset to aggregate source
-            if (packageSources.Contains(_activeSource)) {
-                _packageSourceProvider.ActivePackageSource = _activeSource;
+            if (updatedActiveSource != null) {
+                _packageSourceProvider.ActivePackageSource = updatedActiveSource;
             }
             else {
                 _packageSourceProvider.ActivePackageSource = AggregatePackageSource.Instance;
