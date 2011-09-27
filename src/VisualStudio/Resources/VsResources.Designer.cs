@@ -349,6 +349,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Downloading package &apos;{0}&apos; failed..
+        /// </summary>
+        public static string PackageRestoreDownloadPackageFailed {
+            get {
+                return ResourceManager.GetString("PackageRestoreDownloadPackageFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An error occurred while setting up package restore mode:.
         /// </summary>
         public static string PackageRestoreErrorMessage {

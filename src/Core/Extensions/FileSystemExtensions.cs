@@ -7,14 +7,26 @@ using System.Threading;
 using NuGet.Resources;
 
 namespace NuGet {
-    internal static class FileSystemExtensions {
-        internal static void AddFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files) {
+    public static class FileSystemExtensions {
+        public static void AddFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files) {
             AddFiles(fileSystem, files, String.Empty);
         }
 
-        internal static void AddFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files, string rootDir) {
+        public static void AddFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files, string rootDir) {
+            AddFiles(fileSystem, files, rootDir, preserveFilePath: true);
+        }
+
+        /// <summary>
+        /// Add the files to the specified FileSystem
+        /// </summary>
+        /// <param name="fileSystem">The file system.</param>
+        /// <param name="files">The files to add to FileSystem.</param>
+        /// <param name="rootDir">The directory of the FileSystem to copy the files to.</param>
+        /// <param name="preserveFilePath">if set to <c>true</c> preserve full path of the copies files. Otherwise,
+        /// all files with be copied to the <paramref name="rootDir"/>.</param>
+        public static void AddFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files, string rootDir, bool preserveFilePath) {
             foreach (IPackageFile file in files) {
-                string path = Path.Combine(rootDir, file.Path);
+                string path = Path.Combine(rootDir, preserveFilePath ? file.Path : Path.GetFileName(file.Path));
                 fileSystem.AddFileWithCheck(path, file.GetStream);
             }
         }

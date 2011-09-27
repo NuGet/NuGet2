@@ -288,4 +288,7 @@
   <data name="PackageRestoreErrorMessage" xml:space="preserve">
     <value>An error occurred while setting up package restore mode:</value>
   </data>
+  <data name="PackageRestoreDownloadPackageFailed" xml:space="preserve">
+    <value>Downloading package '{0}' failed.</value>
+  </data>
 </root>

@@ -1,28 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
 using EnvDTE;
-using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio.Resources;
-
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
 
 namespace NuGet.VisualStudio {
     [Export(typeof(IPackageRestoreManager))]
     internal class PackageRestoreManager : IPackageRestoreManager {
-        private const string PackageRestoreFolder = ".nuget";
-        private const string SolutionFolder = "nuget";
+        private const string DotNuGetFolder = ".nuget";
         private const string NuGetExeFile = ".nuget\\nuget.exe";
         private const string NuGetTargetsFile = ".nuget\\nuget.targets";
         private const string NuGetBuildPackageName = "NuGet.Build";
+        private const string NuGetCommandLinePackageName = "NuGet.CommandLine";
 
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly ISolutionManager _solutionManager;
-        private readonly IVsPackageManagerFactory _packageManagerFactory;
         private readonly IPackageRepositoryFactory _packageRepositoryFactory;
         private readonly IVsThreadedWaitDialogFactory _waitDialogFactory;
         private readonly DTE _dte;
@@ -31,13 +29,11 @@ namespace NuGet.VisualStudio {
         public PackageRestoreManager(
             ISolutionManager solutionManager, 
             IFileSystemProvider fileSystemProvider,
-            IVsPackageManagerFactory packageManagerFactory,
             IPackageRepositoryFactory packageRepositoryFactory,
             ISettings settings) :
             this(ServiceLocator.GetInstance<DTE>(),
                  solutionManager,
                  fileSystemProvider,
-                 packageManagerFactory,
                  packageRepositoryFactory,
                  ServiceLocator.GetGlobalService<SVsThreadedWaitDialogFactory, IVsThreadedWaitDialogFactory>()) {
         }
@@ -46,14 +42,12 @@ namespace NuGet.VisualStudio {
             DTE dte,
             ISolutionManager solutionManager,
             IFileSystemProvider fileSystemProvider,
-            IVsPackageManagerFactory packageManagerFactory,
             IPackageRepositoryFactory packageRepositoryFactory,
             IVsThreadedWaitDialogFactory waitDialogFactory) {
 
             _dte = dte;
             _fileSystemProvider = fileSystemProvider;
             _solutionManager = solutionManager;
-            _packageManagerFactory = packageManagerFactory;
             _packageRepositoryFactory = packageRepositoryFactory;
             _waitDialogFactory = waitDialogFactory;
             _solutionManager.ProjectAdded += OnProjectAdded;
@@ -71,8 +65,7 @@ namespace NuGet.VisualStudio {
                 }
 
                 IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(solutionDirectory);
-                return fileSystem.DirectoryExists(PackageRestoreFolder) &&
-                       fileSystem.FileExists(NuGetExeFile) &&
+                return fileSystem.DirectoryExists(DotNuGetFolder) &&
                        fileSystem.FileExists(NuGetTargetsFile);
             }
         }
@@ -171,7 +164,11 @@ namespace NuGet.VisualStudio {
                 relativeSolutionPath = PathUtility.EnsureTrailingSlash(relativeSolutionPath);
 
                 var solutionDirProperty = buildProject.Xml.AddProperty(SolutionDirProperty, relativeSolutionPath);
-                solutionDirProperty.Condition = @"$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'";
+                solutionDirProperty.Condition =
+                    String.Format(
+                        CultureInfo.InvariantCulture,
+                        @"$({0}) == '' Or $({0}) == '*Undefined*'",
+                        SolutionDirProperty);
 
                 project.Save();
             }
@@ -184,53 +181,40 @@ namespace NuGet.VisualStudio {
 
         private void EnsureNuGetBuild() {
             string solutionDirectory = _solutionManager.SolutionDirectory;
-            string nugetToolsPath = Path.Combine(solutionDirectory, PackageRestoreFolder);
-            
-            if (!Directory.Exists(nugetToolsPath) || 
-                !Directory.EnumerateFileSystemEntries(nugetToolsPath).Any()) {
+            string nugetFolderPath = Path.Combine(solutionDirectory, DotNuGetFolder);
 
-                IVsPackageManager packageManager = GetPackageManagerForNuGetFeed();
+            IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(solutionDirectory);
 
-                var installToolsPaths = new List<string>();
-                EventHandler<PackageOperationEventArgs> installHandler = (sender, args) => {
-                    installToolsPaths.Add(Path.Combine(args.TargetPath, Constants.ToolsDirectory));
-                };
+            if (!fileSystem.DirectoryExists(DotNuGetFolder) || 
+                !fileSystem.GetFiles(DotNuGetFolder).Any()) {
 
-                try {
-                    packageManager.PackageInstalled += installHandler;
-                    // install the NuGet.Build package which contains MsBuild targets and settings for the projects
-                    // this will also brings down NuGet.exe as part of the dependency of NuGet.Build
-                    packageManager.InstallPackage(NuGetBuildPackageName, version: null, ignoreDependencies: false);
-
-                    if (!Directory.Exists(nugetToolsPath)) {
-                        Directory.CreateDirectory(nugetToolsPath);
+                // download NuGet.Build and NuGet.CommandLine packages into the .nuget folder
+                IPackageRepository nugetRepository = _packageRepositoryFactory.CreateRepository(NuGetConstants.DefaultFeedUrl);
+                var installPackages = new string[] { NuGetBuildPackageName, NuGetCommandLinePackageName };
+                foreach (var packageName in installPackages) {
+                    IPackage package = nugetRepository.FindPackage(packageName);
+                    if (package == null) {
+                        throw new InvalidOperationException(
+                            String.Format(
+                                CultureInfo.InvariantCulture,
+                                VsResources.PackageRestoreDownloadPackageFailed,
+                                packageName));
                     }
 
-                    // copy all files of NuGet.Build and NuGet.CommandLine packages to .nuget folder
-                    installToolsPaths.ForEach(folder => FileHelper.CopyAllFiles(folder, nugetToolsPath));
-
-                    // now add the .nuget folder to the solution as a solution folder.
-                    _dte.Solution.AddFolderToSolution(SolutionFolder, nugetToolsPath);
-
-                    DisableSourceControlMode();
+                    fileSystem.AddFiles(package.GetFiles(Constants.ToolsDirectory), DotNuGetFolder, preserveFilePath: false);
                 }
-                finally {
-                    packageManager.PackageInstalled -= installHandler;
 
-                    if (packageManager.LocalRepository.Exists(NuGetBuildPackageName)) {
-                        packageManager.UninstallPackage(
-                            NuGetBuildPackageName,
-                            version: null,
-                            forceRemove: false,
-                            removeDependencies: true);
-                    }
-                }
+                // now add the .nuget folder to the solution as a solution folder.
+                _dte.Solution.AddFolderToSolution(DotNuGetFolder, nugetFolderPath);
+
+                DisableSourceControlMode();
             }
         }
 
         private void DisableSourceControlMode() {
             // get the settings for this solution
-            var settings = new Settings(_fileSystemProvider.GetFileSystem(_solutionManager.SolutionDirectory));
+            var nugetFolder = Path.Combine(_solutionManager.SolutionDirectory, DotNuGetFolder);
+            var settings = new Settings(_fileSystemProvider.GetFileSystem(nugetFolder));
             settings.DisableSourceControlMode();
         }
 
@@ -238,14 +222,6 @@ namespace NuGet.VisualStudio {
             if (IsCurrentSolutionEnabled) {
                 EnablePackageRestore(e.Project);
             }
-        }
-
-        private IVsPackageManager GetPackageManagerForNuGetFeed() {
-            IPackageRepository nugetRepository = _packageRepositoryFactory.CreateRepository(NuGetConstants.DefaultFeedUrl);
-            return _packageManagerFactory.CreatePackageManager(
-                nugetRepository,
-                useFallbackForDependencies: false,
-                addToRecent: false);
         }
     }
 }

@@ -74,29 +74,6 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsCurrentSolutionEnabledReturnsFalseIfNuGetExeDoesNotExist() {
-            // Arrange
-            var solutionManager = new Mock<ISolutionManager>();
-            solutionManager.Setup(p => p.IsSolutionOpen).Returns(true);
-            solutionManager.Setup(p => p.SolutionDirectory).Returns("c:\\solution");
-
-            var fileSystem = new Mock<IFileSystem>();
-            fileSystem.Setup(p => p.DirectoryExists(".nuget")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\nuget.targets")).Returns(true);
-
-            var fileSystemProvider = new Mock<IFileSystemProvider>();
-            fileSystemProvider.Setup(p => p.GetFileSystem("c:\\solution")).Returns(fileSystem.Object);
-
-            var packageRestore = CreateInstance(solutionManager: solutionManager.Object, fileSystemProvider: fileSystemProvider.Object);
-
-            // Act
-            bool enabled = packageRestore.IsCurrentSolutionEnabled;
-
-            // Assert
-            Assert.False(enabled);
-        }
-
-        [Fact]
         public void IsCurrentSolutionEnabledReturnsFalseIfNuGetTargetsDoesNotExist() {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
@@ -168,19 +145,22 @@ namespace NuGet.VisualStudio.Test {
 
             // setup file system
             var fileSystem = new PhysicalFileSystem(tempSolutionPath);
-            var fileSystemProvider = new Mock<IFileSystemProvider>();            
+            var fileSystemProvider = new Mock<IFileSystemProvider>();
             fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem);
+
+            var nugetFolderFileSystem = new PhysicalFileSystem(tempSolutionPath + "\\.nuget");
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath + "\\.nuget")).Returns(nugetFolderFileSystem);
 
             // setup DTE
             var dte = new Mock<DTE>();
 
             var projectItems = new Mock<ProjectItems>();
             var solutionFolder = new Mock<Project>();
-            solutionFolder.Setup(s => s.Name).Returns("nuget");
+            solutionFolder.Setup(s => s.Name).Returns(".nuget");
             solutionFolder.SetupGet(s => s.ProjectItems).Returns(projectItems.Object);
 
             var solution = new Mock<Solution>();
-            solution.As<Solution2>().Setup(p => p.AddSolutionFolder("nuget")).Returns(solutionFolder.Object);
+            solution.As<Solution2>().Setup(p => p.AddSolutionFolder(".nuget")).Returns(solutionFolder.Object);
 
             var projects = new MockProjects(new Project[0]);
             solution.As<Solution2>().Setup(s => s.Projects).Returns(projects);
@@ -191,44 +171,19 @@ namespace NuGet.VisualStudio.Test {
             packageRepository.Add(PackageUtility.CreatePackage(
                 "NuGet.Build",
                 version: "1.0",
-                tools: new string[] { "NuGet.target" },
-                dependencies: new PackageDependency[] { new PackageDependency("NuGet.Exe") }));
+                tools: new string[] { "NuGet.targets" },
+                dependencies: new PackageDependency[] { new PackageDependency("NuGet.CommandLine") }));
             packageRepository.Add(PackageUtility.CreatePackage(
-                "NuGet.Exe",
+                "NuGet.CommandLine",
                 version: "1.0",
                 tools: new string[] { "NuGet.exe" }));
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             packageRepositoryFactory.Setup(p => p.CreateRepository(NuGetConstants.DefaultFeedUrl)).Returns(packageRepository);
-
-            // setup package manager
-            var packageManager = new Mock<IVsPackageManager>();
-            packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
-            packageManager.Setup(p => p.InstallPackage("NuGet.Build", null, false)).Callback(
-                () => {
-                    fileSystem.AddFile("packages\\NuGet.Exe\\1.0\\tools\\NuGet.exe", "nuget.exe contents".AsStream());
-                    fileSystem.AddFile("packages\\NuGet.Build\\1.0\\tools\\NuGet.target", "nuget.target contents".AsStream());
-
-                    packageManager.Raise(p => p.PackageInstalled += null, new PackageOperationEventArgs(
-                        null, fileSystem, Path.Combine(tempSolutionPath, "packages\\NuGet.Exe\\1.0")));
-
-                    packageManager.Raise(p => p.PackageInstalled += null, new PackageOperationEventArgs(
-                        null, fileSystem, Path.Combine(tempSolutionPath, "packages\\NuGet.Build\\1.0")));
-                });
-            packageManager.Setup(p => p.LocalRepository).Returns(new MockPackageRepository());
-            packageManager.Setup(p => p.UninstallPackage(
-                It.IsAny<string>(),
-                It.IsAny<Version>(),
-                It.IsAny<bool>(),
-                It.IsAny<bool>()));
-
-            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(p => p.CreatePackageManager(packageRepository, false, false)).Returns(packageManager.Object);
             
             var packageRestore = CreateInstance(
                 dte.Object,
                 solutionManager.Object,
                 fileSystemProvider.Object,
-                packageManagerFactory.Object,
                 packageRepositoryFactory.Object);
 
             // Act 
@@ -239,15 +194,15 @@ namespace NuGet.VisualStudio.Test {
             // verify that the files are copied to the .nuget sub folder under solution
             Assert.True(Directory.Exists(Path.Combine(tempSolutionPath, ".nuget")));
             Assert.True(File.Exists(Path.Combine(tempSolutionPath, ".nuget\\NuGet.exe")));
-            Assert.True(File.Exists(Path.Combine(tempSolutionPath, ".nuget\\NuGet.target")));
+            Assert.True(File.Exists(Path.Combine(tempSolutionPath, ".nuget\\NuGet.targets")));
 
             // verify that solution folder 'nuget' is added to solution
-            solution.As<Solution2>().Verify(p => p.AddSolutionFolder("nuget"));
+            solution.As<Solution2>().Verify(p => p.AddSolutionFolder(".nuget"));
             projectItems.Verify(p => p.AddFromFile(tempSolutionPath + "\\.nuget\\NuGet.exe"));
-            projectItems.Verify(p => p.AddFromFile(tempSolutionPath + "\\.nuget\\NuGet.target"));
+            projectItems.Verify(p => p.AddFromFile(tempSolutionPath + "\\.nuget\\NuGet.targets"));
 
             // verify that the Source Control mode is disabled
-            var settings = new Settings(fileSystem);
+            var settings = new Settings(nugetFolderFileSystem);
             Assert.True(settings.IsSourceControlDisabled());
 
             // clean up
@@ -258,7 +213,6 @@ namespace NuGet.VisualStudio.Test {
             DTE dte = null,
             ISolutionManager solutionManager = null,
             IFileSystemProvider fileSystemProvider = null,
-            IVsPackageManagerFactory packageManagerFactory = null,
             IPackageRepositoryFactory packageRepositoryFactory = null,
             IVsThreadedWaitDialogFactory waitDialogFactory = null) {
 
@@ -272,10 +226,6 @@ namespace NuGet.VisualStudio.Test {
 
             if (fileSystemProvider == null) {
                 fileSystemProvider = new Mock<IFileSystemProvider>().Object;
-            }
-
-            if (packageManagerFactory == null) {
-                packageManagerFactory = new Mock<IVsPackageManagerFactory>().Object;
             }
 
             if (packageRepositoryFactory == null) {
@@ -306,7 +256,6 @@ namespace NuGet.VisualStudio.Test {
                 dte,
                 solutionManager,
                 fileSystemProvider,
-                packageManagerFactory,
                 packageRepositoryFactory,
                 waitDialogFactory);
         }
