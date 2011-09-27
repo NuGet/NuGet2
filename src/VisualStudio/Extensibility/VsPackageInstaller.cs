@@ -20,6 +20,10 @@ namespace NuGet.VisualStudio {
         }
 
         public void InstallPackage(string source, Project project, string packageId, Version version, bool ignoreDependencies) {
+            InstallPackage(source, project, packageId, new SemanticVersion(version), ignoreDependencies);
+        }
+
+        public void InstallPackage(string source, Project project, string packageId, SemanticVersion version, bool ignoreDependencies) {
             if (String.IsNullOrEmpty(source)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "source");
             }
@@ -28,7 +32,7 @@ namespace NuGet.VisualStudio {
             InstallPackage(repository, project, packageId, version, ignoreDependencies);
         }
 
-        internal void InstallPackage(IPackageRepository repository, Project project, string packageId, Version version, bool ignoreDependencies) {
+        internal void InstallPackage(IPackageRepository repository, Project project, string packageId, SemanticVersion version, bool ignoreDependencies) {
             if (project == null) {
                 throw new ArgumentNullException("project");
             }
@@ -48,7 +52,7 @@ namespace NuGet.VisualStudio {
                 projectManager.PackageReferenceAdded += addedHandler;
                 packageManager.PackageInstalled += installedHandler;
 
-                packageManager.InstallPackage(projectManager, packageId, new SemVer(version), ignoreDependencies, allowPrereleaseVersions: false, logger: NullLogger.Instance);
+                packageManager.InstallPackage(projectManager, packageId, version, ignoreDependencies, allowPrereleaseVersions: true, logger: NullLogger.Instance);
             }
             finally {
                 projectManager.PackageReferenceAdded -= addedHandler;

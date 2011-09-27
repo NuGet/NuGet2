@@ -11,12 +11,12 @@ namespace NuGet.VisualStudio {
         // Install
         void InstallPackage(IEnumerable<Project> projects, IPackage package, IEnumerable<PackageOperation> operations, bool ignoreDependencies, bool allowPrereleaseVersions, 
             ILogger logger, IPackageOperationEventListener eventListener);
-        void InstallPackage(IProjectManager projectManager, string packageId, SemVer version, bool ignoreDependencies, bool allowPrereleaseVersions, ILogger logger);
+        void InstallPackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions, ILogger logger);
         void InstallPackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool ignoreDependencies, bool allowPrereleaseVersions, ILogger logger);
 
         // Uninstall
-        void UninstallPackage(IProjectManager projectManager, string packageId, SemVer version, bool forceRemove, bool removeDependencies);
-        void UninstallPackage(IProjectManager projectManager, string packageId, SemVer version, bool forceRemove, bool removeDependencies, ILogger logger);
+        void UninstallPackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool forceRemove, bool removeDependencies);
+        void UninstallPackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool forceRemove, bool removeDependencies, ILogger logger);
 
         // Update
         void UpdatePackages(bool updateDependencies, bool allowPrereleaseVersions, ILogger logger, IPackageOperationEventListener eventListener);
@@ -24,12 +24,12 @@ namespace NuGet.VisualStudio {
 
         void UpdatePackage(IEnumerable<Project> projects, IPackage package, IEnumerable<PackageOperation> operations, bool updateDependencies, bool allowPrereleaseVersions, 
             ILogger logger, IPackageOperationEventListener eventListener);
-        void UpdatePackage(string packageId, SemVer version, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger, IPackageOperationEventListener eventListener);
+        void UpdatePackage(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger, IPackageOperationEventListener eventListener);
         void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions, 
             ILogger logger, IPackageOperationEventListener eventListener);
         void UpdatePackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool updateDependencies, bool allowPrereleaseVersions, 
             ILogger logger);
-        void UpdatePackage(IProjectManager projectManager, string packageId, SemVer version, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger);
+        void UpdatePackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger);
 
         // Safe update (only bug fixes)
         void SafeUpdatePackages(bool updateDependencies, bool allowPrereleaseVersions, ILogger logger, IPackageOperationEventListener eventListener);

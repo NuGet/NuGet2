@@ -62,12 +62,12 @@ namespace NuGet.VisualStudio {
                                 let version = packageElement.GetOptionalAttributeValue("version")
                                 select new { id, version }).ToList();
 
-            Version v;
+            SemanticVersion semVer;
             var missingOrInvalidAttributes = from declaration in declarations
                                              where
                                                  String.IsNullOrWhiteSpace(declaration.id) ||
                                                  String.IsNullOrWhiteSpace(declaration.version) ||
-                                                 !Version.TryParse(declaration.version, out v)
+                                                 !SemanticVersion.TryParse(declaration.version, out semVer)
                                              select declaration;
 
             if (missingOrInvalidAttributes.Any()) {
@@ -133,7 +133,7 @@ namespace NuGet.VisualStudio {
                     // TODO review parameters and installer call
                     // REVIEW is it OK to ignoreDependencies? The expectation is that the vstemplate will list all the required packages
                     // REVIEW We need to figure out if we can break IVsPackageInstaller interface by modifying it to accept a SemVer and still allow MVC 3 projects to work
-                    packageInstaller.InstallPackage(packageRepositoryPath, project, package.Id, package.Version.Version, ignoreDependencies: true);
+                    packageInstaller.InstallPackage(packageRepositoryPath, project, package.Id, package.Version, ignoreDependencies: true);
                 }
                 catch (InvalidOperationException) {
                     failedPackages.Add(package);

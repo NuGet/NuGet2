@@ -57,7 +57,7 @@ namespace NuGet.Test {
             cache.AddPackage(PackageUtility.CreatePackage("TestPackage"));
             Assert.False(cache.Exists("TestPackage"));
             Assert.False(cache.Exists(package));
-            Assert.False(cache.Exists("TestPackage", new SemVer("1.0")));
+            Assert.False(cache.Exists("TestPackage", new SemanticVersion("1.0")));
             Assert.Null(cache.ResolveDependency(new PackageDependency("Bar"), false));
             Assert.Null(cache.FindPackage("TestPackage"));
             Assert.False(cache.FindPackages(new[] { "TestPackage", "B" }).Any());
@@ -66,7 +66,7 @@ namespace NuGet.Test {
             Assert.False(cache.GetUpdates(new[] { package }).Any());
             cache.RemovePackage(package);
             Assert.Equal(0, cache.Source.Length);
-            Assert.False(cache.TryFindPackage("TestPackage", new SemVer("1.0"), out package));
+            Assert.False(cache.TryFindPackage("TestPackage", new SemanticVersion("1.0"), out package));
         }
     }
 }

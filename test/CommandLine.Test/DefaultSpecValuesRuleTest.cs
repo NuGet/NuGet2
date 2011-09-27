@@ -130,7 +130,7 @@ namespace NuGet.Test {
             // Arrange
             var package = new Mock<IPackage>();
             var dependencies = new List<PackageDependency> {
-                new PackageDependency("SampleDependency", new VersionSpec(new SemVer("1.0")))
+                new PackageDependency("SampleDependency", new VersionSpec(new SemanticVersion("1.0")))
             };
             package.Setup(c => c.Dependencies).Returns(dependencies);
             var rule = new DefaultManifestValuesRule();

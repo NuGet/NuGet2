@@ -57,7 +57,7 @@ namespace NuGet.Test {
             mockPackage.Setup(m => m.IsLatestVersion).Returns(true);
             mockPackage.Setup(m => m.Id).Returns(id);
             mockPackage.Setup(m => m.Published).Returns(DateTimeOffset.Now);
-            mockPackage.Setup(m => m.Version).Returns(new SemVer(version));
+            mockPackage.Setup(m => m.Version).Returns(new SemanticVersion(version));
             mockPackage.Setup(m => m.GetFiles()).Returns(allFiles);
             mockPackage.Setup(m => m.AssemblyReferences).Returns(assemblyReferences);
             mockPackage.Setup(m => m.Dependencies).Returns(dependencies);

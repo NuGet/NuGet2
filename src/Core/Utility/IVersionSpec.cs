@@ -2,9 +2,9 @@
 
 namespace NuGet {
     public interface IVersionSpec {
-        SemVer MinVersion { get; }
+        SemanticVersion MinVersion { get; }
         bool IsMinInclusive { get; }
-        SemVer MaxVersion { get; }
+        SemanticVersion MaxVersion { get; }
         bool IsMaxInclusive { get; }
     }
 }

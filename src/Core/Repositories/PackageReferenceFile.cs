@@ -45,8 +45,8 @@ namespace NuGet {
                 string id = e.GetOptionalAttributeValue("id");
                 string versionString = e.GetOptionalAttributeValue("version");
                 string versionConstraintString = e.GetOptionalAttributeValue("allowedVersions");
-                SemVer version;
-                SemVer.TryParse(versionString, out version);
+                SemanticVersion version;
+                SemanticVersion.TryParse(versionString, out version);
 
                 IVersionSpec versionConstaint = null;
                 if (!String.IsNullOrEmpty(versionConstraintString)) {
@@ -61,7 +61,7 @@ namespace NuGet {
         /// <summary>
         /// Deletes an entry from the file with matching id and version. Returns true if the file was deleted.
         /// </summary>
-        public bool DeleteEntry(string id, SemVer version) {
+        public bool DeleteEntry(string id, SemanticVersion version) {
             XDocument document = GetDocument();
 
             if (document == null) {
@@ -71,7 +71,7 @@ namespace NuGet {
             return DeleteEntry(document, id, version);
         }
 
-        public bool EntryExists(string packageId, SemVer version) {
+        public bool EntryExists(string packageId, SemanticVersion version) {
             XDocument document = GetDocument();
             if (document == null) {
                 return false;
@@ -80,13 +80,13 @@ namespace NuGet {
             return FindEntry(document, packageId, version) != null;
         }
 
-        public void AddEntry(string id, SemVer version) {
+        public void AddEntry(string id, SemanticVersion version) {
             XDocument document = GetDocument(createIfNotExists: true);
 
             AddEntry(document, id, version);
         }
 
-        private void AddEntry(XDocument document, string id, SemVer version) {
+        private void AddEntry(XDocument document, string id, SemanticVersion version) {
             XElement element = FindEntry(document, id, version);
 
             if (element != null) {
@@ -108,14 +108,14 @@ namespace NuGet {
             SaveDocument(document);
         }
 
-        private static XElement FindEntry(XDocument document, string id, SemVer version) {
+        private static XElement FindEntry(XDocument document, string id, SemanticVersion version) {
             if (String.IsNullOrEmpty(id)) {
                 return null;
             }
 
             return (from e in document.Root.Elements("package")
                     let entryId = e.GetOptionalAttributeValue("id")
-                    let entryVersion = SemVer.ParseOptionalVersion(e.GetOptionalAttributeValue("version"))
+                    let entryVersion = SemanticVersion.ParseOptionalVersion(e.GetOptionalAttributeValue("version"))
                     where entryId != null && entryVersion != null
                     where id.Equals(entryId, StringComparison.OrdinalIgnoreCase) && entryVersion.Equals(version)
                     select e).FirstOrDefault();
@@ -139,7 +139,7 @@ namespace NuGet {
             FileSystem.AddFile(_path, document.Save);
         }
 
-        private bool DeleteEntry(XDocument document, string id, SemVer version) {
+        private bool DeleteEntry(XDocument document, string id, SemanticVersion version) {
             XElement element = FindEntry(document, id, version);
 
             if (element != null) {

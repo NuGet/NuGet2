@@ -130,7 +130,7 @@ namespace NuGet.Commands {
                 builder.Authors.Remove(projectAuthor);
             }
 
-            builder.Version = new SemVer(VersionUtility.TrimVersion(builder.Version.Version));
+            builder.Version = new SemanticVersion(VersionUtility.TrimVersion(builder.Version.Version));
 
             // Add output files
             AddOutputFiles(builder);
@@ -238,8 +238,8 @@ namespace NuGet.Commands {
 
             string version = _project.GetPropertyValue("SemVer");
             builder.Version = builder.Version ??
-                              SemVer.ParseOptionalVersion(version) ??
-                              new SemVer("1.0");
+                              SemanticVersion.ParseOptionalVersion(version) ??
+                              new SemanticVersion("1.0");
         }
 
         private void AddOutputFiles(PackageBuilder builder) {
@@ -313,7 +313,7 @@ namespace NuGet.Commands {
             // Collect all packages
             var packages = new List<IPackage>();
 
-            IDictionary<Tuple<string, SemVer>, PackageReference> packageReferences = file.GetPackageReferences()
+            IDictionary<Tuple<string, SemanticVersion>, PackageReference> packageReferences = file.GetPackageReferences()
                                                                                           .ToDictionary(r => Tuple.Create(r.Id, r.Version));
 
             foreach (PackageReference reference in packageReferences.Values) {
@@ -351,7 +351,7 @@ namespace NuGet.Commands {
             }
         }
 
-        private static IVersionSpec GetVersionConstraint(IDictionary<Tuple<string, SemVer>, PackageReference> packageReferences, IPackage package) {
+        private static IVersionSpec GetVersionConstraint(IDictionary<Tuple<string, SemanticVersion>, PackageReference> packageReferences, IPackage package) {
             IVersionSpec defaultVersionConstraint = VersionUtility.ParseVersionSpec(package.Version.ToString());
 
             PackageReference packageReference;

@@ -61,7 +61,7 @@ namespace NuGet.Commands {
             else {
                 PackageManager packageManager = CreatePackageManager(fileSystem);
                 string packageId = Arguments[0];
-                SemVer version = Version != null ? new SemVer(Version) : null;
+                SemanticVersion version = Version != null ? new SemanticVersion(Version) : null;
 
                 bool result = InstallPackage(packageManager, fileSystem, packageId, version);
                 if (!result) {
@@ -104,7 +104,7 @@ namespace NuGet.Commands {
             }
         }
 
-        private bool InstallPackage(PackageManager packageManager, IFileSystem fileSystem, string packageId, SemVer version) {
+        private bool InstallPackage(PackageManager packageManager, IFileSystem fileSystem, string packageId, SemanticVersion version) {
             if (AllowMultipleVersions && IsPackageInstalled(packageId, version, packageManager, fileSystem)) {
                 // Use a fast check to verify if the package is already installed. We'll do this by checking if the package directory exists on disk.
                 return false;
@@ -154,7 +154,7 @@ namespace NuGet.Commands {
         }
 
         // Do a very quick check of whether a package in installed by checked whether the nupkg file exists
-        private static bool IsPackageInstalled(string packageId, SemVer version, PackageManager packageManager, IFileSystem fileSystem) {
+        private static bool IsPackageInstalled(string packageId, SemanticVersion version, PackageManager packageManager, IFileSystem fileSystem) {
             var packageDir = packageManager.PathResolver.GetPackageDirectory(packageId, version);
             var packageFile = packageManager.PathResolver.GetPackageFileName(packageId, version);
 

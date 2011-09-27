@@ -97,7 +97,7 @@ namespace NuGet.Commands {
 
         private IPackage BuildPackage(string path, PackageBuilder builder, string outputPath = null) {
             if (!String.IsNullOrEmpty(Version)) {
-                builder.Version = new SemVer(Version);
+                builder.Version = new SemanticVersion(Version);
             }
 
             outputPath = outputPath ?? GetOutputPath(builder);

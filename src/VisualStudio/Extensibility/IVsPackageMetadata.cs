@@ -7,7 +7,7 @@ namespace NuGet.VisualStudio {
     [Guid("8B3C4B38-632E-436C-8934-4669C6118845")]
     public interface IVsPackageMetadata {
         string Id { get; }
-        SemVer Version { get; }
+        SemanticVersion Version { get; }
         string Title { get; }
         string Description { get; }
         IEnumerable<string> Authors { get; }

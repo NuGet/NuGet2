@@ -89,7 +89,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var projectPath = @"X:\projects\my-project\";
             var outputFile = "mypk.out";
             var id = "id";
-            var version = new SemVer("1.1");
+            var version = new SemanticVersion("1.1");
 
             // Act
             var packagePath = NewPackageCommand.GetPackageFilePath(outputFile, projectPath, id, version);
@@ -104,7 +104,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var projectPath = @"X:\projects\my-project\";
             var outputFile = @"X:\outputs\mypk.out";
             var id = "id";
-            var version = new SemVer("1.1");
+            var version = new SemanticVersion("1.1");
 
             // Act
             var packagePath = NewPackageCommand.GetPackageFilePath(outputFile, projectPath, id, version);
@@ -119,7 +119,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var projectPath = @"X:\projects\my-project\";
             string outputFile = null;
             var id = "id";
-            var version = new SemVer("1.1");
+            var version = new SemanticVersion("1.1");
 
             // Act
             var packagePath = NewPackageCommand.GetPackageFilePath(outputFile, projectPath, id, version);

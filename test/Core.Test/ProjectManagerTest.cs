@@ -88,7 +88,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageB10);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A", SemVer.Parse("1.0")), @"Already referencing a newer version of 'A'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A", SemanticVersion.Parse("1.0")), @"Already referencing a newer version of 'A'.");
         }
 
         [Fact]
@@ -347,7 +347,7 @@ namespace NuGet.Test {
             var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem, new MockPackageRepository());
             var package = new Mock<IPackage>();
             package.Setup(m => m.Id).Returns("A");
-            package.Setup(m => m.Version).Returns(new SemVer("1.0"));
+            package.Setup(m => m.Version).Returns(new SemanticVersion("1.0"));
             var file = new Mock<IPackageFile>();
             file.Setup(m => m.Path).Returns(@"content\web.config.transform");
             file.Setup(m => m.GetStream()).Returns(() =>
@@ -390,7 +390,7 @@ namespace NuGet.Test {
             var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem, new MockPackageRepository());
             var package = new Mock<IPackage>();
             package.Setup(m => m.Id).Returns("A");
-            package.Setup(m => m.Version).Returns(new SemVer("1.0"));
+            package.Setup(m => m.Version).Returns(new SemanticVersion("1.0"));
             var file = new Mock<IPackageFile>();
             file.Setup(m => m.Path).Returns(@"content\web.config.transform");
             file.Setup(m => m.GetStream()).Returns(() =>
@@ -427,7 +427,7 @@ namespace NuGet.Test {
             var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem, localRepository);
             var package = new Mock<IPackage>();
             package.Setup(m => m.Id).Returns("A");
-            package.Setup(m => m.Version).Returns(new SemVer("1.0"));
+            package.Setup(m => m.Version).Returns(new SemanticVersion("1.0"));
             var file = new Mock<IPackageFile>();
             var contentFile = new Mock<IPackageFile>();
             contentFile.Setup(m => m.Path).Returns(@"content\foo.txt");
@@ -461,7 +461,7 @@ namespace NuGet.Test {
             var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem.Object, new MockPackageRepository());
             var package = new Mock<IPackage>();
             package.Setup(m => m.Id).Returns("A");
-            package.Setup(m => m.Version).Returns(new SemVer("1.0"));
+            package.Setup(m => m.Version).Returns(new SemanticVersion("1.0"));
             var file = new Mock<IPackageFile>();
             file.Setup(m => m.Path).Returns(@"content\web.config.transform");
             file.Setup(m => m.GetStream()).Returns(() =>
@@ -636,7 +636,7 @@ namespace NuGet.Test {
             projectManager.LocalRepository.AddPackage(packageA20);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A", version: SemVer.Parse("1.0")), @"Already referencing a newer version of 'A'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A", version: SemanticVersion.Parse("1.0")), @"Already referencing a newer version of 'A'.");
         }
 
         [Fact]
@@ -1145,7 +1145,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(package20);
 
             // Act
-            projectManager.UpdatePackageReference("NetFramework", new SemVer("1.1"));
+            projectManager.UpdatePackageReference("NetFramework", new SemanticVersion("1.1"));
 
             // Assert
             Assert.False(projectManager.LocalRepository.Exists(package10));
@@ -1261,7 +1261,7 @@ namespace NuGet.Test {
             mockProjectSystem.Setup(m => m.TargetFramework).Returns(new FrameworkName(".NETFramework", new Version("2.0")));
             var mockPackage = new Mock<IPackage>();
             mockPackage.Setup(m => m.Id).Returns("A");
-            mockPackage.Setup(m => m.Version).Returns(new SemVer("1.0"));
+            mockPackage.Setup(m => m.Version).Returns(new SemanticVersion("1.0"));
             var assemblyReference = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("5.0")));
             mockPackage.Setup(m => m.AssemblyReferences).Returns(new[] { assemblyReference });
             sourceRepository.AddPackage(mockPackage.Object);
@@ -1281,7 +1281,7 @@ namespace NuGet.Test {
             mockProjectSystem.Setup(m => m.TargetFramework).Returns(VersionUtility.ParseFrameworkName("net20"));
             var mockPackage = new Mock<IPackage>();
             mockPackage.Setup(m => m.Id).Returns("A");
-            mockPackage.Setup(m => m.Version).Returns(new SemVer("1.0"));
+            mockPackage.Setup(m => m.Version).Returns(new SemanticVersion("1.0"));
             var frameworkReference = new FrameworkAssemblyReference("System.Web", new[] { VersionUtility.ParseFrameworkName("net50") });
             mockPackage.Setup(m => m.FrameworkAssemblies).Returns(new[] { frameworkReference });
             sourceRepository.AddPackage(mockPackage.Object);

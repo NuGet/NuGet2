@@ -8,10 +8,10 @@ namespace NuGet.VisualStudio {
             Debug.Assert(!String.IsNullOrWhiteSpace(version));
 
             Id = id;
-            Version = new SemVer(version);
+            Version = new SemanticVersion(version);
         }
 
         public string Id { get; private set; }
-        public SemVer Version { get; private set; }
+        public SemanticVersion Version { get; private set; }
     }
 }

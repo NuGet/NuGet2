@@ -170,7 +170,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             // Assert - 1
             Assert.Equal("Baz", packages.Single().Id);
-            Assert.Equal(new SemVer("0.4"), packages.Single().Version);
+            Assert.Equal(new SemanticVersion("0.4"), packages.Single().Version);
 
             // Act - 2
             installCommand.Version = null;
@@ -178,7 +178,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             // Assert - 2
             Assert.Equal("Baz", packages.Single().Id);
-            Assert.Equal(new SemVer("0.7"), packages.Single().Version);
+            Assert.Equal(new SemanticVersion("0.7"), packages.Single().Version);
             repository.Verify();
         }
 
@@ -203,7 +203,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             // Assert 
             Assert.Equal("Baz", packages.Single().Id);
-            Assert.Equal(new SemVer("0.7"), packages.Single().Version);
+            Assert.Equal(new SemanticVersion("0.7"), packages.Single().Version);
         }
 
         [Fact]

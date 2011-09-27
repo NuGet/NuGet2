@@ -52,7 +52,7 @@ namespace NuGet.Commands {
         public override void ExecuteCommand() {
             if (Self) {
                 Assembly assembly = typeof(UpdateCommand).Assembly;
-                SelfUpdate(assembly.Location, new SemVer(assembly.GetName().Version));
+                SelfUpdate(assembly.Location, new SemanticVersion(assembly.GetName().Version));
             }
             else {
                 string inputFile = GetInputFile();
@@ -254,7 +254,7 @@ namespace NuGet.Commands {
             }
         }
 
-        internal void SelfUpdate(string exePath, SemVer version) {
+        internal void SelfUpdate(string exePath, SemanticVersion version) {
             Console.WriteLine(NuGetResources.UpdateCommandCheckingForUpdates, NuGetConstants.DefaultFeedUrl);
 
             // Get the nuget command line package from the specified repository

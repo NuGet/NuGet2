@@ -38,7 +38,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, null);
             cmdlet.Source = "somesource";
             cmdlet.Id = "my-id";
-            cmdlet.Version = new SemVer("2.8");
+            cmdlet.Version = new SemanticVersion("2.8");
 
             // Act
             cmdlet.Execute();
@@ -56,14 +56,14 @@ namespace NuGet.PowerShell.Commands.Test {
 
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, null, null, null);
             cmdlet.Id = "my-id";
-            cmdlet.Version = new SemVer("2.8");
+            cmdlet.Version = new SemanticVersion("2.8");
 
             // Act
             cmdlet.Execute();
 
             // Assert
             Assert.Equal("my-id", vsPackageManager.PackageId);
-            Assert.Equal(new SemVer("2.8"), vsPackageManager.Version);
+            Assert.Equal(new SemanticVersion("2.8"), vsPackageManager.Version);
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace NuGet.PowerShell.Commands.Test {
 
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, null, null, null);
             cmdlet.Id = "my-id";
-            cmdlet.Version = new SemVer("2.8");
+            cmdlet.Version = new SemanticVersion("2.8");
             cmdlet.IgnoreDependencies = new SwitchParameter(true);
 
             // Act
@@ -83,7 +83,7 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal("my-id", vsPackageManager.PackageId);
-            Assert.Equal(new SemVer("2.8"), vsPackageManager.Version);
+            Assert.Equal(new SemanticVersion("2.8"), vsPackageManager.Version);
             Assert.True(vsPackageManager.IgnoreDependencies);
         }
 
@@ -103,7 +103,7 @@ namespace NuGet.PowerShell.Commands.Test {
             packageManagerFactory.Setup(m => m.CreatePackageManager(sourceRepository.Object, true)).Returns(vsPackageManager);
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, packageRepositoryFactory.Object, sourceProvider, null, productUpdateService.Object);
             cmdlet.Id = "my-id";
-            cmdlet.Version = new SemVer("2.8");
+            cmdlet.Version = new SemanticVersion("2.8");
             cmdlet.IgnoreDependencies = new SwitchParameter(true);
             cmdlet.Source = source;
 
@@ -131,7 +131,7 @@ namespace NuGet.PowerShell.Commands.Test {
             packageManagerFactory.Setup(m => m.CreatePackageManager(sourceRepository.Object, true)).Returns(vsPackageManager);
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, packageRepositoryFactory.Object, sourceProvider, null, productUpdateService.Object);
             cmdlet.Id = "my-id";
-            cmdlet.Version = new SemVer("2.8");
+            cmdlet.Version = new SemanticVersion("2.8");
             cmdlet.IgnoreDependencies = new SwitchParameter(true);
             cmdlet.Source = sourceName;
 
@@ -158,7 +158,7 @@ namespace NuGet.PowerShell.Commands.Test {
             packageRepositoryFactory.Setup(c => c.CreateRepository(source)).Returns(sourceRepository.Object);
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, packageRepositoryFactory.Object, sourceProvider, null, productUpdateService.Object);
             cmdlet.Id = "my-id";
-            cmdlet.Version = new SemVer("2.8");
+            cmdlet.Version = new SemanticVersion("2.8");
             cmdlet.IgnoreDependencies = new SwitchParameter(true);
             cmdlet.Source = source;
 
@@ -186,7 +186,7 @@ namespace NuGet.PowerShell.Commands.Test {
             packageRepositoryFactory.Setup(c => c.CreateRepository(source)).Returns(sourceRepository.Object);
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, packageRepositoryFactory.Object, sourceProvider, null, productUpdateService.Object);
             cmdlet.Id = "my-id";
-            cmdlet.Version = new SemVer("2.8");
+            cmdlet.Version = new SemanticVersion("2.8");
             cmdlet.IgnoreDependencies = new SwitchParameter(true);
             cmdlet.Source = sourceName;
 
@@ -274,11 +274,11 @@ namespace NuGet.PowerShell.Commands.Test {
 
             public string PackageId { get; set; }
 
-            public SemVer Version { get; set; }
+            public SemanticVersion Version { get; set; }
 
             public bool IgnoreDependencies { get; set; }
 
-            public override void InstallPackage(IProjectManager projectManager, string packageId, SemVer version, bool ignoreDependencies, bool allowPreReleaseVersions, ILogger logger) {
+            public override void InstallPackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPreReleaseVersions, ILogger logger) {
                 ProjectManager = projectManager;
                 PackageId = packageId;
                 Version = version;

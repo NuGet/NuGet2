@@ -106,9 +106,9 @@ namespace NuGet.Test {
 
 
             // Act && Assert
-            Assert.True(repository.Object.IsReferenced("A", new SemVer("1.0")));
-            Assert.True(repository.Object.IsReferenced("B", new SemVer("1.0")));
-            Assert.False(repository.Object.IsReferenced("C", new SemVer("1.0")));
+            Assert.True(repository.Object.IsReferenced("A", new SemanticVersion("1.0")));
+            Assert.True(repository.Object.IsReferenced("B", new SemanticVersion("1.0")));
+            Assert.False(repository.Object.IsReferenced("C", new SemanticVersion("1.0")));
         }
 
         public class MockSharedRepository : SharedPackageRepository {

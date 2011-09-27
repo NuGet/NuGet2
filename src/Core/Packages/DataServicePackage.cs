@@ -204,10 +204,10 @@ namespace NuGet {
             }
         }
 
-        SemVer IPackageMetadata.Version {
+        SemanticVersion IPackageMetadata.Version {
             get {
                 if (Version != null) {
-                    return new SemVer(Version);
+                    return new SemanticVersion(Version);
                 }
                 return null;
             }

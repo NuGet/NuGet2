@@ -27,7 +27,7 @@ namespace NuGet {
             DeleteEntry(path);
         }
 
-        public bool IsReferenced(string packageId, SemVer version) {
+        public bool IsReferenced(string packageId, SemanticVersion version) {
             // See if this package exists in any other repository before we remove it
             return GetRepositories().Any(r => r.Exists(packageId, version));
         }

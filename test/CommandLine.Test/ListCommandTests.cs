@@ -148,7 +148,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
         private static void AssertPackage(dynamic expected, IPackage package) {
             Assert.Equal(expected.Id, package.Id);
-            Assert.Equal(new SemVer(expected.Ver), package.Version);
+            Assert.Equal(new SemanticVersion(expected.Ver), package.Version);
         }
 
         private static IPackageRepositoryFactory CreatePackageRepositoryFactory() {

@@ -89,8 +89,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>AnalysisResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="SemVer.cs" />
-    <Compile Include="SemVerTypeConverter.cs" />
+    <Compile Include="SemanticVersion.cs" />
+    <Compile Include="SemanticVersionTypeConverter.cs" />
     <Compile Include="Server\PublishData.cs" />
     <Compile Include="Server\PackageServer.cs" />
     <Compile Include="Server\IPackageServer.cs" />

@@ -48,7 +48,7 @@ namespace NuGet.VisualStudio.Test {
             // Assert
             Assert.Equal(1, packages.Count);
             Assert.Equal("A", packages[0].Id);
-            Assert.Equal(new SemVer("1.0"), packages[0].Version);
+            Assert.Equal(new SemanticVersion("1.0"), packages[0].Version);
         }
 
         [Fact]
@@ -402,7 +402,7 @@ namespace NuGet.VisualStudio.Test {
 
         private void AssertPackage(IPackage package, string expectedId, string expectedVersion) {
             Assert.Equal(expectedId, package.Id);
-            Assert.Equal(new SemVer(expectedVersion), package.Version);
+            Assert.Equal(new SemanticVersion(expectedVersion), package.Version);
         }
 
         private class MockSettingsManager : IPersistencePackageSettingsManager {

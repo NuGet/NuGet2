@@ -200,6 +200,20 @@ namespace NuGet.VisualStudio.Test {
             VerifyParsedPackages(document, expectedPackages);
         }
 
+        [Fact]
+        public void GetConfigurationFromXmlDocument_WorksWithSemanticVersions() {
+            var expectedPackages = new[] {
+                new VsTemplateWizardPackageInfo("MyPackage", "4.0.0ctp-2"),
+            };
+            var document =
+                new XDocument(new XElement("VSTemplate",
+                    new XElement("WizardData",
+                        new XElement("packages",
+                            new XElement("package", new XAttribute("id", "MyPackage"), new XAttribute("version", "4.0.0ctp-2"))))));
+
+            VerifyParsedPackages(document, expectedPackages);
+        }
+
         private static void VerifyParsedPackages(XDocument document, IEnumerable<VsTemplateWizardPackageInfo> expectedPackages) {
             // Arrange
             var wizard = new VsTemplateWizard(null);
@@ -326,8 +340,8 @@ namespace NuGet.VisualStudio.Test {
             wizard.RunFinished();
 
             // Assert
-            installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyPackage", new Version(1, 0, 0, 0), true));
-            installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyOtherPackage", new Version(2, 0, 0, 0), true));
+            installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyPackage", new SemanticVersion(1, 0, 0, 0), true));
+            installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyOtherPackage", new SemanticVersion(2, 0, 0, 0), true));
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0 to project...");
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0 to project...");
         }
@@ -354,10 +368,38 @@ namespace NuGet.VisualStudio.Test {
             wizard.RunFinished();
 
             // Assert
-            installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyPackage", new Version(1, 0, 0, 0), true));
-            installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyOtherPackage", new Version(2, 0, 0, 0), true));
+            installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyPackage", new SemanticVersion(1, 0, 0, 0), true));
+            installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyOtherPackage", new SemanticVersion(2, 0, 0, 0), true));
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0 to project...");
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0 to project...");
+        }
+
+        [Fact]
+        public void RunFinished_ForItem_InstallsPrereleasePackages() {
+            // Arrange
+            var mockProject = new Mock<Project>().Object;
+            var projectItemMock = new Mock<ProjectItem>();
+            projectItemMock.Setup(i => i.ContainingProject).Returns(mockProject);
+            var installerMock = new Mock<IVsPackageInstaller>();
+            var document = BuildDocument("template",
+                BuildPackageElement("MyPackage", "1.0.0ctp-1"),
+                BuildPackageElement("MyOtherPackage", "2.0.3.4"));
+            var templateWizard = new TestableVsTemplateWizard(installerMock.Object, loadDocumentCallback: p => document);
+            var wizard = (IWizard)templateWizard;
+            var dteMock = new Mock<DTE>();
+            dteMock.SetupProperty(dte => dte.StatusBar.Text);
+            wizard.RunStarted(dteMock.Object, null, WizardRunKind.AsNewProject,
+                new object[] { @"C:\Some\file.vstemplate" });
+            wizard.ProjectItemFinishedGenerating(projectItemMock.Object);
+
+            // Act
+            wizard.RunFinished();
+
+            // Assert
+            installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyPackage", new SemanticVersion(1, 0, 0, "ctp-1"), true));
+            installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyOtherPackage", new SemanticVersion(2, 0, 3, 4), true));
+            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0.0ctp-1 to project...");
+            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0.3.4 to project...");
         }
 
         [Fact]
@@ -365,7 +407,7 @@ namespace NuGet.VisualStudio.Test {
             // Arrange
             var mockProject = new Mock<Project>().Object;
             var installerMock = new Mock<IVsPackageInstaller>();
-            installerMock.Setup(i => i.InstallPackage(@"C:\Some", mockProject, "MyPackage", new Version(1, 0, 0, 0), true)).
+            installerMock.Setup(i => i.InstallPackage(@"C:\Some", mockProject, "MyPackage", new SemanticVersion(1, 0, 0, 0), true)).
                 Throws<InvalidOperationException>();
             var document = BuildDocument("template",
                 BuildPackageElement("MyPackage", "1.0"),
@@ -383,9 +425,9 @@ namespace NuGet.VisualStudio.Test {
             wizard.RunFinished();
 
             // Assert
-            installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyPackage", new Version(1, 0, 0, 0), true));
+            installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyPackage", new SemanticVersion(1, 0, 0, 0), true));
             installerMock.Verify(
-                i => i.InstallPackage(@"C:\Some", mockProject, "MyOtherPackage", new Version(2, 0, 0, 0), true));
+                i => i.InstallPackage(@"C:\Some", mockProject, "MyOtherPackage", new SemanticVersion(2, 0, 0, 0), true));
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0 to project...");
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0 to project...");
             Assert.Equal(

@@ -43,7 +43,7 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        public SemVer Version {
+        public SemanticVersion Version {
             get {
                 return _basePackage.Version;
             }

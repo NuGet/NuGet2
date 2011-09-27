@@ -125,11 +125,11 @@ namespace NuGet {
             InstallPackage(packageId, version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
         }
 
-        public void InstallPackage(string packageId, SemVer version) {
+        public void InstallPackage(string packageId, SemanticVersion version) {
             InstallPackage(packageId, version, ignoreDependencies: false, allowPrereleaseVersions: false);
         }
 
-        public virtual void InstallPackage(string packageId, SemVer version, bool ignoreDependencies, bool allowPrereleaseVersions) {
+        public virtual void InstallPackage(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions) {
             IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
 
             InstallPackage(package, ignoreDependencies, allowPrereleaseVersions);
@@ -208,15 +208,15 @@ namespace NuGet {
             UninstallPackage(packageId, version: null, forceRemove: false, removeDependencies: false);
         }
 
-        public void UninstallPackage(string packageId, SemVer version) {
+        public void UninstallPackage(string packageId, SemanticVersion version) {
             UninstallPackage(packageId, version: version, forceRemove: false, removeDependencies: false);
         }
 
-        public void UninstallPackage(string packageId, SemVer version, bool forceRemove) {
+        public void UninstallPackage(string packageId, SemanticVersion version, bool forceRemove) {
             UninstallPackage(packageId, version: version, forceRemove: forceRemove, removeDependencies: false);
         }
 
-        public virtual void UninstallPackage(string packageId, SemVer version, bool forceRemove, bool removeDependencies) {
+        public virtual void UninstallPackage(string packageId, SemanticVersion version, bool forceRemove, bool removeDependencies) {
             if (String.IsNullOrEmpty(packageId)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
@@ -309,7 +309,7 @@ namespace NuGet {
                 updateDependencies, allowPrereleaseVersions);
         }
 
-        public void UpdatePackage(string packageId, SemVer version, bool updateDependencies, bool allowPrereleaseVersions) {
+        public void UpdatePackage(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions) {
             UpdatePackage(packageId, () => SourceRepository.FindPackage(packageId, version, allowPrereleaseVersions),
                 updateDependencies, allowPrereleaseVersions);
         }

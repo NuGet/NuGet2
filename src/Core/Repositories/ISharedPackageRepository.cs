@@ -2,7 +2,7 @@
 
 namespace NuGet {
     public interface ISharedPackageRepository : IPackageRepository {
-        bool IsReferenced(string packageId, SemVer version);
+        bool IsReferenced(string packageId, SemanticVersion version);
 
         /// <summary>
         /// Registers a new repository for the shared repository

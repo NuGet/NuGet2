@@ -80,7 +80,7 @@ namespace NuGet {
             }
         }
 
-        public IPackage FindPackage(string packageId, SemVer version) {
+        public IPackage FindPackage(string packageId, SemanticVersion version) {
             if (!_packageReferenceFile.EntryExists(packageId, version)) {
                 return null;
             }

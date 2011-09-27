@@ -21,7 +21,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             updateCmd.Console = consoleInfo.Console;
 
             // Act
-            ExceptionAssert.Throws<CommandLineException>(() => updateCmd.SelfUpdate("c:\foo.exe", new SemVer("2.0")), "Unable to find 'NuGet.CommandLine' package.");
+            ExceptionAssert.Throws<CommandLineException>(() => updateCmd.SelfUpdate("c:\foo.exe", new SemanticVersion("2.0")), "Unable to find 'NuGet.CommandLine' package.");
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             updateCmd.Console = consoleInfo.Console;
 
             // Act
-            updateCmd.SelfUpdate("c:\foo.exe", new SemVer("2.0"));
+            updateCmd.SelfUpdate("c:\foo.exe", new SemanticVersion("2.0"));
 
             // Assert
             Assert.Equal("NuGet.exe is up to date.", consoleInfo.WrittenLines[0]);
@@ -59,7 +59,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             updateCmd.Console = consoleInfo.Console;
 
             // Act & Assert
-            ExceptionAssert.Throws<CommandLineException>(() => updateCmd.SelfUpdate("c:\foo.exe", new SemVer("2.0")), "Invalid NuGet.CommandLine package. Unable to locate NuGet.exe within the package.");
+            ExceptionAssert.Throws<CommandLineException>(() => updateCmd.SelfUpdate("c:\foo.exe", new SemanticVersion("2.0")), "Invalid NuGet.CommandLine package. Unable to locate NuGet.exe within the package.");
         }
 
         [Fact]
@@ -77,7 +77,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             updateCmd.Console = consoleInfo.Console;
 
             // Act
-            updateCmd.SelfUpdate(@"c:\NuGet.exe", new SemVer("2.0"));
+            updateCmd.SelfUpdate(@"c:\NuGet.exe", new SemanticVersion("2.0"));
 
             // Assert
             Assert.True(updateCmd.MovedFiles.ContainsKey(@"c:\NuGet.exe"));

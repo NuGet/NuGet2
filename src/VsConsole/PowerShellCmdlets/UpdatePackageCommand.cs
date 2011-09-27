@@ -61,7 +61,7 @@ namespace NuGet.PowerShell.Commands {
 
         [Parameter(Position = 2, ParameterSetName = "Project")]
         [ValidateNotNull]
-        public SemVer Version { get; set; }
+        public SemanticVersion Version { get; set; }
 
         [Parameter(Position = 3)]
         [ValidateNotNullOrEmpty]

@@ -16,11 +16,11 @@ namespace NuGet {
             return Exists(repository, packageId, version: null);
         }
 
-        public static bool Exists(this IPackageRepository repository, string packageId, SemVer version) {
+        public static bool Exists(this IPackageRepository repository, string packageId, SemanticVersion version) {
             return repository.FindPackage(packageId, version) != null;
         }
 
-        public static bool TryFindPackage(this IPackageRepository repository, string packageId, SemVer version, out IPackage package) {
+        public static bool TryFindPackage(this IPackageRepository repository, string packageId, SemanticVersion version, out IPackage package) {
             package = repository.FindPackage(packageId, version);
             return package != null;
         }
@@ -29,15 +29,17 @@ namespace NuGet {
             return repository.FindPackage(packageId, version: null);
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, string packageId, SemVer version) {
+        public static IPackage FindPackage(this IPackageRepository repository, string packageId, SemanticVersion version) {
+            // Default allow pre release versions to true here because the caller typically wants to find all packages in this scenario for e.g when checking if a 
+            // a package is already installed in the local repository
             return FindPackage(repository, packageId, version, constraintProvider: NullConstraintProvider.Instance, allowPrereleaseVersions: true);
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, string packageId, SemVer version, bool allowPrereleaseVersions) {
+        public static IPackage FindPackage(this IPackageRepository repository, string packageId, SemanticVersion version, bool allowPrereleaseVersions) {
             return FindPackage(repository, packageId, version, constraintProvider: NullConstraintProvider.Instance, allowPrereleaseVersions: allowPrereleaseVersions);
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, string packageId, SemVer version, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions) {
+        public static IPackage FindPackage(this IPackageRepository repository, string packageId, SemanticVersion version, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions) {
             if (repository == null) {
                 throw new ArgumentNullException("repository");
             }

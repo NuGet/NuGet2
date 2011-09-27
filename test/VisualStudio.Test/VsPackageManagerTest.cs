@@ -31,7 +31,7 @@ namespace NuGet.Test.VisualStudio {
             sourceRepository.AddPackage(package);
 
             // Act
-            packageManager.InstallPackage(projectManager, "foo", new SemVer("1.0"), ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance);
+            packageManager.InstallPackage(projectManager, "foo", new SemanticVersion("1.0"), ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance);
 
             // Assert
             Assert.True(packageManager.LocalRepository.Exists(package));
@@ -101,7 +101,7 @@ namespace NuGet.Test.VisualStudio {
             sourceRepository.AddPackage(package);
 
             // Act
-            packageManager.InstallPackage((IProjectManager)null, "foo", new SemVer("1.0"), ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance);
+            packageManager.InstallPackage((IProjectManager)null, "foo", new SemanticVersion("1.0"), ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance);
 
             // Assert
             Assert.True(packageManager.LocalRepository.Exists(package));
@@ -111,7 +111,7 @@ namespace NuGet.Test.VisualStudio {
         public void UninstallProjectLevelPackageThrowsIfPackageIsReferenced() {
             // Arrange            
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
-            localRepository.Setup(m => m.IsReferenced("foo", It.IsAny<SemVer>())).Returns(true);
+            localRepository.Setup(m => m.IsReferenced("foo", It.IsAny<SemanticVersion>())).Returns(true);
             var sourceRepository = new MockPackageRepository();
             var fileSystem = new MockFileSystem();
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
@@ -136,7 +136,7 @@ namespace NuGet.Test.VisualStudio {
         public void UninstallProjectLevelPackageWithNoProjectManagerThrows() {
             // Arrange            
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
-            localRepository.Setup(m => m.IsReferenced("foo", It.IsAny<SemVer>())).Returns(true);
+            localRepository.Setup(m => m.IsReferenced("foo", It.IsAny<SemanticVersion>())).Returns(true);
             var sourceRepository = new MockPackageRepository();
             var fileSystem = new MockFileSystem();
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
@@ -160,7 +160,7 @@ namespace NuGet.Test.VisualStudio {
         public void UninstallPackageRemovesPackageIfPackageIsNotReferenced() {
             // Arrange            
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
-            localRepository.Setup(m => m.IsReferenced("foo", It.IsAny<SemVer>())).Returns(false);
+            localRepository.Setup(m => m.IsReferenced("foo", It.IsAny<SemanticVersion>())).Returns(false);
             var sourceRepository = new MockPackageRepository();
             var fileSystem = new MockFileSystem();
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
@@ -187,7 +187,7 @@ namespace NuGet.Test.VisualStudio {
         public void UpdatePackageRemovesPackageIfPackageIsNotReferenced() {
             // Arrange            
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
-            localRepository.Setup(m => m.IsReferenced("A", new SemVer("1.0"))).Returns(false);
+            localRepository.Setup(m => m.IsReferenced("A", new SemanticVersion("1.0"))).Returns(false);
             var projectRepository = new MockProjectPackageRepository(localRepository.Object);
             var sourceRepository = new MockPackageRepository();
             var fileSystem = new MockFileSystem();
@@ -220,7 +220,7 @@ namespace NuGet.Test.VisualStudio {
         public void UpdatePackageDoesNotRemovesPackageIfPackageIsReferenced() {
             // Arrange            
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
-            localRepository.Setup(m => m.IsReferenced("A", new SemVer("1.0"))).Returns(true);
+            localRepository.Setup(m => m.IsReferenced("A", new SemanticVersion("1.0"))).Returns(true);
             var projectRepository = new MockProjectPackageRepository(localRepository.Object);
             var sourceRepository = new MockPackageRepository();
             var fileSystem = new MockFileSystem();
@@ -332,7 +332,7 @@ namespace NuGet.Test.VisualStudio {
                 new Mock<VsPackageInstallerEvents>().Object,
                 new MockPackageRepository());
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
-            projectManager.AddPackageReference("A", new SemVer("1.0"));
+            projectManager.AddPackageReference("A", new SemanticVersion("1.0"));
 
             // Act
             packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance);
@@ -375,7 +375,7 @@ namespace NuGet.Test.VisualStudio {
                 new Mock<VsPackageInstallerEvents>().Object,
                 new MockPackageRepository());
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
-            projectManager.AddPackageReference("A", new SemVer("1.0"));
+            projectManager.AddPackageReference("A", new SemanticVersion("1.0"));
 
             // Act
             packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance);
@@ -426,7 +426,7 @@ namespace NuGet.Test.VisualStudio {
                 new Mock<VsPackageInstallerEvents>().Object,
                 new MockPackageRepository());
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
-            projectManager.AddPackageReference("A", new SemVer("1.0"));
+            projectManager.AddPackageReference("A", new SemanticVersion("1.0"));
 
             // Act
             packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance);

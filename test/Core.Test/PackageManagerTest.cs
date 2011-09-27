@@ -156,7 +156,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageA);
 
             // Act
-            packageManager.InstallPackage("A", new SemVer("1.0"));
+            packageManager.InstallPackage("A", new SemanticVersion("1.0"));
 
             // Assert
             cacheRepository.Verify(p => p.AddPackage(packageA), Times.Once());
@@ -183,7 +183,7 @@ namespace NuGet.Test {
             sourceRepository.AddPackage(packageA);
 
             // Act
-            packageManager.InstallPackage("A", new SemVer("1.0"), ignoreDependencies: true, allowPrereleaseVersions: true);
+            packageManager.InstallPackage("A", new SemanticVersion("1.0"), ignoreDependencies: true, allowPrereleaseVersions: true);
 
             // Assert
             cacheRepository.Verify(p => p.AddPackage(packageA), Times.Once());
@@ -342,8 +342,8 @@ namespace NuGet.Test {
             packageManager.UpdatePackage("A", updateDependencies: true, allowPrereleaseVersions: false);
 
             // Assert
-            Assert.False(localRepository.Exists("A", new SemVer("1.0")));
-            Assert.True(localRepository.Exists("A", new SemVer("2.0")));
+            Assert.False(localRepository.Exists("A", new SemanticVersion("1.0")));
+            Assert.True(localRepository.Exists("A", new SemanticVersion("2.0")));
         }
 
         [Fact]
@@ -414,7 +414,7 @@ namespace NuGet.Test {
             packageManager.UpdatePackage("A", updateDependencies: true, allowPrereleaseVersions: false);
 
             // Assert
-            Assert.True(localRepository.Exists("A", new SemVer("1.0")));
+            Assert.True(localRepository.Exists("A", new SemanticVersion("1.0")));
         }
 
         [Fact]

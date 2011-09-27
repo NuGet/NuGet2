@@ -65,7 +65,7 @@ namespace NuGet.Test.MSBuild {
         [Fact]
         public void OutputPathUsesPackageIdAndVerion() {
             // Arrange
-            var packageBuilder = new PackageBuilder { Id = "Foo", Version = new SemVer("1.1") };
+            var packageBuilder = new PackageBuilder { Id = "Foo", Version = new SemanticVersion("1.1") };
 
             // Act
             var task = CreateTaskWithDefaultStubs();
@@ -79,7 +79,7 @@ namespace NuGet.Test.MSBuild {
         [Fact]
         public void OutputPathAppendsSymbolPackageIdentifier() {
             // Arrange
-            var packageBuilder = new PackageBuilder { Id = "Foo", Version = new SemVer("1.1") };
+            var packageBuilder = new PackageBuilder { Id = "Foo", Version = new SemanticVersion("1.1") };
 
             // Act
             var task = CreateTaskWithDefaultStubs();

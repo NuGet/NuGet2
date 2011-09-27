@@ -39,12 +39,12 @@ namespace NuGet.Test {
             var repo = GetRemoteRepository();
 
             // Act
-            var package = repo.FindPackage(packageId: "A", version: SemVer.Parse("1.0"));
+            var package = repo.FindPackage(packageId: "A", version: SemanticVersion.Parse("1.0"));
 
             // Assert
             Assert.NotNull(package);
             Assert.Equal("A", package.Id);
-            Assert.Equal(SemVer.Parse("1.0"), package.Version);
+            Assert.Equal(SemanticVersion.Parse("1.0"), package.Version);
         }
 
         [Fact]
@@ -53,8 +53,8 @@ namespace NuGet.Test {
             var repo = GetLocalRepository();
 
             // Act
-            var package1 = repo.FindPackage(packageId: "X", version: SemVer.Parse("1.0"));
-            var package2 = repo.FindPackage(packageId: "A", version: SemVer.Parse("1.1"));
+            var package1 = repo.FindPackage(packageId: "X", version: SemanticVersion.Parse("1.0"));
+            var package2 = repo.FindPackage(packageId: "A", version: SemanticVersion.Parse("1.1"));
 
             // Assert
             Assert.Null(package1 ?? package2);
@@ -72,7 +72,7 @@ namespace NuGet.Test {
             // Assert
             Assert.NotNull(package);
             Assert.Equal("A", package.Id);
-            Assert.Equal(SemVer.Parse("1.0"), package.Version);
+            Assert.Equal(SemanticVersion.Parse("1.0"), package.Version);
         }
 
         [Fact]
@@ -100,7 +100,7 @@ namespace NuGet.Test {
             // Assert
             Assert.NotNull(package);
             Assert.Equal("A", package.Id);
-            Assert.Equal(SemVer.Parse("1.0"), package.Version);
+            Assert.Equal(SemanticVersion.Parse("1.0"), package.Version);
         }
 
         [Fact]
@@ -196,7 +196,7 @@ namespace NuGet.Test {
             // Assert
             Assert.True(packages.Any());
             Assert.Equal(packages.First().Id, "A");
-            Assert.Equal(packages.First().Version, SemVer.Parse("1.2"));
+            Assert.Equal(packages.First().Version, SemanticVersion.Parse("1.2"));
         }
 
         [Fact]
@@ -230,7 +230,7 @@ namespace NuGet.Test {
 
             // Assert
             Assert.Equal("B", package.Id);
-            Assert.Equal(new SemVer("2.0"), package.Version);
+            Assert.Equal(new SemanticVersion("2.0"), package.Version);
         }
 
         [Fact]
@@ -242,11 +242,11 @@ namespace NuGet.Test {
             };
 
             // Act
-            IPackage package = repository.FindPackage("B", new SemVer("1.0"));
+            IPackage package = repository.FindPackage("B", new SemanticVersion("1.0"));
 
             // Assert
             Assert.Equal("B", package.Id);
-            Assert.Equal(new SemVer("1.0.0"), package.Version);
+            Assert.Equal(new SemanticVersion("1.0.0"), package.Version);
         }
 
         [Fact]
@@ -284,15 +284,15 @@ namespace NuGet.Test {
 
             // Assert
             Assert.Equal("B", package1.Id);
-            Assert.Equal(new SemVer("1.0.9"), package1.Version);
+            Assert.Equal(new SemanticVersion("1.0.9"), package1.Version);
             Assert.Equal("B", package2.Id);
-            Assert.Equal(new SemVer("1.0.9"), package2.Version);
+            Assert.Equal(new SemanticVersion("1.0.9"), package2.Version);
             Assert.Equal("B", package3.Id);
-            Assert.Equal(new SemVer("1.0.9"), package3.Version);
+            Assert.Equal(new SemanticVersion("1.0.9"), package3.Version);
             Assert.Equal("B", package4.Id);
-            Assert.Equal(new SemVer("1.0"), package4.Version);
+            Assert.Equal(new SemanticVersion("1.0"), package4.Version);
             Assert.Equal("B", package5.Id);
-            Assert.Equal(new SemVer("1.0.1"), package5.Version);
+            Assert.Equal(new SemanticVersion("1.0.1"), package5.Version);
         }
 
         [Fact]
@@ -330,7 +330,7 @@ namespace NuGet.Test {
             // Assert
             Assert.NotNull(package);
             Assert.Equal("A", package.Id);
-            Assert.Equal(new SemVer("0.9.3"), package.Version);
+            Assert.Equal(new SemanticVersion("0.9.3"), package.Version);
         }
 
         private static IPackageRepository GetEmptyRepository() {
@@ -359,7 +359,7 @@ namespace NuGet.Test {
         private static IPackage CreateMockPackage(string name, string version, string desc = null, string tags = null) {
             Mock<IPackage> package = new Mock<IPackage>();
             package.SetupGet(p => p.Id).Returns(name);
-            package.SetupGet(p => p.Version).Returns(SemVer.Parse(version));
+            package.SetupGet(p => p.Version).Returns(SemanticVersion.Parse(version));
             package.SetupGet(p => p.Description).Returns(desc);
             package.SetupGet(p => p.Tags).Returns(tags);
             return package.Object;

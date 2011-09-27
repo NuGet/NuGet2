@@ -38,7 +38,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, null);
             cmdlet.Source = "somesource";
             cmdlet.Id = "my-id";
-            cmdlet.Version = new SemVer("2.8");
+            cmdlet.Version = new SemanticVersion("2.8");
             cmdlet.ProjectName = "foo";
 
             // Act
@@ -60,7 +60,7 @@ namespace NuGet.PowerShell.Commands.Test {
             repositoryFactory.Setup(c => c.CreateRepository(It.Is<string>(s => s == "somesource"))).Returns(mockPackageRepository);
             var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, null);
             cmdlet.Id = "my-id";
-            cmdlet.Version = new SemVer("2.8");
+            cmdlet.Version = new SemanticVersion("2.8");
             cmdlet.ProjectName = "foo";
 
             // Act
@@ -68,7 +68,7 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal("my-id", vsPackageManager.PackageId);
-            Assert.Equal(new SemVer("2.8"), vsPackageManager.Version);
+            Assert.Equal(new SemanticVersion("2.8"), vsPackageManager.Version);
         }
 
         [Fact]
@@ -83,7 +83,7 @@ namespace NuGet.PowerShell.Commands.Test {
             repositoryFactory.Setup(c => c.CreateRepository(It.Is<string>(s => s == "somesource"))).Returns(mockPackageRepository);
             var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, null);
             cmdlet.Id = "my-id";
-            cmdlet.Version = new SemVer("2.8");
+            cmdlet.Version = new SemanticVersion("2.8");
             cmdlet.ProjectName = "foo";
 
             // Act
@@ -91,7 +91,7 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal("my-id", vsPackageManager.PackageId);
-            Assert.Equal(new SemVer("2.8"), vsPackageManager.Version);
+            Assert.Equal(new SemanticVersion("2.8"), vsPackageManager.Version);
             Assert.True(vsPackageManager.UpdateDependencies);
         }
 
@@ -107,7 +107,7 @@ namespace NuGet.PowerShell.Commands.Test {
             repositoryFactory.Setup(c => c.CreateRepository(It.Is<string>(s => s == "somesource"))).Returns(mockPackageRepository);
             var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, null);
             cmdlet.Id = "my-id";
-            cmdlet.Version = new SemVer("2.8");
+            cmdlet.Version = new SemanticVersion("2.8");
             cmdlet.IgnoreDependencies = new SwitchParameter(isPresent: true);
             cmdlet.ProjectName = "foo";
 
@@ -116,7 +116,7 @@ namespace NuGet.PowerShell.Commands.Test {
 
             // Assert
             Assert.Equal("my-id", vsPackageManager.PackageId);
-            Assert.Equal(new SemVer("2.8"), vsPackageManager.Version);
+            Assert.Equal(new SemanticVersion("2.8"), vsPackageManager.Version);
             Assert.False(vsPackageManager.UpdateDependencies);
         }
 
@@ -137,7 +137,7 @@ namespace NuGet.PowerShell.Commands.Test {
             repositoryFactory.Setup(c => c.CreateRepository(source)).Returns(sourceRepository.Object);
             var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, productUpdateService.Object);
             cmdlet.Id = "my-id";
-            cmdlet.Version = new SemVer("2.8");
+            cmdlet.Version = new SemanticVersion("2.8");
             cmdlet.IgnoreDependencies = new SwitchParameter(isPresent: true);
             cmdlet.Source = source;
             cmdlet.ProjectName = "foo";
@@ -165,7 +165,7 @@ namespace NuGet.PowerShell.Commands.Test {
             repositoryFactory.Setup(c => c.CreateRepository(source)).Returns(sourceRepository.Object);
             var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, productUpdateService.Object);
             cmdlet.Id = "my-id";
-            cmdlet.Version = new SemVer("2.8");
+            cmdlet.Version = new SemanticVersion("2.8");
             cmdlet.IgnoreDependencies = new SwitchParameter(isPresent: true);
             cmdlet.Source = "bing";
             cmdlet.ProjectName = "foo";
@@ -193,7 +193,7 @@ namespace NuGet.PowerShell.Commands.Test {
             repositoryFactory.Setup(c => c.CreateRepository(source)).Returns(sourceRepository.Object);
             var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, productUpdateService.Object);
             cmdlet.Id = "my-id";
-            cmdlet.Version = new SemVer("2.8");
+            cmdlet.Version = new SemanticVersion("2.8");
             cmdlet.IgnoreDependencies = new SwitchParameter(isPresent: true);
             cmdlet.Source = source;
             cmdlet.ProjectName = "foo";
@@ -226,11 +226,11 @@ namespace NuGet.PowerShell.Commands.Test {
 
             public string PackageId { get; set; }
 
-            public SemVer Version { get; set; }
+            public SemanticVersion Version { get; set; }
 
             public bool UpdateDependencies { get; set; }
 
-            public override void UpdatePackage(IProjectManager projectManager, string packageId, SemVer version, bool updateDependencies, bool allowPreReleaseVersions, ILogger logger) {
+            public override void UpdatePackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool updateDependencies, bool allowPreReleaseVersions, ILogger logger) {
                 ProjectManager = projectManager;
                 PackageId = packageId;
                 Version = version;

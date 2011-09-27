@@ -39,7 +39,7 @@ namespace NuGet.Test.MSBuild {
 
             var packageManagerStub = new Mock<IPackageManager>();
             packageManagerStub
-                .Setup(x => x.InstallPackage(It.IsAny<string>(), It.IsAny<SemVer>(), true, true))
+                .Setup(x => x.InstallPackage(It.IsAny<string>(), It.IsAny<SemanticVersion>(), true, true))
                 .Callback(() => installed++);
 
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
@@ -70,7 +70,7 @@ namespace NuGet.Test.MSBuild {
 
             var packageManagerStub = new Mock<IPackageManager>();
             packageManagerStub
-                .Setup(x => x.InstallPackage(It.IsAny<string>(), It.IsAny<SemVer>(), true, true))
+                .Setup(x => x.InstallPackage(It.IsAny<string>(), It.IsAny<SemanticVersion>(), true, true))
                 .Callback(() => installed++);
 
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
@@ -93,7 +93,7 @@ namespace NuGet.Test.MSBuild {
 
             var packageManagerStub = new Mock<IPackageManager>();
             packageManagerStub
-                .Setup(x => x.InstallPackage(It.IsAny<string>(), It.IsAny<SemVer>(), true, true))
+                .Setup(x => x.InstallPackage(It.IsAny<string>(), It.IsAny<SemanticVersion>(), true, true))
                 .Callback(() => installed++);
 
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
@@ -152,7 +152,7 @@ namespace NuGet.Test.MSBuild {
             const string notFoundMessage = "Package not found";
             var packageManagerStub = new Mock<IPackageManager>();
             packageManagerStub
-                .Setup(x => x.InstallPackage(It.IsAny<string>(), It.IsAny<SemVer>(), true, true))
+                .Setup(x => x.InstallPackage(It.IsAny<string>(), It.IsAny<SemanticVersion>(), true, true))
                 .Throws(new InvalidOperationException(notFoundMessage)).Verifiable();
 
             string actualMessage = null;
@@ -178,7 +178,7 @@ namespace NuGet.Test.MSBuild {
             NuGetFetch task = CreateTaskWithDefaultStubs(packageManagerStub: packageManagerStub);
 
             packageManagerStub
-                .Setup(x => x.InstallPackage(It.IsAny<string>(), It.IsAny<SemVer>(), true, true))
+                .Setup(x => x.InstallPackage(It.IsAny<string>(), It.IsAny<SemanticVersion>(), true, true))
                 .Callback(() => installed++);
 
             bool actualResult = task.Execute();
@@ -199,7 +199,7 @@ namespace NuGet.Test.MSBuild {
             NuGetFetch task = CreateTaskWithDefaultStubs(packageManagerStub: packageManagerStub, fileSystemProvider: fileSystemProvider);
 
             packageManagerStub
-                .Setup(x => x.InstallPackage(It.IsAny<string>(), It.IsAny<SemVer>(), true, true))
+                .Setup(x => x.InstallPackage(It.IsAny<string>(), It.IsAny<SemanticVersion>(), true, true))
                 .Callback(() => installed++);
 
             bool actualResult = task.Execute();
@@ -221,7 +221,7 @@ namespace NuGet.Test.MSBuild {
             NuGetFetch task = CreateTaskWithDefaultStubs(buildEngineStub: buildEngineStub, packageManagerStub: packageManagerStub, fileSystemProvider: fileSystemProvider);
 
             packageManagerStub
-                .Setup(x => x.InstallPackage(It.IsAny<string>(), It.IsAny<SemVer>(), true, true))
+                .Setup(x => x.InstallPackage(It.IsAny<string>(), It.IsAny<SemanticVersion>(), true, true))
                 .Callback(() => installed++);
 
             buildEngineStub
@@ -243,8 +243,8 @@ namespace NuGet.Test.MSBuild {
             if (packageManagerStub == null) {
                 packageManagerStub = new Mock<IPackageManager>();
             }
-            packageManagerStub.Setup(x => x.PathResolver.GetPackageDirectory(It.IsAny<string>(), It.IsAny<SemVer>())).Returns("packagedir");
-            packageManagerStub.Setup(x => x.PathResolver.GetPackageFileName(It.IsAny<string>(), It.IsAny<SemVer>())).Returns("packagename");
+            packageManagerStub.Setup(x => x.PathResolver.GetPackageDirectory(It.IsAny<string>(), It.IsAny<SemanticVersion>())).Returns("packagedir");
+            packageManagerStub.Setup(x => x.PathResolver.GetPackageFileName(It.IsAny<string>(), It.IsAny<SemanticVersion>())).Returns("packagename");
 
             if (packageRepositoryStub == null) {
                 packageRepositoryStub = new Mock<IPackageRepository>();
@@ -288,9 +288,9 @@ namespace NuGet.Test.MSBuild {
 
         private static MockFileSystem GetFileSystem(IEnumerable<PackageReference> configReferences = null) {
             configReferences = configReferences ?? new[] {
-                    new PackageReference("package1", new SemVer("1.0.0"), new VersionSpec()),
-                    new PackageReference("package2", new SemVer("1.0.2"), new VersionSpec()),
-                    new PackageReference("package3", new SemVer("1.0.5"), new VersionSpec())
+                    new PackageReference("package1", new SemanticVersion("1.0.0"), new VersionSpec()),
+                    new PackageReference("package2", new SemanticVersion("1.0.2"), new VersionSpec()),
+                    new PackageReference("package3", new SemanticVersion("1.0.5"), new VersionSpec())
             };
 
             var content = @"<?xml version=""1.0"" encoding=""utf-8""?><packages>"

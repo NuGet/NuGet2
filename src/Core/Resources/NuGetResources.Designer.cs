@@ -601,11 +601,11 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Type to compare must be an instance of SemVer..
+        ///   Looks up a localized string similar to Type to compare must be an instance of SemanticVersion..
         /// </summary>
-        internal static string TypeMustBeASemVer {
+        internal static string TypeMustBeASemanticVersion {
             get {
-                return ResourceManager.GetString("TypeMustBeASemVer", resourceCulture);
+                return ResourceManager.GetString("TypeMustBeASemanticVersion", resourceCulture);
             }
         }
         

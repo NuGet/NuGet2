@@ -1,4 +1,5 @@
-﻿using NuGet.Test;
+﻿using System.Linq;
+using NuGet.Test;
 using NuGetConsole.Host.PowerShell;
 using Xunit;
 

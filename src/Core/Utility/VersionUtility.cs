@@ -224,8 +224,8 @@ namespace NuGet {
             value = value.Trim();
 
             // First, try to parse it as a plain version string
-            SemVer version;
-            if (SemVer.TryParse(value, out version)) {
+            SemanticVersion version;
+            if (SemanticVersion.TryParse(value, out version)) {
                 // A plain version is treated as an inclusive minimum range
                 result = new VersionSpec {
                     MinVersion = version,
@@ -310,11 +310,11 @@ namespace NuGet {
         /// <summary>
         /// The safe range is defined as the highest build and revision for a given major and minor version
         /// </summary>
-        public static IVersionSpec GetSafeRange(SemVer version) {
+        public static IVersionSpec GetSafeRange(SemanticVersion version) {
             return new VersionSpec {
                 IsMinInclusive = true,
                 MinVersion = version,
-                MaxVersion = new SemVer(new Version(version.Version.Major, version.Version.Minor + 1))
+                MaxVersion = new SemanticVersion(new Version(version.Version.Major, version.Version.Minor + 1))
             };
         }
 
@@ -453,17 +453,17 @@ namespace NuGet {
         /// <summary>
         /// Returns all possible versions for a version. i.e. 1.0 would return 1.0, 1.0.0, 1.0.0.0
         /// </summary>
-        internal static IEnumerable<SemVer> GetPossibleVersions(SemVer semVer) {
+        internal static IEnumerable<SemanticVersion> GetPossibleVersions(SemanticVersion semVer) {
             // Trim the version so things like 1.0.0.0 end up being 1.0
             Version version = TrimVersion(semVer.Version);
             
             yield return semVer;
             if (version.Build == -1 && version.Revision == -1) {
-                yield return new SemVer(new Version(version.Major, version.Minor, 0), semVer.SpecialVersion);
-                yield return new SemVer(new Version(version.Major, version.Minor, 0, 0), semVer.SpecialVersion);
+                yield return new SemanticVersion(new Version(version.Major, version.Minor, 0), semVer.SpecialVersion);
+                yield return new SemanticVersion(new Version(version.Major, version.Minor, 0, 0), semVer.SpecialVersion);
             }
             else if (version.Revision == -1) {
-                yield return new SemVer(new Version(version.Major, version.Minor, version.Build, 0), semVer.SpecialVersion);
+                yield return new SemanticVersion(new Version(version.Major, version.Minor, version.Build, 0), semVer.SpecialVersion);
             }
         }
 
@@ -527,13 +527,13 @@ namespace NuGet {
             return compatibility;
         }
 
-        private static bool TryParseVersion(string versionString, out SemVer version) {
+        private static bool TryParseVersion(string versionString, out SemanticVersion version) {
             version = null;
-            if (!SemVer.TryParse(versionString, out version)) {
+            if (!SemanticVersion.TryParse(versionString, out version)) {
                 // Support integer version numbers (i.e. 1 -> 1.0)
                 int versionNumber;
                 if (Int32.TryParse(versionString, out versionNumber) && versionNumber > 0) {
-                    version = new SemVer(new Version(versionNumber, 0));
+                    version = new SemanticVersion(new Version(versionNumber, 0));
                 }
             }
             return version != null;

@@ -24,7 +24,7 @@ namespace NuGet.Test {
             // Arrange
             var builder = new PackageBuilder();
             builder.Id = "Package";
-            builder.Version = new SemVer("1.0");
+            builder.Version = new SemanticVersion("1.0");
             builder.Authors.Add("David");
             builder.Description = "This is a test package";
             builder.ReleaseNotes = "This is a release note.";
@@ -40,7 +40,7 @@ namespace NuGet.Test {
 
             // Assert
             Assert.Equal("Package", package.Id);
-            Assert.Equal(new SemVer("1.0"), package.Version);
+            Assert.Equal(new SemanticVersion("1.0"), package.Version);
             Assert.Equal("David", package.Authors.First());
             Assert.Equal("Copyright", package.Copyright);
             var files = package.GetFiles().ToList();

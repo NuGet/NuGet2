@@ -100,7 +100,7 @@ namespace NuGet {
             foreach (var operation in operations) {
                 // We get the opposing operation for the current operation:
                 // if o is +A 1.0 then the opposing key is - A 1.0
-                Tuple<PackageAction, string, SemVer> opposingKey = GetOpposingOperationKey(operation);
+                Tuple<PackageAction, string, SemanticVersion> opposingKey = GetOpposingOperationKey(operation);
 
                 // We can't use TryGetValue since the value of the dictionary entry
                 // is a List of an anonymous type.
@@ -122,11 +122,11 @@ namespace NuGet {
                                   .Select(o => o.Operation);
         }
 
-        private static Tuple<PackageAction, string, SemVer> GetOperationKey(PackageOperation operation) {
+        private static Tuple<PackageAction, string, SemanticVersion> GetOperationKey(PackageOperation operation) {
             return Tuple.Create(operation.Action, operation.Package.Id, operation.Package.Version);
         }
 
-        private static Tuple<PackageAction, string, SemVer> GetOpposingOperationKey(PackageOperation operation) {
+        private static Tuple<PackageAction, string, SemanticVersion> GetOpposingOperationKey(PackageOperation operation) {
             return Tuple.Create(operation.Action == PackageAction.Install ?
                                 PackageAction.Uninstall :
                                 PackageAction.Install, operation.Package.Id, operation.Package.Version);

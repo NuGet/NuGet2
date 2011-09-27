@@ -5,12 +5,12 @@ using NuGet.Resources;
 
 namespace NuGet {
     public static class PackageHelper {
-        public static IPackage ResolvePackage(IPackageRepository sourceRepository, IPackageRepository localRepository, string packageId, SemVer version, bool allowPrereleaseVersions) {
+        public static IPackage ResolvePackage(IPackageRepository sourceRepository, IPackageRepository localRepository, string packageId, SemanticVersion version, bool allowPrereleaseVersions) {
             return ResolvePackage(sourceRepository, localRepository, constraintProvider: NullConstraintProvider.Instance, packageId: packageId, version: version, allowPrereleaseVersions: allowPrereleaseVersions);
         }
 
         public static IPackage ResolvePackage(IPackageRepository sourceRepository, IPackageRepository localRepository, IPackageConstraintProvider constraintProvider, 
-            string packageId, SemVer version, bool allowPrereleaseVersions) {
+            string packageId, SemanticVersion version, bool allowPrereleaseVersions) {
             if (String.IsNullOrEmpty(packageId)) {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }

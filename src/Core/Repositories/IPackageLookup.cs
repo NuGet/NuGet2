@@ -2,6 +2,6 @@
 
 namespace NuGet {
     internal interface IPackageLookup {
-        IPackage FindPackage(string packageId, SemVer version);
+        IPackage FindPackage(string packageId, SemanticVersion version);
     }
 }

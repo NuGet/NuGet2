@@ -76,7 +76,7 @@ namespace NuGet {
             return CreateAggregateQuery(Repositories.Select(getPackages));
         }
 
-        public IPackage FindPackage(string packageId, SemVer version) {
+        public IPackage FindPackage(string packageId, SemanticVersion version) {
             // When we're looking for an exact package, we can optimize but searching each
             // repository one by one until we find the package that matches.
             Func<IPackageRepository, IPackage> findPackage = Wrap(r => r.FindPackage(packageId, version));

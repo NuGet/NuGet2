@@ -225,7 +225,7 @@ namespace NuGet.Dialog.Test {
             packageManager.Setup(p => p.UpdatePackage(
                projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), true, false, It.IsAny<ILogger>())).Callback(
                () => {
-                   projectManager.AddPackageReference("A", new SemVer("2.0"), false, false);
+                   projectManager.AddPackageReference("A", new SemanticVersion("2.0"), false, false);
                });
 
             var scriptExecutor = new Mock<IScriptExecutor>();

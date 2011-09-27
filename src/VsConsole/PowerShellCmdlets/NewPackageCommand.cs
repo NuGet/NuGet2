@@ -137,7 +137,7 @@ namespace NuGet.PowerShell.Commands {
             return outputFilePath;
         }
 
-        internal static string GetPackageFilePath(string outputFile, string projectPath, string id, SemVer version) {
+        internal static string GetPackageFilePath(string outputFile, string projectPath, string id, SemanticVersion version) {
             if (String.IsNullOrEmpty(outputFile)) {
                 outputFile = String.Join(".", id, version, Constants.PackageExtension.TrimStart('.'));
             }

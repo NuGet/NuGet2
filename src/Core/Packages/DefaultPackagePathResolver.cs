@@ -38,7 +38,7 @@ namespace NuGet {
             return GetPackageFileName(package.Id, package.Version);
         }
 
-        public virtual string GetPackageDirectory(string packageId, SemVer version) {
+        public virtual string GetPackageDirectory(string packageId, SemanticVersion version) {
             string directory = packageId;
             if (_useSideBySidePaths) {
                 directory += "." + version;
@@ -46,7 +46,7 @@ namespace NuGet {
             return directory;
         }
 
-        public virtual string GetPackageFileName(string packageId, SemVer version) {
+        public virtual string GetPackageFileName(string packageId, SemanticVersion version) {
             string fileNameBase = packageId;
             if (_useSideBySidePaths) {
                 fileNameBase += "." + version;

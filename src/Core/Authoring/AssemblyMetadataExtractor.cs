@@ -24,7 +24,7 @@ namespace NuGet {
         public static void ExtractMetadata(PackageBuilder builder, string assemblyPath) {
             AssemblyMetadata assemblyMetadata = GetMetadata(assemblyPath);
             builder.Id = assemblyMetadata.Name;
-            builder.Version = new SemVer(assemblyMetadata.Version);
+            builder.Version = new SemanticVersion(assemblyMetadata.Version);
             builder.Title = assemblyMetadata.Title;
             builder.Description = assemblyMetadata.Description;
             builder.Copyright = assemblyMetadata.Copyright;

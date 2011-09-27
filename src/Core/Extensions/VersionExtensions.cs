@@ -6,9 +6,9 @@ namespace NuGet {
             return versionInfo.ToDelegate<IPackage>(p => p.Version);
         }
 
-        public static Func<T, bool> ToDelegate<T>(this IVersionSpec versionInfo, Func<T, SemVer> extractor) {
+        public static Func<T, bool> ToDelegate<T>(this IVersionSpec versionInfo, Func<T, SemanticVersion> extractor) {
             return p => {
-                SemVer version = extractor(p);
+                SemanticVersion version = extractor(p);
                 bool condition = true;
                 if (versionInfo.MinVersion != null) {
                     if (versionInfo.IsMinInclusive) {
@@ -35,12 +35,12 @@ namespace NuGet {
         /// <summary>
         /// Determines if the specified version is within the version spec
         /// </summary>
-        public static bool Satisfies(this IVersionSpec versionSpec, SemVer version) {
+        public static bool Satisfies(this IVersionSpec versionSpec, SemanticVersion version) {
             // The range is unbounded so return true
             if (versionSpec == null) {
                 return true;
             }
-            return versionSpec.ToDelegate<SemVer>(v => v)(version);
+            return versionSpec.ToDelegate<SemanticVersion>(v => v)(version);
         }
     }
 }

@@ -124,11 +124,11 @@ namespace NuGet {
             AddPackageReference(packageId, version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
         }
 
-        public virtual void AddPackageReference(string packageId, SemVer version) {
+        public virtual void AddPackageReference(string packageId, SemanticVersion version) {
             AddPackageReference(packageId, version: version, ignoreDependencies: false, allowPrereleaseVersions: false);
         }
 
-        public virtual void AddPackageReference(string packageId, SemVer version, bool ignoreDependencies, bool allowPrereleaseVersions) {
+        public virtual void AddPackageReference(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions) {
             IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, NullConstraintProvider.Instance, packageId, version, allowPrereleaseVersions);
 
             AddPackageReference(package, ignoreDependencies, allowPrereleaseVersions);
@@ -319,7 +319,7 @@ namespace NuGet {
             UpdatePackageReference(packageId, version: null, updateDependencies: true, allowPrereleaseVersions: false);
         }
 
-        public void UpdatePackageReference(string packageId, SemVer version) {
+        public void UpdatePackageReference(string packageId, SemanticVersion version) {
             UpdatePackageReference(packageId, version: version, updateDependencies: true, allowPrereleaseVersions: false);
         }
 
@@ -327,7 +327,7 @@ namespace NuGet {
             UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, versionSpec, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions);
         }
 
-        public virtual void UpdatePackageReference(string packageId, SemVer version, bool updateDependencies, bool allowPrereleaseVersions) {
+        public virtual void UpdatePackageReference(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions) {
             UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, version, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions);
         }
 

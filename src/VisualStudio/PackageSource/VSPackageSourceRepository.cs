@@ -43,7 +43,7 @@ namespace NuGet.VisualStudio {
             return ActiveRepository.GetPackages();
         }
 
-        public IPackage FindPackage(string packageId, SemVer version) {
+        public IPackage FindPackage(string packageId, SemanticVersion version) {
             return ActiveRepository.FindPackage(packageId, version);
         }
 

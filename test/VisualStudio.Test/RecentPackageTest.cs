@@ -23,7 +23,7 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             Assert.Equal("A", package.Id);
-            Assert.Equal(new SemVer("1.2"), package.Version);
+            Assert.Equal(new SemanticVersion("1.2"), package.Version);
             Assert.Equal(2, contents.Count);
             Assert.Equal(1.0, package.Rating);
             Assert.Equal("content\\one", content1);

@@ -115,17 +115,17 @@ namespace NuGet.VisualStudio.Test {
 
             // Assert
             var dependencyResolver = repository as IDependencyResolver;
-            IPackage dependency = dependencyResolver.ResolveDependency(new PackageDependency("A", new VersionSpec { MinVersion = new SemVer("1.0.0.0") }), null, allowPrereleaseVersions: false);
+            IPackage dependency = dependencyResolver.ResolveDependency(new PackageDependency("A", new VersionSpec { MinVersion = new SemanticVersion("1.0.0.0") }), null, allowPrereleaseVersions: false);
             List<IPackage> packages = repository.GetPackages().ToList();
 
             // Assert
             Assert.Equal(1, packages.Count());
             Assert.Equal("A", packages[0].Id);
-            Assert.Equal(new SemVer("1.0"), packages[0].Version);
+            Assert.Equal(new SemanticVersion("1.0"), packages[0].Version);
 
             Assert.NotNull(dependency);
             Assert.Equal("A", dependency.Id);
-            Assert.Equal(new SemVer("1.2"), dependency.Version);
+            Assert.Equal(new SemanticVersion("1.2"), dependency.Version);
         }
 
         [Fact]
@@ -299,7 +299,7 @@ namespace NuGet.VisualStudio.Test {
             var fallbackRepository = new FallbackRepository(primaryRepository, aggregateRepository);
 
             // Act
-            var resolvedPackage = fallbackRepository.ResolveDependency(new PackageDependency("M2", new VersionSpec { MinVersion = new SemVer("1.0.1") }), false);
+            var resolvedPackage = fallbackRepository.ResolveDependency(new PackageDependency("M2", new VersionSpec { MinVersion = new SemanticVersion("1.0.1") }), false);
 
             // Assert
             Assert.Null(resolvedPackage);
@@ -317,7 +317,7 @@ namespace NuGet.VisualStudio.Test {
             var fallbackRepository = new FallbackRepository(primaryRepository, dependencyResolver);
 
             // Act
-            var resolvedPackage = fallbackRepository.ResolveDependency(new PackageDependency("M2", new VersionSpec { MinVersion = new SemVer("1.0.1") }), false);
+            var resolvedPackage = fallbackRepository.ResolveDependency(new PackageDependency("M2", new VersionSpec { MinVersion = new SemanticVersion("1.0.1") }), false);
 
             // Assert
             Assert.Same(resolvedPackage, packageA11);

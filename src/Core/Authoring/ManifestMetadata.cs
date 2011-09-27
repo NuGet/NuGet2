@@ -94,12 +94,12 @@ namespace NuGet {
         [ManifestVersion(2)]
         public List<ManifestReference> References { get; set; }
 
-        SemVer IPackageMetadata.Version {
+        SemanticVersion IPackageMetadata.Version {
             get {
                 if (Version == null) {
                     return null;
                 }
-                return new SemVer(Version);
+                return new SemanticVersion(Version);
             }
         }
 
