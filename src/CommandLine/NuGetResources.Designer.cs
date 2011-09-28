@@ -1763,27 +1763,27 @@ namespace NuGet {
         /// <summary>
         ///   Looks up a localized string similar to Version &quot;{0}&quot; does not follow semantic versioning guidelines..
         /// </summary>
-        internal static string Warning_SemVer {
+        internal static string Warning_SemanticVersion {
             get {
-                return ResourceManager.GetString("Warning_SemVer", resourceCulture);
+                return ResourceManager.GetString("Warning_SemanticVersion", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org. .
         /// </summary>
-        internal static string Warning_SemVerSolution {
+        internal static string Warning_SemanticVersionSolution {
             get {
-                return ResourceManager.GetString("Warning_SemVerSolution", resourceCulture);
+                return ResourceManager.GetString("Warning_SemanticVersionSolution", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Use semantic versioning.
         /// </summary>
-        internal static string Warning_SemVerTitle {
+        internal static string Warning_SemanticVersionTitle {
             get {
-                return ResourceManager.GetString("Warning_SemVerTitle", resourceCulture);
+                return ResourceManager.GetString("Warning_SemanticVersionTitle", resourceCulture);
             }
         }
         

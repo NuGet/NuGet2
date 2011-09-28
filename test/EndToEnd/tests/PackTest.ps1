@@ -16,7 +16,7 @@ function Test-PackFromProject {
     Assert-NotNull $packageFile
     $zipPackage = New-Object NuGet.ZipPackage($packageFile.FullName)
     Assert-AreEqual $p.Name $zipPackage.Id
-    Assert-AreEqual '1.0' $zipPackage.Version.ToString()
+    Assert-AreEqual '1.0.0' $zipPackage.Version.ToString()
     Assert-AreEqual 'Some Company' $zipPackage.Authors
     Assert-AreEqual 'Description' $zipPackage.Description
     $files = @($zipPackage.GetFiles())

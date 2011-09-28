@@ -26,8 +26,6 @@
       <Word>csproj</Word>
       <Word>vbproj</Word>
       <Word>fsproj</Word>
-      <Word>Ver</Word>
-      <Word>Sem</Word>
       <Word>semver</Word>
     </Recognized>
     <Deprecated>
@@ -39,7 +37,6 @@
       <Term CompoundAlternate="ConsoleDispatcher">ConsoleDispatcher</Term>
       <Term CompoundAlternate="PowerShell">PowerShell</Term>
       <Term CompoundAlternate="WebSite">WebSite</Term>
-      <Term CompoundAlternate="SemVer">SemVer</Term>
     </Compound>
     <DiscreteExceptions>
       <Term></Term>

@@ -7,9 +7,9 @@ namespace NuGet {
         public IEnumerable<PackageIssue> Validate(IPackage package) {
             SemanticVersion semVer;
             if (!SemanticVersion.TryParseStrict(package.Version.ToString(), out semVer)) {
-                yield return new PackageIssue(NuGetResources.Warning_SemVerTitle, 
-                    String.Format(CultureInfo.CurrentCulture, NuGetResources.Warning_SemVer, package.Version), 
-                    NuGetResources.Warning_SemVerSolution);
+                yield return new PackageIssue(NuGetResources.Warning_SemanticVersionTitle, 
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.Warning_SemanticVersion, package.Version), 
+                    NuGetResources.Warning_SemanticVersionSolution);
             }
         }
     }
