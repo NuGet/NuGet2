@@ -24,7 +24,7 @@ namespace NuGet {
         public static void ExtractMetadata(PackageBuilder builder, string assemblyPath) {
             AssemblyMetadata assemblyMetadata = GetMetadata(assemblyPath);
             builder.Id = assemblyMetadata.Name;
-            builder.Version = new SemanticVersion(assemblyMetadata.Version);
+            builder.Version = assemblyMetadata.Version;
             builder.Title = assemblyMetadata.Title;
             builder.Description = assemblyMetadata.Description;
             builder.Copyright = assemblyMetadata.Copyright;
@@ -42,9 +42,15 @@ namespace NuGet {
                 Assembly assembly = Assembly.LoadFrom(path);
                 AssemblyName assemblyName = assembly.GetName();
 
+                SemanticVersion version;
+                string assemblyInformationalVersion = GetAttributeValueOrDefault<AssemblyInformationalVersionAttribute>(assembly, a => a.InformationalVersion);
+                if (!SemanticVersion.TryParse(assemblyInformationalVersion, out version)) {
+                    version = new SemanticVersion(assemblyName.Version);
+                }
+
                 return new AssemblyMetadata {
                     Name = assemblyName.Name,
-                    Version = assemblyName.Version,
+                    Version = version,
                     Title = GetAttributeValueOrDefault<AssemblyTitleAttribute>(assembly, a => a.Title),
                     Company = GetAttributeValueOrDefault<AssemblyCompanyAttribute>(assembly, a => a.Company),
                     Description = GetAttributeValueOrDefault<AssemblyDescriptionAttribute>(assembly, a => a.Description),

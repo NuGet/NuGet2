@@ -77,6 +77,8 @@ namespace NuGet.Commands {
 
         public bool IsTool { get; set; }
 
+        internal bool ConvertVersionToSemanticVersion { get; set; }
+
         public ILogger Logger {
             get {
                 return _logger ?? NullLogger.Instance;
@@ -130,8 +132,6 @@ namespace NuGet.Commands {
                 builder.Authors.Remove(projectAuthor);
             }
 
-            builder.Version = new SemanticVersion(VersionUtility.TrimVersion(builder.Version.Version));
-
             // Add output files
             AddOutputFiles(builder);
 
@@ -157,6 +157,12 @@ namespace NuGet.Commands {
             if (!builder.Authors.Any()) {
                 builder.Authors.Add(Environment.UserName);
                 Logger.Log(MessageLevel.Warning, NuGetResources.Warning_UnspecifiedField, "Author", Environment.UserName);
+            }
+
+            // HACK: To prevent people from seeing warnings when they upgrade to 1.6, we'll treat 4 digit assembly versions with 0-revision component as a 3 digit semantic version.
+            // We only have to do this if the version that we got does not strictly follow semver rules.
+            if (ConvertVersionToSemanticVersion) {
+                builder.Version = ConvertToStrictSemanticVersion(builder.Version);
             }
 
             return builder;
@@ -236,7 +242,7 @@ namespace NuGet.Commands {
                         _project.GetPropertyValue("AssemblyName") ??
                         Path.GetFileNameWithoutExtension(_project.FullPath);
 
-            string version = _project.GetPropertyValue("SemVer");
+            string version = _project.GetPropertyValue("Version");
             builder.Version = builder.Version ??
                               SemanticVersion.ParseOptionalVersion(version) ??
                               new SemanticVersion("1.0");
@@ -530,6 +536,15 @@ namespace NuGet.Commands {
 
             // Otherwise the file is probably a shortcut so just take the file name
             return Path.GetFileName(fullPath);
+        }
+
+        internal static SemanticVersion ConvertToStrictSemanticVersion(SemanticVersion semanticVersion) {
+            SemanticVersion parsedVersion;
+            Version versionValue = semanticVersion.Version;
+            if (!SemanticVersion.TryParseStrict(semanticVersion.ToString(), out parsedVersion) && (versionValue.Revision == 0)) {
+                return new SemanticVersion(versionValue.Major, versionValue.Minor, versionValue.Build, semanticVersion.SpecialVersion);
+            }
+            return semanticVersion;
         }
 
         private class Walker : PackageWalker {

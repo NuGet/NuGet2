@@ -9,7 +9,9 @@ using NuGet.VisualStudio.Test;
 using Xunit;
 
 namespace NuGet.PowerShell.Commands.Test {
-    
+    using PackageUtility = NuGet.Test.PackageUtility;
+    using System.Linq;
+
     public class InstallPackageCommandTest {
         [Fact]
         public void InstallPackageCmdletThrowsWhenSolutionIsClosed() {
@@ -253,6 +255,51 @@ namespace NuGet.PowerShell.Commands.Test {
             // Assert
             // If we've come this far, P1 is successfully installed.
             Assert.True(true);
+        }
+
+        [Fact]
+        public void InstallPackageCmdletDoesNotInstallPrereleasePackageIfFlagIsNotPresent() {
+            // Arrange
+            var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
+            var packageRepository = new MockPackageRepository { PackageUtility.CreatePackage("A", "1.0.0a") };
+            var recentPackageRepository = new Mock<IRecentPackageRepository>();
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, 
+                recentPackageRepository.Object, null);
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
+
+            // Act
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, null, null, null);
+            cmdlet.Id = "A";
+            
+            
+            // Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.Execute(), "Unable to find package 'A'.");
+        }
+
+        [Fact]
+        public void InstallPackageCmdletInstallPrereleasePackageIfFlagIsPresent() {
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0.0a");
+            var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
+            sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
+            sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
+            var packageRepository = new MockPackageRepository { packageA };
+            var recentPackageRepository = new Mock<IRecentPackageRepository>();
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object,
+                recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
+
+            // Act
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, null, new Mock<IHttpClientEvents>().Object, null);
+            cmdlet.Id = "A";
+            cmdlet.Prerelease = true;
+            cmdlet.Execute();
+
+
+            // Assert
+            sharedRepository.Verify();
         }
 
         private static IVsPackageSourceProvider GetPackageSourceProvider(params PackageSource[] sources) {

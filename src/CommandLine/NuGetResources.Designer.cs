@@ -894,6 +894,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Prevent NuGet from attempting to convert assembly version to a semantic version..
+        /// </summary>
+        internal static string PackCommandNoSemVerTransformation {
+            get {
+                return ResourceManager.GetString("PackCommandNoSemVerTransformation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to nuget pack
         ///
         ///nuget pack foo.nuspec
@@ -1752,7 +1761,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Version &quot;{0}&quot; does not follow SemVer guidelines..
+        ///   Looks up a localized string similar to Version &quot;{0}&quot; does not follow semantic versioning guidelines..
         /// </summary>
         internal static string Warning_SemVer {
             get {
@@ -1761,7 +1770,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Update your version number to follow the SemVer scheme as described at http://semver.org..
+        ///   Looks up a localized string similar to Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org. .
         /// </summary>
         internal static string Warning_SemVerSolution {
             get {
@@ -1770,7 +1779,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Semantic versioning.
+        ///   Looks up a localized string similar to Use semantic versioning.
         /// </summary>
         internal static string Warning_SemVerTitle {
             get {

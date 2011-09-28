@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 
 namespace NuGet {
-    public class SemVerValidationRule : IPackageRule {
+    public class StrictSemanticVersionValidationRule : IPackageRule {
         public IEnumerable<PackageIssue> Validate(IPackage package) {
             SemanticVersion semVer;
             if (!SemanticVersion.TryParseStrict(package.Version.ToString(), out semVer)) {

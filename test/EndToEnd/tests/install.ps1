@@ -1360,6 +1360,7 @@ function Test-InstallPackageInstallsHighestReleasedPackageIfPreReleaseFlagIsNotS
     # Act
     $a | Install-Package -Source $context.RepositoryRoot PreReleaseTestPackage
 
+    # Assert
     Assert-Package $a 'PreReleaseTestPackage' '1.0.0'
 }
 
@@ -1370,6 +1371,7 @@ function Test-InstallPackageInstallsHighestPackageIfPreReleaseFlagIsSet {
     # Act
     $a | Install-Package -Source $context.RepositoryRoot PreReleaseTestPackage -PreRelease
 
+    # Assert
     Assert-Package $a 'PreReleaseTestPackage' '1.0.1a'
 }
 
@@ -1380,28 +1382,20 @@ function Test-InstallPackageInstallsHighestPackageIfItIsReleaseWhenPreReleaseFla
     # Act
     $a | Install-Package -Source $context.RepositoryRoot PreReleaseTestPackage.A -PreRelease
 
+    # Assert
     Assert-Package $a 'PreReleaseTestPackage.A' '1.0.0'
 }
 
-function Test-InstallPackageDoesNotInstallIfIndirectDependencyIsPrerelease {
+
+function Test-InstallingPrereleasePackageAddsItToRecentPackageList {
     # Arrange
     $a = New-ClassLibrary
 
-    # Act and Assert
-	Assert-Throws { $a | Install-Package -Source $context.RepositoryPath A } "Unable to resolve dependency 'C (≥ 0.6 && < 1.0)'."
-}
+    # Act
+    $a | Install-Package -Source $context.RepositoryRoot PreReleaseTestPackage.A -PreRelease
 
-
-function Test-InstallPackageInstallsIfIndirectDependencyIsPrereleaseAndFlagIsSet {
-    # Arrange
-    $a = New-ClassLibrary
-
-	Read-Host
-    # Act 
-	$a | Install-Package -Source $context.RepositoryPath A  -Prerelease
-
-	# Assert
-	Assert-Package $a 'A' '1.0'
-	Assert-Package $a 'B' '1.0'
-	Assert-Package $a 'B' '0.8b'
+    # Assert
+    Assert-Package $a 'PreReleaseTestPackage.A' '1.0.0'
+    $p = @(Get-Package -Recent -Filter PreReleaseTestPackage.A)
+    Assert-AreEqual 1 $p.Count
 }

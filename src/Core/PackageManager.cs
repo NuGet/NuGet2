@@ -136,8 +136,6 @@ namespace NuGet {
         }
 
         public virtual void InstallPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions) {
-            // We don't have an user interface that would allow this, but you could certainly get into this state via calling the API.
-            Debug.Assert(package.IsReleaseVersion() || allowPrereleaseVersions);
             Execute(package, new InstallWalker(LocalRepository,
                                                SourceRepository,
                                                Logger,

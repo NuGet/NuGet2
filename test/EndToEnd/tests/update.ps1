@@ -824,3 +824,71 @@ function Test-UpdateAllPackagesInAllProjectsExecutesInstallPs1OnAllProjects {
     Remove-Variable InstallPackageMessages -Scope Global
     Remove-Variable UninstallPackageMessages -Scope Global
 }
+
+function Test-UpdatePackageDoesNotConsiderPrereleasePackagesForUpdateIfFlagIsNotSpecified {
+     param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.0a -Prerelease
+    Assert-Package $p 'PreReleaseTestPackage'
+    $p | Update-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage 
+
+    # Assert
+    Assert-Package $p PreReleaseTestPackage 1.0.0
+}
+
+function Test-UpdatePackageDoesNotConsiderPrereleasePackagesForSafeUpdateIfFlagIsNotSpecified {
+     param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.0a -Prerelease
+    Assert-Package $p 'PreReleaseTestPackage'
+    $p | Update-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage  -Safe
+
+    # Assert
+    Assert-Package $p PreReleaseTestPackage 1.0.0
+}
+
+function Test-UpdatePackageConsidersPrereleasePackagesForUpdateIfFlagIsSpecified {
+     param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.0a -Prerelease
+    Assert-Package $p 'PreReleaseTestPackage'
+    $p | Update-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Prerelease
+
+    # Assert
+    Assert-Package $p PreReleaseTestPackage 1.0.1a
+}
+
+function Test-UpdatePackageDoesNotConsiderPrereleasePackagesForSafeUpdateIfFlagIsNotSpecified {
+     param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.0a -Prerelease
+    Assert-Package $p 'PreReleaseTestPackage'
+    $p | Update-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage  -Safe -Prerelease
+
+    # Assert
+    Assert-Package $p PreReleaseTestPackage 1.0.1a
+}

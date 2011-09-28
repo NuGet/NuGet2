@@ -46,7 +46,7 @@ namespace NuGet.PowerShell.Commands {
         [Parameter]
         public SwitchParameter IgnoreDependencies { get; set; }
 
-        [Parameter(ParameterSetName = "Remote")]
+        [Parameter]
         public SwitchParameter Prerelease { get; set; }
 
         protected override IVsPackageManager CreatePackageManager() {

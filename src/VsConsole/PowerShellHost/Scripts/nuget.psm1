@@ -188,7 +188,7 @@ function GetPackageVersions($parameters, $context) {
     Find-Package @parameters -ExactMatch -ErrorAction SilentlyContinue | Select -ExpandProperty Version | %{
         # Convert to version if the we're looking at the version as a string
         if($_ -is [string]) { 
-            [NuGet.SemVer]::Parse($_) 
+            [NuGet.SemanticVersion]::Parse($_) 
         } else { 
             $_ 
         }  

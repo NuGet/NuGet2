@@ -9,6 +9,7 @@ namespace NuGet {
     /// A hybrid implementation of SemVer that supports semantic versioning as described at http://semver.org while not strictly enforcing it to 
     /// allow older 4-digit versioning schemes to continue working.
     /// </summary>
+    [Serializable]
     public sealed class SemanticVersion : IComparable, IComparable<SemanticVersion>, IEquatable<SemanticVersion> {
         private const string SemanticVersionRegex = @"^(?<Version>\d+(\s*\.\s*\d+){0,3})(?<Release>[a-z][0-9a-z-]*)?$";
         private const string StrictSemanticVersionRegex = @"^(?<Version>\d+(\.\d+){2})(?<Release>[a-z][0-9a-z-]*)?$";
@@ -26,7 +27,7 @@ namespace NuGet {
         }
 
         public SemanticVersion(int major, int minor, int build, string specialVersion)
-            : this(new Version(major, minor, build, 0), specialVersion) {
+            : this(new Version(major, minor, build), specialVersion) {
         }
 
         public SemanticVersion(Version version)

@@ -79,14 +79,6 @@ namespace NuGet {
             }
         }
 
-        //public static Version ParseOptionalVersion(string version) {
-        //    Version versionValue;
-        //    if (!String.IsNullOrEmpty(version) && Version.TryParse(version, out versionValue)) {
-        //        return versionValue;
-        //    }
-        //    return null;
-        //}
-
         /// <summary>
         /// This function tries to normalize a string that represents framework version names into
         /// something a framework name that the package manager understands.

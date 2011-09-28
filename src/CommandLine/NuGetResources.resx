@@ -717,12 +717,15 @@ nuget update -Self</value>
     <value>Package source with Name: {0} enabled successfully.</value>
   </data>
   <data name="Warning_SemVer" xml:space="preserve">
-    <value>Version "{0}" does not follow SemVer guidelines.</value>
+    <value>Version "{0}" does not follow semantic versioning guidelines.</value>
   </data>
   <data name="Warning_SemVerSolution" xml:space="preserve">
-    <value>Update your version number to follow the SemVer scheme as described at http://semver.org.</value>
+    <value>Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org. </value>
   </data>
   <data name="Warning_SemVerTitle" xml:space="preserve">
-    <value>Semantic versioning</value>
+    <value>Use semantic versioning</value>
+  </data>
+  <data name="PackCommandNoSemVerTransformation" xml:space="preserve">
+    <value>Prevent NuGet from attempting to convert assembly version to a semantic version.</value>
   </data>
 </root>

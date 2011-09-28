@@ -149,7 +149,7 @@ namespace GenerateTestPackages {
 
         public FullPackageName FullName { get; private set; }
         public string Id { get { return FullName.Id; } }
-        public SemVer Version { get { return FullName.Version; } }
+        public SemanticVersion Version { get { return FullName.Version; } }
         public IEnumerable<DependencyInfo> Dependencies { get; private set; }
         public bool Processed { get; set; }
 
@@ -176,11 +176,11 @@ namespace GenerateTestPackages {
         public FullPackageName(string nameAndVersion) {
             var parts = nameAndVersion.Split(':');
             Id = parts[0];
-            Version = new SemVer(parts[1]);
+            Version = new SemanticVersion(parts[1]);
         }
 
         public string Id { get; private set; }
-        public SemVer Version { get; private set; }
+        public SemanticVersion Version { get; private set; }
 
         public override string ToString() {
             return Id + ":" + Version;

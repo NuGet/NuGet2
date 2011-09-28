@@ -3,6 +3,7 @@ using System.Linq;
 using Xunit;
 using Moq;
 using NuGet.Commands;
+using Xunit.Extensions;
 
 namespace NuGet.Test.NuGetCommandLine.Commands {
     

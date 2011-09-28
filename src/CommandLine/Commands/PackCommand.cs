@@ -73,6 +73,9 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "PackageCommandNoRunAnalysis")]
         public bool NoPackageAnalysis { get; set; }
 
+        [Option(typeof(NuGetResources), "PackCommandNoSemVerTransformation")]
+        public bool NoSemVerTransformations { get; set; }
+
         [Option(typeof(NuGetResources), "PackageCommandPropertiesDescription")]
         public Dictionary<string, string> Properties {
             get {
@@ -281,7 +284,8 @@ namespace NuGet.Commands {
             var factory = new ProjectFactory(path) {
                 IsTool = Tool,
                 Logger = Console,
-                Build = Build
+                Build = Build,
+                ConvertVersionToSemanticVersion = !NoSemVerTransformations
             };
 
             // Add the additional Properties to the properties of the Project Factory
@@ -291,9 +295,9 @@ namespace NuGet.Commands {
 
             // Create a builder for the main package as well as the sources/symbols package
             PackageBuilder mainPackageBuilder = factory.CreateBuilder();
+
             // Build the main package
             IPackage package = BuildPackage(path, mainPackageBuilder);
-
 
             // If we're excluding symbols then do nothing else
             if (!Symbols) {
@@ -305,6 +309,8 @@ namespace NuGet.Commands {
 
             factory.IncludeSymbols = true;
             PackageBuilder symbolsBuilder = factory.CreateBuilder();
+            symbolsBuilder.Version = mainPackageBuilder.Version;
+
             // Get the file name for the sources package and build it
             string outputPath = GetOutputPath(symbolsBuilder, symbols: true);
             BuildPackage(path, symbolsBuilder, outputPath);
@@ -314,8 +320,12 @@ namespace NuGet.Commands {
         }
 
         private void AnalyzePackage(IPackage package) {
-            IList<PackageIssue> issues = 
-                package.Validate(Rules).OrderBy(p => p.Title, StringComparer.CurrentCulture).ToList();
+            IEnumerable<IPackageRule> packageRules = Rules;
+            if (!NoSemVerTransformations) {
+                packageRules = packageRules.Concat(new[] { new StrictSemanticVersionValidationRule() });
+            }
+
+            IList<PackageIssue> issues = package.Validate(packageRules).OrderBy(p => p.Title, StringComparer.CurrentCulture).ToList();
 
             if (issues.Count > 0) {
                 Console.WriteLine();

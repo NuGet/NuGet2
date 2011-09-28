@@ -194,9 +194,10 @@ namespace NuGet.PowerShell.Commands {
                                             .Where(p => p.Published > NuGetConstants.Unpublished)
                                             .AsCollapsed();
             }
-            else if (!Prerelease) {
-                // If we aren't collapsing versions, and the pre-release flag is not set, only display release versions.
-                // We'll filter this on the client 
+            
+            if (ListAvailable && !Prerelease) {
+                // If we aren't collapsing versions, and the pre-release flag is not set, only display release versions when displaying from a remote source.
+                // We don't need to filter packages when showing recent packages or installed packages.
                 packagesToDisplay = packagesToDisplay.Where(p => p.IsReleaseVersion());
             }
 
