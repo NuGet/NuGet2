@@ -31,7 +31,7 @@ namespace NuGet.Dialog.PackageManagerUI {
         }
 
         private void OkButton_Click(object sender, System.Windows.RoutedEventArgs e) {
-            DialogResult = true;
+            Close();
         }
 
         private void DialogWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
