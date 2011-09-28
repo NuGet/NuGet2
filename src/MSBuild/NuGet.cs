@@ -50,7 +50,7 @@ namespace NuGet.MSBuild {
         public string SpecFile { get; set; }
 
         /// <summary>
-        /// Directory to output nupack files to.
+        /// Directory to output NuGet files to.
         /// </summary>
         public string PackageDir { get; set; }
 
