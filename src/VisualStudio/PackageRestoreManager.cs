@@ -45,6 +45,7 @@ namespace NuGet.VisualStudio {
             IPackageRepositoryFactory packageRepositoryFactory,
             IVsThreadedWaitDialogFactory waitDialogFactory) {
 
+            System.Diagnostics.Debug.Assert(solutionManager != null);
             _dte = dte;
             _fileSystemProvider = fileSystemProvider;
             _solutionManager = solutionManager;
@@ -135,18 +136,25 @@ namespace NuGet.VisualStudio {
             }
 
             MsBuildProject buildProject = project.AsMSBuildProject();
+
+            AddSolutionDirProperty(project, buildProject);
             AddNuGetTargets(project, buildProject);
             SetMsBuildProjectProperty(project, buildProject, "RestorePackages", "true");
+
+            if (project.IsJavaScriptProject()) {
+                // JavaScript project requires an extra kick
+                // in order to save changes to the project file.
+                buildProject.Save();
+            }
         }
 
         private void AddNuGetTargets(Project project, MsBuildProject buildProject) {
             string targetsPath = Path.Combine(@"$(SolutionDir)", NuGetTargetsFile);
 
-            AddSolutionDirProperty(project, buildProject);
-
             // adds an <Import> element to this project file.
-            if (buildProject.Xml.Imports.All(
-                    import => !import.Project.Equals(targetsPath, StringComparison.OrdinalIgnoreCase))) {
+            if (buildProject.Xml.Imports == null ||
+                buildProject.Xml.Imports.All(
+                    import => !targetsPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase))) {
 
                 buildProject.Xml.AddImport(targetsPath);
                 project.Save();

@@ -13,6 +13,7 @@ using CompatibilityMapping = System.Collections.Generic.Dictionary<string, strin
 namespace NuGet {
     public static class VersionUtility {
         private const string NetFrameworkIdentifier = ".NETFramework";
+        private const string WinRTFrameworkIdentifier = ".NETCore";
         private const string LessThanOrEqualTo = "\u2264";
         private const string GreaterThanOrEqualTo = "\u2265";
 
@@ -24,6 +25,7 @@ namespace NuGet {
             { ".NET", NetFrameworkIdentifier },
             { "NETFramework", NetFrameworkIdentifier },
             { ".NETFramework", NetFrameworkIdentifier },
+            { "WinRT", WinRTFrameworkIdentifier},
             { ".NETMicroFramework", ".NETMicroFramework" },
             { "netmf", ".NETMicroFramework" },
             { "SL", "Silverlight" },

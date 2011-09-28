@@ -72,7 +72,6 @@ namespace NuGet.Dialog {
             }
         }
 
-
         private class ProjectNodeComparer : IComparer<ProjectNodeBase> {
             public static readonly ProjectNodeComparer Default = new ProjectNodeComparer();
 

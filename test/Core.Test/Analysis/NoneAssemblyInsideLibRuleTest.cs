@@ -23,7 +23,7 @@ namespace NuGet.Test.Analysis {
         [Fact]
         public void AssemblyInsideLibHasNoIssue() {
             // Arrange
-            var package = PackageUtility.CreatePackage("A", assemblyReferences: new[] { "lib\\abc.dll" });
+            var package = PackageUtility.CreatePackage("A", assemblyReferences: new[] { "lib\\abc.dll", "def\\def.winmd" });
             var rule = new NonAssemblyInsideLibRule();
 
             // Act

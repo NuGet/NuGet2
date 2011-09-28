@@ -9,7 +9,7 @@ namespace NuGet.VisualStudio {
         public ProjectName(Project project) {
             FullName = project.FullName;
             UniqueName = project.UniqueName;
-            ShortName = project.Name;
+            ShortName = project.GetNameFixed();
             CustomUniqueName = project.GetCustomUniqueName();
         }
 

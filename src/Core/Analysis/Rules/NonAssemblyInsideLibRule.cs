@@ -21,6 +21,7 @@ namespace NuGet.Analysis.Rules {
                 path.EndsWith(".pdb", StringComparison.OrdinalIgnoreCase)) {
 
                 return assemblies.Contains(Path.ChangeExtension(path, ".dll")) ||
+                       assemblies.Contains(Path.ChangeExtension(path, ".winmd")) ||
                        assemblies.Contains(Path.ChangeExtension(path, ".exe"));
             }
 

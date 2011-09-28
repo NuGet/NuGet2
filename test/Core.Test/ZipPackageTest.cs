@@ -95,6 +95,16 @@ namespace NuGet.Test {
         }
 
         [Fact]
+        public void IsAssemblyReferenceReturnsTrueForWinMDFileInLib() {
+            // Arrange
+            var file = new PhysicalPackageFile { TargetPath = @"lib\NuGet.Core.WINMD" };
+            IEnumerable<string> references = null;
+
+            // Act and Assert
+            Assert.True(ZipPackage.IsAssemblyReference(file, references));
+        }
+
+        [Fact]
         public void IsAssemblyReferenceReturnsFalseIfFileIsNotListedInReferences() {
             // Arrange
             var file = new PhysicalPackageFile { TargetPath = @"lib\NuGet.Core.dll" };

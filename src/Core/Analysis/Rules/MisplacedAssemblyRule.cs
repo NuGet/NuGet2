@@ -21,7 +21,8 @@ namespace NuGet.Analysis.Rules {
                 else if (!directory.StartsWith(Constants.LibDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) {
                     // when checking for assemblies outside 'lib' folder, only check .dll files.
                     // .exe files are often legitimate outside 'lib'.
-                    if (path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)) {
+                    if (path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ||
+                        path.EndsWith(".winmd", StringComparison.OrdinalIgnoreCase)) {
                         yield return CreatePackageIssueForAssembliesOutsideLib(path);
                     }
                 }

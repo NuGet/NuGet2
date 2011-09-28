@@ -10,7 +10,8 @@ namespace NuGet.VisualStudio {
             { VsConstants.WebApplicationProjectTypeGuid , project => new WebProjectSystem(project) },
             { VsConstants.WebSiteProjectTypeGuid , project => new WebSiteProjectSystem(project) },
             { VsConstants.FsharpProjectTypeGuid , project => new FSharpProjectSystem(project) },
-            { VsConstants.WixProjectTypeGuid , project => new WixProjectSystem(project) }
+            { VsConstants.WixProjectTypeGuid , project => new WixProjectSystem(project) },
+            { VsConstants.JsProjectTypeGuid , project => new JsProjectSystem(project) },
         };
 
 
@@ -22,7 +23,7 @@ namespace NuGet.VisualStudio {
             if (String.IsNullOrEmpty(project.FullName)) {
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
-                    VsResources.DTE_ProjectUnsupported, project.Name));
+                    VsResources.DTE_ProjectUnsupported, project.GetNameFixed()));
             }
 
             // Try to get a factory for the project type guid            

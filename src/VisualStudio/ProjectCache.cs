@@ -60,6 +60,7 @@ namespace NuGet.VisualStudio {
                 return false;
             }
 
+
             return _projectNamesCache.ContainsKey(name) ||
                    _shortNameCache.ContainsKey(name);
         }

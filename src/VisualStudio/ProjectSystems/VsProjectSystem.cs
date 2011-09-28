@@ -17,7 +17,7 @@ using Project = EnvDTE.Project;
 namespace NuGet.VisualStudio {
     public class VsProjectSystem : PhysicalFileSystem, IProjectSystem, IVsProjectSystem, IComparer<IPackageFile> {
         private const string BinDir = "bin";
-        private static readonly string[] AssemblyReferencesExtensions = new[] { ".dll", ".exe" };
+        private static readonly string[] AssemblyReferencesExtensions = new[] { ".dll", ".exe", ".winmd" };
 
         private FrameworkName _targetFramework;
 
@@ -224,12 +224,16 @@ namespace NuGet.VisualStudio {
 
             ThreadHelper.Generic.Invoke(() => {
                 ProjectItems container = Project.GetProjectItems(folderPath, createIfNotExists: true);
-                // Add the file to the project
-                container.AddFromFileCopy(fullPath);
+                // Add the file to project or folder
+                AddFileToContainer(fullPath, container);
             });
 
 
             Logger.Log(MessageLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);
+        }
+
+        protected virtual void AddFileToContainer(string fullPath, ProjectItems container) {
+            container.AddFromFileCopy(fullPath);
         }
 
         public virtual string ResolvePath(string path) {

@@ -17,7 +17,7 @@ namespace NuGet {
 
         private readonly bool _enableCaching;
 
-        private static readonly string[] AssemblyReferencesExtensions = new[] { ".dll", ".exe" };
+        private static readonly string[] AssemblyReferencesExtensions = new[] { ".dll", ".exe", ".winmd" };
 
         private static readonly TimeSpan CacheTimeout = TimeSpan.FromSeconds(15);
 
@@ -273,7 +273,7 @@ namespace NuGet {
         }
 
         internal static bool IsAssemblyReference(IPackageFile file, IEnumerable<string> references) {
-            // Assembly references are in lib/ and have a .dll/.exe extension
+            // Assembly references are in lib/ and have a .dll/.exe/.winmd extension
             var path = file.Path;
             var fileName = Path.GetFileName(path);
 

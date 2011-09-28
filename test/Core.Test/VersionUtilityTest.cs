@@ -24,6 +24,22 @@ namespace NuGet.Test {
         }
 
         [Fact]
+        public void ParseFrameworkNameNormalizesSupportedWinRTFrameworkNames() {
+            // Arrange
+            var knownNameFormats = new[] { "winrt" };
+            Version defaultVersion = new Version("0.0");
+
+            // Act
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+
+            // Assert
+            foreach (var frameworkName in frameworkNames) {
+                Assert.Equal(".NETCore", frameworkName.Identifier);
+                Assert.Equal(defaultVersion, frameworkName.Version);
+            }
+        }
+
+        [Fact]
         public void ParseFrameworkNameNormalizesSupportedNetMicroFrameworkNames() {
             // Arrange
             var knownNameFormats = new[] { "netmf4.1", ".NETMicroFramework4.1" };
@@ -207,6 +223,7 @@ namespace NuGet.Test {
             var f4 = VersionUtility.ParseFrameworkFolderName(@"SL3\sub1\foo.dll");
             var f5 = VersionUtility.ParseFrameworkFolderName(@"SL20\sub1\sub2\foo.dll");
             var f6 = VersionUtility.ParseFrameworkFolderName(@"net\foo.dll");
+            var f7 = VersionUtility.ParseFrameworkFolderName(@"winrt45\foo.dll");
 
             Assert.Null(f1);
             Assert.Equal("Unsupported", f2.Identifier);
@@ -218,6 +235,8 @@ namespace NuGet.Test {
             Assert.Equal(new Version("2.0"), f5.Version);
             Assert.Equal(".NETFramework", f6.Identifier);
             Assert.Equal(new Version(), f6.Version);
+            Assert.Equal(".NETCore", f7.Identifier);
+            Assert.Equal(new Version("4.5"), f7.Version);
         }
 
         [Fact]
@@ -230,6 +249,7 @@ namespace NuGet.Test {
             var wp7 = new FrameworkName("Silverlight", new Version(4, 0), "WindowsPhone");
             var wp7Mango = new FrameworkName("Silverlight", new Version(4, 0), "WindowsPhone71");
             var netMicro41 = new FrameworkName(".NETMicroFramework", new Version(4, 1));
+            var winrt = new FrameworkName(".NETCore", new Version(4, 5));
 
             // Act
             string net40Value = VersionUtility.GetFrameworkString(net40);
@@ -239,6 +259,7 @@ namespace NuGet.Test {
             string wp7Value = VersionUtility.GetFrameworkString(wp7);
             string wp7MangoValue = VersionUtility.GetFrameworkString(wp7Mango);
             string netMicro41Value = VersionUtility.GetFrameworkString(netMicro41);
+            string winrtValue = VersionUtility.GetFrameworkString(winrt);
 
             // Assert
             Assert.Equal(".NETFramework4.0", net40Value);
@@ -248,6 +269,7 @@ namespace NuGet.Test {
             Assert.Equal("Silverlight4.0-WindowsPhone", wp7Value);
             Assert.Equal("Silverlight4.0-WindowsPhone71", wp7MangoValue);
             Assert.Equal(".NETMicroFramework4.1", netMicro41Value);
+            Assert.Equal(".NETCore4.5", winrtValue);
         }
 
         [Fact]

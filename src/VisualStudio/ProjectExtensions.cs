@@ -30,6 +30,7 @@ namespace NuGet.VisualStudio {
                                                                           VsConstants.WebSiteProjectTypeGuid, 
                                                                           VsConstants.CsharpProjectTypeGuid, 
                                                                           VsConstants.VbProjectTypeGuid,
+                                                                          VsConstants.JsProjectTypeGuid,
                                                                           VsConstants.FsharpProjectTypeGuid,
                                                                           VsConstants.WixProjectTypeGuid };
 
@@ -40,14 +41,25 @@ namespace NuGet.VisualStudio {
         // List of project types that cannot have references added to them
         private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[] { VsConstants.WixProjectTypeGuid };
         // List of project types that cannot have binding redirects added
-        private static readonly string[] _unsupportedProjectTypesForBindingRedirects = new[] { VsConstants.WixProjectTypeGuid };
+        private static readonly string[] _unsupportedProjectTypesForBindingRedirects = new[] { VsConstants.WixProjectTypeGuid, VsConstants.JsProjectTypeGuid };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
         // Get the ProjectItems for a folder path
         public static ProjectItems GetProjectItems(this Project project, string folderPath, bool createIfNotExists = false) {
             // Traverse the path to get at the directory
             string[] pathParts = folderPath.Split(PathSeparatorChars, StringSplitOptions.RemoveEmptyEntries);
-            return pathParts.Aggregate(project.ProjectItems, (projectItems, folderName) => GetOrCreateFolder(projectItems, folderName, createIfNotExists));
+
+            ProjectItems cursor = project.ProjectItems;
+            string parentPath = project.GetFullPath();
+            foreach (string part in pathParts) {
+                cursor = GetOrCreateFolder(cursor, parentPath, part, createIfNotExists);
+                if (cursor == null) {
+                    return null;
+                }
+                parentPath = Path.Combine(parentPath, part);
+            }
+
+            return cursor;
         }
 
         public static ProjectItem GetProjectItem(this Project project, string path) {
@@ -164,6 +176,23 @@ namespace NuGet.VisualStudio {
                    outputType == prjOutputType.prjOutputTypeLibrary;
         }
 
+        public static string GetNameFixed(this Project project) {
+            string name = project.Name;
+            if (project.IsJavaScriptProject()) {
+                // The JavaScript project initially returns a "(loading..)" suffix to the project Name.
+                // Need to get rid of it for the rest of NuGet to work properly.
+                const string suffix = " (loading...)";
+                if (name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)) {
+                    name = name.Substring(0, name.Length - suffix.Length);
+                }
+            }
+            return name;
+        }
+
+        public static bool IsJavaScriptProject(this Project project) {
+            return project != null & VsConstants.JsProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
+        }
+
         // TODO: Return null for library projects
         public static string GetConfigurationFile(this Project project) {
             return project.IsWebProject() ? WebConfig : AppConfig;
@@ -172,7 +201,7 @@ namespace NuGet.VisualStudio {
         private static ProjectItem GetProjectItem(ProjectItems projectItems, string name, string kind) {
             try {
                 ProjectItem projectItem = projectItems.Item(name);
-                if (kind.Equals(projectItem.Kind, StringComparison.OrdinalIgnoreCase)) {
+                if (projectItem != null && kind.Equals(projectItem.Kind, StringComparison.OrdinalIgnoreCase)) {
                     return projectItem;
                 }
             }
@@ -197,10 +226,27 @@ namespace NuGet.VisualStudio {
         }
 
         public static string GetFullPath(this Project project) {
-            return project.GetPropertyValue<string>("FullPath");
+            string fullPath = project.GetPropertyValue<string>("FullPath");
+            if (!String.IsNullOrEmpty(fullPath)) {
+                // Some Project System implementations (JS metro app) return the project 
+                // file as FullPath. We only need the parent directory
+                if (File.Exists(fullPath)) {
+                    fullPath = Path.GetDirectoryName(fullPath);
+                }
+            }
+            return fullPath;
         }
 
         public static string GetTargetFramework(this Project project) {
+            if (project.IsJavaScriptProject()) {
+                // HACK: The JS Metro project does not have a TargetFrameworkMoniker property set. 
+                // We hard-code the return value so that it behaves as if it had a WinRT target 
+                // framework, i.e. .NETCore, Version=4.5
+                
+                // Review: What about future versions? Let's not worry about that for now.
+                return ".NETCore, Version=4.5";
+            }
+
             return project.GetPropertyValue<string>("TargetFrameworkMoniker");
         }
 
@@ -227,7 +273,7 @@ namespace NuGet.VisualStudio {
             return token == "*" ? @"(.*)" : @"(" + token + ")";
         }
 
-        private static ProjectItems GetOrCreateFolder(ProjectItems projectItems, string folderName, bool createIfNotExists) {
+        private static ProjectItems GetOrCreateFolder(ProjectItems projectItems, string parentPath, string folderName, bool createIfNotExists) {
             if (projectItems == null) {
                 return null;
             }
@@ -238,11 +284,8 @@ namespace NuGet.VisualStudio {
                 return subFolder.ProjectItems;
             }
             else if (createIfNotExists) {
-                Property property = projectItems.Parent.Properties.Item("FullPath");
-
-                Debug.Assert(property != null, "Unable to get full path property from the project item");
                 // Get the full path of this folder on disk and add it
-                string fullPath = Path.Combine(property.Value, folderName);
+                string fullPath = Path.Combine(parentPath, folderName);
 
                 try {
                     return projectItems.AddFromDirectory(fullPath).ProjectItems;
@@ -329,7 +372,7 @@ namespace NuGet.VisualStudio {
         }
 
         public static FrameworkName GetTargetFrameworkName(this Project project) {
-            string targetFrameworkMoniker = project.GetPropertyValue<string>("TargetFrameworkMoniker");
+            string targetFrameworkMoniker = project.GetTargetFramework();
             if (targetFrameworkMoniker != null) {
                 return new FrameworkName(targetFrameworkMoniker);
             }
@@ -339,16 +382,25 @@ namespace NuGet.VisualStudio {
 
         public static IEnumerable<string> GetProjectTypeGuids(this Project project) {
             // Get the vs hierarchy as an IVsAggregatableProject to get the project type guids
-            var aggregatableProject = (IVsAggregatableProject)project.ToVsHierarchy();
 
-            string projectTypeGuids;
-            int hr = aggregatableProject.GetAggregateProjectTypeGuids(out projectTypeGuids);
+            var hierarchy = project.ToVsHierarchy();
+            var aggregatableProject = hierarchy as IVsAggregatableProject;
+            if (aggregatableProject != null) {
+                string projectTypeGuids;
+                int hr = aggregatableProject.GetAggregateProjectTypeGuids(out projectTypeGuids);
 
-            if (hr != VsConstants.S_OK) {
-                Marshal.ThrowExceptionForHR(hr);
+                if (hr != VsConstants.S_OK) {
+                    Marshal.ThrowExceptionForHR(hr);
+                }
+
+                return projectTypeGuids.Split(';');
             }
-
-            return projectTypeGuids.Split(';');
+            else if (!String.IsNullOrEmpty(project.Kind)) {
+                return new String[] { project.Kind };
+            }
+            else {
+                return new String[0];
+            }
         }
 
         internal static IEnumerable<Project> GetReferencedProjects(this Project project) {
@@ -426,7 +478,8 @@ namespace NuGet.VisualStudio {
         }
 
         public static MsBuildProject AsMSBuildProject(this Project project) {
-            return ProjectCollection.GlobalProjectCollection.GetLoadedProjects(project.FullName).FirstOrDefault();
+            return ProjectCollection.GlobalProjectCollection.GetLoadedProjects(project.FullName).FirstOrDefault() ??
+                   ProjectCollection.GlobalProjectCollection.LoadProject(project.FullName);
         }
 
         /// <summary>
@@ -444,12 +497,12 @@ namespace NuGet.VisualStudio {
                 Stack<string> nameParts = new Stack<string>();
 
                 Project cursor = project;
-                nameParts.Push(cursor.Name);
+                nameParts.Push(cursor.GetNameFixed());
 
                 // walk up till the solution root
                 while (cursor.ParentProjectItem != null && cursor.ParentProjectItem.ContainingProject != null) {
                     cursor = cursor.ParentProjectItem.ContainingProject;
-                    nameParts.Push(cursor.Name);
+                    nameParts.Push(cursor.GetNameFixed());
                 }
 
                 return String.Join("\\", nameParts);
