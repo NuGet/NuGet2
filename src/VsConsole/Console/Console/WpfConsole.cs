@@ -20,9 +20,9 @@ namespace NuGetConsole.Implementation.Console {
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Microsoft.Maintainability", 
+        "Microsoft.Maintainability",
         "CA1506:AvoidExcessiveClassCoupling",
-        Justification="We don't have resources to refactor this class.")]
+        Justification = "We don't have resources to refactor this class.")]
     internal class WpfConsole : ObjectWithFactory<WpfConsoleService>, IDisposable {
         private readonly IPrivateConsoleStatus _consoleStatus;
         private IVsTextBuffer _bufferAdapter;
@@ -333,8 +333,6 @@ namespace NuGetConsole.Implementation.Console {
         }
 
         public SnapshotSpan GetInputLineExtent(int start = 0, int length = -1) {
-            Debug.Assert(_inputLineStart != null);
-
             SnapshotPoint beginPoint = InputLineStart.Value + start;
             return length >= 0
                        ? new SnapshotSpan(beginPoint, length)
@@ -557,14 +555,14 @@ namespace NuGetConsole.Implementation.Console {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Usage", 
-            "CA2213:DisposableFieldsShouldBeDisposed", 
+            "Microsoft.Usage",
+            "CA2213:DisposableFieldsShouldBeDisposed",
             MessageId = "_marshaler",
-            Justification="The Dispose() method on _marshaler is called when the tool window is closed."), 
+            Justification = "The Dispose() method on _marshaler is called when the tool window is closed."),
         System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", 
+            "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification="We don't want to crash VS when it exits.")]
+            Justification = "We don't want to crash VS when it exits.")]
         protected virtual void Dispose(bool disposing) {
             if (disposing) {
                 if (_bufferAdapter != null) {
@@ -585,7 +583,7 @@ namespace NuGetConsole.Implementation.Console {
                 if (disposable != null) {
                     disposable.Dispose();
                 }
-            }   
+            }
         }
 
         ~WpfConsole() {

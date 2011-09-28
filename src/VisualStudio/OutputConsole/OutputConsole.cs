@@ -129,5 +129,8 @@ namespace NuGet.VisualStudio {
         public void ClearConsole() {
             Clear();
         }
+
+        public void AcceptKeyInput() {
+        }
     }
 }

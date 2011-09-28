@@ -81,6 +81,14 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
+        public void AcceptKeyInput() {
+            Debug.Assert(_dispatcher != null);
+
+            if (_dispatcher != null && WpfConsole != null) {
+                WpfConsole.BeginInputLine();
+            }
+        }
+
         public VsKeyInfo WaitKey() {
             try {
                 // raise the StartWaitingKey event on main thread
@@ -291,7 +299,7 @@ namespace NuGetConsole.Implementation.Console {
             }
 
             private bool IsStarted {
-                get {
+                get { 
                     return _buffer != null;
                 }
             }

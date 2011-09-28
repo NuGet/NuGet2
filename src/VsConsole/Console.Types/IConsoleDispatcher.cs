@@ -36,6 +36,8 @@ namespace NuGetConsole {
 
         bool IsKeyAvailable { get; }
 
+        void AcceptKeyInput();
+
         VsKeyInfo WaitKey();
 
         /// <summary>

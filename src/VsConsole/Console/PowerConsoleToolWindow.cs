@@ -374,6 +374,10 @@ namespace NuGetConsole.Implementation {
                 try {
                     if (WpfConsole.Dispatcher.IsStartCompleted) {
                         OnDispatcherStartCompleted();
+                        // if the dispatcher was started before we reach here, 
+                        // it means the dispatcher has been in read-only mode (due to _startedWritingOutput = false).
+                        // enable key input now.
+                        WpfConsole.Dispatcher.AcceptKeyInput();
                     }
                     else {
                         WpfConsole.Dispatcher.StartCompleted += (sender, args) => {
@@ -403,6 +407,8 @@ namespace NuGetConsole.Implementation {
         }
 
         private void OnDispatcherStartCompleted() {
+            WpfConsole.Dispatcher.StartWaitingKey -= OnDispatcherStartWaitingKey;
+
             ConsoleParentPane.NotifyInitializationCompleted();
 
             // force the UI to update the toolbar
