@@ -75,5 +75,29 @@ namespace NuGet.Test
             Assert.Equal(0, cache.Source.Length);
             Assert.False(cache.TryFindPackage("TestPackage", new SemanticVersion("1.0"), out package));
         }
+
+        [Fact]
+        public void MachineCacheUsesEnvironmentSpecifiedLocationIfProvided()
+        {
+            // Arrange
+            System.Environment.SetEnvironmentVariable("NUGETCACHEPATH", @"c:\temp\some\directory");
+
+            // Act
+
+            // Assert
+            Assert.True(MachineCache.GetCachePath() == @"c:\temp\some\directory");
+        }
+
+        [Fact]
+        public void MachineCacheDoesntUseEnvironmentSpecifiedLocationIfNotProvided()
+        {
+            // Arrange
+            System.Environment.SetEnvironmentVariable("NUGETCACHEPATH", @"");
+
+            // Act
+
+            // Assert
+            Assert.True(MachineCache.GetCachePath() == Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"NuGet\Cache"));
+        }
     }
 }
