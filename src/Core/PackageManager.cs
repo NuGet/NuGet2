@@ -141,10 +141,6 @@ namespace NuGet {
                                                Logger,
                                                ignoreDependencies,
                                                allowPrereleaseVersions));
-
-            if (_cacheRepository != null) {
-                _cacheRepository.AddPackage(package);
-            }
         }
 
         private void Execute(IPackage package, IPackageOperationResolver resolver) {
@@ -193,6 +189,10 @@ namespace NuGet {
             Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageInstalledSuccessfully, package.GetFullName());
 
             OnInstalled(args);
+
+            if (_cacheRepository != null) {
+                _cacheRepository.AddPackage(package);
+            }
         }
 
         private void ExpandFiles(IPackage package) {
@@ -346,10 +346,6 @@ namespace NuGet {
                                                 Logger,
                                                 updateDependencies,
                                                 allowPrereleaseVersions));
-
-            if (_cacheRepository != null) {
-                _cacheRepository.AddPackage(newPackage);
-            }
         }
     }
 }
