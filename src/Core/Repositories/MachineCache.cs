@@ -115,9 +115,9 @@ namespace NuGet
         /// <summary>
         /// The cache path is %LocalAppData%\NuGet\Cache 
         /// </summary>
-        private static string GetCachePath()
-        {
-            string localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        internal static string GetCachePath() {
+            string cacheOverride = Environment.GetEnvironmentVariable("NUGETCACHEROOT");
+            string localAppDataPath = !string.IsNullOrEmpty(cacheOverride) ? cacheOverride : Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             if (String.IsNullOrEmpty(localAppDataPath))
             {
                 return null;
