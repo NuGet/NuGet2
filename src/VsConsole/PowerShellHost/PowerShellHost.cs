@@ -176,7 +176,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
             else {
                 // if there is no solution open, we set the active directory to be user profile folder
-                targetDir = "$Env:USERPROFILE";
+                targetDir = Environment.GetEnvironmentVariable("USERPROFILE");
             }
 
             if (Runspace.RunspaceAvailability == RunspaceAvailability.Available) {
