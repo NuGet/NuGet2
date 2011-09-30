@@ -28,6 +28,9 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "InstallCommandExcludeVersionDescription", AltName = "x")]
         public bool ExcludeVersion { get; set; }
 
+        [Option(typeof(NuGetResources), "InstallCommandPrerelease")]
+        public bool Prerelease { get; set; } 
+
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }
 
         public IPackageSourceProvider SourceProvider { get; private set; }
@@ -56,14 +59,15 @@ namespace NuGet.Commands {
             // If the first argument is a packages.config file, install everything it lists
             // Otherwise, treat the first argument as a package Id
             if (Path.GetFileName(Arguments[0]).Equals(PackageReferenceRepository.PackageReferenceFile, StringComparison.OrdinalIgnoreCase)) {
+                Prerelease = true;
                 InstallPackagesFromConfigFile(fileSystem, GetPackageReferenceFile(Arguments[0]));
             }
             else {
-                PackageManager packageManager = CreatePackageManager(fileSystem);
+                IPackageManager packageManager = CreatePackageManager(fileSystem);
                 string packageId = Arguments[0];
                 SemanticVersion version = Version != null ? new SemanticVersion(Version) : null;
 
-                bool result = InstallPackage(packageManager, fileSystem, packageId, version);
+                bool result = InstallPackage(packageManager, fileSystem, packageId, version, ignoreDependencies: false);
                 if (!result) {
                     Console.WriteLine(NuGetResources.InstallCommandPackageAlreadyExists, packageId);
                 }
@@ -82,7 +86,7 @@ namespace NuGet.Commands {
 
         private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile file) {
             var packageReferences = file.GetPackageReferences().ToList();
-            PackageManager packageManager = CreatePackageManager(fileSystem, useMachineCache: true);
+            IPackageManager packageManager = CreatePackageManager(fileSystem, useMachineCache: true);
 
             bool installedAny = false;
             foreach (var package in packageReferences) {
@@ -96,7 +100,7 @@ namespace NuGet.Commands {
                 }
 
                 // Note that we ignore dependencies here because packages.config already contains the full closure
-                installedAny |= InstallPackage(packageManager, fileSystem, package.Id, package.Version);
+                installedAny |= InstallPackage(packageManager, fileSystem, package.Id, package.Version, ignoreDependencies: true);
             }
 
             if (!installedAny && packageReferences.Any()) {
@@ -104,7 +108,7 @@ namespace NuGet.Commands {
             }
         }
 
-        private bool InstallPackage(PackageManager packageManager, IFileSystem fileSystem, string packageId, SemanticVersion version) {
+        internal bool InstallPackage(IPackageManager packageManager, IFileSystem fileSystem, string packageId, SemanticVersion version, bool ignoreDependencies) {
             if (AllowMultipleVersions && IsPackageInstalled(packageId, version, packageManager, fileSystem)) {
                 // Use a fast check to verify if the package is already installed. We'll do this by checking if the package directory exists on disk.
                 return false;
@@ -126,11 +130,11 @@ namespace NuGet.Commands {
                     }
                 }
             }
-            packageManager.InstallPackage(packageId, version);
+            packageManager.InstallPackage(packageId, version, ignoreDependencies: ignoreDependencies, allowPrereleaseVersions: Prerelease);
             return true;
         }
 
-        protected virtual PackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache = false, IPackageRepository machineCacheRepository = null) {
+        protected virtual IPackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache = false, IPackageRepository machineCacheRepository = null) {
             var repository = GetRepository();
 
             machineCacheRepository = machineCacheRepository ?? MachineCache.Default;
@@ -154,7 +158,7 @@ namespace NuGet.Commands {
         }
 
         // Do a very quick check of whether a package in installed by checked whether the nupkg file exists
-        private static bool IsPackageInstalled(string packageId, SemanticVersion version, PackageManager packageManager, IFileSystem fileSystem) {
+        private static bool IsPackageInstalled(string packageId, SemanticVersion version, IPackageManager packageManager, IFileSystem fileSystem) {
             var packageDir = packageManager.PathResolver.GetPackageDirectory(packageId, version);
             var packageFile = packageManager.PathResolver.GetPackageFileName(packageId, version);
 

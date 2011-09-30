@@ -149,6 +149,22 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
+        public void InstallCommandInstallsPrereleasePackageIfFlagIsSpecified() {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem) { Prerelease = true };
+            installCommand.Arguments.Add("Baz");
+            installCommand.Source.Add("Some Source name");
+            installCommand.Source.Add("Some other Source");
+
+            // Act
+            installCommand.ExecuteCommand();
+
+            // Assert
+            Assert.Equal(@"Baz.0.8.1alpha\Baz.0.8.1alpha.nupkg", fileSystem.Paths.Single().Key);
+        }
+
+        [Fact]
         public void InstallCommandUpdatesPackageIfAlreadyPresentAndNotUsingSideBySide() {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -228,9 +244,38 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             Assert.Equal(1, packages.Count);
         }
 
+        [Fact]
+        public void InstallCommandFromConfigIgnoresDependencies() {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""Foo"" version=""1.0.0"" />
+  <package id=""Qux"" version=""2.3.56beta"" />
+</packages>");
+
+            var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
+            var package = PackageUtility.CreatePackage("Foo", "1.0.0");
+            packageManager.Setup(p => p.InstallPackage("Foo", new SemanticVersion("1.0.0"), true, true)).Verifiable();
+            packageManager.Setup(p => p.InstallPackage("Qux", new SemanticVersion("2.3.56beta"), true, true)).Verifiable();
+            packageManager.SetupGet(p => p.PathResolver).Returns(new DefaultPackagePathResolver(fileSystem));
+            var repository = new MockPackageRepository();
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
+            var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+
+            // Act
+            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object);
+            installCommand.Arguments.Add("packages.config");
+            installCommand.Execute();
+    
+            // Assert
+            packageManager.Verify();
+        }
+
         private static IPackageRepositoryFactory GetFactory() {
             var repositoryA = new MockPackageRepository { PackageUtility.CreatePackage("Foo"), PackageUtility.CreatePackage("Baz", "0.4"), PackageUtility.CreatePackage("Baz", "0.7") };
-            var repositoryB = new MockPackageRepository { PackageUtility.CreatePackage("Bar", "0.5") };
+            var repositoryB = new MockPackageRepository { PackageUtility.CreatePackage("Bar", "0.5"), PackageUtility.CreatePackage("Baz", "0.8.1alpha") };
 
             var factory = new Mock<IPackageRepositoryFactory>();
             factory.Setup(c => c.CreateRepository(It.Is<string>(f => f.Equals("Some source")))).Returns(repositoryA);
@@ -254,12 +299,12 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
         private class TestInstallCommand : InstallCommand {
             private readonly IFileSystem _fileSystem;
-            private readonly PackageManager _packageManager;
+            private readonly IPackageManager _packageManager;
 
             public TestInstallCommand(IPackageRepositoryFactory factory,
                                       IPackageSourceProvider sourceProvider,
                                       IFileSystem fileSystem,
-                                      PackageManager packageManager = null)
+                                      IPackageManager packageManager = null)
                 : base(factory, sourceProvider) {
                 _fileSystem = fileSystem;
                 _packageManager = packageManager;
@@ -270,7 +315,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
                 return _fileSystem;
             }
 
-            protected override PackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache, IPackageRepository repository) {
+            protected override IPackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache, IPackageRepository repository) {
                 return _packageManager ?? 
                     base.CreatePackageManager(
                         fileSystem, 

@@ -429,6 +429,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Allows prerelease packages to be installed. This flag is not required when restoring packages by installing from packages.config..
+        /// </summary>
+        internal static string InstallCommandPrerelease {
+            get {
+                return ResourceManager.GetString("InstallCommandPrerelease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A list of packages sources to use for the install..
         /// </summary>
         internal static string InstallCommandSourceDescription {
