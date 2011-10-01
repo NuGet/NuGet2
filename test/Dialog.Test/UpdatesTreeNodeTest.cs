@@ -19,7 +19,7 @@ namespace NuGet.Dialog.Test {
             MockPackageRepository sourceRepository = new MockPackageRepository();
 
             string category = "Mock node";
-            UpdatesTreeNode node = CreateSimpleTreeNode(localRepository, sourceRepository, category);
+            UpdatesTreeNode node = CreateUpdatesTreeNode(localRepository, sourceRepository, category);
 
             // Act & Assert
             Assert.Equal(category, node.Name);
@@ -32,7 +32,7 @@ namespace NuGet.Dialog.Test {
             MockPackageRepository localRepository = new MockPackageRepository();
             MockPackageRepository sourceRepository = new MockPackageRepository();
 
-            UpdatesTreeNode node = CreateSimpleTreeNode(localRepository, sourceRepository);
+            UpdatesTreeNode node = CreateUpdatesTreeNode(localRepository, sourceRepository);
 
             localRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
 
@@ -53,7 +53,7 @@ namespace NuGet.Dialog.Test {
             MockPackageRepository localRepository = new MockPackageRepository();
             MockPackageRepository sourceRepository = new MockPackageRepository();
 
-            UpdatesTreeNode node = CreateSimpleTreeNode(localRepository, sourceRepository);
+            UpdatesTreeNode node = CreateUpdatesTreeNode(localRepository, sourceRepository);
 
             localRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
 
@@ -73,7 +73,7 @@ namespace NuGet.Dialog.Test {
             MockPackageRepository localRepository = new MockPackageRepository();
             MockPackageRepository sourceRepository = new MockPackageRepository();
 
-            UpdatesTreeNode node = CreateSimpleTreeNode(localRepository, sourceRepository);
+            UpdatesTreeNode node = CreateUpdatesTreeNode(localRepository, sourceRepository);
 
             localRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
 
@@ -95,7 +95,7 @@ namespace NuGet.Dialog.Test {
             MockPackageRepository localRepository = new MockPackageRepository();
             MockPackageRepository sourceRepository = new MockPackageRepository();
 
-            UpdatesTreeNode node = CreateSimpleTreeNode(localRepository, sourceRepository);
+            UpdatesTreeNode node = CreateUpdatesTreeNode(localRepository, sourceRepository);
 
             localRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
             localRepository.AddPackage(PackageUtility.CreatePackage("B", "1.0"));
@@ -113,6 +113,31 @@ namespace NuGet.Dialog.Test {
             AssertPackage(packages[1], "B", "2.0");
         }
 
+        [Fact]
+        public void GetPackagesOnlyReturnPackagesCompatibleWithTheProjects() {
+            // Arrange
+            MockPackageRepository localRepository = new MockPackageRepository();
+            localRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
+            localRepository.AddPackage(PackageUtility.CreatePackage("B", "1.0"));
+
+            MockPackageRepository sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.5"));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.9", assemblyReferences: new string[] { "lib\\sl4\\a.dll" } ));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "2.0", assemblyReferences: new string[] { "lib\\net20\\b.dll" }));
+
+            PackagesProviderBase provider = new MockPackagesProvider(new string[] { ".NETFramework,Version=3.0" });
+
+            IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
+            var node = new UpdatesTreeNode(provider, "Mock", parentTreeNode, localRepository, sourceRepository);            
+            
+            // Act
+            var packages = node.GetPackages().ToList();
+
+            // Assert
+            Assert.Equal(1, packages.Count);
+            AssertPackage(packages[0], "B", "2.0");
+        }
+
         private static void AssertPackage(IPackage package, string id, string version = null) {
             Assert.NotNull(package);
             Assert.Equal(id, package.Id);
@@ -121,7 +146,7 @@ namespace NuGet.Dialog.Test {
             }
         }
 
-        private static UpdatesTreeNode CreateSimpleTreeNode(IPackageRepository localRepository, IPackageRepository sourceRepository, string category = "Mock node") {
+        private static UpdatesTreeNode CreateUpdatesTreeNode(IPackageRepository localRepository, IPackageRepository sourceRepository, string category = "Mock node") {
             PackagesProviderBase provider = new MockPackagesProvider();
             IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
             return new UpdatesTreeNode(provider, category, parentTreeNode, localRepository, sourceRepository);

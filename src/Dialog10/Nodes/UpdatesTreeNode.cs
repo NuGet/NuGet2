@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuGet.Dialog.Providers {
@@ -23,9 +25,17 @@ namespace NuGet.Dialog.Providers {
         public override IQueryable<IPackage> GetPackages() {
             // We need to call ToList() here so that we don't evaluate the enumerable twice
             // when trying to count it.
-            return Repository.GetUpdates(_localRepository.GetPackages())
-                             .ToList()
-                             .AsQueryable();
+            IList<IPackage> updateCandidates = Repository.GetUpdates(_localRepository.GetPackages()).ToList();
+
+            IList<FrameworkName> solutionFrameworks = Provider.SupportedFrameworks.Select(s => new FrameworkName(s)).ToList();
+
+            // among the candidates, choose those that are compatible with at least one project in the solution
+            var updates = from package in updateCandidates
+                          let packageFrameworks = package.GetSupportedFrameworks()
+                          where solutionFrameworks.Count == 0 || solutionFrameworks.Any(s => VersionUtility.IsCompatible(s, packageFrameworks))
+                          select package;
+
+            return updates.AsQueryable();
         }
     }
 }

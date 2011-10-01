@@ -84,9 +84,24 @@ namespace NuGet.Test {
                 mockAssemblyReference.Setup(m => m.GetStream()).Returns(() => new MemoryStream());
                 mockAssemblyReference.Setup(m => m.Path).Returns(fileName);
                 mockAssemblyReference.Setup(m => m.Name).Returns(Path.GetFileName(fileName));
+
+                FrameworkName fn = ParseFrameworkName(fileName);
+                if (fn != null) {
+                    mockAssemblyReference.Setup(m => m.SupportedFrameworks).Returns(new [] {fn});
+                }
+                
                 assemblyReferences.Add(mockAssemblyReference.Object);
             }
             return assemblyReferences;
+        }
+
+        private static FrameworkName ParseFrameworkName(string fileName) {
+            if (fileName.StartsWith("lib\\")) {
+                fileName = fileName.Substring(4);
+                return VersionUtility.ParseFrameworkFolderName(fileName);
+            }
+
+            return null;
         }
 
         public static IPackageAssemblyReference CreateAssemblyReference(string path, FrameworkName targetFramework) {

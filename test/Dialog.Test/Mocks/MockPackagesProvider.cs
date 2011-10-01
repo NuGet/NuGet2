@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Moq;
 using NuGet.Dialog.PackageManagerUI;
@@ -8,17 +10,34 @@ using NuGet.VisualStudio;
 namespace NuGet.Dialog.Test {
     internal class MockPackagesProvider : PackagesProviderBase {
 
+        private IEnumerable<string> _supportedFrameworks;
+
         public MockPackagesProvider()
-            : this(new Mock<IPackageRepository>().Object, new Mock<IVsPackageManager>().Object) {
+            : this(new Mock<IPackageRepository>().Object, new Mock<IVsPackageManager>().Object, Enumerable.Empty<string>()) {
+        }
+
+        public MockPackagesProvider(IEnumerable<string> supportedFrameworks)
+            : this(new Mock<IPackageRepository>().Object, new Mock<IVsPackageManager>().Object, supportedFrameworks) {
         }
 
         public MockPackagesProvider(IPackageRepository localRepository, IVsPackageManager packageManagerr)
+            : this(localRepository, packageManagerr, Enumerable.Empty<string>()) {
+        }
+
+        public MockPackagesProvider(IPackageRepository localRepository, IVsPackageManager packageManagerr, IEnumerable<string> supportedFrameworks)
             : base(
                 localRepository,
                 new ResourceDictionary(),
                 new ProviderServices(new Mock<IUserNotifierServices>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider()),
                 new Mock<IProgressProvider>().Object,
                 new Mock<ISolutionManager>().Object) {
+            _supportedFrameworks = supportedFrameworks;
+        }
+
+        public override IEnumerable<string> SupportedFrameworks {
+            get {
+                return _supportedFrameworks;
+            }
         }
 
         public override IVsExtension CreateExtension(NuGet.IPackage package) {
