@@ -115,6 +115,22 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
+        public void InstalledProviderDoesNotCollapseVersions() {
+            // Arrange
+            var repository = CreateInstalledProvider();
+
+            // Act
+            var extentionsTree = repository.ExtensionsTree;
+
+            // Assert
+            Assert.Equal(1, extentionsTree.Nodes.Count);
+
+            Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[0]);
+            Assert.Equal("All", extentionsTree.Nodes[0].Name);
+            Assert.False(((SimpleTreeNode) extentionsTree.Nodes[0]).CollapseVersions);
+        }
+
+        [Fact]
         public void ExecuteMethodCallsUninstallPackageMethodOnPackageManager() {
             // Local repository contains Package A
 
