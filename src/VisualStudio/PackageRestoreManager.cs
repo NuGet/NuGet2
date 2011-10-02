@@ -144,6 +144,7 @@ namespace NuGet.VisualStudio {
             if (project.IsJavaScriptProject()) {
                 // JavaScript project requires an extra kick
                 // in order to save changes to the project file.
+                // TODO: Check with VS team to ask them to fix 
                 buildProject.Save();
             }
         }

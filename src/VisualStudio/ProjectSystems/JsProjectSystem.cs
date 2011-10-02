@@ -11,7 +11,7 @@ namespace NuGet.VisualStudio {
 
         public override string ProjectName {
             get {
-                return Project.GetNameFixed();
+                return Project.GetName();
             }
         }
 

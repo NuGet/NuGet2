@@ -176,11 +176,12 @@ namespace NuGet.VisualStudio {
                    outputType == prjOutputType.prjOutputTypeLibrary;
         }
 
-        public static string GetNameFixed(this Project project) {
+        public static string GetName(this Project project) {
             string name = project.Name;
             if (project.IsJavaScriptProject()) {
                 // The JavaScript project initially returns a "(loading..)" suffix to the project Name.
                 // Need to get rid of it for the rest of NuGet to work properly.
+                // TODO: Follow up with the VS team to see if this will be fixed eventually
                 const string suffix = " (loading...)";
                 if (name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)) {
                     name = name.Substring(0, name.Length - suffix.Length);
@@ -497,12 +498,12 @@ namespace NuGet.VisualStudio {
                 Stack<string> nameParts = new Stack<string>();
 
                 Project cursor = project;
-                nameParts.Push(cursor.GetNameFixed());
+                nameParts.Push(cursor.GetName());
 
                 // walk up till the solution root
                 while (cursor.ParentProjectItem != null && cursor.ParentProjectItem.ContainingProject != null) {
                     cursor = cursor.ParentProjectItem.ContainingProject;
-                    nameParts.Push(cursor.GetNameFixed());
+                    nameParts.Push(cursor.GetName());
                 }
 
                 return String.Join("\\", nameParts);
