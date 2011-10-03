@@ -80,7 +80,17 @@ namespace NuGet {
                 using (var container = new CompositionContainer(catalog)) {
                     var settings = GetCommandLineSettings(fileSystem);
                     var defaultPackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl);
-                    var packageSourceProvider = new PackageSourceProvider(settings, new[] { defaultPackageSource });
+
+                    var officialPackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl, NuGetResources.OfficialPackageSourceName);
+                    var v1PackageSource = new PackageSource(NuGetConstants.V1FeedUrl, NuGetResources.OfficialPackageSourceName);
+
+                    var packageSourceProvider = new PackageSourceProvider(
+                        settings,
+                        new[] { defaultPackageSource },
+                        new Dictionary<PackageSource, PackageSource> { 
+                            { v1PackageSource, officialPackageSource }
+                        }
+                    );
 
                     container.ComposeExportedValue<ISettings>(settings);
                     container.ComposeExportedValue<IPackageRepositoryFactory>(new NuGet.Common.CommandLineRepositoryFactory());

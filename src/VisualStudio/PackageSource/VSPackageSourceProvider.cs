@@ -35,9 +35,10 @@ namespace NuGet.VisualStudio {
             _packageSourceProvider = packageSourceProvider;
             _settings = settings;
             _packageSources = _packageSourceProvider.LoadPackageSources().ToList();
-            
+
             DeserializeActivePackageSource();
             AddOfficialPackageSourceIfNeeded();
+            MigrateActivePackageSource();
         }
 
         public PackageSource ActivePackageSource {
@@ -45,7 +46,10 @@ namespace NuGet.VisualStudio {
                 return _activePackageSource;
             }
             set {
-                if (value != null && !IsAggregateSource(value) && !_packageSources.Contains(value)) {
+                if (value != null && 
+                    !IsAggregateSource(value) && 
+                    !_packageSources.Contains(value) &&
+                    !value.Name.Equals(OfficialFeedName, StringComparison.CurrentCultureIgnoreCase)) {
                     throw new ArgumentException(VsResources.PackageSource_Invalid, "value");
                 }
 
@@ -139,9 +143,6 @@ namespace NuGet.VisualStudio {
             }
 
             if (packageSource != null) {
-                // this is to guard against corrupted VS user settings store
-                AddPackageSource(packageSource);
-
                 // active package source must be enabled. 
                 Debug.Assert(packageSource.IsEnabled);
 
@@ -152,16 +153,27 @@ namespace NuGet.VisualStudio {
             }
         }
 
+        private void MigrateActivePackageSource() {
+            // migrate the active source from the V1 feed to the V2 feed if applicable
+            if (ActivePackageSource != null &&
+                ActivePackageSource.Source.Equals(NuGetConstants.V1FeedUrl, StringComparison.OrdinalIgnoreCase) &&
+                ActivePackageSource.Name.Equals(OfficialFeedName, StringComparison.CurrentCultureIgnoreCase)) {
+
+                ActivePackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl, OfficialFeedName);
+            }
+        }
+
         private void AddOfficialPackageSourceIfNeeded() {
             // Look for an official source by name
-            PackageSource officialFeed = LoadPackageSources().FirstOrDefault(ps => ps.Name == OfficialFeedName);
+            PackageSource officialFeed = _packageSources.FirstOrDefault(ps => ps.Name == OfficialFeedName);
+            bool isOfficialFeedEnabled = true;
 
             if (officialFeed == null) {
                 // There is no official feed currently registered
 
                 // Don't register our feed unless the list is empty (other than the aggregate). This is the first-run scenario.
                 // It also applies if user deletes all their feeds, in which case bringing back the official feed makes sense.
-                if (LoadPackageSources().Count() > 1) {
+                if (_packageSources.Count > 1) {
                     return;
                 }
 
@@ -174,10 +186,12 @@ namespace NuGet.VisualStudio {
 
                 // It doesn't point to the right place (e.g. came from previous build), so get rid of it
                 RemovePackageSource(officialFeed);
+                // in this case, we want to preserve the IsEnabled property of the official Feed
+                isOfficialFeedEnabled = officialFeed.IsEnabled;
             }
 
-            // Insert it at first position 
-            officialFeed = new PackageSource(NuGetConstants.DefaultFeedUrl, OfficialFeedName);
+            // Insert it at first position
+            officialFeed = new PackageSource(NuGetConstants.DefaultFeedUrl, OfficialFeedName, isOfficialFeedEnabled);
             _packageSources.Insert(0, officialFeed);
 
             // Only make it the active source if there isn't one already

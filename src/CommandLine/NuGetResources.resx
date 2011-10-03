@@ -731,4 +731,7 @@ nuget update -Self</value>
   <data name="InstallCommandPrerelease" xml:space="preserve">
     <value>Allows prerelease packages to be installed. This flag is not required when restoring packages by installing from packages.config.</value>
   </data>
+  <data name="OfficialPackageSourceName" xml:space="preserve">
+    <value>NuGet official package source</value>
+  </data>
 </root>

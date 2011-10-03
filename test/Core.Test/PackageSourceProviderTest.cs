@@ -61,6 +61,54 @@ namespace NuGet.Test {
         }
 
         [Fact]
+        public void LoadPackageSourcesPerformMigrationIfSpecified() {
+            // Arrange
+            var settings = new MockUserSettingsManager();
+            settings.SetValues(
+                PackageSourceProvider.PackageSourcesSectionName,
+                new KeyValuePair<string, string>[] { 
+                    new KeyValuePair<string, string>("one", "onesource"),
+                    new KeyValuePair<string, string>("two", "twosource"),
+                    new KeyValuePair<string, string>("three", "threesource"),
+                }
+            );
+
+            // disable package "three"
+            settings.SetValue(
+                PackageSourceProvider.DisabledPackageSourcesSectionName,
+                "three",
+                "threesource");
+
+            var provider = new PackageSourceProvider(
+                settings,
+                null,
+                new Dictionary<PackageSource, PackageSource> {
+                    { new PackageSource("onesource", "one"), new PackageSource("goodsource", "good") },
+                    { new PackageSource("foo", "bar"), new PackageSource("foo", "bar") },
+                    { new PackageSource("threesource", "three"), new PackageSource("awesomesource", "awesome") }
+                }
+            );
+
+            // Act
+            var values = provider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.Equal(3, values.Count);
+            AssertPackageSource(values[0], "good", "goodsource", true);
+            AssertPackageSource(values[1], "two", "twosource", true);
+            AssertPackageSource(values[2], "awesome", "awesomesource", false);
+
+            var savedSettingValues = settings.GetValues(PackageSourceProvider.PackageSourcesSectionName);
+            Assert.Equal(3, savedSettingValues.Count);
+            Assert.Equal("good", savedSettingValues[0].Key);
+            Assert.Equal("goodsource", savedSettingValues[0].Value);
+            Assert.Equal("two", savedSettingValues[1].Key);
+            Assert.Equal("twosource", savedSettingValues[1].Value);
+            Assert.Equal("awesome", savedSettingValues[2].Key);
+            Assert.Equal("awesomesource", savedSettingValues[2].Value);
+        }
+
+        [Fact]
         public void CallSaveMethodAndLoadMethodShouldReturnTheSamePackageSet() {
             // Arrange
             var provider = CreatePackageSourceProvider();
