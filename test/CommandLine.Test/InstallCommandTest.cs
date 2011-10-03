@@ -28,9 +28,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         public void InstallCommandInstallsPackageSuccessfullyIfCacheRepositoryIsNotSet() {
             // Arrange
             var fileSystem = new MockFileSystem();
+            var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
             installCommand.Arguments.Add("Foo");
-            installCommand.UseMockForCacheRepository = false;
 
             // Act
             installCommand.ExecuteCommand();
@@ -304,30 +304,25 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             public TestInstallCommand(IPackageRepositoryFactory factory,
                                       IPackageSourceProvider sourceProvider,
                                       IFileSystem fileSystem,
-                                      IPackageManager packageManager = null)
+                                      IPackageManager packageManager = null,
+                                      IPackageRepository machineCacheRepository = null)
                 : base(factory, sourceProvider) {
                 _fileSystem = fileSystem;
                 _packageManager = packageManager;
-                UseMockForCacheRepository = true;
+                CacheRepository = machineCacheRepository ?? new MockPackageRepository();
             }
 
             protected override IFileSystem CreateFileSystem() {
                 return _fileSystem;
             }
 
-            protected override IPackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache, IPackageRepository repository) {
-                return _packageManager ?? 
-                    base.CreatePackageManager(
-                        fileSystem, 
-                        useMachineCache, 
-                        UseMockForCacheRepository ? new MockPackageRepository() : null);
+            protected override IPackageManager CreatePackageManager(IFileSystem fileSystem) {
+                return _packageManager ?? base.CreatePackageManager(fileSystem);
             }
 
             protected override PackageReferenceFile GetPackageReferenceFile(string path) {
                 return new PackageReferenceFile(_fileSystem, path);
             }
-
-            public bool UseMockForCacheRepository { get; set; }
         }
     }
 }

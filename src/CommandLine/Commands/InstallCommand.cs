@@ -35,6 +35,11 @@ namespace NuGet.Commands {
 
         public IPackageSourceProvider SourceProvider { get; private set; }
 
+        /// <remarks>
+        /// Meant for unit testing.
+        /// </remarks>
+        protected IPackageRepository CacheRepository { get; set; }
+
         private bool AllowMultipleVersions {
             get { return !ExcludeVersion; }
         }
@@ -51,6 +56,7 @@ namespace NuGet.Commands {
 
             RepositoryFactory = packageRepositoryFactory;
             SourceProvider = sourceProvider;
+            CacheRepository = MachineCache.Default;
         }
 
         public override void ExecuteCommand() {
@@ -86,7 +92,7 @@ namespace NuGet.Commands {
 
         private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile file) {
             var packageReferences = file.GetPackageReferences().ToList();
-            IPackageManager packageManager = CreatePackageManager(fileSystem, useMachineCache: true);
+            IPackageManager packageManager = CreatePackageManager(fileSystem);
 
             bool installedAny = false;
             foreach (var package in packageReferences) {
@@ -134,17 +140,10 @@ namespace NuGet.Commands {
             return true;
         }
 
-        protected virtual IPackageManager CreatePackageManager(IFileSystem fileSystem, bool useMachineCache = false, IPackageRepository machineCacheRepository = null) {
+        protected virtual IPackageManager CreatePackageManager(IFileSystem fileSystem) {
             var repository = GetRepository();
-
-            machineCacheRepository = machineCacheRepository ?? MachineCache.Default;
-
-            if (useMachineCache) {
-                repository = new AggregateRepository(new[] { machineCacheRepository, repository });
-            }
-            
             var pathResolver = new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions);
-            var packageManager = new PackageManager(repository, pathResolver, fileSystem, new LocalPackageRepository(pathResolver, fileSystem), machineCacheRepository);
+            var packageManager = new PackageManager(repository, pathResolver, fileSystem, new LocalPackageRepository(pathResolver, fileSystem), CacheRepository);
             packageManager.Logger = Console;
 
             return packageManager;

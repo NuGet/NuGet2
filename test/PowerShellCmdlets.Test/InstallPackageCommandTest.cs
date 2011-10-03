@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Management.Automation;
 using EnvDTE;
 using Moq;
@@ -10,7 +11,6 @@ using Xunit;
 
 namespace NuGet.PowerShell.Commands.Test {
     using PackageUtility = NuGet.Test.PackageUtility;
-    using System.Linq;
 
     public class InstallPackageCommandTest {
         [Fact]
@@ -287,7 +287,7 @@ namespace NuGet.PowerShell.Commands.Test {
             var packageRepository = new MockPackageRepository { packageA };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
             var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object,
-                recentPackageRepository.Object, new VsPackageInstallerEvents());
+                recentPackageRepository.Object, new VsPackageInstallerEvents(), new MockPackageRepository());
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 

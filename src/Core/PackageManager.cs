@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
-using System.Diagnostics;
 
 namespace NuGet {
     public class PackageManager : IPackageManager {
