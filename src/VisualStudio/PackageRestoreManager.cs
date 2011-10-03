@@ -84,7 +84,7 @@ namespace NuGet.VisualStudio {
                 waitDialog.StartWaitDialog(
                     VsResources.DialogTitle,
                     VsResources.PackageRestoreWaitMessage,
-                    VsResources.PackageRestoreProgressMessage,
+                    String.Empty,
                     null,
                     null,
                     iDelayToShowDialog: 0,

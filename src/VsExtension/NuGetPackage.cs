@@ -127,7 +127,7 @@ namespace NuGet.Tools {
                 OleMenuCommand visualizerCommand = new OleMenuCommand(ExecuteVisualizer, null, QueryStatusForVisualizer, visualizerCommandID);
                 mcs.AddCommand(visualizerCommand);
 
-                // menu command for "
+                // menu command for Package Restore command
                 CommandID restorePackagesCommandID = new CommandID(GuidList.guidNuGetPackagesRestoreCmdSet, (int)PkgCmdIDList.cmdidRestorePackages);
                 var restorePackagesCommand = new OleMenuCommand(EnablePackagesRestore, null, QueryStatusEnablePackagesRestore, restorePackagesCommandID);
                 mcs.AddCommand(restorePackagesCommand);
@@ -218,7 +218,7 @@ namespace NuGet.Tools {
 
         private void QueryStatusEnablePackagesRestore(object sender, EventArgs args) {
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = !_packageRestoreManager.IsCurrentSolutionEnabled;
+            command.Visible = IsSolutionOpen && !_packageRestoreManager.IsCurrentSolutionEnabled;
         }
 
         private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args) {

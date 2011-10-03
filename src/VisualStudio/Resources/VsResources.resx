@@ -277,16 +277,13 @@
     <value>NuGet Package Manager</value>
   </data>
   <data name="PackageRestoreCompleted" xml:space="preserve">
-    <value>Successfully converted this solution to package restore mode.</value>
-  </data>
-  <data name="PackageRestoreProgressMessage" xml:space="preserve">
-    <value>Downloading and installing NuGet.Build package...</value>
+    <value>Finished configuring this solution to restore NuGet packages on build.</value>
   </data>
   <data name="PackageRestoreWaitMessage" xml:space="preserve">
-    <value>Configuring the solution for packages restore mode...</value>
+    <value>Configuring the solution to restore NuGet packages on build...</value>
   </data>
   <data name="PackageRestoreErrorMessage" xml:space="preserve">
-    <value>An error occurred while setting up package restore mode:</value>
+    <value>An error occurred while configuring the solution to restore NuGet packages on build</value>
   </data>
   <data name="PackageRestoreDownloadPackageFailed" xml:space="preserve">
     <value>Downloading package '{0}' failed.</value>
