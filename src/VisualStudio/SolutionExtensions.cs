@@ -64,7 +64,14 @@ namespace NuGet.VisualStudio {
                                        .OfType<Project>()
                                        .FirstOrDefault(p => p.Name.Equals(solutionFolderName, StringComparison.OrdinalIgnoreCase));
             if (project == null) {
-                project = solution2.AddSolutionFolder(solutionFolderName);
+                try {
+                    project = solution2.AddSolutionFolder(solutionFolderName);
+                }
+                catch (Exception) {
+                    // VWD doesn't allow adding solution folder.
+                    // In that case, just silently ignore and return
+                    return;
+                }
             }
 
             if (project != null) {
