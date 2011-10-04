@@ -51,6 +51,7 @@ namespace NuGet.Options {
             // HeaderLabel
             // 
             resources.ApplyResources(this.HeaderLabel, "HeaderLabel");
+            this.tableLayoutPanel1.SetColumnSpan(this.HeaderLabel, 2);
             this.HeaderLabel.Name = "HeaderLabel";
             // 
             // PackageSourcesContextMenu
@@ -148,18 +149,21 @@ namespace NuGet.Options {
             // tableLayoutPanel1
             // 
             resources.ApplyResources(this.tableLayoutPanel1, "tableLayoutPanel1");
-            this.tableLayoutPanel1.Controls.Add(this.PackageSourcesListBox, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.NewPackageNameLabel, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.NewPackageName, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.NewPackageSourceLabel, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.NewPackageSource, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.BrowseButton, 2, 2);
-            this.tableLayoutPanel1.Controls.Add(this.addButton, 3, 2);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.HeaderLabel, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.PackageSourcesListBox, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageNameLabel, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageName, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageSourceLabel, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageSource, 1, 3);
+            this.tableLayoutPanel1.Controls.Add(this.BrowseButton, 2, 3);
+            this.tableLayoutPanel1.Controls.Add(this.addButton, 3, 3);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             // 
             // tableLayoutPanel2
             // 
             resources.ApplyResources(this.tableLayoutPanel2, "tableLayoutPanel2");
+            this.tableLayoutPanel1.SetColumnSpan(this.tableLayoutPanel2, 2);
             this.tableLayoutPanel2.Controls.Add(this.removeButton, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.MoveUpButton, 1, 0);
             this.tableLayoutPanel2.Controls.Add(this.MoveDownButton, 2, 0);
@@ -169,8 +173,6 @@ namespace NuGet.Options {
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.tableLayoutPanel2);
-            this.Controls.Add(this.HeaderLabel);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "PackageSourcesOptionsControl";
             this.PackageSourcesContextMenu.ResumeLayout(false);
@@ -179,7 +181,6 @@ namespace NuGet.Options {
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
