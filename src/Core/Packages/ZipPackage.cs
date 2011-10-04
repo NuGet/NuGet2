@@ -160,7 +160,13 @@ namespace NuGet {
             }
         }
 
-        public bool IsAbsoluteLatestVersion {
+        public bool IsLatestStable {
+            get {
+                return true;
+            }
+        }
+
+        public bool Listed {
             get {
                 return true;
             }

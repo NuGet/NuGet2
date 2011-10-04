@@ -27,7 +27,6 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             // Assert
             Assert.Equal("CustomUrlUsed", packages.Single().Id);
-
         }
 
         [Fact]

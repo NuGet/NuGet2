@@ -7,9 +7,10 @@ namespace NuGet {
     public interface IPackage : IPackageMetadata, IServerPackageMetadata {
         bool IsLatestVersion { get; }
 
-        bool IsAbsoluteLatestVersion { get; }
+        bool IsLatestStable { get; }
 
-        // It's nullable since some package types won't support it (in memory packages)
+        bool Listed { get; }
+        
         DateTimeOffset? Published { get; }
 
         IEnumerable<IPackageAssemblyReference> AssemblyReferences { get; }

@@ -76,7 +76,12 @@ namespace NuGet {
             }
         }
 
-        public DateTimeOffset Published {
+        public bool Listed {
+            get;
+            set;
+        }
+
+        public DateTimeOffset? Published {
             get;
             set;
         }
@@ -146,7 +151,7 @@ namespace NuGet {
             set;
         }
 
-        public bool IsAbsoluteLatestVersion {
+        public bool IsLatestStable {
             get;
             set;
         }
@@ -168,9 +173,9 @@ namespace NuGet {
             set;
         }
 
-        DateTimeOffset? IPackage.Published {
+        bool IPackage.Listed {
             get {
-                return Published;
+                return Listed;
             }
         }
 

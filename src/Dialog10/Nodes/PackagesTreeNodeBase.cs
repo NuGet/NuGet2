@@ -298,7 +298,9 @@ namespace NuGet.Dialog.Providers {
                 _query = orderedQuery.AsBufferedEnumerable(PageSize * 3);
                 
                 if (CollapseVersions) {
-                    _query = _query.Where(p => p.Published > NuGetConstants.Unpublished)
+                    // If we are connecting to an older gallery implementation, we need to use the Published field. 
+                    // For newer gallery, the package is never unpublished, it is only unlisted.
+                    _query = _query.Where(p => p.Listed || p.Published > NuGetConstants.Unpublished)
                                    .AsCollapsed();
                 }
             }

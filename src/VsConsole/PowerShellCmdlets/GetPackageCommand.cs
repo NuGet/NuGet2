@@ -173,7 +173,7 @@ namespace NuGet.PowerShell.Commands {
         protected virtual IEnumerable<IPackage> FilterPackages(IQueryable<IPackage> packages) {
             if (CollapseVersions) {
                 if (Prerelease) {
-                    packages = packages.Where(p => p.IsAbsoluteLatestVersion);
+                    packages = packages.Where(p => p.IsLatestStable);
                 }
                 else {
                     packages = packages.Where(p => p.IsLatestVersion);
@@ -191,7 +191,7 @@ namespace NuGet.PowerShell.Commands {
             // We need to do this as the last step of the Queryable as the filtering occurs on the client.
             if (CollapseVersions) {
                 packagesToDisplay = packages.AsEnumerable()
-                                            .Where(p => p.Published > NuGetConstants.Unpublished)
+                                            .Where(p => p.Listed || p.Published > NuGetConstants.Unpublished)
                                             .AsCollapsed();
             }
             

@@ -169,7 +169,13 @@ namespace NuGet.VisualStudio {
         /// <remarks>
         /// This flag is not of relevance to RecentPackages. It is ok to have it always return true.
         /// </remarks>
-        public bool IsAbsoluteLatestVersion {
+        public bool IsLatestStable {
+            get {
+                return this.IsReleaseVersion();
+            }
+        }
+
+        public bool Listed {
             get {
                 return true;
             }

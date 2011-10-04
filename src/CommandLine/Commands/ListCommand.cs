@@ -55,7 +55,7 @@ namespace NuGet.Commands {
             return packages.Where(p => p.IsLatestVersion)
                            .OrderBy(p => p.Id)
                            .AsEnumerable()
-                           .Where(p => p.Published > NuGetConstants.Unpublished)
+                           .Where(p => p.Listed || p.Published > NuGetConstants.Unpublished)
                            .AsCollapsed();
         }
 

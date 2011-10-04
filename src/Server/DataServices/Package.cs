@@ -29,7 +29,6 @@ namespace NuGet.Server.DataServices {
             Description = package.Description;
             Summary = package.Summary;
             ReleaseNotes = package.ReleaseNotes;
-            Language = package.Language;
             Tags = package.Tags;
             Dependencies = String.Join("|", from d in package.Dependencies
                                             select ConvertDependency(d));
@@ -37,12 +36,8 @@ namespace NuGet.Server.DataServices {
             PackageSize = derivedData.PackageSize;
             LastUpdated = derivedData.LastUpdated.UtcDateTime;
             Published = derivedData.Created.UtcDateTime;
-            DownloadCount = -1;
-            Rating = -1;
-            VersionRating = -1;
-            VersionDownloadCount = -1;
-            VersionRatingsCount = -1;
-            IsLatestVersion = true;
+            IsLatestVersion = package.IsLatestVersion;
+            IsLatestStable = package.IsLatestStable;
             Path = derivedData.Path;
             FullPath = derivedData.FullPath;
         }
@@ -92,37 +87,7 @@ namespace NuGet.Server.DataServices {
             set;
         }
 
-        public string ReportAbuseUrl {
-            get;
-            set;
-        }
-
         public int DownloadCount {
-            get;
-            set;
-        }
-
-        public int VersionDownloadCount {
-            get;
-            set;
-        }
-
-        public int RatingsCount {
-            get;
-            set;
-        }
-
-        public int VersionRatingsCount {
-            get;
-            set;
-        }
-
-        public double Rating {
-            get;
-            set;
-        }
-
-        public double VersionRating {
             get;
             set;
         }
@@ -147,22 +112,12 @@ namespace NuGet.Server.DataServices {
             set;
         }
 
-        public string Language {
-            get;
-            set;
-        }
-
         public DateTime Published {
             get;
             set;
         }
 
         public DateTime LastUpdated {
-            get;
-            set;
-        }
-
-        public decimal Price {
             get;
             set;
         }
@@ -182,22 +137,7 @@ namespace NuGet.Server.DataServices {
             set;
         }
 
-        public string ExternalPackageUri {
-            get;
-            set;
-        }
-
-        public string Categories {
-            get;
-            set;
-        }
-
         public string Copyright {
-            get;
-            set;
-        }
-
-        public string PackageType {
             get;
             set;
         }
@@ -208,6 +148,16 @@ namespace NuGet.Server.DataServices {
         }
 
         public bool IsLatestVersion {
+            get;
+            set;
+        }
+
+        public bool IsLatestStable {
+            get;
+            set;
+        }
+
+        public bool Listed {
             get;
             set;
         }
