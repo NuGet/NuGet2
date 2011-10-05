@@ -19,6 +19,10 @@ namespace NuGet {
             : base(resolver, fileSystem) {
         }
 
+        public override bool SupportsPrereleasePackages {
+            get { return true; }
+        }
+
         public void RegisterRepository(string path) {
             AddEntry(path);
         }

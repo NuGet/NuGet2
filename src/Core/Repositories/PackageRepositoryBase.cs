@@ -8,6 +8,8 @@ namespace NuGet {
 
         public abstract IQueryable<IPackage> GetPackages();
 
+        public abstract bool SupportsPrereleasePackages { get; }
+
         public virtual void AddPackage(IPackage package) {
             throw new NotSupportedException();
         }

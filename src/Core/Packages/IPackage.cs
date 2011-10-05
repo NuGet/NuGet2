@@ -5,9 +5,9 @@ using System.IO;
 
 namespace NuGet {
     public interface IPackage : IPackageMetadata, IServerPackageMetadata {
-        bool IsLatestVersion { get; }
+        bool IsAbsoluteLatestVersion { get; }
 
-        bool IsLatestStable { get; }
+        bool IsLatestVersion { get; }
 
         bool Listed { get; }
         

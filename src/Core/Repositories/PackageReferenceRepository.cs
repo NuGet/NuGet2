@@ -31,6 +31,10 @@ namespace NuGet {
             }
         }
 
+        public override bool SupportsPrereleasePackages {
+            get { return true; }
+        }
+
         private ISharedPackageRepository SourceRepository {
             get;
             set;

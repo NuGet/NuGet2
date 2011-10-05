@@ -59,6 +59,12 @@ namespace NuGet {
             }
         }
 
+        public override bool SupportsPrereleasePackages {
+            get {
+                return Context.SupportsProperty("IsAbsoluteLatestVersion");
+            }
+        }
+
         // Don't initialize the Context at the constructor time so that
         // we don't make a web request if we are not going to actually use it
         // since getting the Uri property of the RedirectedHttpClient will

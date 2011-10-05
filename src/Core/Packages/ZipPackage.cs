@@ -154,15 +154,15 @@ namespace NuGet {
             set;
         }
 
-        public bool IsLatestVersion {
+        public bool IsAbsoluteLatestVersion {
             get {
-                return this.IsReleaseVersion();
+                return true;
             }
         }
 
-        public bool IsLatestStable {
+        public bool IsLatestVersion {
             get {
-                return true;
+                return this.IsReleaseVersion();
             }
         }
 

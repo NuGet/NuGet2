@@ -18,6 +18,12 @@ namespace NuGet.Dialog.Providers {
             }
         }
 
+        public bool SupportsPrereleasePackages {
+            get {
+                return Repository.SupportsPrereleasePackages;
+            }
+        }
+
         public LazyRepository(IPackageRepositoryFactory factory, PackageSource source) {
             _repository = new Lazy<IPackageRepository>(() => factory.CreateRepository(source.Source));
         }

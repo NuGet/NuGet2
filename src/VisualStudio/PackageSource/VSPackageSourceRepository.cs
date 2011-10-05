@@ -30,6 +30,12 @@ namespace NuGet.VisualStudio {
             }
         }
 
+        public bool SupportsPrereleasePackages {
+            get {
+                return ActiveRepository.SupportsPrereleasePackages;
+            }
+        }
+
         internal IPackageRepository ActiveRepository {
             get {
                 if (_packageSourceProvider.ActivePackageSource == null) {

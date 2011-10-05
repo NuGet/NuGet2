@@ -11,7 +11,7 @@ namespace NuGet {
     public class DataServiceContextWrapper : IDataServiceContext {
         private static readonly MethodInfo _executeMethodInfo = typeof(DataServiceContext).GetMethod("Execute", new[] { typeof(Uri) });
         private readonly DataServiceContext _context;
-        private readonly HashSet<string> _supportedMethodNames;
+        private readonly DataServiceMetadata _serviceMetadata;
 
         public DataServiceContextWrapper(Uri serviceRoot) {
             if (serviceRoot == null) {
@@ -19,14 +19,14 @@ namespace NuGet {
             }
             _context = new DataServiceContext(serviceRoot);
             _context.MergeOption = MergeOption.OverwriteChanges;
-            _supportedMethodNames = new HashSet<string>(GetSupportedMethodNames(), StringComparer.OrdinalIgnoreCase);
+            _serviceMetadata = GetDataServiceMetadata();
         }
 
-        private IEnumerable<string> GetSupportedMethodNames() {
+        private DataServiceMetadata GetDataServiceMetadata() {
             Uri metadataUri = _context.GetMetadataUri();
 
             if (metadataUri == null) {
-                return Enumerable.Empty<string>();
+                return null;
             }
 
             // Make a request to the metadata uri and get the schema
@@ -34,18 +34,18 @@ namespace NuGet {
             byte[] data = client.DownloadData();
 
             if (data == null) {
-                return Enumerable.Empty<string>();
+                return null;
             }
 
             string schema = Encoding.UTF8.GetString(data);
 
-            return ExtractMethodNamesFromSchema(schema);
+            return ExtractMetadataFromSchema(schema);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "If the docuument is in fails to parse in any way, we want to not fail.")]
-        internal static IEnumerable<string> ExtractMethodNamesFromSchema(string schema) {
+        internal static DataServiceMetadata ExtractMetadataFromSchema(string schema) {
             if (String.IsNullOrEmpty(schema)) {
-                return Enumerable.Empty<string>();
+                return null;
             }
 
             XDocument schemaDocument = null;
@@ -55,29 +55,10 @@ namespace NuGet {
             }
             catch {
                 // If the schema is malformed (for some reason) then just return empty list
-                return Enumerable.Empty<string>();
+                return null;
             }
 
-            // Get all entity containers
-            var entityContainers = from e in schemaDocument.Descendants()
-                                   where e.Name.LocalName == "EntityContainer"
-                                   select e;
-
-            // Find the entity container with the Packages entity set
-            var packageEntityContainer = (from e in entityContainers
-                                          let entitySet = e.Elements().FirstOrDefault(el => el.Name.LocalName == "EntitySet")
-                                          let name = entitySet != null ? entitySet.Attribute("Name").Value : null
-                                          where name != null && name.Equals("Packages", StringComparison.OrdinalIgnoreCase)
-                                          select e).FirstOrDefault();
-
-            if (packageEntityContainer == null) {
-                return Enumerable.Empty<string>();
-            }
-
-            // Get all functions
-            return from e in packageEntityContainer.Elements()
-                   where e.Name.LocalName == "FunctionImport"
-                   select e.Attribute("Name").Value;
+            return ExtractMetadataInternal(schemaDocument);
         }
 
         public Uri BaseUri {
@@ -145,7 +126,78 @@ namespace NuGet {
         }
 
         public bool SupportsServiceMethod(string methodName) {
-            return _supportedMethodNames.Contains(methodName);
+            return _serviceMetadata != null && _serviceMetadata.SupportedMethodNames.Contains(methodName);
+        }
+
+        public bool SupportsProperty(string propertyName) {
+            return _serviceMetadata != null && _serviceMetadata.SupportedMethodNames.Contains(propertyName);
+        }
+
+        internal sealed class DataServiceMetadata {
+            public HashSet<string> SupportedMethodNames { get; set; }
+
+            public HashSet<string> SupportedProperties { get; set; }
+        }
+
+        private static DataServiceMetadata ExtractMetadataInternal(XDocument schemaDocument) {
+            // Get all entity containers
+            var entityContainers = from e in schemaDocument.Descendants()
+                                   where e.Name.LocalName == "EntityContainer"
+                                   select e;
+
+            // Find the entity container with the Packages entity set
+            var result = (from e in entityContainers
+                          let entitySet = e.Elements().FirstOrDefault(el => el.Name.LocalName == "EntitySet")
+                          let name = entitySet != null ? entitySet.Attribute("Name").Value : null
+                          where name != null && name.Equals("Packages", StringComparison.OrdinalIgnoreCase)
+                          select new { Container = e, EntitySet = entitySet }).FirstOrDefault();
+
+            if (result == null) {
+                return null;
+            }
+            var packageEntityContainer = result.Container;
+            var packageEntityTypeAttribute = result.EntitySet.Attribute("EntityType");
+            string packageEntityName = null;
+            if (packageEntityTypeAttribute != null) {
+                packageEntityName = packageEntityTypeAttribute.Value;
+            }
+
+            var metadata = new DataServiceMetadata {
+                SupportedMethodNames = new HashSet<string>(
+                                               from e in packageEntityContainer.Elements()
+                                               where e.Name.LocalName == "FunctionImport"
+                                               select e.Attribute("Name").Value, StringComparer.OrdinalIgnoreCase),
+                SupportedProperties = new HashSet<string>(ExtractSupportedProperties(schemaDocument, packageEntityName),
+                                                          StringComparer.OrdinalIgnoreCase)
+            };
+            return metadata;
+        }
+
+        private static IEnumerable<string> ExtractSupportedProperties(XDocument schemaDocument, string packageEntityName) {
+            // The name is listed in the entity set listing as <EntitySet Name="Packages" EntityType="Gallery.Infrastructure.FeedModels.PublishedPackage" />
+            // We need to extract the name portion to look up the entity type <EntityType Name="PublishedPackage" 
+            packageEntityName = TrimNamespace(packageEntityName);
+
+            var packageEntity = (from e in schemaDocument.Descendants()
+                                 where e.Name.LocalName == "EntityType"
+                                 let attribute = e.Attribute("Name")
+                                 where attribute != null && attribute.Value.Equals(packageEntityName, StringComparison.OrdinalIgnoreCase)
+                                 select e).FirstOrDefault();
+
+            if (packageEntity != null) {
+                return from e in packageEntity.Elements()
+                       where e.Name.LocalName == "Property"
+                       select e.Attribute("Name").Value;
+            }
+            return Enumerable.Empty<string>();
+        }
+
+        private static string TrimNamespace(string packageEntityName) {
+            int lastIndex = packageEntityName.LastIndexOf('.');
+            if (lastIndex > 0 && lastIndex < packageEntityName.Length) {
+                packageEntityName = packageEntityName.Substring(lastIndex + 1);
+            }
+            return packageEntityName;
         }
     }
 }

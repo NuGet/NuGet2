@@ -13,6 +13,8 @@ namespace NuGet {
         /// </summary>
         private readonly ConcurrentBag<IPackageRepository> _failingRepositories = new ConcurrentBag<IPackageRepository>();
         private readonly IEnumerable<IPackageRepository> _repositories;
+        private readonly Lazy<bool> _supportsPrereleasePackages;
+
         private const string SourceValue = "(Aggregate source)";
         private ILogger _logger;
 
@@ -33,6 +35,7 @@ namespace NuGet {
 
         public bool IgnoreFailingRepositories { get; set; }
 
+
         /// <remarks>
         /// Iterating over Repositories returned by this property may throw regardless of IgnoreFailingRepositories.
         /// </remarks>
@@ -40,11 +43,20 @@ namespace NuGet {
             get { return _repositories; }
         }
 
+        public override bool SupportsPrereleasePackages {
+            get {
+                return _supportsPrereleasePackages.Value;
+            }
+        }
+
         public AggregateRepository(IEnumerable<IPackageRepository> repositories) {
             if (repositories == null) {
                 throw new ArgumentNullException("repositories");
             }
             _repositories = Flatten(repositories);
+
+            Func<IPackageRepository, bool> supportsPrereleasePackages = Wrap(r => r.SupportsPrereleasePackages, defaultValue: true);
+            _supportsPrereleasePackages = new Lazy<bool>(() => _repositories.All(supportsPrereleasePackages));
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]
@@ -67,6 +79,8 @@ namespace NuGet {
                              where repository != null
                              select repository).ToArray();
 
+            Func<IPackageRepository, bool> supportsPrereleasePackages = Wrap(r => r.SupportsPrereleasePackages, defaultValue: true);
+            _supportsPrereleasePackages = new Lazy<bool>(() => _repositories.All(supportsPrereleasePackages));
         }
 
         public override IQueryable<IPackage> GetPackages() {
@@ -94,9 +108,9 @@ namespace NuGet {
             }
             return this.ResolveDependencyCore(dependency, constraintProvider, allowPrereleaseVersions);
         }
-
+        
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]
-        private Func<IPackageRepository, T> Wrap<T>(Func<IPackageRepository, T> factory, T defaultValue = null) where T : class {
+        private Func<IPackageRepository, T> Wrap<T>(Func<IPackageRepository, T> factory, T defaultValue = default(T)) {
             if (IgnoreFailingRepositories) {
                 return repository => {
                     if (_failingRepositories.Contains(repository)) {
@@ -119,7 +133,6 @@ namespace NuGet {
             _failingRepositories.Add(repository);
             Logger.Log(MessageLevel.Warning, ExceptionUtility.Unwrap(ex).Message);
         }
-
 
         public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks) {
             return CreateAggregateQuery(Repositories.Select(r => r.Search(searchTerm, targetFrameworks)));

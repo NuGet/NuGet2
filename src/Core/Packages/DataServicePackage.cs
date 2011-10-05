@@ -151,7 +151,7 @@ namespace NuGet {
             set;
         }
 
-        public bool IsLatestStable {
+        public bool IsAbsoluteLatestVersion {
             get;
             set;
         }

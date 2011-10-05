@@ -23,6 +23,9 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "ListCommandAllVersionsDescription")]
         public bool AllVersions { get; set; }
 
+        [Option(typeof(NuGetResources), "ListCommandPrerelease")]
+        public bool Prerelease { get; set; }
+
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }
 
         public IPackageSourceProvider SourceProvider { get; private set; }
@@ -51,11 +54,19 @@ namespace NuGet.Commands {
             if (AllVersions) {
                 return packages.OrderBy(p => p.Id);
             }
+            else {
+                if (Prerelease && packageRepository.SupportsPrereleasePackages) {
+                    packages = packages.Where(p => p.IsAbsoluteLatestVersion);
+                }
+                else {
+                    packages = packages.Where(p => p.IsLatestVersion);
+                }
+            }
 
-            return packages.Where(p => p.IsLatestVersion)
-                           .OrderBy(p => p.Id)
+            return packages.OrderBy(p => p.Id)
                            .AsEnumerable()
                            .Where(p => p.Listed || p.Published > NuGetConstants.Unpublished)
+                           .Where(p => Prerelease || p.IsReleaseVersion())
                            .AsCollapsed();
         }
 

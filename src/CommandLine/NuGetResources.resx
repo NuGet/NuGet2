@@ -734,4 +734,7 @@ nuget update -Self</value>
   <data name="OfficialPackageSourceName" xml:space="preserve">
     <value>NuGet official package source</value>
   </data>
+  <data name="ListCommandPrerelease" xml:space="preserve">
+    <value>Allow prerelease packages to be shown.</value>
+  </data>
 </root>

@@ -18,6 +18,10 @@ namespace NuGet {
             }
         }
 
+        public bool SupportsPrereleasePackages {
+            get { return true; }
+        }
+
         /// <summary>
         /// Returns all packages regardless we've ever seen
         /// </summary>

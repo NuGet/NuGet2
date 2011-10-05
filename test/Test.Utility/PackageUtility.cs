@@ -54,8 +54,8 @@ namespace NuGet.Test {
             allFiles.AddRange(assemblyReferences);
 
             var mockPackage = new Mock<IPackage>(MockBehavior.Strict) { CallBase = true };
-            mockPackage.Setup(m => m.IsLatestVersion).Returns(true);
-            mockPackage.Setup(m => m.IsLatestStable).Returns(true);
+            mockPackage.Setup(m => m.IsAbsoluteLatestVersion).Returns(true);
+            mockPackage.Setup(m => m.IsLatestVersion).Returns(String.IsNullOrEmpty(SemanticVersion.Parse(version).SpecialVersion));
             mockPackage.Setup(m => m.Id).Returns(id);
             mockPackage.Setup(m => m.Listed).Returns(true);
             mockPackage.Setup(m => m.Version).Returns(new SemanticVersion(version));

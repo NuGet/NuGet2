@@ -12,6 +12,10 @@ namespace NuGet.Common {
             get { return null; }
         }
 
+        public override bool SupportsPrereleasePackages {
+            get { return true; }
+        }
+
         public override IQueryable<IPackage> GetPackages() {
             return _packages.AsQueryable();
         }

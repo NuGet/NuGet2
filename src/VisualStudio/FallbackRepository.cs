@@ -18,6 +18,12 @@ namespace NuGet.VisualStudio {
             get { return _primaryRepository.Source; }
         }
 
+        public bool SupportsPrereleasePackages {
+            get {
+                return _primaryRepository.SupportsPrereleasePackages;
+            }
+        }
+
         internal IPackageRepository SourceRepository {
             get { return _primaryRepository; }
         }

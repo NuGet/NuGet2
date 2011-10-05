@@ -44,6 +44,10 @@ namespace NuGet {
             }
         }
 
+        public override bool SupportsPrereleasePackages {
+            get { return true; }
+        }
+
         protected IFileSystem FileSystem {
             get;
             private set;

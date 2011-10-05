@@ -62,6 +62,12 @@ namespace NuGet.VisualStudio {
             }
         }
 
+        public bool SupportsPrereleasePackages {
+            get {
+                return true;
+            }
+        }
+
         public IQueryable<IPackage> GetPackages() {
             // Create an instance of the Aggregate repository
             var repository = _packageSourceProvider.GetAggregate(_repositoryFactory, ignoreFailingRepositories: true);

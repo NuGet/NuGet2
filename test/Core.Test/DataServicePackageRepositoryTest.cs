@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 using Moq;
+using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test {
-    
+
     public class DataServicePackageRepositoryTest {
         [Fact]
         public void SearchUsesDefaultSearchLogicIfServerDoesnotSupportServiceMethod() {
@@ -106,37 +107,48 @@ namespace NuGet.Test {
             });
         }
 
-        [Fact]
-        public void ExtractMethodNamesFromSchemaFindsMethodNames() {
+        [Theory]
+        [InlineData(new object[] { NuGetFeedSchema.SchemaWithNoMethods, 0, 32, new[] { "Id", "Version", "IsLatestVersion" }, new string[0] })]
+        [InlineData(new object[] { NuGetFeedSchema.SchemaWithMethod, 1, 31, new[] { "Id", "Version", "IsLatestVersion" }, new[] { "Search" } })]
+        public void ExtractMethodNamesFromSchemaFindsMethodNamesAndProperties(string schema, int expectedMethodCount, int expectedProperties,
+                IEnumerable<string> sampleProperties, IEnumerable<string> expectedMethods) {
             // Act
-            var schemaNoMethods = DataServiceContextWrapper.ExtractMethodNamesFromSchema(NuGetFeedSchema.SchemaWithNoMethods).ToList();
-            var schemaWithMethods = DataServiceContextWrapper.ExtractMethodNamesFromSchema(NuGetFeedSchema.SchemaWithMethod).ToList();
-            var emptySchema = DataServiceContextWrapper.ExtractMethodNamesFromSchema("").ToList();
-            var nullSchema = DataServiceContextWrapper.ExtractMethodNamesFromSchema(null).ToList();
-            var badSchema = DataServiceContextWrapper.ExtractMethodNamesFromSchema("<xml>DEADBEEF").ToList();
+            var schemaMetadata = DataServiceContextWrapper.ExtractMetadataFromSchema(schema);
 
             // Assert
-            Assert.Equal(0, schemaNoMethods.Count);
-            Assert.Equal(1, schemaWithMethods.Count);
-            Assert.Equal("Search", schemaWithMethods[0]);
-            Assert.Equal(0, emptySchema.Count);
-            Assert.Equal(0, nullSchema.Count);
-            Assert.Equal(0, badSchema.Count);
+            Assert.NotNull(schemaMetadata);
+            Assert.Equal(expectedMethodCount, schemaMetadata.SupportedMethodNames.Count);
+            Assert.Equal(expectedProperties, schemaMetadata.SupportedProperties.Count);
+            Assert.True(schemaMetadata.SupportedProperties.IsSupersetOf(sampleProperties));
+
+            Assert.Equal(expectedMethods.ToList(), schemaMetadata.SupportedMethodNames.ToList());
+        }
+
+        [Theory]
+        [InlineData(new object[] { "" })]
+        [InlineData(new object[] { null })]
+        [InlineData(new object[] { "<xml>DEADBEEF" })]
+        public void ExtractMetadataReturnsNullForBadSchema(string schema) {
+            // Act
+            var schemaMetadata = DataServiceContextWrapper.ExtractMetadataFromSchema(schema);
+
+            // Assert
+            Assert.Null(schemaMetadata);
         }
 
 
         private class NuGetFeedSchema {
             public const string SchemaWithMethod = @"<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes""?>
-<edmx:Edmx SemVer=""1.0"" xmlns:edmx=""http://schemas.microsoft.com/ado/2007/06/edmx"">
+<edmx:Edmx Version=""1.0"" xmlns:edmx=""http://schemas.microsoft.com/ado/2007/06/edmx"">
   <edmx:DataServices xmlns:m=""http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"" m:DataServiceVersion=""2.0"">
     <Schema Namespace=""NuGet.Server.DataServices"" xmlns:d=""http://schemas.microsoft.com/ado/2007/08/dataservices"" xmlns:m=""http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"" xmlns=""http://schemas.microsoft.com/ado/2006/04/edm"">
       <EntityType Name=""Package"" m:HasStream=""true"">
         <Key>
           <PropertyRef Name=""Id"" />
-          <PropertyRef Name=""SemVer"" />
+          <PropertyRef Name=""Version"" />
         </Key>
         <Property Name=""Id"" Type=""Edm.String"" Nullable=""false"" m:FC_TargetPath=""SyndicationTitle"" m:FC_ContentKind=""text"" m:FC_KeepInContent=""false"" />
-        <Property Name=""SemVer"" Type=""Edm.String"" Nullable=""false"" />
+        <Property Name=""Version"" Type=""Edm.String"" Nullable=""false"" />
         <Property Name=""Title"" Type=""Edm.String"" Nullable=""true"" />
         <Property Name=""Authors"" Type=""Edm.String"" Nullable=""true"" m:FC_TargetPath=""SyndicationAuthorName"" m:FC_ContentKind=""text"" m:FC_KeepInContent=""false"" />
         <Property Name=""IconUrl"" Type=""Edm.String"" Nullable=""true"" />
@@ -179,16 +191,16 @@ namespace NuGet.Test {
 </edmx:Edmx>";
 
             public const string SchemaWithNoMethods = @"<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes""?>
-<edmx:Edmx SemVer=""1.0"" xmlns:edmx=""http://schemas.microsoft.com/ado/2007/06/edmx"">
+<edmx:Edmx Version=""1.0"" xmlns:edmx=""http://schemas.microsoft.com/ado/2007/06/edmx"">
   <edmx:DataServices xmlns:m=""http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"" m:DataServiceVersion=""1.0"">
     <Schema Namespace=""Gallery.Infrastructure.FeedModels"" xmlns:d=""http://schemas.microsoft.com/ado/2007/08/dataservices"" xmlns:m=""http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"" xmlns=""http://schemas.microsoft.com/ado/2006/04/edm"">
       <EntityType Name=""PublishedPackage"" m:HasStream=""true"">
         <Key>
           <PropertyRef Name=""Id"" />
-          <PropertyRef Name=""SemVer"" />
+          <PropertyRef Name=""Version"" />
         </Key>
         <Property Name=""Id"" Type=""Edm.String"" Nullable=""false"" />
-        <Property Name=""SemVer"" Type=""Edm.String"" Nullable=""false"" />
+        <Property Name=""Version"" Type=""Edm.String"" Nullable=""false"" />
         <Property Name=""Title"" Type=""Edm.String"" Nullable=""true"" m:FC_TargetPath=""SyndicationTitle"" m:FC_ContentKind=""text"" m:FC_KeepInContent=""true"" />
         <Property Name=""Authors"" Type=""Edm.String"" Nullable=""true"" m:FC_TargetPath=""SyndicationAuthorName"" m:FC_ContentKind=""text"" m:FC_KeepInContent=""true"" />
         <Property Name=""PackageType"" Type=""Edm.String"" Nullable=""true"" />

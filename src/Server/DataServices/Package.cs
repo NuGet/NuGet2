@@ -36,8 +36,8 @@ namespace NuGet.Server.DataServices {
             PackageSize = derivedData.PackageSize;
             LastUpdated = derivedData.LastUpdated.UtcDateTime;
             Published = derivedData.Created.UtcDateTime;
+            IsAbsoluteLatestVersion = package.IsAbsoluteLatestVersion;
             IsLatestVersion = package.IsLatestVersion;
-            IsLatestStable = package.IsLatestStable;
             Path = derivedData.Path;
             FullPath = derivedData.FullPath;
         }
@@ -147,12 +147,12 @@ namespace NuGet.Server.DataServices {
             set;
         }
 
-        public bool IsLatestVersion {
+        public bool IsAbsoluteLatestVersion {
             get;
             set;
         }
 
-        public bool IsLatestStable {
+        public bool IsLatestVersion {
             get;
             set;
         }

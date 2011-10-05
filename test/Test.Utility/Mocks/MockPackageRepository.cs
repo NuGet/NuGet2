@@ -20,6 +20,12 @@ namespace NuGet.Test.Mocks {
             }
         }
 
+        public override bool SupportsPrereleasePackages {
+            get {
+                return true;
+            }
+        }
+
         internal Dictionary<string, List<IPackage>> Packages {
             get;
             set;

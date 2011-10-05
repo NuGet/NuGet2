@@ -165,15 +165,18 @@ namespace NuGet.PowerShell.Commands {
             }
 
             // Apply VersionCollapsing, Skip and Take, in that order.
-            var packagesToDisplay = FilterPackages(packages);
+            var packagesToDisplay = FilterPackages(repository, packages);
 
             WritePackages(packagesToDisplay);
         }
 
-        protected virtual IEnumerable<IPackage> FilterPackages(IQueryable<IPackage> packages) {
+        protected virtual IEnumerable<IPackage> FilterPackages(IPackageRepository sourceRepository, IQueryable<IPackage> packages) {
             if (CollapseVersions) {
-                if (Prerelease) {
-                    packages = packages.Where(p => p.IsLatestStable);
+                // In the event the client is going up against a v1 feed, do not try to fetch pre release packages since this flag does not exist.
+                if (Recent || (Prerelease && sourceRepository.SupportsPrereleasePackages)) {
+                    // For Recent packages, we want to show the highest package even if it is a recent. 
+                    // Review: We should change this to show both the absolute latest and the latest versions but that requires changes to our collapsing behavior.
+                    packages = packages.Where(p => p.IsAbsoluteLatestVersion);
                 }
                 else {
                     packages = packages.Where(p => p.IsLatestVersion);
@@ -190,6 +193,7 @@ namespace NuGet.PowerShell.Commands {
             // When querying a remote source, collapse versions unless AllVersions is specified.
             // We need to do this as the last step of the Queryable as the filtering occurs on the client.
             if (CollapseVersions) {
+                // Review: We should perform the Listed check over OData for better perf
                 packagesToDisplay = packages.AsEnumerable()
                                             .Where(p => p.Listed || p.Published > NuGetConstants.Unpublished)
                                             .AsCollapsed();

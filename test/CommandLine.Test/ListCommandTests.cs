@@ -128,6 +128,122 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
+        public void GetPackageFiltersPackagesUsingIsLatestIfRepositoryDoesNotSupportPrerelease() {
+            // Arrange
+            var package = new Mock<IPackage>(MockBehavior.Strict);
+            package.SetupGet(p => p.Id).Returns("A");
+            package.SetupGet(p => p.Version).Returns(new SemanticVersion("1.0.0"));
+            package.SetupGet(p => p.IsLatestVersion).Returns(true).Verifiable();
+            package.SetupGet(p => p.Listed).Returns(true);
+            package.SetupGet(p => p.IsAbsoluteLatestVersion).Throws(new Exception("Repository does not support this property."));
+
+            var repository = new Mock<IPackageRepository>(MockBehavior.Strict);
+            repository.SetupGet(r => r.SupportsPrereleasePackages).Returns(false).Verifiable();
+            repository.Setup(r => r.GetPackages()).Returns(new[] { package.Object }.AsQueryable());
+            var factory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
+            factory.Setup(f => f.CreateRepository(DefaultRepoUrl)).Returns(repository.Object);
+
+            var cmd = new ListCommand(factory.Object, GetSourceProvider()) {
+                Console = new Mock<IConsole>().Object,
+                Prerelease = true
+            };
+            cmd.Source.Add(DefaultRepoUrl);
+
+            // Act
+            var packages = cmd.GetPackages();
+
+            // Assert
+            Assert.Equal(1, packages.Count());
+            AssertPackage(new { Id = "A", Ver = "1.0.0" }, packages.First());
+            package.Verify();
+            repository.Verify();
+        }
+
+        [Fact]
+        public void GetPackageDoesNotShowUnlistedPackagesOrPackagesWithLegacyDates() {
+            // Arrange
+            var packageA = new Mock<IPackage>(MockBehavior.Strict);
+            packageA.SetupGet(p => p.Id).Returns("A");
+            packageA.SetupGet(p => p.Version).Returns(new SemanticVersion("1.0.0"));
+            packageA.SetupGet(p => p.IsLatestVersion).Returns(true);
+            packageA.SetupGet(pA => pA.Listed).Returns(false);
+            packageA.SetupGet(p => p.Published).Returns(DateTime.Now);
+
+            var packageB = new Mock<IPackage>(MockBehavior.Strict);
+            packageB.SetupGet(p => p.Id).Returns("B");
+            packageB.SetupGet(p => p.Version).Returns(new SemanticVersion("1.0.2"));
+            packageB.SetupGet(pB => pB.Listed).Returns(true);
+            packageB.SetupGet(p => p.IsLatestVersion).Returns(true);
+
+
+            var packageC = new Mock<IPackage>(MockBehavior.Strict);
+            packageC.SetupGet(p => p.Id).Returns("C");
+            packageC.SetupGet(p => p.Version).Returns(new SemanticVersion("1.0.0"));
+            packageC.SetupGet(p => p.IsLatestVersion).Returns(true);
+            packageC.SetupGet(pC => pC.Listed).Returns(false);
+            packageC.SetupGet(p => p.Published).Returns(new DateTime(1900, 1, 1, 0, 0, 0));
+
+            var repository = new MockPackageRepository { packageA.Object, packageB.Object, packageC.Object };
+            var factory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
+            factory.Setup(f => f.CreateRepository(DefaultRepoUrl)).Returns(repository);
+
+            var cmd = new ListCommand(factory.Object, GetSourceProvider()) {
+                Console = new Mock<IConsole>().Object,
+            };
+            cmd.Source.Add(DefaultRepoUrl);
+
+            // Act
+            var packages = cmd.GetPackages();
+
+            // Assert
+            Assert.Equal(2, packages.Count());
+            AssertPackage(new { Id = "A", Ver = "1.0.0" }, packages.First());
+            AssertPackage(new { Id = "B", Ver = "1.0.2" }, packages.Last());
+        }
+
+        [Fact]
+        public void GetPackageUsesIsAbsoluteLatestVersionIfPrereleaseIfSpecifiedAndRespositoriesSupportsPrerelease() {
+            // Arrange
+            var packageA = new Mock<IPackage>(MockBehavior.Strict);
+            packageA.SetupGet(p => p.Id).Returns("A");
+            packageA.SetupGet(p => p.Version).Returns(new SemanticVersion("1.0.0"));
+            packageA.SetupGet(p => p.IsAbsoluteLatestVersion).Returns(true).Verifiable();
+            packageA.SetupGet(pA => pA.Listed).Returns(false);
+            packageA.SetupGet(p => p.Published).Returns(DateTime.Now);
+
+            var packageB = new Mock<IPackage>(MockBehavior.Strict);
+            packageB.SetupGet(p => p.Id).Returns("B");
+            packageB.SetupGet(p => p.Version).Returns(new SemanticVersion("1.0.2"));
+            packageB.SetupGet(pB => pB.Listed).Returns(true);
+            packageB.SetupGet(p => p.IsAbsoluteLatestVersion).Returns(false).Verifiable();
+
+
+            var packageC = new Mock<IPackage>(MockBehavior.Strict);
+            packageC.SetupGet(p => p.Id).Returns("C");
+            packageC.SetupGet(p => p.Version).Returns(new SemanticVersion("1.0.0"));
+            packageC.SetupGet(p => p.IsAbsoluteLatestVersion).Returns(true).Verifiable();
+            packageC.SetupGet(pC => pC.Listed).Returns(true);
+
+            var repository = new MockPackageRepository { packageA.Object, packageB.Object, packageC.Object };
+            var factory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
+            factory.Setup(f => f.CreateRepository(DefaultRepoUrl)).Returns(repository);
+
+            var cmd = new ListCommand(factory.Object, GetSourceProvider()) {
+                Console = new Mock<IConsole>().Object,
+                Prerelease = true
+            };
+            cmd.Source.Add(DefaultRepoUrl);
+
+            // Act
+            var packages = cmd.GetPackages();
+
+            // Assert
+            Assert.Equal(2, packages.Count());
+            AssertPackage(new { Id = "A", Ver = "1.0.0" }, packages.First());
+            AssertPackage(new { Id = "C", Ver = "1.0.0" }, packages.Last());
+        }
+
+        [Fact]
         public void GetPackageResolvesSources() {
             // Arrange
             var factory = CreatePackageRepositoryFactory();
