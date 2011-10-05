@@ -101,7 +101,7 @@
             <CommandFlag>DefaultInvisible</CommandFlag>
             <Strings>
                 <CommandName>cmdRestorePackages</CommandName>
-                <ButtonText>Enable NuGet packa&amp;ge restore</ButtonText>
+                <ButtonText>Enable NuGet Packa&amp;ge Restore</ButtonText>
             </Strings>
         </Button>
 
