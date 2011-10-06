@@ -67,6 +67,7 @@ namespace NuGet.VisualStudio {
 
                 IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(solutionDirectory);
                 return fileSystem.DirectoryExists(DotNuGetFolder) &&
+                       fileSystem.FileExists(NuGetExeFile) &&
                        fileSystem.FileExists(NuGetTargetsFile);
             }
         }
@@ -195,7 +196,8 @@ namespace NuGet.VisualStudio {
             IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(solutionDirectory);
 
             if (!fileSystem.DirectoryExists(DotNuGetFolder) || 
-                !fileSystem.GetFiles(DotNuGetFolder).Any()) {
+                !fileSystem.FileExists(NuGetExeFile) ||
+                !fileSystem.FileExists(NuGetTargetsFile)) {
 
                 // download NuGet.Build and NuGet.CommandLine packages into the .nuget folder
                 IPackageRepository nugetRepository = _packageRepositoryFactory.CreateRepository(NuGetConstants.DefaultFeedUrl);
