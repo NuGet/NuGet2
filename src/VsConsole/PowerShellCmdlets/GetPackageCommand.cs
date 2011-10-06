@@ -86,6 +86,7 @@ namespace NuGet.PowerShell.Commands {
         public SwitchParameter AllVersions { get; set; }
 
         [Parameter(ParameterSetName = "Remote")]
+        [Parameter(ParameterSetName = "Updates")]
         public SwitchParameter Prerelease { get; set; }
 
         [Parameter]
@@ -278,7 +279,7 @@ namespace NuGet.PowerShell.Commands {
                 packagesToUpdate = packagesToUpdate.Find(Filter);
             }
 
-            return sourceRepository.GetUpdates(packagesToUpdate).AsQueryable();
+            return sourceRepository.GetUpdates(packagesToUpdate, Prerelease).AsQueryable();
         }
 
         private void WritePackages(IEnumerable<IPackage> packages) {

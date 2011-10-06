@@ -191,7 +191,7 @@ namespace NuGet.Test {
             var remoteRepo = GetRemoteRepository();
 
             // Act
-            var packages = remoteRepo.GetUpdates(localRepo.GetPackages());
+            var packages = remoteRepo.GetUpdates(localRepo.GetPackages(), includePrerelease: false);
 
             // Assert
             Assert.True(packages.Any());
@@ -206,7 +206,7 @@ namespace NuGet.Test {
             var remoteRepo = GetEmptyRepository();
 
             // Act
-            var packages = remoteRepo.GetUpdates(localRepo.GetPackages());
+            var packages = remoteRepo.GetUpdates(localRepo.GetPackages(), includePrerelease: false);
 
             // Assert
             Assert.False(packages.Any());

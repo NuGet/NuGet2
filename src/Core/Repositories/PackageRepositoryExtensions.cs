@@ -230,7 +230,7 @@ namespace NuGet {
         /// <param name="repository">The repository to search for updates</param>
         /// <param name="packages">Packages to look for updates</param>
         /// <returns></returns>
-        public static IEnumerable<IPackage> GetUpdates(this IPackageRepository repository, IEnumerable<IPackage> packages) {
+        public static IEnumerable<IPackage> GetUpdates(this IPackageRepository repository, IEnumerable<IPackage> packages, bool includePrerelease) {
             List<IPackage> packageList = packages.ToList();
 
             if (!packageList.Any()) {
@@ -238,7 +238,7 @@ namespace NuGet {
             }
 
             // These are the packages that we need to look at for potential updates.
-            IDictionary<string, IPackage> sourcePackages = GetUpdateCandidates(repository, packageList)
+            IDictionary<string, IPackage> sourcePackages = GetUpdateCandidates(repository, packageList, includePrerelease)
                                                                            .ToList()
                                                                            .GroupBy(package => package.Id)
                                                                            .ToDictionary(package => package.Key,
@@ -265,8 +265,17 @@ namespace NuGet {
         /// Since odata dies when our query for updates is too big. We query for updates 10 packages at a time
         /// and return the full list of candidates for updates.
         /// </summary>
-        private static IEnumerable<IPackage> GetUpdateCandidates(IPackageRepository repository, IEnumerable<IPackage> packages) {
-            return FindPackages(repository, packages, GetFilterExpression);
+        private static IEnumerable<IPackage> GetUpdateCandidates(
+            IPackageRepository repository,
+            IEnumerable<IPackage> packages,
+            bool includePrerelease) {
+
+            var query = FindPackages(repository, packages, GetFilterExpression);
+            if (!includePrerelease) {
+                query = query.Where(p => p.IsReleaseVersion());
+            }
+
+            return query;
         }
 
         /// <summary>
@@ -282,7 +291,7 @@ namespace NuGet {
             ParameterExpression parameterExpression = Expression.Parameter(typeof(IPackageMetadata));
             Expression expressionBody = ids.Select(id => GetCompareExpression(parameterExpression, id.ToLower()))
                                                 .Aggregate(Expression.OrElse);
-
+           
             return Expression.Lambda<Func<IPackage, bool>>(expressionBody, parameterExpression);
         }
 

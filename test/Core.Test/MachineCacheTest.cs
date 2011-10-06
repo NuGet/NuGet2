@@ -63,7 +63,7 @@ namespace NuGet.Test {
             Assert.False(cache.FindPackages(new[] { "TestPackage", "B" }).Any());
             Assert.False(cache.FindPackagesById("TestPackage").Any());
             Assert.False(cache.GetPackages().Any());
-            Assert.False(cache.GetUpdates(new[] { package }).Any());
+            Assert.False(cache.GetUpdates(new[] { package }, includePrerelease: true).Any());
             cache.RemovePackage(package);
             Assert.Equal(0, cache.Source.Length);
             Assert.False(cache.TryFindPackage("TestPackage", new SemanticVersion("1.0"), out package));

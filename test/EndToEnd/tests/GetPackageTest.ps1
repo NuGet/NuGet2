@@ -476,3 +476,43 @@ function Test-GetPackagesWithAllAndPrereleaseSwitchShowsAllPackages {
     Assert-AreEqual "PreReleaseTestPackage.A" $packages[5].Id
     Assert-AreEqual "1.0.0a" $packages[5].Version
 }
+
+function Test-GetPackageUpdatesDoNotReturnPrereleasePackagesIfFlagIsNotSpecified {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    $p | Install-Package PrereleaseTestPackage -Version 1.0.0.0b -Source $context.RepositoryRoot -Prerelease
+    Assert-Package $p 'PrereleaseTestPackage' '1.0.0.0b'
+    
+    # Act
+    $updates = @(Get-Package -Updates -Source $context.RepositoryRoot)
+
+    # Assert
+    Assert-AreEqual 1 $updates.Count
+    Assert-AreEqual PrereleaseTestPackage $updates[0].Id
+    #Assert-AreEqual '1.0.0.0' $updates[0].Version
+}
+
+function Test-GetPackageUpdatesReturnPrereleasePackagesIfFlagIsSpecified {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    $p | Install-Package PrereleaseTestPackage -Version 1.0.0.0a -Source $context.RepositoryRoot -Prerelease
+    Assert-Package $p 'PrereleaseTestPackage' '1.0.0.0a'
+    
+    # Act
+    $updates = @(Get-Package -Updates -Prerelease -Source $context.RepositoryRoot)
+
+    # Assert
+    Assert-AreEqual 1 $updates.Count
+    Assert-AreEqual 'PrereleaseTestPackage' $updates[0].Id
+    Assert-AreEqual '1.0.1a' $updates[0].Version
+}

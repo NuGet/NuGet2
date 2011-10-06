@@ -25,7 +25,7 @@ namespace NuGet.Dialog.Providers {
         public override IQueryable<IPackage> GetPackages() {
             // We need to call ToList() here so that we don't evaluate the enumerable twice
             // when trying to count it.
-            IList<IPackage> updateCandidates = Repository.GetUpdates(_localRepository.GetPackages()).ToList();
+            IList<IPackage> updateCandidates = Repository.GetUpdates(_localRepository.GetPackages(), includePrerelease: false).ToList();
 
             IList<FrameworkName> solutionFrameworks = Provider.SupportedFrameworks.Select(s => new FrameworkName(s)).ToList();
 
