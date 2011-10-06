@@ -57,7 +57,7 @@ namespace NuGet {
 
             // Remove all the expired ones
             foreach (var entry in entries) {
-                if (entry.Value.Expired) {
+                if (entry.Value != null && entry.Value.Expired) {
                     Remove(entry.Key);
                 }
             }
