@@ -73,9 +73,6 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "PackageCommandNoRunAnalysis")]
         public bool NoPackageAnalysis { get; set; }
 
-        [Option(typeof(NuGetResources), "PackCommandNoSemVerTransformation")]
-        public bool NoSemanticVersionTransformations { get; set; }
-
         [Option(typeof(NuGetResources), "PackageCommandPropertiesDescription")]
         public Dictionary<string, string> Properties {
             get {
@@ -285,7 +282,6 @@ namespace NuGet.Commands {
                 IsTool = Tool,
                 Logger = Console,
                 Build = Build,
-                ConvertVersionToSemanticVersion = !NoSemanticVersionTransformations
             };
 
             // Add the additional Properties to the properties of the Project Factory
@@ -319,9 +315,10 @@ namespace NuGet.Commands {
             return package;
         }
 
-        private void AnalyzePackage(IPackage package) {
+        internal void AnalyzePackage(IPackage package) {
             IEnumerable<IPackageRule> packageRules = Rules;
-            if (!NoSemanticVersionTransformations) {
+            if (!String.IsNullOrEmpty(package.Version.SpecialVersion)) {
+                // If a package contains a special token, we'll warn users if it does not strictly follow semver guidelines.
                 packageRules = packageRules.Concat(new[] { new StrictSemanticVersionValidationRule() });
             }
 

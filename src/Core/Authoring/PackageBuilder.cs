@@ -186,6 +186,7 @@ namespace NuGet {
                 throw new InvalidOperationException(NuGetResources.CannotCreateEmptyPackage);
             }
 
+            ValidateDependencies(Version, Dependencies);
             ValidateReferenceAssemblies(Files, PackageAssemblyReferences);
 
             using (Package package = Package.Open(stream, FileMode.Create)) {
@@ -202,6 +203,21 @@ namespace NuGet {
                 package.PackageProperties.Version = Version.ToString();
                 package.PackageProperties.Language = Language;
                 package.PackageProperties.Keywords = ((IPackageMetadata)this).Tags;
+            }
+        }
+
+        internal static void ValidateDependencies(SemanticVersion version, IEnumerable<PackageDependency> dependencies) {
+            if (version == null) {
+                // We have independent validation for null-versions.
+                return;
+            }
+
+            if (String.IsNullOrEmpty(version.SpecialVersion)) {
+                // If we are creating a production package, do not allow any of the dependencies to be a prerelease version.
+                var prereleaseDependency = dependencies.FirstOrDefault(IsPrereleaseDependency);
+                if (prereleaseDependency != null) {
+                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_InvalidPrereleaseDependency, prereleaseDependency.ToString()));
+                }
             }
         }
 
@@ -335,6 +351,15 @@ namespace NuGet {
             Debug.Assert(tags != null);
             return from tag in tags.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
                    select tag.Trim();
+        }
+
+        private static bool IsPrereleaseDependency(PackageDependency dependency) {
+            var versionSpec = dependency.VersionSpec;
+            if (versionSpec != null) {
+                return (versionSpec.MinVersion != null && !String.IsNullOrEmpty(dependency.VersionSpec.MinVersion.SpecialVersion)) ||
+                       (versionSpec.MaxVersion != null && !String.IsNullOrEmpty(dependency.VersionSpec.MaxVersion.SpecialVersion));
+            }
+            return false;
         }
     }
 }

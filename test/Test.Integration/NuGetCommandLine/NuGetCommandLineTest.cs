@@ -394,8 +394,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         [Fact]
         public void PackageCommand_SpecifyingProjectFileCreatesPackageAndSymbolsPackge() {
             // Arrange            
-            string expectedPackage = "FakeProject.1.2.0.nupkg";
-            string expectedSymbolsPackage = "FakeProject.1.2.0.symbols.nupkg";
+            string expectedPackage = "FakeProject.1.2.0.0.nupkg";
+            string expectedSymbolsPackage = "FakeProject.1.2.0.0.symbols.nupkg";
 
             WriteProjectFile("Runner.cs", @"using System;
 public class Runner { 
@@ -459,7 +459,7 @@ public class Baz {
         [Fact]
         public void PackageCommand_SpecifyingProjectFilePacksContentAndOutput() {
             // Arrange                        
-            string expectedPackage = "ProjectWithCotent.1.5.0.nupkg";
+            string expectedPackage = "ProjectWithCotent.1.5.0.0.nupkg";
             var contentFiles = new[] { "Foo.xml", "Bar.txt" };
             var sourceFiles = new[] { "A.cs", "B.cs" };
 
@@ -559,7 +559,7 @@ public class Cl_{0} {{
         [Fact]
         public void PackageCommand_SpecifyingProjectFileWithNuSpecWithTokensSubstitutesMetadataFromProject() {
             // Arrange
-            string expectedPackage = "ProjectWithNuSpec.1.2.0.nupkg";
+            string expectedPackage = "ProjectWithNuSpec.1.2.0.0.nupkg";
             WriteAssemblyInfo("ProjectWithNuSpec",
                                "1.2.0.0",
                                "David",
@@ -616,7 +616,7 @@ public class Cl_{0} {{
         [Fact]
         public void PackageCommand_SpecifyingProjectFileWithNuSpecWithEmptyFilesElementDoNotIncludeContentFiles() {
             // Arrange
-            string expectedPackage = "ProjectWithNuSpecEmptyFiles.1.0.0.nupkg";
+            string expectedPackage = "ProjectWithNuSpecEmptyFiles.1.0.0.0.nupkg";
             WriteAssemblyInfo("ProjectWithNuSpecEmptyFiles",
                                "1.0.0.0",
                                "Luan",
@@ -661,7 +661,7 @@ public class Cl_{0} {{
         [Fact]
         public void PackageCommand_SpecifyingProjectFileWithNuSpecNamedAfterProjectUsesNuSpecForMetadata() {
             // Arrange                        
-            string expectedPackage = "Test.1.2.0.nupkg";
+            string expectedPackage = "Test.1.2.nupkg";
             WriteAssemblyInfo("FooProject",
                                "1.5.0.0",
                                "David",
@@ -758,7 +758,7 @@ public class Cl_{0} {{
         [Fact]
         public void PackageCommand_SpecifyingProjectFileAndNuSpecWithFilesMergesFiles() {
             // Arrange                        
-            string expectedPackage = "ProjectWithNuSpecAndFiles.1.3.0.nupkg";
+            string expectedPackage = "ProjectWithNuSpecAndFiles.1.3.0.0.nupkg";
             WriteAssemblyInfo("ProjectWithNuSpecAndFiles",
                                "1.3.0.0",
                                "David2",
@@ -805,7 +805,7 @@ public class Cl_{0} {{
         [Fact]
         public void PackageCommand_PrefersProjectFileIfNuSpecAndProjectFileAreInTheSameDirectory() {
             // Arrange                        
-            string expectedPackage = "ProjectWithNuSpecProjectWins.1.2.0.nupkg";
+            string expectedPackage = "ProjectWithNuSpecProjectWins.1.2.0.0.nupkg";
             WriteAssemblyInfo("ProjectWithNuSpecProjectWins",
                                "1.2.0.0",
                                "David2",
@@ -846,7 +846,7 @@ public class Cl_{0} {{
         [Fact]
         public void PackageCommand_SpecifyingProjectOnlyPacksAssemblyThatProjectProduced() {
             // Arrange                        
-            string expectedPackage = "ProjectWithAssembliesInOutputPath.1.3.0.nupkg";
+            string expectedPackage = "ProjectWithAssembliesInOutputPath.1.3.0.0.nupkg";
             WriteAssemblyInfo("ProjectWithAssembliesInOutputPath",
                                "1.3.0.0",
                                "David2",

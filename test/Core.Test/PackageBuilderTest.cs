@@ -6,9 +6,11 @@ using System.Linq;
 using System.Xml;
 using Xunit;
 using Moq;
+using Xunit.Extensions;
+using System.Globalization;
 
 namespace NuGet.Test {
-    
+
     public class PackageBuilderTest {
         [Fact]
         public void OwnersFallsBackToAuthorsIfNoneSpecified() {
@@ -617,7 +619,7 @@ Description is required.");
 
             // Assert
             Assert.Equal("Artem.XmlProviders", builder.Id);
-            Assert.Equal(new SemanticVersion(2, 5, 0 ,0), builder.Version);
+            Assert.Equal(new SemanticVersion(2, 5, 0, 0), builder.Version);
             Assert.Equal("Some awesome package", builder.Title);
             Assert.Equal(1, builder.Authors.Count);
             Assert.Equal("Velio Ivanov", authors[0]);
@@ -710,9 +712,71 @@ Description is required.");
             // Act and Assert
             ExceptionAssert.Throws<InvalidDataException>(() => PackageBuilder.ValidateReferenceAssemblies(files, packageAssemblyReferences),
                 "Invalid assembly reference 'baz'. Ensure that a file named 'baz' exists in the lib directory.");
+        }
 
+        [Theory]
+        [PropertyData("InvalidDependencyData")]
+        public void ValidateDependenciesThrowsIfAnyDependencyForAStableReleaseIsPrerelease(VersionSpec versionSpec) {
+            // Arrange
+            var badDependency = new PackageDependency("A", versionSpec);
+            var dependencies = new[] {
+                badDependency,
+                new PackageDependency("B", new VersionSpec()),
+            };
+            var packageVersion = new SemanticVersion("1.0.0");
+
+            // Act and Assert
+            ExceptionAssert.Throws<InvalidDataException>(() => PackageBuilder.ValidateDependencies(packageVersion, dependencies),
+                String.Format(CultureInfo.InvariantCulture,
+                    "A stable release of a package should not have on a prerelease dependency. Either modify the version spec of dependency \"{0}\" or update the version field.",
+                    badDependency));
+        }
+
+        [Theory]
+        [PropertyData("InvalidDependencyData")]
+        public void ValidateDependenciesDoesNotThrowIfDependencyForAPrereleaseVersionIsPrerelease(VersionSpec versionSpec) {
+            // Arrange
+            var dependencies = new[] {
+                new PackageDependency("A", versionSpec),
+                new PackageDependency("B", new VersionSpec()),
+            };
+            var packageVersion = new SemanticVersion("1.0.0beta");
+
+            // Act
+            PackageBuilder.ValidateDependencies(packageVersion, dependencies);
+
+            // Assert
             // If we've got this far, no exceptions were thrown.
             Assert.True(true);
+        }
+
+        [Fact]
+        public void ValidateDependenciesDoesNotThrowIfDependencyForAStableVersionIsStable() {
+            // Arrange
+            var dependencies = new[] {
+                new PackageDependency("A", new VersionSpec(new SemanticVersion("1.0.0"))),
+                new PackageDependency("B", new VersionSpec { MinVersion = new SemanticVersion("1.0.1"), MaxVersion = new SemanticVersion("1.2.3") }),
+            };
+            var packageVersion = new SemanticVersion("1.0.0");
+
+            // Act
+            PackageBuilder.ValidateDependencies(packageVersion, dependencies);
+
+            // Assert
+            // If we've got this far, no exceptions were thrown.
+            Assert.True(true);
+        }
+
+        public static IEnumerable<object[]> InvalidDependencyData {
+            get {
+                var prereleaseVer = new SemanticVersion("1.0.0a");
+                var version = new SemanticVersion("2.3.0.6232");
+
+                yield return new object[] { new VersionSpec(prereleaseVer) };
+                yield return new object[] { new VersionSpec { MinVersion = prereleaseVer, MaxVersion = version } };
+                yield return new object[] { new VersionSpec { MinVersion = version, MaxVersion = prereleaseVer, IsMaxInclusive = true } };
+                yield return new object[] { new VersionSpec { MinVersion = prereleaseVer, MaxVersion = prereleaseVer, IsMinInclusive = true } };
+            }
         }
 
         [Fact]

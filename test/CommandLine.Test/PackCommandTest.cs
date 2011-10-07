@@ -4,9 +4,11 @@ using Xunit;
 using Moq;
 using NuGet.Commands;
 using Xunit.Extensions;
+using NuGet.Common;
+using System.Text;
 
 namespace NuGet.Test.NuGetCommandLine.Commands {
-    
+
     public class PackCommandTest {
         [Fact]
         public void PackCommandDefaultFiltersRemovesManifestAndPackageFiles() {
@@ -304,6 +306,28 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             Assert.Equal(files[1].Path, @"lib\mylib.pdb");
             Assert.Equal(files[2].Path, @"tools\mycmd.exe");
             Assert.Equal(files[3].Path, @"src\mylib.cs");
+        }
+
+        [Fact]
+        public void PackCommandWarnsIfVersionContainsSpecialVersionButDoesNotConformToSemVer() {
+            // Arrange
+            var package = PackageUtility.CreatePackage("A", "1.0alpha");
+            var builder = new StringBuilder();
+            var console = new Mock<IConsole>();
+
+            console.Setup(c => c.WriteWarning(It.IsAny<string>(), It.IsAny<object[]>())).Callback<string, object[]>((text, p) => builder.AppendFormat(text, p));
+            console.Setup(c => c.WriteWarning(It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<object[]>())).Callback<bool, string, object[]>((b, text, p) => builder.AppendFormat(text, p));
+            var packCommand = new PackCommand {
+                Console = console.Object,
+                Rules = Enumerable.Empty<IPackageRule>()
+            };
+
+            // Act
+            packCommand.AnalyzePackage(package);
+
+            // Assert
+            Assert.Equal(@"1 issue(s) found with package 'A'.Issue: Use semantic versioningDescription: Version ""1.0alpha"" does not follow semantic versioning guidelines.Solution: Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org. ", 
+                builder.ToString());
         }
 
         private static IList<IPackageFile> GetPackageFiles(params string[] paths) {

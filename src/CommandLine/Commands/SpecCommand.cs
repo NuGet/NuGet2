@@ -46,7 +46,7 @@ namespace NuGet.Commands {
             else {
                 if (!ProjectHelper.TryGetProjectFile(out projectFile)) {
                     manifest.Metadata.Id = Arguments.Any() ? Arguments[0] : "Package";
-                    manifest.Metadata.Version = "1.0";
+                    manifest.Metadata.Version = "1.0.0";
                 }
                 else {
                     fileName = Path.GetFileNameWithoutExtension(projectFile);

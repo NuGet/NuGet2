@@ -60,7 +60,6 @@
     <Compile Include="OptionAttributeTests.cs" />
     <Compile Include="PackCommandTest.cs" />
     <Compile Include="ProgramTest.cs" />
-    <Compile Include="ProjectFactoryTest.cs" />
     <Compile Include="ResourceHelperTests.cs" />
     <Compile Include="SetApiKeyCommandTest.cs" />
     <Compile Include="SourcesCommandTest.cs" />

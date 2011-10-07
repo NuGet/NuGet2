@@ -725,9 +725,6 @@ nuget update -Self</value>
   <data name="Warning_SemanticVersionTitle" xml:space="preserve">
     <value>Use semantic versioning</value>
   </data>
-  <data name="PackCommandNoSemVerTransformation" xml:space="preserve">
-    <value>Prevent NuGet from attempting to convert assembly version to a semantic version.</value>
-  </data>
   <data name="InstallCommandPrerelease" xml:space="preserve">
     <value>Allows prerelease packages to be installed. This flag is not required when restoring packages by installing from packages.config.</value>
   </data>
