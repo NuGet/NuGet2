@@ -65,7 +65,7 @@ namespace NuGet.Dialog.Test {
                     packageB.Id,
                     packageB.Version,
                     false,
-                    false,
+                    true,
                     provider),
                     Times.Once());
 
@@ -74,7 +74,7 @@ namespace NuGet.Dialog.Test {
                     packageB.Id,
                     packageB.Version,
                     false,
-                    false,
+                    true,
                     provider),
                     Times.Once());
 

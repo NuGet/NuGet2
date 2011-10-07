@@ -128,7 +128,7 @@ namespace NuGet.Dialog.Providers {
         protected bool CheckPSScriptAndShowLicenseAgreement(PackageItem item, IVsPackageManager packageManager, out IList<PackageOperation> operations) {
             ShowProgressWindow();
 
-            CheckInstallPSScripts(item.PackageIdentity, packageManager.SourceRepository, out operations);
+            CheckInstallPSScripts(item.PackageIdentity, packageManager.SourceRepository, includePrerelease: false, operations: out operations);
             var licensePackages = from o in operations
                                   where o.Action == PackageAction.Install && o.Package.RequireLicenseAcceptance && !packageManager.LocalRepository.Exists(o.Package)
                                   select o.Package;

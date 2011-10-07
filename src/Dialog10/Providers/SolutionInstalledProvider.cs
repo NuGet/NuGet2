@@ -116,7 +116,7 @@ namespace NuGet.Dialog.Providers {
 
             if (hasInstallWork) {
                 IList<PackageOperation> operations;
-                CheckInstallPSScripts(package, PackageManager.SourceRepository, out operations);
+                CheckInstallPSScripts(package, PackageManager.SourceRepository, includePrerelease: true, operations: out operations);
             }
 
             if (hasUninstallWork) {
@@ -136,7 +136,7 @@ namespace NuGet.Dialog.Providers {
                 try {
                     if (selectedProjectsSet.Contains(project.UniqueName)) {
                         // if the project is checked, install package into it  
-                        InstallPackageToProject(project, item);
+                        InstallPackageToProject(project, item, includePrerelease: true);
                     }
                 }
                 catch (Exception ex) {
