@@ -294,7 +294,7 @@ namespace NuGet.PowerShell.Commands.Test {
             // Act
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, null, new Mock<IHttpClientEvents>().Object, null);
             cmdlet.Id = "A";
-            cmdlet.Prerelease = true;
+            cmdlet.IncludePrerelease = true;
             cmdlet.Execute();
 
 

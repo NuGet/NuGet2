@@ -46,8 +46,8 @@ namespace NuGet.PowerShell.Commands {
         [Parameter]
         public SwitchParameter IgnoreDependencies { get; set; }
 
-        [Parameter]
-        public SwitchParameter Prerelease { get; set; }
+        [Parameter, Alias("Prerelease")]
+        public SwitchParameter IncludePrerelease { get; set; }
 
         protected override IVsPackageManager CreatePackageManager() {
             if (!SolutionManager.IsSolutionOpen) {
@@ -70,7 +70,7 @@ namespace NuGet.PowerShell.Commands {
             try {
                 SubscribeToProgressEvents();
                 if (PackageManager != null) {
-                    PackageManager.InstallPackage(ProjectManager, Id, Version, ignoreDependencies: IgnoreDependencies, allowPrereleaseVersions: Prerelease.IsPresent, 
+                    PackageManager.InstallPackage(ProjectManager, Id, Version, ignoreDependencies: IgnoreDependencies, allowPrereleaseVersions: IncludePrerelease.IsPresent, 
                         logger: this);
                     _hasConnectedToHttpSource |= UriHelper.IsHttpSource(PackageManager.SourceRepository.Source);
                 }

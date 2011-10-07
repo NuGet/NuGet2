@@ -7,7 +7,6 @@ using EnvDTE;
 using NuGet.VisualStudio;
 
 namespace NuGet.PowerShell.Commands {
-
     /// <summary>
     /// This command lists the available packages which are either from a package source or installed in the current solution.
     /// </summary>
@@ -87,7 +86,8 @@ namespace NuGet.PowerShell.Commands {
 
         [Parameter(ParameterSetName = "Remote")]
         [Parameter(ParameterSetName = "Updates")]
-        public SwitchParameter Prerelease { get; set; }
+        [Alias("Prerelease")]
+        public SwitchParameter IncludePrerelease { get; set; }
 
         [Parameter]
         [ValidateRange(0, Int32.MaxValue)]
@@ -174,7 +174,7 @@ namespace NuGet.PowerShell.Commands {
         protected virtual IEnumerable<IPackage> FilterPackages(IPackageRepository sourceRepository, IQueryable<IPackage> packages) {
             if (CollapseVersions) {
                 // In the event the client is going up against a v1 feed, do not try to fetch pre release packages since this flag does not exist.
-                if (Recent || (Prerelease && sourceRepository.SupportsPrereleasePackages)) {
+                if (Recent || (IncludePrerelease && sourceRepository.SupportsPrereleasePackages)) {
                     // For Recent packages, we want to show the highest package even if it is a recent. 
                     // Review: We should change this to show both the absolute latest and the latest versions but that requires changes to our collapsing behavior.
                     packages = packages.Where(p => p.IsAbsoluteLatestVersion);
@@ -200,7 +200,7 @@ namespace NuGet.PowerShell.Commands {
                                             .AsCollapsed();
             }
             
-            if (ListAvailable && !Prerelease) {
+            if (ListAvailable && !IncludePrerelease) {
                 // If we aren't collapsing versions, and the pre-release flag is not set, only display release versions when displaying from a remote source.
                 // We don't need to filter packages when showing recent packages or installed packages.
                 packagesToDisplay = packagesToDisplay.Where(p => p.IsReleaseVersion());
@@ -279,7 +279,7 @@ namespace NuGet.PowerShell.Commands {
                 packagesToUpdate = packagesToUpdate.Find(Filter);
             }
 
-            return sourceRepository.GetUpdates(packagesToUpdate, Prerelease).AsQueryable();
+            return sourceRepository.GetUpdates(packagesToUpdate, IncludePrerelease).AsQueryable();
         }
 
         private void WritePackages(IEnumerable<IPackage> packages) {

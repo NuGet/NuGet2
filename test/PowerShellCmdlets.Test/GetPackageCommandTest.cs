@@ -661,7 +661,7 @@ namespace NuGet.PowerShell.Commands.Test {
             repositoryFactory.Setup(r => r.CreateRepository("NuGet Official Source")).Returns(sourceRepository);
             var cmdlet = BuildCmdlet(repositoryFactory: repositoryFactory.Object, packageManagerFactory: packageManagerFactory.Object);
             cmdlet.Updates = true;
-            cmdlet.Prerelease = true;
+            cmdlet.IncludePrerelease = true;
             cmdlet.Source = "NuGet Official Source";
 
             // Act 
@@ -701,7 +701,7 @@ namespace NuGet.PowerShell.Commands.Test {
             repositoryFactory.Setup(r => r.CreateRepository("NuGet Official Source")).Returns(sourceRepository);
             var cmdlet = BuildCmdlet(repositoryFactory: repositoryFactory.Object);
             cmdlet.ListAvailable = true;
-            cmdlet.Prerelease = true;
+            cmdlet.IncludePrerelease = true;
             cmdlet.Source = "NuGet Official Source";
 
             // Act 
