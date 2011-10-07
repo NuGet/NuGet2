@@ -56,7 +56,9 @@ Register-TabExpansion 'Install-Package' @{
 
         if ($context.Id) { $parameters.filter = $context.Id }
         if ($context.Source) { $parameters.source = $context.Source }
-        if ($context.PreRelease) { $parameters.PreRelease = $true }
+        if ((HasProperty $context 'IncludePreRelease') -or (HasProperty $context 'PreRelease')) {
+            $parameters.IncludePreRelease = $true 
+        }
 
         $parameters.Remote = $true
         $parameters.AllVersions = $true
@@ -114,6 +116,10 @@ Register-TabExpansion 'Update-Package' @{
             $parameters.filter = $context.id 
             $parameters.Remote = $true
             $parameters.AllVersions = $true
+            if ((HasProperty $context 'IncludePreRelease') -or (HasProperty $context 'PreRelease')) {
+                $parameters.IncludePreRelease = $true 
+            }
+
             $versions = GetPackageVersions $parameters $context
 
             if($packages.Count) {
@@ -156,6 +162,10 @@ Register-TabExpansion 'Open-PackagePage' @{
 Register-TabExpansion 'New-Package' @{ 'ProjectName' = { GetProjectNames } }
 Register-TabExpansion 'Add-BindingRedirect' @{ 'ProjectName' = { GetProjectNames } }
 Register-TabExpansion 'Get-Project' @{ 'Name' = { GetProjectNames } }
+
+function HasProperty($context, $name) {
+    return $context.psobject.properties | ? { $_.Name -eq $name }
+}
 
 function GetPackages($context) {  
     $parameters = @{}

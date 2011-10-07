@@ -369,3 +369,38 @@ function Test-GetPackageCommandShowTabExpansioinForProjectNameParameter {
     Assert-AreEqual "Project2" $suggestions[1]
 }
 
+function Test-InstallPackageCommandShowTabExpansionForPreReleasePackagesVersions {
+    param(
+        $context
+    )
+
+    # Act
+    $suggestions = @(TabExpansion "Install-Package PreReleaseTestPackage -Source '$($context.RepositoryRoot)' -IncludePreRelease -Version ")
+
+    # Assert
+    Assert-AreEqual 4 $suggestions.Count
+
+    Assert-AreEqual '1.0.1a' $suggestions[0]
+    Assert-AreEqual '1.0.0' $suggestions[1]
+    Assert-AreEqual '1.0.0b' $suggestions[2]
+    Assert-AreEqual '1.0.0a' $suggestions[3]
+}
+
+function Test-UpdatePackageCommandShowTabExpansionForPreReleasePackagesVersions {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+    Install-Package PreReleaseTestPackage -PreRelease -Version 1.0.0b -Source $context.RepositoryRoot -ProjectName $p.Name
+
+    # Act
+    $suggestions = @(TabExpansion "Update-Package PreReleaseTestPackage -Source '$($context.RepositoryRoot)' -ProjectName '$($p.Name)' -IncludePreRelease -Version ")
+
+    # Assert
+    Assert-AreEqual 2 $suggestions.Count
+
+    Assert-AreEqual '1.0.1a' $suggestions[0]
+    Assert-AreEqual '1.0.0' $suggestions[1]
+}
