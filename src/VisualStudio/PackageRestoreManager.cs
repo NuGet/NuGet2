@@ -77,6 +77,17 @@ namespace NuGet.VisualStudio {
                 throw new InvalidOperationException(VsResources.SolutionNotAvailable);
             }
 
+            if (!quietMode) {
+                // if not in quiet mode, ask user for confirmation before proceeding
+                bool? result = MessageHelper.ShowQueryMessage(
+                    VsResources.PackageRestoreConfirmation, 
+                    VsResources.DialogTitle,
+                    showCancelButton: false);
+                if (result != true) {
+                    return;
+                }
+            }
+
             Exception exception = null;
 
             IVsThreadedWaitDialog2 waitDialog;

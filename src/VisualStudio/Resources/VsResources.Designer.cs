@@ -349,6 +349,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Do you want to configure this solution to restore missing NuGet packages during build? A .nuget folder will be added to the root of the solution that contains files that enable package restore..
+        /// </summary>
+        public static string PackageRestoreConfirmation {
+            get {
+                return ResourceManager.GetString("PackageRestoreConfirmation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Downloading package &apos;{0}&apos; failed..
         /// </summary>
         public static string PackageRestoreDownloadPackageFailed {

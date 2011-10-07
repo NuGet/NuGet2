@@ -288,4 +288,7 @@
   <data name="PackageRestoreDownloadPackageFailed" xml:space="preserve">
     <value>Downloading package '{0}' failed.</value>
   </data>
+  <data name="PackageRestoreConfirmation" xml:space="preserve">
+    <value>Do you want to configure this solution to restore missing NuGet packages during build? A .nuget folder will be added to the root of the solution that contains files that enable package restore.</value>
+  </data>
 </root>

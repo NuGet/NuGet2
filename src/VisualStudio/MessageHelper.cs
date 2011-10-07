@@ -40,13 +40,13 @@ namespace NuGet.VisualStudio {
                 OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
         }
 
-        public static bool? ShowQueryMessage(string message, string title) {
+        public static bool? ShowQueryMessage(string message, string title, bool showCancelButton) {
             int result = VsShellUtilities.ShowMessageBox(
                 ServiceLocator.GetInstance<IServiceProvider>(),
                 message,
                 title,
                 OLEMSGICON.OLEMSGICON_QUERY,
-                OLEMSGBUTTON.OLEMSGBUTTON_YESNOCANCEL,
+                showCancelButton ? OLEMSGBUTTON.OLEMSGBUTTON_YESNOCANCEL : OLEMSGBUTTON.OLEMSGBUTTON_YESNO,
                 OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
 
             if (result == NativeMethods.IDCANCEL) {

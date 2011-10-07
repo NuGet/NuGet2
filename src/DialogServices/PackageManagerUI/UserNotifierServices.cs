@@ -109,7 +109,7 @@ namespace NuGet.Dialog.PackageManagerUI {
                 return (bool?)result;
             }
 
-            return MessageHelper.ShowQueryMessage(message, null);
+            return MessageHelper.ShowQueryMessage(message, title: null, showCancelButton: true);
         }
     }
 }
