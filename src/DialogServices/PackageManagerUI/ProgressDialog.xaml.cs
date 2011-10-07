@@ -34,9 +34,19 @@ namespace NuGet.Dialog.PackageManagerUI {
             Close();
         }
 
-        private void DialogWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e) {
+            base.OnClosing(e);
+
             // do not allow user to close the form when the operation has not completed
             e.Cancel = !OkButton.IsEnabled;
+
+            if (!e.Cancel) {
+                // bug 1598: after closing the (modeless) progress dialog, focus switch to another application.
+                // call Activate() here to prevent that.
+                if (Owner != null) {
+                    Owner.Activate();
+                }
+            }
         }
 
         public void ForceClose() {

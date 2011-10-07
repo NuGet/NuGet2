@@ -15,8 +15,7 @@
     WindowStartupLocation="CenterOwner" 
     ShowInTaskbar="False" 
     ResizeMode="CanResize" 
-    Width="350" 
-    Closing="DialogWindow_Closing" 
+    Width="350"
     MinHeight="230" 
     MinWidth="300" 
     local:WindowSizePersistenceHelper.WindowToken="ProgressWindow">
