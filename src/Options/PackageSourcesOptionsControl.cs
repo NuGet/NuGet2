@@ -327,6 +327,7 @@ namespace NuGet.Options {
                 drawFormat.Alignment = StringAlignment.Near;
                 drawFormat.Trimming = StringTrimming.EllipsisCharacter;
                 drawFormat.LineAlignment = StringAlignment.Near;
+                drawFormat.FormatFlags = StringFormatFlags.NoWrap;
 
                 // the margin between the checkbox and the edge of the list box
                 const int edgeMargin = 8;
@@ -358,17 +359,24 @@ namespace NuGet.Options {
                     // [checkbox] Name
                     //            Source (italics)
 
+                    int textWidth = e.Bounds.Width - checkBoxSize.Width - edgeMargin - textMargin;
+
+                    SizeF nameSize = graphics.MeasureString(currentItem.Name, e.Font, textWidth, drawFormat);
+
                     // resize the bound rectangle to make room for the checkbox above
-                    var textBounds = new Rectangle(
+                    var nameBounds = new Rectangle(
                         e.Bounds.Left + checkBoxSize.Width + edgeMargin + textMargin,
                         e.Bounds.Top,
-                        e.Bounds.Width - checkBoxSize.Width - edgeMargin - textMargin,
-                        e.Bounds.Height);
+                        textWidth,
+                        (int)nameSize.Height);
 
-                    graphics.DrawString(currentItem.Name, e.Font, foreBrush, textBounds, drawFormat);
-                    SizeF nameSize = graphics.MeasureString(currentItem.Name, e.Font, textBounds.Width, drawFormat);
+                    graphics.DrawString(currentItem.Name, e.Font, foreBrush, nameBounds, drawFormat);
 
-                    var sourceBounds = NewBounds(textBounds, 0, (int)nameSize.Height);
+                    var sourceBounds = new Rectangle(
+                        nameBounds.Left,
+                        nameBounds.Bottom,
+                        textWidth,
+                        e.Bounds.Bottom - nameBounds.Bottom);
                     graphics.DrawString(currentItem.Source, italicFont, sourceBrush, sourceBounds, drawFormat);
                 }
                 finally {
@@ -391,6 +399,7 @@ namespace NuGet.Options {
                 drawFormat.Alignment = StringAlignment.Near;
                 drawFormat.Trimming = StringTrimming.EllipsisCharacter;
                 drawFormat.LineAlignment = StringAlignment.Near;
+                drawFormat.FormatFlags = StringFormatFlags.NoWrap;
 
                 SizeF nameLineHeight = e.Graphics.MeasureString(currentItem.Name, Font, e.ItemWidth, drawFormat);
                 SizeF sourceLineHeight = e.Graphics.MeasureString(currentItem.Source, italicFont, e.ItemWidth, drawFormat);
