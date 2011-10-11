@@ -25,6 +25,8 @@ namespace NuGet {
             { ".NET", NetFrameworkIdentifier },
             { "NETFramework", NetFrameworkIdentifier },
             { ".NETFramework", NetFrameworkIdentifier },
+            { "NETCore", WinRTFrameworkIdentifier},
+            { ".NETCore", WinRTFrameworkIdentifier},
             { "WinRT", WinRTFrameworkIdentifier},
             { ".NETMicroFramework", ".NETMicroFramework" },
             { "netmf", ".NETMicroFramework" },

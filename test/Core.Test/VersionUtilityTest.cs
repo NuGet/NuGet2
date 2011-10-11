@@ -26,7 +26,7 @@ namespace NuGet.Test {
         [Fact]
         public void ParseFrameworkNameNormalizesSupportedWinRTFrameworkNames() {
             // Arrange
-            var knownNameFormats = new[] { "winrt" };
+            var knownNameFormats = new[] { "winrt", ".NETCore", "NetCore" };
             Version defaultVersion = new Version("0.0");
 
             // Act
