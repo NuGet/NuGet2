@@ -144,6 +144,19 @@ namespace NuGet {
         }
 
         private void SaveDocument(XDocument document) {
+            // Sort the elements by path
+            var repositoryElements = (from e in GetRepositoryElements(document)
+                                      let path = e.GetOptionalAttributeValue("path")
+                                      where !String.IsNullOrEmpty(path)
+                                      orderby path.ToUpperInvariant()
+                                      select e).ToList();
+
+            // Remove all elements
+            document.Root.RemoveAll();
+
+            // Re-add them sorted
+            repositoryElements.ForEach(e => document.Root.Add(e));
+
             FileSystem.AddFile(StoreFilePath, document.Save);
         }
 
