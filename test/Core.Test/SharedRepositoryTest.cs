@@ -87,16 +87,16 @@ namespace NuGet.Test {
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object);
 
             // Act
-            repository.RegisterRepository(@"c:\foo\Z\packages\packages.config");
+            repository.RegisterRepository(@"c:\foo\z\packages\packages.config");
             repository.RegisterRepository(@"c:\foo\X\packages\packages.config");
-            repository.RegisterRepository(@"c:\foo\A\packages\packages.config");
+            repository.RegisterRepository(@"c:\foo\a\packages\packages.config");
 
             // Assert
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <repositories>
-  <repository path=""A\packages\packages.config"" />
+  <repository path=""a\packages\packages.config"" />
   <repository path=""X\packages\packages.config"" />
-  <repository path=""Z\packages\packages.config"" />
+  <repository path=""z\packages\packages.config"" />
 </repositories>", fileSystem.Object.ReadAllText("repositories.config"));
         }
 
