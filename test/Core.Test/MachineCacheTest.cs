@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Security;
 using NuGet.Test.Mocks;
@@ -80,24 +81,22 @@ namespace NuGet.Test
         public void MachineCacheUsesEnvironmentSpecifiedLocationIfProvided()
         {
             // Arrange
-            System.Environment.SetEnvironmentVariable("NUGETCACHEPATH", @"c:\temp\some\directory");
 
             // Act
 
             // Assert
-            Assert.True(MachineCache.GetCachePath() == @"c:\temp\some\directory");
+            Assert.True(MachineCache.GetCachePath(() => @"c:\temp\some\directory") == @"c:\temp\some\directory");
         }
 
         [Fact]
         public void MachineCacheDoesntUseEnvironmentSpecifiedLocationIfNotProvided()
         {
             // Arrange
-            System.Environment.SetEnvironmentVariable("NUGETCACHEPATH", @"");
 
             // Act
 
             // Assert
-            Assert.True(MachineCache.GetCachePath() == Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"NuGet\Cache"));
+            Assert.True(MachineCache.GetCachePath(() => string.Empty) == Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"NuGet\Cache"));
         }
     }
 }

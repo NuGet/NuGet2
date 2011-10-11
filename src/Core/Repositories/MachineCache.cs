@@ -13,7 +13,7 @@ namespace NuGet
     {
         // Maximum number of packages that can live in this cache.
         private const int MaxPackages = 100;
-        private static readonly Lazy<MachineCache> _instance = new Lazy<MachineCache>(() => CreateDefault(GetCachePath));
+        private static readonly Lazy<MachineCache> _instance = new Lazy<MachineCache>(() => CreateDefault(() => Environment.GetEnvironmentVariable("NuGetCachePath")));
 
         internal MachineCache(IFileSystem fileSystem)
             : base(new DefaultPackagePathResolver(fileSystem), fileSystem, enableCaching: false)
@@ -113,17 +113,16 @@ namespace NuGet
         }
 
         /// <summary>
-        /// The cache path is %LocalAppData%\NuGet\Cache 
+        /// The cache path is %LocalAppData%\NuGet\Cache by default
         /// </summary>
-        internal static string GetCachePath() {
-            string cacheOverride = Environment.GetEnvironmentVariable("NuGetCachePath");
-            if (!string.IsNullOrEmpty(cacheOverride)){
+        internal static string GetCachePath(Func<string> getCacheOverride) {
+            string cacheOverride = getCacheOverride();
+            if (!String.IsNullOrEmpty(cacheOverride)){
                 return cacheOverride;
             }
             else{
                 string localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                if (String.IsNullOrEmpty(localAppDataPath))
-                {
+                if (String.IsNullOrEmpty(localAppDataPath)){
                     return null;
                 }
                 return Path.Combine(localAppDataPath, "NuGet", "Cache");
