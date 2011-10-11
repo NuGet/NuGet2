@@ -69,6 +69,7 @@
     <Compile Include="PackageDependencyTest.cs" />
     <Compile Include="PackageHelperTest.cs" />
     <Compile Include="PackageIdValidatorTest.cs" />
+    <Compile Include="PackageReferenceFileTest.cs" />
     <Compile Include="PackageReferenceRepositoryTest.cs" />
     <Compile Include="PackageSorterTest.cs" />
     <Compile Include="PackageSourceProviderTest.cs" />

@@ -342,4 +342,7 @@
   <data name="PackageVersionRequired" xml:space="preserve">
     <value>A package version is required.</value>
   </data>
+  <data name="ReferenceFile_InvalidVersion" xml:space="preserve">
+    <value>Unable to parse version value '{0}' from '{1}'.</value>
+  </data>
 </root>

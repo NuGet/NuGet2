@@ -46,7 +46,15 @@ namespace NuGet {
                 string versionString = e.GetOptionalAttributeValue("version");
                 string versionConstraintString = e.GetOptionalAttributeValue("allowedVersions");
                 SemanticVersion version;
-                SemanticVersion.TryParse(versionString, out version);
+
+                if (String.IsNullOrEmpty(id) || String.IsNullOrEmpty(versionString)) {
+                    // If the id or version is empty, ignore the record.
+                    continue;
+                }
+
+                if (!SemanticVersion.TryParse(versionString, out version)) {
+                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ReferenceFile_InvalidVersion, versionString, _path));
+                }
 
                 IVersionSpec versionConstaint = null;
                 if (!String.IsNullOrEmpty(versionConstraintString)) {
