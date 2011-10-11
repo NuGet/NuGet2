@@ -278,9 +278,12 @@ namespace NuGet.Commands
                               SemanticVersion.ParseOptionalVersion(version) ??
                               new SemanticVersion("1.0");
         }
+		
+		private IEnumerable<string> GetFiles(string path, string fileNameWithoutExtension, HashSet<string> allowedExtensions) {			
+			return allowedExtensions.Select(extension => Directory.GetFiles(path, fileNameWithoutExtension + extension)).SelectMany(a => a);
+        }
 
-        private void AddOutputFiles(PackageBuilder builder)
-        {
+
             // Get the target framework of the project
             FrameworkName targetFramework = TargetFramework;
 
@@ -305,7 +308,7 @@ namespace NuGet.Commands
             string targetFileName = Path.GetFileNameWithoutExtension(targetPath);
 
             // By default we add all files in the project's output directory
-            foreach (var file in Directory.GetFiles(projectOutputDirectory, targetFileName + "*"))
+            foreach (var file in GetFiles(projectOutputDirectory, targetFileName, allowedOutputExtensions)) {
             {
                 string extension = Path.GetExtension(file);
 
