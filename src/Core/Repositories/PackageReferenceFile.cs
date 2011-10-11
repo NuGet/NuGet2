@@ -58,7 +58,10 @@ namespace NuGet {
 
                 IVersionSpec versionConstaint = null;
                 if (!String.IsNullOrEmpty(versionConstraintString)) {
-                    versionConstaint = VersionUtility.ParseVersionSpec(versionConstraintString);
+                    if (!VersionUtility.TryParseVersionSpec(versionConstraintString, out versionConstaint)) {
+                        throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ReferenceFile_InvalidVersion, versionConstraintString, _path));
+                    }
+                    
                     _constraints[id] = versionConstraintString;
                 }
 

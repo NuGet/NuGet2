@@ -1,8 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
-using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
+using Xunit;
 
 namespace NuGet.Test {
     
@@ -226,7 +227,7 @@ namespace NuGet.Test {
 
 
             // Act & Assert
-            ExceptionAssert.ThrowsArgumentException(() => referenceRepository.GetConstraint("A"), "'[-1.3, 3)' is not a valid version string.");
+            ExceptionAssert.Throws<InvalidDataException>(() => referenceRepository.GetConstraint("A"), "Unable to parse version value '[-1.3, 3)' from 'packages.config'.");
         }
 
         [Fact]
