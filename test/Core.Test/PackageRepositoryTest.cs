@@ -187,11 +187,11 @@ namespace NuGet.Test
             // Arrange
             var repo = new Mock<MockPackageRepository>(MockBehavior.Strict);
             repo.Setup(m => m.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
-            repo.As<ISearchableRepository>().Setup(m => m.Search(It.IsAny<string>(), It.IsAny<IEnumerable<string>>()))
+            repo.As<ISearchableRepository>().Setup(m => m.Search(It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), false))
                                             .Returns(new[] { PackageUtility.CreatePackage("A") }.AsQueryable());
 
             // Act
-            var packages = repo.Object.Search("Hello", new[] { ".NETFramework" }).ToList();
+            var packages = repo.Object.Search("Hello", new[] { ".NETFramework" }, allowPrereleaseVersions: false).ToList();
 
             // Assert
             Assert.Equal(1, packages.Count);

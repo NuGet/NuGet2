@@ -52,9 +52,9 @@ namespace NuGet.Dialog.Providers
             Repository.RemovePackage(package);
         }
 
-        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks)
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
         {
-            return Repository.Search(searchTerm, targetFrameworks);
+            return Repository.Search(searchTerm, targetFrameworks, allowPrereleaseVersions);
         }
     }
 }

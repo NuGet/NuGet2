@@ -160,7 +160,7 @@ namespace NuGet
 
         public bool SupportsProperty(string propertyName)
         {
-            return _serviceMetadata != null && _serviceMetadata.SupportedMethodNames.Contains(propertyName);
+            return _serviceMetadata != null && _serviceMetadata.SupportedProperties.Contains(propertyName);
         }
 
         internal sealed class DataServiceMetadata

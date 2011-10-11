@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Services.Client;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.Versioning;
 
@@ -127,7 +128,8 @@ namespace NuGet
             return new SmartDataServiceQuery<DataServicePackage>(Context, Constants.PackageServiceEntitySetName).AsSafeQueryable();
         }
 
-        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks)
+        [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "OData expects a lower case value.")]
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
         {
             if (!Context.SupportsServiceMethod("Search"))
             {
@@ -142,12 +144,17 @@ namespace NuGet
             // Create a '|' separated string of framework names
             string targetFrameworkString = String.Join("|", shortFrameworkNames);
 
-            // Create a query for the search service method
-            var query = Context.CreateQuery<DataServicePackage>("Search", new Dictionary<string, object> {
+            var searchParameters = new Dictionary<string, object> {
                 { "searchTerm", "'" + Escape(searchTerm) + "'" },
-                { "targetFramework", "'" + Escape(targetFrameworkString) + "'" }
-            });
+                { "targetFramework", "'" + Escape(targetFrameworkString) + "'" },
+            };
 
+            if (SupportsPrereleasePackages) {
+                searchParameters.Add("includePrerelease", allowPrereleaseVersions.ToString().ToLowerInvariant());
+            }
+
+            // Create a query for the search service method
+            var query = Context.CreateQuery<DataServicePackage>("Search", searchParameters);
             return new SmartDataServiceQuery<DataServicePackage>(Context, query).AsSafeQueryable();
         }
 
@@ -156,6 +163,9 @@ namespace NuGet
             return new DataServicePackageRepository(_httpClient, _packageDownloader);
         }
 
+        /// <summary>
+        /// Escapes single quotes in the value by replacing them with two single quotes.
+        /// </summary>
         private static string Escape(string value)
         {
             // REVIEW: Couldn't find another way to do this with odata

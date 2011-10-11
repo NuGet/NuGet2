@@ -192,18 +192,17 @@ namespace NuGet
                     select dependency).FirstOrDefault();
         }
 
-
         public static IQueryable<IPackage> GetPackages(this IPackageRepository repository, IEnumerable<string> targetFrameworks)
         {
-            return Search(repository, searchTerm: null, targetFrameworks: targetFrameworks);
+            return Search(repository, searchTerm: null, targetFrameworks: targetFrameworks, allowPrereleaseVersions: false);
         }
 
-        public static IQueryable<IPackage> Search(this IPackageRepository repository, string searchTerm)
+        public static IQueryable<IPackage> Search(this IPackageRepository repository, string searchTerm, bool allowPrereleaseVersions)
         {
-            return Search(repository, searchTerm, targetFrameworks: Enumerable.Empty<string>());
+            return Search(repository, searchTerm, targetFrameworks: Enumerable.Empty<string>(), allowPrereleaseVersions: allowPrereleaseVersions);
         }
 
-        public static IQueryable<IPackage> Search(this IPackageRepository repository, string searchTerm, IEnumerable<string> targetFrameworks)
+        public static IQueryable<IPackage> Search(this IPackageRepository repository, string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
         {
             if (targetFrameworks == null)
             {
@@ -213,7 +212,7 @@ namespace NuGet
             var searchableRepository = repository as ISearchableRepository;
             if (searchableRepository != null)
             {
-                return searchableRepository.Search(searchTerm, targetFrameworks);
+                return searchableRepository.Search(searchTerm, targetFrameworks, allowPrereleaseVersions);
             }
 
             // Ignore the target framework if the repository doesn't support searching

@@ -67,9 +67,14 @@ namespace NuGet.Server.Infrastructure
             return new Package(package, _derivedDataLookup[package]);
         }
 
-        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks)
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
         {
             var packages = GetPackages().Find(searchTerm);
+            if (!allowPrereleaseVersions)
+            {
+                packages = packages.Where(p => p.IsReleaseVersion());
+
+            }
 
             // TODO: Enable this when we can make it faster
             //if (targetFrameworks.Any()) {

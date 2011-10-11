@@ -66,7 +66,7 @@ namespace NuGet.Dialog.Providers
                 var simpleNode = _baseNode as SimpleTreeNode;
                 if (simpleNode != null)
                 {
-                    return simpleNode.Repository.Search(_searchText, Provider.SupportedFrameworks);
+                    return simpleNode.Repository.Search(_searchText, Provider.SupportedFrameworks, allowPrereleaseVersions: false);
                 }
             }
 

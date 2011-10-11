@@ -159,9 +159,9 @@ namespace NuGet
             Logger.Log(MessageLevel.Warning, ExceptionUtility.Unwrap(ex).Message);
         }
 
-        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks)
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
         {
-            return CreateAggregateQuery(Repositories.Select(r => r.Search(searchTerm, targetFrameworks)));
+            return CreateAggregateQuery(Repositories.Select(r => r.Search(searchTerm, targetFrameworks, allowPrereleaseVersions)));
         }
 
         public IPackageRepository Clone()

@@ -77,9 +77,9 @@ namespace NuGet.VisualStudio
             ActiveRepository.RemovePackage(package);
         }
 
-        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks)
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
         {
-            return ActiveRepository.Search(searchTerm, targetFrameworks);
+            return ActiveRepository.Search(searchTerm, targetFrameworks, allowPrereleaseVersions);
         }
 
         public IPackageRepository Clone()

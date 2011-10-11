@@ -305,7 +305,7 @@ namespace NuGet.PowerShell.Commands
             }
             else
             {
-                packages = sourceRepository.Search(Filter);
+                packages = sourceRepository.Search(Filter, IncludePrerelease);
             }
 
             // for recent packages, we want to order by last installed first instead of Id

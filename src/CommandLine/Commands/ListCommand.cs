@@ -56,7 +56,7 @@ namespace NuGet.Commands
             IPackageRepository packageRepository = GetRepository();
             string searchTerm = Arguments != null ? Arguments.FirstOrDefault() : null;
 
-            IQueryable<IPackage> packages = packageRepository.Search(searchTerm);
+            IQueryable<IPackage> packages = packageRepository.Search(searchTerm, Prerelease);
 
             if (AllVersions)
             {

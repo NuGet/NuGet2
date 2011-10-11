@@ -26,7 +26,7 @@ namespace NuGet.Test
             context.Setup(m => m.SupportsServiceMethod("Search")).Returns(false);
 
             // Act
-            var results = repository.Object.Search("old").ToList();
+            var results = repository.Object.Search("old", allowPrereleaseVersions: false).ToList();
 
             // Assert
             Assert.Equal(1, results.Count);
@@ -60,7 +60,7 @@ namespace NuGet.Test
                    .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object);
 
             // Act
-            repository.Object.Search("old");
+            repository.Object.Search("old", allowPrereleaseVersions: false);
         }
 
         [Fact]
@@ -84,7 +84,7 @@ namespace NuGet.Test
                    .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object);
 
             // Act
-            repository.Object.Search("dante's inferno");
+            repository.Object.Search("dante's inferno", allowPrereleaseVersions: false);
         }
 
         [Fact]
@@ -113,7 +113,34 @@ namespace NuGet.Test
                 VersionUtility.ParseFrameworkName("sl40").FullName,
                 VersionUtility.ParseFrameworkName("sl3-wp").FullName,
                 VersionUtility.ParseFrameworkName("netmf11").FullName,
-            });
+            }, allowPrereleaseVersions: false);
+        }
+
+        [Fact]
+        public void SearchSendsPrereleaseFlagIfSet() {
+            // Arrange
+            var client = new Mock<IHttpClient>();
+            var context = new Mock<IDataServiceContext>();
+            var repository = new Mock<DataServicePackageRepository>(client.Object) { CallBase = true };
+            repository.Object.Context = context.Object;
+            context.Setup(m => m.SupportsServiceMethod("Search")).Returns(true);
+            context.Setup(m => m.CreateQuery<DataServicePackage>(It.IsAny<string>(), It.IsAny<IDictionary<string, object>>()))
+                   .Callback<string, IDictionary<string, object>>((entitySet, parameters) => {
+                       // Assert
+                       Assert.Equal("Search", entitySet);
+                       Assert.Equal(2, parameters.Count);
+                       Assert.Equal("'dante''s inferno'", parameters["searchTerm"]);
+                       Assert.Equal("'net40|sl40|sl30-wp|netmf11'", parameters["targetFramework"]);
+                   })
+                   .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object);
+
+            // Act
+            repository.Object.Search("dante's inferno", new[] {
+                VersionUtility.ParseFrameworkName("net40").FullName,
+                VersionUtility.ParseFrameworkName("sl40").FullName,
+                VersionUtility.ParseFrameworkName("sl3-wp").FullName,
+                VersionUtility.ParseFrameworkName("netmf11").FullName,
+            }, allowPrereleaseVersions: false);
         }
 
         [Theory]

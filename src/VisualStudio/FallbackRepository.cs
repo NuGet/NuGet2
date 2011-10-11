@@ -62,9 +62,9 @@ namespace NuGet.VisualStudio
                    _dependencyResolver.ResolveDependency(dependency, constraintProvider, allowPrereleaseVersions);
         }
 
-        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks)
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
         {
-            return _primaryRepository.Search(searchTerm, targetFrameworks);
+            return _primaryRepository.Search(searchTerm, targetFrameworks, allowPrereleaseVersions);
         }
     }
 }
