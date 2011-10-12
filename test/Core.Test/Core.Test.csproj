@@ -62,6 +62,7 @@
     <Compile Include="EnumerableExtensionsTest.cs" />
     <Compile Include="MachineCacheTest.cs" />
     <Compile Include="ManifestFileTest.cs" />
+    <Compile Include="ManifestSchemaUtilityTest.cs" />
     <Compile Include="ManifestTest.cs" />
     <Compile Include="ManifestVersionUtilityTest.cs" />
     <Compile Include="Mocks\MockUserSettingsManager.cs" />

@@ -139,5 +139,21 @@ namespace NuGet.Test {
             Assert.Equal(1, version);
         }
 
+        [Fact]
+        public void GetManifestVersionReturns3IfUsingSemanticVersioning() {
+            // Arrange
+            var metadata = new ManifestMetadata {
+                Id = "Foo",
+                Version = "1.0.0alpha",
+                Authors = "A, B",
+                Description = "Description"
+            };
+
+            // Act
+            var version = ManifestVersionUtility.GetManifestVersion(metadata);
+
+            // Assert
+            Assert.Equal(3, version);
+        }
     }
 }

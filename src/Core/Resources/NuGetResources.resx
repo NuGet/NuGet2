@@ -345,4 +345,7 @@
   <data name="ReferenceFile_InvalidVersion" xml:space="preserve">
     <value>Unable to parse version value '{0}' from '{1}'.</value>
   </data>
+  <data name="UnknownSchemaVersion" xml:space="preserve">
+    <value>Unknown schema version '{0}'.</value>
+  </data>
 </root>

@@ -700,6 +700,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unknown schema version &apos;{0}&apos;..
+        /// </summary>
+        internal static string UnknownSchemaVersion {
+            get {
+                return ResourceManager.GetString("UnknownSchemaVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to parse config file..
         /// </summary>
         internal static string UserSettings_UnableToParseConfigFile {
