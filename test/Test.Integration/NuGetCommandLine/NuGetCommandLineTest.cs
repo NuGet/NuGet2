@@ -946,7 +946,8 @@ public class Cl_{0} {{
                                "Project with nuspec that has files");
 
             WriteProjectFile("foo.cs", "public class Foo { }");
-            WriteProjectFile(@"bin\Release\Fake.dll", "Some fakedll");
+            WriteProjectFile(@"bin\Debug\Fake.dll", "Some fakedll");
+            WriteProjectFile(@"bin\Debug\ProjectWithAssembliesInOutputPath.Fake.dll", "Some fakedll");
 
             CreateProject("ProjectWithAssembliesInOutputPath", compile: new[] { "foo.cs" });
 
