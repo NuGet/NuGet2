@@ -40,7 +40,7 @@ namespace NuGet.VisualStudio {
         public IFileSystem GetFileSystem(string path) {
             // Get the source control providers
             var physicalFileSystem = new PhysicalFileSystem(path);
-            if (!_settings.IsSourceControlDisabled()) {
+            if (_settings.IsSourceControlDisabled()) {
                 return physicalFileSystem;
             }
 

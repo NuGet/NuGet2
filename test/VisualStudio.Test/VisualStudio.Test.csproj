@@ -62,6 +62,7 @@
     <Compile Include="RecentPackageRepositoryTest.cs" />
     <Compile Include="RecentPackageTest.cs" />
     <Compile Include="RepositorySettingsTest.cs" />
+    <Compile Include="SourceControlHelperTest.cs" />
     <Compile Include="UriHelperTest.cs" />
     <Compile Include="VsFileSystemProviderTest.cs" />
     <Compile Include="VsInstallerTest.cs" />
