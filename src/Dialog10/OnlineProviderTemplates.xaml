@@ -157,10 +157,8 @@
                 <!-- Version -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
                     <eml:TextBlockControl Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <eml:TextBlockControl Style="{StaticResource DetailMetadataValueStyle}">
-                        <Run Text="{Binding Version, Mode=OneWay}" />
-                        <Run Text="(prerelease)" Foreground="DarkRed" />
-                    </eml:TextBlockControl>
+                    <eml:TextBlockControl Text="{Binding Version, Mode=OneWay}" Style="{StaticResource DetailMetadataValueStyle}" />
+                    <eml:TextBlockControl Margin="3,0,0,0" Text="(prerelease)" Foreground="DarkRed" Visibility="{Binding IsPrerelease, Converter={StaticResource boolToVis}}" />
                 </StackPanel>
 
                 <!-- Last Updated -->
