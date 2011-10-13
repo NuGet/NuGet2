@@ -1,17 +1,19 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using NuGet.Commands;
-using Xunit;
 using Moq;
+using NuGet.Commands;
 using NuGet.Common;
+using Xunit;
 
-namespace NuGet.Test.NuGetCommandLine.Commands {
+namespace NuGet.Test.NuGetCommandLine.Commands
+{
 
-    public class SourcesCommandTest {
+    public class SourcesCommandTest
+    {
         [Fact]
-        public void EnableCommandWithNoNameSetThrows() {
+        public void EnableCommandWithNoNameSetThrows()
+        {
             // Arrange
             var command = CreateCommand();
             command.Arguments.Add("Enable");
@@ -23,7 +25,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void DisableCommandWithNoNameSetThrows() {
+        public void DisableCommandWithNoNameSetThrows()
+        {
             // Arrange
             var command = CreateCommand();
             command.Arguments.Add("Disable");
@@ -35,7 +38,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void EnableCommandThrowsWhenPackageSourceNameIsNotFound() {
+        public void EnableCommandThrowsWhenPackageSourceNameIsNotFound()
+        {
             // Arrange
             var command = CreateCommand();
             command.Arguments.Add("Enable");
@@ -48,7 +52,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void DisableCommandThrowsWhenPackageSourceNameIsNotFound() {
+        public void DisableCommandThrowsWhenPackageSourceNameIsNotFound()
+        {
             // Arrange
             var command = CreateCommand();
             command.Arguments.Add("Disable");
@@ -61,7 +66,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void EnableCommandEnableDisabledSourcesCorrectly() {
+        public void EnableCommandEnableDisabledSourcesCorrectly()
+        {
             // Arrange
             var settings = new MockUserSettingsManager();
             settings.SetValues(PackageSourceProvider.PackageSourcesSectionName,
@@ -93,7 +99,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void EnableCommandDoNotAffectPackageSourcesThatAreAlreadyEnabled() {
+        public void EnableCommandDoNotAffectPackageSourcesThatAreAlreadyEnabled()
+        {
             // Arrange
             var settings = new MockUserSettingsManager();
             settings.SetValues(PackageSourceProvider.PackageSourcesSectionName,
@@ -125,7 +132,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void DisableCommandDisablePackageSourcesCorrectly() {
+        public void DisableCommandDisablePackageSourcesCorrectly()
+        {
             // Arrange
             var settings = new MockUserSettingsManager();
             settings.SetValues(PackageSourceProvider.PackageSourcesSectionName,
@@ -157,7 +165,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void DisableCommandDoNotAffectPackageSourcesThatAreAlreadyDisabled() {
+        public void DisableCommandDoNotAffectPackageSourcesThatAreAlreadyDisabled()
+        {
             // Arrange
             var settings = new MockUserSettingsManager();
             settings.SetValues(PackageSourceProvider.PackageSourcesSectionName,
@@ -188,7 +197,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             Assert.True(packageSources[2].IsEnabled);
         }
 
-        private SourcesCommand CreateCommand(ISettings settings = null) {
+        private SourcesCommand CreateCommand(ISettings settings = null)
+        {
             settings = settings ?? new MockUserSettingsManager();
             var packageSourceProvider = new PackageSourceProvider(settings);
             return new SourcesCommand(packageSourceProvider);

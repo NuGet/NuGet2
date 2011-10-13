@@ -8,13 +8,17 @@ using RouteMagic;
 
 [assembly: WebActivator.PreApplicationStartMethod(typeof(NuGet.Server.NuGetRoutes), "Start")]
 
-namespace NuGet.Server {
-    public static class NuGetRoutes {
-        public static void Start() {
+namespace NuGet.Server
+{
+    public static class NuGetRoutes
+    {
+        public static void Start()
+        {
             MapRoutes(RouteTable.Routes);
         }
 
-        private static void MapRoutes(RouteCollection routes) {
+        private static void MapRoutes(RouteCollection routes)
+        {
             // Route to create a new package
             routes.MapDelegate("CreatePackage",
                                "PackageFiles/{apiKey}/nupkg",
@@ -46,7 +50,8 @@ namespace NuGet.Server {
 #endif
         }
 
-        private static PackageService CreatePackageService() {
+        private static PackageService CreatePackageService()
+        {
             return NinjectBootstrapper.Kernel.Get<PackageService>();
         }
     }

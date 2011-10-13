@@ -1,7 +1,9 @@
 ﻿using System.IO;
 
-namespace NuGet {
-    public interface IPackageServer {
+namespace NuGet
+{
+    public interface IPackageServer
+    {
         string Source { get; }
 
         void CreatePackage(string apiKey, Stream packageStream);

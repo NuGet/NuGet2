@@ -1,40 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NuGet {
-    public class PackageSorter : PackageWalker {
+namespace NuGet
+{
+    public class PackageSorter : PackageWalker
+    {
         private IPackageRepository _repository;
         private IList<IPackage> _sortedPackages;
 
-        protected override bool RaiseErrorOnCycle {
-            get {
+        protected override bool RaiseErrorOnCycle
+        {
+            get
+            {
                 return false;
             }
         }
 
-        protected override bool IgnoreWalkInfo {
-            get {
+        protected override bool IgnoreWalkInfo
+        {
+            get
+            {
                 return true;
             }
         }
 
-        protected override bool SkipDependencyResolveError {
-            get {
+        protected override bool SkipDependencyResolveError
+        {
+            get
+            {
                 return true;
             }
         }
 
-        protected override void OnAfterPackageWalk(IPackage package) {
+        protected override void OnAfterPackageWalk(IPackage package)
+        {
             base.OnAfterPackageWalk(package);
 
             _sortedPackages.Add(package);
         }
 
-        protected override IPackage ResolveDependency(PackageDependency dependency) {
+        protected override IPackage ResolveDependency(PackageDependency dependency)
+        {
             return _repository.ResolveDependency(dependency, allowPrereleaseVersions: true);
         }
 
-        protected override void OnDependencyResolveError(PackageDependency dependency) {
+        protected override void OnDependencyResolveError(PackageDependency dependency)
+        {
             // ignore dependency error
         }
 
@@ -42,8 +53,10 @@ namespace NuGet {
         /// Get all packages from the specified repository in the dependency order, 
         /// e.g. if A -> B, then B will come before A.
         /// </summary>
-        public IEnumerable<IPackage> GetPackagesByDependencyOrder(IPackageRepository repository) {
-            if (repository == null) {
+        public IEnumerable<IPackage> GetPackagesByDependencyOrder(IPackageRepository repository)
+        {
+            if (repository == null)
+            {
                 throw new ArgumentNullException("repository");
             }
             Marker.Clear();
@@ -51,7 +64,8 @@ namespace NuGet {
             _repository = repository;
             _sortedPackages = new List<IPackage>();
 
-            foreach (var package in _repository.GetPackages()) {
+            foreach (var package in _repository.GetPackages())
+            {
                 Walk(package);
             }
 

@@ -6,8 +6,10 @@ using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.VisualStudio;
 
-namespace NuGet.Dialog.Providers {
-    internal class UpdatesProvider : OnlineProvider {
+namespace NuGet.Dialog.Providers
+{
+    internal class UpdatesProvider : OnlineProvider
+    {
 
         public UpdatesProvider(
             Project project,
@@ -28,34 +30,44 @@ namespace NuGet.Dialog.Providers {
                 packageManagerFactory,
                 providerServices,
                 progressProvider,
-                solutionManager) {
+                solutionManager)
+        {
         }
 
-        public override string Name {
-            get {
+        public override string Name
+        {
+            get
+            {
                 return Resources.Dialog_UpdateProvider;
             }
         }
 
-        public override float SortOrder {
-            get {
+        public override float SortOrder
+        {
+            get
+            {
                 return 3.0f;
             }
         }
 
-        public override bool RefreshOnNodeSelection {
-            get {
+        public override bool RefreshOnNodeSelection
+        {
+            get
+            {
                 return true;
             }
         }
 
-        protected override PackagesTreeNodeBase CreateTreeNodeForPackageSource(PackageSource source, IPackageRepository sourceRepository) {
+        protected override PackagesTreeNodeBase CreateTreeNodeForPackageSource(PackageSource source, IPackageRepository sourceRepository)
+        {
             return new UpdatesTreeNode(this, source.Name, RootNode, LocalRepository, sourceRepository);
         }
 
-        public override bool CanExecute(PackageItem item) {
+        public override bool CanExecute(PackageItem item)
+        {
             IPackage package = item.PackageIdentity;
-            if (package == null) {
+            if (package == null)
+            {
                 return false;
             }
             // only enable command on a Package in the Update provider if it not updated yet.
@@ -66,29 +78,37 @@ namespace NuGet.Dialog.Providers {
                 p => p.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase) && p.Version < package.Version);
         }
 
-        protected override void ExecuteCommand(IProjectManager projectManager, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations) {
+        protected override void ExecuteCommand(IProjectManager projectManager, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations)
+        {
             activePackageManager.UpdatePackage(projectManager, item.PackageIdentity, operations, updateDependencies: true, allowPrereleaseVersions: false, logger: this);
         }
 
-        public override IVsExtension CreateExtension(IPackage package) {
-            return new PackageItem(this, package, isUpdateItem: true) {
+        public override IVsExtension CreateExtension(IPackage package)
+        {
+            return new PackageItem(this, package, isUpdateItem: true)
+            {
                 CommandName = Resources.Dialog_UpdateButton
             };
         }
 
-        public override string NoItemsMessage {
-            get {
+        public override string NoItemsMessage
+        {
+            get
+            {
                 return Resources.Dialog_UpdatesProviderNoItem;
             }
         }
 
-        public override string ProgressWindowTitle {
-            get {
+        public override string ProgressWindowTitle
+        {
+            get
+            {
                 return Dialog.Resources.Dialog_UpdateProgress;
             }
         }
 
-        protected override string GetProgressMessage(IPackage package) {
+        protected override string GetProgressMessage(IPackage package)
+        {
             return Resources.Dialog_UpdateProgress + package.ToString();
         }
     }

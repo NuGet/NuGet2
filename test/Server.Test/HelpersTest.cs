@@ -1,11 +1,14 @@
 ﻿using System;
 using Xunit;
 
-namespace NuGet.Test.Server.Infrastructure {
+namespace NuGet.Test.Server.Infrastructure
+{
 
-	public class HelpersTest {
+    public class HelpersTest
+    {
         [Fact]
-        public void GetRepositoryUrlCreatesProperUrlWithRootWebApp() {
+        public void GetRepositoryUrlCreatesProperUrlWithRootWebApp()
+        {
             // Arrange
             Uri url = new Uri("http://example.com/default.aspx");
             string applicationPath = "/";
@@ -18,7 +21,8 @@ namespace NuGet.Test.Server.Infrastructure {
         }
 
         [Fact]
-        public void GetRepositoryUrlCreatesProperUrlWithVirtualApp() {
+        public void GetRepositoryUrlCreatesProperUrlWithVirtualApp()
+        {
             // Arrange
             Uri url = new Uri("http://example.com/Foo/default.aspx");
             string applicationPath = "/Foo";
@@ -31,7 +35,8 @@ namespace NuGet.Test.Server.Infrastructure {
         }
 
         [Fact]
-        public void GetRepositoryUrlWithNonStandardPortCreatesProperUrlWithRootWebApp() {
+        public void GetRepositoryUrlWithNonStandardPortCreatesProperUrlWithRootWebApp()
+        {
             // Arrange
             Uri url = new Uri("http://example.com:1337/default.aspx");
             string applicationPath = "/";
@@ -44,7 +49,8 @@ namespace NuGet.Test.Server.Infrastructure {
         }
 
         [Fact]
-        public void GetRepositoryUrlWithNonStandardPortCreatesProperUrlWithVirtualApp() {
+        public void GetRepositoryUrlWithNonStandardPortCreatesProperUrlWithVirtualApp()
+        {
             // Arrange
             Uri url = new Uri("http://example.com:1337/Foo/default.aspx");
             string applicationPath = "/Foo";

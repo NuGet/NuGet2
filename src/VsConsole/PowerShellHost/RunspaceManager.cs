@@ -10,8 +10,10 @@ using EnvDTE80;
 using Microsoft.PowerShell;
 using NuGet.VisualStudio;
 
-namespace NuGetConsole.Host.PowerShell.Implementation {
-    internal class RunspaceManager : IRunspaceManager {
+namespace NuGetConsole.Host.PowerShell.Implementation
+{
+    internal class RunspaceManager : IRunspaceManager
+    {
         private const string PSModulePathEnvVariable = "PSModulePath";
 
         // Cache Runspace by name. There should be only one Runspace instance created though.
@@ -20,11 +22,13 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         public const string ProfilePrefix = "NuGet";
         public const string NuGetCoreModuleName = "NuGet";
 
-        public Tuple<Runspace, NuGetPSHost> GetRunspace(IConsole console, string hostName) {
+        public Tuple<Runspace, NuGetPSHost> GetRunspace(IConsole console, string hostName)
+        {
             return _runspaceCache.GetOrAdd(hostName, name => CreateAndSetupRunspace(console, name));
         }
 
-        private static Tuple<Runspace, NuGetPSHost> CreateAndSetupRunspace(IConsole console, string hostName) {
+        private static Tuple<Runspace, NuGetPSHost> CreateAndSetupRunspace(IConsole console, string hostName)
+        {
             // set up powershell environment variable for module search path
             // ensuring our own Modules folder is searched before system or user-level 
             AddPowerShellModuleSearchPath();
@@ -40,7 +44,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             "Microsoft.Reliability",
             "CA2000:Dispose objects before losing scope",
             Justification = "We can't dispose it if we want to return it.")]
-        private static Tuple<Runspace, NuGetPSHost> CreateRunspace(IConsole console, string hostName) {
+        private static Tuple<Runspace, NuGetPSHost> CreateRunspace(IConsole console, string hostName)
+        {
             DTE dte = ServiceLocator.GetInstance<DTE>();
 
             InitialSessionState initialSessionState = InitialSessionState.CreateDefault();
@@ -67,7 +72,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             privateData = new[] { pmfTuple, rprTuple };
 #endif
 
-            var host = new NuGetPSHost(hostName, privateData) {
+            var host = new NuGetPSHost(hostName, privateData)
+            {
                 ActiveConsole = console
             };
 
@@ -87,7 +93,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             return Tuple.Create(runspace, host);
         }
 
-        private static void AddPowerShellModuleSearchPath() {
+        private static void AddPowerShellModuleSearchPath()
+        {
             string psModulePath = Environment.GetEnvironmentVariable(PSModulePathEnvVariable) ?? String.Empty;
             string extensionRoot = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
@@ -97,34 +104,41 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                                                EnvironmentVariableTarget.Process);
         }
 
-        private static void LoadModules(Runspace runspace) {
+        private static void LoadModules(Runspace runspace)
+        {
             ExecutionPolicy policy = runspace.GetEffectiveExecutionPolicy();
             if (policy != ExecutionPolicy.Unrestricted &&
                 policy != ExecutionPolicy.RemoteSigned &&
-                policy != ExecutionPolicy.Bypass) {
+                policy != ExecutionPolicy.Bypass)
+            {
 
                 ExecutionPolicy machinePolicy = runspace.GetExecutionPolicy(ExecutionPolicyScope.MachinePolicy);
                 ExecutionPolicy userPolicy = runspace.GetExecutionPolicy(ExecutionPolicyScope.UserPolicy);
 
-                if (machinePolicy == ExecutionPolicy.Undefined && userPolicy == ExecutionPolicy.Undefined) {
+                if (machinePolicy == ExecutionPolicy.Undefined && userPolicy == ExecutionPolicy.Undefined)
+                {
                     runspace.SetExecutionPolicy(ExecutionPolicy.RemoteSigned, ExecutionPolicyScope.Process);
                 }
             }
 
             runspace.ImportModule(NuGetCoreModuleName);
 #if DEBUG
-            if (File.Exists(DebugConstants.TestModulePath)) {
+            if (File.Exists(DebugConstants.TestModulePath))
+            {
                 runspace.ImportModule(DebugConstants.TestModulePath);
             }
 #endif
         }
 
-        private static void LoadProfilesIntoRunspace(Runspace runspace) {
-            using (var powerShell = System.Management.Automation.PowerShell.Create()) {
+        private static void LoadProfilesIntoRunspace(Runspace runspace)
+        {
+            using (var powerShell = System.Management.Automation.PowerShell.Create())
+            {
                 powerShell.Runspace = runspace;
 
                 PSCommand[] profileCommands = HostUtilities.GetProfileCommands(ProfilePrefix);
-                foreach (PSCommand command in profileCommands) {
+                foreach (PSCommand command in profileCommands)
+                {
                     powerShell.Commands = command;
                     powerShell.AddCommand("out-default");
                     powerShell.Invoke();

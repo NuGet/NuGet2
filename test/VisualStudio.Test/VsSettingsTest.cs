@@ -5,29 +5,35 @@ using NuGet.Test.Mocks;
 using NuGet.VisualStudio.Test.Mocks;
 using Xunit;
 
-namespace NuGet.VisualStudio.Test {
-    public class VsSettingsTest {
+namespace NuGet.VisualStudio.Test
+{
+    public class VsSettingsTest
+    {
         [Fact]
-        public void VsSettingsThrowsIfSolutionManagerIsNull() {
+        public void VsSettingsThrowsIfSolutionManagerIsNull()
+        {
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(() => new VsSettings(solutionManager: null), "solutionManager");
         }
 
         [Fact]
-        public void VsSettingsThrowsIfDefaultSettingsIsNull() {
+        public void VsSettingsThrowsIfDefaultSettingsIsNull()
+        {
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(() => new VsSettings(solutionManager: new Mock<ISolutionManager>().Object, defaultSettings: null, fileSystemProvider: null), "defaultSettings");
         }
 
         [Fact]
-        public void VsSettingsThrowsIfFileSystemProviderIsNull() {
+        public void VsSettingsThrowsIfFileSystemProviderIsNull()
+        {
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(
                 () => new VsSettings(solutionManager: new Mock<ISolutionManager>().Object, defaultSettings: NullSettings.Instance, fileSystemProvider: null), "fileSystemProvider");
         }
 
         [Fact]
-        public void VsSettingUsesNullSettingsIfSolutionIsUnavailable() {
+        public void VsSettingUsesNullSettingsIfSolutionIsUnavailable()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>(MockBehavior.Strict);
             solutionManager.Setup(s => s.IsSolutionOpen).Returns(false).Verifiable();
@@ -45,7 +51,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void VsSettingUsesNullSettingsIfSolutionDirectoryDoesNotExist() {
+        public void VsSettingUsesNullSettingsIfSolutionDirectoryDoesNotExist()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>(MockBehavior.Strict);
             solutionManager.Setup(s => s.IsSolutionOpen).Returns(true).Verifiable();
@@ -64,7 +71,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void VsSettingUsesNullSettingsIfConfigFileDoesNotExistInRootOfSolution() {
+        public void VsSettingUsesNullSettingsIfConfigFileDoesNotExistInRootOfSolution()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>(MockBehavior.Strict);
             solutionManager.Setup(s => s.IsSolutionOpen).Returns(true).Verifiable();
@@ -83,7 +91,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void VsSettingUsesSettingsFileFromSolutionRootIfExists() {
+        public void VsSettingUsesSettingsFileFromSolutionRootIfExists()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>(MockBehavior.Strict);
             solutionManager.Setup(s => s.IsSolutionOpen).Returns(true).Verifiable();
@@ -106,7 +115,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void VsSettingUsesValuesFromDefaultSettingsForNonSolutionProperties() {
+        public void VsSettingUsesValuesFromDefaultSettingsForNonSolutionProperties()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>(MockBehavior.Strict);
             solutionManager.Setup(s => s.IsSolutionOpen).Returns(true).Verifiable();
@@ -129,7 +139,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void VsSettingSwitchesSettingsIfSolutionChanges() {
+        public void VsSettingSwitchesSettingsIfSolutionChanges()
+        {
             // Arrange
             var solutionManager = new Mock<MockSolutionManager>();
             solutionManager.Setup(s => s.IsSolutionOpen).Returns(true).Verifiable();

@@ -8,11 +8,14 @@ using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 using Xunit;
 
-namespace NuGet.PowerShell.Commands.Test {
-    
-    public class UpdatePackageCommandTest {
+namespace NuGet.PowerShell.Commands.Test
+{
+
+    public class UpdatePackageCommandTest
+    {
         [Fact]
-        public void UpdatePackageCmdletThrowsWhenSolutionIsClosed() {
+        public void UpdatePackageCmdletThrowsWhenSolutionIsClosed()
+        {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
@@ -24,7 +27,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void UpdatePackageCmdletUsesPackageManangerWithSourceIfSpecified() {
+        public void UpdatePackageCmdletUsesPackageManangerWithSourceIfSpecified()
+        {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             var vsPackageManager = new MockVsPackageManager();
@@ -49,7 +53,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void UpdatePackageCmdletPassesParametersCorrectlyWhenIdAndVersionAreSpecified() {
+        public void UpdatePackageCmdletPassesParametersCorrectlyWhenIdAndVersionAreSpecified()
+        {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -72,7 +77,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void UpdatePackageCmdletPassesIgnoreDependencySwitchCorrectly() {
+        public void UpdatePackageCmdletPassesIgnoreDependencySwitchCorrectly()
+        {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -96,7 +102,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void UpdatePackageCmdletPassesIgnoreDependencySwitchCorrectlyWhenPresent() {
+        public void UpdatePackageCmdletPassesIgnoreDependencySwitchCorrectlyWhenPresent()
+        {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -121,7 +128,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void UpdatePackageCmdletInvokeProductUpdateCheckWhenSourceIsHttpAddress() {
+        public void UpdatePackageCmdletInvokeProductUpdateCheckWhenSourceIsHttpAddress()
+        {
             // Arrange
             string source = "http://bing.com";
 
@@ -150,7 +158,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void UpdatePackageCmdletInvokeProductUpdateCheckWhenSourceIsHttpAddressAndSourceIsSpecified() {
+        public void UpdatePackageCmdletInvokeProductUpdateCheckWhenSourceIsHttpAddressAndSourceIsSpecified()
+        {
             // Arrange
             string source = "http://bing.com";
 
@@ -178,7 +187,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void UpdatePackageCmdletDoNotInvokeProductUpdateCheckWhenSourceIsNotHttpAddress() {
+        public void UpdatePackageCmdletDoNotInvokeProductUpdateCheckWhenSourceIsNotHttpAddress()
+        {
             // Arrange
             string source = "ftp://bing.com";
 
@@ -207,19 +217,23 @@ namespace NuGet.PowerShell.Commands.Test {
 
 
 
-        private static IVsPackageSourceProvider GetPackageSourceProvider(params PackageSource[] sources) {
+        private static IVsPackageSourceProvider GetPackageSourceProvider(params PackageSource[] sources)
+        {
             var sourceProvider = new Mock<IVsPackageSourceProvider>();
             sourceProvider.Setup(c => c.LoadPackageSources()).Returns(sources);
             return sourceProvider.Object;
         }
 
-        private class MockVsPackageManager : VsPackageManager {
+        private class MockVsPackageManager : VsPackageManager
+        {
             public MockVsPackageManager()
-                : this(new Mock<IPackageRepository>().Object) {
+                : this(new Mock<IPackageRepository>().Object)
+            {
             }
 
             public MockVsPackageManager(IPackageRepository sourceRepository)
-                : base(new Mock<ISolutionManager>().Object, sourceRepository, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object) {
+                : base(new Mock<ISolutionManager>().Object, sourceRepository, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object)
+            {
             }
 
             public IProjectManager ProjectManager { get; set; }
@@ -230,14 +244,16 @@ namespace NuGet.PowerShell.Commands.Test {
 
             public bool UpdateDependencies { get; set; }
 
-            public override void UpdatePackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool updateDependencies, bool allowPreReleaseVersions, ILogger logger) {
+            public override void UpdatePackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool updateDependencies, bool allowPreReleaseVersions, ILogger logger)
+            {
                 ProjectManager = projectManager;
                 PackageId = packageId;
                 Version = version;
                 UpdateDependencies = updateDependencies;
             }
 
-            public override IProjectManager GetProjectManager(Project project) {
+            public override IProjectManager GetProjectManager(Project project)
+            {
                 return new Mock<IProjectManager>().Object;
             }
         }

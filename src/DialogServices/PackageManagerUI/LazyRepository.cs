@@ -2,45 +2,58 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NuGet.Dialog.Providers {
-    public class LazyRepository : IPackageRepository, ISearchableRepository {
+namespace NuGet.Dialog.Providers
+{
+    public class LazyRepository : IPackageRepository, ISearchableRepository
+    {
         private readonly Lazy<IPackageRepository> _repository;
 
-        private IPackageRepository Repository {
-            get {
+        private IPackageRepository Repository
+        {
+            get
+            {
                 return _repository.Value;
             }
         }
 
-        public string Source {
-            get {
+        public string Source
+        {
+            get
+            {
                 return Repository.Source;
             }
         }
 
-        public bool SupportsPrereleasePackages {
-            get {
+        public bool SupportsPrereleasePackages
+        {
+            get
+            {
                 return Repository.SupportsPrereleasePackages;
             }
         }
 
-        public LazyRepository(IPackageRepositoryFactory factory, PackageSource source) {
+        public LazyRepository(IPackageRepositoryFactory factory, PackageSource source)
+        {
             _repository = new Lazy<IPackageRepository>(() => factory.CreateRepository(source.Source));
         }
 
-        public IQueryable<IPackage> GetPackages() {
+        public IQueryable<IPackage> GetPackages()
+        {
             return Repository.GetPackages();
         }
 
-        public void AddPackage(IPackage package) {
+        public void AddPackage(IPackage package)
+        {
             Repository.AddPackage(package);
         }
 
-        public void RemovePackage(IPackage package) {
+        public void RemovePackage(IPackage package)
+        {
             Repository.RemovePackage(package);
         }
 
-        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks) {
+        public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks)
+        {
             return Repository.Search(searchTerm, targetFrameworks);
         }
     }

@@ -4,11 +4,14 @@ using EnvDTE;
 using NuGet.VisualStudio.Test;
 using Xunit;
 
-namespace NuGet.PowerShell.Commands.Test {
-    
-    public class GetProjectCommandTest {
+namespace NuGet.PowerShell.Commands.Test
+{
+
+    public class GetProjectCommandTest
+    {
         [Fact]
-        public void GetProjectCmdletReturnsDefaultProjectWhenNoFlagsAreSet() {
+        public void GetProjectCmdletReturnsDefaultProjectWhenNoFlagsAreSet()
+        {
             // Arrange
             var cmdlet = BuildCmdlet();
 
@@ -23,7 +26,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetProjectCmdletReturnsAllProjectsWhenAllIsSet() {
+        public void GetProjectCmdletReturnsAllProjectsWhenAllIsSet()
+        {
             // Arrange
             var cmdlet = BuildCmdlet();
             cmdlet.All = new SwitchParameter(isPresent: true);
@@ -35,7 +39,8 @@ namespace NuGet.PowerShell.Commands.Test {
             Assert.Equal(3, result.Count());
         }
 
-        private static GetProjectCommand BuildCmdlet() {
+        private static GetProjectCommand BuildCmdlet()
+        {
             var projects = new[] { 
                 TestUtils.GetProject("ConsoleApplication1"), TestUtils.GetProject("WebSite1"), TestUtils.GetProject("TestProject1") 
             };

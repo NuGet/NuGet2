@@ -3,16 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using EnvDTE;
 
-namespace NuGet.Dialog {
-    internal class SolutionExplorerViewModel {
+namespace NuGet.Dialog
+{
+    internal class SolutionExplorerViewModel
+    {
         private Lazy<FolderNode> _solutionNode;
 
         public SolutionExplorerViewModel(
             Solution solution,
             IPackage package,
             Predicate<Project> checkedStateSelector,
-            Predicate<Project> enabledStateSelector) {
-            if (solution == null) {
+            Predicate<Project> enabledStateSelector)
+        {
+            if (solution == null)
+            {
                 throw new ArgumentNullException("solution");
             }
 
@@ -20,23 +24,30 @@ namespace NuGet.Dialog {
                 () => SolutionWalker.Walk(solution, package, checkedStateSelector, enabledStateSelector));
         }
 
-        public bool HasProjects {
-            get {
+        public bool HasProjects
+        {
+            get
+            {
                 return _solutionNode.Value.HasProjects;
             }
         }
 
-        public IEnumerable<ProjectNodeBase> ProjectNodes {
-            get {
+        public IEnumerable<ProjectNodeBase> ProjectNodes
+        {
+            get
+            {
                 yield return _solutionNode.Value;
             }
         }
 
-        public IEnumerable<Project> GetSelectedProjects() {
-            if (_solutionNode.IsValueCreated) {
+        public IEnumerable<Project> GetSelectedProjects()
+        {
+            if (_solutionNode.IsValueCreated)
+            {
                 return _solutionNode.Value.GetSelectedProjects();
             }
-            else {
+            else
+            {
                 return Enumerable.Empty<Project>();
             }
         }

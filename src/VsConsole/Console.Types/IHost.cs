@@ -1,10 +1,12 @@
 using System;
 
-namespace NuGetConsole {
+namespace NuGetConsole
+{
     /// <summary>
     /// Represents a command host that executes user input commands (synchronously).
     /// </summary>
-    public interface IHost {
+    public interface IHost
+    {
 
         /// <summary>
         /// Gets a value indicating whether this host accepts command line input.
@@ -59,7 +61,8 @@ namespace NuGetConsole {
     /// Represents a command host that executes commands asynchronously. The console depends on
     /// ExecuteEnd event to detect end of command execution.
     /// </summary>
-    public interface IAsyncHost : IHost {
+    public interface IAsyncHost : IHost
+    {
         /// <summary>
         /// Occurs when an async command execution is completed, disregarding if it succeeded, failed or
         /// aborted. The console depends on this event to prompt for next user input.

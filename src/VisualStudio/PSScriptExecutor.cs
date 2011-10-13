@@ -6,31 +6,39 @@ using EnvDTE;
 using NuGet.VisualStudio.Resources;
 using NuGetConsole;
 
-namespace NuGet.VisualStudio {
+namespace NuGet.VisualStudio
+{
     [Export(typeof(IScriptExecutor))]
-    public class PSScriptExecutor : IScriptExecutor {
+    public class PSScriptExecutor : IScriptExecutor
+    {
         private readonly Lazy<IHost> _host;
 
-        public PSScriptExecutor() {
+        public PSScriptExecutor()
+        {
             _host = new Lazy<IHost>(GetHost);
         }
 
-        private IHost Host {
-            get {
+        private IHost Host
+        {
+            get
+            {
                 return _host.Value;
             }
         }
 
         [Import]
-        public IOutputConsoleProvider OutputConsoleProvider {
+        public IOutputConsoleProvider OutputConsoleProvider
+        {
             get;
             set;
         }
 
-        public bool Execute(string installPath, string scriptFileName, IPackage package, Project project, ILogger logger) {
+        public bool Execute(string installPath, string scriptFileName, IPackage package, Project project, ILogger logger)
+        {
             string toolsPath = Path.Combine(installPath, "tools");
             string fullPath = Path.Combine(toolsPath, scriptFileName);
-            if (File.Exists(fullPath)) {
+            if (File.Exists(fullPath))
+            {
                 string logMessage = String.Format(CultureInfo.CurrentCulture, VsResources.ExecutingScript, fullPath);
 
                 // logging to both the Output window and progress window.
@@ -46,7 +54,8 @@ namespace NuGet.VisualStudio {
             return false;
         }
 
-        private IHost GetHost() {
+        private IHost GetHost()
+        {
             // create the console and instantiate the PS host on demand
             IConsole console = OutputConsoleProvider.CreateOutputConsole(requirePowerShellHost: true);
             IHost host = console.Host;
@@ -58,10 +67,12 @@ namespace NuGet.VisualStudio {
             host.Initialize(console);
 
             // after the host initializes, it may set IsCommandEnabled = false
-            if (host.IsCommandEnabled) {
+            if (host.IsCommandEnabled)
+            {
                 return host;
             }
-            else {
+            else
+            {
                 // the PowerShell host fails to initialize if group policy restricts to AllSigned
                 throw new InvalidOperationException(VsResources.Console_InitializeHostFails);
             }

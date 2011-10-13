@@ -2,11 +2,14 @@
 using EnvDTE;
 using Xunit;
 
-namespace NuGet.VisualStudio.Test {
-    
-    public class VsProjectSystemTest {
+namespace NuGet.VisualStudio.Test
+{
+
+    public class VsProjectSystemTest
+    {
         [Fact]
-        public void GetPropertyValueUnknownPropertyReturnsNull() {
+        public void GetPropertyValueUnknownPropertyReturnsNull()
+        {
             // Arrange
             VsProjectSystem projectSystem = new VsProjectSystem(TestUtils.GetProject("Name"));
 
@@ -18,7 +21,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetPropertyValueThrowsArgumentExceptionReturnsNull() {
+        public void GetPropertyValueThrowsArgumentExceptionReturnsNull()
+        {
             // Vs throws an argument exception when trying to index into an invalid property
 
             // Arrange

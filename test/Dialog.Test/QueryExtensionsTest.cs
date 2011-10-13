@@ -4,11 +4,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using Xunit;
 
-namespace NuGet.Dialog.Test {
+namespace NuGet.Dialog.Test
+{
 
-    public class QueryExtensionsTest {
+    public class QueryExtensionsTest
+    {
         [Fact]
-        public void SortBySortsOnOneItem() {
+        public void SortBySortsOnOneItem()
+        {
             // Arrange
             var list = (new[] { 
                 new MockQueryClass { Id = "B" }, new MockQueryClass { Id = "A" }, new MockQueryClass { Id = "C" }
@@ -24,7 +27,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void SortBySortsOnOnePropertyDescending() {
+        public void SortBySortsOnOnePropertyDescending()
+        {
             // Arrange
             var list = (new[] { 
                 new MockQueryClass { Id = "A" }, new MockQueryClass { Id = "B" }, new MockQueryClass { Id = "C" }
@@ -40,7 +44,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void SortBySortsOnMultiplePropertyAscending() {
+        public void SortBySortsOnMultiplePropertyAscending()
+        {
             // Arrange
             var list = (new[] { 
                 new MockQueryClass { Id = "X", Name = "A" }, 
@@ -60,7 +65,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void SortBySortsOnMultiplePropertyDescending() {
+        public void SortBySortsOnMultiplePropertyDescending()
+        {
             // Arrange
             var list = (new[] { 
                 new MockQueryClass { Id = "X", Name = "A" }, 
@@ -80,7 +86,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void SortBySortsOnMoreThanTwoProperties() {
+        public void SortBySortsOnMoreThanTwoProperties()
+        {
             // Arrange
             var list = (new[] { 
                 new MockQueryClass { Id = "X", Name = "A", Description = "D0" }, 
@@ -100,7 +107,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void GetSortExpressionForSingleParameter() {
+        public void GetSortExpressionForSingleParameter()
+        {
             // Arrange
             var source = new[] { new MockQueryClass() }.AsQueryable();
             var expected = source.OrderBy(p => p.Id).Expression as MethodCallExpression;
@@ -112,7 +120,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void GetSortExpressionForChainedParameter() {
+        public void GetSortExpressionForChainedParameter()
+        {
             // Arrange
             var source = new[] { new MockQueryClass() }.AsQueryable();
             var expected = source.OrderBy(p => String.Concat(p.Id, p.Name)).Expression as MethodCallExpression;
@@ -124,7 +133,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void GetSortExpressionDescendingForChainedParameter() {
+        public void GetSortExpressionDescendingForChainedParameter()
+        {
             // Arrange
             var source = new[] { new MockQueryClass() }.AsQueryable();
             var expected = source.OrderByDescending(p => String.Concat(p.Name, p.Id)).Expression as MethodCallExpression;
@@ -135,7 +145,8 @@ namespace NuGet.Dialog.Test {
             AreExpressionsEqual(expected, expression);
         }
 
-        private static void AreExpressionsEqual(MethodCallExpression a, MethodCallExpression b) {
+        private static void AreExpressionsEqual(MethodCallExpression a, MethodCallExpression b)
+        {
             // An expression visitor should be the way to do this, but keeping it simple.
 
             Assert.Equal(a.Method, b.Method);
@@ -144,10 +155,12 @@ namespace NuGet.Dialog.Test {
             var bLambda = (b.Arguments[1] as UnaryExpression).Operand as LambdaExpression;
 
 
-            if (aLambda.Body.NodeType == ExpressionType.MemberAccess) {
+            if (aLambda.Body.NodeType == ExpressionType.MemberAccess)
+            {
                 Assert.Equal((aLambda.Body as MemberExpression).Member, (bLambda.Body as MemberExpression).Member);
             }
-            else {
+            else
+            {
                 var aConcatCall = aLambda.Body as MethodCallExpression;
                 var bConcatCall = bLambda.Body as MethodCallExpression;
 
@@ -156,7 +169,8 @@ namespace NuGet.Dialog.Test {
             }
         }
 
-        public class MockQueryClass {
+        public class MockQueryClass
+        {
             public string Id { get; set; }
 
             public string Name { get; set; }

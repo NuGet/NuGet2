@@ -1,9 +1,12 @@
 ﻿using System;
 using EnvDTE;
 
-namespace NuGet.VisualStudio {
-    public class ProjectEventArgs : EventArgs {
-        public ProjectEventArgs(Project project) {
+namespace NuGet.VisualStudio
+{
+    public class ProjectEventArgs : EventArgs
+    {
+        public ProjectEventArgs(Project project)
+        {
             Project = project;
         }
 

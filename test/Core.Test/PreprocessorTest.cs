@@ -1,14 +1,17 @@
 using System.IO;
 using System.Linq;
-using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class PreprocessorTest {
+namespace NuGet.Test
+{
+
+    public class PreprocessorTest
+    {
         [Fact]
-        public void TransformFileReplacesTokensWithValueAndReturnsModifiedStream() {
+        public void TransformFileReplacesTokensWithValueAndReturnsModifiedStream()
+        {
             // Arrange
             var processor = new Preprocessor();
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
@@ -26,7 +29,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void TransformFileDoesNothingIfFileExists() {
+        public void TransformFileDoesNothingIfFileExists()
+        {
             // Arrange
             var processor = new Preprocessor();
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
@@ -44,7 +48,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RevertFileRemovesFileIfContentIsTheSame() {
+        public void RevertFileRemovesFileIfContentIsTheSame()
+        {
             // Arrange
             var processor = new Preprocessor();
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
@@ -61,7 +66,8 @@ namespace NuGet.Test {
             Assert.True(mockProjectSystem.Object.Deleted.Contains("foo.bar"));
         }
 
-        private Stream GetStream(string content) {
+        private Stream GetStream(string content)
+        {
             return content.AsStream();
         }
     }

@@ -1,10 +1,13 @@
 using Xunit;
 
-namespace NuGet.Test.NuGetCommandLine {
-    
-    public class OptionAttributeTests {
+namespace NuGet.Test.NuGetCommandLine
+{
+
+    public class OptionAttributeTests
+    {
         [Fact]
-        public void GetDescription_ReturnsResourceIfTypeSet() {
+        public void GetDescription_ReturnsResourceIfTypeSet()
+        {
             // Arrange
             OptionAttribute cmd = new OptionAttribute(typeof(MockResourceType), "ResourceName");
 
@@ -16,7 +19,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void GetDescription_ReturnsDescriptionIfTypeNotSet() {
+        public void GetDescription_ReturnsDescriptionIfTypeNotSet()
+        {
             // Arrange
             OptionAttribute cmd = new OptionAttribute("ResourceName");
 
@@ -27,7 +31,8 @@ namespace NuGet.Test.NuGetCommandLine {
             Assert.Equal("ResourceName", actual);
         }
 
-        private class MockResourceType {
+        private class MockResourceType
+        {
             public static string ResourceName { get { return "This is a Resource String."; } }
         }
     }

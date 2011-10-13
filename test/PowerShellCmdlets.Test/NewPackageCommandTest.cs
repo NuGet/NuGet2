@@ -8,10 +8,13 @@ using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 using Xunit;
 
-namespace NuGet.PowerShell.Commands.Test {
-    public class NewPackageCommandTest {
+namespace NuGet.PowerShell.Commands.Test
+{
+    public class NewPackageCommandTest
+    {
         [Fact]
-        public void NewPackageCmdletThrowsIfNoSolutionIsClosed() {
+        public void NewPackageCmdletThrowsIfNoSolutionIsClosed()
+        {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
@@ -22,7 +25,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void NewPackageCmdletThrowsIfProjectSpecifiedDoesNotExist() {
+        public void NewPackageCmdletThrowsIfProjectSpecifiedDoesNotExist()
+        {
             // Arrange
             var project = "does-not-exist";
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -37,7 +41,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void NewPackageCmdletThrowsIfSpecFileDoesNotExistAndSpecParameterDoesNotExist() {
+        public void NewPackageCmdletThrowsIfSpecFileDoesNotExistAndSpecParameterDoesNotExist()
+        {
             // Arrange
             var projectName = "test";
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -53,7 +58,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void NewPackageCmdletThrowsIfMultipleSpecFilesExistAndSpecParameterDoesNotExist() {
+        public void NewPackageCmdletThrowsIfMultipleSpecFilesExistAndSpecParameterDoesNotExist()
+        {
             // Arrange
             var projectName = "test";
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -69,7 +75,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void RemoveExcludedFilesRemovesManifestAndOtherNuGetageFiles() {
+        public void RemoveExcludedFilesRemovesManifestAndOtherNuGetageFiles()
+        {
             // Arrange
             var packageBuilder = new PackageBuilder();
             var files = new[] { "somefile.nuspec", @"\foo\bar\somefile.nupkg", @"\baz\1.cs" };
@@ -84,7 +91,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageFilePathAppendsProjectPathWhenPathIsNotRooted() {
+        public void GetPackageFilePathAppendsProjectPathWhenPathIsNotRooted()
+        {
             // Arrange
             var projectPath = @"X:\projects\my-project\";
             var outputFile = "mypk.out";
@@ -99,7 +107,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageFilePathUsesOutputFileWhenPathIsRooted() {
+        public void GetPackageFilePathUsesOutputFileWhenPathIsRooted()
+        {
             // Arrange
             var projectPath = @"X:\projects\my-project\";
             var outputFile = @"X:\outputs\mypk.out";
@@ -114,7 +123,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageFilePathUsesIdAndVersionWhenOutputFileIsNull() {
+        public void GetPackageFilePathUsesIdAndVersionWhenOutputFileIsNull()
+        {
             // Arrange
             var projectPath = @"X:\projects\my-project\";
             string outputFile = null;

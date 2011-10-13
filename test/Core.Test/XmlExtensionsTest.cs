@@ -1,15 +1,18 @@
 using Xunit;
 
-namespace NuGet.Test {
+namespace NuGet.Test
+{
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Xml.Linq;
 
-    
-    public class XmlExtensionsTest {
+
+    public class XmlExtensionsTest
+    {
         [Fact]
-        public void MergingWithSameTagDifferentAttributesWithNoConflictsMergesAttributes() {
+        public void MergingWithSameTagDifferentAttributesWithNoConflictsMergesAttributes()
+        {
             // Arrange
             XElement a = XElement.Parse(@"<foo><bar a=""aValue"" /></foo>");
             XElement b = XElement.Parse(@"<foo><bar b=""bValue"" /></foo>");
@@ -27,7 +30,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void MergingWithNodeActions() {
+        public void MergingWithNodeActions()
+        {
             // Arrange
             XElement a = XElement.Parse(@"<foo><baz /></foo>");
             XElement b = XElement.Parse(@"<foo><bar /></foo>");
@@ -45,7 +49,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void MergingWithoutInsertionMappingsAddsToEnd() {
+        public void MergingWithoutInsertionMappingsAddsToEnd()
+        {
             // Arrange
             XElement a = XElement.Parse(@"<foo><baz /></foo>");
             XElement b = XElement.Parse(@"<foo><bar /></foo>");
@@ -61,7 +66,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void MergingElementsWithMultipleSameAttributeNamesAndValuesDoesntDuplicateEntries() {
+        public void MergingElementsWithMultipleSameAttributeNamesAndValuesDoesntDuplicateEntries()
+        {
             // Act
             XElement a = XElement.Parse(@"<tests>
     <test name=""one"" value=""foo"" />
@@ -86,7 +92,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void MergingElementsWithMultipleEntiresAddsEntryIfNotExists() {
+        public void MergingElementsWithMultipleEntiresAddsEntryIfNotExists()
+        {
             // Act
             XElement a = XElement.Parse(@"<tests>
     <test name=""one"" value=""foo"" />
@@ -114,7 +121,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void MergingTagWithConflictsAddsTag() {
+        public void MergingTagWithConflictsAddsTag()
+        {
             // Arrange
             XElement a = XElement.Parse(@"<connectionStrings><add name=""sqlce"" connectionString=""|DataDirectory|\foo.sdf"" /></connectionStrings>");
             XElement b = XElement.Parse(@"<connectionStrings><add name=""sqlserver"" connectionString=""foo.bar"" /></connectionStrings>");
@@ -132,7 +140,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ExceptWithTagsNoConflicts() {
+        public void ExceptWithTagsNoConflicts()
+        {
             // Arrange
             XElement a = XElement.Parse(@"<foo><bar b=""2"" /></foo>");
             XElement b = XElement.Parse(@"<foo><bar a=""1"" b=""2"" /></foo>");
@@ -145,7 +154,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ExceptWithTagsWithConflicts() {
+        public void ExceptWithTagsWithConflicts()
+        {
             // Arrange
             XElement a = XElement.Parse(@"<foo><bar b=""2"" a=""g"" /></foo>");
             XElement b = XElement.Parse(@"<foo><bar a=""1"" b=""2"" /></foo>");
@@ -163,7 +173,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ExceptWithSimilarTagsRemovesTagsThatChanged() {
+        public void ExceptWithSimilarTagsRemovesTagsThatChanged()
+        {
             // Act
             XElement a = XElement.Parse(@"<tests>
     <test name=""One"" value=""foo"" />
@@ -185,7 +196,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ExceptWithSimilarTagsRemovesTagsThatWereReordered() {
+        public void ExceptWithSimilarTagsRemovesTagsThatWereReordered()
+        {
             // Act
             XElement a = XElement.Parse(@"
 <configuration>
@@ -210,7 +222,8 @@ namespace NuGet.Test {
             Assert.Equal("<configuration />", result.ToString());
         }
 
-        private static void AssertAttributeValue(XElement element, string attributeName, string expectedAttributeValue) {
+        private static void AssertAttributeValue(XElement element, string attributeName, string expectedAttributeValue)
+        {
             XAttribute attr = element.Attribute(attributeName);
             Assert.NotNull(attr);
             Assert.Equal(expectedAttributeValue, attr.Value);

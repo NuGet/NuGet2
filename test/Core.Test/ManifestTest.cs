@@ -3,14 +3,19 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Xunit;
 
-namespace NuGet.Test {
-    
-    public class ManifestTest {
+namespace NuGet.Test
+{
+
+    public class ManifestTest
+    {
         [Fact]
-        public void ManifestValidatesMetadata() {
+        public void ManifestValidatesMetadata()
+        {
             // Arrange
-            var manifest = new Manifest {
-                Metadata = new ManifestMetadata {
+            var manifest = new Manifest
+            {
+                Metadata = new ManifestMetadata
+                {
                     Id = String.Empty,
                     Version = String.Empty,
                     Authors = String.Empty,
@@ -24,10 +29,13 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ManifestValidatesMetadataUrlsIfEmpty() {
+        public void ManifestValidatesMetadataUrlsIfEmpty()
+        {
             // Arrange
-            var manifest = new Manifest {
-                Metadata = new ManifestMetadata {
+            var manifest = new Manifest
+            {
+                Metadata = new ManifestMetadata
+                {
                     Id = "Foobar",
                     Version = "1.0",
                     Authors = "test-author",
@@ -44,10 +52,13 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ManifestValidatesManifestFiles() {
+        public void ManifestValidatesManifestFiles()
+        {
             // Arrange
-            var manifest = new Manifest {
-                Metadata = new ManifestMetadata {
+            var manifest = new Manifest
+            {
+                Metadata = new ManifestMetadata
+                {
                     Id = "Foobar",
                     Version = "1.0",
                     Authors = "test-author",
@@ -75,10 +86,13 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ManifestEnsuresManifestReferencesDoNotContainInvalidCharacters() {
+        public void ManifestEnsuresManifestReferencesDoNotContainInvalidCharacters()
+        {
             // Arrange
-            var manifest = new Manifest {
-                Metadata = new ManifestMetadata {
+            var manifest = new Manifest
+            {
+                Metadata = new ManifestMetadata
+                {
                     Id = "Foobar",
                     Version = "1.0",
                     Authors = "test-author",
@@ -100,10 +114,13 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ManifestValidatesDependencies() {
+        public void ManifestValidatesDependencies()
+        {
             // Arrange
-            var manifest = new Manifest {
-                Metadata = new ManifestMetadata {
+            var manifest = new Manifest
+            {
+                Metadata = new ManifestMetadata
+                {
                     Id = "Foobar",
                     Version = "1.0",
                     Authors = "test-author",

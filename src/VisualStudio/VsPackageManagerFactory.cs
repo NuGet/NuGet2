@@ -1,10 +1,12 @@
 using System;
 using System.ComponentModel.Composition;
 
-namespace NuGet.VisualStudio {
+namespace NuGet.VisualStudio
+{
     [PartCreationPolicy(CreationPolicy.Shared)]
     [Export(typeof(IVsPackageManagerFactory))]
-    public class VsPackageManagerFactory : IVsPackageManagerFactory {
+    public class VsPackageManagerFactory : IVsPackageManagerFactory
+    {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly ISolutionManager _solutionManager;
         private readonly IFileSystemProvider _fileSystemProvider;
@@ -24,7 +26,8 @@ namespace NuGet.VisualStudio {
                                        IRepositorySettings repositorySettings,
                                        IRecentPackageRepository recentPackagesRepository,
                                        VsPackageInstallerEvents packageEvents) :
-            this(solutionManager, repositoryFactory, packageSourceProvider, fileSystemProvider, repositorySettings, recentPackagesRepository, packageEvents, MachineCache.Default)  {
+            this(solutionManager, repositoryFactory, packageSourceProvider, fileSystemProvider, repositorySettings, recentPackagesRepository, packageEvents, MachineCache.Default)
+        {
         }
 
         public VsPackageManagerFactory(ISolutionManager solutionManager,
@@ -34,27 +37,35 @@ namespace NuGet.VisualStudio {
                                        IRepositorySettings repositorySettings,
                                        IRecentPackageRepository recentPackagesRepository,
                                        VsPackageInstallerEvents packageEvents,
-                                       IPackageRepository cacheRepository) {
-            if (solutionManager == null) {
+                                       IPackageRepository cacheRepository)
+        {
+            if (solutionManager == null)
+            {
                 throw new ArgumentNullException("solutionManager");
             }
-            if (repositoryFactory == null) {
+            if (repositoryFactory == null)
+            {
                 throw new ArgumentNullException("repositoryFactory");
             }
-            if (packageSourceProvider == null) {
+            if (packageSourceProvider == null)
+            {
                 throw new ArgumentNullException("packageSourceProvider");
             }
-            if (fileSystemProvider == null) {
+            if (fileSystemProvider == null)
+            {
                 throw new ArgumentNullException("fileSystemProvider");
             }
-            if (repositorySettings == null) {
+            if (repositorySettings == null)
+            {
                 throw new ArgumentNullException("repositorySettings");
             }
-            if (cacheRepository == null) {
+            if (cacheRepository == null)
+            {
                 throw new ArgumentNullException("cacheRepository");
             }
 
-            if (packageEvents == null) {
+            if (packageEvents == null)
+            {
                 throw new ArgumentNullException("packageEvents");
             }
 
@@ -67,7 +78,8 @@ namespace NuGet.VisualStudio {
             _packageEvents = packageEvents;
             _cacheRepository = cacheRepository;
 
-            _solutionManager.SolutionClosing += (sender, e) => {
+            _solutionManager.SolutionClosing += (sender, e) =>
+            {
                 _repositoryInfo = null;
             };
         }
@@ -75,16 +87,20 @@ namespace NuGet.VisualStudio {
         /// <summary>
         /// Creates an VsPackageManagerInstance that uses the Active Repository (the repository selected in the console drop down) and uses a fallback repository for dependencies.
         /// </summary>
-        public IVsPackageManager CreatePackageManager() {
+        public IVsPackageManager CreatePackageManager()
+        {
             return CreatePackageManager(ServiceLocator.GetInstance<IPackageRepository>(), useFallbackForDependencies: true);
         }
 
-        public IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies) {
+        public IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies)
+        {
             return CreatePackageManager(repository, useFallbackForDependencies, addToRecent: true);
         }
 
-        public IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies, bool addToRecent) {
-            if (useFallbackForDependencies) {
+        public IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies, bool addToRecent)
+        {
+            if (useFallbackForDependencies)
+            {
                 repository = CreateFallbackRepository(repository);
             }
             RepositoryInfo info = GetRepositoryInfo();
@@ -94,7 +110,8 @@ namespace NuGet.VisualStudio {
                                         info.Repository,
                                         _recentPackageRepository,
                                         _packageEvents,
-                                        _cacheRepository) {
+                                        _cacheRepository)
+                                        {
                                             AddToRecent = addToRecent
                                         };
         }
@@ -102,8 +119,10 @@ namespace NuGet.VisualStudio {
         /// <summary>
         /// Creates a FallbackRepository with an aggregate repository that also contains the primaryRepository.
         /// </summary>
-        internal IPackageRepository CreateFallbackRepository(IPackageRepository primaryRepository) {
-            if (IsAggregateRepository(primaryRepository)) {
+        internal IPackageRepository CreateFallbackRepository(IPackageRepository primaryRepository)
+        {
+            if (IsAggregateRepository(primaryRepository))
+            {
                 // If we're using the aggregate repository, we don't need to create a fall back repo.
                 return primaryRepository;
             }
@@ -113,24 +132,29 @@ namespace NuGet.VisualStudio {
             return new FallbackRepository(primaryRepository, aggregateRepository);
         }
 
-        private static bool IsAggregateRepository(IPackageRepository repository) {
-            if (repository is AggregateRepository) {
+        private static bool IsAggregateRepository(IPackageRepository repository)
+        {
+            if (repository is AggregateRepository)
+            {
                 // This test should be ok as long as any aggregate repository that we encounter here means the true Aggregate repository of all repositories in the package source
                 // Since the repository created here comes from the UI, this holds true.
                 return true;
             }
             var vsPackageSourceRepository = repository as VsPackageSourceRepository;
-            if (vsPackageSourceRepository != null) {
+            if (vsPackageSourceRepository != null)
+            {
                 return IsAggregateRepository(vsPackageSourceRepository.ActiveRepository);
             }
             return false;
         }
 
-        private RepositoryInfo GetRepositoryInfo() {
+        private RepositoryInfo GetRepositoryInfo()
+        {
             // Update the path if it needs updating
             string path = _repositorySettings.RepositoryPath;
 
-            if (_repositoryInfo == null || !_repositoryInfo.Path.Equals(path)) {
+            if (_repositoryInfo == null || !_repositoryInfo.Path.Equals(path))
+            {
                 IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(path);
                 ISharedPackageRepository repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem);
 
@@ -140,8 +164,10 @@ namespace NuGet.VisualStudio {
             return _repositoryInfo;
         }
 
-        private class RepositoryInfo {
-            public RepositoryInfo(string path, IFileSystem fileSystem, ISharedPackageRepository repository) {
+        private class RepositoryInfo
+        {
+            public RepositoryInfo(string path, IFileSystem fileSystem, ISharedPackageRepository repository)
+            {
                 Path = path;
                 FileSystem = fileSystem;
                 Repository = repository;

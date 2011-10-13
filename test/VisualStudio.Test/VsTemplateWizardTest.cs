@@ -9,13 +9,17 @@ using Moq;
 using NuGet.Test;
 using Xunit;
 
-namespace NuGet.VisualStudio.Test {
-    public class VsTemplateWizardTest {
+namespace NuGet.VisualStudio.Test
+{
+    public class VsTemplateWizardTest
+    {
         private static readonly XNamespace VSTemplateNamespace = "http://schemas.microsoft.com/developer/vstemplate/2005";
 
-        private static XDocument BuildDocument(string repository = "template", params XObject[] packagesChildren) {
+        private static XDocument BuildDocument(string repository = "template", params XObject[] packagesChildren)
+        {
             var children = new List<object>();
-            if (repository != null) {
+            if (repository != null)
+            {
                 children.Add(new XAttribute("repository", repository));
             }
             children.AddRange(packagesChildren);
@@ -24,23 +28,28 @@ namespace NuGet.VisualStudio.Test {
                     new XElement(VSTemplateNamespace + "packages", children))));
         }
 
-        private static XDocument BuildDocumentWithPackage(string repository, XObject additionalChild = null) {
+        private static XDocument BuildDocumentWithPackage(string repository, XObject additionalChild = null)
+        {
             return BuildDocument(repository, BuildPackageElement("pack", "1.0"), additionalChild);
         }
 
-        private static XElement BuildPackageElement(string id = null, string version = null) {
+        private static XElement BuildPackageElement(string id = null, string version = null)
+        {
             var packageElement = new XElement(VSTemplateNamespace + "package");
-            if (id != null) {
+            if (id != null)
+            {
                 packageElement.Add(new XAttribute("id", id));
             }
-            if (version != null) {
+            if (version != null)
+            {
                 packageElement.Add(new XAttribute("version", version));
             }
             return packageElement;
         }
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_WorksWithMissingWizardDataElement() {
+        public void GetConfigurationFromXmlDocument_WorksWithMissingWizardDataElement()
+        {
             // Arrange
             var document = new XDocument(new XElement(VSTemplateNamespace + "VSTemplate"));
             var wizard = new VsTemplateWizard(null);
@@ -54,7 +63,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_WorksWithMissingPackagesElement() {
+        public void GetConfigurationFromXmlDocument_WorksWithMissingPackagesElement()
+        {
             // Arrange
             var document = new XDocument(
                 new XElement(VSTemplateNamespace + "VSTemplate",
@@ -71,7 +81,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_WorksWithEmptyPackagesElement() {
+        public void GetConfigurationFromXmlDocument_WorksWithEmptyPackagesElement()
+        {
             // Arrange
             var document = BuildDocument(null);
             var wizard = new VsTemplateWizard(null);
@@ -85,7 +96,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_WorksWithTemplateRepository() {
+        public void GetConfigurationFromXmlDocument_WorksWithTemplateRepository()
+        {
             // Arrange
             var document = BuildDocumentWithPackage("template");
             var wizard = new VsTemplateWizard(null);
@@ -99,7 +111,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_WorksWithExtensionRepository() {
+        public void GetConfigurationFromXmlDocument_WorksWithExtensionRepository()
+        {
             // Arrange
             var document = BuildDocumentWithPackage("extension", new XAttribute("repositoryId", "myExtensionId"));
             var wizard = new VsTemplateWizard(null);
@@ -118,7 +131,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_ShowErrorForMissingRepositoryIdAttributeWhenInExtensionRepositoryMode() {
+        public void GetConfigurationFromXmlDocument_ShowErrorForMissingRepositoryIdAttributeWhenInExtensionRepositoryMode()
+        {
             // Arrange
             var document = BuildDocumentWithPackage("extension");
             var wizard = new TestableVsTemplateWizard();
@@ -136,7 +150,8 @@ namespace NuGet.VisualStudio.Test {
 
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_ShowErrorForInvalidRepositoryIdAttributeWhenInExtensionRepositoryMode() {
+        public void GetConfigurationFromXmlDocument_ShowErrorForInvalidRepositoryIdAttributeWhenInExtensionRepositoryMode()
+        {
             // Arrange
             var document = BuildDocumentWithPackage("extension", new XAttribute("repositoryId", "myExtensionId"));
             var wizard = new TestableVsTemplateWizard();
@@ -156,7 +171,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_ShowsErrorForInvalidCacheAttributeValue() {
+        public void GetConfigurationFromXmlDocument_ShowsErrorForInvalidCacheAttributeValue()
+        {
             // Arrange
             var document = BuildDocumentWithPackage("__invalid__");
             var wizard = new TestableVsTemplateWizard();
@@ -172,7 +188,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_IncludesValidPackageElements() {
+        public void GetConfigurationFromXmlDocument_IncludesValidPackageElements()
+        {
             var content = new[] {
                 BuildPackageElement("MyPackage", "1.0"),
                 BuildPackageElement("MyOtherPackage", "2.0")
@@ -187,7 +204,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_WorksWithDocumentWithNoNamespace() {
+        public void GetConfigurationFromXmlDocument_WorksWithDocumentWithNoNamespace()
+        {
             var expectedPackages = new[] {
                 new VsTemplateWizardPackageInfo("MyPackage", "1.0"),
             };
@@ -201,7 +219,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_WorksWithSemanticVersions() {
+        public void GetConfigurationFromXmlDocument_WorksWithSemanticVersions()
+        {
             var expectedPackages = new[] {
                 new VsTemplateWizardPackageInfo("MyPackage", "4.0.0ctp-2"),
             };
@@ -214,7 +233,8 @@ namespace NuGet.VisualStudio.Test {
             VerifyParsedPackages(document, expectedPackages);
         }
 
-        private static void VerifyParsedPackages(XDocument document, IEnumerable<VsTemplateWizardPackageInfo> expectedPackages) {
+        private static void VerifyParsedPackages(XDocument document, IEnumerable<VsTemplateWizardPackageInfo> expectedPackages)
+        {
             // Arrange
             var wizard = new VsTemplateWizard(null);
 
@@ -224,14 +244,16 @@ namespace NuGet.VisualStudio.Test {
             // Assert
             Assert.Equal(expectedPackages.Count(), result.Packages.Count);
             foreach (var pair in expectedPackages.Zip(result.Packages,
-                (expectedPackage, resultPackage) => new { expectedPackage, resultPackage })) {
+                (expectedPackage, resultPackage) => new { expectedPackage, resultPackage }))
+            {
                 Assert.Equal(pair.expectedPackage.Id, pair.resultPackage.Id);
                 Assert.Equal(pair.expectedPackage.Version, pair.resultPackage.Version);
             }
         }
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithMissingIdAttribute() {
+        public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithMissingIdAttribute()
+        {
             var content = new[] {
                 BuildPackageElement(version: "1.0"),
             };
@@ -239,7 +261,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithEmptyIdAttribute() {
+        public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithEmptyIdAttribute()
+        {
             var content = new[] {
                 BuildPackageElement("  ", "1.0"),
             };
@@ -247,7 +270,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithMissingVersionAttribute() {
+        public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithMissingVersionAttribute()
+        {
             var content = new[] {
                 BuildPackageElement(id: "MyPackage")
             };
@@ -255,7 +279,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithEmptyVersionAttribute() {
+        public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithEmptyVersionAttribute()
+        {
             var content = new[] {
                 BuildPackageElement("MyPackage", "  ")
             };
@@ -263,14 +288,16 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithInvalidVersionAttribute() {
+        public void GetConfigurationFromXmlDocument_ErrorOnPackageElementWithInvalidVersionAttribute()
+        {
             var content = new[] {
                 BuildPackageElement("MyPackage", "NotAVersionString")
             };
             InvalidPackageElementHelper(content);
         }
 
-        private static void InvalidPackageElementHelper(XElement[] content) {
+        private static void InvalidPackageElementHelper(XElement[] content)
+        {
             // Arrange
             var document = BuildDocument("template", content);
             var wizard = new TestableVsTemplateWizard();
@@ -284,11 +311,13 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RunStarted_MultiProjectRun_DisplaysErrorMessageAndBacksOut() {
+        public void RunStarted_MultiProjectRun_DisplaysErrorMessageAndBacksOut()
+        {
             RunStartedForInvalidTemplateTypeHelper(WizardRunKind.AsMultiProject);
         }
 
-        private static void RunStartedForInvalidTemplateTypeHelper(WizardRunKind runKind) {
+        private static void RunStartedForInvalidTemplateTypeHelper(WizardRunKind runKind)
+        {
             // Arrange
             var wizard = new TestableVsTemplateWizard();
 
@@ -302,11 +331,13 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RunStarted_LoadsConfigurationFromPath() {
+        public void RunStarted_LoadsConfigurationFromPath()
+        {
             // Arrange
             var document = new XDocument(new XElement("VSTemplate"));
             string path = null;
-            var wizard = new TestableVsTemplateWizard(loadDocumentCallback: p => {
+            var wizard = new TestableVsTemplateWizard(loadDocumentCallback: p =>
+            {
                 path = p;
                 return document;
             });
@@ -321,7 +352,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RunFinished_ForProject_InstallsPackages() {
+        public void RunFinished_ForProject_InstallsPackages()
+        {
             // Arrange
             var mockProject = new Mock<Project>().Object;
             var installerMock = new Mock<IVsPackageInstaller>();
@@ -347,7 +379,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RunFinished_ForItem_InstallsPackages() {
+        public void RunFinished_ForItem_InstallsPackages()
+        {
             // Arrange
             var mockProject = new Mock<Project>().Object;
             var projectItemMock = new Mock<ProjectItem>();
@@ -375,7 +408,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RunFinished_ForItem_InstallsPrereleasePackages() {
+        public void RunFinished_ForItem_InstallsPrereleasePackages()
+        {
             // Arrange
             var mockProject = new Mock<Project>().Object;
             var projectItemMock = new Mock<ProjectItem>();
@@ -403,7 +437,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RunFinished_InstallsValidPackages_ReportsInstallationErrors() {
+        public void RunFinished_InstallsValidPackages_ReportsInstallationErrors()
+        {
             // Arrange
             var mockProject = new Mock<Project>().Object;
             var installerMock = new Mock<IVsPackageInstaller>();
@@ -436,7 +471,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void ShouldAddProjectItem_AlwaysReturnsTrue() {
+        public void ShouldAddProjectItem_AlwaysReturnsTrue()
+        {
             IWizard wizard = new VsTemplateWizard(null);
 
             Assert.True(wizard.ShouldAddProjectItem(null));
@@ -444,23 +480,27 @@ namespace NuGet.VisualStudio.Test {
             Assert.True(wizard.ShouldAddProjectItem("foo"));
         }
 
-        private sealed class TestableVsTemplateWizard : VsTemplateWizard {
+        private sealed class TestableVsTemplateWizard : VsTemplateWizard
+        {
             private readonly Func<string, XDocument> _loadDocumentCallback;
 
             public TestableVsTemplateWizard(IVsPackageInstaller installer = null,
                 Func<string, XDocument> loadDocumentCallback = null)
-                : base(installer) {
+                : base(installer)
+            {
                 ErrorMessages = new List<string>();
                 _loadDocumentCallback = loadDocumentCallback ?? (path => null);
             }
 
             public List<string> ErrorMessages { get; private set; }
 
-            internal override XDocument LoadDocument(string path) {
+            internal override XDocument LoadDocument(string path)
+            {
                 return _loadDocumentCallback(path);
             }
 
-            internal override void ShowErrorMessage(string message) {
+            internal override void ShowErrorMessage(string message)
+            {
                 ErrorMessages.Add(message);
             }
         }

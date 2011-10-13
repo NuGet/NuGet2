@@ -1,15 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class PackageRepositoryTest {
+namespace NuGet.Test
+{
+
+    public class PackageRepositoryTest
+    {
         [Fact]
-        public void FindByIdReturnsPackage() {
+        public void FindByIdReturnsPackage()
+        {
             // Arrange
             var repo = GetLocalRepository();
 
@@ -22,7 +25,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FindByIdReturnsNullWhenPackageNotFound() {
+        public void FindByIdReturnsNullWhenPackageNotFound()
+        {
             // Arrange
             var repo = GetLocalRepository();
 
@@ -34,7 +38,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FindByIdAndVersionReturnsPackage() {
+        public void FindByIdAndVersionReturnsPackage()
+        {
             // Arrange
             var repo = GetRemoteRepository();
 
@@ -48,7 +53,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FindByIdAndVersionReturnsNullWhenPackageNotFound() {
+        public void FindByIdAndVersionReturnsNullWhenPackageNotFound()
+        {
             // Arrange
             var repo = GetLocalRepository();
 
@@ -61,7 +67,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FindByIdAndVersionRangeReturnsPackage() {
+        public void FindByIdAndVersionRangeReturnsPackage()
+        {
             // Arrange
             var repo = GetRemoteRepository();
             var versionSpec = VersionUtility.ParseVersionSpec("[0.9, 1.1]");
@@ -76,7 +83,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FindByIdAndVersionRangeReturnsNullWhenPackageNotFound() {
+        public void FindByIdAndVersionRangeReturnsNullWhenPackageNotFound()
+        {
             // Arrange
             var repo = GetLocalRepository();
             var versionSpec = VersionUtility.ParseVersionSpec("[0.9, 1.1]");
@@ -90,7 +98,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FindPackageByIdVersionAndVersionRangesUsesRangeIfExactVersionIsNull() {
+        public void FindPackageByIdVersionAndVersionRangesUsesRangeIfExactVersionIsNull()
+        {
             // Arrange
             var repo = GetRemoteRepository();
 
@@ -104,7 +113,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FindPackagesReturnsPackagesWithTermInPackageTagOrDescriptionOrId() {
+        public void FindPackagesReturnsPackagesWithTermInPackageTagOrDescriptionOrId()
+        {
             // Arrange
             var term = "TAG";
             var repo = new MockPackageRepository();
@@ -125,7 +135,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FindPackagesReturnsPackagesWithTerm() {
+        public void FindPackagesReturnsPackagesWithTerm()
+        {
             // Arrange
             var term = "B xaml";
             var repo = GetRemoteRepository();
@@ -141,7 +152,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FindPackagesReturnsEmptyCollectionWhenNoPackageContainsTerm() {
+        public void FindPackagesReturnsEmptyCollectionWhenNoPackageContainsTerm()
+        {
             // Arrange
             var term = "does-not-exist";
             var repo = GetRemoteRepository();
@@ -154,7 +166,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FindPackagesReturnsAllPackagesWhenSearchTermIsNullOrEmpty() {
+        public void FindPackagesReturnsAllPackagesWhenSearchTermIsNullOrEmpty()
+        {
             // Arrange
             var repo = GetLocalRepository();
 
@@ -169,7 +182,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SearchUsesInterfaceIfImplementedByRepository() {
+        public void SearchUsesInterfaceIfImplementedByRepository()
+        {
             // Arrange
             var repo = new Mock<MockPackageRepository>(MockBehavior.Strict);
             repo.Setup(m => m.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
@@ -185,7 +199,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetUpdatesReturnsPackagesWithUpdates() {
+        public void GetUpdatesReturnsPackagesWithUpdates()
+        {
             // Arrange 
             var localRepo = GetLocalRepository();
             var remoteRepo = GetRemoteRepository();
@@ -200,7 +215,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetUpdatesReturnsEmptyCollectionWhenSourceRepositoryIsEmpty() {
+        public void GetUpdatesReturnsEmptyCollectionWhenSourceRepositoryIsEmpty()
+        {
             // Arrange 
             var localRepo = GetLocalRepository();
             var remoteRepo = GetEmptyRepository();
@@ -213,7 +229,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FindDependencyPicksHighestVersionIfNotSpecified() {
+        public void FindDependencyPicksHighestVersionIfNotSpecified()
+        {
             // Arrange
             var repository = new MockPackageRepository() {
                 PackageUtility.CreatePackage("B", "2.0"),
@@ -234,7 +251,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FindPackageNormalizesVersionBeforeComparing() {
+        public void FindPackageNormalizesVersionBeforeComparing()
+        {
             // Arrange
             var repository = new MockPackageRepository() {
                 PackageUtility.CreatePackage("B", "1.0.0"),
@@ -250,7 +268,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FindDependencyPicksLowestMajorAndMinorVersionButHighestBuildAndRevision() {
+        public void FindDependencyPicksLowestMajorAndMinorVersionButHighestBuildAndRevision()
+        {
             // Arrange
             var repository = new MockPackageRepository() {
                 PackageUtility.CreatePackage("B", "2.0"),
@@ -296,7 +315,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveSafeVersionReturnsNullIfPackagesNull() {
+        public void ResolveSafeVersionReturnsNullIfPackagesNull()
+        {
             // Act
             var package = PackageRepositoryExtensions.ResolveSafeVersion(null);
 
@@ -305,7 +325,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveSafeVersionReturnsNullIfEmptyPackages() {
+        public void ResolveSafeVersionReturnsNullIfEmptyPackages()
+        {
             // Act
             var package = PackageRepositoryExtensions.ResolveSafeVersion(Enumerable.Empty<IPackage>());
 
@@ -314,7 +335,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveSafeVersionReturnsHighestBuildAndRevisionWithLowestMajorAndMinor() {
+        public void ResolveSafeVersionReturnsHighestBuildAndRevisionWithLowestMajorAndMinor()
+        {
             var packages = new[] { 
                 PackageUtility.CreatePackage("A", "0.9"),
                 PackageUtility.CreatePackage("A", "0.9.3"),
@@ -333,13 +355,15 @@ namespace NuGet.Test {
             Assert.Equal(new SemanticVersion("0.9.3"), package.Version);
         }
 
-        private static IPackageRepository GetEmptyRepository() {
+        private static IPackageRepository GetEmptyRepository()
+        {
             Mock<IPackageRepository> repository = new Mock<IPackageRepository>();
             repository.Setup(c => c.GetPackages()).Returns(() => Enumerable.Empty<IPackage>().AsQueryable());
             return repository.Object;
         }
 
-        private static IPackageRepository GetRemoteRepository() {
+        private static IPackageRepository GetRemoteRepository()
+        {
             Mock<IPackageRepository> repository = new Mock<IPackageRepository>();
             var packages = new[] { CreateMockPackage("A", "1.0", "scripts style"), 
                                    CreateMockPackage("B", "1.0", "testing"), 
@@ -349,14 +373,16 @@ namespace NuGet.Test {
             return repository.Object;
         }
 
-        private static IPackageRepository GetLocalRepository() {
+        private static IPackageRepository GetLocalRepository()
+        {
             Mock<IPackageRepository> repository = new Mock<IPackageRepository>();
             var packages = new[] { CreateMockPackage("A", "1.0"), CreateMockPackage("B", "1.0") };
             repository.Setup(c => c.GetPackages()).Returns(() => packages.AsQueryable());
             return repository.Object;
         }
 
-        private static IPackage CreateMockPackage(string name, string version, string desc = null, string tags = null) {
+        private static IPackage CreateMockPackage(string name, string version, string desc = null, string tags = null)
+        {
             Mock<IPackage> package = new Mock<IPackage>();
             package.SetupGet(p => p.Id).Returns(name);
             package.SetupGet(p => p.Version).Returns(SemanticVersion.Parse(version));

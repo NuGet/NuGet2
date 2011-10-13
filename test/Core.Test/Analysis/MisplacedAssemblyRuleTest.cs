@@ -3,12 +3,15 @@ using System.Linq;
 using NuGet.Analysis.Rules;
 using Xunit;
 
-namespace NuGet.Test.Analysis {
+namespace NuGet.Test.Analysis
+{
 
-    public class MisplacedAssemblyRuleTest {
+    public class MisplacedAssemblyRuleTest
+    {
 
         [Fact]
-        public void NoAssemblyHasNoIssue() {
+        public void NoAssemblyHasNoIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("A", content: new[] { "web.config", "jQuery.js" });
             var rule = new MisplacedAssemblyRule();
@@ -21,7 +24,8 @@ namespace NuGet.Test.Analysis {
         }
 
         [Fact]
-        public void AssemblyPlacedInsideFrameworkFolderHasNoIssue() {
+        public void AssemblyPlacedInsideFrameworkFolderHasNoIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("A", assemblyReferences: new[] { "lib\\net\\abc.dll" });
             var rule = new MisplacedAssemblyRule();
@@ -34,7 +38,8 @@ namespace NuGet.Test.Analysis {
         }
 
         [Fact]
-        public void AssemblyPlacedUnderLibHasOneIssue() {
+        public void AssemblyPlacedUnderLibHasOneIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("A", assemblyReferences: new[] { "lib\\abc.exe" });
             var rule = new MisplacedAssemblyRule();
@@ -53,7 +58,8 @@ namespace NuGet.Test.Analysis {
         }
 
         [Fact]
-        public void TwoAssembliesPlacedUnderLibHasTwoIssues() {
+        public void TwoAssembliesPlacedUnderLibHasTwoIssues()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("A", assemblyReferences: new[] { "lib\\abc.dll", "lib\\def.winmd" });
             var rule = new MisplacedAssemblyRule();
@@ -79,7 +85,8 @@ namespace NuGet.Test.Analysis {
         }
 
         [Fact]
-        public void TwoAssembliesPlacedOutsideLibHasOneIssues() {
+        public void TwoAssembliesPlacedOutsideLibHasOneIssues()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("A", assemblyReferences: new[] { "content\\abc.exe", "tools\\def.winmd" });
             var rule = new MisplacedAssemblyRule();

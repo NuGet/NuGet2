@@ -7,14 +7,17 @@ using NuGet.MSBuild;
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.Test.MSBuild {
+namespace NuGet.Test.MSBuild
+{
 
-	public class NuGetPushTaskUnitTest {
+    public class NuGetPushTaskUnitTest
+    {
         private const string apiKey = "myApiKey";
         private const string server = "server";
 
         [Fact]
-        public void WillLogAnErrorWhenThePackageDoesNotExist() {
+        public void WillLogAnErrorWhenThePackageDoesNotExist()
+        {
             string actualMessage = null;
             var buildEngineStub = new Mock<IBuildEngine>();
             var fileSystemStub = new Mock<IFileSystem>();
@@ -39,7 +42,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillGetApiKeyFromConfigFileIfNotSpecified() {
+        public void WillGetApiKeyFromConfigFileIfNotSpecified()
+        {
             var packageServerStub = new Mock<IPackageServer>();
             var settingsStub = new Mock<ISettings>();
 
@@ -61,7 +65,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillPublishPackageByDefault() {
+        public void WillPublishPackageByDefault()
+        {
             var packageServerStub = new Mock<IPackageServer>();
 
             NuGetPush task = CreateTaskWithDefaultStubs(packageServerStub: packageServerStub);
@@ -77,7 +82,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillPushButNotPublishIfCreateOnly() {
+        public void WillPushButNotPublishIfCreateOnly()
+        {
             var packageServerStub = new Mock<IPackageServer>();
 
             NuGetPush task = CreateTaskWithDefaultStubs(packageServerStub: packageServerStub);
@@ -98,22 +104,28 @@ namespace NuGet.Test.MSBuild {
                                                             Mock<IPackageServer> packageServerStub = null,
                                                             Mock<IFileSystemProvider> fileSystemStub = null,
                                                             Mock<IPackageFactory> packageFactoryStub = null,
-                                                            Mock<ISettings> settingsStub = null) {
+                                                            Mock<ISettings> settingsStub = null)
+        {
             const string packagePath = "thePackageId.1.0.nupkg";
 
-            if (buildEngineStub == null) {
+            if (buildEngineStub == null)
+            {
                 buildEngineStub = new Mock<IBuildEngine>();
             }
-            if (packageServerStub == null) {
+            if (packageServerStub == null)
+            {
                 packageServerStub = new Mock<IPackageServer>();
             }
-            if (fileSystemStub == null) {
+            if (fileSystemStub == null)
+            {
                 fileSystemStub = new Mock<IFileSystemProvider>();
             }
-            if (packageFactoryStub == null) {
+            if (packageFactoryStub == null)
+            {
                 packageFactoryStub = new Mock<IPackageFactory>();
             }
-            if (settingsStub == null) {
+            if (settingsStub == null)
+            {
                 settingsStub = new Mock<ISettings>();
             }
 

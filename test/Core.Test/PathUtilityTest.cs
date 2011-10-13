@@ -1,11 +1,14 @@
 ﻿using System.IO;
 using Xunit;
 
-namespace NuGet.Test {
-    
-    public class PathUtilityTest {
+namespace NuGet.Test
+{
+
+    public class PathUtilityTest
+    {
         [Fact]
-        public void EnsureTrailingSlashThrowsIfPathIsNull() {
+        public void EnsureTrailingSlashThrowsIfPathIsNull()
+        {
             // Arrange
             string path = null;
 
@@ -14,7 +17,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void EnsureTrailingSlashReturnsOriginalPathIfEmpty() {
+        public void EnsureTrailingSlashReturnsOriginalPathIfEmpty()
+        {
             // Arrange
             string path = "";
 
@@ -26,7 +30,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void EnsureTrailingSlashReturnsOriginalStringIfPathTerminatesInSlash() {
+        public void EnsureTrailingSlashReturnsOriginalStringIfPathTerminatesInSlash()
+        {
             // Arrange
             string path = @"foo\bar\";
 
@@ -38,7 +43,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void EnsureTrailingSlashAppendsSlashIfPathDoesNotTerminateInSlash() {
+        public void EnsureTrailingSlashAppendsSlashIfPathDoesNotTerminateInSlash()
+        {
             // Arrange
             string path1 = @"foo\bar";
             string path2 = "foo";
@@ -53,7 +59,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetRelativePathAbsolutePaths() {
+        public void GetRelativePathAbsolutePaths()
+        {
             // Act
             string path = PathUtility.GetRelativePath(@"c:\foo\bar\", @"c:\foo\bar\baz");
 
@@ -62,7 +69,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetRelativePathDirectoryWithPeriods() {
+        public void GetRelativePathDirectoryWithPeriods()
+        {
             // Act
             string path = PathUtility.GetRelativePath(@"c:\foo\MvcApplication1\MvcApplication1.Tests\", @"c:\foo\MvcApplication1\packages\foo.dll");
 
@@ -71,7 +79,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetRelativePathAbsolutePathAndShare() {
+        public void GetRelativePathAbsolutePathAndShare()
+        {
             // Act
             string path = PathUtility.GetRelativePath(@"c:\foo\bar", @"\\baz");
 
@@ -80,7 +89,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetRelativePathShares() {
+        public void GetRelativePathShares()
+        {
             // Act
             string path = PathUtility.GetRelativePath(@"\\baz\a\b\c\", @"\\baz\");
 
@@ -89,7 +99,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetRelativePathFileNames() {
+        public void GetRelativePathFileNames()
+        {
             // Act
             string path = PathUtility.GetRelativePath(@"c:\a\y\x.dll", @"c:\a\b.dll");
 
@@ -98,7 +109,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetRelativePathWithSpaces() {
+        public void GetRelativePathWithSpaces()
+        {
             // Act
             string path = PathUtility.GetRelativePath(@"c:\foo", @"c:\foo\This is a folder");
 
@@ -107,7 +119,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetAbsolutePathWithSpaces() {
+        public void GetAbsolutePathWithSpaces()
+        {
             // Act
             string path = PathUtility.GetAbsolutePath(@"c:\foo\", @"This is a folder");
 
@@ -116,7 +129,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetRelativePathUnrelatedAbsolutePaths() {
+        public void GetRelativePathUnrelatedAbsolutePaths()
+        {
             // Act
             string path = PathUtility.GetRelativePath(@"c:\foo", @"d:\bar");
 
@@ -125,7 +139,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetAbsolutePathComplementsGetRelativePath() {
+        public void GetAbsolutePathComplementsGetRelativePath()
+        {
             // Arrange
             string basePath = @"c:\foo\bar\baz";
             string targetPath = @"c:\foo";
@@ -139,7 +154,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCanonicalPathReturnsCorrectLocalPathWithTrailingBackslash() {
+        public void GetCanonicalPathReturnsCorrectLocalPathWithTrailingBackslash()
+        {
             // Arrange
             string basePath = @"c:\foo\bar\baz";
             string canonicalPath = @"c:\foo\bar\baz\";
@@ -152,7 +168,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCanonicalPathReturnsCorrectLocalPathWithoutMultipleBackslashes() {
+        public void GetCanonicalPathReturnsCorrectLocalPathWithoutMultipleBackslashes()
+        {
             // Arrange
             string basePath = @"c:\\foo\\bar\\baz";
             string canonicalPath = @"c:\foo\bar\baz\";
@@ -165,7 +182,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCanonicalPathReturnsCorrectUncPathWithTrailingBackslash() {
+        public void GetCanonicalPathReturnsCorrectUncPathWithTrailingBackslash()
+        {
             // Arrange
             string basePath = @"\\server\share\foo\bar\baz";
             string canonicalPath = @"\\server\share\foo\bar\baz\";
@@ -178,7 +196,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCanonicalPathReturnsCorrectUncPathWithoutMultipleBackslashes() {
+        public void GetCanonicalPathReturnsCorrectUncPathWithoutMultipleBackslashes()
+        {
             // Arrange
             string basePath = @"\\server\\share\\foo\\bar\\baz";
             string canonicalPath = @"\\server\share\foo\bar\baz\";
@@ -191,7 +210,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCanonicalPathReturnsCorrectUrlForDomainOnlyWithTrailingSlash() {
+        public void GetCanonicalPathReturnsCorrectUrlForDomainOnlyWithTrailingSlash()
+        {
             // Arrange
             string basePath = @"http://www.example.com";
             string canonicalPath = @"http://www.example.com/";
@@ -204,7 +224,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCanonicalPathReturnsCorrectUrlForFolderWithoutTrailingSlash() {
+        public void GetCanonicalPathReturnsCorrectUrlForFolderWithoutTrailingSlash()
+        {
             // Arrange
             string basePath = @"http://www.example.com/nuget";
             string canonicalPath = @"http://www.example.com/nuget";
@@ -217,7 +238,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCanonicalPathReturnsCorrectUrlForFolderWithTrailingSlash() {
+        public void GetCanonicalPathReturnsCorrectUrlForFolderWithTrailingSlash()
+        {
             // Arrange
             string basePath = @"http://www.example.com/nuget/";
             string canonicalPath = @"http://www.example.com/nuget/";
@@ -230,7 +252,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCanonicalPathReturnsCorrectUrlWithFilename() {
+        public void GetCanonicalPathReturnsCorrectUrlWithFilename()
+        {
             // Arrange
             string basePath = @"http://www.example.com/nuget/index.html";
             string canonicalPath = @"http://www.example.com/nuget/index.html";
@@ -243,7 +266,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCanonicalPathReturnsCorrectUrlWithQuerystring() {
+        public void GetCanonicalPathReturnsCorrectUrlWithQuerystring()
+        {
             // Arrange
             string basePath = @"http://www.example.com/nuget/index.html?abc=123";
             string canonicalPath = @"http://www.example.com/nuget/index.html?abc=123";
@@ -256,7 +280,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCanonicalPathReturnsCorrectUrlWithEncodedQuerystring() {
+        public void GetCanonicalPathReturnsCorrectUrlWithEncodedQuerystring()
+        {
             // Arrange
             string basePath = @"http://www.example.com/nuget/index.html?abc%3D123";
             string canonicalPath = @"http://www.example.com/nuget/index.html?abc=123";

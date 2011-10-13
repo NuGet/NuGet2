@@ -2,10 +2,13 @@
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace NuGet.VisualStudio {
-    public static class MessageHelper {
+namespace NuGet.VisualStudio
+{
+    public static class MessageHelper
+    {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1300:SpecifyMessageBoxOptions")]
-        public static void ShowWarningMessage(string message, string title) {
+        public static void ShowWarningMessage(string message, string title)
+        {
             VsShellUtilities.ShowMessageBox(
                ServiceLocator.GetInstance<IServiceProvider>(),
                message,
@@ -16,7 +19,8 @@ namespace NuGet.VisualStudio {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1300:SpecifyMessageBoxOptions")]
-        public static void ShowInfoMessage(string message, string title) {
+        public static void ShowInfoMessage(string message, string title)
+        {
             VsShellUtilities.ShowMessageBox(
                ServiceLocator.GetInstance<IServiceProvider>(),
                message,
@@ -26,11 +30,13 @@ namespace NuGet.VisualStudio {
                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
         }
 
-        public static void ShowErrorMessage(Exception exception, string title) {
+        public static void ShowErrorMessage(Exception exception, string title)
+        {
             ShowErrorMessage(ExceptionUtility.Unwrap(exception).Message, title);
         }
 
-        public static void ShowErrorMessage(string message, string title) {
+        public static void ShowErrorMessage(string message, string title)
+        {
             VsShellUtilities.ShowMessageBox(
                 ServiceLocator.GetInstance<IServiceProvider>(),
                 message,
@@ -40,7 +46,8 @@ namespace NuGet.VisualStudio {
                 OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
         }
 
-        public static bool? ShowQueryMessage(string message, string title, bool showCancelButton) {
+        public static bool? ShowQueryMessage(string message, string title, bool showCancelButton)
+        {
             int result = VsShellUtilities.ShowMessageBox(
                 ServiceLocator.GetInstance<IServiceProvider>(),
                 message,
@@ -49,10 +56,12 @@ namespace NuGet.VisualStudio {
                 showCancelButton ? OLEMSGBUTTON.OLEMSGBUTTON_YESNOCANCEL : OLEMSGBUTTON.OLEMSGBUTTON_YESNO,
                 OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
 
-            if (result == NativeMethods.IDCANCEL) {
+            if (result == NativeMethods.IDCANCEL)
+            {
                 return null;
             }
-            else {
+            else
+            {
                 return (result == NativeMethods.IDYES);
             }
         }

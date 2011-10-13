@@ -4,25 +4,32 @@ using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
 
-namespace NuGet.Dialog.Test {
+namespace NuGet.Dialog.Test
+{
     /// <summary>
     /// Concrete class to assist in testing the abstract PackagesTreeNodeBase
     /// </summary>
-    internal class MockTreeNode : PackagesTreeNodeBase {
+    internal class MockTreeNode : PackagesTreeNodeBase
+    {
 
         private int _numberOfPackages;
         private IEnumerable<IPackage> _packages;
 
-        public override string Name {
-            get {
+        public override string Name
+        {
+            get
+            {
                 return "Mock Tree Node";
             }
         }
 
-        public override IQueryable<IPackage> GetPackages() {
-            if (_packages == null) {
+        public override IQueryable<IPackage> GetPackages()
+        {
+            if (_packages == null)
+            {
                 var packages = new List<IPackage>();
-                for (int i = 0; i < _numberOfPackages; i++) {
+                for (int i = 0; i < _numberOfPackages; i++)
+                {
                     packages.Add(PackageUtility.CreatePackage("A" + i, "1.0", rating: i));
                 }
                 _packages = packages;
@@ -32,13 +39,15 @@ namespace NuGet.Dialog.Test {
         }
 
         public MockTreeNode(IVsExtensionsTreeNode parent, PackagesProviderBase provider, int numberOfPackages, bool collapseVersions)
-            : base(parent, provider, collapseVersions) {
+            : base(parent, provider, collapseVersions)
+        {
 
             _numberOfPackages = numberOfPackages;
         }
 
         public MockTreeNode(IVsExtensionsTreeNode parent, PackagesProviderBase provider, IEnumerable<IPackage> packages, bool collapseVersions)
-            : base(parent, provider, collapseVersions) {
+            : base(parent, provider, collapseVersions)
+        {
 
             _packages = packages;
         }

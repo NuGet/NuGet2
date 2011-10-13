@@ -8,10 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NuGetConsole.Host.PowerShell {
-    using System;
-    
-    
+namespace NuGetConsole.Host.PowerShell
+{
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -22,44 +22,52 @@ namespace NuGetConsole.Host.PowerShell {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
-        
+    internal class Resources
+    {
+
         private static global::System.Resources.ResourceManager resourceMan;
-        
+
         private static global::System.Globalization.CultureInfo resourceCulture;
-        
+
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources() {
+        internal Resources()
+        {
         }
-        
+
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
-            get {
-                if (object.ReferenceEquals(resourceMan, null)) {
+        internal static global::System.Resources.ResourceManager ResourceManager
+        {
+            get
+            {
+                if (object.ReferenceEquals(resourceMan, null))
+                {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuGetConsole.Host.PowerShell.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
-            get {
+        internal static global::System.Globalization.CultureInfo Culture
+        {
+            get
+            {
                 return resourceCulture;
             }
-            set {
+            set
+            {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to #
         ///# This private script adds $InterfaceType members to $psObject which invokes on $wrappedObject
@@ -87,44 +95,54 @@ namespace NuGetConsole.Host.PowerShell {
         ///            }
         ///  [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string Add_WrapperMembers {
-            get {
+        internal static string Add_WrapperMembers
+        {
+            get
+            {
                 return ResourceManager.GetString("Add_WrapperMembers", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Nested prompt not supported..
         /// </summary>
-        internal static string ErrorNestedPromptNotSupported {
-            get {
+        internal static string ErrorNestedPromptNotSupported
+        {
+            get
+            {
                 return ResourceManager.GetString("ErrorNestedPromptNotSupported", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Package Manager Console Host Version {0}.
         /// </summary>
-        internal static string PowerShellHostTitle {
-            get {
+        internal static string PowerShellHostTitle
+        {
+            get
+            {
                 return ResourceManager.GetString("PowerShellHostTitle", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to [?] Help (default is &quot;{0}&quot;):.
         /// </summary>
-        internal static string PromptForChoiceSuffix {
-            get {
+        internal static string PromptForChoiceSuffix
+        {
+            get
+            {
                 return ResourceManager.GetString("PromptForChoiceSuffix", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Zero length collection..
         /// </summary>
-        internal static string ZeroLengthCollection {
-            get {
+        internal static string ZeroLengthCollection
+        {
+            get
+            {
                 return ResourceManager.GetString("ZeroLengthCollection", resourceCulture);
             }
         }

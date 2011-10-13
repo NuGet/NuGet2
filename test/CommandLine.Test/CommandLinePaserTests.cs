@@ -6,10 +6,13 @@ using Moq;
 using NuGet.Commands;
 using Xunit;
 
-namespace NuGet.Test.NuGetCommandLine {
-    public class CommandLinePaserTests {
+namespace NuGet.Test.NuGetCommandLine
+{
+    public class CommandLinePaserTests
+    {
         [Fact]
-        public void GetNextCommandLineItem_ReturnsNullWithNullInput() {
+        public void GetNextCommandLineItem_ReturnsNullWithNullInput()
+        {
             // Act
             string actualItem = CommandLineParser.GetNextCommandLineItem(null);
             // Assert
@@ -17,7 +20,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void GetNextCommandLineItem_ReturnsNullWithEmptyInput() {
+        public void GetNextCommandLineItem_ReturnsNullWithEmptyInput()
+        {
             // Arrange
             var argsEnumerator = new List<string>().GetEnumerator();
             // Act
@@ -27,7 +31,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ParseCommandLine_ThrowsCommandLineExpectionWhenUnknownCommand() {
+        public void ParseCommandLine_ThrowsCommandLineExpectionWhenUnknownCommand()
+        {
             // Arrange 
             var cmdMgr = new Mock<ICommandManager>();
             cmdMgr.Setup(cm => cm.GetCommand(It.IsAny<string>())).Returns<ICommand>(null);
@@ -39,7 +44,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ExtractOptions_ReturnsEmptyCommandWhenCommandLineIsEmpty() {
+        public void ExtractOptions_ReturnsEmptyCommandWhenCommandLineIsEmpty()
+        {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
             var MockCommandOptions = new Dictionary<OptionAttribute, PropertyInfo>();
@@ -58,7 +64,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ExtractOptions_AddsArgumentsWhenItemsDoNotStartWithSlashOrDash() {
+        public void ExtractOptions_AddsArgumentsWhenItemsDoNotStartWithSlashOrDash()
+        {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
             var MockCommandOptions = new Dictionary<OptionAttribute, PropertyInfo>();
@@ -79,7 +86,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ExtractOptions_ThrowsCommandLineExpectionWhenOptionUnknow() {
+        public void ExtractOptions_ThrowsCommandLineExpectionWhenOptionUnknow()
+        {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
             var MockCommandOptions = new Dictionary<OptionAttribute, PropertyInfo>();
@@ -96,7 +104,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ExtractOptions_ParsesOptionsThatStartWithSlash() {
+        public void ExtractOptions_ParsesOptionsThatStartWithSlash()
+        {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
             var MockCommandOptions = new Dictionary<OptionAttribute, PropertyInfo>();
@@ -114,7 +123,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ExtractOptions_UsesShortenedForm() {
+        public void ExtractOptions_UsesShortenedForm()
+        {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
             var MockCommandOptions = new Dictionary<OptionAttribute, PropertyInfo>();
@@ -132,7 +142,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ExtractOptions_ParsesOptionsThatStartWithDash() {
+        public void ExtractOptions_ParsesOptionsThatStartWithDash()
+        {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
             var MockCommandOptions = new Dictionary<OptionAttribute, PropertyInfo>();
@@ -150,7 +161,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ExtractOptions_ThrowsWhenOptionHasNoValue() {
+        public void ExtractOptions_ThrowsWhenOptionHasNoValue()
+        {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
             var MockCommandOptions = new Dictionary<OptionAttribute, PropertyInfo>();
@@ -168,7 +180,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ExtractOptions_ParsesBoolOptionsAsTrueIfPresent() {
+        public void ExtractOptions_ParsesBoolOptionsAsTrueIfPresent()
+        {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
             var MockCommandOptions = new Dictionary<OptionAttribute, PropertyInfo>();
@@ -186,7 +199,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ExtractOptions_ParsesBoolOptionsAsFalseIfFollowedByDash() {
+        public void ExtractOptions_ParsesBoolOptionsAsFalseIfFollowedByDash()
+        {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
             var MockCommandOptions = new Dictionary<OptionAttribute, PropertyInfo>();
@@ -204,7 +218,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ExtractOptions_ThrowsIfUnableToConvertType() {
+        public void ExtractOptions_ThrowsIfUnableToConvertType()
+        {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
 
@@ -223,7 +238,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ExtractOptions_ThrowsIfCommandHasNoProperties() {
+        public void ExtractOptions_ThrowsIfCommandHasNoProperties()
+        {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
 
@@ -239,7 +255,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ExtractOptions_ThrowsIfCommandOptionIsAmbigious() {
+        public void ExtractOptions_ThrowsIfCommandOptionIsAmbigious()
+        {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
 
@@ -263,7 +280,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ExtractOptions_ThrowsIfCommandOptionDoesNotExist() {
+        public void ExtractOptions_ThrowsIfCommandOptionDoesNotExist()
+        {
             // Arrange
             var cmdMgr = new Mock<ICommandManager>();
 
@@ -287,7 +305,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ExtractOptionAddsValuesToListCommand() {
+        public void ExtractOptionAddsValuesToListCommand()
+        {
             // Arrange
             var cmdMgr = new CommandManager();
             var command = new MockCommandWithMultiple();
@@ -306,7 +325,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ExtractOptionsSplitsValueBySemiColorForCollectionOption() {
+        public void ExtractOptionsSplitsValueBySemiColorForCollectionOption()
+        {
             // Arrange
             var cmdMgr = new CommandManager();
             var command = new MockCommandWithMultiple();
@@ -327,11 +347,14 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
 
-        private class MockCommand : ICommand {
+        private class MockCommand : ICommand
+        {
             private readonly List<string> _arguments = new List<string>();
 
-            public IList<string> Arguments {
-                get {
+            public IList<string> Arguments
+            {
+                get
+                {
                     return _arguments;
                 }
             }
@@ -344,32 +367,38 @@ namespace NuGet.Test.NuGetCommandLine {
 
             public int Counter { get; set; }
 
-            public void Execute() {
+            public void Execute()
+            {
                 throw new NotImplementedException();
             }
 
-            public CommandAttribute CommandAttribute {
+            public CommandAttribute CommandAttribute
+            {
                 get { return new CommandAttribute("Mock", "Mock Command Desc"); }
             }
 
-            public IEnumerable<CommandAttribute> GetCommandAttribute() {
+            public IEnumerable<CommandAttribute> GetCommandAttribute()
+            {
                 return new[] { CommandAttribute };
             }
         }
 
 
-        private class MockCommandWithMultiple : Command {
+        private class MockCommandWithMultiple : Command
+        {
             private readonly List<string> _listProperty = new List<string>();
 
             [Option("Regular Option")]
             public string RegularProp { get; set; }
 
             [Option("List property")]
-            public List<string> ListProperty {
+            public List<string> ListProperty
+            {
                 get { return _listProperty; }
             }
 
-            public override void ExecuteCommand() {
+            public override void ExecuteCommand()
+            {
                 throw new NotImplementedException();
             }
         }

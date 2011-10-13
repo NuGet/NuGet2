@@ -1,11 +1,13 @@
 ﻿using Microsoft.VisualStudio.Shell;
 
-namespace NuGet.Tools {
+namespace NuGet.Tools
+{
 
     /// <summary>
     /// This class is used to create a registry key for the FontAndColors category
     /// </summary>
-    public class FontAndColorsRegistrationAttribute : RegistrationAttribute {
+    public class FontAndColorsRegistrationAttribute : RegistrationAttribute
+    {
 
         // this GUID is used by all VSPackages that use the default font and color configurations.
         // http://msdn.microsoft.com/en-us/library/bb165737.aspx
@@ -18,15 +20,18 @@ namespace NuGet.Tools {
         public string ToolWindowPackageGuid { get; private set; }
         public string CategoryKey { get; private set; }
 
-        public FontAndColorsRegistrationAttribute(string categoryKeyName, string categoryGuid, string toolWindowPackageGuid) {
+        public FontAndColorsRegistrationAttribute(string categoryKeyName, string categoryGuid, string toolWindowPackageGuid)
+        {
             CategoryGuid = categoryGuid;
             ToolWindowPackageGuid = toolWindowPackageGuid;
             CategoryKey = "FontAndColors\\" + categoryKeyName;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")]
-        public override void Register(RegistrationContext context) {
-            using (var key = context.CreateKey(CategoryKey)) {
+        public override void Register(RegistrationContext context)
+        {
+            using (var key = context.CreateKey(CategoryKey))
+            {
                 key.SetValue("Category", CategoryGuid);
                 key.SetValue("Package", PackageGuid);
                 key.SetValue("NameID", CategoryNameResourceID);
@@ -37,7 +42,8 @@ namespace NuGet.Tools {
             }
         }
 
-        public override void Unregister(RegistrationContext context) {
+        public override void Unregister(RegistrationContext context)
+        {
             context.RemoveKey(CategoryKey);
         }
     }

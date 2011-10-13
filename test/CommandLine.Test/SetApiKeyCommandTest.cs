@@ -3,25 +3,30 @@ using NuGet.Commands;
 using NuGet.Common;
 using Xunit;
 
-namespace NuGet.Test {
-    public class SetApiKeyCommandTest {
+namespace NuGet.Test
+{
+    public class SetApiKeyCommandTest
+    {
         [Fact]
-        public void SetApiKeyThrowsIfPackageSourceProviderIsNull() {
+        public void SetApiKeyThrowsIfPackageSourceProviderIsNull()
+        {
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(() => new SetApiKeyCommand(packageSourceProvider: null, settings: null), "packageSourceProvider");
         }
 
         [Fact]
-        public void SetApiKeyThrowsIfSettingsFileIsNull() {
+        public void SetApiKeyThrowsIfSettingsFileIsNull()
+        {
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
-            
+
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(() => new SetApiKeyCommand(packageSourceProvider.Object, settings: null), "settings");
         }
 
         [Fact]
-        public void SetApiKeyCommandUsesSettingsFile() {
+        public void SetApiKeyCommandUsesSettingsFile()
+        {
             // Arrange
             var apiKey = "A";
             var settingsFile = new Mock<ISettings>(MockBehavior.Strict);
@@ -30,10 +35,11 @@ namespace NuGet.Test {
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
 
             // Act
-            var setApiKey = new SetApiKeyCommand(packageSourceProvider.Object, settingsFile.Object) {
+            var setApiKey = new SetApiKeyCommand(packageSourceProvider.Object, settingsFile.Object)
+            {
                 Console = new Mock<IConsole>().Object
             };
-            
+
             setApiKey.Arguments.Add(apiKey);
             setApiKey.ExecuteCommand();
 

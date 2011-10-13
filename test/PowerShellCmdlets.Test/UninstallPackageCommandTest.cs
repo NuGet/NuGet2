@@ -7,11 +7,14 @@ using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 using Xunit;
 
-namespace NuGet.PowerShell.Commands.Test {
-    
-    public class UninstallPackageCommandTest {
+namespace NuGet.PowerShell.Commands.Test
+{
+
+    public class UninstallPackageCommandTest
+    {
         [Fact]
-        public void UninstallPackageCmdletThrowsWhenSolutionIsClosed() {
+        public void UninstallPackageCmdletThrowsWhenSolutionIsClosed()
+        {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
@@ -23,7 +26,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void UninstallPackageCmdletPassesParametersCorrectlyWhenIdAndVersionAreSpecified() {
+        public void UninstallPackageCmdletPassesParametersCorrectlyWhenIdAndVersionAreSpecified()
+        {
             // Arrange
             var id = "my-id";
             var version = new SemanticVersion("2.8");
@@ -43,7 +47,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void UninstallPackageCmdletPassesForceSwitchCorrectly() {
+        public void UninstallPackageCmdletPassesForceSwitchCorrectly()
+        {
             // Arrange
             var id = "my-id";
             var version = new SemanticVersion("2.8");
@@ -66,7 +71,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void UninstallPackageCmdletPassesRemoveDependencyCorrectly() {
+        public void UninstallPackageCmdletPassesRemoveDependencyCorrectly()
+        {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -85,9 +91,11 @@ namespace NuGet.PowerShell.Commands.Test {
             Assert.True(vsPackageManager.RemoveDependencies);
         }
 
-        private class MockVsPackageManager : VsPackageManager {
+        private class MockVsPackageManager : VsPackageManager
+        {
             public MockVsPackageManager()
-                : base(new Mock<ISolutionManager>().Object, new Mock<IPackageRepository>().Object, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object) {
+                : base(new Mock<ISolutionManager>().Object, new Mock<IPackageRepository>().Object, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object)
+            {
             }
 
             public IProjectManager ProjectManager { get; set; }
@@ -100,7 +108,8 @@ namespace NuGet.PowerShell.Commands.Test {
 
             public bool RemoveDependencies { get; set; }
 
-            public override void UninstallPackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool forceRemove, bool removeDependencies, ILogger logger) {
+            public override void UninstallPackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool forceRemove, bool removeDependencies, ILogger logger)
+            {
                 ProjectManager = projectManager;
                 PackageId = packageId;
                 Version = version;
@@ -108,7 +117,8 @@ namespace NuGet.PowerShell.Commands.Test {
                 RemoveDependencies = removeDependencies;
             }
 
-            public override IProjectManager GetProjectManager(Project project) {
+            public override IProjectManager GetProjectManager(Project project)
+            {
                 return new Mock<IProjectManager>().Object;
             }
         }

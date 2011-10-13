@@ -1,6 +1,8 @@
 ﻿
-namespace NuGet.Common {
-    public interface IMSBuildProjectSystem : IProjectSystem {
+namespace NuGet.Common
+{
+    public interface IMSBuildProjectSystem : IProjectSystem
+    {
         void Save();
     }
 }

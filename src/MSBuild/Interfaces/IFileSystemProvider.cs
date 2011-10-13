@@ -1,6 +1,8 @@
 ﻿
-namespace NuGet.MSBuild {
-    public interface IFileSystemProvider {
+namespace NuGet.MSBuild
+{
+    public interface IFileSystemProvider
+    {
         IFileSystem CreateFileSystem(string root);
     }
 }

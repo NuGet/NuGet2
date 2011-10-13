@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 
-namespace NuGetConsole {
+namespace NuGetConsole
+{
     /// <summary>
     /// Interface for command line tokenizer (syntax highlighting).
     /// </summary>
-    public interface ICommandTokenizer {
+    public interface ICommandTokenizer
+    {
         /// <summary>
         /// Tokenize a sequence of command lines.
         /// </summary>

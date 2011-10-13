@@ -3,10 +3,14 @@ using System.Net;
 using System.Security;
 using Console = System.Console;
 
-namespace NuGet {
-    public class ConsoleCredentialProvider : ICredentialProvider {
-        public ICredentials GetCredentials(Uri uri, IWebProxy proxy, CredentialType credentialType) {
-            if (uri == null) {
+namespace NuGet
+{
+    public class ConsoleCredentialProvider : ICredentialProvider
+    {
+        public ICredentials GetCredentials(Uri uri, IWebProxy proxy, CredentialType credentialType)
+        {
+            if (uri == null)
+            {
                 throw new ArgumentNullException("uri");
             }
 
@@ -16,7 +20,8 @@ namespace NuGet {
             string username = Console.ReadLine();
             Console.Write(NuGetResources.Credentials_Password);
             SecureString password = ReadLineAsSecureString();
-            var credentials = new NetworkCredential {
+            var credentials = new NetworkCredential
+            {
                 UserName = username,
                 SecurePassword = password
             };
@@ -28,13 +33,18 @@ namespace NuGet {
             "Microsoft.Reliability",
             "CA2000:Dispose objects before losing scope",
             Justification = "Caller's responsibility to dispose.")]
-        public static SecureString ReadLineAsSecureString() {
-            try {
+        public static SecureString ReadLineAsSecureString()
+        {
+            try
+            {
                 var secureString = new SecureString();
                 ConsoleKeyInfo keyInfo;
-                while ((keyInfo = Console.ReadKey(true)).Key != ConsoleKey.Enter) {
-                    if (keyInfo.Key == ConsoleKey.Backspace) {
-                        if (secureString.Length < 1) {
+                while ((keyInfo = Console.ReadKey(true)).Key != ConsoleKey.Enter)
+                {
+                    if (keyInfo.Key == ConsoleKey.Backspace)
+                    {
+                        if (secureString.Length < 1)
+                        {
                             continue;
                         }
                         Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
@@ -42,7 +52,8 @@ namespace NuGet {
                         Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
                         secureString.RemoveAt(secureString.Length - 1);
                     }
-                    else {
+                    else
+                    {
                         secureString.AppendChar(keyInfo.KeyChar);
                         Console.Write('*');
                     }
@@ -50,7 +61,8 @@ namespace NuGet {
                 secureString.MakeReadOnly();
                 return secureString;
             }
-            finally {
+            finally
+            {
                 Console.WriteLine(String.Empty);
             }
         }

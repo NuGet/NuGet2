@@ -2,11 +2,13 @@
 using System.ComponentModel.Composition;
 using NuGet.Common;
 
-namespace NuGet.Commands {
+namespace NuGet.Commands
+{
     [Command(typeof(NuGetResources), "publish", "PublishCommandDescription",
         MinArgs = 2, MaxArgs = 3, UsageDescriptionResourceName = "PublishCommandUsageDescription",
         UsageSummaryResourceName = "PublishCommandUsageSummary", UsageExampleResourceName = "PublishCommandUsageExamples")]
-    public class PublishCommand : Command {
+    public class PublishCommand : Command
+    {
         [Option(typeof(NuGetResources), "PublishCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
@@ -15,19 +17,22 @@ namespace NuGet.Commands {
         public ISettings Settings { get; private set; }
 
         [ImportingConstructor]
-        public PublishCommand(IPackageSourceProvider packageSourceProvider, ISettings settings) {
+        public PublishCommand(IPackageSourceProvider packageSourceProvider, ISettings settings)
+        {
             SourceProvider = packageSourceProvider;
             Settings = settings;
         }
 
-        public override void ExecuteCommand() {
+        public override void ExecuteCommand()
+        {
             //Frist argument should be the package ID
             string packageId = Arguments[0];
             //Second argument should be the package Version
             string packageVersion = Arguments[1];
             //Third argument if present should be the API Key
             string userSetApiKey = null;
-            if (Arguments.Count > 2) {
+            if (Arguments.Count > 2)
+            {
                 userSetApiKey = Arguments[2];
             }
 

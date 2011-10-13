@@ -1,11 +1,14 @@
-﻿using Xunit;
-using NuGet.Test.Mocks;
+﻿using NuGet.Test.Mocks;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class DefaultPackagePathResolverTest {
+namespace NuGet.Test
+{
+
+    public class DefaultPackagePathResolverTest
+    {
         [Fact]
-        public void GetInstallPathPrependsFileSystemRootToPackageDirectory() {
+        public void GetInstallPathPrependsFileSystemRootToPackageDirectory()
+        {
             // Arrange
             MockFileSystem fs = new MockFileSystem();
             DefaultPackagePathResolver resolver = new DefaultPackagePathResolver(fs);
@@ -19,7 +22,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPackageDirectoryWithSideBySideOnAppendsVersionToEndOfPackageDirectory() {
+        public void GetPackageDirectoryWithSideBySideOnAppendsVersionToEndOfPackageDirectory()
+        {
             // Arrange
             MockFileSystem fs = new MockFileSystem();
             DefaultPackagePathResolver resolver = new DefaultPackagePathResolver(fs);
@@ -33,7 +37,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPackageDirectoryWithSideBySideOffDoesNotAppendVersionToEndOfPackageDirectory() {
+        public void GetPackageDirectoryWithSideBySideOffDoesNotAppendVersionToEndOfPackageDirectory()
+        {
             // Arrange
             MockFileSystem fs = new MockFileSystem();
             DefaultPackagePathResolver resolver = new DefaultPackagePathResolver(fs, useSideBySidePaths: false);
@@ -47,7 +52,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPackageFileNameWithSideBySideOnAppendsVersionToEndOfPackageDirectory() {
+        public void GetPackageFileNameWithSideBySideOnAppendsVersionToEndOfPackageDirectory()
+        {
             // Arrange
             MockFileSystem fs = new MockFileSystem();
             DefaultPackagePathResolver resolver = new DefaultPackagePathResolver(fs);
@@ -61,7 +67,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPackageFileNameWithSideBySideOffDoesNotAppendVersionToEndOfPackageDirectory() {
+        public void GetPackageFileNameWithSideBySideOffDoesNotAppendVersionToEndOfPackageDirectory()
+        {
             // Arrange
             MockFileSystem fs = new MockFileSystem();
             DefaultPackagePathResolver resolver = new DefaultPackagePathResolver(fs, useSideBySidePaths: false);

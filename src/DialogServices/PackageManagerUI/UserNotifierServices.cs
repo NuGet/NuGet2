@@ -6,28 +6,36 @@ using System.Windows.Threading;
 using EnvDTE;
 using NuGet.VisualStudio;
 
-namespace NuGet.Dialog.PackageManagerUI {
+namespace NuGet.Dialog.PackageManagerUI
+{
     [Export(typeof(IUserNotifierServices))]
-    internal class UserNotifierServices : IUserNotifierServices {
+    internal class UserNotifierServices : IUserNotifierServices
+    {
         private readonly Dispatcher _uiDispatcher;
 
-        public UserNotifierServices() {
+        public UserNotifierServices()
+        {
             _uiDispatcher = Dispatcher.CurrentDispatcher;
         }
 
-        bool IUserNotifierServices.ShowLicenseWindow(IEnumerable<IPackage> packages) {
-            if (_uiDispatcher.CheckAccess()) {
+        bool IUserNotifierServices.ShowLicenseWindow(IEnumerable<IPackage> packages)
+        {
+            if (_uiDispatcher.CheckAccess())
+            {
                 return ShowLicenseWindow(packages);
             }
-            else {
+            else
+            {
                 // Use Invoke() here to block the worker thread
                 object result = _uiDispatcher.Invoke(new Func<object, bool>(ShowLicenseWindow), packages);
                 return (bool)result;
             }
         }
 
-        private bool ShowLicenseWindow(object dataContext) {
-            var licenseWidow = new LicenseAcceptanceWindow() {
+        private bool ShowLicenseWindow(object dataContext)
+        {
+            var licenseWidow = new LicenseAcceptanceWindow()
+            {
                 DataContext = dataContext
             };
 
@@ -40,9 +48,11 @@ namespace NuGet.Dialog.PackageManagerUI {
         public IEnumerable<Project> ShowProjectSelectorWindow(
             string instructionText,
             IPackage package,
-            Predicate<Project> checkedStateSelector, 
-            Predicate<Project> enabledStateSelector) {
-            if (!_uiDispatcher.CheckAccess()) {
+            Predicate<Project> checkedStateSelector,
+            Predicate<Project> enabledStateSelector)
+        {
+            if (!_uiDispatcher.CheckAccess())
+            {
                 // Use Invoke() here to block the worker thread
                 object result = _uiDispatcher.Invoke(
                     new Func<string, IPackage, Predicate<Project>, Predicate<Project>, IEnumerable<Project>>(ShowProjectSelectorWindow),
@@ -61,25 +71,30 @@ namespace NuGet.Dialog.PackageManagerUI {
                 enabledStateSelector);
 
             // only show the solution explorer window if there is at least one compatible project
-            if (viewModel.HasProjects) {
-                var window = new SolutionExplorer() {
+            if (viewModel.HasProjects)
+            {
+                var window = new SolutionExplorer()
+                {
                     DataContext = viewModel
                 };
                 window.InstructionText.Text = instructionText;
 
                 bool? dialogResult = window.ShowModal();
-                if (dialogResult ?? false) {
+                if (dialogResult ?? false)
+                {
                     return viewModel.GetSelectedProjects();
                 }
-                else {
+                else
+                {
                     return null;
                 }
             }
-            else {
+            else
+            {
                 // if there is no project compatible with the selected package, show an error message and return
                 MessageHelper.ShowWarningMessage(
                     String.Format(
-                        CultureInfo.CurrentCulture, 
+                        CultureInfo.CurrentCulture,
                         Resources.Dialog_NoCompatibleProject,
                         package.Id,
                         Environment.NewLine + String.Join(Environment.NewLine, package.GetSupportedFrameworks())),
@@ -88,21 +103,26 @@ namespace NuGet.Dialog.PackageManagerUI {
             }
         }
 
-        public void ShowSummaryWindow(object failedProjects) {
-            if (!_uiDispatcher.CheckAccess()) {
+        public void ShowSummaryWindow(object failedProjects)
+        {
+            if (!_uiDispatcher.CheckAccess())
+            {
                 _uiDispatcher.Invoke(new Action<object>(ShowSummaryWindow), failedProjects);
                 return;
             }
 
-            var window = new SummaryWindow() {
+            var window = new SummaryWindow()
+            {
                 DataContext = failedProjects
             };
 
             window.ShowModal();
         }
 
-        public bool? ShowRemoveDependenciesWindow(string message) {
-            if (!_uiDispatcher.CheckAccess()) {
+        public bool? ShowRemoveDependenciesWindow(string message)
+        {
+            if (!_uiDispatcher.CheckAccess())
+            {
                 object result = _uiDispatcher.Invoke(
                     new Func<string, bool?>(ShowRemoveDependenciesWindow),
                     message);

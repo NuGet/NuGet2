@@ -6,8 +6,10 @@ using EnvDTE;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
 
-namespace NuGet.Dialog.Providers {
-    internal class SolutionUpdatesProvider : UpdatesProvider, IPackageOperationEventListener {
+namespace NuGet.Dialog.Providers
+{
+    internal class SolutionUpdatesProvider : UpdatesProvider, IPackageOperationEventListener
+    {
 
         private IVsPackageManager _activePackageManager;
         private readonly IUserNotifierServices _userNotifierServices;
@@ -30,16 +32,19 @@ namespace NuGet.Dialog.Providers {
                 packageManagerFactory,
                 providerServices,
                 progressProvider,
-                solutionManager) {
+                solutionManager)
+        {
             _userNotifierServices = providerServices.WindowServices;
         }
 
-        protected override bool ExecuteCore(PackageItem item) {
+        protected override bool ExecuteCore(PackageItem item)
+        {
             _activePackageManager = GetActivePackageManager();
 
             ShowProgressWindow();
             IList<Project> selectedProjectsList;
-            if (_activePackageManager.IsProjectLevel(item.PackageIdentity)) {
+            if (_activePackageManager.IsProjectLevel(item.PackageIdentity))
+            {
                 HideProgressWindow();
                 var selectedProjects = _userNotifierServices.ShowProjectSelectorWindow(
                     Resources.Dialog_UpdatesSolutionInstruction,
@@ -47,7 +52,8 @@ namespace NuGet.Dialog.Providers {
                     // Selector function to return the initial checkbox state for a Project.
                     // We check a project if it has the current package installed by Id, but not version
                     project => _activePackageManager.GetProjectManager(project).LocalRepository.Exists(item.Id),
-                    project => {
+                    project =>
+                    {
                         var localRepository = _activePackageManager.GetProjectManager(project).LocalRepository;
 
                         // for the Updates solution dialog, we only enable a project if it has a old version of 
@@ -57,30 +63,36 @@ namespace NuGet.Dialog.Providers {
                     }
                 );
 
-                if (selectedProjects == null) {
+                if (selectedProjects == null)
+                {
                     // user presses Cancel button on the Solution dialog
                     return false;
                 }
 
                 selectedProjectsList = selectedProjects.ToList();
-                if (selectedProjectsList.Count == 0) {
+                if (selectedProjectsList.Count == 0)
+                {
                     return false;
                 }
             }
-            else {
+            else
+            {
                 // solution package. just update into the solution
                 selectedProjectsList = new Project[0];
             }
 
             IList<PackageOperation> operations;
             bool acceptLicense = CheckPSScriptAndShowLicenseAgreement(item, _activePackageManager, out operations);
-            if (!acceptLicense) {
+            if (!acceptLicense)
+            {
                 return false;
             }
 
-            try {
+            try
+            {
                 // solution level package, need to hook up to PackageInstalled event on the VsPackageManager
-                if (selectedProjectsList.Count == 0) {
+                if (selectedProjectsList.Count == 0)
+                {
                     RegisterPackageOperationEvents(_activePackageManager, null);
                 }
 
@@ -93,9 +105,11 @@ namespace NuGet.Dialog.Providers {
                     logger: this,
                     eventListener: this);
             }
-            finally {
+            finally
+            {
                 // solution level package, need to unhook from the PackageInstalled event on the VsPackageManager
-                if (selectedProjectsList.Count == 0) {
+                if (selectedProjectsList.Count == 0)
+                {
                     UnregisterPackageOperationEvents(_activePackageManager, null);
                 }
             }
@@ -103,19 +117,22 @@ namespace NuGet.Dialog.Providers {
             return true;
         }
 
-        public void OnBeforeAddPackageReference(Project project) {
+        public void OnBeforeAddPackageReference(Project project)
+        {
             RegisterPackageOperationEvents(
                 _activePackageManager,
                 _activePackageManager.GetProjectManager(project));
         }
 
-        public void OnAfterAddPackageReference(Project project) {
+        public void OnAfterAddPackageReference(Project project)
+        {
             UnregisterPackageOperationEvents(
                 _activePackageManager,
                 _activePackageManager.GetProjectManager(project));
         }
 
-        public void OnAddPackageReferenceError(Project project, Exception exception) {
+        public void OnAddPackageReferenceError(Project project, Exception exception)
+        {
             AddFailedProject(project, exception);
         }
     }

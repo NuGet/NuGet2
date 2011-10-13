@@ -2,12 +2,16 @@
 using System.Globalization;
 using System.Net;
 
-namespace NuGet {
-    public static class HttpUtility {
+namespace NuGet
+{
+    public static class HttpUtility
+    {
         private const string UserAgentTemplate = "{0}/{1} ({2})";
 
-        public static string CreateUserAgentString(string client) {
-            if (client == null) {
+        public static string CreateUserAgentString(string client)
+        {
+            if (client == null)
+            {
                 throw new ArgumentNullException("client");
             }
 
@@ -15,20 +19,25 @@ namespace NuGet {
             return String.Format(CultureInfo.InvariantCulture, UserAgentTemplate, client, version, Environment.OSVersion);
         }
 
-        public static void SetUserAgent(WebRequest request, string userAgent) {
-            if (request == null) {
+        public static void SetUserAgent(WebRequest request, string userAgent)
+        {
+            if (request == null)
+            {
                 throw new ArgumentNullException("request");
             }
 
-            if (userAgent == null) {
+            if (userAgent == null)
+            {
                 throw new ArgumentNullException("userAgent");
             }
 
             var httpRequest = request as HttpWebRequest;
-            if (httpRequest != null) {
+            if (httpRequest != null)
+            {
                 httpRequest.UserAgent = userAgent;
             }
-            else {
+            else
+            {
                 httpRequest.Headers[HttpRequestHeader.UserAgent] = userAgent;
             }
         }

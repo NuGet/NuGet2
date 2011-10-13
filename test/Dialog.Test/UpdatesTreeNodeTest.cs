@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
 using Moq;
@@ -8,11 +7,14 @@ using NuGet.Test;
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.Dialog.Test {
+namespace NuGet.Dialog.Test
+{
 
-    public class UpdatesTreeNodeTest {
+    public class UpdatesTreeNodeTest
+    {
         [Fact]
-        public void PropertyNameIsCorrect() {
+        public void PropertyNameIsCorrect()
+        {
 
             // Arrange
             MockPackageRepository localRepository = new MockPackageRepository();
@@ -26,7 +28,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void GetPackagesReturnsCorrectPackages1() {
+        public void GetPackagesReturnsCorrectPackages1()
+        {
 
             // Arrange
             MockPackageRepository localRepository = new MockPackageRepository();
@@ -47,7 +50,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void GetPackagesReturnsCorrectPackages2() {
+        public void GetPackagesReturnsCorrectPackages2()
+        {
 
             // Arrange
             MockPackageRepository localRepository = new MockPackageRepository();
@@ -67,7 +71,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void GetPackagesReturnsCorrectPackages3() {
+        public void GetPackagesReturnsCorrectPackages3()
+        {
 
             // Arrange
             MockPackageRepository localRepository = new MockPackageRepository();
@@ -89,7 +94,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void GetPackagesReturnsCorrectPackages4() {
+        public void GetPackagesReturnsCorrectPackages4()
+        {
 
             // Arrange
             MockPackageRepository localRepository = new MockPackageRepository();
@@ -114,7 +120,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void GetPackagesOnlyReturnPackagesCompatibleWithTheProjects() {
+        public void GetPackagesOnlyReturnPackagesCompatibleWithTheProjects()
+        {
             // Arrange
             MockPackageRepository localRepository = new MockPackageRepository();
             localRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
@@ -122,14 +129,14 @@ namespace NuGet.Dialog.Test {
 
             MockPackageRepository sourceRepository = new MockPackageRepository();
             sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.5"));
-            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.9", assemblyReferences: new string[] { "lib\\sl4\\a.dll" } ));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.9", assemblyReferences: new string[] { "lib\\sl4\\a.dll" }));
             sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "2.0", assemblyReferences: new string[] { "lib\\net20\\b.dll" }));
 
             PackagesProviderBase provider = new MockPackagesProvider(new string[] { ".NETFramework,Version=3.0" });
 
             IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
-            var node = new UpdatesTreeNode(provider, "Mock", parentTreeNode, localRepository, sourceRepository);            
-            
+            var node = new UpdatesTreeNode(provider, "Mock", parentTreeNode, localRepository, sourceRepository);
+
             // Act
             var packages = node.GetPackages().ToList();
 
@@ -138,15 +145,18 @@ namespace NuGet.Dialog.Test {
             AssertPackage(packages[0], "B", "2.0");
         }
 
-        private static void AssertPackage(IPackage package, string id, string version = null) {
+        private static void AssertPackage(IPackage package, string id, string version = null)
+        {
             Assert.NotNull(package);
             Assert.Equal(id, package.Id);
-            if (version != null) {
+            if (version != null)
+            {
                 Assert.Equal(new SemanticVersion(version), package.Version);
             }
         }
 
-        private static UpdatesTreeNode CreateUpdatesTreeNode(IPackageRepository localRepository, IPackageRepository sourceRepository, string category = "Mock node") {
+        private static UpdatesTreeNode CreateUpdatesTreeNode(IPackageRepository localRepository, IPackageRepository sourceRepository, string category = "Mock node")
+        {
             PackagesProviderBase provider = new MockPackagesProvider();
             IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
             return new UpdatesTreeNode(provider, category, parentTreeNode, localRepository, sourceRepository);

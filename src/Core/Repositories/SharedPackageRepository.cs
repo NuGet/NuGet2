@@ -7,47 +7,58 @@ using System.Xml;
 using System.Xml.Linq;
 using NuGet.Resources;
 
-namespace NuGet {
-    public class SharedPackageRepository : LocalPackageRepository, ISharedPackageRepository {
+namespace NuGet
+{
+    public class SharedPackageRepository : LocalPackageRepository, ISharedPackageRepository
+    {
         private const string StoreFilePath = "repositories.config";
 
         public SharedPackageRepository(string path)
-            : base(path) {
+            : base(path)
+        {
         }
 
         public SharedPackageRepository(IPackagePathResolver resolver, IFileSystem fileSystem)
-            : base(resolver, fileSystem) {
+            : base(resolver, fileSystem)
+        {
         }
 
-        public override bool SupportsPrereleasePackages {
+        public override bool SupportsPrereleasePackages
+        {
             get { return true; }
         }
 
-        public void RegisterRepository(string path) {
+        public void RegisterRepository(string path)
+        {
             AddEntry(path);
         }
 
-        public void UnregisterRepository(string path) {
+        public void UnregisterRepository(string path)
+        {
             DeleteEntry(path);
         }
 
-        public bool IsReferenced(string packageId, SemanticVersion version) {
+        public bool IsReferenced(string packageId, SemanticVersion version)
+        {
             // See if this package exists in any other repository before we remove it
             return GetRepositories().Any(r => r.Exists(packageId, version));
         }
 
-        protected virtual IPackageRepository CreateRepository(string path) {
+        protected virtual IPackageRepository CreateRepository(string path)
+        {
             string root = PathUtility.EnsureTrailingSlash(FileSystem.Root);
             string absolutePath = PathUtility.GetAbsolutePath(root, path);
             string directory = Path.GetDirectoryName(absolutePath);
             return new PackageReferenceRepository(new PhysicalFileSystem(directory), this);
         }
 
-        private IEnumerable<IPackageRepository> GetRepositories() {
+        private IEnumerable<IPackageRepository> GetRepositories()
+        {
             return GetRepositoryPaths().Select(CreateRepository);
         }
 
-        internal IEnumerable<string> GetRepositoryPaths() {
+        internal IEnumerable<string> GetRepositoryPaths()
+        {
             // The store file is in this format
             // <repositories>
             //     <repository path="..\packages.config" />
@@ -55,7 +66,8 @@ namespace NuGet {
             XDocument document = GetStoreDocument();
 
             // The document doesn't exist so do nothing
-            if (document == null) {
+            if (document == null)
+            {
                 return Enumerable.Empty<string>();
             }
 
@@ -64,12 +76,14 @@ namespace NuGet {
 
             // Paths have to be relative to the this repository           
             var paths = new HashSet<string>();
-            foreach (var e in GetRepositoryElements(document).ToList()) {
+            foreach (var e in GetRepositoryElements(document).ToList())
+            {
                 string path = NormalizePath(e.GetOptionalAttributeValue("path"));
 
                 if (String.IsNullOrEmpty(path) ||
                     !FileSystem.FileExists(path) ||
-                    !paths.Add(path)) {
+                    !paths.Add(path))
+                {
 
                     // Skip bad entries
                     e.Remove();
@@ -77,14 +91,16 @@ namespace NuGet {
                 }
             }
 
-            if (requiresSave) {
+            if (requiresSave)
+            {
                 SaveDocument(document);
             }
 
             return paths;
         }
 
-        private void AddEntry(string path) {
+        private void AddEntry(string path)
+        {
             path = NormalizePath(path);
 
             // Create the document if it doesn't exist
@@ -92,7 +108,8 @@ namespace NuGet {
 
             XElement element = FindEntry(document, path);
 
-            if (element != null) {
+            if (element != null)
+            {
                 // The path exists already so do nothing
                 return;
             }
@@ -103,38 +120,45 @@ namespace NuGet {
             SaveDocument(document);
         }
 
-        private void DeleteEntry(string path) {
+        private void DeleteEntry(string path)
+        {
             // Get the relative path
             path = NormalizePath(path);
 
             // Remove the repository from the document
             XDocument document = GetStoreDocument();
 
-            if (document == null) {
+            if (document == null)
+            {
                 return;
             }
 
             XElement element = FindEntry(document, path);
 
-            if (element != null) {
+            if (element != null)
+            {
                 element.Remove();
 
                 // No more entries so remove the file
-                if (!document.Root.HasElements) {
+                if (!document.Root.HasElements)
+                {
                     FileSystem.DeleteFile(StoreFilePath);
                 }
-                else {
+                else
+                {
                     SaveDocument(document);
                 }
             }
         }
 
-        private static IEnumerable<XElement> GetRepositoryElements(XDocument document) {
+        private static IEnumerable<XElement> GetRepositoryElements(XDocument document)
+        {
             return from e in document.Root.Elements("repository")
                    select e;
         }
 
-        private XElement FindEntry(XDocument document, string path) {
+        private XElement FindEntry(XDocument document, string path)
+        {
             path = NormalizePath(path);
 
             return (from e in GetRepositoryElements(document)
@@ -143,7 +167,8 @@ namespace NuGet {
                     select e).FirstOrDefault();
         }
 
-        private void SaveDocument(XDocument document) {
+        private void SaveDocument(XDocument document)
+        {
             // Sort the elements by path
             var repositoryElements = (from e in GetRepositoryElements(document)
                                       let path = e.GetOptionalAttributeValue("path")
@@ -160,15 +185,21 @@ namespace NuGet {
             FileSystem.AddFile(StoreFilePath, document.Save);
         }
 
-        private XDocument GetStoreDocument(bool createIfNotExists = false) {
-            try {
+        private XDocument GetStoreDocument(bool createIfNotExists = false)
+        {
+            try
+            {
                 // If the file exists then open and return it
-                if (FileSystem.FileExists(StoreFilePath)) {
-                    using (Stream stream = FileSystem.OpenFile(StoreFilePath)) {
-                        try {
+                if (FileSystem.FileExists(StoreFilePath))
+                {
+                    using (Stream stream = FileSystem.OpenFile(StoreFilePath))
+                    {
+                        try
+                        {
                             return XDocument.Load(stream);
                         }
-                        catch (XmlException) {
+                        catch (XmlException)
+                        {
                             // There was an error reading the file, but don't throw as a result
                         }
                     }
@@ -176,13 +207,15 @@ namespace NuGet {
 
                 // If it doesn't exist and we're creating a new file then return a
                 // document with an empty packages node
-                if (createIfNotExists) {
+                if (createIfNotExists)
+                {
                     return new XDocument(new XElement("repositories"));
                 }
 
                 return null;
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
                                   NuGetResources.ErrorReadingFile,
@@ -190,12 +223,15 @@ namespace NuGet {
             }
         }
 
-        private string NormalizePath(string path) {
-            if (String.IsNullOrEmpty(path)) {
+        private string NormalizePath(string path)
+        {
+            if (String.IsNullOrEmpty(path))
+            {
                 return path;
             }
 
-            if (Path.IsPathRooted(path)) {
+            if (Path.IsPathRooted(path))
+            {
                 string root = PathUtility.EnsureTrailingSlash(FileSystem.Root);
                 return PathUtility.GetRelativePath(root, path);
             }

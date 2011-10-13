@@ -1,7 +1,9 @@
 ﻿using System;
 
-namespace NuGet.VisualStudio {
-    public interface IProductUpdateService {
+namespace NuGet.VisualStudio
+{
+    public interface IProductUpdateService
+    {
         void CheckForAvailableUpdateAsync();
         void Update();
         void DeclineUpdate(bool doNotRemindAgain);

@@ -2,19 +2,24 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
-namespace NuGet {
-    public interface IHttpClient : IHttpClientEvents {
-        string UserAgent {
+namespace NuGet
+{
+    public interface IHttpClient : IHttpClientEvents
+    {
+        string UserAgent
+        {
             get;
             set;
         }
 
-        Uri Uri {
+        Uri Uri
+        {
             get;
             set;
         }
 
-        bool AcceptCompression {
+        bool AcceptCompression
+        {
             get;
             set;
         }

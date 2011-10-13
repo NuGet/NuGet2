@@ -4,10 +4,13 @@ using System.Windows.Forms;
 using Microsoft.VisualStudio.Shell;
 using NuGet.VisualStudio;
 
-namespace NuGet.Options {
+namespace NuGet.Options
+{
     [ComVisible(true)]
-    public abstract class OptionsPageBase : DialogPage, IServiceProvider {
-        protected OptionsPageBase() {
+    public abstract class OptionsPageBase : DialogPage, IServiceProvider
+    {
+        protected OptionsPageBase()
+        {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -18,24 +21,28 @@ namespace NuGet.Options {
             "Microsoft.Reliability",
             "CA2000:Dispose objects before losing scope",
             Justification = "The timer is disposed in the Tick event handler.")]
-        protected override void OnClosed(EventArgs e) {
+        protected override void OnClosed(EventArgs e)
+        {
             base.OnClosed(e);
 
             // delay 5 milliseconds to give the Options dialog a chance to close itself
-            var timer = new Timer {
+            var timer = new Timer
+            {
                 Interval = 5
             };
             timer.Tick += OnTimerTick;
             timer.Start();
         }
 
-        private void OnTimerTick(object sender, EventArgs e) {
+        private void OnTimerTick(object sender, EventArgs e)
+        {
             var timer = (Timer)sender;
             timer.Stop();
             timer.Dispose();
 
             var optionsPageActivator = (IOptionsPageActivator)ServiceLocator.GetInstance<IOptionsPageActivator>();
-            if (optionsPageActivator != null) {
+            if (optionsPageActivator != null)
+            {
                 optionsPageActivator.NotifyOptionsDialogClosed();
             }
         }
@@ -48,7 +55,8 @@ namespace NuGet.Options {
 
         public override void SaveSettingsToStorage() { }
 
-        object IServiceProvider.GetService(Type serviceType) {
+        object IServiceProvider.GetService(Type serviceType)
+        {
             return this.GetService(serviceType);
         }
     }

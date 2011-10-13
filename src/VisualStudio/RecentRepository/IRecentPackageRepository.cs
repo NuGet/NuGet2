@@ -1,6 +1,8 @@
 ﻿
-namespace NuGet.VisualStudio {
-    public interface IRecentPackageRepository : IPackageRepository {
+namespace NuGet.VisualStudio
+{
+    public interface IRecentPackageRepository : IPackageRepository
+    {
         /// <summary>
         /// Clear all packages from the Recent list
         /// </summary>

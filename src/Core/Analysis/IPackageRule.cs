@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace NuGet {
-    public interface IPackageRule {
+namespace NuGet
+{
+    public interface IPackageRule
+    {
         IEnumerable<PackageIssue> Validate(IPackage package);
     }
 }

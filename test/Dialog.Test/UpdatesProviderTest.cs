@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
@@ -13,12 +12,15 @@ using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using Xunit;
 
-namespace NuGet.Dialog.Test {
+namespace NuGet.Dialog.Test
+{
 
-    public class UpdatesProviderTest {
+    public class UpdatesProviderTest
+    {
 
         [Fact]
-        public void NamePropertyIsCorrect() {
+        public void NamePropertyIsCorrect()
+        {
             // Arrange
             var provider = CreateUpdatesProvider();
 
@@ -27,7 +29,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void RefresOnNodeSelectionPropertyIsCorrect() {
+        public void RefresOnNodeSelectionPropertyIsCorrect()
+        {
             // Arrange
             var provider = CreateUpdatesProvider();
 
@@ -36,7 +39,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void VerifySortDescriptors() {
+        public void VerifySortDescriptors()
+        {
             // Arrange
             var provider = CreateUpdatesProvider();
 
@@ -64,7 +68,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void RootNodeIsPopulatedWithCorrectNumberOfChildNodes() {
+        public void RootNodeIsPopulatedWithCorrectNumberOfChildNodes()
+        {
             // Arrange
             var projectManager = new Mock<IProjectManager>();
             projectManager.Setup(p => p.LocalRepository).Returns(new MockPackageRepository());
@@ -79,14 +84,15 @@ namespace NuGet.Dialog.Test {
             Assert.Equal(3, extentionsTree.Nodes.Count);
             Assert.IsType(typeof(UpdatesTreeNode), extentionsTree.Nodes[0]);
             Assert.Equal("All", extentionsTree.Nodes[0].Name);
-			Assert.IsType(typeof(UpdatesTreeNode), extentionsTree.Nodes[1]);
+            Assert.IsType(typeof(UpdatesTreeNode), extentionsTree.Nodes[1]);
             Assert.Equal("One", extentionsTree.Nodes[1].Name);
-			Assert.IsType(typeof(UpdatesTreeNode), extentionsTree.Nodes[2]);
+            Assert.IsType(typeof(UpdatesTreeNode), extentionsTree.Nodes[2]);
             Assert.Equal("Two", extentionsTree.Nodes[2].Name);
         }
 
         [Fact]
-        public void CreateExtensionReturnsAPackageItem() {
+        public void CreateExtensionReturnsAPackageItem()
+        {
             // Arrange
             var provider = CreateUpdatesProvider();
 
@@ -96,13 +102,14 @@ namespace NuGet.Dialog.Test {
             IVsExtension extension = provider.CreateExtension(package);
 
             // Asssert
-			Assert.IsType(typeof(PackageItem), extension);
+            Assert.IsType(typeof(PackageItem), extension);
             Assert.Equal("A", extension.Name);
             Assert.Equal("_Update", ((PackageItem)extension).CommandName);
         }
 
         [Fact]
-        public void CanExecuteReturnsCorrectResult() {
+        public void CanExecuteReturnsCorrectResult()
+        {
             // Local repository contains Package A 1.0 and Package B
             // Source repository contains Package A 2.0 and Package C
 
@@ -141,7 +148,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void ExecuteMethodCallsUpdatePackageMethodOnPackageManager() {
+        public void ExecuteMethodCallsUpdatePackageMethodOnPackageManager()
+        {
             // Local repository contains Package A 1.0 and Package B
             // Source repository contains Package A 2.0 and Package C
 
@@ -181,7 +189,8 @@ namespace NuGet.Dialog.Test {
 
             var manualEvent = new ManualResetEvent(false);
 
-            provider.ExecuteCompletedCallback = delegate {
+            provider.ExecuteCompletedCallback = delegate
+            {
                 // Assert
                 mockWindowServices.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
                 packageManager.Verify(p => p.UpdatePackage(projectManager.Object, packageA2, It.IsAny<IEnumerable<PackageOperation>>(), true, false, provider), Times.Once());
@@ -197,7 +206,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void ExecuteMethodInvokeInstallScriptAndUninstallScript() {
+        public void ExecuteMethodInvokeInstallScriptAndUninstallScript()
+        {
             // Local repository contains Package A 1.0 and Package B
             // Source repository contains Package A 2.0 and Package C
 
@@ -224,7 +234,8 @@ namespace NuGet.Dialog.Test {
             packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project.Object))).Returns(projectManager);
             packageManager.Setup(p => p.UpdatePackage(
                projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), true, false, It.IsAny<ILogger>())).Callback(
-               () => {
+               () =>
+               {
                    projectManager.AddPackageReference("A", new SemanticVersion("2.0"), false, false);
                });
 
@@ -240,13 +251,16 @@ namespace NuGet.Dialog.Test {
 
             ManualResetEvent manualEvent = new ManualResetEvent(false);
 
-            provider.ExecuteCompletedCallback = delegate {
+            provider.ExecuteCompletedCallback = delegate
+            {
                 // Assert
-                try {
+                try
+                {
                     scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), "uninstall.ps1", packageA1, project.Object, It.IsAny<ILogger>()), Times.Once());
                     scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), "install.ps1", packageA2, project.Object, It.IsAny<ILogger>()), Times.Once());
                 }
-                finally {
+                finally
+                {
                     manualEvent.Set();
                 }
             };
@@ -266,9 +280,11 @@ namespace NuGet.Dialog.Test {
             Project project = null,
             IScriptExecutor scriptExecutor = null,
             IUserNotifierServices userNotifierServices = null,
-            ISolutionManager solutionManager = null) {
+            ISolutionManager solutionManager = null)
+        {
 
-            if (packageManager == null) {
+            if (packageManager == null)
+            {
                 var packageManagerMock = new Mock<IVsPackageManager>();
                 var sourceRepository = new MockPackageRepository();
                 packageManagerMock.Setup(p => p.SourceRepository).Returns(sourceRepository);
@@ -276,17 +292,20 @@ namespace NuGet.Dialog.Test {
                 packageManager = packageManagerMock.Object;
             }
 
-            if (localRepository == null) {
+            if (localRepository == null)
+            {
                 localRepository = new Mock<IPackageRepository>().Object;
             }
 
-            if (repositoryFactory == null) {
+            if (repositoryFactory == null)
+            {
                 var repositoryFactoryMock = new Mock<IPackageRepositoryFactory>();
                 repositoryFactoryMock.Setup(p => p.CreateRepository(It.IsAny<string>())).Returns(new MockPackageRepository());
                 repositoryFactory = repositoryFactoryMock.Object;
             }
 
-            if (packageSourceProvider == null) {
+            if (packageSourceProvider == null)
+            {
                 var packageSourceProviderMock = new Mock<IPackageSourceProvider>();
                 packageSourceProviderMock.Setup(p => p.LoadPackageSources()).Returns(
                         new PackageSource[2] {
@@ -302,16 +321,19 @@ namespace NuGet.Dialog.Test {
 
             var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
 
-            if (userNotifierServices == null) {
+            if (userNotifierServices == null)
+            {
                 var mockWindowServices = new Mock<IUserNotifierServices>();
                 userNotifierServices = mockWindowServices.Object;
             }
 
-            if (project == null) {
+            if (project == null)
+            {
                 project = new Mock<Project>().Object;
             }
 
-            if (scriptExecutor == null) {
+            if (scriptExecutor == null)
+            {
                 scriptExecutor = new Mock<IScriptExecutor>().Object;
             }
 
@@ -322,7 +344,8 @@ namespace NuGet.Dialog.Test {
                 new MockOutputConsoleProvider()
             );
 
-            if (solutionManager == null) {
+            if (solutionManager == null)
+            {
                 solutionManager = new Mock<ISolutionManager>().Object;
             }
 
@@ -338,7 +361,8 @@ namespace NuGet.Dialog.Test {
                 solutionManager);
         }
 
-        private static ProjectManager CreateProjectManager(IPackageRepository localRepository, IPackageRepository sourceRepository) {
+        private static ProjectManager CreateProjectManager(IPackageRepository localRepository, IPackageRepository sourceRepository)
+        {
             var projectSystem = new MockVsProjectSystem();
             return new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
         }

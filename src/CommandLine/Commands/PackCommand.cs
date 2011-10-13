@@ -6,10 +6,12 @@ using System.IO;
 using System.Linq;
 using NuGet.Common;
 
-namespace NuGet.Commands {
+namespace NuGet.Commands
+{
     [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", MaxArgs = 1, UsageSummaryResourceName = "PackageCommandUsageSummary",
             UsageDescriptionResourceName = "PackageCommandUsageDescription", UsageExampleResourceName = "PackCommandUsageExamples")]
-    public class PackCommand : Command {
+    public class PackCommand : Command
+    {
         internal static readonly string SymbolsExtension = ".symbols" + Constants.PackageExtension;
 
         private static readonly string[] _defaultExcludes = new[] {
@@ -54,7 +56,8 @@ namespace NuGet.Commands {
         public string Version { get; set; }
 
         [Option(typeof(NuGetResources), "PackageCommandExcludeDescription")]
-        public ICollection<string> Exclude {
+        public ICollection<string> Exclude
+        {
             get { return _excludes; }
         }
 
@@ -74,8 +77,10 @@ namespace NuGet.Commands {
         public bool NoPackageAnalysis { get; set; }
 
         [Option(typeof(NuGetResources), "PackageCommandPropertiesDescription")]
-        public Dictionary<string, string> Properties {
-            get {
+        public Dictionary<string, string> Properties
+        {
+            get
+            {
                 return _properties;
             }
         }
@@ -83,20 +88,24 @@ namespace NuGet.Commands {
         [ImportMany]
         public IEnumerable<IPackageRule> Rules { get; set; }
 
-        public override void ExecuteCommand() {
+        public override void ExecuteCommand()
+        {
             // Get the input file
             string path = GetInputFile();
 
             Console.WriteLine(NuGetResources.PackageCommandAttemptingToBuildPackage, Path.GetFileName(path));
 
             IPackage package = BuildPackage(path);
-            if (package != null && !NoPackageAnalysis) {
+            if (package != null && !NoPackageAnalysis)
+            {
                 AnalyzePackage(package);
             }
         }
 
-        private IPackage BuildPackage(string path, PackageBuilder builder, string outputPath = null) {
-            if (!String.IsNullOrEmpty(Version)) {
+        private IPackage BuildPackage(string path, PackageBuilder builder, string outputPath = null)
+        {
+            if (!String.IsNullOrEmpty(Version))
+            {
                 builder.Version = new SemanticVersion(Version);
             }
 
@@ -107,19 +116,24 @@ namespace NuGet.Commands {
             ExcludeFiles(builder.Files);
             // Track if the package file was already present on disk
             bool isExistingPackage = File.Exists(outputPath);
-            try {
-                using (Stream stream = File.Create(outputPath)) {
+            try
+            {
+                using (Stream stream = File.Create(outputPath))
+                {
                     builder.Save(stream);
                 }
             }
-            catch {
-                if (!isExistingPackage && File.Exists(outputPath)) {
+            catch
+            {
+                if (!isExistingPackage && File.Exists(outputPath))
+                {
                     File.Delete(outputPath);
                 }
                 throw;
             }
 
-            if (Verbose) {
+            if (Verbose)
+            {
                 PrintVerbose(outputPath);
             }
 
@@ -128,7 +142,8 @@ namespace NuGet.Commands {
             return new ZipPackage(outputPath);
         }
 
-        private void PrintVerbose(string outputPath) {
+        private void PrintVerbose(string outputPath)
+        {
             Console.WriteLine();
             var package = new ZipPackage(outputPath);
 
@@ -136,52 +151,63 @@ namespace NuGet.Commands {
             Console.WriteLine("Version: {0}", package.Version);
             Console.WriteLine("Authors: {0}", String.Join(", ", package.Authors));
             Console.WriteLine("Description: {0}", package.Description);
-            if (package.LicenseUrl != null) {
+            if (package.LicenseUrl != null)
+            {
                 Console.WriteLine("License Url: {0}", package.LicenseUrl);
             }
-            if (package.ProjectUrl != null) {
+            if (package.ProjectUrl != null)
+            {
                 Console.WriteLine("Project Url: {0}", package.ProjectUrl);
             }
-            if (!String.IsNullOrEmpty(package.Tags)) {
+            if (!String.IsNullOrEmpty(package.Tags))
+            {
                 Console.WriteLine("Tags: {0}", package.Tags.Trim());
             }
-            if (package.Dependencies.Any()) {
+            if (package.Dependencies.Any())
+            {
                 Console.WriteLine("Dependencies: {0}", String.Join(", ", package.Dependencies.Select(d => d.ToString())));
             }
-            else {
+            else
+            {
                 Console.WriteLine("Dependencies: None");
             }
 
             Console.WriteLine();
 
-            foreach (var file in package.GetFiles().OrderBy(p => p.Path)) {
+            foreach (var file in package.GetFiles().OrderBy(p => p.Path))
+            {
                 Console.WriteLine(NuGetResources.PackageCommandAddedFile, file.Path);
             }
 
             Console.WriteLine();
         }
 
-        internal void ExcludeFiles(ICollection<IPackageFile> packageFiles) {
+        internal void ExcludeFiles(ICollection<IPackageFile> packageFiles)
+        {
             // Always exclude the nuspec file
             // Review: This exclusion should be done by the package builder because it knows which file would collide with the auto-generated
             // manifest file.
             var wildCards = _excludes.Concat(new[] { @"**\*" + Constants.ManifestExtension });
-            if (!NoDefaultExcludes) {
+            if (!NoDefaultExcludes)
+            {
                 // The user has not explicitly disabled default filtering.
                 wildCards = wildCards.Concat(_defaultExcludes);
             }
             PathResolver.FilterPackageFiles(packageFiles, ResolvePath, wildCards);
         }
 
-        private string ResolvePath(IPackageFile packageFile) {
+        private string ResolvePath(IPackageFile packageFile)
+        {
             var physicalPackageFile = packageFile as PhysicalPackageFile;
             // For PhysicalPackageFiles, we want to filter by SourcePaths, the path on disk. The Path value maps to the TargetPath
-            if (physicalPackageFile == null) {
+            if (physicalPackageFile == null)
+            {
                 return packageFile.Path;
             }
             var path = physicalPackageFile.SourcePath;
             int index = path.IndexOf(BasePath, StringComparison.OrdinalIgnoreCase);
-            if (index != -1) {
+            if (index != -1)
+            {
                 // Since wildcards are going to be relative to the base path, remove the BasePath portion of the file's source path. 
                 // Also remove any leading path separator slashes
                 path = path.Substring(index + BasePath.Length).TrimStart(Path.DirectorySeparatorChar);
@@ -189,17 +215,20 @@ namespace NuGet.Commands {
             return path;
         }
 
-        private string GetOutputPath(PackageBuilder builder, bool symbols = false) {
+        private string GetOutputPath(PackageBuilder builder, bool symbols = false)
+        {
             string version = String.IsNullOrEmpty(Version) ? builder.Version.ToString() : Version;
 
             // Output file is {id}.{version}
             string outputFile = builder.Id + "." + version;
 
             // If this is a source package then add .symbols.nupkg to the package file name
-            if (symbols) {
+            if (symbols)
+            {
                 outputFile += SymbolsExtension;
             }
-            else {
+            else
+            {
                 outputFile += Constants.PackageExtension;
             }
 
@@ -207,25 +236,31 @@ namespace NuGet.Commands {
             return Path.Combine(outputDirectory, outputFile);
         }
 
-        private IPackage BuildPackage(string path) {
+        private IPackage BuildPackage(string path)
+        {
             string extension = Path.GetExtension(path);
 
-            if (extension.Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase)) {
+            if (extension.Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase))
+            {
                 return BuildFromNuspec(path);
             }
-            else {
+            else
+            {
                 return BuildFromProjectFile(path);
             }
         }
 
-        private IPackage BuildFromNuspec(string path) {
+        private IPackage BuildFromNuspec(string path)
+        {
             PackageBuilder packageBuilder = CreatePackageBuilderFromNuspec(path);
 
-            if (Symbols) {
+            if (Symbols)
+            {
                 // remove source related files when building the lib package
                 ExcludeFilesForLibPackage(packageBuilder.Files);
 
-                if (!packageBuilder.Files.Any()) {
+                if (!packageBuilder.Files.Any())
+                {
                     throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageCommandNoFilesForLibPackage,
                         path, CommandLineConstants.NuGetDocs));
                 }
@@ -233,19 +268,22 @@ namespace NuGet.Commands {
 
             IPackage package = BuildPackage(path, packageBuilder);
 
-            if (Symbols) {
+            if (Symbols)
+            {
                 BuildSymbolsPackage(path);
             }
 
             return package;
         }
 
-        private void BuildSymbolsPackage(string path) {
+        private void BuildSymbolsPackage(string path)
+        {
             PackageBuilder symbolsBuilder = CreatePackageBuilderFromNuspec(path);
             // remove unnecessary files when building the symbols package
             ExcludeFilesForSymbolPackage(symbolsBuilder.Files);
 
-            if (!symbolsBuilder.Files.Any()) {
+            if (!symbolsBuilder.Files.Any())
+            {
                 throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageCommandNoFilesForSymbolsPackage,
                         path, CommandLineConstants.NuGetDocs));
             }
@@ -254,38 +292,46 @@ namespace NuGet.Commands {
             BuildPackage(path, symbolsBuilder, outputPath);
         }
 
-        internal static void ExcludeFilesForLibPackage(ICollection<IPackageFile> files) {
+        internal static void ExcludeFilesForLibPackage(ICollection<IPackageFile> files)
+        {
             PathResolver.FilterPackageFiles(files, file => file.Path, _libPackageExcludes);
         }
 
-        internal static void ExcludeFilesForSymbolPackage(ICollection<IPackageFile> files) {
+        internal static void ExcludeFilesForSymbolPackage(ICollection<IPackageFile> files)
+        {
             PathResolver.FilterPackageFiles(files, file => file.Path, _symbolPackageExcludes);
         }
 
-        private PackageBuilder CreatePackageBuilderFromNuspec(string path) {
+        private PackageBuilder CreatePackageBuilderFromNuspec(string path)
+        {
             // Set the version property if the flag is set
-            if (!String.IsNullOrEmpty(Version)) {
+            if (!String.IsNullOrEmpty(Version))
+            {
                 Properties["version"] = Version;
             }
 
             // Initialize the property provider based on what was passed in using the properties flag
             var propertyProvider = new DictionaryPropertyProvider(Properties);
 
-            if (String.IsNullOrEmpty(BasePath)) {
+            if (String.IsNullOrEmpty(BasePath))
+            {
                 return new PackageBuilder(path, propertyProvider);
             }
             return new PackageBuilder(path, BasePath, propertyProvider);
         }
 
-        private IPackage BuildFromProjectFile(string path) {
-            var factory = new ProjectFactory(path) {
+        private IPackage BuildFromProjectFile(string path)
+        {
+            var factory = new ProjectFactory(path)
+            {
                 IsTool = Tool,
                 Logger = Console,
                 Build = Build,
             };
 
             // Add the additional Properties to the properties of the Project Factory
-            foreach (var property in Properties) {
+            foreach (var property in Properties)
+            {
                 factory.Properties.Add(property.Key, property.Value);
             }
 
@@ -296,7 +342,8 @@ namespace NuGet.Commands {
             IPackage package = BuildPackage(path, mainPackageBuilder);
 
             // If we're excluding symbols then do nothing else
-            if (!Symbols) {
+            if (!Symbols)
+            {
                 return package;
             }
 
@@ -315,68 +362,80 @@ namespace NuGet.Commands {
             return package;
         }
 
-        internal void AnalyzePackage(IPackage package) {
+        internal void AnalyzePackage(IPackage package)
+        {
             IEnumerable<IPackageRule> packageRules = Rules;
-            if (!String.IsNullOrEmpty(package.Version.SpecialVersion)) {
+            if (!String.IsNullOrEmpty(package.Version.SpecialVersion))
+            {
                 // If a package contains a special token, we'll warn users if it does not strictly follow semver guidelines.
                 packageRules = packageRules.Concat(new[] { new StrictSemanticVersionValidationRule() });
             }
 
             IList<PackageIssue> issues = package.Validate(packageRules).OrderBy(p => p.Title, StringComparer.CurrentCulture).ToList();
 
-            if (issues.Count > 0) {
+            if (issues.Count > 0)
+            {
                 Console.WriteLine();
                 Console.WriteWarning(NuGetResources.PackageCommandPackageIssueSummary, issues.Count, package.Id);
-                foreach (var issue in issues) {
+                foreach (var issue in issues)
+                {
                     PrintPackageIssue(issue);
                 }
             }
         }
 
-        private void PrintPackageIssue(PackageIssue issue) {
+        private void PrintPackageIssue(PackageIssue issue)
+        {
             Console.WriteLine();
             Console.WriteWarning(
-                prependWarningText: false, 
-                value: NuGetResources.PackageCommandIssueTitle, 
+                prependWarningText: false,
+                value: NuGetResources.PackageCommandIssueTitle,
                 args: issue.Title);
 
             Console.WriteWarning(
-                prependWarningText: false, 
-                value: NuGetResources.PackageCommandIssueDescription, 
+                prependWarningText: false,
+                value: NuGetResources.PackageCommandIssueDescription,
                 args: issue.Description);
 
-            if (!String.IsNullOrEmpty(issue.Solution)) {
+            if (!String.IsNullOrEmpty(issue.Solution))
+            {
                 Console.WriteWarning(
-                    prependWarningText: false, 
-                    value: NuGetResources.PackageCommandIssueSolution, 
+                    prependWarningText: false,
+                    value: NuGetResources.PackageCommandIssueSolution,
                     args: issue.Solution);
             }
         }
 
-        private string GetInputFile() {
+        private string GetInputFile()
+        {
             IEnumerable<string> files = null;
 
-            if (Arguments.Any()) {
+            if (Arguments.Any())
+            {
                 files = Arguments;
             }
-            else {
+            else
+            {
                 files = Directory.GetFiles(Directory.GetCurrentDirectory());
             }
 
             return GetInputFile(files);
         }
 
-        internal static string GetInputFile(IEnumerable<string> files) {
+        internal static string GetInputFile(IEnumerable<string> files)
+        {
             var candidates = files.Where(file => _allowedExtensions.Contains(Path.GetExtension(file)))
                                   .ToList();
 
-            switch (candidates.Count) {
+            switch (candidates.Count)
+            {
                 case 1:
                     return candidates.Single();
                 case 2:
                     // Remove all nuspec files
                     candidates.RemoveAll(file => Path.GetExtension(file).Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase));
-                    if (candidates.Count == 1) {
+                    if (candidates.Count == 1)
+                    {
                         return candidates.Single();
                     }
                     goto default;
@@ -385,16 +444,20 @@ namespace NuGet.Commands {
             }
         }
 
-        private class DictionaryPropertyProvider : IPropertyProvider {
+        private class DictionaryPropertyProvider : IPropertyProvider
+        {
             private readonly IDictionary<string, string> _properties;
 
-            public DictionaryPropertyProvider(IDictionary<string, string> properties) {
+            public DictionaryPropertyProvider(IDictionary<string, string> properties)
+            {
                 _properties = properties;
             }
 
-            public dynamic GetPropertyValue(string propertyName) {
+            public dynamic GetPropertyValue(string propertyName)
+            {
                 string value;
-                if (_properties.TryGetValue(propertyName, out value)) {
+                if (_properties.TryGetValue(propertyName, out value))
+                {
                     return value;
                 }
                 return null;

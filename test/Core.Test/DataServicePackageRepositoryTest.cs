@@ -4,11 +4,14 @@ using Moq;
 using Xunit;
 using Xunit.Extensions;
 
-namespace NuGet.Test {
+namespace NuGet.Test
+{
 
-    public class DataServicePackageRepositoryTest {
+    public class DataServicePackageRepositoryTest
+    {
         [Fact]
-        public void SearchUsesDefaultSearchLogicIfServerDoesnotSupportServiceMethod() {
+        public void SearchUsesDefaultSearchLogicIfServerDoesnotSupportServiceMethod()
+        {
             // Arrange
             var client = new Mock<IHttpClient>();
             var context = new Mock<IDataServiceContext>();
@@ -31,7 +34,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SearchUsesServiceMethodIfServerSupportsIt() {
+        public void SearchUsesServiceMethodIfServerSupportsIt()
+        {
             // Arrange
             var client = new Mock<IHttpClient>();
             var context = new Mock<IDataServiceContext>();
@@ -45,7 +49,8 @@ namespace NuGet.Test {
             repository.Object.Context = context.Object;
             context.Setup(m => m.SupportsServiceMethod("Search")).Returns(true);
             context.Setup(m => m.CreateQuery<DataServicePackage>(It.IsAny<string>(), It.IsAny<IDictionary<string, object>>()))
-                   .Callback<string, IDictionary<string, object>>((entitySet, parameters) => {
+                   .Callback<string, IDictionary<string, object>>((entitySet, parameters) =>
+                   {
                        // Assert
                        Assert.Equal("Search", entitySet);
                        Assert.Equal(2, parameters.Count);
@@ -59,7 +64,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SearchEscapesSingleQuotesInParameters() {
+        public void SearchEscapesSingleQuotesInParameters()
+        {
             // Arrange
             var client = new Mock<IHttpClient>();
             var context = new Mock<IDataServiceContext>();
@@ -67,7 +73,8 @@ namespace NuGet.Test {
             repository.Object.Context = context.Object;
             context.Setup(m => m.SupportsServiceMethod("Search")).Returns(true);
             context.Setup(m => m.CreateQuery<DataServicePackage>(It.IsAny<string>(), It.IsAny<IDictionary<string, object>>()))
-                   .Callback<string, IDictionary<string, object>>((entitySet, parameters) => {
+                   .Callback<string, IDictionary<string, object>>((entitySet, parameters) =>
+                   {
                        // Assert
                        Assert.Equal("Search", entitySet);
                        Assert.Equal(2, parameters.Count);
@@ -81,7 +88,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SearchSendsShortTargetFrameworkNames() {
+        public void SearchSendsShortTargetFrameworkNames()
+        {
             // Arrange
             var client = new Mock<IHttpClient>();
             var context = new Mock<IDataServiceContext>();
@@ -89,7 +97,8 @@ namespace NuGet.Test {
             repository.Object.Context = context.Object;
             context.Setup(m => m.SupportsServiceMethod("Search")).Returns(true);
             context.Setup(m => m.CreateQuery<DataServicePackage>(It.IsAny<string>(), It.IsAny<IDictionary<string, object>>()))
-                   .Callback<string, IDictionary<string, object>>((entitySet, parameters) => {
+                   .Callback<string, IDictionary<string, object>>((entitySet, parameters) =>
+                   {
                        // Assert
                        Assert.Equal("Search", entitySet);
                        Assert.Equal(2, parameters.Count);
@@ -111,7 +120,8 @@ namespace NuGet.Test {
         [InlineData(new object[] { NuGetFeedSchema.SchemaWithNoMethods, 0, 32, new[] { "Id", "Version", "IsLatestVersion" }, new string[0] })]
         [InlineData(new object[] { NuGetFeedSchema.SchemaWithMethod, 1, 31, new[] { "Id", "Version", "IsLatestVersion" }, new[] { "Search" } })]
         public void ExtractMethodNamesFromSchemaFindsMethodNamesAndProperties(string schema, int expectedMethodCount, int expectedProperties,
-                IEnumerable<string> sampleProperties, IEnumerable<string> expectedMethods) {
+                IEnumerable<string> sampleProperties, IEnumerable<string> expectedMethods)
+        {
             // Act
             var schemaMetadata = DataServiceContextWrapper.ExtractMetadataFromSchema(schema);
 
@@ -128,7 +138,8 @@ namespace NuGet.Test {
         [InlineData(new object[] { "" })]
         [InlineData(new object[] { null })]
         [InlineData(new object[] { "<xml>DEADBEEF" })]
-        public void ExtractMetadataReturnsNullForBadSchema(string schema) {
+        public void ExtractMetadataReturnsNullForBadSchema(string schema)
+        {
             // Act
             var schemaMetadata = DataServiceContextWrapper.ExtractMetadataFromSchema(schema);
 
@@ -137,7 +148,8 @@ namespace NuGet.Test {
         }
 
 
-        private class NuGetFeedSchema {
+        private class NuGetFeedSchema
+        {
             public const string SchemaWithMethod = @"<?xml version=""1.0"" encoding=""utf-8"" standalone=""yes""?>
 <edmx:Edmx Version=""1.0"" xmlns:edmx=""http://schemas.microsoft.com/ado/2007/06/edmx"">
   <edmx:DataServices xmlns:m=""http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"" m:DataServiceVersion=""2.0"">

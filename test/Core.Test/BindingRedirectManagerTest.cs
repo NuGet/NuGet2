@@ -1,20 +1,24 @@
 ﻿using System;
 using System.IO;
-using Xunit;
 using Moq;
 using NuGet.Runtime;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class BindingRedirectManagerTest {
+namespace NuGet.Test
+{
+
+    public class BindingRedirectManagerTest
+    {
         [Fact]
-        public void AddingBindingRedirectToEmptyConfig() {
+        public void AddingBindingRedirectToEmptyConfig()
+        {
             // Arrange            
             var mockFileSystem = new Mock<IFileSystem>();
             mockFileSystem.Setup(m => m.FileExists("config")).Returns(true);
             mockFileSystem.Setup(m => m.OpenFile("config")).Returns(@"<configuration></configuration>".AsStream());
             var ms = new MemoryStream();
-            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
+            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) =>
+            {
                 stream.CopyTo(ms);
                 ms.Seek(0, SeekOrigin.Begin);
             });
@@ -40,7 +44,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddingBindingRedirectWithMultipleAssemblyBindingSectionsAddsToFirstOne() {
+        public void AddingBindingRedirectWithMultipleAssemblyBindingSectionsAddsToFirstOne()
+        {
             // Arrange            
             var mockFileSystem = new Mock<IFileSystem>();
             mockFileSystem.Setup(m => m.FileExists("config")).Returns(true);
@@ -62,7 +67,8 @@ namespace NuGet.Test {
     </runtime>
 </configuration>".AsStream());
             var ms = new MemoryStream();
-            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
+            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) =>
+            {
                 stream.CopyTo(ms);
                 ms.Seek(0, SeekOrigin.Begin);
             });
@@ -98,7 +104,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddingBindingRedirectsDoesNotAddDuplicates() {
+        public void AddingBindingRedirectsDoesNotAddDuplicates()
+        {
             // Arrange            
             var mockFileSystem = new Mock<IFileSystem>();
             mockFileSystem.Setup(m => m.FileExists("config")).Returns(true);
@@ -114,7 +121,8 @@ namespace NuGet.Test {
   </runtime>
 </configuration>".AsStream());
             var ms = new MemoryStream();
-            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
+            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) =>
+            {
                 stream.CopyTo(ms);
                 ms.Seek(0, SeekOrigin.Begin);
             });
@@ -140,7 +148,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddingBindingRedirectsOverwritesAssemblyBindingIfBindingForAssemblyExists() {
+        public void AddingBindingRedirectsOverwritesAssemblyBindingIfBindingForAssemblyExists()
+        {
             // Arrange            
             var mockFileSystem = new Mock<IFileSystem>();
             mockFileSystem.Setup(m => m.FileExists("config")).Returns(true);
@@ -156,7 +165,8 @@ namespace NuGet.Test {
   </runtime>
 </configuration>".AsStream());
             var ms = new MemoryStream();
-            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
+            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) =>
+            {
                 stream.CopyTo(ms);
                 ms.Seek(0, SeekOrigin.Begin);
             });
@@ -182,7 +192,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddingBindingRedirectsFileWithDuplicateAssemblyIdentitiesOverwritesAssemblyBindingIfBindingForAssemblyExists() {
+        public void AddingBindingRedirectsFileWithDuplicateAssemblyIdentitiesOverwritesAssemblyBindingIfBindingForAssemblyExists()
+        {
             // Arrange            
             var mockFileSystem = new Mock<IFileSystem>();
             mockFileSystem.Setup(m => m.FileExists("config")).Returns(true);
@@ -202,7 +213,8 @@ namespace NuGet.Test {
   </runtime>
 </configuration>".AsStream());
             var ms = new MemoryStream();
-            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
+            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) =>
+            {
                 stream.CopyTo(ms);
                 ms.Seek(0, SeekOrigin.Begin);
             });
@@ -228,7 +240,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemoveBindingRedirectsRemovesParentNodeIfLastElement() {
+        public void RemoveBindingRedirectsRemovesParentNodeIfLastElement()
+        {
             // Arrange            
             var mockFileSystem = new Mock<IFileSystem>();
             mockFileSystem.Setup(m => m.FileExists("config")).Returns(true);
@@ -246,7 +259,8 @@ namespace NuGet.Test {
   </runtime>
 </configuration>".AsStream());
             var ms = new MemoryStream();
-            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
+            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) =>
+            {
                 stream.CopyTo(ms);
                 ms.Seek(0, SeekOrigin.Begin);
             });
@@ -267,7 +281,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemoveBindingRedirectsDoesNotRemoveParentNodeIfNotLastElement() {
+        public void RemoveBindingRedirectsDoesNotRemoveParentNodeIfNotLastElement()
+        {
             // Arrange            
             var mockFileSystem = new Mock<IFileSystem>();
             mockFileSystem.Setup(m => m.FileExists("config")).Returns(true);
@@ -287,7 +302,8 @@ namespace NuGet.Test {
   </runtime>
 </configuration>".AsStream());
             var ms = new MemoryStream();
-            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) => {
+            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) =>
+            {
                 stream.CopyTo(ms);
                 ms.Seek(0, SeekOrigin.Begin);
             });
@@ -312,7 +328,8 @@ namespace NuGet.Test {
 </configuration>", ms.ReadToEnd());
         }
 
-        private static AssemblyBinding GetAssemblyBinding(string name, string publicKey, string version) {
+        private static AssemblyBinding GetAssemblyBinding(string name, string publicKey, string version)
+        {
             var assembly = new Mock<IAssembly>();
             assembly.Setup(m => m.Name).Returns("AssemblyName");
             assembly.Setup(m => m.PublicKeyToken).Returns("token");

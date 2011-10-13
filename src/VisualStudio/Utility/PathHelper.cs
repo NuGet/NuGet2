@@ -4,19 +4,25 @@ using System.IO;
 using System.Linq;
 using Microsoft.Internal.Web.Utils;
 
-namespace NuGet.VisualStudio {
-    public static class PathHelper {
-        public static string SmartTruncate(string path, int maxWidth) {
-            if (maxWidth < 6) {
+namespace NuGet.VisualStudio
+{
+    public static class PathHelper
+    {
+        public static string SmartTruncate(string path, int maxWidth)
+        {
+            if (maxWidth < 6)
+            {
                 string message = String.Format(CultureInfo.CurrentCulture, CommonResources.Argument_Must_Be_GreaterThanOrEqualTo, 6);
                 throw new ArgumentOutOfRangeException("maxWidth", message);
             }
 
-            if (path == null) {
+            if (path == null)
+            {
                 throw new ArgumentNullException("path");
             }
 
-            if (path.Length <= maxWidth) {
+            if (path.Length <= maxWidth)
+            {
                 return path;
             }
 
@@ -30,7 +36,8 @@ namespace NuGet.VisualStudio {
             int remainingWidth = maxWidth - root.Length - 3;       // 3 = length(ellipsis)
 
             // is the directory name too big? 
-            if (folder.Length >= remainingWidth) {
+            if (folder.Length >= remainingWidth)
+            {
                 // yes drop leading backslash and eat into name
                 return String.Format(
                     CultureInfo.InvariantCulture,
@@ -38,7 +45,8 @@ namespace NuGet.VisualStudio {
                     root,
                     folder.Substring(folder.Length - remainingWidth));
             }
-            else {
+            else
+            {
                 // no, show like VS solution explorer (drive+ellipsis+end)
                 return String.Format(
                     CultureInfo.InvariantCulture,
@@ -48,21 +56,25 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        public static string EscapePSPath(string path) {
-            if (path == null) {
+        public static string EscapePSPath(string path)
+        {
+            if (path == null)
+            {
                 throw new ArgumentNullException("path");
             }
 
             // The and [ the ] characters are interpreted as wildcard delimiters. Escape them first.
             path = path.Replace("[", "`[").Replace("]", "`]");
 
-            if (path.Contains("'")) {
+            if (path.Contains("'"))
+            {
                 // If the path has an apostrophe, then use double quotes to enclose it.
                 // However, in that case, if the path also has $ characters in it, they
                 // will be interpreted as variables. Thus we escape the $ characters.
                 return "\"" + path.Replace("$", "`$") + "\"";
             }
-            else {
+            else
+            {
                 // if the path doesn't have apostrophe, then it's safe to enclose it with apostrophes
                 return "'" + path + "'";
             }

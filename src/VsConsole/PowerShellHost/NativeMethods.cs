@@ -5,10 +5,13 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 
-namespace NuGetConsole.Host.PowerShell {
-    internal static class NativeMethods {
+namespace NuGetConsole.Host.PowerShell
+{
+    internal static class NativeMethods
+    {
         [Flags]
-        internal enum CreduiFlags {
+        internal enum CreduiFlags
+        {
             ALWAYS_SHOW_UI = 0x80,
             COMPLETE_USERNAME = 0x800,
             DO_NOT_PERSIST = 2,
@@ -28,7 +31,8 @@ namespace NuGetConsole.Host.PowerShell {
             VALIDATE_USERNAME = 0x400
         }
 
-        internal enum CredUiReturnCodes {
+        internal enum CredUiReturnCodes
+        {
             ERROR_CANCELLED = 0x4c7,
             ERROR_INSUFFICIENT_BUFFER = 0x7a,
             ERROR_INVALID_ACCOUNT_NAME = 0x523,
@@ -40,7 +44,8 @@ namespace NuGetConsole.Host.PowerShell {
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct CreduiInfo {
+        internal struct CreduiInfo
+        {
             public int cbSize;
             public IntPtr hwndParent;
             [MarshalAs(UnmanagedType.LPWStr)]
@@ -60,11 +65,13 @@ namespace NuGetConsole.Host.PowerShell {
         internal static PSCredential CredUIPromptForCredentials(
             string caption, string message, string userName, string targetName,
             PSCredentialTypes allowedCredentialTypes, PSCredentialUIOptions options,
-            IntPtr parentHwnd = default(IntPtr)) {
+            IntPtr parentHwnd = default(IntPtr))
+        {
 
             PSCredential credential = null;
 
-            var info = new CreduiInfo {
+            var info = new CreduiInfo
+            {
                 pszCaptionText = caption,
                 pszMessageText = message
             };
@@ -76,33 +83,39 @@ namespace NuGetConsole.Host.PowerShell {
             info.hwndParent = parentHwnd;
 
             var dwFlags = CreduiFlags.DO_NOT_PERSIST;
-            if ((allowedCredentialTypes & PSCredentialTypes.Domain) != PSCredentialTypes.Domain) {
+            if ((allowedCredentialTypes & PSCredentialTypes.Domain) != PSCredentialTypes.Domain)
+            {
                 dwFlags |= CreduiFlags.GENERIC_CREDENTIALS;
-                if ((options & PSCredentialUIOptions.AlwaysPrompt) == PSCredentialUIOptions.AlwaysPrompt) {
+                if ((options & PSCredentialUIOptions.AlwaysPrompt) == PSCredentialUIOptions.AlwaysPrompt)
+                {
                     dwFlags |= CreduiFlags.ALWAYS_SHOW_UI;
                 }
             }
 
             var codes = CredUiReturnCodes.ERROR_INVALID_PARAMETER;
 
-            if ((pszUserName.Length <= 0x201) && (pszPassword.Length <= 0x100)) {
+            if ((pszUserName.Length <= 0x201) && (pszPassword.Length <= 0x100))
+            {
                 codes = CredUIPromptForCredentials(
                     ref info, targetName, IntPtr.Zero, 0, pszUserName,
                     0x201, pszPassword, 0x100, ref pfSave, dwFlags);
             }
 
-            if (codes == CredUiReturnCodes.NO_ERROR) {
+            if (codes == CredUiReturnCodes.NO_ERROR)
+            {
 
                 string providedUserName = pszUserName.ToString();
                 var providedPassword = new SecureString();
 
-                for (int i = 0; i < pszPassword.Length; i++) {
+                for (int i = 0; i < pszPassword.Length; i++)
+                {
                     providedPassword.AppendChar(pszPassword[i]);
                     pszPassword[i] = '\0';
                 }
                 providedPassword.MakeReadOnly();
 
-                if (!String.IsNullOrEmpty(providedUserName)) {
+                if (!String.IsNullOrEmpty(providedUserName))
+                {
                     credential = new PSCredential(providedUserName, providedPassword);
                 }
             }

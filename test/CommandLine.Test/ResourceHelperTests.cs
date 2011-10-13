@@ -1,30 +1,36 @@
 using System;
 using Xunit;
 
-namespace NuGet.Test.NuGetCommandLine {
-    
-    public class ResourceHelperTests {
+namespace NuGet.Test.NuGetCommandLine
+{
+
+    public class ResourceHelperTests
+    {
 
         [Fact]
-        public void GetLocalizedString_ThrowsArgumentExceptionForNullType() {
+        public void GetLocalizedString_ThrowsArgumentExceptionForNullType()
+        {
             // Act & Assert
             ExceptionAssert.ThrowsArgNull(() => ResourceHelper.GetLocalizedString(null, "foo"), "resourceType");
         }
 
         [Fact]
-        public void GetLocalizedString_ThrowsArgumentExceptionForNullName() {
+        public void GetLocalizedString_ThrowsArgumentExceptionForNullName()
+        {
             // Act & Assert
             ExceptionAssert.ThrowsArgNullOrEmpty(() => ResourceHelper.GetLocalizedString(typeof(string), null), "resourceName");
         }
 
         [Fact]
-        public void GetLocalizedString_ThrowsArgumentExceptionForEmptyName() {
+        public void GetLocalizedString_ThrowsArgumentExceptionForEmptyName()
+        {
             // Act & Assert
             ExceptionAssert.ThrowsArgNullOrEmpty(() => ResourceHelper.GetLocalizedString(typeof(string), ""), "resourceName");
         }
 
         [Fact]
-        public void GetLocalizedString_ThrowsIfNoPropteryByResourceName() {
+        public void GetLocalizedString_ThrowsIfNoPropteryByResourceName()
+        {
             // Arrange 
             Type resourceType = typeof(MockResourceType);
             // Act & Assert
@@ -33,7 +39,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void GetLocalizedString_ThrowsIfPropertyIsNotOfStringType() {
+        public void GetLocalizedString_ThrowsIfPropertyIsNotOfStringType()
+        {
             // Arrange 
             Type resourceType = typeof(MockResourceType);
             // Act & Assert
@@ -42,7 +49,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void GetLocalizedString_ThrowsIfGetPropertyIsNotAvalible() {
+        public void GetLocalizedString_ThrowsIfGetPropertyIsNotAvalible()
+        {
             // Arrange 
             Type resourceType = typeof(MockResourceType);
             // Act & Assert
@@ -51,7 +59,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void GetLocalizedString_ReturnsResourceWithValidName() {
+        public void GetLocalizedString_ReturnsResourceWithValidName()
+        {
             // Arrange
             Type resourceType = typeof(MockResourceType);
             // Act
@@ -60,7 +69,8 @@ namespace NuGet.Test.NuGetCommandLine {
             Assert.Equal("This is a Message.", actual);
         }
 
-        private class MockResourceType {
+        private class MockResourceType
+        {
             public static string Message { get { return "This is a Message."; } }
             public static string MessageTwo { get { return "This is Message Two."; } }
             public static int NotValid { get { return 0; } }

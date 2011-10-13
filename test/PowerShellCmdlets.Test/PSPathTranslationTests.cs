@@ -8,16 +8,20 @@ using System.Threading;
 using Microsoft.PowerShell.Commands;
 using Xunit;
 
-namespace NuGet.PowerShell.Commands.Test {
+namespace NuGet.PowerShell.Commands.Test
+{
     // use a proxy here to save ourselves having to load the Cmdlets
     // assembly into the ps harness.
-    public static class PSPathUtilityProxy {
-        public static bool TryTranslatePSPath(SessionState session, string psPath, out string path, out bool? exists, out string errorMessage) {
+    public static class PSPathUtilityProxy
+    {
+        public static bool TryTranslatePSPath(SessionState session, string psPath, out string path, out bool? exists, out string errorMessage)
+        {
             return PSPathUtility.TryTranslatePSPath(session, psPath, out path, out exists, out errorMessage);
         }
     }
 
-    public class PSPathTranslationTests : IDisposable {
+    public class PSPathTranslationTests : IDisposable
+    {
         private string _tempFilePath;
         private System.Management.Automation.PowerShell _ps;
 
@@ -38,7 +42,8 @@ namespace NuGet.PowerShell.Commands.Test {
               errorMessage = $errorMessage
             }}";
 
-        public PSPathTranslationTests() {
+        public PSPathTranslationTests()
+        {
             // create temp file
             _tempFilePath = Path.GetTempFileName();
 
@@ -63,7 +68,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void TranslatePSPathThatShouldExist() {
+        public void TranslatePSPathThatShouldExist()
+        {
 
             string psPath = "mytemp:\\" + Path.GetFileName(_tempFilePath);
 
@@ -80,7 +86,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void TranslatePSPathThatShouldNotExist() {
+        public void TranslatePSPathThatShouldNotExist()
+        {
 
             string randomFile = Path.GetRandomFileName();
             string psPath = "mytemp:\\" + randomFile;
@@ -97,10 +104,12 @@ namespace NuGet.PowerShell.Commands.Test {
             Assert.Equal(win32Path, (string)result["path"], StringComparer.OrdinalIgnoreCase);
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             _ps.Dispose();
 
-            if (File.Exists(_tempFilePath)) {
+            if (File.Exists(_tempFilePath))
+            {
                 File.Delete(_tempFilePath);
             }
         }

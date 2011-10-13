@@ -1,8 +1,11 @@
 ﻿using System;
 
-namespace NuGet.VisualStudio {
-    public class ProductUpdateAvailableEventArgs : EventArgs {
-        internal ProductUpdateAvailableEventArgs(Version currentVersion, Version newVersion) {
+namespace NuGet.VisualStudio
+{
+    public class ProductUpdateAvailableEventArgs : EventArgs
+    {
+        internal ProductUpdateAvailableEventArgs(Version currentVersion, Version newVersion)
+        {
             CurrentVersion = currentVersion;
             NewVersion = newVersion;
         }

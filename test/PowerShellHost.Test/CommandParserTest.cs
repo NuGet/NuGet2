@@ -1,17 +1,20 @@
-﻿using System.Linq;
-using NuGet.Test;
+﻿using NuGet.Test;
 using NuGetConsole.Host.PowerShell;
 using Xunit;
 
-namespace PowerShellHost.Test {
-    public class CommandParserTest {
+namespace PowerShellHost.Test
+{
+    public class CommandParserTest
+    {
         [Fact]
-        public void NullCommandThrows() {
+        public void NullCommandThrows()
+        {
             ExceptionAssert.ThrowsArgNull(() => CommandParser.Parse(null), "command");
         }
 
         [Fact]
-        public void CommandWithArgumentSetsArgumentAndCompletionArgment() {
+        public void CommandWithArgumentSetsArgumentAndCompletionArgment()
+        {
             // Act
             var command = CommandParser.Parse("Install-Package -Ver ");
 
@@ -24,7 +27,8 @@ namespace PowerShellHost.Test {
         }
 
         [Fact]
-        public void CommandWithPositionalArgumentSetsIndex() {
+        public void CommandWithPositionalArgumentSetsIndex()
+        {
             // Act
             var command = CommandParser.Parse("Install-Package ");
 
@@ -37,7 +41,8 @@ namespace PowerShellHost.Test {
         }
 
         [Fact]
-        public void CommandWithEmptyNamedArgument() {
+        public void CommandWithEmptyNamedArgument()
+        {
             // Act
             var command = CommandParser.Parse("Install-Package -");
 
@@ -49,7 +54,8 @@ namespace PowerShellHost.Test {
         }
 
         [Fact]
-        public void CommandWithNoArguments() {
+        public void CommandWithNoArguments()
+        {
             // Act
             var command = CommandParser.Parse("Install-Package");
 
@@ -61,7 +67,8 @@ namespace PowerShellHost.Test {
         }
 
         [Fact]
-        public void CommandWithSingleQuotedArgument() {
+        public void CommandWithSingleQuotedArgument()
+        {
             // Act
             var command = CommandParser.Parse("Install-Package 'This quoted value' -Value 'Another one' -Name 'John''s value'");
 
@@ -76,7 +83,8 @@ namespace PowerShellHost.Test {
         }
 
         [Fact]
-        public void CommandWithQuotedArgument() {
+        public void CommandWithQuotedArgument()
+        {
             // Act
             var command = CommandParser.Parse("Install-Package \"This quoted value\" -Value \"Another `n one\" -Name \"John`\"s value\"");
 
@@ -91,7 +99,8 @@ namespace PowerShellHost.Test {
         }
 
         [Fact]
-        public void CommandWithNoArgumentValueAndValidArgumentValue() {
+        public void CommandWithNoArgumentValueAndValidArgumentValue()
+        {
             // Act
             var command = CommandParser.Parse("Install-Package -Arg1 -Arg2 Value");
 
@@ -105,7 +114,8 @@ namespace PowerShellHost.Test {
         }
 
         [Fact]
-        public void MultipleCommandsOnlyParsesLastCommand() {
+        public void MultipleCommandsOnlyParsesLastCommand()
+        {
             // Act
             var command = CommandParser.Parse("Get-Values -A 1 'B' | Install-Package -Arg1 -Arg2 Value");
 
@@ -119,7 +129,8 @@ namespace PowerShellHost.Test {
         }
 
         [Fact]
-        public void AssignmentStatementWithCommandParsesCommand() {
+        public void AssignmentStatementWithCommandParsesCommand()
+        {
             // Act
             var command = CommandParser.Parse("$p = Get-Project ");
 

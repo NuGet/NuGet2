@@ -1,6 +1,8 @@
 ﻿
-namespace NuGet.VisualStudio {
-    public interface IProductUpdateSettings {
+namespace NuGet.VisualStudio
+{
+    public interface IProductUpdateSettings
+    {
         bool ShouldCheckForUpdate { get; set; }
     }
 }

@@ -5,10 +5,13 @@ using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.Test {
-    public class ProgramTest {
+namespace NuGet.Test
+{
+    public class ProgramTest
+    {
         [Fact]
-        public void RemoveOldFileDeletesNuGetFileWithExtensionOldIfExist() {
+        public void RemoveOldFileDeletesNuGetFileWithExtensionOldIfExist()
+        {
             // Arrange
             var oldFilePath = GetOldExePath();
             var fileSystem = new MockFileSystem();
@@ -22,7 +25,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemoveOldFileDoesNotDeletesOldNuGetFileIfItDoesNotExistUnderWorkingDirectory() {
+        public void RemoveOldFileDoesNotDeletesOldNuGetFileIfItDoesNotExistUnderWorkingDirectory()
+        {
             // Arrange
             var oldFilePath = GetOldExePathUnderSubdirectory();
             var fileSystem = new MockFileSystem();
@@ -36,7 +40,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemoveOldDoesNotThrow() {
+        public void RemoveOldDoesNotThrow()
+        {
             // Arrange
             var oldFilePath = GetOldExePathUnderSubdirectory();
             var fileSystem = new Mock<IFileSystem>(MockBehavior.Strict);
@@ -52,7 +57,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCommandLineSettingsReturnsSettingsFromLocalFileIfExists() {
+        public void GetCommandLineSettingsReturnsSettingsFromLocalFileIfExists()
+        {
             // Arrange
             var fileContent = @"<?xml version=""1.0""?><configuration><fooSection><add key=""barValue"" value=""qux"" /></fooSection></configuration>";
             var fileSystem = new MockFileSystem();
@@ -66,12 +72,14 @@ namespace NuGet.Test {
             Assert.Equal("qux", value);
         }
 
-        private static string GetOldExePath() {
+        private static string GetOldExePath()
+        {
             var path = typeof(NuGet.Program).Assembly.Location;
             return Path.Combine(Path.GetDirectoryName(path), "NuGet.exe.old");
         }
 
-        private static string GetOldExePathUnderSubdirectory() {
+        private static string GetOldExePathUnderSubdirectory()
+        {
             var path = typeof(NuGet.Program).Assembly.Location;
             return Path.Combine(Path.GetDirectoryName(path), "sub-directory", "NuGet.exe.old");
         }

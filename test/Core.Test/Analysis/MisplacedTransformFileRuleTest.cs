@@ -1,16 +1,17 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 using NuGet.Analysis.Rules;
+using Xunit;
 
-namespace NuGet.Test.Analysis {
-    
-    public class MisplacedTransformFileRuleTest {
+namespace NuGet.Test.Analysis
+{
+
+    public class MisplacedTransformFileRuleTest
+    {
 
         [Fact]
-        public void NoTransformFileHasNoIssue() {
+        public void NoTransformFileHasNoIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("A", content: new[] { "one.js" });
             var rule = new MisplacedTransformFileRule();
@@ -23,7 +24,8 @@ namespace NuGet.Test.Analysis {
         }
 
         [Fact]
-        public void TransformFileInsideContentFolderHasNoIssue() {
+        public void TransformFileInsideContentFolderHasNoIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("A", content: new[] { "one.js.pp", "web.config.transform" });
             var rule = new MisplacedTransformFileRule();
@@ -36,13 +38,14 @@ namespace NuGet.Test.Analysis {
         }
 
         [Fact]
-        public void TransformFileOutsideContentFolderHasIssue() {
+        public void TransformFileOutsideContentFolderHasIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage(
-                "A", 
-                content: new [] { "say.cs.pp", "app.config.transform" },
-                tools: new[] { "web.config.transform" }, 
-                assemblyReferences: new[] { "one.cs.pp" } );
+                "A",
+                content: new[] { "say.cs.pp", "app.config.transform" },
+                tools: new[] { "web.config.transform" },
+                assemblyReferences: new[] { "one.cs.pp" });
             var rule = new MisplacedTransformFileRule();
 
             // Act

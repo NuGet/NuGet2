@@ -6,8 +6,10 @@ using System.Management.Automation.Host;
 using System.Management.Automation.Runspaces;
 using System.Threading;
 
-namespace NuGetConsole.Host.PowerShell.Implementation {
-    internal class NuGetPSHost : PSHost, IHostSupportsInteractiveSession {
+namespace NuGetConsole.Host.PowerShell.Implementation
+{
+    internal class NuGetPSHost : PSHost, IHostSupportsInteractiveSession
+    {
         private readonly CultureInfo _culture = Thread.CurrentThread.CurrentCulture;
         private readonly Guid _instanceId = Guid.NewGuid();
         private readonly string _name;
@@ -15,95 +17,117 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         private readonly CultureInfo _uiCulture = Thread.CurrentThread.CurrentUICulture;
         private PSHostUserInterface _ui;
 
-        public NuGetPSHost(string name, params Tuple<string, object>[] extraData) {
+        public NuGetPSHost(string name, params Tuple<string, object>[] extraData)
+        {
             _name = name;
             _privateData = new PSObject(new Commander(this));
 
             // add extra data as note properties
-            foreach (Tuple<string, object> tuple in extraData) {
+            foreach (Tuple<string, object> tuple in extraData)
+            {
                 _privateData.Properties.Add(new PSNoteProperty(tuple.Item1, tuple.Item2));
             }
         }
 
         public IConsole ActiveConsole { get; set; }
 
-        public override CultureInfo CurrentCulture {
+        public override CultureInfo CurrentCulture
+        {
             get { return _culture; }
         }
 
-        public override CultureInfo CurrentUICulture {
+        public override CultureInfo CurrentUICulture
+        {
             get { return _uiCulture; }
         }
 
-        public override Guid InstanceId {
+        public override Guid InstanceId
+        {
             get { return _instanceId; }
         }
 
-        public override string Name {
+        public override string Name
+        {
             get { return _name; }
         }
 
-        public override PSObject PrivateData {
+        public override PSObject PrivateData
+        {
             get { return _privateData; }
         }
 
-        public override PSHostUserInterface UI {
-            get {
-                if (_ui == null) {
+        public override PSHostUserInterface UI
+        {
+            get
+            {
+                if (_ui == null)
+                {
                     _ui = new NuGetHostUserInterface(this);
                 }
                 return _ui;
             }
         }
 
-        public override Version Version {
+        public override Version Version
+        {
             get { return this.GetType().Assembly.GetName().Version; }
         }
 
         #region IHostSupportsInteractiveSession Members
 
-        public void PushRunspace(Runspace runspace) {
+        public void PushRunspace(Runspace runspace)
+        {
             throw new NotSupportedException();
         }
 
-        public void PopRunspace() {
+        public void PopRunspace()
+        {
             throw new NotSupportedException();
         }
 
-        public bool IsRunspacePushed {
+        public bool IsRunspacePushed
+        {
             get { return false; }
         }
 
-        public Runspace Runspace {
+        public Runspace Runspace
+        {
             get { return Runspace.DefaultRunspace; }
         }
 
         #endregion
 
-        public override void EnterNestedPrompt() {
+        public override void EnterNestedPrompt()
+        {
             UI.WriteErrorLine(Resources.ErrorNestedPromptNotSupported);
         }
 
-        public override void ExitNestedPrompt() {
+        public override void ExitNestedPrompt()
+        {
             throw new NotSupportedException();
         }
 
-        public override void NotifyBeginApplication() {
+        public override void NotifyBeginApplication()
+        {
         }
 
-        public override void NotifyEndApplication() {
+        public override void NotifyEndApplication()
+        {
         }
 
-        public override void SetShouldExit(int exitCode) {
+        public override void SetShouldExit(int exitCode)
+        {
             //TODO: Exit VS?
         }
 
         #region Nested type: Commander
 
-        private class Commander {
+        private class Commander
+        {
             private readonly NuGetPSHost _host;
 
-            public Commander(NuGetPSHost host) {
+            public Commander(NuGetPSHost host)
+            {
                 _host = host;
             }
 
@@ -111,8 +135,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 "Microsoft.Performance",
                 "CA1811:AvoidUncalledPrivateCode",
                 Justification = "This method can be dynamically invoked from PS script.")]
-            public void ClearHost() {
-                if (_host.ActiveConsole != null) {
+            public void ClearHost()
+            {
+                if (_host.ActiveConsole != null)
+                {
                     _host.ActiveConsole.Clear();
                 }
             }

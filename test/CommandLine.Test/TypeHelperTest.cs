@@ -1,11 +1,14 @@
 ﻿using System;
 using Xunit;
 
-namespace NuGet.Test.NuGetCommandLine {
-    
-    public class TypeHelperTest {
+namespace NuGet.Test.NuGetCommandLine
+{
+
+    public class TypeHelperTest
+    {
         [Fact]
-        public void RemoveNullableFromType_ReturnsNonNullableVerson() {
+        public void RemoveNullableFromType_ReturnsNonNullableVerson()
+        {
             // Arrange
             Type expectType = typeof(int);
             // Act
@@ -15,7 +18,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void RemoveNullableFromType_ReturnsSameTypeIfNotNullable() {
+        public void RemoveNullableFromType_ReturnsSameTypeIfNotNullable()
+        {
             // Arrange
             Type expectType = typeof(int);
             // Act
@@ -25,7 +29,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void RemoveNullableFromType_ReturnsSameTypeIfNoNonNullableVerson() {
+        public void RemoveNullableFromType_ReturnsSameTypeIfNoNonNullableVerson()
+        {
             // Arrange
             Type expectType = typeof(string);
             // Act
@@ -35,7 +40,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void TypeAllowsNulls_ReturnsTrueForNullableTypes() {
+        public void TypeAllowsNulls_ReturnsTrueForNullableTypes()
+        {
             // Act
             bool actual = TypeHelper.TypeAllowsNull(typeof(int?));
             // Assert
@@ -43,7 +49,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void TypeAllowsNulls_ReturnsFalaseForNonNullableTypes() {
+        public void TypeAllowsNulls_ReturnsFalaseForNonNullableTypes()
+        {
             // Act
             bool actual = TypeHelper.TypeAllowsNull(typeof(int));
             // Assert
@@ -51,19 +58,22 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ChangeType_ThrowsIfTypeIsNull() {
+        public void ChangeType_ThrowsIfTypeIsNull()
+        {
             // Act & Assert
             ExceptionAssert.ThrowsArgNull(() => TypeHelper.ChangeType(new object(), null), "type");
         }
 
         [Fact]
-        public void ChangeType_ThrowsIfTypeDoesNotAllowNulls() {
+        public void ChangeType_ThrowsIfTypeDoesNotAllowNulls()
+        {
             // Act & Assert
             ExceptionAssert.Throws<InvalidCastException>(() => TypeHelper.ChangeType(null, typeof(int)));
         }
 
         [Fact]
-        public void ChangeType_ReturnsNullIfTypeAllowsNulls() {
+        public void ChangeType_ReturnsNullIfTypeAllowsNulls()
+        {
             // Act
             var actual = TypeHelper.ChangeType(null, typeof(int?));
             // Assert
@@ -71,7 +81,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ChangeType_ReturnsValueIfTypesMatch() {
+        public void ChangeType_ReturnsValueIfTypesMatch()
+        {
             // Act
             var actual = TypeHelper.ChangeType(3, typeof(int));
             // Assert
@@ -80,7 +91,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ChangeType_ReturnsConvertedTypeWhenThereIsAConverterFromTheType() {
+        public void ChangeType_ReturnsConvertedTypeWhenThereIsAConverterFromTheType()
+        {
             // Act
             var actual = TypeHelper.ChangeType("3", typeof(int));
             // Assert
@@ -89,7 +101,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ChangeType_ReturnsConvertedTypeWhenThereIsAConverterFromTheValue() {
+        public void ChangeType_ReturnsConvertedTypeWhenThereIsAConverterFromTheValue()
+        {
             // Act
             var actual = TypeHelper.ChangeType(3, typeof(string));
             // Assert
@@ -98,7 +111,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void ChangeType_ThrowWhenThereIsNoConverterForEither() {
+        public void ChangeType_ThrowWhenThereIsNoConverterForEither()
+        {
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => TypeHelper.ChangeType(false, typeof(MockClass)));
         }

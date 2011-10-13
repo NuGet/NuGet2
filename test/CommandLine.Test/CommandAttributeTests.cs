@@ -1,9 +1,12 @@
 using Xunit;
 
-namespace NuGet.Test.NuGetCommandLine {
-    public class CommandAttributeTests {
+namespace NuGet.Test.NuGetCommandLine
+{
+    public class CommandAttributeTests
+    {
         [Fact]
-        public void GetDescription_ReturnsResourceIfTypeSet() {
+        public void GetDescription_ReturnsResourceIfTypeSet()
+        {
             // Arrange
             CommandAttribute cmd = new CommandAttribute(typeof(MockResourceType), "MockCommand", "ResourceName");
 
@@ -15,7 +18,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void GetDescription_ReturnsDescriptionIfTypeNotSet() {
+        public void GetDescription_ReturnsDescriptionIfTypeNotSet()
+        {
             // Arrange
             CommandAttribute cmd = new CommandAttribute("MockCommand", "ResourceName");
 
@@ -27,7 +31,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void GetUsageSummary_ReturnsResourceIfTypeSet() {
+        public void GetUsageSummary_ReturnsResourceIfTypeSet()
+        {
             // Arrange
             CommandAttribute cmd = new CommandAttribute(typeof(MockResourceType),
                 "MockCommand", "Description") { UsageSummary = "Not a Resource", UsageSummaryResourceName = "ResourceName" };
@@ -40,7 +45,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void GetUsageSummary_ReturnsUsageSummaryIfTypeNotSet() {
+        public void GetUsageSummary_ReturnsUsageSummaryIfTypeNotSet()
+        {
             // Arrange
             CommandAttribute cmd = new CommandAttribute(
                 "MockCommand", "Description") { UsageSummary = "Not a Resource", UsageSummaryResourceName = "ResourceName" };
@@ -53,7 +59,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void GetUsageDescription_ReturnsResourceIfTypeSet() {
+        public void GetUsageDescription_ReturnsResourceIfTypeSet()
+        {
             // Arrange
             CommandAttribute cmd = new CommandAttribute(typeof(MockResourceType),
                 "MockCommand", "Description") { UsageDescription = "Not a Resource", UsageDescriptionResourceName = "ResourceName" };
@@ -66,7 +73,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void GetUsageDescription_ReturnsUsageDescriptionIfTypeNotSet() {
+        public void GetUsageDescription_ReturnsUsageDescriptionIfTypeNotSet()
+        {
             // Arrange
             CommandAttribute cmd = new CommandAttribute(
                 "MockCommand", "Description") { UsageDescription = "Not a Resource", UsageDescriptionResourceName = "ResourceName" };
@@ -79,8 +87,10 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
 
-        public class MockResourceType {
-            public static string ResourceName {
+        public class MockResourceType
+        {
+            public static string ResourceName
+            {
                 get { return "This is a Resource String."; }
             }
         }

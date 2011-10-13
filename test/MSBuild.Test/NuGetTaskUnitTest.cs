@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,14 +7,17 @@ using NuGet.MSBuild;
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.Test.MSBuild {
+namespace NuGet.Test.MSBuild
+{
 
-	public class NuGetTaskUnitTest {
+    public class NuGetTaskUnitTest
+    {
         private const string createdPackage = "thePackageId.1.0.nupkg";
         private const string NuSpecFile = "thePackageId.nuspec";
 
         [Fact]
-        public void WillUseCurrentDirectoryIfBaseDirNotSet() {
+        public void WillUseCurrentDirectoryIfBaseDirNotSet()
+        {
             var fileSystemProviderStub = new Mock<IFileSystemProvider>();
             var currentDir = Directory.GetCurrentDirectory();
             fileSystemProviderStub.Setup(c => c.CreateFileSystem(currentDir)).Returns(new MockFileSystem()).Verifiable();
@@ -29,7 +31,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillUseBaseDirectoryIfBaseDirSet() {
+        public void WillUseBaseDirectoryIfBaseDirSet()
+        {
             var fileSystemProviderStub = new Mock<IFileSystemProvider>();
             var baseDir = "/a/b/c";
             fileSystemProviderStub.Setup(c => c.CreateFileSystem(baseDir)).Returns(new MockFileSystem()).Verifiable();
@@ -44,7 +47,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillLogAnErrorWhenTheSpecFileIsEmpty() {
+        public void WillLogAnErrorWhenTheSpecFileIsEmpty()
+        {
             string actualMessage = null;
             var buildEngineStub = new Mock<IBuildEngine>();
             var fileSystemProviderStub = new Mock<IFileSystemProvider>();
@@ -63,7 +67,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void OutputPathUsesPackageIdAndVerion() {
+        public void OutputPathUsesPackageIdAndVerion()
+        {
             // Arrange
             var packageBuilder = new PackageBuilder { Id = "Foo", Version = new SemanticVersion("1.1") };
 
@@ -77,7 +82,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void OutputPathAppendsSymbolPackageIdentifier() {
+        public void OutputPathAppendsSymbolPackageIdentifier()
+        {
             // Arrange
             var packageBuilder = new PackageBuilder { Id = "Foo", Version = new SemanticVersion("1.1") };
 
@@ -91,7 +97,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillErrorWhenTheSpecFileDoesNotExist() {
+        public void WillErrorWhenTheSpecFileDoesNotExist()
+        {
             // Arrange
             string actualMessage = null;
             var fileSystemProviderStub = new Mock<IFileSystemProvider>();
@@ -112,7 +119,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillRemoveNuspecFilesFromPackage() {
+        public void WillRemoveNuspecFilesFromPackage()
+        {
             // Arrange
             var regularFile = new PhysicalPackageFile { SourcePath = @"C:\readme.txt", TargetPath = @"content\readme.txt" };
             var packageFiles = new List<IPackageFile> { 
@@ -131,7 +139,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillRemoveNupkgFilesFromPackage() {
+        public void WillRemoveNupkgFilesFromPackage()
+        {
             // Arrange
             var regularFile = new PhysicalPackageFile { SourcePath = @"C:\readme.txt", TargetPath = @"content\readme.txt" };
             var packageFiles = new List<IPackageFile> { 
@@ -150,7 +159,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillNotRemoveLibraryFilesFromPackage() {
+        public void WillNotRemoveLibraryFilesFromPackage()
+        {
             // Arrange
             var packageFiles = new List<IPackageFile> { 
                 new PhysicalPackageFile { SourcePath = @"C:\foo.dll", TargetPath = @"lib\foo.dll" },
@@ -167,7 +177,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillLogAnErrorWhenAnUnexpectedErrorHappens() {
+        public void WillLogAnErrorWhenAnUnexpectedErrorHappens()
+        {
             string actualMessage = null;
             var buildEngineStub = new Mock<IBuildEngine>();
             var fileSystemProvider = new Mock<IFileSystemProvider>();
@@ -191,15 +202,18 @@ namespace NuGet.Test.MSBuild {
         private static NuGet.MSBuild.NuGet CreateTaskWithDefaultStubs(
                                                               Mock<IFileSystemProvider> fileSystemProviderStub = null,
                                                               Mock<IBuildEngine> buildEngineStub = null,
-                                                              string fileSystemRoot = "/") {
-            if (fileSystemProviderStub == null) {
+                                                              string fileSystemRoot = "/")
+        {
+            if (fileSystemProviderStub == null)
+            {
                 fileSystemProviderStub = new Mock<IFileSystemProvider>();
                 var mockFileSystem = new MockFileSystem();
                 mockFileSystem.AddFile(fileSystemRoot + NuSpecFile);
                 fileSystemProviderStub.Setup(c => c.CreateFileSystem(It.IsAny<string>())).Returns(mockFileSystem);
             }
 
-            if (buildEngineStub == null) {
+            if (buildEngineStub == null)
+            {
                 buildEngineStub = new Mock<IBuildEngine>();
             }
 

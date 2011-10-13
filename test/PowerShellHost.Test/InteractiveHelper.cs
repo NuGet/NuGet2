@@ -7,12 +7,15 @@ using NuGetConsole.Host.PowerShell.Implementation;
 using NuGetConsole.Implementation.Console;
 using Xunit;
 
-namespace PowerShellHost.Test {
-    internal static class InteractiveHelper {
+namespace PowerShellHost.Test
+{
+    internal static class InteractiveHelper
+    {
         internal static NuGetPSHost InitializeConsole(
             out Mock<NuGetRawUserInterface> mockRawUI,
             out Mock<NuGetHostUserInterface> mockUI,
-            out ConsoleDispatcher dispatcher) {
+            out ConsoleDispatcher dispatcher)
+        {
 
             var console = new Mock<IConsole>();
             console.Setup(o => o.Write("text"));
@@ -22,7 +25,8 @@ namespace PowerShellHost.Test {
             dispatcher = new ConsoleDispatcher(privateWpfConsole.Object);
             console.SetupGet(o => o.Dispatcher).Returns(dispatcher);
 
-            var host = new NuGetPSHost("Test") {
+            var host = new NuGetPSHost("Test")
+            {
                 ActiveConsole = console.Object
             };
 
@@ -36,19 +40,23 @@ namespace PowerShellHost.Test {
             return host;
         }
 
-        internal static bool TryQueueCancelWaitKey(ConsoleDispatcher dispatcher, TimeSpan timeout) {
+        internal static bool TryQueueCancelWaitKey(ConsoleDispatcher dispatcher, TimeSpan timeout)
+        {
             bool cancelWasQueued = ThreadPool.QueueUserWorkItem(
-                state => {
+                state =>
+                {
                     Thread.Sleep(timeout);
                     dispatcher.CancelWaitKey();
                 });
             return cancelWasQueued;
         }
 
-        internal static void PostKeys(ConsoleDispatcher dispatcher, string line, bool appendCarriageReturn = false, TimeSpan timeout = default(TimeSpan)) {
+        internal static void PostKeys(ConsoleDispatcher dispatcher, string line, bool appendCarriageReturn = false, TimeSpan timeout = default(TimeSpan))
+        {
             IntPtr pKeybLayout = NativeMethods.GetKeyboardLayout(0);
 
-            foreach (char keyChar in line) {
+            foreach (char keyChar in line)
+            {
                 short keyScan = NativeMethods.VkKeyScanEx(keyChar, pKeybLayout);
                 byte virtualKey = (byte)(keyScan & 0x00ff);
 
@@ -60,12 +68,14 @@ namespace PowerShellHost.Test {
                 dispatcher.PostKey(keyInfo);
             }
 
-            if (appendCarriageReturn) {
+            if (appendCarriageReturn)
+            {
                 dispatcher.PostKey(VsKeyInfo.Enter);
             }
 
             // queue a cancel operation to prevent test getting "stuck"
-            if (timeout != TimeSpan.Zero) {
+            if (timeout != TimeSpan.Zero)
+            {
                 var cancelWasQueued = TryQueueCancelWaitKey(dispatcher, timeout);
                 Assert.True(cancelWasQueued);
             }

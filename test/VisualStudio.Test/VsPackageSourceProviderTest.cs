@@ -3,11 +3,14 @@ using System.Linq;
 using NuGet.Test;
 using Xunit;
 
-namespace NuGet.VisualStudio.Test {
-    
-    public class VsPackageSourceProviderTest {
+namespace NuGet.VisualStudio.Test
+{
+
+    public class VsPackageSourceProviderTest
+    {
         [Fact]
-        public void AddSourceThrowsIfSourceIsNull() {
+        public void AddSourceThrowsIfSourceIsNull()
+        {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             var packageSourceProvider = new MockPackageSourceProvider();
@@ -18,7 +21,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void CtorIfFirstRunningAddsDefaultSource() {
+        public void CtorIfFirstRunningAddsDefaultSource()
+        {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             var packageSourceProvider = new MockPackageSourceProvider();
@@ -34,7 +38,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void CtorMigrateV1FeedToV2Feed() {
+        public void CtorMigrateV1FeedToV2Feed()
+        {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             userSettingsManager.SetValue(
@@ -53,7 +58,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void CtorMigrateV1FeedToV2FeedAndPreserveIsEnabledProperty() {
+        public void CtorMigrateV1FeedToV2FeedAndPreserveIsEnabledProperty()
+        {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             userSettingsManager.SetValue(
@@ -79,7 +85,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void PreserveActiveSourceWhileMigratingNuGetFeed() {
+        public void PreserveActiveSourceWhileMigratingNuGetFeed()
+        {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             userSettingsManager.SetValues(
@@ -101,7 +108,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void CtorAddsAggregrateIfNothingWasPersistedIntoSettingsManager() {
+        public void CtorAddsAggregrateIfNothingWasPersistedIntoSettingsManager()
+        {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             var packageSourceProvider = new MockPackageSourceProvider();
@@ -116,14 +124,16 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void AddSourceSetsPersistsSourcesToSettingsManager() {
+        public void AddSourceSetsPersistsSourcesToSettingsManager()
+        {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             var packageSourceProvider = new MockPackageSourceProvider();
             var provider = new VsPackageSourceProvider(userSettingsManager, packageSourceProvider);
 
             // Act
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 10; i++)
+            {
                 provider.AddPackageSource(new PackageSource("source" + i, "name" + i));
             }
 
@@ -133,13 +143,15 @@ namespace NuGet.VisualStudio.Test {
             // 11 = 10 package sources that we added + NuGet official source
             Assert.Equal(11, values.Count);
             Assert.Equal(Resources.VsResources.OfficialSourceName, values[0].Name);
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 10; i++)
+            {
                 AssertPackageSource(values[i + 1], "name" + i, "source" + i);
             }
         }
 
         [Fact]
-        public void MigrateActivePackageSourceToV2() {
+        public void MigrateActivePackageSourceToV2()
+        {
             // Arrange
             var settings = new MockUserSettingsManager();
             var provider = new VsPackageSourceProvider(settings);
@@ -156,7 +168,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void SetActivePackageSourcePersistsItToSettingsManager() {
+        public void SetActivePackageSourcePersistsItToSettingsManager()
+        {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             var packageSourceProvider = new MockPackageSourceProvider();
@@ -175,7 +188,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RemoveSourceThrowsIfSourceIsNull() {
+        public void RemoveSourceThrowsIfSourceIsNull()
+        {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             var packageSourceProvider = new MockPackageSourceProvider();
@@ -186,7 +200,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RemovingUnknownPackageSourceReturnsFalse() {
+        public void RemovingUnknownPackageSourceReturnsFalse()
+        {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             var packageSourceProvider = new MockPackageSourceProvider();
@@ -200,7 +215,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RemovingExistingPackageSourceReturnsFalse() {
+        public void RemovingExistingPackageSourceReturnsFalse()
+        {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             var packageSource = new PackageSource("a", "a");
@@ -220,7 +236,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RemovingActivePackageSourceSetsActivePackageSourceToNull() {
+        public void RemovingActivePackageSourceSetsActivePackageSourceToNull()
+        {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             var packageSourceProvider = new MockPackageSourceProvider();
@@ -242,7 +259,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void SettingActivePackageSourceToNonExistantSourceThrows() {
+        public void SettingActivePackageSourceToNonExistantSourceThrows()
+        {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             var packageSourceProvider = new MockPackageSourceProvider();
@@ -253,7 +271,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void SettingsWithMoreThanOneAggregateSourceAreModifiedToNotHaveOne() {
+        public void SettingsWithMoreThanOneAggregateSourceAreModifiedToNotHaveOne()
+        {
             // Arrange
             var userSettingsManager = new MockUserSettingsManager();
             var packageSourceProvider = new MockPackageSourceProvider();
@@ -267,7 +286,8 @@ namespace NuGet.VisualStudio.Test {
             Assert.Equal("NuGet official package source", sources[0].Name);
         }
 
-        private void AssertPackageSource(PackageSource ps, string name, string source) {
+        private void AssertPackageSource(PackageSource ps, string name, string source)
+        {
             Assert.Equal(name, ps.Name);
             Assert.Equal(source, ps.Source);
         }

@@ -1,13 +1,16 @@
-﻿using System;
-using Xunit;
+﻿using Xunit;
 
-namespace NuGet.Test {
-    
-    public class VersionSpecTest {
+namespace NuGet.Test
+{
+
+    public class VersionSpecTest
+    {
         [Fact]
-        public void ToStringExactVersion() {
+        public void ToStringExactVersion()
+        {
             // Arrange
-            var spec = new VersionSpec {
+            var spec = new VersionSpec
+            {
                 IsMaxInclusive = true,
                 IsMinInclusive = true,
                 MaxVersion = new SemanticVersion("1.0"),
@@ -22,9 +25,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ToStringMinVersionInclusive() {
+        public void ToStringMinVersionInclusive()
+        {
             // Arrange
-            var spec = new VersionSpec {
+            var spec = new VersionSpec
+            {
                 IsMinInclusive = true,
                 MinVersion = new SemanticVersion("1.0"),
             };
@@ -37,9 +42,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ToStringMinVersionExclusive() {
+        public void ToStringMinVersionExclusive()
+        {
             // Arrange
-            var spec = new VersionSpec {
+            var spec = new VersionSpec
+            {
                 IsMinInclusive = false,
                 MinVersion = new SemanticVersion("1.0"),
             };
@@ -52,9 +59,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ToStringMaxVersionInclusive() {
+        public void ToStringMaxVersionInclusive()
+        {
             // Arrange
-            var spec = new VersionSpec {
+            var spec = new VersionSpec
+            {
                 IsMaxInclusive = true,
                 MaxVersion = new SemanticVersion("1.0"),
             };
@@ -67,9 +76,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ToStringMaxVersionExclusive() {
+        public void ToStringMaxVersionExclusive()
+        {
             // Arrange
-            var spec = new VersionSpec {
+            var spec = new VersionSpec
+            {
                 IsMaxInclusive = false,
                 MaxVersion = new SemanticVersion("1.0"),
             };
@@ -82,9 +93,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ToStringMinVersionExclusiveMaxInclusive() {
+        public void ToStringMinVersionExclusiveMaxInclusive()
+        {
             // Arrange
-            var spec = new VersionSpec {
+            var spec = new VersionSpec
+            {
                 IsMaxInclusive = true,
                 IsMinInclusive = false,
                 MaxVersion = new SemanticVersion("3.0"),
@@ -99,9 +112,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ToStringMinVersionInclusiveMaxExclusive() {
+        public void ToStringMinVersionInclusiveMaxExclusive()
+        {
             // Arrange
-            var spec = new VersionSpec {
+            var spec = new VersionSpec
+            {
                 IsMaxInclusive = false,
                 IsMinInclusive = true,
                 MaxVersion = new SemanticVersion("4.0"),
@@ -116,9 +131,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ToStringMinVersionInclusiveMaxInclusive() {
+        public void ToStringMinVersionInclusiveMaxInclusive()
+        {
             // Arrange
-            var spec = new VersionSpec {
+            var spec = new VersionSpec
+            {
                 IsMaxInclusive = true,
                 IsMinInclusive = true,
                 MaxVersion = new SemanticVersion("5.0"),
@@ -133,9 +150,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ToStringMinVersionExclusiveMaxExclusive() {
+        public void ToStringMinVersionExclusiveMaxExclusive()
+        {
             // Arrange
-            var spec = new VersionSpec {
+            var spec = new VersionSpec
+            {
                 IsMaxInclusive = false,
                 IsMinInclusive = false,
                 MaxVersion = new SemanticVersion("5.0"),

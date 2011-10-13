@@ -2,39 +2,49 @@
 using System.Collections.Generic;
 using NuGet.Runtime;
 
-namespace NuGet.Test.Mocks {
-    public class MockAssembly : IAssembly {
-        public MockAssembly() {
+namespace NuGet.Test.Mocks
+{
+    public class MockAssembly : IAssembly
+    {
+        public MockAssembly()
+        {
             References = new List<IAssembly>();
         }
 
-        public string Name {
+        public string Name
+        {
             get;
             set;
         }
 
-        public Version Version {
+        public Version Version
+        {
             get;
             set;
         }
 
-        public string PublicKeyToken {
+        public string PublicKeyToken
+        {
             get;
             set;
         }
 
-        public string Culture {
+        public string Culture
+        {
             get;
             set;
         }
 
-        public List<IAssembly> References {
+        public List<IAssembly> References
+        {
             get;
             private set;
         }
 
-        public IEnumerable<IAssembly> ReferencedAssemblies {
-            get {
+        public IEnumerable<IAssembly> ReferencedAssemblies
+        {
+            get
+            {
                 return References;
             }
         }

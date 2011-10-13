@@ -14,10 +14,13 @@ using NuGetConsole.Host.PowerShell.Implementation;
 using NuGetConsole.Implementation.Console;
 using Xunit;
 
-namespace PowerShellHost.Test {
-    public class KeyProcessingTest {
+namespace PowerShellHost.Test
+{
+    public class KeyProcessingTest
+    {
         [Fact]
-        public void SimplePostKeyWaitKey() {
+        public void SimplePostKeyWaitKey()
+        {
 
             var privateWpfConsole = new Mock<IPrivateWpfConsole>();
             var dispatcher = new ConsoleDispatcher(privateWpfConsole.Object);
@@ -42,7 +45,8 @@ namespace PowerShellHost.Test {
         }
 
         [Fact]
-        public void HostUserInterfaceReadkey() {
+        public void HostUserInterfaceReadkey()
+        {
 
             Mock<NuGetRawUserInterface> mockRawUI;
             Mock<NuGetHostUserInterface> mockUI;
@@ -65,7 +69,8 @@ namespace PowerShellHost.Test {
         }
 
         [Fact]
-        public void HostUserInterfaceReadLine() {
+        public void HostUserInterfaceReadLine()
+        {
 
             Mock<NuGetRawUserInterface> mockRawUI;
             Mock<NuGetHostUserInterface> mockUI;
@@ -82,7 +87,8 @@ namespace PowerShellHost.Test {
 
 
         [Fact]
-        public void HostUserInterfaceReadLineAsSecureString() {
+        public void HostUserInterfaceReadLineAsSecureString()
+        {
             Mock<NuGetRawUserInterface> mockRawUI;
             Mock<NuGetHostUserInterface> mockUI;
             ConsoleDispatcher dispatcher;
@@ -100,7 +106,8 @@ namespace PowerShellHost.Test {
         }
 
         [Fact]
-        public void HostUserInterfacePromptForChoice() {
+        public void HostUserInterfacePromptForChoice()
+        {
             Mock<NuGetRawUserInterface> mockRawUI;
             Mock<NuGetHostUserInterface> mockUI;
             ConsoleDispatcher dispatcher;
@@ -125,7 +132,8 @@ namespace PowerShellHost.Test {
         }
 
         [Fact]
-        public void HostUserInterfacePromptForConfirm() {
+        public void HostUserInterfacePromptForConfirm()
+        {
             Mock<NuGetRawUserInterface> mockRawUI;
             Mock<NuGetHostUserInterface> mockUI;
             ConsoleDispatcher dispatcher;
@@ -134,7 +142,8 @@ namespace PowerShellHost.Test {
 
             Runspace rs = RunspaceFactory.CreateRunspace(host);
             rs.Open();
-            using (PowerShell ps = PowerShell.Create()) {
+            using (PowerShell ps = PowerShell.Create())
+            {
                 ps.Runspace = rs;
 
                 // put a "y" on the input queue
@@ -173,7 +182,8 @@ namespace PowerShellHost.Test {
         }
 
         [Fact]
-        public void HostUserInterfacePromptForMissingMandatoryParameters() {
+        public void HostUserInterfacePromptForMissingMandatoryParameters()
+        {
             Mock<NuGetRawUserInterface> mockRawUI;
             Mock<NuGetHostUserInterface> mockUI;
             ConsoleDispatcher dispatcher;
@@ -182,7 +192,8 @@ namespace PowerShellHost.Test {
 
             Runspace rs = RunspaceFactory.CreateRunspace(host);
             rs.Open();
-            using (PowerShell ps = PowerShell.Create()) {
+            using (PowerShell ps = PowerShell.Create())
+            {
                 ps.Runspace = rs;
 
                 // [string]$Name

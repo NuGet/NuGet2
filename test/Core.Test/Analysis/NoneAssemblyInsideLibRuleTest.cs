@@ -3,12 +3,15 @@ using System.Linq;
 using NuGet.Analysis.Rules;
 using Xunit;
 
-namespace NuGet.Test.Analysis {
+namespace NuGet.Test.Analysis
+{
 
-    public class NoneAssemblyInsideLibRuleTest {
+    public class NoneAssemblyInsideLibRuleTest
+    {
 
         [Fact]
-        public void NormalPackageHasNoIssue() {
+        public void NormalPackageHasNoIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("A", content: new[] { "one.js" });
             var rule = new NonAssemblyInsideLibRule();
@@ -21,7 +24,8 @@ namespace NuGet.Test.Analysis {
         }
 
         [Fact]
-        public void AssemblyInsideLibHasNoIssue() {
+        public void AssemblyInsideLibHasNoIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("A", assemblyReferences: new[] { "lib\\abc.dll", "def\\def.winmd" });
             var rule = new NonAssemblyInsideLibRule();
@@ -34,7 +38,8 @@ namespace NuGet.Test.Analysis {
         }
 
         [Fact]
-        public void NonAssemblyInsideLibHasIssue() {
+        public void NonAssemblyInsideLibHasIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage(
                 "A",
@@ -52,7 +57,8 @@ namespace NuGet.Test.Analysis {
         }
 
         [Fact]
-        public void PdbFileAndXmlFilesAreNotWarned() {
+        public void PdbFileAndXmlFilesAreNotWarned()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage(
                 "A",
@@ -66,7 +72,8 @@ namespace NuGet.Test.Analysis {
             Assert.False(issues.Any());
         }
 
-        private void AssertPackageIssueWithPath(PackageIssue issue, string target) {
+        private void AssertPackageIssueWithPath(PackageIssue issue, string target)
+        {
             PackageIssueTestHelper.AssertPackageIssue(
                 issue,
                 "Incompatible files in lib folder.",

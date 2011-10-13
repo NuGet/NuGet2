@@ -2,9 +2,11 @@
 using System.Xml.Serialization;
 using NuGet.Resources;
 
-namespace NuGet {
+namespace NuGet
+{
     [XmlType("dependency")]
-    public class ManifestDependency {
+    public class ManifestDependency
+    {
         [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_DependencyIdRequired")]
         [XmlAttribute("id")]
         public string Id { get; set; }

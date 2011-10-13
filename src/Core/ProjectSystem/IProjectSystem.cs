@@ -1,8 +1,10 @@
 using System.IO;
 using System.Runtime.Versioning;
 
-namespace NuGet {
-    public interface IProjectSystem : IFileSystem, IPropertyProvider {
+namespace NuGet
+{
+    public interface IProjectSystem : IFileSystem, IPropertyProvider
+    {
         FrameworkName TargetFramework { get; }
         string ProjectName { get; }
 

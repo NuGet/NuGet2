@@ -13,8 +13,10 @@ using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
 
-namespace NuGet.Dialog {
-    public partial class PackageManagerWindow : DialogWindow {
+namespace NuGet.Dialog
+{
+    public partial class PackageManagerWindow : DialogWindow
+    {
         internal static PackageManagerWindow CurrentInstance;
         private const string DialogUserAgentClient = "NuGet Add Package Dialog";
         private Lazy<string> _dialogUserAgent = new Lazy<string>(() => HttpUtility.CreateUserAgentString(DialogUserAgentClient));
@@ -44,7 +46,8 @@ namespace NuGet.Dialog {
                  ServiceLocator.GetInstance<ISelectedProviderSettings>(),
                  ServiceLocator.GetInstance<IProductUpdateService>(),
                  ServiceLocator.GetInstance<ISolutionManager>(),
-                 ServiceLocator.GetInstance<IOptionsPageActivator>()) {
+                 ServiceLocator.GetInstance<IOptionsPageActivator>())
+        {
         }
 
         private PackageManagerWindow(Project project,
@@ -60,12 +63,14 @@ namespace NuGet.Dialog {
                                     IProductUpdateService productUpdateService,
                                     ISolutionManager solutionManager,
                                     IOptionsPageActivator optionPageActivator)
-            : base(F1Keyword) {
+            : base(F1Keyword)
+        {
 
             InitializeComponent();
 
             _httpClientEvents = httpClientEvents;
-            if (_httpClientEvents != null) {
+            if (_httpClientEvents != null)
+            {
                 _httpClientEvents.SendingRequest += OnSendingRequest;
             }
 
@@ -101,19 +106,23 @@ namespace NuGet.Dialog {
                 solutionManager);
         }
 
-        private void AddUpdateBar(IProductUpdateService productUpdateService) {
+        private void AddUpdateBar(IProductUpdateService productUpdateService)
+        {
             var updateBar = new ProductUpdateBar(productUpdateService);
             updateBar.UpdateStarting += ExecutedClose;
             LayoutRoot.Children.Add(updateBar);
             updateBar.SizeChanged += OnUpdateBarSizeChanged;
         }
 
-        private void OnUpdateBarSizeChanged(object sender, SizeChangedEventArgs e) {
+        private void OnUpdateBarSizeChanged(object sender, SizeChangedEventArgs e)
+        {
             // when the update bar appears, we adjust the window position 
             // so that it doesn't push the main content area down
-            if (e.HeightChanged) {
+            if (e.HeightChanged)
+            {
                 double heightDifference = e.NewSize.Height - e.PreviousSize.Height;
-                if (heightDifference > 0) {
+                if (heightDifference > 0)
+                {
                     Top = Math.Max(0, Top - heightDifference);
                 }
             }
@@ -127,7 +136,8 @@ namespace NuGet.Dialog {
                                     ProviderServices providerServices,
                                     IPackageRepository recentPackagesRepository,
                                     IHttpClientEvents httpClientEvents,
-                                    ISolutionManager solutionManager) {
+                                    ISolutionManager solutionManager)
+        {
 
             // This package manager is not used for installing from a remote source, and therefore does not need a fallback repository for resolving dependencies
             IVsPackageManager packageManager = packageManagerFactory.CreatePackageManager(ServiceLocator.GetInstance<IPackageRepository>(), useFallbackForDependencies: false);
@@ -140,7 +150,8 @@ namespace NuGet.Dialog {
             UpdatesProvider updatesProvider;
             OnlineProvider recentProvider;
 
-            if (activeProject == null) {
+            if (activeProject == null)
+            {
                 Title = String.Format(
                     CultureInfo.CurrentUICulture,
                     NuGet.Dialog.Resources.Dialog_Title,
@@ -186,7 +197,8 @@ namespace NuGet.Dialog {
                     httpClientEvents,
                     solutionManager);
             }
-            else {
+            else
+            {
                 IProjectManager projectManager = packageManager.GetProjectManager(activeProject);
                 localRepository = projectManager.LocalRepository;
 
@@ -249,53 +261,66 @@ namespace NuGet.Dialog {
             explorer.SelectedProvider = explorer.Providers[selectedProvider];
         }
 
-        private void CanExecuteCommandOnPackage(object sender, CanExecuteRoutedEventArgs e) {
-            if (OperationCoordinator.IsBusy) {
+        private void CanExecuteCommandOnPackage(object sender, CanExecuteRoutedEventArgs e)
+        {
+            if (OperationCoordinator.IsBusy)
+            {
                 e.CanExecute = false;
                 return;
             }
 
             VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
-            if (control == null) {
+            if (control == null)
+            {
                 e.CanExecute = false;
                 return;
             }
 
             PackageItem selectedItem = control.SelectedExtension as PackageItem;
-            if (selectedItem == null) {
+            if (selectedItem == null)
+            {
                 e.CanExecute = false;
                 return;
             }
 
-            try {
+            try
+            {
                 e.CanExecute = selectedItem.IsEnabled;
             }
-            catch (Exception) {
+            catch (Exception)
+            {
                 e.CanExecute = false;
             }
         }
 
-        private void ExecutedPackageCommand(object sender, ExecutedRoutedEventArgs e) {
-            if (OperationCoordinator.IsBusy) {
+        private void ExecutedPackageCommand(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (OperationCoordinator.IsBusy)
+            {
                 return;
             }
 
             VSExtensionsExplorerCtl control = e.Source as VSExtensionsExplorerCtl;
-            if (control == null) {
+            if (control == null)
+            {
                 return;
             }
 
             PackageItem selectedItem = control.SelectedExtension as PackageItem;
-            if (selectedItem == null) {
+            if (selectedItem == null)
+            {
                 return;
             }
 
             PackagesProviderBase provider = control.SelectedProvider as PackagesProviderBase;
-            if (provider != null) {
-                try {
+            if (provider != null)
+            {
+                try
+                {
                     provider.Execute(selectedItem);
                 }
-                catch (Exception exception) {
+                catch (Exception exception)
+                {
                     MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
 
                     ExceptionHelper.WriteToActivityLog(exception);
@@ -303,11 +328,13 @@ namespace NuGet.Dialog {
             }
         }
 
-        private void ExecutedClose(object sender, EventArgs e) {
+        private void ExecutedClose(object sender, EventArgs e)
+        {
             Close();
         }
 
-        private void ExecutedShowOptionsPage(object sender, ExecutedRoutedEventArgs e) {
+        private void ExecutedShowOptionsPage(object sender, ExecutedRoutedEventArgs e)
+        {
             Close();
 
             _optionsPageActivator.ActivatePage(
@@ -318,45 +345,56 @@ namespace NuGet.Dialog {
         /// <summary>
         /// Called when coming back from the Options dialog
         /// </summary>
-        private static void OnActivated(Project project) {
+        private static void OnActivated(Project project)
+        {
             var window = new PackageManagerWindow(project);
-            try {
+            try
+            {
                 window.ShowModal();
             }
-            catch (TargetInvocationException exception) {
+            catch (TargetInvocationException exception)
+            {
                 MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
                 ExceptionHelper.WriteToActivityLog(exception);
             }
         }
 
-        private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e) {
+        private void ExecuteOpenLicenseLink(object sender, ExecutedRoutedEventArgs e)
+        {
             Hyperlink hyperlink = e.OriginalSource as Hyperlink;
-            if (hyperlink != null && hyperlink.NavigateUri != null) {
+            if (hyperlink != null && hyperlink.NavigateUri != null)
+            {
                 UriHelper.OpenExternalLink(hyperlink.NavigateUri);
                 e.Handled = true;
             }
         }
 
-        private void ExecuteSetFocusOnSearchBox(object sender, ExecutedRoutedEventArgs e) {
+        private void ExecuteSetFocusOnSearchBox(object sender, ExecutedRoutedEventArgs e)
+        {
             explorer.SetFocusOnSearchBox();
         }
 
-        private void OnCategorySelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
+        private void OnCategorySelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
             PackagesTreeNodeBase selectedNode = explorer.SelectedExtensionTreeNode as PackagesTreeNodeBase;
-            if (selectedNode != null) {
+            if (selectedNode != null)
+            {
                 // notify the selected node that it is opened.
                 selectedNode.OnOpened();
             }
         }
 
-        private void OnDialogWindowClosing(object sender, System.ComponentModel.CancelEventArgs e) {
+        private void OnDialogWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
             // don't allow the dialog to be closed if an operation is pending
-            if (OperationCoordinator.IsBusy) {
+            if (OperationCoordinator.IsBusy)
+            {
                 e.Cancel = true;
             }
         }
 
-        private void OnDialogWindowClosed(object sender, EventArgs e) {
+        private void OnDialogWindowClosed(object sender, EventArgs e)
+        {
             explorer.Providers.Clear();
 
             // flush output messages to the Output console at once when the dialog is closed.
@@ -369,13 +407,16 @@ namespace NuGet.Dialog {
         /// HACK HACK: Insert the disclaimer element into the correct place inside the Explorer control. 
         /// We don't want to bring in the whole control template of the extension explorer control.
         /// </summary>
-        private void InsertDisclaimerElement() {
+        private void InsertDisclaimerElement()
+        {
             Grid grid = LogicalTreeHelper.FindLogicalNode(explorer, "resGrid") as Grid;
-            if (grid != null) {
+            if (grid != null)
+            {
 
                 // m_Providers is the name of the expander provider control (the one on the leftmost column)
                 UIElement providerExpander = FindChildElementByNameOrType(grid, "m_Providers", typeof(ProviderExpander));
-                if (providerExpander != null) {
+                if (providerExpander != null)
+                {
                     // remove disclaimer text and provider expander from their current parents
                     grid.Children.Remove(providerExpander);
                     LayoutRoot.Children.Remove(DisclaimerText);
@@ -396,11 +437,14 @@ namespace NuGet.Dialog {
             }
         }
 
-        private void AdjustSortComboBoxWidth() {
+        private void AdjustSortComboBoxWidth()
+        {
             Grid grid = LogicalTreeHelper.FindLogicalNode(explorer, "resGrid") as Grid;
-            if (grid != null) {
+            if (grid != null)
+            {
                 var sortCombo = FindChildElementByNameOrType(grid, "cmb_SortOrder", typeof(SortCombo)) as SortCombo;
-                if (sortCombo != null) {
+                if (sortCombo != null)
+                {
                     // The default style fixes the Sort combo control's width to 160, which is bad for localization.
                     // We fix it by setting Min width as 160, and let the control resize to content.
                     sortCombo.ClearValue(FrameworkElement.WidthProperty);
@@ -409,14 +453,19 @@ namespace NuGet.Dialog {
             }
         }
 
-        private UIElement FindChildElementByNameOrType(Grid parent, string childName, Type childType) {
+        private UIElement FindChildElementByNameOrType(Grid parent, string childName, Type childType)
+        {
             UIElement element = parent.FindName(childName) as UIElement;
-            if (element != null) {
+            if (element != null)
+            {
                 return element;
             }
-            else {
-                foreach (UIElement child in parent.Children) {
-                    if (childType.IsInstanceOfType(child)) {
+            else
+            {
+                foreach (UIElement child in parent.Children)
+                {
+                    if (childType.IsInstanceOfType(child))
+                    {
                         return child;
                     }
                 }
@@ -424,31 +473,37 @@ namespace NuGet.Dialog {
             }
         }
 
-        private void OnProviderSelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e) {
+        private void OnProviderSelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
             var selectedProvider = explorer.SelectedProvider as PackagesProviderBase;
-            if (selectedProvider != null) {
+            if (selectedProvider != null)
+            {
                 explorer.NoItemsMessage = selectedProvider.NoItemsMessage;
 
                 // save the selected provider to user settings
                 _selectedProviderSettings.SelectedProvider = explorer.Providers.IndexOf(selectedProvider);
                 // if this is the first time online provider is opened, call to check for update
-                if (selectedProvider == explorer.Providers[1] && !_hasOpenedOnlineProvider) {
+                if (selectedProvider == explorer.Providers[1] && !_hasOpenedOnlineProvider)
+                {
                     _hasOpenedOnlineProvider = true;
                     _productUpdateService.CheckForAvailableUpdateAsync();
                 }
             }
         }
 
-        private void OnSendingRequest(object sender, WebRequestEventArgs e) {
+        private void OnSendingRequest(object sender, WebRequestEventArgs e)
+        {
             HttpUtility.SetUserAgent(e.Request, _dialogUserAgent.Value);
         }
 
-        private void CanExecuteClose(object sender, CanExecuteRoutedEventArgs e) {
+        private void CanExecuteClose(object sender, CanExecuteRoutedEventArgs e)
+        {
             e.CanExecute = !OperationCoordinator.IsBusy;
             e.Handled = true;
         }
 
-        private void OnDialogWindowLoaded(object sender, RoutedEventArgs e) {
+        private void OnDialogWindowLoaded(object sender, RoutedEventArgs e)
+        {
             // HACK: Keep track of the currently open instance of this class.
             CurrentInstance = this;
         }

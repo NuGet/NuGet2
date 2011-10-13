@@ -3,13 +3,15 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGetConsole;
 
-namespace NuGet.VisualStudio {
+namespace NuGet.VisualStudio
+{
 
     /// <summary>
     /// This class implements the IConsole interface in order to integrate with the PowerShellHost.
     /// It sends PowerShell host outputs to the VS Output tool window.
     /// </summary>
-    internal class OutputConsole : IConsole, IConsoleDispatcher {
+    internal class OutputConsole : IConsole, IConsoleDispatcher
+    {
         // guid for our Output window pane
         private static Guid _outputWindowPaneGuid = new Guid("CEC55EC8-CC51-40E7-9243-57B87A6F6BEB");
         private const string _outputWindowPaneName = "Package Manager";
@@ -17,8 +19,10 @@ namespace NuGet.VisualStudio {
         private IVsOutputWindow _outputWindow;
         private IVsOutputWindowPane _outputWindowPane;
 
-        public OutputConsole(IVsOutputWindow outputWindow) {
-            if (outputWindow == null) {
+        public OutputConsole(IVsOutputWindow outputWindow)
+        {
+            if (outputWindow == null)
+            {
                 throw new ArgumentNullException("outputWindow");
             }
 
@@ -27,39 +31,49 @@ namespace NuGet.VisualStudio {
 
         public event EventHandler StartCompleted;
 
-        event EventHandler IConsoleDispatcher.StartWaitingKey {
+        event EventHandler IConsoleDispatcher.StartWaitingKey
+        {
             add { }
             remove { }
         }
 
-        public bool IsStartCompleted {
+        public bool IsStartCompleted
+        {
             get;
             private set;
         }
 
-        public IHost Host {
+        public IHost Host
+        {
             get;
             set;
         }
 
-        public bool ShowDisclaimerHeader {
-            get {
+        public bool ShowDisclaimerHeader
+        {
+            get
+            {
                 return false;
             }
         }
 
-        public IConsoleDispatcher Dispatcher {
+        public IConsoleDispatcher Dispatcher
+        {
             get { return this; }
         }
 
-        public int ConsoleWidth {
-            get {
+        public int ConsoleWidth
+        {
+            get
+            {
                 return 120;
             }
         }
 
-        public void Write(string text) {
-            if (String.IsNullOrEmpty(text)) {
+        public void Write(string text)
+        {
+            if (String.IsNullOrEmpty(text))
+            {
                 return;
             }
 
@@ -68,50 +82,63 @@ namespace NuGet.VisualStudio {
             _outputWindowPane.OutputStringThreadSafe(text);
         }
 
-        public void WriteLine(string text) {
+        public void WriteLine(string text)
+        {
             Write(text + Environment.NewLine);
         }
 
-        public void Write(string text, System.Windows.Media.Color? foreground, System.Windows.Media.Color? background) {
+        public void Write(string text, System.Windows.Media.Color? foreground, System.Windows.Media.Color? background)
+        {
             // the Output window doesn't allow setting text color
             Write(text);
         }
 
-        public void WriteBackspace() {
+        public void WriteBackspace()
+        {
             throw new NotSupportedException();
         }
 
-        public bool IsExecutingCommand {
-            get {
+        public bool IsExecutingCommand
+        {
+            get
+            {
                 return false;
             }
         }
 
-        public bool IsExecutingReadKey {
+        public bool IsExecutingReadKey
+        {
             get { throw new NotSupportedException(); }
         }
 
-        public bool IsKeyAvailable {
+        public bool IsKeyAvailable
+        {
             get { throw new NotSupportedException(); }
         }
 
-        public void WriteProgress(string operation, int percentComplete) {
+        public void WriteProgress(string operation, int percentComplete)
+        {
         }
 
-        public VsKeyInfo WaitKey() {
+        public VsKeyInfo WaitKey()
+        {
             throw new NotSupportedException();
         }
 
-        public void Clear() {
+        public void Clear()
+        {
             Start();
             _outputWindowPane.Clear();
         }
 
-        public void Start() {
-            if (_outputWindowPane == null) {
+        public void Start()
+        {
+            if (_outputWindowPane == null)
+            {
                 // create the Package Manager pane within the Output window
                 int result = _outputWindow.CreatePane(ref _outputWindowPaneGuid, _outputWindowPaneName, fInitVisible: 1, fClearWithSolution: 0);
-                if (result == VSConstants.S_OK) {
+                if (result == VSConstants.S_OK)
+                {
                     result = _outputWindow.GetPane(ref _outputWindowPaneGuid, out _outputWindowPane);
 
                     System.Diagnostics.Debug.Assert(result == VSConstants.S_OK);
@@ -119,18 +146,21 @@ namespace NuGet.VisualStudio {
                 }
             }
 
-            if (StartCompleted != null) {
+            if (StartCompleted != null)
+            {
                 StartCompleted(this, EventArgs.Empty);
             }
 
             IsStartCompleted = true;
         }
 
-        public void ClearConsole() {
+        public void ClearConsole()
+        {
             Clear();
         }
 
-        public void AcceptKeyInput() {
+        public void AcceptKeyInput()
+        {
         }
     }
 }

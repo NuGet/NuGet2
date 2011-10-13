@@ -1,8 +1,10 @@
-namespace NuGetConsole {
+namespace NuGetConsole
+{
     /// <summary>
     /// A token type used by command tokenizer.
     /// </summary>
-    public class Token {
+    public class Token
+    {
         /// <summary>
         /// This token type.
         /// </summary>
@@ -40,7 +42,8 @@ namespace NuGetConsole {
         /// <param name="endLine">The token's end line.</param>
         /// <param name="startColumn">The token's start column.</param>
         /// <param name="endColumn">The token's end column.</param>
-        public Token(TokenType type, int startLine, int endLine, int startColumn, int endColumn) {
+        public Token(TokenType type, int startLine, int endLine, int startColumn, int endColumn)
+        {
             this.Type = type;
             this.StartLine = startLine;
             this.EndLine = endLine;

@@ -6,17 +6,22 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Internal.Web.Utils;
 
-namespace NuGet {
+namespace NuGet
+{
     [Export(typeof(ICommandManager))]
-    public class CommandManager : ICommandManager {
+    public class CommandManager : ICommandManager
+    {
         private readonly IList<ICommand> _commands = new List<ICommand>();
 
-        public IEnumerable<ICommand> GetCommands() {
+        public IEnumerable<ICommand> GetCommands()
+        {
             return _commands;
         }
 
-        public ICommand GetCommand(string commandName) {
-            if (String.IsNullOrEmpty(commandName)) {
+        public ICommand GetCommand(string commandName)
+        {
+            if (String.IsNullOrEmpty(commandName))
+            {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, commandName);
             }
 
@@ -25,17 +30,20 @@ namespace NuGet {
                                             (command.CommandAttribute.AltName ?? String.Empty).StartsWith(commandName, StringComparison.OrdinalIgnoreCase)
                                             select command;
 
-            if (!results.Any()) {
+            if (!results.Any())
+            {
                 throw new CommandLineException(NuGetResources.UnknowCommandError, commandName);
             }
 
             var matchedCommand = results.First();
-            if (results.Skip(1).Any()) {
+            if (results.Skip(1).Any())
+            {
                 // Were there more than one results found?
                 matchedCommand = results.FirstOrDefault(c => c.CommandAttribute.CommandName.Equals(commandName, StringComparison.OrdinalIgnoreCase)
                     || commandName.Equals(c.CommandAttribute.AltName, StringComparison.OrdinalIgnoreCase));
 
-                if (matchedCommand == null) {
+                if (matchedCommand == null)
+                {
                     // No exact match was found and the result returned multiple prefixes.
                     throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.AmbiguousCommand, commandName,
                         String.Join(" ", from c in results select c.CommandAttribute.CommandName)));
@@ -44,12 +52,16 @@ namespace NuGet {
             return matchedCommand;
         }
 
-        public IDictionary<OptionAttribute, PropertyInfo> GetCommandOptions(ICommand command) {
+        public IDictionary<OptionAttribute, PropertyInfo> GetCommandOptions(ICommand command)
+        {
             var result = new Dictionary<OptionAttribute, PropertyInfo>();
 
-            foreach (PropertyInfo propInfo in command.GetType().GetProperties()) {
-                foreach (OptionAttribute attr in propInfo.GetCustomAttributes(typeof(OptionAttribute), true)) {
-                    if (!propInfo.CanWrite && !TypeHelper.IsMultiValuedProperty(propInfo)) {
+            foreach (PropertyInfo propInfo in command.GetType().GetProperties())
+            {
+                foreach (OptionAttribute attr in propInfo.GetCustomAttributes(typeof(OptionAttribute), true))
+                {
+                    if (!propInfo.CanWrite && !TypeHelper.IsMultiValuedProperty(propInfo))
+                    {
                         // If the property has neither a setter nor is of a type that can be cast to ICollection<> then there's no way to assign 
                         // values to it. In this case throw.
                         throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
@@ -62,9 +74,11 @@ namespace NuGet {
             return result;
         }
 
-        public void RegisterCommand(ICommand command) {
+        public void RegisterCommand(ICommand command)
+        {
             var attrib = command.CommandAttribute;
-            if (attrib != null) {
+            if (attrib != null)
+            {
                 _commands.Add(command);
             }
         }

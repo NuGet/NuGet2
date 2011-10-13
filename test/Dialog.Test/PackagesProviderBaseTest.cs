@@ -8,20 +8,24 @@ using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using Xunit;
 
-namespace NuGet.Dialog.Test {
+namespace NuGet.Dialog.Test
+{
 
 
-    public class PackagesProviderBaseTest {
+    public class PackagesProviderBaseTest
+    {
 
         [Fact]
-        public void CtorThrowsIfResourcesArgumentIsNull() {
+        public void CtorThrowsIfResourcesArgumentIsNull()
+        {
             ExceptionAssert.ThrowsArgNull(
                 () => new ConcretePackagesProvider(null),
                 "resources");
         }
 
         [Fact]
-        public void ToStringMethodReturnsNameValue() {
+        public void ToStringMethodReturnsNameValue()
+        {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
 
@@ -33,7 +37,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void PropertyRefreshOnNodeSelectionIsFalse() {
+        public void PropertyRefreshOnNodeSelectionIsFalse()
+        {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
 
@@ -42,7 +47,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void ExtensionsTreeIsNotNull() {
+        public void ExtensionsTreeIsNotNull()
+        {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
 
@@ -51,7 +57,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void ExtensionsTreeIsPopulatedWithOneNode() {
+        public void ExtensionsTreeIsPopulatedWithOneNode()
+        {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
 
@@ -62,7 +69,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void SearchMethodCreatesNewTreeNode() {
+        public void SearchMethodCreatesNewTreeNode()
+        {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
             provider.SelectedNode = (PackagesTreeNodeBase)provider.ExtensionsTree.Nodes[0];
@@ -72,12 +80,13 @@ namespace NuGet.Dialog.Test {
 
             // Assert
             Assert.NotNull(searchNode);
-			Assert.IsType(typeof(PackagesSearchNode), searchNode);
+            Assert.IsType(typeof(PackagesSearchNode), searchNode);
             Assert.True(provider.ExtensionsTree.Nodes.Contains(searchNode));
         }
 
         [Fact]
-        public void SearchMethodDoNotCreateNewSearchNodeWhenSearchTextChanges() {
+        public void SearchMethodDoNotCreateNewSearchNodeWhenSearchTextChanges()
+        {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
             provider.SelectedNode = (PackagesTreeNodeBase)provider.ExtensionsTree.Nodes[0];
@@ -91,7 +100,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void AfterSearchIsDoneTheOriginalNodeIsResetToTheFirstPage() {
+        public void AfterSearchIsDoneTheOriginalNodeIsResetToTheFirstPage()
+        {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
             provider.SelectedNode = (PackagesTreeNodeBase)provider.ExtensionsTree.Nodes[0];
@@ -113,7 +123,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void SearchMethodReturnsNullForNullOrEmptySearchText() {
+        public void SearchMethodReturnsNullForNullOrEmptySearchText()
+        {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
             provider.SelectedNode = (PackagesTreeNodeBase)provider.ExtensionsTree.Nodes[0];
@@ -128,7 +139,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void MediumIconDataTemplate() {
+        public void MediumIconDataTemplate()
+        {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
 
@@ -137,7 +149,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void DetailViewDataTemplate() {
+        public void DetailViewDataTemplate()
+        {
             // Arrange
             PackagesProviderBase provider = CreatePackagesProviderBase();
 
@@ -145,7 +158,8 @@ namespace NuGet.Dialog.Test {
             Assert.NotNull(provider.DetailViewDataTemplate);
         }
 
-        private PackagesProviderBase CreatePackagesProviderBase() {
+        private PackagesProviderBase CreatePackagesProviderBase()
+        {
             ResourceDictionary resources = new ResourceDictionary();
             resources.Add("PackageItemTemplate", new DataTemplate());
             resources.Add("PackageDetailTemplate", new DataTemplate());
@@ -153,10 +167,12 @@ namespace NuGet.Dialog.Test {
             return new ConcretePackagesProvider(resources);
         }
 
-        private class ConcretePackagesProvider : PackagesProviderBase {
+        private class ConcretePackagesProvider : PackagesProviderBase
+        {
 
             public ConcretePackagesProvider(ResourceDictionary resources) :
-                this(new Mock<IPackageRepository>().Object, resources) {
+                this(new Mock<IPackageRepository>().Object, resources)
+            {
             }
 
             public ConcretePackagesProvider(IPackageRepository packageRepository, ResourceDictionary resources) :
@@ -165,21 +181,26 @@ namespace NuGet.Dialog.Test {
                     resources,
                     new ProviderServices(new Mock<IUserNotifierServices>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider()),
                     new Mock<IProgressProvider>().Object,
-                    new Mock<ISolutionManager>().Object) {
+                    new Mock<ISolutionManager>().Object)
+            {
             }
 
-            public override IVsExtension CreateExtension(IPackage package) {
+            public override IVsExtension CreateExtension(IPackage package)
+            {
                 return new Mock<IVsExtension>().Object;
             }
 
-            public override bool CanExecute(PackageItem item) {
+            public override bool CanExecute(PackageItem item)
+            {
                 return false;
             }
 
-            public override void Execute(PackageItem item) {
+            public override void Execute(PackageItem item)
+            {
             }
 
-            protected override void FillRootNodes() {
+            protected override void FillRootNodes()
+            {
                 var repository = new MockPackageRepository();
                 repository.AddPackage(PackageUtility.CreatePackage("hello", "1.0"));
                 repository.AddPackage(PackageUtility.CreatePackage("world", "2.0"));
@@ -188,8 +209,10 @@ namespace NuGet.Dialog.Test {
                 RootNode.Nodes.Add(new SimpleTreeNode(this, "All", RootNode, repository));
             }
 
-            public override string Name {
-                get {
+            public override string Name
+            {
+                get
+                {
                     return "Test Provider";
                 }
             }

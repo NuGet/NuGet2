@@ -5,16 +5,20 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
-namespace NuGet {
-    internal class XmlTransfomer : IPackageFileTransformer {
+namespace NuGet
+{
+    internal class XmlTransfomer : IPackageFileTransformer
+    {
         private readonly IDictionary<XName, Action<XElement, XElement>> _nodeActions;
 
-        public XmlTransfomer(IDictionary<XName, Action<XElement, XElement>> nodeActions) {
+        public XmlTransfomer(IDictionary<XName, Action<XElement, XElement>> nodeActions)
+        {
             _nodeActions = nodeActions;
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We are creating a new stream for the caller to use")]
-        public void TransformFile(IPackageFile file, string targetPath, IProjectSystem projectSystem) {
+        public void TransformFile(IPackageFile file, string targetPath, IProjectSystem projectSystem)
+        {
             // Get the xml fragment
             XElement xmlFragment = GetXml(file, projectSystem);
 
@@ -27,7 +31,8 @@ namespace NuGet {
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We are creating a new stream for the caller to use")]
-        public void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, IProjectSystem projectSystem) {
+        public void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, IProjectSystem projectSystem)
+        {
             // Get the xml snippet
             XElement xmlFragment = GetXml(file, projectSystem);
 
@@ -44,8 +49,10 @@ namespace NuGet {
             projectSystem.AddFile(targetPath, document.Save);
         }
 
-        private static XElement GetXml(IPackageFile file, IProjectSystem projectSystem) {
-            using (Stream stream = file.GetStream()) {
+        private static XElement GetXml(IPackageFile file, IProjectSystem projectSystem)
+        {
+            using (Stream stream = file.GetStream())
+            {
                 var content = Preprocessor.Process(file, projectSystem);
                 return XElement.Parse(content);
             }

@@ -8,15 +8,18 @@ using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 using Xunit;
 
-namespace NuGet.PowerShell.Commands.Test {
+namespace NuGet.PowerShell.Commands.Test
+{
 
-    using PackageUtility = NuGet.Test.PackageUtility;
     using System.Collections.Generic;
+    using PackageUtility = NuGet.Test.PackageUtility;
 
 
-    public class GetPackageCommandTest {
+    public class GetPackageCommandTest
+    {
         [Fact]
-        public void GetPackageReturnsAllInstalledPackagesWhenNoParametersAreSpecified() {
+        public void GetPackageReturnsAllInstalledPackagesWhenNoParametersAreSpecified()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
 
@@ -30,7 +33,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsCorrectInstalledPackagesWhenNoParametersAreSpecifiedAndSkipAndTakeAreSpecified() {
+        public void GetPackageReturnsCorrectInstalledPackagesWhenNoParametersAreSpecifiedAndSkipAndTakeAreSpecified()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.First = 1;
@@ -45,7 +49,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsFilteredPackagesFromInstalledRepo() {
+        public void GetPackageReturnsFilteredPackagesFromInstalledRepo()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.Filter = "P2";
@@ -59,7 +64,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsAllPackagesFromActiveRepositoryWhenRemoteIsPresent() {
+        public void GetPackageReturnsAllPackagesFromActiveRepositoryWhenRemoteIsPresent()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
@@ -76,7 +82,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsCorrectPackagesFromActiveRepositoryWhenRemoteAndSkipAndFirstIsPresent() {
+        public void GetPackageReturnsCorrectPackagesFromActiveRepositoryWhenRemoteAndSkipAndFirstIsPresent()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
@@ -93,7 +100,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsFilteredPackagesFromActiveRepositoryWhenRemoteIsPresent() {
+        public void GetPackageReturnsFilteredPackagesFromActiveRepositoryWhenRemoteIsPresent()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
@@ -108,7 +116,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoFilterIsSpecified() {
+        public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoFilterIsSpecified()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
@@ -124,7 +133,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoFilterIsSpecifiedAndSourceNameIsUsed() {
+        public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoFilterIsSpecifiedAndSourceNameIsUsed()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
@@ -140,7 +150,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageDoesNotReturnPackageFromDisabledSources() {
+        public void GetPackageDoesNotReturnPackageFromDisabledSources()
+        {
             // Arrange
             var packageSourceProvider = new Mock<IVsPackageSourceProvider>();
             packageSourceProvider.Setup(p => p.LoadPackageSources()).Returns(
@@ -164,7 +175,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoFilterIsSpecifiedAndRemoteIsNotSpecified() {
+        public void GetPackageReturnsAllPackagesFromSpecifiedSourceWhenNoFilterIsSpecifiedAndRemoteIsNotSpecified()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.Source = "foo";
@@ -179,7 +191,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsFilteredPackagesFromSpecifiedSourceWhenNoFilterIsSpecified() {
+        public void GetPackageReturnsFilteredPackagesFromSpecifiedSourceWhenNoFilterIsSpecified()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
@@ -195,7 +208,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageThrowsWhenSolutionIsClosedAndRemoteIsNotPresent() {
+        public void GetPackageThrowsWhenSolutionIsClosedAndRemoteIsNotPresent()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet(isSolutionOpen: false);
 
@@ -205,7 +219,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsPackagesFromRemoteWhenSolutionIsClosedAndRemoteIsPresent() {
+        public void GetPackageReturnsPackagesFromRemoteWhenSolutionIsClosedAndRemoteIsPresent()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet(isSolutionOpen: false);
             cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
@@ -222,7 +237,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsPackagesFromRemoteWhenSolutionIsClosedAndSourceIsPresent() {
+        public void GetPackageReturnsPackagesFromRemoteWhenSolutionIsClosedAndSourceIsPresent()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet(isSolutionOpen: false);
             cmdlet.Source = "bing";
@@ -237,7 +253,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageThrowsWhenSolutionIsClosedAndUpdatesIsPresent() {
+        public void GetPackageThrowsWhenSolutionIsClosedAndUpdatesIsPresent()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet(isSolutionOpen: false);
             cmdlet.Updates = new SwitchParameter(isPresent: true);
@@ -248,7 +265,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageThrowsWhenSolutionIsClosedUpdatesAndSourceArePresent() {
+        public void GetPackageThrowsWhenSolutionIsClosedUpdatesAndSourceArePresent()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet(isSolutionOpen: false);
             cmdlet.Updates = new SwitchParameter(isPresent: true);
@@ -260,7 +278,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsListOfPackagesWithUpdates() {
+        public void GetPackageReturnsListOfPackagesWithUpdates()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.Updates = new SwitchParameter(isPresent: true);
@@ -275,7 +294,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsFilteredListOfPackagesWithUpdates() {
+        public void GetPackageReturnsFilteredListOfPackagesWithUpdates()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.Updates = new SwitchParameter(isPresent: true);
@@ -290,7 +310,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsAllPackagesFromSourceWithUpdates() {
+        public void GetPackageReturnsAllPackagesFromSourceWithUpdates()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.Updates = new SwitchParameter(isPresent: true);
@@ -305,7 +326,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsFilteredPackagesFromSourceWithUpdates() {
+        public void GetPackageReturnsFilteredPackagesFromSourceWithUpdates()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.Updates = new SwitchParameter(isPresent: true);
@@ -321,7 +343,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackagesThrowsWhenNoSourceIsProvidedAndRemoteIsPresent() {
+        public void GetPackagesThrowsWhenNoSourceIsProvidedAndRemoteIsPresent()
+        {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(() => GetPackageManager());
@@ -335,7 +358,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackagesReturnsLatestPackageVersionByDefault() {
+        public void GetPackagesReturnsLatestPackageVersionByDefault()
+        {
             // Arrange
             var source = "http://multi-source";
             var cmdlet = BuildCmdlet(repositoryFactory: GetRepositoryFactoryWithMultiplePackageVersions(source), activeSourceName: source);
@@ -353,7 +377,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackagesDoesNotCollapseVersionIfAllVersionsIsPresent() {
+        public void GetPackagesDoesNotCollapseVersionIfAllVersionsIsPresent()
+        {
             // Arrange
             var source = "http://multi-source";
             var cmdlet = BuildCmdlet(repositoryFactory: GetRepositoryFactoryWithMultiplePackageVersions(source), packageManagerFactory: GetPackageManagerForMultipleVersions(),
@@ -376,7 +401,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackagesReturnsLatestUpdateVersions() {
+        public void GetPackagesReturnsLatestUpdateVersions()
+        {
             // Arrange
             var source = "http://multi-source";
             var cmdlet = BuildCmdlet(repositoryFactory: GetRepositoryFactoryWithMultiplePackageVersions(source), packageManagerFactory: GetPackageManagerForMultipleVersions(),
@@ -394,7 +420,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void RecentPackagesCollapsesVersion() {
+        public void RecentPackagesCollapsesVersion()
+        {
             // Arrange
             var cmdlet = BuildCmdlet(repositoryFactory: GetDefaultRepositoryFactory(), recentPackageRepository: GetRepositoryWithMultiplePackageVersions());
             cmdlet.Recent = new SwitchParameter(isPresent: true);
@@ -410,7 +437,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void RecentPackagesFiltersAndCollapsesVersion() {
+        public void RecentPackagesFiltersAndCollapsesVersion()
+        {
             // Arrange
             var cmdlet = BuildCmdlet(repositoryFactory: GetDefaultRepositoryFactory(), recentPackageRepository: GetRepositoryWithMultiplePackageVersions());
             cmdlet.Recent = true;
@@ -426,7 +454,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void RecentPackagesShowsAllPackageVersionsIfSwitchIsPresent() {
+        public void RecentPackagesShowsAllPackageVersionsIfSwitchIsPresent()
+        {
             // Arrange
             var cmdlet = BuildCmdlet(repositoryFactory: GetDefaultRepositoryFactory(), recentPackageRepository: GetRepositoryWithMultiplePackageVersions());
             cmdlet.Recent = true;
@@ -446,7 +475,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void RecentPackagesWithShowAllVersionsAppliesFirstAndSkipFilters() {
+        public void RecentPackagesWithShowAllVersionsAppliesFirstAndSkipFilters()
+        {
             // Arrange
             var cmdlet = BuildCmdlet(repositoryFactory: GetDefaultRepositoryFactory(), recentPackageRepository: GetRepositoryWithMultiplePackageVersions());
             cmdlet.Recent = true;
@@ -464,7 +494,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void TestRecentSwitchWorkCorrectly() {
+        public void TestRecentSwitchWorkCorrectly()
+        {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
             var packageB = PackageUtility.CreatePackage("B", "2.0");
@@ -489,7 +520,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageInvokeProductUpdateCheckWhenSourceIsHttp() {
+        public void GetPackageInvokeProductUpdateCheckWhenSourceIsHttp()
+        {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
             var cmdlet = BuildCmdlet(productUpdateService: productUpdateService.Object);
@@ -504,7 +536,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageInvokeProductUpdateCheckWhenActiveSourceIsHttp() {
+        public void GetPackageInvokeProductUpdateCheckWhenActiveSourceIsHttp()
+        {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
             var cmdlet = BuildCmdlet(isSolutionOpen: false, productUpdateService: productUpdateService.Object, activeSourceName: "http://msn.com");
@@ -518,7 +551,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageDoNotInvokeProductUpdateCheckWhenActiveSourceIsNotHttp() {
+        public void GetPackageDoNotInvokeProductUpdateCheckWhenActiveSourceIsNotHttp()
+        {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
             var cmdlet = BuildCmdlet(isSolutionOpen: false, productUpdateService: productUpdateService.Object);
@@ -532,7 +566,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageInvokeProductUpdateCheckWhenSourceIsNotHttp() {
+        public void GetPackageInvokeProductUpdateCheckWhenSourceIsNotHttp()
+        {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
             var cmdlet = BuildCmdlet(productUpdateService: productUpdateService.Object);
@@ -547,7 +582,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageDoNotInvokeProductUpdateCheckWhenGetLocalPackages() {
+        public void GetPackageDoNotInvokeProductUpdateCheckWhenGetLocalPackages()
+        {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
             var cmdlet = BuildCmdlet(productUpdateService: productUpdateService.Object);
@@ -560,7 +596,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageDoNotInvokeProductUpdateCheckWhenGetUpdatesPackages() {
+        public void GetPackageDoNotInvokeProductUpdateCheckWhenGetUpdatesPackages()
+        {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
             var cmdlet = BuildCmdlet(productUpdateService: productUpdateService.Object);
@@ -574,7 +611,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageDoNotInvokeProductUpdateCheckWhenGetRecentPackages() {
+        public void GetPackageDoNotInvokeProductUpdateCheckWhenGetRecentPackages()
+        {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
             var cmdlet = BuildCmdlet(productUpdateService: productUpdateService.Object);
@@ -588,7 +626,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsPrereleasePackageForInstalledWhenFlagIsNotSpecified() {
+        public void GetPackageReturnsPrereleasePackageForInstalledWhenFlagIsNotSpecified()
+        {
             // Arrange
             var installedPackages = new[] { PackageUtility.CreatePackage("A"), PackageUtility.CreatePackage("B", "1.1.0a"), PackageUtility.CreatePackage("C", "1.3.7.5") };
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -608,7 +647,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsPrereleasePackageForRecentWhenFlagIsNotSpecified() {
+        public void GetPackageReturnsPrereleasePackageForRecentWhenFlagIsNotSpecified()
+        {
             // Arrange
             var recentPackages = new MockPackageRepository() { PackageUtility.CreatePackage("A"), PackageUtility.CreatePackage("B", "1.1.0a"), PackageUtility.CreatePackage("C", "1.3.7.5") };
             var cmdlet = BuildCmdlet(repositoryFactory: GetDefaultRepositoryFactory(), recentPackageRepository: recentPackages);
@@ -625,7 +665,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageDoesNotReturnsUpdatesForPrereleasePackagesWhenFlagIsNotSpecified() {
+        public void GetPackageDoesNotReturnsUpdatesForPrereleasePackagesWhenFlagIsNotSpecified()
+        {
             // Arrange
             var installedPackages = new[] { PackageUtility.CreatePackage("A"), PackageUtility.CreatePackage("B", "1.1.0a"), PackageUtility.CreatePackage("C", "1.3.7.5a") };
             var sourceRepository = new MockPackageRepository() { PackageUtility.CreatePackage("A", "1.1"), PackageUtility.CreatePackage("B", "1.1.0"), 
@@ -649,7 +690,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageReturnsUpdatesForPrereleasePackagesWhenFlagIsSpecified() {
+        public void GetPackageReturnsUpdatesForPrereleasePackagesWhenFlagIsSpecified()
+        {
             // Arrange
             var installedPackages = new[] { PackageUtility.CreatePackage("A"), PackageUtility.CreatePackage("B", "1.1.0a"), PackageUtility.CreatePackage("C", "1.3.7.5a") };
             var sourceRepository = new MockPackageRepository() { PackageUtility.CreatePackage("A", "1.1"), PackageUtility.CreatePackage("B", "1.1.0"), 
@@ -671,11 +713,12 @@ namespace NuGet.PowerShell.Commands.Test {
             Assert.Equal(3, packages.Count());
             AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "A", Version = new SemanticVersion("1.1") });
             AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "B", Version = new SemanticVersion("1.1.0") });
-            AssertPackageResultsEqual(packages.ElementAt(2), new { Id = "C", Version = new SemanticVersion("1.3.7.5b") });        
+            AssertPackageResultsEqual(packages.ElementAt(2), new { Id = "C", Version = new SemanticVersion("1.3.7.5b") });
         }
 
         [Fact]
-        public void GetPackageDoesNotListPrereleasePackagesWhenFlagIsNotSpecified() {
+        public void GetPackageDoesNotListPrereleasePackagesWhenFlagIsNotSpecified()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository() { PackageUtility.CreatePackage("A", "1.1"), PackageUtility.CreatePackage("B", "1.1.0b"), PackageUtility.CreatePackage("D") };
             var repositoryFactory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
@@ -694,7 +737,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void GetPackageListPrereleasePackagesWhenFlagIsSpecified() {
+        public void GetPackageListPrereleasePackagesWhenFlagIsSpecified()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository() { PackageUtility.CreatePackage("A", "1.1"), PackageUtility.CreatePackage("B", "1.1.0b"), PackageUtility.CreatePackage("D") };
             var repositoryFactory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
@@ -714,12 +758,15 @@ namespace NuGet.PowerShell.Commands.Test {
             AssertPackageResultsEqual(packages.ElementAt(2), new { Id = "D", Version = new SemanticVersion("1.0") });
         }
 
-        private static void AssertPackageResultsEqual(dynamic a, dynamic b) {
-            if (a is PSObject) {
+        private static void AssertPackageResultsEqual(dynamic a, dynamic b)
+        {
+            if (a is PSObject)
+            {
                 a = (a as PSObject).BaseObject;
             }
 
-            if (b is PSObject) {
+            if (b is PSObject)
+            {
                 b = (b as PSObject).BaseObject;
             }
 
@@ -733,16 +780,19 @@ namespace NuGet.PowerShell.Commands.Test {
             IProductUpdateService productUpdateService = null,
             IPackageRepositoryFactory repositoryFactory = null,
             IVsPackageManagerFactory packageManagerFactory = null,
-            string activeSourceName = "ActiveRepo") {
+            string activeSourceName = "ActiveRepo")
+        {
 
-            if (packageManagerFactory == null) {
+            if (packageManagerFactory == null)
+            {
                 var mockFactory = new Mock<IVsPackageManagerFactory>();
                 mockFactory.Setup(m => m.CreatePackageManager()).Returns(() => GetPackageManager());
 
                 packageManagerFactory = mockFactory.Object;
             }
 
-            if (recentPackageRepository == null) {
+            if (recentPackageRepository == null)
+            {
                 recentPackageRepository = new Mock<IPackageRepository>().Object;
             }
 
@@ -756,7 +806,8 @@ namespace NuGet.PowerShell.Commands.Test {
                 productUpdateService);
         }
 
-        private static IPackageRepositoryFactory GetDefaultRepositoryFactory(string activeSourceName = "ActiveRepo") {
+        private static IPackageRepositoryFactory GetDefaultRepositoryFactory(string activeSourceName = "ActiveRepo")
+        {
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             var repository = new Mock<IPackageRepository>();
             var packages = new[] { PackageUtility.CreatePackage("P1", "1.4"), PackageUtility.CreatePackage("P6") };
@@ -775,13 +826,15 @@ namespace NuGet.PowerShell.Commands.Test {
             return repositoryFactory.Object;
         }
 
-        private static IPackageRepositoryFactory GetRepositoryFactoryWithMultiplePackageVersions(string sourceName = "MultiSource") {
+        private static IPackageRepositoryFactory GetRepositoryFactoryWithMultiplePackageVersions(string sourceName = "MultiSource")
+        {
             var factory = new Mock<IPackageRepositoryFactory>();
             factory.Setup(c => c.CreateRepository(sourceName)).Returns(GetRepositoryWithMultiplePackageVersions());
             return factory.Object;
         }
 
-        private static IPackageRepository GetRepositoryWithMultiplePackageVersions(string sourceName = "MultiSource") {
+        private static IPackageRepository GetRepositoryWithMultiplePackageVersions(string sourceName = "MultiSource")
+        {
             var repositoryWithMultiplePackageVersions = new Mock<IPackageRepository>();
             var packages = new[] { 
                 PackageUtility.CreatePackage("jQuery", "1.44"), 
@@ -796,7 +849,8 @@ namespace NuGet.PowerShell.Commands.Test {
             return repositoryWithMultiplePackageVersions.Object;
         }
 
-        private static IVsPackageManager GetPackageManager(IEnumerable<IPackage> localPackages = null) {
+        private static IVsPackageManager GetPackageManager(IEnumerable<IPackage> localPackages = null)
+        {
             var fileSystem = new Mock<IFileSystem>();
             var localRepo = new Mock<ISharedPackageRepository>();
             localPackages = localPackages ?? new[] { PackageUtility.CreatePackage("P1", "0.9"), PackageUtility.CreatePackage("P2") };
@@ -805,7 +859,8 @@ namespace NuGet.PowerShell.Commands.Test {
             return new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(), fileSystem.Object, localRepo.Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
         }
 
-        private static IVsPackageManagerFactory GetPackageManagerForMultipleVersions() {
+        private static IVsPackageManagerFactory GetPackageManagerForMultipleVersions()
+        {
             var fileSystem = new Mock<IFileSystem>();
             var localRepo = new Mock<ISharedPackageRepository>();
             var localPackages = new[] { PackageUtility.CreatePackage("jQuery", "1.2"), PackageUtility.CreatePackage("TestPack", "0.1") };
@@ -819,7 +874,8 @@ namespace NuGet.PowerShell.Commands.Test {
             return factory.Object;
         }
 
-        private static IPackageRepository GetActiveRepository() {
+        private static IPackageRepository GetActiveRepository()
+        {
             var remotePackages = new[] { PackageUtility.CreatePackage("P0", "1.1"), PackageUtility.CreatePackage("P1", "1.1"), 
                                          PackageUtility.CreatePackage("P2", "1.2"), PackageUtility.CreatePackage("P3") };
             var remoteRepo = new Mock<IPackageRepository>();
@@ -827,7 +883,8 @@ namespace NuGet.PowerShell.Commands.Test {
             return remoteRepo.Object;
         }
 
-        private static IVsPackageSourceProvider GetSourceProvider(string activeSourceName) {
+        private static IVsPackageSourceProvider GetSourceProvider(string activeSourceName)
+        {
             Mock<IVsPackageSourceProvider> sourceProvider = new Mock<IVsPackageSourceProvider>();
             sourceProvider.Setup(c => c.ActivePackageSource).Returns(new PackageSource(activeSourceName, activeSourceName));
             return sourceProvider.Object;

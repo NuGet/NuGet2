@@ -2,11 +2,14 @@
 using System.Linq;
 using Xunit;
 
-namespace NuGet.Test {
-    
-    public class NullFileSystemTest {
+namespace NuGet.Test
+{
+
+    public class NullFileSystemTest
+    {
         [Fact]
-        public void NullFileSystemReturnsNoFilesOrDirectories() {
+        public void NullFileSystemReturnsNoFilesOrDirectories()
+        {
             // Arrange
             var instance = NullFileSystem.Instance;
 
@@ -22,7 +25,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void NullFileSystemReturnsFalseForExistenceChecks() {
+        public void NullFileSystemReturnsFalseForExistenceChecks()
+        {
             // Arrange
             var instance = NullFileSystem.Instance;
 
@@ -32,7 +36,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void NullFileSystemReturnsNullStreamForOpen() {
+        public void NullFileSystemReturnsNullStreamForOpen()
+        {
             // Arrange
             var instance = NullFileSystem.Instance;
 
@@ -41,7 +46,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void NullFileSystemDoesNotThrowForFileOperations() {
+        public void NullFileSystemDoesNotThrowForFileOperations()
+        {
             // Arrange
             var instance = NullFileSystem.Instance;
 

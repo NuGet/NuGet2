@@ -1,8 +1,10 @@
 ﻿using System.Runtime.Serialization;
 
-namespace NuGet {
+namespace NuGet
+{
     [DataContract]
-    public class PublishData {
+    public class PublishData
+    {
         [DataMember(Name = "key")]
         public string Key { get; set; }
 

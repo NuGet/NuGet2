@@ -6,14 +6,17 @@ using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.VisualStudio.Test {
+namespace NuGet.VisualStudio.Test
+{
     using System.IO;
-    using PackageUtility = NuGet.Test.PackageUtility;    
+    using PackageUtility = NuGet.Test.PackageUtility;
 
-    public class PackageRestoreManagerTest {
+    public class PackageRestoreManagerTest
+    {
 
         [Fact]
-        public void IsCurrentSolutionEnabledReturnsFalseIfSolutionIsNotOpen() {
+        public void IsCurrentSolutionEnabledReturnsFalseIfSolutionIsNotOpen()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(p => p.IsSolutionOpen).Returns(false);
@@ -28,7 +31,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsCurrentSolutionEnabledReturnsFalseIfSolutionDirectoryIsNullOrEmpty() {
+        public void IsCurrentSolutionEnabledReturnsFalseIfSolutionDirectoryIsNullOrEmpty()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(p => p.IsSolutionOpen).Returns(true);
@@ -51,7 +55,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsCurrentSolutionEnabledReturnsFalseIfNuGetFolderDoesNotExist() {
+        public void IsCurrentSolutionEnabledReturnsFalseIfNuGetFolderDoesNotExist()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(p => p.IsSolutionOpen).Returns(true);
@@ -74,7 +79,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsCurrentSolutionEnabledReturnsFalseIfNuGetTargetsDoesNotExist() {
+        public void IsCurrentSolutionEnabledReturnsFalseIfNuGetTargetsDoesNotExist()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(p => p.IsSolutionOpen).Returns(true);
@@ -97,7 +103,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsCurrentSolutionEnabledReturnsTrueIfFilesAndFoldersExist() {
+        public void IsCurrentSolutionEnabledReturnsTrueIfFilesAndFoldersExist()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(p => p.IsSolutionOpen).Returns(true);
@@ -121,7 +128,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void CallingEnableCurrentSolutionThrowsIfSolutionIsNotOpen() {
+        public void CallingEnableCurrentSolutionThrowsIfSolutionIsNotOpen()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(p => p.IsSolutionOpen).Returns(false);
@@ -134,7 +142,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void CallingEnableCurrentSolutionSetupEverythingCorrectly() {
+        public void CallingEnableCurrentSolutionSetupEverythingCorrectly()
+        {
             // Arrange
             string tempSolutionPath = CreateTempFolder();
 
@@ -179,7 +188,7 @@ namespace NuGet.VisualStudio.Test {
                 tools: new string[] { "NuGet.exe" }));
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             packageRepositoryFactory.Setup(p => p.CreateRepository(NuGetConstants.DefaultFeedUrl)).Returns(packageRepository);
-            
+
             var packageRestore = CreateInstance(
                 dte.Object,
                 solutionManager.Object,
@@ -214,25 +223,31 @@ namespace NuGet.VisualStudio.Test {
             ISolutionManager solutionManager = null,
             IFileSystemProvider fileSystemProvider = null,
             IPackageRepositoryFactory packageRepositoryFactory = null,
-            IVsThreadedWaitDialogFactory waitDialogFactory = null) {
+            IVsThreadedWaitDialogFactory waitDialogFactory = null)
+        {
 
-            if (dte == null) {
+            if (dte == null)
+            {
                 dte = new Mock<DTE>().Object;
             }
 
-            if (solutionManager == null) {
+            if (solutionManager == null)
+            {
                 solutionManager = new Mock<ISolutionManager>().Object;
             }
 
-            if (fileSystemProvider == null) {
+            if (fileSystemProvider == null)
+            {
                 fileSystemProvider = new Mock<IFileSystemProvider>().Object;
             }
 
-            if (packageRepositoryFactory == null) {
+            if (packageRepositoryFactory == null)
+            {
                 packageRepositoryFactory = new Mock<IPackageRepositoryFactory>().Object;
             }
 
-            if (waitDialogFactory == null) {
+            if (waitDialogFactory == null)
+            {
                 var mockWaitDialogFactory = new Mock<IVsThreadedWaitDialogFactory>();
                 var mockWaitDialog = new Mock<IVsThreadedWaitDialog2>();
                 mockWaitDialog.Setup(p => p.StartWaitDialog(
@@ -260,9 +275,11 @@ namespace NuGet.VisualStudio.Test {
                 waitDialogFactory);
         }
 
-        private string CreateTempFolder() {
+        private string CreateTempFolder()
+        {
             string folderPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-            if (!Directory.Exists(folderPath)) {
+            if (!Directory.Exists(folderPath))
+            {
                 Directory.CreateDirectory(folderPath);
             }
             return folderPath;

@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Xunit;
+﻿using Xunit;
 
-namespace NuGet.Test.Analysis {
-    internal static class PackageIssueTestHelper {
+namespace NuGet.Test.Analysis
+{
+    internal static class PackageIssueTestHelper
+    {
         public static void AssertPackageIssue(
             PackageIssue issue,
             string expectedTitle,
             string expectedDescription,
-            string expectedSolution) {
+            string expectedSolution)
+        {
 
             Assert.Equal(expectedTitle, issue.Title);
             Assert.Equal(expectedDescription, issue.Description);

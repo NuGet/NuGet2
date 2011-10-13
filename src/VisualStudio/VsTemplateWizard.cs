@@ -13,9 +13,11 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TemplateWizard;
 using NuGet.VisualStudio.Resources;
 
-namespace NuGet.VisualStudio {
+namespace NuGet.VisualStudio
+{
     [Export(typeof(IVsTemplateWizard))]
-    public class VsTemplateWizard : IVsTemplateWizard {
+    public class VsTemplateWizard : IVsTemplateWizard
+    {
         private readonly IVsPackageInstaller _installer;
         private VsTemplateWizardInstallerConfiguration _configuration;
         private Project _project;
@@ -24,17 +26,20 @@ namespace NuGet.VisualStudio {
         private DTE DTE { get; set; }
 
         [ImportingConstructor]
-        public VsTemplateWizard(IVsPackageInstaller installer) {
+        public VsTemplateWizard(IVsPackageInstaller installer)
+        {
             _installer = installer;
         }
 
-        private VsTemplateWizardInstallerConfiguration GetConfigurationFromVsTemplateFile(string vsTemplatePath) {
+        private VsTemplateWizardInstallerConfiguration GetConfigurationFromVsTemplateFile(string vsTemplatePath)
+        {
             XDocument document = LoadDocument(vsTemplatePath);
 
             return GetConfigurationFromXmlDocument(document, vsTemplatePath);
         }
 
-        internal VsTemplateWizardInstallerConfiguration GetConfigurationFromXmlDocument(XDocument document, string vsTemplatePath, object vsExtensionManager = null) {
+        internal VsTemplateWizardInstallerConfiguration GetConfigurationFromXmlDocument(XDocument document, string vsTemplatePath, object vsExtensionManager = null)
+        {
             IEnumerable<VsTemplateWizardPackageInfo> packages = Enumerable.Empty<VsTemplateWizardPackageInfo>();
             string repositoryPath = null;
 
@@ -43,11 +48,13 @@ namespace NuGet.VisualStudio {
                 .ElementsNoNamespace("packages")
                 .FirstOrDefault();
 
-            if (packagesElement != null) {
+            if (packagesElement != null)
+            {
                 RepositoryType repositoryType = GetRepositoryType(packagesElement);
                 packages = GetPackages(packagesElement).ToList();
 
-                if (packages.Any()) {
+                if (packages.Any())
+                {
                     repositoryPath = GetRepositoryPath(packagesElement, repositoryType, vsTemplatePath,
                         vsExtensionManager);
                 }
@@ -56,7 +63,8 @@ namespace NuGet.VisualStudio {
             return new VsTemplateWizardInstallerConfiguration(repositoryPath, packages);
         }
 
-        private IEnumerable<VsTemplateWizardPackageInfo> GetPackages(XElement packagesElement) {
+        private IEnumerable<VsTemplateWizardPackageInfo> GetPackages(XElement packagesElement)
+        {
             var declarations = (from packageElement in packagesElement.ElementsNoNamespace("package")
                                 let id = packageElement.GetOptionalAttributeValue("id")
                                 let version = packageElement.GetOptionalAttributeValue("version")
@@ -70,7 +78,8 @@ namespace NuGet.VisualStudio {
                                                  !SemanticVersion.TryParse(declaration.version, out semVer)
                                              select declaration;
 
-            if (missingOrInvalidAttributes.Any()) {
+            if (missingOrInvalidAttributes.Any())
+            {
                 ShowErrorMessage(
                     VsResources.TemplateWizard_InvalidPackageElementAttributes);
                 throw new WizardBackoutException();
@@ -80,13 +89,16 @@ namespace NuGet.VisualStudio {
                    select new VsTemplateWizardPackageInfo(declaration.id, declaration.version);
         }
 
-        private string GetRepositoryPath(XElement packagesElement, RepositoryType repositoryType, string vsTemplatePath, object vsExtensionManager) {
-            switch (repositoryType) {
+        private string GetRepositoryPath(XElement packagesElement, RepositoryType repositoryType, string vsTemplatePath, object vsExtensionManager)
+        {
+            switch (repositoryType)
+            {
                 case RepositoryType.Template:
                     return Path.GetDirectoryName(vsTemplatePath);
                 case RepositoryType.Extension:
                     string repositoryId = packagesElement.GetOptionalAttributeValue("repositoryId");
-                    if (repositoryId == null) {
+                    if (repositoryId == null)
+                    {
                         ShowErrorMessage(VsResources.TemplateWizard_MissingExtensionId);
                         throw new WizardBackoutException();
                     }
@@ -94,7 +106,8 @@ namespace NuGet.VisualStudio {
 
                     var extensionManagerShim = new ExtensionManagerShim(vsExtensionManager);
                     string installPath;
-                    if (!extensionManagerShim.TryGetExtensionInstallPath(repositoryId, out installPath)) {
+                    if (!extensionManagerShim.TryGetExtensionInstallPath(repositoryId, out installPath))
+                    {
                         ShowErrorMessage(String.Format(VsResources.TemplateWizard_InvalidExtensionId,
                             repositoryId));
                         throw new WizardBackoutException();
@@ -105,9 +118,11 @@ namespace NuGet.VisualStudio {
             return null;
         }
 
-        private RepositoryType GetRepositoryType(XElement packagesElement) {
+        private RepositoryType GetRepositoryType(XElement packagesElement)
+        {
             string repositoryAttributeValue = packagesElement.GetOptionalAttributeValue("repository");
-            switch (repositoryAttributeValue) {
+            switch (repositoryAttributeValue)
+            {
                 case "extension":
                     return RepositoryType.Extension;
                 case "template":
@@ -120,27 +135,33 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        internal virtual XDocument LoadDocument(string path) {
+        internal virtual XDocument LoadDocument(string path)
+        {
             return XDocument.Load(path);
         }
 
-        private void PerformPackageInstall(IVsPackageInstaller packageInstaller, Project project, string packageRepositoryPath, IEnumerable<VsTemplateWizardPackageInfo> packages) {
+        private void PerformPackageInstall(IVsPackageInstaller packageInstaller, Project project, string packageRepositoryPath, IEnumerable<VsTemplateWizardPackageInfo> packages)
+        {
             var failedPackages = new List<VsTemplateWizardPackageInfo>();
 
-            foreach (var package in packages) {
-                try {
+            foreach (var package in packages)
+            {
+                try
+                {
                     DTE.StatusBar.Text = String.Format(CultureInfo.CurrentCulture, VsResources.TemplateWizard_PackageInstallStatus, package.Id, package.Version);
                     // TODO review parameters and installer call
                     // REVIEW is it OK to ignoreDependencies? The expectation is that the vstemplate will list all the required packages
                     // REVIEW We need to figure out if we can break IVsPackageInstaller interface by modifying it to accept a SemVer and still allow MVC 3 projects to work
                     packageInstaller.InstallPackage(packageRepositoryPath, project, package.Id, package.Version, ignoreDependencies: true);
                 }
-                catch (InvalidOperationException) {
+                catch (InvalidOperationException)
+                {
                     failedPackages.Add(package);
                 }
             }
 
-            if (failedPackages.Any()) {
+            if (failedPackages.Any())
+            {
                 var errorString = new StringBuilder();
                 errorString.AppendFormat(VsResources.TemplateWizard_FailedToInstallPackage, packageRepositoryPath);
                 errorString.AppendLine();
@@ -150,29 +171,36 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        private void ProjectFinishedGenerating(Project project) {
+        private void ProjectFinishedGenerating(Project project)
+        {
             _project = project;
         }
 
-        private void ProjectItemFinishedGenerating(ProjectItem projectItem) {
+        private void ProjectItemFinishedGenerating(ProjectItem projectItem)
+        {
             _projectItem = projectItem;
         }
 
-        private void RunFinished() {
-            if (_projectItem != null && _project == null) {
+        private void RunFinished()
+        {
+            if (_projectItem != null && _project == null)
+            {
                 _project = _projectItem.ContainingProject;
             }
 
             Debug.Assert(_project != null);
             Debug.Assert(_configuration != null);
-            if (_configuration.Packages.Any()) {
+            if (_configuration.Packages.Any())
+            {
                 string repositoryPath = _configuration.RepositoryPath;
                 PerformPackageInstall(_installer, _project, repositoryPath, _configuration.Packages);
             }
         }
 
-        private void RunStarted(object automationObject, WizardRunKind runKind, object[] customParams) {
-            if (runKind != WizardRunKind.AsNewProject && runKind != WizardRunKind.AsNewItem) {
+        private void RunStarted(object automationObject, WizardRunKind runKind, object[] customParams)
+        {
+            if (runKind != WizardRunKind.AsNewProject && runKind != WizardRunKind.AsNewItem)
+            {
                 ShowErrorMessage(VsResources.TemplateWizard_InvalidWizardRunKind);
                 throw new WizardBackoutException();
             }
@@ -182,37 +210,45 @@ namespace NuGet.VisualStudio {
             _configuration = GetConfigurationFromVsTemplateFile(vsTemplatePath);
         }
 
-        internal virtual void ShowErrorMessage(string message) {
+        internal virtual void ShowErrorMessage(string message)
+        {
             MessageHelper.ShowErrorMessage(message, VsResources.TemplateWizard_ErrorDialogTitle);
         }
 
-        void IWizard.BeforeOpeningFile(ProjectItem projectItem) {
+        void IWizard.BeforeOpeningFile(ProjectItem projectItem)
+        {
             // do nothing
         }
 
-        void IWizard.ProjectFinishedGenerating(Project project) {
+        void IWizard.ProjectFinishedGenerating(Project project)
+        {
             ProjectFinishedGenerating(project);
         }
 
-        void IWizard.ProjectItemFinishedGenerating(ProjectItem projectItem) {
+        void IWizard.ProjectItemFinishedGenerating(ProjectItem projectItem)
+        {
             ProjectItemFinishedGenerating(projectItem);
         }
 
-        void IWizard.RunFinished() {
+        void IWizard.RunFinished()
+        {
             RunFinished();
         }
 
-        void IWizard.RunStarted(object automationObject, Dictionary<string, string> replacementsDictionary, WizardRunKind runKind, object[] customParams) {
+        void IWizard.RunStarted(object automationObject, Dictionary<string, string> replacementsDictionary, WizardRunKind runKind, object[] customParams)
+        {
             // TODO REVIEW alternatively could get body of WizardData element from replacementsDictionary["$wizarddata$"] instead of parsing vstemplate file.
             RunStarted(automationObject, runKind, customParams);
         }
 
-        bool IWizard.ShouldAddProjectItem(string filePath) {
+        bool IWizard.ShouldAddProjectItem(string filePath)
+        {
             // always add all project items
             return true;
         }
 
-        private enum RepositoryType {
+        private enum RepositoryType
+        {
             /// <summary>
             /// Cache location relative to the template (inside the same folder as the vstemplate file)
             /// </summary>
@@ -223,7 +259,8 @@ namespace NuGet.VisualStudio {
             Extension,
         }
 
-        private class ExtensionManagerShim {
+        private class ExtensionManagerShim
+        {
             private static Type _iInstalledExtensionType;
             private static Type _iVsExtensionManagerType;
             private static PropertyInfo _installPathProperty;
@@ -233,17 +270,21 @@ namespace NuGet.VisualStudio {
 
             private readonly object _extensionManager;
 
-            public ExtensionManagerShim(object extensionManager) {
+            public ExtensionManagerShim(object extensionManager)
+            {
                 InitializeTypes();
                 _extensionManager = extensionManager ?? Package.GetGlobalService(_sVsExtensionManagerType);
             }
 
-            private static void InitializeTypes() {
-                if (_typesInitialized) {
+            private static void InitializeTypes()
+            {
+                if (_typesInitialized)
+                {
                     return;
                 }
 
-                try {
+                try
+                {
                     Assembly extensionManagerAssembly = AppDomain.CurrentDomain.GetAssemblies()
                         .Where(a => a.FullName.StartsWith("Microsoft.VisualStudio.ExtensionManager,"))
                         .First();
@@ -257,24 +298,28 @@ namespace NuGet.VisualStudio {
                         new[] { typeof(string), _iInstalledExtensionType.MakeByRefType() });
                     _installPathProperty = _iInstalledExtensionType.GetProperty("InstallPath", typeof(string));
                     if (_installPathProperty == null || _tryGetInstalledExtensionMethod == null ||
-                        _sVsExtensionManagerType == null) {
+                        _sVsExtensionManagerType == null)
+                    {
                         throw new Exception();
                     }
 
                     _typesInitialized = true;
                 }
-                catch {
+                catch
+                {
                     // if any of the types or methods cannot be loaded throw an error. this indicates that some API in
                     // Microsoft.VisualStudio.ExtensionManager got changed.
                     throw new WizardBackoutException(VsResources.TemplateWizard_ExtensionManagerError);
                 }
             }
 
-            public bool TryGetExtensionInstallPath(string extensionId, out string installPath) {
+            public bool TryGetExtensionInstallPath(string extensionId, out string installPath)
+            {
                 installPath = null;
                 object[] parameters = new object[] { extensionId, null };
                 bool result = (bool)_tryGetInstalledExtensionMethod.Invoke(_extensionManager, parameters);
-                if (!result) {
+                if (!result)
+                {
                     return false;
                 }
                 object extension = parameters[1];

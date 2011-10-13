@@ -6,14 +6,17 @@ using NuGet.Test;
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.VisualStudio.Test {
+namespace NuGet.VisualStudio.Test
+{
 
     using PackageUtility = NuGet.Test.PackageUtility;
 
-    public class RecentPackageRepositoryTest {
+    public class RecentPackageRepositoryTest
+    {
 
         [Fact]
-        public void RemovePackageMethodThrow() {
+        public void RemovePackageMethodThrow()
+        {
             // Arrange
             var repository = CreateRecentPackageRepository();
 
@@ -22,7 +25,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void TestGetPackagesReturnNoPackageIfThereIsNoPackageMetadata() {
+        public void TestGetPackagesReturnNoPackageIfThereIsNoPackageMetadata()
+        {
             // Arrange
             var repository = CreateRecentPackageRepository(null, new IPersistencePackageMetadata[0]);
 
@@ -34,7 +38,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void TestGetPackagesReturnCorrectNumberOfPackages() {
+        public void TestGetPackagesReturnCorrectNumberOfPackages()
+        {
             // Scenario: The remote repository contains package A and C
             // Recent settings store contains metadata for A
             // Calling GetPackages() should return package A.
@@ -52,7 +57,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void TestGetPackagesReturnNothingAfterCallingClear() {
+        public void TestGetPackagesReturnNothingAfterCallingClear()
+        {
             // Arrange
             var repository = CreateRecentPackageRepository();
 
@@ -65,7 +71,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void TestGetPackagesReturnPackagesSortedByDateByDefault() {
+        public void TestGetPackagesReturnPackagesSortedByDateByDefault()
+        {
             // Scenario: The remote repository contains package A, B and C
             // Recent settings store contains metadata for A and B
             // Calling GetPackages() should return package A and B, sorted by date (B goes before A)
@@ -88,7 +95,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void TestGetPackagesReturnCorrectNumberOfPackagesAfterAddingPackage() {
+        public void TestGetPackagesReturnCorrectNumberOfPackagesAfterAddingPackage()
+        {
             // Scenario: The remote repository contains package A and C
             // Recent settings store contains metadata for A and B
             // Calling AddPackage(packageC)
@@ -111,7 +119,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void TestGetPackagesReturnCorrectNumberOfPackagesAfterAddingPackageThatAlreadyExists() {
+        public void TestGetPackagesReturnCorrectNumberOfPackagesAfterAddingPackageThatAlreadyExists()
+        {
             // Scenario: The remote repository contains package A and B
             // Recent settings store contains metadata for A and B
             // Calling AddPackage(packageA)
@@ -143,7 +152,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetPackagesReturnCorrectPackagesAfterAddingManyPackages() {
+        public void GetPackagesReturnCorrectPackagesAfterAddingManyPackages()
+        {
             // Arrange
             var repository = CreateRecentPackageRepository();
 
@@ -172,7 +182,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RecentPackageRepositoryStoresLatestPackageVersions() {
+        public void RecentPackageRepositoryStoresLatestPackageVersions()
+        {
             // Arrange
             var repository = CreateRecentPackageRepository();
 
@@ -198,7 +209,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RecentPackageRepositoryUsesLatestVersionFromStore() {
+        public void RecentPackageRepositoryUsesLatestVersionFromStore()
+        {
             // Arrange
             var repository = CreateRecentPackageRepository();
 
@@ -225,7 +237,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RecentPackageRepositoryCollapsesVersionsInStore() {
+        public void RecentPackageRepositoryCollapsesVersionsInStore()
+        {
             // Arrange
             var storePackages = new[] {
                 new PersistencePackageMetadata("A", "1.0", new DateTime(2037, 01, 01)),
@@ -249,7 +262,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void CallingClearMethodClearsAllPackagesFromSettingsStore() {
+        public void CallingClearMethodClearsAllPackagesFromSettingsStore()
+        {
             // Arrange
             var repository = CreateRecentPackageRepository();
 
@@ -263,12 +277,15 @@ namespace NuGet.VisualStudio.Test {
 
 
         [Fact]
-        public void RecentPackageRepositoryDoesNotReturnPackagesFromSourcesThatAreRemoved() {
+        public void RecentPackageRepositoryDoesNotReturnPackagesFromSourcesThatAreRemoved()
+        {
             // Arrange
             var sources = new List<PackageSource> { new PackageSource("Source1"), new PackageSource("Source2") };
             var factory = new Mock<IPackageRepositoryFactory>();
-            factory.Setup(c => c.CreateRepository(It.IsAny<string>())).Returns<string>(c => {
-                switch (c) {
+            factory.Setup(c => c.CreateRepository(It.IsAny<string>())).Returns<string>(c =>
+            {
+                switch (c)
+                {
                     case "Source1":
                         var repo1 = new MockPackageRepository();
                         repo1.AddRange(new[] { PackageUtility.CreatePackage("Pack1") });
@@ -291,9 +308,9 @@ namespace NuGet.VisualStudio.Test {
             var sourceProvider = new Mock<IPackageSourceProvider>();
             sourceProvider.Setup(c => c.LoadPackageSources()).Returns(sources);
             var repository = new RecentPackageRepository(
-                null, 
-                factory.Object, 
-                sourceProvider.Object, 
+                null,
+                factory.Object,
+                sourceProvider.Object,
                 settingsManager,
                 new MockPackageRepository());
 
@@ -316,12 +333,15 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RecentPackageRepositoryDoesNotReturnPackagesFromSourcesThatAreDisabled() {
+        public void RecentPackageRepositoryDoesNotReturnPackagesFromSourcesThatAreDisabled()
+        {
             // Arrange
             var sources = new List<PackageSource> { new PackageSource("Source1"), new PackageSource("Source2", "Source2", isEnabled: false) };
             var factory = new Mock<IPackageRepositoryFactory>();
-            factory.Setup(c => c.CreateRepository(It.IsAny<string>())).Returns<string>(c => {
-                switch (c) {
+            factory.Setup(c => c.CreateRepository(It.IsAny<string>())).Returns<string>(c =>
+            {
+                switch (c)
+                {
                     case "Source1":
                         var repo1 = new MockPackageRepository();
                         repo1.AddRange(new[] { PackageUtility.CreatePackage("Pack1") });
@@ -360,10 +380,12 @@ namespace NuGet.VisualStudio.Test {
         }
 
         private RecentPackageRepository CreateRecentPackageRepository(
-            IEnumerable<IPackage> packagesList = null, 
+            IEnumerable<IPackage> packagesList = null,
             IEnumerable<IPersistencePackageMetadata> settingsMetadata = null,
-            IPackageRepository cacheRepository = null) {
-            if (packagesList == null) {
+            IPackageRepository cacheRepository = null)
+        {
+            if (packagesList == null)
+            {
                 var packageA = PackageUtility.CreatePackage("A", "1.0");
                 var packageC = PackageUtility.CreatePackage("C", "2.0");
 
@@ -378,7 +400,8 @@ namespace NuGet.VisualStudio.Test {
 
             var mockSettingsManager = new MockSettingsManager();
 
-            if (settingsMetadata == null) {
+            if (settingsMetadata == null)
+            {
                 var A = new PersistencePackageMetadata("A", "1.0", new DateTime(2010, 8, 12));
                 var B = new PersistencePackageMetadata("B", "2.0", new DateTime(2011, 3, 2));
                 settingsMetadata = new[] { A, B };
@@ -389,36 +412,42 @@ namespace NuGet.VisualStudio.Test {
             var mockPackageSourceProvider = new MockPackageSourceProvider();
             mockPackageSourceProvider.SavePackageSources(new[] { new PackageSource("source") });
 
-            if (cacheRepository == null) {
+            if (cacheRepository == null)
+            {
                 cacheRepository = new MockPackageRepository();
             }
             return new RecentPackageRepository(
-                /* dte */ null, 
-                mockRepositoryFactory.Object, 
-                mockPackageSourceProvider, 
+                /* dte */ null,
+                mockRepositoryFactory.Object,
+                mockPackageSourceProvider,
                 mockSettingsManager,
                 cacheRepository);
         }
 
-        private void AssertPackage(IPackage package, string expectedId, string expectedVersion) {
+        private void AssertPackage(IPackage package, string expectedId, string expectedVersion)
+        {
             Assert.Equal(expectedId, package.Id);
             Assert.Equal(new SemanticVersion(expectedVersion), package.Version);
         }
 
-        private class MockSettingsManager : IPersistencePackageSettingsManager {
+        private class MockSettingsManager : IPersistencePackageSettingsManager
+        {
 
             List<IPersistencePackageMetadata> _items = new List<IPersistencePackageMetadata>();
 
-            public System.Collections.Generic.IEnumerable<IPersistencePackageMetadata> LoadPackageMetadata(int maximumCount) {
+            public System.Collections.Generic.IEnumerable<IPersistencePackageMetadata> LoadPackageMetadata(int maximumCount)
+            {
                 return _items.Take(maximumCount);
             }
 
-            public void SavePackageMetadata(System.Collections.Generic.IEnumerable<IPersistencePackageMetadata> packageMetadata) {
+            public void SavePackageMetadata(System.Collections.Generic.IEnumerable<IPersistencePackageMetadata> packageMetadata)
+            {
                 _items.Clear();
                 _items.AddRange(packageMetadata);
             }
 
-            public void ClearPackageMetadata() {
+            public void ClearPackageMetadata()
+            {
                 _items.Clear();
             }
         }

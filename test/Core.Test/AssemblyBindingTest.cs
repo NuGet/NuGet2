@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Linq;
 using System.Xml.Linq;
-using Xunit;
 using Moq;
 using NuGet.Runtime;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class AssemblyBindingTest {
+namespace NuGet.Test
+{
+
+    public class AssemblyBindingTest
+    {
         [Fact]
-        public void CtorCopiesAssemblyProperties() {
+        public void CtorCopiesAssemblyProperties()
+        {
             // Arrange
             var assembly = new Mock<IAssembly>();
             assembly.Setup(m => m.Name).Returns("AssemblyName");
@@ -29,7 +32,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseAssemblyBindingConfigSectionPreservesContent() {
+        public void ParseAssemblyBindingConfigSectionPreservesContent()
+        {
             // Arrange
             string assemblyBindingXml = @"<assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
          <dependentAssembly>

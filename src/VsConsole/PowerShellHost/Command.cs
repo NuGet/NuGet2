@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace NuGetConsole.Host.PowerShell {
+namespace NuGetConsole.Host.PowerShell
+{
     /// <summary>
     /// Represents a parsed powershell command e.g. "Install-Package el -Version "
     /// </summary>
-    public class Command {
+    public class Command
+    {
         // Command arguments by name and index (That's why it's <object, string>)
         // "-Version " would be { "Version", "" } and
         // "-Version" would be { "Version", null }
@@ -20,7 +22,8 @@ namespace NuGetConsole.Host.PowerShell {
         // Command name
         public string CommandName { get; set; }
 
-        public Command() {
+        public Command()
+        {
             Arguments = new Dictionary<object, string>();
         }
     }

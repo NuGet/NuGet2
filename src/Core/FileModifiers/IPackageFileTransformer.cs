@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 
-namespace NuGet {
-    public interface IPackageFileTransformer {
+namespace NuGet
+{
+    public interface IPackageFileTransformer
+    {
         /// <summary>
         /// Transforms the file
         /// </summary>

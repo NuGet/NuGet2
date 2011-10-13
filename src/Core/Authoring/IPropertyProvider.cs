@@ -1,5 +1,7 @@
-﻿namespace NuGet {
-    public interface IPropertyProvider {
+﻿namespace NuGet
+{
+    public interface IPropertyProvider
+    {
         dynamic GetPropertyValue(string propertyName);
     }
 }

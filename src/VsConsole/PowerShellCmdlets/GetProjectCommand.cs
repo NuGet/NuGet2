@@ -4,7 +4,8 @@ using System.Management.Automation;
 using EnvDTE;
 using NuGet.VisualStudio;
 
-namespace NuGet.PowerShell.Commands {
+namespace NuGet.PowerShell.Commands
+{
     /// <summary>
     /// This cmdlet returns the list of project names in the current solution, 
     /// which is used for tab expansion.
@@ -12,7 +13,8 @@ namespace NuGet.PowerShell.Commands {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.PowerShell", "PS1101:AllCmdletsShouldAcceptPipelineInput", Justification = "Will investiage this one.")]
     [Cmdlet(VerbsCommon.Get, "Project", DefaultParameterSetName = ParameterSetByName)]
     [OutputType(typeof(Project))]
-    public class GetProjectCommand : NuGetBaseCommand {
+    public class GetProjectCommand : NuGetBaseCommand
+    {
         private const string ParameterSetByName = "ByName";
         private const string ParameterSetAllProjects = "AllProjects";
 
@@ -20,11 +22,13 @@ namespace NuGet.PowerShell.Commands {
 
         public GetProjectCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
-                    ServiceLocator.GetInstance<IHttpClientEvents>()) {
+                    ServiceLocator.GetInstance<IHttpClientEvents>())
+        {
         }
 
         public GetProjectCommand(ISolutionManager solutionManager, IHttpClientEvents httpClientEvents)
-            : base(solutionManager, null, httpClientEvents) {
+            : base(solutionManager, null, httpClientEvents)
+        {
             _solutionManager = solutionManager;
         }
 
@@ -36,23 +40,30 @@ namespace NuGet.PowerShell.Commands {
         [Parameter(Mandatory = true, ParameterSetName = ParameterSetAllProjects)]
         public SwitchParameter All { get; set; }
 
-        protected override void ProcessRecordCore() {
-            if (!SolutionManager.IsSolutionOpen) {
+        protected override void ProcessRecordCore()
+        {
+            if (!SolutionManager.IsSolutionOpen)
+            {
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
-            if (All.IsPresent) {
+            if (All.IsPresent)
+            {
                 WriteObject(_solutionManager.GetProjects(), enumerateCollection: true);
             }
-            else {
+            else
+            {
                 // No name specified; return default project (if not null)
-                if (Name == null) {
+                if (Name == null)
+                {
                     Project defaultProject = _solutionManager.DefaultProject;
-                    if (defaultProject != null) {
+                    if (defaultProject != null)
+                    {
                         WriteObject(defaultProject);
                     }
                 }
-                else {
+                else
+                {
                     // get all projects matching name(s) - handles wildcards
                     WriteObject(GetProjectsByName(Name), enumerateCollection: true);
                 }

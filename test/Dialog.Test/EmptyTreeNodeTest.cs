@@ -5,12 +5,15 @@ using NuGet.Dialog.Providers;
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.Dialog.Test {
+namespace NuGet.Dialog.Test
+{
 
-    public class EmptyTreeNodeTest {
+    public class EmptyTreeNodeTest
+    {
 
         [Fact]
-        public void PropertyNameIsCorrect() {
+        public void PropertyNameIsCorrect()
+        {
 
             // Arrange
             MockPackageRepository repository = new MockPackageRepository();
@@ -23,7 +26,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void GetPackagesReturnCorrectPackages() {
+        public void GetPackagesReturnCorrectPackages()
+        {
             // Arrange
             EmptyTreeNode node = CreateEmptyTreeNode();
 
@@ -34,7 +38,8 @@ namespace NuGet.Dialog.Test {
             Assert.Equal(0, producedPackages.Count);
         }
 
-        private static EmptyTreeNode CreateEmptyTreeNode(string category = "Mock node") {
+        private static EmptyTreeNode CreateEmptyTreeNode(string category = "Mock node")
+        {
             PackagesProviderBase provider = new MockPackagesProvider();
             IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
             return new EmptyTreeNode(provider, category, parentTreeNode);

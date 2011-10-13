@@ -5,12 +5,15 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using NuGet.Common;
 
-namespace NuGet.Commands {
-    public abstract class Command : ICommand {
+namespace NuGet.Commands
+{
+    public abstract class Command : ICommand
+    {
         private const string CommandSuffix = "Command";
         private CommandAttribute _commandAttribute;
 
-        protected Command() {
+        protected Command()
+        {
             Arguments = new List<string>();
         }
 
@@ -28,20 +31,26 @@ namespace NuGet.Commands {
         [Option("help", AltName = "?")]
         public bool Help { get; set; }
 
-        public CommandAttribute CommandAttribute {
-            get {
-                if (_commandAttribute == null) {
+        public CommandAttribute CommandAttribute
+        {
+            get
+            {
+                if (_commandAttribute == null)
+                {
                     _commandAttribute = GetCommandAttribute();
                 }
                 return _commandAttribute;
             }
         }
 
-        public void Execute() {
-            if (Help) {
+        public void Execute()
+        {
+            if (Help)
+            {
                 HelpCommand.ViewHelpForCommand(CommandAttribute.CommandName);
             }
-            else {
+            else
+            {
                 ExecuteCommand();
             }
         }
@@ -49,19 +58,23 @@ namespace NuGet.Commands {
         public abstract void ExecuteCommand();
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This method does quite a bit of processing.")]
-        public virtual CommandAttribute GetCommandAttribute() {
+        public virtual CommandAttribute GetCommandAttribute()
+        {
             var attributes = GetType().GetCustomAttributes(typeof(CommandAttribute), true);
-            if (attributes.Any()) {
+            if (attributes.Any())
+            {
                 return (CommandAttribute)attributes.FirstOrDefault();
             }
 
             // Use the command name minus the suffix if present and default description
             string name = GetType().Name;
             int idx = name.LastIndexOf(CommandSuffix, StringComparison.OrdinalIgnoreCase);
-            if (idx >= 0) {
+            if (idx >= 0)
+            {
                 name = name.Substring(0, idx);
             }
-            if (!String.IsNullOrEmpty(name)) {
+            if (!String.IsNullOrEmpty(name))
+            {
                 return new CommandAttribute(name, NuGetResources.DefaultCommandDescription);
             }
             return null;

@@ -12,7 +12,8 @@ using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 
-namespace NuGet.Options {
+namespace NuGet.Options
+{
     /// <summary>
     /// Represents the Tools - Options - Package Manager dialog
     /// </summary>
@@ -20,7 +21,8 @@ namespace NuGet.Options {
     /// The code in this class assumes that while the dialog is open, noone is modifying the VSPackageSourceProvider directly.
     /// Otherwise, we have a problem with synchronization with the package source provider.
     /// </remarks>
-    public partial class PackageSourcesOptionsControl : UserControl {
+    public partial class PackageSourcesOptionsControl : UserControl
+    {
         private readonly PackageSource _officialSource = new PackageSource(NuGetConstants.DefaultFeedUrl, VsResources.OfficialSourceName);
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private PackageSource _activeSource;
@@ -30,10 +32,12 @@ namespace NuGet.Options {
         private Size _checkBoxSize;
 
         public PackageSourcesOptionsControl(IServiceProvider serviceProvider)
-            : this(ServiceLocator.GetInstance<IVsPackageSourceProvider>(), serviceProvider) {
+            : this(ServiceLocator.GetInstance<IVsPackageSourceProvider>(), serviceProvider)
+        {
         }
 
-        public PackageSourcesOptionsControl(IVsPackageSourceProvider packageSourceProvider, IServiceProvider serviceProvider) {
+        public PackageSourcesOptionsControl(IVsPackageSourceProvider packageSourceProvider, IServiceProvider serviceProvider)
+        {
             InitializeComponent();
 
             _serviceProvider = serviceProvider;
@@ -41,7 +45,8 @@ namespace NuGet.Options {
             SetupEventHandlers();
         }
 
-        private void SetupEventHandlers() {
+        private void SetupEventHandlers()
+        {
             NewPackageName.TextChanged += (o, e) => UpdateUI();
             NewPackageSource.TextChanged += (o, e) => UpdateUI();
             MoveUpButton.Click += (o, e) => MoveSelectedItem(-1);
@@ -51,7 +56,8 @@ namespace NuGet.Options {
             UpdateUI();
         }
 
-        private void UpdateUI() {
+        private void UpdateUI()
+        {
             var selectedSource = (PackageSource)PackageSourcesListBox.SelectedItem;
 
             MoveUpButton.Enabled = selectedSource != null && PackageSourcesListBox.SelectedIndex > 0;
@@ -61,15 +67,18 @@ namespace NuGet.Options {
             removeButton.Enabled = selectedSource != null && !selectedSource.Equals(_officialSource);
         }
 
-        private void MoveSelectedItem(int offset) {
-            if (PackageSourcesListBox.SelectedItem == null) {
+        private void MoveSelectedItem(int offset)
+        {
+            if (PackageSourcesListBox.SelectedItem == null)
+            {
                 return;
             }
 
             int oldIndex = PackageSourcesListBox.SelectedIndex;
             int newIndex = oldIndex + offset;
 
-            if (newIndex < 0 || newIndex > PackageSourcesListBox.Items.Count - 1) {
+            if (newIndex < 0 || newIndex > PackageSourcesListBox.Items.Count - 1)
+            {
                 return;
             }
             var item = PackageSourcesListBox.SelectedItem;
@@ -80,8 +89,10 @@ namespace NuGet.Options {
             UpdateUI();
         }
 
-        internal void InitializeOnActivated() {
-            if (_initialized) {
+        internal void InitializeOnActivated()
+        {
+            if (_initialized)
+            {
                 return;
             }
 
@@ -99,12 +110,14 @@ namespace NuGet.Options {
         /// Persist the package sources, which was add/removed via the Options page, to the VS Settings store.
         /// This gets called when users click OK button.
         /// </summary>
-        internal bool ApplyChangedSettings() {
+        internal bool ApplyChangedSettings()
+        {
             // if user presses Enter after filling in Name/Source but doesn't click Add
             // the options will be closed without adding the source, try adding before closing
             // Only apply if nothing was added
             TryAddSourceResults result = TryAddSource();
-            if (result != TryAddSourceResults.NothingAdded) {
+            if (result != TryAddSourceResults.NothingAdded)
+            {
                 return false;
             }
 
@@ -116,10 +129,12 @@ namespace NuGet.Options {
             var updatedActiveSource = packageSources.Find(p => p.IsEnabled && p.Equals(_activeSource));
 
             // restore current active source if it still exists, or reset to aggregate source
-            if (updatedActiveSource != null) {
+            if (updatedActiveSource != null)
+            {
                 _packageSourceProvider.ActivePackageSource = updatedActiveSource;
             }
-            else {
+            else
+            {
                 _packageSourceProvider.ActivePackageSource = AggregatePackageSource.Instance;
             }
             return true;
@@ -128,7 +143,8 @@ namespace NuGet.Options {
         /// <summary>
         /// This gets called when users close the Options dialog
         /// </summary>
-        internal void ClearSettings() {
+        internal void ClearSettings()
+        {
             // clear this flag so that we will set up the bindings again when the option page is activated next time
             _initialized = false;
 
@@ -137,45 +153,54 @@ namespace NuGet.Options {
             UpdateUI();
         }
 
-        private void OnRemoveButtonClick(object sender, EventArgs e) {
-            if (PackageSourcesListBox.SelectedItem == null) {
+        private void OnRemoveButtonClick(object sender, EventArgs e)
+        {
+            if (PackageSourcesListBox.SelectedItem == null)
+            {
                 return;
             }
             _allPackageSources.Remove(PackageSourcesListBox.SelectedItem);
             UpdateUI();
         }
 
-        private void OnAddButtonClick(object sender, EventArgs e) {
+        private void OnAddButtonClick(object sender, EventArgs e)
+        {
             TryAddSourceResults result = TryAddSource();
-            if (result == TryAddSourceResults.NothingAdded) {
+            if (result == TryAddSourceResults.NothingAdded)
+            {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_NameAndSourceRequired, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageName);
             }
             UpdateUI();
         }
 
-        private TryAddSourceResults TryAddSource() {
+        private TryAddSourceResults TryAddSource()
+        {
             var name = NewPackageName.Text.Trim();
             var source = NewPackageSource.Text.Trim();
-            if (String.IsNullOrWhiteSpace(name) && String.IsNullOrWhiteSpace(source)) {
+            if (String.IsNullOrWhiteSpace(name) && String.IsNullOrWhiteSpace(source))
+            {
                 return TryAddSourceResults.NothingAdded;
             }
 
             // validate name
-            if (String.IsNullOrWhiteSpace(name)) {
+            if (String.IsNullOrWhiteSpace(name))
+            {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_NameRequired, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageName);
                 return TryAddSourceResults.InvalidSource;
             }
 
             // validate source
-            if (String.IsNullOrWhiteSpace(source)) {
+            if (String.IsNullOrWhiteSpace(source))
+            {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_SourceRequried, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageSource);
                 return TryAddSourceResults.InvalidSource;
             }
 
-            if (!(PathValidator.IsValidLocalPath(source) || PathValidator.IsValidUncPath(source) || PathValidator.IsValidUrl(source))) {
+            if (!(PathValidator.IsValidLocalPath(source) || PathValidator.IsValidUncPath(source) || PathValidator.IsValidUrl(source)))
+            {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_InvalidSource, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageSource);
                 return TryAddSourceResults.InvalidSource;
@@ -187,7 +212,8 @@ namespace NuGet.Options {
             // also make sure it's not the same as the aggregate source ('All')
             bool hasName = sourcesList.Any(ps => String.Equals(name, ps.Name, StringComparison.CurrentCultureIgnoreCase)
                 || String.Equals(name, AggregatePackageSource.Instance.Name, StringComparison.CurrentCultureIgnoreCase));
-            if (hasName) {
+            if (hasName)
+            {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueName, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageName);
                 return TryAddSourceResults.SourceAlreadyAdded;
@@ -195,7 +221,8 @@ namespace NuGet.Options {
 
             // check to see if source has already been added
             bool hasSource = sourcesList.Any(ps => String.Equals(PathUtility.GetCanonicalPath(source), PathUtility.GetCanonicalPath(ps.Source), StringComparison.OrdinalIgnoreCase));
-            if (hasSource) {
+            if (hasSource)
+            {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueSource, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageSource);
                 return TryAddSourceResults.SourceAlreadyAdded;
@@ -212,46 +239,56 @@ namespace NuGet.Options {
             return TryAddSourceResults.SourceAdded;
         }
 
-        private static void SelectAndFocus(TextBox textBox) {
+        private static void SelectAndFocus(TextBox textBox)
+        {
             textBox.Focus();
             textBox.SelectAll();
         }
 
-        private void ClearNameSource() {
+        private void ClearNameSource()
+        {
             NewPackageName.Text = String.Empty;
             NewPackageSource.Text = String.Empty;
             NewPackageName.Focus();
         }
 
-        private void PackageSourcesContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e) {
-            if (e.ClickedItem == CopyPackageSourceStripMenuItem && PackageSourcesListBox.SelectedItem != null) {
+        private void PackageSourcesContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            if (e.ClickedItem == CopyPackageSourceStripMenuItem && PackageSourcesListBox.SelectedItem != null)
+            {
                 CopySelectedItem((PackageSource)PackageSourcesListBox.SelectedItem);
             }
         }
 
-        private void PackageSourcesListBox_KeyUp(object sender, KeyEventArgs e) {
-            if (e.KeyCode == Keys.C && e.Control) {
+        private void PackageSourcesListBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.C && e.Control)
+            {
                 CopySelectedItem((PackageSource)PackageSourcesListBox.SelectedItem);
                 e.Handled = true;
             }
-            else if (e.KeyCode == Keys.Space) {
+            else if (e.KeyCode == Keys.Space)
+            {
                 TogglePackageSourceEnabled(PackageSourcesListBox.SelectedIndex);
                 e.Handled = true;
             }
         }
 
-        private void TogglePackageSourceEnabled(int itemIndex) {
-            if (itemIndex < 0 || itemIndex >= PackageSourcesListBox.Items.Count) {
+        private void TogglePackageSourceEnabled(int itemIndex)
+        {
+            if (itemIndex < 0 || itemIndex >= PackageSourcesListBox.Items.Count)
+            {
                 return;
             }
 
             var item = (PackageSource)PackageSourcesListBox.Items[itemIndex];
             item.IsEnabled = !item.IsEnabled;
-            
+
             PackageSourcesListBox.Invalidate(GetCheckBoxRectangleForListBoxItem(itemIndex));
         }
 
-        private Rectangle GetCheckBoxRectangleForListBoxItem(int itemIndex) {
+        private Rectangle GetCheckBoxRectangleForListBoxItem(int itemIndex)
+        {
             const int edgeMargin = 8;
 
             Rectangle itemRectangle = PackageSourcesListBox.GetItemRectangle(itemIndex);
@@ -266,21 +303,27 @@ namespace NuGet.Options {
             return checkBoxRectangle;
         }
 
-        private static void CopySelectedItem(PackageSource selectedPackageSource) {
+        private static void CopySelectedItem(PackageSource selectedPackageSource)
+        {
             Clipboard.Clear();
             Clipboard.SetText(selectedPackageSource.Source);
         }
 
-        private void PackageSourcesListBox_MouseUp(object sender, MouseEventArgs e) {
-            if (e.Button == MouseButtons.Right) {
+        private void PackageSourcesListBox_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
                 PackageSourcesListBox.SelectedIndex = PackageSourcesListBox.IndexFromPoint(e.Location);
             }
-            else if (e.Button == MouseButtons.Left) {
+            else if (e.Button == MouseButtons.Left)
+            {
                 int itemIndex = PackageSourcesListBox.IndexFromPoint(e.Location);
-                if (itemIndex >= 0 && itemIndex < PackageSourcesListBox.Items.Count) {
+                if (itemIndex >= 0 && itemIndex < PackageSourcesListBox.Items.Count)
+                {
                     Rectangle checkBoxRectangle = GetCheckBoxRectangleForListBoxItem(itemIndex);
                     // if the mouse click position is inside the checkbox, toggle the IsEnabled property
-                    if (checkBoxRectangle.Contains(e.Location)) {
+                    if (checkBoxRectangle.Contains(e.Location))
+                    {
                         TogglePackageSourceEnabled(itemIndex);
                     }
                 }
@@ -292,29 +335,36 @@ namespace NuGet.Options {
         private readonly Color SelectionFocusBorderColor = Color.FromArgb(0x89, 0xB0, 0xDF);
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Drawing.Graphics.MeasureString(System.String,System.Drawing.Font,System.Int32,System.Drawing.StringFormat)")]
-        private void PackageSourcesListBox_DrawItem(object sender, DrawItemEventArgs e) {
+        private void PackageSourcesListBox_DrawItem(object sender, DrawItemEventArgs e)
+        {
             Graphics graphics = e.Graphics;
 
             // Draw the background of the ListBox control for each item.
-            if (e.BackColor.Name == KnownColor.Highlight.ToString()) {
-                using (var gradientBrush = new LinearGradientBrush(e.Bounds, SelectionFocusGradientLightColor, SelectionFocusGradientDarkColor, 90.0F)) {
+            if (e.BackColor.Name == KnownColor.Highlight.ToString())
+            {
+                using (var gradientBrush = new LinearGradientBrush(e.Bounds, SelectionFocusGradientLightColor, SelectionFocusGradientDarkColor, 90.0F))
+                {
                     graphics.FillRectangle(gradientBrush, e.Bounds);
                 }
-                using (var borderPen = new Pen(SelectionFocusBorderColor)) {
+                using (var borderPen = new Pen(SelectionFocusBorderColor))
+                {
                     graphics.DrawRectangle(borderPen, e.Bounds.Left, e.Bounds.Top, e.Bounds.Width - 1, e.Bounds.Height - 1);
                 }
             }
-            else {
+            else
+            {
                 // alternate background color for even/odd rows
                 Color backColor = e.Index % 2 == 0
                                       ? Color.FromKnownColor(KnownColor.Window)
                                       : Color.FromArgb(0xF6, 0xF6, 0xF6);
-                using (Brush backBrush = new SolidBrush(backColor)) {
+                using (Brush backBrush = new SolidBrush(backColor))
+                {
                     graphics.FillRectangle(backBrush, e.Bounds);
                 }
             }
 
-            if (e.Index < 0 || e.Index >= PackageSourcesListBox.Items.Count) {
+            if (e.Index < 0 || e.Index >= PackageSourcesListBox.Items.Count)
+            {
                 return;
             }
 
@@ -323,7 +373,8 @@ namespace NuGet.Options {
             using (StringFormat drawFormat = new StringFormat())
             using (Brush foreBrush = new SolidBrush(Color.FromKnownColor(KnownColor.WindowText)))
             using (Brush sourceBrush = new SolidBrush(Color.FromKnownColor(KnownColor.Navy)))
-            using (Font italicFont = new Font(e.Font, FontStyle.Italic)) {
+            using (Font italicFont = new Font(e.Font, FontStyle.Italic))
+            {
                 drawFormat.Alignment = StringAlignment.Near;
                 drawFormat.Trimming = StringTrimming.EllipsisCharacter;
                 drawFormat.LineAlignment = StringAlignment.Near;
@@ -342,7 +393,8 @@ namespace NuGet.Options {
                     new Point(edgeMargin, e.Bounds.Top + edgeMargin),
                     checkBoxState);
 
-                if (_checkBoxSize.IsEmpty) {
+                if (_checkBoxSize.IsEmpty)
+                {
                     // save the checkbox size so that we can detect mouse click on the 
                     // checkbox in the MouseUp event handler.
                     // here we assume that all checkboxes have the same size, which is reasonable. 
@@ -350,7 +402,8 @@ namespace NuGet.Options {
                 }
 
                 GraphicsState oldState = graphics.Save();
-                try {
+                try
+                {
                     // turn on high quality text rendering mode
                     graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
@@ -379,7 +432,8 @@ namespace NuGet.Options {
                         e.Bounds.Bottom - nameBounds.Bottom);
                     graphics.DrawString(currentItem.Source, italicFont, sourceBrush, sourceBounds, drawFormat);
                 }
-                finally {
+                finally
+                {
                     graphics.Restore(oldState);
                 }
 
@@ -388,14 +442,17 @@ namespace NuGet.Options {
             }
         }
 
-        private void PackageSourcesListBox_MeasureItem(object sender, MeasureItemEventArgs e) {
-            if (e.Index < 0 || e.Index >= PackageSourcesListBox.Items.Count) {
+        private void PackageSourcesListBox_MeasureItem(object sender, MeasureItemEventArgs e)
+        {
+            if (e.Index < 0 || e.Index >= PackageSourcesListBox.Items.Count)
+            {
                 return;
             }
 
             PackageSource currentItem = (PackageSource)PackageSourcesListBox.Items[e.Index];
             using (StringFormat drawFormat = new StringFormat())
-            using (Font italicFont = new Font(Font, FontStyle.Italic)) {
+            using (Font italicFont = new Font(Font, FontStyle.Italic))
+            {
                 drawFormat.Alignment = StringAlignment.Near;
                 drawFormat.Trimming = StringTrimming.EllipsisCharacter;
                 drawFormat.LineAlignment = StringAlignment.Near;
@@ -408,28 +465,34 @@ namespace NuGet.Options {
             }
         }
 
-        private void PackageSourcesListBox_MouseMove(object sender, MouseEventArgs e) {
+        private void PackageSourcesListBox_MouseMove(object sender, MouseEventArgs e)
+        {
             int index = PackageSourcesListBox.IndexFromPoint(e.X, e.Y);
 
-            if (index >= 0 && index < PackageSourcesListBox.Items.Count && e.Y <= PackageSourcesListBox.PreferredHeight) {
+            if (index >= 0 && index < PackageSourcesListBox.Items.Count && e.Y <= PackageSourcesListBox.PreferredHeight)
+            {
                 string newToolTip = ((PackageSource)PackageSourcesListBox.Items[index]).Source;
                 string currentToolTip = packageListToolTip.GetToolTip(PackageSourcesListBox);
-                if (currentToolTip != newToolTip) {
+                if (currentToolTip != newToolTip)
+                {
                     packageListToolTip.SetToolTip(PackageSourcesListBox, newToolTip);
                 }
             }
-            else {
+            else
+            {
                 packageListToolTip.SetToolTip(PackageSourcesListBox, null);
                 packageListToolTip.Hide(PackageSourcesListBox);
             }
         }
 
-        private static Rectangle NewBounds(Rectangle sourceBounds, int xOffset, int yOffset) {
+        private static Rectangle NewBounds(Rectangle sourceBounds, int xOffset, int yOffset)
+        {
             return new Rectangle(sourceBounds.Left + xOffset, sourceBounds.Top + yOffset,
                 sourceBounds.Width - xOffset, sourceBounds.Height - yOffset);
         }
 
-        private void OnBrowseButtonClicked(object sender, EventArgs e) {
+        private void OnBrowseButtonClicked(object sender, EventArgs e)
+        {
             const int MaxDirectoryLength = 1000;
 
             //const int BIF_RETURNONLYFSDIRS = 0x00000001;   // For finding a folder to start document searching.
@@ -445,7 +508,8 @@ namespace NuGet.Options {
             Marshal.Copy(rgch, 0, bufferPtr, rgch.Length);
 
             VSBROWSEINFOW[] pBrowse = new VSBROWSEINFOW[1];
-            pBrowse[0] = new VSBROWSEINFOW() {
+            pBrowse[0] = new VSBROWSEINFOW()
+            {
                 lStructSize = (uint)Marshal.SizeOf(pBrowse[0]),
                 dwFlags = (uint)(BIF_BROWSEINCLUDEURLS),
                 pwzDlgTitle = Resources.BrowseFolderDialogDescription,
@@ -458,30 +522,36 @@ namespace NuGet.Options {
             var browseInfo = new VSNSEBROWSEINFOW[1] { new VSNSEBROWSEINFOW() };
 
             int ret = uiShell.GetDirectoryViaBrowseDlgEx(pBrowse, "", Resources.BrowseFolderDialogSelectButton, "", browseInfo);
-            if (ret == VSConstants.S_OK) {
+            if (ret == VSConstants.S_OK)
+            {
                 var pathPtr = pBrowse[0].pwzDirName;
                 var path = Marshal.PtrToStringAuto(pathPtr);
                 NewPackageSource.Text = path;
 
                 // if the package name text box is empty, we fill it with the selected folder's name
-                if (String.IsNullOrEmpty(NewPackageName.Text)) {
+                if (String.IsNullOrEmpty(NewPackageName.Text))
+                {
                     NewPackageName.Text = Path.GetFileName(path);
                 }
             }
         }
 
-        private string DetermineInitialDirectory() {
+        private string DetermineInitialDirectory()
+        {
             // determine the inital directory to show in the folder dialog
             string initialDir = NewPackageSource.Text;
 
-            if (IsPathRootedSafe(initialDir) && Directory.Exists(initialDir)) {
+            if (IsPathRootedSafe(initialDir) && Directory.Exists(initialDir))
+            {
                 return initialDir;
             }
 
             var selectedItem = (PackageSource)PackageSourcesListBox.SelectedItem;
-            if (selectedItem != null) {
+            if (selectedItem != null)
+            {
                 initialDir = selectedItem.Source;
-                if (IsPathRootedSafe(initialDir)) {
+                if (IsPathRootedSafe(initialDir))
+                {
                     return initialDir;
                 }
             }
@@ -490,14 +560,16 @@ namespace NuGet.Options {
             return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         }
 
-        private static bool IsPathRootedSafe(string path) {
+        private static bool IsPathRootedSafe(string path)
+        {
             // Check to make sure path does not contain any invalid chars.
             // Otherwise, Path.IsPathRooted() will throw an ArgumentException.
             return path.IndexOfAny(Path.GetInvalidPathChars()) == -1 && Path.IsPathRooted(path);
         }
     }
 
-    internal enum TryAddSourceResults {
+    internal enum TryAddSourceResults
+    {
         NothingAdded = 0,
         SourceAdded = 1,
         InvalidSource = 2,

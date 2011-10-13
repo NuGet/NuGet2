@@ -1,7 +1,9 @@
 using System;
 
-namespace NuGet {
-    public interface IProjectManager {
+namespace NuGet
+{
+    public interface IProjectManager
+    {
         IPackageRepository LocalRepository { get; }
         ILogger Logger { get; set; }
         IProjectSystem Project { get; }

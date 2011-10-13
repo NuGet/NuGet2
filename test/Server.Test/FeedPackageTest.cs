@@ -5,10 +5,13 @@ using System.Linq;
 using NuGet;
 using Xunit;
 
-namespace Server.Test {
-    public class FeedPackageTest {
+namespace Server.Test
+{
+    public class FeedPackageTest
+    {
         [Fact]
-        public void FeedPackageHasSameMembersAsDataServicePackage() {
+        public void FeedPackageHasSameMembersAsDataServicePackage()
+        {
             // Arrange
             // This is not pretty but it's the most effective way.
             var excludedProperties = new[] { "Owners", "ReportAbuseUrl", "GalleryDetailsUrl", "DownloadUrl", "Rating", "RatingsCount", "Language", 
@@ -21,11 +24,13 @@ namespace Server.Test {
 
             // Assert
             // Assert.Equal(feedPackageProperties.Count, dataServiceProperties.Count);
-            foreach (var property in dataServiceProperties) {
-                if (excludedProperties.Contains(property)) {
+            foreach (var property in dataServiceProperties)
+            {
+                if (excludedProperties.Contains(property))
+                {
                     continue;
                 }
-                Assert.True(feedPackageProperties.Contains(property), String.Format(CultureInfo.InvariantCulture, 
+                Assert.True(feedPackageProperties.Contains(property), String.Format(CultureInfo.InvariantCulture,
                     "Property {0} could not be found in NuGet.Server package.", property));
             }
         }

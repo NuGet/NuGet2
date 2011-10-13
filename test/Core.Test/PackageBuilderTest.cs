@@ -1,21 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml;
-using Xunit;
 using Moq;
+using Xunit;
 using Xunit.Extensions;
-using System.Globalization;
 
-namespace NuGet.Test {
+namespace NuGet.Test
+{
 
-    public class PackageBuilderTest {
+    public class PackageBuilderTest
+    {
         [Fact]
-        public void OwnersFallsBackToAuthorsIfNoneSpecified() {
+        public void OwnersFallsBackToAuthorsIfNoneSpecified()
+        {
             // Arrange
-            PackageBuilder builder = new PackageBuilder() {
+            PackageBuilder builder = new PackageBuilder()
+            {
                 Id = "A",
                 Version = new SemanticVersion("1.0"),
                 Description = "Description"
@@ -42,9 +46,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ReleaseNotesAttributeIsRecognized() {
+        public void ReleaseNotesAttributeIsRecognized()
+        {
             // Arrange
-            PackageBuilder builder = new PackageBuilder() {
+            PackageBuilder builder = new PackageBuilder()
+            {
                 Id = "A",
                 Version = new SemanticVersion("1.0"),
                 Description = "Description",
@@ -73,9 +79,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void CreatePackageUsesV1SchemaNamespaceIfFrameworkAssembliesAreUsed() {
+        public void CreatePackageUsesV1SchemaNamespaceIfFrameworkAssembliesAreUsed()
+        {
             // Arrange
-            PackageBuilder builder = new PackageBuilder() {
+            PackageBuilder builder = new PackageBuilder()
+            {
                 Id = "A",
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
@@ -106,9 +114,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void CreatePackageUsesV2SchemaNamespaceIfReferenceAssembliesAreUsed() {
+        public void CreatePackageUsesV2SchemaNamespaceIfReferenceAssembliesAreUsed()
+        {
             // Arrange
-            PackageBuilder builder = new PackageBuilder() {
+            PackageBuilder builder = new PackageBuilder()
+            {
                 Id = "A",
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
@@ -139,9 +149,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void CreatePackageTrimsExtraWhitespace() {
+        public void CreatePackageTrimsExtraWhitespace()
+        {
             // Arrange
-            PackageBuilder builder = new PackageBuilder() {
+            PackageBuilder builder = new PackageBuilder()
+            {
                 Id = "                 A                 ",
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions                                         ",
@@ -183,20 +195,24 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void VersionFormatIsPreserved() {
+        public void VersionFormatIsPreserved()
+        {
             // Arrange
-            PackageBuilder builder = new PackageBuilder() {
+            PackageBuilder builder = new PackageBuilder()
+            {
                 Id = "A",
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
                 Summary = "Summary",
             };
             builder.Authors.Add("David");
-            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec {
+            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec
+            {
                 MinVersion = new SemanticVersion("1.0"),
                 IsMinInclusive = true
             }));
-            builder.Dependencies.Add(new PackageDependency("C", new VersionSpec {
+            builder.Dependencies.Add(new PackageDependency("C", new VersionSpec
+            {
                 MinVersion = new SemanticVersion("1.0"),
                 MaxVersion = new SemanticVersion("5.0"),
                 IsMinInclusive = false
@@ -228,20 +244,24 @@ namespace NuGet.Test {
 
 
         [Fact]
-        public void SavingPackageWithDuplicateDependenciesThrows() {
+        public void SavingPackageWithDuplicateDependenciesThrows()
+        {
             // Arrange
-            PackageBuilder builder = new PackageBuilder() {
+            PackageBuilder builder = new PackageBuilder()
+            {
                 Id = "A",
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
                 Summary = "Summary",
             };
             builder.Authors.Add("David");
-            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec {
+            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec
+            {
                 MinVersion = new SemanticVersion("1.0"),
                 IsMinInclusive = true
             }));
-            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec {
+            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec
+            {
                 MinVersion = new SemanticVersion("1.0"),
                 MaxVersion = new SemanticVersion("5.0"),
                 IsMinInclusive = false
@@ -253,16 +273,19 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SavingPackageWithInvalidDependencyRangeThrows() {
+        public void SavingPackageWithInvalidDependencyRangeThrows()
+        {
             // Arrange
-            PackageBuilder builder = new PackageBuilder() {
+            PackageBuilder builder = new PackageBuilder()
+            {
                 Id = "A",
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
                 Summary = "Summary",
             };
             builder.Authors.Add("David");
-            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec {
+            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec
+            {
                 MinVersion = new SemanticVersion("1.0"),
                 MaxVersion = new SemanticVersion("1.0")
             }));
@@ -273,9 +296,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SavingPackageValidatesReferences() {
+        public void SavingPackageValidatesReferences()
+        {
             // Arrange
-            var builder = new PackageBuilder {
+            var builder = new PackageBuilder
+            {
                 Id = "A",
                 Version = new SemanticVersion("1.0"),
                 Description = "Test",
@@ -289,16 +314,19 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SavingPackageWithInvalidDependencyVersionMaxLessThanMinThrows() {
+        public void SavingPackageWithInvalidDependencyVersionMaxLessThanMinThrows()
+        {
             // Arrange
-            PackageBuilder builder = new PackageBuilder() {
+            PackageBuilder builder = new PackageBuilder()
+            {
                 Id = "A",
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
                 Summary = "Summary",
             };
             builder.Authors.Add("David");
-            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec {
+            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec
+            {
                 MinVersion = new SemanticVersion("2.0"),
                 MaxVersion = new SemanticVersion("1.0")
             }));
@@ -309,7 +337,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SaveThrowsIfRequiredPropertiesAreMissing() {
+        public void SaveThrowsIfRequiredPropertiesAreMissing()
+        {
             // Arrange
             var builder = new PackageBuilder();
             builder.Id = "Package";
@@ -322,7 +351,8 @@ Description is required.");
         }
 
         [Fact]
-        public void SaveThrowsIfNoFilesOrDependencies() {
+        public void SaveThrowsIfNoFilesOrDependencies()
+        {
             // Arrange
             var builder = new PackageBuilder();
             builder.Id = "A";
@@ -334,7 +364,8 @@ Description is required.");
         }
 
         [Fact]
-        public void PackageBuilderThrowsIfXmlIsMalformed() {
+        public void PackageBuilderThrowsIfXmlIsMalformed()
+        {
             // Arrange
             string spec1 = "kjdkfj";
             string spec2 = @"<?xml version=""1.0"" encoding=""utf-8""?>";
@@ -349,7 +380,8 @@ Description is required.");
         }
 
         [Fact]
-        public void MissingIdThrows() {
+        public void MissingIdThrows()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
@@ -364,7 +396,8 @@ Description is required.");
         }
 
         [Fact]
-        public void MissingVersionThrows() {
+        public void MissingVersionThrows()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
@@ -379,7 +412,8 @@ Description is required.");
         }
 
         [Fact]
-        public void MissingAuthorsThrows() {
+        public void MissingAuthorsThrows()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
@@ -394,7 +428,8 @@ Description is required.");
         }
 
         [Fact]
-        public void MissingDescriptionThrows() {
+        public void MissingDescriptionThrows()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
@@ -409,7 +444,8 @@ Description is required.");
         }
 
         [Fact]
-        public void MalformedDependenciesThrows() {
+        public void MalformedDependenciesThrows()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
@@ -428,7 +464,8 @@ Description is required.");
         }
 
         [Fact]
-        public void MissingFileSrcThrows() {
+        public void MissingFileSrcThrows()
+        {
             // Act
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
@@ -451,7 +488,8 @@ Description is required.");
         }
 
         [Fact]
-        public void MisplacedFileNodeThrows() {
+        public void MisplacedFileNodeThrows()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
@@ -475,7 +513,8 @@ Description is required.");
         }
 
         [Fact]
-        public void ReadingManifestWithNamespaceBuilderFromStreamCopiesMetadata() {
+        public void ReadingManifestWithNamespaceBuilderFromStreamCopiesMetadata()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0""?>
 <package>
@@ -518,7 +557,8 @@ Description is required.");
         }
 
         [Fact]
-        public void ReadingManifestWithSerializationNamespaceBuilderFromStreamCopiesMetadata() {
+        public void ReadingManifestWithSerializationNamespaceBuilderFromStreamCopiesMetadata()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0""?>
 <package>
@@ -555,7 +595,8 @@ Description is required.");
         }
 
         [Fact]
-        public void ReadingManifestWithOldStyleXmlnsDeclaratoinsFromStreamCopiesMetadata() {
+        public void ReadingManifestWithOldStyleXmlnsDeclaratoinsFromStreamCopiesMetadata()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0""?>
 <package xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"">
@@ -592,7 +633,8 @@ Description is required.");
         }
 
         [Fact]
-        public void ReadingPackageManifestFromStreamCopiesMetadata() {
+        public void ReadingPackageManifestFromStreamCopiesMetadata()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
@@ -643,7 +685,8 @@ Description is required.");
         }
 
         [Fact]
-        public void PackageBuilderThrowsWhenLicenseUrlIsPresentButEmpty() {
+        public void PackageBuilderThrowsWhenLicenseUrlIsPresentButEmpty()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
@@ -663,7 +706,8 @@ Description is required.");
         }
 
         [Fact]
-        public void PackageBuilderThrowsWhenLicenseUrlIsWhiteSpace() {
+        public void PackageBuilderThrowsWhenLicenseUrlIsWhiteSpace()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
@@ -683,7 +727,8 @@ Description is required.");
         }
 
         [Fact]
-        public void ValidateReferencesAllowsPartialFileNames() {
+        public void ValidateReferencesAllowsPartialFileNames()
+        {
             // Arrange
             var files = new[] {
                 new PhysicalPackageFile { TargetPath = @"lib\net40\foo.dll" },
@@ -700,7 +745,8 @@ Description is required.");
         }
 
         [Fact]
-        public void ValidateReferencesThrowsForPartialNamesThatDoNotHaveAKnownExtension() {
+        public void ValidateReferencesThrowsForPartialNamesThatDoNotHaveAKnownExtension()
+        {
             // Arrange
             var files = new[] {
                 new PhysicalPackageFile { TargetPath = @"lib\net20\foo.dll" },
@@ -716,7 +762,8 @@ Description is required.");
 
         [Theory]
         [PropertyData("InvalidDependencyData")]
-        public void ValidateDependenciesThrowsIfAnyDependencyForAStableReleaseIsPrerelease(VersionSpec versionSpec) {
+        public void ValidateDependenciesThrowsIfAnyDependencyForAStableReleaseIsPrerelease(VersionSpec versionSpec)
+        {
             // Arrange
             var badDependency = new PackageDependency("A", versionSpec);
             var dependencies = new[] {
@@ -734,7 +781,8 @@ Description is required.");
 
         [Theory]
         [PropertyData("InvalidDependencyData")]
-        public void ValidateDependenciesDoesNotThrowIfDependencyForAPrereleaseVersionIsPrerelease(VersionSpec versionSpec) {
+        public void ValidateDependenciesDoesNotThrowIfDependencyForAPrereleaseVersionIsPrerelease(VersionSpec versionSpec)
+        {
             // Arrange
             var dependencies = new[] {
                 new PackageDependency("A", versionSpec),
@@ -751,7 +799,8 @@ Description is required.");
         }
 
         [Fact]
-        public void ValidateDependenciesDoesNotThrowIfDependencyForAStableVersionIsStable() {
+        public void ValidateDependenciesDoesNotThrowIfDependencyForAStableVersionIsStable()
+        {
             // Arrange
             var dependencies = new[] {
                 new PackageDependency("A", new VersionSpec(new SemanticVersion("1.0.0"))),
@@ -767,8 +816,10 @@ Description is required.");
             Assert.True(true);
         }
 
-        public static IEnumerable<object[]> InvalidDependencyData {
-            get {
+        public static IEnumerable<object[]> InvalidDependencyData
+        {
+            get
+            {
                 var prereleaseVer = new SemanticVersion("1.0.0a");
                 var version = new SemanticVersion("2.3.0.6232");
 
@@ -780,7 +831,8 @@ Description is required.");
         }
 
         [Fact]
-        public void PackageBuilderRequireLicenseAcceptedWithoutLicenseUrlThrows() {
+        public void PackageBuilderRequireLicenseAcceptedWithoutLicenseUrlThrows()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
@@ -801,7 +853,8 @@ Enabling license acceptance requires a license url.");
         }
 
         [Fact]
-        public void PackageBuilderThrowsWhenLicenseUrlIsMalformed() {
+        public void PackageBuilderThrowsWhenLicenseUrlIsMalformed()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
@@ -821,9 +874,11 @@ Enabling license acceptance requires a license url.");
         }
 
         [Fact]
-        public void PackageBuilderThrowsIfPackageIdInvalid() {
+        public void PackageBuilderThrowsIfPackageIdInvalid()
+        {
             // Arrange
-            var builder = new PackageBuilder {
+            var builder = new PackageBuilder
+            {
                 Id = "  a.  b",
                 Version = new SemanticVersion("1.0"),
                 Description = "Description"
@@ -835,7 +890,8 @@ Enabling license acceptance requires a license url.");
         }
 
         [Fact]
-        public void ReadingPackageWithUnknownSchemaThrows() {
+        public void ReadingPackageWithUnknownSchemaThrows()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package xmlns=""http://schemas.microsoft.com/packaging/2011/03/nuspec.xsd"">
@@ -853,7 +909,8 @@ Enabling license acceptance requires a license url.");
         }
 
         [Fact]
-        public void ReadingPackageWithUnknownSchemaAndMissingIdThrows() {
+        public void ReadingPackageWithUnknownSchemaAndMissingIdThrows()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package xmlns=""http://schemas.microsoft.com/packaging/2011/03/nuspec.xsd"">
@@ -870,7 +927,8 @@ Enabling license acceptance requires a license url.");
         }
 
         [Fact]
-        public void ReadingPackageWithSchemaWithOlderVersionAttribute() {
+        public void ReadingPackageWithSchemaWithOlderVersionAttribute()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
@@ -895,7 +953,8 @@ Enabling license acceptance requires a license url.");
         }
 
         [Fact]
-        public void ReadingPackageWithSchemaVersionAttribute() {
+        public void ReadingPackageWithSchemaVersionAttribute()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
@@ -924,7 +983,8 @@ Enabling license acceptance requires a license url.");
         }
 
         [Fact]
-        public void ReadingPackageWithSchemaVersionAttributeWithNamespace() {
+        public void ReadingPackageWithSchemaVersionAttributeWithNamespace()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
@@ -949,7 +1009,8 @@ Enabling license acceptance requires a license url.");
         }
 
         [Fact]
-        public void MissingMetadataNodeThrows() {
+        public void MissingMetadataNodeThrows()
+        {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>  
@@ -960,7 +1021,8 @@ Enabling license acceptance requires a license url.");
         }
 
         [Fact]
-        public void PackageBuilderWorksWithFileNamesContainingSpecialCharacters() {
+        public void PackageBuilderWorksWithFileNamesContainingSpecialCharacters()
+        {
             // Arrange
             var fileNames = new[] {
                 @"lib\regular.file.dll",
@@ -973,12 +1035,14 @@ Enabling license acceptance requires a license url.");
             // Act
             var builder = new PackageBuilder { Id = "test", Version = new SemanticVersion("1.0"), Description = "test" };
             builder.Authors.Add("test");
-            foreach (var name in fileNames) {
+            foreach (var name in fileNames)
+            {
                 builder.Files.Add(CreatePackageFile(name));
             }
 
             // Assert
-            using (MemoryStream stream = new MemoryStream()) {
+            using (MemoryStream stream = new MemoryStream())
+            {
                 builder.Save(stream);
 
                 var zipPackage = new ZipPackage(() => new MemoryStream(stream.ToArray()), enableCaching: false);
@@ -990,7 +1054,8 @@ Enabling license acceptance requires a license url.");
             }
         }
 
-        private static IPackageFile CreatePackageFile(string name) {
+        private static IPackageFile CreatePackageFile(string name)
+        {
             var file = new Mock<IPackageFile>();
             file.SetupGet(f => f.Path).Returns(name);
             file.Setup(f => f.GetStream()).Returns(new MemoryStream());

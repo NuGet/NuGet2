@@ -6,13 +6,17 @@ using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGetConsole;
 
-namespace NuGet.VisualStudio {
+namespace NuGet.VisualStudio
+{
     [Export(typeof(IOutputConsoleProvider))]
-    public class OutputConsoleProvider : IOutputConsoleProvider {
+    public class OutputConsoleProvider : IOutputConsoleProvider
+    {
         private IConsole _console;
 
-        public IConsole CreateOutputConsole(bool requirePowerShellHost) {
-            if (_console == null) {
+        public IConsole CreateOutputConsole(bool requirePowerShellHost)
+        {
+            if (_console == null)
+            {
                 var serviceProvider = ServiceLocator.GetInstance<IServiceProvider>();
                 var outputWindow = (IVsOutputWindow)serviceProvider.GetService(typeof(SVsOutputWindow));
                 Debug.Assert(outputWindow != null);
@@ -21,7 +25,8 @@ namespace NuGet.VisualStudio {
             }
 
             // only instantiate the PS host if necessary (e.g. when package contains PS script files)
-            if (requirePowerShellHost && _console.Host == null) {
+            if (requirePowerShellHost && _console.Host == null)
+            {
                 var hostProvider = GetPowerShellHostProvider();
                 _console.Host = hostProvider.CreateHost(@async: false);
             }
@@ -29,7 +34,8 @@ namespace NuGet.VisualStudio {
             return _console;
         }
 
-        private static IHostProvider GetPowerShellHostProvider() {
+        private static IHostProvider GetPowerShellHostProvider()
+        {
             // The PowerConsole design enables multiple hosts (PowerShell, Python, Ruby)
             // For the Output window console, we're only interested in the PowerShell host. 
             // Here we filter out the PowerShell host provider based on its name.

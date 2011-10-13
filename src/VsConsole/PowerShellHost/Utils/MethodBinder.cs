@@ -4,11 +4,13 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
-namespace NuGetConsole.Host {
+namespace NuGetConsole.Host
+{
     /// <summary>
     /// A simple method binder to call interface methods.
     /// </summary>
-    public abstract class MethodBinder {
+    public abstract class MethodBinder
+    {
         /// <summary>
         /// Try to invoke a method.
         /// </summary>
@@ -19,12 +21,14 @@ namespace NuGetConsole.Host {
         /// <param name="result">Result of the method call.</param>
         /// <returns>true if the method call is performed.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate")]
-        public bool TryInvoke(Type type, string name, object target, object[] args, out object result) {
+        public bool TryInvoke(Type type, string name, object target, object[] args, out object result)
+        {
             MemberInfo[] members = type.GetMember(
                 name, MemberTypes.Method, BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod);
 
             // Don't support overload yet
-            if (members.Length == 1 && members[0] is MethodInfo) {
+            if (members.Length == 1 && members[0] is MethodInfo)
+            {
                 result = Invoke((MethodInfo)members[0], target, args);
                 return true;
             }
@@ -40,7 +44,8 @@ namespace NuGetConsole.Host {
         /// <param name="target">The target object to invoke the method.</param>
         /// <param name="args">Arguments for the method call.</param>
         /// <returns>Result of the method call.</returns>
-        public object Invoke(MethodInfo method, object target, object[] args) {
+        public object Invoke(MethodInfo method, object target, object[] args)
+        {
             object[] unwrappedArgs = UnwrapArgs(method, args);
             object result = method.Invoke(target, unwrappedArgs);
             return WrapResult(method, args, result, unwrappedArgs);
@@ -53,9 +58,11 @@ namespace NuGetConsole.Host {
         /// <param name="parameterInfo">The expected parameter info.</param>
         /// <param name="arg">The arg value.</param>
         /// <returns>The arg value converted to expected parameter type.</returns>
-        protected static object ChangeType(ParameterInfo parameterInfo, object arg) {
+        protected static object ChangeType(ParameterInfo parameterInfo, object arg)
+        {
             Type parameterType = parameterInfo.ParameterType;
-            if (parameterType.IsByRef) {
+            if (parameterType.IsByRef)
+            {
                 parameterType = parameterType.GetElementType();
             }
             return Convert.ChangeType(arg, parameterType, CultureInfo.InvariantCulture);
@@ -90,10 +97,13 @@ namespace NuGetConsole.Host {
         /// <param name="paramInfo">The parameter info.</param>
         /// <returns>true if the parameter is considered optional.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate")]
-        protected virtual bool TryGetOptionalArg(ParameterInfo paramInfo, out object argValue) {
-            if (paramInfo.IsOut || paramInfo.IsOptional) {
+        protected virtual bool TryGetOptionalArg(ParameterInfo paramInfo, out object argValue)
+        {
+            if (paramInfo.IsOut || paramInfo.IsOptional)
+            {
                 argValue = paramInfo.RawDefaultValue;
-                if (argValue == DBNull.Value) {
+                if (argValue == DBNull.Value)
+                {
                     // When default parameter is not really specified, use null.
                     // This works with types like "int32&".
                     argValue = null;
@@ -112,7 +122,8 @@ namespace NuGetConsole.Host {
         /// </summary>
         /// <param name="allResults">The results list.</param>
         /// <returns>A tuple that contains method call results.</returns>
-        protected virtual object CreateResultTuple(IList<object> allResults) {
+        protected virtual object CreateResultTuple(IList<object> allResults)
+        {
             return allResults;
         }
 
@@ -122,7 +133,8 @@ namespace NuGetConsole.Host {
         /// </summary>
         /// <param name="arg">An arg object.</param>
         /// <returns>true if arg represents a Type.</returns>
-        public virtual bool IsType(object arg) {
+        public virtual bool IsType(object arg)
+        {
             return arg is Type;
         }
 
@@ -131,7 +143,8 @@ namespace NuGetConsole.Host {
         /// </summary>
         /// <param name="arg">An arg object.</param>
         /// <returns>A Type instance represented by arg.</returns>
-        public virtual Type ConvertToType(object arg) {
+        public virtual Type ConvertToType(object arg)
+        {
             return (Type)arg;
         }
 
@@ -141,21 +154,25 @@ namespace NuGetConsole.Host {
         /// </summary>
         /// <param name="parameterInfos">All the parameterinfo.</param>
         /// <returns>true if UnwrapArgs/WrapResult should be performed.</returns>
-        protected virtual bool IsUnwrapArgsNeeded(ParameterInfo[] parameterInfos) {
+        protected virtual bool IsUnwrapArgsNeeded(ParameterInfo[] parameterInfos)
+        {
             return parameterInfos.Any(p => p.IsOut);
         }
 
-        object[] UnwrapArgs(MethodInfo m, object[] args) {
+        object[] UnwrapArgs(MethodInfo m, object[] args)
+        {
             ParameterInfo[] paramInfos = m.GetParameters();
 
             // Skip if not needed
-            if (!IsUnwrapArgsNeeded(paramInfos)) {
+            if (!IsUnwrapArgsNeeded(paramInfos))
+            {
                 return args;
             }
 
             object[] newArgs = new object[paramInfos.Length];
             int k = 0;
-            for (int i = 0; i < paramInfos.Length; i++) {
+            for (int i = 0; i < paramInfos.Length; i++)
+            {
                 ParameterInfo paramInfo = paramInfos[i];
                 object argValue;
                 if (k < args.Length && TryConvertArg(paramInfo, args[k], out argValue)) // If args[k] matches
@@ -165,29 +182,35 @@ namespace NuGetConsole.Host {
                     continue;
                 }
 
-                if (TryGetOptionalArg(paramInfo, out argValue)) {
+                if (TryGetOptionalArg(paramInfo, out argValue))
+                {
                     newArgs[i] = argValue;
                 }
-                else {
+                else
+                {
                     throw new MissingMemberException();
                 }
             }
             return newArgs;
         }
 
-        object WrapResult(MethodInfo m, object[] args, object result, object[] unwrappedArgs) {
-            if (args == unwrappedArgs) {
+        object WrapResult(MethodInfo m, object[] args, object result, object[] unwrappedArgs)
+        {
+            if (args == unwrappedArgs)
+            {
                 return result;
             }
 
             List<object> allResults = new List<object>();
-            if (result != null && result.GetType() != typeof(void)) {
+            if (result != null && result.GetType() != typeof(void))
+            {
                 allResults.Add(result);
             }
 
             ParameterInfo[] paramInfos = m.GetParameters();
             int k = 0;
-            for (int i = 0; i < paramInfos.Length; i++) {
+            for (int i = 0; i < paramInfos.Length; i++)
+            {
                 ParameterInfo paramInfo = paramInfos[i];
                 if (k < args.Length && TryReturnArg(paramInfo, args[k], unwrappedArgs[i])) // If args[k] matches
                 {

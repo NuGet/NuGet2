@@ -1,26 +1,33 @@
 using System;
-namespace NuGet {
-    public class PackageOperation {
-        public PackageOperation(IPackage package, PackageAction action) {
+namespace NuGet
+{
+    public class PackageOperation
+    {
+        public PackageOperation(IPackage package, PackageAction action)
+        {
             Package = package;
             Action = action;
         }
 
-        public IPackage Package {
+        public IPackage Package
+        {
             get;
             private set;
         }
 
-        public PackageAction Action {
+        public PackageAction Action
+        {
             get;
             private set;
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return (Action == PackageAction.Install ? "+ " : "- ") + Package.Id + " " + Package.Version;
         }
 
-        public override bool Equals(object obj) {
+        public override bool Equals(object obj)
+        {
             var operation = obj as PackageOperation;
             return operation != null &&
                    operation.Action == Action &&
@@ -28,7 +35,8 @@ namespace NuGet {
                    operation.Package.Version.Equals(Package.Version);
         }
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             var combiner = new HashCodeCombiner();
             combiner.AddObject(Package.Id);
             combiner.AddObject(Package.Version);

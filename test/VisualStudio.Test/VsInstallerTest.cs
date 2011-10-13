@@ -5,10 +5,13 @@ using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.VisualStudio.Test {
-    public class VsPackageInstallerTest {
+namespace NuGet.VisualStudio.Test
+{
+    public class VsPackageInstallerTest
+    {
         [Fact]
-        public void InstallPackageConvertsVersionToSemanticVersion() {
+        public void InstallPackageConvertsVersionToSemanticVersion()
+        {
             // Arrange
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
             var sourceRepository = new MockPackageRepository();
@@ -40,7 +43,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void InstallPackageRunsInitAndInstallScripts() {
+        public void InstallPackageRunsInitAndInstallScripts()
+        {
             // Arrange
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
             var sourceRepository = new MockPackageRepository();
@@ -69,7 +73,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void InstallPackageDoesNotUseFallbackRepository() {
+        public void InstallPackageDoesNotUseFallbackRepository()
+        {
             // Arrange
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
             var sourceRepository = new MockPackageRepository();
@@ -101,7 +106,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void InstallPackageDoesNotAddToRecentRepository() {
+        public void InstallPackageDoesNotAddToRecentRepository()
+        {
             // Arrange
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
             var sourceRepository = new MockPackageRepository();
@@ -133,12 +139,15 @@ namespace NuGet.VisualStudio.Test {
         }
 
         // This repository better simulates what happens when we're running the package manager in vs
-        private class MockProjectPackageRepository : MockPackageRepository {
+        private class MockProjectPackageRepository : MockPackageRepository
+        {
             private readonly IPackageRepository _parent;
-            public MockProjectPackageRepository(IPackageRepository parent) {
+            public MockProjectPackageRepository(IPackageRepository parent)
+            {
                 _parent = parent;
             }
-            public override IQueryable<IPackage> GetPackages() {
+            public override IQueryable<IPackage> GetPackages()
+            {
                 return base.GetPackages().Where(p => _parent.Exists(p));
             }
         }

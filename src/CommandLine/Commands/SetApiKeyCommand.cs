@@ -2,11 +2,13 @@
 using System.ComponentModel.Composition;
 using NuGet.Common;
 
-namespace NuGet.Commands {
+namespace NuGet.Commands
+{
     [Command(typeof(NuGetResources), "setApiKey", "SetApiKeyCommandDescription",
         MinArgs = 1, MaxArgs = 1, UsageDescriptionResourceName = "SetApiKeyCommandUsageDescription",
         UsageSummaryResourceName = "SetApiKeyCommandUsageSummary", UsageExampleResourceName = "SetApiKeyCommandUsageExamples")]
-    public class SetApiKeyCommand : Command {
+    public class SetApiKeyCommand : Command
+    {
         [Option(typeof(NuGetResources), "SetApiKeyCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
@@ -15,11 +17,14 @@ namespace NuGet.Commands {
         public ISettings Settings { get; private set; }
 
         [ImportingConstructor]
-        public SetApiKeyCommand(IPackageSourceProvider packageSourceProvider, ISettings settings) {
-            if (packageSourceProvider == null) {
+        public SetApiKeyCommand(IPackageSourceProvider packageSourceProvider, ISettings settings)
+        {
+            if (packageSourceProvider == null)
+            {
                 throw new ArgumentNullException("packageSourceProvider");
             }
-            if (settings == null) {
+            if (settings == null)
+            {
                 throw new ArgumentNullException("settings");
             }
 
@@ -27,7 +32,8 @@ namespace NuGet.Commands {
             Settings = settings;
         }
 
-        public override void ExecuteCommand() {
+        public override void ExecuteCommand()
+        {
             //Frist argument should be the ApiKey
             string apiKey = Arguments[0];
 
@@ -35,12 +41,14 @@ namespace NuGet.Commands {
 
             //If the user passed a source use it for the gallery location
             string source;
-            if (String.IsNullOrEmpty(Source)) {
+            if (String.IsNullOrEmpty(Source))
+            {
                 source = NuGetConstants.DefaultGalleryServerUrl;
                 // If no source was specified, set the default symbol server key to be the same
                 setSymbolServerKey = true;
             }
-            else {
+            else
+            {
                 source = SourceProvider.ResolveAndValidateSource(Source);
             }
 
@@ -49,14 +57,16 @@ namespace NuGet.Commands {
             string sourceName = CommandLineUtility.GetSourceDisplayName(source);
 
             // Setup the symbol server key
-            if (setSymbolServerKey) {
+            if (setSymbolServerKey)
+            {
                 Settings.SetEncryptedValue(CommandLineUtility.ApiKeysSectionName, NuGetConstants.DefaultSymbolServerUrl, apiKey);
                 Console.WriteLine(NuGetResources.SetApiKeyCommandDefaultApiKeysSaved,
                                   apiKey,
                                   sourceName,
                                   CommandLineUtility.GetSourceDisplayName(NuGetConstants.DefaultSymbolServerUrl));
             }
-            else {
+            else
+            {
                 Console.WriteLine(NuGetResources.SetApiKeyCommandApiKeySaved, apiKey, sourceName);
             }
         }

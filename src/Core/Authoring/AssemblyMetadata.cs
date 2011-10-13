@@ -1,8 +1,10 @@
 ﻿using System;
 
-namespace NuGet {
+namespace NuGet
+{
     [Serializable]
-    public class AssemblyMetadata {
+    public class AssemblyMetadata
+    {
         public string Name { get; set; }
         public SemanticVersion Version { get; set; }
         public string Title { get; set; }

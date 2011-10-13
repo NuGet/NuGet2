@@ -4,11 +4,14 @@ using System.Linq;
 using System.Runtime.Versioning;
 using Xunit;
 
-namespace NuGet.Test {
-    
-    public class ProjectSystemExtensionsTest {
+namespace NuGet.Test
+{
+
+    public class ProjectSystemExtensionsTest
+    {
         [Fact]
-        public void GetCompatibleReferencesPrefersMatchingProfile() {
+        public void GetCompatibleReferencesPrefersMatchingProfile()
+        {
             // Arrange                                                                                                                       
             var assemblyReference30client = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0"), "client"));
             var assemblyReference40client = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("4.0"), "client"));
@@ -25,7 +28,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCompatibleReferencesPrefersMatchingProfileIfSpecified() {
+        public void GetCompatibleReferencesPrefersMatchingProfileIfSpecified()
+        {
             // Arrange                                                                                                                       
             var assemblyReferenceSL40phone = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName("Silverlight", new Version("4.0"), "WindowsPhone"));
             var assemblyReferenceSL40 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName("Silverlight", new Version("4.0")));
@@ -41,7 +45,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCompatibleReferencesPicksHigestVersionLessThanTargetVersion() {
+        public void GetCompatibleReferencesPicksHigestVersionLessThanTargetVersion()
+        {
             // Arrange                                                                                                                       
             var assemblyReference10 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("1.0")));
             var assemblyReference20 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("2.0")));
@@ -59,7 +64,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCompatibleReferencesReferenceWithUnspecifiedFrameworkName() {
+        public void GetCompatibleReferencesReferenceWithUnspecifiedFrameworkName()
+        {
             // Arrange
             var assemblyReference10 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("1.0")));
             var assemblyReference20 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("2.0")));
@@ -77,7 +83,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCompatibleReferencesReferenceWithUnspecifiedFrameworkNameWinsIfNoMatchingSpecificFrameworkNames() {
+        public void GetCompatibleReferencesReferenceWithUnspecifiedFrameworkNameWinsIfNoMatchingSpecificFrameworkNames()
+        {
             // Arrange
             var assemblyReference20 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("2.0")));
             var assemblyReference30 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0")));
@@ -94,7 +101,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCompatibleReferencesReferenceMostSpecificVersionWins() {
+        public void GetCompatibleReferencesReferenceMostSpecificVersionWins()
+        {
             // Arrange
             var assemblyReference10 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("1.0")));
             var assemblyReference20 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("2.0")));
@@ -112,7 +120,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCompatibleReferencesHighestSpecifiedAssemblyLessThanProjectTargetFrameworkWins() {
+        public void GetCompatibleReferencesHighestSpecifiedAssemblyLessThanProjectTargetFrameworkWins()
+        {
             // Arrange
             var assemblyReference10 = PackageUtility.CreateAssemblyReference("foo1.dll", new FrameworkName(".NETFramework", new Version("1.0")));
             var assemblyReference20 = PackageUtility.CreateAssemblyReference("foo1.dll", new FrameworkName(".NETFramework", new Version("2.0")));
@@ -130,7 +139,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCompatibleReferencesReturnsNullIfNoBestMatchFound() {
+        public void GetCompatibleReferencesReturnsNullIfNoBestMatchFound()
+        {
             // Arrange
             var assemblyReference = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("5.0")));
             var assemblyReferences = new IPackageAssemblyReference[] { assemblyReference };
@@ -143,7 +153,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetCompatibleReferencesMostSpecificFrameworkIfProfileNameSpecified() {
+        public void GetCompatibleReferencesMostSpecificFrameworkIfProfileNameSpecified()
+        {
             // Arrange
             var assemblyReference30client = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("3.0"), "Client"));
             var assemblyReference40 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("4.0")));
@@ -158,7 +169,8 @@ namespace NuGet.Test {
             Assert.Equal(assemblyReference40, compatibleAssemblyReferences[0]);
         }
 
-        private IEnumerable<T> GetCompatibleItems<T>(FrameworkName frameworkName, IEnumerable<T> items) where T : IFrameworkTargetable {
+        private IEnumerable<T> GetCompatibleItems<T>(FrameworkName frameworkName, IEnumerable<T> items) where T : IFrameworkTargetable
+        {
             IEnumerable<T> compatibleItems;
             VersionUtility.TryGetCompatibleItems(frameworkName, items, out compatibleItems);
             return compatibleItems;

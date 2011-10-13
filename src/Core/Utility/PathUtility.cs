@@ -1,14 +1,19 @@
 ﻿using System;
 using System.IO;
 
-namespace NuGet {
-    public static class PathUtility {
-        public static string EnsureTrailingSlash(string path) {
-            if (path == null) {
+namespace NuGet
+{
+    public static class PathUtility
+    {
+        public static string EnsureTrailingSlash(string path)
+        {
+            if (path == null)
+            {
                 throw new ArgumentNullException("path");
             }
             int length = path.Length;
-            if ((length != 0) && (path[length - 1] != Path.DirectorySeparatorChar)) {
+            if ((length != 0) && (path[length - 1] != Path.DirectorySeparatorChar))
+            {
                 return path + Path.DirectorySeparatorChar;
             }
             return path;
@@ -17,12 +22,15 @@ namespace NuGet {
         /// <summary>
         /// Returns path2 relative to path1
         /// </summary>
-        public static string GetRelativePath(string path1, string path2) {
-            if (path1 == null) {
+        public static string GetRelativePath(string path1, string path2)
+        {
+            if (path1 == null)
+            {
                 throw new ArgumentNullException("path1");
             }
 
-            if (path2 == null) {
+            if (path2 == null)
+            {
                 throw new ArgumentNullException("path2");
             }
 
@@ -32,12 +40,15 @@ namespace NuGet {
             return UriUtility.GetPath(source.MakeRelativeUri(target));
         }
 
-        public static string GetAbsolutePath(string basePath, string relativePath) {
-            if (basePath == null) {
+        public static string GetAbsolutePath(string basePath, string relativePath)
+        {
+            if (basePath == null)
+            {
                 throw new ArgumentNullException("basePath");
             }
 
-            if (relativePath == null) {
+            if (relativePath == null)
+            {
                 throw new ArgumentNullException("relativePath");
             }
 
@@ -45,11 +56,14 @@ namespace NuGet {
             return resultUri.LocalPath;
         }
 
-        public static string GetCanonicalPath(string path) {
-            if (PathValidator.IsValidLocalPath(path) || (PathValidator.IsValidUncPath(path))) {
+        public static string GetCanonicalPath(string path)
+        {
+            if (PathValidator.IsValidLocalPath(path) || (PathValidator.IsValidUncPath(path)))
+            {
                 return Path.GetFullPath(EnsureTrailingSlash(path));
             }
-            if (PathValidator.IsValidUrl(path)) {
+            if (PathValidator.IsValidUrl(path))
+            {
                 var url = new Uri(path);
                 // return canonical representation of Uri
                 return url.ToString();

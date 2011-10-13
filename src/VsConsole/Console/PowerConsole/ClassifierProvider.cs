@@ -4,16 +4,19 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
 using NuGetConsole.Implementation.Console;
 
-namespace NuGetConsole.Implementation.PowerConsole {
+namespace NuGetConsole.Implementation.PowerConsole
+{
 
     [Export(typeof(IClassifierProvider))]
     [ContentType(PowerConsoleWindow.ContentType)]
-    class ClassifierProvider : IClassifierProvider {
+    class ClassifierProvider : IClassifierProvider
+    {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         [Import]
         public IWpfConsoleService WpfConsoleService { get; set; }
 
-        public IClassifier GetClassifier(ITextBuffer textBuffer) {
+        public IClassifier GetClassifier(ITextBuffer textBuffer)
+        {
             return WpfConsoleService.GetClassifier(textBuffer) as IClassifier;
         }
     }

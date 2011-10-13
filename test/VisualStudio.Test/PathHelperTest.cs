@@ -1,25 +1,30 @@
-﻿using Xunit;
-using NuGet.Test;
+﻿using NuGet.Test;
+using Xunit;
 
-namespace NuGet.VisualStudio.Test {
-    
-    public class PathHelperTest {
+namespace NuGet.VisualStudio.Test
+{
+
+    public class PathHelperTest
+    {
 
         [Fact]
-        public void ThrowsIfInputIsNull() {
+        public void ThrowsIfInputIsNull()
+        {
             // Act & Assert
             ExceptionAssert.ThrowsArgNull(() => PathHelper.SmartTruncate(null, 10), "path");
         }
 
         [Fact]
-        public void ThrowsIfMaxLengthIsLessThan6() {
+        public void ThrowsIfMaxLengthIsLessThan6()
+        {
             // Act & Assert
             ExceptionAssert.ThrowsArgOutOfRange(() => PathHelper.SmartTruncate("", 5), "maxWidth", 6, null, true);
             ExceptionAssert.ThrowsArgOutOfRange(() => PathHelper.SmartTruncate("", -4), "maxWidth", 6, null, true);
         }
 
         [Fact]
-        public void ReturnsTheSameStringIfItIsEqualToMaxWidthValue() {
+        public void ReturnsTheSameStringIfItIsEqualToMaxWidthValue()
+        {
             // Arrange
             string input = "abcdef";
             int maxWidth = 6;
@@ -32,7 +37,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void ReturnsTheSameStringIfItIsShorterThanMaxWidthValue() {
+        public void ReturnsTheSameStringIfItIsShorterThanMaxWidthValue()
+        {
             // Arrange
             string input = @"c:\user\documents\projects";
             int maxWidth = 30;
@@ -45,7 +51,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void TruncateIfInputIsLongerThanMaxWidth() {
+        public void TruncateIfInputIsLongerThanMaxWidth()
+        {
             // Arrange
             string input = @"c:\user\documents\projects";
             int maxWidth = 20;
@@ -58,7 +65,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void TruncateIfInputIsLongerThanMaxWidth2() {
+        public void TruncateIfInputIsLongerThanMaxWidth2()
+        {
             // Arrange
             string input = @"c:\user\documents\projects\";
             int maxWidth = 26;
@@ -71,7 +79,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void TruncateFolderNameIfItIsTooLong() {
+        public void TruncateFolderNameIfItIsTooLong()
+        {
             // Arrange
             string input = @"c:\thisisaverylongname";
             int maxWidth = 10;
@@ -85,7 +94,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void EscapePSPathTest() {
+        public void EscapePSPathTest()
+        {
             TestEscapePSPath("", "''");
             TestEscapePSPath("abc", "'abc'");
             TestEscapePSPath("a$$b", "'a$$b'");
@@ -100,7 +110,8 @@ namespace NuGet.VisualStudio.Test {
             TestEscapePSPath(@"c:\users\name\Foo]\Console.sln", @"'c:\users\name\Foo`]\Console.sln'");
         }
 
-        private static void TestEscapePSPath(string input, string expectedOutput) {
+        private static void TestEscapePSPath(string input, string expectedOutput)
+        {
             string output = PathHelper.EscapePSPath(input);
             Assert.Equal(expectedOutput, output);
         }

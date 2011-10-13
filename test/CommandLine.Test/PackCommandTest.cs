@@ -1,17 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Xunit;
+using System.Text;
 using Moq;
 using NuGet.Commands;
-using Xunit.Extensions;
 using NuGet.Common;
-using System.Text;
+using Xunit;
 
-namespace NuGet.Test.NuGetCommandLine.Commands {
+namespace NuGet.Test.NuGetCommandLine.Commands
+{
 
-    public class PackCommandTest {
+    public class PackCommandTest
+    {
         [Fact]
-        public void PackCommandDefaultFiltersRemovesManifestAndPackageFiles() {
+        public void PackCommandDefaultFiltersRemovesManifestAndPackageFiles()
+        {
             // Arrange
             var files = GetPackageFiles(
                     @"x:\packagefiles\some-file\1.txt",
@@ -34,7 +36,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void PackCommandDefaultFiltersRemovesRepoFiles() {
+        public void PackCommandDefaultFiltersRemovesRepoFiles()
+        {
             // Arrange
             var files = GetPackageFiles(
                     @"x:\packagefiles\some-file\1.txt",
@@ -56,7 +59,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void PackCommandDefaultFiltersRemovesNugetFiles() {
+        public void PackCommandDefaultFiltersRemovesNugetFiles()
+        {
             // Arrange
             var files = GetPackageFiles(
                     @"x:\packagefiles\some-file\1.txt",
@@ -74,7 +78,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void ExcludeFilesUsesWildCardExtension() {
+        public void ExcludeFilesUsesWildCardExtension()
+        {
             // Arrange
             var files = GetPackageFiles(
                     @"p:\some-file\should-be-removed\test.ext",
@@ -94,7 +99,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void ExcludeFilesExcludesWildCardPaths() {
+        public void ExcludeFilesExcludesWildCardPaths()
+        {
             // Arrange
             var files = GetPackageFiles(
                     @"p:\some-file\should-be-removed\test.ext",
@@ -115,7 +121,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void ExcludeFilesDoesNotExcludeDefaultFilesIfExcludeSpecialPathsIsDisabled() {
+        public void ExcludeFilesDoesNotExcludeDefaultFilesIfExcludeSpecialPathsIsDisabled()
+        {
             // Arrange
             var files = GetPackageFiles(
                     @"p:\some-file\should-be-removed\test.ext",
@@ -137,7 +144,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void ExcludeFilesPerformsCaseInsensitiveSearch() {
+        public void ExcludeFilesPerformsCaseInsensitiveSearch()
+        {
             // Arrange
             var files = GetPackageFiles(
                     @"p:\some-file\should-be-removed\test.ext",
@@ -158,7 +166,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void ExcludeFilesDoesNotUseDefaultExcludesIfDisabled() {
+        public void ExcludeFilesDoesNotUseDefaultExcludesIfDisabled()
+        {
             // Arrange
             var files = GetPackageFiles(
                     @"p:\some-file\test.txt",
@@ -181,7 +190,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void ExcludeFilesUsesPathIfFileIsNotPhysicalPackageFile() {
+        public void ExcludeFilesUsesPathIfFileIsNotPhysicalPackageFile()
+        {
             // Arrange
             var mockFile = new Mock<IPackageFile>();
             mockFile.Setup(c => c.Path).Returns(@"content\foo.txt");
@@ -198,22 +208,26 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void GetInputFileThrowsIfNoFiles() {
+        public void GetInputFileThrowsIfNoFiles()
+        {
             ExceptionAssert.Throws<CommandLineException>(() => PackCommand.GetInputFile(Enumerable.Empty<string>()), "Please specify a nuspec or project file to use.");
         }
 
         [Fact]
-        public void GetInputFileMultipleProjectFilesThrows() {
+        public void GetInputFileMultipleProjectFilesThrows()
+        {
             ExceptionAssert.Throws<CommandLineException>(() => PackCommand.GetInputFile(new[] { "a.csproj", "b.fsproj" }), "Please specify a nuspec or project file to use.");
         }
 
         [Fact]
-        public void GetInputFileMultipleNuSpecFilesThrows() {
+        public void GetInputFileMultipleNuSpecFilesThrows()
+        {
             ExceptionAssert.Throws<CommandLineException>(() => PackCommand.GetInputFile(new[] { "a.nuspec", "b.NuspeC" }), "Please specify a nuspec or project file to use.");
         }
 
         [Fact]
-        public void GetInputFileNuSpecAndProjectFilePrefersProjectFile() {
+        public void GetInputFileNuSpecAndProjectFilePrefersProjectFile()
+        {
             // Act
             string file = PackCommand.GetInputFile(new[] { "a.nuspec", "foo.csproj" });
 
@@ -221,7 +235,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             Assert.Equal("foo.csproj", file);
         }
         [Fact]
-        public void ExcludeFilesForLibPackageRemovesAllPDBs() {
+        public void ExcludeFilesForLibPackageRemovesAllPDBs()
+        {
             // Arrange
             var files = GetPackageFiles(
                     @"lib\mylib.dll",
@@ -243,7 +258,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void ExcludeFilesForLibPackageRemovesAllFilesFromSrcTargetFolder() {
+        public void ExcludeFilesForLibPackageRemovesAllFilesFromSrcTargetFolder()
+        {
             // Arrange
             var files = GetPackageFiles(
                     @"lib\mylib.dll",
@@ -265,7 +281,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void ExcludeFilesForSymbolPackageRemovesAllContentFiles() {
+        public void ExcludeFilesForSymbolPackageRemovesAllContentFiles()
+        {
             // Arrange
             var files = GetPackageFiles(
                     @"lib\mylib.dll",
@@ -286,7 +303,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void ExcludeFilesForSymbolPackageRemovesScripts() {
+        public void ExcludeFilesForSymbolPackageRemovesScripts()
+        {
             // Arrange
             var files = GetPackageFiles(
                     @"lib\mylib.dll",
@@ -309,7 +327,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void PackCommandWarnsIfVersionContainsSpecialVersionButDoesNotConformToSemVer() {
+        public void PackCommandWarnsIfVersionContainsSpecialVersionButDoesNotConformToSemVer()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("A", "1.0alpha");
             var builder = new StringBuilder();
@@ -317,7 +336,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             console.Setup(c => c.WriteWarning(It.IsAny<string>(), It.IsAny<object[]>())).Callback<string, object[]>((text, p) => builder.AppendFormat(text, p));
             console.Setup(c => c.WriteWarning(It.IsAny<bool>(), It.IsAny<string>(), It.IsAny<object[]>())).Callback<bool, string, object[]>((b, text, p) => builder.AppendFormat(text, p));
-            var packCommand = new PackCommand {
+            var packCommand = new PackCommand
+            {
                 Console = console.Object,
                 Rules = Enumerable.Empty<IPackageRule>()
             };
@@ -326,11 +346,12 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             packCommand.AnalyzePackage(package);
 
             // Assert
-            Assert.Equal(@"1 issue(s) found with package 'A'.Issue: Use semantic versioningDescription: Version ""1.0alpha"" does not follow semantic versioning guidelines.Solution: Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org. ", 
+            Assert.Equal(@"1 issue(s) found with package 'A'.Issue: Use semantic versioningDescription: Version ""1.0alpha"" does not follow semantic versioning guidelines.Solution: Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org. ",
                 builder.ToString());
         }
 
-        private static IList<IPackageFile> GetPackageFiles(params string[] paths) {
+        private static IList<IPackageFile> GetPackageFiles(params string[] paths)
+        {
             return (from p in paths
                     select new PhysicalPackageFile { SourcePath = p, TargetPath = p } as IPackageFile
             ).ToList();

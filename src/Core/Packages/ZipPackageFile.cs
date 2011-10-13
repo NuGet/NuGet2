@@ -2,30 +2,37 @@ using System;
 using System.IO;
 using System.IO.Packaging;
 
-namespace NuGet {
-    internal class ZipPackageFile : IPackageFile {
+namespace NuGet
+{
+    internal class ZipPackageFile : IPackageFile
+    {
         private Func<Stream> _streamFactory;
 
-        public ZipPackageFile(PackagePart part) {
+        public ZipPackageFile(PackagePart part)
+        {
             Path = UriUtility.GetPath(part.Uri);
             _streamFactory = part.GetStream().ToStreamFactory();
         }
 
-        public ZipPackageFile(IPackageFile file) {
+        public ZipPackageFile(IPackageFile file)
+        {
             Path = file.Path;
             _streamFactory = file.GetStream().ToStreamFactory();
         }
 
-        public string Path {
+        public string Path
+        {
             get;
             private set;
         }
 
-        public Stream GetStream() {
+        public Stream GetStream()
+        {
             return _streamFactory();
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return Path;
         }
     }

@@ -6,18 +6,22 @@ using System.Linq;
 using System.Xml.Linq;
 using NuGet.VisualStudio;
 
-namespace NuGet.Dialog {
-    public class Visualizer {
+namespace NuGet.Dialog
+{
+    public class Visualizer
+    {
         private const string dgmlNS = "http://schemas.microsoft.com/vs/2009/dgml";
         private readonly IVsPackageManagerFactory _packageManagerFactory;
         private readonly ISolutionManager _solutionManager;
 
-        public Visualizer(IVsPackageManagerFactory packageManagerFactory, ISolutionManager solutionManager) {
+        public Visualizer(IVsPackageManagerFactory packageManagerFactory, ISolutionManager solutionManager)
+        {
             _packageManagerFactory = packageManagerFactory;
             _solutionManager = solutionManager;
         }
 
-        public string CreateGraph() {
+        public string CreateGraph()
+        {
             // We only use the package manager to locate the LocalRepository, we should be fine disabling fallback.
             var packageManager = _packageManagerFactory.CreatePackageManager(ServiceLocator.GetInstance<IPackageRepository>(), useFallbackForDependencies: false);
             var solutionManager = new SolutionManager();
@@ -29,11 +33,14 @@ namespace NuGet.Dialog {
             return GenerateDGML(nodes, links);
         }
 
-        private static void VisitProjects(IVsPackageManager packageManager, SolutionManager solutionManager, List<DGMLNode> nodes, List<DGMLLink> links) {
-            foreach (var project in solutionManager.GetProjects()) {
+        private static void VisitProjects(IVsPackageManager packageManager, SolutionManager solutionManager, List<DGMLNode> nodes, List<DGMLLink> links)
+        {
+            foreach (var project in solutionManager.GetProjects())
+            {
                 var projectManager = packageManager.GetProjectManager(project);
                 var repo = projectManager.LocalRepository;
-                if (!repo.GetPackages().Any()) {
+                if (!repo.GetPackages().Any())
+                {
                     // Project has no packages. Ignore it.
                     continue;
                 }
@@ -46,16 +53,20 @@ namespace NuGet.Dialog {
             }
         }
 
-        private static IEnumerable<IPackage> VisitProjectPackages(List<DGMLNode> nodes, List<DGMLLink> links, IPackageRepository repo) {
+        private static IEnumerable<IPackage> VisitProjectPackages(List<DGMLNode> nodes, List<DGMLLink> links, IPackageRepository repo)
+        {
             var mapping = repo.GetPackages().ToDictionary(c => c.Id, StringComparer.OrdinalIgnoreCase);
             var dependencies = new HashSet<IPackage>();
-            foreach (var package in repo.GetPackages()) {
+            foreach (var package in repo.GetPackages())
+            {
                 var packageName = package.GetFullName();
                 nodes.Add(new DGMLNode { Name = packageName, Label = packageName, Category = "Package" });
 
-                foreach (var dependency in package.Dependencies) {
+                foreach (var dependency in package.Dependencies)
+                {
                     IPackage dependentPackage;
-                    if (mapping.TryGetValue(dependency.Id, out dependentPackage)) {
+                    if (mapping.TryGetValue(dependency.Id, out dependentPackage))
+                    {
                         dependencies.Add(dependentPackage);
                         links.Add(new DGMLLink { SourceName = packageName, DestName = dependentPackage.GetFullName(), Category = "Package Dependency" });
                     }
@@ -64,7 +75,8 @@ namespace NuGet.Dialog {
             return dependencies;
         }
 
-        private string GenerateDGML(List<DGMLNode> nodes, List<DGMLLink> links) {
+        private string GenerateDGML(List<DGMLNode> nodes, List<DGMLLink> links)
+        {
             bool hasDependencies = links.Any(l => l.Category == "Package Dependency");
             var document = new XDocument(
                 new XElement(XName.Get("DirectedGraph", dgmlNS),
@@ -87,25 +99,29 @@ namespace NuGet.Dialog {
             return saveFilePath;
         }
 
-        private static XElement StyleElement(string category, string targetType, string propertyName, string propertyValue) {
+        private static XElement StyleElement(string category, string targetType, string propertyName, string propertyValue)
+        {
             return new XElement(XName.Get("Style", dgmlNS), new XAttribute("TargetType", targetType), new XAttribute("GroupLabel", category), new XAttribute("ValueLabel", "True"),
                     new XElement(XName.Get("Condition", dgmlNS), new XAttribute("Expression", String.Format(CultureInfo.InvariantCulture, "HasCategory('{0}')", category))),
                     new XElement(XName.Get("Setter", dgmlNS), new XAttribute("Property", propertyName), new XAttribute("Value", propertyValue)));
         }
 
-        private class DGMLNode : IEquatable<DGMLNode> {
+        private class DGMLNode : IEquatable<DGMLNode>
+        {
             public string Name { get; set; }
 
             public string Label { get; set; }
 
             public string Category { get; set; }
 
-            public bool Equals(DGMLNode other) {
+            public bool Equals(DGMLNode other)
+            {
                 return Name.Equals(other.Name, StringComparison.OrdinalIgnoreCase);
             }
         }
 
-        private class DGMLLink {
+        private class DGMLLink
+        {
             public string SourceName { get; set; }
 
             public string DestName { get; set; }

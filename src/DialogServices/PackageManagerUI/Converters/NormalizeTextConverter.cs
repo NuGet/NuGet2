@@ -1,14 +1,18 @@
 ﻿using System;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows.Data;
-using System.Net;
 
-namespace NuGet.Dialog.PackageManagerUI {
-    public class NormalizeTextConverter : IValueConverter {
+namespace NuGet.Dialog.PackageManagerUI
+{
+    public class NormalizeTextConverter : IValueConverter
+    {
 
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
             string stringValue = (string)value;
-            if (String.IsNullOrEmpty(stringValue)) {
+            if (String.IsNullOrEmpty(stringValue))
+            {
                 return stringValue;
             }
 
@@ -19,7 +23,8 @@ namespace NuGet.Dialog.PackageManagerUI {
             return WebUtility.HtmlDecode(normalizedText);
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
             throw new NotImplementedException();
         }
     }

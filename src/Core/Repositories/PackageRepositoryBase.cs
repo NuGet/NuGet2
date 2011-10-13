@@ -1,8 +1,10 @@
-namespace NuGet {
+namespace NuGet
+{
     using System;
     using System.Linq;
 
-    public abstract class PackageRepositoryBase : IPackageRepository {
+    public abstract class PackageRepositoryBase : IPackageRepository
+    {
 
         public abstract string Source { get; }
 
@@ -10,11 +12,13 @@ namespace NuGet {
 
         public abstract bool SupportsPrereleasePackages { get; }
 
-        public virtual void AddPackage(IPackage package) {
+        public virtual void AddPackage(IPackage package)
+        {
             throw new NotSupportedException();
         }
 
-        public virtual void RemovePackage(IPackage package) {
+        public virtual void RemovePackage(IPackage package)
+        {
             throw new NotSupportedException();
         }
     }

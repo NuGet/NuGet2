@@ -1,9 +1,13 @@
 ﻿using System;
 
-namespace NuGet.Common {
-    public static class PackageSourceProviderExtensions {
-        public static string ResolveAndValidateSource(this IPackageSourceProvider sourceProvider, string source) {
-            if (String.IsNullOrEmpty(source)) {
+namespace NuGet.Common
+{
+    public static class PackageSourceProviderExtensions
+    {
+        public static string ResolveAndValidateSource(this IPackageSourceProvider sourceProvider, string source)
+        {
+            if (String.IsNullOrEmpty(source))
+            {
                 return null;
             }
 

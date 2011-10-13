@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 using Moq;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class PackageSourceProviderTest {
+namespace NuGet.Test
+{
+
+    public class PackageSourceProviderTest
+    {
         [Fact]
-        public void TestNoPackageSourcesAreReturnedIfUserSettingsIsEmpty() {
+        public void TestNoPackageSourcesAreReturnedIfUserSettingsIsEmpty()
+        {
             // Arrange
             var provider = CreatePackageSourceProvider();
 
@@ -20,7 +23,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void LoadPackageSourcesReturnsEmptySequenceIfDefaultPackageSourceIsNull() {
+        public void LoadPackageSourcesReturnsEmptySequenceIfDefaultPackageSourceIsNull()
+        {
             // Arrange
             var settings = new MockUserSettingsManager();
             var provider = new PackageSourceProvider(settings, defaultSources: null);
@@ -33,7 +37,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void LoadPackageSourcesReturnsEmptySequenceIfDefaultPackageSourceIsEmpty() {
+        public void LoadPackageSourcesReturnsEmptySequenceIfDefaultPackageSourceIsEmpty()
+        {
             // Arrange
             var settings = new MockUserSettingsManager();
             var provider = new PackageSourceProvider(settings, defaultSources: new PackageSource[] { });
@@ -46,7 +51,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void LoadPackageSourcesReturnsDefaultSourcesIfSpecified() {
+        public void LoadPackageSourcesReturnsDefaultSourcesIfSpecified()
+        {
             // Arrange
             var settings = new MockUserSettingsManager();
             var provider = new PackageSourceProvider(settings, defaultSources: new[] { new PackageSource("A"), new PackageSource("B") });
@@ -61,7 +67,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void LoadPackageSourcesPerformMigrationIfSpecified() {
+        public void LoadPackageSourcesPerformMigrationIfSpecified()
+        {
             // Arrange
             var settings = new MockUserSettingsManager();
             settings.SetValues(
@@ -109,7 +116,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void CallSaveMethodAndLoadMethodShouldReturnTheSamePackageSet() {
+        public void CallSaveMethodAndLoadMethodShouldReturnTheSamePackageSet()
+        {
             // Arrange
             var provider = CreatePackageSourceProvider();
 
@@ -121,13 +129,15 @@ namespace NuGet.Test {
 
             // Assert
             Assert.Equal(sources.Length, values.Count);
-            for (int i = 0; i < sources.Length; i++) {
+            for (int i = 0; i < sources.Length; i++)
+            {
                 AssertPackageSource(values[i], sources[i].Name, sources[i].Source, true);
             }
         }
 
         [Fact]
-        public void LoadPackageSourcesReturnCorrectDataFromSettings() {
+        public void LoadPackageSourcesReturnCorrectDataFromSettings()
+        {
             // Arrange
             var settings = new MockUserSettingsManager();
             settings.SetValues(PackageSourceProvider.PackageSourcesSectionName,
@@ -150,7 +160,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void LoadPackageSourcesReturnCorrectDataFromSettingsWhenSomePackageSourceIsDisabled() {
+        public void LoadPackageSourcesReturnCorrectDataFromSettingsWhenSomePackageSourceIsDisabled()
+        {
             // Arrange
             var settings = new MockUserSettingsManager();
             settings.SetValues(PackageSourceProvider.PackageSourcesSectionName,
@@ -177,7 +188,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SavePackageSourcesSaveCorrectDataToSettings() {
+        public void SavePackageSourcesSaveCorrectDataToSettings()
+        {
             // Arrange
             var settings = new MockUserSettingsManager();
             var provider = CreatePackageSourceProvider(settings);
@@ -196,7 +208,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SavePackageSourcesSaveCorrectDataToSettingsWhenSomePackgeSourceIsDisabled() {
+        public void SavePackageSourcesSaveCorrectDataToSettingsWhenSomePackgeSourceIsDisabled()
+        {
             // Arrange
             var settings = new MockUserSettingsManager();
             var provider = CreatePackageSourceProvider(settings);
@@ -220,7 +233,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetAggregateReturnsAggregateRepositoryForAllSources() {
+        public void GetAggregateReturnsAggregateRepositoryForAllSources()
+        {
             // Arrange
             var repositoryA = new Mock<IPackageRepository>();
             var repositoryB = new Mock<IPackageRepository>();
@@ -240,7 +254,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetAggregateSkipsInvalidSources() {
+        public void GetAggregateSkipsInvalidSources()
+        {
             // Arrange
             var repositoryA = new Mock<IPackageRepository>();
             var repositoryC = new Mock<IPackageRepository>();
@@ -262,7 +277,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetAggregateSkipsDisabledSources() {
+        public void GetAggregateSkipsDisabledSources()
+        {
             // Arrange
             var repositoryA = new Mock<IPackageRepository>();
             var repositoryB = new Mock<IPackageRepository>();
@@ -283,7 +299,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetAggregateHandlesInvalidUriSources() {
+        public void GetAggregateHandlesInvalidUriSources()
+        {
             // Arrange
             var factory = PackageRepositoryFactory.Default;
             var sources = new Mock<IPackageSourceProvider>();
@@ -301,7 +318,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetAggregateSetsIgnoreInvalidRepositoryProperty() {
+        public void GetAggregateSetsIgnoreInvalidRepositoryProperty()
+        {
             // Arrange
             var repositoryA = new Mock<IPackageRepository>();
             var repositoryC = new Mock<IPackageRepository>();
@@ -319,7 +337,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetAggregateWithInvalidSourcesThrows() {
+        public void GetAggregateWithInvalidSourcesThrows()
+        {
             // Arrange
             var repositoryA = new Mock<IPackageRepository>();
             var repositoryC = new Mock<IPackageRepository>();
@@ -336,7 +355,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveSourceLooksUpNameAndSource() {
+        public void ResolveSourceLooksUpNameAndSource()
+        {
             // Arrange
             var sources = new Mock<IPackageSourceProvider>();
             PackageSource source1 = new PackageSource("Source", "SourceName"), source2 = new PackageSource("http://www.test.com", "Baz");
@@ -354,7 +374,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveSourceIgnoreDisabledSources() {
+        public void ResolveSourceIgnoreDisabledSources()
+        {
             // Arrange
             var sources = new Mock<IPackageSourceProvider>();
             PackageSource source1 = new PackageSource("Source", "SourceName");
@@ -376,7 +397,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveSourceReturnsOriginalValueIfNotFoundInSources() {
+        public void ResolveSourceReturnsOriginalValueIfNotFoundInSources()
+        {
             // Arrange
             var sources = new Mock<IPackageSourceProvider>();
             PackageSource source1 = new PackageSource("Source", "SourceName"), source2 = new PackageSource("http://www.test.com", "Baz");
@@ -390,13 +412,15 @@ namespace NuGet.Test {
             Assert.Equal(source, result);
         }
 
-        private void AssertPackageSource(PackageSource ps, string name, string source, bool isEnabled) {
+        private void AssertPackageSource(PackageSource ps, string name, string source, bool isEnabled)
+        {
             Assert.Equal(name, ps.Name);
             Assert.Equal(source, ps.Source);
             Assert.True(ps.IsEnabled == isEnabled);
         }
 
-        private IPackageSourceProvider CreatePackageSourceProvider(ISettings settings = null) {
+        private IPackageSourceProvider CreatePackageSourceProvider(ISettings settings = null)
+        {
             settings = settings ?? new MockUserSettingsManager();
             return new PackageSourceProvider(settings);
         }

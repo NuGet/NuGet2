@@ -10,9 +10,11 @@ using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.Utilities;
 
-namespace NuGetConsole.Implementation.Console {
+namespace NuGetConsole.Implementation.Console
+{
     [Export(typeof(IWpfConsoleService))]
-    class WpfConsoleService : IWpfConsoleService {
+    class WpfConsoleService : IWpfConsoleService
+    {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         [Import]
         internal IContentTypeRegistryService ContentTypeRegistryService { get; set; }
@@ -50,11 +52,13 @@ namespace NuGetConsole.Implementation.Console {
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "MEF export")]
         [Export(typeof(IConsoleStatus))]
-        public IConsoleStatus ConsoleStatus {
+        public IConsoleStatus ConsoleStatus
+        {
             get { return _privateConsoleStatus; }
         }
 
-        public WpfConsoleService() {
+        public WpfConsoleService()
+        {
             _privateConsoleStatus = new PrivateConsoleStatus();
         }
 
@@ -63,7 +67,8 @@ namespace NuGetConsole.Implementation.Console {
             "Microsoft.Reliability",
             "CA2000:Dispose objects before losing scope",
             Justification = "Caller's responsibility to dispose.")]
-        public IWpfConsole CreateConsole(IServiceProvider sp, string contentTypeName, string hostName) {
+        public IWpfConsole CreateConsole(IServiceProvider sp, string contentTypeName, string hostName)
+        {
             return new WpfConsole(this, sp, _privateConsoleStatus, contentTypeName, hostName).MarshaledConsole;
         }
 
@@ -71,12 +76,14 @@ namespace NuGetConsole.Implementation.Console {
             "Microsoft.Reliability",
             "CA2000:Dispose objects before losing scope",
             Justification = "We can't dispose an object if the objective is to return it.")]
-        public object TryCreateCompletionSource(object textBuffer) {
+        public object TryCreateCompletionSource(object textBuffer)
+        {
             ITextBuffer buffer = (ITextBuffer)textBuffer;
             return new WpfConsoleCompletionSource(this, buffer);
         }
 
-        public object GetClassifier(object textBuffer) {
+        public object GetClassifier(object textBuffer)
+        {
             ITextBuffer buffer = (ITextBuffer)textBuffer;
             return buffer.Properties.GetOrCreateSingletonProperty<IClassifier>(
                 () => new WpfConsoleClassifier(this, buffer));
@@ -85,12 +92,15 @@ namespace NuGetConsole.Implementation.Console {
 
         private static IService GetSingletonHostService<IService, IServiceFactory>(WpfConsole console,
             IEnumerable<Lazy<IServiceFactory, IHostNameMetadata>> providers, Func<IServiceFactory, IHost, IService> create, Func<IService> def)
-            where IService : class {
-            return console.WpfTextView.Properties.GetOrCreateSingletonProperty<IService>(() => {
+            where IService : class
+        {
+            return console.WpfTextView.Properties.GetOrCreateSingletonProperty<IService>(() =>
+            {
                 IService service = null;
 
                 var lazyProvider = providers.FirstOrDefault(f => string.Equals(f.Metadata.HostName, console.HostName));
-                if (lazyProvider != null) {
+                if (lazyProvider != null)
+                {
                     service = create(lazyProvider.Value, console.Host);
                 }
 
@@ -98,13 +108,15 @@ namespace NuGetConsole.Implementation.Console {
             });
         }
 
-        public ICommandExpansion GetCommandExpansion(WpfConsole console) {
+        public ICommandExpansion GetCommandExpansion(WpfConsole console)
+        {
             return GetSingletonHostService<ICommandExpansion, ICommandExpansionProvider>(console, CommandExpansionProviders,
                 (factory, host) => factory.Create(host),
                 () => null);
         }
 
-        public ICommandTokenizer GetCommandTokenizer(WpfConsole console) {
+        public ICommandTokenizer GetCommandTokenizer(WpfConsole console)
+        {
             return GetSingletonHostService<ICommandTokenizer, ICommandTokenizerProvider>(console, CommandTokenizerProviders,
                 (factory, host) => factory.Create(host),
                 () => null);
@@ -112,8 +124,10 @@ namespace NuGetConsole.Implementation.Console {
 
         IClassificationType[] _tokenClassifications;
 
-        public IClassificationType GetTokenTypeClassification(TokenType tokenType) {
-            if (_tokenClassifications == null) {
+        public IClassificationType GetTokenTypeClassification(TokenType tokenType)
+        {
+            if (_tokenClassifications == null)
+            {
                 _tokenClassifications = new IClassificationType[] {
                     StandardClassificationService.CharacterLiteral,
                     StandardClassificationService.Comment,
@@ -135,30 +149,36 @@ namespace NuGetConsole.Implementation.Console {
             }
 
             int i = (int)tokenType;
-            if (i < 0 || i >= _tokenClassifications.Length) {
+            if (i < 0 || i >= _tokenClassifications.Length)
+            {
                 i = (int)TokenType.Other;
             }
 
             return _tokenClassifications[i];
         }
 
-        private sealed class PrivateConsoleStatus : IPrivateConsoleStatus {
+        private sealed class PrivateConsoleStatus : IPrivateConsoleStatus
+        {
 
-            public PrivateConsoleStatus() {
+            public PrivateConsoleStatus()
+            {
             }
 
-            public void SetBusyState(bool isBusy) {
+            public void SetBusyState(bool isBusy)
+            {
                 IsBusy = isBusy;
             }
 
-            public bool IsBusy {
+            public bool IsBusy
+            {
                 get;
                 private set;
             }
         }
     }
 
-    public interface INameMetadata {
+    public interface INameMetadata
+    {
         string Name { get; }
     }
 }

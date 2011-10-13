@@ -1,12 +1,16 @@
 using System.ComponentModel;
 
-namespace NuGet {
-    public class PackageOperationEventArgs : CancelEventArgs {
+namespace NuGet
+{
+    public class PackageOperationEventArgs : CancelEventArgs
+    {
         public PackageOperationEventArgs(IPackage package, IFileSystem fileSystem, string targetPath)
-            : this(package, fileSystem, targetPath, targetPath) {
+            : this(package, fileSystem, targetPath, targetPath)
+        {
         }
 
-        public PackageOperationEventArgs(IPackage package, IFileSystem fileSystem, string targetPath, string installPath) {
+        public PackageOperationEventArgs(IPackage package, IFileSystem fileSystem, string targetPath, string installPath)
+        {
             Package = package;
             TargetPath = targetPath;
             InstallPath = installPath;

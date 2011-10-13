@@ -2,12 +2,15 @@
 using System.Linq;
 using Xunit;
 
-namespace NuGet.VisualStudio.Test {
+namespace NuGet.VisualStudio.Test
+{
     using PackageUtility = NuGet.Test.PackageUtility;
 
-    public class RecentPackageTest {
+    public class RecentPackageTest
+    {
         [Fact]
-        public void TestTheFirstConstructor() {
+        public void TestTheFirstConstructor()
+        {
             // Arrange
             IPackage basePackage = PackageUtility.CreatePackage(
                 "A",
@@ -30,8 +33,10 @@ namespace NuGet.VisualStudio.Test {
             Assert.Equal("content\\two", content2);
         }
 
-        private string ReadStream(Stream stream) {
-            using (StreamReader reader = new StreamReader(stream)) {
+        private string ReadStream(Stream stream)
+        {
+            using (StreamReader reader = new StreamReader(stream))
+            {
                 return reader.ReadToEnd();
             }
         }

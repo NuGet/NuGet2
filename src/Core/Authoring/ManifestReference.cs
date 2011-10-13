@@ -6,20 +6,25 @@ using System.IO;
 using System.Xml.Serialization;
 using NuGet.Resources;
 
-namespace NuGet {
+namespace NuGet
+{
     [XmlType("reference")]
-    public class ManifestReference : IValidatableObject {
+    public class ManifestReference : IValidatableObject
+    {
         private static readonly char[] _referenceFileInvalidCharacters = Path.GetInvalidFileNameChars();
 
         [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_RequiredMetadataMissing")]
         [XmlAttribute("file")]
         public string File { get; set; }
 
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) {
-            if (String.IsNullOrEmpty(File)) {
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (String.IsNullOrEmpty(File))
+            {
                 yield return new ValidationResult(NuGetResources.Manifest_RequiredMetadataMissing, new[] { "File" });
             }
-            else if (File.IndexOfAny(_referenceFileInvalidCharacters) != -1) {
+            else if (File.IndexOfAny(_referenceFileInvalidCharacters) != -1)
+            {
                 yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_InvalidReferenceFile, File));
             }
         }

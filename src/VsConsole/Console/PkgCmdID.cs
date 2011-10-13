@@ -1,7 +1,9 @@
 // PkgCmdID.cs
 // MUST match PkgCmdID.h
-namespace NuGetConsole.Implementation {
-    static class PkgCmdIDList {
+namespace NuGetConsole.Implementation
+{
+    static class PkgCmdIDList
+    {
         public const int idToolbar = 0x1010;
         public const int cmdidPowerConsole = 0x0100;
         public const int cmdidProjects = 0x0500;

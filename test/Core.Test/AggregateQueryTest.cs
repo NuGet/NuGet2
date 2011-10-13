@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace NuGet.Test {
-    
-    public class AggregateQueryTest {
+namespace NuGet.Test
+{
+
+    public class AggregateQueryTest
+    {
         [Fact]
-        public void AggregateQueryIgnoresInvalidRepositoriesIfFlagIsSet() {
+        public void AggregateQueryIgnoresInvalidRepositoriesIfFlagIsSet()
+        {
             // Arrange
             IEnumerable<IQueryable<string>> sources = new[] {
                 Enumerable.Range(0, 3).Select(i => i + "A").AsQueryable(),
@@ -26,7 +29,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AggregateQueryThrowsForInvalidRepositoriesIfFlagIsSet() {
+        public void AggregateQueryThrowsForInvalidRepositoriesIfFlagIsSet()
+        {
             // Arrange
             IEnumerable<IQueryable<string>> sources = new[] {
                 Enumerable.Range(0, 3).Select(i => i + "A").AsQueryable(),
@@ -41,7 +45,8 @@ namespace NuGet.Test {
 
 
         [Fact]
-        public void CountDoesNotThrowIfForInvalidRepositoriesIfFlagIsSet() {
+        public void CountDoesNotThrowIfForInvalidRepositoriesIfFlagIsSet()
+        {
             // Arrange
             IEnumerable<IQueryable<string>> sources = new[] {
                 Enumerable.Range(0, 3).Select(i => i + "A").AsQueryable(),
@@ -56,9 +61,12 @@ namespace NuGet.Test {
             Assert.Equal(6, aggregateQuery.Count());
         }
 
-        private IQueryable<string> GetInvalidSequence(string suffix) {
-            Func<int, string> selector = (value) => {
-                if (value > 1) {
+        private IQueryable<string> GetInvalidSequence(string suffix)
+        {
+            Func<int, string> selector = (value) =>
+            {
+                if (value > 1)
+                {
                     throw new Exception();
                 }
                 return value + suffix;

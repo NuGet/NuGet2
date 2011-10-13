@@ -1,9 +1,11 @@
-namespace NuGet {
+namespace NuGet
+{
     using System;
     using System.Collections.Generic;
     using System.IO;
 
-    public interface IFileSystem {
+    public interface IFileSystem
+    {
         ILogger Logger { get; set; }
         string Root { get; }
         void DeleteDirectory(string path, bool recursive);

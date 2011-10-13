@@ -1,5 +1,7 @@
-﻿namespace NuGet {
-    public enum CredentialType {
+﻿namespace NuGet
+{
+    public enum CredentialType
+    {
         ProxyCredentials,
         RequestCredentials
     }

@@ -8,45 +8,56 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TemplateWizard;
 using IServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
-namespace NuGet.VisualStudio {
+namespace NuGet.VisualStudio
+{
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses",
         Justification = "This class is referenced via .vstemplate files from a VS project template")]
-    internal sealed class TemplateWizard : IWizard {
+    internal sealed class TemplateWizard : IWizard
+    {
         [Import]
         internal IVsTemplateWizard Wizard { get; set; }
 
-        private void Initialize(object automationObject) {
-            using (var serviceProvider = new ServiceProvider((IServiceProvider)automationObject)) {
+        private void Initialize(object automationObject)
+        {
+            using (var serviceProvider = new ServiceProvider((IServiceProvider)automationObject))
+            {
                 var componentModel = (IComponentModel)serviceProvider.GetService(typeof(SComponentModel));
-                using (var container = new CompositionContainer(componentModel.DefaultExportProvider)) {
+                using (var container = new CompositionContainer(componentModel.DefaultExportProvider))
+                {
                     container.ComposeParts(this);
                 }
             }
         }
 
-        void IWizard.BeforeOpeningFile(ProjectItem projectItem) {
+        void IWizard.BeforeOpeningFile(ProjectItem projectItem)
+        {
             Wizard.BeforeOpeningFile(projectItem);
         }
 
-        void IWizard.ProjectFinishedGenerating(Project project) {
+        void IWizard.ProjectFinishedGenerating(Project project)
+        {
             Wizard.ProjectFinishedGenerating(project);
         }
 
-        void IWizard.ProjectItemFinishedGenerating(ProjectItem projectItem) {
+        void IWizard.ProjectItemFinishedGenerating(ProjectItem projectItem)
+        {
             Wizard.ProjectItemFinishedGenerating(projectItem);
         }
 
-        void IWizard.RunFinished() {
+        void IWizard.RunFinished()
+        {
             Wizard.RunFinished();
         }
 
-        void IWizard.RunStarted(object automationObject, Dictionary<string, string> replacementsDictionary, WizardRunKind runKind, object[] customParams) {
+        void IWizard.RunStarted(object automationObject, Dictionary<string, string> replacementsDictionary, WizardRunKind runKind, object[] customParams)
+        {
             Initialize(automationObject);
 
             Wizard.RunStarted(automationObject, replacementsDictionary, runKind, customParams);
         }
 
-        bool IWizard.ShouldAddProjectItem(string filePath) {
+        bool IWizard.ShouldAddProjectItem(string filePath)
+        {
             return Wizard.ShouldAddProjectItem(filePath);
         }
     }

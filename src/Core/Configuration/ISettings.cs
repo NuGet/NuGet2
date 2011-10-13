@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace NuGet {
-    public interface ISettings {
+namespace NuGet
+{
+    public interface ISettings
+    {
         string GetValue(string section, string key);
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is the best fit for this internal class")]
         IList<KeyValuePair<string, string>> GetValues(string section);

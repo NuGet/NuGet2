@@ -6,9 +6,11 @@ using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.ComponentModelHost;
 
-namespace NuGet.VisualStudio {
+namespace NuGet.VisualStudio
+{
     [Export(typeof(IFileSystemProvider))]
-    public class VsFileSystemProvider : IFileSystemProvider {
+    public class VsFileSystemProvider : IFileSystemProvider
+    {
         private readonly DTE _dte;
         private readonly IComponentModel _componentModel;
         private readonly ISettings _settings;
@@ -16,19 +18,24 @@ namespace NuGet.VisualStudio {
         public VsFileSystemProvider()
             : this(ServiceLocator.GetInstance<DTE>(),
                    ServiceLocator.GetGlobalService<SComponentModel, IComponentModel>(),
-                   ServiceLocator.GetInstance<ISettings>()) {
+                   ServiceLocator.GetInstance<ISettings>())
+        {
         }
 
-        public VsFileSystemProvider(DTE dte, IComponentModel componentModel, ISettings settings) {
-            if (dte == null) {
+        public VsFileSystemProvider(DTE dte, IComponentModel componentModel, ISettings settings)
+        {
+            if (dte == null)
+            {
                 throw new ArgumentNullException("dte");
             }
 
-            if (componentModel == null) {
+            if (componentModel == null)
+            {
                 throw new ArgumentNullException("componentModel");
             }
 
-            if (settings == null) {
+            if (settings == null)
+            {
                 throw new ArgumentNullException("settings");
             }
 
@@ -37,10 +44,12 @@ namespace NuGet.VisualStudio {
             _settings = settings;
         }
 
-        public IFileSystem GetFileSystem(string path) {
+        public IFileSystem GetFileSystem(string path)
+        {
             // Get the source control providers
             var physicalFileSystem = new PhysicalFileSystem(path);
-            if (_settings.IsSourceControlDisabled()) {
+            if (_settings.IsSourceControlDisabled())
+            {
                 return physicalFileSystem;
             }
 
@@ -50,18 +59,22 @@ namespace NuGet.VisualStudio {
             IFileSystem fileSystem = null;
 
             var sourceControl = (SourceControl2)_dte.SourceControl;
-            if (providers.Any() && sourceControl != null) {
+            if (providers.Any() && sourceControl != null)
+            {
                 SourceControlBindings binding = null;
-                try {
+                try
+                {
                     // Get the binding for this solution
                     binding = sourceControl.GetBindings(_dte.Solution.FullName);
                 }
-                catch (NotImplementedException) {
+                catch (NotImplementedException)
+                {
                     // Some source control providers don't bother to implement this.
                     // TFS might be the only one using it
                 }
 
-                if (binding != null) {
+                if (binding != null)
+                {
                     fileSystem = providers.Select(provider => GetFileSystemFromProvider(provider, path, binding))
                                           .Where(fs => fs != null)
                                           .FirstOrDefault();
@@ -72,11 +85,14 @@ namespace NuGet.VisualStudio {
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We should never fail")]
-        private static IFileSystem GetFileSystemFromProvider(ISourceControlFileSystemProvider provider, string path, SourceControlBindings binding) {
-            try {
+        private static IFileSystem GetFileSystemFromProvider(ISourceControlFileSystemProvider provider, string path, SourceControlBindings binding)
+        {
+            try
+            {
                 return provider.GetFileSystem(path, binding);
             }
-            catch {
+            catch
+            {
                 // Ignore exceptions that can happen when some binaries are missing. e.g. TfsSourceControlFileSystemProvider
                 // would throw a jitting error if TFS is not installed
             }

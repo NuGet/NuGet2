@@ -8,10 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NuGet.MSBuild.Resources {
-    using System;
-    
-    
+namespace NuGet.MSBuild.Resources
+{
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -22,247 +22,301 @@ namespace NuGet.MSBuild.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class NuGetResources {
-        
+    internal class NuGetResources
+    {
+
         private static global::System.Resources.ResourceManager resourceMan;
-        
+
         private static global::System.Globalization.CultureInfo resourceCulture;
-        
+
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal NuGetResources() {
+        internal NuGetResources()
+        {
         }
-        
+
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
-            get {
-                if (object.ReferenceEquals(resourceMan, null)) {
+        internal static global::System.Resources.ResourceManager ResourceManager
+        {
+            get
+            {
+                if (object.ReferenceEquals(resourceMan, null))
+                {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuGet.MSBuild.Resources.NuGetResources", typeof(NuGetResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
-            get {
+        internal static global::System.Globalization.CultureInfo Culture
+        {
+            get
+            {
                 return resourceCulture;
             }
-            set {
+            set
+            {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to ApiKey is blank - unable to locate in config file..
         /// </summary>
-        internal static string BlankApiKey {
-            get {
+        internal static string BlankApiKey
+        {
+            get
+            {
                 return ResourceManager.GetString("BlankApiKey", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Using build-specified config file for feeds.
         /// </summary>
-        internal static string BuildSpecificConfig {
-            get {
+        internal static string BuildSpecificConfig
+        {
+            get
+            {
                 return ResourceManager.GetString("BuildSpecificConfig", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Using build-specified feeds.
         /// </summary>
-        internal static string BuildSpecificFeeds {
-            get {
+        internal static string BuildSpecificFeeds
+        {
+            get
+            {
                 return ResourceManager.GetString("BuildSpecificFeeds", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Created a package for {0} at {1}..
         /// </summary>
-        internal static string CreatedPackage {
-            get {
+        internal static string CreatedPackage
+        {
+            get
+            {
                 return ResourceManager.GetString("CreatedPackage", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Creating a package for {0} at {1}..
         /// </summary>
-        internal static string CreatingPackage {
-            get {
+        internal static string CreatingPackage
+        {
+            get
+            {
                 return ResourceManager.GetString("CreatingPackage", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to .
         /// </summary>
-        internal static string DefaultSymbolServer {
-            get {
+        internal static string DefaultSymbolServer
+        {
+            get
+            {
                 return ResourceManager.GetString("DefaultSymbolServer", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Cannot specify feeds and local config file.
         /// </summary>
-        internal static string FeedsAndConfigSpecified {
-            get {
+        internal static string FeedsAndConfigSpecified
+        {
+            get
+            {
                 return ResourceManager.GetString("FeedsAndConfigSpecified", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Feed Url &apos;{0}&apos; is not a valid Url.
         /// </summary>
-        internal static string InvalidFeedUrl {
-            get {
+        internal static string InvalidFeedUrl
+        {
+            get
+            {
                 return ResourceManager.GetString("InvalidFeedUrl", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Looking for NuGet dependencies.
         /// </summary>
-        internal static string LookingForDependencies {
-            get {
+        internal static string LookingForDependencies
+        {
+            get
+            {
                 return ResourceManager.GetString("LookingForDependencies", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Using machine config file for feeds.
         /// </summary>
-        internal static string MachineSpecificConfig {
-            get {
+        internal static string MachineSpecificConfig
+        {
+            get
+            {
                 return ResourceManager.GetString("MachineSpecificConfig", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to No packages found requiring installation.
         /// </summary>
-        internal static string NoPackagesFound {
-            get {
+        internal static string NoPackagesFound
+        {
+            get
+            {
                 return ResourceManager.GetString("NoPackagesFound", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Package configuration file &apos;{0}&apos; does not exist.
         /// </summary>
-        internal static string PackageConfigNotFound {
-            get {
+        internal static string PackageConfigNotFound
+        {
+            get
+            {
                 return ResourceManager.GetString("PackageConfigNotFound", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Error parsing packages.config file at &apos;{0}&apos;.
         /// </summary>
-        internal static string PackageConfigParseError {
-            get {
+        internal static string PackageConfigParseError
+        {
+            get
+            {
                 return ResourceManager.GetString("PackageConfigParseError", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The package directory does not exist..
         /// </summary>
-        internal static string PackageDirDoesNotExist {
-            get {
+        internal static string PackageDirDoesNotExist
+        {
+            get
+            {
                 return ResourceManager.GetString("PackageDirDoesNotExist", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The package at &apos;{0}&apos; does not exist..
         /// </summary>
-        internal static string PackageDoesNotExist {
-            get {
+        internal static string PackageDoesNotExist
+        {
+            get
+            {
                 return ResourceManager.GetString("PackageDoesNotExist", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Package created at {0}..
         /// </summary>
-        internal static string PushCommandPackageCreated {
-            get {
+        internal static string PushCommandPackageCreated
+        {
+            get
+            {
                 return ResourceManager.GetString("PushCommandPackageCreated", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Package published at {0}..
         /// </summary>
-        internal static string PushCommandPackagePublished {
-            get {
+        internal static string PushCommandPackagePublished
+        {
+            get
+            {
                 return ResourceManager.GetString("PushCommandPackagePublished", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Pushing package &apos;{0}&apos; to &apos;{1}&apos;..
         /// </summary>
-        internal static string PushCommandPushingPackage {
-            get {
+        internal static string PushCommandPushingPackage
+        {
+            get
+            {
                 return ResourceManager.GetString("PushCommandPushingPackage", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The spec file does not exist..
         /// </summary>
-        internal static string SpecFileDoesNotExist {
-            get {
+        internal static string SpecFileDoesNotExist
+        {
+            get
+            {
                 return ResourceManager.GetString("SpecFileDoesNotExist", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The spec file must not be empty..
         /// </summary>
-        internal static string SpecFileMustNotBeEmpty {
-            get {
+        internal static string SpecFileMustNotBeEmpty
+        {
+            get
+            {
                 return ResourceManager.GetString("SpecFileMustNotBeEmpty", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Starting to grab dependent packages using NuGet.
         /// </summary>
-        internal static string StartingFetch {
-            get {
+        internal static string StartingFetch
+        {
+            get
+            {
                 return ResourceManager.GetString("StartingFetch", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to The symbol server is not configured..
         /// </summary>
-        internal static string SymbolServerNotConfigured {
-            get {
+        internal static string SymbolServerNotConfigured
+        {
+            get
+            {
                 return ResourceManager.GetString("SymbolServerNotConfigured", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to An unexpected error occurred while creating the package: {0}.
         /// </summary>
-        internal static string UnexpectedError {
-            get {
+        internal static string UnexpectedError
+        {
+            get
+            {
                 return ResourceManager.GetString("UnexpectedError", resourceCulture);
             }
         }

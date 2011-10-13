@@ -1,16 +1,20 @@
 ﻿using System.Linq;
 using Xunit;
 
-namespace NuGet.Test {
-    
-    public class BufferedEnumerableTest {
-        public void CtorThrowsIfSourceIsNull() {
+namespace NuGet.Test
+{
+
+    public class BufferedEnumerableTest
+    {
+        public void CtorThrowsIfSourceIsNull()
+        {
             // Act & Assert
             ExceptionAssert.ThrowsArgNull(() => new BufferedEnumerable<object>(null, 100), "source");
         }
 
         [Fact]
-        public void TakingMoreThanBufferSizesReturnsItems() {
+        public void TakingMoreThanBufferSizesReturnsItems()
+        {
             // Arrange
             var e = new BufferedEnumerable<int>(Enumerable.Range(0, 10000).AsQueryable(), 5);
 
@@ -22,7 +26,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void BufferedEnumeratorTakingLessThanBufferSizeOnlyQueriesSourceOnce() {
+        public void BufferedEnumeratorTakingLessThanBufferSizeOnlyQueriesSourceOnce()
+        {
             // Arrange
             var state = new BufferedEnumerable<int>.QueryState<int>(5);
             var query = Enumerable.Range(0, 10000).AsQueryable();
@@ -30,7 +35,8 @@ namespace NuGet.Test {
             e.Reset();
 
             // Act
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 4; i++)
+            {
                 e.MoveNext();
             }
 
@@ -39,7 +45,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void BufferedEnumeratorTakingMoreThanBufferSizeQueriesSourceMoreThanOnce() {
+        public void BufferedEnumeratorTakingMoreThanBufferSizeQueriesSourceMoreThanOnce()
+        {
             // Arrange
             var state = new BufferedEnumerable<int>.QueryState<int>(5);
             var query = Enumerable.Range(0, 10000).AsQueryable();
@@ -47,7 +54,8 @@ namespace NuGet.Test {
             e.Reset();
 
             // Act
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < 6; i++)
+            {
                 e.MoveNext();
             }
 
@@ -57,7 +65,8 @@ namespace NuGet.Test {
 
 
         [Fact]
-        public void IfNoMoreItemsInSourceSetsIsEmpty() {
+        public void IfNoMoreItemsInSourceSetsIsEmpty()
+        {
             // Arrange
             var state = new BufferedEnumerable<int>.QueryState<int>(5);
             var query = Enumerable.Range(0, 5).AsQueryable();
@@ -65,7 +74,8 @@ namespace NuGet.Test {
             e.Reset();
 
             // Act
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 5; i++)
+            {
                 e.MoveNext();
             }
 

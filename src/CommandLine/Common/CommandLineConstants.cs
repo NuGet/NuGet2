@@ -1,5 +1,7 @@
-﻿namespace NuGet.Common {
-    internal static class CommandLineConstants {
+﻿namespace NuGet.Common
+{
+    internal static class CommandLineConstants
+    {
         internal static readonly string UserAgent = "NuGet Command Line";
 
         internal static string NuGetDocs = "http://docs.nuget.org/";

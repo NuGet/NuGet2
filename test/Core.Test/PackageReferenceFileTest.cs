@@ -6,16 +6,19 @@ using NuGet.Test.Mocks;
 using Xunit;
 using Xunit.Extensions;
 
-namespace NuGet.Test {
-    public class PackageReferenceFileTest {
+namespace NuGet.Test
+{
+    public class PackageReferenceFileTest
+    {
         [Fact]
-        public void GetPackageReferencesIgnoresEntryIfIdIsNotPresent() {
+        public void GetPackageReferencesIgnoresEntryIfIdIsNotPresent()
+        {
             // Arrange
             var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id="""" version=""1.0"" />
 </packages>";
-            var fileSystem =new MockFileSystem();
+            var fileSystem = new MockFileSystem();
             fileSystem.AddFile("packages.config", config);
             var packageReferenceFile = new PackageReferenceFile(fileSystem, "packages.config");
 
@@ -27,7 +30,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPackageReferencesThrowsIfVersionIsNotPresent() {
+        public void GetPackageReferencesThrowsIfVersionIsNotPresent()
+        {
             // Arrange
             var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
@@ -47,7 +51,8 @@ namespace NuGet.Test {
         [Theory]
         [InlineData("abcd")]
         [InlineData("1.24.4%")]
-        public void GetPackageReferencesThrowsIfVersionIsInvalid(string version) {
+        public void GetPackageReferencesThrowsIfVersionIsInvalid(string version)
+        {
             // Arrange
             var config = String.Format(CultureInfo.InvariantCulture, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
@@ -65,7 +70,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPackageReferencesThrowsIfVersionSpecIsInvalid() {
+        public void GetPackageReferencesThrowsIfVersionSpecIsInvalid()
+        {
             // Arrange
             var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>

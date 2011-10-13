@@ -4,9 +4,11 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 
-namespace NuGet.Dialog.PackageManagerUI {
+namespace NuGet.Dialog.PackageManagerUI
+{
     [Export(typeof(IProgressWindowOpener))]
-    public sealed class ProgressWindowOpener : IProgressWindowOpener {
+    public sealed class ProgressWindowOpener : IProgressWindowOpener
+    {
         private static readonly TimeSpan DelayInterval = TimeSpan.FromMilliseconds(500);
 
         private ProgressDialog _currentWindow;
@@ -16,58 +18,73 @@ namespace NuGet.Dialog.PackageManagerUI {
         private Lazy<DispatcherTimer> _closeTimer;
         private Lazy<DispatcherTimer> _showTimer;
 
-        public ProgressWindowOpener() {
+        public ProgressWindowOpener()
+        {
             _uiDispatcher = Dispatcher.CurrentDispatcher;
 
-            _showTimer = new Lazy<DispatcherTimer>(() => {
-                var timer = new DispatcherTimer {
+            _showTimer = new Lazy<DispatcherTimer>(() =>
+            {
+                var timer = new DispatcherTimer
+                {
                     Interval = DelayInterval
                 };
                 timer.Tick += new EventHandler(OnShowTimerTick);
                 return timer;
             });
 
-            _closeTimer = new Lazy<DispatcherTimer>(() => {
+            _closeTimer = new Lazy<DispatcherTimer>(() =>
+            {
                 var timer = new DispatcherTimer();
                 timer.Tick += new EventHandler(OnCloseTimerTick);
                 return timer;
             });
         }
 
-        private DispatcherTimer CloseTimer {
-            get {
+        private DispatcherTimer CloseTimer
+        {
+            get
+            {
                 return _closeTimer.Value;
             }
         }
 
-        private bool IsPendingShow {
-            get {
+        private bool IsPendingShow
+        {
+            get
+            {
                 return _showTimer.IsValueCreated && _showTimer.Value.IsEnabled;
             }
         }
 
-        private void CancelPendingShow() {
-            if (_showTimer.IsValueCreated) {
+        private void CancelPendingShow()
+        {
+            if (_showTimer.IsValueCreated)
+            {
                 _showTimer.Value.Stop();
             }
         }
 
-        private void OnShowTimerTick(object sender, EventArgs e) {
+        private void OnShowTimerTick(object sender, EventArgs e)
+        {
             CancelPendingShow();
 
-            if (!_currentWindow.IsVisible) {
+            if (!_currentWindow.IsVisible)
+            {
                 _currentWindow.Show();
                 _lastShowTime = DateTime.Now;
             }
         }
 
-        private void CancelPendingClose() {
-            if (_closeTimer.IsValueCreated) {
+        private void CancelPendingClose()
+        {
+            if (_closeTimer.IsValueCreated)
+            {
                 CloseTimer.Stop();
             }
         }
 
-        private void OnCloseTimerTick(object sender, EventArgs e) {
+        private void OnCloseTimerTick(object sender, EventArgs e)
+        {
             CancelPendingClose();
             HandleClose(hideOnly: (bool)CloseTimer.Tag);
         }
@@ -79,17 +96,21 @@ namespace NuGet.Dialog.PackageManagerUI {
         /// <remarks>
         /// This method can be called from worker thread.
         /// </remarks>
-        public void Show(string title, Window owner) {
-            if (!_uiDispatcher.CheckAccess()) {
+        public void Show(string title, Window owner)
+        {
+            if (!_uiDispatcher.CheckAccess())
+            {
                 // must use BeginInvoke() here to avoid blocking the worker thread
                 _uiDispatcher.BeginInvoke(new Action<string, Window>(Show), title, owner);
                 return;
             }
 
-            if (!IsPendingShow) {
+            if (!IsPendingShow)
+            {
                 CancelPendingClose();
 
-                if (_currentWindow == null) {
+                if (_currentWindow == null)
+                {
                     _currentWindow = new ProgressDialog() { Owner = owner };
                     _currentWindow.Closed += OnWindowClosed;
                 }
@@ -99,8 +120,10 @@ namespace NuGet.Dialog.PackageManagerUI {
             }
         }
 
-        private void OnWindowClosed(object sender, EventArgs e) {
-            if (_currentWindow != null) {
+        private void OnWindowClosed(object sender, EventArgs e)
+        {
+            if (_currentWindow != null)
+            {
                 _currentWindow.Closed -= OnWindowClosed;
                 _currentWindow = null;
             }
@@ -112,14 +135,17 @@ namespace NuGet.Dialog.PackageManagerUI {
         /// <remarks>
         /// This method can be called from worker thread.
         /// </remarks>
-        public void Hide() {
-            if (!_uiDispatcher.CheckAccess()) {
+        public void Hide()
+        {
+            if (!_uiDispatcher.CheckAccess())
+            {
                 // must use BeginInvoke() here to avoid blocking the worker thread
                 _uiDispatcher.BeginInvoke(new Action(Hide));
                 return;
             }
 
-            if (IsOpen) {
+            if (IsOpen)
+            {
                 CancelPendingShow();
                 HandleClose(hideOnly: true);
             }
@@ -129,37 +155,48 @@ namespace NuGet.Dialog.PackageManagerUI {
         /// This property is only logical. The dialog may not be actually visible even if 
         /// the property returns true, due to the delay in showing.
         /// </summary>
-        public bool IsOpen {
-            get {
+        public bool IsOpen
+        {
+            get
+            {
                 return _currentWindow != null && (_currentWindow.IsVisible || IsPendingShow);
             }
         }
 
-        public bool Close() {
-            if (IsOpen) {
+        public bool Close()
+        {
+            if (IsOpen)
+            {
                 CancelPendingShow();
                 HandleClose(hideOnly: false);
                 return true;
             }
-            else {
+            else
+            {
                 return false;
             }
         }
 
-        private void HandleClose(bool hideOnly) {
+        private void HandleClose(bool hideOnly)
+        {
             TimeSpan elapsed = DateTime.Now - _lastShowTime;
-            if (elapsed >= DelayInterval) {
+            if (elapsed >= DelayInterval)
+            {
                 // if the dialog has been shown for more than 500ms, just close it
-                if (_currentWindow.IsVisible) {
-                    if (hideOnly) {
+                if (_currentWindow.IsVisible)
+                {
+                    if (hideOnly)
+                    {
                         _currentWindow.Hide();
                     }
-                    else {
+                    else
+                    {
                         _currentWindow.ForceClose();
                     }
                 }
             }
-            else {
+            else
+            {
                 CloseTimer.Tag = hideOnly;
                 // otherwise, set a timer so that we close it after it has been shown for 500ms
                 CloseTimer.Interval = DelayInterval - elapsed;
@@ -167,11 +204,14 @@ namespace NuGet.Dialog.PackageManagerUI {
             }
         }
 
-        public void SetCompleted(bool successful) {
-            if (successful) {
+        public void SetCompleted(bool successful)
+        {
+            if (successful)
+            {
                 Close();
             }
-            else if (_currentWindow != null) {
+            else if (_currentWindow != null)
+            {
                 _currentWindow.SetErrorState();
             }
         }
@@ -182,18 +222,22 @@ namespace NuGet.Dialog.PackageManagerUI {
         /// <remarks>
         /// This method can be called from worker thread.
         /// </remarks>
-        public void AddMessage(MessageLevel level, string message) {
-            if (!_uiDispatcher.CheckAccess()) {
+        public void AddMessage(MessageLevel level, string message)
+        {
+            if (!_uiDispatcher.CheckAccess())
+            {
                 _uiDispatcher.BeginInvoke(new Action<MessageLevel, string>(AddMessage), level, message);
                 return;
             }
 
-            if (IsOpen) {
+            if (IsOpen)
+            {
                 Brush messageBrush;
 
                 // select message color based on MessageLevel value.
                 // these colors match the colors in the console, which are set in MyHostUI.cs
-                switch (level) {
+                switch (level)
+                {
                     case MessageLevel.Debug:
                         messageBrush = Brushes.DarkGray;
                         break;
@@ -213,37 +257,47 @@ namespace NuGet.Dialog.PackageManagerUI {
 
                 _currentWindow.AddMessage(message, messageBrush);
             }
-            else {
+            else
+            {
                 throw new InvalidOperationException();
             }
         }
 
-        public void ClearMessages() {
-            if (!_uiDispatcher.CheckAccess()) {
+        public void ClearMessages()
+        {
+            if (!_uiDispatcher.CheckAccess())
+            {
                 _uiDispatcher.Invoke(new Action(ClearMessages));
                 return;
             }
 
-            if (_currentWindow != null) {
+            if (_currentWindow != null)
+            {
                 _currentWindow.ClearMessages();
             }
         }
 
-        public void ShowProgress(string operation, int percentComplete) {
-            if (!_uiDispatcher.CheckAccess()) {
+        public void ShowProgress(string operation, int percentComplete)
+        {
+            if (!_uiDispatcher.CheckAccess())
+            {
                 _uiDispatcher.BeginInvoke(new Action<string, int>(ShowProgress), operation, percentComplete);
                 return;
             }
 
-            if (operation == null) {
+            if (operation == null)
+            {
                 throw new ArgumentNullException("operation");
             }
 
-            if (IsOpen) {
-                if (percentComplete < 0) {
+            if (IsOpen)
+            {
+                if (percentComplete < 0)
+                {
                     percentComplete = 0;
                 }
-                else if (percentComplete > 100) {
+                else if (percentComplete > 100)
+                {
                     percentComplete = 100;
                 }
 

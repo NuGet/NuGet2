@@ -9,12 +9,15 @@ using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 using Xunit;
 
-namespace NuGet.PowerShell.Commands.Test {
+namespace NuGet.PowerShell.Commands.Test
+{
     using PackageUtility = NuGet.Test.PackageUtility;
 
-    public class InstallPackageCommandTest {
+    public class InstallPackageCommandTest
+    {
         [Fact]
-        public void InstallPackageCmdletThrowsWhenSolutionIsClosed() {
+        public void InstallPackageCmdletThrowsWhenSolutionIsClosed()
+        {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
@@ -26,7 +29,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void InstallPackageCmdletUsesPackageManangerWithSourceIfSpecified() {
+        public void InstallPackageCmdletUsesPackageManangerWithSourceIfSpecified()
+        {
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             var vsPackageManager = new MockVsPackageManager();
@@ -50,7 +54,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void InstallPackageCmdletPassesParametersCorrectlyWhenIdAndVersionAreSpecified() {
+        public void InstallPackageCmdletPassesParametersCorrectlyWhenIdAndVersionAreSpecified()
+        {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -69,7 +74,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void InstallPackageCmdletPassesIgnoreDependencySwitchCorrectly() {
+        public void InstallPackageCmdletPassesIgnoreDependencySwitchCorrectly()
+        {
             // Arrange
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
@@ -90,7 +96,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void InstallPackageCmdletInvokeProductUpdateCheckWhenSourceIsHttpAddress() {
+        public void InstallPackageCmdletInvokeProductUpdateCheckWhenSourceIsHttpAddress()
+        {
             // Arrange
             string source = "http://bing.com";
 
@@ -117,7 +124,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void InstallPackageCmdletInvokeProductUpdateCheckWhenSourceIsHttpAddressAndSourceNameIsSpecified() {
+        public void InstallPackageCmdletInvokeProductUpdateCheckWhenSourceIsHttpAddressAndSourceNameIsSpecified()
+        {
             // Arrange
             string source = "http://bing.com";
             string sourceName = "bing";
@@ -145,7 +153,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void InstallPackageCmdletDoNotInvokeProductUpdateCheckWhenSourceIsNotHttpAddress() {
+        public void InstallPackageCmdletDoNotInvokeProductUpdateCheckWhenSourceIsNotHttpAddress()
+        {
             // Arrange
             string source = "ftp://bing.com";
 
@@ -172,7 +181,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void InstallPackageCmdletDoNotInvokeProductUpdateCheckWhenSourceIsNotHttpAddressAndSourceNameIsSpecified() {
+        public void InstallPackageCmdletDoNotInvokeProductUpdateCheckWhenSourceIsNotHttpAddressAndSourceNameIsSpecified()
+        {
             // Arrange
             string source = "ftp://bing.com";
             string sourceName = "BING";
@@ -200,7 +210,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void InstallPackageCmdletCreatesFallbackRepository() {
+        public void InstallPackageCmdletCreatesFallbackRepository()
+        {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
             IPackageRepository repoA = new MockPackageRepository(), repoB = new MockPackageRepository();
@@ -234,7 +245,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void InstallPackageCmdletCreatesPackageManagerWithFallbackFlagSet() {
+        public void InstallPackageCmdletCreatesPackageManagerWithFallbackFlagSet()
+        {
             // Arrange
             var productUpdateService = new Mock<IProductUpdateService>();
             var fallbackRepo = new Mock<IVsPackageManager>();
@@ -258,12 +270,13 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void InstallPackageCmdletDoesNotInstallPrereleasePackageIfFlagIsNotPresent() {
+        public void InstallPackageCmdletDoesNotInstallPrereleasePackageIfFlagIsNotPresent()
+        {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
             var packageRepository = new MockPackageRepository { PackageUtility.CreatePackage("A", "1.0.0a") };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, 
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object,
                 recentPackageRepository.Object, null);
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
@@ -271,14 +284,15 @@ namespace NuGet.PowerShell.Commands.Test {
             // Act
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, null, null, null);
             cmdlet.Id = "A";
-            
-            
+
+
             // Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => cmdlet.Execute(), "Unable to find package 'A'.");
         }
 
         [Fact]
-        public void InstallPackageCmdletInstallPrereleasePackageIfFlagIsPresent() {
+        public void InstallPackageCmdletInstallPrereleasePackageIfFlagIsPresent()
+        {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0.0a");
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
@@ -302,19 +316,23 @@ namespace NuGet.PowerShell.Commands.Test {
             sharedRepository.Verify();
         }
 
-        private static IVsPackageSourceProvider GetPackageSourceProvider(params PackageSource[] sources) {
+        private static IVsPackageSourceProvider GetPackageSourceProvider(params PackageSource[] sources)
+        {
             var sourceProvider = new Mock<IVsPackageSourceProvider>();
             sourceProvider.Setup(c => c.LoadPackageSources()).Returns(sources);
             return sourceProvider.Object;
         }
 
-        private class MockVsPackageManager : VsPackageManager {
+        private class MockVsPackageManager : VsPackageManager
+        {
             public MockVsPackageManager()
-                : this(new Mock<IPackageRepository>().Object) {
+                : this(new Mock<IPackageRepository>().Object)
+            {
             }
 
             public MockVsPackageManager(IPackageRepository sourceRepository)
-                : base(new Mock<ISolutionManager>().Object, sourceRepository, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object, new MockPackageRepository()) {
+                : base(new Mock<ISolutionManager>().Object, sourceRepository, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object, new MockPackageRepository())
+            {
             }
 
             public IProjectManager ProjectManager { get; set; }
@@ -325,14 +343,16 @@ namespace NuGet.PowerShell.Commands.Test {
 
             public bool IgnoreDependencies { get; set; }
 
-            public override void InstallPackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPreReleaseVersions, ILogger logger) {
+            public override void InstallPackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPreReleaseVersions, ILogger logger)
+            {
                 ProjectManager = projectManager;
                 PackageId = packageId;
                 Version = version;
                 IgnoreDependencies = ignoreDependencies;
             }
 
-            public override IProjectManager GetProjectManager(Project project) {
+            public override IProjectManager GetProjectManager(Project project)
+            {
                 return new Mock<IProjectManager>().Object;
             }
         }

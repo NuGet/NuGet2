@@ -4,8 +4,10 @@ using System.Linq;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
 
-namespace NuGet {
-    public class PackageManager : IPackageManager {
+namespace NuGet
+{
+    public class PackageManager : IPackageManager
+    {
         private ILogger _logger;
         private readonly IPackageRepository _cacheRepository;
 
@@ -15,15 +17,18 @@ namespace NuGet {
         private event EventHandler<PackageOperationEventArgs> _packageUninstalled;
 
         public PackageManager(IPackageRepository sourceRepository, string path)
-            : this(sourceRepository, new DefaultPackagePathResolver(path), new PhysicalFileSystem(path)) {
+            : this(sourceRepository, new DefaultPackagePathResolver(path), new PhysicalFileSystem(path))
+        {
         }
 
         public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem) :
-            this(sourceRepository, pathResolver, fileSystem, new LocalPackageRepository(pathResolver, fileSystem)) {
+            this(sourceRepository, pathResolver, fileSystem, new LocalPackageRepository(pathResolver, fileSystem))
+        {
         }
 
         public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem, IPackageRepository localRepository) :
-            this(sourceRepository, pathResolver, fileSystem, localRepository, MachineCache.Default) {
+            this(sourceRepository, pathResolver, fileSystem, localRepository, MachineCache.Default)
+        {
         }
 
         public PackageManager(
@@ -31,20 +36,26 @@ namespace NuGet {
             IPackagePathResolver pathResolver,
             IFileSystem fileSystem,
             IPackageRepository localRepository,
-            IPackageRepository cacheRepository) {
-            if (sourceRepository == null) {
+            IPackageRepository cacheRepository)
+        {
+            if (sourceRepository == null)
+            {
                 throw new ArgumentNullException("sourceRepository");
             }
-            if (pathResolver == null) {
+            if (pathResolver == null)
+            {
                 throw new ArgumentNullException("pathResolver");
             }
-            if (fileSystem == null) {
+            if (fileSystem == null)
+            {
                 throw new ArgumentNullException("fileSystem");
             }
-            if (localRepository == null) {
+            if (localRepository == null)
+            {
                 throw new ArgumentNullException("localRepository");
             }
-            if (cacheRepository == null) {
+            if (cacheRepository == null)
+            {
                 throw new ArgumentNullException("cacheRepository");
             }
 
@@ -55,86 +66,109 @@ namespace NuGet {
             _cacheRepository = cacheRepository;
         }
 
-        public event EventHandler<PackageOperationEventArgs> PackageInstalled {
-            add {
+        public event EventHandler<PackageOperationEventArgs> PackageInstalled
+        {
+            add
+            {
                 _packageInstalled += value;
             }
-            remove {
+            remove
+            {
                 _packageInstalled -= value;
             }
         }
 
-        public event EventHandler<PackageOperationEventArgs> PackageInstalling {
-            add {
+        public event EventHandler<PackageOperationEventArgs> PackageInstalling
+        {
+            add
+            {
                 _packageInstalling += value;
             }
-            remove {
+            remove
+            {
                 _packageInstalling -= value;
             }
         }
 
-        public event EventHandler<PackageOperationEventArgs> PackageUninstalling {
-            add {
+        public event EventHandler<PackageOperationEventArgs> PackageUninstalling
+        {
+            add
+            {
                 _packageUninstalling += value;
             }
-            remove {
+            remove
+            {
                 _packageUninstalling -= value;
             }
         }
 
-        public event EventHandler<PackageOperationEventArgs> PackageUninstalled {
-            add {
+        public event EventHandler<PackageOperationEventArgs> PackageUninstalled
+        {
+            add
+            {
                 _packageUninstalled += value;
             }
-            remove {
+            remove
+            {
                 _packageUninstalled -= value;
             }
         }
 
-        public IFileSystem FileSystem {
+        public IFileSystem FileSystem
+        {
             get;
             set;
         }
 
-        public IPackageRepository SourceRepository {
+        public IPackageRepository SourceRepository
+        {
             get;
             private set;
         }
 
-        public IPackageRepository LocalRepository {
+        public IPackageRepository LocalRepository
+        {
             get;
             private set;
         }
 
-        public IPackagePathResolver PathResolver {
+        public IPackagePathResolver PathResolver
+        {
             get;
             private set;
         }
 
-        public ILogger Logger {
-            get {
+        public ILogger Logger
+        {
+            get
+            {
                 return _logger ?? NullLogger.Instance;
             }
-            set {
+            set
+            {
                 _logger = value;
             }
         }
 
-        public void InstallPackage(string packageId) {
+        public void InstallPackage(string packageId)
+        {
             InstallPackage(packageId, version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
         }
 
-        public void InstallPackage(string packageId, SemanticVersion version) {
+        public void InstallPackage(string packageId, SemanticVersion version)
+        {
             InstallPackage(packageId, version, ignoreDependencies: false, allowPrereleaseVersions: false);
         }
 
-        public virtual void InstallPackage(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions) {
+        public virtual void InstallPackage(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)
+        {
             IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
 
             InstallPackage(package, ignoreDependencies, allowPrereleaseVersions);
         }
 
-        public virtual void InstallPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions) {
+        public virtual void InstallPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions)
+        {
             Execute(package, new InstallWalker(LocalRepository,
                                                SourceRepository,
                                                Logger,
@@ -142,42 +176,54 @@ namespace NuGet {
                                                allowPrereleaseVersions));
         }
 
-        private void Execute(IPackage package, IPackageOperationResolver resolver) {
+        private void Execute(IPackage package, IPackageOperationResolver resolver)
+        {
             var operations = resolver.ResolveOperations(package);
-            if (operations.Any()) {
-                foreach (PackageOperation operation in operations) {
+            if (operations.Any())
+            {
+                foreach (PackageOperation operation in operations)
+                {
                     Execute(operation);
                 }
             }
-            else if (LocalRepository.Exists(package)) {
+            else if (LocalRepository.Exists(package))
+            {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageAlreadyInstalled, package.GetFullName());
             }
         }
 
-        protected void Execute(PackageOperation operation) {
+        protected void Execute(PackageOperation operation)
+        {
             bool packageExists = LocalRepository.Exists(operation.Package);
 
-            if (operation.Action == PackageAction.Install) {
+            if (operation.Action == PackageAction.Install)
+            {
                 // If the package is already installed, then skip it
-                if (packageExists) {
+                if (packageExists)
+                {
                     Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageAlreadyInstalled, operation.Package.GetFullName());
                 }
-                else {
+                else
+                {
                     ExecuteInstall(operation.Package);
                 }
             }
-            else {
-                if (packageExists) {
+            else
+            {
+                if (packageExists)
+                {
                     ExecuteUninstall(operation.Package);
                 }
             }
         }
 
-        protected void ExecuteInstall(IPackage package) {
+        protected void ExecuteInstall(IPackage package)
+        {
             PackageOperationEventArgs args = CreateOperation(package);
             OnInstalling(args);
 
-            if (args.Cancel) {
+            if (args.Cancel)
+            {
                 return;
             }
 
@@ -189,38 +235,46 @@ namespace NuGet {
 
             OnInstalled(args);
 
-            if (_cacheRepository != null) {
+            if (_cacheRepository != null)
+            {
                 _cacheRepository.AddPackage(package);
             }
         }
 
-        private void ExpandFiles(IPackage package) {
+        private void ExpandFiles(IPackage package)
+        {
             string packageDirectory = PathResolver.GetPackageDirectory(package);
 
             // Add files
             FileSystem.AddFiles(package.GetFiles(), packageDirectory);
         }
 
-        public void UninstallPackage(string packageId) {
+        public void UninstallPackage(string packageId)
+        {
             UninstallPackage(packageId, version: null, forceRemove: false, removeDependencies: false);
         }
 
-        public void UninstallPackage(string packageId, SemanticVersion version) {
+        public void UninstallPackage(string packageId, SemanticVersion version)
+        {
             UninstallPackage(packageId, version: version, forceRemove: false, removeDependencies: false);
         }
 
-        public void UninstallPackage(string packageId, SemanticVersion version, bool forceRemove) {
+        public void UninstallPackage(string packageId, SemanticVersion version, bool forceRemove)
+        {
             UninstallPackage(packageId, version: version, forceRemove: forceRemove, removeDependencies: false);
         }
 
-        public virtual void UninstallPackage(string packageId, SemanticVersion version, bool forceRemove, bool removeDependencies) {
-            if (String.IsNullOrEmpty(packageId)) {
+        public virtual void UninstallPackage(string packageId, SemanticVersion version, bool forceRemove, bool removeDependencies)
+        {
+            if (String.IsNullOrEmpty(packageId))
+            {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
 
             IPackage package = LocalRepository.FindPackage(packageId, version: version);
 
-            if (package == null) {
+            if (package == null)
+            {
                 throw new InvalidOperationException(String.Format(
                     CultureInfo.CurrentCulture,
                     NuGetResources.UnknownPackage, packageId));
@@ -229,15 +283,18 @@ namespace NuGet {
             UninstallPackage(package, forceRemove, removeDependencies);
         }
 
-        public void UninstallPackage(IPackage package) {
+        public void UninstallPackage(IPackage package)
+        {
             UninstallPackage(package, forceRemove: false, removeDependencies: false);
         }
 
-        public void UninstallPackage(IPackage package, bool forceRemove) {
+        public void UninstallPackage(IPackage package, bool forceRemove)
+        {
             UninstallPackage(package, forceRemove: forceRemove, removeDependencies: false);
         }
 
-        public virtual void UninstallPackage(IPackage package, bool forceRemove, bool removeDependencies) {
+        public virtual void UninstallPackage(IPackage package, bool forceRemove, bool removeDependencies)
+        {
             Execute(package, new UninstallWalker(LocalRepository,
                                                  new DependentsWalker(LocalRepository),
                                                  Logger,
@@ -245,11 +302,13 @@ namespace NuGet {
                                                  forceRemove));
         }
 
-        protected virtual void ExecuteUninstall(IPackage package) {
+        protected virtual void ExecuteUninstall(IPackage package)
+        {
             PackageOperationEventArgs args = CreateOperation(package);
             OnUninstalling(args);
 
-            if (args.Cancel) {
+            if (args.Cancel)
+            {
                 return;
             }
 
@@ -262,64 +321,80 @@ namespace NuGet {
             OnUninstalled(args);
         }
 
-        private void RemoveFiles(IPackage package) {
+        private void RemoveFiles(IPackage package)
+        {
             string packageDirectory = PathResolver.GetPackageDirectory(package);
 
             // Remove resource files
             FileSystem.DeleteFiles(package.GetFiles(), packageDirectory);
         }
 
-        private void OnInstalling(PackageOperationEventArgs e) {
-            if (_packageInstalling != null) {
+        private void OnInstalling(PackageOperationEventArgs e)
+        {
+            if (_packageInstalling != null)
+            {
                 _packageInstalling(this, e);
             }
         }
 
-        protected virtual void OnInstalled(PackageOperationEventArgs e) {
-            if (_packageInstalled != null) {
+        protected virtual void OnInstalled(PackageOperationEventArgs e)
+        {
+            if (_packageInstalled != null)
+            {
                 _packageInstalled(this, e);
             }
         }
 
-        protected virtual void OnUninstalled(PackageOperationEventArgs e) {
-            if (_packageUninstalled != null) {
+        protected virtual void OnUninstalled(PackageOperationEventArgs e)
+        {
+            if (_packageUninstalled != null)
+            {
                 _packageUninstalled(this, e);
             }
         }
 
-        private void OnUninstalling(PackageOperationEventArgs e) {
-            if (_packageUninstalling != null) {
+        private void OnUninstalling(PackageOperationEventArgs e)
+        {
+            if (_packageUninstalling != null)
+            {
                 _packageUninstalling(this, e);
             }
         }
 
-        private PackageOperationEventArgs CreateOperation(IPackage package) {
+        private PackageOperationEventArgs CreateOperation(IPackage package)
+        {
             return new PackageOperationEventArgs(package, FileSystem, PathResolver.GetInstallPath(package));
         }
 
-        public void UpdatePackage(string packageId, bool updateDependencies, bool allowPrereleaseVersions) {
+        public void UpdatePackage(string packageId, bool updateDependencies, bool allowPrereleaseVersions)
+        {
             UpdatePackage(packageId, version: null, updateDependencies: updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
         }
 
-        public void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions) {
+        public void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions)
+        {
             UpdatePackage(packageId, () => SourceRepository.FindPackage(packageId, versionSpec, allowPrereleaseVersions),
                 updateDependencies, allowPrereleaseVersions);
         }
 
-        public void UpdatePackage(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions) {
+        public void UpdatePackage(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions)
+        {
             UpdatePackage(packageId, () => SourceRepository.FindPackage(packageId, version, allowPrereleaseVersions),
                 updateDependencies, allowPrereleaseVersions);
         }
 
-        internal void UpdatePackage(string packageId, Func<IPackage> resolvePackage, bool updateDependencies, bool allowPrereleaseVersions) {
-            if (String.IsNullOrEmpty(packageId)) {
+        internal void UpdatePackage(string packageId, Func<IPackage> resolvePackage, bool updateDependencies, bool allowPrereleaseVersions)
+        {
+            if (String.IsNullOrEmpty(packageId))
+            {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
 
             IPackage oldPackage = LocalRepository.FindPackage(packageId);
 
             // Check to see if this package is installed
-            if (oldPackage == null) {
+            if (oldPackage == null)
+            {
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
                     NuGetResources.UnknownPackage, packageId));
@@ -329,15 +404,18 @@ namespace NuGet {
 
             IPackage newPackage = resolvePackage();
 
-            if (newPackage != null && oldPackage.Version != newPackage.Version) {
+            if (newPackage != null && oldPackage.Version != newPackage.Version)
+            {
                 UpdatePackage(newPackage, updateDependencies, allowPrereleaseVersions);
             }
-            else {
+            else
+            {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_NoUpdatesAvailable, packageId);
             }
         }
 
-        public void UpdatePackage(IPackage newPackage, bool updateDependencies, bool allowPrereleaseVersions) {
+        public void UpdatePackage(IPackage newPackage, bool updateDependencies, bool allowPrereleaseVersions)
+        {
             Execute(newPackage, new UpdateWalker(LocalRepository,
                                                 SourceRepository,
                                                 new DependentsWalker(LocalRepository),

@@ -1,5 +1,7 @@
-﻿namespace NuGet.VisualStudio {
-    public interface IFileSystemProvider {
+﻿namespace NuGet.VisualStudio
+{
+    public interface IFileSystemProvider
+    {
         IFileSystem GetFileSystem(string path);
     }
 }

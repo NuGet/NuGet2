@@ -10,18 +10,23 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace NuGet.Dialog {
-    internal static class ProjectUtilities {
-        public static ImageSource GetImage(Project project) {
+namespace NuGet.Dialog
+{
+    internal static class ProjectUtilities
+    {
+        public static ImageSource GetImage(Project project)
+        {
             IVsSolution solution = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
             IVsHierarchy hierarchy;
-            if (ErrorHandler.Succeeded(solution.GetProjectOfUniqueName(project.UniqueName, out hierarchy))) {
+            if (ErrorHandler.Succeeded(solution.GetProjectOfUniqueName(project.UniqueName, out hierarchy)))
+            {
                 return GetImageFromHierarchy(new HierarchyItemIdentity(hierarchy, VSConstants.VSITEMID_ROOT), (int)__VSHPROPID.VSHPROPID_IconIndex, (int)__VSHPROPID.VSHPROPID_IconHandle);
             }
             return null;
         }
 
-        static uint UnboxAsUInt32(object var) {
+        static uint UnboxAsUInt32(object var)
+        {
             if (var is short)
                 return (uint)(short)var;
             else if (var is int)
@@ -42,21 +47,26 @@ namespace NuGet.Dialog {
                 return default(uint);
         }
 
-        static IntPtr UnboxAsIntPtr(object potentialIntPtr) {
-            if (potentialIntPtr is int) {
+        static IntPtr UnboxAsIntPtr(object potentialIntPtr)
+        {
+            if (potentialIntPtr is int)
+            {
                 return new IntPtr((int)potentialIntPtr);
             }
-            else if (potentialIntPtr is long) {
+            else if (potentialIntPtr is long)
+            {
                 return new IntPtr((long)potentialIntPtr);
             }
-            else if (potentialIntPtr is IntPtr) {
+            else if (potentialIntPtr is IntPtr)
+            {
                 return (IntPtr)potentialIntPtr;
             }
 
             return IntPtr.Zero;
         }
 
-        private static BitmapSource GetImageFromHierarchy(HierarchyItemIdentity item, int iconIndexProperty, int iconHandleProperty) {
+        private static BitmapSource GetImageFromHierarchy(HierarchyItemIdentity item, int iconIndexProperty, int iconHandleProperty)
+        {
             int iconIndex;
             IntPtr iconHandle;
             IntPtr iconImageList;
@@ -64,45 +74,55 @@ namespace NuGet.Dialog {
 
             IVsHierarchy iconSourceHierarchy = item.Hierarchy;
             uint iconSourceItemid = item.ItemID;
-            if (item.IsNestedItem) {
+            if (item.IsNestedItem)
+            {
                 bool useNestedHierarchyIconList;
-                if (TryGetHierarchyProperty(item.Hierarchy, item.ItemID, (int)__VSHPROPID2.VSHPROPID_UseInnerHierarchyIconList, out useNestedHierarchyIconList) && useNestedHierarchyIconList) {
+                if (TryGetHierarchyProperty(item.Hierarchy, item.ItemID, (int)__VSHPROPID2.VSHPROPID_UseInnerHierarchyIconList, out useNestedHierarchyIconList) && useNestedHierarchyIconList)
+                {
                     iconSourceHierarchy = item.NestedHierarchy;
                     iconSourceItemid = item.NestedItemID;
                 }
             }
 
             if (TryGetHierarchyProperty(iconSourceHierarchy, iconSourceItemid, iconIndexProperty, out iconIndex) &&
-                TryGetHierarchyProperty(iconSourceHierarchy, VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_IconImgList, UnboxAsIntPtr, out iconImageList)) {
+                TryGetHierarchyProperty(iconSourceHierarchy, VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_IconImgList, UnboxAsIntPtr, out iconImageList))
+            {
                 NativeImageList imageList = new NativeImageList(iconImageList);
                 iconBitmapSource = imageList.GetImage(iconIndex);
             }
-            else if (TryGetHierarchyProperty(item.Hierarchy, item.ItemID, iconHandleProperty, UnboxAsIntPtr, out iconHandle)) {
+            else if (TryGetHierarchyProperty(item.Hierarchy, item.ItemID, iconHandleProperty, UnboxAsIntPtr, out iconHandle))
+            {
                 // Don't call DestroyIcon on iconHandle, as it's a shared resource owned by the hierarchy
                 iconBitmapSource = Imaging.CreateBitmapSourceFromHIcon(iconHandle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                 iconBitmapSource.Freeze();
             }
 
-            if (iconBitmapSource == null) {
+            if (iconBitmapSource == null)
+            {
                 iconBitmapSource = GetSystemIconImage(item);
             }
 
             return iconBitmapSource;
         }
 
-        private static BitmapSource GetSystemIconImage(HierarchyItemIdentity item) {
+        private static BitmapSource GetSystemIconImage(HierarchyItemIdentity item)
+        {
             IVsProject project = item.NestedHierarchy as IVsProject;
-            if (project != null) {
+            if (project != null)
+            {
                 string document;
-                if (ErrorHandler.Succeeded(project.GetMkDocument(item.NestedItemID, out document))) {
+                if (ErrorHandler.Succeeded(project.GetMkDocument(item.NestedItemID, out document)))
+                {
                     SHFILEINFO shfi = new SHFILEINFO();
                     uint cbFileInfo = (uint)Marshal.SizeOf(shfi);
                     IntPtr systemImageList = NativeMethods.SHGetFileInfo(document, 0, ref shfi, cbFileInfo, SHGFI.SysIconIndex | SHGFI.SmallIcon);
-                    if (systemImageList == IntPtr.Zero) {
+                    if (systemImageList == IntPtr.Zero)
+                    {
                         systemImageList = NativeMethods.SHGetFileInfo(document, 0, ref shfi, cbFileInfo, SHGFI.SysIconIndex | SHGFI.SmallIcon | SHGFI.UseFileAttributes);
                     }
 
-                    if (systemImageList != IntPtr.Zero) {
+                    if (systemImageList != IntPtr.Zero)
+                    {
                         NativeImageList imageList = new NativeImageList(systemImageList);
                         return imageList.GetImage(shfi.iIcon);
                     }
@@ -112,9 +132,11 @@ namespace NuGet.Dialog {
             return null;
         }
 
-        static bool TryGetHierarchyProperty<T>(IVsHierarchy hierarchy, uint itemid, int propid, out T value) {
+        static bool TryGetHierarchyProperty<T>(IVsHierarchy hierarchy, uint itemid, int propid, out T value)
+        {
             object obj;
-            if (ErrorHandler.Succeeded(hierarchy.GetProperty(itemid, propid, out obj)) && obj is T) {
+            if (ErrorHandler.Succeeded(hierarchy.GetProperty(itemid, propid, out obj)) && obj is T)
+            {
                 value = (T)obj;
                 return true;
             }
@@ -123,9 +145,11 @@ namespace NuGet.Dialog {
             return false;
         }
 
-        static bool TryGetHierarchyProperty<T>(IVsHierarchy hierarchy, uint itemid, int propid, Func<object, T> converter, out T value) {
+        static bool TryGetHierarchyProperty<T>(IVsHierarchy hierarchy, uint itemid, int propid, Func<object, T> converter, out T value)
+        {
             object obj;
-            if (ErrorHandler.Succeeded(hierarchy.GetProperty(itemid, propid, out obj))) {
+            if (ErrorHandler.Succeeded(hierarchy.GetProperty(itemid, propid, out obj)))
+            {
                 value = converter(obj);
                 return true;
             }
@@ -135,68 +159,84 @@ namespace NuGet.Dialog {
         }
 
         #region HierarchyItemIdentity
-        class HierarchyItemIdentity {
+        class HierarchyItemIdentity
+        {
             bool _isNestedInfoValid;
             bool _isNestedItem;
             HierarchyItemPair _hierarchyInfo;
             HierarchyItemPair _nestedInfo;
 
-            public HierarchyItemIdentity(IVsHierarchy hierarchy, uint itemid) {
+            public HierarchyItemIdentity(IVsHierarchy hierarchy, uint itemid)
+            {
                 // see if this hierarchy/itemid pair is equal to a node in a parent hierarchy
                 IVsHierarchy parentHierarchy;
                 uint parentItemid;
 
                 if (itemid == (uint)VSConstants.VSITEMID.Root &&
                     TryGetHierarchyProperty(hierarchy, itemid, (int)__VSHPROPID.VSHPROPID_ParentHierarchy, out parentHierarchy) &&
-                    TryGetHierarchyProperty(hierarchy, itemid, (int)__VSHPROPID.VSHPROPID_ParentHierarchyItemid, UnboxAsUInt32, out parentItemid)) {
+                    TryGetHierarchyProperty(hierarchy, itemid, (int)__VSHPROPID.VSHPROPID_ParentHierarchyItemid, UnboxAsUInt32, out parentItemid))
+                {
                     _isNestedInfoValid = true;
                     _isNestedItem = true;
                     _hierarchyInfo = new HierarchyItemPair(parentHierarchy, parentItemid);
                     _nestedInfo = new HierarchyItemPair(hierarchy, itemid);
                 }
-                else {
+                else
+                {
                     _hierarchyInfo = new HierarchyItemPair(hierarchy, itemid);
                 }
             }
 
-            public IVsHierarchy Hierarchy {
-                get {
+            public IVsHierarchy Hierarchy
+            {
+                get
+                {
                     return _hierarchyInfo.Hierarchy;
                 }
             }
 
-            public uint ItemID {
-                get {
+            public uint ItemID
+            {
+                get
+                {
                     return _hierarchyInfo.ItemID;
                 }
             }
 
-            public IVsHierarchy NestedHierarchy {
-                get {
+            public IVsHierarchy NestedHierarchy
+            {
+                get
+                {
                     EnsureNestedInfo();
 
                     return _nestedInfo.Hierarchy;
                 }
             }
 
-            public uint NestedItemID {
-                get {
+            public uint NestedItemID
+            {
+                get
+                {
                     EnsureNestedInfo();
 
                     return _nestedInfo.ItemID;
                 }
             }
 
-            public bool IsNestedItem {
-                get {
+            public bool IsNestedItem
+            {
+                get
+                {
                     EnsureNestedInfo();
 
                     return _isNestedItem;
                 }
             }
 
-            private void EnsureNestedInfo() {
-                if (!_isNestedInfoValid) {
+            private void EnsureNestedInfo()
+            {
+                if (!_isNestedInfoValid)
+                {
 
                     _isNestedItem = HierarchyItemPair.MaybeMapToNested(_hierarchyInfo, out _nestedInfo);
                     _isNestedInfoValid = true;
@@ -206,8 +246,10 @@ namespace NuGet.Dialog {
         #endregion
 
         #region HierarchyItemPair
-        public class HierarchyItemPair {
-            public HierarchyItemPair(IVsHierarchy hierarchy, uint itemid) {
+        public class HierarchyItemPair
+        {
+            public HierarchyItemPair(IVsHierarchy hierarchy, uint itemid)
+            {
                 Hierarchy = hierarchy;
                 ItemID = itemid;
             }
@@ -215,11 +257,13 @@ namespace NuGet.Dialog {
             public IVsHierarchy Hierarchy { get; private set; }
             public uint ItemID { get; private set; }
 
-            public override int GetHashCode() {
+            public override int GetHashCode()
+            {
                 return base.GetHashCode();
             }
 
-            public static bool MaybeMapToNested(HierarchyItemPair outerInfo, out HierarchyItemPair nestedInfo) {
+            public static bool MaybeMapToNested(HierarchyItemPair outerInfo, out HierarchyItemPair nestedInfo)
+            {
                 Guid IID_IVsHierarchy = typeof(IVsHierarchy).GUID;
                 IVsHierarchy nestedHierarchy;
                 uint nestedItemId;
@@ -227,16 +271,19 @@ namespace NuGet.Dialog {
                 if (ErrorHandler.Succeeded(outerInfo.Hierarchy.GetNestedHierarchy(outerInfo.ItemID, ref IID_IVsHierarchy, out nestedHierarchyPtr, out nestedItemId)) &&
                     nestedHierarchyPtr != IntPtr.Zero) // For items in solution folders, it succeeds with a returned null ptr!
                 {
-                    try {
+                    try
+                    {
                         nestedHierarchy = Marshal.GetObjectForIUnknown(nestedHierarchyPtr) as IVsHierarchy;
                     }
-                    finally {
+                    finally
+                    {
                         Marshal.Release(nestedHierarchyPtr);
                     }
                     nestedInfo = new HierarchyItemPair(nestedHierarchy, nestedItemId);
                     return true;
                 }
-                else {
+                else
+                {
                     nestedInfo = outerInfo;
                     return false;
                 }
@@ -246,7 +293,8 @@ namespace NuGet.Dialog {
 
         #region NativeMethods
         [Flags]
-        enum SHGFI : uint {
+        enum SHGFI : uint
+        {
             /// <summary>get icon</summary>
             Icon = 0x000000100,
             /// <summary>get display name</summary>
@@ -286,7 +334,8 @@ namespace NuGet.Dialog {
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-        struct SHFILEINFO {
+        struct SHFILEINFO
+        {
             public IntPtr hIcon;
             public int iIcon;
             public uint dwAttributes;
@@ -296,7 +345,8 @@ namespace NuGet.Dialog {
             public string szTypeName;
         }
 
-        static class NativeMethods {
+        static class NativeMethods
+        {
             [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
             public static extern IntPtr SHGetFileInfo(string pszPath, uint dwFileAttributes, ref SHFILEINFO psfi, uint cbFileInfo, SHGFI uFlags);
 
@@ -318,9 +368,12 @@ namespace NuGet.Dialog {
         /// <summary>
         /// Represents a weak cache of images from a native HIMAGELIST.
         /// </summary>
-        class NativeImageList {
-            public NativeImageList(IntPtr imageListHandle) {
-                if (imageListHandle == IntPtr.Zero) {
+        class NativeImageList
+        {
+            public NativeImageList(IntPtr imageListHandle)
+            {
+                if (imageListHandle == IntPtr.Zero)
+                {
                     throw new ArgumentNullException("imageListHandle");
                 }
 
@@ -329,30 +382,37 @@ namespace NuGet.Dialog {
 
             private IntPtr ImageListHandle { get; set; }
 
-            private int ImageListCount {
-                get {
+            private int ImageListCount
+            {
+                get
+                {
                     return NativeMethods.ImageList_GetImageCount(ImageListHandle);
                 }
             }
 
-            public BitmapSource GetImage(int index) {
-                if (index >= ImageListCount || index < 0) {
+            public BitmapSource GetImage(int index)
+            {
+                if (index >= ImageListCount || index < 0)
+                {
                     return null;
                 }
 
                 // generate the ImageSource from the native HIMAGELIST handle
                 IntPtr hIcon = NativeMethods.ImageList_GetIcon(ImageListHandle, index, NativeMethods.ILD_TRANSPARENT);
-                if (hIcon == IntPtr.Zero) {
+                if (hIcon == IntPtr.Zero)
+                {
                     return null;
                 }
 
-                try {
+                try
+                {
                     // Int32Rect.Empty means use the dimensions of the source image
                     BitmapSource image = Imaging.CreateBitmapSourceFromHIcon(hIcon, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                     image.Freeze();
                     return image;
                 }
-                finally {
+                finally
+                {
                     NativeMethods.DestroyIcon(hIcon);
                 }
             }

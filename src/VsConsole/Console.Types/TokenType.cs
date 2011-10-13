@@ -1,8 +1,10 @@
-namespace NuGetConsole {
+namespace NuGetConsole
+{
     /// <summary>
     /// General token types expected by PowerConsole.
     /// </summary>
-    public enum TokenType {
+    public enum TokenType
+    {
         /// <summary>
         /// A character literal.
         /// </summary>

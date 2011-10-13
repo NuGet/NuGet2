@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using Microsoft.TeamFoundation.VersionControl.Client;
 
-namespace NuGet.TeamFoundationServer {
-    public interface ITfsWorkspace {
+namespace NuGet.TeamFoundationServer
+{
+    public interface ITfsWorkspace
+    {
         bool PendEdit(string fullPath);
         bool PendAdd(string fullPath);
         bool PendDelete(string fullPath, RecursionType recursionType);

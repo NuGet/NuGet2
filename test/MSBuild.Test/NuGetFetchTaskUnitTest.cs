@@ -7,13 +7,16 @@ using NuGet.MSBuild;
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.Test.MSBuild {
-	
-    public class NuGetFetchTaskUnitTest {
+namespace NuGet.Test.MSBuild
+{
+
+    public class NuGetFetchTaskUnitTest
+    {
         private const string createdPackage = "thePackageId.1.0.nupkg";
 
-		[Fact]
-        public void WillErrorIfPackagesDotConfigUnreadable() {
+        [Fact]
+        public void WillErrorIfPackagesDotConfigUnreadable()
+        {
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile("packages.config", "foo bar".AsStream());
             var fileSystemProvider = new Mock<IFileSystemProvider>();
@@ -33,8 +36,9 @@ namespace NuGet.Test.MSBuild {
             Assert.Equal("Error parsing packages.config file at 'packages.config'", actualMessage);
         }
 
-		[Fact]
-        public void WillGetSettingsFromSpecifiedConfigFileIfFeedsAreNull() {
+        [Fact]
+        public void WillGetSettingsFromSpecifiedConfigFileIfFeedsAreNull()
+        {
             var installed = 0;
 
             var packageManagerStub = new Mock<IPackageManager>();
@@ -65,7 +69,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillGetSettingsFromSpecifiedConfigFileIfFeedsAreNotSpecified() {
+        public void WillGetSettingsFromSpecifiedConfigFileIfFeedsAreNotSpecified()
+        {
             var installed = 0;
 
             var packageManagerStub = new Mock<IPackageManager>();
@@ -88,7 +93,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillGetSettingsFromDefaultConfigFileIfFeedsAreNotSpecified() {
+        public void WillGetSettingsFromDefaultConfigFileIfFeedsAreNotSpecified()
+        {
             var installed = 0;
 
             var packageManagerStub = new Mock<IPackageManager>();
@@ -111,7 +117,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillErrorIfPackagesDotConfigNotFound() {
+        public void WillErrorIfPackagesDotConfigNotFound()
+        {
             string actualMessage = null;
             var buildEngineStub = new Mock<IBuildEngine>();
             buildEngineStub.Setup(x => x.LogErrorEvent(It.IsAny<BuildErrorEventArgs>()))
@@ -128,7 +135,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillErrorIfFeedsInvalid() {
+        public void WillErrorIfFeedsInvalid()
+        {
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             repositoryFactory
                 .Setup(x => x.CreateRepository(It.IsAny<string>()))
@@ -148,7 +156,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillErrorGracefullyIfPackageNotFound() {
+        public void WillErrorGracefullyIfPackageNotFound()
+        {
             const string notFoundMessage = "Package not found";
             var packageManagerStub = new Mock<IPackageManager>();
             packageManagerStub
@@ -171,7 +180,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillInstallPackagesFromPackagesDotConfig() {
+        public void WillInstallPackagesFromPackagesDotConfig()
+        {
             var installed = 0;
             var packageManagerStub = new Mock<IPackageManager>();
 
@@ -188,7 +198,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WilNotReInstallExistingPackages() {
+        public void WilNotReInstallExistingPackages()
+        {
             var installed = 0;
             var packageManagerStub = new Mock<IPackageManager>();
 
@@ -209,7 +220,8 @@ namespace NuGet.Test.MSBuild {
         }
 
         [Fact]
-        public void WillDoNothingIfNoPackagesNeedToBeInstalled() {
+        public void WillDoNothingIfNoPackagesNeedToBeInstalled()
+        {
             string actualMessage = string.Empty;
             var buildEngineStub = new Mock<IBuildEngine>();
             var installed = 0;
@@ -239,20 +251,24 @@ namespace NuGet.Test.MSBuild {
                                                              Mock<IBuildEngine> buildEngineStub = null,
                                                              Mock<IFileSystemProvider> fileSystemProvider = null,
                                                              Mock<IPackageRepositoryFactory> repositoryFactory = null,
-                                                             Mock<IPackageSourceProvider> packageSourceProvider = null) {
-            if (packageManagerStub == null) {
+                                                             Mock<IPackageSourceProvider> packageSourceProvider = null)
+        {
+            if (packageManagerStub == null)
+            {
                 packageManagerStub = new Mock<IPackageManager>();
             }
             packageManagerStub.Setup(x => x.PathResolver.GetPackageDirectory(It.IsAny<string>(), It.IsAny<SemanticVersion>())).Returns("packagedir");
             packageManagerStub.Setup(x => x.PathResolver.GetPackageFileName(It.IsAny<string>(), It.IsAny<SemanticVersion>())).Returns("packagename");
 
-            if (packageRepositoryStub == null) {
+            if (packageRepositoryStub == null)
+            {
                 packageRepositoryStub = new Mock<IPackageRepository>();
                 packageRepositoryStub.Setup(c => c.GetPackages())
                                      .Returns(new[] { PackageUtility.CreatePackage("package1", "1.0.0"), PackageUtility.CreatePackage("package2", "1.0.2"), PackageUtility.CreatePackage("package3", "1.0.5") }.AsQueryable());
             }
 
-            if (buildEngineStub == null) {
+            if (buildEngineStub == null)
+            {
                 buildEngineStub = new Mock<IBuildEngine>();
             }
 
@@ -261,19 +277,22 @@ namespace NuGet.Test.MSBuild {
                 .Setup(x => x.CreateFrom(It.IsAny<IPackageRepository>(), It.IsAny<string>()))
                 .Returns(packageManagerStub.Object);
 
-            if (fileSystemProvider == null) {
+            if (fileSystemProvider == null)
+            {
                 fileSystemProvider = new Mock<IFileSystemProvider>();
                 fileSystemProvider.Setup(c => c.CreateFileSystem(It.IsAny<string>())).Returns(GetFileSystem());
             }
 
-            if (repositoryFactory == null) {
+            if (repositoryFactory == null)
+            {
                 repositoryFactory = new Mock<IPackageRepositoryFactory>();
                 repositoryFactory
                     .Setup(x => x.CreateRepository(It.IsAny<string>()))
                     .Returns(packageRepositoryStub.Object);
             }
 
-            if (packageSourceProvider == null) {
+            if (packageSourceProvider == null)
+            {
                 packageSourceProvider = new Mock<IPackageSourceProvider>();
                 packageSourceProvider.Setup(c => c.LoadPackageSources()).Returns(new[] { new PackageSource("Foo") });
             }
@@ -286,7 +305,8 @@ namespace NuGet.Test.MSBuild {
             return task;
         }
 
-        private static MockFileSystem GetFileSystem(IEnumerable<PackageReference> configReferences = null) {
+        private static MockFileSystem GetFileSystem(IEnumerable<PackageReference> configReferences = null)
+        {
             configReferences = configReferences ?? new[] {
                     new PackageReference("package1", new SemanticVersion("1.0.0"), new VersionSpec()),
                     new PackageReference("package2", new SemanticVersion("1.0.2"), new VersionSpec()),

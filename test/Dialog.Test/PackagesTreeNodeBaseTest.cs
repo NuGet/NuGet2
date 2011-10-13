@@ -8,12 +8,15 @@ using NuGet.Dialog.Providers;
 using NuGet.Test;
 using Xunit;
 
-namespace NuGet.Dialog.Test {
+namespace NuGet.Dialog.Test
+{
 
-    public class PackagesTreeNodeBaseTest {
+    public class PackagesTreeNodeBaseTest
+    {
 
         [Fact]
-        public void ParentPropertyIsCorrect() {
+        public void ParentPropertyIsCorrect()
+        {
             // Arrange
             IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(parentTreeNode);
@@ -23,7 +26,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void IsSearchResultsNodeIsFalse() {
+        public void IsSearchResultsNodeIsFalse()
+        {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
@@ -32,7 +36,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void IsExpandedIsFalseByDefault() {
+        public void IsExpandedIsFalseByDefault()
+        {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
@@ -41,7 +46,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void IsSelectedIsFalseByDefault() {
+        public void IsSelectedIsFalseByDefault()
+        {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
@@ -50,7 +56,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void ExtensionsPropertyIsNotNull() {
+        public void ExtensionsPropertyIsNotNull()
+        {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
@@ -59,7 +66,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void NodesPropertyIsNotNullAndEmpty() {
+        public void NodesPropertyIsNotNullAndEmpty()
+        {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
@@ -69,7 +77,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void ToStringMethodReturnsName() {
+        public void ToStringMethodReturnsName()
+        {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
@@ -78,7 +87,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void TotalPagesPropertyIsCorrect() {
+        public void TotalPagesPropertyIsCorrect()
+        {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
@@ -87,7 +97,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void CurrentPagesPropertyIsCorrect() {
+        public void CurrentPagesPropertyIsCorrect()
+        {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
@@ -96,15 +107,18 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void IsSelectedPropertyWhenChangedRaiseEvent() {
+        public void IsSelectedPropertyWhenChangedRaiseEvent()
+        {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
             node.IsSelected = false;
 
             bool propertyRaised = false;
-            node.PropertyChanged += (o, e) => {
-                if (e.PropertyName == "IsSelected") {
+            node.PropertyChanged += (o, e) =>
+            {
+                if (e.PropertyName == "IsSelected")
+                {
                     propertyRaised = true;
                 }
             };
@@ -117,15 +131,18 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void IsExpandedPropertyWhenChangedRaiseEvent() {
+        public void IsExpandedPropertyWhenChangedRaiseEvent()
+        {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
             node.IsExpanded = false;
 
             bool propertyRaised = false;
-            node.PropertyChanged += (o, e) => {
-                if (e.PropertyName == "IsExpanded") {
+            node.PropertyChanged += (o, e) =>
+            {
+                if (e.PropertyName == "IsExpanded")
+                {
                     propertyRaised = true;
                 }
             };
@@ -138,13 +155,16 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void WhenConstructedLoadPageOneAutomatically() {
-            TreeNodeActionTest(node => {
+        public void WhenConstructedLoadPageOneAutomatically()
+        {
+            TreeNodeActionTest(node =>
+            {
                 // Act
                 // Simply accessing the Extensions property will trigger loading the first page
                 IList<IVsExtension> extensions = node.Extensions;
             },
-            node => {
+            node =>
+            {
                 // Assert
                 Assert.Equal(1, node.TotalPages);
                 Assert.Equal(10, node.Extensions.Count);
@@ -152,9 +172,11 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void LoadPageMethodLoadTheCorrectExtensions() {
+        public void LoadPageMethodLoadTheCorrectExtensions()
+        {
             TreeNodeActionTest(node => node.LoadPage(2),
-                               node => {
+                               node =>
+                               {
                                    // Assert
                                    Assert.Equal(5, node.TotalPages);
                                    Assert.Equal(2, node.CurrentPage);
@@ -168,12 +190,14 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void LoadPageMethodWithCustomSortLoadsExtensionsInTheCorrectOrder() {
+        public void LoadPageMethodWithCustomSortLoadsExtensionsInTheCorrectOrder()
+        {
             // Arrange
             var idSortDescriptor = new PackageSortDescriptor("Id", "Id", ListSortDirection.Descending);
 
             TreeNodeActionTest(node => node.SortSelectionChanged(idSortDescriptor),
-                               node => {
+                               node =>
+                               {
                                    // Assert
                                    Assert.Equal(1, node.TotalPages);
                                    Assert.Equal(1, node.CurrentPage);
@@ -189,7 +213,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void LoadPageFollowedBySortClearsCacheAndUsesNewSortOrder() {
+        public void LoadPageFollowedBySortClearsCacheAndUsesNewSortOrder()
+        {
             // Arrange
             var idSortDescriptor = new PackageSortDescriptor("Id", "Id", ListSortDirection.Ascending);
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(numberOfPackages: 5);
@@ -198,7 +223,8 @@ namespace NuGet.Dialog.Test {
             // Act            
             TreeNodeActionTest(node,
                                n => n.LoadPage(1),
-                               n => {
+                               n =>
+                               {
                                    // Assert
                                    Assert.Equal(1, n.TotalPages);
                                    Assert.Equal(1, n.CurrentPage);
@@ -212,7 +238,8 @@ namespace NuGet.Dialog.Test {
 
             TreeNodeActionTest(node,
                                n => n.SortSelectionChanged(idSortDescriptor),
-                               n => {
+                               n =>
+                               {
                                    // Assert
                                    Assert.Equal(1, n.TotalPages);
                                    Assert.Equal(1, n.CurrentPage);
@@ -226,7 +253,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void DuplicateExtensionsAreRemoved() {
+        public void DuplicateExtensionsAreRemoved()
+        {
             // Arrange
             var node = CreatePackagesTreeNodeBase(new[]{
                 PackageUtility.CreatePackage("A", "1.0", rating:1),
@@ -240,7 +268,8 @@ namespace NuGet.Dialog.Test {
             // Act
             TreeNodeActionTest(node,
                                n => n.LoadPage(1),
-                               n => {
+                               n =>
+                               {
                                    // Assert
                                    Assert.Equal(1, n.TotalPages);
                                    Assert.Equal(1, n.CurrentPage);
@@ -252,7 +281,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void DuplicateExtensionsAreNotRemovedIfCollapseVersionsPropertyIsFalse() {
+        public void DuplicateExtensionsAreNotRemovedIfCollapseVersionsPropertyIsFalse()
+        {
             // Arrange
             var node = CreatePackagesTreeNodeBase(new[]{
                     PackageUtility.CreatePackage("A", "1.0",rating:1),
@@ -268,7 +298,8 @@ namespace NuGet.Dialog.Test {
             // Act
             TreeNodeActionTest(node,
                                n => n.LoadPage(1),
-                               n => {
+                               n =>
+                               {
                                    // Assert
                                    Assert.Equal(1, n.TotalPages);
                                    Assert.Equal(1, n.CurrentPage);
@@ -285,7 +316,8 @@ namespace NuGet.Dialog.Test {
         private static void TreeNodeActionTest(Action<PackagesTreeNodeBase> treeNodeAction,
                                                Action<PackagesTreeNodeBase> callback,
                                                int? pageSize = null,
-                                               int? numberOfPackages = null) {
+                                               int? numberOfPackages = null)
+        {
             const int defaultNumberOfPackages = 10;
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(numberOfPackages: numberOfPackages ?? defaultNumberOfPackages);
             node.IsSelected = true;
@@ -295,23 +327,28 @@ namespace NuGet.Dialog.Test {
         private static void TreeNodeActionTest(PackagesTreeNodeBase node,
                                                Action<PackagesTreeNodeBase> treeNodeAction,
                                                Action<PackagesTreeNodeBase> callback,
-                                               int? pageSize = null) {
+                                               int? pageSize = null)
+        {
             // Arrange
             ManualResetEventSlim resetEvent = new ManualResetEventSlim(initialState: false);
             node.PageSize = pageSize ?? node.PageSize;
 
             Exception exception = null;
 
-            node.PackageLoadCompleted += delegate {
-                try {
+            node.PackageLoadCompleted += delegate
+            {
+                try
+                {
                     // Callback for assertion
                     callback(node);
                 }
-                catch (Exception e) {
+                catch (Exception e)
+                {
                     // There was an exception when running the callback async, so record the exception
                     exception = e;
                 }
-                finally {
+                finally
+                {
                     // If there is an exception we don't want to freeze the unit test forever
                     resetEvent.Set();
                 }
@@ -328,7 +365,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void SortSelectionChangedReturnsFalseIfCurrentSortDescriptorIsNull() {
+        public void SortSelectionChangedReturnsFalseIfCurrentSortDescriptorIsNull()
+        {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase(numberOfPackages: 10);
 
@@ -340,7 +378,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void LoadPageThrowsIfPageNumberIsLessThanOne() {
+        public void LoadPageThrowsIfPageNumberIsLessThanOne()
+        {
             // Arrange
             PackagesTreeNodeBase node = CreatePackagesTreeNodeBase();
 
@@ -348,8 +387,10 @@ namespace NuGet.Dialog.Test {
             ExceptionAssert.ThrowsArgOutOfRange(() => node.LoadPage(0), "pageNumber", 1, null, true);
         }
 
-        private static PackagesTreeNodeBase CreatePackagesTreeNodeBase(IVsExtensionsTreeNode parentTreeNode = null, int numberOfPackages = 1, bool collapseVersions = true) {
-            if (parentTreeNode == null) {
+        private static PackagesTreeNodeBase CreatePackagesTreeNodeBase(IVsExtensionsTreeNode parentTreeNode = null, int numberOfPackages = 1, bool collapseVersions = true)
+        {
+            if (parentTreeNode == null)
+            {
                 parentTreeNode = parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
             }
 
@@ -358,13 +399,16 @@ namespace NuGet.Dialog.Test {
 
         }
 
-        private static PackagesTreeNodeBase CreatePackagesTreeNodeBase(IEnumerable<IPackage> packages, IVsExtensionsTreeNode parentTreeNode = null, bool collapseVersions = true) {
-            if (parentTreeNode == null) {
+        private static PackagesTreeNodeBase CreatePackagesTreeNodeBase(IEnumerable<IPackage> packages, IVsExtensionsTreeNode parentTreeNode = null, bool collapseVersions = true)
+        {
+            if (parentTreeNode == null)
+            {
                 parentTreeNode = parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
             }
 
             PackagesProviderBase provider = new MockPackagesProvider();
-            return new MockTreeNode(parentTreeNode, provider, packages, collapseVersions) {
+            return new MockTreeNode(parentTreeNode, provider, packages, collapseVersions)
+            {
                 IsSelected = true
             };
         }

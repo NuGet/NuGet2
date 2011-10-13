@@ -3,11 +3,13 @@ using System.ComponentModel.Composition;
 using System.Globalization;
 using NuGet.Common;
 
-namespace NuGet.Commands {
+namespace NuGet.Commands
+{
     [Command(typeof(NuGetResources), "delete", "DeleteCommandDescription",
         MinArgs = 2, MaxArgs = 3, UsageDescriptionResourceName = "DeleteCommandUsageDescription",
         UsageSummaryResourceName = "DeleteCommandUsageSummary", UsageExampleResourceName = "DeleteCommandUsageExamples")]
-    public class DeleteCommand : Command {
+    public class DeleteCommand : Command
+    {
         [Option(typeof(NuGetResources), "DeleteCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
@@ -17,21 +19,24 @@ namespace NuGet.Commands {
         public IPackageSourceProvider SourceProvider { get; private set; }
 
         public ISettings Settings { get; private set; }
-        
+
         [ImportingConstructor]
-        public DeleteCommand(IPackageSourceProvider packageSourceProvider, ISettings settings) {
+        public DeleteCommand(IPackageSourceProvider packageSourceProvider, ISettings settings)
+        {
             SourceProvider = packageSourceProvider;
             Settings = settings;
         }
 
-        public override void ExecuteCommand() {
+        public override void ExecuteCommand()
+        {
             //First argument should be the package ID
             string packageId = Arguments[0];
             //Second argument should be the package Version
             string packageVersion = Arguments[1];
             //Third argument, if present, should be the API Key
             string userSetApiKey = null;
-            if (Arguments.Count > 2) {
+            if (Arguments.Count > 2)
+            {
                 userSetApiKey = Arguments[2];
             }
 
@@ -44,12 +49,14 @@ namespace NuGet.Commands {
 
             string sourceDisplayName = CommandLineUtility.GetSourceDisplayName(source);
 
-            if (NoPrompt || Console.Confirm(String.Format(CultureInfo.CurrentCulture, NuGetResources.DeleteCommandConfirm, packageId, packageVersion, sourceDisplayName))) {
+            if (NoPrompt || Console.Confirm(String.Format(CultureInfo.CurrentCulture, NuGetResources.DeleteCommandConfirm, packageId, packageVersion, sourceDisplayName)))
+            {
                 Console.WriteLine(NuGetResources.DeleteCommandDeletingPackage, packageId, packageVersion, sourceDisplayName);
                 gallery.DeletePackage(apiKey, packageId, packageVersion);
                 Console.WriteLine(NuGetResources.DeleteCommandDeletedPackage, packageId, packageVersion);
             }
-            else {
+            else
+            {
                 Console.WriteLine(NuGetResources.DeleteCommandCanceled);
             }
 

@@ -1,6 +1,8 @@
 using System;
-namespace NuGet {
-    public interface IPackageManager {
+namespace NuGet
+{
+    public interface IPackageManager
+    {
         IFileSystem FileSystem { get; set; }
         IPackageRepository LocalRepository { get; }
         ILogger Logger { get; set; }

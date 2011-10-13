@@ -6,12 +6,15 @@ using System.Windows.Forms;
 using NuGet.Options;
 using NuGet.VisualStudio;
 
-namespace NuGet.TestUI {
-    public partial class TestForm : Form {
+namespace NuGet.TestUI
+{
+    public partial class TestForm : Form
+    {
         private MockPackageSourceProvider _packageSourceProvider = new MockPackageSourceProvider();
         private PackageSourcesOptionsControl _optionsControl;
         private bool _isClosing;
-        public TestForm() {
+        public TestForm()
+        {
             InitializeComponent();
 
             var list = new List<PackageSource> {
@@ -36,9 +39,11 @@ namespace NuGet.TestUI {
             _optionsControl.InitializeOnActivated();
         }
 
-        private void OkButton_Click(object sender, EventArgs e) {
+        private void OkButton_Click(object sender, EventArgs e)
+        {
             bool wasApplied = _optionsControl.ApplyChangedSettings();
-            if (!wasApplied) {
+            if (!wasApplied)
+            {
                 _isClosing = false;
                 return; // don't close
             }
@@ -52,11 +57,13 @@ namespace NuGet.TestUI {
             this.Close();
         }
 
-        private void TestForm_FormClosing(object sender, FormClosingEventArgs e) {
+        private void TestForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
             e.Cancel = !_isClosing;
         }
 
-        private void theCancelButton_Click(object sender, EventArgs e) {
+        private void theCancelButton_Click(object sender, EventArgs e)
+        {
             _isClosing = true;
             this.Close();
         }

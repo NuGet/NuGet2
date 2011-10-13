@@ -6,10 +6,13 @@ using NuGet.Server.Infrastructure;
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.Test.Server.Infrastructure {
-    public class ServerPackageRepositoryTest {
+namespace NuGet.Test.Server.Infrastructure
+{
+    public class ServerPackageRepositoryTest
+    {
         [Fact]
-        public void ServerPackageRepositoryReadsDerivedData() {
+        public void ServerPackageRepositoryReadsDerivedData()
+        {
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             var package = new PackageBuilder() { Id = "Test", Version = new SemanticVersion("1.0"), Description = "Description" };
@@ -32,20 +35,22 @@ namespace NuGet.Test.Server.Infrastructure {
             // Assert
             byte[] data = memoryStream.ToArray();
             Assert.Equal(data.Length, packages.Single().PackageSize);
-        	Assert.Equal(data.Select(Invert).ToArray(), Convert.FromBase64String(packages.Single().PackageHash).ToArray());
+            Assert.Equal(data.Select(Invert).ToArray(), Convert.FromBase64String(packages.Single().PackageHash).ToArray());
 
             //CollectionAssert.AreEquivalent(data.Select(Invert).ToArray(), Convert.FromBase64String(packages.Single().PackageHash));
             Assert.Equal(data.Length, packages.Single().PackageSize);
         }
 
-        private static IHashProvider GetHashProvider() {
+        private static IHashProvider GetHashProvider()
+        {
             var hashProvider = new Mock<IHashProvider>();
             hashProvider.Setup(c => c.CalculateHash(It.IsAny<byte[]>())).Returns((byte[] value) => value.Select(Invert).ToArray());
 
             return hashProvider.Object;
         }
 
-        private static byte Invert(byte value) {
+        private static byte Invert(byte value)
+        {
             return (byte)~value;
         }
     }

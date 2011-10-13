@@ -4,12 +4,15 @@ using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Text;
 
-namespace NuGet {
-    internal class ZipPackageAssemblyReference : ZipPackageFile, IPackageAssemblyReference {
+namespace NuGet
+{
+    internal class ZipPackageAssemblyReference : ZipPackageFile, IPackageAssemblyReference
+    {
         private FrameworkName _targetFramework;
 
         public ZipPackageAssemblyReference(IPackageFile file)
-            : base(file) {
+            : base(file)
+        {
             Debug.Assert(Path.StartsWith("lib", StringComparison.OrdinalIgnoreCase), "path doesn't start with lib");
 
             // Get rid of the lib folder            
@@ -18,30 +21,39 @@ namespace NuGet {
             _targetFramework = VersionUtility.ParseFrameworkFolderName(path);
         }
 
-        public FrameworkName TargetFramework {
-            get {
+        public FrameworkName TargetFramework
+        {
+            get
+            {
                 return _targetFramework;
             }
         }
 
-        IEnumerable<FrameworkName> IFrameworkTargetable.SupportedFrameworks {
-            get {
-                if (TargetFramework != null) {
+        IEnumerable<FrameworkName> IFrameworkTargetable.SupportedFrameworks
+        {
+            get
+            {
+                if (TargetFramework != null)
+                {
                     yield return TargetFramework;
                 }
                 yield break;
             }
         }
 
-        public string Name {
-            get {
+        public string Name
+        {
+            get
+            {
                 return System.IO.Path.GetFileName(Path);
             }
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             var builder = new StringBuilder();
-            if (TargetFramework != null) {
+            if (TargetFramework != null)
+            {
                 builder.Append(TargetFramework).Append(" ");
             }
             builder.Append(Name).AppendFormat(" ({0})", Path);

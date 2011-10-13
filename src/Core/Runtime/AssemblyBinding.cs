@@ -2,80 +2,98 @@
 using System.Diagnostics;
 using System.Xml.Linq;
 
-namespace NuGet.Runtime {
-    public class AssemblyBinding : IEquatable<AssemblyBinding> {
+namespace NuGet.Runtime
+{
+    public class AssemblyBinding : IEquatable<AssemblyBinding>
+    {
         private const string Namespace = "urn:schemas-microsoft-com:asm.v1";
         private string _oldVersion;
         private string _culture;
 
-        internal AssemblyBinding() {
+        internal AssemblyBinding()
+        {
         }
 
-        public AssemblyBinding(IAssembly assembly) {
+        public AssemblyBinding(IAssembly assembly)
+        {
             Name = assembly.Name;
             PublicKeyToken = assembly.PublicKeyToken;
             NewVersion = assembly.Version.ToString();
             Culture = assembly.Culture;
         }
 
-        public string Name {
+        public string Name
+        {
             get;
             private set;
         }
 
-        public string Culture {
-            get {
+        public string Culture
+        {
+            get
+            {
                 return _culture ?? "neutral";
             }
-            set {
+            set
+            {
                 _culture = value;
             }
         }
 
-        public string PublicKeyToken {
+        public string PublicKeyToken
+        {
             get;
             private set;
         }
 
-        public string ProcessorArchitecture {
+        public string ProcessorArchitecture
+        {
             get;
             private set;
         }
 
-        public string NewVersion {
+        public string NewVersion
+        {
             get;
             private set;
         }
 
-        public string OldVersion {
-            get {
+        public string OldVersion
+        {
+            get
+            {
                 // If not old version as specified, we make all versions of this assembly
                 // point to the new version
                 return _oldVersion ?? "0.0.0.0-" + NewVersion;
             }
-            set {
+            set
+            {
                 _oldVersion = value;
             }
         }
 
         // These properties aren't meant for use, just used for round tripping existing 
         // <dependentAssembly /> elements
-        public string CodeBaseHref {
+        public string CodeBaseHref
+        {
             get;
             private set;
         }
 
-        public string CodeBaseVersion {
+        public string CodeBaseVersion
+        {
             get;
             private set;
         }
 
-        public string PublisherPolicy {
+        public string PublisherPolicy
+        {
             get;
             private set;
         }
 
-        public XElement ToXElement() {
+        public XElement ToXElement()
+        {
             // We're going to generate the fragment below.
             //<dependentAssembly> 
             //   <assemblyIdentity name="{Name}" 
@@ -100,12 +118,14 @@ namespace NuGet.Runtime {
                                  new XAttribute("oldVersion", OldVersion),
                                  new XAttribute("newVersion", NewVersion)));
 
-            if (!String.IsNullOrEmpty(PublisherPolicy)) {
+            if (!String.IsNullOrEmpty(PublisherPolicy))
+            {
                 dependenyAssembly.Add(new XElement(GetQualifiedName("publisherPolicy"),
                                         new XAttribute("apply", PublisherPolicy)));
             }
 
-            if (!String.IsNullOrEmpty(CodeBaseHref)) {
+            if (!String.IsNullOrEmpty(CodeBaseHref))
+            {
                 Debug.Assert(!String.IsNullOrEmpty(CodeBaseVersion));
                 dependenyAssembly.Add(new XElement(GetQualifiedName("codeBase"),
                                           new XAttribute("href", CodeBaseHref),
@@ -120,12 +140,15 @@ namespace NuGet.Runtime {
             return dependenyAssembly;
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return ToXElement().ToString();
         }
 
-        public static AssemblyBinding Parse(XContainer dependentAssembly) {
-            if (dependentAssembly == null) {
+        public static AssemblyBinding Parse(XContainer dependentAssembly)
+        {
+            if (dependentAssembly == null)
+            {
                 throw new ArgumentNullException("dependentAssembly");
             }
             // This code parses a <dependentAssembly /> element of an <assemblyBinding /> section in config
@@ -135,7 +158,8 @@ namespace NuGet.Runtime {
 
             // Parses this schema http://msdn.microsoft.com/en-us/library/0ash1ksb.aspx
             XElement assemblyIdentity = dependentAssembly.Element(GetQualifiedName("assemblyIdentity"));
-            if (assemblyIdentity != null) {
+            if (assemblyIdentity != null)
+            {
                 // <assemblyIdentity /> http://msdn.microsoft.com/en-us/library/b0yt6ck0.aspx
                 binding.Name = assemblyIdentity.Attribute("name").Value;
                 binding.Culture = assemblyIdentity.GetOptionalAttributeValue("culture");
@@ -144,21 +168,24 @@ namespace NuGet.Runtime {
             }
 
             XElement bindingRedirect = dependentAssembly.Element(GetQualifiedName("bindingRedirect"));
-            if (bindingRedirect != null) {
+            if (bindingRedirect != null)
+            {
                 // <bindingRedirect /> http://msdn.microsoft.com/en-us/library/eftw1fys.aspx
                 binding.OldVersion = bindingRedirect.Attribute("oldVersion").Value;
                 binding.NewVersion = bindingRedirect.Attribute("newVersion").Value;
             }
 
             XElement codeBase = dependentAssembly.Element(GetQualifiedName("codeBase"));
-            if (codeBase != null) {
+            if (codeBase != null)
+            {
                 // <codeBase /> http://msdn.microsoft.com/en-us/library/efs781xb.aspx
                 binding.CodeBaseHref = codeBase.Attribute("href").Value;
                 binding.CodeBaseVersion = codeBase.Attribute("version").Value;
             }
 
             XElement publisherPolicy = dependentAssembly.Element(GetQualifiedName("publisherPolicy"));
-            if (publisherPolicy != null) {
+            if (publisherPolicy != null)
+            {
                 // <publisherPolicy /> http://msdn.microsoft.com/en-us/library/cf9025zt.aspx
                 binding.PublisherPolicy = publisherPolicy.Attribute("apply").Value;
             }
@@ -166,38 +193,46 @@ namespace NuGet.Runtime {
             return binding;
         }
 
-        public static XName GetQualifiedName(string name) {
+        public static XName GetQualifiedName(string name)
+        {
             return XName.Get(name, Namespace);
         }
 
-        public bool Equals(AssemblyBinding other) {
+        public bool Equals(AssemblyBinding other)
+        {
             return SafeEquals(Name, other.Name) &&
                    SafeEquals(PublicKeyToken, other.PublicKeyToken) &&
                    SafeEquals(Culture, other.Culture) &&
                    SafeEquals(ProcessorArchitecture, other.ProcessorArchitecture);
         }
 
-        private static bool SafeEquals(object a, object b) {
-            if (a != null && b != null) {
+        private static bool SafeEquals(object a, object b)
+        {
+            if (a != null && b != null)
+            {
                 return a.Equals(b);
             }
 
-            if (a == null && b == null) {
+            if (a == null && b == null)
+            {
                 return true;
             }
 
             return false;
         }
 
-        public override bool Equals(object obj) {
+        public override bool Equals(object obj)
+        {
             var other = obj as AssemblyBinding;
-            if (other != null) {
+            if (other != null)
+            {
                 return Equals(other);
             }
             return base.Equals(obj);
         }
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             var combiner = new HashCodeCombiner();
 
             // assemblyIdentity

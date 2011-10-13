@@ -23,7 +23,8 @@ using NuGetConsole.Implementation;
 using ManagePackageDialog = dialog::NuGet.Dialog.PackageManagerWindow;
 using VS10ManagePackageDialog = dialog10::NuGet.Dialog.PackageManagerWindow;
 
-namespace NuGet.Tools {
+namespace NuGet.Tools
+{
     /// <summary>
     /// This is the class that implements the package exposed by this assembly.
     /// </summary>
@@ -43,7 +44,8 @@ namespace NuGet.Tools {
         NuGetConsole.Implementation.GuidList.GuidPackageManagerConsoleFontAndColorCategoryString,
         "{" + GuidList.guidNuGetPkgString + "}")]
     [Guid(GuidList.guidNuGetPkgString)]
-    public sealed class NuGetPackage : Microsoft.VisualStudio.Shell.Package {
+    public sealed class NuGetPackage : Microsoft.VisualStudio.Shell.Package
+    {
         // This product version will be updated by the build script to match the daily build version.
         // It is displayed in the Help - About box of Visual Studio
         public const string ProductVersion = "1.2.0.0";
@@ -56,7 +58,8 @@ namespace NuGet.Tools {
         private bool? _isVisualizerSupported;
         private IPackageRestoreManager _packageRestoreManager;
 
-        public NuGetPackage() {
+        public NuGetPackage()
+        {
             HttpClient.DefaultCredentialProvider = new VSRequestCredentialProvider();
         }
 
@@ -64,7 +67,8 @@ namespace NuGet.Tools {
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
         /// </summary>
-        protected override void Initialize() {
+        protected override void Initialize()
+        {
             base.Initialize();
 
             // get the UI context cookie for the debugging mode
@@ -89,14 +93,17 @@ namespace NuGet.Tools {
             // restore mode enabled, we make sure every thing is set up correctly.
             // For example, projects which were added outside of VS need to have
             // the <Import> element added.
-            if (_packageRestoreManager.IsCurrentSolutionEnabled) {
+            if (_packageRestoreManager.IsCurrentSolutionEnabled)
+            {
                 _packageRestoreManager.EnableCurrentSolution(quietMode: true);
             }
         }
 
-        private void AddMenuCommandHandlers() {
+        private void AddMenuCommandHandlers()
+        {
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (null != mcs) {
+            if (null != mcs)
+            {
                 // menu command for opening Package Manager Console
                 CommandID toolwndCommandID = new CommandID(GuidList.guidNuGetConsoleCmdSet, (int)PkgCmdIDList.cmdidPowerConsole);
                 MenuCommand menuToolWin = new MenuCommand(ShowToolWindow, toolwndCommandID);
@@ -134,12 +141,14 @@ namespace NuGet.Tools {
             }
         }
 
-        private void ShowToolWindow(object sender, EventArgs e) {
+        private void ShowToolWindow(object sender, EventArgs e)
+        {
             // Get the instance number 0 of this tool window. This window is single instance so this instance
             // is actually the only one.
             // The last flag is set to true so that if the tool window does not exists it will be created.
             ToolWindowPane window = this.FindToolWindow(typeof(PowerConsoleToolWindow), 0, true);
-            if ((null == window) || (null == window.Frame)) {
+            if ((null == window) || (null == window.Frame))
+            {
                 throw new NotSupportedException(Resources.CanNotCreateWindow);
             }
             IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
@@ -149,7 +158,8 @@ namespace NuGet.Tools {
         /// <summary>
         /// Executes the NuGet Visualizer.
         /// </summary>
-        private void ExecuteVisualizer(object sender, EventArgs e) {
+        private void ExecuteVisualizer(object sender, EventArgs e)
+        {
             var visualizer = new NuGet.Dialog.Visualizer(
                 ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                 ServiceLocator.GetInstance<ISolutionManager>());
@@ -157,24 +167,31 @@ namespace NuGet.Tools {
             _dte.ItemOperations.OpenFile(outputFile);
         }
 
-        private void ShowManageLibraryPackageDialog(object sender, EventArgs e) {
-            if (_vsMonitorSelection.GetIsSolutionNodeSelected()) {
+        private void ShowManageLibraryPackageDialog(object sender, EventArgs e)
+        {
+            if (_vsMonitorSelection.GetIsSolutionNodeSelected())
+            {
                 ShowManageLibraryPackageDialog(null);
             }
-            else {
+            else
+            {
                 Project project = _vsMonitorSelection.GetActiveProject();
-                if (project != null && !project.IsUnloaded() && project.IsSupported()) {
+                if (project != null && !project.IsUnloaded() && project.IsSupported())
+                {
                     ShowManageLibraryPackageDialog(project);
                 }
-                else {
+                else
+                {
                     // show error message when no supported project is selected.
                     string projectName = project != null ? project.Name : String.Empty;
 
                     string errorMessage;
-                    if (String.IsNullOrEmpty(projectName)) {
+                    if (String.IsNullOrEmpty(projectName))
+                    {
                         errorMessage = Resources.NoProjectSelected;
                     }
-                    else {
+                    else
+                    {
                         errorMessage = String.Format(CultureInfo.CurrentCulture, VsResources.DTE_ProjectUnsupported, projectName);
                     }
 
@@ -185,119 +202,146 @@ namespace NuGet.Tools {
             }
         }
 
-        private void ShowManageLibraryPackageForSolutionDialog(object sender, EventArgs e) {
+        private void ShowManageLibraryPackageForSolutionDialog(object sender, EventArgs e)
+        {
             ShowManageLibraryPackageDialog(null);
         }
 
-        private static void ShowManageLibraryPackageDialog(Project project) {
+        private static void ShowManageLibraryPackageDialog(Project project)
+        {
             DialogWindow window = VsVersionHelper.IsVisualStudio2010 ?
                 GetVS10PackageManagerWindow(project) :
                 GetPackageManagerWindow(project);
-            try {
+            try
+            {
                 window.ShowModal();
             }
-            catch (TargetInvocationException exception) {
+            catch (TargetInvocationException exception)
+            {
                 MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
                 ExceptionHelper.WriteToActivityLog(exception);
             }
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static DialogWindow GetVS10PackageManagerWindow(Project project) {
+        private static DialogWindow GetVS10PackageManagerWindow(Project project)
+        {
             return new VS10ManagePackageDialog(project);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static DialogWindow GetPackageManagerWindow(Project project) {
+        private static DialogWindow GetPackageManagerWindow(Project project)
+        {
             return new ManagePackageDialog(project);
         }
 
-        private void EnablePackagesRestore(object sender, EventArgs args) {
+        private void EnablePackagesRestore(object sender, EventArgs args)
+        {
             _packageRestoreManager.EnableCurrentSolution(quietMode: false);
         }
 
-        private void QueryStatusEnablePackagesRestore(object sender, EventArgs args) {
+        private void QueryStatusEnablePackagesRestore(object sender, EventArgs args)
+        {
             OleMenuCommand command = (OleMenuCommand)sender;
             command.Visible = IsSolutionOpen && !_packageRestoreManager.IsCurrentSolutionEnabled;
         }
 
-        private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args) {
+        private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args)
+        {
             bool isSolutionSelected = _vsMonitorSelection.GetIsSolutionNodeSelected();
 
             OleMenuCommand command = (OleMenuCommand)sender;
             command.Visible = !IsIDEInDebuggingOrBuildingContext() && (isSolutionSelected || HasActiveLoadedSupportedProject);
             // disable the dialog menu if the console is busy executing a command;
             command.Enabled = !_consoleStatus.IsBusy;
-            if (command.Visible) {
+            if (command.Visible)
+            {
                 command.Text = isSolutionSelected ? Resources.ManagePackageForSolutionLabel : Resources.ManagePackageLabel;
             }
         }
 
-        private void BeforeQueryStatusForAddPackageForSolutionDialog(object sender, EventArgs args) {
+        private void BeforeQueryStatusForAddPackageForSolutionDialog(object sender, EventArgs args)
+        {
             OleMenuCommand command = (OleMenuCommand)sender;
             command.Visible = IsSolutionOpen && !IsIDEInDebuggingOrBuildingContext();
             // disable the dialog menu if the console is busy executing a command;
             command.Enabled = !_consoleStatus.IsBusy;
         }
 
-        private void QueryStatusForVisualizer(object sender, EventArgs args) {
+        private void QueryStatusForVisualizer(object sender, EventArgs args)
+        {
             OleMenuCommand command = (OleMenuCommand)sender;
             command.Visible = IsSolutionOpen && IsVisualizerSupported;
         }
 
-        private bool IsIDEInDebuggingOrBuildingContext() {
+        private bool IsIDEInDebuggingOrBuildingContext()
+        {
             int pfActive;
             int result = _vsMonitorSelection.IsCmdUIContextActive(_debuggingContextCookie, out pfActive);
-            if (result == VSConstants.S_OK && pfActive > 0) {
+            if (result == VSConstants.S_OK && pfActive > 0)
+            {
                 return true;
             }
 
             result = _vsMonitorSelection.IsCmdUIContextActive(_solutionBuildingContextCookie, out pfActive);
-            if (result == VSConstants.S_OK && pfActive > 0) {
+            if (result == VSConstants.S_OK && pfActive > 0)
+            {
                 return true;
             }
 
             return false;
         }
 
-        private void ShowPackageSourcesOptionPage(object sender, EventArgs args) {
+        private void ShowPackageSourcesOptionPage(object sender, EventArgs args)
+        {
             ShowOptionPageSafe(typeof(PackageSourceOptionsPage));
         }
 
-        private void ShowGeneralSettingsOptionPage(object sender, EventArgs args) {
+        private void ShowGeneralSettingsOptionPage(object sender, EventArgs args)
+        {
             ShowOptionPageSafe(typeof(GeneralOptionPage));
         }
 
-        private void ShowOptionPageSafe(Type optionPageType) {
-            try {
+        private void ShowOptionPageSafe(Type optionPageType)
+        {
+            try
+            {
                 ShowOptionPage(optionPageType);
             }
-            catch (Exception exception) {
+            catch (Exception exception)
+            {
                 MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
                 ExceptionHelper.WriteToActivityLog(exception);
             }
-        }        
+        }
 
         /// <summary>
         /// Gets whether the current IDE has an active, supported and non-unloaded project, which is a precondition for
         /// showing the Add Library Package Reference dialog
         /// </summary>
-        private bool HasActiveLoadedSupportedProject {
-            get {
+        private bool HasActiveLoadedSupportedProject
+        {
+            get
+            {
                 Project project = _vsMonitorSelection.GetActiveProject();
                 return project != null && !project.IsUnloaded() && project.IsSupported();
             }
         }
 
-        private bool IsSolutionOpen {
-            get {
+        private bool IsSolutionOpen
+        {
+            get
+            {
                 return _dte != null && _dte.Solution != null && _dte.Solution.IsOpen;
             }
         }
 
-        private bool IsVisualizerSupported {
-            get {
-                if (!_isVisualizerSupported == null) {
+        private bool IsVisualizerSupported
+        {
+            get
+            {
+                if (!_isVisualizerSupported == null)
+                {
                     _isVisualizerSupported = _visualizerSupportedSKUs.Contains(_dte.Edition, StringComparer.OrdinalIgnoreCase);
                 }
                 return _isVisualizerSupported.Value;

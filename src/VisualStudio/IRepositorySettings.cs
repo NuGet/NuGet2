@@ -1,5 +1,7 @@
-﻿namespace NuGet.VisualStudio {
-    public interface IRepositorySettings {
+﻿namespace NuGet.VisualStudio
+{
+    public interface IRepositorySettings
+    {
         string RepositoryPath { get; }
     }
 }

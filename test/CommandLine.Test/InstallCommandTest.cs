@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 using Moq;
 using NuGet.Commands;
 using NuGet.Common;
 using NuGet.Test.Mocks;
+using Xunit;
 
-namespace NuGet.Test.NuGetCommandLine.Commands {
-    
-    public class InstallCommandTest {
+namespace NuGet.Test.NuGetCommandLine.Commands
+{
+
+    public class InstallCommandTest
+    {
         [Fact]
-        public void InstallCommandInstallsPackageIfArgumentIsNotPackageReferenceFile() {
+        public void InstallCommandInstallsPackageIfArgumentIsNotPackageReferenceFile()
+        {
             // Arrange
             var fileSystem = new MockFileSystem();
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
@@ -25,7 +28,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void InstallCommandInstallsPackageSuccessfullyIfCacheRepositoryIsNotSet() {
+        public void InstallCommandInstallsPackageSuccessfullyIfCacheRepositoryIsNotSet()
+        {
             // Arrange
             var fileSystem = new MockFileSystem();
             var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
@@ -40,7 +44,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void InstallCommandResolvesSourceName() {
+        public void InstallCommandResolvesSourceName()
+        {
             // Arrange
             var fileSystem = new MockFileSystem();
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
@@ -55,7 +60,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void InstallCommandLogsWarningsForFailingRepositoriesIfNoSourcesAreSpecified() {
+        public void InstallCommandLogsWarningsForFailingRepositoriesIfNoSourcesAreSpecified()
+        {
             // Arrange
             MessageLevel? level = null;
             string message = null;
@@ -65,8 +71,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             repositoryB.Setup(c => c.GetPackages()).Returns(GetPackagesWithException().AsQueryable());
             var fileSystem = new MockFileSystem();
             var console = new Mock<IConsole>();
-            console.Setup(c => c.Log(It.IsAny<MessageLevel>(), It.IsAny<string>(), It.IsAny<object[]>())).Callback((MessageLevel a, string b, object[] c) => {
-                if (a == MessageLevel.Warning) {
+            console.Setup(c => c.Log(It.IsAny<MessageLevel>(), It.IsAny<string>(), It.IsAny<object[]>())).Callback((MessageLevel a, string b, object[] c) =>
+            {
+                if (a == MessageLevel.Warning)
+                {
                     level = a;
                     message = b;
                 }
@@ -76,7 +84,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var factory = new Mock<IPackageRepositoryFactory>();
             factory.Setup(c => c.CreateRepository("A")).Returns(repositoryA);
             factory.Setup(c => c.CreateRepository("B")).Returns(repositoryB.Object);
-            var installCommand = new TestInstallCommand(factory.Object, sourceProvider, fileSystem) {
+            var installCommand = new TestInstallCommand(factory.Object, sourceProvider, fileSystem)
+            {
                 Console = console.Object
             };
             installCommand.Arguments.Add("Foo");
@@ -90,7 +99,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void InstallCommandInstallsPackageFromAllSourcesIfArgumentIsNotPackageReferenceFile() {
+        public void InstallCommandInstallsPackageFromAllSourcesIfArgumentIsNotPackageReferenceFile()
+        {
             // Arrange
             var fileSystem = new MockFileSystem();
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
@@ -111,7 +121,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void InstallCommandInstallsAllPackagesFromConfigFileIfSpecifiedAsArgument() {
+        public void InstallCommandInstallsAllPackagesFromConfigFileIfSpecifiedAsArgument()
+        {
             // Arrange
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile(@"dir\packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -133,7 +144,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void InstallCommandUsesMultipleSourcesIfSpecified() {
+        public void InstallCommandUsesMultipleSourcesIfSpecified()
+        {
             // Arrange
             var fileSystem = new MockFileSystem();
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
@@ -149,7 +161,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void InstallCommandInstallsPrereleasePackageIfFlagIsSpecified() {
+        public void InstallCommandInstallsPrereleasePackageIfFlagIsSpecified()
+        {
             // Arrange
             var fileSystem = new MockFileSystem();
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem) { Prerelease = true };
@@ -165,7 +178,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void InstallCommandUpdatesPackageIfAlreadyPresentAndNotUsingSideBySide() {
+        public void InstallCommandUpdatesPackageIfAlreadyPresentAndNotUsingSideBySide()
+        {
             // Arrange
             var fileSystem = new MockFileSystem();
             var packages = new List<IPackage>();
@@ -199,7 +213,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void InstallCommandUpdatesPackagesFromPackagesConfigIfAlreadyPresentAndNotUsingSideBySide() {
+        public void InstallCommandUpdatesPackagesFromPackagesConfigIfAlreadyPresentAndNotUsingSideBySide()
+        {
             // Arrange
             var fileSystem = new MockFileSystem();
             var packages = new List<IPackage> { PackageUtility.CreatePackage("Baz", "0.4") };
@@ -223,7 +238,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void InstallCommandWorksIfExcludedVersionsAndPackageIsNotFoundInRemoteRepository() {
+        public void InstallCommandWorksIfExcludedVersionsAndPackageIsNotFoundInRemoteRepository()
+        {
             // Arrange
             var fileSystem = new MockFileSystem();
             var packages = new List<IPackage> { PackageUtility.CreatePackage("A", "0.5") };
@@ -245,7 +261,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void InstallCommandFromConfigIgnoresDependencies() {
+        public void InstallCommandFromConfigIgnoresDependencies()
+        {
             // Arrange
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile(@"packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -268,12 +285,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object);
             installCommand.Arguments.Add("packages.config");
             installCommand.Execute();
-    
+
             // Assert
             packageManager.Verify();
         }
 
-        private static IPackageRepositoryFactory GetFactory() {
+        private static IPackageRepositoryFactory GetFactory()
+        {
             var repositoryA = new MockPackageRepository { PackageUtility.CreatePackage("Foo"), PackageUtility.CreatePackage("Baz", "0.4"), PackageUtility.CreatePackage("Baz", "0.7") };
             var repositoryB = new MockPackageRepository { PackageUtility.CreatePackage("Bar", "0.5"), PackageUtility.CreatePackage("Baz", "0.8.1alpha") };
 
@@ -284,7 +302,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             return factory.Object;
         }
 
-        private static IPackageSourceProvider GetSourceProvider(IEnumerable<PackageSource> sources = null) {
+        private static IPackageSourceProvider GetSourceProvider(IEnumerable<PackageSource> sources = null)
+        {
             var sourceProvider = new Mock<IPackageSourceProvider>();
             sources = sources ?? new[] { new PackageSource("Some source", "Some source name"), new PackageSource("Some other source") };
             sourceProvider.Setup(c => c.LoadPackageSources()).Returns(sources);
@@ -292,12 +311,14 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             return sourceProvider.Object;
         }
 
-        private static IEnumerable<IPackage> GetPackagesWithException() {
+        private static IEnumerable<IPackage> GetPackagesWithException()
+        {
             yield return PackageUtility.CreatePackage("Baz");
             throw new InvalidOperationException("Boom");
         }
 
-        private class TestInstallCommand : InstallCommand {
+        private class TestInstallCommand : InstallCommand
+        {
             private readonly IFileSystem _fileSystem;
             private readonly IPackageManager _packageManager;
 
@@ -306,21 +327,25 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
                                       IFileSystem fileSystem,
                                       IPackageManager packageManager = null,
                                       IPackageRepository machineCacheRepository = null)
-                : base(factory, sourceProvider) {
+                : base(factory, sourceProvider)
+            {
                 _fileSystem = fileSystem;
                 _packageManager = packageManager;
                 CacheRepository = machineCacheRepository ?? new MockPackageRepository();
             }
 
-            protected override IFileSystem CreateFileSystem() {
+            protected override IFileSystem CreateFileSystem()
+            {
                 return _fileSystem;
             }
 
-            protected override IPackageManager CreatePackageManager(IFileSystem fileSystem) {
+            protected override IPackageManager CreatePackageManager(IFileSystem fileSystem)
+            {
                 return _packageManager ?? base.CreatePackageManager(fileSystem);
             }
 
-            protected override PackageReferenceFile GetPackageReferenceFile(string path) {
+            protected override PackageReferenceFile GetPackageReferenceFile(string path)
+            {
                 return new PackageReferenceFile(_fileSystem, path);
             }
         }

@@ -2,9 +2,11 @@
 using System.Xml.Serialization;
 using NuGet.Resources;
 
-namespace NuGet {
+namespace NuGet
+{
     [XmlType("frameworkAssembly")]
-    public class ManifestFrameworkAssembly {
+    public class ManifestFrameworkAssembly
+    {
         [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_AssemblyNameRequired")]
         [XmlAttribute("assemblyName")]
         public string AssemblyName { get; set; }

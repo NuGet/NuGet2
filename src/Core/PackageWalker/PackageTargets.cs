@@ -1,8 +1,10 @@
 using System;
 
-namespace NuGet {
+namespace NuGet
+{
     [Flags]
-    public enum PackageTargets {
+    public enum PackageTargets
+    {
         None = 0,
         Project = 1,
         External = 2,

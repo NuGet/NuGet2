@@ -1,20 +1,26 @@
 ﻿using System;
 using NuGet.VisualStudio;
 
-namespace NuGetConsole.Host.PowerShell.Implementation {
-    internal class SyncPowerShellHost : PowerShellHost {
+namespace NuGetConsole.Host.PowerShell.Implementation
+{
+    internal class SyncPowerShellHost : PowerShellHost
+    {
         public SyncPowerShellHost(string name, IRunspaceManager runspaceManager)
-            : base(name, runspaceManager) {
+            : base(name, runspaceManager)
+        {
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        protected override bool ExecuteHost(string fullCommand, string command, params object[] inputs) {
+        protected override bool ExecuteHost(string fullCommand, string command, params object[] inputs)
+        {
             SetSyncModeOnHost(true);
-            try {
+            try
+            {
                 Runspace.Invoke(fullCommand, inputs, true);
                 OnExecuteCommandEnd();
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 ExceptionHelper.WriteToActivityLog(e);
                 throw;
             }

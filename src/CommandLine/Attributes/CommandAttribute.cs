@@ -1,8 +1,10 @@
 using System;
 
-namespace NuGet {
+namespace NuGet
+{
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-    public sealed class CommandAttribute : Attribute {
+    public sealed class CommandAttribute : Attribute
+    {
         private string _description;
         private string _usageSummary;
         private string _usageDescription;
@@ -20,62 +22,80 @@ namespace NuGet {
         public string UsageDescriptionResourceName { get; set; }
         public string UsageExampleResourceName { get; set; }
 
-        public string Description {
-            get {
-                if (ResourceType != null && !String.IsNullOrEmpty(DescriptionResourceName)) {
+        public string Description
+        {
+            get
+            {
+                if (ResourceType != null && !String.IsNullOrEmpty(DescriptionResourceName))
+                {
                     return ResourceHelper.GetLocalizedString(ResourceType, DescriptionResourceName);
                 }
                 return _description;
             }
-            private set {
+            private set
+            {
                 _description = value;
             }
         }
 
-        public string UsageSummary {
-            get {
-                if (ResourceType != null && !String.IsNullOrEmpty(UsageSummaryResourceName)) {
+        public string UsageSummary
+        {
+            get
+            {
+                if (ResourceType != null && !String.IsNullOrEmpty(UsageSummaryResourceName))
+                {
                     return ResourceHelper.GetLocalizedString(ResourceType, UsageSummaryResourceName);
                 }
                 return _usageSummary;
             }
-            set {
+            set
+            {
                 _usageSummary = value;
             }
         }
 
-        public string UsageDescription {
-            get {
-                if (ResourceType != null && !String.IsNullOrEmpty(UsageDescriptionResourceName)) {
+        public string UsageDescription
+        {
+            get
+            {
+                if (ResourceType != null && !String.IsNullOrEmpty(UsageDescriptionResourceName))
+                {
                     return ResourceHelper.GetLocalizedString(ResourceType, UsageDescriptionResourceName);
                 }
                 return _usageDescription;
             }
-            set {
+            set
+            {
                 _usageDescription = value;
             }
         }
 
-        public string UsageExample {
-            get {
-                if (ResourceType != null && !String.IsNullOrEmpty(UsageExampleResourceName)) {
+        public string UsageExample
+        {
+            get
+            {
+                if (ResourceType != null && !String.IsNullOrEmpty(UsageExampleResourceName))
+                {
                     return ResourceHelper.GetLocalizedString(ResourceType, UsageExampleResourceName);
                 }
                 return _example;
             }
-            set {
+            set
+            {
                 _example = value;
             }
         }
 
-        public CommandAttribute(string commandName, string description) {
+        public CommandAttribute(string commandName, string description)
+        {
             CommandName = commandName;
             Description = description;
             MinArgs = 0;
             MaxArgs = Int32.MaxValue;
         }
 
-        public CommandAttribute(Type resourceType, string commandName, string descriptionResourceName) {
+        public CommandAttribute(Type resourceType, string commandName, string descriptionResourceName)
+        {
             ResourceType = resourceType;
             CommandName = commandName;
             DescriptionResourceName = descriptionResourceName;

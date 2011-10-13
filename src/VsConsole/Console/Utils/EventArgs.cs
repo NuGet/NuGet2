@@ -1,10 +1,13 @@
 using System;
 
-namespace NuGetConsole {
-    class EventArgs<T> : EventArgs {
+namespace NuGetConsole
+{
+    class EventArgs<T> : EventArgs
+    {
         public T Arg { get; private set; }
 
-        public EventArgs(T arg) {
+        public EventArgs(T arg)
+        {
             this.Arg = arg;
         }
     }

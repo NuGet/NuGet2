@@ -4,9 +4,10 @@ using System.IO;
 using System.Linq;
 using Xunit;
 
-namespace NuGet.Test.Integration.NuGetCommandLine {
-	public class NuGetCommandLineTest : IDisposable, IUseFixture<NugetProgramStatic>
-	{
+namespace NuGet.Test.Integration.NuGetCommandLine
+{
+    public class NuGetCommandLineTest : IDisposable, IUseFixture<NugetProgramStatic>
+    {
         private const string NoSpecsfolder = @".\nospecs\";
         private const string OneSpecfolder = @".\onespec\";
         private const string TwoSpecsFolder = @".\twospecs\";
@@ -20,8 +21,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         private TextWriter originalErrorConsoleOutput;
         private string startingDirectory;
 
-    	public NuGetCommandLineTest()
-    	{
+        public NuGetCommandLineTest()
+        {
             DeleteDirs();
 
             Directory.CreateDirectory(NoSpecsfolder);
@@ -39,7 +40,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
             startingDirectory = Directory.GetCurrentDirectory();
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             DeleteDirs();
             System.Console.SetOut(originalConsoleOutput);
             System.Console.SetError(originalErrorConsoleOutput);
@@ -48,7 +50,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
 
 
         [Fact]
-        public void NuGetCommandLine_ShowsHelpIfThereIsNoCommand() {
+        public void NuGetCommandLine_ShowsHelpIfThereIsNoCommand()
+        {
             // Arrange 
             string[] args = new string[0];
 
@@ -61,7 +64,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [Fact]
-        public void PackageCommand_ThrowsWhenPassingNoArgsAndThereAreNoNuSpecFiles() {
+        public void PackageCommand_ThrowsWhenPassingNoArgsAndThereAreNoNuSpecFiles()
+        {
             // Arrange 
             string[] args = new string[] { "pack" };
             Directory.SetCurrentDirectory(NoSpecsfolder);
@@ -75,7 +79,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [Fact]
-        public void PackageCommand_ThrowsWhenPassingNoArgsAndThereIsMoreThanOneNuSpecFile() {
+        public void PackageCommand_ThrowsWhenPassingNoArgsAndThereIsMoreThanOneNuSpecFile()
+        {
             // Arrange
             string nuspecFile = Path.Combine(TwoSpecsFolder, "antlr.nuspec");
             File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
@@ -93,7 +98,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [Fact]
-        public void PackageCommand_CreatesPackageWhenPassingNoArgsAndThereOneNuSpecFile() {
+        public void PackageCommand_CreatesPackageWhenPassingNoArgsAndThereOneNuSpecFile()
+        {
             //Arrange
             string nuspecFile = Path.Combine(OneSpecfolder, "antlr.nuspec");
             File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
@@ -110,7 +116,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [Fact]
-        public void PackageCommand_CreatesPackageWhenPassingBasePath() {
+        public void PackageCommand_CreatesPackageWhenPassingBasePath()
+        {
             //Arrange
             string nuspecFile = Path.Combine(OneSpecfolder, "Antlr.nuspec");
             string expectedPackage = Path.Combine("..\\output\\", "Antlr.3.1.1.nupkg");
@@ -129,7 +136,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [Fact]
-        public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID1() {
+        public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID1()
+        {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "InvalidId.nuspec");
             string expectedPackage = "InvalidId.nupkg";
@@ -160,7 +168,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [Fact]
-        public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID2() {
+        public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID2()
+        {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "InvalidId.nuspec");
             string expectedPackage = "InvalidId.nupkg";
@@ -191,7 +200,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [Fact]
-        public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID3() {
+        public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID3()
+        {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "InvalidId.nuspec");
             string expectedPackage = "InvalidId.nupkg";
@@ -222,7 +232,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [Fact]
-        public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID4() {
+        public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasInvalidID4()
+        {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "InvalidId.nuspec");
             string expectedPackage = "InvalidId.nupkg";
@@ -253,7 +264,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [Fact]
-        public void PackageCommand_SpecifyingFilesInNuspecOnlyPackagesSpecifiedFiles() {
+        public void PackageCommand_SpecifyingFilesInNuspecOnlyPackagesSpecifiedFiles()
+        {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
             string expectedPackage = "test.1.1.1.nupkg";
@@ -288,7 +300,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [Fact]
-        public void PackageCommand_SpecifyingEmptyFilesElementInNuspecPackagesNoFiles() {
+        public void PackageCommand_SpecifyingEmptyFilesElementInNuspecPackagesNoFiles()
+        {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
             string expectedPackage = "empty.2.2.2.nupkg";
@@ -324,7 +337,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [Fact]
-        public void PackageCommand_AcceptEmptyDependenciesElement() {
+        public void PackageCommand_AcceptEmptyDependenciesElement()
+        {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
             string expectedPackage = "dep.2.2.2.nupkg";
@@ -358,7 +372,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [Fact]
-        public void PackageCommand_AcceptEmptyFrameworkAssemblyElement() {
+        public void PackageCommand_AcceptEmptyFrameworkAssemblyElement()
+        {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
             string expectedPackage = "framework.2.2.2.nupkg";
@@ -392,7 +407,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine {
         }
 
         [Fact]
-        public void PackageCommand_SpecifyingProjectFileCreatesPackageAndSymbolsPackge() {
+        public void PackageCommand_SpecifyingProjectFileCreatesPackageAndSymbolsPackge()
+        {
             // Arrange            
             string expectedPackage = "FakeProject.1.2.0.0.nupkg";
             string expectedSymbolsPackage = "FakeProject.1.2.0.0.symbols.nupkg";
@@ -457,18 +473,21 @@ public class Baz {
 
 
         [Fact]
-        public void PackageCommand_SpecifyingProjectFilePacksContentAndOutput() {
+        public void PackageCommand_SpecifyingProjectFilePacksContentAndOutput()
+        {
             // Arrange                        
             string expectedPackage = "ProjectWithCotent.1.5.0.0.nupkg";
             var contentFiles = new[] { "Foo.xml", "Bar.txt" };
             var sourceFiles = new[] { "A.cs", "B.cs" };
 
-            foreach (var contentFile in contentFiles) {
+            foreach (var contentFile in contentFiles)
+            {
                 WriteProjectFile(contentFile, contentFile);
             }
 
             int index = 0;
-            foreach (var sourceFile in sourceFiles) {
+            foreach (var sourceFile in sourceFiles)
+            {
                 WriteProjectFile(sourceFile, String.Format(@"using System;
 public class Cl_{0} {{
     public void Foo() {{ }}
@@ -504,11 +523,12 @@ public class Cl_{0} {{
         }
 
         [Fact]
-        public void PackageCommand_TestDefaultPackageIssueRules() {
+        public void PackageCommand_TestDefaultPackageIssueRules()
+        {
             //Arrange
             string nuspecFile = Path.Combine(OneSpecfolder, "beta.nuspec");
             File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
-            
+
             // violated rule: Invalid Framework Folder
             Directory.CreateDirectory(Path.Combine(OneSpecfolder, "lib"));
             Directory.CreateDirectory(Path.Combine(OneSpecfolder, "lib", "unknown"));
@@ -557,7 +577,8 @@ public class Cl_{0} {{
         }
 
         [Fact]
-        public void PackageCommand_SpecifyingProjectFileWithNuSpecWithTokensSubstitutesMetadataFromProject() {
+        public void PackageCommand_SpecifyingProjectFileWithNuSpecWithTokensSubstitutesMetadataFromProject()
+        {
             // Arrange
             string expectedPackage = "ProjectWithNuSpec.1.2.0.0.nupkg";
             WriteAssemblyInfo("ProjectWithNuSpec",
@@ -614,7 +635,8 @@ public class Cl_{0} {{
         }
 
         [Fact]
-        public void PackageCommand_SpecifyingProjectFileWithNuSpecWithEmptyFilesElementDoNotIncludeContentFiles() {
+        public void PackageCommand_SpecifyingProjectFileWithNuSpecWithEmptyFilesElementDoNotIncludeContentFiles()
+        {
             // Arrange
             string expectedPackage = "ProjectWithNuSpecEmptyFiles.1.0.0.0.nupkg";
             WriteAssemblyInfo("ProjectWithNuSpecEmptyFiles",
@@ -659,7 +681,8 @@ public class Cl_{0} {{
         }
 
         [Fact]
-        public void PackageCommand_SpecifyingProjectFileWithNuSpecNamedAfterProjectUsesNuSpecForMetadata() {
+        public void PackageCommand_SpecifyingProjectFileWithNuSpecNamedAfterProjectUsesNuSpecForMetadata()
+        {
             // Arrange                        
             string expectedPackage = "Test.1.2.nupkg";
             WriteAssemblyInfo("FooProject",
@@ -699,7 +722,8 @@ public class Cl_{0} {{
         }
 
         [Fact]
-        public void PackageCommand_SpecifyingProjectFileWithNoBuildThrowsIfProjectNotBuilt() {
+        public void PackageCommand_SpecifyingProjectFileWithNoBuildThrowsIfProjectNotBuilt()
+        {
             // Arrange                        
             WriteAssemblyInfo("ProjectNoBuild",
                                "1.5.0.0",
@@ -721,7 +745,8 @@ public class Cl_{0} {{
         }
 
         [Fact]
-        public void PackageCommand_SpecifyingProjectFileWithNuSpecWithUnsupportedTokensThrows() {
+        public void PackageCommand_SpecifyingProjectFileWithNuSpecWithUnsupportedTokensThrows()
+        {
             // Arrange                        
             string expectedPackage = "ProjectWithBrokenNuSpec.1.2.nupkg";
             WriteAssemblyInfo("ProjectWithBrokenNuSpec",
@@ -756,7 +781,8 @@ public class Cl_{0} {{
         }
 
         [Fact]
-        public void PackageCommand_SpecifyingProjectFileAndNuSpecWithFilesMergesFiles() {
+        public void PackageCommand_SpecifyingProjectFileAndNuSpecWithFilesMergesFiles()
+        {
             // Arrange                        
             string expectedPackage = "ProjectWithNuSpecAndFiles.1.3.0.0.nupkg";
             WriteAssemblyInfo("ProjectWithNuSpecAndFiles",
@@ -803,7 +829,8 @@ public class Cl_{0} {{
         }
 
         [Fact]
-        public void PackageCommand_PrefersProjectFileIfNuSpecAndProjectFileAreInTheSameDirectory() {
+        public void PackageCommand_PrefersProjectFileIfNuSpecAndProjectFileAreInTheSameDirectory()
+        {
             // Arrange                        
             string expectedPackage = "ProjectWithNuSpecProjectWins.1.2.0.0.nupkg";
             WriteAssemblyInfo("ProjectWithNuSpecProjectWins",
@@ -844,7 +871,8 @@ public class Cl_{0} {{
         }
 
         [Fact]
-        public void PackageCommand_SpecifyingProjectOnlyPacksAssemblyThatProjectProduced() {
+        public void PackageCommand_SpecifyingProjectOnlyPacksAssemblyThatProjectProduced()
+        {
             // Arrange                        
             string expectedPackage = "ProjectWithAssembliesInOutputPath.1.3.0.0.nupkg";
             WriteAssemblyInfo("ProjectWithAssembliesInOutputPath",
@@ -876,7 +904,8 @@ public class Cl_{0} {{
         }
 
         [Fact]
-        public void PackageCommand_WhenErrorIsThrownPackageFileIsDeleted() {
+        public void PackageCommand_WhenErrorIsThrownPackageFileIsDeleted()
+        {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithErrors.nuspec");
             string expectedPackage = "hello world.1.1.1.nupkg";
@@ -903,7 +932,8 @@ public class Cl_{0} {{
 
 
         [Fact]
-        public void PackCommandAllowsPassingPropertiesFromCommandLine() {
+        public void PackCommandAllowsPassingPropertiesFromCommandLine()
+        {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithProperties.nuspec");
             string expectedPackage = "foo.1.1.nupkg";
@@ -934,7 +964,8 @@ public class Cl_{0} {{
         }
 
         [Fact]
-        public void PackCommandAllowsPassingVersionSetsVersionProperty() {
+        public void PackCommandAllowsPassingVersionSetsVersionProperty()
+        {
             // Arrange            
             string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithProperties.nuspec");
             string expectedPackage = "MyPackage.2.5.nupkg";
@@ -965,7 +996,8 @@ public class Cl_{0} {{
         }
 
         [Fact]
-        public void UpdateCommandThrowsWithNoArguments() {
+        public void UpdateCommandThrowsWithNoArguments()
+        {
             // Arrange            
             var args = new string[] { "update" };
 
@@ -978,7 +1010,8 @@ public class Cl_{0} {{
         }
 
         [Fact]
-        public void UpdateCommandWithInvalidFileThrows() {
+        public void UpdateCommandWithInvalidFileThrows()
+        {
             // Arrange            
             var args = new string[] { "update", "lolz.txt" };
 
@@ -990,14 +1023,16 @@ public class Cl_{0} {{
             Assert.True(consoleOutput.ToString().Contains("No packages.config or solution file specified."));
         }
 
-        private ZipPackage VerifyPackageContents(string packageFile, IEnumerable<string> expectedFiles) {
+        private ZipPackage VerifyPackageContents(string packageFile, IEnumerable<string> expectedFiles)
+        {
             var package = new ZipPackage(packageFile);
             var files = package.GetFiles().Select(f => f.Path).OrderBy(f => f).ToArray();
             Assert.Equal(expectedFiles.OrderBy(f => f).ToArray(), files);
             return package;
         }
 
-        private void CreateProject(string projectName, IEnumerable<string> content = null, IEnumerable<string> compile = null, IEnumerable<Tuple<string, string>> links = null) {
+        private void CreateProject(string projectName, IEnumerable<string> content = null, IEnumerable<string> compile = null, IEnumerable<Tuple<string, string>> links = null)
+        {
             string projectFile = Path.Combine(ProjectFilesFolder, projectName + ".csproj");
             File.WriteAllText(projectFile, GetProjectContent(projectName, compile: compile, content: content, links: links));
         }
@@ -1006,7 +1041,8 @@ public class Cl_{0} {{
                                                 string targetFrameworkVersion = "4.0",
                                                 IEnumerable<string> compile = null,
                                                 IEnumerable<string> content = null,
-                                                IEnumerable<Tuple<string, string>> links = null) {
+                                                IEnumerable<Tuple<string, string>> links = null)
+        {
             compile = compile ?? Enumerable.Empty<string>();
             content = content ?? Enumerable.Empty<string>();
             links = links ?? Enumerable.Empty<Tuple<string, string>>();
@@ -1071,21 +1107,25 @@ public class Cl_{0} {{
 ", projectName, targetFrameworkVersion, contentItemGroup, compileItemGroup, linkItemGroup);
         }
 
-        private static void WriteProjectFile(string path, string contents) {
+        private static void WriteProjectFile(string path, string contents)
+        {
             string fullPath = Path.Combine(ProjectFilesFolder, path);
             Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
             File.WriteAllText(fullPath, contents);
         }
 
-        private static void WriteAssemblyInfo(string assemblyName, string version, string author, string description) {
+        private static void WriteAssemblyInfo(string assemblyName, string version, string author, string description)
+        {
             WriteAssemblyInfo(assemblyName, version, author, description, null);
         }
 
-        private static void WriteAssemblyInfo(string assemblyName, string version, string author, string description, string title) {
+        private static void WriteAssemblyInfo(string assemblyName, string version, string author, string description, string title)
+        {
             WriteProjectFile(@"Properties\AssemblyInfo.cs", GetAssemblyInfoContent(assemblyName, version, author, description, title));
         }
 
-        private static string GetAssemblyInfoContent(string assemblyName, string version, string author, string description, string title) {
+        private static string GetAssemblyInfoContent(string assemblyName, string version, string author, string description, string title)
+        {
             return String.Format(@"using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -1104,7 +1144,8 @@ using System.Runtime.InteropServices;
 ", assemblyName, version, author, description, title);
         }
 
-        private static void DeleteDirs() {
+        private static void DeleteDirs()
+        {
             DeleteDir(NoSpecsfolder);
             DeleteDir(OneSpecfolder);
             DeleteDir(TwoSpecsFolder);
@@ -1113,28 +1154,35 @@ using System.Runtime.InteropServices;
             DeleteDir(ProjectFilesFolder);
         }
 
-        private static void DeleteDir(string directory) {
-            try {
-                if (Directory.Exists(directory)) {
-                    foreach (var file in Directory.GetFiles(directory)) {
-                        try {
+        private static void DeleteDir(string directory)
+        {
+            try
+            {
+                if (Directory.Exists(directory))
+                {
+                    foreach (var file in Directory.GetFiles(directory))
+                    {
+                        try
+                        {
                             File.Delete(file);
                         }
-                        catch (FileNotFoundException) {
+                        catch (FileNotFoundException)
+                        {
 
                         }
                     }
                     Directory.Delete(directory, recursive: true);
                 }
             }
-            catch (DirectoryNotFoundException) {
+            catch (DirectoryNotFoundException)
+            {
 
             }
         }
 
-    	public void SetFixture(NugetProgramStatic data)
-		{
-			//use fixture sets up / tears down the static (awesome idea! <sarcasm/>) use extensions.
-		}
-	}
+        public void SetFixture(NugetProgramStatic data)
+        {
+            //use fixture sets up / tears down the static (awesome idea! <sarcasm/>) use extensions.
+        }
+    }
 }

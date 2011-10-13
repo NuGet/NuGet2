@@ -1,7 +1,8 @@
-﻿using System;
-
-namespace NuGet {
-    public interface ISharedPackageRepository : IPackageRepository {
+﻿
+namespace NuGet
+{
+    public interface ISharedPackageRepository : IPackageRepository
+    {
         bool IsReferenced(string packageId, SemanticVersion version);
 
         /// <summary>

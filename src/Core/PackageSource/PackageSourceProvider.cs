@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace NuGet {
-    public class PackageSourceProvider : IPackageSourceProvider {
+namespace NuGet
+{
+    public class PackageSourceProvider : IPackageSourceProvider
+    {
         internal const string PackageSourcesSectionName = "packageSources";
         internal const string DisabledPackageSourcesSectionName = "disabledPackageSources";
         private readonly ISettings _settingsManager;
@@ -12,7 +13,8 @@ namespace NuGet {
         private readonly IDictionary<PackageSource, PackageSource> _migratePackageSources;
 
         public PackageSourceProvider(ISettings settingsManager)
-            : this(settingsManager, defaultSources: null) {
+            : this(settingsManager, defaultSources: null)
+        {
         }
 
         /// <summary>
@@ -21,14 +23,17 @@ namespace NuGet {
         /// <param name="settingsManager">Specifies the settings file to use to read package sources.</param>
         /// <param name="defaultSources">Specifies the sources to return if no package sources are available.</param>
         public PackageSourceProvider(ISettings settingsManager, IEnumerable<PackageSource> defaultSources)
-            : this(settingsManager, defaultSources, migratePackageSources: null) {
+            : this(settingsManager, defaultSources, migratePackageSources: null)
+        {
         }
 
         public PackageSourceProvider(
             ISettings settingsManager,
             IEnumerable<PackageSource> defaultSources,
-            IDictionary<PackageSource, PackageSource> migratePackageSources) {
-            if (settingsManager == null) {
+            IDictionary<PackageSource, PackageSource> migratePackageSources)
+        {
+            if (settingsManager == null)
+            {
                 throw new ArgumentNullException("settingsManager");
             }
             _settingsManager = settingsManager;
@@ -40,14 +45,18 @@ namespace NuGet {
         /// Returns PackageSources if specified in the config file. Else returns the default sources specified in the constructor.
         /// If no default values were specified, returns an empty sequence.
         /// </summary>
-        public IEnumerable<PackageSource> LoadPackageSources() {
+        public IEnumerable<PackageSource> LoadPackageSources()
+        {
             IList<KeyValuePair<string, string>> settingsValue = _settingsManager.GetValues(PackageSourcesSectionName);
-            if (settingsValue != null && settingsValue.Any()) {
+            if (settingsValue != null && settingsValue.Any())
+            {
                 // put disabled package source names into the hash set
                 var disabledSources = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
                 IList<KeyValuePair<string, string>> disabledSourcesValues = _settingsManager.GetValues(DisabledPackageSourcesSectionName);
-                if (disabledSourcesValues != null) {
-                    foreach (var pair in disabledSourcesValues) {
+                if (disabledSourcesValues != null)
+                {
+                    foreach (var pair in disabledSourcesValues)
+                    {
                         disabledSources.Add(pair.Key);
                     }
                 }
@@ -56,12 +65,15 @@ namespace NuGet {
                                            Select(p => new PackageSource(p.Value, p.Key, isEnabled: !disabledSources.Contains(p.Key))).
                                            ToList();
 
-                if (_migratePackageSources != null) {
+                if (_migratePackageSources != null)
+                {
                     bool hasChanges = false;
                     // doing migration
-                    for (int i = 0; i < loadedPackageSources.Count; i++) {
+                    for (int i = 0; i < loadedPackageSources.Count; i++)
+                    {
                         PackageSource ps = loadedPackageSources[i];
-                        if (_migratePackageSources.ContainsKey(ps)) {
+                        if (_migratePackageSources.ContainsKey(ps))
+                        {
                             loadedPackageSources[i] = _migratePackageSources[ps];
                             // make sure we preserve the IsEnabled property when migrating package sources
                             loadedPackageSources[i].IsEnabled = ps.IsEnabled;
@@ -69,7 +81,8 @@ namespace NuGet {
                         }
                     }
 
-                    if (hasChanges) {
+                    if (hasChanges)
+                    {
                         SavePackageSources(loadedPackageSources);
                     }
                 }
@@ -79,7 +92,8 @@ namespace NuGet {
             return _defaultPackageSources;
         }
 
-        public void SavePackageSources(IEnumerable<PackageSource> sources) {
+        public void SavePackageSources(IEnumerable<PackageSource> sources)
+        {
             // clear the old values
             _settingsManager.DeleteSection(PackageSourcesSectionName);
 

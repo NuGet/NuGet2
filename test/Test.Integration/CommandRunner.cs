@@ -2,14 +2,18 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace NuGet.Test.Integration {
-    public class CommandRunner {
+namespace NuGet.Test.Integration
+{
+    public class CommandRunner
+    {
         private static readonly int Timeout = (int)TimeSpan.FromMinutes(1).TotalMilliseconds;
 
-        public static Tuple<int, string> Run(string process, string workingDirectory, string arguments, bool waitForExit) {
+        public static Tuple<int, string> Run(string process, string workingDirectory, string arguments, bool waitForExit)
+        {
             string result = String.Empty;
 
-            ProcessStartInfo psi = new ProcessStartInfo(Path.GetFullPath(process), arguments) {
+            ProcessStartInfo psi = new ProcessStartInfo(Path.GetFullPath(process), arguments)
+            {
                 WorkingDirectory = Path.GetFullPath(workingDirectory),
                 UseShellExecute = false,
                 CreateNoWindow = true,
@@ -21,23 +25,27 @@ namespace NuGet.Test.Integration {
             StreamReader errorOutput;
             int exitCode = 1;
 
-            using (Process p = new Process()) {
+            using (Process p = new Process())
+            {
                 p.StartInfo = psi;
                 p.Start();
                 standardOutput = p.StandardOutput;
                 errorOutput = p.StandardError;
 
 
-                if (waitForExit) {
+                if (waitForExit)
+                {
                     p.WaitForExit(Timeout);
                 }
-                if (p.HasExited) {
+                if (p.HasExited)
+                {
                     exitCode = p.ExitCode;
                 }
             }
 
             result = standardOutput.ReadToEnd();
-            if (string.IsNullOrEmpty(result)) {
+            if (string.IsNullOrEmpty(result))
+            {
                 result = errorOutput.ReadToEnd();
             }
 

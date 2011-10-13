@@ -1,10 +1,12 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace NuGet {
+namespace NuGet
+{
 
     [DataContract]
-    public class PackageSource : IEquatable<PackageSource> {
+    public class PackageSource : IEquatable<PackageSource>
+    {
         [DataMember]
         public string Name { get; private set; }
 
@@ -14,19 +16,24 @@ namespace NuGet {
         public bool IsEnabled { get; set; }
 
         public PackageSource(string source) :
-            this(source, source, isEnabled: true) {
+            this(source, source, isEnabled: true)
+        {
         }
 
         public PackageSource(string source, string name) :
-            this(source, name, isEnabled: true) {
+            this(source, name, isEnabled: true)
+        {
         }
 
-        public PackageSource(string source, string name, bool isEnabled) {
-            if (source == null) {
+        public PackageSource(string source, string name, bool isEnabled)
+        {
+            if (source == null)
+            {
                 throw new ArgumentNullException("source");
             }
 
-            if (name == null) {
+            if (name == null)
+            {
                 throw new ArgumentNullException("name");
             }
 
@@ -35,8 +42,10 @@ namespace NuGet {
             IsEnabled = isEnabled;
         }
 
-        public bool Equals(PackageSource other) {
-            if (other == null) {
+        public bool Equals(PackageSource other)
+        {
+            if (other == null)
+            {
                 return false;
             }
 
@@ -44,23 +53,28 @@ namespace NuGet {
                 Source.Equals(other.Source, StringComparison.OrdinalIgnoreCase);
         }
 
-        public override bool Equals(object obj) {
+        public override bool Equals(object obj)
+        {
             var source = obj as PackageSource;
-            if (obj != null) {
+            if (obj != null)
+            {
                 return Equals(source);
             }
             return (obj == null) && base.Equals(obj);
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return Name + " [" + Source + "]";
         }
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             return Name.GetHashCode() * 3137 + Source.GetHashCode();
         }
 
-        public PackageSource Clone() {
+        public PackageSource Clone()
+        {
             return new PackageSource(Source, Name, IsEnabled);
         }
     }

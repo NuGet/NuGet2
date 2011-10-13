@@ -16,23 +16,29 @@ using NuGet.VisualStudio;
 using NuGetConsole.Implementation.Console;
 using NuGetConsole.Implementation.PowerConsole;
 
-namespace NuGetConsole.Implementation {
+namespace NuGetConsole.Implementation
+{
     /// <summary>
     /// This class implements the tool window.
     /// </summary>
     [Guid("0AD07096-BBA9-4900-A651-0598D26F6D24")]
-    public sealed class PowerConsoleToolWindow : ToolWindowPane, IOleCommandTarget {
+    public sealed class PowerConsoleToolWindow : ToolWindowPane, IOleCommandTarget
+    {
         /// <summary>
         /// Get VS IComponentModel service.
         /// </summary>
-        private IComponentModel ComponentModel {
-            get {
+        private IComponentModel ComponentModel
+        {
+            get
+            {
                 return this.GetService<IComponentModel>(typeof(SComponentModel));
             }
         }
 
-        private IProductUpdateService ProductUpdateService {
-            get {
+        private IProductUpdateService ProductUpdateService
+        {
+            get
+            {
                 return ComponentModel.GetService<IProductUpdateService>();
             }
         }
@@ -40,26 +46,34 @@ namespace NuGetConsole.Implementation {
         /// <summary>
         /// Get IWpfConsoleService through MEF.
         /// </summary>
-        private IWpfConsoleService WpfConsoleService {
-            get {
+        private IWpfConsoleService WpfConsoleService
+        {
+            get
+            {
                 return ComponentModel.GetService<IWpfConsoleService>();
             }
         }
 
-        private PowerConsoleWindow PowerConsoleWindow {
-            get {
+        private PowerConsoleWindow PowerConsoleWindow
+        {
+            get
+            {
                 return ComponentModel.GetService<IPowerConsoleWindow>() as PowerConsoleWindow;
             }
         }
 
-        private IVsUIShell VsUIShell {
-            get {
+        private IVsUIShell VsUIShell
+        {
+            get
+            {
                 return this.GetService<IVsUIShell>(typeof(SVsUIShell));
             }
         }
 
-        private bool IsToolbarEnabled {
-            get {
+        private bool IsToolbarEnabled
+        {
+            get
+            {
                 return _wpfConsole != null &&
                        _wpfConsole.Dispatcher.IsStartCompleted &&
                        _wpfConsole.Host != null &&
@@ -71,18 +85,21 @@ namespace NuGetConsole.Implementation {
         /// Standard constructor for the tool window.
         /// </summary>
         public PowerConsoleToolWindow() :
-            base(null) {
+            base(null)
+        {
             this.Caption = Resources.ToolWindowTitle;
             this.BitmapResourceID = 301;
             this.BitmapIndex = 0;
             this.ToolBar = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.idToolbar);
         }
 
-        protected override void Initialize() {
+        protected override void Initialize()
+        {
             base.Initialize();
 
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (mcs != null) {
+            if (mcs != null)
+            {
                 // Get list command for the Feed combo
                 CommandID sourcesListCommandID = new CommandID(GuidList.guidNuGetCmdSet, PkgCmdIDList.cmdidSourcesList);
                 mcs.AddCommand(new OleMenuCommand(SourcesList_Exec, sourcesListCommandID));
@@ -109,7 +126,8 @@ namespace NuGetConsole.Implementation {
             }
         }
 
-        public override void OnToolWindowCreated() {
+        public override void OnToolWindowCreated()
+        {
             // Register key bindings to use in the editor
             var windowFrame = (IVsWindowFrame)Frame;
             Guid cmdUi = VSConstants.GUID_TextEditorFactory;
@@ -118,7 +136,8 @@ namespace NuGetConsole.Implementation {
             // pause for a tiny moment to let the tool window open before initializing the host
             var timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromMilliseconds(0);
-            timer.Tick += (o, e) => {
+            timer.Tick += (o, e) =>
+            {
                 timer.Stop();
                 LoadConsoleEditor();
             };
@@ -127,7 +146,8 @@ namespace NuGetConsole.Implementation {
             base.OnToolWindowCreated();
         }
 
-        protected override void OnClose() {
+        protected override void OnClose()
+        {
             base.OnClose();
 
             WpfConsole.Dispose();
@@ -138,9 +158,11 @@ namespace NuGetConsole.Implementation {
         /// </summary>
         /// <param name="m"></param>
         /// <returns></returns>
-        protected override bool PreProcessMessage(ref System.Windows.Forms.Message m) {
+        protected override bool PreProcessMessage(ref System.Windows.Forms.Message m)
+        {
             IVsWindowPane vsWindowPane = this.VsTextView as IVsWindowPane;
-            if (vsWindowPane != null) {
+            if (vsWindowPane != null)
+            {
                 MSG[] pMsg = new MSG[1];
                 pMsg[0].hwnd = m.HWnd;
                 pMsg[0].message = (uint)m.Msg;
@@ -156,13 +178,16 @@ namespace NuGetConsole.Implementation {
         /// <summary>
         /// Override to forward to editor or handle accordingly if supported by this tool window.
         /// </summary>
-        int IOleCommandTarget.QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText) {
+        int IOleCommandTarget.QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
+        {
 
             // examine buttons within our toolbar
-            if (pguidCmdGroup == GuidList.guidNuGetCmdSet) {
+            if (pguidCmdGroup == GuidList.guidNuGetCmdSet)
+            {
                 bool isEnabled = IsToolbarEnabled;
 
-                if (isEnabled) {
+                if (isEnabled)
+                {
                     bool isStopButton = (prgCmds[0].cmdID == 0x0600);   // 0x0600 is the Command ID of the Stop button, defined in .vsct
 
                     // when command is executing: enable stop button and disable the rest
@@ -170,10 +195,12 @@ namespace NuGetConsole.Implementation {
                     isEnabled = !isStopButton ^ WpfConsole.Dispatcher.IsExecutingCommand;
                 }
 
-                if (isEnabled) {
+                if (isEnabled)
+                {
                     prgCmds[0].cmdf = (uint)(OLECMDF.OLECMDF_SUPPORTED | OLECMDF.OLECMDF_ENABLED);
                 }
-                else {
+                else
+                {
                     prgCmds[0].cmdf = (uint)(OLECMDF.OLECMDF_SUPPORTED);
                 }
 
@@ -182,14 +209,17 @@ namespace NuGetConsole.Implementation {
 
             int hr = OleCommandFilter.OLECMDERR_E_NOTSUPPORTED;
 
-            if (this.VsTextView != null) {
+            if (this.VsTextView != null)
+            {
                 IOleCommandTarget cmdTarget = (IOleCommandTarget)VsTextView;
                 hr = cmdTarget.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
             }
 
-            if (hr == OleCommandFilter.OLECMDERR_E_NOTSUPPORTED) {
+            if (hr == OleCommandFilter.OLECMDERR_E_NOTSUPPORTED)
+            {
                 IOleCommandTarget target = this.GetService(typeof(IOleCommandTarget)) as IOleCommandTarget;
-                if (target != null) {
+                if (target != null)
+                {
                     hr = target.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
                 }
             }
@@ -200,17 +230,21 @@ namespace NuGetConsole.Implementation {
         /// <summary>
         /// Override to forward to editor or handle accordingly if supported by this tool window.
         /// </summary>
-        int IOleCommandTarget.Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut) {
+        int IOleCommandTarget.Exec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
+        {
             int hr = OleCommandFilter.OLECMDERR_E_NOTSUPPORTED;
 
-            if (this.VsTextView != null) {
+            if (this.VsTextView != null)
+            {
                 IOleCommandTarget cmdTarget = (IOleCommandTarget)VsTextView;
                 hr = cmdTarget.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
             }
 
-            if (hr == OleCommandFilter.OLECMDERR_E_NOTSUPPORTED) {
+            if (hr == OleCommandFilter.OLECMDERR_E_NOTSUPPORTED)
+            {
                 IOleCommandTarget target = this.GetService(typeof(IOleCommandTarget)) as IOleCommandTarget;
-                if (target != null) {
+                if (target != null)
+                {
                     hr = target.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
                 }
             }
@@ -218,10 +252,13 @@ namespace NuGetConsole.Implementation {
             return hr;
         }
 
-        private void SourcesList_Exec(object sender, EventArgs e) {
+        private void SourcesList_Exec(object sender, EventArgs e)
+        {
             OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
-            if (args != null) {
-                if (args.InValue != null || args.OutValue == IntPtr.Zero) {
+            if (args != null)
+            {
+                if (args.InValue != null || args.OutValue == IntPtr.Zero)
+                {
                     throw new ArgumentException("Invalid argument", "e");
                 }
                 Marshal.GetNativeVariantForObject(PowerConsoleWindow.PackageSources, args.OutValue);
@@ -231,13 +268,16 @@ namespace NuGetConsole.Implementation {
         /// <summary>
         /// Called to retrieve current combo item name or to select a new item.
         /// </summary>
-        private void Sources_Exec(object sender, EventArgs e) {
+        private void Sources_Exec(object sender, EventArgs e)
+        {
             OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
-            if (args != null) {
+            if (args != null)
+            {
                 if (args.InValue != null && args.InValue is int) // Selected a feed
                 {
                     int index = (int)args.InValue;
-                    if (index >= 0 && index < PowerConsoleWindow.PackageSources.Length) {
+                    if (index >= 0 && index < PowerConsoleWindow.PackageSources.Length)
+                    {
                         PowerConsoleWindow.ActivePackageSource = PowerConsoleWindow.PackageSources[index];
                     }
                 }
@@ -249,10 +289,13 @@ namespace NuGetConsole.Implementation {
             }
         }
 
-        private void ProjectsList_Exec(object sender, EventArgs e) {
+        private void ProjectsList_Exec(object sender, EventArgs e)
+        {
             OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
-            if (args != null) {
-                if (args.InValue != null || args.OutValue == IntPtr.Zero) {
+            if (args != null)
+            {
+                if (args.InValue != null || args.OutValue == IntPtr.Zero)
+                {
                     throw new ArgumentException("Invalid argument", "e");
                 }
 
@@ -264,17 +307,22 @@ namespace NuGetConsole.Implementation {
         /// <summary>
         /// Called to retrieve current combo item name or to select a new item.
         /// </summary>
-        private void Projects_Exec(object sender, EventArgs e) {
+        private void Projects_Exec(object sender, EventArgs e)
+        {
             OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
-            if (args != null) {
-                if (args.InValue != null && args.InValue is int) {
+            if (args != null)
+            {
+                if (args.InValue != null && args.InValue is int)
+                {
                     // Selected a default projects
                     int index = (int)args.InValue;
-                    if (index >= 0 && index < PowerConsoleWindow.AvailableProjects.Length) {
+                    if (index >= 0 && index < PowerConsoleWindow.AvailableProjects.Length)
+                    {
                         PowerConsoleWindow.SetDefaultProjectIndex(index);
                     }
                 }
-                else if (args.OutValue != IntPtr.Zero) {
+                else if (args.OutValue != IntPtr.Zero)
+                {
                     string displayName = PowerConsoleWindow.DefaultProject ?? string.Empty;
                     Marshal.GetNativeVariantForObject(displayName, args.OutValue);
                 }
@@ -284,26 +332,34 @@ namespace NuGetConsole.Implementation {
         /// <summary>
         /// ClearHost command handler.
         /// </summary>
-        private void ClearHost_Exec(object sender, EventArgs e) {
-            if (WpfConsole != null) {
+        private void ClearHost_Exec(object sender, EventArgs e)
+        {
+            if (WpfConsole != null)
+            {
                 WpfConsole.Dispatcher.ClearConsole();
             }
         }
 
-        private void StopHost_Exec(object sender, EventArgs e) {
-            if (WpfConsole != null) {
+        private void StopHost_Exec(object sender, EventArgs e)
+        {
+            if (WpfConsole != null)
+            {
                 WpfConsole.Host.Abort();
             }
         }
 
-        private HostInfo ActiveHostInfo {
-            get {
+        private HostInfo ActiveHostInfo
+        {
+            get
+            {
                 return PowerConsoleWindow.ActiveHostInfo;
             }
         }
 
-        private void LoadConsoleEditor() {
-            if (WpfConsole != null) {
+        private void LoadConsoleEditor()
+        {
+            if (WpfConsole != null)
+            {
                 // allow the console to start writing output
                 WpfConsole.StartWritingOutput();
 
@@ -313,7 +369,8 @@ namespace NuGetConsole.Implementation {
                 // WPF doesn't handle input focus automatically in this scenario. We
                 // have to set the focus manually, otherwise the editor is displayed but
                 // not focused and not receiving keyboard inputs until clicked.
-                if (consolePane != null) {
+                if (consolePane != null)
+                {
                     PendingMoveFocus(consolePane);
                 }
             }
@@ -325,38 +382,48 @@ namespace NuGetConsole.Implementation {
         /// In this case, we need to set focus in its Loaded event.
         /// </summary>
         /// <param name="consolePane"></param>
-        private void PendingMoveFocus(FrameworkElement consolePane) {
-            if (consolePane.IsLoaded && consolePane.IsConnectedToPresentationSource()) {
+        private void PendingMoveFocus(FrameworkElement consolePane)
+        {
+            if (consolePane.IsLoaded && consolePane.IsConnectedToPresentationSource())
+            {
                 PendingFocusPane = null;
                 MoveFocus(consolePane);
             }
-            else {
+            else
+            {
                 PendingFocusPane = consolePane;
             }
         }
 
         private FrameworkElement _pendingFocusPane;
-        private FrameworkElement PendingFocusPane {
-            get {
+        private FrameworkElement PendingFocusPane
+        {
+            get
+            {
                 return _pendingFocusPane;
             }
-            set {
-                if (_pendingFocusPane != null) {
+            set
+            {
+                if (_pendingFocusPane != null)
+                {
                     _pendingFocusPane.Loaded -= PendingFocusPane_Loaded;
                 }
                 _pendingFocusPane = value;
-                if (_pendingFocusPane != null) {
+                if (_pendingFocusPane != null)
+                {
                     _pendingFocusPane.Loaded += PendingFocusPane_Loaded;
                 }
             }
         }
 
-        private void PendingFocusPane_Loaded(object sender, RoutedEventArgs e) {
+        private void PendingFocusPane_Loaded(object sender, RoutedEventArgs e)
+        {
             MoveFocus(PendingFocusPane);
             PendingFocusPane = null;
         }
 
-        private void MoveFocus(FrameworkElement consolePane) {
+        private void MoveFocus(FrameworkElement consolePane)
+        {
             // TAB focus into editor (consolePane.Focus() does not work due to editor layouts)
             consolePane.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
 
@@ -369,25 +436,32 @@ namespace NuGetConsole.Implementation {
             "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification = "We really don't want exceptions from the console to bring down VS")]
-        private void StartConsoleSession(FrameworkElement consolePane) {
-            if (WpfConsole != null && WpfConsole.Content == consolePane && WpfConsole.Host != null) {
-                try {
-                    if (WpfConsole.Dispatcher.IsStartCompleted) {
+        private void StartConsoleSession(FrameworkElement consolePane)
+        {
+            if (WpfConsole != null && WpfConsole.Content == consolePane && WpfConsole.Host != null)
+            {
+                try
+                {
+                    if (WpfConsole.Dispatcher.IsStartCompleted)
+                    {
                         OnDispatcherStartCompleted();
                         // if the dispatcher was started before we reach here, 
                         // it means the dispatcher has been in read-only mode (due to _startedWritingOutput = false).
                         // enable key input now.
                         WpfConsole.Dispatcher.AcceptKeyInput();
                     }
-                    else {
-                        WpfConsole.Dispatcher.StartCompleted += (sender, args) => {
+                    else
+                    {
+                        WpfConsole.Dispatcher.StartCompleted += (sender, args) =>
+                        {
                             OnDispatcherStartCompleted();
                         };
                         WpfConsole.Dispatcher.StartWaitingKey += OnDispatcherStartWaitingKey;
                         WpfConsole.Dispatcher.Start();
                     }
                 }
-                catch (Exception x) {
+                catch (Exception x)
+                {
                     // hide the text "initialize host" when an error occurs.
                     ConsoleParentPane.NotifyInitializationCompleted();
 
@@ -395,18 +469,21 @@ namespace NuGetConsole.Implementation {
                     ExceptionHelper.WriteToActivityLog(x);
                 }
             }
-            else {
+            else
+            {
                 ConsoleParentPane.NotifyInitializationCompleted();
             }
         }
 
-        private void OnDispatcherStartWaitingKey(object sender, EventArgs args) {
+        private void OnDispatcherStartWaitingKey(object sender, EventArgs args)
+        {
             WpfConsole.Dispatcher.StartWaitingKey -= OnDispatcherStartWaitingKey;
             // we want to hide the text "initialize host..." when waiting for key input
             ConsoleParentPane.NotifyInitializationCompleted();
         }
 
-        private void OnDispatcherStartCompleted() {
+        private void OnDispatcherStartCompleted()
+        {
             WpfConsole.Dispatcher.StartWaitingKey -= OnDispatcherStartWaitingKey;
 
             ConsoleParentPane.NotifyInitializationCompleted();
@@ -421,15 +498,20 @@ namespace NuGetConsole.Implementation {
         /// Get the WpfConsole of the active host.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        private IWpfConsole WpfConsole {
-            get {
-                if (_wpfConsole == null) {
+        private IWpfConsole WpfConsole
+        {
+            get
+            {
+                if (_wpfConsole == null)
+                {
                     Debug.Assert(ActiveHostInfo != null);
 
-                    try {
+                    try
+                    {
                         _wpfConsole = ActiveHostInfo.WpfConsole;
                     }
-                    catch (Exception x) {
+                    catch (Exception x)
+                    {
                         _wpfConsole = ActiveHostInfo.WpfConsole;
                         _wpfConsole.Write(x.ToString());
                     }
@@ -444,9 +526,12 @@ namespace NuGetConsole.Implementation {
         /// <summary>
         /// Get the VsTextView of current WpfConsole if exists.
         /// </summary>
-        private IVsTextView VsTextView {
-            get {
-                if (_vsTextView == null && _wpfConsole != null) {
+        private IVsTextView VsTextView
+        {
+            get
+            {
+                if (_vsTextView == null && _wpfConsole != null)
+                {
                     _vsTextView = (IVsTextView)(WpfConsole.VsTextView);
                 }
                 return _vsTextView;
@@ -458,20 +543,26 @@ namespace NuGetConsole.Implementation {
         /// <summary>
         /// Get the parent pane of console panes. This serves as the Content of this tool window.
         /// </summary>
-        private ConsoleContainer ConsoleParentPane {
-            get {
-                if (_consoleParentPane == null) {
+        private ConsoleContainer ConsoleParentPane
+        {
+            get
+            {
+                if (_consoleParentPane == null)
+                {
                     _consoleParentPane = new ConsoleContainer(ProductUpdateService);
                 }
                 return _consoleParentPane;
             }
         }
 
-        public override object Content {
-            get {
+        public override object Content
+        {
+            get
+            {
                 return this.ConsoleParentPane;
             }
-            set {
+            set
+            {
                 base.Content = value;
             }
         }

@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace NuGet {
-    public interface IPackage : IPackageMetadata, IServerPackageMetadata {
+namespace NuGet
+{
+    public interface IPackage : IPackageMetadata, IServerPackageMetadata
+    {
         bool IsAbsoluteLatestVersion { get; }
 
         bool IsLatestVersion { get; }
 
         bool Listed { get; }
-        
+
         DateTimeOffset? Published { get; }
 
         IEnumerable<IPackageAssemblyReference> AssemblyReferences { get; }

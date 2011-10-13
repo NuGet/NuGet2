@@ -3,26 +3,32 @@ using System.Data.Services.Common;
 using System.Linq;
 using NuGet.Server.Infrastructure;
 
-namespace NuGet.Server.DataServices {
+namespace NuGet.Server.DataServices
+{
     [DataServiceKey("Id", "Version")]
     [EntityPropertyMapping("Id", SyndicationItemProperty.Title, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [EntityPropertyMapping("Authors", SyndicationItemProperty.AuthorName, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [EntityPropertyMapping("LastUpdated", SyndicationItemProperty.Updated, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [EntityPropertyMapping("Summary", SyndicationItemProperty.Summary, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [HasStream]
-    public class Package {
-        public Package(IPackage package, DerivedPackageData derivedData) {
+    public class Package
+    {
+        public Package(IPackage package, DerivedPackageData derivedData)
+        {
             Id = package.Id;
             Version = package.Version.ToString();
             Title = package.Title;
             Authors = String.Join(",", package.Authors);
-            if (package.IconUrl != null) {
+            if (package.IconUrl != null)
+            {
                 IconUrl = package.IconUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
             }
-            if (package.LicenseUrl != null) {
+            if (package.LicenseUrl != null)
+            {
                 LicenseUrl = package.LicenseUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
             }
-            if (package.ProjectUrl != null) {
+            if (package.ProjectUrl != null)
+            {
                 ProjectUrl = package.ProjectUrl.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
             }
             RequireLicenseAcceptance = package.RequireLicenseAcceptance;
@@ -42,127 +48,152 @@ namespace NuGet.Server.DataServices {
             FullPath = derivedData.FullPath;
         }
 
-        internal string FullPath {
+        internal string FullPath
+        {
             get;
             set;
         }
 
-        internal string Path {
+        internal string Path
+        {
             get;
             set;
         }
 
-        public string Id {
+        public string Id
+        {
             get;
             set;
         }
 
-        public string Version {
+        public string Version
+        {
             get;
             set;
         }
 
-        public string Title {
+        public string Title
+        {
             get;
             set;
         }
 
-        public string Authors {
+        public string Authors
+        {
             get;
             set;
         }
 
-        public string IconUrl {
+        public string IconUrl
+        {
             get;
             set;
         }
 
-        public string LicenseUrl {
+        public string LicenseUrl
+        {
             get;
             set;
         }
 
-        public string ProjectUrl {
+        public string ProjectUrl
+        {
             get;
             set;
         }
 
-        public int DownloadCount {
+        public int DownloadCount
+        {
             get;
             set;
         }
 
-        public bool RequireLicenseAcceptance {
+        public bool RequireLicenseAcceptance
+        {
             get;
             set;
         }
 
-        public string Description {
+        public string Description
+        {
             get;
             set;
         }
 
-        public string Summary {
+        public string Summary
+        {
             get;
             set;
         }
 
-        public string ReleaseNotes {
+        public string ReleaseNotes
+        {
             get;
             set;
         }
 
-        public DateTime Published {
+        public DateTime Published
+        {
             get;
             set;
         }
 
-        public DateTime LastUpdated {
+        public DateTime LastUpdated
+        {
             get;
             set;
         }
 
-        public string Dependencies {
+        public string Dependencies
+        {
             get;
             set;
         }
 
-        public string PackageHash {
+        public string PackageHash
+        {
             get;
             set;
         }
 
-        public long PackageSize {
+        public long PackageSize
+        {
             get;
             set;
         }
 
-        public string Copyright {
+        public string Copyright
+        {
             get;
             set;
         }
 
-        public string Tags {
+        public string Tags
+        {
             get;
             set;
         }
 
-        public bool IsAbsoluteLatestVersion {
+        public bool IsAbsoluteLatestVersion
+        {
             get;
             set;
         }
 
-        public bool IsLatestVersion {
+        public bool IsLatestVersion
+        {
             get;
             set;
         }
 
-        public bool Listed {
+        public bool Listed
+        {
             get;
             set;
         }
 
-        private string ConvertDependency(PackageDependency dependency) {
+        private string ConvertDependency(PackageDependency dependency)
+        {
             return String.Format("{0}:{1}", dependency.Id, dependency.VersionSpec);
         }
     }

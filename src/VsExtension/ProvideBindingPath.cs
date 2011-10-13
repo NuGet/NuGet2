@@ -17,7 +17,8 @@
 using System;
 using System.Text;
 
-namespace Microsoft.VisualStudio.Shell {
+namespace Microsoft.VisualStudio.Shell
+{
     /// <summary>
     /// This attribute registers a path that should be probed for candidate assemblies at assembly load time.
     /// 
@@ -29,7 +30,8 @@ namespace Microsoft.VisualStudio.Shell {
     /// for assemblies to load.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
-    public sealed class ProvideBindingPathAttribute : RegistrationAttribute {
+    public sealed class ProvideBindingPathAttribute : RegistrationAttribute
+    {
         /// <summary>
         /// An optional SubPath to set after $PackageFolder$. This should be used
         /// if the assemblies to be probed reside in a different directory than
@@ -37,18 +39,23 @@ namespace Microsoft.VisualStudio.Shell {
         /// </summary>
         public string SubPath { get; set; }
 
-        private static string GetPathToKey(RegistrationContext context) {
+        private static string GetPathToKey(RegistrationContext context)
+        {
             return string.Concat(@"BindingPaths\", context.ComponentType.GUID.ToString("B").ToUpperInvariant());
         }
 
-        public override void Register(RegistrationContext context) {
-            if (context == null) {
+        public override void Register(RegistrationContext context)
+        {
+            if (context == null)
+            {
                 throw new ArgumentNullException("context");
             }
 
-            using (Key childKey = context.CreateKey(GetPathToKey(context))) {
+            using (Key childKey = context.CreateKey(GetPathToKey(context)))
+            {
                 StringBuilder keyName = new StringBuilder(context.ComponentPath);
-                if (!string.IsNullOrEmpty(SubPath)) {
+                if (!string.IsNullOrEmpty(SubPath))
+                {
                     keyName.Append("\\");
                     keyName.Append(SubPath);
                 }
@@ -57,8 +64,10 @@ namespace Microsoft.VisualStudio.Shell {
             }
         }
 
-        public override void Unregister(RegistrationContext context) {
-            if (context == null) {
+        public override void Unregister(RegistrationContext context)
+        {
+            if (context == null)
+            {
                 throw new ArgumentNullException("context");
             }
 

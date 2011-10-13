@@ -2,11 +2,14 @@
 using Xunit;
 
 
-namespace NuGet.Dialog.Test.SolutionExplorer {
+namespace NuGet.Dialog.Test.SolutionExplorer
+{
 
-    public class ProjectNodeTest {
+    public class ProjectNodeTest
+    {
         [Fact]
-        public void NamePropertyIsCorrect() {
+        public void NamePropertyIsCorrect()
+        {
             // Arrange
             var project = MockProjectUtility.CreateMockProject("A");
             var node = new ProjectNode(project);
@@ -16,7 +19,8 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
         }
 
         [Fact]
-        public void IsSelectedFalseByDefault() {
+        public void IsSelectedFalseByDefault()
+        {
             // Arrange
             var project = MockProjectUtility.CreateMockProject("A");
             var node = new ProjectNode(project);
@@ -26,7 +30,8 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
         }
 
         [Fact]
-        public void ProjectPropertyIsCorrect() {
+        public void ProjectPropertyIsCorrect()
+        {
             // Arrange
             var project = MockProjectUtility.CreateMockProject("A");
             var node = new ProjectNode(project);
@@ -36,7 +41,8 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
         }
 
         [Fact]
-        public void GetSelectedProjectReturnsProjectIfIsSelectedIsTrueAndIsEnabledIsTrue() {
+        public void GetSelectedProjectReturnsProjectIfIsSelectedIsTrueAndIsEnabledIsTrue()
+        {
             // Arrange
             var project = MockProjectUtility.CreateMockProject("A");
             var node = new ProjectNode(project);
@@ -50,7 +56,8 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
         }
 
         [Fact]
-        public void GetSelectedProjectReturnsEmptyIfIsSelectedIsFalse() {
+        public void GetSelectedProjectReturnsEmptyIfIsSelectedIsFalse()
+        {
             // Arrange
             var project = MockProjectUtility.CreateMockProject("A");
             var node = new ProjectNode(project);
@@ -63,7 +70,8 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
         }
 
         [Fact]
-        public void GetSelectedProjectReturnsEmptyIfIsSelectedIsFalseOrIsEnabledIsFalse() {
+        public void GetSelectedProjectReturnsEmptyIfIsSelectedIsFalseOrIsEnabledIsFalse()
+        {
             // Arrange
             var project = MockProjectUtility.CreateMockProject("A");
             var node = new ProjectNode(project);
@@ -88,7 +96,8 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
         }
 
         [Fact]
-        public void ParentPropertyIsNullByDefault() {
+        public void ParentPropertyIsNullByDefault()
+        {
             // Arrange
             var project = MockProjectUtility.CreateMockProject("A");
             var node = new ProjectNode(project);
@@ -98,13 +107,16 @@ namespace NuGet.Dialog.Test.SolutionExplorer {
         }
 
         [Fact]
-        public void ChangingIsSelectedPropertyRaisePropertyChangedEvent() {
+        public void ChangingIsSelectedPropertyRaisePropertyChangedEvent()
+        {
             // Arrange
             var project = MockProjectUtility.CreateMockProject("A");
             var node = new ProjectNode(project);
             bool called = false;
-            node.PropertyChanged += (o, e) => {
-                if (e.PropertyName == "IsSelected") {
+            node.PropertyChanged += (o, e) =>
+            {
+                if (e.PropertyName == "IsSelected")
+                {
                     called = true;
                 }
             };

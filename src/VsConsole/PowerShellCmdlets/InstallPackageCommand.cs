@@ -2,12 +2,14 @@ using System;
 using System.Management.Automation;
 using NuGet.VisualStudio;
 
-namespace NuGet.PowerShell.Commands {
+namespace NuGet.PowerShell.Commands
+{
     /// <summary>
     /// This command installs the specified package into the specified project.
     /// </summary>
     [Cmdlet(VerbsLifecycle.Install, "Package")]
-    public class InstallPackageCommand : ProcessPackageBaseCommand {
+    public class InstallPackageCommand : ProcessPackageBaseCommand
+    {
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IProductUpdateService _productUpdateService;
@@ -19,7 +21,8 @@ namespace NuGet.PowerShell.Commands {
                    ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                    ServiceLocator.GetInstance<IHttpClientEvents>(),
-                   ServiceLocator.GetInstance<IProductUpdateService>()) {
+                   ServiceLocator.GetInstance<IProductUpdateService>())
+        {
         }
 
         public InstallPackageCommand(
@@ -29,7 +32,8 @@ namespace NuGet.PowerShell.Commands {
             IVsPackageSourceProvider packageSourceProvider,
             IHttpClientEvents httpClientEvents,
             IProductUpdateService productUpdateService)
-            : base(solutionManager, packageManagerFactory, httpClientEvents) {
+            : base(solutionManager, packageManagerFactory, httpClientEvents)
+        {
             _productUpdateService = productUpdateService;
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;
@@ -49,12 +53,15 @@ namespace NuGet.PowerShell.Commands {
         [Parameter, Alias("Prerelease")]
         public SwitchParameter IncludePrerelease { get; set; }
 
-        protected override IVsPackageManager CreatePackageManager() {
-            if (!SolutionManager.IsSolutionOpen) {
+        protected override IVsPackageManager CreatePackageManager()
+        {
+            if (!SolutionManager.IsSolutionOpen)
+            {
                 return null;
             }
 
-            if (!String.IsNullOrEmpty(Source)) {
+            if (!String.IsNullOrEmpty(Source))
+            {
                 var repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, Source);
                 return repository == null ? null : PackageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: true);
             }
@@ -62,32 +69,40 @@ namespace NuGet.PowerShell.Commands {
             return base.CreatePackageManager();
         }
 
-        protected override void ProcessRecordCore() {
-            if (!SolutionManager.IsSolutionOpen) {
+        protected override void ProcessRecordCore()
+        {
+            if (!SolutionManager.IsSolutionOpen)
+            {
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
-            try {
+            try
+            {
                 SubscribeToProgressEvents();
-                if (PackageManager != null) {
-                    PackageManager.InstallPackage(ProjectManager, Id, Version, ignoreDependencies: IgnoreDependencies, allowPrereleaseVersions: IncludePrerelease.IsPresent, 
+                if (PackageManager != null)
+                {
+                    PackageManager.InstallPackage(ProjectManager, Id, Version, ignoreDependencies: IgnoreDependencies, allowPrereleaseVersions: IncludePrerelease.IsPresent,
                         logger: this);
                     _hasConnectedToHttpSource |= UriHelper.IsHttpSource(PackageManager.SourceRepository.Source);
                 }
             }
-            finally {
+            finally
+            {
                 UnsubscribeFromProgressEvents();
             }
         }
 
-        protected override void EndProcessing() {
+        protected override void EndProcessing()
+        {
             base.EndProcessing();
 
             CheckForNuGetUpdate();
         }
 
-        private void CheckForNuGetUpdate() {
-            if (_productUpdateService != null && _hasConnectedToHttpSource) {
+        private void CheckForNuGetUpdate()
+        {
+            if (_productUpdateService != null && _hasConnectedToHttpSource)
+            {
                 _productUpdateService.CheckForAvailableUpdateAsync();
             }
         }

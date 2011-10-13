@@ -4,14 +4,16 @@ using System.Linq;
 using System.Management.Automation;
 using NuGet.VisualStudio;
 
-namespace NuGet.PowerShell.Commands {
+namespace NuGet.PowerShell.Commands
+{
     /// <summary>
     /// FindPackage is identical to GetPackage except that FindPackage filters packages only by Id and does not consider description or tags.
     /// </summary>
     [SuppressMessage("Microsoft.PowerShell", "PS1101:AllCmdletsShouldAcceptPipelineInput", Justification = "Will investiage this one.")]
     [Cmdlet(VerbsCommon.Find, "Package", DefaultParameterSetName = "Default")]
     [OutputType(typeof(IPackage))]
-    public class FindPackageCommand : GetPackageCommand {
+    public class FindPackageCommand : GetPackageCommand
+    {
         private const int MaxReturnedPackages = 30;
 
         public FindPackageCommand()
@@ -20,7 +22,8 @@ namespace NuGet.PowerShell.Commands {
                    ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                    ServiceLocator.GetInstance<IRecentPackageRepository>(),
-                   ServiceLocator.GetInstance<IHttpClientEvents>()) {
+                   ServiceLocator.GetInstance<IHttpClientEvents>())
+        {
         }
 
         public FindPackageCommand(IPackageRepositoryFactory repositoryFactory,
@@ -29,7 +32,8 @@ namespace NuGet.PowerShell.Commands {
                           IVsPackageManagerFactory packageManagerFactory,
                           IPackageRepository recentPackagesRepository,
                           IHttpClientEvents httpClientEvents)
-            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory, recentPackagesRepository, httpClientEvents, null) {
+            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory, recentPackagesRepository, httpClientEvents, null)
+        {
 
         }
 
@@ -40,20 +44,25 @@ namespace NuGet.PowerShell.Commands {
         [Parameter]
         public SwitchParameter ExactMatch { get; set; }
 
-        protected override void ProcessRecordCore() {
+        protected override void ProcessRecordCore()
+        {
             // Since this is used for intellisense, we need to limit the number of packages that we return. Otherwise,
             // typing InstallPackage TAB would download the entire feed.
             base.First = MaxReturnedPackages;
             base.ProcessRecordCore();
         }
 
-        protected override IQueryable<IPackage> GetPackages(IPackageRepository sourceRepository) {
+        protected override IQueryable<IPackage> GetPackages(IPackageRepository sourceRepository)
+        {
             var packages = sourceRepository.GetPackages();
-            if (!String.IsNullOrEmpty(Filter)) {
-                if (ExactMatch) {
+            if (!String.IsNullOrEmpty(Filter))
+            {
+                if (ExactMatch)
+                {
                     packages = packages.Where(p => p.Id.ToLower() == Filter.ToLower());
                 }
-                else {
+                else
+                {
                     packages = packages.Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
                 }
             }
@@ -64,11 +73,13 @@ namespace NuGet.PowerShell.Commands {
         }
 
 
-        protected override IQueryable<IPackage> GetPackagesForUpdate(IPackageRepository sourceRepository) {
+        protected override IQueryable<IPackage> GetPackagesForUpdate(IPackageRepository sourceRepository)
+        {
             IPackageRepository localRepository = PackageManager.LocalRepository;
             var packagesToUpdate = localRepository.GetPackages();
 
-            if (!String.IsNullOrEmpty(Filter)) {
+            if (!String.IsNullOrEmpty(Filter))
+            {
                 packagesToUpdate = packagesToUpdate.Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
             }
 
@@ -78,7 +89,8 @@ namespace NuGet.PowerShell.Commands {
                                    .AsQueryable();
         }
 
-        protected override void Log(MessageLevel level, string formattedMessage) {
+        protected override void Log(MessageLevel level, string formattedMessage)
+        {
             // We don't want this cmdlet to print anything
         }
     }

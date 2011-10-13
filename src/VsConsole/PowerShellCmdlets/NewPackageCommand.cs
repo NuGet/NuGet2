@@ -7,24 +7,28 @@ using System.Management.Automation;
 using EnvDTE;
 using NuGet.VisualStudio;
 
-namespace NuGet.PowerShell.Commands {
+namespace NuGet.PowerShell.Commands
+{
 
     /// <summary>
     /// This command creates new package file.
     /// </summary>
     [Cmdlet(VerbsCommon.New, "Package")]
-    public class NewPackageCommand : NuGetBaseCommand {
+    public class NewPackageCommand : NuGetBaseCommand
+    {
         private static readonly HashSet<string> _exclude =
             new HashSet<string>(new[] { Constants.PackageExtension, Constants.ManifestExtension }, StringComparer.OrdinalIgnoreCase);
 
         public NewPackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                   ServiceLocator.GetInstance<IHttpClientEvents>()) {
+                   ServiceLocator.GetInstance<IHttpClientEvents>())
+        {
         }
 
         public NewPackageCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory, IHttpClientEvents httpClientEvents)
-            : base(solutionManager, packageManagerFactory, httpClientEvents) {
+            : base(solutionManager, packageManagerFactory, httpClientEvents)
+        {
         }
 
         [Parameter(Position = 0, ValueFromPipelineByPropertyName = true)]
@@ -45,25 +49,30 @@ namespace NuGet.PowerShell.Commands {
         [Parameter]
         public SwitchParameter NoClobber { get; set; }
 
-        protected override void ProcessRecordCore() {
-            if (!SolutionManager.IsSolutionOpen) {
+        protected override void ProcessRecordCore()
+        {
+            if (!SolutionManager.IsSolutionOpen)
+            {
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
             string projectName = ProjectName;
 
             // no project specified - choose default
-            if (String.IsNullOrEmpty(projectName)) {
+            if (String.IsNullOrEmpty(projectName))
+            {
                 projectName = SolutionManager.DefaultProjectName;
             }
 
             // no default project? empty solution or no compatible projects found
-            if (String.IsNullOrEmpty(projectName)) {
+            if (String.IsNullOrEmpty(projectName))
+            {
                 ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
             }
 
             var projectIns = SolutionManager.GetProject(projectName);
-            if (projectIns == null) {
+            if (projectIns == null)
+            {
                 ErrorHandler.WriteProjectNotFoundError(projectName, terminating: true);
             }
 
@@ -77,20 +86,24 @@ namespace NuGet.PowerShell.Commands {
             RemoveExludedFiles(builder);
 
             WriteLine(String.Format(CultureInfo.CurrentCulture, Resources.Cmdlet_CreatingPackage, outputFilePath));
-            using (Stream stream = File.Create(outputFilePath)) {
+            using (Stream stream = File.Create(outputFilePath))
+            {
                 builder.Save(stream);
             }
             WriteLine(Resources.Cmdlet_PackageCreated);
         }
 
-        private string GetSpecFilePath(Project projectIns) {
+        private string GetSpecFilePath(Project projectIns)
+        {
             string specFilePath = null;
             ProjectItem specFile = null;
 
-            try {
+            try
+            {
                 specFile = FindSpecFile(projectIns, SpecFileName).SingleOrDefault();
             }
-            catch (InvalidOperationException) {
+            catch (InvalidOperationException)
+            {
                 // SingleOrDefault will throw if more than one spec files were found
                 // terminating
                 ErrorHandler.HandleException(
@@ -100,7 +113,8 @@ namespace NuGet.PowerShell.Commands {
                     category: ErrorCategory.InvalidOperation);
             }
 
-            if (specFile == null) {
+            if (specFile == null)
+            {
                 // terminating
                 ErrorHandler.HandleException(
                     new ItemNotFoundException(Resources.Cmdlet_NuspecFileNotFound),
@@ -109,20 +123,23 @@ namespace NuGet.PowerShell.Commands {
                     category: ErrorCategory.ObjectNotFound,
                     target: SpecFileName);
             }
-            else {
+            else
+            {
                 specFilePath = specFile.FileNames[0];
             }
 
             return specFilePath;
         }
 
-        private string GetTargetFilePath(Project projectIns, PackageBuilder builder) {
+        private string GetTargetFilePath(Project projectIns, PackageBuilder builder)
+        {
             // Get the output file path
             string outputFilePath = GetPackageFilePath(TargetFile, projectIns.FullName, builder.Id, builder.Version);
 
             bool fileExists = File.Exists(outputFilePath);
             // prevent overwrite if -NoClobber specified
-            if (fileExists && NoClobber.IsPresent) {
+            if (fileExists && NoClobber.IsPresent)
+            {
                 // terminating
                 ErrorHandler.HandleException(
                     new UnauthorizedAccessException(String.Format(
@@ -137,12 +154,15 @@ namespace NuGet.PowerShell.Commands {
             return outputFilePath;
         }
 
-        internal static string GetPackageFilePath(string outputFile, string projectPath, string id, SemanticVersion version) {
-            if (String.IsNullOrEmpty(outputFile)) {
+        internal static string GetPackageFilePath(string outputFile, string projectPath, string id, SemanticVersion version)
+        {
+            if (String.IsNullOrEmpty(outputFile))
+            {
                 outputFile = String.Join(".", id, version, Constants.PackageExtension.TrimStart('.'));
             }
 
-            if (!Path.IsPathRooted(outputFile)) {
+            if (!Path.IsPathRooted(outputFile))
+            {
                 // if the path is a relative, prepend the project path to it
                 string folder = Path.GetDirectoryName(projectPath);
                 outputFile = Path.Combine(folder, outputFile);
@@ -151,29 +171,36 @@ namespace NuGet.PowerShell.Commands {
             return outputFile;
         }
 
-        internal static void RemoveExludedFiles(PackageBuilder builder) {
+        internal static void RemoveExludedFiles(PackageBuilder builder)
+        {
             // Remove the output file or the package spec might try to include it (which is default behavior)
             builder.Files.RemoveAll(file => _exclude.Contains(Path.GetExtension(file.Path)));
         }
 
-        private static IEnumerable<ProjectItem> FindSpecFile(EnvDTE.Project projectIns, string specFile) {
-            if (!String.IsNullOrEmpty(specFile)) {
+        private static IEnumerable<ProjectItem> FindSpecFile(EnvDTE.Project projectIns, string specFile)
+        {
+            if (!String.IsNullOrEmpty(specFile))
+            {
                 ProjectItem projectItem = null;
                 projectIns.ProjectItems.TryGetFile(specFile, out projectItem);
                 yield return projectItem;
             }
-            else {
+            else
+            {
                 // Verify if the project has exactly one file with the .nuspec extension. 
                 // If found, use it as the manifest file for package creation.
                 int count = 0;
                 ProjectItem foundItem = null;
 
-                foreach (ProjectItem item in projectIns.ProjectItems) {
-                    if (item.Name.EndsWith(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase)) {
+                foreach (ProjectItem item in projectIns.ProjectItems)
+                {
+                    if (item.Name.EndsWith(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase))
+                    {
                         foundItem = item;
                         yield return foundItem;
                         count++;
-                        if (count > 1) {
+                        if (count > 1)
+                        {
                             yield break;
                         }
                     }

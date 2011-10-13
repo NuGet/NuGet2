@@ -6,15 +6,18 @@ using Castle.DynamicProxy.Generators;
 using EnvDTE;
 using Moq;
 
-namespace NuGet.VisualStudio.Test {
-    internal static class TestUtils {
+namespace NuGet.VisualStudio.Test
+{
+    internal static class TestUtils
+    {
         private static readonly Func<bool> actionWrapper = () => { AttributesToAvoidReplicating.Add<TypeIdentifierAttribute>(); return true; };
         private static readonly Lazy<bool> lazyAction = new Lazy<bool>(actionWrapper);
 
         public static Project GetProject(string name,
                                          string kind = VsConstants.CsharpProjectTypeGuid,
                                          IEnumerable<string> projectFiles = null,
-                                         Func<string, Property> propertyGetter = null) {
+                                         Func<string, Property> propertyGetter = null)
+        {
             EnsureTypeIdentifierAttribute();
 
 
@@ -25,7 +28,8 @@ namespace NuGet.VisualStudio.Test {
             project.SetupGet(p => p.Kind).Returns(kind);
 
             Mock<Properties> properties = new Mock<Properties>();
-            if (propertyGetter != null) {
+            if (propertyGetter != null)
+            {
                 properties.Setup(p => p.Item(It.IsAny<string>())).Returns<string>(propertyGetter);
             }
 
@@ -33,12 +37,14 @@ namespace NuGet.VisualStudio.Test {
             fullName.Setup(c => c.Value).Returns(name);
             properties.Setup(p => p.Item("FullPath")).Returns(fullName.Object);
             project.SetupGet(p => p.Properties).Returns(properties.Object);
-            if (projectFiles != null) {
+            if (projectFiles != null)
+            {
 
                 var lookup = new Dictionary<object, ProjectItem>();
                 var projectItems = new Mock<ProjectItems>();
 
-                foreach (var file in projectFiles) {
+                foreach (var file in projectFiles)
+                {
                     var item = new Mock<ProjectItem>();
                     item.Setup(i => i.Name).Returns(file);
                     lookup[file] = item.Object;
@@ -50,11 +56,13 @@ namespace NuGet.VisualStudio.Test {
             return project.Object;
         }
 
-        public static ISolutionManager GetSolutionManagerWithProjects(params string[] projects) {
+        public static ISolutionManager GetSolutionManagerWithProjects(params string[] projects)
+        {
             return GetSolutionManager(isSolutionOpen: true, defaultProjectName: null, projects: projects.Select(p => GetProject(p)));
         }
 
-        public static ISolutionManager GetSolutionManager(bool isSolutionOpen = true, string defaultProjectName = null, IEnumerable<Project> projects = null) {
+        public static ISolutionManager GetSolutionManager(bool isSolutionOpen = true, string defaultProjectName = null, IEnumerable<Project> projects = null)
+        {
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.SetupGet(c => c.DefaultProjectName).Returns(defaultProjectName);
             solutionManager.SetupGet(c => c.DefaultProject).Returns(
@@ -67,13 +75,16 @@ namespace NuGet.VisualStudio.Test {
             return solutionManager.Object;
         }
 
-        public static DTE GetDTE() {
+        public static DTE GetDTE()
+        {
             EnsureTypeIdentifierAttribute();
             return new Mock<DTE>().Object;
         }
 
-        public static void EnsureTypeIdentifierAttribute() {
-            if (!lazyAction.Value) {
+        public static void EnsureTypeIdentifierAttribute()
+        {
+            if (!lazyAction.Value)
+            {
                 throw new InvalidOperationException("Lazy action must have been initialized by now");
             }
         }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using Moq;
@@ -7,14 +6,17 @@ using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 using Xunit;
 
-namespace NuGet.PowerShell.Commands.Test {
+namespace NuGet.PowerShell.Commands.Test
+{
 
     using PackageUtility = NuGet.Test.PackageUtility;
 
-    
-    public class FindPackageCommandTest {
+
+    public class FindPackageCommandTest
+    {
         [Fact]
-        public void FindPackageFiltersByIdWhenSwitchIsSpecified() {
+        public void FindPackageFiltersByIdWhenSwitchIsSpecified()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.Filter = "pac";
@@ -28,7 +30,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void FindPackageReturnsMaximumResultsWithFirstAndSkipParametersSet() {
+        public void FindPackageReturnsMaximumResultsWithFirstAndSkipParametersSet()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
@@ -46,7 +49,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void FindPackageReturnsMaximumResultsWithFirstParameterSet() {
+        public void FindPackageReturnsMaximumResultsWithFirstParameterSet()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
@@ -64,7 +68,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void FindPackageFiltersRemoteByIdWhenSwitchIsSpecified() {
+        public void FindPackageFiltersRemoteByIdWhenSwitchIsSpecified()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.Filter = "pac";
@@ -79,7 +84,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void FindPackageReturnsPackagesFilteredByIdWithUpdates() {
+        public void FindPackageReturnsPackagesFilteredByIdWithUpdates()
+        {
             // Arrange 
             var cmdlet = BuildCmdlet();
             cmdlet.Updates = new SwitchParameter(isPresent: true);
@@ -94,7 +100,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void FindPackageReturnsAllVersionsForSpecificPackage() {
+        public void FindPackageReturnsAllVersionsForSpecificPackage()
+        {
             // Arrange 
             var packages = new[] { 
                 PackageUtility.CreatePackage("Awesome", "0.1", description: "some desc"),
@@ -118,7 +125,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void FindPackageReturnsAllVersionsForSpecificPackageWhenSourceNameisUsed() {
+        public void FindPackageReturnsAllVersionsForSpecificPackageWhenSourceNameisUsed()
+        {
             // Arrange 
             var packages = new[] { 
                 PackageUtility.CreatePackage("Awesome", "0.1", description: "some desc"),
@@ -142,7 +150,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void FindPackageReturnsPerformsPartialSearchesByDefault() {
+        public void FindPackageReturnsPerformsPartialSearchesByDefault()
+        {
             // Arrange 
             var packages = new[] { 
                 PackageUtility.CreatePackage("Awesome", "0.1", description: "some desc"),
@@ -168,7 +177,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void FindPackageReturnsPerformsPartialSearchesByDefaultAndSourceNameIsUsed() {
+        public void FindPackageReturnsPerformsPartialSearchesByDefaultAndSourceNameIsUsed()
+        {
             // Arrange 
             var packages = new[] { 
                 PackageUtility.CreatePackage("Awesome", "0.1", description: "some desc"),
@@ -194,7 +204,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void FindPackagePerformsExactMatchesIfExactMatchIsSpecified() {
+        public void FindPackagePerformsExactMatchesIfExactMatchIsSpecified()
+        {
             // Arrange 
             var packages = new[] { 
                 PackageUtility.CreatePackage("Awesome", "0.1", description: "some desc"),
@@ -220,7 +231,8 @@ namespace NuGet.PowerShell.Commands.Test {
         }
 
         [Fact]
-        public void FindPackagePerformsExactMatchesIfExactMatchIsSpecifiedAndSourceNameIsUsed() {
+        public void FindPackagePerformsExactMatchesIfExactMatchIsSpecifiedAndSourceNameIsUsed()
+        {
             // Arrange 
             var packages = new[] { 
                 PackageUtility.CreatePackage("Awesome", "0.1", description: "some desc"),
@@ -244,12 +256,15 @@ namespace NuGet.PowerShell.Commands.Test {
             AssertPackageResultsEqual(result.Last(), new { Id = "Awesome", Version = new SemanticVersion("0.4") });
         }
 
-        private static void AssertPackageResultsEqual(dynamic a, dynamic b) {
-            if (a is PSObject) {
+        private static void AssertPackageResultsEqual(dynamic a, dynamic b)
+        {
+            if (a is PSObject)
+            {
                 a = (a as PSObject).BaseObject;
             }
 
-            if (b is PSObject) {
+            if (b is PSObject)
+            {
                 b = (b as PSObject).BaseObject;
             }
 
@@ -257,7 +272,8 @@ namespace NuGet.PowerShell.Commands.Test {
             Assert.Equal(a.Version, b.Version);
         }
 
-        private static FindPackageCommand BuildCmdlet(bool isSolutionOpen = true, IEnumerable<IPackage> packages = null) {
+        private static FindPackageCommand BuildCmdlet(bool isSolutionOpen = true, IEnumerable<IPackage> packages = null)
+        {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
             return new FindPackageCommand(
@@ -269,7 +285,8 @@ namespace NuGet.PowerShell.Commands.Test {
                 null);
         }
 
-        private static IPackageRepositoryFactory GetRepositoryFactory(IEnumerable<IPackage> packages = null) {
+        private static IPackageRepositoryFactory GetRepositoryFactory(IEnumerable<IPackage> packages = null)
+        {
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             var repository = new Mock<IPackageRepository>();
             packages = packages ?? new[] { PackageUtility.CreatePackage("P1", "1.4"), PackageUtility.CreatePackage("P6") };
@@ -281,7 +298,8 @@ namespace NuGet.PowerShell.Commands.Test {
             return repositoryFactory.Object;
         }
 
-        private static IVsPackageManager GetPackageManager() {
+        private static IVsPackageManager GetPackageManager()
+        {
             var fileSystem = new Mock<IFileSystem>();
             var localRepo = new Mock<ISharedPackageRepository>();
             var localPackages = new[] { PackageUtility.CreatePackage("P1", "0.9"), PackageUtility.CreatePackage("Pack2") };
@@ -294,7 +312,8 @@ namespace NuGet.PowerShell.Commands.Test {
             return new VsPackageManager(TestUtils.GetSolutionManager(), remoteRepo.Object, fileSystem.Object, localRepo.Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
         }
 
-        private static IVsPackageSourceProvider GetSourceProvider() {
+        private static IVsPackageSourceProvider GetSourceProvider()
+        {
             Mock<IVsPackageSourceProvider> sourceProvider = new Mock<IVsPackageSourceProvider>();
             sourceProvider.Setup(c => c.ActivePackageSource).Returns(new PackageSource("foo", "foosource"));
             return sourceProvider.Object;

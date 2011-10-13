@@ -1,14 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 using NuGet.Analysis.Rules;
+using Xunit;
 
-namespace NuGet.Test.Analysis {
-    
-    public class MissingSummaryRuleTest {
+namespace NuGet.Test.Analysis
+{
+
+    public class MissingSummaryRuleTest
+    {
 
         [Fact]
-        public void PackageWithShortDescriptionHasNoIssue() {
+        public void PackageWithShortDescriptionHasNoIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("A", description: new string('a', 300));
             var rule = new MissingSummaryRule();
@@ -21,7 +24,8 @@ namespace NuGet.Test.Analysis {
         }
 
         [Fact]
-        public void PackageWithLongDescriptionYieldOneIssue() {
+        public void PackageWithLongDescriptionYieldOneIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("A", description: new string('a', 301));
             var rule = new MissingSummaryRule();
@@ -39,7 +43,8 @@ namespace NuGet.Test.Analysis {
         }
 
         [Fact]
-        public void PackageWithLongDescriptionAndSummaryHasNoIssue() {
+        public void PackageWithLongDescriptionAndSummaryHasNoIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("A", description: new string('a', 301), summary: "summary");
             var rule = new MissingSummaryRule();

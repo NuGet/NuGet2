@@ -4,28 +4,34 @@ using Moq;
 using NuGet.Test;
 using Xunit;
 
-namespace NuGet.VisualStudio.Test {
-    public class VsFileSystemProviderTest {
+namespace NuGet.VisualStudio.Test
+{
+    public class VsFileSystemProviderTest
+    {
         [Fact]
-        public void VsFileSystemProviderThrowsIfDteIsNull() {
+        public void VsFileSystemProviderThrowsIfDteIsNull()
+        {
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(() => new VsFileSystemProvider(dte: null, componentModel: null, settings: null), "dte");
         }
 
         [Fact]
-        public void VsFileSystemProviderThrowsIfComponentModelIsNull() {
+        public void VsFileSystemProviderThrowsIfComponentModelIsNull()
+        {
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(() => new VsFileSystemProvider(dte: new Mock<DTE>().Object, componentModel: null, settings: null), "componentModel");
         }
 
         [Fact]
-        public void VsFileSystemProviderThrowsIfSettingsIsNull() {
+        public void VsFileSystemProviderThrowsIfSettingsIsNull()
+        {
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(() => new VsFileSystemProvider(dte: new Mock<DTE>().Object, componentModel: new Mock<IComponentModel>().Object, settings: null), "settings");
         }
 
         [Fact]
-        public void VsFileSystemProviderReturnsPhysialFileSystemIfSourceControlSupportIsDisabled() {
+        public void VsFileSystemProviderReturnsPhysialFileSystemIfSourceControlSupportIsDisabled()
+        {
             // Arrange
             var dte = new Mock<DTE>();
             var componentModel = new Mock<IComponentModel>();

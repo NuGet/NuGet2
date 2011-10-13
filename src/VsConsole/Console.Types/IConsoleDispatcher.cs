@@ -1,10 +1,12 @@
 using System;
 
-namespace NuGetConsole {
+namespace NuGetConsole
+{
     /// <summary>
     /// IConsoleDispatcher dispatches and executes console command line inputs on the host.
     /// </summary>
-    public interface IConsoleDispatcher {
+    public interface IConsoleDispatcher
+    {
 
         /// <summary>
         /// Start dispatching console command line inputs. This method can execute asynchronously.

@@ -8,14 +8,19 @@ using Microsoft.PowerShell;
 using NuGet;
 using NuGet.VisualStudio;
 
-namespace NuGetConsole.Host.PowerShell.Implementation {
-    internal static class RunspaceExtensions {
-        public static Collection<PSObject> Invoke(this Runspace runspace, string command, object[] inputs, bool outputResults) {
-            if (string.IsNullOrEmpty(command)) {
+namespace NuGetConsole.Host.PowerShell.Implementation
+{
+    internal static class RunspaceExtensions
+    {
+        public static Collection<PSObject> Invoke(this Runspace runspace, string command, object[] inputs, bool outputResults)
+        {
+            if (string.IsNullOrEmpty(command))
+            {
                 throw new ArgumentNullException("command");
             }
 
-            using (Pipeline pipeline = CreatePipeline(runspace, command, outputResults)) {
+            using (Pipeline pipeline = CreatePipeline(runspace, command, outputResults))
+            {
                 return inputs != null ? pipeline.Invoke(inputs) : pipeline.Invoke();
             }
         }
@@ -29,19 +34,23 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             string command,
             object[] inputs,
             bool outputResults,
-            EventHandler<PipelineStateEventArgs> pipelineStateChanged) {
+            EventHandler<PipelineStateEventArgs> pipelineStateChanged)
+        {
 
-            if (string.IsNullOrEmpty(command)) {
+            if (string.IsNullOrEmpty(command))
+            {
                 throw new ArgumentNullException("command");
             }
 
             Pipeline pipeline = CreatePipeline(runspace, command, outputResults);
 
-            pipeline.StateChanged += (sender, e) => {
+            pipeline.StateChanged += (sender, e) =>
+            {
                 pipelineStateChanged.Raise(sender, e);
 
                 // Dispose Pipeline object upon completion
-                switch (e.PipelineStateInfo.State) {
+                switch (e.PipelineStateInfo.State)
+                {
                     case PipelineState.Completed:
                     case PipelineState.Failed:
                     case PipelineState.Stopped:
@@ -50,8 +59,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 }
             };
 
-            if (inputs != null) {
-                foreach (var input in inputs) {
+            if (inputs != null)
+            {
+                foreach (var input in inputs)
+                {
                     pipeline.Input.Write(input);
                 }
             }
@@ -60,20 +71,24 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             return pipeline;
         }
 
-        public static string ExtractErrorFromErrorRecord(this Runspace runspace, ErrorRecord record) {
+        public static string ExtractErrorFromErrorRecord(this Runspace runspace, ErrorRecord record)
+        {
             Pipeline pipeline = runspace.CreatePipeline("$input", false);
             pipeline.Commands.Add("out-string");
 
             Collection<PSObject> result;
-            using (PSDataCollection<object> inputCollection = new PSDataCollection<object>()) {
+            using (PSDataCollection<object> inputCollection = new PSDataCollection<object>())
+            {
                 inputCollection.Add(record);
                 inputCollection.Complete();
                 result = pipeline.Invoke(inputCollection);
             }
 
-            if (result.Count > 0) {
+            if (result.Count > 0)
+            {
                 string str = result[0].BaseObject as string;
-                if (!string.IsNullOrEmpty(str)) {
+                if (!string.IsNullOrEmpty(str))
+                {
                     // Remove \r\n, which is added by the Out-String cmdlet.
                     return str.Substring(0, str.Length - 2);
                 }
@@ -82,41 +97,51 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             return String.Empty;
         }
 
-        private static Pipeline CreatePipeline(Runspace runspace, string command, bool outputResults) {
+        private static Pipeline CreatePipeline(Runspace runspace, string command, bool outputResults)
+        {
             Pipeline pipeline = runspace.CreatePipeline(command, addToHistory: true);
-            if (outputResults) {
+            if (outputResults)
+            {
                 pipeline.Commands.Add("out-default");
                 pipeline.Commands[0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
             }
             return pipeline;
         }
 
-        public static ExecutionPolicy GetEffectiveExecutionPolicy(this Runspace runspace) {
+        public static ExecutionPolicy GetEffectiveExecutionPolicy(this Runspace runspace)
+        {
             return GetExecutionPolicy(runspace, "Get-ExecutionPolicy");
         }
 
-        public static ExecutionPolicy GetExecutionPolicy(this Runspace runspace, ExecutionPolicyScope scope) {
+        public static ExecutionPolicy GetExecutionPolicy(this Runspace runspace, ExecutionPolicyScope scope)
+        {
             return GetExecutionPolicy(runspace, "Get-ExecutionPolicy -Scope " + scope);
         }
 
-        private static ExecutionPolicy GetExecutionPolicy(this Runspace runspace, string command) {
+        private static ExecutionPolicy GetExecutionPolicy(this Runspace runspace, string command)
+        {
             Collection<PSObject> results = runspace.Invoke(command, null, false);
-            if (results.Count > 0) {
+            if (results.Count > 0)
+            {
                 return (ExecutionPolicy)results[0].BaseObject;
             }
-            else {
+            else
+            {
                 return ExecutionPolicy.Undefined;
             }
         }
 
-        public static void SetExecutionPolicy(this Runspace runspace, ExecutionPolicy policy, ExecutionPolicyScope scope) {
+        public static void SetExecutionPolicy(this Runspace runspace, ExecutionPolicy policy, ExecutionPolicyScope scope)
+        {
             string command = string.Format(CultureInfo.InvariantCulture, "Set-ExecutionPolicy {0} -Scope {1} -Force", policy.ToString(), scope.ToString());
             runspace.Invoke(command, null, false);
         }
 
-        public static void ExecuteScript(this Runspace runspace, string installPath, string scriptPath, IPackage package) {
+        public static void ExecuteScript(this Runspace runspace, string installPath, string scriptPath, IPackage package)
+        {
             string fullPath = Path.Combine(installPath, scriptPath);
-            if (File.Exists(fullPath)) {
+            if (File.Exists(fullPath))
+            {
                 string folderPath = Path.GetDirectoryName(fullPath);
 
                 runspace.Invoke(
@@ -126,12 +151,15 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             }
         }
 
-        public static void ImportModule(this Runspace runspace, string modulePath) {
+        public static void ImportModule(this Runspace runspace, string modulePath)
+        {
             runspace.Invoke("Import-Module " + PathHelper.EscapePSPath(modulePath), null, false);
         }
 
-        public static void ChangePSDirectory(this Runspace runspace, string directory) {
-            if (!String.IsNullOrWhiteSpace(directory)) {
+        public static void ChangePSDirectory(this Runspace runspace, string directory)
+        {
+            if (!String.IsNullOrWhiteSpace(directory))
+            {
                 runspace.Invoke("Set-Location " + PathHelper.EscapePSPath(directory), null, false);
             }
         }

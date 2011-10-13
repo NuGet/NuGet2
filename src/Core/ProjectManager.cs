@@ -10,8 +10,10 @@ using System.Xml.Linq;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
 
-namespace NuGet {
-    public class ProjectManager : IProjectManager {
+namespace NuGet
+{
+    public class ProjectManager : IProjectManager
+    {
         private event EventHandler<PackageOperationEventArgs> _packageReferenceAdding;
         private event EventHandler<PackageOperationEventArgs> _packageReferenceAdded;
         private event EventHandler<PackageOperationEventArgs> _packageReferenceRemoving;
@@ -26,17 +28,22 @@ namespace NuGet {
             { ".pp", new Preprocessor() }
         };
 
-        public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IProjectSystem project, IPackageRepository localRepository) {
-            if (sourceRepository == null) {
+        public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IProjectSystem project, IPackageRepository localRepository)
+        {
+            if (sourceRepository == null)
+            {
                 throw new ArgumentNullException("sourceRepository");
             }
-            if (pathResolver == null) {
+            if (pathResolver == null)
+            {
                 throw new ArgumentNullException("pathResolver");
             }
-            if (project == null) {
+            if (project == null)
+            {
                 throw new ArgumentNullException("project");
             }
-            if (localRepository == null) {
+            if (localRepository == null)
+            {
                 throw new ArgumentNullException("localRepository");
             }
 
@@ -46,142 +53,181 @@ namespace NuGet {
             LocalRepository = localRepository;
         }
 
-        public IPackagePathResolver PathResolver {
+        public IPackagePathResolver PathResolver
+        {
             get;
             private set;
         }
 
-        public IPackageRepository LocalRepository {
+        public IPackageRepository LocalRepository
+        {
             get;
             private set;
         }
 
-        public IPackageRepository SourceRepository {
+        public IPackageRepository SourceRepository
+        {
             get;
             private set;
         }
 
-        public IPackageConstraintProvider ConstraintProvider {
-            get {
+        public IPackageConstraintProvider ConstraintProvider
+        {
+            get
+            {
                 return _constraintProvider ?? NullConstraintProvider.Instance;
             }
-            set {
+            set
+            {
                 _constraintProvider = value;
             }
         }
 
-        public IProjectSystem Project {
+        public IProjectSystem Project
+        {
             get;
             private set;
         }
 
-        public ILogger Logger {
-            get {
+        public ILogger Logger
+        {
+            get
+            {
                 return _logger ?? NullLogger.Instance;
             }
-            set {
+            set
+            {
                 _logger = value;
             }
         }
 
-        public event EventHandler<PackageOperationEventArgs> PackageReferenceAdding {
-            add {
+        public event EventHandler<PackageOperationEventArgs> PackageReferenceAdding
+        {
+            add
+            {
                 _packageReferenceAdding += value;
             }
-            remove {
+            remove
+            {
                 _packageReferenceAdding -= value;
             }
         }
 
-        public event EventHandler<PackageOperationEventArgs> PackageReferenceAdded {
-            add {
+        public event EventHandler<PackageOperationEventArgs> PackageReferenceAdded
+        {
+            add
+            {
                 _packageReferenceAdded += value;
             }
-            remove {
+            remove
+            {
                 _packageReferenceAdded -= value;
             }
         }
 
-        public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoving {
-            add {
+        public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoving
+        {
+            add
+            {
                 _packageReferenceRemoving += value;
             }
-            remove {
+            remove
+            {
                 _packageReferenceRemoving -= value;
             }
         }
 
-        public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoved {
-            add {
+        public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoved
+        {
+            add
+            {
                 _packageReferenceRemoved += value;
             }
-            remove {
+            remove
+            {
                 _packageReferenceRemoved -= value;
             }
         }
 
-        public virtual void AddPackageReference(string packageId) {
+        public virtual void AddPackageReference(string packageId)
+        {
             AddPackageReference(packageId, version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
         }
 
-        public virtual void AddPackageReference(string packageId, SemanticVersion version) {
+        public virtual void AddPackageReference(string packageId, SemanticVersion version)
+        {
             AddPackageReference(packageId, version: version, ignoreDependencies: false, allowPrereleaseVersions: false);
         }
 
-        public virtual void AddPackageReference(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions) {
+        public virtual void AddPackageReference(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)
+        {
             IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, NullConstraintProvider.Instance, packageId, version, allowPrereleaseVersions);
 
             AddPackageReference(package, ignoreDependencies, allowPrereleaseVersions);
         }
 
-        public virtual void AddPackageReference(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions) {
+        public virtual void AddPackageReference(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions)
+        {
             Execute(package, new UpdateWalker(LocalRepository,
                                               SourceRepository,
                                               new DependentsWalker(LocalRepository),
                                               ConstraintProvider,
                                               NullLogger.Instance,
                                               !ignoreDependencies,
-                                              allowPrereleaseVersions) {
+                                              allowPrereleaseVersions)
+                                              {
                                                   AcceptedTargets = PackageTargets.Project
                                               });
         }
 
-        private void Execute(IPackage package, IPackageOperationResolver resolver) {
+        private void Execute(IPackage package, IPackageOperationResolver resolver)
+        {
             IEnumerable<PackageOperation> operations = resolver.ResolveOperations(package);
-            if (operations.Any()) {
-                foreach (PackageOperation operation in operations) {
+            if (operations.Any())
+            {
+                foreach (PackageOperation operation in operations)
+                {
                     Execute(operation);
                 }
             }
-            else if (LocalRepository.Exists(package)) {
+            else if (LocalRepository.Exists(package))
+            {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_ProjectAlreadyReferencesPackage, Project.ProjectName, package.GetFullName());
             }
         }
 
-        protected void Execute(PackageOperation operation) {
+        protected void Execute(PackageOperation operation)
+        {
             bool packageExists = LocalRepository.Exists(operation.Package);
 
-            if (operation.Action == PackageAction.Install) {
+            if (operation.Action == PackageAction.Install)
+            {
                 // If the package is already installed, then skip it
-                if (packageExists) {
+                if (packageExists)
+                {
                     Logger.Log(MessageLevel.Info, NuGetResources.Log_ProjectAlreadyReferencesPackage, Project.ProjectName, operation.Package.GetFullName());
                 }
-                else {
+                else
+                {
                     AddPackageReferenceToProject(operation.Package);
                 }
             }
-            else {
-                if (packageExists) {
+            else
+            {
+                if (packageExists)
+                {
                     RemovePackageReferenceFromProject(operation.Package);
                 }
             }
         }
 
-        protected void AddPackageReferenceToProject(IPackage package) {
+        protected void AddPackageReferenceToProject(IPackage package)
+        {
             PackageOperationEventArgs args = CreateOperation(package);
             OnPackageReferenceAdding(args);
 
-            if (args.Cancel) {
+            if (args.Cancel)
+            {
                 return;
             }
 
@@ -191,39 +237,47 @@ namespace NuGet {
             OnPackageReferenceAdded(args);
         }
 
-        protected virtual void ExtractPackageFilesToProject(IPackage package) {
+        protected virtual void ExtractPackageFilesToProject(IPackage package)
+        {
             // BUG 491: Installing a package with incompatible binaries still does a partial install.
             // Resolve assembly references first so that if this fails we never do anything to the project
             IEnumerable<IPackageAssemblyReference> assemblyReferences = GetCompatibleItems(Project, package.AssemblyReferences, package.GetFullName());
             IEnumerable<FrameworkAssemblyReference> frameworkReferences = Project.GetCompatibleItemsCore(package.FrameworkAssemblies);
 
-            try {
+            try
+            {
                 // Add content files
                 Project.AddFiles(package.GetContentFiles(), _fileTransformers);
 
                 // Add the references to the reference path
-                foreach (IPackageAssemblyReference assemblyReference in assemblyReferences) {
+                foreach (IPackageAssemblyReference assemblyReference in assemblyReferences)
+                {
                     // Get the physical path of the assembly reference
                     string referencePath = Path.Combine(PathResolver.GetInstallPath(package), assemblyReference.Path);
                     string relativeReferencePath = PathUtility.GetRelativePath(Project.Root, referencePath);
 
-                    if (Project.ReferenceExists(assemblyReference.Name)) {
+                    if (Project.ReferenceExists(assemblyReference.Name))
+                    {
                         Project.RemoveReference(assemblyReference.Name);
                     }
 
-                    using (Stream stream = assemblyReference.GetStream()) {
+                    using (Stream stream = assemblyReference.GetStream())
+                    {
                         Project.AddReference(relativeReferencePath, stream);
                     }
                 }
 
                 // Add GAC/Framework references
-                foreach (FrameworkAssemblyReference frameworkReference in frameworkReferences) {
-                    if (!Project.ReferenceExists(frameworkReference.AssemblyName)) {
+                foreach (FrameworkAssemblyReference frameworkReference in frameworkReferences)
+                {
+                    if (!Project.ReferenceExists(frameworkReference.AssemblyName))
+                    {
                         Project.AddFrameworkReference(frameworkReference.AssemblyName);
                     }
                 }
             }
-            finally {
+            finally
+            {
                 // Add package to local repository in the finally so that the user can uninstall it
                 // if any exception occurs. This is easier than rolling back since the user can just
                 // manually uninstall things that may have failed.
@@ -232,26 +286,32 @@ namespace NuGet {
             }
         }
 
-        public bool IsInstalled(IPackage package) {
+        public bool IsInstalled(IPackage package)
+        {
             return LocalRepository.Exists(package);
         }
 
-        public void RemovePackageReference(string packageId) {
+        public void RemovePackageReference(string packageId)
+        {
             RemovePackageReference(packageId, forceRemove: false, removeDependencies: false);
         }
 
-        public void RemovePackageReference(string packageId, bool forceRemove) {
+        public void RemovePackageReference(string packageId, bool forceRemove)
+        {
             RemovePackageReference(packageId, forceRemove: forceRemove, removeDependencies: false);
         }
 
-        public void RemovePackageReference(string packageId, bool forceRemove, bool removeDependencies) {
-            if (String.IsNullOrEmpty(packageId)) {
+        public void RemovePackageReference(string packageId, bool forceRemove, bool removeDependencies)
+        {
+            if (String.IsNullOrEmpty(packageId))
+            {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
 
             IPackage package = LocalRepository.FindPackage(packageId);
 
-            if (package == null) {
+            if (package == null)
+            {
                 throw new InvalidOperationException(String.Format(
                     CultureInfo.CurrentCulture,
                     NuGetResources.UnknownPackage, packageId));
@@ -260,7 +320,8 @@ namespace NuGet {
             RemovePackageReference(package, forceRemove, removeDependencies);
         }
 
-        public virtual void RemovePackageReference(IPackage package, bool forceRemove, bool removeDependencies) {
+        public virtual void RemovePackageReference(IPackage package, bool forceRemove, bool removeDependencies)
+        {
             Execute(package, new UninstallWalker(LocalRepository,
                                                  new DependentsWalker(LocalRepository),
                                                  NullLogger.Instance,
@@ -269,11 +330,13 @@ namespace NuGet {
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-        private void RemovePackageReferenceFromProject(IPackage package) {
+        private void RemovePackageReferenceFromProject(IPackage package)
+        {
             PackageOperationEventArgs args = CreateOperation(package);
             OnPackageReferenceRemoving(args);
 
-            if (args.Cancel) {
+            if (args.Cancel)
+            {
                 return;
             }
 
@@ -304,7 +367,8 @@ namespace NuGet {
             Project.DeleteFiles(contentFilesToDelete, otherPackages, _fileTransformers);
 
             // Remove references
-            foreach (IPackageAssemblyReference assemblyReference in assemblyReferencesToDelete) {
+            foreach (IPackageAssemblyReference assemblyReference in assemblyReferencesToDelete)
+            {
                 Project.RemoveReference(assemblyReference.Name);
             }
 
@@ -315,31 +379,38 @@ namespace NuGet {
             OnPackageReferenceRemoved(args);
         }
 
-        public void UpdatePackageReference(string packageId) {
+        public void UpdatePackageReference(string packageId)
+        {
             UpdatePackageReference(packageId, version: null, updateDependencies: true, allowPrereleaseVersions: false);
         }
 
-        public void UpdatePackageReference(string packageId, SemanticVersion version) {
+        public void UpdatePackageReference(string packageId, SemanticVersion version)
+        {
             UpdatePackageReference(packageId, version: version, updateDependencies: true, allowPrereleaseVersions: false);
         }
 
-        public void UpdatePackageReference(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions) {
+        public void UpdatePackageReference(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions)
+        {
             UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, versionSpec, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions);
         }
 
-        public virtual void UpdatePackageReference(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions) {
+        public virtual void UpdatePackageReference(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions)
+        {
             UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, version, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions);
         }
 
-        private void UpdatePackageReference(string packageId, Func<IPackage> resolvePackage, bool updateDependencies, bool allowPrereleaseVersions) {
-            if (String.IsNullOrEmpty(packageId)) {
+        private void UpdatePackageReference(string packageId, Func<IPackage> resolvePackage, bool updateDependencies, bool allowPrereleaseVersions)
+        {
+            if (String.IsNullOrEmpty(packageId))
+            {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
             }
 
             IPackage oldPackage = LocalRepository.FindPackage(packageId);
 
             // Check to see if this package is installed
-            if (oldPackage == null) {
+            if (oldPackage == null)
+            {
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
                     NuGetResources.ProjectDoesNotHaveReference, Project.ProjectName, packageId));
@@ -349,13 +420,16 @@ namespace NuGet {
 
             IPackage package = resolvePackage();
 
-            if (package != null && oldPackage.Version != package.Version) {
+            if (package != null && oldPackage.Version != package.Version)
+            {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_UpdatingPackages, package.Id, oldPackage.Version, package.Version, Project.ProjectName);
                 UpdatePackageReference(package, updateDependencies, allowPrereleaseVersions);
             }
-            else {
+            else
+            {
                 IVersionSpec constraint = ConstraintProvider.GetConstraint(packageId);
-                if (constraint != null) {
+                if (constraint != null)
+                {
                     Logger.Log(MessageLevel.Info, NuGetResources.Log_ApplyingConstraints, packageId, VersionUtility.PrettyPrint(constraint), ConstraintProvider.Source);
                 }
 
@@ -363,43 +437,55 @@ namespace NuGet {
             }
         }
 
-        protected void UpdatePackageReference(IPackage package) {
+        protected void UpdatePackageReference(IPackage package)
+        {
             UpdatePackageReference(package, updateDependencies: true, allowPrereleaseVersions: false);
         }
 
-        protected void UpdatePackageReference(IPackage package, bool updateDependencies, bool allowPrereleaseVersions) {
+        protected void UpdatePackageReference(IPackage package, bool updateDependencies, bool allowPrereleaseVersions)
+        {
             AddPackageReference(package, !updateDependencies, allowPrereleaseVersions);
         }
 
-        private void OnPackageReferenceAdding(PackageOperationEventArgs e) {
-            if (_packageReferenceAdding != null) {
+        private void OnPackageReferenceAdding(PackageOperationEventArgs e)
+        {
+            if (_packageReferenceAdding != null)
+            {
                 _packageReferenceAdding(this, e);
             }
         }
 
-        private void OnPackageReferenceAdded(PackageOperationEventArgs e) {
-            if (_packageReferenceAdded != null) {
+        private void OnPackageReferenceAdded(PackageOperationEventArgs e)
+        {
+            if (_packageReferenceAdded != null)
+            {
                 _packageReferenceAdded(this, e);
             }
         }
 
-        private void OnPackageReferenceRemoved(PackageOperationEventArgs e) {
-            if (_packageReferenceRemoved != null) {
+        private void OnPackageReferenceRemoved(PackageOperationEventArgs e)
+        {
+            if (_packageReferenceRemoved != null)
+            {
                 _packageReferenceRemoved(this, e);
             }
         }
 
-        private void OnPackageReferenceRemoving(PackageOperationEventArgs e) {
-            if (_packageReferenceRemoving != null) {
+        private void OnPackageReferenceRemoving(PackageOperationEventArgs e)
+        {
+            if (_packageReferenceRemoving != null)
+            {
                 _packageReferenceRemoving(this, e);
             }
         }
 
-        private PackageOperationEventArgs CreateOperation(IPackage package) {
+        private PackageOperationEventArgs CreateOperation(IPackage package)
+        {
             return new PackageOperationEventArgs(package, Project, PathResolver.GetInstallPath(package));
         }
 
-        private static IDictionary<XName, Action<XElement, XElement>> GetConfigMappings() {
+        private static IDictionary<XName, Action<XElement, XElement>> GetConfigMappings()
+        {
             // REVIEW: This might be an edge case, but we're setting this rule for all xml files.
             // If someone happens to do a transform where the xml file has a configSections node
             // we will add it first. This is probably fine, but this is a config specific scenario
@@ -408,12 +494,14 @@ namespace NuGet {
             };
         }
 
-        private static IEnumerable<T> GetCompatibleItems<T>(IProjectSystem project, IEnumerable<T> items, string package) where T : IFrameworkTargetable {
+        private static IEnumerable<T> GetCompatibleItems<T>(IProjectSystem project, IEnumerable<T> items, string package) where T : IFrameworkTargetable
+        {
             // A package might have references that target a specific version of the framework (.net/silverlight etc)
             // so we try to get the highest version that satisfies the target framework i.e.
             // if a package has 1.0, 2.0, 4.0 and the target framework is 3.5 we'd pick the 2.0 references.
             IEnumerable<T> compatibleItems;
-            if (!project.TryGetCompatibleItems(items, out compatibleItems)) {
+            if (!project.TryGetCompatibleItems(items, out compatibleItems))
+            {
                 throw new InvalidOperationException(
                            String.Format(CultureInfo.CurrentCulture,
                            NuGetResources.UnableToFindCompatibleItems, package, project.TargetFramework, NuGetResources.AssemblyReferences));
@@ -422,16 +510,20 @@ namespace NuGet {
             return compatibleItems;
         }
 
-        private class PackageFileComparer : IEqualityComparer<IPackageFile> {
+        private class PackageFileComparer : IEqualityComparer<IPackageFile>
+        {
             internal static PackageFileComparer Default = new PackageFileComparer();
-            private PackageFileComparer() {
+            private PackageFileComparer()
+            {
             }
 
-            public bool Equals(IPackageFile x, IPackageFile y) {
+            public bool Equals(IPackageFile x, IPackageFile y)
+            {
                 return x.Path.Equals(y.Path, StringComparison.OrdinalIgnoreCase);
             }
 
-            public int GetHashCode(IPackageFile obj) {
+            public int GetHashCode(IPackageFile obj)
+            {
                 return obj.Path.GetHashCode();
             }
         }
@@ -439,7 +531,8 @@ namespace NuGet {
         // HACK: We need this to avoid a partial trust issue. We need to be able to evaluate closures
         // within this class. The attributes are necessary to prevent this method from being inlined into ClosureEvaluator 
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-        internal static object Eval(FieldInfo fieldInfo, object obj) {
+        internal static object Eval(FieldInfo fieldInfo, object obj)
+        {
             return fieldInfo.GetValue(obj);
         }
     }

@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace NuGet.Test {
-    
-    public class EnumerableExtensionsTest {
+namespace NuGet.Test
+{
+
+    public class EnumerableExtensionsTest
+    {
         [Fact]
-        public void DistinctLastNoElements() {
+        public void DistinctLastNoElements()
+        {
             // Arrange
             var items = Enumerable.Empty<Item>();
 
@@ -19,7 +22,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void DistinctLastOneElement() {
+        public void DistinctLastOneElement()
+        {
             // Arrange
             var items = new Item[] { new Item { Name = "John", Age = 10 } };
 
@@ -33,7 +37,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void DistinctLastThreeSimilarElements() {
+        public void DistinctLastThreeSimilarElements()
+        {
             // Arrange
             var items = new Item[] { new Item { Name = "John", Age = 410 },
                                      new Item { Name = "John", Age = 550 },
@@ -49,7 +54,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void DistinctLastMultipleSimilarElements() {
+        public void DistinctLastMultipleSimilarElements()
+        {
             // Arrange
             var items = new Item[] { new Item { Name = "Phil", Age = 1 },
                                      new Item { Name = "John", Age = 40 },
@@ -73,7 +79,8 @@ namespace NuGet.Test {
 
 
         [Fact]
-        public void SafeQueryableThrowsIfSourceIsNull() {
+        public void SafeQueryableThrowsIfSourceIsNull()
+        {
             // Arrange
             IEnumerable<int> source = null;
 
@@ -82,7 +89,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SafeQueryableReturnsOriginalIQueryableWhenNotRewritingQueries() {
+        public void SafeQueryableReturnsOriginalIQueryableWhenNotRewritingQueries()
+        {
             // Arrange
             IQueryable<int> source = Enumerable.Range(0, 4).AsQueryable();
 
@@ -94,7 +102,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SafeQueryableWrapsIEnumerableWhenNotRewritingQueries() {
+        public void SafeQueryableWrapsIEnumerableWhenNotRewritingQueries()
+        {
             // Arrange
             IEnumerable<int> source = Enumerable.Range(0, 4);
 
@@ -106,7 +115,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SafeQueryableReturnsSafeEnumerableQueryWhenRewriting() {
+        public void SafeQueryableReturnsSafeEnumerableQueryWhenRewriting()
+        {
             // Arrange
             IEnumerable<int> source = Enumerable.Range(0, 4);
 
@@ -118,10 +128,13 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SafeIterateWithFailingElementAtTheBeginningOfSequence() {
+        public void SafeIterateWithFailingElementAtTheBeginningOfSequence()
+        {
             // Arrange
-            var enumerable = Enumerable.Range(0, 4).Select(e => {
-                if (e == 0) {
+            var enumerable = Enumerable.Range(0, 4).Select(e =>
+            {
+                if (e == 0)
+                {
                     throw new Exception();
                 }
                 return e * e;
@@ -131,14 +144,17 @@ namespace NuGet.Test {
             var result = EnumerableExtensions.SafeIterate(enumerable);
 
             // Assert
-            Assert.Equal(new [] { 1, 4, 9 }, result.ToArray());
+            Assert.Equal(new[] { 1, 4, 9 }, result.ToArray());
         }
 
         [Fact]
-        public void SafeIterateWithFailingElementInMiddleOfSequence() {
+        public void SafeIterateWithFailingElementInMiddleOfSequence()
+        {
             // Arrange
-            var enumerable = Enumerable.Range(0, 4).Select(e => {
-                if (e == 1 || e == 3) {
+            var enumerable = Enumerable.Range(0, 4).Select(e =>
+            {
+                if (e == 1 || e == 3)
+                {
                     throw new Exception();
                 }
                 return e * e;
@@ -152,10 +168,13 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SafeIterateWithFailingElementAtEndOfSequence() {
+        public void SafeIterateWithFailingElementAtEndOfSequence()
+        {
             // Arrange
-            var enumerable = Enumerable.Range(0, 4).Select(e => {
-                if (e == 3) {
+            var enumerable = Enumerable.Range(0, 4).Select(e =>
+            {
+                if (e == 3)
+                {
                     throw new Exception();
                 }
                 return e * e;
@@ -168,23 +187,29 @@ namespace NuGet.Test {
             Assert.Equal(new[] { 0, 1, 4 }, result.ToArray());
         }
 
-        private class Item {
+        private class Item
+        {
             public string Name { get; set; }
             public int Age { get; set; }
         }
 
-        private class ItemAgeComparer : IComparer<Item> {
-            public int Compare(Item x, Item y) {
+        private class ItemAgeComparer : IComparer<Item>
+        {
+            public int Compare(Item x, Item y)
+            {
                 return x.Age.CompareTo(y.Age);
             }
         }
 
-        private class ItemNameComparer : IEqualityComparer<Item> {
-            public bool Equals(Item x, Item y) {
+        private class ItemNameComparer : IEqualityComparer<Item>
+        {
+            public bool Equals(Item x, Item y)
+            {
                 return x.Name.Equals(y.Name);
             }
 
-            public int GetHashCode(Item obj) {
+            public int GetHashCode(Item obj)
+            {
                 return obj.Name.GetHashCode();
             }
         }

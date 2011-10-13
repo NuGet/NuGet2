@@ -2,10 +2,13 @@
 using Xunit;
 using Xunit.Extensions;
 
-namespace NuGet.VisualStudio.Test {
-    public class SourceControlHelperTest {
+namespace NuGet.VisualStudio.Test
+{
+    public class SourceControlHelperTest
+    {
         [Fact]
-        public void IsSourceControlDisabledReturnsFalseIfSettingsHasNoValue() {
+        public void IsSourceControlDisabledReturnsFalseIfSettingsHasNoValue()
+        {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
             settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration")).Returns("").Verifiable();
@@ -22,11 +25,12 @@ namespace NuGet.VisualStudio.Test {
         [InlineData(new object[] { " " })]
         [InlineData(new object[] { "blah" })]
         [InlineData(new object[] { "false" })]
-        public void IsSourceControlDisabledReturnsFalseIfSettingsValueIsNotBooleanTrue(string value) {
+        public void IsSourceControlDisabledReturnsFalseIfSettingsValueIsNotBooleanTrue(string value)
+        {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
             settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration")).Returns(value).Verifiable();
-            
+
             // Act
             bool isDisabled = settings.Object.IsSourceControlDisabled();
 
@@ -40,7 +44,8 @@ namespace NuGet.VisualStudio.Test {
         [InlineData(new object[] { "True" })]
         [InlineData(new object[] { "tRuE" })]
         [InlineData(new object[] { "TRUE" })]
-        public void IsSourceControlDisabledReturnsTrueIfSettingsValueIsBooleanTrue(string value) {
+        public void IsSourceControlDisabledReturnsTrueIfSettingsValueIsBooleanTrue(string value)
+        {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
             settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration")).Returns(value).Verifiable();

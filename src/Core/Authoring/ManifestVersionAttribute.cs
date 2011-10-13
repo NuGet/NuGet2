@@ -1,9 +1,12 @@
 ﻿using System;
 
-namespace NuGet {
+namespace NuGet
+{
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    internal sealed class ManifestVersionAttribute : Attribute {
-        public ManifestVersionAttribute(int version) {
+    internal sealed class ManifestVersionAttribute : Attribute
+    {
+        public ManifestVersionAttribute(int version)
+        {
             Version = version;
 
         }

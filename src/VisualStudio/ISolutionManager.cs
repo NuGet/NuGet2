@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using EnvDTE;
 
-namespace NuGet.VisualStudio {
-    public interface ISolutionManager {
+namespace NuGet.VisualStudio
+{
+    public interface ISolutionManager
+    {
         event EventHandler SolutionOpened;
         event EventHandler SolutionClosing;
         event EventHandler SolutionClosed;

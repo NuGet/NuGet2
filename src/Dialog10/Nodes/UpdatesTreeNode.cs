@@ -3,12 +3,14 @@ using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
-namespace NuGet.Dialog.Providers {
+namespace NuGet.Dialog.Providers
+{
 
     /// <summary>
     /// This class represents a tree node under the Updates tab
     /// </summary>
-    internal class UpdatesTreeNode : SimpleTreeNode {
+    internal class UpdatesTreeNode : SimpleTreeNode
+    {
         private readonly IPackageRepository _localRepository;
 
         public UpdatesTreeNode(
@@ -17,12 +19,14 @@ namespace NuGet.Dialog.Providers {
             IVsExtensionsTreeNode parent,
             IPackageRepository localRepository,
             IPackageRepository sourceRepository) :
-            base(provider, category, parent, sourceRepository) {
+            base(provider, category, parent, sourceRepository)
+        {
 
             _localRepository = localRepository;
         }
 
-        public override IQueryable<IPackage> GetPackages() {
+        public override IQueryable<IPackage> GetPackages()
+        {
             // We need to call ToList() here so that we don't evaluate the enumerable twice
             // when trying to count it.
             IList<IPackage> updateCandidates = Repository.GetUpdates(_localRepository.GetPackages(), includePrerelease: false).ToList();

@@ -9,21 +9,27 @@ using System.Xml.Linq;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
 
-namespace NuGet {
-    public class PackageReferenceFile {
+namespace NuGet
+{
+    public class PackageReferenceFile
+    {
         private readonly string _path;
         private readonly Dictionary<string, string> _constraints = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         public PackageReferenceFile(string path) :
             this(new PhysicalFileSystem(Path.GetDirectoryName(path)),
-                                        Path.GetFileName(path)) {
+                                        Path.GetFileName(path))
+        {
         }
 
-        public PackageReferenceFile(IFileSystem fileSystem, string path) {
-            if (fileSystem == null) {
+        public PackageReferenceFile(IFileSystem fileSystem, string path)
+        {
+            if (fileSystem == null)
+            {
                 throw new ArgumentNullException("fileSystem");
             }
-            if (String.IsNullOrEmpty(path)) {
+            if (String.IsNullOrEmpty(path))
+            {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "path");
             }
 
@@ -34,34 +40,41 @@ namespace NuGet {
         private IFileSystem FileSystem { get; set; }
 
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This might be expensive")]
-        public IEnumerable<PackageReference> GetPackageReferences() {
+        public IEnumerable<PackageReference> GetPackageReferences()
+        {
             XDocument document = GetDocument();
 
-            if (document == null) {
+            if (document == null)
+            {
                 yield break;
             }
 
-            foreach (var e in document.Root.Elements("package")) {
+            foreach (var e in document.Root.Elements("package"))
+            {
                 string id = e.GetOptionalAttributeValue("id");
                 string versionString = e.GetOptionalAttributeValue("version");
                 string versionConstraintString = e.GetOptionalAttributeValue("allowedVersions");
                 SemanticVersion version;
 
-                if (String.IsNullOrEmpty(id) || String.IsNullOrEmpty(versionString)) {
+                if (String.IsNullOrEmpty(id) || String.IsNullOrEmpty(versionString))
+                {
                     // If the id or version is empty, ignore the record.
                     continue;
                 }
 
-                if (!SemanticVersion.TryParse(versionString, out version)) {
+                if (!SemanticVersion.TryParse(versionString, out version))
+                {
                     throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ReferenceFile_InvalidVersion, versionString, _path));
                 }
 
                 IVersionSpec versionConstaint = null;
-                if (!String.IsNullOrEmpty(versionConstraintString)) {
-                    if (!VersionUtility.TryParseVersionSpec(versionConstraintString, out versionConstaint)) {
+                if (!String.IsNullOrEmpty(versionConstraintString))
+                {
+                    if (!VersionUtility.TryParseVersionSpec(versionConstraintString, out versionConstaint))
+                    {
                         throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ReferenceFile_InvalidVersion, versionConstraintString, _path));
                     }
-                    
+
                     _constraints[id] = versionConstraintString;
                 }
 
@@ -72,35 +85,42 @@ namespace NuGet {
         /// <summary>
         /// Deletes an entry from the file with matching id and version. Returns true if the file was deleted.
         /// </summary>
-        public bool DeleteEntry(string id, SemanticVersion version) {
+        public bool DeleteEntry(string id, SemanticVersion version)
+        {
             XDocument document = GetDocument();
 
-            if (document == null) {
+            if (document == null)
+            {
                 return false;
             }
 
             return DeleteEntry(document, id, version);
         }
 
-        public bool EntryExists(string packageId, SemanticVersion version) {
+        public bool EntryExists(string packageId, SemanticVersion version)
+        {
             XDocument document = GetDocument();
-            if (document == null) {
+            if (document == null)
+            {
                 return false;
             }
 
             return FindEntry(document, packageId, version) != null;
         }
 
-        public void AddEntry(string id, SemanticVersion version) {
+        public void AddEntry(string id, SemanticVersion version)
+        {
             XDocument document = GetDocument(createIfNotExists: true);
 
             AddEntry(document, id, version);
         }
 
-        private void AddEntry(XDocument document, string id, SemanticVersion version) {
+        private void AddEntry(XDocument document, string id, SemanticVersion version)
+        {
             XElement element = FindEntry(document, id, version);
 
-            if (element != null) {
+            if (element != null)
+            {
                 element.Remove();
             }
 
@@ -110,7 +130,8 @@ namespace NuGet {
 
             // Restore the version constraint
             string versionConstraint;
-            if (_constraints.TryGetValue(id, out versionConstraint)) {
+            if (_constraints.TryGetValue(id, out versionConstraint))
+            {
                 newElement.Add(new XAttribute("allowedVersions", versionConstraint));
             }
 
@@ -119,8 +140,10 @@ namespace NuGet {
             SaveDocument(document);
         }
 
-        private static XElement FindEntry(XDocument document, string id, SemanticVersion version) {
-            if (String.IsNullOrEmpty(id)) {
+        private static XElement FindEntry(XDocument document, string id, SemanticVersion version)
+        {
+            if (String.IsNullOrEmpty(id))
+            {
                 return null;
             }
 
@@ -132,7 +155,8 @@ namespace NuGet {
                     select e).FirstOrDefault();
         }
 
-        private void SaveDocument(XDocument document) {
+        private void SaveDocument(XDocument document)
+        {
             // Sort the elements by package id and only take valid entries (one with both id and version)
             var packageElements = (from e in document.Root.Elements("package")
                                    let id = e.GetOptionalAttributeValue("id")
@@ -150,14 +174,17 @@ namespace NuGet {
             FileSystem.AddFile(_path, document.Save);
         }
 
-        private bool DeleteEntry(XDocument document, string id, SemanticVersion version) {
+        private bool DeleteEntry(XDocument document, string id, SemanticVersion version)
+        {
             XElement element = FindEntry(document, id, version);
 
-            if (element != null) {
+            if (element != null)
+            {
                 // Preserve the allowedVersions attribute for this package id (if any defined)
                 var versionConstraint = element.GetOptionalAttributeValue("allowedVersions");
 
-                if (!String.IsNullOrEmpty(versionConstraint)) {
+                if (!String.IsNullOrEmpty(versionConstraint))
+                {
                     _constraints[id] = versionConstraint;
                 }
 
@@ -165,12 +192,14 @@ namespace NuGet {
                 element.Remove();
 
                 // Remove the file if there are no more elements
-                if (!document.Root.HasElements) {
+                if (!document.Root.HasElements)
+                {
                     FileSystem.DeleteFile(_path);
 
                     return true;
                 }
-                else {
+                else
+                {
                     // Otherwise save the updated document
                     SaveDocument(document);
                 }
@@ -179,24 +208,30 @@ namespace NuGet {
             return false;
         }
 
-        private XDocument GetDocument(bool createIfNotExists = false) {
-            try {
+        private XDocument GetDocument(bool createIfNotExists = false)
+        {
+            try
+            {
                 // If the file exists then open and return it
-                if (FileSystem.FileExists(_path)) {
-                    using (Stream stream = FileSystem.OpenFile(_path)) {
+                if (FileSystem.FileExists(_path))
+                {
+                    using (Stream stream = FileSystem.OpenFile(_path))
+                    {
                         return XDocument.Load(stream);
                     }
                 }
 
                 // If it doesn't exist and we're creating a new file then return a
                 // document with an empty packages node
-                if (createIfNotExists) {
+                if (createIfNotExists)
+                {
                     return new XDocument(new XElement("packages"));
                 }
 
                 return null;
             }
-            catch (XmlException e) {
+            catch (XmlException e)
+            {
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture, NuGetResources.ErrorReadingFile, FileSystem.GetFullPath(_path)), e);
             }

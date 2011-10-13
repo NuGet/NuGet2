@@ -1,13 +1,16 @@
 ﻿using System;
 using System.IO;
-using Xunit;
 using Moq;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class PackageDownloaderTest {
+namespace NuGet.Test
+{
+
+    public class PackageDownloaderTest
+    {
         [Fact]
-        public void DownloadPackageWithUnverifiedPackageThrowsInvalidDataException() {
+        public void DownloadPackageWithUnverifiedPackageThrowsInvalidDataException()
+        {
             // Arrange
             var downloadClient = new Mock<IHttpClient>();
             downloadClient.Setup(c => c.DownloadData()).Returns(new byte[] { 123 });

@@ -2,15 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Versioning;
-using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class ProjectManagerTest {
+namespace NuGet.Test
+{
+
+    public class ProjectManagerTest
+    {
         [Fact]
-        public void AddingPackageReferenceNullOrEmptyPackageIdThrows() {
+        public void AddingPackageReferenceNullOrEmptyPackageIdThrows()
+        {
             // Arrange
             ProjectManager projectManager = CreateProjectManager();
 
@@ -20,7 +23,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddingUnknownPackageReferenceThrows() {
+        public void AddingUnknownPackageReferenceThrows()
+        {
             // Arrange
             ProjectManager projectManager = CreateProjectManager();
 
@@ -29,7 +33,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddingPackageReferenceThrowsExceptionPackageReferenceIsAdded() {
+        public void AddingPackageReferenceThrowsExceptionPackageReferenceIsAdded()
+        {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new Mock<MockProjectSystem>() { CallBase = true };
@@ -47,7 +52,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddingPackageReferenceAddsPreprocessedFileToTargetPathWithRemovedExtension() {
+        public void AddingPackageReferenceAddsPreprocessedFileToTargetPathWithRemovedExtension()
+        {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -64,7 +70,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddPackageReferenceWhenNewVersionOfPackageAlreadyReferencedThrows() {
+        public void AddPackageReferenceWhenNewVersionOfPackageAlreadyReferencedThrows()
+        {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -92,7 +99,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovingUnknownPackageReferenceThrows() {
+        public void RemovingUnknownPackageReferenceThrows()
+        {
             // Arrange
             var projectManager = CreateProjectManager();
 
@@ -101,7 +109,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovingPackageReferenceWithOtherProjectWithReferencesThatWereNotCopiedToProject() {
+        public void RemovingPackageReferenceWithOtherProjectWithReferencesThatWereNotCopiedToProject()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -128,7 +137,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovingUnknownPackageReferenceNullOrEmptyPackageIdThrows() {
+        public void RemovingUnknownPackageReferenceNullOrEmptyPackageIdThrows()
+        {
             // Arrange
             var projectManager = CreateProjectManager();
 
@@ -138,7 +148,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovingPackageReferenceWithNoDependents() {
+        public void RemovingPackageReferenceWithNoDependents()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -155,7 +166,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddPackageReferenceAddsContentAndReferencesProjectSystem() {
+        public void AddPackageReferenceAddsContentAndReferencesProjectSystem()
+        {
             // Arrange
             var projectSystem = new MockProjectSystem();
             var localRepository = new MockPackageRepository();
@@ -180,7 +192,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddPackageReferenceAddingPackageWithDuplicateReferenceOverwritesReference() {
+        public void AddPackageReferenceAddingPackageWithDuplicateReferenceOverwritesReference()
+        {
             // Arrange
             var projectSystem = new MockProjectSystem();
             var localRepository = new MockPackageRepository();
@@ -208,7 +221,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddPackageReferenceRaisesOnBeforeInstallAndOnAfterInstall() {
+        public void AddPackageReferenceRaisesOnBeforeInstallAndOnAfterInstall()
+        {
             // Arrange
             var projectSystem = new MockProjectSystem();
             var mockRepository = new MockPackageRepository();
@@ -217,13 +231,15 @@ namespace NuGet.Test {
                                                         new[] { "contentFile" },
                                                         new[] { "reference.dll" },
                                                         new[] { "tool" });
-            projectManager.PackageReferenceAdding += (sender, e) => {
+            projectManager.PackageReferenceAdding += (sender, e) =>
+            {
                 // Assert
                 Assert.Equal(e.InstallPath, @"C:\MockFileSystem\A.1.0");
                 Assert.Same(e.Package, packageA);
             };
 
-            projectManager.PackageReferenceAdded += (sender, e) => {
+            projectManager.PackageReferenceAdded += (sender, e) =>
+            {
                 // Assert
                 Assert.Equal(e.InstallPath, @"C:\MockFileSystem\A.1.0");
                 Assert.Same(e.Package, packageA);
@@ -236,20 +252,23 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovePackageReferenceRaisesOnBeforeUninstallAndOnAfterUninstall() {
+        public void RemovePackageReferenceRaisesOnBeforeUninstallAndOnAfterUninstall()
+        {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
             var mockRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(new MockProjectSystem()), mockProjectSystem, new MockPackageRepository());
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                              new[] { @"sub\file1", @"sub\file2" });
-            projectManager.PackageReferenceRemoving += (sender, e) => {
+            projectManager.PackageReferenceRemoving += (sender, e) =>
+            {
                 // Assert
                 Assert.Equal(e.InstallPath, @"C:\MockFileSystem\A.1.0");
                 Assert.Same(e.Package, packageA);
             };
 
-            projectManager.PackageReferenceRemoved += (sender, e) => {
+            projectManager.PackageReferenceRemoved += (sender, e) =>
+            {
                 // Assert
                 Assert.Equal(e.InstallPath, @"C:\MockFileSystem\A.1.0");
                 Assert.Same(e.Package, packageA);
@@ -263,7 +282,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovePackageReferenceExcludesFileIfAnotherPackageUsesThem() {
+        public void RemovePackageReferenceExcludesFileIfAnotherPackageUsesThem()
+        {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
             var mockRepository = new MockPackageRepository();
@@ -289,7 +309,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddPackageWithUnsupportedFilesSkipsUnsupportedFiles() {
+        public void AddPackageWithUnsupportedFilesSkipsUnsupportedFiles()
+        {
             // Arrange            
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
@@ -311,7 +332,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddPackageWithUnsupportedTransformFileSkipsUnsupportedFile() {
+        public void AddPackageWithUnsupportedTransformFileSkipsUnsupportedFile()
+        {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
             var localRepository = new MockPackageRepository();
@@ -333,7 +355,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddPackageWithTransformFile() {
+        public void AddPackageWithTransformFile()
+        {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
             var mockRepository = new MockPackageRepository();
@@ -376,7 +399,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovePackageWithTransformFile() {
+        public void RemovePackageWithTransformFile()
+        {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
             var mockRepository = new MockPackageRepository();
@@ -417,7 +441,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovePackageWithTransformFileThatThrowsContinuesRemovingPackage() {
+        public void RemovePackageWithTransformFileThatThrowsContinuesRemovingPackage()
+        {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
             var mockRepository = new MockPackageRepository();
@@ -453,7 +478,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovePackageWithUnsupportedTransformFileDoesNothing() {
+        public void RemovePackageWithUnsupportedTransformFileDoesNothing()
+        {
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             mockProjectSystem.Setup(m => m.IsSupportedFile("web.config")).Returns(false);
@@ -483,7 +509,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovePackageRemovesDirectoriesAddedByPackageFilesIfEmpty() {
+        public void RemovePackageRemovesDirectoriesAddedByPackageFilesIfEmpty()
+        {
             // Arrange
             var mockProjectSystem = new MockProjectSystem();
             var mockRepository = new MockPackageRepository();
@@ -504,7 +531,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddPackageReferenceWhenOlderVersionOfPackageInstalledDoesAnUpgrade() {
+        public void AddPackageReferenceWhenOlderVersionOfPackageInstalledDoesAnUpgrade()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -542,7 +570,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageNullOrEmptyPackageIdThrows() {
+        public void UpdatePackageNullOrEmptyPackageIdThrows()
+        {
             // Arrange
             ProjectManager packageManager = CreateProjectManager();
 
@@ -552,7 +581,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageReferenceWithMixedDependenciesUpdatesPackageAndDependenciesIfUnused() {
+        public void UpdatePackageReferenceWithMixedDependenciesUpdatesPackageAndDependenciesIfUnused()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -607,7 +637,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageReferenceIfPackageNotReferencedThrows() {
+        public void UpdatePackageReferenceIfPackageNotReferencedThrows()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -618,7 +649,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageReferenceToOlderVersionThrows() {
+        public void UpdatePackageReferenceToOlderVersionThrows()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -640,7 +672,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageReferenceWithUnresolvedDependencyThrows() {
+        public void UpdatePackageReferenceWithUnresolvedDependencyThrows()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -672,7 +705,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageReferenceWithUpdateDependenciesSetToFalseIgnoresDependencies() {
+        public void UpdatePackageReferenceWithUpdateDependenciesSetToFalseIgnoresDependencies()
+        {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -714,7 +748,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageHasNoEffectIfConstraintsDefinedDontAllowForUpdates() {
+        public void UpdatePackageHasNoEffectIfConstraintsDefinedDontAllowForUpdates()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -739,7 +774,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdateDependencyDependentsHaveSatisfyableDependencies() {
+        public void UpdateDependencyDependentsHaveSatisfyableDependencies()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -785,7 +821,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageReferenceWithSatisfyableDependencies() {
+        public void UpdatePackageReferenceWithSatisfyableDependencies()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -849,7 +886,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageReferenceWithDependenciesInUseThrowsConflictError() {
+        public void UpdatePackageReferenceWithDependenciesInUseThrowsConflictError()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -903,7 +941,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageReferenceFromRepositorySuccesfullyUpdatesDependentsIfDependentsAreResolvable() {
+        public void UpdatePackageReferenceFromRepositorySuccesfullyUpdatesDependentsIfDependentsAreResolvable()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -940,7 +979,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageReferenceFromRepositoryFailsIfPackageHasUnresolvableDependents() {
+        public void UpdatePackageReferenceFromRepositoryFailsIfPackageHasUnresolvableDependents()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -963,7 +1003,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageReferenceFromRepositoryFailsIfPackageHasAnyUnresolvableDependents() {
+        public void UpdatePackageReferenceFromRepositoryFailsIfPackageHasAnyUnresolvableDependents()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -1004,7 +1045,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageReferenceFromRepositoryOverlappingDependencies() {
+        public void UpdatePackageReferenceFromRepositoryOverlappingDependencies()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -1054,7 +1096,8 @@ namespace NuGet.Test {
 
 
         [Fact]
-        public void UpdatePackageReferenceFromRepositoryChainedIncompatibleDependents() {
+        public void UpdatePackageReferenceFromRepositoryChainedIncompatibleDependents()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -1102,7 +1145,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageReferenceNoVersionSpecifiedShouldUpdateToLatest() {
+        public void UpdatePackageReferenceNoVersionSpecifiedShouldUpdateToLatest()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -1129,7 +1173,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UpdatePackageReferenceVersionSpeciedShouldUpdateToSpecifiedVersion() {
+        public void UpdatePackageReferenceVersionSpeciedShouldUpdateToSpecifiedVersion()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -1153,7 +1198,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovingPackageReferenceRemovesPackageButNotDependencies() {
+        public void RemovingPackageReferenceRemovesPackageButNotDependencies()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -1180,7 +1226,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovePackageReferenceOnlyRemovedAssembliesFromTheTargetFramework() {
+        public void RemovePackageReferenceOnlyRemovedAssembliesFromTheTargetFramework()
+        {
             // Arrange
             var net20 = new FrameworkName(".NETFramework", new Version("2.0"));
             var sourceRepository = new MockPackageRepository();
@@ -1215,7 +1262,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ReAddingAPackageReferenceAfterRemovingADependencyShouldReReferenceAllDependencies() {
+        public void ReAddingAPackageReferenceAfterRemovingADependencyShouldReReferenceAllDependencies()
+        {
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
@@ -1252,7 +1300,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddPackageReferenceWithAnyNonCompatibleReferenceThrowsAndPackageIsNotReferenced() {
+        public void AddPackageReferenceWithAnyNonCompatibleReferenceThrowsAndPackageIsNotReferenced()
+        {
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             var localRepository = new MockPackageRepository();
@@ -1272,7 +1321,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddPackageReferenceWithAnyNonCompatibleFrameworkReferenceDoesNotThrow() {
+        public void AddPackageReferenceWithAnyNonCompatibleFrameworkReferenceDoesNotThrow()
+        {
             // Arrange
             var mockProjectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             var localRepository = new MockPackageRepository();
@@ -1291,7 +1341,8 @@ namespace NuGet.Test {
             Assert.True(localRepository.Exists(mockPackage.Object));
         }
 
-        private ProjectManager CreateProjectManager() {
+        private ProjectManager CreateProjectManager()
+        {
             var projectSystem = new MockProjectSystem();
             return new ProjectManager(new MockPackageRepository(), new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
         }

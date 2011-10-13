@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace NuGetConsole {
+namespace NuGetConsole
+{
     [Serializable]
-    public class VsKeyInfo {
+    public class VsKeyInfo
+    {
         private static readonly Lazy<VsKeyInfo> VsKeyInfoReturn = new Lazy<VsKeyInfo>(
             () => Create(Key.Return, '\r', 13));
 
-        private VsKeyInfo() {
+        private VsKeyInfo()
+        {
         }
 
         public static VsKeyInfo Create(Key key,
@@ -18,9 +21,11 @@ namespace NuGetConsole {
             bool controlPressed = false,
             bool altPressed = false,
             bool capsLockToggled = false,
-            bool numLockToggled = false) {
+            bool numLockToggled = false)
+        {
 
-            return new VsKeyInfo {
+            return new VsKeyInfo
+            {
                 Key = key,
                 KeyChar = keyChar,
                 VirtualKey = virtualKey,
@@ -33,7 +38,8 @@ namespace NuGetConsole {
             };
         }
 
-        public static VsKeyInfo Enter {
+        public static VsKeyInfo Enter
+        {
             get { return VsKeyInfoReturn.Value; }
         }
 

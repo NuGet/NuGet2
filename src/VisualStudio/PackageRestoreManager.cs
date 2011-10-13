@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Globalization;
 using System.IO;
@@ -10,9 +9,11 @@ using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio.Resources;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
 
-namespace NuGet.VisualStudio {
+namespace NuGet.VisualStudio
+{
     [Export(typeof(IPackageRestoreManager))]
-    internal class PackageRestoreManager : IPackageRestoreManager {
+    internal class PackageRestoreManager : IPackageRestoreManager
+    {
         private const string DotNuGetFolder = ".nuget";
         private const string NuGetExeFile = ".nuget\\nuget.exe";
         private const string NuGetTargetsFile = ".nuget\\nuget.targets";
@@ -27,7 +28,7 @@ namespace NuGet.VisualStudio {
 
         [ImportingConstructor]
         public PackageRestoreManager(
-            ISolutionManager solutionManager, 
+            ISolutionManager solutionManager,
             IFileSystemProvider fileSystemProvider,
             IPackageRepositoryFactory packageRepositoryFactory,
             ISettings settings) :
@@ -35,7 +36,8 @@ namespace NuGet.VisualStudio {
                  solutionManager,
                  fileSystemProvider,
                  packageRepositoryFactory,
-                 ServiceLocator.GetGlobalService<SVsThreadedWaitDialogFactory, IVsThreadedWaitDialogFactory>()) {
+                 ServiceLocator.GetGlobalService<SVsThreadedWaitDialogFactory, IVsThreadedWaitDialogFactory>())
+        {
         }
 
         internal PackageRestoreManager(
@@ -43,7 +45,8 @@ namespace NuGet.VisualStudio {
             ISolutionManager solutionManager,
             IFileSystemProvider fileSystemProvider,
             IPackageRepositoryFactory packageRepositoryFactory,
-            IVsThreadedWaitDialogFactory waitDialogFactory) {
+            IVsThreadedWaitDialogFactory waitDialogFactory)
+        {
 
             System.Diagnostics.Debug.Assert(solutionManager != null);
             _dte = dte;
@@ -54,14 +57,18 @@ namespace NuGet.VisualStudio {
             _solutionManager.ProjectAdded += OnProjectAdded;
         }
 
-        public bool IsCurrentSolutionEnabled {
-            get {
-                if (!_solutionManager.IsSolutionOpen) {
+        public bool IsCurrentSolutionEnabled
+        {
+            get
+            {
+                if (!_solutionManager.IsSolutionOpen)
+                {
                     return false;
                 }
 
                 string solutionDirectory = _solutionManager.SolutionDirectory;
-                if (String.IsNullOrEmpty(solutionDirectory)) {
+                if (String.IsNullOrEmpty(solutionDirectory))
+                {
                     return false;
                 }
 
@@ -72,18 +79,22 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        public void EnableCurrentSolution(bool quietMode) {
-            if (!_solutionManager.IsSolutionOpen) {
+        public void EnableCurrentSolution(bool quietMode)
+        {
+            if (!_solutionManager.IsSolutionOpen)
+            {
                 throw new InvalidOperationException(VsResources.SolutionNotAvailable);
             }
 
-            if (!quietMode) {
+            if (!quietMode)
+            {
                 // if not in quiet mode, ask user for confirmation before proceeding
                 bool? result = MessageHelper.ShowQueryMessage(
-                    VsResources.PackageRestoreConfirmation, 
+                    VsResources.PackageRestoreConfirmation,
                     VsResources.DialogTitle,
                     showCancelButton: false);
-                if (result != true) {
+                if (result != true)
+                {
                     return;
                 }
             }
@@ -92,7 +103,8 @@ namespace NuGet.VisualStudio {
 
             IVsThreadedWaitDialog2 waitDialog;
             _waitDialogFactory.CreateInstance(out waitDialog);
-            try {
+            try
+            {
                 waitDialog.StartWaitDialog(
                     VsResources.DialogTitle,
                     VsResources.PackageRestoreWaitMessage,
@@ -105,17 +117,21 @@ namespace NuGet.VisualStudio {
 
                 EnablePackageRestore();
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 exception = ex;
                 ExceptionHelper.WriteToActivityLog(exception);
             }
-            finally {
+            finally
+            {
                 int canceled;
                 waitDialog.EndWaitDialog(out canceled);
             }
 
-            if (!quietMode) {
-                if (exception != null) {
+            if (!quietMode)
+            {
+                if (exception != null)
+                {
                     // show error message
                     MessageHelper.ShowErrorMessage(
                         VsResources.PackageRestoreErrorMessage +
@@ -124,7 +140,8 @@ namespace NuGet.VisualStudio {
                             ExceptionUtility.Unwrap(exception).Message,
                         VsResources.DialogTitle);
                 }
-                else {
+                else
+                {
                     // show success message
                     MessageHelper.ShowInfoMessage(
                         VsResources.PackageRestoreCompleted,
@@ -133,16 +150,20 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        private void EnablePackageRestore() {
+        private void EnablePackageRestore()
+        {
             EnsureNuGetBuild();
 
-            foreach (Project project in _solutionManager.GetProjects()) {
+            foreach (Project project in _solutionManager.GetProjects())
+            {
                 EnablePackageRestore(project);
             }
         }
 
-        private void EnablePackageRestore(Project project) {
-            if (project.IsWebSite()) {
+        private void EnablePackageRestore(Project project)
+        {
+            if (project.IsWebSite())
+            {
                 // Can't do anything with Website
                 return;
             }
@@ -153,7 +174,8 @@ namespace NuGet.VisualStudio {
             AddNuGetTargets(project, buildProject);
             SetMsBuildProjectProperty(project, buildProject, "RestorePackages", "true");
 
-            if (project.IsJavaScriptProject()) {
+            if (project.IsJavaScriptProject())
+            {
                 // JavaScript project requires an extra kick
                 // in order to save changes to the project file.
                 // TODO: Check with VS team to ask them to fix 
@@ -161,13 +183,15 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        private void AddNuGetTargets(Project project, MsBuildProject buildProject) {
+        private void AddNuGetTargets(Project project, MsBuildProject buildProject)
+        {
             string targetsPath = Path.Combine(@"$(SolutionDir)", NuGetTargetsFile);
 
             // adds an <Import> element to this project file.
             if (buildProject.Xml.Imports == null ||
                 buildProject.Xml.Imports.All(
-                    import => !targetsPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase))) {
+                    import => !targetsPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase)))
+            {
 
                 buildProject.Xml.AddImport(targetsPath);
                 project.Save();
@@ -175,11 +199,13 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        private void AddSolutionDirProperty(Project project, MsBuildProject buildProject) {
+        private void AddSolutionDirProperty(Project project, MsBuildProject buildProject)
+        {
             const string SolutionDirProperty = "SolutionDir";
 
             if (buildProject.Xml.Properties == null ||
-                buildProject.Xml.Properties.All(p => p.Name != SolutionDirProperty)) {
+                buildProject.Xml.Properties.All(p => p.Name != SolutionDirProperty))
+            {
 
                 string relativeSolutionPath = PathUtility.GetRelativePath(project.FullName, _solutionManager.SolutionDirectory);
                 relativeSolutionPath = PathUtility.EnsureTrailingSlash(relativeSolutionPath);
@@ -195,27 +221,32 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        private static void SetMsBuildProjectProperty(Project project, MsBuildProject buildProject, string name, string value) {
+        private static void SetMsBuildProjectProperty(Project project, MsBuildProject buildProject, string name, string value)
+        {
             buildProject.SetProperty(name, value);
             project.Save();
         }
 
-        private void EnsureNuGetBuild() {
+        private void EnsureNuGetBuild()
+        {
             string solutionDirectory = _solutionManager.SolutionDirectory;
             string nugetFolderPath = Path.Combine(solutionDirectory, DotNuGetFolder);
 
             IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(solutionDirectory);
 
-            if (!fileSystem.DirectoryExists(DotNuGetFolder) || 
+            if (!fileSystem.DirectoryExists(DotNuGetFolder) ||
                 !fileSystem.FileExists(NuGetExeFile) ||
-                !fileSystem.FileExists(NuGetTargetsFile)) {
+                !fileSystem.FileExists(NuGetTargetsFile))
+            {
 
                 // download NuGet.Build and NuGet.CommandLine packages into the .nuget folder
                 IPackageRepository nugetRepository = _packageRepositoryFactory.CreateRepository(NuGetConstants.DefaultFeedUrl);
                 var installPackages = new string[] { NuGetBuildPackageName, NuGetCommandLinePackageName };
-                foreach (var packageName in installPackages) {
+                foreach (var packageName in installPackages)
+                {
                     IPackage package = nugetRepository.FindPackage(packageName);
-                    if (package == null) {
+                    if (package == null)
+                    {
                         throw new InvalidOperationException(
                             String.Format(
                                 CultureInfo.InvariantCulture,
@@ -233,15 +264,18 @@ namespace NuGet.VisualStudio {
             }
         }
 
-        private void DisableSourceControlMode() {
+        private void DisableSourceControlMode()
+        {
             // get the settings for this solution
             var nugetFolder = Path.Combine(_solutionManager.SolutionDirectory, DotNuGetFolder);
             var settings = new Settings(_fileSystemProvider.GetFileSystem(nugetFolder));
             settings.DisableSourceControlMode();
         }
 
-        private void OnProjectAdded(object sender, ProjectEventArgs e) {
-            if (IsCurrentSolutionEnabled) {
+        private void OnProjectAdded(object sender, ProjectEventArgs e)
+        {
+            if (IsCurrentSolutionEnabled)
+            {
                 EnablePackageRestore(e.Project);
             }
         }

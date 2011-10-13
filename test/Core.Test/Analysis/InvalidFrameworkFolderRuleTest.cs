@@ -1,14 +1,15 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using NuGet.Analysis.Rules;
 using Xunit;
 
-namespace NuGet.Test.Analysis {
-    public class InvalidFrameworkFolderRuleTest {
+namespace NuGet.Test.Analysis
+{
+    public class InvalidFrameworkFolderRuleTest
+    {
         [Fact]
-        public void PackageWithNoLibFolderHasNoIssue() {
+        public void PackageWithNoLibFolderHasNoIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("A", content: new[] { "one", "two" });
             var rule = new InvalidFrameworkFolderRule();
@@ -21,12 +22,13 @@ namespace NuGet.Test.Analysis {
         }
 
         [Fact]
-        public void PackageWithValidFrameworkNamesHasNoIssue() {
+        public void PackageWithValidFrameworkNamesHasNoIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage(
-                "A", 
+                "A",
                 content: new[] { "one", "two" },
-                assemblyReferences: new[] { "lib\\sl4\\abc.dll" } );
+                assemblyReferences: new[] { "lib\\sl4\\abc.dll" });
             var rule = new InvalidFrameworkFolderRule();
 
             // Act
@@ -37,7 +39,8 @@ namespace NuGet.Test.Analysis {
         }
 
         [Fact]
-        public void PackageWithInvalidFrameworkNamesHasOneIssue() {
+        public void PackageWithInvalidFrameworkNamesHasOneIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage(
                 "A",

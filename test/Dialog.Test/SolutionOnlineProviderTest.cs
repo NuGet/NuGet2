@@ -10,12 +10,15 @@ using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using Xunit;
 
-namespace NuGet.Dialog.Test {
+namespace NuGet.Dialog.Test
+{
 
-    public class SolutionOnlineProviderTest {
+    public class SolutionOnlineProviderTest
+    {
 
         [Fact]
-        public void ExecuteMethodCallsInstallPackageMethodOnPackageManager() {
+        public void ExecuteMethodCallsInstallPackageMethodOnPackageManager()
+        {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
             var packageB = PackageUtility.CreatePackage("B", "2.0");
@@ -63,7 +66,8 @@ namespace NuGet.Dialog.Test {
 
             var manualEvent = new ManualResetEventSlim(false);
 
-            provider.ExecuteCompletedCallback = delegate {
+            provider.ExecuteCompletedCallback = delegate
+            {
                 // Assert
                 mockPackageManager.Verify(p => p.InstallPackage(
                     new Project[] { project1, project2 },
@@ -87,86 +91,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void ExecuteMethodDoNotCallInstallPackageIfUserPressCancelOnTheProjectSelectorButton() {
-            // Arrange
-            var packageA = PackageUtility.CreatePackage("A", "1.0");
-            var packageB = PackageUtility.CreatePackage("B", "2.0");
-            var packageC = PackageUtility.CreatePackage("C", "3.0");
-
-            var sourceRepository = new MockPackageRepository();
-            sourceRepository.AddPackage(packageA);
-            sourceRepository.AddPackage(packageC);
-            sourceRepository.AddPackage(packageB);
-
-            var localRepository = new MockPackageRepository();
-            localRepository.AddPackage(packageA);
-
-            var projectManager1 = new Mock<IProjectManager>();
-            projectManager1.Setup(p => p.LocalRepository).Returns(localRepository);
-
-            var projectManager2 = new Mock<IProjectManager>();
-            projectManager2.Setup(p => p.LocalRepository).Returns(localRepository);
-
-            var project1 = MockProjectUtility.CreateMockProject("Project1");
-            var project2 = MockProjectUtility.CreateMockProject("Project2");
-
-            var packageManager = new Mock<IVsPackageManager>();
-            packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
-            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project1))).Returns(projectManager1.Object);
-            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project2))).Returns(projectManager2.Object);
-            packageManager.Setup(p => p.IsProjectLevel(It.IsAny<IPackage>())).Returns(true);
-
-            var solutionManager = new Mock<ISolutionManager>();
-            solutionManager.Setup(p => p.GetProject(It.Is<string>(s => s == "Project1"))).Returns(project1);
-            solutionManager.Setup(p => p.GetProject(It.Is<string>(s => s == "Project2"))).Returns(project2);
-            solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
-
-            var mockWindowService = new Mock<IUserNotifierServices>();
-            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(
-                It.IsAny<string>(),
-                It.IsAny<IPackage>(), 
-                It.IsAny<Predicate<Project>>(), 
-                It.IsAny<Predicate<Project>>())).Returns((Func<IEnumerable<Project>>)null);
-
-            var provider = CreateSolutionOnlineProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, userNotifierServices: mockWindowService.Object);
-            var extensionTree = provider.ExtensionsTree;
-
-            var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
-            firstTreeNode.Repository.AddPackage(packageA);
-            firstTreeNode.Repository.AddPackage(packageB);
-            firstTreeNode.Repository.AddPackage(packageC);
-
-            provider.SelectedNode = firstTreeNode;
-            IVsPackageManager activePackageManager = provider.GetActivePackageManager();
-            Mock<IVsPackageManager> mockPackageManager = Mock.Get<IVsPackageManager>(activePackageManager);
-
-            var manualEvent = new ManualResetEventSlim(false);
-
-            provider.ExecuteCompletedCallback = delegate {
-                // Assert
-                mockPackageManager.Verify(p => p.InstallPackage(
-                    It.IsAny<IEnumerable<Project>>(),
-                    packageB,
-                    It.IsAny<IEnumerable<PackageOperation>>(),
-                    false,
-                    false,
-                    provider,
-                    provider), Times.Never());
-
-                manualEvent.Set();
-            };
-
-            var extensionB = new PackageItem(provider, packageB);
-
-            // Act
-            provider.Execute(extensionB);
-
-            // do not allow the method to return
-            manualEvent.Wait();
-        }
-
-        [Fact]
-        public void ExecuteMethodDoNotCallInstallPackageIfUserDoesNotSelectAnyProject() {
+        public void ExecuteMethodDoNotCallInstallPackageIfUserPressCancelOnTheProjectSelectorButton()
+        {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
             var packageB = PackageUtility.CreatePackage("B", "2.0");
@@ -204,7 +130,88 @@ namespace NuGet.Dialog.Test {
             mockWindowService.Setup(p => p.ShowProjectSelectorWindow(
                 It.IsAny<string>(),
                 It.IsAny<IPackage>(),
-                It.IsAny<Predicate<Project>>(), 
+                It.IsAny<Predicate<Project>>(),
+                It.IsAny<Predicate<Project>>())).Returns((Func<IEnumerable<Project>>)null);
+
+            var provider = CreateSolutionOnlineProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, userNotifierServices: mockWindowService.Object);
+            var extensionTree = provider.ExtensionsTree;
+
+            var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
+            firstTreeNode.Repository.AddPackage(packageA);
+            firstTreeNode.Repository.AddPackage(packageB);
+            firstTreeNode.Repository.AddPackage(packageC);
+
+            provider.SelectedNode = firstTreeNode;
+            IVsPackageManager activePackageManager = provider.GetActivePackageManager();
+            Mock<IVsPackageManager> mockPackageManager = Mock.Get<IVsPackageManager>(activePackageManager);
+
+            var manualEvent = new ManualResetEventSlim(false);
+
+            provider.ExecuteCompletedCallback = delegate
+            {
+                // Assert
+                mockPackageManager.Verify(p => p.InstallPackage(
+                    It.IsAny<IEnumerable<Project>>(),
+                    packageB,
+                    It.IsAny<IEnumerable<PackageOperation>>(),
+                    false,
+                    false,
+                    provider,
+                    provider), Times.Never());
+
+                manualEvent.Set();
+            };
+
+            var extensionB = new PackageItem(provider, packageB);
+
+            // Act
+            provider.Execute(extensionB);
+
+            // do not allow the method to return
+            manualEvent.Wait();
+        }
+
+        [Fact]
+        public void ExecuteMethodDoNotCallInstallPackageIfUserDoesNotSelectAnyProject()
+        {
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+            var packageB = PackageUtility.CreatePackage("B", "2.0");
+            var packageC = PackageUtility.CreatePackage("C", "3.0");
+
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageC);
+            sourceRepository.AddPackage(packageB);
+
+            var localRepository = new MockPackageRepository();
+            localRepository.AddPackage(packageA);
+
+            var projectManager1 = new Mock<IProjectManager>();
+            projectManager1.Setup(p => p.LocalRepository).Returns(localRepository);
+
+            var projectManager2 = new Mock<IProjectManager>();
+            projectManager2.Setup(p => p.LocalRepository).Returns(localRepository);
+
+            var project1 = MockProjectUtility.CreateMockProject("Project1");
+            var project2 = MockProjectUtility.CreateMockProject("Project2");
+
+            var packageManager = new Mock<IVsPackageManager>();
+            packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project1))).Returns(projectManager1.Object);
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project2))).Returns(projectManager2.Object);
+            packageManager.Setup(p => p.IsProjectLevel(It.IsAny<IPackage>())).Returns(true);
+
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(p => p.GetProject(It.Is<string>(s => s == "Project1"))).Returns(project1);
+            solutionManager.Setup(p => p.GetProject(It.Is<string>(s => s == "Project2"))).Returns(project2);
+            solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
+
+            var mockWindowService = new Mock<IUserNotifierServices>();
+            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(
+                It.IsAny<string>(),
+                It.IsAny<IPackage>(),
+                It.IsAny<Predicate<Project>>(),
                 It.IsAny<Predicate<Project>>())).Returns(new Project[0]);
 
             var provider = CreateSolutionOnlineProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, userNotifierServices: mockWindowService.Object);
@@ -221,7 +228,8 @@ namespace NuGet.Dialog.Test {
 
             var manualEvent = new ManualResetEventSlim(false);
 
-            provider.ExecuteCompletedCallback = delegate {
+            provider.ExecuteCompletedCallback = delegate
+            {
                 // Assert
                 mockPackageManager.Verify(p => p.InstallPackage(
                     It.IsAny<IEnumerable<Project>>(),
@@ -251,8 +259,10 @@ namespace NuGet.Dialog.Test {
             IPackageSourceProvider packageSourceProvider = null,
             IScriptExecutor scriptExecutor = null,
             ISolutionManager solutionManager = null,
-            IUserNotifierServices userNotifierServices = null) {
-            if (packageManager == null) {
+            IUserNotifierServices userNotifierServices = null)
+        {
+            if (packageManager == null)
+            {
                 var packageManagerMock = new Mock<IVsPackageManager>();
                 var sourceRepository = new MockPackageRepository();
                 packageManagerMock.Setup(p => p.SourceRepository).Returns(sourceRepository);
@@ -260,13 +270,15 @@ namespace NuGet.Dialog.Test {
                 packageManager = packageManagerMock.Object;
             }
 
-            if (repositoryFactory == null) {
+            if (repositoryFactory == null)
+            {
                 var repositoryFactoryMock = new Mock<IPackageRepositoryFactory>();
                 repositoryFactoryMock.Setup(p => p.CreateRepository(It.IsAny<string>())).Returns(new MockPackageRepository());
                 repositoryFactory = repositoryFactoryMock.Object;
             }
 
-            if (packageSourceProvider == null) {
+            if (packageSourceProvider == null)
+            {
                 var packageSourceProviderMock = new Mock<IPackageSourceProvider>();
                 packageSourceProviderMock.Setup(p => p.LoadPackageSources()).Returns(
                         new PackageSource[2] {
@@ -282,20 +294,23 @@ namespace NuGet.Dialog.Test {
 
             var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
 
-            if (scriptExecutor == null) {
+            if (scriptExecutor == null)
+            {
                 scriptExecutor = new Mock<IScriptExecutor>().Object;
             }
 
-            if (solutionManager == null) {
+            if (solutionManager == null)
+            {
                 solutionManager = new Mock<ISolutionManager>().Object;
             }
 
-            if (userNotifierServices == null) {
+            if (userNotifierServices == null)
+            {
                 var mockWindowServices = new Mock<IUserNotifierServices>();
                 mockWindowServices.Setup(p => p.ShowProjectSelectorWindow(
                     It.IsAny<string>(),
                     It.IsAny<IPackage>(),
-                    It.IsAny<Predicate<Project>>(), 
+                    It.IsAny<Predicate<Project>>(),
                     It.IsAny<Predicate<Project>>()))
                 .Returns(solutionManager.GetProjects());
                 userNotifierServices = mockWindowServices.Object;
@@ -308,7 +323,8 @@ namespace NuGet.Dialog.Test {
                 new MockOutputConsoleProvider()
             );
 
-            if (localRepository == null) {
+            if (localRepository == null)
+            {
                 localRepository = new Mock<IPackageRepository>().Object;
             }
 

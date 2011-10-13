@@ -5,8 +5,10 @@ using System.Management.Automation;
 using Microsoft.Internal.Web.Utils;
 using Microsoft.PowerShell.Commands;
 
-namespace NuGet.PowerShell.Commands {
-    public static class PSPathUtility {
+namespace NuGet.PowerShell.Commands
+{
+    public static class PSPathUtility
+    {
         /// <summary>
         /// Translate a PSPath into a System.IO.* friendly Win32 path.
         /// Does not resolve/glob wildcards.
@@ -20,8 +22,10 @@ namespace NuGet.PowerShell.Commands {
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Justification = "Following BCL TryParse pattern.")]
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "3#", Justification = "Following BCL TryParse pattern.")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "ps", Justification = "ps is a common powershell prefix")]
-        public static bool TryTranslatePSPath(SessionState session, string psPath, out string path, out bool? exists, out string errorMessage) {
-            if (String.IsNullOrEmpty(psPath)) {
+        public static bool TryTranslatePSPath(SessionState session, string psPath, out string path, out bool? exists, out string errorMessage)
+        {
+            if (String.IsNullOrEmpty(psPath))
+            {
                 throw new ArgumentException(
                     String.Format(
                         CultureInfo.CurrentCulture,
@@ -35,17 +39,21 @@ namespace NuGet.PowerShell.Commands {
             errorMessage = null;
 
             // session is null during unit tests
-            if (session == null) {
+            if (session == null)
+            {
                 return false;
             }
 
-            if (!session.Path.IsValid(psPath)) {
+            if (!session.Path.IsValid(psPath))
+            {
                 errorMessage = String.Format(
                     CultureInfo.CurrentCulture,
                     Resources.Cmdlet_InvalidPathSyntax, psPath);
             }
-            else {
-                try {
+            else
+            {
+                try
+                {
                     // we do not glob wildcards (literalpath.)
                     exists = session.InvokeProvider.Item.Exists(psPath, force: false, literalPath: true);
 
@@ -56,17 +64,21 @@ namespace NuGet.PowerShell.Commands {
                     path = session.Path.GetUnresolvedProviderPathFromPSPath(psPath, out provider, out drive);
 
                     // ensure path is on the filesystem (not registry, certificate, variable etc.)
-                    if (provider.ImplementingType != typeof(FileSystemProvider)) {
+                    if (provider.ImplementingType != typeof(FileSystemProvider))
+                    {
                         errorMessage = Resources.Cmdlet_InvalidProvider;
                     }
-                    else {
+                    else
+                    {
                         succeeded = true;
                     }
                 }
-                catch (ProviderNotFoundException) {
+                catch (ProviderNotFoundException)
+                {
                     errorMessage = Resources.Cmdlet_InvalidProvider;
                 }
-                catch (DriveNotFoundException ex) {
+                catch (DriveNotFoundException ex)
+                {
                     errorMessage = String.Format(
                         CultureInfo.CurrentCulture,
                         Resources.Cmdlet_InvalidPSDrive, ex.ItemName);

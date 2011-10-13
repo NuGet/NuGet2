@@ -1,19 +1,20 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.VisualStudio.ExtensionsExplorer;
-
 using Moq;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
-using Xunit;
 using NuGet.Test.Mocks;
+using Xunit;
 
-namespace NuGet.Dialog.Test {
+namespace NuGet.Dialog.Test
+{
 
-    public class PackagesSearchNodeTest {
+    public class PackagesSearchNodeTest
+    {
 
         [Fact]
-        public void NamePropertyIsValid() {
+        public void NamePropertyIsValid()
+        {
             // Arrange
             PackagesSearchNode node = CreatePackagesSearchNode("hello", 1);
 
@@ -22,7 +23,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void IsSearchResultsNodePropertyIsValid() {
+        public void IsSearchResultsNodePropertyIsValid()
+        {
             // Arrange
             PackagesSearchNode node = CreatePackagesSearchNode("hello", 1);
 
@@ -31,7 +33,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void SetSearchTextMethodChangesQuery() {
+        public void SetSearchTextMethodChangesQuery()
+        {
             // Arrange
             PackagesSearchNode node = CreatePackagesSearchNode("A", 5);
 
@@ -50,7 +53,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void GetPackagesReturnsCorrectPackagesBasedOnExtensions() {
+        public void GetPackagesReturnsCorrectPackagesBasedOnExtensions()
+        {
             // Arrange
             PackagesSearchNode node = CreatePackagesSearchNode("A", 5);
 
@@ -62,7 +66,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void GetPackagesDoNotCollapseVersionsIfBaseNodeDoesNotDoSo() {
+        public void GetPackagesDoNotCollapseVersionsIfBaseNodeDoesNotDoSo()
+        {
             // Arrange
             PackagesProviderBase provider = new MockPackagesProvider();
 
@@ -95,7 +100,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void GetPackagesReturnsCorrectPackagesBasedOnExtensions2() {
+        public void GetPackagesReturnsCorrectPackagesBasedOnExtensions2()
+        {
             // Arrange
             PackagesSearchNode node = CreatePackagesSearchNode("B", 5);
 
@@ -107,7 +113,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void GetPackagesReturnsUpdatesPackageIfBaseNodeIsUpdates() {
+        public void GetPackagesReturnsUpdatesPackageIfBaseNodeIsUpdates()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
             localRepository.AddPackage(PackageUtility.CreatePackage("A1", "1.0"));
@@ -132,21 +139,25 @@ namespace NuGet.Dialog.Test {
             Assert.Equal(new SemanticVersion("2.0"), packages[0].Version);
         }
 
-        private static PackagesSearchNode CreatePackagesSearchNode(string searchTerm, int numberOfPackages = 1, bool collapseVersions = true, PackagesTreeNodeBase baseNode = null) {
+        private static PackagesSearchNode CreatePackagesSearchNode(string searchTerm, int numberOfPackages = 1, bool collapseVersions = true, PackagesTreeNodeBase baseNode = null)
+        {
             PackagesProviderBase provider = new MockPackagesProvider();
 
             IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
             PackagesTreeNodeBase baseTreeNode;
-            if (baseNode != null) {
+            if (baseNode != null)
+            {
                 baseTreeNode = baseNode;
             }
-            else {
+            else
+            {
                 baseTreeNode = new MockTreeNode(parentTreeNode, provider, numberOfPackages, collapseVersions);
             }
             return new PackagesSearchNode(provider, parentTreeNode, baseTreeNode, searchTerm);
         }
 
-        private static UpdatesTreeNode CreateUpdatesTreeNode(IPackageRepository localRepository, IPackageRepository sourceRepository, string category = "Mock node") {
+        private static UpdatesTreeNode CreateUpdatesTreeNode(IPackageRepository localRepository, IPackageRepository sourceRepository, string category = "Mock node")
+        {
             PackagesProviderBase provider = new MockPackagesProvider();
             IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
             return new UpdatesTreeNode(provider, category, parentTreeNode, localRepository, sourceRepository);

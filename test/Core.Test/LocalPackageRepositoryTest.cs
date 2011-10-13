@@ -2,15 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class LocalPackageRepositoryTest {
+namespace NuGet.Test
+{
+
+    public class LocalPackageRepositoryTest
+    {
         [Fact]
-        public void GetPackageFilesOnlyDetectsFilesWithPackageExtension() {
+        public void GetPackageFilesOnlyDetectsFilesWithPackageExtension()
+        {
             // Arrange
             var mockFileSystem = new MockProjectSystem();
             mockFileSystem.AddFile("foo.nupkg");
@@ -28,7 +31,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPackageFilesDetectsFilesInRootOrFirstLevelOfFolders() {
+        public void GetPackageFilesDetectsFilesInRootOrFirstLevelOfFolders()
+        {
             // Arrange
             var mockFileSystem = new MockProjectSystem();
             mockFileSystem.AddFile("P1.nupkg");
@@ -50,7 +54,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPackagesOnlyRetrievesPackageFilesWhereLastModifiedIsOutOfDate() {
+        public void GetPackagesOnlyRetrievesPackageFilesWhereLastModifiedIsOutOfDate()
+        {
             // Arrange
             var mockFileSystem = new Mock<MockProjectSystem>() { CallBase = true };
             var lastModified = new Dictionary<string, DateTimeOffset>();
@@ -61,7 +66,8 @@ namespace NuGet.Test {
             var repository = new LocalPackageRepository(new DefaultPackagePathResolver(mockFileSystem.Object),
                                                         mockFileSystem.Object);
             var results = new List<string>();
-            Func<string, IPackage> openPackage = p => {
+            Func<string, IPackage> openPackage = p =>
+            {
                 results.Add(p);
                 string id = Path.GetFileNameWithoutExtension(p);
                 return PackageUtility.CreatePackage(id, "1.0");
@@ -87,14 +93,16 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FindPackageMatchesExactVersionIfSideBySideIsDisabled() {
+        public void FindPackageMatchesExactVersionIfSideBySideIsDisabled()
+        {
             // Arrange
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile(@"A\A.nupkg");
 
             var repository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem, enableCaching: false);
             var searchedPaths = new List<string>();
-            Func<string, IPackage> openPackage = p => {
+            Func<string, IPackage> openPackage = p =>
+            {
                 searchedPaths.Add(p);
                 string id = Path.GetFileNameWithoutExtension(p);
                 return PackageUtility.CreatePackage("A", "1.1");
@@ -117,7 +125,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FindPackageMatchesExactVersionIfSideBySideIsEnabled() {
+        public void FindPackageMatchesExactVersionIfSideBySideIsEnabled()
+        {
             // Arrange
             var fileSystem = new Mock<MockProjectSystem> { CallBase = true };
             fileSystem.Setup(c => c.FileExists(It.Is<string>(a => a.Equals(@"A.1.0\A.1.0.nupkg")))).Returns(false);
@@ -126,7 +135,8 @@ namespace NuGet.Test {
 
             var repository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem.Object, useSideBySidePaths: true), fileSystem.Object, enableCaching: false);
             var searchedPaths = new List<string>();
-            Func<string, IPackage> openPackage = p => {
+            Func<string, IPackage> openPackage = p =>
+            {
                 searchedPaths.Add(p);
                 string id = Path.GetFileNameWithoutExtension(p);
                 return PackageUtility.CreatePackage("A", "1.1");
@@ -150,7 +160,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddPackageAddsFileToFileSystem() {
+        public void AddPackageAddsFileToFileSystem()
+        {
             // Arrange
             var mockFileSystem = new MockProjectSystem();
             var repository = new LocalPackageRepository(new DefaultPackagePathResolver(mockFileSystem),
@@ -165,7 +176,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovePackageRemovesPackageFileAndDirectoryAndRoot() {
+        public void RemovePackageRemovesPackageFileAndDirectoryAndRoot()
+        {
             // Arrange
             var mockFileSystem = new MockProjectSystem();
             mockFileSystem.AddFile(@"A.1.0\A.1.0.nupkg");
@@ -184,7 +196,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovePackageDoesNotRemovesRootIfNotEmpty() {
+        public void RemovePackageDoesNotRemovesRootIfNotEmpty()
+        {
             // Arrange
             var mockFileSystem = new MockProjectSystem();
             mockFileSystem.AddFile(@"A.1.0\A.1.0.nupkg");
@@ -202,7 +215,8 @@ namespace NuGet.Test {
             Assert.True(mockFileSystem.Deleted.Contains(@"A.1.0\A.1.0.nupkg"));
         }
 
-        private static DateTimeOffset GetDateTimeOffset(int seconds) {
+        private static DateTimeOffset GetDateTimeOffset(int seconds)
+        {
             return new DateTimeOffset(1000, 10, 1, 0, 0, seconds, TimeSpan.Zero);
         }
     }

@@ -5,10 +5,12 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using NuGet.Common;
 
-namespace NuGet.Commands {
+namespace NuGet.Commands
+{
     [Command(typeof(NuGetResources), "spec", "SpecCommandDescription", MaxArgs = 1,
             UsageSummaryResourceName = "SpecCommandUsageSummary", UsageExampleResourceName = "SpecCommandUsageExamples")]
-    public class SpecCommand : Command {
+    public class SpecCommand : Command
+    {
         internal static readonly string SampleProjectUrl = "http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE";
         internal static readonly string SampleLicenseUrl = "http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE";
         internal static readonly string SampleIconUrl = "http://ICON_URL_HERE_OR_DELETE_THIS_LINE";
@@ -18,23 +20,27 @@ namespace NuGet.Commands {
         internal static readonly ManifestDependency SampleManifestDependency = new ManifestDependency { Id = "SampleDependency", Version = "1.0" };
 
         [Option(typeof(NuGetResources), "SpecCommandAssemblyPathDescription")]
-        public string AssemblyPath {
+        public string AssemblyPath
+        {
             get;
             set;
         }
 
         [Option(typeof(NuGetResources), "SpecCommandForceDescription")]
-        public bool Force {
+        public bool Force
+        {
             get;
             set;
         }
 
-        public override void ExecuteCommand() {
+        public override void ExecuteCommand()
+        {
             var manifest = new Manifest();
             string projectFile = null;
             string fileName = null;
 
-            if (!String.IsNullOrEmpty(AssemblyPath)) {
+            if (!String.IsNullOrEmpty(AssemblyPath))
+            {
                 // Extract metadata from the assembly
                 string path = Path.Combine(Directory.GetCurrentDirectory(), AssemblyPath);
                 AssemblyMetadata metadata = AssemblyMetadataExtractor.GetMetadata(path);
@@ -43,12 +49,15 @@ namespace NuGet.Commands {
                 manifest.Metadata.Authors = metadata.Company;
                 manifest.Metadata.Description = metadata.Description;
             }
-            else {
-                if (!ProjectHelper.TryGetProjectFile(out projectFile)) {
+            else
+            {
+                if (!ProjectHelper.TryGetProjectFile(out projectFile))
+                {
                     manifest.Metadata.Id = Arguments.Any() ? Arguments[0] : "Package";
                     manifest.Metadata.Version = "1.0.0";
                 }
-                else {
+                else
+                {
                     fileName = Path.GetFileNameWithoutExtension(projectFile);
                     manifest.Metadata.Id = "$id$";
                     manifest.Metadata.Title = "$title$";
@@ -62,9 +71,11 @@ namespace NuGet.Commands {
             fileName = fileName ?? manifest.Metadata.Id;
 
             // If we're using a project file then we want the a minimal nuspec
-            if (String.IsNullOrEmpty(projectFile)) {
+            if (String.IsNullOrEmpty(projectFile))
+            {
                 manifest.Metadata.Description = manifest.Metadata.Description ?? SampleDescription;
-                if (String.IsNullOrEmpty(manifest.Metadata.Authors)) {
+                if (String.IsNullOrEmpty(manifest.Metadata.Authors))
+                {
                     manifest.Metadata.Authors = Environment.UserName;
                 }
                 manifest.Metadata.Dependencies = new List<ManifestDependency>();
@@ -80,12 +91,16 @@ namespace NuGet.Commands {
             string nuspecFile = fileName + Constants.ManifestExtension;
 
             // Skip the creation if the file exists and force wasn't specified
-            if (File.Exists(nuspecFile) && !Force) {
+            if (File.Exists(nuspecFile) && !Force)
+            {
                 Console.WriteLine(NuGetResources.SpecCommandFileExists, nuspecFile);
             }
-            else {
-                try {
-                    using (var stream = new MemoryStream()) {
+            else
+            {
+                try
+                {
+                    using (var stream = new MemoryStream())
+                    {
                         manifest.Save(stream, validate: false);
                         stream.Seek(0, SeekOrigin.Begin);
                         string content = stream.ReadToEnd();
@@ -94,7 +109,8 @@ namespace NuGet.Commands {
 
                     Console.WriteLine(NuGetResources.SpecCommandCreatedNuSpec, nuspecFile);
                 }
-                catch {
+                catch
+                {
                     // Cleanup the file if it fails to save for some reason
                     File.Delete(nuspecFile);
                     throw;
@@ -102,7 +118,8 @@ namespace NuGet.Commands {
             }
         }
 
-        private static string RemoveSchemaNamespace(string content) {
+        private static string RemoveSchemaNamespace(string content)
+        {
             // This seems to be the only way to clear out xml namespaces.
             return Regex.Replace(content, @"(xmlns:?[^=]*=[""][^""]*[""])", String.Empty, RegexOptions.IgnoreCase | RegexOptions.Multiline);
         }

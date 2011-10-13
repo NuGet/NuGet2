@@ -1,4 +1,5 @@
-namespace Microsoft.Internal.Web.Utils {
+namespace Microsoft.Internal.Web.Utils
+{
     using System;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
@@ -10,7 +11,8 @@ namespace Microsoft.Internal.Web.Utils {
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
     [CompilerGenerated()]
-    internal static class CommonResources {
+    internal static class CommonResources
+    {
 
         private static global::System.Resources.ResourceManager resourceMan;
 
@@ -20,9 +22,12 @@ namespace Microsoft.Internal.Web.Utils {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
-            get {
-                if (object.ReferenceEquals(resourceMan, null)) {
+        internal static global::System.Resources.ResourceManager ResourceManager
+        {
+            get
+            {
+                if (object.ReferenceEquals(resourceMan, null))
+                {
                     // Find the CommonResources.resources file's full resource name in this assembly
                     string commonResourcesName = Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(s => s.EndsWith("CommonResources.resources", StringComparison.OrdinalIgnoreCase)).Single();
 
@@ -43,11 +48,14 @@ namespace Microsoft.Internal.Web.Utils {
         /// </summary>
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Property may not be used in every assembly it is imported into")]
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
-            get {
+        internal static global::System.Globalization.CultureInfo Culture
+        {
+            get
+            {
                 return resourceCulture;
             }
-            set {
+            set
+            {
                 resourceCulture = value;
             }
         }
@@ -56,8 +64,10 @@ namespace Microsoft.Internal.Web.Utils {
         ///   Looks up a localized string similar to {0} cannot be null or an empty string.
         /// </summary>
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Property may not be used in every assembly it is imported into")]
-        internal static string Argument_Cannot_Be_Null_Or_Empty {
-            get {
+        internal static string Argument_Cannot_Be_Null_Or_Empty
+        {
+            get
+            {
                 return ResourceManager.GetString("Argument_Cannot_Be_Null_Or_Empty", resourceCulture);
             }
         }
@@ -66,8 +76,10 @@ namespace Microsoft.Internal.Web.Utils {
         ///   Looks up a localized string similar to {0} must be between {1} and {2}.
         /// </summary>
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Property may not be used in every assembly it is imported into")]
-        internal static string Argument_Must_Be_Between {
-            get {
+        internal static string Argument_Must_Be_Between
+        {
+            get
+            {
                 return ResourceManager.GetString("Argument_Must_Be_Between", resourceCulture);
             }
         }
@@ -76,8 +88,10 @@ namespace Microsoft.Internal.Web.Utils {
         ///   Looks up a localized string similar to {0} must be a valid value from the {1} enumeration.
         /// </summary>
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Property may not be used in every assembly it is imported into")]
-        internal static string Argument_Must_Be_Enum_Member {
-            get {
+        internal static string Argument_Must_Be_Enum_Member
+        {
+            get
+            {
                 return ResourceManager.GetString("Argument_Must_Be_Enum_Member", resourceCulture);
             }
         }
@@ -86,8 +100,10 @@ namespace Microsoft.Internal.Web.Utils {
         ///   Looks up a localized string similar to {0} must be greater than {1}.
         /// </summary>
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Property may not be used in every assembly it is imported into")]
-        internal static string Argument_Must_Be_GreaterThan {
-            get {
+        internal static string Argument_Must_Be_GreaterThan
+        {
+            get
+            {
                 return ResourceManager.GetString("Argument_Must_Be_GreaterThan", resourceCulture);
             }
         }
@@ -96,8 +112,10 @@ namespace Microsoft.Internal.Web.Utils {
         ///   Looks up a localized string similar to {0} must be greater than or equal to {1}.
         /// </summary>
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Property may not be used in every assembly it is imported into")]
-        internal static string Argument_Must_Be_GreaterThanOrEqualTo {
-            get {
+        internal static string Argument_Must_Be_GreaterThanOrEqualTo
+        {
+            get
+            {
                 return ResourceManager.GetString("Argument_Must_Be_GreaterThanOrEqualTo", resourceCulture);
             }
         }
@@ -106,8 +124,10 @@ namespace Microsoft.Internal.Web.Utils {
         ///   Looks up a localized string similar to {0} must be less than {1}.
         /// </summary>
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Property may not be used in every assembly it is imported into")]
-        internal static string Argument_Must_Be_LessThan {
-            get {
+        internal static string Argument_Must_Be_LessThan
+        {
+            get
+            {
                 return ResourceManager.GetString("Argument_Must_Be_LessThan", resourceCulture);
             }
         }
@@ -116,8 +136,10 @@ namespace Microsoft.Internal.Web.Utils {
         ///   Looks up a localized string similar to {0} must be less than or equal to {1}.
         /// </summary>
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Property may not be used in every assembly it is imported into")]
-        internal static string Argument_Must_Be_LessThanOrEqualTo {
-            get {
+        internal static string Argument_Must_Be_LessThanOrEqualTo
+        {
+            get
+            {
                 return ResourceManager.GetString("Argument_Must_Be_LessThanOrEqualTo", resourceCulture);
             }
         }
@@ -126,8 +148,10 @@ namespace Microsoft.Internal.Web.Utils {
         ///   Looks up a localized string similar to {0} cannot be an empty string, it must either be null or a non-empty string.
         /// </summary>
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Property may not be used in every assembly it is imported into")]
-        internal static string Argument_Must_Be_Null_Or_Non_Empty {
-            get {
+        internal static string Argument_Must_Be_Null_Or_Non_Empty
+        {
+            get
+            {
                 return ResourceManager.GetString("Argument_Must_Be_Null_Or_Non_Empty", resourceCulture);
             }
         }

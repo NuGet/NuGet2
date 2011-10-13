@@ -2,7 +2,8 @@ using System;
 using System.Management.Automation;
 using System.Reflection;
 
-namespace NuGetConsole.Host.PowerShell.Implementation {
+namespace NuGetConsole.Host.PowerShell.Implementation
+{
     /// <summary>
     /// This class helps provide Get-Interface for PowerShell host.
     /// 
@@ -14,24 +15,30 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
     /// Note that the full class name is reference in Add-WrapperMembers.ps1 (Resources.resx) and Profile.ps1.
     /// Be sure to update all the above 3 places if full class name is changed.
     /// </remarks>
-    public class PSTypeWrapper : TypeWrapper<PSObject> {
+    public class PSTypeWrapper : TypeWrapper<PSObject>
+    {
         PSTypeWrapper(object wrappedObject)
-            : base(wrappedObject) {
+            : base(wrappedObject)
+        {
         }
 
-        internal override MethodBinder Binder {
+        internal override MethodBinder Binder
+        {
             get { return PSMethodBinder.Instance; }
         }
 
-        protected override PSObject CreateInterfaceWrapper(TypeWrapper<PSObject> wrapper, Type interfaceType) {
+        protected override PSObject CreateInterfaceWrapper(TypeWrapper<PSObject> wrapper, Type interfaceType)
+        {
             PSObject psObject = new PSObject(wrapper);
             AddWrapperMembersScript.Invoke(psObject, wrapper.WrappedObject, interfaceType);
             return psObject;
         }
 
         static ScriptBlock _addWrapperMembersScript;
-        static ScriptBlock AddWrapperMembersScript {
-            get {
+        static ScriptBlock AddWrapperMembersScript
+        {
+            get
+            {
                 return _addWrapperMembersScript ??
                     (_addWrapperMembersScript = ScriptBlock.Create(Resources.Add_WrapperMembers));
             }
@@ -43,7 +50,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         /// <param name="scriptValue">A PowerShell BaseObject.</param>
         /// <param name="interfaceType">An interface type expected.</param>
         /// <returns>A PSObject which exposes properties/methods to call the interface members.</returns>
-        public static PSObject GetInterface(object scriptValue, Type interfaceType) {
+        public static PSObject GetInterface(object scriptValue, Type interfaceType)
+        {
             return GetInterface(scriptValue, interfaceType,
                 obj => obj as PSTypeWrapper ?? new PSTypeWrapper(obj));
         }
@@ -58,14 +66,16 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
         /// <param name="method">The method info.</param>
         /// <param name="parameters">Raw arguments. If it contains [ref] args, this method will set their result Values.</param>
         /// <returns>Invoke method result.</returns>
-        public static object InvokeMethod(object target, MethodInfo method, PSObject[] parameters) {
+        public static object InvokeMethod(object target, MethodInfo method, PSObject[] parameters)
+        {
             return PSMethodBinder.Instance.Invoke(method, target, parameters);
         }
 
         /// <summary>
         /// A PS MethodBinder to support PSTypeWrapper.
         /// </summary>
-        class PSMethodBinder : MethodBinder {
+        class PSMethodBinder : MethodBinder
+        {
             /// <summary>
             /// The singleton instance of PSMethodBinder.
             /// </summary>
@@ -74,7 +84,8 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             /// <summary>
             /// Private constructor.
             /// </summary>
-            PSMethodBinder() {
+            PSMethodBinder()
+            {
             }
 
             /// <summary>
@@ -82,29 +93,34 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
             /// </summary>
             /// <param name="arg">The PSObject.</param>
             /// <returns>The BaseObject of arg, or null if arg is null.</returns>
-            static object GetBaseObject(PSObject arg) {
+            static object GetBaseObject(PSObject arg)
+            {
                 return arg != null ? arg.BaseObject : null;
             }
 
             /// <summary>
             /// Override to always unwrap args.
             /// </summary>
-            protected override bool IsUnwrapArgsNeeded(ParameterInfo[] paramInfos) {
+            protected override bool IsUnwrapArgsNeeded(ParameterInfo[] paramInfos)
+            {
                 // Unwrap PSObject parameters to BaseObjects are always needed, plus we need ChangeType
                 return true;
             }
 
-            protected override bool TryConvertArg(ParameterInfo paramInfo, object arg, out object argValue) {
+            protected override bool TryConvertArg(ParameterInfo paramInfo, object arg, out object argValue)
+            {
                 object argBaseObject = GetBaseObject(arg as PSObject);
 
                 // normal byval parameter
-                if (!paramInfo.IsOut) {
+                if (!paramInfo.IsOut)
+                {
                     argValue = ChangeType(paramInfo, argBaseObject);
                     return true; // matched
                 }
 
                 var psReference = argBaseObject as PSReference;
-                if (psReference != null) {
+                if (psReference != null)
+                {
                     argValue = paramInfo.IsIn ? ChangeType(paramInfo, psReference.Value) : null;
                     return true; // matched
                 }
@@ -113,15 +129,18 @@ namespace NuGetConsole.Host.PowerShell.Implementation {
                 return false; // not matched arg
             }
 
-            protected override bool TryReturnArg(ParameterInfo paramInfo, object arg, object argValue) {
+            protected override bool TryReturnArg(ParameterInfo paramInfo, object arg, object argValue)
+            {
                 // normal byval parameter
-                if (!paramInfo.IsOut) {
+                if (!paramInfo.IsOut)
+                {
                     return true; // matched
                 }
 
                 object argBaseObject = GetBaseObject(arg as PSObject);
                 var psReference = argBaseObject as PSReference;
-                if (psReference != null) {
+                if (psReference != null)
+                {
                     psReference.Value = argValue;
                     return true; // matched
                 }

@@ -2,11 +2,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace NuGet.Test {
-    
-    public class PathResolverTest {
+namespace NuGet.Test
+{
+
+    public class PathResolverTest
+    {
         [Fact]
-        public void GetPathToEnumerateReturnsSearchPathIfSearchPathIsNotUnderBasePath() {
+        public void GetPathToEnumerateReturnsSearchPathIfSearchPathIsNotUnderBasePath()
+        {
             // Arrange
             var basePath = @"c:\packages\bin";
             var searchPath = @"d:\work\projects\project1\bin\*\*.dll";
@@ -19,7 +22,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPathToEnumerateReturnsSearchPathIfSearchPathIsUnderBasePath() {
+        public void GetPathToEnumerateReturnsSearchPathIfSearchPathIsUnderBasePath()
+        {
             // Arrange
             var basePath = @"d:\work";
             var searchPath = @"d:\work\projects\project1\bin\*\*.dll";
@@ -32,7 +36,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPathToEnumerateReturnsSearchPathIfItIsANetworkPath() {
+        public void GetPathToEnumerateReturnsSearchPathIfItIsANetworkPath()
+        {
             // Arrange
             var basePath = @"c:\work";
             var searchPath = @"\\build-vm\shared\drops\nuget.*";
@@ -45,7 +50,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPathToEnumerateReturnsCombinedPathFromBaseForSearchWithWildcardFileName() {
+        public void GetPathToEnumerateReturnsCombinedPathFromBaseForSearchWithWildcardFileName()
+        {
             // Arrange
             var basePath = @"c:\work\projects\my-project";
             var searchPath = @"bin\debug\*.dll";
@@ -58,7 +64,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPathToEnumerateReturnsCombinedPathFromBaseForSearchWithWildcardInPath() {
+        public void GetPathToEnumerateReturnsCombinedPathFromBaseForSearchWithWildcardInPath()
+        {
             // Arrange
             var basePath = @"c:\work\projects\my-project";
             var searchPath = @"output\*\binaries\NuGet.dll";
@@ -71,7 +78,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPathToEnumerateReturnsBasePathIfSearchPathStartsWithRecursiveWildcard() {
+        public void GetPathToEnumerateReturnsBasePathIfSearchPathStartsWithRecursiveWildcard()
+        {
             // Arrange
             var basePath = @"c:\work\projects\my-project";
             var searchPath = @"**\*.dll";
@@ -84,7 +92,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPathToEnumerateReturnsBasePathIfSearchPathStartsWithWildcard() {
+        public void GetPathToEnumerateReturnsBasePathIfSearchPathStartsWithWildcard()
+        {
             // Arrange
             var basePath = @"c:\work\projects\my-project\bin";
             var searchPath = @"*.dll";
@@ -97,7 +106,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPathToEnumerateReturnsFullPathIfSearchPathDoesNotContainWildCards() {
+        public void GetPathToEnumerateReturnsFullPathIfSearchPathDoesNotContainWildCards()
+        {
             // Arrange
             var basePath = @"c:\work\projects\my-project\";
             var searchPath = @"bin\release\SuperBin.dll";
@@ -110,7 +120,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolvePackagePathPreservesPortionOfWildCardInPackagePath() {
+        public void ResolvePackagePathPreservesPortionOfWildCardInPackagePath()
+        {
             // Arrange
             var basePath = @"c:\work\projects\my-project\";
             var searchPattern = @"bin\release\**\*.dll";
@@ -126,7 +137,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolvePackagePathAppendsFullTargetPathToPortionOfWildCardInPackagePath() {
+        public void ResolvePackagePathAppendsFullTargetPathToPortionOfWildCardInPackagePath()
+        {
             // Arrange
             var basePath = @"c:\work\projects\my-project\";
             var searchPattern = @"bin\release\**\*.dll";
@@ -142,7 +154,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolvePackagePathAppendsFileNameToTargetForWildCardInExtension() {
+        public void ResolvePackagePathAppendsFileNameToTargetForWildCardInExtension()
+        {
             // Arrange
             var basePath = @"c:\work\projects\my-project\";
             var searchPattern = @"bin\release\NuGet.*";
@@ -158,7 +171,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolvePackagePathAppendsFileNameToTargetForWildCardInFileName() {
+        public void ResolvePackagePathAppendsFileNameToTargetForWildCardInFileName()
+        {
             // Arrange
             var basePath = @"c:\work\projects\my-project\";
             var searchPattern = @"bin\release\*.dll";
@@ -174,7 +188,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolvePackagePathAppendsFileNameToTargetForWildCardInPath() {
+        public void ResolvePackagePathAppendsFileNameToTargetForWildCardInPath()
+        {
             // Arrange
             var basePath = @"c:\work\projects\my-project\";
             var searchPattern = @"out\*\NuGet*.dll";
@@ -190,7 +205,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolvePackagePathAppendsFileNameToTargetForMultipleWildCardInPath() {
+        public void ResolvePackagePathAppendsFileNameToTargetForMultipleWildCardInPath()
+        {
             // Arrange
             var basePath = @"c:\work\";
             var searchPattern = @"src\Nu*\bin\*\NuGet*.dll";
@@ -207,7 +223,8 @@ namespace NuGet.Test {
 
 
         [Fact]
-        public void ResolvePackagePathReturnsTargetPathIfNoWildCardIsPresentInSearchPatternAndTargetPathHasSameExtension() {
+        public void ResolvePackagePathReturnsTargetPathIfNoWildCardIsPresentInSearchPatternAndTargetPathHasSameExtension()
+        {
             // Arrange
             var basePath = @"c:\work\";
             var searchPattern = @"site\css\main.css";
@@ -224,7 +241,8 @@ namespace NuGet.Test {
 
 
         [Fact]
-        public void GetMatchesFiltersByWildCards() {
+        public void GetMatchesFiltersByWildCards()
+        {
             // Arrange
             var files = new[] { 
                 new PhysicalPackageFile { SourcePath = @"content\1.txt" }, 
@@ -242,7 +260,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetMatchesAllowsRecursiveWildcardMatches() {
+        public void GetMatchesAllowsRecursiveWildcardMatches()
+        {
             // Arrange
             var files = new[] { 
                 new PhysicalPackageFile { SourcePath = @"content\1.txt" }, 
@@ -262,7 +281,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetMatchesPerformsRecursiveWildcardSearch() {
+        public void GetMatchesPerformsRecursiveWildcardSearch()
+        {
             // Arrange
             var files = new[] { 
                 new PhysicalPackageFile { SourcePath = @"content\1.txt" }, 
@@ -282,7 +302,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetMatchesPerformsExactMatches() {
+        public void GetMatchesPerformsExactMatches()
+        {
             // Arrange
             var files = new[] { 
                 new PhysicalPackageFile { SourcePath = @"foo.dll" }, 
@@ -301,7 +322,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void FilterPathRemovesItemsThatMatchWildcard() {
+        public void FilterPathRemovesItemsThatMatchWildcard()
+        {
             // Arrange
             var files = new List<IPackageFile>(new[] { 
                 new PhysicalPackageFile { TargetPath = @"foo.dll" }, 

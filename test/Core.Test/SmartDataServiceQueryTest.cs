@@ -2,14 +2,17 @@
 using System.Data.Services.Client;
 using System.Linq;
 using System.Linq.Expressions;
-using Xunit;
 using Moq;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class SmartDataServiceQueryTest {
+namespace NuGet.Test
+{
+
+    public class SmartDataServiceQueryTest
+    {
         [Fact]
-        public void GetEnumeratorExecutesBatchIfRequiresBatchTrue() {
+        public void GetEnumeratorExecutesBatchIfRequiresBatchTrue()
+        {
             // Arrange
             var mockContext = new Mock<IDataServiceContext>();
             var mockQuery = new Mock<IDataServiceQuery<int>>();
@@ -26,7 +29,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ProjectionTest() {
+        public void ProjectionTest()
+        {
             // Arrange
             var mockContext = new Mock<IDataServiceContext>();
             var mockStringQuery = new Mock<IDataServiceQuery<string>>();

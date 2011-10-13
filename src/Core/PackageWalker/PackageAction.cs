@@ -1,5 +1,7 @@
-namespace NuGet {
-    public enum PackageAction {
+namespace NuGet
+{
+    public enum PackageAction
+    {
         Install,
         Uninstall
     }

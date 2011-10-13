@@ -5,19 +5,26 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
-namespace NuGet {
-    internal static class TypeHelper {
-        public static Type RemoveNullableFromType(Type type) {
+namespace NuGet
+{
+    internal static class TypeHelper
+    {
+        public static Type RemoveNullableFromType(Type type)
+        {
             return Nullable.GetUnderlyingType(type) ?? type;
         }
 
-        public static object ChangeType(object value, Type type) {
-            if (type == null) {
+        public static object ChangeType(object value, Type type)
+        {
+            if (type == null)
+            {
                 throw new ArgumentNullException("type");
             }
 
-            if (value == null) {
-                if (TypeAllowsNull(type)) {
+            if (value == null)
+            {
+                if (TypeAllowsNull(type))
+                {
                     return null;
                 }
                 return Convert.ChangeType(value, type, CultureInfo.CurrentCulture);
@@ -25,17 +32,20 @@ namespace NuGet {
 
             type = RemoveNullableFromType(type);
 
-            if (value.GetType() == type) {
+            if (value.GetType() == type)
+            {
                 return value;
             }
 
             TypeConverter converter = TypeDescriptor.GetConverter(type);
-            if (converter.CanConvertFrom(value.GetType())) {
+            if (converter.CanConvertFrom(value.GetType()))
+            {
                 return converter.ConvertFrom(value);
             }
 
             TypeConverter otherConverter = TypeDescriptor.GetConverter(value.GetType());
-            if (otherConverter.CanConvertTo(type)) {
+            if (otherConverter.CanConvertTo(type))
+            {
                 return otherConverter.ConvertTo(value, type);
             }
 
@@ -43,20 +53,25 @@ namespace NuGet {
                 NuGetResources.UnableToConvertTypeError, value.GetType(), type));
         }
 
-        public static bool TypeAllowsNull(Type type) {
+        public static bool TypeAllowsNull(Type type)
+        {
             return Nullable.GetUnderlyingType(type) != null || !type.IsValueType;
         }
 
-        public static Type GetGenericCollectionType(Type type) {
+        public static Type GetGenericCollectionType(Type type)
+        {
             return GetInterfaceType(type, typeof(ICollection<>));
         }
 
-        public static Type GetDictionaryType(Type type) {
+        public static Type GetDictionaryType(Type type)
+        {
             return GetInterfaceType(type, typeof(IDictionary<,>));
         }
 
-        private static Type GetInterfaceType(Type type, Type interfaceType) {
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == interfaceType) {
+        private static Type GetInterfaceType(Type type, Type interfaceType)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == interfaceType)
+            {
                 return type;
             }
             return (from t in type.GetInterfaces()
@@ -64,11 +79,13 @@ namespace NuGet {
                     select t).SingleOrDefault();
         }
 
-        public static bool IsKeyValueProperty(PropertyInfo property) {
+        public static bool IsKeyValueProperty(PropertyInfo property)
+        {
             return GetDictionaryType(property.PropertyType) != null;
         }
 
-        public static bool IsMultiValuedProperty(PropertyInfo property) {
+        public static bool IsMultiValuedProperty(PropertyInfo property)
+        {
             return GetGenericCollectionType(property.PropertyType) != null || IsKeyValueProperty(property);
         }
     }

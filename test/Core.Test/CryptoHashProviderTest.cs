@@ -2,11 +2,14 @@
 using System.Text;
 using Xunit;
 
-namespace NuGet.Test {
-    
-    public class CryptoHashProviderTest {
+namespace NuGet.Test
+{
+
+    public class CryptoHashProviderTest
+    {
         [Fact]
-        public void DefaultCryptoHashProviderUsesSHA512() {
+        public void DefaultCryptoHashProviderUsesSHA512()
+        {
             // Arrange
             byte[] testBytes = Encoding.UTF8.GetBytes("There is no butter knife");
             string expectedHash = "xy/brd+/mxheBbyBL7i8Oyy62P2ZRteaIkfc4yA8ncH1MYkbDo+XwBcZsOBY2YeaOucrdLJj5odPvozD430w2g==";
@@ -20,7 +23,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void CryptoHashProviderReturnsTrueIfHashAreEqual() {
+        public void CryptoHashProviderReturnsTrueIfHashAreEqual()
+        {
             // Arrange
             byte[] testBytes = Encoding.UTF8.GetBytes("There is no butter knife");
             string expectedHash = "xy/brd+/mxheBbyBL7i8Oyy62P2ZRteaIkfc4yA8ncH1MYkbDo+XwBcZsOBY2YeaOucrdLJj5odPvozD430w2g==";
@@ -34,7 +38,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void CryptoHashProviderReturnsFalseIfHashValuesAreUnequal() {
+        public void CryptoHashProviderReturnsFalseIfHashValuesAreUnequal()
+        {
             // Arrange
             byte[] testBytes = Encoding.UTF8.GetBytes("There is no butter knife");
             byte[] badBytes = Encoding.UTF8.GetBytes("this is a bad input");

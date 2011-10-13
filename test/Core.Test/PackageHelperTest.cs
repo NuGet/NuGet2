@@ -1,21 +1,25 @@
 ﻿using System;
-using Xunit;
 using NuGet.Test.Mocks;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class PackageHelperTest {
+namespace NuGet.Test
+{
+
+    public class PackageHelperTest
+    {
         [Fact]
-        public void ResolveUnknownPackageThrows() {
+        public void ResolveUnknownPackageThrows()
+        {
             ExceptionAssert.Throws<InvalidOperationException>(
-                () => PackageHelper.ResolvePackage(new MockPackageRepository(), new MockPackageRepository(), "elmah", null, allowPrereleaseVersions: false), 
+                () => PackageHelper.ResolvePackage(new MockPackageRepository(), new MockPackageRepository(), "elmah", null, allowPrereleaseVersions: false),
                 "Unable to find package 'elmah'.");
         }
 
         [Fact]
-        public void ResolveSpecificVersionOfUnknownPackageThrows() {
+        public void ResolveSpecificVersionOfUnknownPackageThrows()
+        {
             ExceptionAssert.Throws<InvalidOperationException>(
-                () => PackageHelper.ResolvePackage(new MockPackageRepository(), new MockPackageRepository(), "elmah", new SemanticVersion("1.1"), allowPrereleaseVersions: false), 
+                () => PackageHelper.ResolvePackage(new MockPackageRepository(), new MockPackageRepository(), "elmah", new SemanticVersion("1.1"), allowPrereleaseVersions: false),
                 "Unable to find version '1.1' of package 'elmah'.");
         }
     }

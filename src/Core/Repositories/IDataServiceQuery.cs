@@ -2,12 +2,15 @@
 using System.Data.Services.Client;
 using System.Linq.Expressions;
 
-namespace NuGet {
-    public interface IDataServiceQuery<T> : IDataServiceQuery {
+namespace NuGet
+{
+    public interface IDataServiceQuery<T> : IDataServiceQuery
+    {
         IEnumerator<T> GetEnumerator();
     }
 
-    public interface IDataServiceQuery {
+    public interface IDataServiceQuery
+    {
         bool RequiresBatch(Expression expression);
         DataServiceRequest GetRequest(Expression expression);
         IDataServiceQuery<TElement> CreateQuery<TElement>(Expression expression);

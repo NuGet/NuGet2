@@ -1,13 +1,16 @@
-namespace NuGet.Test {
+namespace NuGet.Test
+{
     using System.IO;
-    using Xunit;
     using Moq;
     using NuGet.Test.Mocks;
+    using Xunit;
 
-    
-    public class FileSystemExtensionsTest {
+
+    public class FileSystemExtensionsTest
+    {
         [Fact]
-        public void AddFilesAddFilesToProjectSystem() {
+        public void AddFilesAddFilesToProjectSystem()
+        {
             // Arrange
             var fileSystem = new MockProjectSystem();
             var files = PackageUtility.CreateFiles(new[] { "A", "B", "C" });
@@ -22,7 +25,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddFilesAddFilesToProjectSystemIfNotExists() {
+        public void AddFilesAddFilesToProjectSystemIfNotExists()
+        {
             // Arrange
             var mockFileSystem = new Mock<IFileSystem>();
             mockFileSystem.Setup(m => m.Logger).Returns(NullLogger.Instance);

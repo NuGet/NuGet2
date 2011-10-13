@@ -1,13 +1,16 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 
-namespace NuGet {
-    public class VersionSpec : IVersionSpec {
-        public VersionSpec() {
+namespace NuGet
+{
+    public class VersionSpec : IVersionSpec
+    {
+        public VersionSpec()
+        {
         }
 
-        public VersionSpec(SemanticVersion version) {
+        public VersionSpec(SemanticVersion version)
+        {
             IsMinInclusive = true;
             IsMaxInclusive = true;
             MinVersion = version;
@@ -19,29 +22,36 @@ namespace NuGet {
         public SemanticVersion MaxVersion { get; set; }
         public bool IsMaxInclusive { get; set; }
 
-        public override string ToString() {
-            if (MinVersion != null && IsMinInclusive && MaxVersion == null && !IsMaxInclusive) {
+        public override string ToString()
+        {
+            if (MinVersion != null && IsMinInclusive && MaxVersion == null && !IsMaxInclusive)
+            {
                 return MinVersion.ToString();
             }
 
-            if (MinVersion != null && MaxVersion != null && MinVersion == MaxVersion && IsMinInclusive && IsMaxInclusive) {
+            if (MinVersion != null && MaxVersion != null && MinVersion == MaxVersion && IsMinInclusive && IsMaxInclusive)
+            {
                 return "[" + MinVersion + "]";
             }
 
             var versionBuilder = new StringBuilder();
-            if (IsMinInclusive) {
+            if (IsMinInclusive)
+            {
                 versionBuilder.Append("[");
             }
-            else {
+            else
+            {
                 versionBuilder.Append("(");
             }
 
             versionBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0}, {1}", MinVersion, MaxVersion);
 
-            if (IsMaxInclusive) {
+            if (IsMaxInclusive)
+            {
                 versionBuilder.Append("]");
             }
-            else {
+            else
+            {
                 versionBuilder.Append(")");
             }
 

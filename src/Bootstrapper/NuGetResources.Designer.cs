@@ -8,10 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace NuGet {
-    using System;
-    
-    
+namespace NuGet
+{
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -22,76 +22,92 @@ namespace NuGet {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class NuGetResources {
-        
+    internal class NuGetResources
+    {
+
         private static global::System.Resources.ResourceManager resourceMan;
-        
+
         private static global::System.Globalization.CultureInfo resourceCulture;
-        
+
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal NuGetResources() {
+        internal NuGetResources()
+        {
         }
-        
+
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
-            get {
-                if (object.ReferenceEquals(resourceMan, null)) {
+        internal static global::System.Resources.ResourceManager ResourceManager
+        {
+            get
+            {
+                if (object.ReferenceEquals(resourceMan, null))
+                {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NuGet.NuGetResources", typeof(NuGetResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
-            get {
+        internal static global::System.Globalization.CultureInfo Culture
+        {
+            get
+            {
                 return resourceCulture;
             }
-            set {
+            set
+            {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Password: .
         /// </summary>
-        internal static string Credentials_Password {
-            get {
+        internal static string Credentials_Password
+        {
+            get
+            {
                 return ResourceManager.GetString("Credentials_Password", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Please provide proxy credentials:.
         /// </summary>
-        internal static string Credentials_ProxyCredentials {
-            get {
+        internal static string Credentials_ProxyCredentials
+        {
+            get
+            {
                 return ResourceManager.GetString("Credentials_ProxyCredentials", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Please provide credentials for {0}:.
         /// </summary>
-        internal static string Credentials_RequestCredentials {
-            get {
+        internal static string Credentials_RequestCredentials
+        {
+            get
+            {
                 return ResourceManager.GetString("Credentials_RequestCredentials", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to UserName: .
         /// </summary>
-        internal static string Credentials_UserName {
-            get {
+        internal static string Credentials_UserName
+        {
+            get
+            {
                 return ResourceManager.GetString("Credentials_UserName", resourceCulture);
             }
         }

@@ -3,12 +3,14 @@ using System.Management.Automation;
 using EnvDTE;
 using NuGet.VisualStudio;
 
-namespace NuGet.PowerShell.Commands {
+namespace NuGet.PowerShell.Commands
+{
     /// <summary>
     /// This project updates the specified package to the specified project.
     /// </summary>
     [Cmdlet(VerbsData.Update, "Package", DefaultParameterSetName = "All")]
-    public class UpdatePackageCommand : ProcessPackageBaseCommand, IPackageOperationEventListener {
+    public class UpdatePackageCommand : ProcessPackageBaseCommand, IPackageOperationEventListener
+    {
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IProductUpdateService _productUpdateService;
@@ -20,7 +22,8 @@ namespace NuGet.PowerShell.Commands {
                    ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                    ServiceLocator.GetInstance<IHttpClientEvents>(),
-                   ServiceLocator.GetInstance<IProductUpdateService>()) {
+                   ServiceLocator.GetInstance<IProductUpdateService>())
+        {
         }
 
         public UpdatePackageCommand(ISolutionManager solutionManager,
@@ -29,7 +32,8 @@ namespace NuGet.PowerShell.Commands {
                                     IVsPackageSourceProvider packageSourceProvider,
                                     IHttpClientEvents httpClientEvents,
                                     IProductUpdateService productUpdateService)
-            : base(solutionManager, packageManagerFactory, httpClientEvents) {
+            : base(solutionManager, packageManagerFactory, httpClientEvents)
+        {
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;
             _productUpdateService = productUpdateService;
@@ -39,22 +43,28 @@ namespace NuGet.PowerShell.Commands {
         // want it to be mandatory here.
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0, ParameterSetName = "Project")]
         [Parameter(ValueFromPipelineByPropertyName = true, Position = 0, ParameterSetName = "All")]
-        public override string Id {
-            get {
+        public override string Id
+        {
+            get
+            {
                 return base.Id;
             }
-            set {
+            set
+            {
                 base.Id = value;
             }
         }
 
         [Parameter(Position = 1, ValueFromPipelineByPropertyName = true, ParameterSetName = "All")]
         [Parameter(Position = 1, ValueFromPipelineByPropertyName = true, ParameterSetName = "Project")]
-        public override string ProjectName {
-            get {
+        public override string ProjectName
+        {
+            get
+            {
                 return base.ProjectName;
             }
-            set {
+            set
+            {
                 base.ProjectName = value;
             }
         }
@@ -76,59 +86,79 @@ namespace NuGet.PowerShell.Commands {
         [Parameter, Alias("Prerelease")]
         public SwitchParameter IncludePrerelease { get; set; }
 
-        protected override IVsPackageManager CreatePackageManager() {
-            if (!String.IsNullOrEmpty(Source)) {
+        protected override IVsPackageManager CreatePackageManager()
+        {
+            if (!String.IsNullOrEmpty(Source))
+            {
                 IPackageRepository repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, Source);
                 return repository == null ? null : PackageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: true);
             }
             return base.CreatePackageManager();
         }
 
-        protected override void ProcessRecordCore() {
-            if (!SolutionManager.IsSolutionOpen) {
+        protected override void ProcessRecordCore()
+        {
+            if (!SolutionManager.IsSolutionOpen)
+            {
                 // terminating
                 ErrorHandler.ThrowSolutionNotOpenTerminatingError();
             }
 
-            try {
+            try
+            {
                 SubscribeToProgressEvents();
-                if (PackageManager != null) {
+                if (PackageManager != null)
+                {
                     IProjectManager projectManager = ProjectManager;
-                    if (!String.IsNullOrEmpty(Id)) {
+                    if (!String.IsNullOrEmpty(Id))
+                    {
                         // If a package id was specified, but no project was specified, then update this package in all projects
-                        if (String.IsNullOrEmpty(ProjectName)) {
-                            if (Safe.IsPresent) {
+                        if (String.IsNullOrEmpty(ProjectName))
+                        {
+                            if (Safe.IsPresent)
+                            {
                                 PackageManager.SafeUpdatePackage(Id, !IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
                             }
-                            else {
+                            else
+                            {
                                 PackageManager.UpdatePackage(Id, Version, !IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
                             }
                         }
-                        else if (projectManager != null) {
+                        else if (projectManager != null)
+                        {
                             // If there was a project specified, then update the package in that project
-                            if (Safe.IsPresent) {
+                            if (Safe.IsPresent)
+                            {
                                 PackageManager.SafeUpdatePackage(projectManager, Id, !IgnoreDependencies, IncludePrerelease, this);
                             }
-                            else {
+                            else
+                            {
                                 PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, IncludePrerelease, this);
                             }
                         }
                     }
-                    else {
+                    else
+                    {
                         // if no id was specified then update all packages in the solution
-                        if (Safe.IsPresent) {
-                            if (String.IsNullOrEmpty(ProjectName)) {
+                        if (Safe.IsPresent)
+                        {
+                            if (String.IsNullOrEmpty(ProjectName))
+                            {
                                 PackageManager.SafeUpdatePackages(!IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
                             }
-                            else if (projectManager != null) {
+                            else if (projectManager != null)
+                            {
                                 PackageManager.SafeUpdatePackages(projectManager, !IgnoreDependencies.IsPresent, IncludePrerelease, this);
                             }
                         }
-                        else {
-                            if (String.IsNullOrEmpty(ProjectName)) {
+                        else
+                        {
+                            if (String.IsNullOrEmpty(ProjectName))
+                            {
                                 PackageManager.UpdatePackages(!IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
                             }
-                            else if (projectManager != null) {
+                            else if (projectManager != null)
+                            {
                                 PackageManager.UpdatePackages(projectManager, !IgnoreDependencies.IsPresent, IncludePrerelease, this);
                             }
                         }
@@ -136,32 +166,39 @@ namespace NuGet.PowerShell.Commands {
                     _hasConnectedToHttpSource |= UriHelper.IsHttpSource(PackageManager.SourceRepository.Source);
                 }
             }
-            finally {
+            finally
+            {
                 UnsubscribeFromProgressEvents();
             }
         }
 
-        protected override void EndProcessing() {
+        protected override void EndProcessing()
+        {
             base.EndProcessing();
 
             CheckForNuGetUpdate();
         }
 
-        private void CheckForNuGetUpdate() {
-            if (_productUpdateService != null && _hasConnectedToHttpSource) {
+        private void CheckForNuGetUpdate()
+        {
+            if (_productUpdateService != null && _hasConnectedToHttpSource)
+            {
                 _productUpdateService.CheckForAvailableUpdateAsync();
             }
         }
 
-        public void OnBeforeAddPackageReference(Project project) {
+        public void OnBeforeAddPackageReference(Project project)
+        {
             RegisterProjectEvents(project);
         }
 
-        public void OnAfterAddPackageReference(Project project) {
+        public void OnAfterAddPackageReference(Project project)
+        {
             // No-op
         }
 
-        public void OnAddPackageReferenceError(Project project, Exception exception) {
+        public void OnAddPackageReferenceError(Project project, Exception exception)
+        {
             // No-op
         }
     }

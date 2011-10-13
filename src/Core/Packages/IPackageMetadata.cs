@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 
-namespace NuGet {
-    public interface IPackageMetadata {
+namespace NuGet
+{
+    public interface IPackageMetadata
+    {
         string Id { get; }
         SemanticVersion Version { get; }
         string Title { get; }
@@ -23,7 +25,7 @@ namespace NuGet {
         /// Specifies assemblies from GAC that the package depends on.
         /// </summary>
         IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies { get; }
-        
+
         /// <summary>
         /// Specifies other packages that the package depends on.
         /// </summary>

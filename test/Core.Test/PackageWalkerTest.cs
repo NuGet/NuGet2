@@ -1,15 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class PackageWalkerTest {
+namespace NuGet.Test
+{
+
+    public class PackageWalkerTest
+    {
         [Fact]
-        public void ReverseDependencyWalkerUsersVersionAndIdToDetermineVisited() {
+        public void ReverseDependencyWalkerUsersVersionAndIdToDetermineVisited()
+        {
             // Arrange
             // A 1.0 -> B 1.0
             IPackage packageA1 = PackageUtility.CreatePackage("A",
@@ -44,7 +47,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependenciesForInstallPackageWithUnknownDependencyThrows() {
+        public void ResolveDependenciesForInstallPackageWithUnknownDependencyThrows()
+        {
             // Arrange            
             IPackage package = PackageUtility.CreatePackage("A",
                                                             "1.0",
@@ -63,7 +67,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependenciesForInstallPackageResolvesDependencyUsingDependencyProvider() {
+        public void ResolveDependenciesForInstallPackageResolvesDependencyUsingDependencyProvider()
+        {
             // Arrange            
             IPackage packageA = PackageUtility.CreatePackage("A",
                                                             "1.0",
@@ -81,7 +86,7 @@ namespace NuGet.Test {
             IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                              repository.Object,
                                                              NullLogger.Instance,
-                                                             ignoreDependencies: false, 
+                                                             ignoreDependencies: false,
                                                              allowPrereleaseVersions: false);
 
 
@@ -99,7 +104,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependenciesForInstallPackageResolvesDependencyWithConstraintsUsingDependencyResolver() {
+        public void ResolveDependenciesForInstallPackageResolvesDependencyWithConstraintsUsingDependencyResolver()
+        {
             // Arrange            
             var packageDependency = new PackageDependency("B", new VersionSpec { MinVersion = new SemanticVersion("1.1") });
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
@@ -134,7 +140,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependenciesForInstallCircularReferenceThrows() {
+        public void ResolveDependenciesForInstallCircularReferenceThrows()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
@@ -164,7 +171,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependenciesForInstallDiamondDependencyGraph() {
+        public void ResolveDependenciesForInstallDiamondDependencyGraph()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
@@ -220,7 +228,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependenciesForInstallDiamondDependencyGraphWithDifferntVersionOfSamePackage() {
+        public void ResolveDependenciesForInstallDiamondDependencyGraphWithDifferntVersionOfSamePackage()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
@@ -304,7 +313,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UninstallWalkerIgnoresMissingDependencies() {
+        public void UninstallWalkerIgnoresMissingDependencies()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
             // A -> [B, C]
@@ -346,7 +356,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependenciesForUninstallDiamondDependencyGraph() {
+        public void ResolveDependenciesForUninstallDiamondDependencyGraph()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
             // A -> [B, C]
@@ -403,7 +414,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependencyForInstallCircularReferenceWithDifferentVersionOfPackageReferenceThrows() {
+        public void ResolveDependencyForInstallCircularReferenceWithDifferentVersionOfPackageReferenceThrows()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
@@ -440,7 +452,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolvingDependencyForUpdateWithConflictingDependents() {
+        public void ResolvingDependencyForUpdateWithConflictingDependents()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
@@ -488,7 +501,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolvingDependencyForUpdateThatHasAnUnsatisfiedConstraint() {
+        public void ResolvingDependencyForUpdateThatHasAnUnsatisfiedConstraint()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
@@ -518,7 +532,7 @@ namespace NuGet.Test {
                                                                    sourceRepository,
                                                                    constraintProvider.Object,
                                                                    NullLogger.Instance,
-                                                                   ignoreDependencies: false, 
+                                                                   ignoreDependencies: false,
                                                                    allowPrereleaseVersions: false);
 
             // Act & Assert
@@ -526,7 +540,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependencyForInstallPackageWithDependencyThatDoesntMeetMinimumVersionThrows() {
+        public void ResolveDependencyForInstallPackageWithDependencyThatDoesntMeetMinimumVersionThrows()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
@@ -550,7 +565,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependencyForInstallPackageWithDependencyThatDoesntMeetExactVersionThrows() {
+        public void ResolveDependencyForInstallPackageWithDependencyThatDoesntMeetExactVersionThrows()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
@@ -576,7 +592,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveOperationsForInstallSameDependencyAtDifferentLevelsInGraph() {
+        public void ResolveOperationsForInstallSameDependencyAtDifferentLevelsInGraph()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
@@ -627,7 +644,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependenciesForInstallSameDependencyAtDifferentLevelsInGraphDuringUpdate() {
+        public void ResolveDependenciesForInstallSameDependencyAtDifferentLevelsInGraphDuringUpdate()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
@@ -720,7 +738,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependenciesForInstallPackageWithDependencyReturnsPackageAndDependency() {
+        public void ResolveDependenciesForInstallPackageWithDependencyReturnsPackageAndDependency()
+        {
             // Arrange            
             var localRepository = new MockPackageRepository();
 
@@ -751,7 +770,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependenciesForUninstallPackageWithDependentThrows() {
+        public void ResolveDependenciesForUninstallPackageWithDependentThrows()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
 
@@ -776,7 +796,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependenciesForUninstallPackageWithDependentAndRemoveDependenciesThrows() {
+        public void ResolveDependenciesForUninstallPackageWithDependentAndRemoveDependenciesThrows()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
 
@@ -801,7 +822,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependenciesForUninstallPackageWithDependentAndForceReturnsPackage() {
+        public void ResolveDependenciesForUninstallPackageWithDependentAndForceReturnsPackage()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
 
@@ -831,7 +853,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependenciesForUninstallPackageWithRemoveDependenciesExcludesDependencyIfDependencyInUse() {
+        public void ResolveDependenciesForUninstallPackageWithRemoveDependenciesExcludesDependencyIfDependencyInUse()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
 
@@ -874,7 +897,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ResolveDependenciesForUninstallPackageWithRemoveDependenciesSetAndForceReturnsAllDependencies() {
+        public void ResolveDependenciesForUninstallPackageWithRemoveDependenciesSetAndForceReturnsAllDependencies()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
 
@@ -916,7 +940,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ProjectInstallWalkerIgnoresSolutionLevelPackages() {
+        public void ProjectInstallWalkerIgnoresSolutionLevelPackages()
+        {
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
@@ -949,7 +974,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AfterPackageWalkMetaPackageIsClassifiedTheSameAsDependencies() {
+        public void AfterPackageWalkMetaPackageIsClassifiedTheSameAsDependencies()
+        {
             // Arrange
             var mockRepository = new MockPackageRepository();
             var walker = new TestWalker(mockRepository);
@@ -976,7 +1002,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void MetaPackageWithMixedTargetsThrows() {
+        public void MetaPackageWithMixedTargetsThrows()
+        {
             // Arrange
             var mockRepository = new MockPackageRepository();
             var walker = new TestWalker(mockRepository);
@@ -998,7 +1025,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ExternalPackagesThatDepdendOnProjectLevelPackagesThrows() {
+        public void ExternalPackagesThatDepdendOnProjectLevelPackagesThrows()
+        {
             // Arrange
             var mockRepository = new MockPackageRepository();
             var walker = new TestWalker(mockRepository);
@@ -1018,7 +1046,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void InstallWalkerResolvesLowestMajorAndMinorVersionButHighestBuildAndRevisionForDependencies() {
+        public void InstallWalkerResolvesLowestMajorAndMinorVersionButHighestBuildAndRevisionForDependencies()
+        {
             // Arrange
 
             // A 1.0 -> B 1.0
@@ -1061,19 +1090,23 @@ namespace NuGet.Test {
             Assert.Equal(new SemanticVersion("1.0"), packages[3].Package.Version);
         }
 
-        private void AssertOperation(string expectedId, string expectedVersion, PackageAction expectedAction, PackageOperation operation) {
+        private void AssertOperation(string expectedId, string expectedVersion, PackageAction expectedAction, PackageOperation operation)
+        {
             Assert.Equal(expectedAction, operation.Action);
             Assert.Equal(expectedId, operation.Package.Id);
             Assert.Equal(new SemanticVersion(expectedVersion), operation.Package.Version);
         }
 
-        private class TestWalker : PackageWalker {
+        private class TestWalker : PackageWalker
+        {
             private readonly IPackageRepository _repository;
-            public TestWalker(IPackageRepository repository) {
+            public TestWalker(IPackageRepository repository)
+            {
                 _repository = repository;
             }
 
-            protected override IPackage ResolveDependency(PackageDependency dependency) {
+            protected override IPackage ResolveDependency(PackageDependency dependency)
+            {
                 return _repository.ResolveDependency(dependency, AllowPrereleaseVersions);
             }
         }

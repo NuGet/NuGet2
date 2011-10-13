@@ -5,8 +5,10 @@ using System.Globalization;
 using System.Linq;
 using NuGet.Resources;
 
-namespace NuGet {
-    public class InstallWalker : PackageWalker, IPackageOperationResolver {
+namespace NuGet
+{
+    public class InstallWalker : PackageWalker, IPackageOperationResolver
+    {
         private readonly bool _ignoreDependencies;
         private readonly bool _allowPrereleaseVersions;
         private readonly OperationLookup _operations;
@@ -21,7 +23,8 @@ namespace NuGet {
                  constraintProvider: NullConstraintProvider.Instance,
                  logger: logger,
                  ignoreDependencies: ignoreDependencies,
-                 allowPrereleaseVersions: allowPrereleaseVersions) {
+                 allowPrereleaseVersions: allowPrereleaseVersions)
+        {
         }
 
         public InstallWalker(IPackageRepository localRepository,
@@ -29,15 +32,19 @@ namespace NuGet {
                              IPackageConstraintProvider constraintProvider,
                              ILogger logger,
                              bool ignoreDependencies,
-                             bool allowPrereleaseVersions) {
+                             bool allowPrereleaseVersions)
+        {
 
-            if (sourceRepository == null) {
+            if (sourceRepository == null)
+            {
                 throw new ArgumentNullException("sourceRepository");
             }
-            if (localRepository == null) {
+            if (localRepository == null)
+            {
                 throw new ArgumentNullException("localRepository");
             }
-            if (logger == null) {
+            if (logger == null)
+            {
                 throw new ArgumentNullException("logger");
             }
 
@@ -50,59 +57,73 @@ namespace NuGet {
             _allowPrereleaseVersions = allowPrereleaseVersions;
         }
 
-        protected ILogger Logger {
+        protected ILogger Logger
+        {
             get;
             private set;
         }
 
-        protected IPackageRepository Repository {
+        protected IPackageRepository Repository
+        {
             get;
             private set;
         }
 
-        protected override bool IgnoreDependencies {
-            get {
+        protected override bool IgnoreDependencies
+        {
+            get
+            {
                 return _ignoreDependencies;
             }
         }
 
-        protected override bool AllowPrereleaseVersions {
-            get {
+        protected override bool AllowPrereleaseVersions
+        {
+            get
+            {
                 return _allowPrereleaseVersions;
             }
         }
 
-        protected IPackageRepository SourceRepository {
+        protected IPackageRepository SourceRepository
+        {
             get;
             private set;
         }
 
         private IPackageConstraintProvider ConstraintProvider { get; set; }
 
-        protected IList<PackageOperation> Operations {
-            get {
+        protected IList<PackageOperation> Operations
+        {
+            get
+            {
                 return _operations.ToList();
             }
         }
 
-        protected virtual ConflictResult GetConflict(IPackage package) {
+        protected virtual ConflictResult GetConflict(IPackage package)
+        {
             var conflictingPackage = Marker.FindPackage(package.Id);
-            if (conflictingPackage != null) {
+            if (conflictingPackage != null)
+            {
                 return new ConflictResult(conflictingPackage, Marker, Marker);
             }
             return null;
         }
 
-        protected override void OnBeforePackageWalk(IPackage package) {
+        protected override void OnBeforePackageWalk(IPackage package)
+        {
             ConflictResult conflictResult = GetConflict(package);
 
-            if (conflictResult == null) {
+            if (conflictResult == null)
+            {
                 return;
             }
 
             // If the conflicting package is the same as the package being installed
             // then no-op
-            if (PackageEqualityComparer.IdAndVersion.Equals(package, conflictResult.Package)) {
+            if (PackageEqualityComparer.IdAndVersion.Equals(package, conflictResult.Package))
+            {
                 return;
             }
 
@@ -119,24 +140,29 @@ namespace NuGet {
                                        select dependentPackage;
 
             // If there were incompatible packages that we failed to update then we throw an exception
-            if (incompatiblePackages.Any() && !TryUpdate(incompatiblePackages, conflictResult, package, out incompatiblePackages)) {
+            if (incompatiblePackages.Any() && !TryUpdate(incompatiblePackages, conflictResult, package, out incompatiblePackages))
+            {
                 throw CreatePackageConflictException(package, conflictResult.Package, incompatiblePackages);
             }
-            else if (package.Version < conflictResult.Package.Version) {
+            else if (package.Version < conflictResult.Package.Version)
+            {
                 // REVIEW: Should we have a flag to allow downgrading?
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
                     NuGetResources.NewerVersionAlreadyReferenced, package.Id));
             }
-            else if (package.Version > conflictResult.Package.Version) {
+            else if (package.Version > conflictResult.Package.Version)
+            {
                 Uninstall(conflictResult.Package, conflictResult.DependentsResolver, conflictResult.Repository);
             }
         }
 
-        private void Uninstall(IPackage package, IDependentsResolver dependentsResolver, IPackageRepository repository) {
+        private void Uninstall(IPackage package, IDependentsResolver dependentsResolver, IPackageRepository repository)
+        {
             // If this package isn't part of the current graph (i.e. hasn't been visited yet) and
             // is marked for removal, then do nothing. This is so we don't get unnecessary duplicates.
-            if (!Marker.Contains(package) && _operations.Contains(package, PackageAction.Uninstall)) {
+            if (!Marker.Contains(package) && _operations.Contains(package, PackageAction.Uninstall))
+            {
                 return;
             }
 
@@ -148,19 +174,22 @@ namespace NuGet {
                                                removeDependencies: !IgnoreDependencies,
                                                forceRemove: false) { ThrowOnConflicts = false };
 
-            foreach (var operation in resolver.ResolveOperations(package)) {
+            foreach (var operation in resolver.ResolveOperations(package))
+            {
                 _operations.AddOperation(operation);
             }
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We re-throw a more specific exception later on")]
-        private bool TryUpdate(IEnumerable<IPackage> dependents, ConflictResult conflictResult, IPackage package, out IEnumerable<IPackage> incompatiblePackages) {
+        private bool TryUpdate(IEnumerable<IPackage> dependents, ConflictResult conflictResult, IPackage package, out IEnumerable<IPackage> incompatiblePackages)
+        {
             // Key dependents by id so we can look up the old package later
             var dependentsLookup = dependents.ToDictionary(d => d.Id, StringComparer.OrdinalIgnoreCase);
             var compatiblePackages = new Dictionary<IPackage, IPackage>();
 
             // Initialize each compatible package to null
-            foreach (var dependent in dependents) {
+            foreach (var dependent in dependents)
+            {
                 compatiblePackages[dependent] = null;
             }
 
@@ -168,14 +197,16 @@ namespace NuGet {
             var packages = from p in SourceRepository.FindCompatiblePackages(ConstraintProvider, dependentsLookup.Keys, package)
                            group p by p.Id into g
                            let oldPackage = dependentsLookup[g.Key]
-                           select new {
+                           select new
+                           {
                                OldPackage = oldPackage,
                                NewPackage = g.Where(p => p.Version > oldPackage.Version)
                                              .OrderBy(p => p.Version)
                                              .ResolveSafeVersion()
                            };
 
-            foreach (var p in packages) {
+            foreach (var p in packages)
+            {
                 compatiblePackages[p.OldPackage] = p.NewPackage;
             }
 
@@ -184,13 +215,15 @@ namespace NuGet {
             incompatiblePackages = compatiblePackages.Where(p => p.Value == null)
                                                      .Select(p => p.Key);
 
-            if (incompatiblePackages.Any()) {
+            if (incompatiblePackages.Any())
+            {
                 return false;
             }
 
             IPackageConstraintProvider currentConstraintProvider = ConstraintProvider;
 
-            try {
+            try
+            {
                 // Add a constraint for the incoming package so we don't try to update it by mistake.
                 // Scenario:
                 // A 1.0 -> B [1.0]
@@ -212,15 +245,18 @@ namespace NuGet {
 
                 var failedPackages = new List<IPackage>();
                 // Update each of the existing packages to more compatible one
-                foreach (var pair in compatiblePackages) {
-                    try {
+                foreach (var pair in compatiblePackages)
+                {
+                    try
+                    {
                         // Remove the old package
                         Uninstall(pair.Key, conflictResult.DependentsResolver, conflictResult.Repository);
 
                         // Install the new package
                         Walk(pair.Value);
                     }
-                    catch {
+                    catch
+                    {
                         // If we failed to update this package (most likely because of a conflict further up the dependency chain)
                         // we keep track of it so we can report an error about the top level package.
                         failedPackages.Add(pair.Key);
@@ -231,7 +267,8 @@ namespace NuGet {
 
                 return !incompatiblePackages.Any();
             }
-            finally {
+            finally
+            {
                 // Restore the current constraint provider
                 ConstraintProvider = currentConstraintProvider;
 
@@ -240,19 +277,23 @@ namespace NuGet {
             }
         }
 
-        protected override void OnAfterPackageWalk(IPackage package) {
-            if (!Repository.Exists(package)) {
+        protected override void OnAfterPackageWalk(IPackage package)
+        {
+            if (!Repository.Exists(package))
+            {
                 // Don't add the package for installation if it already exists in the repository
                 _operations.AddOperation(new PackageOperation(package, PackageAction.Install));
             }
-            else {
+            else
+            {
                 // If we already added an entry for removing this package then remove it 
                 // (it's equivalent for doing +P since we're removing a -P from the list)
                 _operations.RemoveOperation(package, PackageAction.Uninstall);
             }
         }
 
-        protected override IPackage ResolveDependency(PackageDependency dependency) {
+        protected override IPackage ResolveDependency(PackageDependency dependency)
+        {
             Logger.Log(MessageLevel.Info, NuGetResources.Log_AttemptingToRetrievePackageFromSource, dependency);
 
             // First try to get a local copy of the package
@@ -262,23 +303,27 @@ namespace NuGet {
             IPackage sourcePackage = SourceRepository.ResolveDependency(dependency, ConstraintProvider, AllowPrereleaseVersions);
 
             // We didn't find a copy in the local repository
-            if (package == null) {
+            if (package == null)
+            {
                 return sourcePackage;
             }
 
             // Only use the package from the source repository if it's a newer version (it'll only be newer in bug fixes)
-            if (sourcePackage != null && package.Version < sourcePackage.Version) {
+            if (sourcePackage != null && package.Version < sourcePackage.Version)
+            {
                 return sourcePackage;
             }
 
             return package;
         }
 
-        protected override void OnDependencyResolveError(PackageDependency dependency) {
+        protected override void OnDependencyResolveError(PackageDependency dependency)
+        {
             IVersionSpec spec = ConstraintProvider.GetConstraint(dependency.Id);
 
             string message = String.Empty;
-            if (spec != null) {
+            if (spec != null)
+            {
                 message = String.Format(CultureInfo.CurrentCulture, NuGetResources.AdditonalConstraintsDefined, dependency.Id, VersionUtility.PrettyPrint(spec), ConstraintProvider.Source);
             }
 
@@ -287,7 +332,8 @@ namespace NuGet {
                 NuGetResources.UnableToResolveDependency + message, dependency));
         }
 
-        public IEnumerable<PackageOperation> ResolveOperations(IPackage package) {
+        public IEnumerable<PackageOperation> ResolveOperations(IPackage package)
+        {
             _operations.Clear();
             Marker.Clear();
 
@@ -296,7 +342,8 @@ namespace NuGet {
         }
 
 
-        private IEnumerable<IPackage> GetDependents(ConflictResult conflict) {
+        private IEnumerable<IPackage> GetDependents(ConflictResult conflict)
+        {
             // Skip all dependents that are marked for uninstall
             IEnumerable<IPackage> packages = _operations.GetPackages(PackageAction.Uninstall);
 
@@ -304,8 +351,10 @@ namespace NuGet {
                                               .Except(packages, PackageEqualityComparer.IdAndVersion);
         }
 
-        private static InvalidOperationException CreatePackageConflictException(IPackage resolvedPackage, IPackage package, IEnumerable<IPackage> dependents) {
-            if (dependents.Count() == 1) {
+        private static InvalidOperationException CreatePackageConflictException(IPackage resolvedPackage, IPackage package, IEnumerable<IPackage> dependents)
+        {
+            if (dependents.Count() == 1)
+            {
                 return new InvalidOperationException(String.Format(CultureInfo.CurrentCulture,
                        NuGetResources.ConflictErrorWithDependent, package.GetFullName(), resolvedPackage.GetFullName(), dependents.Single().Id));
             }
@@ -319,52 +368,64 @@ namespace NuGet {
         /// Operation lookup encapsulates an operation list and another efficient data structure for finding package operations
         /// by package id, version and PackageAction.
         /// </summary>
-        private class OperationLookup {
+        private class OperationLookup
+        {
             private readonly List<PackageOperation> _operations = new List<PackageOperation>();
             private readonly Dictionary<PackageAction, Dictionary<IPackage, PackageOperation>> _operationLookup = new Dictionary<PackageAction, Dictionary<IPackage, PackageOperation>>();
 
-            internal void Clear() {
+            internal void Clear()
+            {
                 _operations.Clear();
                 _operationLookup.Clear();
             }
 
-            internal IList<PackageOperation> ToList() {
+            internal IList<PackageOperation> ToList()
+            {
                 return _operations;
             }
 
-            internal IEnumerable<IPackage> GetPackages(PackageAction action) {
+            internal IEnumerable<IPackage> GetPackages(PackageAction action)
+            {
                 Dictionary<IPackage, PackageOperation> dictionary = GetPackageLookup(action);
-                if (dictionary != null) {
+                if (dictionary != null)
+                {
                     return dictionary.Keys;
                 }
                 return Enumerable.Empty<IPackage>();
             }
 
-            internal void AddOperation(PackageOperation operation) {
+            internal void AddOperation(PackageOperation operation)
+            {
                 Dictionary<IPackage, PackageOperation> dictionary = GetPackageLookup(operation.Action, createIfNotExists: true);
-                if (!dictionary.ContainsKey(operation.Package)) {
+                if (!dictionary.ContainsKey(operation.Package))
+                {
                     dictionary.Add(operation.Package, operation);
                     _operations.Add(operation);
                 }
             }
 
-            internal void RemoveOperation(IPackage package, PackageAction action) {
+            internal void RemoveOperation(IPackage package, PackageAction action)
+            {
                 Dictionary<IPackage, PackageOperation> dictionary = GetPackageLookup(action);
                 PackageOperation operation;
-                if (dictionary != null && dictionary.TryGetValue(package, out operation)) {
+                if (dictionary != null && dictionary.TryGetValue(package, out operation))
+                {
                     dictionary.Remove(package);
                     _operations.Remove(operation);
                 }
             }
 
-            internal bool Contains(IPackage package, PackageAction action) {
+            internal bool Contains(IPackage package, PackageAction action)
+            {
                 Dictionary<IPackage, PackageOperation> dictionary = GetPackageLookup(action);
                 return dictionary != null && dictionary.ContainsKey(package);
             }
 
-            private Dictionary<IPackage, PackageOperation> GetPackageLookup(PackageAction action, bool createIfNotExists = false) {
+            private Dictionary<IPackage, PackageOperation> GetPackageLookup(PackageAction action, bool createIfNotExists = false)
+            {
                 Dictionary<IPackage, PackageOperation> packages;
-                if (!_operationLookup.TryGetValue(action, out packages) && createIfNotExists) {
+                if (!_operationLookup.TryGetValue(action, out packages) && createIfNotExists)
+                {
                     packages = new Dictionary<IPackage, PackageOperation>(PackageEqualityComparer.IdAndVersion);
                     _operationLookup.Add(action, packages);
                 }

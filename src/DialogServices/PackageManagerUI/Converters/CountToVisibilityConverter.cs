@@ -3,26 +3,33 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace NuGet.Dialog.PackageManagerUI {
-    public class CountToVisibilityConverter : IValueConverter {
+namespace NuGet.Dialog.PackageManagerUI
+{
+    public class CountToVisibilityConverter : IValueConverter
+    {
 
         public bool Inverted { get; set; }
 
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
             double count = System.Convert.ToDouble(value, CultureInfo.InvariantCulture);
 
             double threshold = 0;
-            if (parameter != null) {
+            if (parameter != null)
+            {
                 threshold = System.Convert.ToDouble(parameter, CultureInfo.InvariantCulture);
             }
 
             Visibility returnValue = count > threshold ? Visibility.Visible : Visibility.Collapsed;
 
-            if (Inverted) {
-                if (returnValue == Visibility.Visible) {
+            if (Inverted)
+            {
+                if (returnValue == Visibility.Visible)
+                {
                     returnValue = Visibility.Collapsed;
                 }
-                else {
+                else
+                {
                     returnValue = Visibility.Visible;
                 }
             }
@@ -30,7 +37,8 @@ namespace NuGet.Dialog.PackageManagerUI {
             return returnValue;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
             throw new NotImplementedException();
         }
     }

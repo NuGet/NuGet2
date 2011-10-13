@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using Xunit;
+﻿using System.Collections.Generic;
 using Moq;
 using NuGet.Commands;
 using NuGet.Common;
 using NuGet.Test.Mocks;
+using Xunit;
 
-namespace NuGet.Test.NuGetCommandLine.Commands {
-    
-    public class UpdateCommandTest {
+namespace NuGet.Test.NuGetCommandLine.Commands
+{
+
+    public class UpdateCommandTest
+    {
         [Fact]
-        public void SelfUpdateNoCommandLinePackageOnServerThrows() {
+        public void SelfUpdateNoCommandLinePackageOnServerThrows()
+        {
             // Arrange
             var factory = new Mock<IPackageRepositoryFactory>();
             var sourceProvider = new Mock<IPackageSourceProvider>();
@@ -25,7 +27,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void SelfUpdateOlderVersionDoesNotUpdate() {
+        public void SelfUpdateOlderVersionDoesNotUpdate()
+        {
             // Arrange
             var factory = new Mock<IPackageRepositoryFactory>();
             var sourceProvider = new Mock<IPackageSourceProvider>();
@@ -45,7 +48,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void SelfUpdateNoNuGetExeInNuGetExePackageThrows() {
+        public void SelfUpdateNoNuGetExeInNuGetExePackageThrows()
+        {
             // Arrange
             var factory = new Mock<IPackageRepositoryFactory>();
             var sourceProvider = new Mock<IPackageSourceProvider>();
@@ -63,7 +67,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void SelfUpdateNewVersionDoesUpdatesExe() {
+        public void SelfUpdateNewVersionDoesUpdatesExe()
+        {
             // Arrange
             var factory = new Mock<IPackageRepositoryFactory>();
             var sourceProvider = new Mock<IPackageSourceProvider>();
@@ -87,7 +92,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
 
-        private ConsoleInfo GetConsoleInfo() {
+        private ConsoleInfo GetConsoleInfo()
+        {
             var lines = new List<string>();
             var console = new Mock<IConsole>();
             console.Setup(m => m.WriteLine(It.IsAny<string>())).Callback<string>(lines.Add);
@@ -96,8 +102,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         // Using Tuple.ItemN is makes the code harder to read
-        private class ConsoleInfo {
-            public ConsoleInfo(IConsole console, IList<string> lines) {
+        private class ConsoleInfo
+        {
+            public ConsoleInfo(IConsole console, IList<string> lines)
+            {
                 Console = console;
                 WrittenLines = lines;
             }
@@ -105,19 +113,23 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             public IList<string> WrittenLines { get; private set; }
         }
 
-        private class MockUpdateCommand : UpdateCommand {
+        private class MockUpdateCommand : UpdateCommand
+        {
             public Dictionary<string, string> MovedFiles = new Dictionary<string, string>();
             public Dictionary<string, string> UpdatedFiles = new Dictionary<string, string>();
 
             public MockUpdateCommand(IPackageRepositoryFactory factory, IPackageSourceProvider sourceProvider)
-                : base(factory, sourceProvider) {
+                : base(factory, sourceProvider)
+            {
             }
 
-            protected override void Move(string oldPath, string newPath) {
+            protected override void Move(string oldPath, string newPath)
+            {
                 MovedFiles[oldPath] = newPath;
             }
 
-            protected override void UpdateFile(string exePath, IPackageFile file) {
+            protected override void UpdateFile(string exePath, IPackageFile file)
+            {
                 UpdatedFiles[exePath] = file.Path;
             }
         }

@@ -1,14 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 using NuGet.Analysis.Rules;
+using Xunit;
 
-namespace NuGet.Test.Analysis {
-    
-    public class MisplacedScriptFileRuleTest  {
+namespace NuGet.Test.Analysis
+{
+
+    public class MisplacedScriptFileRuleTest
+    {
 
         [Fact]
-        public void NoScriptHasNoIssue() {
+        public void NoScriptHasNoIssue()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("A", content: new[] { "web.config", "jQuery.js" });
             var rule = new MisplacedScriptFileRule();
@@ -22,7 +25,8 @@ namespace NuGet.Test.Analysis {
 
 
         [Fact]
-        public void ScriptsOutsideToolsFolder() {
+        public void ScriptsOutsideToolsFolder()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage(
                 "A",
@@ -50,7 +54,8 @@ namespace NuGet.Test.Analysis {
                 "Move it into the 'tools' folder.");
         }
 
-        public void UnrecognizedScriptsInsideToolsFolder() {
+        public void UnrecognizedScriptsInsideToolsFolder()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage(
                 "A",

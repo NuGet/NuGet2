@@ -3,24 +3,31 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Internal.Web.Utils;
 
-namespace NuGet {
-    public static class SettingsExtensions {
+namespace NuGet
+{
+    public static class SettingsExtensions
+    {
         private static string _entropy = "NuGet";
 
-        public static string GetDecryptedValue(this ISettings settings, string section, string key) {
-            if (String.IsNullOrEmpty(section)) {
+        public static string GetDecryptedValue(this ISettings settings, string section, string key)
+        {
+            if (String.IsNullOrEmpty(section))
+            {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
             }
 
-            if (String.IsNullOrEmpty(key)) {
+            if (String.IsNullOrEmpty(key))
+            {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "key");
             }
 
             var encrpytedString = settings.GetValue(section, key);
-            if (encrpytedString == null) {
+            if (encrpytedString == null)
+            {
                 return null;
             }
-            if (String.IsNullOrEmpty(encrpytedString)) {
+            if (String.IsNullOrEmpty(encrpytedString))
+            {
                 return String.Empty;
             }
             var encrpytedByteArray = Convert.FromBase64String(encrpytedString);
@@ -29,21 +36,27 @@ namespace NuGet {
 
         }
 
-        public static void SetEncryptedValue(this ISettings settings, string section, string key, string value) {
-            if (String.IsNullOrEmpty(section)) {
+        public static void SetEncryptedValue(this ISettings settings, string section, string key, string value)
+        {
+            if (String.IsNullOrEmpty(section))
+            {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
             }
-            if (String.IsNullOrEmpty(key)) {
+            if (String.IsNullOrEmpty(key))
+            {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "key");
             }
-            if (value == null) {
+            if (value == null)
+            {
                 throw new ArgumentNullException("value");
             }
 
-            if (String.IsNullOrEmpty(value)) {
+            if (String.IsNullOrEmpty(value))
+            {
                 settings.SetValue(section, key, String.Empty);
             }
-            else {
+            else
+            {
                 var decryptedByteArray = StringToBytes(value);
                 var encryptedByteArray = ProtectedData.Protect(decryptedByteArray, StringToBytes(_entropy), DataProtectionScope.CurrentUser);
                 var encryptedString = Convert.ToBase64String(encryptedByteArray);
@@ -52,11 +65,13 @@ namespace NuGet {
 
         }
 
-        private static byte[] StringToBytes(string str) {
+        private static byte[] StringToBytes(string str)
+        {
             return Encoding.UTF8.GetBytes(str);
         }
 
-        private static string BytesToString(byte[] bytes) {
+        private static string BytesToString(byte[] bytes)
+        {
             return Encoding.UTF8.GetString(bytes);
         }
     }

@@ -4,42 +4,51 @@ using System.Text.RegularExpressions;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
 
-namespace NuGet {
+namespace NuGet
+{
     /// <summary>
     /// A hybrid implementation of SemVer that supports semantic versioning as described at http://semver.org while not strictly enforcing it to 
     /// allow older 4-digit versioning schemes to continue working.
     /// </summary>
     [Serializable]
-    public sealed class SemanticVersion : IComparable, IComparable<SemanticVersion>, IEquatable<SemanticVersion> {
+    public sealed class SemanticVersion : IComparable, IComparable<SemanticVersion>, IEquatable<SemanticVersion>
+    {
         private const string SemanticVersionRegex = @"^(?<Version>\d+(\s*\.\s*\d+){0,3})(?<Release>[a-z][0-9a-z-]*)?$";
         private const string StrictSemanticVersionRegex = @"^(?<Version>\d+(\.\d+){2})(?<Release>[a-z][0-9a-z-]*)?$";
-        private readonly string _originalString; 
+        private readonly string _originalString;
 
         public SemanticVersion(string version)
-            : this(Parse(version)) {
+            : this(Parse(version))
+        {
             // The constructor normalizes the version string so that it we do not need to normalize it every time we need to operate on it. 
             // The original string represents the original form in which the version is represented to be used when printing.
             _originalString = version;
         }
 
         public SemanticVersion(int major, int minor, int build, int revision)
-            : this(new Version(major, minor, build, revision)) {
+            : this(new Version(major, minor, build, revision))
+        {
         }
 
         public SemanticVersion(int major, int minor, int build, string specialVersion)
-            : this(new Version(major, minor, build), specialVersion) {
+            : this(new Version(major, minor, build), specialVersion)
+        {
         }
 
         public SemanticVersion(Version version)
-            : this(version, String.Empty) {
+            : this(version, String.Empty)
+        {
         }
 
         public SemanticVersion(Version version, string specialVersion)
-            : this(version, specialVersion, null) {
+            : this(version, specialVersion, null)
+        {
         }
 
-        private SemanticVersion(Version version, string specialVersion, string originalString) {
-            if (version == null) {
+        private SemanticVersion(Version version, string specialVersion, string originalString)
+        {
+            if (version == null)
+            {
                 throw new ArgumentNullException("version");
             }
             Version = NormalizeVersionValue(version);
@@ -47,7 +56,8 @@ namespace NuGet {
             _originalString = String.IsNullOrEmpty(originalString) ? version.ToString() + specialVersion : originalString;
         }
 
-        internal SemanticVersion(SemanticVersion semVer) {
+        internal SemanticVersion(SemanticVersion semVer)
+        {
             _originalString = semVer.ToString();
             Version = semVer.Version;
             SpecialVersion = semVer.SpecialVersion;
@@ -56,7 +66,8 @@ namespace NuGet {
         /// <summary>
         /// Gets the normalized version portion.
         /// </summary>
-        public Version Version {
+        public Version Version
+        {
             get;
             private set;
         }
@@ -64,7 +75,8 @@ namespace NuGet {
         /// <summary>
         /// Gets the optional special version.
         /// </summary>
-        public string SpecialVersion {
+        public string SpecialVersion
+        {
             get;
             private set;
         }
@@ -72,13 +84,16 @@ namespace NuGet {
         /// <summary>
         /// Parses a version string using loose semantic versioning rules that allows 2-4 version components followed by an optional special version.
         /// </summary>
-        public static SemanticVersion Parse(string version) {
-            if (String.IsNullOrEmpty(version)) {
+        public static SemanticVersion Parse(string version)
+        {
+            if (String.IsNullOrEmpty(version))
+            {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "version");
             }
 
             SemanticVersion semVer;
-            if (!TryParse(version, out semVer)) {
+            if (!TryParse(version, out semVer))
+            {
                 throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InvalidVersionString, version), "version");
             }
             return semVer;
@@ -87,20 +102,24 @@ namespace NuGet {
         /// <summary>
         /// Parses a version string using loose semantic versioning rules that allows 2-4 version components followed by an optional special version.
         /// </summary>
-        public static bool TryParse(string version, out SemanticVersion value) {
+        public static bool TryParse(string version, out SemanticVersion value)
+        {
             return TryParseInternal(version, SemanticVersionRegex, out value);
         }
 
         /// <summary>
         /// Parses a version string using strict semantic versioning rules that allows exactly 3 components and an optional special version.
         /// </summary>
-        public static bool TryParseStrict(string version, out SemanticVersion value) {
+        public static bool TryParseStrict(string version, out SemanticVersion value)
+        {
             return TryParseInternal(version, StrictSemanticVersionRegex, out value);
         }
 
-        private static bool TryParseInternal(string version, string regex, out SemanticVersion semVer) {
+        private static bool TryParseInternal(string version, string regex, out SemanticVersion semVer)
+        {
             semVer = null;
-            if (String.IsNullOrEmpty(version)) {
+            if (String.IsNullOrEmpty(version))
+            {
                 return false;
             }
             var regexFlags = RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture;
@@ -108,7 +127,8 @@ namespace NuGet {
 
             var match = semVerRegex.Match(version.Trim());
             Version versionValue;
-            if (!match.Success || !Version.TryParse(match.Groups["Version"].Value, out versionValue)) {
+            if (!match.Success || !Version.TryParse(match.Groups["Version"].Value, out versionValue))
+            {
                 return false;
             }
 
@@ -120,103 +140,127 @@ namespace NuGet {
         /// Attempts to parse the version token as a SemanticVersion.
         /// </summary>
         /// <returns>An instance of SemanticVersion if it parses correctly, null otherwise.</returns>
-        public static SemanticVersion ParseOptionalVersion(string version) {
+        public static SemanticVersion ParseOptionalVersion(string version)
+        {
             SemanticVersion semVer;
             TryParse(version, out semVer);
             return semVer;
         }
 
-        private static Version NormalizeVersionValue(Version version) {
+        private static Version NormalizeVersionValue(Version version)
+        {
             return new Version(version.Major,
                                version.Minor,
                                Math.Max(version.Build, 0),
                                Math.Max(version.Revision, 0));
         }
 
-        public int CompareTo(object obj) {
-            if (Object.ReferenceEquals(obj, null)) {
+        public int CompareTo(object obj)
+        {
+            if (Object.ReferenceEquals(obj, null))
+            {
                 return 1;
             }
             SemanticVersion other = obj as SemanticVersion;
-            if (other == null) {
+            if (other == null)
+            {
                 throw new ArgumentException(NuGetResources.TypeMustBeASemanticVersion, "obj");
             }
             return CompareTo(other);
         }
 
-        public int CompareTo(SemanticVersion other) {
-            if (Object.ReferenceEquals(other, null)) {
+        public int CompareTo(SemanticVersion other)
+        {
+            if (Object.ReferenceEquals(other, null))
+            {
                 return 1;
             }
 
             int result = Version.CompareTo(other.Version);
 
-            if (result != 0) {
+            if (result != 0)
+            {
                 return result;
             }
 
             bool empty = String.IsNullOrEmpty(SpecialVersion);
             bool otherEmpty = String.IsNullOrEmpty(other.SpecialVersion);
-            if (empty && otherEmpty) {
+            if (empty && otherEmpty)
+            {
                 return 0;
             }
-            else if (empty) {
+            else if (empty)
+            {
                 return 1;
             }
-            else if (otherEmpty) {
+            else if (otherEmpty)
+            {
                 return -1;
             }
             return StringComparer.OrdinalIgnoreCase.Compare(SpecialVersion, other.SpecialVersion);
         }
 
-        public static bool operator ==(SemanticVersion version1, SemanticVersion version2) {
-            if (Object.ReferenceEquals(version1, null)) {
+        public static bool operator ==(SemanticVersion version1, SemanticVersion version2)
+        {
+            if (Object.ReferenceEquals(version1, null))
+            {
                 return Object.ReferenceEquals(version2, null);
             }
             return version1.Equals(version2);
         }
 
-        public static bool operator !=(SemanticVersion version1, SemanticVersion version2) {
+        public static bool operator !=(SemanticVersion version1, SemanticVersion version2)
+        {
             return !(version1 == version2);
         }
 
-        public static bool operator <(SemanticVersion version1, SemanticVersion version2) {
-            if (version1 == null) {
+        public static bool operator <(SemanticVersion version1, SemanticVersion version2)
+        {
+            if (version1 == null)
+            {
                 throw new ArgumentNullException("version1");
             }
             return version1.CompareTo(version2) < 0;
         }
 
-        public static bool operator <=(SemanticVersion version1, SemanticVersion version2) {
+        public static bool operator <=(SemanticVersion version1, SemanticVersion version2)
+        {
             return (version1 == version2) || (version1 < version2);
         }
 
-        public static bool operator >(SemanticVersion version1, SemanticVersion version2) {
-            if (version1 == null) {
+        public static bool operator >(SemanticVersion version1, SemanticVersion version2)
+        {
+            if (version1 == null)
+            {
                 throw new ArgumentNullException("version1");
             }
             return version2 < version1;
         }
 
-        public static bool operator >=(SemanticVersion version1, SemanticVersion version2) {
+        public static bool operator >=(SemanticVersion version1, SemanticVersion version2)
+        {
             return (version1 == version2) || (version1 > version2);
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return _originalString;
         }
 
-        public bool Equals(SemanticVersion other) {
-            return other != null && Version.Equals(other.Version) 
+        public bool Equals(SemanticVersion other)
+        {
+            return other != null && Version.Equals(other.Version)
                                  && SpecialVersion.Equals(other.SpecialVersion, StringComparison.OrdinalIgnoreCase);
         }
 
-        public override bool Equals(object obj) {
+        public override bool Equals(object obj)
+        {
             SemanticVersion semVer = obj as SemanticVersion;
             return semVer != null && Equals(semVer);
         }
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             var hashCodeCombiner = new HashCodeCombiner();
             hashCodeCombiner.AddObject(Version);
             hashCodeCombiner.AddObject(SpecialVersion);

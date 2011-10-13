@@ -3,14 +3,17 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace NuGet {
-    public static class PathValidator {
+namespace NuGet
+{
+    public static class PathValidator
+    {
         /// <summary>
         /// Validates that a source is a valid path or url.
         /// </summary>
         /// <param name="source">The path to validate.</param>
         /// <returns>True if valid, False if invalid.</returns>
-        public static bool IsValidSource(string source) {
+        public static bool IsValidSource(string source)
+        {
             return PathValidator.IsValidLocalPath(source) || PathValidator.IsValidUncPath(source) || PathValidator.IsValidUrl(source);
         }
 
@@ -24,11 +27,14 @@ namespace NuGet {
         /// <param name="path">The path to validate.</param>
         /// <returns>True if valid, False if invalid.</returns>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want to throw during detection")]
-        public static bool IsValidLocalPath(string path) {
-            try {
+        public static bool IsValidLocalPath(string path)
+        {
+            try
+            {
                 return Regex.IsMatch(path.Trim(), @"^[A-Za-z]:\\") && Path.IsPathRooted(path);
             }
-            catch {
+            catch
+            {
                 return false;
             }
 
@@ -44,12 +50,15 @@ namespace NuGet {
         /// <param name="path">The path to validate.</param>
         /// <returns>True if valid, False if invalid.</returns>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want to throw during detection")]
-        public static bool IsValidUncPath(string path) {
-            try {
+        public static bool IsValidUncPath(string path)
+        {
+            try
+            {
                 Path.GetFullPath(path);
                 return Regex.IsMatch(path.Trim(), @"^\\\\");
             }
-            catch {
+            catch
+            {
                 return false;
             }
         }
@@ -60,7 +69,8 @@ namespace NuGet {
         /// <param name="url">The url to validate.</param>
         /// <returns>True if valid, False if invalid.</returns>
         [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "0#", Justification = "We're trying to validate that a stirng is infct a uri")]
-        public static bool IsValidUrl(string url) {
+        public static bool IsValidUrl(string url)
+        {
             Uri result;
 
             // Make sure url starts with protocol:// because Uri.TryCreate() returns true for local and UNC paths even if badly formed.

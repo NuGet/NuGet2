@@ -4,52 +4,65 @@ using System.Linq;
 using System.Management.Automation;
 using System.Text;
 
-namespace NuGetConsole.Host.PowerShell {
+namespace NuGetConsole.Host.PowerShell
+{
     /// <summary>
     /// A simple parser used for parsing commands that require completion (intellisense).
     /// </summary>
-    public class CommandParser {
+    public class CommandParser
+    {
         private int _index;
         private readonly string _command;
         private readonly char[] _escapeChars = new[] { 'n', 'r', 't', 'a', 'b', '"', '\'', '`', '0' };
 
-        private CommandParser(string command) {
+        private CommandParser(string command)
+        {
             _command = command;
         }
 
-        private char CurrentChar {
-            get {
+        private char CurrentChar
+        {
+            get
+            {
                 return GetChar(_index);
             }
         }
 
-        private char NextChar {
-            get {
+        private char NextChar
+        {
+            get
+            {
                 return GetChar(_index + 1);
             }
         }
 
-        private bool Done {
-            get {
+        private bool Done
+        {
+            get
+            {
                 return _index >= _command.Length;
             }
         }
 
-        public static Command Parse(string command) {
-            if (command == null) {
+        public static Command Parse(string command)
+        {
+            if (command == null)
+            {
                 throw new ArgumentNullException("command");
             }
             return new CommandParser(command).ParseCore();
         }
 
-        private Command ParseCore() {
+        private Command ParseCore()
+        {
             Collection<PSParseError> errors;
             Collection<PSToken> tokens = PSParser.Tokenize(_command, out errors);
 
             // Use the powershell tokenizer to find the index of the last command so we can start parsing from there
             var lastCommandToken = tokens.LastOrDefault(t => t.Type == PSTokenType.Command);
 
-            if (lastCommandToken != null) {
+            if (lastCommandToken != null)
+            {
                 // Start parsing from a command
                 _index = lastCommandToken.Start;
             }
@@ -60,27 +73,33 @@ namespace NuGetConsole.Host.PowerShell {
             // Get the command name
             parsedCommand.CommandName = ParseToken();
 
-            while (!Done) {
+            while (!Done)
+            {
                 SkipWhitespace();
 
                 string argument = ParseToken();
 
-                if (argument.StartsWith("-", StringComparison.Ordinal)) {
+                if (argument.StartsWith("-", StringComparison.Ordinal))
+                {
                     // Trim the -
                     argument = argument.Substring(1);
 
-                    if (!String.IsNullOrEmpty(argument)) {
+                    if (!String.IsNullOrEmpty(argument))
+                    {
                         // Parse the argument value if any
-                        if (SkipWhitespace() && CurrentChar != '-') {
+                        if (SkipWhitespace() && CurrentChar != '-')
+                        {
                             parsedCommand.Arguments[argument] = ParseToken();
                         }
-                        else {
+                        else
+                        {
                             parsedCommand.Arguments[argument] = null;
                         }
 
                         parsedCommand.CompletionArgument = argument;
                     }
-                    else {
+                    else
+                    {
                         // If this was an empty argument then we aren't trying to complete anything
                         parsedCommand.CompletionArgument = null;
                     }
@@ -88,7 +107,8 @@ namespace NuGetConsole.Host.PowerShell {
                     // Reset the completion index if we're completing an argument (these 2 properties are mutually exclusive)
                     parsedCommand.CompletionIndex = null;
                 }
-                else {
+                else
+                {
                     // Reset the completion argument
                     parsedCommand.CompletionArgument = null;
                     parsedCommand.CompletionIndex = positionalArgumentIndex;
@@ -99,15 +119,19 @@ namespace NuGetConsole.Host.PowerShell {
             return parsedCommand;
         }
 
-        private string ParseSingleQuotes() {
+        private string ParseSingleQuotes()
+        {
             var sb = new StringBuilder();
-            while (!Done) {
+            while (!Done)
+            {
                 sb.Append(ParseUntil(c => c == '\''));
 
-                if (ParseChar() == '\'' && CurrentChar == '\'') {
+                if (ParseChar() == '\'' && CurrentChar == '\'')
+                {
                     sb.Append(ParseChar());
                 }
-                else {
+                else
+                {
                     break;
                 }
             }
@@ -115,17 +139,21 @@ namespace NuGetConsole.Host.PowerShell {
             return sb.ToString();
         }
 
-        private string ParseDoubleQuotes() {
+        private string ParseDoubleQuotes()
+        {
             var sb = new StringBuilder();
-            while (!Done) {
+            while (!Done)
+            {
                 // Parse until we see a quote or an escape character
                 sb.Append(ParseUntil(c => c == '"' || c == '`'));
 
-                if (IsEscapeSequence()) {
+                if (IsEscapeSequence())
+                {
                     sb.Append(ParseChar());
                     sb.Append(ParseChar());
                 }
-                else {
+                else
+                {
                     ParseChar();
                     break;
                 }
@@ -134,43 +162,52 @@ namespace NuGetConsole.Host.PowerShell {
             return sb.ToString();
         }
 
-        private bool IsEscapeSequence() {
+        private bool IsEscapeSequence()
+        {
             return CurrentChar == '`' && Array.IndexOf(_escapeChars, NextChar) >= 0;
         }
 
-        private char ParseChar() {
+        private char ParseChar()
+        {
             char ch = CurrentChar;
             _index++;
             return ch;
         }
 
-        private string ParseToken() {
-            if (CurrentChar == '\'') {
+        private string ParseToken()
+        {
+            if (CurrentChar == '\'')
+            {
                 ParseChar();
                 return ParseSingleQuotes();
             }
-            else if (CurrentChar == '"') {
+            else if (CurrentChar == '"')
+            {
                 ParseChar();
                 return ParseDoubleQuotes();
             }
             return ParseUntil(Char.IsWhiteSpace);
         }
 
-        private string ParseUntil(Func<char, bool> predicate) {
+        private string ParseUntil(Func<char, bool> predicate)
+        {
             var sb = new StringBuilder();
-            while (!Done && !predicate(CurrentChar)) {
+            while (!Done && !predicate(CurrentChar))
+            {
                 sb.Append(CurrentChar);
                 _index++;
             }
             return sb.ToString();
         }
 
-        private bool SkipWhitespace() {
+        private bool SkipWhitespace()
+        {
             string ws = ParseUntil(c => !Char.IsWhiteSpace(c));
             return ws.Length > 0;
         }
 
-        private char GetChar(int index) {
+        private char GetChar(int index)
+        {
             return index < _command.Length ? _command[index] : '\0';
         }
     }

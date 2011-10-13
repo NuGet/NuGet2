@@ -6,8 +6,10 @@ using System.Windows;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.VisualStudio;
 
-namespace NuGet.Dialog.Providers {
-    internal class SolutionRecentProvider : SolutionOnlineProvider {
+namespace NuGet.Dialog.Providers
+{
+    internal class SolutionRecentProvider : SolutionOnlineProvider
+    {
         private readonly IPackageRepository _recentPackagesRepository;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
         private readonly IPackageRepositoryFactory _packageRepositoryFactory;
@@ -32,7 +34,8 @@ namespace NuGet.Dialog.Providers {
                 packageManagerFactory,
                 providerServices,
                 progressProvider,
-                solutionManager) {
+                solutionManager)
+        {
 
             _recentPackagesRepository = recentPackagesRepository;
             _packageManagerFactory = packageManagerFactory;
@@ -40,26 +43,34 @@ namespace NuGet.Dialog.Providers {
             _packageSourceProvider = packageSourceProvider;
         }
 
-        public override string Name {
-            get {
+        public override string Name
+        {
+            get
+            {
                 return Resources.Dialog_RecentProvider;
             }
         }
 
-        public override float SortOrder {
-            get {
+        public override float SortOrder
+        {
+            get
+            {
                 return 4.0f;
             }
         }
 
-        public override bool RefreshOnNodeSelection {
-            get {
+        public override bool RefreshOnNodeSelection
+        {
+            get
+            {
                 return true;
             }
         }
 
-        protected internal override IVsPackageManager GetActivePackageManager() {
-            if (_recentPackageManager == null) {
+        protected internal override IVsPackageManager GetActivePackageManager()
+        {
+            if (_recentPackageManager == null)
+            {
                 var repository = _packageSourceProvider.GetAggregate(_packageRepositoryFactory, ignoreFailingRepositories: true);
                 _recentPackageManager = _packageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: false);
             }
@@ -67,7 +78,8 @@ namespace NuGet.Dialog.Providers {
             return _recentPackageManager;
         }
 
-        protected override IList<IVsSortDescriptor> CreateSortDescriptors() {
+        protected override IList<IVsSortDescriptor> CreateSortDescriptors()
+        {
             return new List<IVsSortDescriptor> {
                         new PackageSortDescriptor(Resources.Dialog_RecentPackagesDefaultSort, "LastUsedDate", ListSortDirection.Descending),
                         new PackageSortDescriptor(String.Format(CultureInfo.CurrentCulture, "{0}: {1}", Resources.Dialog_SortOption_Name, Resources.Dialog_SortAscending), new[] { "Title", "Id" }, ListSortDirection.Ascending),
@@ -75,13 +87,16 @@ namespace NuGet.Dialog.Providers {
                   };
         }
 
-        protected override void FillRootNodes() {
+        protected override void FillRootNodes()
+        {
             var allNode = new SimpleTreeNode(this, Resources.Dialog_RootNodeAll, RootNode, _recentPackagesRepository);
             RootNode.Nodes.Add(allNode);
         }
 
-        public override string NoItemsMessage {
-            get {
+        public override string NoItemsMessage
+        {
+            get
+            {
                 return Resources.Dialog_RecentProviderNoItem;
             }
         }

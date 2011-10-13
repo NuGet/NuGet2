@@ -1,10 +1,13 @@
 ﻿using NuGet.Commands;
 using Xunit;
 
-namespace NuGet.Test.NuGetCommandLine {
-    public class CommandTest {
+namespace NuGet.Test.NuGetCommandLine
+{
+    public class CommandTest
+    {
         [Fact]
-        public void GetCommandAttributes_ReturnsEmptyIfNoCommandAttributes() {
+        public void GetCommandAttributes_ReturnsEmptyIfNoCommandAttributes()
+        {
             // Arrange
             var command = new CommandWithBadName();
 
@@ -13,7 +16,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void GetCommandAttributes_UsesCommandNameAndDefaultDescriptionIfNoCommandAttributesPresent() {
+        public void GetCommandAttributes_UsesCommandNameAndDefaultDescriptionIfNoCommandAttributesPresent()
+        {
             // Arrange
             var command = new MockWithoutCommandAttributesCommand();
 
@@ -23,7 +27,8 @@ namespace NuGet.Test.NuGetCommandLine {
         }
 
         [Fact]
-        public void GetCommandAttributes_UsesCommandAttributesIfAvailable() {
+        public void GetCommandAttributes_UsesCommandAttributesIfAvailable()
+        {
             // Arrange
             var command = new MockCommandWithCommandAttributes();
 
@@ -32,21 +37,27 @@ namespace NuGet.Test.NuGetCommandLine {
             Assert.Equal(command.CommandAttribute.Description, "DescFromAttribute");
         }
 
-        private class CommandWithBadName : Command {
-            public override void ExecuteCommand() {
+        private class CommandWithBadName : Command
+        {
+            public override void ExecuteCommand()
+            {
 
             }
         }
 
-        private class MockWithoutCommandAttributesCommand : Command {
-            public override void ExecuteCommand() {
+        private class MockWithoutCommandAttributesCommand : Command
+        {
+            public override void ExecuteCommand()
+            {
 
             }
         }
 
         [CommandAttribute(commandName: "NameFromAttribute", description: "DescFromAttribute")]
-        public class MockCommandWithCommandAttributes : Command {
-            public override void ExecuteCommand() {
+        public class MockCommandWithCommandAttributes : Command
+        {
+            public override void ExecuteCommand()
+            {
 
             }
         }

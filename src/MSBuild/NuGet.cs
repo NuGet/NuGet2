@@ -5,8 +5,10 @@ using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
-namespace NuGet.MSBuild {
-    public class NuGet : Task {
+namespace NuGet.MSBuild
+{
+    public class NuGet : Task
+    {
         private static readonly string SymbolsExtension = ".symbols" + Constants.PackageExtension;
         private readonly IFileSystemProvider _fileSystemProvider;
 
@@ -31,10 +33,12 @@ namespace NuGet.MSBuild {
 
 
         public NuGet()
-            : this(new FileSystemProvider()) {
+            : this(new FileSystemProvider())
+        {
         }
 
-        public NuGet(IFileSystemProvider fileSystemProvider) {
+        public NuGet(IFileSystemProvider fileSystemProvider)
+        {
             _fileSystemProvider = fileSystemProvider;
         }
 
@@ -64,30 +68,36 @@ namespace NuGet.MSBuild {
 
         public bool Symbols { get; set; }
 
-        public override bool Execute() {
-            if (String.IsNullOrEmpty(BaseDir)) {
+        public override bool Execute()
+        {
+            if (String.IsNullOrEmpty(BaseDir))
+            {
                 BaseDir = Directory.GetCurrentDirectory();
             }
 
             var fileSystem = _fileSystemProvider.CreateFileSystem(BaseDir);
 
-            if (String.IsNullOrEmpty(SpecFile)) {
+            if (String.IsNullOrEmpty(SpecFile))
+            {
                 Log.LogError(Resources.NuGetResources.SpecFileMustNotBeEmpty);
                 return false;
             }
 
-            if (!fileSystem.FileExists(SpecFile)) {
+            if (!fileSystem.FileExists(SpecFile))
+            {
                 Log.LogError(Resources.NuGetResources.SpecFileDoesNotExist);
                 return false;
             }
 
             PackageDir = Path.Combine(Directory.GetCurrentDirectory(), PackageDir ?? String.Empty);
-            if (!fileSystem.DirectoryExists(PackageDir)) {
+            if (!fileSystem.DirectoryExists(PackageDir))
+            {
                 Log.LogError(Resources.NuGetResources.PackageDirDoesNotExist);
                 return false;
             }
 
-            try {
+            try
+            {
                 string packageFilePath = BuildPackage(fileSystem, SpecFile);
 
                 OutputPackage = packageFilePath;
@@ -97,7 +107,8 @@ namespace NuGet.MSBuild {
                     fileSystem.GetFullPath(SpecFile),
                     fileSystem.GetFullPath(packageFilePath)));
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 Log.LogError(Resources.NuGetResources.UnexpectedError, ex.ToString());
                 return false;
             }
@@ -105,13 +116,16 @@ namespace NuGet.MSBuild {
             return true;
         }
 
-        private string BuildPackage(IFileSystem fileSystem, string specFilePath) {
+        private string BuildPackage(IFileSystem fileSystem, string specFilePath)
+        {
             PackageBuilder packageBuilder;
-            using (Stream stream = fileSystem.OpenFile(specFilePath)) {
+            using (Stream stream = fileSystem.OpenFile(specFilePath))
+            {
                 packageBuilder = new PackageBuilder(fileSystem.OpenFile(specFilePath), BaseDir);
             }
 
-            if (Symbols) {
+            if (Symbols)
+            {
                 // remove source related files when building the lib package
                 ExcludeFilesForLibPackage(packageBuilder.Files);
             }
@@ -124,15 +138,18 @@ namespace NuGet.MSBuild {
 
             BuildPackage(fileSystem, packageBuilder, packageFilePath);
 
-            if (Symbols) {
+            if (Symbols)
+            {
                 BuildSymbolsPackage(fileSystem, specFilePath);
             }
 
             return packageFilePath;
         }
 
-        private void BuildPackage(IFileSystem fileSystem, PackageBuilder builder, string path, string outputPath = null) {
-            if (Version != null) {
+        private void BuildPackage(IFileSystem fileSystem, PackageBuilder builder, string path, string outputPath = null)
+        {
+            if (Version != null)
+            {
                 builder.Version = Version;
             }
             outputPath = outputPath ?? GetOutputPath(builder);
@@ -142,24 +159,30 @@ namespace NuGet.MSBuild {
 
             // Track if the package file was already present on disk
             bool isExistingPackage = fileSystem.FileExists(outputPath);
-            try {
-                using (MemoryStream stream = new MemoryStream()) {
+            try
+            {
+                using (MemoryStream stream = new MemoryStream())
+                {
                     builder.Save(stream);
                     stream.Seek(0, SeekOrigin.Begin);
                     fileSystem.AddFile(outputPath, stream);
                 }
             }
-            catch {
-                if (!isExistingPackage && fileSystem.FileExists(outputPath)) {
+            catch
+            {
+                if (!isExistingPackage && fileSystem.FileExists(outputPath))
+                {
                     File.Delete(outputPath);
                 }
                 throw;
             }
         }
 
-        private void BuildSymbolsPackage(IFileSystem fileSystem, string specFilePath) {
+        private void BuildSymbolsPackage(IFileSystem fileSystem, string specFilePath)
+        {
             PackageBuilder symbolsBuilder;
-            using (Stream stream = fileSystem.OpenFile(specFilePath)) {
+            using (Stream stream = fileSystem.OpenFile(specFilePath))
+            {
                 symbolsBuilder = new PackageBuilder(stream, BaseDir);
             }
 
@@ -170,7 +193,8 @@ namespace NuGet.MSBuild {
             BuildPackage(fileSystem, symbolsBuilder, specFilePath, outputPath);
         }
 
-        internal void ExcludeFiles(ICollection<IPackageFile> packageFiles) {
+        internal void ExcludeFiles(ICollection<IPackageFile> packageFiles)
+        {
             // Always exclude the nuspec file
             // Review: This exclusion should be done by the package builder because it knows which file would collide with the auto-generated
             // manifest file.
@@ -180,25 +204,30 @@ namespace NuGet.MSBuild {
             PathResolver.FilterPackageFiles(packageFiles, ResolvePath, wildCards);
         }
 
-        internal static void ExcludeFilesForLibPackage(ICollection<IPackageFile> files) {
+        internal static void ExcludeFilesForLibPackage(ICollection<IPackageFile> files)
+        {
             PathResolver.FilterPackageFiles(files, file => file.Path, _libPackageExcludes);
         }
 
-        internal static void ExcludeFilesForSymbolPackage(ICollection<IPackageFile> files) {
+        internal static void ExcludeFilesForSymbolPackage(ICollection<IPackageFile> files)
+        {
             PathResolver.FilterPackageFiles(files, file => file.Path, _symbolPackageExcludes);
         }
 
-        internal string GetOutputPath(IPackageBuilder builder, bool symbols = false) {
+        internal string GetOutputPath(IPackageBuilder builder, bool symbols = false)
+        {
             string version = builder.Version.ToString();
 
             // Output file is {id}.{version}
             string outputFile = builder.Id + "." + version;
 
             // If this is a source package then add .symbols.nupkg to the package file name
-            if (symbols) {
+            if (symbols)
+            {
                 outputFile += SymbolsExtension;
             }
-            else {
+            else
+            {
                 outputFile += Constants.PackageExtension;
             }
 
@@ -206,15 +235,18 @@ namespace NuGet.MSBuild {
             return Path.Combine(PackageDir, outputFile);
         }
 
-        private string ResolvePath(IPackageFile packageFile) {
+        private string ResolvePath(IPackageFile packageFile)
+        {
             var physicalPackageFile = packageFile as PhysicalPackageFile;
             // For PhysicalPackageFiles, we want to filter by SourcePaths, the path on disk. The Path value maps to the TargetPath
-            if (physicalPackageFile == null) {
+            if (physicalPackageFile == null)
+            {
                 return packageFile.Path;
             }
             var path = physicalPackageFile.SourcePath;
             int index = path.IndexOf(BaseDir, StringComparison.OrdinalIgnoreCase);
-            if (index != -1) {
+            if (index != -1)
+            {
                 // Since wildcards are going to be relative to the base path, remove the BaseDir portion of the file's source path. 
                 // Also remove any leading path separator slashes
                 path = path.Substring(index + BaseDir.Length).TrimStart(Path.DirectorySeparatorChar);

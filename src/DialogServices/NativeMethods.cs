@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace NuGet.Dialog {
-    internal static class NativeMethods {
+namespace NuGet.Dialog
+{
+    internal static class NativeMethods
+    {
         public const int MF_BYPOSITION = 0x400;
 
         [DllImport("User32")]

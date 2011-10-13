@@ -4,10 +4,13 @@ using System.Linq;
 using Moq;
 using Xunit;
 
-namespace NuGet.Test {
-    public class DefaultSpecValuesRuleTest {
+namespace NuGet.Test
+{
+    public class DefaultSpecValuesRuleTest
+    {
         [Fact]
-        public void RuleReturnsIssueIfProjectUrlIsSampleValue() {
+        public void RuleReturnsIssueIfProjectUrlIsSampleValue()
+        {
             // Arrange
             var package = new Mock<IPackage>();
             package.Setup(c => c.ProjectUrl).Returns(new Uri("http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE"));
@@ -24,7 +27,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RuleReturnsIssueIfIconUrlIsSampleValue() {
+        public void RuleReturnsIssueIfIconUrlIsSampleValue()
+        {
             // Arrange
             var package = new Mock<IPackage>();
             package.Setup(c => c.IconUrl).Returns(new Uri("http://ICON_URL_HERE_OR_DELETE_THIS_LINE"));
@@ -41,7 +45,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RuleReturnsIssueIfLicenseUrlIsSampleValue() {
+        public void RuleReturnsIssueIfLicenseUrlIsSampleValue()
+        {
             // Arrange
             var package = new Mock<IPackage>();
             package.Setup(c => c.LicenseUrl).Returns(new Uri("http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE"));
@@ -58,7 +63,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RuleReturnsIssueIfTagIsSampleValue() {
+        public void RuleReturnsIssueIfTagIsSampleValue()
+        {
             // Arrange
             var package = new Mock<IPackage>();
             package.Setup(c => c.Tags).Returns("Tag1 Tag2");
@@ -75,7 +81,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RuleReturnsIssueIfReleaseNotesIsSampleValue() {
+        public void RuleReturnsIssueIfReleaseNotesIsSampleValue()
+        {
             // Arrange
             var package = new Mock<IPackage>();
             package.Setup(c => c.ReleaseNotes).Returns("Summary of changes made in this release of the package.");
@@ -92,7 +99,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RuleReturnsIssueIfDescriptionIsSampleValue() {
+        public void RuleReturnsIssueIfDescriptionIsSampleValue()
+        {
             // Arrange
             var package = new Mock<IPackage>();
             package.Setup(c => c.Description).Returns("Package description");
@@ -109,7 +117,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RuleReturnsIssueIfTagIsSampleValueWithSpaces() {
+        public void RuleReturnsIssueIfTagIsSampleValueWithSpaces()
+        {
             // Arrange
             var package = new Mock<IPackage>();
             package.Setup(c => c.Tags).Returns(" Tag1 Tag2 ");
@@ -126,7 +135,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RuleReturnsIssueIfDependencyIsSampleValue() {
+        public void RuleReturnsIssueIfDependencyIsSampleValue()
+        {
             // Arrange
             var package = new Mock<IPackage>();
             var dependencies = new List<PackageDependency> {

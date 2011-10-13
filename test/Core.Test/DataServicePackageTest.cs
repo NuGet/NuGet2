@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class DataServicePackageTest {
+namespace NuGet.Test
+{
+
+    public class DataServicePackageTest
+    {
         [Fact]
-        public void EmptyDependenciesStringReturnsEmptyDependenciesCollection() {
+        public void EmptyDependenciesStringReturnsEmptyDependenciesCollection()
+        {
             // Arrange
             var servicePackage = new DataServicePackage();
 
@@ -21,7 +24,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void NullDependenciesStringReturnsEmptyDependenciesCollection() {
+        public void NullDependenciesStringReturnsEmptyDependenciesCollection()
+        {
             // Arrange
             var servicePackage = new DataServicePackage();
 
@@ -30,7 +34,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void DependenciesStringWithExtraSpaces() {
+        public void DependenciesStringWithExtraSpaces()
+        {
             // Arrange
             var servicePackage = new DataServicePackage();
 
@@ -51,9 +56,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void DownloadAndVerifyThrowsIfPackageHashIsNull() {
+        public void DownloadAndVerifyThrowsIfPackageHashIsNull()
+        {
             // Arrange
-            var servicePackage = new DataServicePackage {
+            var servicePackage = new DataServicePackage
+            {
                 Id = "A",
                 Version = "1.2"
             };
@@ -63,9 +70,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ShouldUpdateReturnsTrueIfOldHashAndPackageHashAreDifferent() {
+        public void ShouldUpdateReturnsTrueIfOldHashAndPackageHashAreDifferent()
+        {
             // Arrange
-            var servicePackage = new DataServicePackage {
+            var servicePackage = new DataServicePackage
+            {
                 Id = "A",
                 Version = "1.2",
                 PackageHash = "NEWHASH"
@@ -79,9 +88,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ShouldUpdateReturnsTrueIfPackageNotInRepository() {
+        public void ShouldUpdateReturnsTrueIfPackageNotInRepository()
+        {
             // Arrange
-            var servicePackage = new DataServicePackage {
+            var servicePackage = new DataServicePackage
+            {
                 Id = "A",
                 Version = "1.2",
                 PackageHash = "HASH",
@@ -96,9 +107,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ShouldUpdateReturnsTrueIfRepositoryPackageHashIsDifferentFromPackageHash() {
+        public void ShouldUpdateReturnsTrueIfRepositoryPackageHashIsDifferentFromPackageHash()
+        {
             // Arrange
-            var servicePackage = new DataServicePackage {
+            var servicePackage = new DataServicePackage
+            {
                 Id = "A",
                 Version = "1.2",
                 PackageHash = "HASH",
@@ -117,9 +130,11 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ShouldUpdateReturnsTrueIfRepositoryThrows() {
+        public void ShouldUpdateReturnsTrueIfRepositoryThrows()
+        {
             // Arrange
-            var servicePackage = new DataServicePackage {
+            var servicePackage = new DataServicePackage
+            {
                 Id = "A",
                 Version = "1.2",
                 PackageHash = "HASH",

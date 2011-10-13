@@ -4,14 +4,18 @@ using System.IO.Packaging;
 using System.Linq;
 using NuGet;
 
-namespace Bootstrapper {
-    public class Program {
+namespace Bootstrapper
+{
+    public class Program
+    {
         private const string NuGetCommandLinePackageId = "nuget.commandline";
         private const string GalleryUrl = "http://packages.nuget.org/v1/FeedService.svc";
         private const string NuGetExeFilePath = "/tools/NuGet.exe";
 
-        public static int Main(string[] args) {
-            try {
+        public static int Main(string[] args)
+        {
+            try
+            {
                 Console.WriteLine("NuGet bootstrapper {0}", typeof(Program).Assembly.GetName().Version);
 
                 // Setup the proxy for gallery requests
@@ -30,7 +34,8 @@ namespace Bootstrapper {
                     .OrderByDescending(p => Version.Parse(p.Version))
                     .FirstOrDefault();
 
-                if (packageMetadata != null) {
+                if (packageMetadata != null)
+                {
                     Console.WriteLine("Found NuGet.exe version {0}.", packageMetadata.Version);
                     Console.WriteLine("Downloading...");
 
@@ -38,11 +43,13 @@ namespace Bootstrapper {
                     var downloadClient = new HttpClient(uri);
                     var packageStream = new MemoryStream(downloadClient.DownloadData());
 
-                    using (Package package = Package.Open(packageStream)) {
+                    using (Package package = Package.Open(packageStream))
+                    {
                         var fileUri = PackUriHelper.CreatePartUri(new Uri(NuGetExeFilePath, UriKind.Relative));
                         PackagePart nugetExePart = package.GetPart(fileUri);
 
-                        if (nugetExePart != null) {
+                        if (nugetExePart != null)
+                        {
                             // Get the exe path and move it to a temp file (NuGet.exe.old) so we can replace the running exe with the bits we got 
                             // from the package repository
                             string exePath = typeof(Program).Assembly.Location;
@@ -58,37 +65,47 @@ namespace Bootstrapper {
 
                 return 0;
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 WriteError(e);
             }
 
             return 1;
         }
 
-        private static void WriteError(Exception e) {
+        private static void WriteError(Exception e)
+        {
             var currentColor = Console.ForegroundColor;
-            try {                
+            try
+            {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Error.WriteLine(e.GetBaseException().Message);
             }
-            finally {
+            finally
+            {
                 Console.ForegroundColor = currentColor;
             }
         }
 
-        private static void UpdateFile(string exePath, PackagePart part) {
-            using (Stream fromStream = part.GetStream(), toStream = File.Create(exePath)) {
+        private static void UpdateFile(string exePath, PackagePart part)
+        {
+            using (Stream fromStream = part.GetStream(), toStream = File.Create(exePath))
+            {
                 fromStream.CopyTo(toStream);
             }
         }
 
-        private static void Move(string oldPath, string newPath) {
-            try {
-                if (File.Exists(newPath)) {
+        private static void Move(string oldPath, string newPath)
+        {
+            try
+            {
+                if (File.Exists(newPath))
+                {
                     File.Delete(newPath);
                 }
             }
-            catch (FileNotFoundException) {
+            catch (FileNotFoundException)
+            {
 
             }
 

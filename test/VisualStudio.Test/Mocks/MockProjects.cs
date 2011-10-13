@@ -1,43 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using EnvDTE;
 
-namespace NuGet.VisualStudio.Test {
-    internal class MockProjects : Projects {
+namespace NuGet.VisualStudio.Test
+{
+    internal class MockProjects : Projects
+    {
         private IList<Project> _projects;
 
-        public MockProjects(IList<Project> projects) {
+        public MockProjects(IList<Project> projects)
+        {
             _projects = projects;
         }
 
-        public int Count {
+        public int Count
+        {
             get { return _projects.Count; }
         }
 
-        public DTE DTE {
+        public DTE DTE
+        {
             get { return null; }
         }
 
-        public System.Collections.IEnumerator GetEnumerator() {
+        public System.Collections.IEnumerator GetEnumerator()
+        {
             return _projects.GetEnumerator();
         }
 
-        public Project Item(object index) {
+        public Project Item(object index)
+        {
             int intIndex = (int)index;
             return _projects[intIndex];
         }
 
-        public string Kind {
+        public string Kind
+        {
             get { return ""; }
         }
 
-        public DTE Parent {
+        public DTE Parent
+        {
             get { return null; }
         }
 
-        public Properties Properties {
+        public Properties Properties
+        {
             get { return null; }
         }
     }

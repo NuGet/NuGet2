@@ -1,18 +1,22 @@
 ﻿using System;
 using System.Linq;
 using System.Security;
-using Xunit;
 using NuGet.Test.Mocks;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class MachineCacheTest {
+namespace NuGet.Test
+{
+
+    public class MachineCacheTest
+    {
         [Fact]
-        public void AddingMoreThanPackageLimitClearsCache() {
+        public void AddingMoreThanPackageLimitClearsCache()
+        {
             // Arrange
             var mockFileSystem = new MockFileSystem();
             MachineCache cache = new MachineCache(mockFileSystem);
-            for (int i = 0; i < 100; i++) {
+            for (int i = 0; i < 100; i++)
+            {
                 cache.AddPackage(PackageUtility.CreatePackage("A", i + ".0"));
             }
 
@@ -24,11 +28,13 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ClearRemovesAllPackageFilesFromCache() {
+        public void ClearRemovesAllPackageFilesFromCache()
+        {
             // Arrange
             var mockFileSystem = new MockFileSystem();
             MachineCache cache = new MachineCache(mockFileSystem);
-            for (int i = 0; i < 20; i++) {
+            for (int i = 0; i < 20; i++)
+            {
                 cache.AddPackage(PackageUtility.CreatePackage("A", i + ".0"));
             }
 
@@ -40,7 +46,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void MachineCacheUsesNullFileSystemIfItCannotAccessCachePath() {
+        public void MachineCacheUsesNullFileSystemIfItCannotAccessCachePath()
+        {
             // Arrange
             Func<string> getCachePathDirectory = () => { throw new SecurityException("Boo"); };
             var package = PackageUtility.CreatePackage("TestPackage");

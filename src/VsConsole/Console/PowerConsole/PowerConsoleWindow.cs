@@ -6,10 +6,12 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace NuGetConsole.Implementation.PowerConsole {
+namespace NuGetConsole.Implementation.PowerConsole
+{
     [Export(typeof(IPowerConsoleWindow))]
     [Export(typeof(IHostInitializer))]
-    internal class PowerConsoleWindow : IPowerConsoleWindow, IHostInitializer, IDisposable {
+    internal class PowerConsoleWindow : IPowerConsoleWindow, IHostInitializer, IDisposable
+    {
         public const string ContentType = "PackageConsole";
 
         private Dictionary<string, HostInfo> _hostInfos;
@@ -29,11 +31,15 @@ namespace NuGetConsole.Implementation.PowerConsole {
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
             Justification = "_hostInfo collection is disposed.")]
-        Dictionary<string, HostInfo> HostInfos {
-            get {
-                if (_hostInfos == null) {
+        Dictionary<string, HostInfo> HostInfos
+        {
+            get
+            {
+                if (_hostInfos == null)
+                {
                     _hostInfos = new Dictionary<string, HostInfo>();
-                    foreach (Lazy<IHostProvider, IHostMetadata> p in HostProviders) {
+                    foreach (Lazy<IHostProvider, IHostMetadata> p in HostProviders)
+                    {
                         HostInfo info = new HostInfo(this, p);
                         _hostInfos[info.HostName] = info;
                     }
@@ -42,9 +48,12 @@ namespace NuGetConsole.Implementation.PowerConsole {
             }
         }
 
-        internal HostInfo ActiveHostInfo {
-            get {
-                if (_activeHostInfo == null) {
+        internal HostInfo ActiveHostInfo
+        {
+            get
+            {
+                if (_activeHostInfo == null)
+                {
                     // we only have exactly one host, the PowerShellHost. So always choose the first and only one.
                     _activeHostInfo = HostInfos.Values.FirstOrDefault();
                 }
@@ -53,35 +62,45 @@ namespace NuGetConsole.Implementation.PowerConsole {
         }
 
         // represent the default feed
-        public string ActivePackageSource {
-            get {
+        public string ActivePackageSource
+        {
+            get
+            {
                 HostInfo hi = ActiveHostInfo;
                 return (hi != null && hi.WpfConsole != null && hi.WpfConsole.Host != null) ?
                     ActiveHostInfo.WpfConsole.Host.ActivePackageSource :
                     null;
             }
-            set {
+            set
+            {
                 HostInfo hi = ActiveHostInfo;
-                if (hi != null && hi.WpfConsole != null && hi.WpfConsole.Host != null) {
+                if (hi != null && hi.WpfConsole != null && hi.WpfConsole.Host != null)
+                {
                     hi.WpfConsole.Host.ActivePackageSource = value;
                 }
             }
         }
 
-        public string[] PackageSources {
-            get {
+        public string[] PackageSources
+        {
+            get
+            {
                 return ActiveHostInfo.WpfConsole.Host.GetPackageSources();
             }
         }
 
-        public string[] AvailableProjects {
-            get {
+        public string[] AvailableProjects
+        {
+            get
+            {
                 return ActiveHostInfo.WpfConsole.Host.GetAvailableProjects();
             }
         }
 
-        public string DefaultProject {
-            get {
+        public string DefaultProject
+        {
+            get
+            {
                 HostInfo hi = ActiveHostInfo;
                 return (hi != null && hi.WpfConsole != null && hi.WpfConsole.Host != null) ?
                     ActiveHostInfo.WpfConsole.Host.DefaultProject :
@@ -89,40 +108,51 @@ namespace NuGetConsole.Implementation.PowerConsole {
             }
         }
 
-        public void SetDefaultProjectIndex(int selectedIndex) {
+        public void SetDefaultProjectIndex(int selectedIndex)
+        {
             HostInfo hi = ActiveHostInfo;
-            if (hi != null && hi.WpfConsole != null && hi.WpfConsole.Host != null) {
+            if (hi != null && hi.WpfConsole != null && hi.WpfConsole.Host != null)
+            {
                 hi.WpfConsole.Host.SetDefaultProjectIndex(selectedIndex);
             }
         }
 
-        public void Show() {
+        public void Show()
+        {
             IVsUIShell vsUIShell = ServiceProvider.GetService<IVsUIShell>(typeof(SVsUIShell));
-            if (vsUIShell != null) {
+            if (vsUIShell != null)
+            {
                 Guid guid = typeof(PowerConsoleToolWindow).GUID;
                 IVsWindowFrame frame;
 
                 ErrorHandler.ThrowOnFailure(
                     vsUIShell.FindToolWindow((uint)__VSFINDTOOLWIN.FTW_fForceCreate, ref guid, out frame));
 
-                if (frame != null) {
+                if (frame != null)
+                {
                     ErrorHandler.ThrowOnFailure(frame.Show());
                 }
             }
         }
 
-        public void Start() {
+        public void Start()
+        {
             ActiveHostInfo.WpfConsole.Dispatcher.Start();
         }
 
-        public void SetDefaultRunspace() {
+        public void SetDefaultRunspace()
+        {
             ActiveHostInfo.WpfConsole.Host.SetDefaultRunspace();
         }
 
-        void IDisposable.Dispose() {
-            if (_hostInfos != null) {
-                foreach (IDisposable hostInfo in _hostInfos.Values) {
-                    if (hostInfo != null) {
+        void IDisposable.Dispose()
+        {
+            if (_hostInfos != null)
+            {
+                foreach (IDisposable hostInfo in _hostInfos.Values)
+                {
+                    if (hostInfo != null)
+                    {
                         hostInfo.Dispose();
                     }
                 }

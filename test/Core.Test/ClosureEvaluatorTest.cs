@@ -2,11 +2,14 @@
 using System.Linq.Expressions;
 using Xunit;
 
-namespace NuGet.Test {
-    
-    public class ClosureEvaluatorQueryTest {
+namespace NuGet.Test
+{
+
+    public class ClosureEvaluatorQueryTest
+    {
         [Fact]
-        public void ClosureEvaluatorReplacesClosureVariablesWithTheirValue() {
+        public void ClosureEvaluatorReplacesClosureVariablesWithTheirValue()
+        {
             // Arrange
             int value = 2;
             var query = from i in new[] { 1, 2, 3 }.AsSafeQueryable()

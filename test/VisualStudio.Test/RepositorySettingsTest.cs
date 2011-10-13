@@ -1,20 +1,24 @@
 ﻿using System;
-using Xunit;
 using Moq;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio.Test.Mocks;
+using Xunit;
 
-namespace NuGet.VisualStudio.Test {
-    
-    public class RepositorySettingsTest {
+namespace NuGet.VisualStudio.Test
+{
+
+    public class RepositorySettingsTest
+    {
         [Fact]
-        public void CtorWithNullSolutionManagerThrows() {
+        public void CtorWithNullSolutionManagerThrows()
+        {
             ExceptionAssert.ThrowsArgNull(() => new RepositorySettings(null, new Mock<IFileSystemProvider>().Object), "solutionManager");
         }
 
         [Fact]
-        public void RepositoryPathThrowsIfSolutionDirectoryIsNull() {
+        public void RepositoryPathThrowsIfSolutionDirectoryIsNull()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             var repositorySettings = new RepositorySettings(solutionManager.Object, new Mock<IFileSystemProvider>().Object);
@@ -24,7 +28,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RepositoryPathDefaultsToPackagesFolderInSolutionDirectoryIfNoConfigExists() {
+        public void RepositoryPathDefaultsToPackagesFolderInSolutionDirectoryIfNoConfigExists()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(m => m.SolutionDirectory).Returns(@"bar\baz");
@@ -40,7 +45,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RepositoryPathComesFromConfigFileIfSpecified() {
+        public void RepositoryPathComesFromConfigFileIfSpecified()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(m => m.SolutionDirectory).Returns(@"bar\baz");
@@ -62,7 +68,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RepositoryPathDefaultsToPackagesDirectoryIfConfigFileHasEmptyOrNullRepositoryPath() {
+        public void RepositoryPathDefaultsToPackagesDirectoryIfConfigFileHasEmptyOrNullRepositoryPath()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(m => m.SolutionDirectory).Returns(@"bar\baz");
@@ -84,7 +91,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void RepositoryPathMalformedConfigThrows() {
+        public void RepositoryPathMalformedConfigThrows()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(m => m.SolutionDirectory).Returns(@"bar\baz");
@@ -102,7 +110,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void ConfigFoundInDirectoryHierarchyIsCached() {
+        public void ConfigFoundInDirectoryHierarchyIsCached()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(m => m.SolutionDirectory).Returns(@"bar\baz");
@@ -132,7 +141,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void OnlyConfigPathIsCachedNotRepositoryPath() {
+        public void OnlyConfigPathIsCachedNotRepositoryPath()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(m => m.SolutionDirectory).Returns(@"bar\baz");
@@ -162,7 +172,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void ConfigurationCacheIsClearedIfFileRemoved() {
+        public void ConfigurationCacheIsClearedIfFileRemoved()
+        {
             // Arrange
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(m => m.SolutionDirectory).Returns(@"bar\baz");
@@ -189,7 +200,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void ConfigurationCacheIsClearedIfSolutionCloses() {
+        public void ConfigurationCacheIsClearedIfSolutionCloses()
+        {
             // Arrange
             var solutionManager = new Mock<MockSolutionManager>();
             solutionManager.Setup(m => m.SolutionDirectory).Returns(@"bar\baz");

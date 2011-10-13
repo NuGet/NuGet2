@@ -1,13 +1,15 @@
 using System.ComponentModel.Composition;
 
-namespace NuGetConsole.Host.PowerShellProvider {
+namespace NuGetConsole.Host.PowerShellProvider
+{
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Microsoft.Performance",
         "CA1812:AvoidUninstantiatedInternalClasses",
         Justification = "MEF requires this class to be non-static.")]
     [Export(typeof(ICommandExpansionProvider))]
     [HostName(PowerShellHostProvider.HostName)]
-    internal class PowerShellCommandExpansionProvider : CommandExpansionProvider {
+    internal class PowerShellCommandExpansionProvider : CommandExpansionProvider
+    {
         // Empty
     }
 
@@ -16,9 +18,11 @@ namespace NuGetConsole.Host.PowerShellProvider {
     /// provider creates an ITabExpansion based CommandExpansion if a given host
     /// implements ITabExpansion.
     /// </summary>
-    internal class CommandExpansionProvider : ICommandExpansionProvider {
+    internal class CommandExpansionProvider : ICommandExpansionProvider
+    {
 
-        public ICommandExpansion Create(IHost host) {
+        public ICommandExpansion Create(IHost host)
+        {
             ITabExpansion tabExpansion = host as ITabExpansion;
             return tabExpansion != null ? CreateTabExpansion(tabExpansion) : null;
         }
@@ -27,7 +31,8 @@ namespace NuGetConsole.Host.PowerShellProvider {
         /// Create a ITabExpansion based command expansion instance. This base implementation
         /// creates a CommandExpansion instance.
         /// </summary>
-        protected virtual ICommandExpansion CreateTabExpansion(ITabExpansion tabExpansion) {
+        protected virtual ICommandExpansion CreateTabExpansion(ITabExpansion tabExpansion)
+        {
             return new CommandExpansion(tabExpansion);
         }
     }

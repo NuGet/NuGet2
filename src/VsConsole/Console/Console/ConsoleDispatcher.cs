@@ -8,9 +8,11 @@ using System.Windows.Media;
 using Microsoft.VisualStudio.Text;
 using NuGet;
 
-namespace NuGetConsole.Implementation.Console {
+namespace NuGetConsole.Implementation.Console
+{
 
-    internal interface IPrivateConsoleDispatcher : IConsoleDispatcher, IDisposable {
+    internal interface IPrivateConsoleDispatcher : IConsoleDispatcher, IDisposable
+    {
         event EventHandler<EventArgs<Tuple<SnapshotSpan, bool>>> ExecuteInputLine;
         void PostInputLine(InputLine inputLine);
         void PostKey(VsKeyInfo key);
@@ -21,7 +23,8 @@ namespace NuGetConsole.Implementation.Console {
     /// <summary>
     /// This class handles input line posting and command line dispatching/execution.
     /// </summary>
-    internal class ConsoleDispatcher : IPrivateConsoleDispatcher {
+    internal class ConsoleDispatcher : IPrivateConsoleDispatcher
+    {
 
         private readonly BlockingCollection<VsKeyInfo> _keyBuffer = new BlockingCollection<VsKeyInfo>();
         private CancellationTokenSource _cancelWaitKeySource;
@@ -44,53 +47,67 @@ namespace NuGetConsole.Implementation.Console {
 
         public event EventHandler StartWaitingKey;
 
-        public ConsoleDispatcher(IPrivateWpfConsole wpfConsole) {
+        public ConsoleDispatcher(IPrivateWpfConsole wpfConsole)
+        {
             UtilityMethods.ThrowIfArgumentNull(wpfConsole);
 
             this.WpfConsole = wpfConsole;
         }
 
-        public bool IsExecutingCommand {
-            get {
+        public bool IsExecutingCommand
+        {
+            get
+            {
                 return (_dispatcher != null) && _dispatcher.IsExecuting;
             }
         }
 
-        public void PostKey(VsKeyInfo key) {
-            if (key == null) {
+        public void PostKey(VsKeyInfo key)
+        {
+            if (key == null)
+            {
                 throw new ArgumentNullException("key");
             }
             _keyBuffer.Add(key);
         }
 
-        public bool IsExecutingReadKey {
+        public bool IsExecutingReadKey
+        {
             get { return _isExecutingReadKey; }
         }
 
-        public bool IsKeyAvailable {
-            get {
+        public bool IsKeyAvailable
+        {
+            get
+            {
                 // In our BlockingCollection<T> producer/consumer this is
                 // not critical so no need for locking. 
                 return _keyBuffer.Count > 0;
             }
         }
 
-        public void CancelWaitKey() {
-            if (_isExecutingReadKey && !_cancelWaitKeySource.IsCancellationRequested) {
+        public void CancelWaitKey()
+        {
+            if (_isExecutingReadKey && !_cancelWaitKeySource.IsCancellationRequested)
+            {
                 _cancelWaitKeySource.Cancel();
             }
         }
 
-        public void AcceptKeyInput() {
+        public void AcceptKeyInput()
+        {
             Debug.Assert(_dispatcher != null);
 
-            if (_dispatcher != null && WpfConsole != null) {
+            if (_dispatcher != null && WpfConsole != null)
+            {
                 WpfConsole.BeginInputLine();
             }
         }
 
-        public VsKeyInfo WaitKey() {
-            try {
+        public VsKeyInfo WaitKey()
+        {
+            try
+            {
                 // raise the StartWaitingKey event on main thread
                 RaiseEventSafe(StartWaitingKey);
 
@@ -103,16 +120,20 @@ namespace NuGetConsole.Implementation.Console {
 
                 return key;
             }
-            catch (OperationCanceledException) {
+            catch (OperationCanceledException)
+            {
                 return null;
             }
-            finally {
+            finally
+            {
                 _isExecutingReadKey = false;
             }
         }
 
-        private void RaiseEventSafe(EventHandler handler) {
-            if (handler != null) {
+        private void RaiseEventSafe(EventHandler handler)
+        {
+            if (handler != null)
+            {
                 Microsoft.VisualStudio.Shell.ThreadHelper.Generic.Invoke(() => handler(this, EventArgs.Empty));
             }
         }
@@ -121,20 +142,26 @@ namespace NuGetConsole.Implementation.Console {
 
         #region IConsoleDispatcher
 
-        public void Start() {
+        public void Start()
+        {
             // Only Start once
-            lock (_lockObj) {
-                if (_dispatcher == null) {
+            lock (_lockObj)
+            {
+                if (_dispatcher == null)
+                {
                     IHost host = WpfConsole.Host;
 
-                    if (host == null) {
+                    if (host == null)
+                    {
                         throw new InvalidOperationException("Can't start Console dispatcher. Host is null.");
                     }
 
-                    if (host is IAsyncHost) {
+                    if (host is IAsyncHost)
+                    {
                         _dispatcher = new AsyncHostConsoleDispatcher(this);
                     }
-                    else {
+                    else
+                    {
                         _dispatcher = new SyncHostConsoleDispatcher(this);
                     }
 
@@ -142,13 +169,16 @@ namespace NuGetConsole.Implementation.Console {
                         // gives the host a chance to do initialization works before the console starts accepting user inputs
                         () => host.Initialize(WpfConsole)
                     ).ContinueWith(
-                        task => {
-                            if (task.IsFaulted) {
+                        task =>
+                        {
+                            if (task.IsFaulted)
+                            {
                                 var exception = ExceptionUtility.Unwrap(task.Exception);
                                 WriteError(exception.Message);
                             }
 
-                            if (host.IsCommandEnabled) {
+                            if (host.IsCommandEnabled)
+                            {
                                 Microsoft.VisualStudio.Shell.ThreadHelper.Generic.Invoke(_dispatcher.Start);
                             }
 
@@ -161,15 +191,19 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
-        private void WriteError(string message) {
-            if (WpfConsole != null) {
+        private void WriteError(string message)
+        {
+            if (WpfConsole != null)
+            {
                 WpfConsole.Write(message + Environment.NewLine, Colors.Red, null);
             }
         }
 
-        public void ClearConsole() {
+        public void ClearConsole()
+        {
             Debug.Assert(_dispatcher != null);
-            if (_dispatcher != null) {
+            if (_dispatcher != null)
+            {
                 _dispatcher.ClearConsole();
             }
         }
@@ -178,35 +212,43 @@ namespace NuGetConsole.Implementation.Console {
         #region IPrivateConsoleDispatcher
         public event EventHandler<EventArgs<Tuple<SnapshotSpan, bool>>> ExecuteInputLine;
 
-        void OnExecute(SnapshotSpan inputLineSpan, bool isComplete) {
+        void OnExecute(SnapshotSpan inputLineSpan, bool isComplete)
+        {
             ExecuteInputLine.Raise(this, Tuple.Create(inputLineSpan, isComplete));
         }
 
-        public void PostInputLine(InputLine inputLine) {
+        public void PostInputLine(InputLine inputLine)
+        {
             Debug.Assert(_dispatcher != null);
-            if (_dispatcher != null) {
+            if (_dispatcher != null)
+            {
                 _dispatcher.PostInputLine(inputLine);
             }
         }
         #endregion
 
-        private abstract class Dispatcher {
+        private abstract class Dispatcher
+        {
             protected ConsoleDispatcher ParentDispatcher { get; private set; }
             protected IPrivateWpfConsole WpfConsole { get; private set; }
 
             private bool _isExecuting;
 
-            public bool IsExecuting {
-                get {
+            public bool IsExecuting
+            {
+                get
+                {
                     return _isExecuting;
                 }
-                protected set {
+                protected set
+                {
                     _isExecuting = value;
                     WpfConsole.SetExecutionMode(_isExecuting);
                 }
             }
 
-            protected Dispatcher(ConsoleDispatcher parentDispatcher) {
+            protected Dispatcher(ConsoleDispatcher parentDispatcher)
+            {
                 ParentDispatcher = parentDispatcher;
                 WpfConsole = parentDispatcher.WpfConsole;
             }
@@ -215,22 +257,27 @@ namespace NuGetConsole.Implementation.Console {
             /// Process a input line.
             /// </summary>
             /// <param name="inputLine"></param>
-            protected Tuple<bool, bool> Process(InputLine inputLine) {
+            protected Tuple<bool, bool> Process(InputLine inputLine)
+            {
                 SnapshotSpan inputSpan = inputLine.SnapshotSpan;
 
-                if (inputLine.Flags.HasFlag(InputLineFlag.Echo)) {
+                if (inputLine.Flags.HasFlag(InputLineFlag.Echo))
+                {
                     WpfConsole.BeginInputLine();
 
-                    if (inputLine.Flags.HasFlag(InputLineFlag.Execute)) {
+                    if (inputLine.Flags.HasFlag(InputLineFlag.Execute))
+                    {
                         WpfConsole.WriteLine(inputLine.Text);
                         inputSpan = WpfConsole.EndInputLine(true).Value;
                     }
-                    else {
+                    else
+                    {
                         WpfConsole.Write(inputLine.Text);
                     }
                 }
 
-                if (inputLine.Flags.HasFlag(InputLineFlag.Execute)) {
+                if (inputLine.Flags.HasFlag(InputLineFlag.Execute))
+                {
                     string command = inputLine.Text;
                     bool isExecuted = WpfConsole.Host.Execute(WpfConsole, command, null);
                     WpfConsole.InputHistory.Add(command);
@@ -240,19 +287,23 @@ namespace NuGetConsole.Implementation.Console {
                 return Tuple.Create(false, false);
             }
 
-            public void PromptNewLine() {
+            public void PromptNewLine()
+            {
                 WpfConsole.Write(WpfConsole.Host.Prompt + (char)32);    // 32 is the space
                 WpfConsole.BeginInputLine();
             }
 
-            public void ClearConsole() {
+            public void ClearConsole()
+            {
                 // When inputting commands
-                if (WpfConsole.InputLineStart != null) {
+                if (WpfConsole.InputLineStart != null)
+                {
                     WpfConsole.Host.Abort(); // Clear constructing multi-line command
                     WpfConsole.Clear();
                     PromptNewLine();
                 }
-                else {
+                else
+                {
                     WpfConsole.Clear();
                 }
             }
@@ -264,23 +315,30 @@ namespace NuGetConsole.Implementation.Console {
         /// <summary>
         /// This class dispatches inputs for synchronous hosts.
         /// </summary>
-        private class SyncHostConsoleDispatcher : Dispatcher {
+        private class SyncHostConsoleDispatcher : Dispatcher
+        {
             public SyncHostConsoleDispatcher(ConsoleDispatcher parentDispatcher)
-                : base(parentDispatcher) {
+                : base(parentDispatcher)
+            {
             }
 
-            public override void Start() {
+            public override void Start()
+            {
                 PromptNewLine();
             }
 
-            public override void PostInputLine(InputLine inputLine) {
+            public override void PostInputLine(InputLine inputLine)
+            {
                 IsExecuting = true;
-                try {
-                    if (Process(inputLine).Item1) {
+                try
+                {
+                    if (Process(inputLine).Item1)
+                    {
                         PromptNewLine();
                     }
                 }
-                finally {
+                finally
+                {
                     IsExecuting = false;
                 }
             }
@@ -289,30 +347,37 @@ namespace NuGetConsole.Implementation.Console {
         /// <summary>
         /// This class dispatches inputs for asynchronous hosts.
         /// </summary>
-        private class AsyncHostConsoleDispatcher : Dispatcher {
+        private class AsyncHostConsoleDispatcher : Dispatcher
+        {
             private Queue<InputLine> _buffer;
             private Marshaler _marshaler;
 
             public AsyncHostConsoleDispatcher(ConsoleDispatcher parentDispatcher)
-                : base(parentDispatcher) {
+                : base(parentDispatcher)
+            {
                 _marshaler = new Marshaler(this);
             }
 
-            private bool IsStarted {
-                get { 
+            private bool IsStarted
+            {
+                get
+                {
                     return _buffer != null;
                 }
             }
 
-            public override void Start() {
-                if (IsStarted) {
+            public override void Start()
+            {
+                if (IsStarted)
+                {
                     // Can only start once... ConsoleDispatcher is already protecting this.
                     throw new InvalidOperationException();
                 }
                 _buffer = new Queue<InputLine>();
 
                 IAsyncHost asyncHost = WpfConsole.Host as IAsyncHost;
-                if (asyncHost == null) {
+                if (asyncHost == null)
+                {
                     // ConsoleDispatcher is already checking this.
                     throw new InvalidOperationException();
                 }
@@ -321,28 +386,35 @@ namespace NuGetConsole.Implementation.Console {
                 PromptNewLine();
             }
 
-            public override void PostInputLine(InputLine inputLine) {
+            public override void PostInputLine(InputLine inputLine)
+            {
                 // The editor should be completely readonly unless started.
                 Debug.Assert(IsStarted);
 
-                if (IsStarted) {
+                if (IsStarted)
+                {
                     _buffer.Enqueue(inputLine);
                     ProcessInputs();
                 }
             }
 
-            private void ProcessInputs() {
-                if (IsExecuting) {
+            private void ProcessInputs()
+            {
+                if (IsExecuting)
+                {
                     return;
                 }
 
-                if (_buffer.Count > 0) {
+                if (_buffer.Count > 0)
+                {
                     InputLine inputLine = _buffer.Dequeue();
                     Tuple<bool, bool> executeState = Process(inputLine);
-                    if (executeState.Item1) {
+                    if (executeState.Item1)
+                    {
                         IsExecuting = true;
 
-                        if (!executeState.Item2) {
+                        if (!executeState.Item2)
+                        {
                             // If NOT really executed, processing the same as ExecuteEnd event
                             OnExecuteEnd();
                         }
@@ -350,8 +422,10 @@ namespace NuGetConsole.Implementation.Console {
                 }
             }
 
-            private void OnExecuteEnd() {
-                if (IsStarted) {
+            private void OnExecuteEnd()
+            {
+                if (IsStarted)
+                {
                     // Filter out noise. A host could execute private commands.
                     Debug.Assert(IsExecuting);
                     IsExecuting = false;
@@ -365,64 +439,80 @@ namespace NuGetConsole.Implementation.Console {
             /// This private Marshaler marshals async host event to main thread so that the dispatcher
             /// doesn't need to worry about threading.
             /// </summary>
-            private class Marshaler : Marshaler<AsyncHostConsoleDispatcher> {
+            private class Marshaler : Marshaler<AsyncHostConsoleDispatcher>
+            {
                 public Marshaler(AsyncHostConsoleDispatcher impl)
-                    : base(impl) {
+                    : base(impl)
+                {
                 }
 
-                public void AsyncHost_ExecuteEnd(object sender, EventArgs e) {
+                public void AsyncHost_ExecuteEnd(object sender, EventArgs e)
+                {
                     Invoke(() => _impl.OnExecuteEnd());
                 }
             }
         }
 
-        protected virtual void Dispose(bool disposing) {
-            if (disposing) {
-                if (_keyBuffer != null) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_keyBuffer != null)
+                {
                     _keyBuffer.Dispose();
                 }
 
-                if (_cancelWaitKeySource != null) {
+                if (_cancelWaitKeySource != null)
+                {
                     _cancelWaitKeySource.Dispose();
                 }
             }
         }
 
-        void IDisposable.Dispose() {
-            try {
+        void IDisposable.Dispose()
+        {
+            try
+            {
                 Dispose(true);
             }
-            finally {
+            finally
+            {
                 GC.SuppressFinalize(this);
             }
         }
 
-        ~ConsoleDispatcher() {
+        ~ConsoleDispatcher()
+        {
             Dispose(false);
         }
     }
 
     [Flags]
-    internal enum InputLineFlag {
+    internal enum InputLineFlag
+    {
         Echo = 1,
         Execute = 2
     }
 
-    internal class InputLine {
+    internal class InputLine
+    {
         public SnapshotSpan SnapshotSpan { get; private set; }
         public string Text { get; private set; }
         public InputLineFlag Flags { get; private set; }
 
-        public InputLine(string text, bool execute) {
+        public InputLine(string text, bool execute)
+        {
             this.Text = text;
             this.Flags = InputLineFlag.Echo;
 
-            if (execute) {
+            if (execute)
+            {
                 this.Flags |= InputLineFlag.Execute;
             }
         }
 
-        public InputLine(SnapshotSpan snapshotSpan) {
+        public InputLine(SnapshotSpan snapshotSpan)
+        {
             this.SnapshotSpan = snapshotSpan;
             this.Text = snapshotSpan.GetText();
             this.Flags = InputLineFlag.Execute;

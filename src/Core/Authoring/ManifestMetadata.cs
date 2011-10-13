@@ -8,9 +8,11 @@ using System.Runtime.Versioning;
 using System.Xml.Serialization;
 using NuGet.Resources;
 
-namespace NuGet {
+namespace NuGet
+{
     [XmlType("metadata")]
-    public class ManifestMetadata : IPackageMetadata, IValidatableObject {
+    public class ManifestMetadata : IPackageMetadata, IValidatableObject
+    {
         private string _owners;
 
         [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_RequiredMetadataMissing")]
@@ -29,12 +31,15 @@ namespace NuGet {
         public string Authors { get; set; }
 
         [XmlElement("owners")]
-        public string Owners {
-            get {
+        public string Owners
+        {
+            get
+            {
                 // Fallback to authors
                 return _owners ?? Authors;
             }
-            set {
+            set
+            {
                 _owners = value;
             }
         }
@@ -94,63 +99,84 @@ namespace NuGet {
         [ManifestVersion(2)]
         public List<ManifestReference> References { get; set; }
 
-        SemanticVersion IPackageMetadata.Version {
-            get {
-                if (Version == null) {
+        SemanticVersion IPackageMetadata.Version
+        {
+            get
+            {
+                if (Version == null)
+                {
                     return null;
                 }
                 return new SemanticVersion(Version);
             }
         }
 
-        Uri IPackageMetadata.IconUrl {
-            get {
-                if (IconUrl == null) {
+        Uri IPackageMetadata.IconUrl
+        {
+            get
+            {
+                if (IconUrl == null)
+                {
                     return null;
                 }
                 return new Uri(IconUrl);
             }
         }
 
-        Uri IPackageMetadata.LicenseUrl {
-            get {
-                if (LicenseUrl == null) {
+        Uri IPackageMetadata.LicenseUrl
+        {
+            get
+            {
+                if (LicenseUrl == null)
+                {
                     return null;
                 }
                 return new Uri(LicenseUrl);
             }
         }
 
-        Uri IPackageMetadata.ProjectUrl {
-            get {
-                if (ProjectUrl == null) {
+        Uri IPackageMetadata.ProjectUrl
+        {
+            get
+            {
+                if (ProjectUrl == null)
+                {
                     return null;
                 }
                 return new Uri(ProjectUrl);
             }
         }
 
-        IEnumerable<string> IPackageMetadata.Authors {
-            get {
-                if (String.IsNullOrEmpty(Authors)) {
+        IEnumerable<string> IPackageMetadata.Authors
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(Authors))
+                {
                     return Enumerable.Empty<string>();
                 }
                 return Authors.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             }
         }
 
-        IEnumerable<string> IPackageMetadata.Owners {
-            get {
-                if (String.IsNullOrEmpty(Owners)) {
+        IEnumerable<string> IPackageMetadata.Owners
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(Owners))
+                {
                     return Enumerable.Empty<string>();
                 }
                 return Owners.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             }
         }
 
-        IEnumerable<PackageDependency> IPackageMetadata.Dependencies {
-            get {
-                if (Dependencies == null) {
+        IEnumerable<PackageDependency> IPackageMetadata.Dependencies
+        {
+            get
+            {
+                if (Dependencies == null)
+                {
                     return Enumerable.Empty<PackageDependency>();
                 }
                 return from dependency in Dependencies
@@ -158,9 +184,12 @@ namespace NuGet {
             }
         }
 
-        IEnumerable<FrameworkAssemblyReference> IPackageMetadata.FrameworkAssemblies {
-            get {
-                if (FrameworkAssemblies == null) {
+        IEnumerable<FrameworkAssemblyReference> IPackageMetadata.FrameworkAssemblies
+        {
+            get
+            {
+                if (FrameworkAssemblies == null)
+                {
                     return Enumerable.Empty<FrameworkAssemblyReference>();
                 }
 
@@ -169,29 +198,36 @@ namespace NuGet {
             }
         }
 
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) {
-            if (LicenseUrl == String.Empty) {
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (LicenseUrl == String.Empty)
+            {
                 yield return new ValidationResult(
                     String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_UriCannotBeEmpty, "LicenseUrl"));
             }
 
-            if (IconUrl == String.Empty) {
+            if (IconUrl == String.Empty)
+            {
                 yield return new ValidationResult(
                     String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_UriCannotBeEmpty, "IconUrl"));
             }
 
-            if (ProjectUrl == String.Empty) {
+            if (ProjectUrl == String.Empty)
+            {
                 yield return new ValidationResult(
                     String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_UriCannotBeEmpty, "ProjectUrl"));
             }
 
-            if (RequireLicenseAcceptance && String.IsNullOrWhiteSpace(LicenseUrl)) {
+            if (RequireLicenseAcceptance && String.IsNullOrWhiteSpace(LicenseUrl))
+            {
                 yield return new ValidationResult(NuGetResources.Manifest_RequireLicenseAcceptanceRequiresLicenseUrl);
             }
         }
 
-        private static IEnumerable<FrameworkName> ParseFrameworkNames(string frameworkNames) {
-            if (String.IsNullOrEmpty(frameworkNames.SafeTrim())) {
+        private static IEnumerable<FrameworkName> ParseFrameworkNames(string frameworkNames)
+        {
+            if (String.IsNullOrEmpty(frameworkNames.SafeTrim()))
+            {
                 return Enumerable.Empty<FrameworkName>();
             }
 

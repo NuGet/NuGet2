@@ -1,6 +1,8 @@
-namespace NuGet.Test.Integration.NuGetCommandLine {
+namespace NuGet.Test.Integration.NuGetCommandLine
+{
 
-    public class NuSpecFileContext {
+    public class NuSpecFileContext
+    {
 
         public static string FileContents =
             @"<?xml version=""1.0"" encoding=""utf-8""?>

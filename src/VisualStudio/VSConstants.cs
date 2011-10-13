@@ -1,5 +1,7 @@
-namespace NuGet.VisualStudio {
-    internal static class VsConstants {
+namespace NuGet.VisualStudio
+{
+    internal static class VsConstants
+    {
         // Project type guids
         internal const string WebApplicationProjectTypeGuid = "{349C5851-65DF-11DA-9384-00065B846F21}";
         internal const string WebSiteProjectTypeGuid = "{E24C65DC-7377-472B-9ABA-BC803B73C61A}";

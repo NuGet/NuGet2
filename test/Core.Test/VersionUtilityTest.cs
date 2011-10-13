@@ -5,10 +5,13 @@ using System.Runtime.Versioning;
 using Xunit;
 using Xunit.Extensions;
 
-namespace NuGet.Test {
-    public class VersionUtilityTest {
+namespace NuGet.Test
+{
+    public class VersionUtilityTest
+    {
         [Fact]
-        public void ParseFrameworkNameNormalizesSupportedNetFrameworkNames() {
+        public void ParseFrameworkNameNormalizesSupportedNetFrameworkNames()
+        {
             // Arrange
             var knownNameFormats = new[] { ".net", ".netframework", "net", "netframework" };
             Version defaultVersion = new Version("0.0");
@@ -17,14 +20,16 @@ namespace NuGet.Test {
             var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
 
             // Assert
-            foreach (var frameworkName in frameworkNames) {
+            foreach (var frameworkName in frameworkNames)
+            {
                 Assert.Equal(".NETFramework", frameworkName.Identifier);
                 Assert.Equal(defaultVersion, frameworkName.Version);
             }
         }
 
         [Fact]
-        public void ParseFrameworkNameNormalizesSupportedWinRTFrameworkNames() {
+        public void ParseFrameworkNameNormalizesSupportedWinRTFrameworkNames()
+        {
             // Arrange
             var knownNameFormats = new[] { "winrt", ".NETCore", "NetCore" };
             Version defaultVersion = new Version("0.0");
@@ -33,14 +38,16 @@ namespace NuGet.Test {
             var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
 
             // Assert
-            foreach (var frameworkName in frameworkNames) {
+            foreach (var frameworkName in frameworkNames)
+            {
                 Assert.Equal(".NETCore", frameworkName.Identifier);
                 Assert.Equal(defaultVersion, frameworkName.Version);
             }
         }
 
         [Fact]
-        public void ParseFrameworkNameNormalizesSupportedNetMicroFrameworkNames() {
+        public void ParseFrameworkNameNormalizesSupportedNetMicroFrameworkNames()
+        {
             // Arrange
             var knownNameFormats = new[] { "netmf4.1", ".NETMicroFramework4.1" };
             Version version41 = new Version("4.1");
@@ -49,14 +56,16 @@ namespace NuGet.Test {
             var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
 
             // Assert
-            foreach (var frameworkName in frameworkNames) {
+            foreach (var frameworkName in frameworkNames)
+            {
                 Assert.Equal(".NETMicroFramework", frameworkName.Identifier);
                 Assert.Equal(version41, frameworkName.Version);
             }
         }
 
         [Fact]
-        public void ParseFrameworkNameNormalizesSupportedSilverlightNames() {
+        public void ParseFrameworkNameNormalizesSupportedSilverlightNames()
+        {
             // Arrange
             var knownNameFormats = new[] { "sl", "SL", "SilVerLight", "Silverlight", "Silverlight " };
             Version defaultVersion = new Version("0.0");
@@ -65,14 +74,16 @@ namespace NuGet.Test {
             var frameworkNames = knownNameFormats.Select(VersionUtility.ParseFrameworkName);
 
             // Assert
-            foreach (var frameworkName in frameworkNames) {
+            foreach (var frameworkName in frameworkNames)
+            {
                 Assert.Equal("Silverlight", frameworkName.Identifier);
                 Assert.Equal(defaultVersion, frameworkName.Version);
             }
         }
 
         [Fact]
-        public void ParseFrameworkNameReturnsUnsupportedFrameworkNameIfUnrecognized() {
+        public void ParseFrameworkNameReturnsUnsupportedFrameworkNameIfUnrecognized()
+        {
             // Arrange
             Version version20 = new Version("2.0");
 
@@ -88,7 +99,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseFrameworkNameUsesNetFrameworkIfOnlyVersionSpecified() {
+        public void ParseFrameworkNameUsesNetFrameworkIfOnlyVersionSpecified()
+        {
             // Arrange
             Version version20 = new Version("2.0");
 
@@ -101,7 +113,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseFrameworkNameVersionFormats() {
+        public void ParseFrameworkNameVersionFormats()
+        {
             // Arrange
             var versionFormats = new[] { "4.0", "40", "4" };
             Version version40 = new Version("4.0");
@@ -110,14 +123,16 @@ namespace NuGet.Test {
             var frameworkNames = versionFormats.Select(VersionUtility.ParseFrameworkName);
 
             // Assert
-            foreach (var frameworkName in frameworkNames) {
+            foreach (var frameworkName in frameworkNames)
+            {
                 Assert.Equal(".NETFramework", frameworkName.Identifier);
                 Assert.Equal(version40, frameworkName.Version);
             }
         }
 
         [Fact]
-        public void ParseFrameworkNameVersionIntegerLongerThan4CharsTrimsExccess() {
+        public void ParseFrameworkNameVersionIntegerLongerThan4CharsTrimsExccess()
+        {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("NET41235");
 
@@ -127,7 +142,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseFrameworkNameInvalidVersionFormatUsesDefaultVersion() {
+        public void ParseFrameworkNameInvalidVersionFormatUsesDefaultVersion()
+        {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("NET4.1.4.5.5");
 
@@ -136,7 +152,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseFrameworkNameWithProfile() {
+        public void ParseFrameworkNameWithProfile()
+        {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("net40-client");
 
@@ -147,7 +164,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseFrameworkNameWithUnknownProfileUsesProfileAsIs() {
+        public void ParseFrameworkNameWithUnknownProfileUsesProfileAsIs()
+        {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("net40-other");
 
@@ -158,7 +176,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseFrameworkNameWithFullProfileNoamlizesToEmptyProfile() {
+        public void ParseFrameworkNameWithFullProfileNoamlizesToEmptyProfile()
+        {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("net40-full");
 
@@ -169,7 +188,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseFrameworkNameWithWPProfileGetNormalizedToWindowsPhone() {
+        public void ParseFrameworkNameWithWPProfileGetNormalizedToWindowsPhone()
+        {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("sl4-wp");
 
@@ -180,7 +200,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseFrameworkNameWithCFProfileGetNormalizedToCompactFramework() {
+        public void ParseFrameworkNameWithCFProfileGetNormalizedToCompactFramework()
+        {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("net20-cf");
 
@@ -191,7 +212,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseFrameworkNameWithEmptyProfile() {
+        public void ParseFrameworkNameWithEmptyProfile()
+        {
             // Act
             var frameworkName = VersionUtility.ParseFrameworkName("sl4-");
 
@@ -202,7 +224,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseFrameworkNameWithInvalidFrameworkNameThrows() {
+        public void ParseFrameworkNameWithInvalidFrameworkNameThrows()
+        {
             // Act
             ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName("-"), "frameworkName", "Framework name is missing.");
             ExceptionAssert.ThrowsArgumentException(() => VersionUtility.ParseFrameworkName("-client"), "frameworkName", "Framework name is missing.");
@@ -211,7 +234,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseFrameworkFolderName() {
+        public void ParseFrameworkFolderName()
+        {
             // foo.dll
             // sub\foo.dll -> Unsupported since we can't tell if this was meant to be a framework name or not
             // {FrameworkName}{Version}\foo.dll
@@ -240,7 +264,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetFrameworkStringFromFrameworkName() {
+        public void GetFrameworkStringFromFrameworkName()
+        {
             // Arrange
             var net40 = new FrameworkName(".NETFramework", new Version(4, 0));
             var net40Client = new FrameworkName(".NETFramework", new Version(4, 0), "Client");
@@ -273,13 +298,15 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionSpecWithNullThrows() {
+        public void ParseVersionSpecWithNullThrows()
+        {
             // Act & Assert
             ExceptionAssert.ThrowsArgNull(() => VersionUtility.ParseVersionSpec(null), "value");
         }
 
         [Fact]
-        public void ParseVersionSpecSimpleVersionNoBrackets() {
+        public void ParseVersionSpecSimpleVersionNoBrackets()
+        {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("1.2");
 
@@ -291,7 +318,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionSpecSimpleVersionNoBracketsExtraSpaces() {
+        public void ParseVersionSpecSimpleVersionNoBracketsExtraSpaces()
+        {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("  1  .   2  ");
 
@@ -303,7 +331,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionSpecMaxOnlyInclusive() {
+        public void ParseVersionSpecMaxOnlyInclusive()
+        {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("(,1.2]");
 
@@ -315,7 +344,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionSpecMaxOnlyExclusive() {
+        public void ParseVersionSpecMaxOnlyExclusive()
+        {
             var versionInfo = VersionUtility.ParseVersionSpec("(,1.2)");
             Assert.Equal(null, versionInfo.MinVersion);
             Assert.False(versionInfo.IsMinInclusive);
@@ -324,7 +354,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionSpecExactVersion() {
+        public void ParseVersionSpecExactVersion()
+        {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("[1.2]");
 
@@ -336,7 +367,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionSpecMinOnlyExclusive() {
+        public void ParseVersionSpecMinOnlyExclusive()
+        {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("(1.2,)");
 
@@ -348,7 +380,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionSpecRangeExclusiveExclusive() {
+        public void ParseVersionSpecRangeExclusiveExclusive()
+        {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("(1.2,2.3)");
 
@@ -360,7 +393,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionSpecRangeExclusiveInclusive() {
+        public void ParseVersionSpecRangeExclusiveInclusive()
+        {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("(1.2,2.3]");
 
@@ -372,7 +406,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionSpecRangeInclusiveExclusive() {
+        public void ParseVersionSpecRangeInclusiveExclusive()
+        {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("[1.2,2.3)");
             Assert.Equal("1.2", versionInfo.MinVersion.ToString());
@@ -382,7 +417,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionSpecRangeInclusiveInclusive() {
+        public void ParseVersionSpecRangeInclusiveInclusive()
+        {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("[1.2,2.3]");
 
@@ -394,7 +430,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionSpecRangeInclusiveInclusiveExtraSpaces() {
+        public void ParseVersionSpecRangeInclusiveInclusiveExtraSpaces()
+        {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("   [  1 .2   , 2  .3   ]  ");
 
@@ -406,7 +443,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void NormalizeVersionFillsInZerosForUnsetVersionParts() {
+        public void NormalizeVersionFillsInZerosForUnsetVersionParts()
+        {
             // Act
             Version version = VersionUtility.NormalizeVersion(new Version("1.5"));
 
@@ -415,7 +453,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionSpecRangeIntegerRanges() {
+        public void ParseVersionSpecRangeIntegerRanges()
+        {
             // Act
             var versionInfo = VersionUtility.ParseVersionSpec("   [1, 2]  ");
 
@@ -427,7 +466,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionSpecRangeNegativeIntegerRanges() {
+        public void ParseVersionSpecRangeNegativeIntegerRanges()
+        {
             // Act
             IVersionSpec versionInfo;
             bool parsed = VersionUtility.TryParseVersionSpec("   [-1, 2]  ", out versionInfo);
@@ -437,7 +477,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void TrimVersionTrimsRevisionIfZero() {
+        public void TrimVersionTrimsRevisionIfZero()
+        {
             // Act
             var version = VersionUtility.TrimVersion(new Version("1.2.3.0"));
 
@@ -446,7 +487,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void TrimVersionTrimsRevisionAndBuildIfZero() {
+        public void TrimVersionTrimsRevisionAndBuildIfZero()
+        {
             // Act
             var version = VersionUtility.TrimVersion(new Version("1.2.0.0"));
 
@@ -455,7 +497,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void TrimVersionTrimsBuildIfRevisionIsNonZero() {
+        public void TrimVersionTrimsBuildIfRevisionIsNonZero()
+        {
             // Act
             var version = VersionUtility.TrimVersion(new Version("1.2.0.5"));
 
@@ -464,7 +507,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetAllPossibleVersionsTwoDigits() {
+        public void GetAllPossibleVersionsTwoDigits()
+        {
             // Arrange
             var expectedVersions = new[] { 
                 new SemanticVersion("1.1"), 
@@ -476,13 +520,15 @@ namespace NuGet.Test {
             var versions = VersionUtility.GetPossibleVersions(new SemanticVersion("1.1")).ToList();
 
             // Assert
-            foreach (var v in expectedVersions) {
+            foreach (var v in expectedVersions)
+            {
                 Assert.True(versions.Contains(v));
             }
         }
 
         [Fact]
-        public void GetAllPossibleVersionsThreeDigits() {
+        public void GetAllPossibleVersionsThreeDigits()
+        {
             // Arrange
             var expectedVersions = new[] { 
                 new SemanticVersion("1.0"), 
@@ -494,13 +540,15 @@ namespace NuGet.Test {
             var versions = VersionUtility.GetPossibleVersions(new SemanticVersion("1.0.0")).ToList();
 
             // Assert
-            foreach (var v in expectedVersions) {
+            foreach (var v in expectedVersions)
+            {
                 Assert.True(versions.Contains(v));
             }
         }
 
         [Fact]
-        public void GetAllPossibleVersionsFourDigits() {
+        public void GetAllPossibleVersionsFourDigits()
+        {
             // Arrange
             var expectedVersions = new[] { 
                 new SemanticVersion("1.0"), 
@@ -512,13 +560,15 @@ namespace NuGet.Test {
             var versions = VersionUtility.GetPossibleVersions(new SemanticVersion("1.0.0.0")).ToList();
 
             // Assert
-            foreach (var v in expectedVersions) {
+            foreach (var v in expectedVersions)
+            {
                 Assert.True(versions.Contains(v));
             }
         }
 
         [Fact]
-        public void GetAllPossibleVersionsThreeDigitsWithZeroBetween() {
+        public void GetAllPossibleVersionsThreeDigitsWithZeroBetween()
+        {
             // Arrange
             var expectedVersions = new[] { 
                 new SemanticVersion("1.0.1"), 
@@ -529,13 +579,15 @@ namespace NuGet.Test {
             var versions = VersionUtility.GetPossibleVersions(new SemanticVersion("1.0.1")).ToList();
 
             // Assert
-            foreach (var v in expectedVersions) {
+            foreach (var v in expectedVersions)
+            {
                 Assert.True(versions.Contains(v));
             }
         }
 
         [Fact]
-        public void GetAllPossibleVersionsFourDigitsWithTrailingZeros() {
+        public void GetAllPossibleVersionsFourDigitsWithTrailingZeros()
+        {
             // Arrange
             var expectedVersions = new[] { 
                 new SemanticVersion("1.1.0.0"), 
@@ -547,13 +599,15 @@ namespace NuGet.Test {
             var versions = VersionUtility.GetPossibleVersions(new SemanticVersion("1.1.0.0")).ToList();
 
             // Assert
-            foreach (var v in expectedVersions) {
+            foreach (var v in expectedVersions)
+            {
                 Assert.True(versions.Contains(v));
             }
         }
 
         [Fact]
-        public void GetSafeVersions() {
+        public void GetSafeVersions()
+        {
             // Act
             IVersionSpec versionSpec1 = VersionUtility.GetSafeRange(new SemanticVersion("1.3"));
             IVersionSpec versionSpec2 = VersionUtility.GetSafeRange(new SemanticVersion("0.9"));
@@ -565,7 +619,8 @@ namespace NuGet.Test {
             AssertSafeVersion(versionSpec3, new SemanticVersion("2.9.45.6"), new SemanticVersion("2.10"));
         }
 
-        private void AssertSafeVersion(IVersionSpec versionSpec, SemanticVersion minVer, SemanticVersion maxVer) {
+        private void AssertSafeVersion(IVersionSpec versionSpec, SemanticVersion minVer, SemanticVersion maxVer)
+        {
             Assert.True(versionSpec.IsMinInclusive);
             Assert.False(versionSpec.IsMaxInclusive);
             Assert.Equal(versionSpec.MinVersion, minVer);
@@ -573,12 +628,14 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void TrimVersionThrowsIfVersionNull() {
+        public void TrimVersionThrowsIfVersionNull()
+        {
             ExceptionAssert.ThrowsArgNull(() => VersionUtility.TrimVersion(null), "version");
         }
 
         [Fact]
-        public void IsCompatibleReturnsFalseForSlAndWindowsPhoneFrameworks() {
+        public void IsCompatibleReturnsFalseForSlAndWindowsPhoneFrameworks()
+        {
             // Arrange
             FrameworkName sl3 = VersionUtility.ParseFrameworkName("sl3");
             FrameworkName wp7 = VersionUtility.ParseFrameworkName("sl3-wp");
@@ -593,7 +650,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void IsCompatibleWindowsPhoneVersions() {
+        public void IsCompatibleWindowsPhoneVersions()
+        {
             // Arrange
             FrameworkName wp7 = VersionUtility.ParseFrameworkName("sl3-wp");
             FrameworkName wp7Mango = VersionUtility.ParseFrameworkName("sl4-wp71");
@@ -608,7 +666,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void NetFrameworkCompatibiilityIsCompatibleReturns() {
+        public void NetFrameworkCompatibiilityIsCompatibleReturns()
+        {
             // Arrange
             FrameworkName net40 = VersionUtility.ParseFrameworkName("net40");
             FrameworkName net40Client = VersionUtility.ParseFrameworkName("net40-client");
@@ -623,7 +682,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void LowerFrameworkVersionsAreNotCompatibleWithHigherFrameworkVersionsWithSameFrameworkName() {
+        public void LowerFrameworkVersionsAreNotCompatibleWithHigherFrameworkVersionsWithSameFrameworkName()
+        {
             // Arrange
             FrameworkName net40 = VersionUtility.ParseFrameworkName("net40");
             FrameworkName net20 = VersionUtility.ParseFrameworkName("net20");
@@ -638,7 +698,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void IsCompatibleReturnsTrueIfSupportedFrameworkListIsEmpty() {
+        public void IsCompatibleReturnsTrueIfSupportedFrameworkListIsEmpty()
+        {
             // Arrange
             FrameworkName net40Client = VersionUtility.ParseFrameworkName("net40-client");
 
@@ -650,7 +711,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionThrowsIfExclusiveMinAndMaxVersionSpecContainsNoValues() {
+        public void ParseVersionThrowsIfExclusiveMinAndMaxVersionSpecContainsNoValues()
+        {
             // Arrange
             var versionString = "(,)";
 
@@ -660,7 +722,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionThrowsIfInclusiveMinAndMaxVersionSpecContainsNoValues() {
+        public void ParseVersionThrowsIfInclusiveMinAndMaxVersionSpecContainsNoValues()
+        {
             // Arrange
             var versionString = "[,]";
 
@@ -670,7 +733,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionThrowsIfInclusiveMinAndExclusiveMaxVersionSpecContainsNoValues() {
+        public void ParseVersionThrowsIfInclusiveMinAndExclusiveMaxVersionSpecContainsNoValues()
+        {
             // Arrange
             var versionString = "[,)";
 
@@ -680,7 +744,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionThrowsIfExclusiveMinAndInclusiveMaxVersionSpecContainsNoValues() {
+        public void ParseVersionThrowsIfExclusiveMinAndInclusiveMaxVersionSpecContainsNoValues()
+        {
             // Arrange
             var versionString = "(,]";
 
@@ -690,7 +755,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionThrowsIfVersionSpecIsMissingVersionComponent() {
+        public void ParseVersionThrowsIfVersionSpecIsMissingVersionComponent()
+        {
             // Arrange
             var versionString = "(,1.3..2]";
 
@@ -700,7 +766,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ParseVersionThrowsIfVersionSpecContainsMoreThen4VersionComponents() {
+        public void ParseVersionThrowsIfVersionSpecContainsMoreThen4VersionComponents()
+        {
             // Arrange
             var versionString = "(1.2.3.4.5,1.2]";
 
@@ -711,7 +778,8 @@ namespace NuGet.Test {
 
         [Theory]
         [PropertyData("VersionSpecData")]
-        public void ParseVersionParsesTokensVersionsCorrectly(string versionString, VersionSpec versionSpec) {
+        public void ParseVersionParsesTokensVersionsCorrectly(string versionString, VersionSpec versionSpec)
+        {
             // Act
             var actual = VersionUtility.ParseVersionSpec(versionString);
 
@@ -722,8 +790,10 @@ namespace NuGet.Test {
             Assert.Equal(versionSpec.MaxVersion, actual.MaxVersion);
         }
 
-        public static IEnumerable<object[]> VersionSpecData {
-            get {
+        public static IEnumerable<object[]> VersionSpecData
+        {
+            get
+            {
                 yield return new object[] { "(1.2.3.4, 3.2)", new VersionSpec { MinVersion = new SemanticVersion("1.2.3.4"), MaxVersion = new SemanticVersion("3.2"), IsMinInclusive = false, IsMaxInclusive = false } };
                 yield return new object[] { "(1.2.3.4, 3.2]", new VersionSpec { MinVersion = new SemanticVersion("1.2.3.4"), MaxVersion = new SemanticVersion("3.2"), IsMinInclusive = false, IsMaxInclusive = true } };
                 yield return new object[] { "[1.2, 3.2.5)", new VersionSpec { MinVersion = new SemanticVersion("1.2"), MaxVersion = new SemanticVersion("3.2.5"), IsMinInclusive = true, IsMaxInclusive = false } };
@@ -731,7 +801,7 @@ namespace NuGet.Test {
                 yield return new object[] { "(, 3.2.4.5]", new VersionSpec { MinVersion = null, MaxVersion = new SemanticVersion("3.2.4.5"), IsMinInclusive = false, IsMaxInclusive = true } };
                 yield return new object[] { "(1.6, ]", new VersionSpec { MinVersion = new SemanticVersion("1.6"), MaxVersion = null, IsMinInclusive = false, IsMaxInclusive = true } };
                 yield return new object[] { "(1.6)", new VersionSpec { MinVersion = new SemanticVersion("1.6"), MaxVersion = new SemanticVersion("1.6"), IsMinInclusive = false, IsMaxInclusive = false } };
-                yield return new object[] { "[2.7]", new VersionSpec { MinVersion = new SemanticVersion("2.7"), MaxVersion = new SemanticVersion("2.7"), IsMinInclusive = true, IsMaxInclusive = true} };
+                yield return new object[] { "[2.7]", new VersionSpec { MinVersion = new SemanticVersion("2.7"), MaxVersion = new SemanticVersion("2.7"), IsMinInclusive = true, IsMaxInclusive = true } };
             }
         }
     }

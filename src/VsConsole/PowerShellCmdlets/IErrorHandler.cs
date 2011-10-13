@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Management.Automation;
 
-namespace NuGet.PowerShell.Commands {
+namespace NuGet.PowerShell.Commands
+{
     /// <summary>
     /// Interface defining common NuGet Cmdlet error handling and generation operations.
     /// </summary>
-    public interface IErrorHandler {
+    public interface IErrorHandler
+    {
         /// <summary>
         /// Handles a native PowerShell ErrorRecord. If terminating is set to true, this method does not return.
         /// </summary>

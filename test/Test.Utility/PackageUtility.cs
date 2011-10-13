@@ -1,4 +1,5 @@
-namespace NuGet.Test {
+namespace NuGet.Test
+{
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -7,8 +8,10 @@ namespace NuGet.Test {
     using System.Text;
     using Moq;
 
-    public class PackageUtility {
-        public static IPackage CreateProjectLevelPackage(string id, string version = "1.0", IEnumerable<PackageDependency> dependencies = null) {
+    public class PackageUtility
+    {
+        public static IPackage CreateProjectLevelPackage(string id, string version = "1.0", IEnumerable<PackageDependency> dependencies = null)
+        {
             return CreatePackage(id, version, assemblyReferences: new[] { id + ".dll" }, dependencies: dependencies);
         }
 
@@ -20,7 +23,8 @@ namespace NuGet.Test {
                                               IEnumerable<PackageDependency> dependencies = null,
                                               double? rating = null,
                                               string description = null,
-                                              string summary = null) {
+                                              string summary = null)
+        {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
             return CreatePackage(id,
                                  version,
@@ -41,7 +45,8 @@ namespace NuGet.Test {
                                               IEnumerable<PackageDependency> dependencies,
                                               double? rating,
                                               string description,
-                                              string summary) {
+                                              string summary)
+        {
             content = content ?? Enumerable.Empty<string>();
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>();
             dependencies = dependencies ?? Enumerable.Empty<PackageDependency>();
@@ -77,26 +82,31 @@ namespace NuGet.Test {
             return mockPackage.Object;
         }
 
-        private static List<IPackageAssemblyReference> CreateAssemblyReferences(IEnumerable<string> fileNames) {
+        private static List<IPackageAssemblyReference> CreateAssemblyReferences(IEnumerable<string> fileNames)
+        {
             var assemblyReferences = new List<IPackageAssemblyReference>();
-            foreach (var fileName in fileNames) {
+            foreach (var fileName in fileNames)
+            {
                 var mockAssemblyReference = new Mock<IPackageAssemblyReference>();
                 mockAssemblyReference.Setup(m => m.GetStream()).Returns(() => new MemoryStream());
                 mockAssemblyReference.Setup(m => m.Path).Returns(fileName);
                 mockAssemblyReference.Setup(m => m.Name).Returns(Path.GetFileName(fileName));
 
                 FrameworkName fn = ParseFrameworkName(fileName);
-                if (fn != null) {
-                    mockAssemblyReference.Setup(m => m.SupportedFrameworks).Returns(new [] {fn});
+                if (fn != null)
+                {
+                    mockAssemblyReference.Setup(m => m.SupportedFrameworks).Returns(new[] { fn });
                 }
-                
+
                 assemblyReferences.Add(mockAssemblyReference.Object);
             }
             return assemblyReferences;
         }
 
-        private static FrameworkName ParseFrameworkName(string fileName) {
-            if (fileName.StartsWith("lib\\")) {
+        private static FrameworkName ParseFrameworkName(string fileName)
+        {
+            if (fileName.StartsWith("lib\\"))
+            {
                 fileName = fileName.Substring(4);
                 return VersionUtility.ParseFrameworkFolderName(fileName);
             }
@@ -104,7 +114,8 @@ namespace NuGet.Test {
             return null;
         }
 
-        public static IPackageAssemblyReference CreateAssemblyReference(string path, FrameworkName targetFramework) {
+        public static IPackageAssemblyReference CreateAssemblyReference(string path, FrameworkName targetFramework)
+        {
             var mockAssemblyReference = new Mock<IPackageAssemblyReference>();
             mockAssemblyReference.Setup(m => m.GetStream()).Returns(() => new MemoryStream());
             mockAssemblyReference.Setup(m => m.Path).Returns(path);
@@ -114,9 +125,11 @@ namespace NuGet.Test {
             return mockAssemblyReference.Object;
         }
 
-        public static List<IPackageFile> CreateFiles(IEnumerable<string> fileNames, string directory = "") {
+        public static List<IPackageFile> CreateFiles(IEnumerable<string> fileNames, string directory = "")
+        {
             var files = new List<IPackageFile>();
-            foreach (var fileName in fileNames) {
+            foreach (var fileName in fileNames)
+            {
                 string path = Path.Combine(directory, fileName);
                 var mockFile = new Mock<IPackageFile>();
                 mockFile.Setup(m => m.Path).Returns(path);

@@ -1,5 +1,7 @@
-﻿namespace NuGet {
-    public interface IDependencyResolver {
+﻿namespace NuGet
+{
+    public interface IDependencyResolver
+    {
         IPackage ResolveDependency(PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions);
     }
 }

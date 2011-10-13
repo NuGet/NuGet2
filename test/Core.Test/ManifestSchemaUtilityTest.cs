@@ -2,13 +2,16 @@
 using Xunit;
 using Xunit.Extensions;
 
-namespace NuGet.Test {
-    public class ManifestSchemaUtilityTest {
+namespace NuGet.Test
+{
+    public class ManifestSchemaUtilityTest
+    {
         [Theory]
         [InlineData(new object[] { 0 })]
         [InlineData(new object[] { -1 })]
         [InlineData(new object[] { -5 })]
-        public void GetSchemaNamespaceThrowsIfVersionIsNotAPostiveInteger(int version) {
+        public void GetSchemaNamespaceThrowsIfVersionIsNotAPostiveInteger(int version)
+        {
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => ManifestSchemaUtility.GetSchemaNamespace(version), "Unknown schema version '" + version + "'.");
         }
@@ -17,7 +20,8 @@ namespace NuGet.Test {
         [InlineData(new object[] { 1, "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd" })]
         [InlineData(new object[] { 2, "http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd" })]
         [InlineData(new object[] { 3, "http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd" })]
-        public void GetSchemaNamespaceReturnsRightSchemaVersion(int version, string expectedSchemaNamespace) {
+        public void GetSchemaNamespaceReturnsRightSchemaVersion(int version, string expectedSchemaNamespace)
+        {
             // Act
             string actualSchemaNamespace = ManifestSchemaUtility.GetSchemaNamespace(version);
 

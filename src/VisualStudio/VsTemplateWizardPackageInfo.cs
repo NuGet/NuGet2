@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace NuGet.VisualStudio {
-    internal sealed class VsTemplateWizardPackageInfo {
-        public VsTemplateWizardPackageInfo(string id, string version) {
+namespace NuGet.VisualStudio
+{
+    internal sealed class VsTemplateWizardPackageInfo
+    {
+        public VsTemplateWizardPackageInfo(string id, string version)
+        {
             Debug.Assert(!String.IsNullOrWhiteSpace(id));
             Debug.Assert(!String.IsNullOrWhiteSpace(version));
 

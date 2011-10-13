@@ -5,22 +5,27 @@ using System.Linq;
 using System.Runtime.Versioning;
 using Xunit;
 
-namespace NuGet.Test {
-    
-    public class ZipPackageTest {
+namespace NuGet.Test
+{
+
+    public class ZipPackageTest
+    {
         [Fact]
-        public void CtorWithStreamThrowsIfNull() {
+        public void CtorWithStreamThrowsIfNull()
+        {
             ExceptionAssert.ThrowsArgNull(() => new ZipPackage((Stream)null), "stream");
         }
 
         [Fact]
-        public void CtorWithFileNameThrowsIfNullOrEmpty() {
+        public void CtorWithFileNameThrowsIfNullOrEmpty()
+        {
             ExceptionAssert.ThrowsArgNullOrEmpty(() => new ZipPackage((string)null), "fileName");
             ExceptionAssert.ThrowsArgNullOrEmpty(() => new ZipPackage(String.Empty), "fileName");
         }
 
         [Fact]
-        public void CtorWithStream() {
+        public void CtorWithStream()
+        {
             // Arrange
             var builder = new PackageBuilder();
             builder.Id = "Package";
@@ -55,7 +60,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void IsAssemblyReferenceReturnsFalseIfFileDoesNotStartWithLib() {
+        public void IsAssemblyReferenceReturnsFalseIfFileDoesNotStartWithLib()
+        {
             // Arrange
             var file = new PhysicalPackageFile { TargetPath = @"content\foo.dll" };
             IEnumerable<string> references = null;
@@ -65,7 +71,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void IsAssemblyReferenceReturnsFalseIfFileExtensionIsNotAReferenceItem() {
+        public void IsAssemblyReferenceReturnsFalseIfFileExtensionIsNotAReferenceItem()
+        {
             // Arrange
             var file = new PhysicalPackageFile { TargetPath = @"lib\foo.txt" };
             IEnumerable<string> references = null;
@@ -75,7 +82,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void IsAssemblyReferenceReturnsFalseIfFileIsAResourceAssembly() {
+        public void IsAssemblyReferenceReturnsFalseIfFileIsAResourceAssembly()
+        {
             // Arrange
             var file = new PhysicalPackageFile { TargetPath = @"lib\NuGet.resources.dll" };
             IEnumerable<string> references = null;
@@ -85,7 +93,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void IsAssemblyReferenceReturnsTrueIfFileIsAReferenceItemInLib() {
+        public void IsAssemblyReferenceReturnsTrueIfFileIsAReferenceItemInLib()
+        {
             // Arrange
             var file = new PhysicalPackageFile { TargetPath = @"lib\NuGet.Core.dll" };
             IEnumerable<string> references = null;
@@ -95,7 +104,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void IsAssemblyReferenceReturnsTrueForWinMDFileInLib() {
+        public void IsAssemblyReferenceReturnsTrueForWinMDFileInLib()
+        {
             // Arrange
             var file = new PhysicalPackageFile { TargetPath = @"lib\NuGet.Core.WINMD" };
             IEnumerable<string> references = null;
@@ -105,7 +115,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void IsAssemblyReferenceReturnsFalseIfFileIsNotListedInReferences() {
+        public void IsAssemblyReferenceReturnsFalseIfFileIsNotListedInReferences()
+        {
             // Arrange
             var file = new PhysicalPackageFile { TargetPath = @"lib\NuGet.Core.dll" };
             IEnumerable<string> references = new[] {
@@ -118,7 +129,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void IsAssemblyReferenceReturnsTrueIfFileIsListedInReferences() {
+        public void IsAssemblyReferenceReturnsTrueIfFileIsListedInReferences()
+        {
             // Arrange
             var file = new PhysicalPackageFile { TargetPath = @"lib\NuGet.Core.dll" };
             IEnumerable<string> references = new[] {

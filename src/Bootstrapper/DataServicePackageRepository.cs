@@ -2,15 +2,19 @@ using System;
 using System.Data.Services.Client;
 using System.Linq;
 
-namespace NuGet {
-    public class DataServicePackageRepository {
+namespace NuGet
+{
+    public class DataServicePackageRepository
+    {
         internal const string PackageServiceEntitySetName = "Packages";
 
         private DataServiceContext _context;
         private readonly IHttpClient _httpClient;
 
-        public DataServicePackageRepository(IHttpClient client) {
-            if (client == null) {
+        public DataServicePackageRepository(IHttpClient client)
+        {
+            if (client == null)
+            {
                 throw new ArgumentNullException("client");
             }
 
@@ -22,9 +26,12 @@ namespace NuGet {
         // we don't make a web request if we are not going to actually use it
         // since getting the Uri property of the RedirectedHttpClient will
         // trigger that functionality.
-        private DataServiceContext Context {
-            get {
-                if (_context == null) {
+        private DataServiceContext Context
+        {
+            get
+            {
+                if (_context == null)
+                {
                     _context = new DataServiceContext(_httpClient.Uri);
                     _context.SendingRequest += OnSendingRequest;
                     _context.IgnoreMissingProperties = true;
@@ -33,16 +40,19 @@ namespace NuGet {
             }
         }
 
-        private void OnSendingRequest(object sender, SendingRequestEventArgs e) {
+        private void OnSendingRequest(object sender, SendingRequestEventArgs e)
+        {
             _httpClient.InitializeRequest(e.Request);
         }
 
-        public Uri GetReadStreamUri(object entity) {
+        public Uri GetReadStreamUri(object entity)
+        {
             return Context.GetReadStreamUri(entity);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
-        public IQueryable<DataServicePackage> GetPackages() {
+        public IQueryable<DataServicePackage> GetPackages()
+        {
             return Context.CreateQuery<DataServicePackage>(PackageServiceEntitySetName);
         }
     }

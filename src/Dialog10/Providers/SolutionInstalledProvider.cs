@@ -7,12 +7,14 @@ using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
 
-namespace NuGet.Dialog.Providers {
+namespace NuGet.Dialog.Providers
+{
     /// <summary>
     /// IVsExtensionsProvider implementation responsible for gathering
     /// a list of installed packages which will be shown in the Add Package dialog.
     /// </summary>
-    internal class SolutionInstalledProvider : InstalledProvider {
+    internal class SolutionInstalledProvider : InstalledProvider
+    {
 
         private readonly ISolutionManager _solutionManager;
         private readonly IUserNotifierServices _userNotifierServices;
@@ -25,17 +27,20 @@ namespace NuGet.Dialog.Providers {
             ProviderServices providerServices,
             IProgressProvider progressProvider,
             ISolutionManager solutionManager)
-            : base(packageManager, null, localRepository, resources, providerServices, progressProvider, solutionManager) {
+            : base(packageManager, null, localRepository, resources, providerServices, progressProvider, solutionManager)
+        {
 
             _solutionManager = solutionManager;
             _userNotifierServices = providerServices.WindowServices;
         }
 
-        public override bool CanExecute(PackageItem item) {
+        public override bool CanExecute(PackageItem item)
+        {
             return true;
         }
 
-        protected override void FillRootNodes() {
+        protected override void FillRootNodes()
+        {
             var allNode = new SimpleTreeNode(
                 this,
                 Resources.Dialog_RootNodeAll,
@@ -49,21 +54,25 @@ namespace NuGet.Dialog.Providers {
             "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification = "We don't want one failed project to affect the other projects.")]
-        protected override bool ExecuteCore(PackageItem item) {
+        protected override bool ExecuteCore(PackageItem item)
+        {
             IPackage package = item.PackageIdentity;
 
             bool? removeDepedencies = false;
 
             // treat solution-level packages specially
-            if (!PackageManager.IsProjectLevel(item.PackageIdentity)) {
+            if (!PackageManager.IsProjectLevel(item.PackageIdentity))
+            {
                 removeDepedencies = AskRemoveDependencyAndCheckUninstallPSScript(package, checkDependents: true);
-                if (removeDepedencies == null) {
+                if (removeDepedencies == null)
+                {
                     // user presses Cancel
                     return false;
                 }
 
                 ShowProgressWindow();
-                try {
+                try
+                {
                     RegisterPackageOperationEvents(PackageManager, null);
                     PackageManager.UninstallPackage(
                         null,
@@ -73,7 +82,8 @@ namespace NuGet.Dialog.Providers {
                         removeDependencies: (bool)removeDepedencies,
                         logger: this);
                 }
-                finally {
+                finally
+                {
                     UnregisterPackageOperationEvents(PackageManager, null);
                 }
                 return true;
@@ -88,7 +98,8 @@ namespace NuGet.Dialog.Providers {
                 project => PackageManager.GetProjectManager(project).IsInstalled(package),
                 ignored => true);
 
-            if (selectedProjects == null) {
+            if (selectedProjects == null)
+            {
                 // user presses Cancel button on the Solution dialog
                 return false;
             }
@@ -109,19 +120,23 @@ namespace NuGet.Dialog.Providers {
             bool hasUninstallWork = allProjects.Any(p =>
                 !selectedProjectsSet.Contains(p.UniqueName) && IsPackageInstalledInProject(p, package));
 
-            if (!hasInstallWork && !hasUninstallWork) {
+            if (!hasInstallWork && !hasUninstallWork)
+            {
                 // nothing to do, so return
                 return false;
             }
 
-            if (hasInstallWork) {
+            if (hasInstallWork)
+            {
                 IList<PackageOperation> operations;
                 CheckInstallPSScripts(package, PackageManager.SourceRepository, includePrerelease: true, operations: out operations);
             }
 
-            if (hasUninstallWork) {
+            if (hasUninstallWork)
+            {
                 removeDepedencies = AskRemoveDependencyAndCheckUninstallPSScript(package, checkDependents: false);
-                if (removeDepedencies == null) {
+                if (removeDepedencies == null)
+                {
                     // user cancels the operation.
                     return false;
                 }
@@ -132,27 +147,35 @@ namespace NuGet.Dialog.Providers {
             // now install the packages that are checked
             // Bug 1357: It's crucial that we perform all installs before uninstalls
             // to avoid the package file being deleted before an install.
-            foreach (Project project in allProjects) {
-                try {
-                    if (selectedProjectsSet.Contains(project.UniqueName)) {
+            foreach (Project project in allProjects)
+            {
+                try
+                {
+                    if (selectedProjectsSet.Contains(project.UniqueName))
+                    {
                         // if the project is checked, install package into it  
                         InstallPackageToProject(project, item, includePrerelease: true);
                     }
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     AddFailedProject(project, ex);
                 }
             }
 
             // now uninstall the packages that are unchecked.            
-            foreach (Project project in allProjects) {
-                try {
-                    if (!selectedProjectsSet.Contains(project.UniqueName)) {
+            foreach (Project project in allProjects)
+            {
+                try
+                {
+                    if (!selectedProjectsSet.Contains(project.UniqueName))
+                    {
                         // if the project is unchecked, uninstall package from it
                         UninstallPackageFromProject(project, item, (bool)removeDepedencies);
                     }
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     AddFailedProject(project, ex);
                 }
             }
@@ -161,22 +184,26 @@ namespace NuGet.Dialog.Providers {
             return true;
         }
 
-        private bool IsPackageInstalledInProject(Project project, IPackage package) {
+        private bool IsPackageInstalledInProject(Project project, IPackage package)
+        {
             IProjectManager projectManager = PackageManager.GetProjectManager(project);
             return projectManager != null && projectManager.IsInstalled(package);
         }
 
-        public override IVsExtension CreateExtension(IPackage package) {
+        public override IVsExtension CreateExtension(IPackage package)
+        {
             string commandText = PackageManager.IsProjectLevel(package) ?
                 Resources.Dialog_SolutionManageButton :
                 Resources.Dialog_UninstallButton;
 
-            return new PackageItem(this, package, GetReferenceProjects(package)) {
+            return new PackageItem(this, package, GetReferenceProjects(package))
+            {
                 CommandName = commandText
             };
         }
 
-        protected override void OnExecuteCompleted(PackageItem item) {
+        protected override void OnExecuteCompleted(PackageItem item)
+        {
             _lastExecutionItem = item;
             SelectedNode.PackageLoadCompleted += SelectedNode_PackageLoadCompleted;
 
@@ -186,29 +213,35 @@ namespace NuGet.Dialog.Providers {
             SelectedNode.Refresh();
         }
 
-        private void SelectedNode_PackageLoadCompleted(object sender, EventArgs e) {
+        private void SelectedNode_PackageLoadCompleted(object sender, EventArgs e)
+        {
             ((PackagesTreeNodeBase)sender).PackageLoadCompleted -= SelectedNode_PackageLoadCompleted;
-            
-            if (SelectedNode == null || _lastExecutionItem == null) {
+
+            if (SelectedNode == null || _lastExecutionItem == null)
+            {
                 return;
             }
 
             // find a new PackageItem that represents the same package as _lastExecutionItem does;
             PackageItem foundItem = SelectedNode.Extensions.OfType<PackageItem>().FirstOrDefault(
                 p => PackageEqualityComparer.IdAndVersion.Equals(p.PackageIdentity, _lastExecutionItem.PackageIdentity));
-            if (foundItem != null) {
+            if (foundItem != null)
+            {
                 foundItem.IsSelected = true;
             }
 
             _lastExecutionItem = null;
         }
 
-        protected override string GetProgressMessage(IPackage package) {
+        protected override string GetProgressMessage(IPackage package)
+        {
             return Resources.Dialog_InstallAndUninstallProgress + package.ToString();
         }
 
-        public override string ProgressWindowTitle {
-            get {
+        public override string ProgressWindowTitle
+        {
+            get
+            {
                 return Resources.Dialog_InstallAndUninstallProgress;
             }
         }
@@ -216,7 +249,8 @@ namespace NuGet.Dialog.Providers {
         /// <summary>
         /// Get a list of projects which has the specified package installed.
         /// </summary>
-        private IEnumerable<Project> GetReferenceProjects(IPackage package) {
+        private IEnumerable<Project> GetReferenceProjects(IPackage package)
+        {
             return from project in _solutionManager.GetProjects()
                    let projectManager = PackageManager.GetProjectManager(project)
                    where projectManager.IsInstalled(package)

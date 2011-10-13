@@ -5,18 +5,21 @@ using System.IO;
 using System.Linq;
 using Xunit;
 
-namespace NuGet.Test.Integration.PathResolver {
+namespace NuGet.Test.Integration.PathResolver
+{
     /// <summary>
     /// Tests based on scenarios specified in http://nuget.codeplex.com/wikipage?title=File%20Element%20Specification
     /// </summary>
-    public class PathResolverTest {
+    public class PathResolverTest
+    {
 
         /// <summary>
         /// Foo.dll at basePath. target="lib"
         /// Expected: \lib\foo.dll
         /// </summary>
         [Fact]
-        public void SingleAssemblyTest() {
+        public void SingleAssemblyTest()
+        {
             // Arrange
             string search = "foo.dll";
             string target = "lib";
@@ -37,7 +40,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected \lib\foo.dll
         /// </summary>
         [Fact]
-        public void SingleAssemblyInDeepPathTest() {
+        public void SingleAssemblyInDeepPathTest()
+        {
             // Arrange
             string search = @"bar\baz\foo.dll";
             string target = "lib";
@@ -60,7 +64,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected \lib\foo.dll, \lib\bar.dll
         /// </summary>
         [Fact]
-        public void SetOfDllsFromBinTest() {
+        public void SetOfDllsFromBinTest()
+        {
             // Arrange
             string search = @"bin\release\*.dll";
             string target = "lib";
@@ -84,7 +89,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected \lib\net40\foo.dll, \lib\net20\foo.dll
         /// </summary>
         [Fact]
-        public void DllFromDifferenFrameworkTest() {
+        public void DllFromDifferenFrameworkTest()
+        {
             // Arrange
             string search = @"lib\**";
             string target = "lib";
@@ -109,7 +115,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected \Content\css\mobile\style1.css \Content\css\mobile\style2.css
         /// </summary>
         [Fact]
-        public void ContentFilesTest() {
+        public void ContentFilesTest()
+        {
             // Arrange
             string search = @"css\mobile\*.css";
             string target = @"content\css\mobile";
@@ -134,7 +141,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected \content\css\mobile\style.css \content\css\mobile\wp7\style.css \content\css\browser\style.css
         /// </summary>
         [Fact]
-        public void ContentFilesWithDirectoryStructureTest() {
+        public void ContentFilesWithDirectoryStructureTest()
+        {
             // Arrange
             string search = @"css\**\*.css";
             string target = @"content\css";
@@ -164,7 +172,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: \Content\style.css
         /// </summary>
         [Fact]
-        public void ContentFilesWithDeepPath() {
+        public void ContentFilesWithDeepPath()
+        {
             // Arrange
             string search = @"css\cool\style.css";
             string target = @"content";
@@ -188,7 +197,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: \Content\images\foo.bar\Neatpick.png
         /// </summary>
         [Fact]
-        public void ContentFilesCopiedToFolderWithDotInNameTest() {
+        public void ContentFilesCopiedToFolderWithDotInNameTest()
+        {
             // Arrange
             string search = @"images\neatpic.png";
             string target = @"content\images\foo.bar";
@@ -211,7 +221,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: Content\css\cool\style.css
         /// </summary>
         [Fact]
-        public void ContentFileWithDeepPathAndDeepTargetTest() {
+        public void ContentFileWithDeepPathAndDeepTargetTest()
+        {
             // Arrange
             string search = @"css\cool\style.css";
             string target = @"content\css\cool";
@@ -235,7 +246,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: Content\css\cool\style.css
         /// </summary>
         [Fact]
-        public void ContentFileWithDeepPathAndDeepTargetWithFileNameTest() {
+        public void ContentFileWithDeepPathAndDeepTargetWithFileNameTest()
+        {
             // Arrange
             string search = @"css\cool\style.css";
             string target = @"content\css\cool\style.css";
@@ -259,7 +271,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: Content\css\cool\style.css
         /// </summary>
         [Fact]
-        public void ContentFileCopyAndRename() {
+        public void ContentFileCopyAndRename()
+        {
             // Arrange
             string search = @"ie\css\style.css";
             string target = @"content\css\ie.css";
@@ -283,7 +296,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: No files to be present
         /// </summary>
         [Fact]
-        public void NoFilesAreCopiedWhenFilterReturnsEmptyResults() {
+        public void NoFilesAreCopiedWhenFilterReturnsEmptyResults()
+        {
             // Arrange
             string search = @"ie\**\*.cs";
             string target = @"content\style\";
@@ -307,7 +321,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: content\styles\style.css, content\styles\css\style\style.css 
         /// </summary>
         [Fact]
-        public void DirectoryStructureWithRepeatingTerms() {
+        public void DirectoryStructureWithRepeatingTerms()
+        {
             // Arrange
             string search = @"style\**\*.css";
             string target = @"content\styles";
@@ -335,7 +350,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: Exception thrown stating file \style\main.css was not found.
         /// </summary>
         [Fact]
-        public void MissingFileThrowsAnException() {
+        public void MissingFileThrowsAnException()
+        {
             // Arrange
             string search = @"style\main.css";
             string target = String.Empty;
@@ -354,7 +370,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: Exception thrown stating file main.css was not found.
         /// </summary>
         [Fact]
-        public void MissingFileAtRootThrowsAnException() {
+        public void MissingFileAtRootThrowsAnException()
+        {
             // Arrange
             string search = @"main.css";
             string target = String.Empty;
@@ -371,7 +388,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Target: 
         /// </summary>
         [Fact]
-        public void WildcardSearchWithNoResultingItemsDoesNotThrow() {
+        public void WildcardSearchWithNoResultingItemsDoesNotThrow()
+        {
             // Arrange
             string search = @"css\*.jpg";
             string target = String.Empty;
@@ -395,7 +413,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: \content\css\main.css
         /// </summary>
         [Fact]
-        public void RelativePathsWithNoWildCards() {
+        public void RelativePathsWithNoWildCards()
+        {
             // Arrange
             string search = @"..\static\css\main.css";
             string target = @"content\css";
@@ -420,7 +439,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: \content\css\style.css
         /// </summary>
         [Fact]
-        public void RelativePathsWithCopyRename() {
+        public void RelativePathsWithCopyRename()
+        {
             // Arrange
             string search = @"..\..\static\css\main.css";
             string target = @"content\css\style.css";
@@ -445,7 +465,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\net40\awesomeproj.core.dll, lib\net40\awesomeproj.aux.dll
         /// </summary>
         [Fact]
-        public void RelativePathWithWildCards() {
+        public void RelativePathWithWildCards()
+        {
             // Arrange
             string search = @"..\..\src\awesomeproj\bin\release\*.dll";
             string target = @"lib\net40";
@@ -472,7 +493,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\foo.dll
         /// </summary>
         [Fact]
-        public void AbsolutePathWithNoWildCards() {
+        public void AbsolutePathWithNoWildCards()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
                                                 new Dir("release",
@@ -496,7 +518,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\bar.dll
         /// </summary>
         [Fact]
-        public void AbsolutePathWithFileRename() {
+        public void AbsolutePathWithFileRename()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
                                                 new Dir("release",
@@ -520,7 +543,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\foo.dll
         /// </summary>
         [Fact]
-        public void AbsolutePathWithWildcard() {
+        public void AbsolutePathWithWildcard()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
                                                 new Dir("release",
@@ -545,7 +569,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\foo.dll, lib\bar.dll, lib\test.dll
         /// </summary>
         [Fact]
-        public void MultipleFileSourcesCanBeSpecifiedUsingSemiColonSeparator() {
+        public void MultipleFileSourcesCanBeSpecifiedUsingSemiColonSeparator()
+        {
             // Arrange
             string root = CreateFileSystem(
                                             new Dir("sample", new File("test.dll")),
@@ -576,7 +601,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\foo.dll, lib\bar.dll, lib\test.dll
         /// </summary>
         [Fact]
-        public void ManifestThrowsIfFirstFileSourceValuesInSemiColonSeparatedListsAreEmpty() {
+        public void ManifestThrowsIfFirstFileSourceValuesInSemiColonSeparatedListsAreEmpty()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("sample", new File("test.dll")));
 
@@ -595,7 +621,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\foo.dll, lib\bar.dll, lib\test.dll
         /// </summary>
         [Fact]
-        public void ManifestIgnoresEmptyItemsInSemiColonSeparatedList() {
+        public void ManifestIgnoresEmptyItemsInSemiColonSeparatedList()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("sample", new File("test.dll")));
 
@@ -618,7 +645,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: Exception stating File not found: bin\release\bar.dll
         /// </summary>
         [Fact]
-        public void PackageBuilderThrowsIfAnyOneItemOfSemiColonSeparatedListIsNotFound() {
+        public void PackageBuilderThrowsIfAnyOneItemOfSemiColonSeparatedListIsNotFound()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
                                                 new Dir("release",
@@ -640,7 +668,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\net40\foo.dll, lib\net35\foo.dll
         /// </summary>
         [Fact]
-        public void AbsolutePathWithRecursiveWildcard() {
+        public void AbsolutePathWithRecursiveWildcard()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
                                                 new Dir("release",
@@ -669,7 +698,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\release\baz.dll
         /// </summary>
         [Fact]
-        public void PathWithWildCardInDirectoryNameAndFileName() {
+        public void PathWithWildCardInDirectoryNameAndFileName()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
                                                 new Dir("release",
@@ -693,7 +723,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\release\baz.dll
         /// </summary>
         [Fact]
-        public void PathWithWildCardInDirectoryNameAndFileExtension() {
+        public void PathWithWildCardInDirectoryNameAndFileExtension()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
                                                 new Dir("release",
@@ -717,7 +748,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\release\baz.dll
         /// </summary>
         [Fact]
-        public void SourceStructureIsPreservedWithRecursiveWildCard() {
+        public void SourceStructureIsPreservedWithRecursiveWildCard()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
                                                 new Dir("release",
@@ -742,7 +774,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// In the case of a path without wildcard characters, we rename the source if the source and target extensions are identical.
         /// </summary>
         [Fact]
-        public void SourceWithWildcardIgnoresExtensionBasedRenameRule() {
+        public void SourceWithWildcardIgnoresExtensionBasedRenameRule()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("bin",
                                                 new Dir("release",
@@ -767,7 +800,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// In the case of a path without wildcard characters, we rename the source if the source and target extensions are identical.
         /// </summary>
         [Fact]
-        public void WildCardInMiddleOfPath() {
+        public void WildCardInMiddleOfPath()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("Output",
                                             new Dir("NuGet",
@@ -796,7 +830,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// In the case of a path without wildcard characters, we rename the source if the source and target extensions are identical.
         /// </summary>
         [Fact]
-        public void WildCardInMiddleOfPathAndExtension() {
+        public void WildCardInMiddleOfPathAndExtension()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("Output",
                                             new Dir("NuGet",
@@ -826,7 +861,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// In the case of a path without wildcard characters, we rename the source if the source and target extensions are identical.
         /// </summary>
         [Fact]
-        public void RecursiveSearchForPathNotInBaseDirectory() {
+        public void RecursiveSearchForPathNotInBaseDirectory()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("Packages", new Dir("bin")),
                                            new Dir("Output",
@@ -856,7 +892,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\release\baz.dll
         /// </summary>
         [Fact]
-        public void RelativePathWithWildCard() {
+        public void RelativePathWithWildCard()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("properties"),
                                            new Dir("bin",
@@ -882,7 +919,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\release\baz.dll
         /// </summary>
         [Fact]
-        public void DeepRelativePathWithWildCard() {
+        public void DeepRelativePathWithWildCard()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("tools",
                                                 new Dir("nuspec")),
@@ -909,7 +947,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// Expected: lib\release\baz.dll
         /// </summary>
         [Fact]
-        public void RelativePathWithRecursiveWildCard() {
+        public void RelativePathWithRecursiveWildCard()
+        {
             // Arrange
             string root = CreateFileSystem(new Dir("tools",
                                                 new Dir("nuspec")),
@@ -940,7 +979,8 @@ namespace NuGet.Test.Integration.PathResolver {
         /// In the case of a path without wildcard characters, we rename the source if the source and target extensions are identical.
         /// </summary>
         [Fact]
-        public void WildCardInPathDoesNotPickUpFileInNestedDirectories() {
+        public void WildCardInPathDoesNotPickUpFileInNestedDirectories()
+        {
             // Arrange
             string expectedContent = "this is the right foo";
             string root = CreateFileSystem(new Dir("Output",
@@ -969,7 +1009,8 @@ namespace NuGet.Test.Integration.PathResolver {
         }
 
         [Fact]
-        public void ExclusionWithSimpleExtensions() {
+        public void ExclusionWithSimpleExtensions()
+        {
             // Arrange
             var root = CreateExclusionProject();
             var manifest = GetExclusionManifest(@"**\*.*", "", @"**\*.pdb");
@@ -988,7 +1029,8 @@ namespace NuGet.Test.Integration.PathResolver {
         }
 
         [Fact]
-        public void ExclusionWithPath() {
+        public void ExclusionWithPath()
+        {
             // Arrange
             var root = CreateExclusionProject();
             var manifest = GetExclusionManifest(@"**\*.*", "", @"bin\**");
@@ -1005,7 +1047,8 @@ namespace NuGet.Test.Integration.PathResolver {
         }
 
         [Fact]
-        public void MultipleExclusionsForSearchPath() {
+        public void MultipleExclusionsForSearchPath()
+        {
             // Arrange
             var root = CreateExclusionProject();
             var manifest = GetExclusionManifest(@"**\*.*", "", @"**\*.pdb;*.csproj;Properties\*;*\Debug\*");
@@ -1021,7 +1064,8 @@ namespace NuGet.Test.Integration.PathResolver {
         }
 
         [Fact]
-        public void ExclusionsWithRelativePaths() {
+        public void ExclusionsWithRelativePaths()
+        {
             // Arrange
             var root = CreateExclusionProject();
             var manifest = GetExclusionManifest(@"..\bin\*\*.*", "lib", @"..\bin\debug\*");
@@ -1034,7 +1078,8 @@ namespace NuGet.Test.Integration.PathResolver {
             Assert.Equal(@"lib\MyProject.dll", package.Files[0].Path);
         }
 
-        private string CreateExclusionProject() {
+        private string CreateExclusionProject()
+        {
             return CreateFileSystem(new File("MyProject.csproj"),
                                     new File("Main.cs"),
                                     new File("MainCore.cs"),
@@ -1049,7 +1094,8 @@ namespace NuGet.Test.Integration.PathResolver {
 
         }
 
-        private static Stream GetExclusionManifest(string search, string target, string exclusion) {
+        private static Stream GetExclusionManifest(string search, string target, string exclusion)
+        {
             return String.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>
@@ -1060,7 +1106,8 @@ namespace NuGet.Test.Integration.PathResolver {
   </metadata><files><file src=""{0}"" target=""{1}"" exclude=""{2}"" /></files></package>", search, target, exclusion).AsStream();
         }
 
-        private static Stream GetManifest(string search, string target) {
+        private static Stream GetManifest(string search, string target)
+        {
             return String.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>Artem.XmlProviders</id>
@@ -1072,47 +1119,58 @@ namespace NuGet.Test.Integration.PathResolver {
         }
 
         //not as elegant as the mstest version as xUnit does not appear to give similar context about the "context" of the test being invoked
-        private string CreateFileSystem(params File[] files) {
+        private string CreateFileSystem(params File[] files)
+        {
             string rootDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             new Dir(rootDir, files).Create();
             return rootDir;
         }
 
-        private class File {
+        private class File
+        {
             protected readonly string _name;
             private readonly string _contents;
-            public File(string name, string contents = "") {
+            public File(string name, string contents = "")
+            {
                 _name = name;
                 _contents = contents;
             }
 
             public File Parent { get; set; }
 
-            public virtual void Create() {
+            public virtual void Create()
+            {
                 System.IO.File.AppendAllText(GetFullPath(), _contents);
             }
 
-            public string GetFullPath() {
+            public string GetFullPath()
+            {
                 return Parent == null ? _name : Path.Combine(Parent.GetFullPath(), _name);
             }
         }
 
-        private class Dir : File {
+        private class Dir : File
+        {
             IEnumerable<File> _files;
 
             public Dir(string name, params File[] files)
-                : base(name) {
-                if (files != null) {
-                    foreach (var f in files) {
+                : base(name)
+            {
+                if (files != null)
+                {
+                    foreach (var f in files)
+                    {
                         f.Parent = this;
                     }
                     _files = files;
                 }
             }
 
-            public override void Create() {
+            public override void Create()
+            {
                 Directory.CreateDirectory(GetFullPath());
-                foreach (var f in _files) {
+                foreach (var f in _files)
+                {
                     f.Create();
                 }
             }

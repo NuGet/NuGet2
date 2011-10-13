@@ -3,8 +3,10 @@ using System.IO;
 using Microsoft.Win32;
 using Xunit;
 
-namespace NuGet.Test.Integration.MSBuild {
-    public class NuGetTaskIntegrationTest : IDisposable {
+namespace NuGet.Test.Integration.MSBuild
+{
+    public class NuGetTaskIntegrationTest : IDisposable
+    {
         static string _absolutePackageDir = Path.GetFullPath(@"..\..\..\_package");
         static string _absolutePackageSourceDir = Path.GetFullPath(@"..\..\..\_package_source");
         static string _msBuildPath;
@@ -13,9 +15,9 @@ namespace NuGet.Test.Integration.MSBuild {
         const string _packageSourceDir = @".\_package_source";
         const string _workingDir = @".\_working";
 
-    	public NuGetTaskIntegrationTest()
-    	{
-    		DeleteTestDirs();
+        public NuGetTaskIntegrationTest()
+        {
+            DeleteTestDirs();
 
             Directory.CreateDirectory(_absolutePackageDir);
             Directory.CreateDirectory(_absolutePackageSourceDir);
@@ -24,12 +26,14 @@ namespace NuGet.Test.Integration.MSBuild {
             Directory.CreateDirectory(_workingDir);
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             DeleteTestDirs();
         }
 
         [Fact]
-        public void WillCreateAPackageWhenTheSpecFileIsRelativeToTheWorkingDir() {
+        public void WillCreateAPackageWhenTheSpecFileIsRelativeToTheWorkingDir()
+        {
             string NuGetTaskXml = CreateTaskXml();
             CreatePackageSourceAndBuildFile(NuGetTaskXml);
 
@@ -39,7 +43,8 @@ namespace NuGet.Test.Integration.MSBuild {
         }
 
         [Fact]
-        public void WillCreateAPackageWhenThePackageDirIsRelativeToTheWorkingDir() {
+        public void WillCreateAPackageWhenThePackageDirIsRelativeToTheWorkingDir()
+        {
             string NuGetTaskXml = CreateTaskXml();
             CreatePackageSourceAndBuildFile(NuGetTaskXml);
 
@@ -49,7 +54,8 @@ namespace NuGet.Test.Integration.MSBuild {
         }
 
         [Fact]
-        public void WillCreateAPackageWhenThePackageDirHasAnAbsolutePath() {
+        public void WillCreateAPackageWhenThePackageDirHasAnAbsolutePath()
+        {
             string NuGetTaskXml = CreateTaskXml(packageDir: _absolutePackageDir);
             CreatePackageSourceAndBuildFile(NuGetTaskXml);
 
@@ -59,7 +65,8 @@ namespace NuGet.Test.Integration.MSBuild {
         }
 
         [Fact]
-        public void WillCreateAPackageWhenTheSpecFileHasAnAbsolutePath() {
+        public void WillCreateAPackageWhenTheSpecFileHasAnAbsolutePath()
+        {
             string NuGetTask = CreateTaskXml(packageSourceDir: _absolutePackageSourceDir);
             CreatePackageSourceAndBuildFile(NuGetTask, packageSourceDir: _absolutePackageSourceDir);
 
@@ -68,7 +75,8 @@ namespace NuGet.Test.Integration.MSBuild {
             Assert.True(PackageExists());
         }
 
-        static string CreatePackageSourceAndBuildFile(string NuGetTaskXml, string packageSourceDir = _packageSourceDir) {
+        static string CreatePackageSourceAndBuildFile(string NuGetTaskXml, string packageSourceDir = _packageSourceDir)
+        {
             var buildFileContents = string.Format(
 @"<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
     <UsingTask
@@ -102,7 +110,8 @@ namespace NuGet.Test.Integration.MSBuild {
             return string.Format("{0} {1}", "fnord.msbuild", "/t:Package");
         }
 
-        static string CreateTaskXml(string packageSourceDir = _packageSourceDir, string packageDir = _packageDir) {
+        static string CreateTaskXml(string packageSourceDir = _packageSourceDir, string packageDir = _packageDir)
+        {
             return string.Format(
                 @"<NuGet SpecFile=""{0}{1}\fnord.nuspec"" PackageDir=""{2}{3}"" />",
                 packageSourceDir.StartsWith(".") ? @"..\" : "",
@@ -111,7 +120,8 @@ namespace NuGet.Test.Integration.MSBuild {
                 packageDir);
         }
 
-        static void DeleteTestDirs() {
+        static void DeleteTestDirs()
+        {
             DeleteTestDir(_absolutePackageDir);
             DeleteTestDir(_absolutePackageSourceDir);
             DeleteTestDir(_packageDir);
@@ -119,23 +129,27 @@ namespace NuGet.Test.Integration.MSBuild {
             DeleteTestDir(_workingDir);
         }
 
-        static void DeleteTestDir(string dir) {
+        static void DeleteTestDir(string dir)
+        {
             string libDir = Path.Combine(dir, "lib");
 
-            if (Directory.Exists(libDir)) {
+            if (Directory.Exists(libDir))
+            {
                 foreach (var file in Directory.GetFiles(libDir))
                     File.Delete(file);
                 Directory.Delete(libDir);
             }
 
-            if (Directory.Exists(dir)) {
+            if (Directory.Exists(dir))
+            {
                 foreach (var file in Directory.GetFiles(dir))
                     File.Delete(file);
                 Directory.Delete(dir);
             }
         }
 
-        static string ExecuteTask() {
+        static string ExecuteTask()
+        {
             return CommandRunner.Run(
                 GetMSBuildPath(),
                 _workingDir,
@@ -143,8 +157,10 @@ namespace NuGet.Test.Integration.MSBuild {
                 true).Item2;
         }
 
-        static string GetMSBuildPath() {
-            if (_msBuildPath == null) {
+        static string GetMSBuildPath()
+        {
+            if (_msBuildPath == null)
+            {
                 string msBuildDir = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\MSBuild\ToolsVersions\4.0", "MSBuildToolsPath", null) as string;
                 if (msBuildDir == null)
                     throw new Exception("Unable to locate the MSBuild directory.");
@@ -155,7 +171,8 @@ namespace NuGet.Test.Integration.MSBuild {
             return _msBuildPath;
         }
 
-        static bool PackageExists(string packageDir = _packageDir) {
+        static bool PackageExists(string packageDir = _packageDir)
+        {
             return File.Exists(Path.Combine(packageDir, _packageFile));
         }
     }

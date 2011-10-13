@@ -3,22 +3,28 @@ using System.ComponentModel.Composition;
 using System.Windows;
 using Microsoft.Internal.Web.Utils;
 
-namespace NuGet.VisualStudio {
+namespace NuGet.VisualStudio
+{
     [Export(typeof(IWindowSettingsManager))]
-    internal class WindowSettingsManager : SettingsManagerBase, IWindowSettingsManager {
+    internal class WindowSettingsManager : SettingsManagerBase, IWindowSettingsManager
+    {
 
         private const string KeyTemplate = @"NuGet\Windows\";
 
         public WindowSettingsManager() :
-            this(ServiceLocator.GetInstance<IServiceProvider>()) {
+            this(ServiceLocator.GetInstance<IServiceProvider>())
+        {
         }
 
         public WindowSettingsManager(IServiceProvider serivceProvider) :
-            base(serivceProvider) {
+            base(serivceProvider)
+        {
         }
 
-        public Size GetWindowSize(string windowToken) {
-            if (String.IsNullOrEmpty(windowToken)) {
+        public Size GetWindowSize(string windowToken)
+        {
+            if (String.IsNullOrEmpty(windowToken))
+            {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "windowToken");
             }
 
@@ -28,8 +34,10 @@ namespace NuGet.VisualStudio {
             return new Size(width, height);
         }
 
-        public void SetWindowSize(string windowToken, Size size) {
-            if (String.IsNullOrEmpty(windowToken)) {
+        public void SetWindowSize(string windowToken, Size size)
+        {
+            if (String.IsNullOrEmpty(windowToken))
+            {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "windowToken");
             }
 

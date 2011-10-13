@@ -1,10 +1,13 @@
 ﻿using Xunit;
 
-namespace NuGet.VisualStudio.Test {
-    
-    public class PathValidatorTest {
+namespace NuGet.VisualStudio.Test
+{
+
+    public class PathValidatorTest
+    {
         [Fact]
-        public void IsValidFilePathReturnsTrueForValidLocalPath() {
+        public void IsValidFilePathReturnsTrueForValidLocalPath()
+        {
             // Act
             var isValid = PathValidator.IsValidLocalPath(@"C:\Path\To\Source");
 
@@ -13,7 +16,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidUncPathReturnsTrueForValidUncPath() {
+        public void IsValidUncPathReturnsTrueForValidUncPath()
+        {
             // Act
             var isValid = PathValidator.IsValidUncPath(@"\\server\share\Path\To\Source");
 
@@ -22,7 +26,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidFilePathReturnsFalseForInvalidLocalPathFormat() {
+        public void IsValidFilePathReturnsFalseForInvalidLocalPathFormat()
+        {
             // Act
             var isValid = PathValidator.IsValidLocalPath(@"ABC:\Path\To\Source");
 
@@ -31,7 +36,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidFilePathReturnsFalseForRelativePath() {
+        public void IsValidFilePathReturnsFalseForRelativePath()
+        {
             // Act
             var isValid = PathValidator.IsValidLocalPath(@"Path\To\Source");
 
@@ -40,7 +46,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidFilePathReturnsFalseForRelativePathWithDriveLetter() {
+        public void IsValidFilePathReturnsFalseForRelativePathWithDriveLetter()
+        {
             // Act
             var isValid = PathValidator.IsValidLocalPath(@"C:Path\To\Source");
 
@@ -49,7 +56,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidFilePathReturnsFalseForAbsolutePathWithoutDriveLetter() {
+        public void IsValidFilePathReturnsFalseForAbsolutePathWithoutDriveLetter()
+        {
             // Act
             var isValid = PathValidator.IsValidLocalPath(@"\Path\To\Source");
 
@@ -58,7 +66,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidUncPathReturnsFalseForInvalidUncPathMissingShare() {
+        public void IsValidUncPathReturnsFalseForInvalidUncPathMissingShare()
+        {
             // Act
             var isValid = PathValidator.IsValidUncPath(@"\\server\");
 
@@ -67,7 +76,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidUncPathReturnsFalseForInvalidUncPathMissingDoubleBackslash() {
+        public void IsValidUncPathReturnsFalseForInvalidUncPathMissingDoubleBackslash()
+        {
             // Act
             var isValid = PathValidator.IsValidUncPath(@"\server");
 
@@ -76,7 +86,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidFilePathReturnsFalseForInvalidLocalPathBadCharacters() {
+        public void IsValidFilePathReturnsFalseForInvalidLocalPathBadCharacters()
+        {
             // Act
             var isValid = PathValidator.IsValidLocalPath(@"C:\Path\*\:\""\Source");
 
@@ -85,7 +96,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidUncPathReturnsFalseForInvalidUncPathBadCharacters() {
+        public void IsValidUncPathReturnsFalseForInvalidUncPathBadCharacters()
+        {
             // Act
             var isValid = PathValidator.IsValidUncPath(@"\\server\share\*\:\""\Source");
 
@@ -94,7 +106,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidUrlReturnsTrueForValidUrl() {
+        public void IsValidUrlReturnsTrueForValidUrl()
+        {
             // Act
             var isValid = PathValidator.IsValidUrl(@"http://go.microsoft.com/fwlink/?LinkID=199193");
 
@@ -103,7 +116,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidUrlReturnsTrueForValidHttpsUrl() {
+        public void IsValidUrlReturnsTrueForValidHttpsUrl()
+        {
             // Act
             var isValid = PathValidator.IsValidUrl(@"https://go.microsoft.com/fwlink/?LinkID=199193");
 
@@ -112,7 +126,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidUrlReturnsTrueForValidUrlUsingIpAddress() {
+        public void IsValidUrlReturnsTrueForValidUrlUsingIpAddress()
+        {
             // Act
             var isValid = PathValidator.IsValidUrl(@"http://127.0.0.1/mysource");
 
@@ -121,7 +136,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidUrlReturnsTrueForValidUrlUsingPorts() {
+        public void IsValidUrlReturnsTrueForValidUrlUsingPorts()
+        {
             // Act
             var isValid = PathValidator.IsValidUrl(@"http://127.0.0.1:8080/mysource");
 
@@ -130,7 +146,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidUrlReturnsFalseForInvalidUrl() {
+        public void IsValidUrlReturnsFalseForInvalidUrl()
+        {
             // Act
             var isValid = PathValidator.IsValidUrl(@"http::/\/go.microsoft.com/fw&link/?LinkID=199193");
 
@@ -139,7 +156,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidUrlReturnsFalseForInvalidUrlAsLocalPath() {
+        public void IsValidUrlReturnsFalseForInvalidUrlAsLocalPath()
+        {
             // Act
             var isValid = PathValidator.IsValidUrl(@"C:\Path\To\Source");
 
@@ -148,7 +166,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void IsValidUrlReturnsFalseForInvalidUrlAsUncPath() {
+        public void IsValidUrlReturnsFalseForInvalidUrlAsUncPath()
+        {
             // Act
             var isValid = PathValidator.IsValidUrl(@"\\server\share");
 

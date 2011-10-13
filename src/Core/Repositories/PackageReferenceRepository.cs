@@ -2,22 +2,27 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NuGet {
+namespace NuGet
+{
     /// <summary>
     /// This repository implementation keeps track of packages that are referenced in a project but
     /// it also has a reference to the repository that actually contains the packages. It keeps track
     /// of packages in an xml file at the project root (packages.xml).
     /// </summary>
-    public class PackageReferenceRepository : PackageRepositoryBase, IPackageLookup, IPackageConstraintProvider {
+    public class PackageReferenceRepository : PackageRepositoryBase, IPackageLookup, IPackageConstraintProvider
+    {
         public static readonly string PackageReferenceFile = "packages.config";
         private readonly PackageReferenceFile _packageReferenceFile;
         private readonly string _fullPath;
 
-        public PackageReferenceRepository(IFileSystem fileSystem, ISharedPackageRepository sourceRepository) {
-            if (fileSystem == null) {
+        public PackageReferenceRepository(IFileSystem fileSystem, ISharedPackageRepository sourceRepository)
+        {
+            if (fileSystem == null)
+            {
                 throw new ArgumentNullException("fileSystem");
             }
-            if (sourceRepository == null) {
+            if (sourceRepository == null)
+            {
                 throw new ArgumentNullException("sourceRepository");
             }
             _packageReferenceFile = new PackageReferenceFile(fileSystem, PackageReferenceFile);
@@ -25,49 +30,61 @@ namespace NuGet {
             SourceRepository = sourceRepository;
         }
 
-        public override string Source {
-            get {
+        public override string Source
+        {
+            get
+            {
                 return PackageReferenceFile;
             }
         }
 
-        public override bool SupportsPrereleasePackages {
+        public override bool SupportsPrereleasePackages
+        {
             get { return true; }
         }
 
-        private ISharedPackageRepository SourceRepository {
+        private ISharedPackageRepository SourceRepository
+        {
             get;
             set;
         }
 
-        private string PackageReferenceFileFullPath {
-            get {
+        private string PackageReferenceFileFullPath
+        {
+            get
+            {
                 return _fullPath;
             }
         }
 
-        public override IQueryable<IPackage> GetPackages() {
+        public override IQueryable<IPackage> GetPackages()
+        {
             return GetPackagesCore().AsSafeQueryable();
         }
 
-        private IEnumerable<IPackage> GetPackagesCore() {
-            foreach (var reference in _packageReferenceFile.GetPackageReferences()) {
+        private IEnumerable<IPackage> GetPackagesCore()
+        {
+            foreach (var reference in _packageReferenceFile.GetPackageReferences())
+            {
                 IPackage package = null;
 
                 if (String.IsNullOrEmpty(reference.Id) ||
                     reference.Version == null ||
-                    !SourceRepository.TryFindPackage(reference.Id, reference.Version, out package)) {
+                    !SourceRepository.TryFindPackage(reference.Id, reference.Version, out package))
+                {
 
                     // Skip bad entries
                     continue;
                 }
-                else {
+                else
+                {
                     yield return package;
                 }
             }
         }
 
-        public override void AddPackage(IPackage package) {
+        public override void AddPackage(IPackage package)
+        {
             _packageReferenceFile.AddEntry(package.Id, package.Version);
 
             // Notify the source repository every time we add a new package to the repository.
@@ -77,31 +94,39 @@ namespace NuGet {
             SourceRepository.RegisterRepository(PackageReferenceFileFullPath);
         }
 
-        public override void RemovePackage(IPackage package) {
-            if (_packageReferenceFile.DeleteEntry(package.Id, package.Version)) {
+        public override void RemovePackage(IPackage package)
+        {
+            if (_packageReferenceFile.DeleteEntry(package.Id, package.Version))
+            {
                 // Remove the repository from the source
                 SourceRepository.UnregisterRepository(PackageReferenceFileFullPath);
             }
         }
 
-        public IPackage FindPackage(string packageId, SemanticVersion version) {
-            if (!_packageReferenceFile.EntryExists(packageId, version)) {
+        public IPackage FindPackage(string packageId, SemanticVersion version)
+        {
+            if (!_packageReferenceFile.EntryExists(packageId, version))
+            {
                 return null;
             }
 
             return SourceRepository.FindPackage(packageId, version);
         }
 
-        public void RegisterIfNecessary() {
-            if (GetPackages().Any()) {
+        public void RegisterIfNecessary()
+        {
+            if (GetPackages().Any())
+            {
                 SourceRepository.RegisterRepository(PackageReferenceFileFullPath);
             }
         }
 
-        public IVersionSpec GetConstraint(string packageId) {
+        public IVersionSpec GetConstraint(string packageId)
+        {
             // Find the reference entry for this package
             PackageReference reference = _packageReferenceFile.GetPackageReferences().FirstOrDefault(p => p.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase));
-            if (reference != null) {
+            if (reference != null)
+            {
                 return reference.VersionConstraint;
             }
             return null;

@@ -3,16 +3,20 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 
-namespace NuGet.VisualStudio {
-    public partial class ProductUpdateBar : UserControl {
+namespace NuGet.VisualStudio
+{
+    public partial class ProductUpdateBar : UserControl
+    {
         private readonly IProductUpdateService _productUpdateService;
 
         public event EventHandler UpdateStarting = delegate { };
 
-        public ProductUpdateBar(IProductUpdateService productUpdateService) {
+        public ProductUpdateBar(IProductUpdateService productUpdateService)
+        {
             InitializeComponent();
 
-            if (productUpdateService == null) {
+            if (productUpdateService == null)
+            {
                 throw new ArgumentNullException("productUpdateService");
             }
 
@@ -20,12 +24,14 @@ namespace NuGet.VisualStudio {
             _productUpdateService.UpdateAvailable += OnUpdateAvailable;
         }
 
-        private void OnUpdateAvailable(object sender, ProductUpdateAvailableEventArgs e) {
+        private void OnUpdateAvailable(object sender, ProductUpdateAvailableEventArgs e)
+        {
             // this event handler will be invoked on background thread. Has to use Dispatcher to show update bar.
             Dispatcher.BeginInvoke(new Action<Version, Version>(ShowUpdateBar), e.CurrentVersion, e.NewVersion);
         }
 
-        private void OnUpdateLinkClick(object sender, RoutedEventArgs e) {
+        private void OnUpdateLinkClick(object sender, RoutedEventArgs e)
+        {
             HideUpdateBar();
 
             UpdateStarting(this, EventArgs.Empty);
@@ -34,23 +40,28 @@ namespace NuGet.VisualStudio {
             Dispatcher.BeginInvoke(new Action(_productUpdateService.Update), DispatcherPriority.Background);
         }
 
-        private void OnDeclineUpdateLinkClick(object sender, RoutedEventArgs e) {
+        private void OnDeclineUpdateLinkClick(object sender, RoutedEventArgs e)
+        {
             HideUpdateBar();
             _productUpdateService.DeclineUpdate(false);
         }
 
-        private void OnDeclineUpdateLinkClickNoRemind(object sender, RoutedEventArgs e) {
+        private void OnDeclineUpdateLinkClickNoRemind(object sender, RoutedEventArgs e)
+        {
             HideUpdateBar();
             _productUpdateService.DeclineUpdate(true);
         }
 
-        public void ShowUpdateBar(Version currentVersion, Version newVersion) {
-            if (IsVisible) {
+        public void ShowUpdateBar(Version currentVersion, Version newVersion)
+        {
+            if (IsVisible)
+            {
                 UpdateBar.Visibility = Visibility.Visible;
             }
         }
 
-        private void HideUpdateBar() {
+        private void HideUpdateBar()
+        {
             UpdateBar.Visibility = Visibility.Collapsed;
         }
     }

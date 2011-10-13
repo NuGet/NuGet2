@@ -1,9 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace NuGet {
-    public interface IPackageFile {
-        string Path {
+namespace NuGet
+{
+    public interface IPackageFile
+    {
+        string Path
+        {
             get;
         }
 

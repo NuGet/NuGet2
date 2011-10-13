@@ -1,8 +1,10 @@
-namespace NuGetConsole.Implementation.Console {
+namespace NuGetConsole.Implementation.Console
+{
     /// <summary>
     /// HostName MEF metadata viewer.
     /// </summary>
-    public interface IHostNameMetadata {
+    public interface IHostNameMetadata
+    {
         string HostName { get; }
     }
 }

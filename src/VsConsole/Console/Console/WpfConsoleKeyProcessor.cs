@@ -10,9 +10,11 @@ using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
 
-namespace NuGetConsole.Implementation.Console {
+namespace NuGetConsole.Implementation.Console
+{
 
-    internal class WpfConsoleKeyProcessor : OleCommandFilter {
+    internal class WpfConsoleKeyProcessor : OleCommandFilter
+    {
         private readonly Lazy<IntPtr> _pKeybLayout = new Lazy<IntPtr>(() => NativeMethods.GetKeyboardLayout(0));
         private WpfConsole WpfConsole { get; set; }
         private IWpfTextView WpfTextView { get; set; }
@@ -20,7 +22,8 @@ namespace NuGetConsole.Implementation.Console {
         private ICommandExpansion CommandExpansion { get; set; }
 
         public WpfConsoleKeyProcessor(WpfConsole wpfConsole)
-            : base(wpfConsole.VsTextView) {
+            : base(wpfConsole.VsTextView)
+        {
             WpfConsole = wpfConsole;
             WpfTextView = wpfConsole.WpfTextView;
             CommandExpansion = wpfConsole.Factory.GetCommandExpansion(wpfConsole);
@@ -30,8 +33,10 @@ namespace NuGetConsole.Implementation.Console {
         /// Check if Caret is in read only region. This is true if the console is currently not
         /// in input mode, or the caret is before current prompt.
         /// </summary>
-        private bool IsCaretInReadOnlyRegion {
-            get {
+        private bool IsCaretInReadOnlyRegion
+        {
+            get
+            {
                 return WpfConsole.InputLineStart == null || // shortcut -- no inut allowed
                        WpfTextView.TextBuffer.IsReadOnly(WpfTextView.Caret.Position.BufferPosition.Position);
             }
@@ -40,10 +45,13 @@ namespace NuGetConsole.Implementation.Console {
         /// <summary>
         /// Check if Caret is on InputLine, including before or after Prompt.
         /// </summary>
-        private bool IsCaretOnInputLine {
-            get {
+        private bool IsCaretOnInputLine
+        {
+            get
+            {
                 SnapshotPoint? inputStart = WpfConsole.InputLineStart;
-                if (inputStart != null) {
+                if (inputStart != null)
+                {
                     SnapshotSpan inputExtent = inputStart.Value.GetContainingLine().ExtentIncludingLineBreak;
                     SnapshotPoint caretPos = CaretPosition;
                     return inputExtent.Contains(caretPos) || inputExtent.End == caretPos;
@@ -57,19 +65,25 @@ namespace NuGetConsole.Implementation.Console {
         /// Check if Caret is exactly on InputLineStart. Do nothing when HOME/Left keys are pressed here.
         /// When caret is right to this position, HOME/Left moves caret to this position.
         /// </summary>
-        private bool IsCaretAtInputLineStart {
-            get {
+        private bool IsCaretAtInputLineStart
+        {
+            get
+            {
                 return WpfConsole.InputLineStart == WpfTextView.Caret.Position.BufferPosition;
             }
         }
 
-        private SnapshotPoint CaretPosition {
+        private SnapshotPoint CaretPosition
+        {
             get { return WpfTextView.Caret.Position.BufferPosition; }
         }
 
-        private bool IsSelectionReadonly {
-            get {
-                if (!WpfTextView.Selection.IsEmpty) {
+        private bool IsSelectionReadonly
+        {
+            get
+            {
+                if (!WpfTextView.Selection.IsEmpty)
+                {
                     ITextBuffer buffer = WpfTextView.TextBuffer;
                     return WpfTextView.Selection.SelectedSpans.Any(span => buffer.IsReadOnly(span));
                 }
@@ -80,58 +94,72 @@ namespace NuGetConsole.Implementation.Console {
         /// <summary>
         /// Manually execute a command on the OldChain (so this filter won't participate in the command filtering).
         /// </summary>
-        private void ExecuteCommand(VSConstants.VSStd2KCmdID idCommand, object args = null) {
+        private void ExecuteCommand(VSConstants.VSStd2KCmdID idCommand, object args = null)
+        {
             OldChain.Execute(idCommand, args);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
-        protected override int InternalExec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut) {
+        protected override int InternalExec(ref Guid pguidCmdGroup, uint nCmdID, uint nCmdexecopt, IntPtr pvaIn, IntPtr pvaOut)
+        {
             int hr = OLECMDERR_E_NOTSUPPORTED;
 
-            if (WpfConsole == null || WpfConsole.Host == null || WpfConsole.Dispatcher == null) {
+            if (WpfConsole == null || WpfConsole.Host == null || WpfConsole.Dispatcher == null)
+            {
                 return hr;
             }
 
-            if (!WpfConsole.Host.IsCommandEnabled) {
+            if (!WpfConsole.Host.IsCommandEnabled)
+            {
                 return hr;
             }
 
-            if (!WpfConsole.Dispatcher.IsExecutingReadKey) {
+            if (!WpfConsole.Dispatcher.IsExecutingReadKey)
+            {
                 // if the console has not been successfully started, do not accept any key inputs, unless
                 // we are in the middle of a ReadKey call. This happens when the execution group policy setting
                 // is set to AllSigned, and PS is asking user to trust the certificate.
-                if (!WpfConsole.Dispatcher.IsStartCompleted) {
+                if (!WpfConsole.Dispatcher.IsStartCompleted)
+                {
                     return hr;
                 }
 
                 // if the console is in the middle of executing a command, do not accept any key inputs unless
                 // we are in the middle of a ReadKey call. 
-                if (WpfConsole.Dispatcher.IsExecutingCommand) {
+                if (WpfConsole.Dispatcher.IsExecutingCommand)
+                {
                     return hr;
                 }
             }
 
-            if (pguidCmdGroup == VSConstants.GUID_VSStandardCommandSet97) {
+            if (pguidCmdGroup == VSConstants.GUID_VSStandardCommandSet97)
+            {
                 //Debug.Print("Exec: GUID_VSStandardCommandSet97: {0}", (VSConstants.VSStd97CmdID)nCmdID);
 
-                switch ((VSConstants.VSStd97CmdID)nCmdID) {
+                switch ((VSConstants.VSStd97CmdID)nCmdID)
+                {
                     case VSConstants.VSStd97CmdID.Paste:
-                        if (IsCaretInReadOnlyRegion || IsSelectionReadonly) {
+                        if (IsCaretInReadOnlyRegion || IsSelectionReadonly)
+                        {
                             hr = VSConstants.S_OK; // eat it
                         }
-                        else {
+                        else
+                        {
                             PasteText(ref hr);
                         }
                         break;
                 }
             }
-            else if (pguidCmdGroup == VSConstants.VSStd2K) {
+            else if (pguidCmdGroup == VSConstants.VSStd2K)
+            {
                 //Debug.Print("Exec: VSStd2K: {0}", (VSConstants.VSStd2KCmdID)nCmdID);
 
                 var commandID = (VSConstants.VSStd2KCmdID)nCmdID;
 
-                if (WpfConsole.Dispatcher.IsExecutingReadKey) {
-                    switch (commandID) {
+                if (WpfConsole.Dispatcher.IsExecutingReadKey)
+                {
+                    switch (commandID)
+                    {
                         case VSConstants.VSStd2KCmdID.TYPECHAR:
                         case VSConstants.VSStd2KCmdID.BACKSPACE:
                         case VSConstants.VSStd2KCmdID.RETURN:
@@ -148,25 +176,34 @@ namespace NuGetConsole.Implementation.Console {
                     }
                     hr = VSConstants.S_OK; // eat everything
                 }
-                else {
-                    switch (commandID) {
+                else
+                {
+                    switch (commandID)
+                    {
                         case VSConstants.VSStd2KCmdID.TYPECHAR:
-                            if (IsCompletionSessionActive) {
+                            if (IsCompletionSessionActive)
+                            {
                                 char ch = (char)(ushort)Marshal.GetObjectForNativeVariant(pvaIn);
-                                if (IsCommitChar(ch)) {
-                                    if (_completionSession.SelectedCompletionSet.SelectionStatus.IsSelected) {
+                                if (IsCommitChar(ch))
+                                {
+                                    if (_completionSession.SelectedCompletionSet.SelectionStatus.IsSelected)
+                                    {
                                         _completionSession.Commit();
                                     }
-                                    else {
+                                    else
+                                    {
                                         _completionSession.Dismiss();
                                     }
                                 }
                             }
-                            else {
-                                if (IsSelectionReadonly) {
+                            else
+                            {
+                                if (IsSelectionReadonly)
+                                {
                                     WpfTextView.Selection.Clear();
                                 }
-                                if (IsCaretInReadOnlyRegion) {
+                                if (IsCaretInReadOnlyRegion)
+                                {
                                     WpfTextView.Caret.MoveTo(WpfConsole.InputLineExtent.End);
                                 }
                             }
@@ -178,7 +215,8 @@ namespace NuGetConsole.Implementation.Console {
                         case VSConstants.VSStd2KCmdID.WORDPREV:
                         case VSConstants.VSStd2KCmdID.WORDPREV_EXT:
                         case VSConstants.VSStd2KCmdID.WORDPREV_EXT_COL:
-                            if (IsCaretAtInputLineStart) {
+                            if (IsCaretAtInputLineStart)
+                            {
                                 //
                                 // Note: This simple implementation depends on Prompt containing a trailing space.
                                 // When caret is on the right of InputLineStart, editor will handle it correctly,
@@ -191,13 +229,15 @@ namespace NuGetConsole.Implementation.Console {
                         case VSConstants.VSStd2KCmdID.BOL:
                         case VSConstants.VSStd2KCmdID.BOL_EXT:
                         case VSConstants.VSStd2KCmdID.BOL_EXT_COL:
-                            if (IsCaretOnInputLine) {
+                            if (IsCaretOnInputLine)
+                            {
                                 VirtualSnapshotPoint oldCaretPoint = WpfTextView.Caret.Position.VirtualBufferPosition;
 
                                 WpfTextView.Caret.MoveTo(WpfConsole.InputLineStart.Value);
                                 WpfTextView.Caret.EnsureVisible();
 
-                                if ((VSConstants.VSStd2KCmdID)nCmdID == VSConstants.VSStd2KCmdID.BOL) {
+                                if ((VSConstants.VSStd2KCmdID)nCmdID == VSConstants.VSStd2KCmdID.BOL)
+                                {
                                     WpfTextView.Selection.Clear();
                                 }
                                 else if ((VSConstants.VSStd2KCmdID)nCmdID != VSConstants.VSStd2KCmdID.BOL)
@@ -216,8 +256,10 @@ namespace NuGetConsole.Implementation.Console {
                             break;
 
                         case VSConstants.VSStd2KCmdID.UP:
-                            if (!IsCompletionSessionActive) {
-                                if (IsCaretInReadOnlyRegion) {
+                            if (!IsCompletionSessionActive)
+                            {
+                                if (IsCaretInReadOnlyRegion)
+                                {
                                     ExecuteCommand(VSConstants.VSStd2KCmdID.END);
                                 }
                                 WpfConsole.NavigateHistory(-1);
@@ -226,8 +268,10 @@ namespace NuGetConsole.Implementation.Console {
                             break;
 
                         case VSConstants.VSStd2KCmdID.DOWN:
-                            if (!IsCompletionSessionActive) {
-                                if (IsCaretInReadOnlyRegion) {
+                            if (!IsCompletionSessionActive)
+                            {
+                                if (IsCaretInReadOnlyRegion)
+                                {
                                     ExecuteCommand(VSConstants.VSStd2KCmdID.END);
                                 }
                                 WpfConsole.NavigateHistory(+1);
@@ -236,15 +280,19 @@ namespace NuGetConsole.Implementation.Console {
                             break;
 
                         case VSConstants.VSStd2KCmdID.RETURN:
-                            if (IsCompletionSessionActive) {
-                                if (_completionSession.SelectedCompletionSet.SelectionStatus.IsSelected) {
+                            if (IsCompletionSessionActive)
+                            {
+                                if (_completionSession.SelectedCompletionSet.SelectionStatus.IsSelected)
+                                {
                                     _completionSession.Commit();
                                 }
-                                else {
+                                else
+                                {
                                     _completionSession.Dismiss();
                                 }
                             }
-                            else if (IsCaretOnInputLine || !IsCaretInReadOnlyRegion) {
+                            else if (IsCaretOnInputLine || !IsCaretInReadOnlyRegion)
+                            {
                                 ExecuteCommand(VSConstants.VSStd2KCmdID.END);
                                 ExecuteCommand(VSConstants.VSStd2KCmdID.RETURN);
 
@@ -254,11 +302,14 @@ namespace NuGetConsole.Implementation.Console {
                             break;
 
                         case VSConstants.VSStd2KCmdID.TAB:
-                            if (!IsCaretInReadOnlyRegion) {
-                                if (IsCompletionSessionActive) {
+                            if (!IsCaretInReadOnlyRegion)
+                            {
+                                if (IsCompletionSessionActive)
+                                {
                                     _completionSession.Commit();
                                 }
-                                else {
+                                else
+                                {
                                     TriggerCompletion();
                                 }
                             }
@@ -266,11 +317,13 @@ namespace NuGetConsole.Implementation.Console {
                             break;
 
                         case VSConstants.VSStd2KCmdID.CANCEL:
-                            if (IsCompletionSessionActive) {
+                            if (IsCompletionSessionActive)
+                            {
                                 _completionSession.Dismiss();
                                 hr = VSConstants.S_OK;
                             }
-                            else if (!IsCaretInReadOnlyRegion) {
+                            else if (!IsCaretInReadOnlyRegion)
+                            {
                                 // Delete all text after InputLineStart
                                 WpfTextView.TextBuffer.Delete(WpfConsole.AllInputExtent);
                                 hr = VSConstants.S_OK;
@@ -288,20 +341,24 @@ namespace NuGetConsole.Implementation.Console {
             return hr;
         }
 
-        private VsKeyInfo GetVsKeyInfo(IntPtr pvaIn, VSConstants.VSStd2KCmdID commandID) {
+        private VsKeyInfo GetVsKeyInfo(IntPtr pvaIn, VSConstants.VSStd2KCmdID commandID)
+        {
             // catch current modifiers as early as possible
             bool capsLockToggled = Keyboard.IsKeyToggled(Key.CapsLock);
             bool numLockToggled = Keyboard.IsKeyToggled(Key.NumLock);
 
             char keyChar;
-            if ((commandID == VSConstants.VSStd2KCmdID.RETURN) && pvaIn == IntPtr.Zero) {
+            if ((commandID == VSConstants.VSStd2KCmdID.RETURN) && pvaIn == IntPtr.Zero)
+            {
                 // <enter> pressed
                 keyChar = Environment.NewLine[0]; // [CR]LF
             }
-            else if ((commandID == VSConstants.VSStd2KCmdID.BACKSPACE) && pvaIn == IntPtr.Zero) {
+            else if ((commandID == VSConstants.VSStd2KCmdID.BACKSPACE) && pvaIn == IntPtr.Zero)
+            {
                 keyChar = '\b'; // backspace control character
             }
-            else {
+            else
+            {
                 Debug.Assert(pvaIn != IntPtr.Zero, "pvaIn != IntPtr.Zero");
 
                 // 1) deref pointer to char
@@ -336,40 +393,49 @@ namespace NuGetConsole.Implementation.Console {
 
         private static readonly char[] NEWLINE_CHARS = new char[] { '\n', '\r' };
 
-        private void PasteText(ref int hr) {
+        private void PasteText(ref int hr)
+        {
             string text = System.Windows.Clipboard.GetText();
             int iLineStart = 0;
             int iNewLine = -1;
             char c;
-            if (!string.IsNullOrEmpty(text) && (iNewLine = text.IndexOfAny(NEWLINE_CHARS)) >= 0) {
+            if (!string.IsNullOrEmpty(text) && (iNewLine = text.IndexOfAny(NEWLINE_CHARS)) >= 0)
+            {
                 ITextBuffer textBuffer = WpfTextView.TextBuffer;
-                while (iLineStart < text.Length) {
+                while (iLineStart < text.Length)
+                {
                     string pasteLine = (iNewLine >= 0 ?
                         text.Substring(iLineStart, iNewLine - iLineStart) : text.Substring(iLineStart));
 
-                    if (iLineStart == 0) {
-                        if (!WpfTextView.Selection.IsEmpty) {
+                    if (iLineStart == 0)
+                    {
+                        if (!WpfTextView.Selection.IsEmpty)
+                        {
                             textBuffer.Replace(WpfTextView.Selection.SelectedSpans[0], pasteLine);
                         }
-                        else {
+                        else
+                        {
                             textBuffer.Insert(WpfTextView.Caret.Position.BufferPosition.Position, pasteLine);
                         }
 
                         this.Execute(VSConstants.VSStd2KCmdID.RETURN);
                     }
-                    else {
+                    else
+                    {
                         WpfConsole.Dispatcher.PostInputLine(
                             new InputLine(pasteLine, iNewLine >= 0));
                     }
 
-                    if (iNewLine < 0) {
+                    if (iNewLine < 0)
+                    {
                         break;
                     }
 
                     iLineStart = iNewLine + 1;
                     if (iLineStart < text.Length
                         && (c = text[iLineStart]) != text[iNewLine]
-                        && (c == '\n' || c == '\r')) {
+                        && (c == '\n' || c == '\r'))
+                    {
                         iLineStart++;
                     }
                     iNewLine = (iLineStart < text.Length ? text.IndexOfAny(NEWLINE_CHARS, iLineStart) : -1);
@@ -381,30 +447,37 @@ namespace NuGetConsole.Implementation.Console {
 
         #region completion
 
-        static bool IsCommitChar(char c) {
+        static bool IsCommitChar(char c)
+        {
             // TODO: CommandExpansion determines this
             return (char.IsPunctuation(c) && c != '-' && c != '_') || char.IsWhiteSpace(c);
         }
 
-        ICompletionBroker CompletionBroker {
+        ICompletionBroker CompletionBroker
+        {
             get { return WpfConsole.Factory.CompletionBroker; }
         }
 
         ICompletionSession _completionSession;
 
-        bool IsCompletionSessionActive {
-            get {
+        bool IsCompletionSessionActive
+        {
+            get
+            {
                 return _completionSession != null && !_completionSession.IsDismissed;
             }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        void TriggerCompletion() {
-            if (CommandExpansion == null) {
+        void TriggerCompletion()
+        {
+            if (CommandExpansion == null)
+            {
                 return; // Host CommandExpansion service not available
             }
 
-            if (IsCompletionSessionActive) {
+            if (IsCompletionSessionActive)
+            {
                 _completionSession.Dismiss();
                 _completionSession = null;
             }
@@ -414,15 +487,18 @@ namespace NuGetConsole.Implementation.Console {
             Debug.Assert(caretIndex >= 0);
 
             SimpleExpansion simpleExpansion = null;
-            try {
+            try
+            {
                 simpleExpansion = CommandExpansion.GetExpansions(line, caretIndex);
             }
-            catch (Exception x) {
+            catch (Exception x)
+            {
                 // Ignore exception from expansion
                 Debug.Print(x.ToString());
             }
 
-            if (simpleExpansion != null && simpleExpansion.Expansions != null) {
+            if (simpleExpansion != null && simpleExpansion.Expansions != null)
+            {
                 IList<string> expansions = simpleExpansion.Expansions;
                 if (expansions.Count == 1) // Shortcut for 1 TabExpansion candidate
                 {
@@ -441,14 +517,17 @@ namespace NuGetConsole.Implementation.Console {
             }
         }
 
-        void ReplaceTabExpansion(int lastWordIndex, int length, string expansion) {
-            if (!string.IsNullOrEmpty(expansion)) {
+        void ReplaceTabExpansion(int lastWordIndex, int length, string expansion)
+        {
+            if (!string.IsNullOrEmpty(expansion))
+            {
                 SnapshotSpan extent = WpfConsole.GetInputLineExtent(lastWordIndex, length);
                 WpfTextView.TextBuffer.Replace(extent, expansion);
             }
         }
 
-        void CompletionSession_Dismissed(object sender, EventArgs e) {
+        void CompletionSession_Dismissed(object sender, EventArgs e)
+        {
             Debug.Assert(this._completionSession == sender);
             this._completionSession.Dismissed -= CompletionSession_Dismissed;
             this._completionSession = null;

@@ -2,18 +2,22 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace NuGet.VisualStudio {
+namespace NuGet.VisualStudio
+{
     /// <summary>
     /// Represents a Recent package.
     /// </summary>
-    public class RecentPackage : IPackage, IPersistencePackageMetadata, IEquatable<RecentPackage> {
+    public class RecentPackage : IPackage, IPersistencePackageMetadata, IEquatable<RecentPackage>
+    {
         private readonly IPackage _basePackage;
 
         /// <summary>
         /// This constructor is used during serialization.
         /// </summary>
-        public RecentPackage(IPackage basePackage, DateTime lastUsedDate) {
-            if (basePackage == null) {
+        public RecentPackage(IPackage basePackage, DateTime lastUsedDate)
+        {
+            if (basePackage == null)
+            {
                 throw new ArgumentNullException("basePackage");
             }
 
@@ -23,187 +27,246 @@ namespace NuGet.VisualStudio {
 
         public DateTime LastUsedDate { get; set; }
 
-        public IEnumerable<IPackageAssemblyReference> AssemblyReferences {
-            get {
+        public IEnumerable<IPackageAssemblyReference> AssemblyReferences
+        {
+            get
+            {
                 return _basePackage.AssemblyReferences;
             }
         }
 
-        public IEnumerable<IPackageFile> GetFiles() {
+        public IEnumerable<IPackageFile> GetFiles()
+        {
             return _basePackage.GetFiles();
         }
 
-        public Stream GetStream() {
+        public Stream GetStream()
+        {
             return _basePackage.GetStream();
         }
 
-        public string Id {
-            get {
+        public string Id
+        {
+            get
+            {
                 return _basePackage.Id;
             }
         }
 
-        public SemanticVersion Version {
-            get {
+        public SemanticVersion Version
+        {
+            get
+            {
                 return _basePackage.Version;
             }
         }
 
-        public string Title {
-            get {
+        public string Title
+        {
+            get
+            {
                 return _basePackage.Title;
             }
         }
 
-        public IEnumerable<string> Authors {
-            get {
+        public IEnumerable<string> Authors
+        {
+            get
+            {
                 return _basePackage.Authors;
             }
         }
 
-        public IEnumerable<string> Owners {
-            get {
+        public IEnumerable<string> Owners
+        {
+            get
+            {
                 return _basePackage.Owners;
             }
         }
 
-        public Uri IconUrl {
-            get {
+        public Uri IconUrl
+        {
+            get
+            {
                 return _basePackage.IconUrl;
             }
         }
 
-        public Uri LicenseUrl {
-            get {
+        public Uri LicenseUrl
+        {
+            get
+            {
                 return _basePackage.LicenseUrl;
             }
         }
 
-        public Uri ProjectUrl {
-            get {
+        public Uri ProjectUrl
+        {
+            get
+            {
                 return _basePackage.ProjectUrl;
             }
         }
 
-        public bool RequireLicenseAcceptance {
-            get {
+        public bool RequireLicenseAcceptance
+        {
+            get
+            {
                 return _basePackage.RequireLicenseAcceptance;
             }
         }
 
-        public string Description {
-            get {
+        public string Description
+        {
+            get
+            {
                 return _basePackage.Description;
             }
         }
 
-        public string Summary {
-            get {
+        public string Summary
+        {
+            get
+            {
                 return _basePackage.Summary;
             }
         }
 
-        public string ReleaseNotes {
-            get {
+        public string ReleaseNotes
+        {
+            get
+            {
                 return _basePackage.ReleaseNotes;
             }
         }
 
-        public string Language {
-            get {
+        public string Language
+        {
+            get
+            {
                 return _basePackage.Language;
             }
         }
 
-        public string Tags {
-            get {
+        public string Tags
+        {
+            get
+            {
                 return _basePackage.Tags;
             }
         }
 
-        public IEnumerable<PackageDependency> Dependencies {
-            get {
+        public IEnumerable<PackageDependency> Dependencies
+        {
+            get
+            {
                 return _basePackage.Dependencies;
             }
         }
 
-        public Uri ReportAbuseUrl {
-            get {
+        public Uri ReportAbuseUrl
+        {
+            get
+            {
                 return _basePackage.ReportAbuseUrl;
             }
         }
 
-        public int DownloadCount {
-            get {
+        public int DownloadCount
+        {
+            get
+            {
                 return _basePackage.DownloadCount;
             }
         }
 
-        public int RatingsCount {
-            get {
+        public int RatingsCount
+        {
+            get
+            {
                 return _basePackage.RatingsCount;
             }
         }
 
-        public double Rating {
-            get {
+        public double Rating
+        {
+            get
+            {
                 return _basePackage.Rating;
             }
         }
-        
-        public string Copyright {
-            get {
+
+        public string Copyright
+        {
+            get
+            {
                 return _basePackage.Copyright;
             }
         }
 
-        public bool IsAbsoluteLatestVersion {
-            get {
+        public bool IsAbsoluteLatestVersion
+        {
+            get
+            {
                 return true;
             }
         }
 
-        public bool IsLatestVersion {
-            get {
+        public bool IsLatestVersion
+        {
+            get
+            {
                 return this.IsReleaseVersion();
             }
         }
 
-        public bool Listed {
-            get {
+        public bool Listed
+        {
+            get
+            {
                 return true;
             }
         }
 
-        public DateTimeOffset? Published {
-            get {
+        public DateTimeOffset? Published
+        {
+            get
+            {
                 return _basePackage.Published;
             }
         }
 
-        public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies {
-            get {
+        public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies
+        {
+            get
+            {
                 return _basePackage.FrameworkAssemblies;
             }
         }
 
-        public bool Equals(RecentPackage other) {
-            if (other == null) {
+        public bool Equals(RecentPackage other)
+        {
+            if (other == null)
+            {
                 return false;
             }
 
             return Id.Equals(other.Id, StringComparison.OrdinalIgnoreCase) && Version == other.Version;
         }
 
-        public override bool Equals(object obj) {
+        public override bool Equals(object obj)
+        {
             return Equals(obj as RecentPackage);
         }
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             return Id.GetHashCode() * 3137 + Version.GetHashCode();
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return Id + " " + Version + " " + LastUsedDate;
         }
     }

@@ -5,11 +5,14 @@ using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.Test {
-    
-    public class PackageReferenceRepositoryTest {
+namespace NuGet.Test
+{
+
+    public class PackageReferenceRepositoryTest
+    {
         [Fact]
-        public void RegisterIfNecessaryDoesNotRegistersWithSharedRepositoryIfRepositoryDoesNotContainsPackages() {
+        public void RegisterIfNecessaryDoesNotRegistersWithSharedRepositoryIfRepositoryDoesNotContainsPackages()
+        {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
             string path = null;
@@ -26,7 +29,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RegisterIfNecessaryRegistersWithSharedRepositoryIfRepositoryContainsPackages() {
+        public void RegisterIfNecessaryRegistersWithSharedRepositoryIfRepositoryContainsPackages()
+        {
             // Arrange
             var sharedRepository = new Mock<MockPackageRepository>().As<ISharedPackageRepository>();
             string path = null;
@@ -46,7 +50,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddPackageAddsEntryToPackagesConfig() {
+        public void AddPackageAddsEntryToPackagesConfig()
+        {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
             string path = null;
@@ -69,7 +74,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AddPackageDoesNotAddEntryToPackagesConfigIfExists() {
+        public void AddPackageDoesNotAddEntryToPackagesConfigIfExists()
+        {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
             var fileSystem = new MockFileSystem();
@@ -92,7 +98,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovingAndAddingPackageReferenceWithSameIdPreservesConstraint() {
+        public void RemovingAndAddingPackageReferenceWithSameIdPreservesConstraint()
+        {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
             var fileSystem = new MockFileSystem();
@@ -117,7 +124,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovePackageRemovesEntryFromPackagesConfig() {
+        public void RemovePackageRemovesEntryFromPackagesConfig()
+        {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
             var fileSystem = new MockFileSystem();
@@ -141,7 +149,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RemovePackageRemovesEntryFromPackagesConfigDeletesFileAndUnregistersRepositoryIfLastEntry() {
+        public void RemovePackageRemovesEntryFromPackagesConfigDeletesFileAndUnregistersRepositoryIfLastEntry()
+        {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>();
             string path = null;
@@ -166,7 +175,8 @@ namespace NuGet.Test {
 
 
         [Fact]
-        public void GetPackagesReturnsPackagesFromSourceRepositoryListedInPackagesConfig() {
+        public void GetPackagesReturnsPackagesFromSourceRepositoryListedInPackagesConfig()
+        {
             // Arrange
             var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
             var packageA = PackageUtility.CreatePackage("A");
@@ -188,7 +198,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetConstraintReturnsConstraintListedForPackageIdInPackagesConfig() {
+        public void GetConstraintReturnsConstraintListedForPackageIdInPackagesConfig()
+        {
             // Arrange
             var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
             var packageA = PackageUtility.CreatePackage("A");
@@ -213,7 +224,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetConstraintThrowsIfConstrainInvalid() {
+        public void GetConstraintThrowsIfConstrainInvalid()
+        {
             // Arrange
             var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
             var packageA = PackageUtility.CreatePackage("A");
@@ -231,7 +243,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPackagesReturnsOnlyValidPackagesFromSourceRepositoryListedInPackagesConfig() {
+        public void GetPackagesReturnsOnlyValidPackagesFromSourceRepositoryListedInPackagesConfig()
+        {
             // Arrange
             var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
             var packageA = PackageUtility.CreatePackage("A");
@@ -270,7 +283,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPackagesWithMalformedPackagesConfigThrows() {
+        public void GetPackagesWithMalformedPackagesConfigThrows()
+        {
             // Arrange
             var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
             var packageA = PackageUtility.CreatePackage("A");
@@ -287,7 +301,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPackagesNoPackagesConfigReturnsEmptyList() {
+        public void GetPackagesNoPackagesConfigReturnsEmptyList()
+        {
             // Arrange
             var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
             var packageA = PackageUtility.CreatePackage("A");

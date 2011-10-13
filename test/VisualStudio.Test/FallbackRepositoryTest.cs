@@ -5,12 +5,15 @@ using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.VisualStudio.Test {
+namespace NuGet.VisualStudio.Test
+{
     using NuGet.Test;
 
-    public class FallbackRepositoryTest {
+    public class FallbackRepositoryTest
+    {
         [Fact]
-        public void CreatePackageManagerUsesPrimaryRepositoryAsdependencyResolverIfUseFallbackIsFalse() {
+        public void CreatePackageManagerUsesPrimaryRepositoryAsdependencyResolverIfUseFallbackIsFalse()
+        {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
@@ -27,8 +30,10 @@ namespace NuGet.VisualStudio.Test {
 
             mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source2 });
             mockFileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
-            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s => {
-                switch (s) {
+            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s =>
+            {
+                switch (s)
+                {
                     case "Source1": return mockRepository1;
                     case "Source2": return mockRepository2;
                     default: return null;
@@ -45,7 +50,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void CreatePackageManagerUsesFallbackRepositoryyAsdependencyResolverIfUseFallbackIsTrue() {
+        public void CreatePackageManagerUsesFallbackRepositoryyAsdependencyResolverIfUseFallbackIsTrue()
+        {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
@@ -62,8 +68,10 @@ namespace NuGet.VisualStudio.Test {
 
             mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source2 });
             mockFileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
-            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s => {
-                switch (s) {
+            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s =>
+            {
+                switch (s)
+                {
                     case "Source1": return mockRepository1;
                     case "Source2": return mockRepository2;
                     default: return null;
@@ -86,7 +94,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void ResolveDependencyReturnsPackagesFromAggregateSources() {
+        public void ResolveDependencyReturnsPackagesFromAggregateSources()
+        {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
@@ -101,8 +110,10 @@ namespace NuGet.VisualStudio.Test {
             mockRepository2.AddPackage(PackageUtility.CreatePackage("A", "1.2"));
 
             mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source2 });
-            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s => {
-                switch (s) {
+            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s =>
+            {
+                switch (s)
+                {
                     case "Source1": return mockRepository1;
                     case "Source2": return mockRepository2;
                     default: return null;
@@ -129,7 +140,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void CreateFallbackRepositoryReturnsCurrentIfCurrentIsAggregateRepository() {
+        public void CreateFallbackRepositoryReturnsCurrentIfCurrentIsAggregateRepository()
+        {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
@@ -146,8 +158,10 @@ namespace NuGet.VisualStudio.Test {
             mockRepository2.AddPackage(PackageUtility.CreatePackage("A", "1.2"));
 
             mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source2, aggregateSource });
-            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s => {
-                switch (s) {
+            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s =>
+            {
+                switch (s)
+                {
                     case "Source1": return mockRepository1;
                     case "Source2": return mockRepository2;
                     default: return null;
@@ -163,7 +177,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void CreateFallbackRepositoryUsesResolvedSourceNameWhenEnsuringRepositoryIsNotAlreadyListedInAggregate() {
+        public void CreateFallbackRepositoryUsesResolvedSourceNameWhenEnsuringRepositoryIsNotAlreadyListedInAggregate()
+        {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
@@ -180,8 +195,10 @@ namespace NuGet.VisualStudio.Test {
             mockRepository2.AddPackage(PackageUtility.CreatePackage("A", "1.2"));
 
             mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source2, aggregateSource });
-            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s => {
-                switch (s) {
+            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s =>
+            {
+                switch (s)
+                {
                     case "Source1": return mockRepository1;
                     case "Source2": return mockRepository2;
                     default: return null;
@@ -198,7 +215,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void CreateFallbackRepositoryDoesNotThrowWhenIteratingOverFailingRepositories() {
+        public void CreateFallbackRepositoryDoesNotThrowWhenIteratingOverFailingRepositories()
+        {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
@@ -212,8 +230,10 @@ namespace NuGet.VisualStudio.Test {
             var aggregateSource = AggregatePackageSource.Instance;
 
             mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source3, source2, aggregateSource });
-            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s => {
-                switch (s) {
+            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s =>
+            {
+                switch (s)
+                {
                     case "Source1": return mockRepository1;
                     case "Source2": return mockRepository2;
                     case "SourceBad": throw new InvalidOperationException();
@@ -231,7 +251,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void CreateFallbackRepositoryIncludesRepositoryOnceInAggregateDependencyResolver() {
+        public void CreateFallbackRepositoryIncludesRepositoryOnceInAggregateDependencyResolver()
+        {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
@@ -246,8 +267,10 @@ namespace NuGet.VisualStudio.Test {
             mockRepository2.AddPackage(PackageUtility.CreatePackage("A", "1.2"));
 
             mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source2 });
-            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s => {
-                switch (s) {
+            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s =>
+            {
+                switch (s)
+                {
                     case "Source1": return mockRepository1;
                     case "Source2": return mockRepository2;
                     default: return null;
@@ -267,7 +290,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void FallbackRepositoryDoesNotQueryDependencyResolverIfPrimaryRepositoryContainsRequiredDependency() {
+        public void FallbackRepositoryDoesNotQueryDependencyResolverIfPrimaryRepositoryContainsRequiredDependency()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("M1", "1.0");
             var dependencyResolver = new Mock<IPackageRepository>(MockBehavior.Strict);
@@ -286,7 +310,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void FallbackRepositoryRetursNullIfPrimaryRepositoryDoesNotHaveDependencyAndDependencyResolverThrows() {
+        public void FallbackRepositoryRetursNullIfPrimaryRepositoryDoesNotHaveDependencyAndDependencyResolverThrows()
+        {
             // Arrange
             var package = PackageUtility.CreatePackage("M1", "1.0");
             var dependencyResolver = new Mock<IPackageRepository>(MockBehavior.Strict);
@@ -306,7 +331,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void FallbackRepositoryUsesDependencyResolverIfPrimaryRepositoryDoesNotHaveRequiredDependency() {
+        public void FallbackRepositoryUsesDependencyResolverIfPrimaryRepositoryDoesNotHaveRequiredDependency()
+        {
             // Arrange
             IPackage packageA10 = PackageUtility.CreatePackage("M1", "1.0"), packageA11 = PackageUtility.CreatePackage("M2", "1.1");
 

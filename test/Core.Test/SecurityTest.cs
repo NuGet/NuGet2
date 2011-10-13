@@ -3,11 +3,14 @@ using System.Linq;
 using System.Security;
 using Xunit;
 
-namespace NuGet.Test {
-    
-    public class SecurityTest {
+namespace NuGet.Test
+{
+
+    public class SecurityTest
+    {
         [Fact]
-        public void VerifyNuGetCoreSecurityTransparent() {
+        public void VerifyNuGetCoreSecurityTransparent()
+        {
             // Act
             var securityTransparentAttributes = typeof(IPackage).Assembly.GetCustomAttributes(inherit: true).OfType<SecurityTransparentAttribute>();
 

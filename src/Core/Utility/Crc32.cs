@@ -17,8 +17,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-namespace NuGet {
-    internal static class Crc32 {
+namespace NuGet
+{
+    internal static class Crc32
+    {
 
         // Table for CRC calculation
         private static readonly uint[] crcTable = new uint[256] {  
@@ -80,7 +82,8 @@ namespace NuGet {
         /// Calculate the CRC (Cyclic Redundancy Check) for a buffer of bytes 
         /// See RFC1952 for details.
         /// </summary>
-        static internal uint Calculate(byte[] buffer) {
+        static internal uint Calculate(byte[] buffer)
+        {
             return Calculate(buffer, 0, buffer.Length);
         }
 
@@ -92,7 +95,8 @@ namespace NuGet {
         /// <param name="offset">The start index of the range of bytes to checksum</param>
         /// <param name="length">The length of the range of bytes to checksum</param>
         /// <returns></returns>
-        static internal uint Calculate(byte[] buffer, int offset, int length) {
+        static internal uint Calculate(byte[] buffer, int offset, int length)
+        {
             return Calculate(0, buffer, offset, length);
         }
 
@@ -103,13 +107,15 @@ namespace NuGet {
         /// CRCs can be computed in chunks, where you take the CRC of the preceding block of data and use
         /// this as the 'crc32' to compute the next chunk.  
         /// </summary>  
-        static internal uint Calculate(uint crc32, byte[] buffer, int offset, int length) {
+        static internal uint Calculate(uint crc32, byte[] buffer, int offset, int length)
+        {
             Debug.Assert((buffer != null) && (offset >= 0) && (length >= 0)
                           && (offset <= buffer.Length - length), "check the caller");
 
             crc32 ^= 0xffffffffU;
 
-            while (--length >= 0) {
+            while (--length >= 0)
+            {
                 crc32 = crcTable[(crc32 ^ buffer[offset++]) & 0xFF] ^ (crc32 >> 8);
             }
 
@@ -117,19 +123,23 @@ namespace NuGet {
             return crc32;
         }
 
-        internal static uint Calculate(Stream stream) {
+        internal static uint Calculate(Stream stream)
+        {
             // Copy the stream to a memory steam and get the CRC32 of the bytes
-            using (var memoryStream = new MemoryStream()) {
+            using (var memoryStream = new MemoryStream())
+            {
                 stream.CopyTo(memoryStream);
                 return Crc32.Calculate(memoryStream.ToArray());
             }
         }
 
-        internal static uint Calculate(string content) {
+        internal static uint Calculate(string content)
+        {
             return Calculate(content, Encoding.Default);
         }
 
-        internal static uint Calculate(string content, Encoding encoding) {
+        internal static uint Calculate(string content, Encoding encoding)
+        {
             return Calculate(encoding.GetBytes(content));
         }
     }

@@ -3,11 +3,14 @@ using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.Test {
-    
-    public class SharedRepositoryTest {
+namespace NuGet.Test
+{
+
+    public class SharedRepositoryTest
+    {
         [Fact]
-        public void RegisterRepositoryAddsRelativePathToRepositoriesConfig() {
+        public void RegisterRepositoryAddsRelativePathToRepositoriesConfig()
+        {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
             fileSystem.Setup(m => m.Root).Returns(@"c:\foo\");
@@ -24,7 +27,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RegisterRepositoryDoesNotAddRelativePathToRepositoriesConfigIfExists() {
+        public void RegisterRepositoryDoesNotAddRelativePathToRepositoriesConfigIfExists()
+        {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
             fileSystem.Object.AddFile("repositories.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -47,7 +51,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetRepositoryPathsRemovesInvalidOrNonExistantPathsAndReturnsRelativePaths() {
+        public void GetRepositoryPathsRemovesInvalidOrNonExistantPathsAndReturnsRelativePaths()
+        {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
             fileSystem.Setup(m => m.FileExists(@"A\packages.config")).Returns(true);
@@ -80,7 +85,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RepositoryPathsAreSavedInAlphabeticalOrder() {
+        public void RepositoryPathsAreSavedInAlphabeticalOrder()
+        {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
             fileSystem.Setup(m => m.Root).Returns(@"c:\foo\");
@@ -101,7 +107,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void IsReferencedReturnsTrueIfAnyOtherRepositoryReferencesAPackage() {
+        public void IsReferencedReturnsTrueIfAnyOtherRepositoryReferencesAPackage()
+        {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
             fileSystem.Setup(m => m.FileExists(@"A\packages.config")).Returns(true);
@@ -131,16 +138,20 @@ namespace NuGet.Test {
             Assert.False(repository.Object.IsReferenced("C", new SemanticVersion("1.0")));
         }
 
-        public class MockSharedRepository : SharedPackageRepository {
+        public class MockSharedRepository : SharedPackageRepository
+        {
             public MockSharedRepository(IPackagePathResolver resolver, IFileSystem fileSystem)
-                : base(resolver, fileSystem) {
+                : base(resolver, fileSystem)
+            {
             }
 
-            protected override IPackageRepository CreateRepository(string path) {
+            protected override IPackageRepository CreateRepository(string path)
+            {
                 return Create(path);
             }
 
-            public virtual IPackageRepository Create(string path) {
+            public virtual IPackageRepository Create(string path)
+            {
                 return null;
             }
         }

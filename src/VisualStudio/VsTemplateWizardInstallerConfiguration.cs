@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace NuGet.VisualStudio {
-    internal sealed class VsTemplateWizardInstallerConfiguration {
-        public VsTemplateWizardInstallerConfiguration(string repositoryPath, IEnumerable<VsTemplateWizardPackageInfo> packages) {
+namespace NuGet.VisualStudio
+{
+    internal sealed class VsTemplateWizardInstallerConfiguration
+    {
+        public VsTemplateWizardInstallerConfiguration(string repositoryPath, IEnumerable<VsTemplateWizardPackageInfo> packages)
+        {
             Packages = packages.ToList().AsReadOnly();
             RepositoryPath = repositoryPath;
         }

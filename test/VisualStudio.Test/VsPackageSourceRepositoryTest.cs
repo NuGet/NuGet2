@@ -6,19 +6,23 @@ using NuGet.Test;
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.VisualStudio.Test {
+namespace NuGet.VisualStudio.Test
+{
     using PackageUtility = NuGet.Test.PackageUtility;
 
-    public class VsPackageSourceRepositoryTest {
+    public class VsPackageSourceRepositoryTest
+    {
         [Fact]
-        public void CtorNullSourceProviderOrRepositoryFactoryThrows() {
+        public void CtorNullSourceProviderOrRepositoryFactoryThrows()
+        {
             // Assert
             ExceptionAssert.ThrowsArgNull(() => new VsPackageSourceRepository(new Mock<IPackageRepositoryFactory>().Object, null), "packageSourceProvider");
             ExceptionAssert.ThrowsArgNull(() => new VsPackageSourceRepository(null, new Mock<IVsPackageSourceProvider>().Object), "repositoryFactory");
         }
 
         [Fact]
-        public void NullActivePackageSourceThrows() {
+        public void NullActivePackageSourceThrows()
+        {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
@@ -33,7 +37,8 @@ namespace NuGet.VisualStudio.Test {
         }
 
         [Fact]
-        public void GetPackagesReturnsPackagesFromActiveSource() {
+        public void GetPackagesReturnsPackagesFromActiveSource()
+        {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             var mockSourceProvider = new Mock<IVsPackageSourceProvider>();

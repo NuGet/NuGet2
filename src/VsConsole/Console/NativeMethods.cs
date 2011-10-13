@@ -1,8 +1,10 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace NuGetConsole {
-    internal static class NativeMethods {
+namespace NuGetConsole
+{
+    internal static class NativeMethods
+    {
 
         // Size of VARIANTs in 32 bit systems
         public const int VariantSize = 16;

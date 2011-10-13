@@ -2,18 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Data;
 
-namespace NuGet.Dialog.PackageManagerUI {
+namespace NuGet.Dialog.PackageManagerUI
+{
 
-    public class StringCollectionsToStringConverter : IValueConverter {
+    public class StringCollectionsToStringConverter : IValueConverter
+    {
 
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
-            if (targetType == typeof(string)) {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (targetType == typeof(string))
+            {
 
                 string stringValue = value as string;
-                if (stringValue != null) {
+                if (stringValue != null)
+                {
                     return stringValue;
                 }
-                else {
+                else
+                {
                     IEnumerable<string> parts = (IEnumerable<string>)value;
                     return String.Join(", ", parts);
                 }
@@ -22,7 +28,8 @@ namespace NuGet.Dialog.PackageManagerUI {
             return value;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) {
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
             throw new NotImplementedException();
         }
     }

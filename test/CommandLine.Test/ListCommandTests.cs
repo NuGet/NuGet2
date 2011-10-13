@@ -1,20 +1,23 @@
 ﻿using System;
 using System.Linq;
-using Xunit;
 using Moq;
 using NuGet.Commands;
 using NuGet.Common;
 using NuGet.Test.Mocks;
+using Xunit;
 
-namespace NuGet.Test.NuGetCommandLine.Commands {
-    
-    public class ListCommandTests {
+namespace NuGet.Test.NuGetCommandLine.Commands
+{
+
+    public class ListCommandTests
+    {
         private const string DefaultRepoUrl = "https://go.microsoft.com/fwlink/?LinkID=206669";
         private const string NonDefaultRepoUrl1 = "http://NotDefault1";
         private const string NonDefaultRepoUrl2 = "http://NotDefault2";
 
         [Fact]
-        public void GetPackagesUsesSourceIfDefined() {
+        public void GetPackagesUsesSourceIfDefined()
+        {
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
             IConsole console = new Mock<IConsole>().Object;
@@ -30,7 +33,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void GetPackagesUsesAggregateSourceIfNoSourceDefined() {
+        public void GetPackagesUsesAggregateSourceIfNoSourceDefined()
+        {
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
             IConsole console = new Mock<IConsole>().Object;
@@ -51,7 +55,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void GetPackageUsesSearchTermsIfPresent() {
+        public void GetPackageUsesSearchTermsIfPresent()
+        {
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
             IConsole console = new Mock<IConsole>().Object;
@@ -70,7 +75,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void GetPackageCollapsesVersionsByDefault() {
+        public void GetPackageCollapsesVersionsByDefault()
+        {
             // Arrange
             var factory = CreatePackageRepositoryFactory();
             var console = new Mock<IConsole>().Object;
@@ -88,7 +94,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void GetPackageFiltersAndCollapsesVersions() {
+        public void GetPackageFiltersAndCollapsesVersions()
+        {
             // Arrange
             var factory = CreatePackageRepositoryFactory();
             var console = new Mock<IConsole>().Object;
@@ -106,7 +113,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void GetPackageReturnsAllVersionsIfAllVersionsFlagIsSet() {
+        public void GetPackageReturnsAllVersionsIfAllVersionsFlagIsSet()
+        {
             // Arrange
             var factory = CreatePackageRepositoryFactory();
             var console = new Mock<IConsole>().Object;
@@ -128,7 +136,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void GetPackageFiltersPackagesUsingIsLatestIfRepositoryDoesNotSupportPrerelease() {
+        public void GetPackageFiltersPackagesUsingIsLatestIfRepositoryDoesNotSupportPrerelease()
+        {
             // Arrange
             var package = new Mock<IPackage>(MockBehavior.Strict);
             package.SetupGet(p => p.Id).Returns("A");
@@ -143,7 +152,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var factory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
             factory.Setup(f => f.CreateRepository(DefaultRepoUrl)).Returns(repository.Object);
 
-            var cmd = new ListCommand(factory.Object, GetSourceProvider()) {
+            var cmd = new ListCommand(factory.Object, GetSourceProvider())
+            {
                 Console = new Mock<IConsole>().Object,
                 Prerelease = true
             };
@@ -160,7 +170,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void GetPackageDoesNotShowUnlistedPackagesOrPackagesWithLegacyDates() {
+        public void GetPackageDoesNotShowUnlistedPackagesOrPackagesWithLegacyDates()
+        {
             // Arrange
             var packageA = new Mock<IPackage>(MockBehavior.Strict);
             packageA.SetupGet(p => p.Id).Returns("A");
@@ -187,7 +198,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var factory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
             factory.Setup(f => f.CreateRepository(DefaultRepoUrl)).Returns(repository);
 
-            var cmd = new ListCommand(factory.Object, GetSourceProvider()) {
+            var cmd = new ListCommand(factory.Object, GetSourceProvider())
+            {
                 Console = new Mock<IConsole>().Object,
             };
             cmd.Source.Add(DefaultRepoUrl);
@@ -202,7 +214,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void GetPackageUsesIsAbsoluteLatestVersionIfPrereleaseIfSpecifiedAndRespositoriesSupportsPrerelease() {
+        public void GetPackageUsesIsAbsoluteLatestVersionIfPrereleaseIfSpecifiedAndRespositoriesSupportsPrerelease()
+        {
             // Arrange
             var packageA = new Mock<IPackage>(MockBehavior.Strict);
             packageA.SetupGet(p => p.Id).Returns("A");
@@ -228,7 +241,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             var factory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
             factory.Setup(f => f.CreateRepository(DefaultRepoUrl)).Returns(repository);
 
-            var cmd = new ListCommand(factory.Object, GetSourceProvider()) {
+            var cmd = new ListCommand(factory.Object, GetSourceProvider())
+            {
                 Console = new Mock<IConsole>().Object,
                 Prerelease = true
             };
@@ -244,7 +258,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
         }
 
         [Fact]
-        public void GetPackageResolvesSources() {
+        public void GetPackageResolvesSources()
+        {
             // Arrange
             var factory = CreatePackageRepositoryFactory();
             var console = new Mock<IConsole>().Object;
@@ -261,12 +276,14 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             AssertPackage(new { Id = "CustomUrlUsed", Ver = "1.0" }, packages.Single());
         }
 
-        private static void AssertPackage(dynamic expected, IPackage package) {
+        private static void AssertPackage(dynamic expected, IPackage package)
+        {
             Assert.Equal(expected.Id, package.Id);
             Assert.Equal(new SemanticVersion(expected.Ver), package.Version);
         }
 
-        private static IPackageRepositoryFactory CreatePackageRepositoryFactory() {
+        private static IPackageRepositoryFactory CreatePackageRepositoryFactory()
+        {
             //Default Repository
             MockPackageRepository defaultPackageRepository = new MockPackageRepository();
             var packageA = PackageUtility.CreatePackage("DefaultUrlUsed", "1.0");
@@ -291,8 +308,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
 
             //Setup Factory
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
-            packageRepositoryFactory.Setup(p => p.CreateRepository(It.IsAny<string>())).Returns<string>(s => {
-                switch (s) {
+            packageRepositoryFactory.Setup(p => p.CreateRepository(It.IsAny<string>())).Returns<string>(s =>
+            {
+                switch (s)
+                {
                     case NonDefaultRepoUrl1: return nondefaultPackageRepository;
                     case NonDefaultRepoUrl2: return multiVersionRepo;
                     default: return defaultPackageRepository;
@@ -303,9 +322,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands {
             return packageRepositoryFactory.Object;
         }
 
-        private static IPackageSourceProvider GetSourceProvider(params string[] sources) {
+        private static IPackageSourceProvider GetSourceProvider(params string[] sources)
+        {
             var provider = new Mock<IPackageSourceProvider>();
-            if (sources == null || !sources.Any()) {
+            if (sources == null || !sources.Any())
+            {
                 sources = new[] { DefaultRepoUrl, NonDefaultRepoUrl1, NonDefaultRepoUrl2 };
             }
             provider.Setup(c => c.LoadPackageSources()).Returns(sources.Select(c => new PackageSource(c)));

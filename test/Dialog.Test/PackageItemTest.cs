@@ -7,13 +7,16 @@ using NuGet.Test;
 using NuGet.VisualStudio;
 using Xunit;
 
-namespace NuGet.Dialog.Test {
+namespace NuGet.Dialog.Test
+{
 
 
-    public class PackageItemTest {
-		
+    public class PackageItemTest
+    {
+
         [Fact]
-        public void PackageIdentityPropertyReturnsCorrectObject() {
+        public void PackageIdentityPropertyReturnsCorrectObject()
+        {
 
             // Arrange
             IPackage package = PackageUtility.CreatePackage("A", "1.0", new string[] { "This is a package." });
@@ -24,7 +27,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void PropertyNameIsCorrect() {
+        public void PropertyNameIsCorrect()
+        {
             // Arrange
             IPackage package = PackageUtility.CreatePackage("A", "1.0", new string[] { "This is a package." });
             var packageItem = CreatePackageItem(package);
@@ -35,7 +39,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void PropertyVersionIsCorrect() {
+        public void PropertyVersionIsCorrect()
+        {
             // Arrange
             IPackage package = PackageUtility.CreatePackage("A", "1.0", new string[] { "This is a package." });
             var packageItem = CreatePackageItem(package);
@@ -45,7 +50,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void PropertyIsEnabledIsCorrect() {
+        public void PropertyIsEnabledIsCorrect()
+        {
             // Arrange
             IPackage package = PackageUtility.CreatePackage("A", "1.0", new string[] { "This is a package." });
             var packageItem = CreatePackageItem(package);
@@ -55,7 +61,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void PropertyDescriptionIsCorrect() {
+        public void PropertyDescriptionIsCorrect()
+        {
             // Arrange
             IPackage package = PackageUtility.CreatePackage("A", "1.0", new string[] { "This is a package." });
             var packageItem = CreatePackageItem(package);
@@ -65,7 +72,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void PropertyAuthorsIsCorrect() {
+        public void PropertyAuthorsIsCorrect()
+        {
             // Arrange
             IPackage package = PackageUtility.CreatePackage("A", "1.0", new string[] { "This is a package." });
             var packageItem = CreatePackageItem(package);
@@ -79,7 +87,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void PropertyLicenseUrlIsCorrect() {
+        public void PropertyLicenseUrlIsCorrect()
+        {
             // Arrange
             IPackage package = PackageUtility.CreatePackage("A", "1.0", new string[] { "This is a package." });
             var packageItem = CreatePackageItem(package);
@@ -91,7 +100,8 @@ namespace NuGet.Dialog.Test {
             Assert.Equal("ftp://test/somelicense.txts", licenseUrl.AbsoluteUri);
         }
 
-        private static PackageItem CreatePackageItem(IPackage package) {
+        private static PackageItem CreatePackageItem(IPackage package)
+        {
             var packageManager = new Mock<IVsPackageManager>();
             var localRepository = new Mock<IPackageRepository>();
 

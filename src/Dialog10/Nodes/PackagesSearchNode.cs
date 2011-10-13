@@ -2,23 +2,29 @@ using System;
 using System.Linq;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 
-namespace NuGet.Dialog.Providers {
+namespace NuGet.Dialog.Providers
+{
 
-    internal class PackagesSearchNode : PackagesTreeNodeBase {
+    internal class PackagesSearchNode : PackagesTreeNodeBase
+    {
 
         private string _searchText;
         private readonly PackagesTreeNodeBase _baseNode;
 
-        public PackagesTreeNodeBase BaseNode {
-            get {
+        public PackagesTreeNodeBase BaseNode
+        {
+            get
+            {
                 return _baseNode;
             }
         }
 
         public PackagesSearchNode(PackagesProviderBase provider, IVsExtensionsTreeNode parent, PackagesTreeNodeBase baseNode, string searchText) :
-            base(parent, provider, baseNode.CollapseVersions) {
+            base(parent, provider, baseNode.CollapseVersions)
+        {
 
-            if (baseNode == null) {
+            if (baseNode == null)
+            {
                 throw new ArgumentNullException("baseNode");
             }
 
@@ -29,29 +35,37 @@ namespace NuGet.Dialog.Providers {
             IsSearchResultsNode = true;
         }
 
-        public override string Name {
-            get {
+        public override string Name
+        {
+            get
+            {
                 return Resources.Dialog_RootNodeSearch;
             }
         }
 
-        public void SetSearchText(string newSearchText) {
-            if (newSearchText == null) {
+        public void SetSearchText(string newSearchText)
+        {
+            if (newSearchText == null)
+            {
                 throw new ArgumentNullException("newSearchText");
             }
 
             _searchText = newSearchText;
 
-            if (IsSelected) {
+            if (IsSelected)
+            {
                 ResetQuery();
                 LoadPage(1);
             }
         }
 
-        public override IQueryable<IPackage> GetPackages() {
-            if (!(_baseNode is UpdatesTreeNode)) {
+        public override IQueryable<IPackage> GetPackages()
+        {
+            if (!(_baseNode is UpdatesTreeNode))
+            {
                 var simpleNode = _baseNode as SimpleTreeNode;
-                if (simpleNode != null) {
+                if (simpleNode != null)
+                {
                     return simpleNode.Repository.Search(_searchText, Provider.SupportedFrameworks);
                 }
             }

@@ -1,7 +1,8 @@
-﻿using System;
-
-namespace NuGet {
-    internal interface IPackageLookup {
+﻿
+namespace NuGet
+{
+    internal interface IPackageLookup
+    {
         IPackage FindPackage(string packageId, SemanticVersion version);
     }
 }

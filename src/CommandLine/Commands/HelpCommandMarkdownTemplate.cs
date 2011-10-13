@@ -13,193 +13,196 @@ namespace NuGet.Commands
 {
     using System;
     using System.Collections.Generic;
-    
-    #line 2 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+
+#line 2 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
     using System.Globalization;
-    
-    #line default
-    #line hidden
-    using System.Linq;
-    using System.Text;
-    
-    #line 3 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
-    using Microsoft.CSharp;
-    
-    #line default
-    #line hidden
-    
+
+#line default
+#line hidden
+
+
+#line 3 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+
+
+#line default
+#line hidden
+
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "1.1.0.0")]
     internal partial class HelpCommandMarkdownTemplate : HelpCommandMarkdownTemplateBase
     {
 #line hidden
 
-        #line 4 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+#line 4 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
 
-    public NuGet.CommandAttribute CommandAttribute { get; set; }
+        public NuGet.CommandAttribute CommandAttribute { get; set; }
 
-    public IEnumerable<dynamic> Options { get; set; } 
-    
-    private TextInfo TextInfo {
-        get { return CultureInfo.CurrentCulture.TextInfo; }
-    }
+        public IEnumerable<dynamic> Options { get; set; }
 
-        #line default
-        #line hidden
+        private TextInfo TextInfo
+        {
+            get { return CultureInfo.CurrentCulture.TextInfo; }
+        }
+
+#line default
+#line hidden
 
         public override void Execute()
         {
 
 
-WriteLiteral("\r\n");
+            WriteLiteral("\r\n");
 
 
 
 
-WriteLiteral("\r\n\r\n##  ");
+            WriteLiteral("\r\n\r\n##  ");
 
 
-            
-            #line 14 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
-Write(TextInfo.ToTitleCase(CommandAttribute.CommandName));
 
-            
-            #line default
-            #line hidden
-WriteLiteral(" Command\r\n\r\n");
+#line 14 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            Write(TextInfo.ToTitleCase(CommandAttribute.CommandName));
 
 
-            
-            #line 16 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
-Write(CommandAttribute.Description);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n\r\n### Usage\r\n    nuget ");
+#line default
+#line hidden
+            WriteLiteral(" Command\r\n\r\n");
 
 
-            
-            #line 19 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
-     Write(TextInfo.ToLower(CommandAttribute.CommandName));
 
-            
-            #line default
-            #line hidden
-WriteLiteral(" ");
+#line 16 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            Write(CommandAttribute.Description);
 
 
-            
-            #line 19 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
-                                                     Write(CommandAttribute.UsageSummary);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
+#line default
+#line hidden
+            WriteLiteral("\r\n\r\n### Usage\r\n    nuget ");
 
 
-            
-            #line 20 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
- if(!String.IsNullOrEmpty(CommandAttribute.UsageDescription)) {
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
+#line 19 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            Write(TextInfo.ToLower(CommandAttribute.CommandName));
 
 
-            
-            #line 22 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
-    
-            
-            #line default
-            #line hidden
-            
-            #line 22 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
-Write(CommandAttribute.UsageDescription ?? "");
-
-            
-            #line default
-            #line hidden
-            
-            #line 22 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
-                                                    
-}
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n### Options\r\n<table>\r\n");
+#line default
+#line hidden
+            WriteLiteral(" ");
 
 
-            
-            #line 27 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
- foreach (var option in Options) {
 
-            
-            #line default
-            #line hidden
-WriteLiteral("    <tr>\r\n        <td>");
+#line 19 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            Write(CommandAttribute.UsageSummary);
 
 
-            
-            #line 29 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
-       Write(option.Name);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</td>\r\n        <td>");
+#line default
+#line hidden
+            WriteLiteral("\r\n");
 
 
-            
-            #line 30 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
-       Write(option.Description);
 
-            
-            #line default
-            #line hidden
-WriteLiteral("</td>\r\n    </tr>\r\n");
+#line 20 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            if (!String.IsNullOrEmpty(CommandAttribute.UsageDescription))
+            {
 
 
-            
-            #line 32 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
-}
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</table>\r\n");
+#line default
+#line hidden
+                WriteLiteral("\r\n");
 
 
-            
-            #line 34 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
- if (!String.IsNullOrEmpty(CommandAttribute.UsageExample)) {
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n### Examples\r\n\r\n    ");
+#line 22 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
 
 
-            
-            #line 38 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
-Write(CommandAttribute.UsageExample.Replace(Environment.NewLine, Environment.NewLine + "    "));
+#line default
+#line hidden
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-WriteLiteral("\r\n");
+#line 22 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+                Write(CommandAttribute.UsageDescription ?? "");
 
 
-            
-            #line 40 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
-}
-            
-            #line default
-            #line hidden
+#line default
+#line hidden
+
+#line 22 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+
+            }
+
+
+#line default
+#line hidden
+            WriteLiteral("\r\n### Options\r\n<table>\r\n");
+
+
+
+#line 27 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            foreach (var option in Options)
+            {
+
+
+#line default
+#line hidden
+                WriteLiteral("    <tr>\r\n        <td>");
+
+
+
+#line 29 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+                Write(option.Name);
+
+
+#line default
+#line hidden
+                WriteLiteral("</td>\r\n        <td>");
+
+
+
+#line 30 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+                Write(option.Description);
+
+
+#line default
+#line hidden
+                WriteLiteral("</td>\r\n    </tr>\r\n");
+
+
+
+#line 32 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            }
+
+
+#line default
+#line hidden
+            WriteLiteral("</table>\r\n");
+
+
+
+#line 34 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            if (!String.IsNullOrEmpty(CommandAttribute.UsageExample))
+            {
+
+
+#line default
+#line hidden
+                WriteLiteral("\r\n### Examples\r\n\r\n    ");
+
+
+
+#line 38 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+                Write(CommandAttribute.UsageExample.Replace(Environment.NewLine, Environment.NewLine + "    "));
+
+
+#line default
+#line hidden
+                WriteLiteral("\r\n");
+
+                WriteLiteral("\r\n");
+
+
+
+#line 40 "D:\forks\nuget\src\CommandLine\Commands\HelpCommandMarkdownTemplate.cshtml"
+            }
+
+#line default
+#line hidden
 
         }
         public string TransformText()
@@ -228,32 +231,34 @@ WriteLiteral("\r\n");
         }
         public void WriteLiteral(string textToAppend)
         {
-            
-        if (String.IsNullOrEmpty(textToAppend)) {
-            return; 
-        }
-        this.GenerationEnvironment.Append(textToAppend);;
+
+            if (String.IsNullOrEmpty(textToAppend))
+            {
+                return;
+            }
+            this.GenerationEnvironment.Append(textToAppend); ;
         }
         public void Write(object value)
         {
 
-                string stringValue;
-                if ((value == null))
-                {
-                    throw new global::System.ArgumentNullException("value");
-                }
-                System.Type t = value.GetType();
-                System.Reflection.MethodInfo method = t.GetMethod("ToString", new System.Type[] {
+            string stringValue;
+            if ((value == null))
+            {
+                throw new global::System.ArgumentNullException("value");
+            }
+            System.Type t = value.GetType();
+            System.Reflection.MethodInfo method = t.GetMethod("ToString", new System.Type[] {
                             typeof(System.IFormatProvider)});
-                if ((method == null)) 
-                {
-                    stringValue = value.ToString();
-                }
-                else {
-                    stringValue = ((string)(method.Invoke(value, new object[] { System.Globalization.CultureInfo.InvariantCulture })));
-                }
-                WriteLiteral(stringValue);
-            
+            if ((method == null))
+            {
+                stringValue = value.ToString();
+            }
+            else
+            {
+                stringValue = ((string)(method.Invoke(value, new object[] { System.Globalization.CultureInfo.InvariantCulture })));
+            }
+            WriteLiteral(stringValue);
+
         }
     }
     #endregion

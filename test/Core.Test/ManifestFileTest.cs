@@ -2,11 +2,14 @@
 using System.Linq;
 using Xunit;
 
-namespace NuGet.Test {
-    
-    public class ManifestFileTest {
+namespace NuGet.Test
+{
+
+    public class ManifestFileTest
+    {
         [Fact]
-        public void ManifestFileReturnsNoValidationResultsIfSourceAndTargetPathAreValid() {
+        public void ManifestFileReturnsNoValidationResultsIfSourceAndTargetPathAreValid()
+        {
             // Arrange
             var manifestFile = new ManifestFile { Source = @"bin\release\MyLib.dll", Target = @"lib" };
             var validationContext = new ValidationContext(new object(), null, null);
@@ -19,7 +22,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ManifestFileReturnsNoValidationResultIfSourceContainsWildCardCharacters() {
+        public void ManifestFileReturnsNoValidationResultIfSourceContainsWildCardCharacters()
+        {
             // Arrange
             var manifestFile = new ManifestFile { Source = @"b?n\**\*.dll", Target = @"lib" };
             var validationContext = new ValidationContext(new object(), null, null);
@@ -32,7 +36,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ManifestFileReturnsValidationResultIfSourceContainsInvalidCharacters() {
+        public void ManifestFileReturnsValidationResultIfSourceContainsInvalidCharacters()
+        {
             // Arrange
             var manifestFile = new ManifestFile { Source = @"bin\\|\\*.dll", Target = @"lib" };
             var validationContext = new ValidationContext(new object(), null, null);
@@ -46,7 +51,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ManifestFileReturnsValidationResultIfTargetContainsInvalidCharacters() {
+        public void ManifestFileReturnsValidationResultIfTargetContainsInvalidCharacters()
+        {
             // Arrange
             var manifestFile = new ManifestFile { Source = @"bin\\**\\*.dll", Target = @"lib\\|\\net40" };
             var validationContext = new ValidationContext(new object(), null, null);
@@ -60,7 +66,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ManifestFileReturnsValidationResultsIfSourceAndTargetContainsInvalidCharacters() {
+        public void ManifestFileReturnsValidationResultsIfSourceAndTargetContainsInvalidCharacters()
+        {
             // Arrange
             var manifestFile = new ManifestFile { Source = @"bin|\\**\\*.dll", Target = @"lib\\|\\net40" };
             var validationContext = new ValidationContext(new object(), null, null);
@@ -75,7 +82,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ManifestFileReturnsValidationResultsIfTargetPathContainsWildCardCharacters() {
+        public void ManifestFileReturnsValidationResultsIfTargetPathContainsWildCardCharacters()
+        {
             // Arrange
             var manifestFile = new ManifestFile { Source = @"bin\\**\\*.dll", Target = @"lib\\**\\net40" };
             var validationContext = new ValidationContext(new object(), null, null);

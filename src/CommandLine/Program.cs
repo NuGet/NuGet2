@@ -7,8 +7,10 @@ using System.IO;
 using System.Linq;
 using NuGet.Commands;
 
-namespace NuGet {
-    public class Program {
+namespace NuGet
+{
+    public class Program
+    {
         private const string NuGetExtensionsKey = "NUGET_EXTENSIONS_PATH";
         private static readonly string ExtensionsDirectoryRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NuGet", "Commands");
 
@@ -26,10 +28,12 @@ namespace NuGet {
         /// </summary>
         public static bool IgnoreExtensions { get; set; }
 
-        public static int Main(string[] args) {
+        public static int Main(string[] args)
+        {
             var console = new NuGet.Common.Console();
             var fileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
-            try {
+            try
+            {
                 // Remove NuGet.exe.old
                 RemoveOldFile(fileSystem);
 
@@ -42,7 +46,8 @@ namespace NuGet {
                 HttpClient.DefaultCredentialProvider = new ConsoleCredentialProvider();
 
                 // Add commands to the manager
-                foreach (ICommand cmd in p.Commands) {
+                foreach (ICommand cmd in p.Commands)
+                {
                     p.Manager.RegisterCommand(cmd);
                 }
 
@@ -52,7 +57,8 @@ namespace NuGet {
                 ICommand command = parser.ParseCommandLine(args) ?? p.HelpCommand;
 
                 // Fallback on the help command if we failed to parse a valid command
-                if (!ArgumentCountValid(command)) {
+                if (!ArgumentCountValid(command))
+                {
                     // Get the command name and add it to the argument list of the help command
                     string commandName = command.CommandAttribute.CommandName;
 
@@ -61,23 +67,29 @@ namespace NuGet {
 
                     p.HelpCommand.ViewHelpForCommand(commandName);
                 }
-                else {
+                else
+                {
                     command.Execute();
                 }
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 console.WriteError(e.Message);
                 return 1;
             }
             return 0;
         }
 
-        private void Initialize(IFileSystem fileSystem) {
-            using (var catalog = new AggregateCatalog(new AssemblyCatalog(GetType().Assembly))) {
-                if (!IgnoreExtensions) {
+        private void Initialize(IFileSystem fileSystem)
+        {
+            using (var catalog = new AggregateCatalog(new AssemblyCatalog(GetType().Assembly)))
+            {
+                if (!IgnoreExtensions)
+                {
                     AddExtensionsToCatalog(catalog);
                 }
-                using (var container = new CompositionContainer(catalog)) {
+                using (var container = new CompositionContainer(catalog))
+                {
                     var settings = GetCommandLineSettings(fileSystem);
                     var defaultPackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl);
 
@@ -101,54 +113,69 @@ namespace NuGet {
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want to block the exe from usage if anything failed")]
-        internal static void RemoveOldFile(IFileSystem fileSystem) {
+        internal static void RemoveOldFile(IFileSystem fileSystem)
+        {
             string oldFile = typeof(Program).Assembly.Location + ".old";
-            try {
-                if (fileSystem.FileExists(oldFile)) {
+            try
+            {
+                if (fileSystem.FileExists(oldFile))
+                {
                     fileSystem.DeleteFile(oldFile);
                 }
             }
-            catch {
+            catch
+            {
                 // We don't want to block the exe from usage if anything failed
             }
         }
 
-        public static bool ArgumentCountValid(ICommand command) {
+        public static bool ArgumentCountValid(ICommand command)
+        {
             CommandAttribute attribute = command.CommandAttribute;
             return command.Arguments.Count >= attribute.MinArgs &&
                    command.Arguments.Count <= attribute.MaxArgs;
         }
 
-        private static void AddExtensionsToCatalog(AggregateCatalog catalog) {
+        private static void AddExtensionsToCatalog(AggregateCatalog catalog)
+        {
             IEnumerable<string> directories = new[] { ExtensionsDirectoryRoot };
 
             var customExtensions = Environment.GetEnvironmentVariable(NuGetExtensionsKey);
-            if (!String.IsNullOrEmpty(customExtensions)) {
+            if (!String.IsNullOrEmpty(customExtensions))
+            {
                 // Add all directories from the environment variable if available.
                 directories = directories.Concat(customExtensions.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
             }
 
-            foreach (var directory in directories) {
-                if (Directory.Exists(directory)) {
+            foreach (var directory in directories)
+            {
+                if (Directory.Exists(directory))
+                {
                     var files = Directory.EnumerateFiles(directory, "*.dll", SearchOption.AllDirectories);
                     RegisterExtensions(catalog, files);
                 }
             }
         }
 
-        private static void RegisterExtensions(AggregateCatalog catalog, IEnumerable<string> enumerateFiles) {
-            foreach (var item in enumerateFiles) {
-                try {
+        private static void RegisterExtensions(AggregateCatalog catalog, IEnumerable<string> enumerateFiles)
+        {
+            foreach (var item in enumerateFiles)
+            {
+                try
+                {
                     catalog.Catalogs.Add(new AssemblyCatalog(item));
                 }
-                catch (BadImageFormatException) {
+                catch (BadImageFormatException)
+                {
                     // Ignore if the dll wasn't a valid assembly
                 }
             }
         }
 
-        internal static ISettings GetCommandLineSettings(IFileSystem workingDirectory) {
-            if (workingDirectory.FileExists(Constants.SettingsFileName)) {
+        internal static ISettings GetCommandLineSettings(IFileSystem workingDirectory)
+        {
+            if (workingDirectory.FileExists(Constants.SettingsFileName))
+            {
                 return new Settings(workingDirectory);
             }
             return Settings.DefaultSettings;

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
@@ -13,13 +12,16 @@ using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using Xunit;
 
-namespace NuGet.Dialog.Test {
+namespace NuGet.Dialog.Test
+{
 
 
-    public class InstalledProviderTest {
+    public class InstalledProviderTest
+    {
 
         [Fact]
-        public void NamePropertyIsCorrect() {
+        public void NamePropertyIsCorrect()
+        {
             // Arrange
             var provider = CreateInstalledProvider();
 
@@ -28,7 +30,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void RefresOnNodeSelectionPropertyIsCorrect() {
+        public void RefresOnNodeSelectionPropertyIsCorrect()
+        {
             // Arrange
             var provider = CreateInstalledProvider();
 
@@ -37,7 +40,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void VerifySortDescriptors() {
+        public void VerifySortDescriptors()
+        {
             // Arrange
             var provider = CreateInstalledProvider();
 
@@ -55,7 +59,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void RootNodeIsPopulatedWithOneNode() {
+        public void RootNodeIsPopulatedWithOneNode()
+        {
             // Arrange            
             var provider = CreateInstalledProvider();
 
@@ -64,11 +69,12 @@ namespace NuGet.Dialog.Test {
 
             // Assert
             Assert.Equal(1, extentionsTree.Nodes.Count);
-			Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[0]);
+            Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[0]);
         }
 
         [Fact]
-        public void CreateExtensionReturnsAPackageItem() {
+        public void CreateExtensionReturnsAPackageItem()
+        {
             // Arrange
             var provider = CreateInstalledProvider();
 
@@ -78,13 +84,14 @@ namespace NuGet.Dialog.Test {
             IVsExtension extension = provider.CreateExtension(package);
 
             // Asssert
-			Assert.IsType(typeof(PackageItem), extension);
+            Assert.IsType(typeof(PackageItem), extension);
             Assert.Equal("A", extension.Name);
             Assert.Equal("_Uninstall", ((PackageItem)extension).CommandName);
         }
 
         [Fact]
-        public void CanExecuteReturnsCorrectResult() {
+        public void CanExecuteReturnsCorrectResult()
+        {
 
             // Local repository contains Package A and Package B
             // We test the CanExecute() method on Package A and Package C
@@ -115,7 +122,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void InstalledProviderDoesNotCollapseVersions() {
+        public void InstalledProviderDoesNotCollapseVersions()
+        {
             // Arrange
             var repository = CreateInstalledProvider();
 
@@ -127,11 +135,12 @@ namespace NuGet.Dialog.Test {
 
             Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[0]);
             Assert.Equal("All", extentionsTree.Nodes[0].Name);
-            Assert.False(((SimpleTreeNode) extentionsTree.Nodes[0]).CollapseVersions);
+            Assert.False(((SimpleTreeNode)extentionsTree.Nodes[0]).CollapseVersions);
         }
 
         [Fact]
-        public void ExecuteMethodCallsUninstallPackageMethodOnPackageManager() {
+        public void ExecuteMethodCallsUninstallPackageMethodOnPackageManager()
+        {
             // Local repository contains Package A
 
             // Arrange
@@ -154,7 +163,8 @@ namespace NuGet.Dialog.Test {
             var mockWindowServices = new Mock<IUserNotifierServices>();
 
             var mre = new ManualResetEventSlim(false);
-            provider.ExecuteCompletedCallback = () => {
+            provider.ExecuteCompletedCallback = () =>
+            {
                 // Assert
                 packageManager.Verify(p => p.UninstallPackage(projectManager.Object, "A", null, false, false, provider), Times.Once());
                 mockWindowServices.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
@@ -169,7 +179,8 @@ namespace NuGet.Dialog.Test {
         }
 
         [Fact]
-        public void ExecuteMethodInvokesUninstallScriptWhenThePackageContainsOne() {
+        public void ExecuteMethodInvokesUninstallScriptWhenThePackageContainsOne()
+        {
             // Arrange
             var repository = new MockPackageRepository();
 
@@ -199,12 +210,15 @@ namespace NuGet.Dialog.Test {
 
             var manualEvent = new ManualResetEventSlim(false);
 
-            provider.ExecuteCompletedCallback = () => {
-                try {
+            provider.ExecuteCompletedCallback = () =>
+            {
+                try
+                {
                     // Assert
                     scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), "uninstall.ps1", packageA, project.Object, It.IsAny<ILogger>()));
                 }
-                finally {
+                finally
+                {
                     manualEvent.Set();
                 }
             };
@@ -220,18 +234,22 @@ namespace NuGet.Dialog.Test {
             IPackageRepository localRepository = null,
             Project project = null,
             IScriptExecutor scriptExecutor = null,
-            ISolutionManager solutionManager = null) {
-            if (packageManager == null) {
+            ISolutionManager solutionManager = null)
+        {
+            if (packageManager == null)
+            {
                 packageManager = new Mock<IVsPackageManager>().Object;
             }
 
             var mockProgressWindowOpener = new Mock<IProgressWindowOpener>();
 
-            if (project == null) {
+            if (project == null)
+            {
                 project = new Mock<Project>().Object;
             }
 
-            if (scriptExecutor == null) {
+            if (scriptExecutor == null)
+            {
                 scriptExecutor = new Mock<IScriptExecutor>().Object;
             }
 
@@ -242,11 +260,13 @@ namespace NuGet.Dialog.Test {
                 new MockOutputConsoleProvider()
             );
 
-            if (localRepository == null) {
+            if (localRepository == null)
+            {
                 localRepository = new MockPackageRepository();
             }
 
-            if (solutionManager == null) {
+            if (solutionManager == null)
+            {
                 solutionManager = new Mock<ISolutionManager>().Object;
             }
 
@@ -260,7 +280,8 @@ namespace NuGet.Dialog.Test {
                 solutionManager);
         }
 
-        private static ProjectManager CreateProjectManager(IPackageRepository localRepository) {
+        private static ProjectManager CreateProjectManager(IPackageRepository localRepository)
+        {
             var projectSystem = new MockVsProjectSystem();
             return new ProjectManager(new MockPackageRepository(), new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
         }

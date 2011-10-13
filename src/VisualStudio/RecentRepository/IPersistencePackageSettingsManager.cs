@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 
-namespace NuGet.VisualStudio {
+namespace NuGet.VisualStudio
+{
 
     /// <summary>
     /// Responsible for loading and storing package metadata to the VS settings store.
     /// </summary>
-    public interface IPersistencePackageSettingsManager {
+    public interface IPersistencePackageSettingsManager
+    {
 
         /// <summary>
         /// Loads all package metadata from the settings store.

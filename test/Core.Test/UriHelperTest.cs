@@ -1,10 +1,13 @@
 using System;
 using Xunit;
 
-namespace NuGet.Test {
-    public class UriHelperTest {
+namespace NuGet.Test
+{
+    public class UriHelperTest
+    {
         [Fact]
-        public void CreatePartUriCreatesUriFromPath() {
+        public void CreatePartUriCreatesUriFromPath()
+        {
             // Act
             Uri uri = UriUtility.CreatePartUri(@"a\b\c.txt");
 
@@ -13,7 +16,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void CreatePartUriEncodesUri() {
+        public void CreatePartUriEncodesUri()
+        {
             // Act
             Uri uri = UriUtility.CreatePartUri(@"My awesome projects\C#.NET\?123\foo.txt");
 
@@ -22,7 +26,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPathFromUri() {
+        public void GetPathFromUri()
+        {
             // Arrange
             Uri uri = new Uri("/a/b.txt", UriKind.Relative);
 
@@ -34,7 +39,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPathFromUriWithEncodedSpacesDecodesSpaces() {
+        public void GetPathFromUriWithEncodedSpacesDecodesSpaces()
+        {
             // Arrange
             Uri uri = new Uri("/a/b/This%20is%20a%20test/c.txt", UriKind.Relative);
 

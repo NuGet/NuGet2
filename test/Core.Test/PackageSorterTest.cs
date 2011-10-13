@@ -1,13 +1,16 @@
 ﻿using System.Linq;
-using Xunit;
 using Moq;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class PackageSorterTest {
+namespace NuGet.Test
+{
+
+    public class PackageSorterTest
+    {
 
         [Fact]
-        public void TestSortByDependencySimple() {
+        public void TestSortByDependencySimple()
+        {
 
             //  A  --> B --> C
 
@@ -33,7 +36,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void TestSortByDependencyComplex() {
+        public void TestSortByDependencyComplex()
+        {
 
             //      A    
             //    /   \  

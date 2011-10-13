@@ -1,7 +1,8 @@
-using System;
 
-namespace NuGet {
-    public interface IPackagePathResolver {
+namespace NuGet
+{
+    public interface IPackagePathResolver
+    {
         /// <summary>
         /// Gets the physical installation path of a package
         /// </summary>

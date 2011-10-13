@@ -1,10 +1,13 @@
 ﻿using Xunit;
 
-namespace NuGet.Test {
-    
-    public class PackageIdValidatorTest {
+namespace NuGet.Test
+{
+
+    public class PackageIdValidatorTest
+    {
         [Fact]
-        public void ValidatePackageIdInvalidIdThrows() {
+        public void ValidatePackageIdInvalidIdThrows()
+        {
             // Arrange
             string packageId = "  Invalid  . Woo   .";
 
@@ -13,7 +16,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void EmptyIsNotValid() {
+        public void EmptyIsNotValid()
+        {
             // Arrange
             string packageId = "";
 
@@ -25,7 +29,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void NullThrowsException() {
+        public void NullThrowsException()
+        {
             // Arrange
             string packageId = null;
 
@@ -34,7 +39,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void AlphaNumericIsValid() {
+        public void AlphaNumericIsValid()
+        {
             // Arrange
             string packageId = "42This1Is4You";
 
@@ -46,7 +52,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void MultipleDotSeparatorsAllowed() {
+        public void MultipleDotSeparatorsAllowed()
+        {
             // Arrange
             string packageId = "I.Like.Writing.Unit.Tests";
 
@@ -58,7 +65,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void NumbersAndWordsDotSeparatedAllowd() {
+        public void NumbersAndWordsDotSeparatedAllowd()
+        {
             // Arrange
             string packageId = "1.2.3.4.Uno.Dos.Tres.Cuatro";
 
@@ -70,7 +78,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void UnderscoreDotAndDashSeparatorsAreValid() {
+        public void UnderscoreDotAndDashSeparatorsAreValid()
+        {
             // Arrange
             string packageId = "Nu_Get.Core-IsCool";
 
@@ -82,7 +91,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void NonAlphaNumericUnderscoreDotDashIsInvalid() {
+        public void NonAlphaNumericUnderscoreDotDashIsInvalid()
+        {
             // Arrange
             string packageId = "ILike*Asterisks";
 
@@ -94,7 +104,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void ConsecutiveSeparatorsNotAllowed() {
+        public void ConsecutiveSeparatorsNotAllowed()
+        {
             // Arrange
             string packageId = "I_.Like.-Separators";
 
@@ -106,7 +117,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void StartingWithSeparatorsNotAllowed() {
+        public void StartingWithSeparatorsNotAllowed()
+        {
             // Arrange
             string packageId = "-StartWithSeparator";
 
@@ -118,7 +130,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void EndingWithSeparatorsNotAllowed() {
+        public void EndingWithSeparatorsNotAllowed()
+        {
             // Arrange
             string packageId = "StartWithSeparator.";
 

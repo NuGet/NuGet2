@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace NuGet.VisualStudio {
+namespace NuGet.VisualStudio
+{
     [ComImport]
     [Guid("8B3C4B38-632E-436C-8934-4669C6118845")]
-    public interface IVsPackageMetadata {
+    public interface IVsPackageMetadata
+    {
         string Id { get; }
         SemanticVersion Version { get; }
         string Title { get; }

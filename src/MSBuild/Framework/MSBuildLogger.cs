@@ -2,16 +2,21 @@
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
-namespace NuGet.MSBuild {
-    public class MSBuildLogger : ILogger {
+namespace NuGet.MSBuild
+{
+    public class MSBuildLogger : ILogger
+    {
         private readonly TaskLoggingHelper _buildLog;
 
-        public MSBuildLogger(TaskLoggingHelper buildLog) {
+        public MSBuildLogger(TaskLoggingHelper buildLog)
+        {
             _buildLog = buildLog;
         }
 
-        public void Log(MessageLevel level, string message, params object[] args) {
-            switch (level) {
+        public void Log(MessageLevel level, string message, params object[] args)
+        {
+            switch (level)
+            {
                 case MessageLevel.Info:
                     _buildLog.LogMessage(MessageImportance.Normal, message, args);
                     break;

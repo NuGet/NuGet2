@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
 using Moq;
 using NuGet.Test.Mocks;
+using Xunit;
 
-namespace NuGet.Test {
-    
-    public class AggregateRepositoryTest {
+namespace NuGet.Test
+{
+
+    public class AggregateRepositoryTest
+    {
         [Fact]
-        public void GetPackagesNoOrderByExpressionThrows() {
+        public void GetPackagesNoOrderByExpressionThrows()
+        {
             // Arrange
             var repository = new AggregateRepository(new[] { 
                 new MockPackageRepository { 
@@ -25,7 +28,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPackagesRemoveDuplicates() {
+        public void GetPackagesRemoveDuplicates()
+        {
             // Arrange
             var r1 = new MockPackageRepository() {
                 PackageUtility.CreatePackage("A"),
@@ -56,7 +60,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPackagesWithPagingTakesLowestNElements() {
+        public void GetPackagesWithPagingTakesLowestNElements()
+        {
             // Arrange
             var r1 = new MockPackageRepository() {
                 PackageUtility.CreatePackage("A"),
@@ -86,7 +91,8 @@ namespace NuGet.Test {
 
 
         [Fact]
-        public void GetPackagesRemoveDuplicatesIfTheyAreTheSameVersion() {
+        public void GetPackagesRemoveDuplicatesIfTheyAreTheSameVersion()
+        {
             // Arrange
             var r1 = new MockPackageRepository() {
                 PackageUtility.CreatePackage("A", "2.0"),
@@ -121,7 +127,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPackagesComplexOrderByAndDuplicatesRemovesDuplicatesAndMaintainsOrder() {
+        public void GetPackagesComplexOrderByAndDuplicatesRemovesDuplicatesAndMaintainsOrder()
+        {
             // Arrange
             var r1 = new MockPackageRepository() {
                 PackageUtility.CreatePackage("A", "2.0"),
@@ -158,7 +165,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetUpdates() {
+        public void GetUpdates()
+        {
             // Arrange
             var r1 = new MockPackageRepository() {
                 PackageUtility.CreatePackage("A", "2.0"),
@@ -189,7 +197,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SupressErrorWorksForGetPackagesForRepositoriesThatThrowWhenInvoked() {
+        public void SupressErrorWorksForGetPackagesForRepositoriesThatThrowWhenInvoked()
+        {
             // Arrange
             var mockRepository = new Mock<IPackageRepository>();
             mockRepository.Setup(c => c.GetPackages()).Throws(new InvalidOperationException()).Verifiable();
@@ -213,7 +222,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SupressErrorWorksForFindPackagesForRepositoriesThatThrowWhenInvoked() {
+        public void SupressErrorWorksForFindPackagesForRepositoriesThatThrowWhenInvoked()
+        {
             // Arrange
             var mockRepository = new Mock<IPackageRepository>();
             mockRepository.Setup(c => c.GetPackages()).Throws(new InvalidOperationException()).Verifiable();
@@ -243,7 +253,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SupressErrorWorksForGetDependenciesForRepositoriesThatThrowWhenInvoked() {
+        public void SupressErrorWorksForGetDependenciesForRepositoriesThatThrowWhenInvoked()
+        {
             // Arrange
             var mockRepository = new Mock<IPackageRepository>();
             mockRepository.Setup(c => c.GetPackages()).Throws(new InvalidOperationException()).Verifiable();
@@ -270,7 +281,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void SupressErrorWorksForGetPackagesForRepositoriesThatThrowDuringEnumeration() {
+        public void SupressErrorWorksForGetPackagesForRepositoriesThatThrowDuringEnumeration()
+        {
             // Arrange
             var mockRepository = new Mock<IPackageRepository>();
             mockRepository.Setup(c => c.GetPackages()).Returns(GetPackagesWithException().AsQueryable());
@@ -294,10 +306,13 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void RepositoriesPropertyThrowsIfIgnoreFlagIsNotSet() {
+        public void RepositoriesPropertyThrowsIfIgnoreFlagIsNotSet()
+        {
             // Arrange
-            var repositories = Enumerable.Range(0, 3).Select(e => {
-                if (e == 1) {
+            var repositories = Enumerable.Range(0, 3).Select(e =>
+            {
+                if (e == 1)
+                {
                     throw new InvalidOperationException("Repository exception");
                 }
                 return new MockPackageRepository();
@@ -310,7 +325,8 @@ namespace NuGet.Test {
         }
 
         [Fact]
-        public void GetPackagesSupressesExceptionForConsecutiveCalls() {
+        public void GetPackagesSupressesExceptionForConsecutiveCalls()
+        {
             // Arrange
             var repo1 = new Mock<IPackageRepository>();
             repo1.Setup(r => r.GetPackages()).Returns(Enumerable.Repeat(PackageUtility.CreatePackage("Foo"), 50).AsQueryable()).Verifiable();
@@ -320,7 +336,8 @@ namespace NuGet.Test {
             var aggregateRepository = new AggregateRepository(new[] { repo1.Object, repo2.Object }) { IgnoreFailingRepositories = true };
 
             // Act 
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 5; i++)
+            {
                 aggregateRepository.GetPackages();
             }
 
@@ -329,13 +346,16 @@ namespace NuGet.Test {
             repo2.Verify(r => r.GetPackages(), Times.AtMostOnce());
         }
 
-        private static IEnumerable<IPackage> GetPackagesWithException() {
+        private static IEnumerable<IPackage> GetPackagesWithException()
+        {
             yield return PackageUtility.CreatePackage("A");
             throw new InvalidOperationException();
         }
 
-        public abstract class PackageLookupBase : IPackageLookup {
-            public virtual IPackage FindPackage(string packageId, SemanticVersion version) {
+        public abstract class PackageLookupBase : IPackageLookup
+        {
+            public virtual IPackage FindPackage(string packageId, SemanticVersion version)
+            {
                 throw new NotImplementedException();
             }
         }
