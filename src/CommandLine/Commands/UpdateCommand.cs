@@ -49,6 +49,9 @@ namespace NuGet.Commands {
         [Option(typeof(NuGetResources), "UpdateCommandVerboseDescription")]
         public bool Verbose { get; set; }
 
+        [Option(typeof(NuGetResources), "UpdateCommandPrerelease")]
+        public bool Prerelease { get; set; }
+
         public override void ExecuteCommand() {
             if (Self) {
                 Assembly assembly = typeof(UpdateCommand).Assembly;
@@ -239,12 +242,15 @@ namespace NuGet.Commands {
             foreach (var package in GetPackages(localRepository)) {
                 if (localRepository.Exists(package.Id)) {
                     try {
+                        // If the user explicitly allows prerelease or if the package being updated is prerelease we'll include prerelease versions in our list of packages
+                        // being considered for an update.
+                        bool allowPrerelease = Prerelease || !package.IsReleaseVersion();
                         if (Safe) {
                             IVersionSpec safeRange = VersionUtility.GetSafeRange(package.Version);
-                            projectManager.UpdatePackageReference(package.Id, safeRange, updateDependencies: true, allowPrereleaseVersions: false);
+                            projectManager.UpdatePackageReference(package.Id, safeRange, updateDependencies: true, allowPrereleaseVersions: allowPrerelease);
                         }
                         else {
-                            projectManager.UpdatePackageReference(package.Id, version: null, updateDependencies: true, allowPrereleaseVersions: false);
+                            projectManager.UpdatePackageReference(package.Id, version: null, updateDependencies: true, allowPrereleaseVersions: allowPrerelease);
                         }
                     }
                     catch (InvalidOperationException e) {
