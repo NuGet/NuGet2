@@ -404,3 +404,17 @@ function Test-UpdatePackageCommandShowTabExpansionForPreReleasePackagesVersions 
     Assert-AreEqual '1.0.1a' $suggestions[0]
     Assert-AreEqual '1.0.0' $suggestions[1]
 }
+
+function Test-InstallPackageCommandShowTabExpansionForPreReleasePackagesIfPreReleaseFlagIsSet {
+    param(
+        $context
+    )
+
+    # Act
+    $suggestions = @(TabExpansion "Install-Package -Source '$($context.RepositoryRoot)\TabExpansionForPrereleasePackages' -PreRelease -Id ")
+
+    # Assert
+    Assert-AreEqual 1 $suggestions.Count
+
+    Assert-AreEqual 'MyPackage' $suggestions[0]
+}

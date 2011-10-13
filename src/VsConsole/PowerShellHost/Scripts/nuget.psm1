@@ -44,6 +44,7 @@ Register-TabExpansion 'Get-Package' @{
 Register-TabExpansion 'Install-Package' @{
     'Id' = {
         param($context)
+
         GetPackageIds (GetPackages $context)
     }
     'ProjectName' = {
@@ -172,6 +173,9 @@ function GetPackages($context) {
 
     if ($context.Id) { $parameters.filter = $context.Id }
     if ($context.Source) { $parameters.source = $context.Source }
+    if ((HasProperty $context 'IncludePreRelease') -or (HasProperty $context 'PreRelease')) {
+        $parameters.IncludePreRelease = $true 
+    }
 
     return Find-Package @parameters -Remote -ErrorAction SilentlyContinue
 }
