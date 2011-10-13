@@ -12,7 +12,7 @@ namespace NuGet.Dialog.Providers {
     internal class PackageItem : IVsExtension, INotifyPropertyChanged {
         private readonly PackagesProviderBase _provider;
         private readonly IPackage _packageIdentity;
-        private readonly bool _isUpdateItem;
+        private readonly bool _isUpdateItem, _isPrerelease;
         private bool _isSelected;
         private readonly ObservableCollection<Project> _referenceProjectNames;
 
@@ -24,6 +24,7 @@ namespace NuGet.Dialog.Providers {
             _provider = provider;
             _packageIdentity = package;
             _isUpdateItem = isUpdateItem;
+            _isPrerelease = !package.IsReleaseVersion();
             _referenceProjectNames = new ObservableCollection<Project>(referenceProjectNames);
         }
 
@@ -80,6 +81,12 @@ namespace NuGet.Dialog.Providers {
         public ICollection<Project> ReferenceProjects {
             get {
                 return _referenceProjectNames;
+            }
+        }
+
+        public bool IsPrerelease {
+            get {
+                return _isPrerelease;
             }
         }
 

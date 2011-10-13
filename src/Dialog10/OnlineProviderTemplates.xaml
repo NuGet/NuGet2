@@ -13,7 +13,8 @@
     <self:DescriptionLabelConverter x:Key="DescriptionLabelConverter" />
     <self:NormalizeTextConverter x:Key="NormalizeTextConverter" />
     <self:FixUrlConverter x:Key="urlConverter" />
-    <self:BooleanToVisibilityConverter Inverted="True" x:Key="boolToVis" />
+    <self:BooleanToVisibilityConverter Inverted="True" x:Key="invertedBoolToVis" />
+    <self:BooleanToVisibilityConverter x:Key="boolToVis" />
     <self:CountToVisibilityConverter x:Key="countConverter" />
     <self:CountToVisibilityConverter Inverted="True" x:Key="invertedCountConverter" />
     <self:ProjectToDisplayNameConverter x:Key="ProjectToNameConverter" />
@@ -31,12 +32,11 @@
     </Style>
 
     <Style x:Key="TileImageStyle" TargetType="{x:Type Image}">
-        <Setter Property="Margin" Value="0,4,4,4" />
         <Setter Property="Height" Value="32" />
         <Setter Property="Width" Value="32" />
-        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="StretchDirection" Value="DownOnly" />
-        <Setter Property="Stretch" Value="Uniform" />
+        <Setter Property="Stretch" Value="Fill" />
         <Style.Triggers>
             <EventTrigger RoutedEvent="ImageFailed">
                 <BeginStoryboard>
@@ -60,8 +60,19 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <Image Style="{StaticResource TileImageStyle}" Source="{Binding PackageIdentity.IconUrl, Converter={StaticResource urlConverter}, TargetNullValue={StaticResource BitmapImage_DefaultIcon}}" Width="32" Height="32" Stretch="Fill" StretchDirection="DownOnly">
-            </Image>
+            <StackPanel Orientation="Vertical" Margin="0,3,0,0">
+                <Image Style="{StaticResource TileImageStyle}" Source="{Binding PackageIdentity.IconUrl, Converter={StaticResource urlConverter}, TargetNullValue={StaticResource BitmapImage_DefaultIcon}}">
+                </Image>
+
+                <TextBlock 
+                    Text="Prerelease"
+                    FontStyle="Italic"
+                    FontSize="9"
+                    Margin="0,4"
+                    Foreground="DarkRed"
+                    HorizontalAlignment="Center"
+                    Visibility="{Binding IsPrerelease, Converter={StaticResource boolToVis}}" />
+            </StackPanel>
 
             <StackPanel Grid.Column="1" Style="{StaticResource TileMiddleStackPanelStyle}">
                 <eml:TextBlockControl  
@@ -89,7 +100,7 @@
                 <Image
                     HorizontalAlignment="Right"
                     Source="{StaticResource BitmapImage_AlreadyInstalled}"
-                    Visibility="{Binding IsEnabled, Mode=OneWay, Converter={StaticResource boolToVis}}">
+                    Visibility="{Binding IsEnabled, Mode=OneWay, Converter={StaticResource invertedBoolToVis}}">
                     <Image.ToolTip>
                         <TextBlock 
                             Text="{x:Static resources:Resources.Dialog_PackageInstalledTooltip}"
@@ -146,7 +157,10 @@
                 <!-- Version -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
                     <eml:TextBlockControl Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <eml:TextBlockControl Text="{Binding Version}" Style="{StaticResource DetailMetadataValueStyle}"  />
+                    <eml:TextBlockControl Style="{StaticResource DetailMetadataValueStyle}">
+                        <Run Text="{Binding Version, Mode=OneWay}" />
+                        <Run Text="(prerelease)" Foreground="DarkRed" />
+                    </eml:TextBlockControl>
                 </StackPanel>
 
                 <!-- Last Updated -->
