@@ -117,22 +117,27 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void SearchSendsPrereleaseFlagIfSet() {
+        public void SearchSendsPrereleaseFlagIfSet()
+        {
             // Arrange
             var client = new Mock<IHttpClient>();
             var context = new Mock<IDataServiceContext>();
             var repository = new Mock<DataServicePackageRepository>(client.Object) { CallBase = true };
             repository.Object.Context = context.Object;
             context.Setup(m => m.SupportsServiceMethod("Search")).Returns(true);
+            context.Setup(m => m.SupportsProperty("IsAbsoluteLatestVersion")).Returns(true);
             context.Setup(m => m.CreateQuery<DataServicePackage>(It.IsAny<string>(), It.IsAny<IDictionary<string, object>>()))
-                   .Callback<string, IDictionary<string, object>>((entitySet, parameters) => {
+                   .Callback<string, IDictionary<string, object>>((entitySet, parameters) =>
+                   {
                        // Assert
                        Assert.Equal("Search", entitySet);
-                       Assert.Equal(2, parameters.Count);
+                       Assert.Equal(3, parameters.Count);
                        Assert.Equal("'dante''s inferno'", parameters["searchTerm"]);
                        Assert.Equal("'net40|sl40|sl30-wp|netmf11'", parameters["targetFramework"]);
+                       Assert.Equal("true", parameters["includePrerelease"]);
                    })
-                   .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object);
+                   .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object)
+                   .Verifiable();
 
             // Act
             repository.Object.Search("dante's inferno", new[] {
@@ -140,7 +145,9 @@ namespace NuGet.Test
                 VersionUtility.ParseFrameworkName("sl40").FullName,
                 VersionUtility.ParseFrameworkName("sl3-wp").FullName,
                 VersionUtility.ParseFrameworkName("netmf11").FullName,
-            }, allowPrereleaseVersions: false);
+            }, allowPrereleaseVersions: true);
+
+            context.Verify();
         }
 
         [Theory]

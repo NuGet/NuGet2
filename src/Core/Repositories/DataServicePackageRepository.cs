@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Services.Client;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.Versioning;
 
@@ -149,8 +150,9 @@ namespace NuGet
                 { "targetFramework", "'" + Escape(targetFrameworkString) + "'" },
             };
 
-            if (SupportsPrereleasePackages) {
-                searchParameters.Add("includePrerelease", allowPrereleaseVersions.ToString().ToLowerInvariant());
+            if (SupportsPrereleasePackages)
+            {
+                searchParameters.Add("includePrerelease", allowPrereleaseVersions.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
             }
 
             // Create a query for the search service method
