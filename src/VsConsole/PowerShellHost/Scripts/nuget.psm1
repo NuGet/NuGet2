@@ -57,7 +57,7 @@ Register-TabExpansion 'Install-Package' @{
 
         if ($context.Id) { $parameters.filter = $context.Id }
         if ($context.Source) { $parameters.source = $context.Source }
-        if ((HasProperty $context 'IncludePreRelease') -or (HasProperty $context 'PreRelease')) {
+        if (IsPrereleaseSet $context) {
             $parameters.IncludePreRelease = $true 
         }
 
@@ -117,7 +117,7 @@ Register-TabExpansion 'Update-Package' @{
             $parameters.filter = $context.id 
             $parameters.Remote = $true
             $parameters.AllVersions = $true
-            if ((HasProperty $context 'IncludePreRelease') -or (HasProperty $context 'PreRelease')) {
+            if (IsPrereleaseSet $context) {
                 $parameters.IncludePreRelease = $true 
             }
 
@@ -168,12 +168,17 @@ function HasProperty($context, $name) {
     return $context.psobject.properties | ? { $_.Name -eq $name }
 }
 
+function IsPrereleaseSet($context) {
+	# Need to figure out a better way to do this. 
+	return (HasProperty $context 'IncludePreRelease') -or (HasProperty $context 'PreRelease') -or (HasProperty $context 'Pre')
+}
+
 function GetPackages($context) {  
     $parameters = @{}
 
     if ($context.Id) { $parameters.filter = $context.Id }
     if ($context.Source) { $parameters.source = $context.Source }
-    if ((HasProperty $context 'IncludePreRelease') -or (HasProperty $context 'PreRelease')) {
+    if (IsPrereleaseSet $context) {
         $parameters.IncludePreRelease = $true 
     }
 
