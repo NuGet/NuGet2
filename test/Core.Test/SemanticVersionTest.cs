@@ -31,6 +31,67 @@ namespace NuGet.Test
             }
         }
 
+        [Theory]
+        [InlineData(20)]
+        [InlineData(19)]
+        [InlineData(10)]
+        public void CtorDoesNotThrowIfSpecialVersionIsNotGreaterThan20(int specialVersionLength)
+        {
+            // Arrange
+            string specialVersion = new String('d', specialVersionLength);
+            string versionString = "1.0.0" + specialVersion;
+
+            new SemanticVersion(versionString);
+            new SemanticVersion(new Version("1.0.0.0"), specialVersion);
+            new SemanticVersion(1, 0, 0, specialVersion);
+
+            SemanticVersion.Parse(versionString);
+
+            SemanticVersion sv;
+            Assert.True(SemanticVersion.TryParse(versionString, out sv));
+            Assert.True(SemanticVersion.TryParseStrict(versionString, out sv));
+        }
+
+        [Theory]
+        [InlineData(21)]
+        [InlineData(22)]
+        [InlineData(100)]
+        public void CtorThrowsIfSpecialVersionIsTooLong(int specialVersionLength)
+        {
+            // Arrange
+            string specialVersion = new String('d', specialVersionLength);
+            string versionString = "1.0.0" + specialVersion;
+
+            // Act && Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => new SemanticVersion(versionString), 
+                "version", 
+                "'" + versionString + "' is not a valid version string.");
+
+            // Act && Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => SemanticVersion.Parse(versionString),
+                "version",
+                "'" + versionString + "' is not a valid version string.");
+
+            // Act && Assert
+            SemanticVersion sv;
+            Assert.False(SemanticVersion.TryParse(versionString, out sv));
+            Assert.False(SemanticVersion.TryParseStrict(versionString, out sv));
+
+            // Act && Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => new SemanticVersion(1, 0, 0, specialVersion),
+                "specialVersion",
+                "The special version part cannot exceed 20 characters.");
+
+            // Act && Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => new SemanticVersion(new Version("1.0"), specialVersion),
+                "specialVersion",
+                "The special version part cannot exceed 20 characters.");
+        }
+
         [Fact]
         public void ParseThrowsIfStringIsNullOrEmpty()
         {
@@ -54,7 +115,6 @@ namespace NuGet.Test
                 "version",
                 String.Format(CultureInfo.InvariantCulture, "'{0}' is not a valid version string.", versionString));
         }
-
 
         public static IEnumerable<object[]> LegacyVersionData
         {

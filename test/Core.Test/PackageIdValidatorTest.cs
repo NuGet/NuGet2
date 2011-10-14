@@ -1,4 +1,5 @@
 ﻿using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test
 {
@@ -140,6 +141,37 @@ namespace NuGet.Test
 
             // Assert
             Assert.False(isValid);
+        }
+
+        [Theory]
+        [InlineData(65)]
+        [InlineData(66)]
+        [InlineData(100)]
+        public void IdExceedingMaxLengthThrows(int idTestLength)
+        {
+            // Arrange
+            string packageId = new string('d', idTestLength);
+
+            // Act && Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => PackageIdValidator.ValidatePackageId(packageId),
+                "Id must not exceed 64 characters.");
+        }
+
+        [Theory]
+        [InlineData(65, false)]
+        [InlineData(66, false)]
+        [InlineData(100, false)]
+        [InlineData(64, true)]
+        [InlineData(20, true)]
+        [InlineData(63, true)]
+        public void ValidatesCheckIdLength(int idTestLength, bool expectedResult)
+        {
+            // Arrange
+            string packageId = new string('d', idTestLength);
+
+            // Act && Assert
+            Assert.Equal(expectedResult, PackageIdValidator.IsValidPackageId(packageId));
         }
     }
 }

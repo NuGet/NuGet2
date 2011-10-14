@@ -396,6 +396,43 @@ Description is required.");
         }
 
         [Fact]
+        public void IdExceedingMaxLengthThrows()
+        {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package><metadata>
+    <id>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</id>
+    <version>2.5</version>
+    <authors>Velio Ivanov</authors>
+    <language>en-us</language>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+  </metadata></package>";
+
+            // Act & Assert
+            ExceptionAssert.Throws<ArgumentException>(() => new PackageBuilder(spec.AsStream(), null), "Id must not exceed 64 characters.");
+        }
+
+        [Fact]
+        public void SpecialVersionExceedingMaxLengthThrows()
+        {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package><metadata>
+    <id>aaa</id>
+    <version>2.5vvvvvvvvvvvvvvvvvvvvv</version>
+    <authors>Velio Ivanov</authors>
+    <language>en-us</language>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+  </metadata></package>";
+
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => new PackageBuilder(spec.AsStream(), null), 
+                "version", 
+                "'2.5vvvvvvvvvvvvvvvvvvvvv' is not a valid version string.");
+        }
+
+        [Fact]
         public void MissingVersionThrows()
         {
             // Arrange
@@ -887,6 +924,22 @@ Enabling license acceptance requires a license url.");
 
             // Act & Assert            
             ExceptionAssert.ThrowsArgumentException(() => builder.Save(new MemoryStream()), "The package ID '  a.  b' contains invalid characters. Examples of valid package IDs include 'MyPackage' and 'MyPackage.Sample'.");
+        }
+
+        [Fact]
+        public void PackageBuilderThrowsIfPackageIdExceedsMaxLengthLimit()
+        {
+            // Arrange
+            var builder = new PackageBuilder
+            {
+                Id = new string('c', 65),
+                Version = new SemanticVersion("1.0"),
+                Description = "Description"
+            };
+            builder.Authors.Add("Me");
+
+            // Act & Assert            
+            ExceptionAssert.ThrowsArgumentException(() => builder.Save(new MemoryStream()), "Id must not exceed 64 characters.");
         }
 
         [Fact]

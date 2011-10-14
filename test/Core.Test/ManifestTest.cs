@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test
 {
-
     public class ManifestTest
     {
         [Fact]

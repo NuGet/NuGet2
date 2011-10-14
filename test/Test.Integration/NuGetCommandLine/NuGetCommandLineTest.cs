@@ -264,6 +264,70 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         }
 
         [Fact]
+        public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasIDExceedingMaxLength()
+        {
+            // Arrange            
+            string nuspecFile = Path.Combine(SpecificFilesFolder, "InvalidId.nuspec");
+            string expectedPackage = "InvalidId.nupkg";
+            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa9</id>
+    <version>1.0</version>
+    <authors>Terence Parr</authors>
+    <description>ANother Tool for Language Recognition, is a language tool that provides a framework for constructing recognizers, interpreters, compilers, and translators from grammatical descriptions containing actions in a variety of target languages.</description>
+    <language>en-US</language>
+  </metadata>
+  <files>
+    <file src=""file1.txt"" target=""content"" />
+  </files>
+</package>");
+
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory(SpecificFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.Equal(1, result);
+            Assert.True(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nId must not exceed 64 characters.\r\n"));
+            Assert.False(File.Exists(expectedPackage));
+        }
+
+        [Fact]
+        public void PackageCommand_ShowConsistentErrorMessageWhenNuspecHasVersionExceedingMaxLength()
+        {
+            // Arrange            
+            string nuspecFile = Path.Combine(SpecificFilesFolder, "InvalidId.nuspec");
+            string expectedPackage = "InvalidId.nupkg";
+            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>two</id>
+    <version>1.0wwwwwwwwwwwwwwwwwwww0</version>
+    <authors>Terence Parr</authors>
+    <description>ANother Tool for Language Recognition, is a language tool that provides a framework for constructing recognizers, interpreters, compilers, and translators from grammatical descriptions containing actions in a variety of target languages.</description>
+    <language>en-US</language>
+  </metadata>
+  <files>
+    <file src=""file1.txt"" target=""content"" />
+  </files>
+</package>");
+
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory(SpecificFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.Equal(1, result);
+            Assert.True(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\n'1.0wwwwwwwwwwwwwwwwwwww0' is not a valid version string.\r\nParameter name: version\r\n"));
+            Assert.False(File.Exists(expectedPackage));
+        }
+
+        [Fact]
         public void PackageCommand_SpecifyingFilesInNuspecOnlyPackagesSpecifiedFiles()
         {
             // Arrange            
