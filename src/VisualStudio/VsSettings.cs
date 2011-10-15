@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.IO;
 
 namespace NuGet.VisualStudio
 {
@@ -117,7 +118,8 @@ namespace NuGet.VisualStudio
                     return;
                 }
 
-                var fileSystem = _fileSystemProvider.GetFileSystem(_solutionManager.SolutionDirectory);
+                var nugetSettingsDirectory = Path.Combine(_solutionManager.SolutionDirectory, ".nuget");
+                var fileSystem = _fileSystemProvider.GetFileSystem(nugetSettingsDirectory);
                 if (fileSystem.FileExists(Constants.SettingsFileName))
                 {
                     _solutionSettings = new Settings(fileSystem);
