@@ -226,6 +226,11 @@ namespace NuGet
                 throw new InvalidOperationException(NuGetResources.CannotCreateEmptyPackage);
             }
 
+            if (!ValidateSpecialVersionLength(Version))
+            {
+                throw new InvalidOperationException(NuGetResources.SemVerSpecialVersionTooLong);
+            }
+
             ValidateDependencies(Version, Dependencies);
             ValidateReferenceAssemblies(Files, PackageAssemblyReferences);
 
@@ -432,6 +437,11 @@ namespace NuGet
                        (versionSpec.MaxVersion != null && !String.IsNullOrEmpty(dependency.VersionSpec.MaxVersion.SpecialVersion));
             }
             return false;
+        }
+
+        private static bool ValidateSpecialVersionLength(SemanticVersion version)
+        {
+            return version == null || version.SpecialVersion == null || version.SpecialVersion.Length <= 20;
         }
     }
 }

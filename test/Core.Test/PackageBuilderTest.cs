@@ -423,13 +423,18 @@ Description is required.");
     <authors>Velio Ivanov</authors>
     <language>en-us</language>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
-  </metadata></package>";
+    <dependencies>
+       <dependency id=""A"" />
+    </dependencies>
+  </metadata>
+</package>";
+
+            var builder = new PackageBuilder(spec.AsStream(), null);
 
             // Act & Assert
-            ExceptionAssert.ThrowsArgumentException(
-                () => new PackageBuilder(spec.AsStream(), null), 
-                "version", 
-                "'2.5vvvvvvvvvvvvvvvvvvvvv' is not a valid version string.");
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => builder.Save(new MemoryStream()),
+                "The special version part cannot exceed 20 characters.");
         }
 
         [Fact]
@@ -940,6 +945,23 @@ Enabling license acceptance requires a license url.");
 
             // Act & Assert            
             ExceptionAssert.ThrowsArgumentException(() => builder.Save(new MemoryStream()), "Id must not exceed 64 characters.");
+        }
+
+        [Fact]
+        public void PackageBuilderThrowsIfSpecialVersionExceedsMaxLengthLimit()
+        {
+            // Arrange
+            var builder = new PackageBuilder
+            {
+                Id = "cool",
+                Version = new SemanticVersion("1.0vvvvvvvvvvvvvvvvvvvvK"),
+                Description = "Description"
+            };
+            builder.Authors.Add("Me");
+            builder.Dependencies.Add(new PackageDependency("X"));
+
+            // Act & Assert            
+            ExceptionAssert.Throws<InvalidOperationException>(() => builder.Save(new MemoryStream()), "The special version part cannot exceed 20 characters.");
         }
 
         [Fact]

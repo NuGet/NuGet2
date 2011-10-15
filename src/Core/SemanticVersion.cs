@@ -13,9 +13,8 @@ namespace NuGet
     [Serializable]
     public sealed class SemanticVersion : IComparable, IComparable<SemanticVersion>, IEquatable<SemanticVersion>
     {
-        public const int MaxSpecialVersionLength = 20;
-        private const string SemanticVersionRegex = @"^(?<Version>\d+(\s*\.\s*\d+){0,3})(?<Release>[a-z][0-9a-z-]{0,19})?$";
-        private const string StrictSemanticVersionRegex = @"^(?<Version>\d+(\.\d+){2})(?<Release>[a-z][0-9a-z-]{0,19})?$";
+        private const string SemanticVersionRegex = @"^(?<Version>\d+(\s*\.\s*\d+){0,3})(?<Release>[a-z][0-9a-z-]*)?$";
+        private const string StrictSemanticVersionRegex = @"^(?<Version>\d+(\.\d+){2})(?<Release>[a-z][0-9a-z-]*)?$";
         private readonly string _originalString;
 
         public SemanticVersion(string version)
@@ -52,11 +51,6 @@ namespace NuGet
             {
                 throw new ArgumentNullException("version");
             }
-            if (specialVersion != null && specialVersion.Length > MaxSpecialVersionLength)
-            {
-                throw new ArgumentException(NuGetResources.SemVerSpecialVersionTooLong, "specialVersion");
-            }
-
             Version = NormalizeVersionValue(version);
             SpecialVersion = specialVersion ?? String.Empty;
             _originalString = String.IsNullOrEmpty(originalString) ? version.ToString() + specialVersion : originalString;

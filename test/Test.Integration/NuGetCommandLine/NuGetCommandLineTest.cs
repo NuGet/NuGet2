@@ -309,10 +309,11 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     <authors>Terence Parr</authors>
     <description>ANother Tool for Language Recognition, is a language tool that provides a framework for constructing recognizers, interpreters, compilers, and translators from grammatical descriptions containing actions in a variety of target languages.</description>
     <language>en-US</language>
+    <dependencies>
+       <dependency id=""X"" />
+    </dependencies>
   </metadata>
-  <files>
-    <file src=""file1.txt"" target=""content"" />
-  </files>
+
 </package>");
 
             string[] args = new string[] { "pack" };
@@ -323,7 +324,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 
             // Assert
             Assert.Equal(1, result);
-            Assert.True(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\n'1.0wwwwwwwwwwwwwwwwwwww0' is not a valid version string.\r\nParameter name: version\r\n"));
+            Assert.True(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nThe special version part cannot exceed 20 characters.\r\n"));
             Assert.False(File.Exists(expectedPackage));
         }
 
