@@ -6,7 +6,7 @@ $ErrorActionPreference = "Stop"
 $NoResultValue = New-Object PSObject -Property @{ NoResult = $true }
 
 # Hashtable that stores tab expansion definitions
-$TabExpansionCommands = @{}
+$TabExpansionCommands = New-Object 'System.Collections.Hashtable' -ArgumentList @([System.StringComparer]::InvariantCultureIgnoreCase)
 
 function Register-TabExpansion {
 <#
@@ -28,8 +28,12 @@ function Register-TabExpansion {
         [parameter(Mandatory = $true)]
         $Definition
     )
- 
-    $TabExpansionCommands[$Name] = $Definition 
+
+    # transfer $definition data into a new hashtable that compare values using InvariantCultureIgnoreCase
+    $normalizedDefinition = New-Object 'System.Collections.Hashtable' -ArgumentList @([System.StringComparer]::InvariantCultureIgnoreCase)
+    $definition.GetEnumerator() | % { $normalizedDefinition[$_.Name] = $_.Value }
+        
+    $TabExpansionCommands[$Name] = $normalizedDefinition
 }
 
 Register-TabExpansion 'Get-Package' @{
@@ -247,8 +251,9 @@ function NugetTabExpansion($line, $lastWord) {
                     # The above statement shouldn't show intellisense for id since it already has a value
                     if($parsedCommand.Arguments[$argument] -eq $null) {
                         $value = $parsedCommand.Arguments[$index]
+
                         if(!$value) {
-                            $value = ''   
+                            $value = ''
                         }
                         $parsedCommand.Arguments[$argument] = $value
                         break
@@ -260,11 +265,11 @@ function NugetTabExpansion($line, $lastWord) {
                 } while($true);    
             }
 
-            if($argument) {                
+            if($argument) {
                 # Populate the arguments dictionary with the name and value of the 
                 # associated index. i.e. for the command "Install-Package elmah" arguments should have
                 # an entries with { 0, "elmah" } and { "Id", "elmah" }
-                $arguments = @{}
+                $arguments = New-Object 'System.Collections.Hashtable' -ArgumentList @([System.StringComparer]::InvariantCultureIgnoreCase)
 
                 $parsedCommand.Arguments.Keys | Where-Object { $_ -is [int] } | %{
                     $argName = GetArgumentName $command $_
@@ -281,7 +286,7 @@ function NugetTabExpansion($line, $lastWord) {
                 # for this parameter (if specified)
                 $action = $definition[$argument]
                 $argumentValue = $parsedCommand.Arguments[$argument]
-                        
+
                 if($command.Parameters[$argument] -and 
                    $argumentValue -ne $null -and
                    $action) {
@@ -294,7 +299,7 @@ function NugetTabExpansion($line, $lastWord) {
                     }
 
                     # Use the argument value to filter results
-                    $results = $results | %{ $_.ToString() } | Where-Object { $_.StartsWith($argumentValue, "OrdinalIgnoreCase") }
+                    $results = $results | %{ $_.ToString([System.Globalization.CultureInfo]::InvariantCulture) } | Where-Object { $_.StartsWith($argumentValue, "OrdinalIgnoreCase") }
 
                     return NormalizeResults $results
                 }
