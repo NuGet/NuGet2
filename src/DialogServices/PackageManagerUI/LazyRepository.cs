@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace NuGet.Dialog.Providers
 {
-    public class LazyRepository : IPackageRepository, ISearchableRepository
+    public class LazyRepository : IPackageRepository, ISearchableRepository, IFindPackagesRepository
     {
         private readonly Lazy<IPackageRepository> _repository;
 
@@ -55,6 +55,11 @@ namespace NuGet.Dialog.Providers
         public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
         {
             return Repository.Search(searchTerm, targetFrameworks, allowPrereleaseVersions);
+        }
+
+        public IEnumerable<IPackage> FindPackagesById(string packageId)
+        {
+            return Repository.FindPackagesById(packageId);
         }
     }
 }

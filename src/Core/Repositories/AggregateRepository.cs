@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NuGet
 {
-    public class AggregateRepository : PackageRepositoryBase, IPackageLookup, IDependencyResolver, ISearchableRepository, ICloneableRepository
+    public class AggregateRepository : PackageRepositoryBase, IPackageLookup, IDependencyResolver, ISearchableRepository, ICloneableRepository, IFindPackagesRepository
     {
         /// <summary>
         /// When the ignore flag is set up, this collection keeps track of failing repositories so that the AggregateRepository 
@@ -188,6 +188,32 @@ namespace NuGet
                 }
                 return new[] { repository };
             });
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]
+        public IEnumerable<IPackage> FindPackagesById(string packageId)
+        {
+            if (IgnoreFailingRepositories)
+            {
+                List<IPackage> allPackages = new List<IPackage>();
+                foreach (IPackageRepository repository in _repositories)
+                {
+                    try
+                    {
+                        var packages = repository.FindPackagesById(packageId);
+                        allPackages.AddRange(packages);
+                    }
+                    catch (Exception exception)
+                    {
+                        LogRepository(repository, exception);
+                    }
+                }
+                return allPackages;
+            }
+            else
+            {
+                return _repositories.SelectMany(p => p.FindPackagesById(packageId));
+            }
         }
     }
 }

@@ -8,11 +8,12 @@ using System.Runtime.Versioning;
 
 namespace NuGet
 {
-    public class DataServicePackageRepository : PackageRepositoryBase, IHttpClientEvents, ISearchableRepository, ICloneableRepository
+    public class DataServicePackageRepository : PackageRepositoryBase, IHttpClientEvents, ISearchableRepository, ICloneableRepository, ICultureAwareRepository
     {
         private IDataServiceContext _context;
         private readonly IHttpClient _httpClient;
         private readonly PackageDownloader _packageDownloader;
+        private CultureInfo _culture;
 
         // Just forward calls to the package downloader
         public event EventHandler<ProgressEventArgs> ProgressAvailable
@@ -66,6 +67,21 @@ namespace NuGet
             _httpClient.AcceptCompression = true;
 
             _packageDownloader = packageDownloader;
+        }
+
+        public CultureInfo Culture
+        {
+            get 
+            {
+                if (_culture == null)
+                {
+                    // TODO: Technically, if this is a remote server, we have to return the culture of the server
+                    // instead of invariant culture. However, there is no trivial way to retrieve the server's culture,
+                    // So temporarily use Invariant culture here. 
+                    _culture = _httpClient.Uri.IsLoopback ? CultureInfo.CurrentCulture : CultureInfo.InvariantCulture;
+                }
+                return _culture;
+            }
         }
 
         public override string Source

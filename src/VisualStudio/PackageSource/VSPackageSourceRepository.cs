@@ -7,7 +7,7 @@ using NuGet.VisualStudio.Resources;
 namespace NuGet.VisualStudio
 {
     [Export(typeof(IPackageRepository))]
-    public class VsPackageSourceRepository : IPackageRepository, ISearchableRepository, ICloneableRepository
+    public class VsPackageSourceRepository : IPackageRepository, ISearchableRepository, ICloneableRepository, IFindPackagesRepository
     {
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepositoryFactory _repositoryFactory;
@@ -85,6 +85,11 @@ namespace NuGet.VisualStudio
         public IPackageRepository Clone()
         {
             return ActiveRepository.Clone();
+        }
+
+        public IEnumerable<IPackage> FindPackagesById(string packageId)
+        {
+            return ActiveRepository.FindPackagesById(packageId);
         }
     }
 }

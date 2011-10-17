@@ -1386,7 +1386,6 @@ function Test-InstallPackageInstallsHighestPackageIfItIsReleaseWhenPreReleaseFla
     Assert-Package $a 'PreReleaseTestPackage.A' '1.0.0'
 }
 
-
 function Test-InstallingPrereleasePackageAddsItToRecentPackageList {
     # Arrange
     $a = New-ClassLibrary
@@ -1398,4 +1397,23 @@ function Test-InstallingPrereleasePackageAddsItToRecentPackageList {
     Assert-Package $a 'PreReleaseTestPackage.A' '1.0.0'
     $p = @(Get-Package -Recent -Filter PreReleaseTestPackage.A)
     Assert-AreEqual 1 $p.Count
+}
+
+function Test-InstallingPackagesWorksInTurkishLocaleWhenPackageIdContainsLetterI 
+{
+    # Arrange
+    $p = New-ClassLibrary
+
+    $currentCulture = [System.Threading.Thread]::CurrentThread.CurrentCulture
+
+    [System.Threading.Thread]::CurrentThread.CurrentCulture = New-Object 'System.Globalization.CultureInfo' 'tr-TR'
+
+    # Act
+    $p | Install-Package 'YUICompressor.NET'
+
+     # Restore culture
+    [System.Threading.Thread]::CurrentThread.CurrentCulture = $currentCulture
+
+    # Assert
+    Assert-Package $p 'yuicompressor.NeT'
 }

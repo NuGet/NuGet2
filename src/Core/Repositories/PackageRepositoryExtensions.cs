@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -111,10 +112,28 @@ namespace NuGet
 
         public static IEnumerable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId)
         {
-            return (from p in repository.GetPackages()
-                    where p.Id.ToLower() == packageId.ToLower()
-                    orderby p.Id
-                    select p).ToList();
+            var findPackagesRepository = repository as IFindPackagesRepository;
+            if (findPackagesRepository != null)
+            {
+                return findPackagesRepository.FindPackagesById(packageId).ToList();
+            }
+            else
+            {
+                var cultureRepository = repository as ICultureAwareRepository;
+                if (cultureRepository != null)
+                {
+                    packageId = packageId.ToLower(cultureRepository.Culture);
+                }
+                else
+                {
+                    packageId = packageId.ToLower(CultureInfo.CurrentCulture);
+                }
+
+                return (from p in repository.GetPackages()
+                        where p.Id.ToLower() == packageId
+                        orderby p.Id
+                        select p).ToList();
+            }
         }
 
         /// <summary>
