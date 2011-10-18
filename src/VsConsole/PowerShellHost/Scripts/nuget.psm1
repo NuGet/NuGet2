@@ -299,7 +299,7 @@ function NugetTabExpansion($line, $lastWord) {
                     }
 
                     # Use the argument value to filter results
-                    $results = $results | %{ $_.ToString([System.Globalization.CultureInfo]::InvariantCulture) } | Where-Object { $_.StartsWith($argumentValue, "OrdinalIgnoreCase") }
+                    $results = $results | %{ $_.ToString() } | Where-Object { $_.StartsWith($argumentValue, "OrdinalIgnoreCase") }
 
                     return NormalizeResults $results
                 }
