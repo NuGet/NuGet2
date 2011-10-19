@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.Internal.Web.Utils;
@@ -66,10 +67,18 @@ namespace NuGet.Runtime
                 // Look to see if we already have this in the list of bindings already in config.
                 if (currentBindings.Contains(bindingRedirect))
                 {
-                    // Remove the assembly binding elements
-                    foreach (var bindingElement in currentBindings[bindingRedirect])
+                    var existingBindings = currentBindings[bindingRedirect];
+                    if (existingBindings.Any())
                     {
-                        RemoveElement(bindingElement);
+                        // Remove all but the first assembly binding elements
+                        foreach (var bindingElement in existingBindings.Skip(1))
+                        {
+                            RemoveElement(bindingElement);
+                        }
+
+                        UpdateBindingRedirectElement(existingBindings.First(), bindingRedirect);
+                        // Since we have a binding element, the assembly binding node (parent node) must exist. We don't need to do anything more here.
+                        continue;
                     }
                 }
 
@@ -190,6 +199,15 @@ namespace NuGet.Runtime
         private XDocument GetConfiguration()
         {
             return XmlUtility.GetOrCreateDocument("configuration", _fileSystem, _configurationPath);
+        }
+
+        private static void UpdateBindingRedirectElement(XElement element, AssemblyBinding bindingRedirect)
+        {
+            var bindingRedirectElement = element.Element(AssemblyBinding.GetQualifiedName("bindingRedirect"));
+            // Since we've successfully parsed this node, it has to be valid and this child must exist.
+            Debug.Assert(bindingRedirectElement != null);
+            bindingRedirectElement.Attribute("oldVersion").SetValue(bindingRedirect.OldVersion);
+            bindingRedirectElement.Attribute("newVersion").SetValue(bindingRedirect.NewVersion);
         }
     }
 }
