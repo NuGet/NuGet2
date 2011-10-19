@@ -322,7 +322,7 @@ function Write-TestResults {
     $fail = 0
     $skipped = 0
 
-    $rows = $Results | %{   
+    $rows = $Results | % { 
         $status = 'Passed'
         if($_.Skipped) {
             $status = 'Skipped'
@@ -343,4 +343,9 @@ function Write-TestResults {
 
     [String]::Format($resultsTemplate, $TestRunId, (Split-Path $Path), $Results.Count, $pass, $fail, $skipped, [String]::Join("", $rows)) | Out-File $Path | Out-Null
     Write-Host "Ran $($Results.Count) Tests, $pass Passed, $fail Failed, $skipped Skipped. See $Path for more details"
+
+    if ($fail -gt 0) 
+    {
+        [System.Diagnostics.Process]::Start($Path)
+    }
 }

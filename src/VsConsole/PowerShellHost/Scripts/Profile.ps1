@@ -152,6 +152,9 @@ function TabExpansion($line, $lastWord) {
     $nugetSuggestions = & (Get-Module NuGet) NuGetTabExpansion $line $lastWord
 
     if ($nugetSuggestions.NoResult) {
+        $line = $line.ToUpperInvariant()
+        $lastWord = $lastWord.ToUpperInvariant()
+
         return DefaultTabExpansion $line $lastWord
     }
     else {

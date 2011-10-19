@@ -391,15 +391,15 @@ namespace NuGet
 
         public void UpdatePackageReference(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions)
         {
-            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, versionSpec, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions);
+            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, versionSpec, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions, targetVersionSetExplicitly: versionSpec != null);
         }
 
         public virtual void UpdatePackageReference(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions)
         {
-            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, version, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions);
+            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, version, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions, targetVersionSetExplicitly: version != null);
         }
 
-        private void UpdatePackageReference(string packageId, Func<IPackage> resolvePackage, bool updateDependencies, bool allowPrereleaseVersions)
+        private void UpdatePackageReference(string packageId, Func<IPackage> resolvePackage, bool updateDependencies, bool allowPrereleaseVersions, bool targetVersionSetExplicitly)
         {
             if (String.IsNullOrEmpty(packageId))
             {
@@ -420,7 +420,13 @@ namespace NuGet
 
             IPackage package = resolvePackage();
 
-            if (package != null && oldPackage.Version != package.Version)
+            // the condition (allowPrereleaseVersions || targetVersionSetExplicitly || oldPackage.IsReleaseVersion() || !package.IsReleaseVersion() || oldPackage.Version < package.Version)
+            // is to fix bug 1574. We want to do nothing if, let's say, you have package 2.0alpha installed, and you do:
+            //      update-package
+            // without specifying a version explicitly, and the feed only has version 1.0 as the latest stable version.
+            if (package != null &&
+                oldPackage.Version != package.Version &&
+                (allowPrereleaseVersions || targetVersionSetExplicitly || oldPackage.IsReleaseVersion() || !package.IsReleaseVersion() || oldPackage.Version < package.Version))
             {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_UpdatingPackages, package.Id, oldPackage.Version, package.Version, Project.ProjectName);
                 UpdatePackageReference(package, updateDependencies, allowPrereleaseVersions);

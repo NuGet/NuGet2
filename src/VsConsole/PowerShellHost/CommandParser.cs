@@ -79,7 +79,7 @@ namespace NuGetConsole.Host.PowerShell
 
                 string argument = ParseToken();
 
-                if (argument.StartsWith("-", StringComparison.Ordinal))
+                if (argument.Length > 0 && argument[0] == '-')
                 {
                     // Trim the -
                     argument = argument.Substring(1);

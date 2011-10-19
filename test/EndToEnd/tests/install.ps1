@@ -1406,13 +1406,18 @@ function Test-InstallingPackagesWorksInTurkishLocaleWhenPackageIdContainsLetterI
 
     $currentCulture = [System.Threading.Thread]::CurrentThread.CurrentCulture
 
-    [System.Threading.Thread]::CurrentThread.CurrentCulture = New-Object 'System.Globalization.CultureInfo' 'tr-TR'
+    try 
+    {
+        [System.Threading.Thread]::CurrentThread.CurrentCulture = New-Object 'System.Globalization.CultureInfo' 'tr-TR'
 
-    # Act
-    $p | Install-Package 'YUICompressor.NET'
-
-     # Restore culture
-    [System.Threading.Thread]::CurrentThread.CurrentCulture = $currentCulture
+        # Act
+        $p | Install-Package 'YUICompressor.NET'
+    }
+    finally 
+    {
+         # Restore culture
+        [System.Threading.Thread]::CurrentThread.CurrentCulture = $currentCulture
+    }
 
     # Assert
     Assert-Package $p 'yuicompressor.NeT'

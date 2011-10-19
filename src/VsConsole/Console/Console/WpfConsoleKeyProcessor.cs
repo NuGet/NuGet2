@@ -9,6 +9,7 @@ using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Editor;
+using NuGet.VisualStudio;
 
 namespace NuGetConsole.Implementation.Console
 {
@@ -493,8 +494,8 @@ namespace NuGetConsole.Implementation.Console
             }
             catch (Exception x)
             {
-                // Ignore exception from expansion
-                Debug.Print(x.ToString());
+                // Ignore exception from expansion, but write it to the activity log
+                ExceptionHelper.WriteToActivityLog(x);
             }
 
             if (simpleExpansion != null && simpleExpansion.Expansions != null)

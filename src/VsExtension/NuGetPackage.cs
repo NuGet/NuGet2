@@ -244,6 +244,7 @@ namespace NuGet.Tools
         {
             OleMenuCommand command = (OleMenuCommand)sender;
             command.Visible = IsSolutionOpen && !_packageRestoreManager.IsCurrentSolutionEnabled;
+            command.Enabled = !_consoleStatus.IsBusy;
         }
 
         private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args)

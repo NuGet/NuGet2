@@ -39,7 +39,6 @@ namespace NuGet
 
         public bool IgnoreFailingRepositories { get; set; }
 
-
         /// <remarks>
         /// Iterating over Repositories returned by this property may throw regardless of IgnoreFailingRepositories.
         /// </remarks>
@@ -193,27 +192,33 @@ namespace NuGet
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]
         public IEnumerable<IPackage> FindPackagesById(string packageId)
         {
-            if (IgnoreFailingRepositories)
+            var tasks = _repositories.Select(p => Task.Factory.StartNew(state => p.FindPackagesById(packageId), p)).ToArray();
+
+            try
             {
-                List<IPackage> allPackages = new List<IPackage>();
-                foreach (IPackageRepository repository in _repositories)
+                Task.WaitAll(tasks);
+            }
+            catch (AggregateException)
+            {
+                if (!IgnoreFailingRepositories)
                 {
-                    try
-                    {
-                        var packages = repository.FindPackagesById(packageId);
-                        allPackages.AddRange(packages);
-                    }
-                    catch (Exception exception)
-                    {
-                        LogRepository(repository, exception);
-                    }
+                    throw;
                 }
-                return allPackages;
             }
-            else
+
+            var allPackages = new List<IPackage>();
+            foreach (var task in tasks)
             {
-                return _repositories.SelectMany(p => p.FindPackagesById(packageId));
+                if (task.IsFaulted)
+                {
+                    LogRepository((IPackageRepository)task.AsyncState, task.Exception);
+                }
+                else if (task.Result != null)
+                {
+                    allPackages.AddRange(task.Result);
+                }
             }
+            return allPackages;
         }
     }
 }
