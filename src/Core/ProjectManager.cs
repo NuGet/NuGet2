@@ -420,6 +420,10 @@ namespace NuGet
 
             IPackage package = resolvePackage();
 
+            // the condition (allowPrereleaseVersions || targetVersionSetExplicitly || oldPackage.IsReleaseVersion() || !package.IsReleaseVersion() || oldPackage.Version < package.Version)
+            // is to fix bug 1574. We want to do nothing if, let's say, you have package 2.0alpha installed, and you do:
+            //      update-package
+            // without specifying a version explicitly, and the feed only has version 1.0 as the latest stable version.
             if (package != null &&
                 oldPackage.Version != package.Version &&
                 (allowPrereleaseVersions || targetVersionSetExplicitly || oldPackage.IsReleaseVersion() || !package.IsReleaseVersion() || oldPackage.Version < package.Version))
