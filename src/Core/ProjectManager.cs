@@ -391,15 +391,15 @@ namespace NuGet
 
         public void UpdatePackageReference(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions)
         {
-            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, versionSpec, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions);
+            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, versionSpec, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions, targetVersionSetExplicitly: versionSpec != null);
         }
 
         public virtual void UpdatePackageReference(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions)
         {
-            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, version, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions);
+            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, version, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions, targetVersionSetExplicitly: version != null);
         }
 
-        private void UpdatePackageReference(string packageId, Func<IPackage> resolvePackage, bool updateDependencies, bool allowPrereleaseVersions)
+        private void UpdatePackageReference(string packageId, Func<IPackage> resolvePackage, bool updateDependencies, bool allowPrereleaseVersions, bool targetVersionSetExplicitly)
         {
             if (String.IsNullOrEmpty(packageId))
             {
@@ -420,7 +420,9 @@ namespace NuGet
 
             IPackage package = resolvePackage();
 
-            if (package != null && oldPackage.Version != package.Version)
+            if (package != null &&
+                oldPackage.Version != package.Version &&
+                (allowPrereleaseVersions || targetVersionSetExplicitly || oldPackage.IsReleaseVersion() || !package.IsReleaseVersion() || oldPackage.Version < package.Version))
             {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_UpdatingPackages, package.Id, oldPackage.Version, package.Version, Project.ProjectName);
                 UpdatePackageReference(package, updateDependencies, allowPrereleaseVersions);
