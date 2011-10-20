@@ -301,7 +301,7 @@ namespace NuGet
             RemovePackageReference(packageId, forceRemove: forceRemove, removeDependencies: false);
         }
 
-        public void RemovePackageReference(string packageId, bool forceRemove, bool removeDependencies)
+        public virtual void RemovePackageReference(string packageId, bool forceRemove, bool removeDependencies)
         {
             if (String.IsNullOrEmpty(packageId))
             {
