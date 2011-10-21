@@ -137,19 +137,5 @@ namespace NuGet.VisualStudio.Test
             packageManagerFactory.Verify(m => m.CreatePackageManager(), Times.Never());
             packageManagerFactory.Verify(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), It.IsAny<bool>(), true), Times.Never());
         }
-
-        // This repository better simulates what happens when we're running the package manager in vs
-        private class MockProjectPackageRepository : MockPackageRepository
-        {
-            private readonly IPackageRepository _parent;
-            public MockProjectPackageRepository(IPackageRepository parent)
-            {
-                _parent = parent;
-            }
-            public override IQueryable<IPackage> GetPackages()
-            {
-                return base.GetPackages().Where(p => _parent.Exists(p));
-            }
-        }
     }
 }
