@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data.Services.Client;
 using System.Globalization;
 using System.Linq.Expressions;
+using System.Xml.Linq;
 using NuGet.Resources;
 
 namespace NuGet
@@ -115,11 +116,33 @@ namespace NuGet
             }
             catch (Exception exception)
             {
+                string message = ExtractMessageFromClientException(exception);
+                if (!String.IsNullOrEmpty(message))
+                {
+                    throw new InvalidOperationException(message, exception);
+                }
+                
                 throw new InvalidOperationException(
                     String.Format(CultureInfo.CurrentCulture,
                     NuGetResources.InvalidFeed,
                     _context.BaseUri), exception);
             }
+        }
+
+        private static string ExtractMessageFromClientException(Exception exception)
+        {
+            var dataServiceQueryException = exception as DataServiceQueryException;
+            if (dataServiceQueryException != null && dataServiceQueryException.InnerException != null)
+            {
+                var dataServiceClientException = dataServiceQueryException.InnerException as DataServiceClientException;
+                XDocument document;
+                if (dataServiceQueryException != null && XmlUtility.TryParseDocument(dataServiceClientException.Message, out document) 
+                        && document.Root.Name.LocalName.Equals("error", StringComparison.OrdinalIgnoreCase))
+                {
+                    return document.Root.GetOptionalElementValue("message");
+                }
+            }
+            return null;
         }
     }
 }

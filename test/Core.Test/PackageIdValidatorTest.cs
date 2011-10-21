@@ -144,9 +144,9 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData(65)]
-        [InlineData(66)]
-        [InlineData(100)]
+        [InlineData(101)]
+        [InlineData(102)]
+        [InlineData(200)]
         public void IdExceedingMaxLengthThrows(int idTestLength)
         {
             // Arrange
@@ -155,16 +155,16 @@ namespace NuGet.Test
             // Act && Assert
             ExceptionAssert.ThrowsArgumentException(
                 () => PackageIdValidator.ValidatePackageId(packageId),
-                "Id must not exceed 64 characters.");
+                "Id must not exceed 100 characters.");
         }
 
         [Theory]
-        [InlineData(65, false)]
-        [InlineData(66, false)]
-        [InlineData(100, false)]
+        [InlineData(101, false)]
+        [InlineData(102, false)]
+        [InlineData(200, false)]
         [InlineData(64, true)]
-        [InlineData(20, true)]
-        [InlineData(63, true)]
+        [InlineData(90, true)]
+        [InlineData(99, true)]
         public void ValidatesCheckIdLength(int idTestLength, bool expectedResult)
         {
             // Arrange

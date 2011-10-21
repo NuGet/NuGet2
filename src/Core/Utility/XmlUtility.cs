@@ -1,8 +1,9 @@
+using System.IO;
+using System.Xml;
+using System.Xml.Linq;
+
 namespace NuGet
 {
-    using System.IO;
-    using System.Xml.Linq;
-
     internal static class XmlUtility
     {
         internal static XDocument GetOrCreateDocument(XName rootName, IFileSystem fileSystem, string path)
@@ -34,6 +35,20 @@ namespace NuGet
             using (Stream configStream = fileSystem.OpenFile(path))
             {
                 return XDocument.Load(configStream);
+            }
+        }
+
+        internal static bool TryParseDocument(string content, out XDocument document)
+        {
+            document = null;
+            try
+            {
+                document = XDocument.Parse(content);
+                return true;
+            }
+            catch (XmlException)
+            {
+                return false;
             }
         }
     }

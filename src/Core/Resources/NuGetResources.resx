@@ -352,6 +352,6 @@
     <value>The special version part cannot exceed 20 characters.</value>
   </data>
   <data name="Manifest_IdMaxLengthExceeded" xml:space="preserve">
-    <value>Id must not exceed 64 characters.</value>
+    <value>Id must not exceed 100 characters.</value>
   </data>
 </root>

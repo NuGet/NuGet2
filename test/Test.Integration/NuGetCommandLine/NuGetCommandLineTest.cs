@@ -272,7 +272,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
-    <id>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa9</id>
+    <id>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa9</id>
     <version>1.0</version>
     <authors>Terence Parr</authors>
     <description>ANother Tool for Language Recognition, is a language tool that provides a framework for constructing recognizers, interpreters, compilers, and translators from grammatical descriptions containing actions in a variety of target languages.</description>
@@ -291,7 +291,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 
             // Assert
             Assert.Equal(1, result);
-            Assert.True(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nId must not exceed 64 characters.\r\n"));
+            Assert.True(consoleOutput.ToString().Contains("Attempting to build package from 'InvalidId.nuspec'.\r\nId must not exceed 100 characters.\r\n"));
             Assert.False(File.Exists(expectedPackage));
         }
 

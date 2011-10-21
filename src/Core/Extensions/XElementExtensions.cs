@@ -24,13 +24,12 @@ namespace NuGet
             return attr != null ? attr.Value : null;
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "We don't care about base types")]
-        public static string GetOptionalElementValue(this XElement element, string localName, string namespaceName = null)
+        public static string GetOptionalElementValue(this XContainer element, string localName, string namespaceName = null)
         {
             XElement child;
             if (String.IsNullOrEmpty(namespaceName))
             {
-                child = element.Element(localName);
+                child = element.ElementsNoNamespace(localName).FirstOrDefault();
             }
             else
             {
@@ -83,8 +82,6 @@ namespace NuGet
             }
             return source;
         }
-
-
 
         public static XElement MergeWith(this XElement source, XElement target)
         {

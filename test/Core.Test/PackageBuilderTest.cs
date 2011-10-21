@@ -401,7 +401,7 @@ Description is required.");
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
-    <id>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</id>
+    <id>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</id>
     <version>2.5</version>
     <authors>Velio Ivanov</authors>
     <language>en-us</language>
@@ -409,7 +409,7 @@ Description is required.");
   </metadata></package>";
 
             // Act & Assert
-            ExceptionAssert.Throws<ArgumentException>(() => new PackageBuilder(spec.AsStream(), null), "Id must not exceed 64 characters.");
+            ExceptionAssert.Throws<ArgumentException>(() => new PackageBuilder(spec.AsStream(), null), "Id must not exceed 100 characters.");
         }
 
         [Fact]
@@ -937,14 +937,14 @@ Enabling license acceptance requires a license url.");
             // Arrange
             var builder = new PackageBuilder
             {
-                Id = new string('c', 65),
+                Id = new string('c', 101),
                 Version = new SemanticVersion("1.0"),
                 Description = "Description"
             };
             builder.Authors.Add("Me");
 
             // Act & Assert            
-            ExceptionAssert.ThrowsArgumentException(() => builder.Save(new MemoryStream()), "Id must not exceed 64 characters.");
+            ExceptionAssert.ThrowsArgumentException(() => builder.Save(new MemoryStream()), "Id must not exceed 100 characters.");
         }
 
         [Fact]
