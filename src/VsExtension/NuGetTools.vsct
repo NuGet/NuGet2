@@ -128,7 +128,7 @@
     </Buttons>
 
     <Combos>
-      <Combo guid="guidPowerConsoleCmdSet" id="cmdidSources" idCommandList="cmdidSourcesList" type="IndexCombo" defaultWidth="200" priority="0x1005">
+      <Combo guid="guidPowerConsoleCmdSet" id="cmdidSources" idCommandList="cmdidSourcesList" type="IndexCombo" defaultWidth="180" priority="0x1005">
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbarHostsGroup" />
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
@@ -136,7 +136,7 @@
         </Strings>
       </Combo>
 
-      <Combo guid="guidPowerConsoleCmdSet" id="cmdidProjects" idCommandList="cmdidProjectsList" type="IndexCombo" defaultWidth="200" priority="0x1010">
+      <Combo guid="guidPowerConsoleCmdSet" id="cmdidProjects" idCommandList="cmdidProjectsList" type="IndexCombo" defaultWidth="270" priority="0x1010">
         <Parent guid="guidPowerConsoleCmdSet" id="idToolbarProjectGroup" />
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
