@@ -173,21 +173,6 @@
                     <eml:TextBlockControl Text="{Binding PackageIdentity.DownloadCount}" Style="{StaticResource DetailMetadataValueStyle}"  />
                 </StackPanel>
 
-                <!-- Rating count -->
-                <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding PackageIdentity.Rating, Converter={StaticResource countConverter}, ConverterParameter=-1}">
-                    <eml:TextBlockControl Text="{x:Static resources:Resources.Dialog_RatingLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <eml:MultiStarControl Height="12" Value="{Binding PackageIdentity.Rating, Mode=OneWay}" Margin="3,0,3,0">
-                        <FrameworkElement.ToolTip>
-                            <TextBlock Text="{Binding PackageIdentity.Rating, StringFormat={x:Static resources:Resources.Dialog_RatingTooltip}}" Style="{StaticResource TileToolTipStyle}"/>
-                        </FrameworkElement.ToolTip>
-                    </eml:MultiStarControl>
-                    <eml:TextBlockControl Text="{Binding PackageIdentity.RatingsCount, StringFormat={x:Static resources:Resources.Dialog_VotesCount}}" Style="{StaticResource DetailMetadataValueStyle}" />
-                    <eml:TextBlockControl Margin="4,0,0,0" Visibility="{Binding PackageIdentity.GalleryDetailsUrl, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
-                        <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.GalleryDetailsUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
-                            <Run Text="{x:Static resources:Resources.Dialog_RateItLabel}" />
-                        </Hyperlink>
-                    </eml:TextBlockControl>
-                </StackPanel>
 
                 <!-- View License link -->
                 <TextBlock Visibility="{Binding LicenseUrl, Converter={StaticResource NullToVisibilityConverter}}">

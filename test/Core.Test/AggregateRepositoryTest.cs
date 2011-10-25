@@ -135,7 +135,7 @@ namespace NuGet.Test
             };
 
             var r2 = new MockPackageRepository() {
-                PackageUtility.CreatePackage("A", rating : 3),
+                PackageUtility.CreatePackage("A", downloadCount : 3),
             };
 
             var r3 = new MockPackageRepository() {
@@ -149,7 +149,7 @@ namespace NuGet.Test
             var repository = new AggregateRepository(new[] { r1, r2, r3, r4 });
 
             // Act
-            var packages = repository.GetPackages().OrderByDescending(p => p.Rating)
+            var packages = repository.GetPackages().OrderByDescending(p => p.DownloadCount)
                                                    .ThenBy(p => p.Id)
                                                    .ToList();
 

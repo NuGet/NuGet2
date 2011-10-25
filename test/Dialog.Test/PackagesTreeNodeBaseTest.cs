@@ -257,12 +257,12 @@ namespace NuGet.Dialog.Test
         {
             // Arrange
             var node = CreatePackagesTreeNodeBase(new[]{
-                PackageUtility.CreatePackage("A", "1.0", rating:1),
-                PackageUtility.CreatePackage("A", "2.0",rating:1),
-                PackageUtility.CreatePackage("A", "3.0",rating:1),
-                PackageUtility.CreatePackage("B", "1.0",rating:2),
-                PackageUtility.CreatePackage("B", "2.0",rating:2),
-                PackageUtility.CreatePackage("C", "4.0",rating:2.3)
+                PackageUtility.CreatePackage("A", "1.0", downloadCount: 1),
+                PackageUtility.CreatePackage("A", "2.0", downloadCount: 1),
+                PackageUtility.CreatePackage("A", "3.0", downloadCount: 1),
+                PackageUtility.CreatePackage("B", "1.0", downloadCount: 2),
+                PackageUtility.CreatePackage("B", "2.0", downloadCount: 2),
+                PackageUtility.CreatePackage("C", "4.0", downloadCount: 3)
             });
 
             // Act
@@ -273,7 +273,7 @@ namespace NuGet.Dialog.Test
                                    // Assert
                                    Assert.Equal(1, n.TotalPages);
                                    Assert.Equal(1, n.CurrentPage);
-                                   Assert.Equal(3, n.Extensions.Count);
+                                   Assert.Equal(3, n.Extensions.Count); 
                                    Assert.Equal("C", n.Extensions[0].Name);
                                    Assert.Equal("B", n.Extensions[1].Name);
                                    Assert.Equal("A", n.Extensions[2].Name);
@@ -285,12 +285,12 @@ namespace NuGet.Dialog.Test
         {
             // Arrange
             var node = CreatePackagesTreeNodeBase(new[]{
-                    PackageUtility.CreatePackage("A", "1.0",rating:1),
-                    PackageUtility.CreatePackage("A", "2.0",rating:1),
-                    PackageUtility.CreatePackage("A", "3.0",rating:1),
-                    PackageUtility.CreatePackage("B", "1.0",rating:2),
-                    PackageUtility.CreatePackage("B", "2.0",rating:2),
-                    PackageUtility.CreatePackage("C", "4.0",rating:2.3)
+                    PackageUtility.CreatePackage("A", "1.0", downloadCount: 1),
+                    PackageUtility.CreatePackage("A", "2.0", downloadCount: 1),
+                    PackageUtility.CreatePackage("A", "3.0", downloadCount: 1),
+                    PackageUtility.CreatePackage("B", "1.0", downloadCount: 2),
+                    PackageUtility.CreatePackage("B", "2.0", downloadCount: 2),
+                    PackageUtility.CreatePackage("C", "4.0", downloadCount: 3)
                 },
                 parentTreeNode: null,
                 collapseVersions: false);

@@ -21,7 +21,7 @@ namespace NuGet.Test
                                               IEnumerable<string> assemblyReferences = null,
                                               IEnumerable<string> tools = null,
                                               IEnumerable<PackageDependency> dependencies = null,
-                                              double? rating = null,
+                                              int downloadCount = 0,
                                               string description = null,
                                               string summary = null)
         {
@@ -32,7 +32,7 @@ namespace NuGet.Test
                                  CreateAssemblyReferences(assemblyReferences),
                                  tools,
                                  dependencies,
-                                 rating,
+                                 downloadCount,
                                  description,
                                  summary);
         }
@@ -43,7 +43,7 @@ namespace NuGet.Test
                                               IEnumerable<IPackageAssemblyReference> assemblyReferences,
                                               IEnumerable<string> tools,
                                               IEnumerable<PackageDependency> dependencies,
-                                              double? rating,
+                                              int downloadCount,
                                               string description,
                                               string summary)
         {
@@ -72,12 +72,11 @@ namespace NuGet.Test
             mockPackage.Setup(m => m.Authors).Returns(new[] { "Tester" });
             mockPackage.Setup(m => m.GetStream()).Returns(() => new MemoryStream());
             mockPackage.Setup(m => m.LicenseUrl).Returns(new Uri("ftp://test/somelicense.txts"));
-            mockPackage.Setup(m => m.Rating).Returns(rating ?? -1);
             mockPackage.Setup(m => m.Summary).Returns(summary);
             mockPackage.Setup(m => m.FrameworkAssemblies).Returns(Enumerable.Empty<FrameworkAssemblyReference>());
             mockPackage.Setup(m => m.Tags).Returns(String.Empty);
             mockPackage.Setup(m => m.Title).Returns(String.Empty);
-            mockPackage.Setup(m => m.DownloadCount).Returns(0);
+            mockPackage.Setup(m => m.DownloadCount).Returns(downloadCount);
             mockPackage.Setup(m => m.RequireLicenseAcceptance).Returns(false);
             return mockPackage.Object;
         }

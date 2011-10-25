@@ -168,12 +168,6 @@
   <data name="Dialog_PackageUpdatedTooltip" xml:space="preserve">
     <value>This package is already updated.</value>
   </data>
-  <data name="Dialog_RatingLabel" xml:space="preserve">
-    <value>Rating:</value>
-  </data>
-  <data name="Dialog_RatingTooltip" xml:space="preserve">
-    <value>{0:f1} stars</value>
-  </data>
   <data name="Dialog_ReportAbuse" xml:space="preserve">
     <value>Report Abuse</value>
   </data>
@@ -191,9 +185,6 @@
   </data>
   <data name="Dialog_SortDescending" xml:space="preserve">
     <value>Descending</value>
-  </data>
-  <data name="Dialog_SortOption_HighestRated" xml:space="preserve">
-    <value>Highest Rated</value>
   </data>
   <data name="Dialog_SortOption_MostDownloads" xml:space="preserve">
     <value>Most Downloads</value>
@@ -263,9 +254,6 @@
   </data>
   <data name="License_AuthorFormatString" xml:space="preserve">
     <value>(Author: {0})</value>
-  </data>
-  <data name="Dialog_RateItLabel" xml:space="preserve">
-    <value>Rate It</value>
   </data>
   <data name="Dialog_TagLabel" xml:space="preserve">
     <value>Tags:</value>

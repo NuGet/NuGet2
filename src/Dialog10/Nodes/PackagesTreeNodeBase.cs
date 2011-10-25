@@ -370,10 +370,10 @@ namespace NuGet.Dialog.Providers
 
         private IOrderedQueryable<IPackage> ApplyOrdering(IQueryable<IPackage> query)
         {
-            // If the default sort is null then fall back to rating
+            // If the default sort is null then fall back to download count
             if (Provider.CurrentSort == null)
             {
-                return query.OrderByDescending(p => p.Rating);
+                return query.OrderByDescending(p => p.DownloadCount);
             }
 
             // Order by the current descriptor

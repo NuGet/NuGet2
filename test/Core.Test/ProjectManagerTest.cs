@@ -121,7 +121,7 @@ namespace NuGet.Test
                                                         assemblyReferences: new[] { PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName("SP", new Version("40.0"))) },
                                                         tools: null,
                                                         dependencies: null,
-                                                        rating: null,
+                                                        downloadCount: 0,
                                                         description: null,
                                                         summary: null);
             projectManager.LocalRepository.AddPackage(packageA);
@@ -1290,7 +1290,7 @@ namespace NuGet.Test
                 assemblyReferences: new[] { net20Reference, net40Reference },
                 tools: null,
                 dependencies: null,
-                rating: null,
+                downloadCount: 0,
                 description: null,
                 summary: null);
 

@@ -48,23 +48,20 @@ namespace NuGet.Dialog.Test
             var descriptors = provider.SortDescriptors.Cast<PackageSortDescriptor>().ToList();
 
             // Assert
-            Assert.Equal(5, descriptors.Count);
+            Assert.Equal(4, descriptors.Count);
             Assert.Equal("DownloadCount", descriptors[0].SortProperties.First());
             Assert.Equal(ListSortDirection.Descending, descriptors[0].Direction);
 
-            Assert.Equal("Rating", descriptors[1].SortProperties.First());
+            Assert.Equal("Published", descriptors[1].SortProperties.First());
             Assert.Equal(ListSortDirection.Descending, descriptors[1].Direction);
 
-            Assert.Equal("Published", descriptors[2].SortProperties.First());
-            Assert.Equal(ListSortDirection.Descending, descriptors[2].Direction);
+            Assert.Equal("Title", descriptors[2].SortProperties.First());
+            Assert.Equal("Id", descriptors[2].SortProperties.Last());
+            Assert.Equal(ListSortDirection.Ascending, descriptors[2].Direction);
 
             Assert.Equal("Title", descriptors[3].SortProperties.First());
             Assert.Equal("Id", descriptors[3].SortProperties.Last());
-            Assert.Equal(ListSortDirection.Ascending, descriptors[3].Direction);
-
-            Assert.Equal("Title", descriptors[4].SortProperties.First());
-            Assert.Equal("Id", descriptors[4].SortProperties.Last());
-            Assert.Equal(ListSortDirection.Descending, descriptors[4].Direction);
+            Assert.Equal(ListSortDirection.Descending, descriptors[3].Direction);
         }
 
         [Fact]

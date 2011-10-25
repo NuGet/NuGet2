@@ -133,22 +133,6 @@ namespace NuGet
             }
         }
 
-        public double Rating
-        {
-            get
-            {
-                return -1;
-            }
-        }
-
-        public int RatingsCount
-        {
-            get
-            {
-                return 0;
-            }
-        }
-
         public bool RequireLicenseAcceptance
         {
             get;

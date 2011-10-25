@@ -115,18 +115,6 @@ namespace NuGet
             set;
         }
 
-        public double Rating
-        {
-            get;
-            set;
-        }
-
-        public int RatingsCount
-        {
-            get;
-            set;
-        }
-
         public bool RequireLicenseAcceptance
         {
             get;
