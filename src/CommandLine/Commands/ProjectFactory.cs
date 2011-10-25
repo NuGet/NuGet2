@@ -279,11 +279,12 @@ namespace NuGet.Commands
                               new SemanticVersion("1.0");
         }
 		
-		private IEnumerable<string> GetFiles(string path, string fileNameWithoutExtension, HashSet<string> allowedExtensions) {			
+		private static IEnumerable<string> GetFiles(string path, string fileNameWithoutExtension, HashSet<string> allowedExtensions) {			
 			return allowedExtensions.Select(extension => Directory.GetFiles(path, fileNameWithoutExtension + extension)).SelectMany(a => a);
         }
 
-
+        private void AddOutputFiles(PackageBuilder builder)
+        {
             // Get the target framework of the project
             FrameworkName targetFramework = TargetFramework;
 
@@ -308,39 +309,41 @@ namespace NuGet.Commands
             string targetFileName = Path.GetFileNameWithoutExtension(targetPath);
 
             // By default we add all files in the project's output directory
-            foreach (var file in GetFiles(projectOutputDirectory, targetFileName, allowedOutputExtensions)) {
+            foreach (var file in GetFiles(projectOutputDirectory, targetFileName, allowedOutputExtensions))
             {
-                string extension = Path.GetExtension(file);
-
-                // Only look at files we care about
-                if (!allowedOutputExtensions.Contains(extension))
                 {
-                    continue;
-                }
+                    string extension = Path.GetExtension(file);
 
-                string targetFolder = null;
-
-                if (IsTool)
-                {
-                    targetFolder = ToolsFolder;
-                }
-                else
-                {
-                    if (targetFramework == null)
+                    // Only look at files we care about
+                    if (!allowedOutputExtensions.Contains(extension))
                     {
-                        targetFolder = ReferenceFolder;
+                        continue;
+                    }
+
+                    string targetFolder = null;
+
+                    if (IsTool)
+                    {
+                        targetFolder = ToolsFolder;
                     }
                     else
                     {
-                        targetFolder = Path.Combine(ReferenceFolder, VersionUtility.GetShortFrameworkName(targetFramework));
+                        if (targetFramework == null)
+                        {
+                            targetFolder = ReferenceFolder;
+                        }
+                        else
+                        {
+                            targetFolder = Path.Combine(ReferenceFolder, VersionUtility.GetShortFrameworkName(targetFramework));
+                        }
                     }
-                }
 
-                builder.Files.Add(new PhysicalPackageFile
-                {
-                    SourcePath = file,
-                    TargetPath = Path.Combine(targetFolder, Path.GetFileName(file))
-                });
+                    builder.Files.Add(new PhysicalPackageFile
+                    {
+                        SourcePath = file,
+                        TargetPath = Path.Combine(targetFolder, Path.GetFileName(file))
+                    });
+                }
             }
         }
 
