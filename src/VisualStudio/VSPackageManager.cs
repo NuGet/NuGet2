@@ -953,7 +953,7 @@ namespace NuGet.VisualStudio
                             }
                             catch (Exception e)
                             {
-                                logger.Log(MessageLevel.Error, e.Message);
+                                logger.Log(MessageLevel.Error, ExceptionUtility.Unwrap(e).Message);
                                 eventListener.OnAddPackageReferenceError(project, e);
                             }
                             finally
@@ -1042,7 +1042,7 @@ namespace NuGet.VisualStudio
                     }
                     catch (Exception e)
                     {
-                        logger.Log(MessageLevel.Error, e.Message);
+                        logger.Log(MessageLevel.Error, ExceptionUtility.Unwrap(e).Message);
                     }
                 }
             }
