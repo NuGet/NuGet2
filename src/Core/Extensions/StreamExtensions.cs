@@ -40,7 +40,7 @@ namespace NuGet
 
         public static Stream AsStream(this string value)
         {
-            return AsStream(value, Encoding.Default);
+            return AsStream(value, Encoding.UTF8);
         }
 
         public static Stream AsStream(this string value, Encoding encoding)
