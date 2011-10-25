@@ -516,3 +516,57 @@ function Test-GetPackageUpdatesReturnPrereleasePackagesIfFlagIsSpecified {
     Assert-AreEqual 'PrereleaseTestPackage' $updates[0].Id
     Assert-AreEqual '1.0.1a' $updates[0].Version
 }
+
+function Test-GetPackageUpdatesReturnAllVersionsIfFlagIsSpecified 
+{
+    param
+    (
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    $p | Install-Package PrereleaseTestPackage -Version 1.0.0a -Source $context.RepositoryRoot -Prerelease
+    Assert-Package $p 'PrereleaseTestPackage' '1.0.0a'
+    
+    # Act
+    $updates = @(Get-Package -Updates -AllVersions -Source $context.RepositoryRoot)
+
+    # Assert
+    Assert-AreEqual 2 $updates.Count
+    Assert-AreEqual 'PrereleaseTestPackage' $updates[0].Id
+    Assert-AreEqual '1.0.0' $updates[0].Version
+
+    Assert-AreEqual 'PrereleaseTestPackage' $updates[1].Id
+    Assert-AreEqual '2.0.0' $updates[1].Version
+}
+
+function Test-GetPackageUpdatesReturnAllVersionsAndPrereleaseVersionsIfTwoFlagsAreSpecified 
+{
+    param
+    (
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    $p | Install-Package PrereleaseTestPackage -Version 1.0.0b -Source $context.RepositoryRoot -Prerelease
+    Assert-Package $p 'PrereleaseTestPackage' '1.0.0b'
+    
+    # Act
+    $updates = @(Get-Package -Updates -AllVersions -Prerelease -Source $context.RepositoryRoot)
+
+    # Assert
+    Assert-AreEqual 3 $updates.Count
+
+    Assert-AreEqual 'PrereleaseTestPackage' $updates[0].Id
+    Assert-AreEqual '1.0.0' $updates[0].Version
+
+    Assert-AreEqual 'PrereleaseTestPackage' $updates[1].Id
+    Assert-AreEqual '1.0.1a' $updates[1].Version
+
+    Assert-AreEqual 'PrereleaseTestPackage' $updates[2].Id
+    Assert-AreEqual '2.0.0' $updates[2].Version
+}

@@ -5,7 +5,6 @@ using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuGet.Dialog.Providers
 {
-
     /// <summary>
     /// This class represents a tree node under the Updates tab
     /// </summary>
@@ -29,7 +28,7 @@ namespace NuGet.Dialog.Providers
         {
             // We need to call ToList() here so that we don't evaluate the enumerable twice
             // when trying to count it.
-            IList<IPackage> updateCandidates = Repository.GetUpdates(_localRepository.GetPackages(), includePrerelease: false).ToList();
+            IList<IPackage> updateCandidates = Repository.GetUpdates(_localRepository.GetPackages(), includePrerelease: false, includeAllVersions: false).ToList();
 
             IList<FrameworkName> solutionFrameworks = Provider.SupportedFrameworks.Select(s => new FrameworkName(s)).ToList();
 

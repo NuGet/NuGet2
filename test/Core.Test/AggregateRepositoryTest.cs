@@ -188,7 +188,7 @@ namespace NuGet.Test
             var repository = new AggregateRepository(new[] { r1, r2, r3, r4 });
 
             // Act
-            var updates = repository.GetUpdates(new[] { PackageUtility.CreatePackage("A", "1.0") }, includePrerelease: false).ToList();
+            var updates = repository.GetUpdates(new[] { PackageUtility.CreatePackage("A", "1.0") }, includePrerelease: false, includeAllVersions: false).ToList();
 
             // Assert
             Assert.Equal(1, updates.Count);

@@ -291,7 +291,11 @@ namespace NuGet
         /// <param name="repository">The repository to search for updates</param>
         /// <param name="packages">Packages to look for updates</param>
         /// <returns></returns>
-        public static IEnumerable<IPackage> GetUpdates(this IPackageRepository repository, IEnumerable<IPackage> packages, bool includePrerelease)
+        public static IEnumerable<IPackage> GetUpdates(
+            this IPackageRepository repository,
+            IEnumerable<IPackage> packages,
+            bool includePrerelease,
+            bool includeAllVersions)
         {
             List<IPackage> packageList = packages.ToList();
 
@@ -300,20 +304,42 @@ namespace NuGet
                 yield break;
             }
 
-            // These are the packages that we need to look at for potential updates.
-            IDictionary<string, IPackage> sourcePackages = GetUpdateCandidates(repository, packageList, includePrerelease)
-                                                                           .ToList()
-                                                                           .GroupBy(package => package.Id)
-                                                                           .ToDictionary(package => package.Key,
-                                                                                         package => package.OrderByDescending(p => p.Version).First());
-
-            foreach (IPackage package in packageList)
+            if (includeAllVersions)
             {
-                IPackage newestAvailablePackage;
-                if (sourcePackages.TryGetValue(package.Id, out newestAvailablePackage) &&
-                    newestAvailablePackage.Version > package.Version)
+                // These are the packages that we need to look at for potential updates.
+                ILookup<string, IPackage> sourcePackages = GetUpdateCandidates(repository, packageList, includePrerelease)
+                                                                               .ToList()
+                                                                               .ToLookup(package => package.Id, StringComparer.OrdinalIgnoreCase);
+
+                foreach (IPackage package in packageList)
                 {
-                    yield return newestAvailablePackage;
+                    foreach (var candidate in sourcePackages[package.Id])
+                    {
+                        if (candidate.Version > package.Version)
+                        {
+                            yield return candidate;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // These are the packages that we need to look at for potential updates.
+                IDictionary<string, IPackage> sourcePackages = GetUpdateCandidates(repository, packageList, includePrerelease)
+                                                                               .ToList()
+                                                                               .GroupBy(package => package.Id)
+                                                                               .ToDictionary(package => package.Key,
+                                                                                             package => package.OrderByDescending(p => p.Version).First(),
+                                                                                             StringComparer.OrdinalIgnoreCase);
+
+                foreach (IPackage package in packageList)
+                {
+                    IPackage newestAvailablePackage;
+                    if (sourcePackages.TryGetValue(package.Id, out newestAvailablePackage) &&
+                        newestAvailablePackage.Version > package.Version)
+                    {
+                        yield return newestAvailablePackage;
+                    }
                 }
             }
         }

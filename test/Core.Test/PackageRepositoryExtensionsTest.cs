@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using Moq;
 using Xunit;
+using NuGet.Test.Mocks;
 
 namespace NuGet.Test
 {
@@ -61,5 +62,35 @@ namespace NuGet.Test
             }
         }
 
+        [Fact]
+        public void GetUpdatesReturnAllPackageVersionsWhenFlagIsSpecified()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "2.0", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "3.0", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "3.0alpha", new string[] { "hello" }));
+
+            var packages = new IPackage[] 
+            {
+                PackageUtility.CreatePackage("A", "1.5")
+            };
+
+            // Act
+            var foundPackages = PackageRepositoryExtensions.GetUpdates(sourceRepository, packages, includePrerelease: true, includeAllVersions: true).ToList();
+
+            // Assert
+            Assert.Equal(3, foundPackages.Count);
+
+            Assert.Equal("A", foundPackages[0].Id);
+            Assert.Equal(new SemanticVersion("2.0"), foundPackages[0].Version);
+
+            Assert.Equal("A", foundPackages[1].Id);
+            Assert.Equal(new SemanticVersion("3.0"), foundPackages[1].Version);
+
+            Assert.Equal("A", foundPackages[2].Id);
+            Assert.Equal(new SemanticVersion("3.0alpha"), foundPackages[2].Version);
+        }
     }
 }
