@@ -21,5 +21,13 @@ namespace NuGet.VisualStudio
         public void OnAddPackageReferenceError(EnvDTE.Project project, Exception exception)
         {
         }
+
+        public void OnBeforePackageOperation(IVsPackageManager packageManager)
+        {
+        }
+
+        public void OnAfterPackageOperation(IVsPackageManager packageManager)
+        {
+        }
     }
 }

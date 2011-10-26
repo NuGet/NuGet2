@@ -502,7 +502,11 @@ namespace NuGet.Dialog.Providers
 
         protected void RegisterPackageOperationEvents(IPackageManager packageManager, IProjectManager projectManager)
         {
-            packageManager.PackageInstalled += OnPackageInstalled;
+            if (packageManager != null)
+            {
+                packageManager.PackageInstalled += OnPackageInstalled;
+            }
+            
             if (projectManager != null)
             {
                 projectManager.PackageReferenceAdded += OnPackageReferenceAdded;
@@ -512,7 +516,11 @@ namespace NuGet.Dialog.Providers
 
         protected void UnregisterPackageOperationEvents(IPackageManager packageManager, IProjectManager projectManager)
         {
-            packageManager.PackageInstalled -= OnPackageInstalled;
+            if (packageManager != null)
+            {
+                packageManager.PackageInstalled -= OnPackageInstalled;
+            }
+            
             if (projectManager != null)
             {
                 projectManager.PackageReferenceAdded -= OnPackageReferenceAdded;
