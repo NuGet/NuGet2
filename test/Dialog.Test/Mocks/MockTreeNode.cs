@@ -30,7 +30,7 @@ namespace NuGet.Dialog.Test
                 var packages = new List<IPackage>();
                 for (int i = 0; i < _numberOfPackages; i++)
                 {
-                    packages.Add(PackageUtility.CreatePackage("A" + i, "1.0", rating: i));
+                    packages.Add(PackageUtility.CreatePackage("A" + i, "1.0", downloadCount: i));
                 }
                 _packages = packages;
             }

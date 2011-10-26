@@ -15,8 +15,7 @@ namespace NuGet.VisualStudio.Test
             IPackage basePackage = PackageUtility.CreatePackage(
                 "A",
                 "1.2",
-                content: new string[] { "one", "two" },
-                rating: 1.0);
+                content: new string[] { "one", "two" });
 
             // Act
             var package = basePackage;
@@ -28,7 +27,6 @@ namespace NuGet.VisualStudio.Test
             Assert.Equal("A", package.Id);
             Assert.Equal(new SemanticVersion("1.2"), package.Version);
             Assert.Equal(2, contents.Count);
-            Assert.Equal(1.0, package.Rating);
             Assert.Equal("content\\one", content1);
             Assert.Equal("content\\two", content2);
         }

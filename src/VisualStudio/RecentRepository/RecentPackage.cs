@@ -181,22 +181,6 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public int RatingsCount
-        {
-            get
-            {
-                return _basePackage.RatingsCount;
-            }
-        }
-
-        public double Rating
-        {
-            get
-            {
-                return _basePackage.Rating;
-            }
-        }
-
         public string Copyright
         {
             get

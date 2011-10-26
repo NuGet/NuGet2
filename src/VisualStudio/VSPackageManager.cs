@@ -594,45 +594,54 @@ namespace NuGet.VisualStudio
                 eventListener = NullPackageOperationEventListener.Instance;
             }
 
-            ExecuteOperationsWithPackage(
-                null,
-                package,
-                operations,
-                () =>
-                {
-                    bool success = false;
+            try
+            {
+                eventListener.OnBeforePackageOperation(this);
 
-                    foreach (var project in projects)
+                ExecuteOperationsWithPackage(
+                    null,
+                    package,
+                    operations,
+                    () =>
                     {
-                        try
+                        bool success = false;
+
+                        foreach (var project in projects)
                         {
-                            eventListener.OnBeforeAddPackageReference(project);
+                            try
+                            {
+                                eventListener.OnBeforeAddPackageReference(project);
 
-                            IProjectManager projectManager = GetProjectManager(project);
-                            InitializeLogger(logger, projectManager);
+                                IProjectManager projectManager = GetProjectManager(project);
+                                InitializeLogger(logger, projectManager);
 
-                            projectAction(projectManager);
-                            success |= true;
+                                projectAction(projectManager);
+                                success |= true;
+                            }
+                            catch (Exception ex)
+                            {
+                                eventListener.OnAddPackageReferenceError(project, ex);
+                            }
+                            finally
+                            {
+                                eventListener.OnAfterAddPackageReference(project);
+                            }
                         }
-                        catch (Exception ex)
+
+                        // Throw an exception only if all the update failed for all projects
+                        // so we rollback any solution level operations that might have happened
+                        if (projects.Any() && !success)
                         {
-                            eventListener.OnAddPackageReferenceError(project, ex);
+                            throw new InvalidOperationException(VsResources.OperationFailed);
                         }
-                        finally
-                        {
-                            eventListener.OnAfterAddPackageReference(project);
-                        }
-                    }
 
-                    // Throw an exception only if all the update failed for all projects
-                    // so we rollback any solution level operations that might have happened
-                    if (projects.Any() && !success)
-                    {
-                        throw new InvalidOperationException(VsResources.OperationFailed);
-                    }
-
-                },
-                logger);
+                    },
+                    logger);
+            }
+            finally
+            {
+                eventListener.OnAfterPackageOperation(this);
+            }
         }
 
         private void ExecuteOperationsWithPackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, Action action, ILogger logger)
@@ -953,7 +962,7 @@ namespace NuGet.VisualStudio
                             }
                             catch (Exception e)
                             {
-                                logger.Log(MessageLevel.Error, e.Message);
+                                logger.Log(MessageLevel.Error, ExceptionUtility.Unwrap(e).Message);
                                 eventListener.OnAddPackageReferenceError(project, e);
                             }
                             finally
@@ -1042,7 +1051,7 @@ namespace NuGet.VisualStudio
                     }
                     catch (Exception e)
                     {
-                        logger.Log(MessageLevel.Error, e.Message);
+                        logger.Log(MessageLevel.Error, ExceptionUtility.Unwrap(e).Message);
                     }
                 }
             }

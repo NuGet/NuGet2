@@ -146,20 +146,30 @@ namespace NuGet.Dialog.Providers
         public void OnBeforeAddPackageReference(Project project)
         {
             RegisterPackageOperationEvents(
-                _activePackageManager,
+                null,
                 _activePackageManager.GetProjectManager(project));
         }
 
         public void OnAfterAddPackageReference(Project project)
         {
             UnregisterPackageOperationEvents(
-                _activePackageManager,
+                null,
                 _activePackageManager.GetProjectManager(project));
         }
 
         public void OnAddPackageReferenceError(Project project, Exception exception)
         {
             AddFailedProject(project, exception);
+        }
+
+        public void OnBeforePackageOperation(IVsPackageManager packageManager)
+        {
+            RegisterPackageOperationEvents(packageManager, projectManager: null);
+        }
+
+        public void OnAfterPackageOperation(IVsPackageManager packageManager)
+        {
+            UnregisterPackageOperationEvents(packageManager, projectManager: null);
         }
     }
 }
