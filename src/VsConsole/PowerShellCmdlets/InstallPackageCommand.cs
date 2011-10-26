@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Management.Automation;
 using NuGet.VisualStudio;
 
@@ -83,7 +84,7 @@ namespace NuGet.PowerShell.Commands
                 {
                     PackageManager.InstallPackage(ProjectManager, Id, Version, ignoreDependencies: IgnoreDependencies, allowPrereleaseVersions: IncludePrerelease.IsPresent,
                         logger: this);
-                    _hasConnectedToHttpSource |= UriHelper.IsHttpSource(PackageManager.SourceRepository.Source);
+                    _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source, _packageSourceProvider);
                 }
             }
             finally

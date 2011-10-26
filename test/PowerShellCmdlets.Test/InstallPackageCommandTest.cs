@@ -61,7 +61,7 @@ namespace NuGet.PowerShell.Commands.Test
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
 
-            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, null, null, null);
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, null, null);
             cmdlet.Id = "my-id";
             cmdlet.Version = new SemanticVersion("2.8");
 
@@ -81,7 +81,7 @@ namespace NuGet.PowerShell.Commands.Test
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
 
-            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, null, null, null);
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, null, null);
             cmdlet.Id = "my-id";
             cmdlet.Version = new SemanticVersion("2.8");
             cmdlet.IgnoreDependencies = new SwitchParameter(true);
@@ -306,11 +306,10 @@ namespace NuGet.PowerShell.Commands.Test
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
             // Act
-            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, null, new Mock<IHttpClientEvents>().Object, null);
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, new Mock<IHttpClientEvents>().Object, null);
             cmdlet.Id = "A";
             cmdlet.IncludePrerelease = true;
             cmdlet.Execute();
-
 
             // Assert
             sharedRepository.Verify();

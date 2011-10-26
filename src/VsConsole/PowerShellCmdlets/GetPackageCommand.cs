@@ -265,13 +265,13 @@ namespace NuGet.PowerShell.Commands
             }
             else if (SolutionManager.IsSolutionOpen)
             {
-                _hasConnectedToHttpSource |= IsHttpSource(_packageSourceProvider);
+                _hasConnectedToHttpSource |= UriHelper.IsHttpSource(_packageSourceProvider);
                 // If the solution is open, retrieve the cached repository instance
                 return PackageManager.SourceRepository;
             }
             else if (_packageSourceProvider.ActivePackageSource != null)
             {
-                _hasConnectedToHttpSource |= IsHttpSource(_packageSourceProvider);
+                _hasConnectedToHttpSource |= UriHelper.IsHttpSource(_packageSourceProvider);
                 // No solution available. Use the repository Url to create a new repository
                 return _repositoryFactory.CreateRepository(_packageSourceProvider.ActivePackageSource.Source);
             }
@@ -279,19 +279,6 @@ namespace NuGet.PowerShell.Commands
             {
                 // No active source has been specified. 
                 throw new InvalidOperationException(Resources.Cmdlet_NoActivePackageSource);
-            }
-        }
-
-        private static bool IsHttpSource(IVsPackageSourceProvider packageSourceProvider)
-        {
-            var activeSource = packageSourceProvider.ActivePackageSource;
-            if (activeSource.IsAggregate())
-            {
-                return packageSourceProvider.GetEnabledPackageSources().Any(s => UriHelper.IsHttpSource(s.Source));
-            }
-            else
-            {
-                return UriHelper.IsHttpSource(activeSource.Source);
             }
         }
 
