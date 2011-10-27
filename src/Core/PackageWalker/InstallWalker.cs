@@ -297,7 +297,8 @@ namespace NuGet
             Logger.Log(MessageLevel.Info, NuGetResources.Log_AttemptingToRetrievePackageFromSource, dependency);
 
             // First try to get a local copy of the package
-            IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, AllowPrereleaseVersions);
+            // Bug1638: Include prereleases when resolving locally installed dependencies.
+            IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, allowPrereleaseVersions: true);
 
             // Next, query the source repo for the same dependency
             IPackage sourcePackage = SourceRepository.ResolveDependency(dependency, ConstraintProvider, AllowPrereleaseVersions);

@@ -530,9 +530,9 @@ namespace NuGet.Test.VisualStudio
             var package3A = PackageUtility.CreatePackage("qux", "1.0alpha");
             var package3B = PackageUtility.CreatePackage("qux", "1.0beta");
             var package3 = PackageUtility.CreatePackage("qux", "1.0");
-            localRepository.AddPackage(package3);
-            localRepository.AddPackage(package3A);
-            localRepository.AddPackage(package3B);
+            sourceRepository.AddPackage(package3);
+            sourceRepository.AddPackage(package3A);
+            sourceRepository.AddPackage(package3B);
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.InstallPackage(package, ignoreDependencies: false, allowPrereleaseVersions: false),

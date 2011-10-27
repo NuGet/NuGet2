@@ -132,9 +132,6 @@
   <data name="Debug_AddedFileToFolder" xml:space="preserve">
     <value>Added file '{0}' to folder '{1}'.</value>
   </data>
-  <data name="Debug_DependencyAlreadyInstalled" xml:space="preserve">
-    <value>Dependency '{0}' already installed.</value>
-  </data>
   <data name="Debug_LookingForUpdates" xml:space="preserve">
     <value>Looking for updates for '{0}'...</value>
   </data>
