@@ -477,7 +477,8 @@ namespace NuGet.Dialog.Test
                 new System.Windows.ResourceDictionary(),
                 services,
                 new Mock<IProgressProvider>().Object,
-                solutionManager);
+                solutionManager,
+                new Mock<IFileOperations>().Object);
         }
     }
 }

@@ -21,6 +21,7 @@
     <Compile Include="Extensibility\VsPackageEventHandler.cs" />
     <Compile Include="Extensibility\VsPackageMetadata.cs" />
     <Compile Include="FallbackRepository.cs" />
+    <Compile Include="IFileOperations.cs" />
     <Compile Include="IOptionsPageActivator.cs" />
     <Compile Include="Extensibility\IVsPackageInstallerEvents.cs" />
     <Compile Include="Extensibility\IVsPackageInstallerServices.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="VisualStudioCredentialProvider.cs" />
     <Compile Include="Extensibility\VsPackageInstallerEvents.cs" />
     <Compile Include="Extensibility\VsPackageInstallerServices.cs" />
+    <Compile Include="VsFileOperations.cs" />
     <Compile Include="VsSettings.cs" />
     <Compile Include="VSRequestCredentialProvider.cs" />
     <Compile Include="VsTemplateWizard.cs" />

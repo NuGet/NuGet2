@@ -9,7 +9,6 @@ using Xunit;
 
 namespace NuGet.PowerShell.Commands.Test
 {
-
     public class UninstallPackageCommandTest
     {
         [Fact]
@@ -18,7 +17,7 @@ namespace NuGet.PowerShell.Commands.Test
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
-            var uninstallCmdlet = new UninstallPackageCommand(TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, null);
+            var uninstallCmdlet = new UninstallPackageCommand(TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, null, new Mock<IFileOperations>().Object);
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => uninstallCmdlet.GetResults(),
@@ -34,7 +33,7 @@ namespace NuGet.PowerShell.Commands.Test
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            var uninstallCmdlet = new Mock<UninstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null) { CallBase = true };
+            var uninstallCmdlet = new Mock<UninstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IFileOperations>().Object) { CallBase = true };
             uninstallCmdlet.Object.Id = id;
             uninstallCmdlet.Object.Version = version;
 
@@ -56,7 +55,7 @@ namespace NuGet.PowerShell.Commands.Test
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            var uninstallCmdlet = new Mock<UninstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null) { CallBase = true };
+            var uninstallCmdlet = new Mock<UninstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IFileOperations>().Object) { CallBase = true };
             uninstallCmdlet.Object.Id = id;
             uninstallCmdlet.Object.Version = version;
             uninstallCmdlet.Object.Force = new SwitchParameter(forceSwitch);
@@ -77,7 +76,7 @@ namespace NuGet.PowerShell.Commands.Test
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            var uninstallCmdlet = new Mock<UninstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null) { CallBase = true };
+            var uninstallCmdlet = new Mock<UninstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IFileOperations>().Object) { CallBase = true };
             uninstallCmdlet.Object.Id = "my-id";
             uninstallCmdlet.Object.Version = new SemanticVersion("2.8");
             uninstallCmdlet.Object.RemoveDependencies = new SwitchParameter(true);

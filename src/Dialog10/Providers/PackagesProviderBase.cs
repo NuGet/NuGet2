@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using EnvDTE;
@@ -26,6 +27,7 @@ namespace NuGet.Dialog.Providers
         private readonly IPackageRepository _localRepository;
         private readonly ProviderServices _providerServices;
         private Dictionary<Project, Exception> _failedProjects;
+        private string _readmeFile, _originalPackageId;
 
         private object _mediumIconDataTemplate;
         private object _detailViewDataTemplate;
@@ -33,15 +35,16 @@ namespace NuGet.Dialog.Providers
         private readonly IProgressProvider _progressProvider;
         private CultureInfo _uiCulture, _culture;
         private ISolutionManager _solutionManager;
+        private IFileOperations _fileOperations;
 
         protected PackagesProviderBase(
             IPackageRepository localRepository,
             ResourceDictionary resources,
             ProviderServices providerServices,
             IProgressProvider progressProvider,
-            ISolutionManager solutionManager)
+            ISolutionManager solutionManager,
+            IFileOperations fileOperations)
         {
-
             if (resources == null)
             {
                 throw new ArgumentNullException("resources");
@@ -57,6 +60,7 @@ namespace NuGet.Dialog.Providers
                 throw new ArgumentNullException("solutionManager");
             }
 
+            _fileOperations = fileOperations;
             _localRepository = localRepository;
             _providerServices = providerServices;
             _progressProvider = progressProvider;
@@ -301,6 +305,8 @@ namespace NuGet.Dialog.Providers
             // disable all operations while this install is in progress
             OperationCoordinator.IsBusy = true;
 
+            _readmeFile = null;
+            _originalPackageId = item.Id;
             _progressProvider.ProgressAvailable += OnProgressAvailable;
 
             _uiCulture = System.Threading.Thread.CurrentThread.CurrentUICulture;
@@ -353,6 +359,7 @@ namespace NuGet.Dialog.Providers
                 {
                     OnExecuteCompleted((PackageItem)e.Result);
                     _providerServices.ProgressWindow.SetCompleted(successful: true);
+                    OpenReadMeFile();
                 }
             }
             else
@@ -531,6 +538,7 @@ namespace NuGet.Dialog.Providers
         private void OnPackageInstalled(object sender, PackageOperationEventArgs e)
         {
             _providerServices.ScriptExecutor.ExecuteInitScript(e.InstallPath, e.Package, this);
+            PrepareOpenReadMeFile(e);
         }
 
         private void OnPackageReferenceAdded(object sender, PackageOperationEventArgs e)
@@ -569,7 +577,6 @@ namespace NuGet.Dialog.Providers
             bool includePrerelease,
             out IList<PackageOperation> operations)
         {
-
             // Review: Is there any way the user could get into a position that we would need to allow pre release versions here?
             var walker = new InstallWalker(
                 LocalRepository,
@@ -588,6 +595,23 @@ namespace NuGet.Dialog.Providers
                 {
                     throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
                 }
+            }
+        }
+
+        private void PrepareOpenReadMeFile(PackageOperationEventArgs e)
+        {
+            // only open the read me file for the first package that initiates this operation.
+            if (e.Package.Id.Equals(_originalPackageId, StringComparison.OrdinalIgnoreCase) && e.Package.HasReadMeFileAtRoot())
+            {
+                _readmeFile = Path.Combine(e.InstallPath, NuGetConstants.ReadmeFileName);
+            }
+        }
+
+        private void OpenReadMeFile()
+        {
+            if (_readmeFile != null)
+            {
+                _fileOperations.OpenFile(_readmeFile);
             }
         }
     }

@@ -21,7 +21,8 @@ namespace NuGet.Dialog.Providers
             IVsPackageManagerFactory packageManagerFactory,
             ProviderServices providerServices,
             IProgressProvider progressProvider,
-            ISolutionManager solutionManager) :
+            ISolutionManager solutionManager,
+            IFileOperations fileOperations) :
             base(
                 null,
                 localRepository,
@@ -31,7 +32,8 @@ namespace NuGet.Dialog.Providers
                 packageManagerFactory,
                 providerServices,
                 progressProvider,
-                solutionManager)
+                solutionManager,
+                fileOperations)
         {
             _userNotifierServices = providerServices.WindowServices;
         }

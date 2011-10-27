@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using Moq;
 using NuGet.Dialog.PackageManagerUI;
@@ -35,7 +36,8 @@ namespace NuGet.Dialog.Test
                 new ResourceDictionary(),
                 new ProviderServices(new Mock<IUserNotifierServices>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider()),
                 new Mock<IProgressProvider>().Object,
-                new Mock<ISolutionManager>().Object)
+                new Mock<ISolutionManager>().Object,
+                new Mock<IFileOperations>().Object)
         {
             _supportedFrameworks = supportedFrameworks;
         }

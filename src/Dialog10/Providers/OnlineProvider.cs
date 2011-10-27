@@ -30,8 +30,9 @@ namespace NuGet.Dialog.Providers
             IVsPackageManagerFactory packageManagerFactory,
             ProviderServices providerServices,
             IProgressProvider progressProvider,
-            ISolutionManager solutionManager) :
-            base(localRepository, resources, providerServices, progressProvider, solutionManager)
+            ISolutionManager solutionManager,
+            IFileOperations fileOperations) :
+            base(localRepository, resources, providerServices, progressProvider, solutionManager, fileOperations)
         {
 
             _packageRepositoryFactory = packageRepositoryFactory;

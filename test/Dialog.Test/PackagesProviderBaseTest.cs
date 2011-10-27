@@ -7,6 +7,7 @@ using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using Xunit;
+using EnvDTE;
 
 namespace NuGet.Dialog.Test
 {
@@ -181,7 +182,8 @@ namespace NuGet.Dialog.Test
                     resources,
                     new ProviderServices(new Mock<IUserNotifierServices>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider()),
                     new Mock<IProgressProvider>().Object,
-                    new Mock<ISolutionManager>().Object)
+                    new Mock<ISolutionManager>().Object,
+                    new Mock<IFileOperations>().Object)
             {
             }
 

@@ -25,7 +25,8 @@ namespace NuGet.Dialog.Providers
             IPackageSourceProvider packageSourceProvider,
             ProviderServices providerServices,
             IProgressProvider progressProvider,
-            ISolutionManager solutionManager) :
+            ISolutionManager solutionManager,
+            IFileOperations fileOperations) :
             base(
                 localRepository,
                 resources,
@@ -34,7 +35,8 @@ namespace NuGet.Dialog.Providers
                 packageManagerFactory,
                 providerServices,
                 progressProvider,
-                solutionManager)
+                solutionManager,
+                fileOperations)
         {
 
             _recentPackagesRepository = recentPackagesRepository;

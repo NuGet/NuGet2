@@ -336,7 +336,8 @@ namespace NuGet.Dialog.Test
                 factory.Object,
                 services,
                 new Mock<IProgressProvider>().Object,
-                solutionManager);
+                solutionManager,
+                new Mock<IFileOperations>().Object);
         }
     }
 }

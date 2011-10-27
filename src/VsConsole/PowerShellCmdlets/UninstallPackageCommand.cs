@@ -10,16 +10,16 @@ namespace NuGet.PowerShell.Commands
     [Cmdlet(VerbsLifecycle.Uninstall, "Package")]
     public class UninstallPackageCommand : ProcessPackageBaseCommand
     {
-
         public UninstallPackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                   ServiceLocator.GetInstance<IHttpClientEvents>())
+                   ServiceLocator.GetInstance<IHttpClientEvents>(),
+                   ServiceLocator.GetInstance<IFileOperations>())
         {
         }
 
-        public UninstallPackageCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory, IHttpClientEvents httpClientEvents)
-            : base(solutionManager, packageManagerFactory, httpClientEvents)
+        public UninstallPackageCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory, IHttpClientEvents httpClientEvents, IFileOperations fileOperations)
+            : base(solutionManager, packageManagerFactory, httpClientEvents, fileOperations)
         {
         }
 

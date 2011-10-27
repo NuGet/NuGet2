@@ -11,6 +11,8 @@ namespace NuGet
 
         public static readonly string DefaultSymbolServerUrl = "http://nuget.gw.symbolsource.org/Public/NuGet";
 
+        public static readonly string ReadmeFileName = "readme.txt";
+
         // This is temporary until we fix the gallery to have proper first class support for this.
         // The magic unpublished date is 1900-01-01T00:00:00
         public static readonly DateTimeOffset Unpublished = new DateTimeOffset(1900, 1, 1, 0, 0, 0, TimeSpan.FromHours(-8));

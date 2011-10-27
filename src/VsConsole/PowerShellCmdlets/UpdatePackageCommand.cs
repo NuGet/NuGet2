@@ -22,7 +22,8 @@ namespace NuGet.PowerShell.Commands
                    ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                    ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                    ServiceLocator.GetInstance<IHttpClientEvents>(),
-                   ServiceLocator.GetInstance<IProductUpdateService>())
+                   ServiceLocator.GetInstance<IProductUpdateService>(),
+                   ServiceLocator.GetInstance<IFileOperations>())
         {
         }
 
@@ -31,8 +32,9 @@ namespace NuGet.PowerShell.Commands
                                     IPackageRepositoryFactory repositoryFactory,
                                     IVsPackageSourceProvider packageSourceProvider,
                                     IHttpClientEvents httpClientEvents,
-                                    IProductUpdateService productUpdateService)
-            : base(solutionManager, packageManagerFactory, httpClientEvents)
+                                    IProductUpdateService productUpdateService,
+                                    IFileOperations fileOperations)
+            : base(solutionManager, packageManagerFactory, httpClientEvents, fileOperations)
         {
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;

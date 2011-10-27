@@ -14,5 +14,10 @@ namespace NuGet.VisualStudio
         {
             return package.GetFiles().Any(file => names.Any(name => file.Path.EndsWith(name, StringComparison.OrdinalIgnoreCase)));
         }
+
+        public static bool HasReadMeFileAtRoot(this IPackage package)
+        {
+            return package.GetFiles().Any(f => f.Path.Equals(NuGetConstants.ReadmeFileName, StringComparison.OrdinalIgnoreCase));
+        }
     }
 }

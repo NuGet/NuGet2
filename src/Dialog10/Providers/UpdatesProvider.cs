@@ -10,7 +10,6 @@ namespace NuGet.Dialog.Providers
 {
     internal class UpdatesProvider : OnlineProvider
     {
-
         public UpdatesProvider(
             Project project,
             IPackageRepository localRepository,
@@ -20,7 +19,8 @@ namespace NuGet.Dialog.Providers
             IVsPackageManagerFactory packageManagerFactory,
             ProviderServices providerServices,
             IProgressProvider progressProvider,
-            ISolutionManager solutionManager) :
+            ISolutionManager solutionManager,
+            IFileOperations fileOperations) :
             base(
                 project,
                 localRepository,
@@ -30,7 +30,8 @@ namespace NuGet.Dialog.Providers
                 packageManagerFactory,
                 providerServices,
                 progressProvider,
-                solutionManager)
+                solutionManager,
+                fileOperations)
         {
         }
 

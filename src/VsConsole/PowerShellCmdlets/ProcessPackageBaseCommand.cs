@@ -21,10 +21,18 @@ namespace NuGet.PowerShell.Commands
         // project managers since the same cmdlet instance can be used across invocations.
         private readonly Dictionary<string, IProjectManager> _projectManagers = new Dictionary<string, IProjectManager>();
         private readonly Dictionary<IProjectManager, Project> _projectManagerToProject = new Dictionary<IProjectManager, Project>();
+        private string _readmeFile;
+        private readonly IFileOperations _fileOperations;
 
-        protected ProcessPackageBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory, IHttpClientEvents httpClientEvents)
+        protected ProcessPackageBaseCommand(
+            ISolutionManager solutionManager, 
+            IVsPackageManagerFactory packageManagerFactory, 
+            IHttpClientEvents httpClientEvents,
+            IFileOperations fileOperations)
             : base(solutionManager, packageManagerFactory, httpClientEvents)
         {
+            Debug.Assert(fileOperations != null);
+            _fileOperations = fileOperations;
         }
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
@@ -64,6 +72,8 @@ namespace NuGet.PowerShell.Commands
         {
             base.BeginProcessing();
 
+            _readmeFile = null;
+
             if (PackageManager != null)
             {
                 PackageManager.PackageInstalling += OnPackageInstalling;
@@ -88,6 +98,8 @@ namespace NuGet.PowerShell.Commands
             }
 
             WriteLine();
+
+            OpenReadMeFile();
         }
 
         private Tuple<IProjectManager, Project> GetProjectManager()
@@ -160,6 +172,24 @@ namespace NuGet.PowerShell.Commands
         {
             AddToolsFolderToEnvironmentPath(e.InstallPath);
             ExecuteScript(e.InstallPath, PowerShellScripts.Init, e.Package, null);
+            PrepareOpenReadMeFile(e);
+        }
+
+        private void PrepareOpenReadMeFile(PackageOperationEventArgs e)
+        {
+            // only open the read me file for the first package that initiates this operation.
+            if (e.Package.Id.Equals(this.Id, StringComparison.OrdinalIgnoreCase) && e.Package.HasReadMeFileAtRoot()) 
+            {
+                _readmeFile = Path.Combine(e.InstallPath, NuGetConstants.ReadmeFileName);
+            }
+        }
+
+        private void OpenReadMeFile()
+        {
+            if (_readmeFile != null )
+            {
+                _fileOperations.OpenFile(_readmeFile);
+            }
         }
 
         protected virtual void AddToolsFolderToEnvironmentPath(string installPath)
