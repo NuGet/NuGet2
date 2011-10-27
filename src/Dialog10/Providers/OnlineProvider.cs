@@ -163,7 +163,7 @@ namespace NuGet.Dialog.Providers
                 // hide the progress window if we are going to show license window
                 HideProgressWindow();
 
-                bool accepted = _providerServices.WindowServices.ShowLicenseWindow(licensePackages);
+                bool accepted = _providerServices.UserNotifierServices.ShowLicenseWindow(licensePackages);
                 if (!accepted)
                 {
                     return false;

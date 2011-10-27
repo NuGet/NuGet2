@@ -35,7 +35,7 @@ namespace NuGet.Dialog.Providers
                 solutionManager,
                 fileOperations)
         {
-            _userNotifierServices = providerServices.WindowServices;
+            _userNotifierServices = providerServices.UserNotifierServices;
         }
 
         protected override bool ExecuteCore(PackageItem item)

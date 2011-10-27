@@ -375,7 +375,7 @@ namespace NuGet.Dialog.Providers
                 // then hide the progress window.
                 _providerServices.ProgressWindow.Close();
 
-                _providerServices.WindowServices.ShowSummaryWindow(_failedProjects);
+                _providerServices.UserNotifierServices.ShowSummaryWindow(_failedProjects);
             }
 
             // write a blank line into the output window to separate entries from different operations

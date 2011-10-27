@@ -42,7 +42,7 @@ namespace NuGet.Dialog.Providers
 
             _packageManager = packageManager;
             _project = project;
-            _userNotifierServices = providerServices.WindowServices;
+            _userNotifierServices = providerServices.UserNotifierServices;
         }
 
         protected IVsPackageManager PackageManager

@@ -32,6 +32,5 @@
         <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
         <MefComponent>|VisualStudio|</MefComponent>
         <Assembly AssemblyName="|VisualStudio.Interop;AssemblyName|">|VisualStudio.Interop|</Assembly>
-        <MefComponent>|DialogServices|</MefComponent>
     </Content>
 </Vsix>

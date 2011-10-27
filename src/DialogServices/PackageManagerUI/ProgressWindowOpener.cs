@@ -1,12 +1,10 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace NuGet.Dialog.PackageManagerUI
 {
-    [Export(typeof(IProgressWindowOpener))]
     public sealed class ProgressWindowOpener : IProgressWindowOpener
     {
         private static readonly TimeSpan DelayInterval = TimeSpan.FromMilliseconds(500);

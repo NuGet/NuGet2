@@ -14,8 +14,6 @@ using Xunit;
 
 namespace NuGet.Dialog.Test
 {
-
-
     public class InstalledProviderTest
     {
 
@@ -256,6 +254,7 @@ namespace NuGet.Dialog.Test
             var services = new ProviderServices(
                 null,
                 mockProgressWindowOpener.Object,
+                new Mock<ISelectedProviderSettings>().Object,
                 scriptExecutor,
                 new MockOutputConsoleProvider()
             );

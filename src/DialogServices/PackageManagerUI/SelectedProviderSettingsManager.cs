@@ -1,10 +1,8 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.PackageManagerUI
 {
-    [Export(typeof(ISelectedProviderSettings))]
     internal class SelectedProviderSettingsManager : SettingsManagerBase, ISelectedProviderSettings
     {
         private const string SettingsRoot = "NuGet";

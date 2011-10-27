@@ -32,7 +32,7 @@ namespace NuGet.Dialog.Providers
         {
 
             _solutionManager = solutionManager;
-            _userNotifierServices = providerServices.WindowServices;
+            _userNotifierServices = providerServices.UserNotifierServices;
         }
 
         public override bool CanExecute(PackageItem item)

@@ -40,10 +40,8 @@ namespace NuGet.Dialog
                  ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                  ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                  ServiceLocator.GetInstance<IPackageSourceProvider>(),
-                 ServiceLocator.GetInstance<ProviderServices>(),
                  ServiceLocator.GetInstance<IRecentPackageRepository>(),
                  ServiceLocator.GetInstance<IHttpClientEvents>(),
-                 ServiceLocator.GetInstance<ISelectedProviderSettings>(),
                  ServiceLocator.GetInstance<IProductUpdateService>(),
                  ServiceLocator.GetInstance<ISolutionManager>(),
                  ServiceLocator.GetInstance<IOptionsPageActivator>(),
@@ -52,19 +50,17 @@ namespace NuGet.Dialog
         }
 
         private PackageManagerWindow(Project project,
-                                    DTE dte,
-                                    IVsUIShell vsUIShell,
-                                    IVsPackageManagerFactory packageManagerFactory,
-                                    IPackageRepositoryFactory repositoryFactory,
-                                    IPackageSourceProvider packageSourceProvider,
-                                    ProviderServices providerServices,
-                                    IRecentPackageRepository recentPackagesRepository,
-                                    IHttpClientEvents httpClientEvents,
-                                    ISelectedProviderSettings selectedProviderSettings,
-                                    IProductUpdateService productUpdateService,
-                                    ISolutionManager solutionManager,
-                                    IOptionsPageActivator optionPageActivator,
-                                    IFileOperations fileOperations)
+                                     DTE dte,
+                                     IVsUIShell vsUIShell,
+                                     IVsPackageManagerFactory packageManagerFactory,
+                                     IPackageRepositoryFactory repositoryFactory,
+                                     IPackageSourceProvider packageSourceProvider,
+                                     IRecentPackageRepository recentPackagesRepository,
+                                     IHttpClientEvents httpClientEvents,
+                                     IProductUpdateService productUpdateService,
+                                     ISolutionManager solutionManager,
+                                     IOptionsPageActivator optionPageActivator,
+                                     IFileOperations fileOperations)
             : base(F1Keyword)
         {
 
@@ -76,25 +72,21 @@ namespace NuGet.Dialog
                 _httpClientEvents.SendingRequest += OnSendingRequest;
             }
 
-            AddUpdateBar(productUpdateService);
-
             _vsUIShell = vsUIShell;
-            _selectedProviderSettings = selectedProviderSettings;
             _productUpdateService = productUpdateService;
             _optionsPageActivator = optionPageActivator;
             _activeProject = project;
 
+            AddUpdateBar(productUpdateService);
             InsertDisclaimerElement();
             AdjustSortComboBoxWidth();
 
             // replace the ConsoleOutputProvider with SmartOutputConsoleProvider so that we can clear 
             // the console the first time an entry is written to it
+            var providerServices = new ProviderServices();
             _smartOutputConsoleProvider = new SmartOutputConsoleProvider(providerServices.OutputConsoleProvider);
-            providerServices = new ProviderServices(
-                providerServices.WindowServices,
-                providerServices.ProgressWindow,
-                providerServices.ScriptExecutor,
-                _smartOutputConsoleProvider);
+            providerServices.OutputConsoleProvider = _smartOutputConsoleProvider;
+            _selectedProviderSettings = providerServices.SelectedProviderSettings;
 
             SetupProviders(
                 project,

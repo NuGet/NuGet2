@@ -106,8 +106,6 @@
     <ProjectReference Include="..\DialogServices\DialogServices.csproj">
       <Project>{05497432-8899-4ED4-BB97-7B5EA3E911DB}</Project>
       <Name>DialogServices</Name>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
-      <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
     <ProjectReference Include="..\Dialog\Dialog.csproj">
       <Project>{1C5E9CB6-F6FE-4858-BB63-AA50832F0A4D}</Project>

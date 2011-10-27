@@ -319,6 +319,7 @@ namespace NuGet.Dialog.Test
             var services = new ProviderServices(
                 userNotifierServices,
                 mockProgressWindowOpener.Object,
+                new Mock<ISelectedProviderSettings>().Object,
                 scriptExecutor,
                 new MockOutputConsoleProvider()
             );

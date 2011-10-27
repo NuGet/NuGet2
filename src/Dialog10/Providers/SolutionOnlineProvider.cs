@@ -36,7 +36,7 @@ namespace NuGet.Dialog.Providers
                 solutionManager,
                 fileOperations)
         {
-            _userNotifierServices = providerServices.WindowServices;
+            _userNotifierServices = providerServices.UserNotifierServices;
             _solutionManager = solutionManager;
         }
 

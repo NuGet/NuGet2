@@ -258,7 +258,7 @@ namespace NuGet.Dialog.Providers
                     String.Format(CultureInfo.CurrentCulture, CommonResources.Argument_Must_Be_GreaterThanOrEqualTo, 1));
             }
 
-            Trace.WriteLine("Dialog loading page: " + pageNumber);
+            Debug.WriteLine("Dialog loading page: " + pageNumber);
             if (_loadingInProgress)
             {
                 return;
@@ -303,7 +303,7 @@ namespace NuGet.Dialog.Providers
         /// </summary>
         private void CancelCurrentExtensionQuery()
         {
-            Trace.WriteLine("Cancelling pending extensions query.");
+            Debug.WriteLine("Cancelling pending extensions query.");
 
             if (_currentCancellationSource != null)
             {
