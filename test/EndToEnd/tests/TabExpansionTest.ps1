@@ -380,10 +380,10 @@ function Test-InstallPackageCommandShowTabExpansionForPreReleasePackagesVersions
     # Assert
     Assert-AreEqual 4 $suggestions.Count
 
-    Assert-AreEqual '1.0.1a' $suggestions[0]
+    Assert-AreEqual '1.0.1-a' $suggestions[0]
     Assert-AreEqual '1.0.0' $suggestions[1]
-    Assert-AreEqual '1.0.0b' $suggestions[2]
-    Assert-AreEqual '1.0.0a' $suggestions[3]
+    Assert-AreEqual '1.0.0-b' $suggestions[2]
+    Assert-AreEqual '1.0.0-a' $suggestions[3]
 }
 
 function Test-UpdatePackageCommandShowTabExpansionForPreReleasePackagesVersions {
@@ -401,7 +401,7 @@ function Test-UpdatePackageCommandShowTabExpansionForPreReleasePackagesVersions 
     # Assert
     Assert-AreEqual 2 $suggestions.Count
 
-    Assert-AreEqual '1.0.1a' $suggestions[0]
+    Assert-AreEqual '1.0.1-a' $suggestions[0]
     Assert-AreEqual '1.0.0' $suggestions[1]
 }
 

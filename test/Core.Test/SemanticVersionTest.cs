@@ -26,8 +26,8 @@ namespace NuGet.Test
             get
             {
                 yield return new object[] { "1.0.0", new Version("1.0.0.0"), "" };
-                yield return new object[] { "2.3alpha", new Version("2.3.0.0"), "alpha" };
-                yield return new object[] { "3.4.0.3RC-3", new Version("3.4.0.3"), "RC-3" };
+                yield return new object[] { "2.3-alpha", new Version("2.3.0.0"), "alpha" };
+                yield return new object[] { "3.4.0.3-RC-3", new Version("3.4.0.3"), "RC-3" };
             }
         }
 
@@ -47,7 +47,9 @@ namespace NuGet.Test
         [InlineData("1.2.3.Beta")]
         [InlineData("1.2.3.4This version is full of awesomeness!!")]
         [InlineData("So.is.this")]
+        [InlineData("1.34.2Alpha")]
         [InlineData("1.34.2Release Candidate")]
+        [InlineData("1.4.7-")]
         public void ParseThrowsIfStringIsNotAValidSemVer(string versionString)
         {
             ExceptionAssert.ThrowsArgumentException(() => SemanticVersion.Parse(versionString),
@@ -82,10 +84,10 @@ namespace NuGet.Test
         {
             get
             {
-                yield return new object[] { "1.022Beta", new SemanticVersion(new Version("1.22.0.0"), "Beta") };
-                yield return new object[] { "23.2.3Alpha", new SemanticVersion(new Version("23.2.3.0"), "Alpha") };
-                yield return new object[] { "1.3.42.10133PreRelease", new SemanticVersion(new Version("1.3.42.10133"), "PreRelease") };
-                yield return new object[] { "1.3.42.200930RC-2", new SemanticVersion(new Version("1.3.42.200930"), "RC-2") };
+                yield return new object[] { "1.022-Beta", new SemanticVersion(new Version("1.22.0.0"), "Beta") };
+                yield return new object[] { "23.2.3-Alpha", new SemanticVersion(new Version("23.2.3.0"), "Alpha") };
+                yield return new object[] { "1.3.42.10133-PreRelease", new SemanticVersion(new Version("1.3.42.10133"), "PreRelease") };
+                yield return new object[] { "1.3.42.200930-RC-2", new SemanticVersion(new Version("1.3.42.200930"), "RC-2") };
             }
         }
 
@@ -105,9 +107,9 @@ namespace NuGet.Test
         {
             get
             {
-                yield return new object[] { "  1.022Beta", new SemanticVersion(new Version("1.22.0.0"), "Beta") };
-                yield return new object[] { "23.2.3Alpha  ", new SemanticVersion(new Version("23.2.3.0"), "Alpha") };
-                yield return new object[] { "    1.3.42.10133PreRelease  ", new SemanticVersion(new Version("1.3.42.10133"), "PreRelease") };
+                yield return new object[] { "  1.022-Beta", new SemanticVersion(new Version("1.22.0.0"), "Beta") };
+                yield return new object[] { "23.2.3-Alpha  ", new SemanticVersion(new Version("23.2.3.0"), "Alpha") };
+                yield return new object[] { "    1.3.42.10133-PreRelease  ", new SemanticVersion(new Version("1.3.42.10133"), "PreRelease") };
             }
         }
 
@@ -130,10 +132,10 @@ namespace NuGet.Test
         [InlineData("1.4.5.6", "1.45.6")]
         [InlineData("1.4.5.6", "1.4.5.60")]
         [InlineData("1.01", "1.10")]
-        [InlineData("1.01alpha", "1.10beta")]
-        [InlineData("1.01.0RC-1", "1.10.0rc-2")]
-        [InlineData("1.01RC-1", "1.01")]
-        [InlineData("1.01", "1.2preview")]
+        [InlineData("1.01-alpha", "1.10-beta")]
+        [InlineData("1.01.0-RC-1", "1.10.0-rc-2")]
+        [InlineData("1.01-RC-1", "1.01")]
+        [InlineData("1.01", "1.2-preview")]
         public void SemVerLessThanAndGreaterThanOperatorsWorks(string versionA, string versionB)
         {
             // Arrange
@@ -165,8 +167,8 @@ namespace NuGet.Test
         [InlineData("1.0", "1.0.0.0")]
         [InlineData("1.23.01", "1.23.1")]
         [InlineData("1.45.6", "1.45.6.0")]
-        [InlineData("1.45.6Alpha", "1.45.6Alpha")]
-        [InlineData("1.6.2BeTa", "1.6.02beta")]
+        [InlineData("1.45.6-Alpha", "1.45.6-Alpha")]
+        [InlineData("1.6.2-BeTa", "1.6.02-beta")]
         [InlineData("22.3.07     ", "22.3.07")]
         public void SemVerEqualsOperatorWorks(string versionA, string versionB)
         {
@@ -201,10 +203,10 @@ namespace NuGet.Test
         [InlineData("1.0")]
         [InlineData("1.0.0")]
         [InlineData("1.0.0.0")]
-        [InlineData("1.0alpha")]
-        [InlineData("1.0.0b")]
+        [InlineData("1.0-alpha")]
+        [InlineData("1.0.0-b")]
         [InlineData("3.0.1.2")]
-        [InlineData("2.1.4.3pre-1")]
+        [InlineData("2.1.4.3-pre-1")]
         public void ToStringReturnsOriginalValue(string version)
         {
             // Act
@@ -214,11 +216,33 @@ namespace NuGet.Test
             Assert.Equal(version, semVer.ToString());
         }
 
+        public static IEnumerable<object[]> ToStringFromVersionData
+        {
+            get
+            {
+                yield return new object[] { new Version("1.0"), null, "1.0" };
+                yield return new object[] { new Version("1.0.3.120"), String.Empty, "1.0.3.120" };
+                yield return new object[] { new Version("1.0.3.120"), "alpha", "1.0.3.120-alpha" };
+                yield return new object[] { new Version("1.0.3.120"), "rc-2", "1.0.3.120-rc-2" };
+            }
+        }
+
+        [Theory]
+        [PropertyDataAttribute("ToStringFromVersionData")]
+        public void ToStringConstructedFromVersionAndSpecialVersionConstructor(Version version, string specialVersion, string expected)
+        {
+            // Act
+            SemanticVersion semVer = new SemanticVersion(version, specialVersion);
+
+            // Assert
+            Assert.Equal(expected, semVer.ToString());
+        }
+
         [Fact]
         public void TryParseStrictParsesStrictVersion()
         {
             // Arrange
-            var versionString = "1.3.2CTP-2-Refresh-Alpha";
+            var versionString = "1.3.2-CTP-2-Refresh-Alpha";
 
             // Act
             SemanticVersion version;
@@ -233,9 +257,9 @@ namespace NuGet.Test
         [Theory]
         [InlineData("2.7")]
         [InlineData("1.3.4.5")]
-        [InlineData("1.3alpha")]
+        [InlineData("1.3-alpha")]
         [InlineData("1.3 .4")]
-        [InlineData("2.3.18.2a")]
+        [InlineData("2.3.18.2-a")]
         public void TryParseStrictReturnsFalseIfVersionIsNotStrictSemVer(string version)
         {
             // Act 

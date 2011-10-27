@@ -274,7 +274,7 @@ namespace NuGet.PowerShell.Commands.Test
         {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
-            var packageRepository = new MockPackageRepository { PackageUtility.CreatePackage("A", "1.0.0a") };
+            var packageRepository = new MockPackageRepository { PackageUtility.CreatePackage("A", "1.0.0-a") };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
             var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object,
                 recentPackageRepository.Object, null);
@@ -294,7 +294,7 @@ namespace NuGet.PowerShell.Commands.Test
         public void InstallPackageCmdletInstallPrereleasePackageIfFlagIsPresent()
         {
             // Arrange
-            var packageA = PackageUtility.CreatePackage("A", "1.0.0a");
+            var packageA = PackageUtility.CreatePackage("A", "1.0.0-a");
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();

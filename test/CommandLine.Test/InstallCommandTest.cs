@@ -9,7 +9,6 @@ using Xunit;
 
 namespace NuGet.Test.NuGetCommandLine.Commands
 {
-
     public class InstallCommandTest
     {
         [Fact]
@@ -174,7 +173,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             installCommand.ExecuteCommand();
 
             // Assert
-            Assert.Equal(@"Baz.0.8.1alpha\Baz.0.8.1alpha.nupkg", fileSystem.Paths.Single().Key);
+            Assert.Equal(@"Baz.0.8.1-alpha\Baz.0.8.1-alpha.nupkg", fileSystem.Paths.Single().Key);
         }
 
         [Fact]
@@ -223,7 +222,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Add(c)).Verifiable();
             repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Remove(c)).Verifiable();
 
-            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object, new MockPackageRepository());
+            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object,
+                new MockPackageRepository());
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager);
 
             installCommand.ExcludeVersion = true;
@@ -268,13 +268,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             fileSystem.AddFile(@"packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""Foo"" version=""1.0.0"" />
-  <package id=""Qux"" version=""2.3.56beta"" />
+  <package id=""Qux"" version=""2.3.56-beta"" />
 </packages>");
 
             var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
             var package = PackageUtility.CreatePackage("Foo", "1.0.0");
             packageManager.Setup(p => p.InstallPackage("Foo", new SemanticVersion("1.0.0"), true, true)).Verifiable();
-            packageManager.Setup(p => p.InstallPackage("Qux", new SemanticVersion("2.3.56beta"), true, true)).Verifiable();
+            packageManager.Setup(p => p.InstallPackage("Qux", new SemanticVersion("2.3.56-beta"), true, true)).Verifiable();
             packageManager.SetupGet(p => p.PathResolver).Returns(new DefaultPackagePathResolver(fileSystem));
             var repository = new MockPackageRepository();
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
@@ -293,7 +293,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         private static IPackageRepositoryFactory GetFactory()
         {
             var repositoryA = new MockPackageRepository { PackageUtility.CreatePackage("Foo"), PackageUtility.CreatePackage("Baz", "0.4"), PackageUtility.CreatePackage("Baz", "0.7") };
-            var repositoryB = new MockPackageRepository { PackageUtility.CreatePackage("Bar", "0.5"), PackageUtility.CreatePackage("Baz", "0.8.1alpha") };
+            var repositoryB = new MockPackageRepository { PackageUtility.CreatePackage("Bar", "0.5"), PackageUtility.CreatePackage("Baz", "0.8.1-alpha") };
 
             var factory = new Mock<IPackageRepositoryFactory>();
             factory.Setup(c => c.CreateRepository(It.Is<string>(f => f.Equals("Some source")))).Returns(repositoryA);

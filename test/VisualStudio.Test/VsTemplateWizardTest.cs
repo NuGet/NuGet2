@@ -222,13 +222,13 @@ namespace NuGet.VisualStudio.Test
         public void GetConfigurationFromXmlDocument_WorksWithSemanticVersions()
         {
             var expectedPackages = new[] {
-                new VsTemplateWizardPackageInfo("MyPackage", "4.0.0ctp-2"),
+                new VsTemplateWizardPackageInfo("MyPackage", "4.0.0-ctp-2"),
             };
             var document =
                 new XDocument(new XElement("VSTemplate",
                     new XElement("WizardData",
                         new XElement("packages",
-                            new XElement("package", new XAttribute("id", "MyPackage"), new XAttribute("version", "4.0.0ctp-2"))))));
+                            new XElement("package", new XAttribute("id", "MyPackage"), new XAttribute("version", "4.0.0-ctp-2"))))));
 
             VerifyParsedPackages(document, expectedPackages);
         }
@@ -416,7 +416,7 @@ namespace NuGet.VisualStudio.Test
             projectItemMock.Setup(i => i.ContainingProject).Returns(mockProject);
             var installerMock = new Mock<IVsPackageInstaller>();
             var document = BuildDocument("template",
-                BuildPackageElement("MyPackage", "1.0.0ctp-1"),
+                BuildPackageElement("MyPackage", "1.0.0-ctp-1"),
                 BuildPackageElement("MyOtherPackage", "2.0.3.4"));
             var templateWizard = new TestableVsTemplateWizard(installerMock.Object, loadDocumentCallback: p => document);
             var wizard = (IWizard)templateWizard;
@@ -432,7 +432,7 @@ namespace NuGet.VisualStudio.Test
             // Assert
             installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyPackage", new SemanticVersion(1, 0, 0, "ctp-1"), true));
             installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyOtherPackage", new SemanticVersion(2, 0, 3, 4), true));
-            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0.0ctp-1 to project...");
+            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0.0-ctp-1 to project...");
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0.3.4 to project...");
         }
 

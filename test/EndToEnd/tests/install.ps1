@@ -1371,7 +1371,7 @@ function Test-InstallPackageInstallsHighestPackageIfPreReleaseFlagIsSet {
     $a | Install-Package -Source $context.RepositoryRoot PreReleaseTestPackage -PreRelease
 
     # Assert
-    Assert-Package $a 'PreReleaseTestPackage' '1.0.1a'
+    Assert-Package $a 'PreReleaseTestPackage' '1.0.1-a'
 }
 
 function Test-InstallPackageInstallsHighestPackageIfItIsReleaseWhenPreReleaseFlagIsSet {
@@ -1427,10 +1427,10 @@ function Test-InstallPackageConsidersPrereleasePackagesWhenResolvingDependencyWh
     $a = New-ClassLibrary
 
     $a | Install-Package -Source $context.RepositoryRoot PrereleaseTestPackage -Prerelease
-    Assert-Package $a 'PrereleaseTestPackage' '1.0.1a'
+    Assert-Package $a 'PrereleaseTestPackage' '1.0.1-a'
 
     $a | Install-Package -Source $context.RepositoryRoot PackageWithDependencyOnPrereleaseTestPackage
-    Assert-Package $a 'PrereleaseTestPackage' '1.0.1a'
+    Assert-Package $a 'PrereleaseTestPackage' '1.0.1-a'
     Assert-Package $a 'PackageWithDependencyOnPrereleaseTestPackage' '1.0.0'
 
 

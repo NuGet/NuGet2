@@ -829,7 +829,7 @@ namespace NuGet.Test
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             var packageA1 = PackageUtility.CreatePackage("A", "1.0", content: new string[] { "good" });
-            var packageA2 = PackageUtility.CreatePackage("A", "2.0alpha", content: new string[] { "excellent" });
+            var packageA2 = PackageUtility.CreatePackage("A", "2.0-alpha", content: new string[] { "excellent" });
 
             // project has A 2.0alpha installed
             projectManager.LocalRepository.AddPackage(packageA2);
@@ -840,7 +840,7 @@ namespace NuGet.Test
             projectManager.UpdatePackageReference("A", version: null, updateDependencies: false, allowPrereleaseVersions: false);
 
             // Assert
-            Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("2.0alpha")));
+            Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("2.0-alpha")));
             Assert.False(projectManager.LocalRepository.Exists("A", new SemanticVersion("1.0")));
         }
 
@@ -853,7 +853,7 @@ namespace NuGet.Test
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             var packageA1 = PackageUtility.CreatePackage("A", "1.0", content: new string[] {"good"});
-            var packageA2 = PackageUtility.CreatePackage("A", "2.0alpha", content: new string[] {"excellent"});
+            var packageA2 = PackageUtility.CreatePackage("A", "2.0-alpha", content: new string[] {"excellent"});
 
             // project has A 1.0 installed
             projectManager.LocalRepository.AddPackage(packageA1);
@@ -864,8 +864,7 @@ namespace NuGet.Test
             projectManager.UpdatePackageReference("A", version: null, updateDependencies: false, allowPrereleaseVersions: true);
 
             // Assert
-            Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("2.0alpha")));
-            //Assert.False(projectManager.LocalRepository.Exists("A", new SemanticVersion("1.0")));
+            Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("2.0-alpha")));
         }
 
         [Fact]

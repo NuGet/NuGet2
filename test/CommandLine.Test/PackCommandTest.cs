@@ -330,7 +330,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         public void PackCommandWarnsIfVersionContainsSpecialVersionButDoesNotConformToSemVer()
         {
             // Arrange
-            var package = PackageUtility.CreatePackage("A", "1.0alpha");
+            var package = PackageUtility.CreatePackage("A", "1.0-alpha");
             var builder = new StringBuilder();
             var console = new Mock<IConsole>();
 
@@ -346,7 +346,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             packCommand.AnalyzePackage(package);
 
             // Assert
-            Assert.Equal(@"1 issue(s) found with package 'A'.Issue: Use semantic versioningDescription: Version ""1.0alpha"" does not follow semantic versioning guidelines.Solution: Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org. ",
+            Assert.Equal(@"1 issue(s) found with package 'A'.Issue: Use semantic versioningDescription: Version ""1.0-alpha"" does not follow semantic versioning guidelines.Solution: Update your nuspec file or use the AssemblyInformationalVersion assembly attribute to specify a semantic version as described at http://semver.org. ",
                 builder.ToString());
         }
 
