@@ -13,7 +13,12 @@ namespace NuGet
     {
         // Maximum number of packages that can live in this cache.
         private const int MaxPackages = 100;
-        private static readonly Lazy<MachineCache> _instance = new Lazy<MachineCache>(() => CreateDefault(() => Environment.GetEnvironmentVariable("NuGetCachePath")));
+        private const string NuGetCachePathEnvironmentVariable = "NuGetCachePath";
+
+        private static readonly Lazy<MachineCache> _instance = new Lazy<MachineCache>(
+            () => CreateDefault(
+                () => GetCachePath(
+                    () => Environment.GetEnvironmentVariable(NuGetCachePathEnvironmentVariable))));
 
         internal MachineCache(IFileSystem fileSystem)
             : base(new DefaultPackagePathResolver(fileSystem), fileSystem, enableCaching: false)

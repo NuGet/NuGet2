@@ -83,9 +83,11 @@ namespace NuGet.Test
             // Arrange
 
             // Act
+            var cachePath = MachineCache.GetCachePath(() => @"c:\temp\some\directory");
+            var expectedPath = @"c:\temp\some\directory";
 
             // Assert
-            Assert.True(MachineCache.GetCachePath(() => @"c:\temp\some\directory") == @"c:\temp\some\directory");
+            Assert.Equal(expectedPath, cachePath);
         }
 
         [Fact]
@@ -94,9 +96,11 @@ namespace NuGet.Test
             // Arrange
 
             // Act
+            var cachePath = MachineCache.GetCachePath(() => string.Empty);
+            var expectedPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"NuGet\Cache");
 
             // Assert
-            Assert.True(MachineCache.GetCachePath(() => string.Empty) == Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"NuGet\Cache"));
+            Assert.Equal(expectedPath, cachePath);
         }
     }
 }
