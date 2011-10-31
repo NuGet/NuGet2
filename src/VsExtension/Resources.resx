@@ -120,6 +120,9 @@
   <data name="CanNotCreateWindow" xml:space="preserve">
     <value>Can not create tool window.</value>
   </data>
+  <data name="ErrorDialogBoxTitle" xml:space="preserve">
+    <value>Operation failed</value>
+  </data>
   <data name="ManagePackageForSolutionLabel" xml:space="preserve">
     <value>Manage NuGet Packages for &amp;Solution...</value>
   </data>

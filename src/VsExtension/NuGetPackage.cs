@@ -195,9 +195,7 @@ namespace NuGet.Tools
                         errorMessage = String.Format(CultureInfo.CurrentCulture, VsResources.DTE_ProjectUnsupported, projectName);
                     }
 
-                    MessageHelper.ShowWarningMessage(
-                        errorMessage,
-                        NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
+                    MessageHelper.ShowWarningMessage(errorMessage, Resources.ErrorDialogBoxTitle);
                 }
             }
         }
@@ -218,7 +216,7 @@ namespace NuGet.Tools
             }
             catch (TargetInvocationException exception)
             {
-                MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
+                MessageHelper.ShowErrorMessage(exception, Resources.ErrorDialogBoxTitle);
                 ExceptionHelper.WriteToActivityLog(exception);
             }
         }
@@ -311,7 +309,7 @@ namespace NuGet.Tools
             }
             catch (Exception exception)
             {
-                MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
+                MessageHelper.ShowErrorMessage(exception, Resources.ErrorDialogBoxTitle);
                 ExceptionHelper.WriteToActivityLog(exception);
             }
         }
