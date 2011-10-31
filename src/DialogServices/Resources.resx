@@ -318,4 +318,7 @@
   <data name="Dialog_SortOption_PublishedDate" xml:space="preserve">
     <value>Published Date</value>
   </data>
+  <data name="Dialog_NoCompatibleProjectNoFrameworkNames" xml:space="preserve">
+    <value>'{0}' could not be installed because it is not compatible with any project in the solution. The package doesn't target any framework.</value>
+  </data>
 </root>

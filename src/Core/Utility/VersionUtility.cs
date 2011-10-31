@@ -19,7 +19,11 @@ namespace NuGet
         private const string LessThanOrEqualTo = "\u2264";
         private const string GreaterThanOrEqualTo = "\u2265";
 
-        internal static readonly FrameworkName UnsupportedFrameworkName = new FrameworkName("Unsupported", new Version());
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Security", 
+            "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes",
+            Justification="The type FrameworkName is immutable.")]
+        public static readonly FrameworkName UnsupportedFrameworkName = new FrameworkName("Unsupported", new Version());
         private static readonly Version _emptyVersion = new Version();
 
         private static readonly Dictionary<string, string> _knownIdentifiers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {

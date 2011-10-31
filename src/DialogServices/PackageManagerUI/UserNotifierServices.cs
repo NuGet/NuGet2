@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Windows.Threading;
 using EnvDTE;
 using NuGet.VisualStudio;
+using System.Runtime.Versioning;
 
 namespace NuGet.Dialog.PackageManagerUI
 {
@@ -89,14 +91,21 @@ namespace NuGet.Dialog.PackageManagerUI
             }
             else
             {
-                // if there is no project compatible with the selected package, show an error message and return
-                MessageHelper.ShowWarningMessage(
+                IEnumerable<FrameworkName> supportedFrameworks = package.GetSupportedFrameworks()
+                                                                        .Where(name => name != null && name != VersionUtility.UnsupportedFrameworkName);
+                string errorMessage = supportedFrameworks.Any() ?
                     String.Format(
                         CultureInfo.CurrentCulture,
                         Resources.Dialog_NoCompatibleProject,
                         package.Id,
-                        Environment.NewLine + String.Join(Environment.NewLine, package.GetSupportedFrameworks())),
-                    title: null);
+                        Environment.NewLine + String.Join(Environment.NewLine, supportedFrameworks)) :
+                    String.Format(
+                        CultureInfo.CurrentCulture,
+                        Resources.Dialog_NoCompatibleProjectNoFrameworkNames,
+                        package.Id);
+
+                // if there is no project compatible with the selected package, show an error message and return
+                MessageHelper.ShowWarningMessage(errorMessage, title: null);
                 return null;
             }
         }
