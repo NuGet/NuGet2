@@ -70,7 +70,7 @@ namespace NuGet.Test
             sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0", new string[] { "hello" }));
             sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "2.0", new string[] { "hello" }));
             sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "3.0", new string[] { "hello" }));
-            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "3.0alpha", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "3.0-alpha", new string[] { "hello" }));
 
             var packages = new IPackage[] 
             {
@@ -90,7 +90,7 @@ namespace NuGet.Test
             Assert.Equal(new SemanticVersion("3.0"), foundPackages[1].Version);
 
             Assert.Equal("A", foundPackages[2].Id);
-            Assert.Equal(new SemanticVersion("3.0alpha"), foundPackages[2].Version);
+            Assert.Equal(new SemanticVersion("3.0-alpha"), foundPackages[2].Version);
         }
     }
 }

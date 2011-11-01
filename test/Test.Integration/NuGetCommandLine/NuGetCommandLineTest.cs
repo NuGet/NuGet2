@@ -305,7 +305,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 <package>
   <metadata>
     <id>two</id>
-    <version>1.0wwwwwwwwwwwwwwwwwwww0</version>
+    <version>1.0-wwwwwwwwwwwwwwwwwwww0</version>
     <authors>Terence Parr</authors>
     <description>ANother Tool for Language Recognition, is a language tool that provides a framework for constructing recognizers, interpreters, compilers, and translators from grammatical descriptions containing actions in a variety of target languages.</description>
     <language>en-US</language>

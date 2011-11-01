@@ -164,7 +164,7 @@ namespace NuGet.Test
             var metadata = new ManifestMetadata
             {
                 Id = "Foo",
-                Version = "1.0.0alpha",
+                Version = "1.0.0-alpha",
                 Authors = "A, B",
                 Description = "Description"
             };

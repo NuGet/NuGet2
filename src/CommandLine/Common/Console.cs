@@ -63,7 +63,15 @@ namespace NuGet.Common
 
         public void Write(string format, params object[] args)
         {
-            System.Console.Write(format, args);
+            if (args.IsEmpty())
+            {
+                // Don't try to format strings that do not have arguments. We end up throwing if the original string was not meant to be a format token and contained braces (for instance html)
+                System.Console.Write(format);
+            }
+            else
+            {
+                System.Console.Write(format, args);
+            }
         }
 
         public void WriteLine()
@@ -139,7 +147,15 @@ namespace NuGet.Common
             {
                 currentColor = System.Console.ForegroundColor;
                 System.Console.ForegroundColor = color;
-                writer.WriteLine(value, args);
+                if (args.IsEmpty())
+                {
+                    // If it doesn't look like something that needs to be formatted, don't format it.
+                    writer.WriteLine(value);
+                }
+                else
+                {
+                    writer.WriteLine(value, args);
+                }
             }
             finally
             {

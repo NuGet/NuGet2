@@ -527,12 +527,12 @@ namespace NuGet.Test.VisualStudio
             var package2 = PackageUtility.CreatePackage("bar", "2.0.0", dependencies: new[] { new PackageDependency("qux", versionSpec) });
             sourceRepository.AddPackage(package2);
 
-            var package3A = PackageUtility.CreatePackage("qux", "1.0alpha");
-            var package3B = PackageUtility.CreatePackage("qux", "1.0beta");
+            var package3A = PackageUtility.CreatePackage("qux", "1.0-alpha");
+            var package3B = PackageUtility.CreatePackage("qux", "1.0-beta");
             var package3 = PackageUtility.CreatePackage("qux", "1.0");
-            localRepository.AddPackage(package3);
-            localRepository.AddPackage(package3A);
-            localRepository.AddPackage(package3B);
+            sourceRepository.AddPackage(package3);
+            sourceRepository.AddPackage(package3A);
+            sourceRepository.AddPackage(package3B);
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.InstallPackage(package, ignoreDependencies: false, allowPrereleaseVersions: false),
@@ -563,8 +563,8 @@ namespace NuGet.Test.VisualStudio
             var package2 = PackageUtility.CreatePackage("bar", "2.0.0", dependencies: new[] { new PackageDependency("qux", versionSpec) });
             sourceRepository.AddPackage(package2);
 
-            var package3A = PackageUtility.CreatePackage("qux", "1.0alpha");
-            var package3B = PackageUtility.CreatePackage("qux", "1.0beta");
+            var package3A = PackageUtility.CreatePackage("qux", "1.0-alpha");
+            var package3B = PackageUtility.CreatePackage("qux", "1.0-beta");
             var package3 = PackageUtility.CreatePackage("qux", "1.0");
             localRepository.AddPackage(package3);
             localRepository.AddPackage(package3A);
@@ -596,8 +596,8 @@ namespace NuGet.Test.VisualStudio
                 new Mock<VsPackageInstallerEvents>().Object,
                 new MockPackageRepository());
 
-            var package3_1A = PackageUtility.CreatePackage("qux", "1.0alpha");
-            var package3_1B = PackageUtility.CreatePackage("qux", "1.1alpha");
+            var package3_1A = PackageUtility.CreatePackage("qux", "1.0-alpha");
+            var package3_1B = PackageUtility.CreatePackage("qux", "1.1-alpha");
             var package3_10 = PackageUtility.CreatePackage("qux", "1.0");
             var package3_09 = PackageUtility.CreatePackage("qux", "0.9");
             localRepository.AddPackage(package3_10);
@@ -631,8 +631,8 @@ namespace NuGet.Test.VisualStudio
                 new Mock<VsPackageInstallerEvents>().Object,
                 new MockPackageRepository());
 
-            var package3_10A = PackageUtility.CreatePackage("qux", "1.0alpha");
-            var package3_11B = PackageUtility.CreatePackage("qux", "1.1alpha");
+            var package3_10A = PackageUtility.CreatePackage("qux", "1.0-alpha");
+            var package3_11B = PackageUtility.CreatePackage("qux", "1.1-alpha");
             var package3_10 = PackageUtility.CreatePackage("qux", "1.0");
             var package3_09 = PackageUtility.CreatePackage("qux", "0.9");
             localRepository.AddPackage(package3_10);

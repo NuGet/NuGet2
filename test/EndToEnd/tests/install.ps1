@@ -25,8 +25,7 @@ function Test-WebsiteSimpleInstall {
     Assert-Package $p AntiXSS
     Assert-SolutionPackage AntiXSS
     Assert-Reference $p AntiXSSLibrary 4.0.0.0
-    Assert-Reference $p HtmlSanitizationLibrary 4.0.0.0
-}
+    Assert-Reference $p HtmlSanitizationLibrary 4.0.0.0}
 
 function Test-DiamondDependencies {
     param(
@@ -1372,7 +1371,7 @@ function Test-InstallPackageInstallsHighestPackageIfPreReleaseFlagIsSet {
     $a | Install-Package -Source $context.RepositoryRoot PreReleaseTestPackage -PreRelease
 
     # Assert
-    Assert-Package $a 'PreReleaseTestPackage' '1.0.1a'
+    Assert-Package $a 'PreReleaseTestPackage' '1.0.1-a'
 }
 
 function Test-InstallPackageInstallsHighestPackageIfItIsReleaseWhenPreReleaseFlagIsSet {
@@ -1421,4 +1420,18 @@ function Test-InstallingPackagesWorksInTurkishLocaleWhenPackageIdContainsLetterI
 
     # Assert
     Assert-Package $p 'yuicompressor.NeT'
+}
+
+function Test-InstallPackageConsidersPrereleasePackagesWhenResolvingDependencyWhenPrereleaseFlagIsNotSpecified {
+    # Arrange
+    $a = New-ClassLibrary
+
+    $a | Install-Package -Source $context.RepositoryRoot PrereleaseTestPackage -Prerelease
+    Assert-Package $a 'PrereleaseTestPackage' '1.0.1-a'
+
+    $a | Install-Package -Source $context.RepositoryRoot PackageWithDependencyOnPrereleaseTestPackage
+    Assert-Package $a 'PrereleaseTestPackage' '1.0.1-a'
+    Assert-Package $a 'PackageWithDependencyOnPrereleaseTestPackage' '1.0.0'
+
+
 }

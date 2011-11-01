@@ -43,7 +43,7 @@ namespace NuGet
                 // Reset the Lazy IHttpClient instance if we catch an Exception so that
                 // subsequent requests are able to try and create it again in case there
                 // was some issue with authentication or some other request related configuration
-                // If we don't do it this here then the exception is always thrown as soon as we
+                // If we don't do it here then the exception is always thrown as soon as we
                 // try to access _cachedClient.Value property.
                 try
                 {

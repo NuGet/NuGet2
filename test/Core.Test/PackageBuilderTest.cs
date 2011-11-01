@@ -419,7 +419,7 @@ Description is required.");
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package><metadata>
     <id>aaa</id>
-    <version>2.5vvvvvvvvvvvvvvvvvvvvv</version>
+    <version>2.5.0-vvvvvvvvvvvvvvvvvvvvv</version>
     <authors>Velio Ivanov</authors>
     <language>en-us</language>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
@@ -830,7 +830,7 @@ Description is required.");
                 new PackageDependency("A", versionSpec),
                 new PackageDependency("B", new VersionSpec()),
             };
-            var packageVersion = new SemanticVersion("1.0.0beta");
+            var packageVersion = new SemanticVersion("1.0.0-beta");
 
             // Act
             PackageBuilder.ValidateDependencies(packageVersion, dependencies);
@@ -862,7 +862,7 @@ Description is required.");
         {
             get
             {
-                var prereleaseVer = new SemanticVersion("1.0.0a");
+                var prereleaseVer = new SemanticVersion("1.0.0-a");
                 var version = new SemanticVersion("2.3.0.6232");
 
                 yield return new object[] { new VersionSpec(prereleaseVer) };
@@ -954,7 +954,7 @@ Enabling license acceptance requires a license url.");
             var builder = new PackageBuilder
             {
                 Id = "cool",
-                Version = new SemanticVersion("1.0vvvvvvvvvvvvvvvvvvvvK"),
+                Version = new SemanticVersion("1.0-vvvvvvvvvvvvvvvvvvvvK"),
                 Description = "Description"
             };
             builder.Authors.Add("Me");

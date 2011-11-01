@@ -451,7 +451,7 @@ namespace NuGet.Test
                 localRepository,
                 new MockPackageRepository());
 
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0.0beta",
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0.0-beta",
                                                              dependencies: new[] {
                                                                  new PackageDependency("C")
                                                              });
@@ -487,7 +487,7 @@ namespace NuGet.Test
                                                                  new PackageDependency("C")
                                                              });
 
-            IPackage packageC = PackageUtility.CreatePackage("C", "1.0.0RC-1");
+            IPackage packageC = PackageUtility.CreatePackage("C", "1.0.0-RC-1");
             sourceRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageC);
 
@@ -518,7 +518,7 @@ namespace NuGet.Test
                                                                  new PackageDependency("C")
                                                              });
 
-            IPackage packageC = PackageUtility.CreatePackage("C", "1.0.0RC-1");
+            IPackage packageC = PackageUtility.CreatePackage("C", "1.0.0-RC-1");
             sourceRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageC);
 
@@ -547,7 +547,7 @@ namespace NuGet.Test
                                                                  new PackageDependency("C")
                                                              });
 
-            IPackage packageC_RC = PackageUtility.CreatePackage("C", "1.0.0RC-1");
+            IPackage packageC_RC = PackageUtility.CreatePackage("C", "1.0.0-RC-1");
             IPackage packageC = PackageUtility.CreatePackage("C", "0.9");
             sourceRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageC);
@@ -559,6 +559,42 @@ namespace NuGet.Test
             // Assert
             Assert.True(localRepository.Exists(packageA));
             Assert.True(localRepository.Exists(packageC));
+        }
+
+        [Fact]
+        public void InstallPackageConsidersAlreadyInstalledPrereleasePackagesWhenResolvingDependencies()
+        {
+            // Arrange
+            var packageB_05 = PackageUtility.CreatePackage("B", "0.5.0");
+            var packageB_10a = PackageUtility.CreatePackage("B", "1.0.0-a");
+            var packageA = PackageUtility.CreatePackage("A", 
+                                dependencies: new[] { new PackageDependency("B", VersionUtility.ParseVersionSpec("[0.5.0, 2.0.0)")) });
+
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var packageManager = new PackageManager(
+                sourceRepository,
+                new DefaultPackagePathResolver(projectSystem),
+                projectSystem,
+                localRepository,
+                new MockPackageRepository());
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageB_10a);
+            sourceRepository.AddPackage(packageB_05);
+
+            // Act 
+            // The allowPrereleaseVersions flag should be irrelevant since we specify a version.
+            packageManager.InstallPackage("B", version: new SemanticVersion("1.0.0-a"), ignoreDependencies: false, allowPrereleaseVersions: false); 
+            // Verify we actually did install B.1.0.0a
+            Assert.True(localRepository.Exists(packageB_10a));
+
+            packageManager.InstallPackage("A");
+            
+            // Assert
+            Assert.True(localRepository.Exists(packageA));
+            Assert.True(localRepository.Exists(packageB_10a));
+
         }
 
         private PackageManager CreatePackageManager()

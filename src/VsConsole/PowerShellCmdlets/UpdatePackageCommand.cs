@@ -165,7 +165,7 @@ namespace NuGet.PowerShell.Commands
                             }
                         }
                     }
-                    _hasConnectedToHttpSource |= UriHelper.IsHttpSource(PackageManager.SourceRepository.Source);
+                    _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source, _packageSourceProvider);
                 }
             }
             finally
