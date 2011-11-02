@@ -203,13 +203,5 @@ namespace NuGet.PowerShell.Commands
         {
             // No-op
         }
-
-        public void OnBeforePackageOperation(IVsPackageManager packageManager)
-        {
-        }
-
-        public void OnAfterPackageOperation(IVsPackageManager packageManager)
-        {
-        }
     }
 }

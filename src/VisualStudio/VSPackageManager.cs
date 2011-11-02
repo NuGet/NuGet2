@@ -594,54 +594,45 @@ namespace NuGet.VisualStudio
                 eventListener = NullPackageOperationEventListener.Instance;
             }
 
-            try
-            {
-                eventListener.OnBeforePackageOperation(this);
+            ExecuteOperationsWithPackage(
+                null,
+                package,
+                operations,
+                () =>
+                {
+                    bool success = false;
 
-                ExecuteOperationsWithPackage(
-                    null,
-                    package,
-                    operations,
-                    () =>
+                    foreach (var project in projects)
                     {
-                        bool success = false;
-
-                        foreach (var project in projects)
+                        try
                         {
-                            try
-                            {
-                                eventListener.OnBeforeAddPackageReference(project);
+                            eventListener.OnBeforeAddPackageReference(project);
 
-                                IProjectManager projectManager = GetProjectManager(project);
-                                InitializeLogger(logger, projectManager);
+                            IProjectManager projectManager = GetProjectManager(project);
+                            InitializeLogger(logger, projectManager);
 
-                                projectAction(projectManager);
-                                success |= true;
-                            }
-                            catch (Exception ex)
-                            {
-                                eventListener.OnAddPackageReferenceError(project, ex);
-                            }
-                            finally
-                            {
-                                eventListener.OnAfterAddPackageReference(project);
-                            }
+                            projectAction(projectManager);
+                            success |= true;
                         }
-
-                        // Throw an exception only if all the update failed for all projects
-                        // so we rollback any solution level operations that might have happened
-                        if (projects.Any() && !success)
+                        catch (Exception ex)
                         {
-                            throw new InvalidOperationException(VsResources.OperationFailed);
+                            eventListener.OnAddPackageReferenceError(project, ex);
                         }
+                        finally
+                        {
+                            eventListener.OnAfterAddPackageReference(project);
+                        }
+                    }
 
-                    },
-                    logger);
-            }
-            finally
-            {
-                eventListener.OnAfterPackageOperation(this);
-            }
+                    // Throw an exception only if all the update failed for all projects
+                    // so we rollback any solution level operations that might have happened
+                    if (projects.Any() && !success)
+                    {
+                        throw new InvalidOperationException(VsResources.OperationFailed);
+                    }
+
+                },
+                logger);
         }
 
         private void ExecuteOperationsWithPackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, Action action, ILogger logger)

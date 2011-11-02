@@ -91,11 +91,7 @@ namespace NuGet.Dialog.Providers
 
             try
             {
-                // solution level package, need to hook up to PackageInstalled event on the VsPackageManager
-                if (selectedProjectsList.Count == 0)
-                {
-                    RegisterPackageOperationEvents(_activePackageManager, null);
-                }
+                RegisterPackageOperationEvents(_activePackageManager, null);
 
                 _activePackageManager.UpdatePackage(
                     selectedProjectsList,
@@ -108,11 +104,7 @@ namespace NuGet.Dialog.Providers
             }
             finally
             {
-                // solution level package, need to unhook from the PackageInstalled event on the VsPackageManager
-                if (selectedProjectsList.Count == 0)
-                {
-                    UnregisterPackageOperationEvents(_activePackageManager, null);
-                }
+                UnregisterPackageOperationEvents(_activePackageManager, null);
             }
 
             return true;
@@ -120,31 +112,17 @@ namespace NuGet.Dialog.Providers
 
         public void OnBeforeAddPackageReference(Project project)
         {
-            RegisterPackageOperationEvents(
-                null,
-                _activePackageManager.GetProjectManager(project));
+            RegisterPackageOperationEvents(null, _activePackageManager.GetProjectManager(project));
         }
 
         public void OnAfterAddPackageReference(Project project)
         {
-            UnregisterPackageOperationEvents(
-                null,
-                _activePackageManager.GetProjectManager(project));
+            UnregisterPackageOperationEvents(null, _activePackageManager.GetProjectManager(project));
         }
 
         public void OnAddPackageReferenceError(Project project, Exception exception)
         {
             AddFailedProject(project, exception);
-        }
-
-        public void OnBeforePackageOperation(IVsPackageManager packageManager)
-        {
-            RegisterPackageOperationEvents(packageManager, projectManager: null);
-        }
-
-        public void OnAfterPackageOperation(IVsPackageManager packageManager)
-        {
-            UnregisterPackageOperationEvents(packageManager, projectManager: null);
         }
     }
 }
