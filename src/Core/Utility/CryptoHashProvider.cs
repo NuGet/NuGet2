@@ -1,25 +1,25 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 
 namespace NuGet
 {
     public class CryptoHashProvider : IHashProvider
     {
-        private static readonly HashAlgorithm _defaultHashAlgorithm = SHA512.Create();
-        private readonly HashAlgorithm _hashAlgorithm;
+        private readonly Func<HashAlgorithm> _hashAlgorithm;
 
         public CryptoHashProvider()
-            : this(_defaultHashAlgorithm)
+            : this(SHA512.Create)
         {
         }
 
-        public CryptoHashProvider(HashAlgorithm hashAlgorithm)
+        public CryptoHashProvider(Func<HashAlgorithm> hashAlgorithm)
         {
             _hashAlgorithm = hashAlgorithm;
         }
 
         public byte[] CalculateHash(byte[] data)
         {
-            return _hashAlgorithm.ComputeHash(data);
+            return _hashAlgorithm().ComputeHash(data);
         }
 
         public bool VerifyHash(byte[] data, byte[] hash)
