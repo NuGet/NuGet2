@@ -5,21 +5,24 @@ namespace NuGet
 {
     public class CryptoHashProvider : IHashProvider
     {
-        private readonly Func<HashAlgorithm> _hashAlgorithm;
+        private readonly Func<HashAlgorithm> _algorithmFactory;
 
         public CryptoHashProvider()
             : this(SHA512.Create)
         {
         }
 
-        public CryptoHashProvider(Func<HashAlgorithm> hashAlgorithm)
+        public CryptoHashProvider(Func<HashAlgorithm> algorithmFactory)
         {
-            _hashAlgorithm = hashAlgorithm;
+            _algorithmFactory = algorithmFactory;
         }
 
         public byte[] CalculateHash(byte[] data)
         {
-            return _hashAlgorithm().ComputeHash(data);
+            using (HashAlgorithm algorithm = _algorithmFactory())
+            {
+                return algorithm.ComputeHash(data);
+            }
         }
 
         public bool VerifyHash(byte[] data, byte[] hash)
