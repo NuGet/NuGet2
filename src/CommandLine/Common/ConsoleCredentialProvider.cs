@@ -35,9 +35,10 @@ namespace NuGet
             Justification = "Caller's responsibility to dispose.")]
         public static SecureString ReadLineAsSecureString()
         {
+            var secureString = new SecureString();
+
             try
             {
-                var secureString = new SecureString();
                 ConsoleKeyInfo keyInfo;
                 while ((keyInfo = Console.ReadKey(true)).Key != ConsoleKey.Enter)
                 {
@@ -58,13 +59,16 @@ namespace NuGet
                         Console.Write('*');
                     }
                 }
-                secureString.MakeReadOnly();
-                return secureString;
-            }
-            finally
-            {
                 Console.WriteLine(String.Empty);
             }
+            catch (InvalidOperationException)
+            {
+                foreach (var c in Console.ReadLine())
+                    secureString.AppendChar(c);
+            }
+
+            secureString.MakeReadOnly();
+            return secureString;
         }
     }
 }
