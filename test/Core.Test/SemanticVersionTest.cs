@@ -57,7 +57,6 @@ namespace NuGet.Test
                 String.Format(CultureInfo.InvariantCulture, "'{0}' is not a valid version string.", versionString));
         }
 
-
         public static IEnumerable<object[]> LegacyVersionData
         {
             get
@@ -124,7 +123,6 @@ namespace NuGet.Test
             Assert.Equal(expected.Version, actual.Version);
             Assert.Equal(expected.SpecialVersion, actual.SpecialVersion);
         }
-
 
         [Theory]
         [InlineData("1.0", "1.0.1")]
