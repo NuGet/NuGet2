@@ -202,10 +202,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Class diagrams\PackageManagers.cd" />
-    <None Include="Class diagrams\ProjectSystems.cd" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj">
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>Core</Name>
