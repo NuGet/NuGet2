@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 using EnvDTE;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -24,6 +27,7 @@ namespace NuGet.VisualStudio
         private readonly ISolutionManager _solutionManager;
         private readonly IPackageRepositoryFactory _packageRepositoryFactory;
         private readonly IVsThreadedWaitDialogFactory _waitDialogFactory;
+        private readonly IVsPackageManagerFactory _packageManagerFactory;
         private readonly DTE _dte;
 
         [ImportingConstructor]
@@ -31,11 +35,13 @@ namespace NuGet.VisualStudio
             ISolutionManager solutionManager,
             IFileSystemProvider fileSystemProvider,
             IPackageRepositoryFactory packageRepositoryFactory,
+            IVsPackageManagerFactory packageManagerFactory,
             ISettings settings) :
             this(ServiceLocator.GetInstance<DTE>(),
                  solutionManager,
                  fileSystemProvider,
                  packageRepositoryFactory,
+                 packageManagerFactory,
                  ServiceLocator.GetGlobalService<SVsThreadedWaitDialogFactory, IVsThreadedWaitDialogFactory>())
         {
         }
@@ -45,16 +51,20 @@ namespace NuGet.VisualStudio
             ISolutionManager solutionManager,
             IFileSystemProvider fileSystemProvider,
             IPackageRepositoryFactory packageRepositoryFactory,
+            IVsPackageManagerFactory packageManagerFactory,
             IVsThreadedWaitDialogFactory waitDialogFactory)
         {
 
-            System.Diagnostics.Debug.Assert(solutionManager != null);
+            Debug.Assert(solutionManager != null);
             _dte = dte;
             _fileSystemProvider = fileSystemProvider;
             _solutionManager = solutionManager;
             _packageRepositoryFactory = packageRepositoryFactory;
             _waitDialogFactory = waitDialogFactory;
+            _packageManagerFactory = packageManagerFactory;
             _solutionManager.ProjectAdded += OnProjectAdded;
+            _solutionManager.SolutionOpened += OnSolutionOpenedOrClosed;
+            _solutionManager.SolutionClosed += OnSolutionOpenedOrClosed;
         }
 
         public bool IsCurrentSolutionEnabled
@@ -148,6 +158,59 @@ namespace NuGet.VisualStudio
                         VsResources.DialogTitle);
                 }
             }
+        }
+
+        public event EventHandler<PackagesMissingStatusEventArgs> PackagesMissingStatusChanged = delegate { };
+
+        public Task RestoreMissingPackages()
+        {
+            TaskScheduler uiScheduler;
+            try
+            {
+                uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+            }
+            catch (InvalidOperationException)
+            {
+                // this exception occurs during unit tests
+                uiScheduler = TaskScheduler.Default;
+            }
+
+            Task task = Task.Factory.StartNew(() => {
+                IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager();
+                IPackageRepository localRepository = packageManager.LocalRepository;
+                var projectReferences = GetAllPackageReferences(packageManager);
+                foreach (var reference in projectReferences)
+                {
+                    if (!localRepository.Exists(reference.Id, reference.Version))
+                    {
+                        packageManager.InstallPackage(reference.Id, reference.Version, ignoreDependencies: true, allowPrereleaseVersions: true);
+                    }
+                }
+            });
+
+            task.ContinueWith(originalTask =>
+            {
+                if (originalTask.IsFaulted)
+                {
+                    ExceptionHelper.WriteToActivityLog(originalTask.Exception);
+                }
+                else 
+                {
+                    // we don't allow canceling
+                    Debug.Assert(!originalTask.IsCanceled);
+
+                    // after we're done with restoring packages, do the check again
+                    CheckForMissingPackages();
+                }
+            }, uiScheduler);
+
+            return task;
+        }
+
+        public void CheckForMissingPackages()
+        {
+            bool missing = IsCurrentSolutionEnabled ? CheckForMissingPackagesCore() : false;
+            PackagesMissingStatusChanged(this, new PackagesMissingStatusEventArgs(missing));
         }
 
         private void EnablePackageRestore()
@@ -277,7 +340,51 @@ namespace NuGet.VisualStudio
             if (IsCurrentSolutionEnabled)
             {
                 EnablePackageRestore(e.Project);
+                CheckForMissingPackages();
             }
+        }
+
+        private void OnSolutionOpenedOrClosed(object sender, EventArgs e)
+        {
+            CheckForMissingPackages();
+        }
+
+        private bool CheckForMissingPackagesCore()
+        {
+            // this can happen during unit tests
+            if (_packageManagerFactory == null)
+            {
+                return false;
+            }
+
+            IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager();
+            IPackageRepository localRepository = packageManager.LocalRepository;
+            var projectReferences = GetAllPackageReferences(packageManager);
+            return projectReferences.Any(reference => !localRepository.Exists(reference.Id, reference.Version));
+        }
+
+        /// <summary>
+        /// Gets all package references in all projects of the current solution.
+        /// </summary>
+        private IEnumerable<PackageReference> GetAllPackageReferences(IVsPackageManager packageManager)
+        {
+            return from project in _solutionManager.GetProjects()
+                   from reference in GetPackageReferences(packageManager.GetProjectManager(project))
+                   select reference;
+        }
+
+        /// <summary>
+        /// Gets the package references of the specified project.
+        /// </summary>
+        private IEnumerable<PackageReference> GetPackageReferences(IProjectManager projectManager)
+        {
+            var packageRepository = projectManager.LocalRepository as PackageReferenceRepository;
+            if (packageRepository != null)
+            {
+                return packageRepository.ReferenceFile.GetPackageReferences();
+            }
+
+            return new PackageReference[0];
         }
     }
 }

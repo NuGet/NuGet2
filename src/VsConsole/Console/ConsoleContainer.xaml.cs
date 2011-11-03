@@ -9,12 +9,12 @@ namespace NuGetConsole
     /// </summary>
     public partial class ConsoleContainer : UserControl
     {
-
-        public ConsoleContainer(IProductUpdateService productUpdateService)
+        public ConsoleContainer(IProductUpdateService productUpdateService, IPackageRestoreManager packageRestoreManager)
         {
             InitializeComponent();
 
             RootLayout.Children.Add(new ProductUpdateBar(productUpdateService));
+            RootLayout.Children.Add(new PackageRestoreBar(packageRestoreManager));
         }
 
         public void AddConsoleEditor(UIElement content)

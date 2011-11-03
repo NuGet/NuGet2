@@ -1,0 +1,15 @@
+﻿<UserControl x:Class="NuGet.VisualStudio.PackageRestoreBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             Loaded="UserControl_Loaded"
+             xmlns:resx="clr-namespace:NuGet.VisualStudio.Resources"
+             xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0">
+    <Border x:Name="RestoreBar" VerticalAlignment="Center" Visibility="Collapsed" Background="{DynamicResource {x:Static vsfx:VsBrushes.InfoBackgroundKey}}" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.ActiveBorderKey}}">
+        <DockPanel Margin="0,4,0,6" LastChildFill="False">
+            <TextBlock x:Name="StatusMessage" Text="{x:Static resx:VsResources.AskForRestoreMessage}" DockPanel.Dock="Left" TextOptions.TextFormattingMode="Display" VerticalAlignment="Center" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.InfoTextKey}}" Margin="5,0,5,0" />
+            <Button x:Name="RestoreButton" DockPanel.Dock="Left" Content="{x:Static resx:VsResources.RestoreButtonLabel}" Click="OnRestoreLinkClick" Margin="5,0,0,0" Padding="8,2,8,2" />
+        </DockPanel>
+    </Border>
+</UserControl>

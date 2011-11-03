@@ -43,6 +43,7 @@ namespace NuGet.Dialog
                  ServiceLocator.GetInstance<IRecentPackageRepository>(),
                  ServiceLocator.GetInstance<IHttpClientEvents>(),
                  ServiceLocator.GetInstance<IProductUpdateService>(),
+                 ServiceLocator.GetInstance<IPackageRestoreManager>(),
                  ServiceLocator.GetInstance<ISolutionManager>(),
                  ServiceLocator.GetInstance<IOptionsPageActivator>(),
                  ServiceLocator.GetInstance<IFileOperations>())
@@ -58,6 +59,7 @@ namespace NuGet.Dialog
                                      IRecentPackageRepository recentPackagesRepository,
                                      IHttpClientEvents httpClientEvents,
                                      IProductUpdateService productUpdateService,
+                                     IPackageRestoreManager packageRestoreManager,
                                      ISolutionManager solutionManager,
                                      IOptionsPageActivator optionPageActivator,
                                      IFileOperations fileOperations)
@@ -78,6 +80,7 @@ namespace NuGet.Dialog
             _activeProject = project;
 
             AddUpdateBar(productUpdateService);
+            AddRestoreBar(packageRestoreManager);
             InsertDisclaimerElement();
             AdjustSortComboBoxWidth();
 
@@ -106,10 +109,17 @@ namespace NuGet.Dialog
             var updateBar = new ProductUpdateBar(productUpdateService);
             updateBar.UpdateStarting += ExecutedClose;
             LayoutRoot.Children.Add(updateBar);
-            updateBar.SizeChanged += OnUpdateBarSizeChanged;
+            updateBar.SizeChanged += OnHeaderBarSizeChanged;
         }
 
-        private void OnUpdateBarSizeChanged(object sender, SizeChangedEventArgs e)
+        private void AddRestoreBar(IPackageRestoreManager packageRestoreManager)
+        {
+            var restoreBar = new PackageRestoreBar(packageRestoreManager);
+            LayoutRoot.Children.Add(restoreBar);
+            restoreBar.SizeChanged += OnHeaderBarSizeChanged;
+        }
+
+        private void OnHeaderBarSizeChanged(object sender, SizeChangedEventArgs e)
         {
             // when the update bar appears, we adjust the window position 
             // so that it doesn't push the main content area down

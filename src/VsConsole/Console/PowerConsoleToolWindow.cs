@@ -43,6 +43,14 @@ namespace NuGetConsole.Implementation
             }
         }
 
+        private IPackageRestoreManager PackageRestoreManager
+        {
+            get
+            {
+                return ComponentModel.GetService<IPackageRestoreManager>();
+            }
+        }
+
         /// <summary>
         /// Get IWpfConsoleService through MEF.
         /// </summary>
@@ -549,7 +557,7 @@ namespace NuGetConsole.Implementation
             {
                 if (_consoleParentPane == null)
                 {
-                    _consoleParentPane = new ConsoleContainer(ProductUpdateService);
+                    _consoleParentPane = new ConsoleContainer(ProductUpdateService, PackageRestoreManager);
                 }
                 return _consoleParentPane;
             }

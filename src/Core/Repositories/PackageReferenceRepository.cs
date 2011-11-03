@@ -57,6 +57,14 @@ namespace NuGet
             }
         }
 
+        public PackageReferenceFile ReferenceFile
+        {
+            get
+            {
+                return _packageReferenceFile;
+            }
+        }
+
         public override IQueryable<IPackage> GetPackages()
         {
             return GetPackagesCore().AsSafeQueryable();

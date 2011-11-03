@@ -291,4 +291,13 @@
   <data name="PackageRestoreConfirmation" xml:space="preserve">
     <value>Do you want to configure this solution to restore missing NuGet packages during build? A .nuget folder will be added to the root of the solution that contains files that enable package restore.</value>
   </data>
+  <data name="AskForRestoreMessage" xml:space="preserve">
+    <value>Some NuGet packages are missing from this solution. Click Restore button to restore them.</value>
+  </data>
+  <data name="RestoreButtonLabel" xml:space="preserve">
+    <value>_Restore</value>
+  </data>
+  <data name="PackageRestoreErrorTryAgain" xml:space="preserve">
+    <value>An error occurred while trying to restore packages. Please try again.</value>
+  </data>
 </root>
