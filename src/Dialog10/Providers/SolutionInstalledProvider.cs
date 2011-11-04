@@ -209,8 +209,7 @@ namespace NuGet.Dialog.Providers
 
             // For the solution Installed provider, packages can be installed and uninstalled.
             // It's cumbersome to update the packages incrementally, so we just refresh everything.
-            SelectedNode.ResetQuery();
-            SelectedNode.Refresh();
+            SelectedNode.Refresh(resetQueryBeforeRefresh: true);
         }
 
         private void SelectedNode_PackageLoadCompleted(object sender, EventArgs e)

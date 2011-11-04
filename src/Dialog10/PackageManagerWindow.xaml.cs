@@ -25,10 +25,11 @@ namespace NuGet.Dialog
 
         private readonly IHttpClientEvents _httpClientEvents;
         private bool _hasOpenedOnlineProvider;
+        private ComboBox _prereleaseComboBox;
 
         private readonly SmartOutputConsoleProvider _smartOutputConsoleProvider;
         private readonly IVsUIShell _vsUIShell;
-        private readonly ISelectedProviderSettings _selectedProviderSettings;
+        private readonly IProviderSettings _providerSettings;
         private readonly IProductUpdateService _productUpdateService;
         private readonly IOptionsPageActivator _optionsPageActivator;
         private readonly Project _activeProject;
@@ -77,17 +78,18 @@ namespace NuGet.Dialog
             _optionsPageActivator = optionPageActivator;
             _activeProject = project;
 
-            AddUpdateBar(productUpdateService);
-            AddRestoreBar(packageRestoreManager);
-            InsertDisclaimerElement();
-            AdjustSortComboBoxWidth();
-
             // replace the ConsoleOutputProvider with SmartOutputConsoleProvider so that we can clear 
             // the console the first time an entry is written to it
             var providerServices = new ProviderServices();
             _smartOutputConsoleProvider = new SmartOutputConsoleProvider(providerServices.OutputConsoleProvider);
             providerServices.OutputConsoleProvider = _smartOutputConsoleProvider;
-            _selectedProviderSettings = providerServices.SelectedProviderSettings;
+            _providerSettings = providerServices.ProviderSettings;
+
+            AddUpdateBar(productUpdateService);
+            AddRestoreBar(packageRestoreManager);
+            InsertDisclaimerElement();
+            AdjustSortComboBoxWidth();
+            PreparePrereleaseComboBox();
 
             SetupProviders(
                 project,
@@ -258,8 +260,13 @@ namespace NuGet.Dialog
             explorer.Providers.Add(updatesProvider);
             explorer.Providers.Add(recentProvider);
 
+            installedProvider.IncludePrerelease =
+                onlineProvider.IncludePrerelease =
+                updatesProvider.IncludePrerelease =
+                recentProvider.IncludePrerelease = _providerSettings.IncludePrereleasePackages;
+
             // retrieve the selected provider from the settings
-            int selectedProvider = Math.Min(3, _selectedProviderSettings.SelectedProvider);
+            int selectedProvider = Math.Min(3, _providerSettings.SelectedProvider);
             explorer.SelectedProvider = explorer.Providers[selectedProvider];
         }
 
@@ -441,18 +448,67 @@ namespace NuGet.Dialog
 
         private void AdjustSortComboBoxWidth()
         {
+            ComboBox sortCombo = FindComboBox("cmd_SortOrder");
+            if (sortCombo != null)
+            {
+                // The default style fixes the Sort combo control's width to 160, which is bad for localization.
+                // We fix it by setting Min width as 160, and let the control resize to content.
+                sortCombo.ClearValue(FrameworkElement.WidthProperty);
+                sortCombo.MinWidth = 160;
+            }
+        }
+
+        private void PreparePrereleaseComboBox()
+        {
+            // This ComboBox is actually used to display framework versions in various VS dialogs. 
+            // We "repurpose" it here to show Prerelease option instead.
+            ComboBox fxCombo = FindComboBox("cmb_Fx");
+            if (fxCombo != null)
+            {
+                fxCombo.Items.Clear();
+                fxCombo.Items.Add(NuGet.Dialog.Resources.Filter_StablePackages);
+                fxCombo.Items.Add(NuGet.Dialog.Resources.Filter_IncludePrerelease);
+                fxCombo.SelectedIndex = _providerSettings.IncludePrereleasePackages ? 1 : 0;
+                fxCombo.SelectionChanged += OnFxComboBoxSelectionChanged;
+
+                _prereleaseComboBox = fxCombo;
+            }
+        }
+
+        private void OnFxComboBoxSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var combo = (ComboBox)sender;
+            if (combo.SelectedIndex == -1) {
+                return;
+            }
+
+            bool includePrerelease = combo.SelectedIndex == 1;
+
+            // persist the option to VS settings store
+            _providerSettings.IncludePrereleasePackages = includePrerelease;
+            
+            // set the flags on all providers
+            foreach (PackagesProviderBase provider in explorer.Providers)
+            {
+                provider.IncludePrerelease = includePrerelease;
+            }
+
+            var selectedTreeNode = explorer.SelectedExtensionTreeNode as PackagesTreeNodeBase;
+            if (selectedTreeNode != null)
+            {
+                selectedTreeNode.Refresh(resetQueryBeforeRefresh: true);
+            }
+        }
+
+        private ComboBox FindComboBox(string name)
+        {
             Grid grid = LogicalTreeHelper.FindLogicalNode(explorer, "resGrid") as Grid;
             if (grid != null)
             {
-                var sortCombo = FindChildElementByNameOrType(grid, "cmb_SortOrder", typeof(SortCombo)) as SortCombo;
-                if (sortCombo != null)
-                {
-                    // The default style fixes the Sort combo control's width to 160, which is bad for localization.
-                    // We fix it by setting Min width as 160, and let the control resize to content.
-                    sortCombo.ClearValue(FrameworkElement.WidthProperty);
-                    sortCombo.MinWidth = 160;
-                }
+                return FindChildElementByNameOrType(grid, name, typeof(SortCombo)) as ComboBox;
             }
+
+            return null;
         }
 
         private UIElement FindChildElementByNameOrType(Grid parent, string childName, Type childType)
@@ -481,15 +537,20 @@ namespace NuGet.Dialog
             if (selectedProvider != null)
             {
                 explorer.NoItemsMessage = selectedProvider.NoItemsMessage;
+                _prereleaseComboBox.Visibility = selectedProvider.ShowPrereleaseComboBox ? Visibility.Visible : Visibility.Collapsed;
 
                 // save the selected provider to user settings
-                _selectedProviderSettings.SelectedProvider = explorer.Providers.IndexOf(selectedProvider);
+                _providerSettings.SelectedProvider = explorer.Providers.IndexOf(selectedProvider);
                 // if this is the first time online provider is opened, call to check for update
                 if (selectedProvider == explorer.Providers[1] && !_hasOpenedOnlineProvider)
                 {
                     _hasOpenedOnlineProvider = true;
                     _productUpdateService.CheckForAvailableUpdateAsync();
                 }
+            }
+            else
+            {
+                _prereleaseComboBox.Visibility = Visibility.Collapsed;
             }
         }
 

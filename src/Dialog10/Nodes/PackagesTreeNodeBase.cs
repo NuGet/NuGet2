@@ -217,8 +217,12 @@ namespace NuGet.Dialog.Providers
         /// <summary>
         /// Refresh the list of packages belong to this node
         /// </summary>
-        public void Refresh()
+        public void Refresh(bool resetQueryBeforeRefresh = false)
         {
+            if (resetQueryBeforeRefresh)
+            {
+                ResetQuery();
+            }
             LoadPage(CurrentPage);
         }
 
@@ -329,7 +333,14 @@ namespace NuGet.Dialog.Providers
 
                 if (CollapseVersions)
                 {
-                    query = query.Where(p => p.IsLatestVersion);
+                    if (Provider.IncludePrerelease)
+                    {
+                        query = query.Where(p => p.IsAbsoluteLatestVersion);
+                    }
+                    else
+                    {
+                        query = query.Where(p => p.IsLatestVersion);
+                    }
                 }
 
                 token.ThrowIfCancellationRequested();
@@ -452,7 +463,6 @@ namespace NuGet.Dialog.Providers
                 else
                 {
                     LoadPageResult result = task.Result;
-
                     IEnumerable<IPackage> packages = result.Packages;
 
                     _extensions.Clear();

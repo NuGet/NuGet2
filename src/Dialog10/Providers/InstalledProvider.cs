@@ -68,6 +68,15 @@ namespace NuGet.Dialog.Providers
             }
         }
 
+        public override bool ShowPrereleaseComboBox
+        {
+            get
+            {
+                // for Installed tab, we always show prerelease packages. hence, hide the combobox
+                return false;
+            }
+        }
+
         public override bool RefreshOnNodeSelection
         {
             get

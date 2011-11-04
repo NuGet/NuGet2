@@ -1,8 +1,9 @@
 ﻿
 namespace NuGet.Dialog.PackageManagerUI
 {
-    public interface ISelectedProviderSettings
+    public interface IProviderSettings
     {
         int SelectedProvider { get; set; }
+        bool IncludePrereleasePackages { get; set; }
     }
 }

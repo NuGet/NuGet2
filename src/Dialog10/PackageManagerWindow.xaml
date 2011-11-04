@@ -83,7 +83,7 @@
                 HorizontalAlignment="Stretch"
                 SnapsToDevicePixels="True"
                 ListViewIsVirtualizing="True"
-                IsFxComboVisible="False"
+                IsFxComboVisible="True"
                 IsMediumIconsViewButtonVisible="False"
                 IsSmallIconsViewButtonVisible="False"
                 IsLargeIconsViewButtonVisible="False"

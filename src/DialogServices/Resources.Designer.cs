@@ -610,6 +610,24 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Include prerelease packages.
+        /// </summary>
+        public static string Filter_IncludePrerelease {
+            get {
+                return ResourceManager.GetString("Filter_IncludePrerelease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stable packages only.
+        /// </summary>
+        public static string Filter_StablePackages {
+            get {
+                return ResourceManager.GetString("Filter_StablePackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to I _Accept.
         /// </summary>
         public static string License_Accept {

@@ -20,6 +20,25 @@ namespace NuGet.VisualStudio
             _settingsManager = new Lazy<SettingsManager>(() => new ShellSettingsManager(serviceProvider));
         }
 
+        protected bool ReadBool(string settingsRoot, string property, bool defaultValue = false)
+        {
+            var userSettingsStore = _settingsManager.Value.GetReadOnlySettingsStore(SettingsScope.UserSettings);
+            if (userSettingsStore.CollectionExists(settingsRoot))
+            {
+                return userSettingsStore.GetBoolean(settingsRoot, property, defaultValue);
+            }
+            else
+            {
+                return defaultValue;
+            }
+        }
+
+        protected void WriteBool(string settingsRoot, string property, bool value)
+        {
+            WritableSettingsStore userSettingsStore = GetWritableSettingsStore(settingsRoot);
+            userSettingsStore.SetBoolean(settingsRoot, property, value);
+        }
+
         protected int ReadInt32(string settingsRoot, string property, int defaultValue = 0)
         {
             var userSettingsStore = _settingsManager.Value.GetReadOnlySettingsStore(SettingsScope.UserSettings);

@@ -9,13 +9,13 @@ namespace NuGet.Dialog.Providers
         public IProgressWindowOpener ProgressWindow { get; private set; }
         public IScriptExecutor ScriptExecutor { get; private set; }
         public IOutputConsoleProvider OutputConsoleProvider { get; set; }
-        public ISelectedProviderSettings SelectedProviderSettings { get; private set; }
+        public IProviderSettings ProviderSettings { get; private set; }
         public IVsCommonOperations VsCommonOperations { get; private set; }
 
         public ProviderServices() :
             this(new UserNotifierServices(),
                  new ProgressWindowOpener(),
-                 new SelectedProviderSettingsManager(),
+                 new ProviderSettingsManager(),
                  ServiceLocator.GetInstance<IScriptExecutor>(),
                  ServiceLocator.GetInstance<IOutputConsoleProvider>(),
                  ServiceLocator.GetInstance<IVsCommonOperations>()) 
@@ -25,7 +25,7 @@ namespace NuGet.Dialog.Providers
         public ProviderServices(
             IUserNotifierServices userNotifierServices,
             IProgressWindowOpener progressWindow,
-            ISelectedProviderSettings selectedProviderSettings,
+            IProviderSettings selectedProviderSettings,
             IScriptExecutor scriptExecutor,
             IOutputConsoleProvider outputConsoleProvider,
             IVsCommonOperations vsCommonOperations)
@@ -34,7 +34,7 @@ namespace NuGet.Dialog.Providers
             ProgressWindow = progressWindow;
             ScriptExecutor = scriptExecutor;
             OutputConsoleProvider = outputConsoleProvider;
-            SelectedProviderSettings = selectedProviderSettings;
+            ProviderSettings = selectedProviderSettings;
             VsCommonOperations = vsCommonOperations;
         }
     }

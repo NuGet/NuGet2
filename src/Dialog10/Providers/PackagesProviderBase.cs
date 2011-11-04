@@ -109,6 +109,20 @@ namespace NuGet.Dialog.Providers
             set;
         }
 
+        public virtual bool ShowPrereleaseComboBox
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        internal bool IncludePrerelease
+        {
+            get;
+            set;
+        }
+
         public virtual IEnumerable<string> SupportedFrameworks
         {
             get

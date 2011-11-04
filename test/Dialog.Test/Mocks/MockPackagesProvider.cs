@@ -34,7 +34,7 @@ namespace NuGet.Dialog.Test
                    new ProviderServices(
                        new Mock<IUserNotifierServices>().Object,
                        new Mock<IProgressWindowOpener>().Object,
-                       new Mock<ISelectedProviderSettings>().Object,
+                    new Mock<IProviderSettings>().Object,
                        new Mock<IScriptExecutor>().Object,
                        new MockOutputConsoleProvider(),
                        new Mock<IVsCommonOperations>().Object),
