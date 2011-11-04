@@ -45,8 +45,7 @@ namespace NuGet.Dialog
                  ServiceLocator.GetInstance<IProductUpdateService>(),
                  ServiceLocator.GetInstance<IPackageRestoreManager>(),
                  ServiceLocator.GetInstance<ISolutionManager>(),
-                 ServiceLocator.GetInstance<IOptionsPageActivator>(),
-                 ServiceLocator.GetInstance<IFileOperations>())
+                 ServiceLocator.GetInstance<IOptionsPageActivator>())
         {
         }
 
@@ -61,8 +60,7 @@ namespace NuGet.Dialog
                                      IProductUpdateService productUpdateService,
                                      IPackageRestoreManager packageRestoreManager,
                                      ISolutionManager solutionManager,
-                                     IOptionsPageActivator optionPageActivator,
-                                     IFileOperations fileOperations)
+                                     IOptionsPageActivator optionPageActivator)
             : base(F1Keyword)
         {
 
@@ -100,8 +98,7 @@ namespace NuGet.Dialog
                 providerServices,
                 recentPackagesRepository,
                 httpClientEvents,
-                solutionManager,
-                fileOperations);
+                solutionManager);
         }
 
         private void AddUpdateBar(IProductUpdateService productUpdateService)
@@ -141,8 +138,7 @@ namespace NuGet.Dialog
                                     ProviderServices providerServices,
                                     IPackageRepository recentPackagesRepository,
                                     IHttpClientEvents httpClientEvents,
-                                    ISolutionManager solutionManager,
-                                    IFileOperations fileOperations)
+                                    ISolutionManager solutionManager)
         {
 
             // This package manager is not used for installing from a remote source, and therefore does not need a fallback repository for resolving dependencies
@@ -173,16 +169,14 @@ namespace NuGet.Dialog
                     packageManagerFactory,
                     providerServices,
                     httpClientEvents,
-                    solutionManager,
-                    fileOperations);
+                    solutionManager);
                 installedProvider = new SolutionInstalledProvider(
                     packageManager,
                     localRepository,
                     Resources,
                     providerServices,
                     httpClientEvents,
-                    solutionManager,
-                    fileOperations);
+                    solutionManager);
 
                 updatesProvider = new SolutionUpdatesProvider(
                     localRepository,
@@ -192,8 +186,7 @@ namespace NuGet.Dialog
                     packageManagerFactory,
                     providerServices,
                     httpClientEvents,
-                    solutionManager,
-                    fileOperations);
+                    solutionManager);
 
                 recentProvider = new SolutionRecentProvider(
                     localRepository,
@@ -204,8 +197,7 @@ namespace NuGet.Dialog
                     packageSourceProvider,
                     providerServices,
                     httpClientEvents,
-                    solutionManager,
-                    fileOperations);
+                    solutionManager);
             }
             else
             {
@@ -226,8 +218,7 @@ namespace NuGet.Dialog
                     packageManagerFactory,
                     providerServices,
                     httpClientEvents,
-                    solutionManager,
-                    fileOperations);
+                    solutionManager);
 
                 installedProvider = new InstalledProvider(
                     packageManager,
@@ -236,8 +227,7 @@ namespace NuGet.Dialog
                     Resources,
                     providerServices,
                     httpClientEvents,
-                    solutionManager,
-                    fileOperations);
+                    solutionManager);
 
                 updatesProvider = new UpdatesProvider(
                     activeProject,
@@ -248,8 +238,7 @@ namespace NuGet.Dialog
                     packageManagerFactory,
                     providerServices,
                     httpClientEvents,
-                    solutionManager,
-                    fileOperations);
+                    solutionManager);
 
                 recentProvider = new RecentProvider(
                     activeProject,
@@ -261,8 +250,7 @@ namespace NuGet.Dialog
                     packageSourceProvider,
                     providerServices,
                     httpClientEvents,
-                    solutionManager,
-                    fileOperations);
+                    solutionManager);
             }
 
             explorer.Providers.Add(installedProvider);

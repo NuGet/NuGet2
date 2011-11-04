@@ -464,7 +464,8 @@ namespace NuGet.Dialog.Test
                 mockProgressWindowOpener.Object,
                 new Mock<ISelectedProviderSettings>().Object,
                 scriptExecutor,
-                new MockOutputConsoleProvider()
+                new MockOutputConsoleProvider(),
+                new Mock<IFileOpener>().Object
             );
 
             if (localRepository == null)
@@ -478,8 +479,7 @@ namespace NuGet.Dialog.Test
                 new System.Windows.ResourceDictionary(),
                 services,
                 new Mock<IProgressProvider>().Object,
-                solutionManager,
-                new Mock<IFileOperations>().Object);
+                solutionManager);
         }
     }
 }

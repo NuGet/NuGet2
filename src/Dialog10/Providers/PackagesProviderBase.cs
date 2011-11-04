@@ -35,15 +35,13 @@ namespace NuGet.Dialog.Providers
         private readonly IProgressProvider _progressProvider;
         private CultureInfo _uiCulture, _culture;
         private ISolutionManager _solutionManager;
-        private IFileOperations _fileOperations;
 
         protected PackagesProviderBase(
-            IPackageRepository localRepository,
-            ResourceDictionary resources,
-            ProviderServices providerServices,
-            IProgressProvider progressProvider,
-            ISolutionManager solutionManager,
-            IFileOperations fileOperations)
+            IPackageRepository localRepository, 
+            ResourceDictionary resources, 
+            ProviderServices providerServices, 
+            IProgressProvider progressProvider, 
+            ISolutionManager solutionManager)
         {
             if (resources == null)
             {
@@ -60,7 +58,6 @@ namespace NuGet.Dialog.Providers
                 throw new ArgumentNullException("solutionManager");
             }
 
-            _fileOperations = fileOperations;
             _localRepository = localRepository;
             _providerServices = providerServices;
             _progressProvider = progressProvider;
@@ -611,7 +608,7 @@ namespace NuGet.Dialog.Providers
         {
             if (_readmeFile != null)
             {
-                _fileOperations.OpenFile(_readmeFile);
+                _providerServices.FileOpener.OpenFile(_readmeFile);
             }
         }
     }

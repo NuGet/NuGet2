@@ -5,16 +5,16 @@ using EnvDTE;
 
 namespace NuGet.VisualStudio
 {
-    [Export(typeof(IFileOperations))]
-    public class VsFileOperations : IFileOperations
+    [Export(typeof(IFileOpener))]
+    public class VsFileOpener : IFileOpener
     {
         private readonly DTE _dte;
 
-        public VsFileOperations() : this(ServiceLocator.GetInstance<DTE>())
+        public VsFileOpener() : this(ServiceLocator.GetInstance<DTE>())
         {
         }
 
-        public VsFileOperations(DTE dte)
+        public VsFileOpener(DTE dte)
         {
             _dte = dte;
         }

@@ -181,14 +181,12 @@ namespace NuGet.Dialog.Test
                     packageRepository,
                     resources,
                     new ProviderServices(
-                        new Mock<IUserNotifierServices>().Object, 
-                        new Mock<IProgressWindowOpener>().Object,
-                        new Mock<ISelectedProviderSettings>().Object,
-                        new Mock<IScriptExecutor>().Object, 
-                        new MockOutputConsoleProvider()),
-                    new Mock<IProgressProvider>().Object,
-                    new Mock<ISolutionManager>().Object,
-                    new Mock<IFileOperations>().Object)
+                       new Mock<IUserNotifierServices>().Object,
+                       new Mock<IProgressWindowOpener>().Object,
+                       new Mock<ISelectedProviderSettings>().Object,
+                       new Mock<IScriptExecutor>().Object,
+                       new MockOutputConsoleProvider(),
+                       new Mock<IFileOpener>().Object), new Mock<IProgressProvider>().Object, new Mock<ISolutionManager>().Object)
             {
             }
 

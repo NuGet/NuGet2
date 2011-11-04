@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using NuGet.Dialog.PackageManagerUI;
+﻿using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.Providers
@@ -11,13 +10,15 @@ namespace NuGet.Dialog.Providers
         public IScriptExecutor ScriptExecutor { get; private set; }
         public IOutputConsoleProvider OutputConsoleProvider { get; set; }
         public ISelectedProviderSettings SelectedProviderSettings { get; private set; }
+        public IFileOpener FileOpener { get; private set; }
 
         public ProviderServices() :
             this(new UserNotifierServices(),
                  new ProgressWindowOpener(),
                  new SelectedProviderSettingsManager(),
                  ServiceLocator.GetInstance<IScriptExecutor>(),
-                 ServiceLocator.GetInstance<IOutputConsoleProvider>()) 
+                 ServiceLocator.GetInstance<IOutputConsoleProvider>(),
+                 ServiceLocator.GetInstance<IFileOpener>()) 
         {
         }
 
@@ -26,13 +27,15 @@ namespace NuGet.Dialog.Providers
             IProgressWindowOpener progressWindow,
             ISelectedProviderSettings selectedProviderSettings,
             IScriptExecutor scriptExecutor,
-            IOutputConsoleProvider outputConsoleProvider)
+            IOutputConsoleProvider outputConsoleProvider,
+            IFileOpener fileOpener)
         {
             UserNotifierServices = userNotifierServices;
             ProgressWindow = progressWindow;
             ScriptExecutor = scriptExecutor;
             OutputConsoleProvider = outputConsoleProvider;
             SelectedProviderSettings = selectedProviderSettings;
+            FileOpener = fileOpener;
         }
     }
 }

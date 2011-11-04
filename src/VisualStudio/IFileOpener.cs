@@ -1,7 +1,7 @@
 ﻿
 namespace NuGet.VisualStudio
 {
-    public interface IFileOperations
+    public interface IFileOpener
     {
         bool OpenFile(string filePath);
     }

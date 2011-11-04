@@ -29,18 +29,17 @@ namespace NuGet.Dialog.Test
         }
 
         public MockPackagesProvider(IPackageRepository localRepository, IVsPackageManager packageManagerr, IEnumerable<string> supportedFrameworks)
-            : base(
-                localRepository,
-                new ResourceDictionary(),
-                new ProviderServices(
-                    new Mock<IUserNotifierServices>().Object, 
-                    new Mock<IProgressWindowOpener>().Object, 
-                    new Mock<ISelectedProviderSettings>().Object,
-                    new Mock<IScriptExecutor>().Object, 
-                    new MockOutputConsoleProvider()),
-                new Mock<IProgressProvider>().Object,
-                new Mock<ISolutionManager>().Object,
-                new Mock<IFileOperations>().Object)
+            : base(localRepository, 
+                   new ResourceDictionary(), 
+                   new ProviderServices(
+                       new Mock<IUserNotifierServices>().Object,
+                       new Mock<IProgressWindowOpener>().Object,
+                       new Mock<ISelectedProviderSettings>().Object,
+                       new Mock<IScriptExecutor>().Object,
+                       new MockOutputConsoleProvider(),
+                       new Mock<IFileOpener>().Object),
+                   new Mock<IProgressProvider>().Object, 
+                   new Mock<ISolutionManager>().Object)
         {
             _supportedFrameworks = supportedFrameworks;
         }

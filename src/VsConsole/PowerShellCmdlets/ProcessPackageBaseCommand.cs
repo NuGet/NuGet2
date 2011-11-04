@@ -22,13 +22,13 @@ namespace NuGet.PowerShell.Commands
         private readonly Dictionary<string, IProjectManager> _projectManagers = new Dictionary<string, IProjectManager>();
         private readonly Dictionary<IProjectManager, Project> _projectManagerToProject = new Dictionary<IProjectManager, Project>();
         private string _readmeFile;
-        private readonly IFileOperations _fileOperations;
+        private readonly IFileOpener _fileOperations;
 
         protected ProcessPackageBaseCommand(
             ISolutionManager solutionManager, 
             IVsPackageManagerFactory packageManagerFactory, 
             IHttpClientEvents httpClientEvents,
-            IFileOperations fileOperations)
+            IFileOpener fileOperations)
             : base(solutionManager, packageManagerFactory, httpClientEvents)
         {
             Debug.Assert(fileOperations != null);

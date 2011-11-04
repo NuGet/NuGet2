@@ -339,7 +339,8 @@ namespace NuGet.Dialog.Test
                 mockProgressWindowOpener.Object,
                 new Mock<ISelectedProviderSettings>().Object,
                 scriptExecutor,
-                new MockOutputConsoleProvider()
+                new MockOutputConsoleProvider(),
+                new Mock<IFileOpener>().Object
             );
 
             if (solutionManager == null)
@@ -356,8 +357,7 @@ namespace NuGet.Dialog.Test
                 factory.Object,
                 services,
                 new Mock<IProgressProvider>().Object,
-                solutionManager,
-                new Mock<IFileOperations>().Object);
+                solutionManager);
         }
 
         private static ProjectManager CreateProjectManager(IPackageRepository localRepository, IPackageRepository sourceRepository)
