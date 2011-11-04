@@ -8,13 +8,13 @@ namespace NuGet.VisualStudio
         /// <summary>
         /// Gets a value indicating whether the current solution is configured for Package Restore mode.
         /// </summary>
-        bool IsCurrentSolutionEnabled { get; }
+        bool IsCurrentSolutionEnabledForRestore { get; }
 
         /// <summary>
         /// Configures the current solution for Package Restore mode.
         /// </summary>
         /// <param name="quietMode">if set to <c>true</c>, the method will not show any error message.</param>
-        void EnableCurrentSolution(bool quietMode);
+        void EnableCurrentSolutionForRestore(bool quietMode);
 
         /// <summary>
         /// Occurs when it is detected that the packages are missing or restored for the current solution.

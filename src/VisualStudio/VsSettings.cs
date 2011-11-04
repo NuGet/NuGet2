@@ -118,7 +118,7 @@ namespace NuGet.VisualStudio
                     return;
                 }
 
-                var nugetSettingsDirectory = Path.Combine(_solutionManager.SolutionDirectory, ".nuget");
+                var nugetSettingsDirectory = Path.Combine(_solutionManager.SolutionDirectory, VsConstants.NuGetSolutionSettingsFolder);
                 var fileSystem = _fileSystemProvider.GetFileSystem(nugetSettingsDirectory);
                 if (fileSystem.FileExists(Constants.SettingsFileName))
                 {

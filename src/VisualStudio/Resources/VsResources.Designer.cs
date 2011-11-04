@@ -97,7 +97,7 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Some NuGet packages are missing from this solution. Click Restore button to restore them..
+        ///   Looks up a localized string similar to Some NuGet packages are missing from this solution. Click to restore..
         /// </summary>
         public static string AskForRestoreMessage {
             get {

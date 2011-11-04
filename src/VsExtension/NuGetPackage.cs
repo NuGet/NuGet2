@@ -93,9 +93,9 @@ namespace NuGet.Tools
             // restore mode enabled, we make sure every thing is set up correctly.
             // For example, projects which were added outside of VS need to have
             // the <Import> element added.
-            if (_packageRestoreManager.IsCurrentSolutionEnabled)
+            if (_packageRestoreManager.IsCurrentSolutionEnabledForRestore)
             {
-                _packageRestoreManager.EnableCurrentSolution(quietMode: true);
+                _packageRestoreManager.EnableCurrentSolutionForRestore(quietMode: true);
             }
         }
 
@@ -235,13 +235,13 @@ namespace NuGet.Tools
 
         private void EnablePackagesRestore(object sender, EventArgs args)
         {
-            _packageRestoreManager.EnableCurrentSolution(quietMode: false);
+            _packageRestoreManager.EnableCurrentSolutionForRestore(quietMode: false);
         }
 
         private void QueryStatusEnablePackagesRestore(object sender, EventArgs args)
         {
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = IsSolutionOpen && !_packageRestoreManager.IsCurrentSolutionEnabled;
+            command.Visible = IsSolutionOpen && !_packageRestoreManager.IsCurrentSolutionEnabledForRestore;
             command.Enabled = !_consoleStatus.IsBusy;
         }
 

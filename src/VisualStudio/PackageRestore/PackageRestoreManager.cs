@@ -17,9 +17,8 @@ namespace NuGet.VisualStudio
     [Export(typeof(IPackageRestoreManager))]
     internal class PackageRestoreManager : IPackageRestoreManager
     {
-        private const string DotNuGetFolder = ".nuget";
-        private const string NuGetExeFile = ".nuget\\nuget.exe";
-        private const string NuGetTargetsFile = ".nuget\\nuget.targets";
+        private static readonly string NuGetExeFile = Path.Combine(VsConstants.NuGetSolutionSettingsFolder, "nuget.exe");
+        private static readonly string NuGetTargetsFile = Path.Combine(VsConstants.NuGetSolutionSettingsFolder, "nuget.targets");
         private const string NuGetBuildPackageName = "NuGet.Build";
         private const string NuGetCommandLinePackageName = "NuGet.CommandLine";
 
@@ -67,7 +66,7 @@ namespace NuGet.VisualStudio
             _solutionManager.SolutionClosed += OnSolutionOpenedOrClosed;
         }
 
-        public bool IsCurrentSolutionEnabled
+        public bool IsCurrentSolutionEnabledForRestore
         {
             get
             {
@@ -83,13 +82,13 @@ namespace NuGet.VisualStudio
                 }
 
                 IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(solutionDirectory);
-                return fileSystem.DirectoryExists(DotNuGetFolder) &&
+                return fileSystem.DirectoryExists(VsConstants.NuGetSolutionSettingsFolder) &&
                        fileSystem.FileExists(NuGetExeFile) &&
                        fileSystem.FileExists(NuGetTargetsFile);
             }
         }
 
-        public void EnableCurrentSolution(bool quietMode)
+        public void EnableCurrentSolutionForRestore(bool quietMode)
         {
             if (!_solutionManager.IsSolutionOpen)
             {
@@ -118,9 +117,9 @@ namespace NuGet.VisualStudio
                 waitDialog.StartWaitDialog(
                     VsResources.DialogTitle,
                     VsResources.PackageRestoreWaitMessage,
-                    String.Empty,
-                    null,
-                    null,
+                    String.Empty, 
+                    varStatusBmpAnim: null, 
+                    szStatusBarText: null,
                     iDelayToShowDialog: 0,
                     fIsCancelable: false,
                     fShowMarqueeProgress: true);
@@ -209,7 +208,7 @@ namespace NuGet.VisualStudio
 
         public void CheckForMissingPackages()
         {
-            bool missing = IsCurrentSolutionEnabled ? CheckForMissingPackagesCore() : false;
+            bool missing = IsCurrentSolutionEnabledForRestore && CheckForMissingPackagesCore();
             PackagesMissingStatusChanged(this, new PackagesMissingStatusEventArgs(missing));
         }
 
@@ -293,11 +292,11 @@ namespace NuGet.VisualStudio
         private void EnsureNuGetBuild()
         {
             string solutionDirectory = _solutionManager.SolutionDirectory;
-            string nugetFolderPath = Path.Combine(solutionDirectory, DotNuGetFolder);
+            string nugetFolderPath = Path.Combine(solutionDirectory, VsConstants.NuGetSolutionSettingsFolder);
 
             IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(solutionDirectory);
 
-            if (!fileSystem.DirectoryExists(DotNuGetFolder) ||
+            if (!fileSystem.DirectoryExists(VsConstants.NuGetSolutionSettingsFolder) ||
                 !fileSystem.FileExists(NuGetExeFile) ||
                 !fileSystem.FileExists(NuGetTargetsFile))
             {
@@ -317,11 +316,11 @@ namespace NuGet.VisualStudio
                                 packageName));
                     }
 
-                    fileSystem.AddFiles(package.GetFiles(Constants.ToolsDirectory), DotNuGetFolder, preserveFilePath: false);
+                    fileSystem.AddFiles(package.GetFiles(Constants.ToolsDirectory), VsConstants.NuGetSolutionSettingsFolder, preserveFilePath: false);
                 }
 
                 // now add the .nuget folder to the solution as a solution folder.
-                _dte.Solution.AddFolderToSolution(DotNuGetFolder, nugetFolderPath);
+                _dte.Solution.AddFolderToSolution(VsConstants.NuGetSolutionSettingsFolder, nugetFolderPath);
 
                 DisableSourceControlMode();
             }
@@ -330,14 +329,14 @@ namespace NuGet.VisualStudio
         private void DisableSourceControlMode()
         {
             // get the settings for this solution
-            var nugetFolder = Path.Combine(_solutionManager.SolutionDirectory, DotNuGetFolder);
+            var nugetFolder = Path.Combine(_solutionManager.SolutionDirectory, VsConstants.NuGetSolutionSettingsFolder);
             var settings = new Settings(_fileSystemProvider.GetFileSystem(nugetFolder));
             settings.DisableSourceControlMode();
         }
 
         private void OnProjectAdded(object sender, ProjectEventArgs e)
         {
-            if (IsCurrentSolutionEnabled)
+            if (IsCurrentSolutionEnabledForRestore)
             {
                 EnablePackageRestore(e.Project);
                 CheckForMissingPackages();

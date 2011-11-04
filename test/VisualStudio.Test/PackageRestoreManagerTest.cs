@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
+using System.Threading;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -11,7 +11,6 @@ using Xunit;
 namespace NuGet.VisualStudio.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
-    using System.Threading;
 
     public class PackageRestoreManagerTest
     {
@@ -25,7 +24,7 @@ namespace NuGet.VisualStudio.Test
             var packageRestore = CreateInstance(solutionManager: solutionManager.Object);
 
             // Act
-            bool enabled = packageRestore.IsCurrentSolutionEnabled;
+            bool enabled = packageRestore.IsCurrentSolutionEnabledForRestore;
 
             // Assert
             Assert.False(enabled);
@@ -42,14 +41,14 @@ namespace NuGet.VisualStudio.Test
             var packageRestore = CreateInstance(solutionManager: solutionManager.Object);
 
             // Act 1
-            bool enabled = packageRestore.IsCurrentSolutionEnabled;
+            bool enabled = packageRestore.IsCurrentSolutionEnabledForRestore;
 
             // Assert
             Assert.False(enabled);
 
             // Act 2
             solutionManager.Setup(p => p.SolutionDirectory).Returns(String.Empty);
-            enabled = packageRestore.IsCurrentSolutionEnabled;
+            enabled = packageRestore.IsCurrentSolutionEnabledForRestore;
 
             // Assert
             Assert.False(enabled);
@@ -73,7 +72,7 @@ namespace NuGet.VisualStudio.Test
             var packageRestore = CreateInstance(solutionManager: solutionManager.Object, fileSystemProvider: fileSystemProvider.Object);
 
             // Act
-            bool enabled = packageRestore.IsCurrentSolutionEnabled;
+            bool enabled = packageRestore.IsCurrentSolutionEnabledForRestore;
 
             // Assert
             Assert.False(enabled);
@@ -97,7 +96,7 @@ namespace NuGet.VisualStudio.Test
             var packageRestore = CreateInstance(solutionManager: solutionManager.Object, fileSystemProvider: fileSystemProvider.Object);
 
             // Act
-            bool enabled = packageRestore.IsCurrentSolutionEnabled;
+            bool enabled = packageRestore.IsCurrentSolutionEnabledForRestore;
 
             // Assert
             Assert.False(enabled);
@@ -122,7 +121,7 @@ namespace NuGet.VisualStudio.Test
             var packageRestore = CreateInstance(solutionManager: solutionManager.Object, fileSystemProvider: fileSystemProvider.Object);
 
             // Act
-            bool enabled = packageRestore.IsCurrentSolutionEnabled;
+            bool enabled = packageRestore.IsCurrentSolutionEnabledForRestore;
 
             // Assert
             Assert.True(enabled);
@@ -138,7 +137,7 @@ namespace NuGet.VisualStudio.Test
             var packageRestore = CreateInstance(solutionManager: solutionManager.Object);
 
             // Act & Assert
-            Exception exception = Assert.Throws<InvalidOperationException>(() => packageRestore.EnableCurrentSolution(quietMode: true));
+            Exception exception = Assert.Throws<InvalidOperationException>(() => packageRestore.EnableCurrentSolutionForRestore(quietMode: true));
             Assert.Equal("The current environment does not have a solution loaded.", exception.Message);
         }
 
@@ -197,7 +196,7 @@ namespace NuGet.VisualStudio.Test
                 packageRepositoryFactory.Object);
 
             // Act 
-            packageRestore.EnableCurrentSolution(quietMode: true);
+            packageRestore.EnableCurrentSolutionForRestore(quietMode: true);
 
             // Assert
 
@@ -232,7 +231,7 @@ namespace NuGet.VisualStudio.Test
             var project = new Mock<Project>();
 
             // setup SolutionManager
-            var solutionManager = new Mock<ISolutionManager>();
+            var solutionManager = new Mock<ISolutionManager>(MockBehavior.Strict);
             solutionManager.Setup(p => p.IsSolutionOpen).Returns(true);
             solutionManager.Setup(p => p.SolutionDirectory).Returns(tempSolutionPath);
             solutionManager.Setup(p => p.GetProjects()).Returns(new[] { project.Object });
@@ -247,16 +246,15 @@ namespace NuGet.VisualStudio.Test
             fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem.Object);
 
             // setup VsPackageManager
-            var projectFileSystem = new Mock<IFileSystem>();
-            projectFileSystem.Setup(p => p.FileExists("packages.config")).Returns(true);
-            projectFileSystem.Setup(p => p.OpenFile("packages.config")).Returns(
+            var projectFileSystem = new MockFileSystem();
+            projectFileSystem.AddFile("packages.config", 
                 @"<?xml version=""1.0"" encoding=""utf-8""?>
                 <packages>
                     <package id=""A"" version=""1.0.0.0"" />
                     <package id=""B"" version=""1.2-alpha"" />
-                </packages>".AsStream());
+                </packages>");
 
-            var packageReferenceRepository = new PackageReferenceRepository(projectFileSystem.Object, new Mock<ISharedPackageRepository>().Object);
+            var packageReferenceRepository = new PackageReferenceRepository(projectFileSystem, new Mock<ISharedPackageRepository>().Object);
             var projectManager = new Mock<IProjectManager>();
             projectManager.Setup(p => p.LocalRepository).Returns(packageReferenceRepository);
 
@@ -316,15 +314,14 @@ namespace NuGet.VisualStudio.Test
             fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem.Object);
 
             // setup VsPackageManager
-            var projectFileSystem = new Mock<IFileSystem>();
-            projectFileSystem.Setup(p => p.FileExists("packages.config")).Returns(true);
-            projectFileSystem.Setup(p => p.OpenFile("packages.config")).Returns(
+            var projectFileSystem = new MockFileSystem();
+            projectFileSystem.AddFile("packages.config", 
                 @"<?xml version=""1.0"" encoding=""utf-8""?>
                 <packages>
                     <package id=""A"" version=""1.0.0.0"" />
-                </packages>".AsStream());
+                </packages>");
 
-            var packageReferenceRepository = new PackageReferenceRepository(projectFileSystem.Object, new Mock<ISharedPackageRepository>().Object);
+            var packageReferenceRepository = new PackageReferenceRepository(projectFileSystem, new Mock<ISharedPackageRepository>().Object);
             var projectManager = new Mock<IProjectManager>();
             projectManager.Setup(p => p.LocalRepository).Returns(packageReferenceRepository);
 
@@ -383,16 +380,15 @@ namespace NuGet.VisualStudio.Test
             fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem.Object);
 
             // setup VsPackageManager
-            var projectFileSystem = new Mock<IFileSystem>();
-            projectFileSystem.Setup(p => p.FileExists("packages.config")).Returns(true);
-            projectFileSystem.Setup(p => p.OpenFile("packages.config")).Returns(
+            var projectFileSystem = new MockFileSystem();
+            projectFileSystem.AddFile("packages.config", 
                 @"<?xml version=""1.0"" encoding=""utf-8""?>
                 <packages>
                     <package id=""A"" version=""1.0.0.0"" />
                     <package id=""B"" version=""1.2-alpha"" />
-                </packages>".AsStream());
+                </packages>");
 
-            var packageReferenceRepository = new PackageReferenceRepository(projectFileSystem.Object, new Mock<ISharedPackageRepository>().Object);
+            var packageReferenceRepository = new PackageReferenceRepository(projectFileSystem, new Mock<ISharedPackageRepository>().Object);
             var projectManager = new Mock<IProjectManager>();
             projectManager.Setup(p => p.LocalRepository).Returns(packageReferenceRepository);
 
@@ -462,7 +458,7 @@ namespace NuGet.VisualStudio.Test
                 </packages>";
 
             var projectFileSystem = new MockFileSystem();
-            projectFileSystem.AddFile("packages.config", tempFile.AsStream());
+            projectFileSystem.AddFile("packages.config", tempFile);
 
             var packageReferenceRepository = new PackageReferenceRepository(projectFileSystem, new Mock<ISharedPackageRepository>().Object);
             var projectManager = new Mock<IProjectManager>();
