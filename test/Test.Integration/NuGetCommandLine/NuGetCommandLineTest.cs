@@ -996,6 +996,60 @@ public class Cl_{0} {{
             Assert.False(File.Exists(expectedPackage));
         }
 
+        [Fact]
+        public void PackageCommand_SpecifyingProjectFileAndHaveDependenciesSkipContentFromDependencies()
+        {
+            // Arrange  
+            string expectedPackage = "ProjectWithDependenciesWithContent.1.2.0.0.nupkg";
+            WriteAssemblyInfo("ProjectWithDependenciesWithContent",
+                               "1.2.0.0",
+                                 "Thomas",
+                                 "Project with content",
+                                "Title of Package");
+
+            //add dummy .sln file to let NuGet find the /packages/ folder and dependency package  
+            WriteProjectFile("ProjectWithDependenciesWithContent.sln", "");
+            WriteProjectFile("foo.aspx", "");
+            WriteProjectFile("foo.cs", "public class Foo { }");
+            //packages.config for dependencies  
+            WriteProjectFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>  
+<packages>  
+   <package id=""jQuery"" version=""1.6.4"" />  
+</packages>");
+
+            //added by jquery-package, but we have done local changes to this file 
+            WriteProjectFile("Scripts/jQuery-1.6.4.js", @"This is a file that is changed in this project. Therefore this file should be included in this package!");
+
+            CreateProject("ProjectWithDependenciesWithContent", content: new[] { "foo.aspx", "packages.config", "Scripts/jquery-1.6.4.min.js", "Scripts/jquery-1.6.4.js", "Scripts/jquery-1.6.4-vsdoc.js" },
+                                               compile: new[] { "foo.cs" });
+
+            string[] args = new string[] { "pack", "ProjectWithDependenciesWithContent.csproj", "-Build", "-Verbose" };
+
+            Directory.SetCurrentDirectory(ProjectFilesFolder); 
+
+            // Act  
+            
+            //install packages from packages.config  
+            int result = Program.Main(new[] { "install", "packages.config", "-OutputDirectory", "packages" });
+
+            //copy content from jquery package (to ensure no changes to the file)
+            File.Copy(@"packages\jQuery.1.6.4\Content\Scripts\jquery-1.6.4.min.js", @"Scripts\jquery-1.6.4.min.js");
+            File.Copy(@"packages\jQuery.1.6.4\Content\Scripts\jquery-1.6.4-vsdoc.js", @"Scripts\jquery-1.6.4-vsdoc.js");
+
+            //execute main program (pack)
+            result = Program.Main(args);
+             
+            // Assert  
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
+
+            //package should not contain content from jquery package that we have not changed
+            var package = VerifyPackageContents(expectedPackage, new[] { @"content\foo.aspx", @"content\Scripts\jquery-1.6.4.js", @"lib\net40\ProjectWithDependenciesWithContent.dll" });
+            var dependencies = package.Dependencies.ToList();
+            Assert.Equal(1, dependencies.Count); 
+            Assert.Equal("jQuery", dependencies[0].Id);
+        }
 
         [Fact]
         public void PackCommandAllowsPassingPropertiesFromCommandLine()

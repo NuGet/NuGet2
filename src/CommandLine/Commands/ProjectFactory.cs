@@ -579,6 +579,19 @@ namespace NuGet.Commands
 
         private void AddFiles(PackageBuilder builder, string itemType, string targetFolder)
         {
+            // Skip files that are added by dependency packages 
+            string  packagesConfig = GetPackagesConfig();
+            IPackageRepository repository = GetPackagesRepository();
+            var contentFilesInDependencies = new List<IPackageFile>();
+            if (packagesConfig != null && repository != null)
+            {
+                var dependendies = new PackageReferenceFile(packagesConfig).GetPackageReferences();
+                contentFilesInDependencies =
+                    dependendies.Select(reference => repository.FindPackage(reference.Id, reference.Version)).SelectMany
+                        (
+                            a => a.GetContentFiles()).ToList();
+            }
+
             // Get the content files from the project
             foreach (var item in _project.GetItems(itemType))
             {
@@ -595,6 +608,27 @@ namespace NuGet.Commands
                 {
                     Logger.Log(MessageLevel.Warning, NuGetResources.Warning_FileDoesNotExist, targetFilePath);
                     continue;
+                }
+
+                // Check that file is added by dependency
+                IPackageFile targetFile =
+                    contentFilesInDependencies.Find(a => a.Path.Equals(Path.Combine(targetFolder, targetFilePath), StringComparison.OrdinalIgnoreCase));
+                if (targetFile != null)
+                {
+                    // Compare contents as well
+                    using (var dependencyFileStream = targetFile.GetStream())
+                    using (var fileContentsStream = File.Open(fullPath, FileMode.Open))
+                    {
+                        var isEqual = FileHelper.IsFilesEqual(dependencyFileStream, fileContentsStream);
+                        
+                        if (isEqual)
+                        {
+                            Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsChanged, targetFilePath);
+                            continue;
+                        }
+
+                        Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsNotChanged, targetFilePath);
+                    }
                 }
 
                 builder.Files.Add(new PhysicalPackageFile

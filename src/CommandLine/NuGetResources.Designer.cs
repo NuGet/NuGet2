@@ -895,6 +895,24 @@ namespace NuGet
                 return ResourceManager.GetString("PackageCommandExcludeDescription", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File from dependency is changed. Adding file &apos;{0}&apos;..
+        /// </summary>
+        internal static string PackageCommandFileFromDependencyIsChanged {
+            get {
+                return ResourceManager.GetString("PackageCommandFileFromDependencyIsChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File from dependency is not changed. File &apos;{0}&apos; is not added..
+        /// </summary>
+        internal static string PackageCommandFileFromDependencyIsNotChanged {
+            get {
+                return ResourceManager.GetString("PackageCommandFileFromDependencyIsNotChanged", resourceCulture);
+            }
+        }
 
         /// <summary>
         ///   Looks up a localized string similar to Description: {0}.
@@ -1834,7 +1852,17 @@ namespace NuGet
                 return ResourceManager.GetString("UnableToFindBuildOutput", resourceCulture);
             }
         }
-
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File does not exists ({0})..
+        /// </summary>
+        internal static string UnableToFindFile {
+            get 
+			{
+                return ResourceManager.GetString("UnableToFindFile", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to Unable to find &apos;{0}&apos;. Make sure they are specified in packages.config..
         /// </summary>

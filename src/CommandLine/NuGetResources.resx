@@ -737,4 +737,13 @@ nuget update -Self</value>
   <data name="UpdateCommandPrerelease" xml:space="preserve">
     <value>Allows updating to prerelease versions. This flag is not required when updating prerelease packages that are already installed.</value>
   </data>
+  <data name="PackageCommandFileFromDependencyIsChanged" xml:space="preserve">
+    <value>File from dependency is changed. Adding file '{0}'.</value>
+  </data>
+  <data name="PackageCommandFileFromDependencyIsNotChanged" xml:space="preserve">
+    <value>File from dependency is not changed. File '{0}' is not added.</value>
+  </data>
+  <data name="UnableToFindFile">
+    <value>File does not exists ({0}).</value>
+  </data>
 </root>

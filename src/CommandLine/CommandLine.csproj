@@ -78,6 +78,7 @@
     <Compile Include="Common\CommandLineUtility.cs" />
     <Compile Include="Common\Console.cs" />
     <Compile Include="Common\ConsoleCredentialProvider.cs" />
+    <Compile Include="Common\FileHelper.cs" />
     <Compile Include="Common\IConsole.cs" />
     <Compile Include="Common\IMSBuildProjectSystem.cs" />
     <Compile Include="Common\MSBuildProjectSystem.cs" />
