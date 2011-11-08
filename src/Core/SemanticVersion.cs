@@ -13,8 +13,9 @@ namespace NuGet
     [Serializable]
     public sealed class SemanticVersion : IComparable, IComparable<SemanticVersion>, IEquatable<SemanticVersion>
     {
-        private const string SemanticVersionRegex = @"^(?<Version>\d+(\s*\.\s*\d+){0,3})(?<Release>-[a-z][0-9a-z-]*)?$";
-        private const string StrictSemanticVersionRegex = @"^(?<Version>\d+(\.\d+){2})(?<Release>-[a-z][0-9a-z-]*)?$";
+        private const RegexOptions _flags = RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture;
+        private static readonly Regex _semanticVersionRegex = new Regex(@"^(?<Version>\d+(\s*\.\s*\d+){0,3})(?<Release>-[a-z][0-9a-z-]*)?$", _flags);
+        private static readonly Regex _strictSemanticVersionRegex = new Regex(@"^(?<Version>\d+(\.\d+){2})(?<Release>-[a-z][0-9a-z-]*)?$", _flags);
         private readonly string _originalString;
 
         public SemanticVersion(string version)
@@ -104,7 +105,7 @@ namespace NuGet
         /// </summary>
         public static bool TryParse(string version, out SemanticVersion value)
         {
-            return TryParseInternal(version, SemanticVersionRegex, out value);
+            return TryParseInternal(version, _semanticVersionRegex, out value);
         }
 
         /// <summary>
@@ -112,20 +113,18 @@ namespace NuGet
         /// </summary>
         public static bool TryParseStrict(string version, out SemanticVersion value)
         {
-            return TryParseInternal(version, StrictSemanticVersionRegex, out value);
+            return TryParseInternal(version, _strictSemanticVersionRegex, out value);
         }
 
-        private static bool TryParseInternal(string version, string regex, out SemanticVersion semVer)
+        private static bool TryParseInternal(string version, Regex regex, out SemanticVersion semVer)
         {
             semVer = null;
             if (String.IsNullOrEmpty(version))
             {
                 return false;
             }
-            var regexFlags = RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture;
-            var semVerRegex = new Regex(regex, regexFlags);
 
-            var match = semVerRegex.Match(version.Trim());
+            var match = regex.Match(version.Trim());
             Version versionValue;
             if (!match.Success || !Version.TryParse(match.Groups["Version"].Value, out versionValue))
             {

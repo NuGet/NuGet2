@@ -187,7 +187,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Add(c)).Verifiable();
             repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Remove(c)).Verifiable();
 
-            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object, new MockPackageRepository());
+            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object);
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager);
 
             installCommand.Version = "0.4";
@@ -222,8 +222,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Add(c)).Verifiable();
             repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Remove(c)).Verifiable();
 
-            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object,
-                new MockPackageRepository());
+            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object);
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager);
 
             installCommand.ExcludeVersion = true;
@@ -248,7 +247,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Throws(new Exception("Method should not be called"));
             repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Throws(new Exception("Method should not be called"));
 
-            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object, new MockPackageRepository());
+            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object);
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager);
 
             installCommand.ExcludeVersion = true;

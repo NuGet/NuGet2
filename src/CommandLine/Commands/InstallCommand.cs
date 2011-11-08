@@ -168,7 +168,7 @@ namespace NuGet.Commands
         {
             var repository = GetRepository();
             var pathResolver = new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions);
-            var packageManager = new PackageManager(repository, pathResolver, fileSystem, new LocalPackageRepository(pathResolver, fileSystem), CacheRepository);
+            var packageManager = new PackageManager(repository, pathResolver, fileSystem, new LocalPackageRepository(pathResolver, fileSystem));
             packageManager.Logger = Console;
 
             return packageManager;

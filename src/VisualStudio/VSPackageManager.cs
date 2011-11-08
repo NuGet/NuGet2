@@ -18,24 +18,13 @@ namespace NuGet.VisualStudio
         private readonly IRecentPackageRepository _recentPackagesRepository;
         private readonly VsPackageInstallerEvents _packageEvents;
 
-        public VsPackageManager(ISolutionManager solutionManager,
-                                IPackageRepository sourceRepository,
-                                IFileSystem fileSystem,
-                                ISharedPackageRepository sharedRepository,
-                                IRecentPackageRepository recentPackagesRepository,
-                                VsPackageInstallerEvents packageEvents) :
-            this(solutionManager, sourceRepository, fileSystem, sharedRepository, recentPackagesRepository, packageEvents, MachineCache.Default)
-        {
-        }
-
-        public VsPackageManager(ISolutionManager solutionManager,
-                                IPackageRepository sourceRepository,
-                                IFileSystem fileSystem,
-                                ISharedPackageRepository sharedRepository,
-                                IRecentPackageRepository recentPackagesRepository,
-                                VsPackageInstallerEvents packageEvents,
-                                IPackageRepository cacheRepository) :
-            base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository, cacheRepository)
+        public VsPackageManager(ISolutionManager solutionManager, 
+                IPackageRepository sourceRepository, 
+                IFileSystem fileSystem, 
+                ISharedPackageRepository sharedRepository, 
+                IRecentPackageRepository recentPackagesRepository, 
+                VsPackageInstallerEvents packageEvents) :
+            base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository)
         {
 
             _solutionManager = solutionManager;

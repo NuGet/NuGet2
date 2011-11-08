@@ -1,12 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using Moq;
+using NuGet.Test.Mocks;
+using Xunit;
+
 namespace NuGet.Test
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using Moq;
-    using NuGet.Test.Mocks;
-    using Xunit;
-
     public class PackageManagerTest
     {
         [Fact]
@@ -17,7 +17,6 @@ namespace NuGet.Test
             ExceptionAssert.ThrowsArgNull(() => new PackageManager(new MockPackageRepository(), null, new MockProjectSystem(), new MockPackageRepository()), "pathResolver");
             ExceptionAssert.ThrowsArgNull(() => new PackageManager(new MockPackageRepository(), new DefaultPackagePathResolver("foo"), null, new MockPackageRepository()), "fileSystem");
             ExceptionAssert.ThrowsArgNull(() => new PackageManager(new MockPackageRepository(), new DefaultPackagePathResolver("foo"), new MockProjectSystem(), null), "localRepository");
-            ExceptionAssert.ThrowsArgNull(() => new PackageManager(new MockPackageRepository(), new DefaultPackagePathResolver("foo"), new MockProjectSystem(), new MockPackageRepository(), null), "cacheRepository");
         }
 
         [Fact]
@@ -27,12 +26,7 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                localRepository,
-                new MockPackageRepository());
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
@@ -79,12 +73,7 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                localRepository,
-                new MockPackageRepository());
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
             var package = PackageUtility.CreatePackage("foo", "1.2.33");
             localRepository.AddPackage(package);
 
@@ -118,102 +107,13 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void InstallPackageAddPackageToCache1()
-        {
-            // Arrange
-            var cacheRepository = new Mock<IPackageRepository>();
-            var projectSystem = new MockProjectSystem();
-            var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                new MockPackageRepository(),
-                cacheRepository: cacheRepository.Object);
-
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
-                                                             new[] { "contentFile", @"sub\contentFile" },
-                                                             new[] { @"lib\reference.dll" },
-                                                             new[] { @"readme.txt" });
-
-            sourceRepository.AddPackage(packageA);
-
-            // Act
-            packageManager.InstallPackage("A");
-
-            // Assert
-            cacheRepository.Verify(p => p.AddPackage(packageA), Times.Once());
-        }
-
-        [Fact]
-        public void InstallPackageAddPackageToCache2()
-        {
-            // Arrange
-            var cacheRepository = new Mock<IPackageRepository>();
-            var projectSystem = new MockProjectSystem();
-            var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                new MockPackageRepository(),
-                cacheRepository: cacheRepository.Object);
-
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
-                                                             new[] { "contentFile", @"sub\contentFile" },
-                                                             new[] { @"lib\reference.dll" },
-                                                             new[] { @"readme.txt" });
-
-            sourceRepository.AddPackage(packageA);
-
-            // Act
-            packageManager.InstallPackage("A", new SemanticVersion("1.0"));
-
-            // Assert
-            cacheRepository.Verify(p => p.AddPackage(packageA), Times.Once());
-        }
-
-        [Fact]
-        public void InstallPackageAddPackageToCache3()
-        {
-            // Arrange
-            var cacheRepository = new Mock<IPackageRepository>();
-            var projectSystem = new MockProjectSystem();
-            var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                new MockPackageRepository(),
-                cacheRepository: cacheRepository.Object);
-
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
-                                                             new[] { "contentFile", @"sub\contentFile" },
-                                                             new[] { @"lib\reference.dll" },
-                                                             new[] { @"readme.txt" });
-
-            sourceRepository.AddPackage(packageA);
-
-            // Act
-            packageManager.InstallPackage("A", new SemanticVersion("1.0"), ignoreDependencies: true, allowPrereleaseVersions: true);
-
-            // Assert
-            cacheRepository.Verify(p => p.AddPackage(packageA), Times.Once());
-        }
-
-        [Fact]
         public void InstallPackageAddsAllFilesToFileSystem()
         {
             // Arrange
             var projectSystem = new MockProjectSystem();
             var sourceRepository = new MockPackageRepository();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
-            var packageManager = new PackageManager(
-                sourceRepository,
-                pathResolver,
-                projectSystem,
-                new LocalPackageRepository(pathResolver, projectSystem),
-                new MockPackageRepository());
+            var packageManager = new PackageManager(sourceRepository, pathResolver, projectSystem, new LocalPackageRepository(pathResolver, projectSystem));
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                              new[] { "contentFile", @"sub\contentFile" },
@@ -242,12 +142,7 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                localRepository,
-                new MockPackageRepository());
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> {
@@ -274,12 +169,7 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            PackageManager packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                localRepository,
-                new MockPackageRepository());
+            PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                 dependencies: new List<PackageDependency> {
@@ -318,12 +208,7 @@ namespace NuGet.Test
             var projectSystem = new Mock<IProjectSystem>();
             projectSystem.Setup(m => m.AddFile(@"A.1.0\content\file", It.IsAny<Stream>())).Throws<UnauthorizedAccessException>();
             projectSystem.Setup(m => m.Root).Returns("FakeRoot");
-            PackageManager packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem.Object),
-                projectSystem.Object,
-                localRepository,
-                new MockPackageRepository());
+            PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object, localRepository);
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "file" });
             sourceRepository.AddPackage(packageA);
@@ -343,12 +228,7 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            PackageManager packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                localRepository,
-                new MockPackageRepository());
+            PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
             IPackage A10 = PackageUtility.CreatePackage("A", "1.0");
             IPackage A20 = PackageUtility.CreatePackage("A", "2.0");
@@ -364,46 +244,13 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void UpdatePackageAddNewPackageToCache()
-        {
-            // Arrange
-            var cacheRepository = new Mock<IPackageRepository>();
-            var localRepository = new MockPackageRepository();
-            var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem();
-            PackageManager packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                localRepository,
-                cacheRepository: cacheRepository.Object);
-
-            IPackage A10 = PackageUtility.CreatePackage("A", "1.0");
-            IPackage A20 = PackageUtility.CreatePackage("A", "2.0");
-            localRepository.Add(A10);
-            sourceRepository.Add(A20);
-
-            // Act
-            packageManager.UpdatePackage("A", updateDependencies: true, allowPrereleaseVersions: false);
-
-            // Assert
-            cacheRepository.Verify(p => p.AddPackage(A20), Times.Once());
-            cacheRepository.Verify(p => p.AddPackage(A10), Times.Never());
-        }
-
-        [Fact]
         public void UpdatePackageThrowsIfPackageNotInstalled()
         {
             // Arrange
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            PackageManager packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                localRepository,
-                new MockPackageRepository());
+            PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
             IPackage A20 = PackageUtility.CreatePackage("A", "2.0");
             sourceRepository.Add(A20);
@@ -420,12 +267,7 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            PackageManager packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                localRepository,
-                new MockPackageRepository());
+            PackageManager packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
             IPackage A10 = PackageUtility.CreatePackage("A", "1.0");
             localRepository.Add(A10);
@@ -444,12 +286,7 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                localRepository,
-                new MockPackageRepository());
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0.0-beta",
                                                              dependencies: new[] {
@@ -475,12 +312,7 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                localRepository,
-                new MockPackageRepository());
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0.0",
                                                              dependencies: new[] {
@@ -506,12 +338,7 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                localRepository,
-                new MockPackageRepository());
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0.0",
                                                              dependencies: new[] {
@@ -535,12 +362,7 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                localRepository,
-                new MockPackageRepository());
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
 
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0.0",
                                                              dependencies: new[] {
@@ -567,30 +389,25 @@ namespace NuGet.Test
             // Arrange
             var packageB_05 = PackageUtility.CreatePackage("B", "0.5.0");
             var packageB_10a = PackageUtility.CreatePackage("B", "1.0.0-a");
-            var packageA = PackageUtility.CreatePackage("A", 
+            var packageA = PackageUtility.CreatePackage("A",
                                 dependencies: new[] { new PackageDependency("B", VersionUtility.ParseVersionSpec("[0.5.0, 2.0.0)")) });
 
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
-            var packageManager = new PackageManager(
-                sourceRepository,
-                new DefaultPackagePathResolver(projectSystem),
-                projectSystem,
-                localRepository,
-                new MockPackageRepository());
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
             sourceRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageB_10a);
             sourceRepository.AddPackage(packageB_05);
 
             // Act 
             // The allowPrereleaseVersions flag should be irrelevant since we specify a version.
-            packageManager.InstallPackage("B", version: new SemanticVersion("1.0.0-a"), ignoreDependencies: false, allowPrereleaseVersions: false); 
+            packageManager.InstallPackage("B", version: new SemanticVersion("1.0.0-a"), ignoreDependencies: false, allowPrereleaseVersions: false);
             // Verify we actually did install B.1.0.0a
             Assert.True(localRepository.Exists(packageB_10a));
 
             packageManager.InstallPackage("A");
-            
+
             // Assert
             Assert.True(localRepository.Exists(packageA));
             Assert.True(localRepository.Exists(packageB_10a));
