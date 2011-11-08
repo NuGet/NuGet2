@@ -1432,6 +1432,38 @@ function Test-InstallPackageConsidersPrereleasePackagesWhenResolvingDependencyWh
     $a | Install-Package -Source $context.RepositoryRoot PackageWithDependencyOnPrereleaseTestPackage
     Assert-Package $a 'PrereleaseTestPackage' '1.0.1-a'
     Assert-Package $a 'PackageWithDependencyOnPrereleaseTestPackage' '1.0.0'
+}
 
+function Test-InstallPackageDontMakeExcessiveNetworkRequests 
+{
+    # Arrange
+    $a = New-ClassLibrary
 
+    $nugetsource = "https://go.microsoft.com/FWLink/?LinkID=206669"
+    
+    $repository = Get-PackageRepository $nugetsource
+    Assert-NotNull $repository
+
+    $packageDownloader = $repository.PackageDownloader
+        Assert-NotNull $packageDownloader
+
+    $global:numberOfRequests = 0
+    $eventId = "__DataServiceSendingRequest"
+
+    try 
+    {
+        Register-ObjectEvent $packageDownloader "SendingRequest" $eventId { $global:numberOfRequests++; }
+
+        # Act
+        $a | Install-Package "nugetpackageexplorer.types" -version 1.0 -source $nugetsource
+
+        # Assert
+        Assert-Package $a 'nugetpackageexplorer.types' '1.0'
+        Assert-AreEqual 1 $global:numberOfRequests
+    }
+    finally 
+    {
+        Unregister-Event $eventId -ea SilentlyContinue
+        Remove-Variable 'numberOfRequests' -Scope 'Global' -ea SilentlyContinue
+    }
 }

@@ -42,6 +42,11 @@ namespace NuGet
             }
         }
 
+        public PackageDownloader PackageDownloader
+        {
+            get { return _packageDownloader; }
+        }
+
         public DataServicePackageRepository(Uri serviceRoot)
             : this(new HttpClient(serviceRoot))
         {

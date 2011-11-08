@@ -924,3 +924,40 @@ function Test-UpdatePackageDoesNotConsiderPrereleasePackagesForSafeUpdateIfFlagI
     # Assert
     Assert-Package $p PreReleaseTestPackage 1.0.1a
 }
+
+function Test-UpdatePackageDontMakeExcessiveNetworkRequests 
+{
+    # Arrange
+    $a = New-ClassLibrary
+
+    $nugetsource = "https://go.microsoft.com/FWLink/?LinkID=206669"
+    
+    $repository = Get-PackageRepository $nugetsource
+    Assert-NotNull $repository
+
+    $packageDownloader = $repository.PackageDownloader
+        Assert-NotNull $packageDownloader
+
+    $global:numberOfRequests = 0
+    $eventId = "__DataServiceSendingRequest"
+
+    $a | Install-Package "nugetpackageexplorer.types" -version 1.0 -source $nugetsource
+    Assert-Package $a 'nugetpackageexplorer.types' '1.0'
+
+    try 
+    {
+        Register-ObjectEvent $packageDownloader "SendingRequest" $eventId { $global:numberOfRequests++; }
+
+        # Act
+        $a | Update-Package "nugetpackageexplorer.types" -version 2.0 -source $nugetsource
+
+        # Assert
+        Assert-Package $a 'nugetpackageexplorer.types' '2.0'
+        Assert-AreEqual 1 $global:numberOfRequests
+    }
+    finally 
+    {
+        Unregister-Event $eventId -ea SilentlyContinue
+        Remove-Variable 'numberOfRequests' -Scope 'Global' -ea SilentlyContinue
+    }
+}

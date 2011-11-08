@@ -349,3 +349,15 @@ function Write-TestResults {
         [System.Diagnostics.Process]::Start($Path)
     }
 }
+
+function Get-PackageRepository
+{
+    param
+    (
+        $source
+    )
+
+    $componentModel = Get-VSComponentModel
+    $repositoryFactory = $componentModel.GetService([NuGet.IPackageRepositoryFactory])
+    $repositoryFactory.CreateRepository($source)
+}

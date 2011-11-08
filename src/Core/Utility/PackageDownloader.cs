@@ -35,6 +35,7 @@ namespace NuGet
             _packageFactory = packageFactory;
             _hashProvider = hashProvider;
         }
+
         public IPackage DownloadPackage(Uri uri, byte[] packageHash, IPackageMetadata package)
         {
             if (uri == null)
