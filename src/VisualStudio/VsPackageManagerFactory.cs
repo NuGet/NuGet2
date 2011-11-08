@@ -109,8 +109,7 @@ namespace NuGet.VisualStudio
                                         info.FileSystem,
                                         info.Repository,
                                         _recentPackageRepository,
-                                        _packageEvents,
-                                        _cacheRepository)
+                                        _packageEvents)
                                         {
                                             AddToRecent = addToRecent
                                         };

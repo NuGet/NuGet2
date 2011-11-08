@@ -9,7 +9,6 @@ namespace NuGet
     public class PackageManager : IPackageManager
     {
         private ILogger _logger;
-        private readonly IPackageRepository _cacheRepository;
 
         private event EventHandler<PackageOperationEventArgs> _packageInstalling;
         private event EventHandler<PackageOperationEventArgs> _packageInstalled;
@@ -26,17 +25,7 @@ namespace NuGet
         {
         }
 
-        public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem, IPackageRepository localRepository) :
-            this(sourceRepository, pathResolver, fileSystem, localRepository, MachineCache.Default)
-        {
-        }
-
-        public PackageManager(
-            IPackageRepository sourceRepository,
-            IPackagePathResolver pathResolver,
-            IFileSystem fileSystem,
-            IPackageRepository localRepository,
-            IPackageRepository cacheRepository)
+        public PackageManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IFileSystem fileSystem, IPackageRepository localRepository)
         {
             if (sourceRepository == null)
             {
@@ -54,16 +43,11 @@ namespace NuGet
             {
                 throw new ArgumentNullException("localRepository");
             }
-            if (cacheRepository == null)
-            {
-                throw new ArgumentNullException("cacheRepository");
-            }
 
             SourceRepository = sourceRepository;
             PathResolver = pathResolver;
             FileSystem = fileSystem;
             LocalRepository = localRepository;
-            _cacheRepository = cacheRepository;
         }
 
         public event EventHandler<PackageOperationEventArgs> PackageInstalled
@@ -234,11 +218,6 @@ namespace NuGet
             Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageInstalledSuccessfully, package.GetFullName());
 
             OnInstalled(args);
-
-            if (_cacheRepository != null)
-            {
-                _cacheRepository.AddPackage(package);
-            }
         }
 
         private void ExpandFiles(IPackage package)

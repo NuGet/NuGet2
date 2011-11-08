@@ -1,12 +1,13 @@
-﻿using Moq;
+﻿using System;
+using Moq;
+using NuGet.Test;
 using NuGet.Test.Mocks;
 using Xunit;
 
 namespace NuGet.VisualStudio.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
-    using NuGet.Test;
-    using System;
+
     public class VsUninstallerTest
     {
         [Fact]
@@ -24,7 +25,7 @@ namespace NuGet.VisualStudio.Test
             var scriptExecutor = new Mock<IScriptExecutor>(MockBehavior.Strict);
             scriptExecutor.Setup(s => s.Execute(@"C:\MockFileSystem\A.1.0", "uninstall.ps1", package, project, NullLogger.Instance)).Returns(true).Verifiable();
             var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), activeRepository, new MockFileSystem(), localRepository.Object,
-                new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object, new Mock<IPackageRepository>().Object) { CallBase = true };
+                new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager(activeRepository, false, false)).Returns(packageManager.Object);
             packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager).Verifiable();
@@ -56,7 +57,7 @@ namespace NuGet.VisualStudio.Test
             var scriptExecutor = new Mock<IScriptExecutor>(MockBehavior.Strict);
             scriptExecutor.Setup(s => s.Execute(@"C:\MockFileSystem\A.1.0", "uninstall.ps1", packageA, project, NullLogger.Instance)).Returns(true).Verifiable();
             var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), activeRepository, new MockFileSystem(), localRepository.Object,
-                new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object, new Mock<IPackageRepository>().Object) { CallBase = true };
+                new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager(activeRepository, false, false)).Returns(packageManager.Object);
             packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager).Verifiable();
@@ -91,7 +92,7 @@ namespace NuGet.VisualStudio.Test
             scriptExecutor.Setup(s => s.Execute(@"C:\MockFileSystem\A.1.0", "uninstall.ps1", packageA, project, NullLogger.Instance)).Returns(true).Verifiable();
             scriptExecutor.Setup(s => s.Execute(@"C:\MockFileSystem\B.1.0", "uninstall.ps1", packageB, project, NullLogger.Instance)).Returns(true).Verifiable();
             var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), activeRepository, new MockFileSystem(), localRepository.Object,
-                new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object, new Mock<IPackageRepository>().Object) { CallBase = true };
+                new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager(activeRepository, false, false)).Returns(packageManager.Object);
             packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager).Verifiable();
@@ -125,7 +126,7 @@ namespace NuGet.VisualStudio.Test
             var scriptExecutor = new Mock<IScriptExecutor>(MockBehavior.Strict);
             scriptExecutor.Setup(s => s.Execute(@"C:\MockFileSystem\A.1.0", "uninstall.ps1", packageA, project, NullLogger.Instance)).Returns(true).Verifiable();
             var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), activeRepository, new MockFileSystem(), localRepository.Object,
-                new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object, new Mock<IPackageRepository>().Object) { CallBase = true };
+                new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager(activeRepository, false, false)).Returns(packageManager.Object);
             packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager).Verifiable();
