@@ -8,6 +8,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 {
     public class NuGetCommandLineTest : IDisposable, IUseFixture<NugetProgramStatic>
     {
+        private const string DefaultRepoUrl = "https://go.microsoft.com/fwlink/?LinkID=206669";
         private const string NoSpecsfolder = @".\nospecs\";
         private const string OneSpecfolder = @".\onespec\";
         private const string TwoSpecsFolder = @".\twospecs\";
@@ -1028,7 +1029,7 @@ public class Cl_{0} {{
             // Act  
 
             //install packages from packages.config  
-            int result = Program.Main(new[] { "install", "packages.config", "-OutputDirectory", "packages" });
+            int result = Program.Main(new[] { "install", "packages.config", "-OutputDirectory", "packages", "-source", DefaultRepoUrl });
 
             //copy content from jquery package (to ensure no changes to the file)
             File.Copy(@"packages\jQuery.1.6.4\Content\Scripts\jquery-1.6.4.min.js", @"Scripts\jquery-1.6.4.min.js");
