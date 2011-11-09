@@ -969,15 +969,24 @@ namespace NuGet.VisualStudio
 
                 if (newPackage != null && package.Version != newPackage.Version)
                 {
-                    // We might be updating a solution only package
-                    UpdatePackage(newPackage, updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
+                    try
+                    {
+                        InitializeLogger(logger, projectManager: null);
+
+                        // We might be updating a solution only package
+                        UpdatePackage(newPackage, updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
+                    }
+                    finally
+                    {
+                        ClearLogger(logger, projectManager: null);
+                    }
 
                     // Add package to recent repository
                     AddPackageToRecentRepository(newPackage);
                 }
                 else
                 {
-                    Logger.Log(MessageLevel.Info, VsResources.NoUpdatesAvailable, packageId);
+                    logger.Log(MessageLevel.Info, VsResources.NoUpdatesAvailable, packageId);
                 }
             }
         }
