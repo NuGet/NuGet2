@@ -278,9 +278,10 @@ namespace NuGet.Commands
                               SemanticVersion.ParseOptionalVersion(version) ??
                               new SemanticVersion("1.0");
         }
-		
-		private static IEnumerable<string> GetFiles(string path, string fileNameWithoutExtension, HashSet<string> allowedExtensions) {			
-			return allowedExtensions.Select(extension => Directory.GetFiles(path, fileNameWithoutExtension + extension)).SelectMany(a => a);
+
+        private static IEnumerable<string> GetFiles(string path, string fileNameWithoutExtension, HashSet<string> allowedExtensions)
+        {
+            return allowedExtensions.Select(extension => Directory.GetFiles(path, fileNameWithoutExtension + extension)).SelectMany(a => a);
         }
 
         private void AddOutputFiles(PackageBuilder builder)
@@ -580,16 +581,15 @@ namespace NuGet.Commands
         private void AddFiles(PackageBuilder builder, string itemType, string targetFolder)
         {
             // Skip files that are added by dependency packages 
-            string  packagesConfig = GetPackagesConfig();
+            string packagesConfig = GetPackagesConfig();
             IPackageRepository repository = GetPackagesRepository();
             var contentFilesInDependencies = new List<IPackageFile>();
             if (packagesConfig != null && repository != null)
             {
-                var dependendies = new PackageReferenceFile(packagesConfig).GetPackageReferences();
-                contentFilesInDependencies =
-                    dependendies.Select(reference => repository.FindPackage(reference.Id, reference.Version)).SelectMany
-                        (
-                            a => a.GetContentFiles()).ToList();
+                var references = new PackageReferenceFile(packagesConfig).GetPackageReferences();
+                contentFilesInDependencies = references.Select(reference => repository.FindPackage(reference.Id, reference.Version))
+                                                       .SelectMany(a => a.GetContentFiles())
+                                                       .ToList();
             }
 
             // Get the content files from the project
@@ -611,30 +611,29 @@ namespace NuGet.Commands
                 }
 
                 // Check that file is added by dependency
-                IPackageFile targetFile =
-                    contentFilesInDependencies.Find(a => a.Path.Equals(Path.Combine(targetFolder, targetFilePath), StringComparison.OrdinalIgnoreCase));
+                string targetPath = Path.Combine(targetFolder, targetFilePath);
+                IPackageFile targetFile = contentFilesInDependencies.Find(a => a.Path.Equals(targetPath, StringComparison.OrdinalIgnoreCase));
                 if (targetFile != null)
                 {
                     // Compare contents as well
                     using (var dependencyFileStream = targetFile.GetStream())
                     using (var fileContentsStream = File.Open(fullPath, FileMode.Open))
                     {
-                        var isEqual = FileHelper.IsFilesEqual(dependencyFileStream, fileContentsStream);
-                        
+                        var isEqual = FileHelper.AreFilesEqual(dependencyFileStream, fileContentsStream);
                         if (isEqual)
                         {
-                            Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsChanged, targetFilePath);
+                            Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsNotChanged, targetFilePath);
                             continue;
                         }
 
-                        Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsNotChanged, targetFilePath);
+                        Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsChanged, targetFilePath);
                     }
                 }
 
                 builder.Files.Add(new PhysicalPackageFile
                 {
                     SourcePath = fullPath,
-                    TargetPath = Path.Combine(targetFolder, targetFilePath)
+                    TargetPath = targetPath
                 });
             }
         }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 using Xunit;
 
 namespace NuGet.Test.NuGetCommandLine
@@ -13,69 +9,66 @@ namespace NuGet.Test.NuGetCommandLine
         public void SameBinaryFileStreamShouldBeEqual()
         {
             // Arrange
-            using (var file1 = new FileStream("./Moq.dll", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (var file2 = new FileStream("./Moq.dll", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var file1 = File.OpenRead("./Moq.dll"))
+            using (var file2 = File.OpenRead("./Moq.dll"))
             {
                 // Act
-                var result = FileHelper.IsFilesEqual(file1, file2);
+                var result = FileHelper.AreFilesEqual(file1, file2);
                 // Assert
                 Assert.True(result);
             }
-
         }
 
         [Fact]
         public void DifferentBinaryFileStreamsShouldNotBeEqual()
         {
             // Arrange
-            using (var file1 = new FileStream("./Moq.dll", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (var file2 = new FileStream("./Ninject.dll", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var file1 = File.OpenRead("./Moq.dll"))
+            using (var file2 = File.OpenRead("./Ninject.dll"))
             {
-                //Act
-                var result = FileHelper.IsFilesEqual(file1, file2);
+                // Act
+                var result = FileHelper.AreFilesEqual(file1, file2);
+
                 // Assert
                 Assert.False(result);
             }
-
         }
 
         [Fact]
         public void SameTextFileStreamShouldBeEqual()
         {
             // Arrange
-            using (var file1 = new FileStream("./Moq.xml", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (var file2 = new FileStream("./Moq.xml", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var file1 = File.OpenRead("./Moq.xml"))
+            using (var file2 = File.OpenRead("./Moq.xml"))
             {
                 // Act
-                var result = FileHelper.IsFilesEqual(file1, file2);
+                var result = FileHelper.AreFilesEqual(file1, file2);
                 // Assert
                 Assert.True(result);
             }
-
         }
 
         [Fact]
         public void DifferentTextFileStreamsShouldNotBeEqual()
         {
             // Arrange
-            using (var file1 = new FileStream("./Moq.xml", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (var file2 = new FileStream("./Ninject.xml", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var file1 = File.OpenRead("./Moq.xml"))
+            using (var file2 = File.OpenRead("./Ninject.xml"))
             {
                 // Act
-                var result = FileHelper.IsFilesEqual(file1, file2);
+                var result = FileHelper.AreFilesEqual(file1, file2);
+
                 // Assert
                 Assert.False(result);
             }
-            
         }
 
         [Fact]
         public void SameBinaryFilePathShouldBeEqual()
         {
-            // Arrange
-
             // Act
-            var result = FileHelper.IsFilesEqual("./Moq.dll", "./Moq.dll");
+            var result = FileHelper.AreFilesEqual("./Moq.dll", "./Moq.dll");
+
             // Assert
             Assert.True(result);
         }
@@ -83,10 +76,9 @@ namespace NuGet.Test.NuGetCommandLine
         [Fact]
         public void DifferentBinaryFilePathsShouldNotBeEqual()
         {
-            // Arrange
-            
             // Act
-            var result = FileHelper.IsFilesEqual("./Moq.dll", "./Ninject.dll");
+            var result = FileHelper.AreFilesEqual("./Moq.dll", "./Ninject.dll");
+
             // Assert
             Assert.False(result);
         }
@@ -94,10 +86,9 @@ namespace NuGet.Test.NuGetCommandLine
         [Fact]
         public void SameTextFilePathsShouldBeEqual()
         {
-            // Arrange
-
             // Act
-            var result = FileHelper.IsFilesEqual("./Moq.xml", "./Moq.xml");
+            var result = FileHelper.AreFilesEqual("./Moq.xml", "./Moq.xml");
+
             // Assert
             Assert.True(result);
         }
@@ -105,15 +96,11 @@ namespace NuGet.Test.NuGetCommandLine
         [Fact]
         public void DifferentTextFilePathsShouldNotBeEqual()
         {
-            // Arrange
-            
             // Act
-            var result = FileHelper.IsFilesEqual("./Moq.xml", "./Ninject.xml");
+            var result = FileHelper.AreFilesEqual("./Moq.xml", "./Ninject.xml");
+
             // Assert
             Assert.False(result);
         }
-
-
-
     }
 }

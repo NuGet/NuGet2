@@ -1,16 +1,15 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace NuGet
 {
     internal static class FileHelper
     {
-        const int BYTES_TO_READ = sizeof(Int64);
+        private const int BytesToRead = sizeof(Int64);
 
-        public static bool IsFilesEqual(Stream s1, Stream s2)
+        public static bool AreFilesEqual(Stream s1, Stream s2)
         {
             if (s1 == null)
             {
@@ -21,11 +20,11 @@ namespace NuGet
                 throw new ArgumentNullException("s2");
             }
 
-            var iterations = (int)Math.Ceiling((double)s1.Length / BYTES_TO_READ);
+            var iterations = (int)Math.Ceiling((double)s1.Length / BytesToRead);
             return FileAreEqual(s1, s2, iterations);
         }
 
-        public static bool IsFilesEqual(string path1, string path2)
+        public static bool AreFilesEqual(string path1, string path2)
         {
             if (path1 == null)
             {
@@ -39,7 +38,7 @@ namespace NuGet
             return FilesAreEqual(new FileInfo(path1), new FileInfo(path2));
         }
 
-        static bool FilesAreEqual(FileInfo first, FileInfo second)
+        private static bool FilesAreEqual(FileInfo first, FileInfo second)
         {
             if (first == null)
             {
@@ -54,6 +53,7 @@ namespace NuGet
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, NuGetResources.UnableToFindFile, first.FullName), "first");
             }
+
             if (!second.Exists)
             {
                 throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, NuGetResources.UnableToFindFile, second.FullName), "second");
@@ -64,7 +64,7 @@ namespace NuGet
                 return false;
             }
 
-            var iterations = (int)Math.Ceiling((double)first.Length / BYTES_TO_READ);
+            var iterations = (int)Math.Ceiling((double)first.Length / BytesToRead);
 
             using (FileStream fs1 = first.OpenRead())
             using (FileStream fs2 = second.OpenRead())
@@ -75,21 +75,29 @@ namespace NuGet
 
         private static bool FileAreEqual(Stream s1, Stream s2, int iterations)
         {
-            if (s1 == null) throw new ArgumentNullException("s1");
-            if (s2 == null) throw new ArgumentNullException("s2");
+            if (s1 == null)
+            {
+                throw new ArgumentNullException("s1");
+            }
+            if (s2 == null)
+            {
+                throw new ArgumentNullException("s2");
+            }
 
             if (s1.Length != s2.Length)
             {
                 return false;
             }
 
-            var one = new byte[BYTES_TO_READ];
-            var two = new byte[BYTES_TO_READ];
+            Debug.Assert(iterations >= 0);
+
+            var one = new byte[BytesToRead];
+            var two = new byte[BytesToRead];
 
             for (var i = 0; i < iterations; i++)
             {
-                s1.Read(one, 0, BYTES_TO_READ);
-                s2.Read(two, 0, BYTES_TO_READ);
+                s1.Read(one, 0, BytesToRead);
+                s2.Read(two, 0, BytesToRead);
 
                 if (BitConverter.ToInt64(one, 0) != BitConverter.ToInt64(two, 0))
                 {

@@ -48,7 +48,6 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             Directory.SetCurrentDirectory(startingDirectory);
         }
 
-
         [Fact]
         public void NuGetCommandLine_ShowsHelpIfThereIsNoCommand()
         {
@@ -1020,15 +1019,14 @@ public class Cl_{0} {{
             //added by jquery-package, but we have done local changes to this file 
             WriteProjectFile("Scripts/jQuery-1.6.4.js", @"This is a file that is changed in this project. Therefore this file should be included in this package!");
 
-            CreateProject("ProjectWithDependenciesWithContent", content: new[] { "foo.aspx", "packages.config", "Scripts/jquery-1.6.4.min.js", "Scripts/jquery-1.6.4.js", "Scripts/jquery-1.6.4-vsdoc.js" },
-                                               compile: new[] { "foo.cs" });
+            CreateProject("ProjectWithDependenciesWithContent", 
+                          content: new[] { "foo.aspx", "packages.config", "Scripts/jquery-1.6.4.min.js", "Scripts/jquery-1.6.4.js", "Scripts/jquery-1.6.4-vsdoc.js" },
+                          compile: new[] { "foo.cs" });
 
-            string[] args = new string[] { "pack", "ProjectWithDependenciesWithContent.csproj", "-Build", "-Verbose" };
-
-            Directory.SetCurrentDirectory(ProjectFilesFolder); 
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
 
             // Act  
-            
+
             //install packages from packages.config  
             int result = Program.Main(new[] { "install", "packages.config", "-OutputDirectory", "packages" });
 
@@ -1037,8 +1035,8 @@ public class Cl_{0} {{
             File.Copy(@"packages\jQuery.1.6.4\Content\Scripts\jquery-1.6.4-vsdoc.js", @"Scripts\jquery-1.6.4-vsdoc.js");
 
             //execute main program (pack)
-            result = Program.Main(args);
-             
+            result = Program.Main(new[] { "pack", "ProjectWithDependenciesWithContent.csproj", "-Build", "-Verbose" });
+
             // Assert  
             Assert.Equal(0, result);
             Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
@@ -1047,7 +1045,7 @@ public class Cl_{0} {{
             //package should not contain content from jquery package that we have not changed
             var package = VerifyPackageContents(expectedPackage, new[] { @"content\foo.aspx", @"content\Scripts\jquery-1.6.4.js", @"lib\net40\ProjectWithDependenciesWithContent.dll" });
             var dependencies = package.Dependencies.ToList();
-            Assert.Equal(1, dependencies.Count); 
+            Assert.Equal(1, dependencies.Count);
             Assert.Equal("jQuery", dependencies[0].Id);
         }
 
