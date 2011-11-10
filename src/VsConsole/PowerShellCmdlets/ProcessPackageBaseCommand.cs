@@ -21,10 +21,19 @@ namespace NuGet.PowerShell.Commands
         // project managers since the same cmdlet instance can be used across invocations.
         private readonly Dictionary<string, IProjectManager> _projectManagers = new Dictionary<string, IProjectManager>();
         private readonly Dictionary<IProjectManager, Project> _projectManagerToProject = new Dictionary<IProjectManager, Project>();
+        private string _readmeFile;
+        private readonly IVsCommonOperations _vsCommonOperations;
+        private IDisposable _expandedNodesDisposable;
 
-        protected ProcessPackageBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory, IHttpClientEvents httpClientEvents)
+        protected ProcessPackageBaseCommand(
+            ISolutionManager solutionManager, 
+            IVsPackageManagerFactory packageManagerFactory, 
+            IHttpClientEvents httpClientEvents,
+            IVsCommonOperations vsCommonOperations)
             : base(solutionManager, packageManagerFactory, httpClientEvents)
         {
+            Debug.Assert(vsCommonOperations != null);
+            _vsCommonOperations = vsCommonOperations;
         }
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
@@ -69,6 +78,10 @@ namespace NuGet.PowerShell.Commands
                 PackageManager.PackageInstalling += OnPackageInstalling;
                 PackageManager.PackageInstalled += OnPackageInstalled;
             }
+
+            // remember currently expanded nodes so that we can leave them expanded 
+            // after the operation has finished.
+            SaveExpandedNodes();
         }
 
         protected override void EndProcessing()
@@ -88,6 +101,8 @@ namespace NuGet.PowerShell.Commands
             }
 
             WriteLine();
+
+            CollapseNodes();
         }
 
         private Tuple<IProjectManager, Project> GetProjectManager()
@@ -160,6 +175,23 @@ namespace NuGet.PowerShell.Commands
         {
             AddToolsFolderToEnvironmentPath(e.InstallPath);
             ExecuteScript(e.InstallPath, PowerShellScripts.Init, e.Package, null);
+        }
+
+        private void PrepareOpenReadMeFile(PackageOperationEventArgs e)
+        {
+            // only open the read me file for the first package that initiates this operation.
+            if (e.Package.Id.Equals(this.Id, StringComparison.OrdinalIgnoreCase) && e.Package.HasReadMeFileAtRoot()) 
+            {
+                _readmeFile = Path.Combine(e.InstallPath, NuGetConstants.ReadmeFileName);
+            }
+        }
+
+        private void OpenReadMeFile()
+        {
+            if (_readmeFile != null )
+            {
+                _vsCommonOperations.OpenFile(_readmeFile);
+            }
         }
 
         protected virtual void AddToolsFolderToEnvironmentPath(string installPath)
@@ -250,6 +282,22 @@ namespace NuGet.PowerShell.Commands
                     package.LicenseUrl);
 
                 WriteLine(message);
+            }
+        }
+
+        private void SaveExpandedNodes()
+        {
+            // remember which nodes are currently open so that we can keep them open after the operation
+            _expandedNodesDisposable = _vsCommonOperations.SaveSolutionExplorerNodeStates(SolutionManager);
+        }
+
+        private void CollapseNodes()
+        {
+            // collapse all nodes in solution explorer that we expanded during the operation
+            if (_expandedNodesDisposable != null)
+            {
+                _expandedNodesDisposable.Dispose();
+                _expandedNodesDisposable = null;
             }
         }
     }

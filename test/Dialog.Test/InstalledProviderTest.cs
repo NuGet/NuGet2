@@ -256,8 +256,10 @@ namespace NuGet.Dialog.Test
             var services = new ProviderServices(
                 null,
                 mockProgressWindowOpener.Object,
+                new Mock<ISelectedProviderSettings>().Object,
                 scriptExecutor,
-                new MockOutputConsoleProvider()
+                new MockOutputConsoleProvider(),
+                new Mock<IVsCommonOperations>().Object
             );
 
             if (localRepository == null)

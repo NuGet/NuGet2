@@ -14,12 +14,13 @@ namespace NuGet.PowerShell.Commands
         public UninstallPackageCommand()
             : this(ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                   ServiceLocator.GetInstance<IHttpClientEvents>())
+                   ServiceLocator.GetInstance<IHttpClientEvents>(),
+                   ServiceLocator.GetInstance<IVsCommonOperations>())
         {
         }
 
-        public UninstallPackageCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory, IHttpClientEvents httpClientEvents)
-            : base(solutionManager, packageManagerFactory, httpClientEvents)
+        public UninstallPackageCommand(ISolutionManager solutionManager, IVsPackageManagerFactory packageManagerFactory, IHttpClientEvents httpClientEvents, IVsCommonOperations vsCommonOperations)
+            : base(solutionManager, packageManagerFactory, httpClientEvents, vsCommonOperations)
         {
         }
 

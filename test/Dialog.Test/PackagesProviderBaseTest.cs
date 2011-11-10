@@ -10,8 +10,6 @@ using Xunit;
 
 namespace NuGet.Dialog.Test
 {
-
-
     public class PackagesProviderBaseTest
     {
 
@@ -169,7 +167,6 @@ namespace NuGet.Dialog.Test
 
         private class ConcretePackagesProvider : PackagesProviderBase
         {
-
             public ConcretePackagesProvider(ResourceDictionary resources) :
                 this(new Mock<IPackageRepository>().Object, resources)
             {
@@ -179,9 +176,13 @@ namespace NuGet.Dialog.Test
                 base(
                     packageRepository,
                     resources,
-                    new ProviderServices(new Mock<IUserNotifierServices>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider()),
-                    new Mock<IProgressProvider>().Object,
-                    new Mock<ISolutionManager>().Object)
+                    new ProviderServices(
+                       new Mock<IUserNotifierServices>().Object,
+                       new Mock<IProgressWindowOpener>().Object,
+                       new Mock<ISelectedProviderSettings>().Object,
+                       new Mock<IScriptExecutor>().Object,
+                       new MockOutputConsoleProvider(),
+                       new Mock<IVsCommonOperations>().Object), new Mock<IProgressProvider>().Object, new Mock<ISolutionManager>().Object)
             {
             }
 
@@ -218,4 +219,3 @@ namespace NuGet.Dialog.Test
             }
         }
     }
-}

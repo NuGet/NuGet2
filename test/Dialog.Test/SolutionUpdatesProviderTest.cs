@@ -12,10 +12,8 @@ using Xunit;
 
 namespace NuGet.Dialog.Test
 {
-
     public class SolutionUpdatesProviderTest
     {
-
         [Fact]
         public void ExecuteMethodCallUpdatePackageOnAllProjects()
         {
@@ -249,8 +247,10 @@ namespace NuGet.Dialog.Test
             var services = new ProviderServices(
                 userNotifierServices,
                 mockProgressWindowOpener.Object,
+                new Mock<ISelectedProviderSettings>().Object,
                 scriptExecutor,
-                new MockOutputConsoleProvider()
+                new MockOutputConsoleProvider(),
+                new Mock<IVsCommonOperations>().Object
             );
 
             if (localRepository == null)

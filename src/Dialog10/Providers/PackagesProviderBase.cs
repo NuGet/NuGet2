@@ -26,6 +26,7 @@ namespace NuGet.Dialog.Providers
         private readonly IPackageRepository _localRepository;
         private readonly ProviderServices _providerServices;
         private Dictionary<Project, Exception> _failedProjects;
+        private string _readmeFile, _originalPackageId;
 
         private object _mediumIconDataTemplate;
         private object _detailViewDataTemplate;
@@ -33,6 +34,7 @@ namespace NuGet.Dialog.Providers
         private readonly IProgressProvider _progressProvider;
         private CultureInfo _uiCulture, _culture;
         private ISolutionManager _solutionManager;
+        private IDisposable _expandedNodesDisposable;
 
         protected PackagesProviderBase(
             IPackageRepository localRepository,
@@ -310,6 +312,8 @@ namespace NuGet.Dialog.Providers
 
             ClearProgressMessages();
 
+            SaveExpandedNodes();
+
             var worker = new BackgroundWorker();
             worker.DoWork += OnRunWorkerDoWork;
             worker.RunWorkerCompleted += OnRunWorkerCompleted;
@@ -353,6 +357,8 @@ namespace NuGet.Dialog.Providers
                 {
                     OnExecuteCompleted((PackageItem)e.Result);
                     _providerServices.ProgressWindow.SetCompleted(successful: true);
+
+                    CollapseNodes();
                 }
             }
             else
@@ -588,6 +594,39 @@ namespace NuGet.Dialog.Providers
                 {
                     throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
                 }
+            }
+        }
+
+        private void PrepareOpenReadMeFile(PackageOperationEventArgs e)
+        {
+            // only open the read me file for the first package that initiates this operation.
+            if (e.Package.Id.Equals(_originalPackageId, StringComparison.OrdinalIgnoreCase) && e.Package.HasReadMeFileAtRoot())
+            {
+                _readmeFile = Path.Combine(e.InstallPath, NuGetConstants.ReadmeFileName);
+            }
+        }
+
+        private void OpenReadMeFile()
+        {
+            if (_readmeFile != null)
+            {
+                _providerServices.VsCommonOperations.OpenFile(_readmeFile);
+            }
+        }
+
+        private void SaveExpandedNodes()
+        {
+            // remember which nodes are currently open so that we can keep them open after the operation
+            _expandedNodesDisposable = _providerServices.VsCommonOperations.SaveSolutionExplorerNodeStates(_solutionManager);
+        }
+
+        private void CollapseNodes()
+        {
+            // collapse all nodes in solution explorer that we expanded during the operation
+            if (_expandedNodesDisposable != null)
+            {
+                _expandedNodesDisposable.Dispose();
+                _expandedNodesDisposable = null;
             }
         }
     }

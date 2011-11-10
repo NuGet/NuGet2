@@ -11,7 +11,6 @@ namespace NuGet.Dialog.Test
 {
     internal class MockPackagesProvider : PackagesProviderBase
     {
-
         private IEnumerable<string> _supportedFrameworks;
 
         public MockPackagesProvider()
@@ -30,12 +29,17 @@ namespace NuGet.Dialog.Test
         }
 
         public MockPackagesProvider(IPackageRepository localRepository, IVsPackageManager packageManagerr, IEnumerable<string> supportedFrameworks)
-            : base(
-                localRepository,
-                new ResourceDictionary(),
-                new ProviderServices(new Mock<IUserNotifierServices>().Object, new Mock<IProgressWindowOpener>().Object, new Mock<IScriptExecutor>().Object, new MockOutputConsoleProvider()),
-                new Mock<IProgressProvider>().Object,
-                new Mock<ISolutionManager>().Object)
+            : base(localRepository, 
+                   new ResourceDictionary(), 
+                   new ProviderServices(
+                       new Mock<IUserNotifierServices>().Object,
+                       new Mock<IProgressWindowOpener>().Object,
+                       new Mock<ISelectedProviderSettings>().Object,
+                       new Mock<IScriptExecutor>().Object,
+                       new MockOutputConsoleProvider(),
+                       new Mock<IVsCommonOperations>().Object),
+                   new Mock<IProgressProvider>().Object, 
+                   new Mock<ISolutionManager>().Object)
         {
             _supportedFrameworks = supportedFrameworks;
         }
