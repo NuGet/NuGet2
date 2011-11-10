@@ -409,11 +409,14 @@ function Test-GetPackagesDoesNotShowPrereleasePackagesWhenSwitchIsNotSpecified {
     $packages = @(Get-Package -Source $context.RepositoryRoot -ListAvailable -Filter PreReleaseTestPackage)
 
     # Assert
-    Assert-AreEqual 2 $packages.Count
-    Assert-AreEqual "PreReleaseTestPackage" $packages[0].Id
-    Assert-AreEqual "1.0.0" $packages[0].Version
-    Assert-AreEqual "PreReleaseTestPackage.A" $packages[1].Id
+    Assert-AreEqual 3 $packages.Count
+    Assert-AreEqual "PackageWithDependencyOnPrereleaseTestPackage" $packages[0].Id
+    Assert-AreEqual "1.0" $packages[0].Version
+	Assert-AreEqual "PreReleaseTestPackage" $packages[1].Id
     Assert-AreEqual "1.0.0" $packages[1].Version
+    Assert-AreEqual "PreReleaseTestPackage.A" $packages[2].Id
+    Assert-AreEqual "1.0.0" $packages[2].Version
+	
 }
 
 function Test-GetPackagesAllVersionsDoesNotShowPrereleasePackagesWhenSwitchIsNotSpecified {
@@ -425,11 +428,13 @@ function Test-GetPackagesAllVersionsDoesNotShowPrereleasePackagesWhenSwitchIsNot
     $packages = @(Get-Package -ListAvailable -Source $context.RepositoryRoot -AllVersions -Filter PreReleaseTestPackage)
 
     # Assert
-    Assert-AreEqual 2 $packages.Count
-    Assert-AreEqual "PreReleaseTestPackage" $packages[0].Id
-    Assert-AreEqual "1.0.0" $packages[0].Version
-    Assert-AreEqual "PreReleaseTestPackage.A" $packages[1].Id
+    Assert-AreEqual 3 $packages.Count
+	Assert-AreEqual "PackageWithDependencyOnPrereleaseTestPackage" $packages[0].Id
+    Assert-AreEqual "1.0" $packages[0].Version
+    Assert-AreEqual "PreReleaseTestPackage" $packages[1].Id
     Assert-AreEqual "1.0.0" $packages[1].Version
+    Assert-AreEqual "PreReleaseTestPackage.A" $packages[2].Id
+    Assert-AreEqual "1.0.0" $packages[2].Version
 }
 
 function Test-GetPackagesWithPrereleaseSwitchShowsPrereleasePackages {
@@ -441,11 +446,13 @@ function Test-GetPackagesWithPrereleaseSwitchShowsPrereleasePackages {
     $packages = @(Get-Package -ListAvailable -Source $context.RepositoryRoot -Prerelease -Filter PreReleaseTestPackage)
 
     # Assert
-    Assert-AreEqual 2 $packages.Count
-    Assert-AreEqual "PreReleaseTestPackage" $packages[0].Id
-    Assert-AreEqual "1.0.1a" $packages[0].Version
-    Assert-AreEqual "PreReleaseTestPackage.A" $packages[1].Id
-    Assert-AreEqual "1.0.0" $packages[1].Version
+    Assert-AreEqual 3 $packages.Count
+    Assert-AreEqual "PackageWithDependencyOnPrereleaseTestPackage" $packages[0].Id
+    Assert-AreEqual "1.0" $packages[0].Version
+	Assert-AreEqual "PreReleaseTestPackage" $packages[1].Id
+    Assert-AreEqual "1.0.1-a" $packages[1].Version
+    Assert-AreEqual "PreReleaseTestPackage.A" $packages[2].Id
+    Assert-AreEqual "1.0.0" $packages[2].Version
 }
 
 function Test-GetPackagesWithAllAndPrereleaseSwitchShowsAllPackages {
@@ -457,24 +464,27 @@ function Test-GetPackagesWithAllAndPrereleaseSwitchShowsAllPackages {
     $packages = @(Get-Package -ListAvailable -Source $context.RepositoryRoot -Prerelease -AllVersions -Filter PreReleaseTestPackage)
 
     # Assert
-    Assert-AreEqual 6 $packages.Count
-    Assert-AreEqual "PreReleaseTestPackage" $packages[0].Id
-    Assert-AreEqual "1.0.0" $packages[0].Version
-
-    Assert-AreEqual "PreReleaseTestPackage" $packages[1].Id
-    Assert-AreEqual "1.0.0a" $packages[1].Version
+    Assert-AreEqual 7 $packages.Count
+    Assert-AreEqual "PackageWithDependencyOnPrereleaseTestPackage" $packages[0].Id
+    Assert-AreEqual "1.0" $packages[0].Version
+	
+	Assert-AreEqual "PreReleaseTestPackage" $packages[1].Id
+    Assert-AreEqual "1.0.0-a" $packages[1].Version
 
     Assert-AreEqual "PreReleaseTestPackage" $packages[2].Id
-    Assert-AreEqual "1.0.0b" $packages[2].Version
+    Assert-AreEqual "1.0.0-b" $packages[2].Version
 
     Assert-AreEqual "PreReleaseTestPackage" $packages[3].Id
-    Assert-AreEqual "1.0.1a" $packages[3].Version
+    Assert-AreEqual "1.0.0" $packages[3].Version
 
-    Assert-AreEqual "PreReleaseTestPackage.A" $packages[4].Id
-    Assert-AreEqual "1.0.0" $packages[4].Version
+    Assert-AreEqual "PreReleaseTestPackage" $packages[4].Id
+    Assert-AreEqual "1.0.1-a" $packages[4].Version
 
     Assert-AreEqual "PreReleaseTestPackage.A" $packages[5].Id
-    Assert-AreEqual "1.0.0a" $packages[5].Version
+    Assert-AreEqual "1.0.0-a" $packages[5].Version
+
+    Assert-AreEqual "PreReleaseTestPackage.A" $packages[6].Id
+    Assert-AreEqual "1.0.0" $packages[6].Version
 }
 
 function Test-GetPackageUpdatesDoNotReturnPrereleasePackagesIfFlagIsNotSpecified {
@@ -485,8 +495,8 @@ function Test-GetPackageUpdatesDoNotReturnPrereleasePackagesIfFlagIsNotSpecified
     # Arrange
     $p = New-ClassLibrary
 
-    $p | Install-Package PrereleaseTestPackage -Version 1.0.0.0b -Source $context.RepositoryRoot -Prerelease
-    Assert-Package $p 'PrereleaseTestPackage' '1.0.0.0b'
+    $p | Install-Package PrereleaseTestPackage -Version 1.0.0.0-b -Source $context.RepositoryRoot -Prerelease
+    Assert-Package $p 'PrereleaseTestPackage' '1.0.0.0-b'
     
     # Act
     $updates = @(Get-Package -Updates -Source $context.RepositoryRoot)
@@ -505,8 +515,8 @@ function Test-GetPackageUpdatesReturnPrereleasePackagesIfFlagIsSpecified {
     # Arrange
     $p = New-ClassLibrary
 
-    $p | Install-Package PrereleaseTestPackage -Version 1.0.0.0a -Source $context.RepositoryRoot -Prerelease
-    Assert-Package $p 'PrereleaseTestPackage' '1.0.0.0a'
+    $p | Install-Package PrereleaseTestPackage -Version 1.0.0.0-a -Source $context.RepositoryRoot -Prerelease
+    Assert-Package $p 'PrereleaseTestPackage' '1.0.0.0-a'
     
     # Act
     $updates = @(Get-Package -Updates -Prerelease -Source $context.RepositoryRoot)
@@ -514,7 +524,7 @@ function Test-GetPackageUpdatesReturnPrereleasePackagesIfFlagIsSpecified {
     # Assert
     Assert-AreEqual 1 $updates.Count
     Assert-AreEqual 'PrereleaseTestPackage' $updates[0].Id
-    Assert-AreEqual '1.0.1a' $updates[0].Version
+    Assert-AreEqual '1.0.1-a' $updates[0].Version
 }
 
 function Test-GetPackageDoesNotThrowIfSolutionIsTemporary {
