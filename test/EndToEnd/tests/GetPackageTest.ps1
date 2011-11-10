@@ -516,3 +516,13 @@ function Test-GetPackageUpdatesReturnPrereleasePackagesIfFlagIsSpecified {
     Assert-AreEqual 'PrereleaseTestPackage' $updates[0].Id
     Assert-AreEqual '1.0.1a' $updates[0].Version
 }
+
+function Test-GetPackageDoesNotThrowIfSolutionIsTemporary {
+    param($context) 
+
+    # Arrange
+    New-TextFile
+    
+    # Act and Assert
+    Assert-Throws { Get-Package } "Unable to locate the solution directory. Please ensure that the solution has been saved."
+}
