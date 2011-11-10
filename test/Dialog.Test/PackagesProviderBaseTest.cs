@@ -11,8 +11,6 @@ using EnvDTE;
 
 namespace NuGet.Dialog.Test
 {
-
-
     public class PackagesProviderBaseTest
     {
 
@@ -170,7 +168,6 @@ namespace NuGet.Dialog.Test
 
         private class ConcretePackagesProvider : PackagesProviderBase
         {
-
             public ConcretePackagesProvider(ResourceDictionary resources) :
                 this(new Mock<IPackageRepository>().Object, resources)
             {
@@ -186,7 +183,7 @@ namespace NuGet.Dialog.Test
                        new Mock<ISelectedProviderSettings>().Object,
                        new Mock<IScriptExecutor>().Object,
                        new MockOutputConsoleProvider(),
-                       new Mock<IFileOpener>().Object), new Mock<IProgressProvider>().Object, new Mock<ISolutionManager>().Object)
+                       new Mock<IVsCommonOperations>().Object), new Mock<IProgressProvider>().Object, new Mock<ISolutionManager>().Object)
             {
             }
 

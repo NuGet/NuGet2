@@ -35,6 +35,7 @@ namespace NuGet.Dialog.Providers
         private readonly IProgressProvider _progressProvider;
         private CultureInfo _uiCulture, _culture;
         private ISolutionManager _solutionManager;
+        private IDisposable _expandedNodesDisposable;
 
         protected PackagesProviderBase(
             IPackageRepository localRepository, 
@@ -313,6 +314,8 @@ namespace NuGet.Dialog.Providers
 
             ClearProgressMessages();
 
+            SaveExpandedNodes();
+
             var worker = new BackgroundWorker();
             worker.DoWork += OnRunWorkerDoWork;
             worker.RunWorkerCompleted += OnRunWorkerCompleted;
@@ -357,6 +360,8 @@ namespace NuGet.Dialog.Providers
                     OnExecuteCompleted((PackageItem)e.Result);
                     _providerServices.ProgressWindow.SetCompleted(successful: true);
                     OpenReadMeFile();
+
+                    CollapseNodes();
                 }
             }
             else
@@ -608,7 +613,23 @@ namespace NuGet.Dialog.Providers
         {
             if (_readmeFile != null)
             {
-                _providerServices.FileOpener.OpenFile(_readmeFile);
+                _providerServices.VsCommonOperations.OpenFile(_readmeFile);
+            }
+        }
+
+        private void SaveExpandedNodes()
+        {
+            // remember which nodes are currently open so that we can keep them open after the operation
+            _expandedNodesDisposable = _providerServices.VsCommonOperations.SaveSolutionExplorerNodeStates(_solutionManager);
+        }
+
+        private void CollapseNodes()
+        {
+            // collapse all nodes in solution explorer that we expanded during the operation
+            if (_expandedNodesDisposable != null)
+            {
+                _expandedNodesDisposable.Dispose();
+                _expandedNodesDisposable = null;
             }
         }
     }

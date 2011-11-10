@@ -14,10 +14,8 @@ using Xunit;
 
 namespace NuGet.Dialog.Test
 {
-
     public class UpdatesProviderTest
     {
-
         [Fact]
         public void NamePropertyIsCorrect()
         {
@@ -340,7 +338,7 @@ namespace NuGet.Dialog.Test
                 new Mock<ISelectedProviderSettings>().Object,
                 scriptExecutor,
                 new MockOutputConsoleProvider(),
-                new Mock<IFileOpener>().Object
+                new Mock<IVsCommonOperations>().Object
             );
 
             if (solutionManager == null)

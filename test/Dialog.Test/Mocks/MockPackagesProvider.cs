@@ -37,7 +37,7 @@ namespace NuGet.Dialog.Test
                        new Mock<ISelectedProviderSettings>().Object,
                        new Mock<IScriptExecutor>().Object,
                        new MockOutputConsoleProvider(),
-                       new Mock<IFileOpener>().Object),
+                       new Mock<IVsCommonOperations>().Object),
                    new Mock<IProgressProvider>().Object, 
                    new Mock<ISolutionManager>().Object)
         {

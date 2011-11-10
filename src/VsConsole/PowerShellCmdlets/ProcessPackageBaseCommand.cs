@@ -22,17 +22,18 @@ namespace NuGet.PowerShell.Commands
         private readonly Dictionary<string, IProjectManager> _projectManagers = new Dictionary<string, IProjectManager>();
         private readonly Dictionary<IProjectManager, Project> _projectManagerToProject = new Dictionary<IProjectManager, Project>();
         private string _readmeFile;
-        private readonly IFileOpener _fileOperations;
+        private readonly IVsCommonOperations _vsCommonOperations;
+        private IDisposable _expandedNodesDisposable;
 
         protected ProcessPackageBaseCommand(
             ISolutionManager solutionManager, 
             IVsPackageManagerFactory packageManagerFactory, 
             IHttpClientEvents httpClientEvents,
-            IFileOpener fileOperations)
+            IVsCommonOperations vsCommonOperations)
             : base(solutionManager, packageManagerFactory, httpClientEvents)
         {
-            Debug.Assert(fileOperations != null);
-            _fileOperations = fileOperations;
+            Debug.Assert(vsCommonOperations != null);
+            _vsCommonOperations = vsCommonOperations;
         }
 
         [Parameter(Mandatory = true, ValueFromPipelineByPropertyName = true, Position = 0)]
@@ -79,6 +80,10 @@ namespace NuGet.PowerShell.Commands
                 PackageManager.PackageInstalling += OnPackageInstalling;
                 PackageManager.PackageInstalled += OnPackageInstalled;
             }
+
+            // remember currently expanded nodes so that we can leave them expanded 
+            // after the operation has finished.
+            SaveExpandedNodes();
         }
 
         protected override void EndProcessing()
@@ -100,6 +105,8 @@ namespace NuGet.PowerShell.Commands
             WriteLine();
 
             OpenReadMeFile();
+
+            CollapseNodes();
         }
 
         private Tuple<IProjectManager, Project> GetProjectManager()
@@ -188,7 +195,7 @@ namespace NuGet.PowerShell.Commands
         {
             if (_readmeFile != null )
             {
-                _fileOperations.OpenFile(_readmeFile);
+                _vsCommonOperations.OpenFile(_readmeFile);
             }
         }
 
@@ -280,6 +287,22 @@ namespace NuGet.PowerShell.Commands
                     package.LicenseUrl);
 
                 WriteLine(message);
+            }
+        }
+
+        private void SaveExpandedNodes()
+        {
+            // remember which nodes are currently open so that we can keep them open after the operation
+            _expandedNodesDisposable = _vsCommonOperations.SaveSolutionExplorerNodeStates(SolutionManager);
+        }
+
+        private void CollapseNodes()
+        {
+            // collapse all nodes in solution explorer that we expanded during the operation
+            if (_expandedNodesDisposable != null)
+            {
+                _expandedNodesDisposable.Dispose();
+                _expandedNodesDisposable = null;
             }
         }
     }

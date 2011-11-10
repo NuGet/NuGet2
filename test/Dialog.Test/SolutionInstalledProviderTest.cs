@@ -13,10 +13,8 @@ using Xunit;
 
 namespace NuGet.Dialog.Test
 {
-
     public class SolutionInstalledProviderTest
     {
-
         [Fact]
         public void ExecuteMethodCallsInstallPackageMethodOnPackageManager()
         {
@@ -465,7 +463,7 @@ namespace NuGet.Dialog.Test
                 new Mock<ISelectedProviderSettings>().Object,
                 scriptExecutor,
                 new MockOutputConsoleProvider(),
-                new Mock<IFileOpener>().Object
+                new Mock<IVsCommonOperations>().Object
             );
 
             if (localRepository == null)

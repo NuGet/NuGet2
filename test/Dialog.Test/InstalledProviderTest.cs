@@ -257,7 +257,7 @@ namespace NuGet.Dialog.Test
                 new Mock<ISelectedProviderSettings>().Object,
                 scriptExecutor,
                 new MockOutputConsoleProvider(),
-                new Mock<IFileOpener>().Object
+                new Mock<IVsCommonOperations>().Object
             );
 
             if (localRepository == null)
