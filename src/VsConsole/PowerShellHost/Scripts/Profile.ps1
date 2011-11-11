@@ -144,8 +144,13 @@ function Get-VSComponentModel
 Set-Location "$env:USERPROFILE"
 
 # Backup the original tab expansion function
-if ((Test-Path Function:\DefaultTabExpansion) -eq $false) {
+if ((Test-Path Function:\DefaultTabExpansion) -eq $false -and (Test-Path Function:\TabExpansion)) {
     Rename-Item Function:\TabExpansion DefaultTabExpansion
+}
+
+# Backup the original tab expansion function
+if ((Test-Path Function:\DefaultTabExpansion2) -eq $false -and (Test-Path Function:\TabExpansion2)) {
+    Rename-Item Function:\TabExpansion2 DefaultTabExpansion2
 }
 
 function TabExpansion($line, $lastWord) {
@@ -155,7 +160,14 @@ function TabExpansion($line, $lastWord) {
         $line = $line.ToUpperInvariant()
         $lastWord = $lastWord.ToUpperInvariant()
 
-        return DefaultTabExpansion $line $lastWord
+		if (Test-Path Function:\DefaultTabExpansion) 
+		{
+			return DefaultTabExpansion $line $lastWord
+		}
+		elseif (Test-Path Function:\DefaultTabExpansion2) 
+		{
+			return DefaultTabExpansion2 $line $line.Length
+		}
     }
     else {
         return $nugetSuggestions
