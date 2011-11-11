@@ -8,6 +8,7 @@ using EnvDTE;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio.Resources;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
+using System.Diagnostics;
 
 namespace NuGet.VisualStudio
 {
@@ -230,6 +231,11 @@ namespace NuGet.VisualStudio
         private void EnsureNuGetBuild()
         {
             string solutionDirectory = _solutionManager.SolutionDirectory;
+            if (String.IsNullOrEmpty(solutionDirectory))
+            {
+                Debug.Fail("_solutionManager.SolutionDirectory == null");
+                return;
+            }
             string nugetFolderPath = Path.Combine(solutionDirectory, DotNuGetFolder);
 
             IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(solutionDirectory);

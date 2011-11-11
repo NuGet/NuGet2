@@ -38,7 +38,6 @@ namespace NuGet.Tools
     [ProvideOptionPage(typeof(PackageSourceOptionsPage), "Package Manager", "Package Sources", 113, 114, true)]
     [ProvideOptionPage(typeof(GeneralOptionPage), "Package Manager", "General", 113, 115, true)]
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
-    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExists_string)]
     [FontAndColorsRegistration(
         "Package Manager Console",
         NuGetConsole.Implementation.GuidList.GuidPackageManagerConsoleFontAndColorCategoryString,
