@@ -252,6 +252,11 @@ function New-WindowsPhoneClassLibrary {
     }
 }
 
+function New-TextFile {
+    $dte.ItemOperations.NewFile('General\Text File')
+    $dte.ActiveDocument.Object("TextDocument")
+}
+
 function Build-Project {
     param(
         [parameter(Mandatory = $true)]

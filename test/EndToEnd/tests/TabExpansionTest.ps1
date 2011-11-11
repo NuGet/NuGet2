@@ -393,7 +393,7 @@ function Test-UpdatePackageCommandShowTabExpansionForPreReleasePackagesVersions 
 
     # Arrange
     $p = New-ClassLibrary
-    Install-Package PreReleaseTestPackage -PreRelease -Version 1.0.0b -Source $context.RepositoryRoot -ProjectName $p.Name
+    Install-Package PreReleaseTestPackage -PreRelease -Version 1.0.0-b -Source $context.RepositoryRoot -ProjectName $p.Name
 
     # Act
     $suggestions = @(TabExpansion "Update-Package PreReleaseTestPackage -Source '$($context.RepositoryRoot)' -ProjectName '$($p.Name)' -IncludePreRelease -Version ")

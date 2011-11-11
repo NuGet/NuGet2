@@ -834,7 +834,7 @@ function Test-UpdatePackageDoesNotConsiderPrereleasePackagesForUpdateIfFlagIsNot
     $p = New-ClassLibrary
 
     # Act
-    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.0a -Prerelease
+    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.0-a -Prerelease
     Assert-Package $p 'PreReleaseTestPackage'
     $p | Update-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage 
 
@@ -851,12 +851,12 @@ function Test-UpdatePackageDoesNothingIfNewVersionLessThanInstalledPrereleaseVer
     $p = New-ClassLibrary
 
     # Act
-    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.1a -Prerelease
-    Assert-Package $p 'PreReleaseTestPackage' 1.0.1a
+    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.1-a -Prerelease
+    Assert-Package $p 'PreReleaseTestPackage' 1.0.1-a
     $p | Update-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage
 
     # Assert
-    Assert-Package $p PreReleaseTestPackage 1.0.1a
+    Assert-Package $p PreReleaseTestPackage 1.0.1-a
 }
 
 function Test-UpdatePackageThrowsIfNewVersionLessThanInstalledPrereleaseVersionWhenVersionIsSetExplicitly {
@@ -868,8 +868,8 @@ function Test-UpdatePackageThrowsIfNewVersionLessThanInstalledPrereleaseVersionW
     $p = New-ClassLibrary
 
     # Act & Assert
-    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.1a -Prerelease
-    Assert-Package $p 'PreReleaseTestPackage' 1.0.1a
+    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.1-a -Prerelease
+    Assert-Package $p 'PreReleaseTestPackage' 1.0.1-a
 
     Assert-Throws { $p | Update-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0 } "Already referencing a newer version of 'PreReleaseTestPackage'."
 }
@@ -883,7 +883,7 @@ function Test-UpdatePackageDoesNotConsiderPrereleasePackagesForSafeUpdateIfFlagI
     $p = New-ClassLibrary
 
     # Act
-    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.0a -Prerelease
+    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.0-a -Prerelease
     Assert-Package $p 'PreReleaseTestPackage'
     $p | Update-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage  -Safe
 
@@ -900,12 +900,12 @@ function Test-UpdatePackageConsidersPrereleasePackagesForUpdateIfFlagIsSpecified
     $p = New-ClassLibrary
 
     # Act
-    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.0a -Prerelease
+    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.0-a -Prerelease
     Assert-Package $p 'PreReleaseTestPackage'
     $p | Update-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Prerelease
 
     # Assert
-    Assert-Package $p PreReleaseTestPackage 1.0.1a
+    Assert-Package $p PreReleaseTestPackage 1.0.1-a
 }
 
 function Test-UpdatePackageDoesNotConsiderPrereleasePackagesForSafeUpdateIfFlagIsNotSpecified {
@@ -917,12 +917,12 @@ function Test-UpdatePackageDoesNotConsiderPrereleasePackagesForSafeUpdateIfFlagI
     $p = New-ClassLibrary
 
     # Act
-    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.0a -Prerelease
+    $p | Install-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage -Version 1.0.0-a -Prerelease
     Assert-Package $p 'PreReleaseTestPackage'
     $p | Update-Package -Source $context.RepositoryRoot -Id PreReleaseTestPackage  -Safe -Prerelease
 
     # Assert
-    Assert-Package $p PreReleaseTestPackage 1.0.1a
+    Assert-Package $p PreReleaseTestPackage 1.0.1-a
 }
 
 function Test-UpdatePackageDontMakeExcessiveNetworkRequests 

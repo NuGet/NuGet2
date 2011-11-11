@@ -4,6 +4,7 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
@@ -97,12 +98,25 @@ namespace NuGet.VisualStudio
                 }
                 // Use .Properties.Item("Path") instead of .FullName because .FullName might not be
                 // available if the solution is just being created
+                string solutionFilePath = null;
+
                 Property property = _dte.Solution.Properties.Item("Path");
                 if (property == null)
                 {
                     return null;
                 }
-                string solutionFilePath = property.Value;
+                try
+                {
+                    // When using a temporary solution, (such as by saying File -> New File), querying this value throws.
+                    // Since we wouldn't be able to do manage any packages at this point, we return null. Consumers of this property typically 
+                    // use a String.IsNullOrEmpty check either way, so it's alright.
+                    solutionFilePath = property.Value;
+                }
+                catch (COMException)
+                {
+                    return null;
+                }
+
                 if (String.IsNullOrEmpty(solutionFilePath))
                 {
                     return null;
