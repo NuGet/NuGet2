@@ -16,6 +16,9 @@ namespace NuGet.Commands
         [Option(typeof(NuGetResources), "DeleteCommandNoPromptDescription", AltName = "np")]
         public bool NoPrompt { get; set; }
 
+        [Option(typeof(NuGetResources), "CommandApiKey", AltName = "np")]
+        public string ApiKey { get; set; }
+
         public IPackageSourceProvider SourceProvider { get; private set; }
 
         public ISettings Settings { get; private set; }
@@ -33,19 +36,13 @@ namespace NuGet.Commands
             string packageId = Arguments[0];
             //Second argument should be the package Version
             string packageVersion = Arguments[1];
-            //Third argument, if present, should be the API Key
-            string userSetApiKey = null;
-            if (Arguments.Count > 2)
-            {
-                userSetApiKey = Arguments[2];
-            }
 
             //If the user passed a source use it for the gallery location
             string source = SourceProvider.ResolveAndValidateSource(Source) ?? NuGetConstants.DefaultGalleryServerUrl;
             var gallery = new PackageServer(source, CommandLineConstants.UserAgent);
 
             //If the user did not pass an API Key look in the config file
-            string apiKey = String.IsNullOrEmpty(userSetApiKey) ? CommandLineUtility.GetApiKey(Settings, source) : userSetApiKey;
+            string apiKey = GetApiKey(source);
 
             string sourceDisplayName = CommandLineUtility.GetSourceDisplayName(source);
 
@@ -60,6 +57,30 @@ namespace NuGet.Commands
                 Console.WriteLine(NuGetResources.DeleteCommandCanceled);
             }
 
+        }
+
+        private string GetApiKey(string source)
+        {
+            string apiKey = null;
+
+            if (!String.IsNullOrEmpty(ApiKey))
+            {
+                return ApiKey;
+            }
+
+            // Second argument, if present, should be the API Key
+            if (Arguments.Count > 1)
+            {
+                apiKey = Arguments[1];
+            }
+
+            // If the user did not pass an API Key look in the config file
+            if (String.IsNullOrEmpty(apiKey))
+            {
+                apiKey = CommandLineUtility.GetApiKey(Settings, source, throwIfNotFound: true);
+            }
+
+            return apiKey;
         }
     }
 }

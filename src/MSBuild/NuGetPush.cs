@@ -124,15 +124,7 @@ namespace NuGet.MSBuild
             }
 
             // Publish the package on the server
-            if (!CreateOnly)
-            {
-                packageServer.PublishPackage(ApiKey, package.Id, package.Version.ToString());
-                Log.LogMessage(NuGetResources.PushCommandPackagePublished, source);
-            }
-            else
-            {
-                Log.LogMessage(NuGetResources.PushCommandPackageCreated, source);
-            }
+            Log.LogMessage(NuGetResources.PushCommandPackageCreated, source);
         }
 
         /// <summary>

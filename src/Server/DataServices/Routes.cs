@@ -21,23 +21,20 @@ namespace NuGet.Server
         {
             // Route to create a new package
             routes.MapDelegate("CreatePackage",
-                               "PackageFiles/{apiKey}/nupkg",
+                               "api/v2/package",
+                               new { httpMethod = new HttpMethodConstraint("POST") },
                                context => CreatePackageService().CreatePackage(context.HttpContext));
-
-            // Route to publish a package
-            routes.MapDelegate("PublishPackage",
-                               "PublishedPackages/Publish",
-                               new { stub = new IncomingOnlyRouteConstraint() },
-                               context => CreatePackageService().PublishPackage(context.HttpContext));
 
             // Route to delete packages
             routes.MapDelegate("DeletePackage",
-                               "Packages/{apiKey}/{packageId}/{version}",
+                               "api/v2/package/{packageId}/{version}",
+                               new { httpMethod = new HttpMethodConstraint("DELETE") },
                                context => CreatePackageService().DeletePackage(context.HttpContext));
 
             // Route to get packages
             routes.MapDelegate("DownloadPackage",
-                               "download/{packageId}/{version}",
+                               "api/v2/package/{packageId}/{version}",
+                               new { httpMethod = new HttpMethodConstraint("GET") },
                                context => CreatePackageService().DownloadPackage(context.HttpContext));
 
 #if DEBUG

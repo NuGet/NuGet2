@@ -16,6 +16,9 @@ namespace NuGet.Commands
         [Option(typeof(NuGetResources), "PushCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
+        [Option(typeof(NuGetResources), "CommandApiKey")]
+        public string ApiKey { get; set; }
+
         public IPackageSourceProvider SourceProvider { get; private set; }
 
         public ISettings Settings { get; private set; }
@@ -33,7 +36,24 @@ namespace NuGet.Commands
             string packagePath = Arguments[0];
 
             // Don't push symbols by default
-            bool pushSymbols = false;
+            string source = ResolveSource(packagePath);
+
+            var apiKey = GetApiKey(source);
+            if (String.IsNullOrEmpty(apiKey))
+            {
+                throw new CommandLineException(NuGetResources.NoApiKeyFound, CommandLineUtility.GetSourceDisplayName(source));
+            }
+
+            PushPackage(packagePath, source, apiKey);
+
+            if (source.Equals(NuGetConstants.DefaultGalleryServerUrl, StringComparison.OrdinalIgnoreCase))
+            {
+                PushSymbols(packagePath);
+            }
+        }
+
+        private string ResolveSource(string packagePath)
+        {
             string source = null;
 
             if (!String.IsNullOrEmpty(Source))
@@ -49,16 +69,9 @@ namespace NuGet.Commands
                 else
                 {
                     source = NuGetConstants.DefaultGalleryServerUrl;
-                    pushSymbols = true;
                 }
             }
-
-            PushPackage(packagePath, source);
-
-            if (pushSymbols)
-            {
-                PushSymbols(packagePath);
-            }
+            return source;
         }
 
         private void PushSymbols(string packagePath)
@@ -95,11 +108,9 @@ namespace NuGet.Commands
             return Path.Combine(packageDir, symbolPath);
         }
 
-        private void PushPackage(string packagePath, string source, string apiKey = null)
+        private void PushPackage(string packagePath, string source, string apiKey)
         {
             var packageServer = new PackageServer(source, CommandLineConstants.UserAgent);
-            // Use the specified api key or fall back to default behavior
-            apiKey = apiKey ?? GetApiKey(source);
 
             // Push the package to the server
             var package = new ZipPackage(packagePath);
@@ -112,24 +123,20 @@ namespace NuGet.Commands
                 packageServer.CreatePackage(apiKey, stream);
             }
 
-            // Publish the package on the server
-            if (!CreateOnly)
+            if (CreateOnly)
             {
-                var cmd = new PublishCommand(SourceProvider, Settings);
-                cmd.Console = Console;
-                cmd.Source = source;
-                cmd.Arguments.AddRange(new[] { package.Id, package.Version.ToString(), apiKey });
-                cmd.Execute();
-            }
-            else
-            {
-                Console.WriteLine(NuGetResources.PushCommandPackageCreated, source);
+                Console.WriteWarning(NuGetResources.Warning_PublishPackageDeprecated);
             }
         }
 
         private string GetApiKey(string source, bool throwIfNotFound = true)
         {
             string apiKey = null;
+
+            if (!String.IsNullOrEmpty(ApiKey))
+            {
+                return ApiKey;
+            }
 
             // Second argument, if present, should be the API Key
             if (Arguments.Count > 1)
