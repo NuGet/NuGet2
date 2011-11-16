@@ -8,7 +8,7 @@ namespace NuGet
     public class PackageServer : IPackageServer
     {
         private const string ServiceEndpoint = "/api/v2/package";
-        private const string ApiKeyHeader = "X-ApiKey";
+        private const string ApiKeyHeader = "X-NuGet-ApiKey";
 
         private readonly Lazy<Uri> _baseUri;
         private readonly string _source;

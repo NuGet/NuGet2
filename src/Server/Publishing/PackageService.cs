@@ -10,7 +10,7 @@ namespace NuGet.Server
 {
     public class PackageService
     {
-        private const string ApiKeyHeader = "X-APIKEY";
+        private const string ApiKeyHeader = "X-NUGET-APIKEY";
         private readonly IServerPackageRepository _serverRepository;
         private readonly IPackageAuthenticationService _authenticationService;
 
