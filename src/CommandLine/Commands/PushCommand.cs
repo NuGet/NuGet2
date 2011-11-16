@@ -32,7 +32,7 @@ namespace NuGet.Commands
 
         public override void ExecuteCommand()
         {
-            // Frist argument should be the package
+            // First argument should be the package
             string packagePath = Arguments[0];
 
             // Don't push symbols by default
@@ -120,7 +120,7 @@ namespace NuGet.Commands
 
             using (Stream stream = package.GetStream())
             {
-                packageServer.CreatePackage(apiKey, stream);
+                packageServer.PushPackage(apiKey, stream);
             }
 
             if (CreateOnly)
@@ -131,13 +131,13 @@ namespace NuGet.Commands
 
         private string GetApiKey(string source, bool throwIfNotFound = true)
         {
-            string apiKey = null;
-
             if (!String.IsNullOrEmpty(ApiKey))
             {
                 return ApiKey;
             }
 
+            string apiKey = null;
+            
             // Second argument, if present, should be the API Key
             if (Arguments.Count > 1)
             {

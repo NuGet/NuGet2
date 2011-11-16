@@ -120,7 +120,7 @@ namespace NuGet.MSBuild
             Log.LogMessage(NuGetResources.PushCommandPushingPackage, package.GetFullName(), source);
             using (Stream stream = package.GetStream())
             {
-                packageServer.CreatePackage(ApiKey, stream);
+                packageServer.PushPackage(ApiKey, stream);
             }
 
             // Publish the package on the server

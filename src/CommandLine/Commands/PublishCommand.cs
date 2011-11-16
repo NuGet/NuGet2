@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using NuGet.Common;
 
 namespace NuGet.Commands
@@ -14,7 +13,7 @@ namespace NuGet.Commands
 
         public override void ExecuteCommand()
         {
-            Console.Write(NuGetResources.Warning_PublishPackageDeprecated);
+            Console.WriteWarning(NuGetResources.Warning_PublishPackageDeprecated);
         }
     }
 }

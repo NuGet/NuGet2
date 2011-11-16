@@ -16,7 +16,7 @@ namespace NuGet.Commands
         [Option(typeof(NuGetResources), "DeleteCommandNoPromptDescription", AltName = "np")]
         public bool NoPrompt { get; set; }
 
-        [Option(typeof(NuGetResources), "CommandApiKey", AltName = "np")]
+        [Option(typeof(NuGetResources), "CommandApiKey")]
         public string ApiKey { get; set; }
 
         public IPackageSourceProvider SourceProvider { get; private set; }

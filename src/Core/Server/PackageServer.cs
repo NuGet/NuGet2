@@ -30,7 +30,7 @@ namespace NuGet
             get { return _source; }
         }
 
-        public void CreatePackage(string apiKey, Stream packageStream)
+        public void PushPackage(string apiKey, Stream packageStream)
         {
             HttpClient client = GetClient("", "POST", "application/octet-stream");
 
