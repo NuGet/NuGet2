@@ -40,16 +40,22 @@ namespace NuGet
         public static IPackage FindPackage(this IPackageRepository repository, string packageId, SemanticVersion version)
         {
             // Default allow pre release versions to true here because the caller typically wants to find all packages in this scenario for e.g when checking if a 
-            // a package is already installed in the local repository
-            return FindPackage(repository, packageId, version, constraintProvider: NullConstraintProvider.Instance, allowPrereleaseVersions: true);
+            // a package is already installed in the local repository. The same applies to allowUnlisted.
+            return FindPackage(repository, packageId, version, NullConstraintProvider.Instance, allowPrereleaseVersions: true, allowUnlisted: true);
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, string packageId, SemanticVersion version, bool allowPrereleaseVersions)
+        public static IPackage FindPackage(this IPackageRepository repository, string packageId, SemanticVersion version, bool allowPrereleaseVersions, bool allowUnlisted)
         {
-            return FindPackage(repository, packageId, version, constraintProvider: NullConstraintProvider.Instance, allowPrereleaseVersions: allowPrereleaseVersions);
+            return FindPackage(repository, packageId, version, NullConstraintProvider.Instance, allowPrereleaseVersions, allowUnlisted);
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, string packageId, SemanticVersion version, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions)
+        public static IPackage FindPackage(
+            this IPackageRepository repository, 
+            string packageId, 
+            SemanticVersion version, 
+            IPackageConstraintProvider constraintProvider, 
+            bool allowPrereleaseVersions, 
+            bool allowUnlisted)
         {
             if (repository == null)
             {
@@ -59,6 +65,13 @@ namespace NuGet
             if (packageId == null)
             {
                 throw new ArgumentNullException("packageId");
+            }
+
+            // if an explicit version is specified, disregard the 'allowUnlisted' argument
+            // and always allow unlisted packages.
+            if (version != null)
+            {
+                allowUnlisted = true;
             }
 
             // If the repository implements it's own lookup then use that instead.
@@ -75,6 +88,11 @@ namespace NuGet
             packages = packages.ToList()
                                .OrderByDescending(p => p.Version);
 
+            if (!allowUnlisted)
+            {
+                packages = packages.Where(PackageExtensions.IsListed);
+            }
+
             if (version != null)
             {
                 packages = packages.Where(p => p.Version == version);
@@ -88,9 +106,9 @@ namespace NuGet
         }
 
         public static IPackage FindPackage(this IPackageRepository repository, string packageId, IVersionSpec versionSpec,
-                IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions)
+                IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions, bool allowUnlisted)
         {
-            var packages = repository.FindPackages(packageId, versionSpec, allowPrereleaseVersions);
+            var packages = repository.FindPackages(packageId, versionSpec, allowPrereleaseVersions, allowUnlisted);
 
             if (constraintProvider != null)
             {
@@ -160,7 +178,12 @@ namespace NuGet
             }
         }
 
-        public static IEnumerable<IPackage> FindPackages(this IPackageRepository repository, string packageId, IVersionSpec versionSpec, bool allowPrereleaseVersions)
+        public static IEnumerable<IPackage> FindPackages(
+            this IPackageRepository repository, 
+            string packageId, 
+            IVersionSpec versionSpec, 
+            bool allowPrereleaseVersions, 
+            bool allowUnlisted)
         {
             if (repository == null)
             {
@@ -175,6 +198,11 @@ namespace NuGet
             IEnumerable<IPackage> packages = repository.FindPackagesById(packageId)
                                                        .OrderByDescending(p => p.Version);
 
+            if (!allowUnlisted)
+            {
+                packages = packages.Where(PackageExtensions.IsListed);
+            }
+
             if (versionSpec != null)
             {
                 packages = packages.FindByVersion(versionSpec);
@@ -185,17 +213,28 @@ namespace NuGet
             return packages;
         }
 
-        public static IPackage FindPackage(this IPackageRepository repository, string packageId, IVersionSpec versionSpec, bool allowPrereleaseVersions)
+        public static IPackage FindPackage(
+            this IPackageRepository repository, 
+            string packageId, 
+            IVersionSpec versionSpec, 
+            bool allowPrereleaseVersions, 
+            bool allowUnlisted)
         {
-            return repository.FindPackages(packageId, versionSpec, allowPrereleaseVersions).FirstOrDefault();
+            return repository.FindPackages(packageId, versionSpec, allowPrereleaseVersions, allowUnlisted).FirstOrDefault();
         }
 
         public static IEnumerable<IPackage> FindCompatiblePackages(this IPackageRepository repository,
                                                                    IPackageConstraintProvider constraintProvider,
                                                                    IEnumerable<string> packageIds,
-                                                                   IPackage package)
+                                                                   IPackage package,
+                                                                   bool allowUnlisted)
         {
-            return (from p in repository.FindPackages(packageIds)
+            var packages = repository.FindPackages(packageIds);
+            if (!allowUnlisted)
+            {
+                packages = packages.Where(PackageExtensions.IsListed);
+            }
+            return (from p in packages
                     let dependency = p.FindDependency(package.Id)
                     let otherConstaint = constraintProvider.GetConstraint(p.Id)
                     where dependency != null &&
@@ -344,6 +383,9 @@ namespace NuGet
                 query = query.Where(p => p.IsReleaseVersion());
             }
 
+            // for updates, we never consider unlisted packages
+            query = query.Where(PackageExtensions.IsListed);
+
             return query;
         }
 
@@ -379,8 +421,11 @@ namespace NuGet
             return Expression.Equal(toLowerExpression, Expression.Constant(value));
         }
 
-        private static IEnumerable<IPackage> FilterPackagesByConstraints(IPackageConstraintProvider constraintProvider, IEnumerable<IPackage> packages, string packageId,
-                bool allowPrereleaseVersions)
+        private static IEnumerable<IPackage> FilterPackagesByConstraints(
+            IPackageConstraintProvider constraintProvider, 
+            IEnumerable<IPackage> packages, 
+            string packageId,
+            bool allowPrereleaseVersions)
         {
             constraintProvider = constraintProvider ?? NullConstraintProvider.Instance;
 

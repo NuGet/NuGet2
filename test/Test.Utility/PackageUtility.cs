@@ -23,7 +23,8 @@ namespace NuGet.Test
                                               IEnumerable<PackageDependency> dependencies = null,
                                               int downloadCount = 0,
                                               string description = null,
-                                              string summary = null)
+                                              string summary = null,
+                                              bool listed = true)
         {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
             return CreatePackage(id,
@@ -34,7 +35,8 @@ namespace NuGet.Test
                                  dependencies,
                                  downloadCount,
                                  description,
-                                 summary);
+                                 summary,
+                                 listed);
         }
 
         public static IPackage CreatePackage(string id,
@@ -45,7 +47,8 @@ namespace NuGet.Test
                                               IEnumerable<PackageDependency> dependencies,
                                               int downloadCount,
                                               string description,
-                                              string summary)
+                                              string summary,
+                                              bool listed)
         {
             content = content ?? Enumerable.Empty<string>();
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>();
@@ -78,6 +81,12 @@ namespace NuGet.Test
             mockPackage.Setup(m => m.Title).Returns(String.Empty);
             mockPackage.Setup(m => m.DownloadCount).Returns(downloadCount);
             mockPackage.Setup(m => m.RequireLicenseAcceptance).Returns(false);
+            mockPackage.Setup(m => m.Listed).Returns(listed);
+            if (!listed)
+            {
+                mockPackage.Setup(m => m.Published).Returns(Constants.Unpublished);
+            }
+            
             return mockPackage.Object;
         }
 

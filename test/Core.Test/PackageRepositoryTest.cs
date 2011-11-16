@@ -74,7 +74,7 @@ namespace NuGet.Test
             var versionSpec = VersionUtility.ParseVersionSpec("[0.9, 1.1]");
 
             // Act
-            var package = repo.FindPackage("A", versionSpec, allowPrereleaseVersions: false);
+            var package = repo.FindPackage("A", versionSpec, allowPrereleaseVersions: false, allowUnlisted: true);
 
             // Assert
             Assert.NotNull(package);
@@ -90,8 +90,8 @@ namespace NuGet.Test
             var versionSpec = VersionUtility.ParseVersionSpec("[0.9, 1.1]");
 
             // Act
-            var package1 = repo.FindPackage("X", VersionUtility.ParseVersionSpec("[0.9, 1.1]"), allowPrereleaseVersions: false);
-            var package2 = repo.FindPackage("A", VersionUtility.ParseVersionSpec("[1.4, 1.5]"), allowPrereleaseVersions: false);
+            var package1 = repo.FindPackage("X", VersionUtility.ParseVersionSpec("[0.9, 1.1]"), allowPrereleaseVersions: false, allowUnlisted: true);
+            var package2 = repo.FindPackage("A", VersionUtility.ParseVersionSpec("[1.4, 1.5]"), allowPrereleaseVersions: false, allowUnlisted: true);
 
             // Assert
             Assert.Null(package1 ?? package2);
@@ -104,7 +104,7 @@ namespace NuGet.Test
             var repo = GetRemoteRepository();
 
             // Act
-            var package = repo.FindPackage("A", VersionUtility.ParseVersionSpec("[0.6, 1.1.5]"), allowPrereleaseVersions: false);
+            var package = repo.FindPackage("A", VersionUtility.ParseVersionSpec("[0.6, 1.1.5]"), allowPrereleaseVersions: false, allowUnlisted: true);
 
             // Assert
             Assert.NotNull(package);
@@ -388,6 +388,7 @@ namespace NuGet.Test
             package.SetupGet(p => p.Version).Returns(SemanticVersion.Parse(version));
             package.SetupGet(p => p.Description).Returns(desc);
             package.SetupGet(p => p.Tags).Returns(tags);
+            package.SetupGet(p => p.Listed).Returns(true);
             return package.Object;
         }
     }

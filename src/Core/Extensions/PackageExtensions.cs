@@ -20,6 +20,11 @@ namespace NuGet
             return String.IsNullOrEmpty(packageMetadata.Version.SpecialVersion);
         }
 
+        public static bool IsListed(this IPackage package)
+        {
+            return package.Listed || package.Published > Constants.Unpublished;
+        }
+
         public static IEnumerable<IPackage> FindByVersion(this IEnumerable<IPackage> source, IVersionSpec versionSpec)
         {
             if (versionSpec == null)

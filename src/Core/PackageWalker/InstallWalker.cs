@@ -194,7 +194,7 @@ namespace NuGet
             }
 
             // Get compatible packages in one batch so we don't have to make requests for each one
-            var packages = from p in SourceRepository.FindCompatiblePackages(ConstraintProvider, dependentsLookup.Keys, package)
+            var packages = from p in SourceRepository.FindCompatiblePackages(ConstraintProvider, dependentsLookup.Keys, package, allowUnlisted: false)
                            group p by p.Id into g
                            let oldPackage = dependentsLookup[g.Key]
                            select new
