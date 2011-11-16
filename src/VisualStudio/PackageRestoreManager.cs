@@ -73,7 +73,7 @@ namespace NuGet.VisualStudio
                     return false;
                 }
 
-                IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(solutionDirectory);
+                IFileSystem fileSystem = new PhysicalFileSystem(solutionDirectory);
                 return fileSystem.DirectoryExists(DotNuGetFolder) &&
                        fileSystem.FileExists(NuGetExeFile) &&
                        fileSystem.FileExists(NuGetTargetsFile);

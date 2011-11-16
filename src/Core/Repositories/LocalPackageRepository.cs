@@ -65,7 +65,7 @@ namespace NuGet
             private set;
         }
 
-        protected IPackagePathResolver PathResolver
+        public IPackagePathResolver PathResolver
         {
             get;
             set;
