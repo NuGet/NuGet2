@@ -79,7 +79,7 @@ namespace NuGet.Test
             var repository = new Mock<PackageRepositoryBase>();
             repository.Setup(c => c.GetPackages()).Returns(new[] { packageA }.AsQueryable());
             var dependencyProvider = repository.As<IDependencyResolver>();
-            dependencyProvider.Setup(c => c.ResolveDependency(It.Is<PackageDependency>(p => p.Id == "B"), It.IsAny<IPackageConstraintProvider>(), false))
+            dependencyProvider.Setup(c => c.ResolveDependency(It.Is<PackageDependency>(p => p.Id == "B"), It.IsAny<IPackageConstraintProvider>(), false, true))
                               .Returns(packageB).Verifiable();
             var localRepository = new MockPackageRepository();
 
@@ -115,7 +115,7 @@ namespace NuGet.Test
             var repository = new Mock<PackageRepositoryBase>(MockBehavior.Strict);
             repository.Setup(c => c.GetPackages()).Returns(new[] { packageA }.AsQueryable());
             var dependencyProvider = repository.As<IDependencyResolver>();
-            dependencyProvider.Setup(c => c.ResolveDependency(packageDependency, It.IsAny<IPackageConstraintProvider>(), false))
+            dependencyProvider.Setup(c => c.ResolveDependency(packageDependency, It.IsAny<IPackageConstraintProvider>(), false, true))
                               .Returns(packageB12).Verifiable();
             var localRepository = new MockPackageRepository();
 
@@ -1107,7 +1107,7 @@ namespace NuGet.Test
 
             protected override IPackage ResolveDependency(PackageDependency dependency)
             {
-                return _repository.ResolveDependency(dependency, AllowPrereleaseVersions);
+                return _repository.ResolveDependency(dependency, AllowPrereleaseVersions, false);
             }
         }
     }

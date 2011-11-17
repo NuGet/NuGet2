@@ -243,7 +243,7 @@ namespace NuGet.Test
             var dependency = new PackageDependency("B");
 
             // Act
-            IPackage package = repository.ResolveDependency(dependency, allowPrereleaseVersions: false);
+            IPackage package = repository.ResolveDependency(dependency, allowPrereleaseVersions: false, preferListedPackages: false);
 
             // Assert
             Assert.Equal("B", package.Id);
@@ -295,11 +295,11 @@ namespace NuGet.Test
             PackageDependency dependency5 = PackageDependency.CreateDependency("B", "[1.0.0, 1.0.8]");
 
             // Act
-            IPackage package1 = repository.ResolveDependency(dependency1, allowPrereleaseVersions: false);
-            IPackage package2 = repository.ResolveDependency(dependency2, allowPrereleaseVersions: false);
-            IPackage package3 = repository.ResolveDependency(dependency3, allowPrereleaseVersions: false);
-            IPackage package4 = repository.ResolveDependency(dependency4, allowPrereleaseVersions: false);
-            IPackage package5 = repository.ResolveDependency(dependency5, allowPrereleaseVersions: false);
+            IPackage package1 = repository.ResolveDependency(dependency1, allowPrereleaseVersions: false, preferListedPackages: false);
+            IPackage package2 = repository.ResolveDependency(dependency2, allowPrereleaseVersions: false, preferListedPackages: false);
+            IPackage package3 = repository.ResolveDependency(dependency3, allowPrereleaseVersions: false, preferListedPackages: false);
+            IPackage package4 = repository.ResolveDependency(dependency4, allowPrereleaseVersions: false, preferListedPackages: false);
+            IPackage package5 = repository.ResolveDependency(dependency5, allowPrereleaseVersions: false, preferListedPackages: false);
 
             // Assert
             Assert.Equal("B", package1.Id);

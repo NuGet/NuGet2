@@ -226,15 +226,9 @@ namespace NuGet
         public static IEnumerable<IPackage> FindCompatiblePackages(this IPackageRepository repository,
                                                                    IPackageConstraintProvider constraintProvider,
                                                                    IEnumerable<string> packageIds,
-                                                                   IPackage package,
-                                                                   bool allowUnlisted)
+                                                                   IPackage package)
         {
-            var packages = repository.FindPackages(packageIds);
-            if (!allowUnlisted)
-            {
-                packages = packages.Where(PackageExtensions.IsListed);
-            }
-            return (from p in packages
+            return (from p in repository.FindPackages(packageIds)
                     let dependency = p.FindDependency(package.Id)
                     let otherConstaint = constraintProvider.GetConstraint(p.Id)
                     where dependency != null &&
@@ -277,22 +271,27 @@ namespace NuGet
             return repository.GetPackages().Find(searchTerm);
         }
 
-        public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency, bool allowPrereleaseVersions)
+        public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency, bool allowPrereleaseVersions, bool preferListedPackages)
         {
-            return ResolveDependency(repository, dependency: dependency, constraintProvider: null, allowPrereleaseVersions: allowPrereleaseVersions);
+            return ResolveDependency(repository, dependency, constraintProvider: null, allowPrereleaseVersions: allowPrereleaseVersions, preferListedPackages: preferListedPackages);
         }
 
-        public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions)
+        public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions, bool preferListedPackages)
         {
             IDependencyResolver dependencyResolver = repository as IDependencyResolver;
             if (dependencyResolver != null)
             {
-                return dependencyResolver.ResolveDependency(dependency, constraintProvider, allowPrereleaseVersions);
+                return dependencyResolver.ResolveDependency(dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages);
             }
-            return ResolveDependencyCore(repository, dependency, constraintProvider, allowPrereleaseVersions);
+            return ResolveDependencyCore(repository, dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages);
         }
 
-        internal static IPackage ResolveDependencyCore(this IPackageRepository repository, PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions)
+        internal static IPackage ResolveDependencyCore(
+            this IPackageRepository repository, 
+            PackageDependency dependency,
+            IPackageConstraintProvider constraintProvider, 
+            bool allowPrereleaseVersions, 
+            bool preferListedPackages)
         {
             if (repository == null)
             {
@@ -309,19 +308,36 @@ namespace NuGet
             // Always filter by constraints when looking for dependencies
             packages = FilterPackagesByConstraints(constraintProvider, packages, dependency.Id, allowPrereleaseVersions);
 
+            IList<IPackage> candidates = packages.ToList();
+
+            if (preferListedPackages)
+            {
+                // pick among Listed packages first
+                IPackage listedSelectedPackage = ResolveDependencyCore(candidates.Where(PackageExtensions.IsListed),
+                                                                       dependency);
+                if (listedSelectedPackage != null)
+                {
+                    return listedSelectedPackage;
+                }
+            }
+
+            return ResolveDependencyCore(candidates, dependency);
+        }
+
+        private static IPackage ResolveDependencyCore(IEnumerable<IPackage> packages, PackageDependency dependency)
+        {
             // If version info was specified then use it
             if (dependency.VersionSpec != null)
             {
                 packages = packages.FindByVersion(dependency.VersionSpec);
+                return packages.ResolveSafeVersion();
             }
             else
             {
                 // BUG 840: If no version info was specified then pick the latest
                 return packages.OrderByDescending(p => p.Version)
-                               .FirstOrDefault();
+                    .FirstOrDefault();
             }
-
-            return packages.ResolveSafeVersion();
         }
 
         /// <summary>
