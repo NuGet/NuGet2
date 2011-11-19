@@ -101,7 +101,7 @@
         <command:parameter required="false" position="named">
             <maml:name>IncludePrerelease</maml:name>
             <maml:description>
-                <maml:para>Indicates whether this command will consider prerelease packages. If omitted, only stable packages are processed.</maml:para>
+                <maml:para>Indicates whether this command will consider prerelease packages. If omitted, only stable packages are considered.</maml:para>
             </maml:description>
         </command:parameter>
     </command:parameters>
