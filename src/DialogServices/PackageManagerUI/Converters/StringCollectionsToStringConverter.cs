@@ -19,6 +19,7 @@ namespace NuGet.Dialog.PackageManagerUI
                 {
                     return String.Empty;
                 }
+                else
                 {
                     IEnumerable<string> parts = (IEnumerable<string>)value;
                     return String.Join(", ", parts);
