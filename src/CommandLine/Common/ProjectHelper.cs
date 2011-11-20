@@ -51,6 +51,8 @@ namespace NuGet.Common
                 }
 
                 path = Path.GetDirectoryName(path);
+                //When you get to c:\, the parent path is null.
+                if (path == null) break;
 
                 depth++;
             } while (depth < maxDepth);
