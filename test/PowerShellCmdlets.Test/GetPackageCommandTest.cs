@@ -964,8 +964,9 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             localRepository.Verify();
-            Assert.Equal(1, packages.Count());
-            AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "C", Version = new SemanticVersion("2.0.3.5-alpha") });
+            Assert.Equal(2, packages.Count());
+            AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "C", Version = new SemanticVersion("2.0.1") });
+            AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "C", Version = new SemanticVersion("2.0.3.5-alpha") });
         }
 
         private static void AssertPackageResultsEqual(dynamic a, dynamic b)
