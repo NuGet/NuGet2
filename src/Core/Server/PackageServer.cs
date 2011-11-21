@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using Microsoft.Internal.Web.Utils;
+using NuGet.Resources;
 
 namespace NuGet
 {
@@ -118,7 +120,7 @@ namespace NuGet
                 var httpResponse = (HttpWebResponse)e.Response;
                 if (httpResponse != null && httpResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    throw new InvalidOperationException(httpResponse.StatusDescription, e);
+                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageServerError, httpResponse.StatusDescription, e.Message), e);
                 }
             }
             finally
