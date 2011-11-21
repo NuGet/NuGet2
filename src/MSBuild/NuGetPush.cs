@@ -120,19 +120,11 @@ namespace NuGet.MSBuild
             Log.LogMessage(NuGetResources.PushCommandPushingPackage, package.GetFullName(), source);
             using (Stream stream = package.GetStream())
             {
-                packageServer.CreatePackage(ApiKey, stream);
+                packageServer.PushPackage(ApiKey, stream);
             }
 
             // Publish the package on the server
-            if (!CreateOnly)
-            {
-                packageServer.PublishPackage(ApiKey, package.Id, package.Version.ToString());
-                Log.LogMessage(NuGetResources.PushCommandPackagePublished, source);
-            }
-            else
-            {
-                Log.LogMessage(NuGetResources.PushCommandPackageCreated, source);
-            }
+            Log.LogMessage(NuGetResources.PushCommandPackageCreated, source);
         }
 
         /// <summary>

@@ -391,12 +391,17 @@ namespace NuGet
 
         public void UpdatePackageReference(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions)
         {
-            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, versionSpec, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions, targetVersionSetExplicitly: versionSpec != null);
+            UpdatePackageReference(
+                packageId, 
+                () => SourceRepository.FindPackage(packageId, versionSpec, ConstraintProvider, allowPrereleaseVersions, allowUnlisted: false),
+                updateDependencies, 
+                allowPrereleaseVersions, 
+                targetVersionSetExplicitly: versionSpec != null);
         }
 
         public virtual void UpdatePackageReference(string packageId, SemanticVersion version, bool updateDependencies, bool allowPrereleaseVersions)
         {
-            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, version, ConstraintProvider, allowPrereleaseVersions), updateDependencies, allowPrereleaseVersions, targetVersionSetExplicitly: version != null);
+            UpdatePackageReference(packageId, () => SourceRepository.FindPackage(packageId, version, ConstraintProvider, allowPrereleaseVersions, allowUnlisted: false), updateDependencies, allowPrereleaseVersions, targetVersionSetExplicitly: version != null);
         }
 
         private void UpdatePackageReference(string packageId, Func<IPackage> resolvePackage, bool updateDependencies, bool allowPrereleaseVersions, bool targetVersionSetExplicitly)

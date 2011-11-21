@@ -676,7 +676,7 @@ namespace NuGet.Commands
 
             protected override IPackage ResolveDependency(PackageDependency dependency)
             {
-                return _repository.ResolveDependency(dependency, allowPrereleaseVersions: false);
+                return _repository.ResolveDependency(dependency, allowPrereleaseVersions: false, preferListedPackages: false);
             }
 
             protected override bool OnAfterResolveDependency(IPackage package, IPackage dependency)

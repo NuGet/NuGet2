@@ -113,17 +113,17 @@ namespace NuGet
                                .FirstOrDefault(p => p != null);
         }
 
-        public IPackage ResolveDependency(PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions)
+        public IPackage ResolveDependency(PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions, bool preferListedPackages)
         {
             if (ResolveDependenciesVertically)
             {
-                Func<IPackageRepository, IPackage> resolveDependency = Wrap(r => r.ResolveDependency(dependency, constraintProvider, allowPrereleaseVersions));
+                Func<IPackageRepository, IPackage> resolveDependency = Wrap(r => r.ResolveDependency(dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages));
 
                 return Repositories.Select(r => Task.Factory.StartNew(() => resolveDependency(r)))
                                         .ToArray()
                                         .WhenAny(package => package != null);
             }
-            return this.ResolveDependencyCore(dependency, constraintProvider, allowPrereleaseVersions);
+            return this.ResolveDependencyCore(dependency, constraintProvider, allowPrereleaseVersions, preferListedPackages);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]

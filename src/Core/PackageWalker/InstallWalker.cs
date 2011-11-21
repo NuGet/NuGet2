@@ -298,10 +298,10 @@ namespace NuGet
 
             // First try to get a local copy of the package
             // Bug1638: Include prereleases when resolving locally installed dependencies.
-            IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, allowPrereleaseVersions: true);
+            IPackage package = Repository.ResolveDependency(dependency, ConstraintProvider, allowPrereleaseVersions: true, preferListedPackages: false);
 
             // Next, query the source repo for the same dependency
-            IPackage sourcePackage = SourceRepository.ResolveDependency(dependency, ConstraintProvider, AllowPrereleaseVersions);
+            IPackage sourcePackage = SourceRepository.ResolveDependency(dependency, ConstraintProvider, AllowPrereleaseVersions, preferListedPackages: true);
 
             // We didn't find a copy in the local repository
             if (package == null)

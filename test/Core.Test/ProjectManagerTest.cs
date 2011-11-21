@@ -123,7 +123,8 @@ namespace NuGet.Test
                                                         dependencies: null,
                                                         downloadCount: 0,
                                                         description: null,
-                                                        summary: null);
+                                                        summary: null,
+                                                        listed: true);
             projectManager.LocalRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageA);
             projectManager.LocalRepository.AddPackage(packageB);
@@ -371,6 +372,7 @@ namespace NuGet.Test
             var package = new Mock<IPackage>();
             package.Setup(m => m.Id).Returns("A");
             package.Setup(m => m.Version).Returns(new SemanticVersion("1.0"));
+            package.Setup(m => m.Listed).Returns(true);
             var file = new Mock<IPackageFile>();
             file.Setup(m => m.Path).Returns(@"content\web.config.transform");
             file.Setup(m => m.GetStream()).Returns(() =>
@@ -1291,7 +1293,8 @@ namespace NuGet.Test
                 dependencies: null,
                 downloadCount: 0,
                 description: null,
-                summary: null);
+                summary: null,
+                listed: true);
 
             projectManager.LocalRepository.AddPackage(packageA);
 
@@ -1358,6 +1361,7 @@ namespace NuGet.Test
             var mockPackage = new Mock<IPackage>();
             mockPackage.Setup(m => m.Id).Returns("A");
             mockPackage.Setup(m => m.Version).Returns(new SemanticVersion("1.0"));
+            mockPackage.Setup(m => m.Listed).Returns(true);
             var assemblyReference = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("5.0")));
             mockPackage.Setup(m => m.AssemblyReferences).Returns(new[] { assemblyReference });
             sourceRepository.AddPackage(mockPackage.Object);
@@ -1379,6 +1383,7 @@ namespace NuGet.Test
             var mockPackage = new Mock<IPackage>();
             mockPackage.Setup(m => m.Id).Returns("A");
             mockPackage.Setup(m => m.Version).Returns(new SemanticVersion("1.0"));
+            mockPackage.Setup(m => m.Listed).Returns(true);
             var frameworkReference = new FrameworkAssemblyReference("System.Web", new[] { VersionUtility.ParseFrameworkName("net50") });
             mockPackage.Setup(m => m.FrameworkAssemblies).Returns(new[] { frameworkReference });
             sourceRepository.AddPackage(mockPackage.Object);

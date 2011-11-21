@@ -8,6 +8,7 @@ using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.PowerShell.Commands.Test
 {
@@ -334,6 +335,285 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             sharedRepository.Verify();
+        }
+
+        [Fact]
+        public void InstallPackageWithoutSettingVersionDoNotInstallUnlistedPackage()
+        {
+            // Arrange
+            var packageA1 = PackageUtility.CreatePackage("A", "1.0.0");
+            var packageA2 = PackageUtility.CreatePackage("A", "2.0.0", listed: false);
+            var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
+            sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
+            sharedRepository.Setup(s => s.AddPackage(packageA1));
+
+            var packageRepository = new MockPackageRepository { packageA1, packageA2 };
+            var recentPackageRepository = new Mock<IRecentPackageRepository>();
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
+
+            // Act
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, new Mock<IHttpClientEvents>().Object, null);
+            cmdlet.Id = "A";
+            cmdlet.Execute();
+
+            // Assert
+            sharedRepository.Verify(s => s.AddPackage(packageA1), Times.Once());
+            sharedRepository.Verify(s => s.AddPackage(packageA2), Times.Never());
+        }
+
+        [Fact]
+        public void InstallPackageWithoutSettingVersionDoNotInstallUnlistedPackageWithPrerelease()
+        {
+            // Arrange
+            var packageA1 = PackageUtility.CreatePackage("A", "1.0.0");
+            var packageA2 = PackageUtility.CreatePackage("A", "1.0.1-alpha", listed: false);
+            var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
+            sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
+            sharedRepository.Setup(s => s.AddPackage(packageA1));
+
+            var packageRepository = new MockPackageRepository { packageA1, packageA2 };
+            var recentPackageRepository = new Mock<IRecentPackageRepository>();
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
+
+            // Act
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, new Mock<IHttpClientEvents>().Object, null);
+            cmdlet.Id = "A";
+            cmdlet.IncludePrerelease = true;
+            cmdlet.Execute();
+
+            // Assert
+            sharedRepository.Verify(s => s.AddPackage(packageA1), Times.Once());
+            sharedRepository.Verify(s => s.AddPackage(packageA2), Times.Never());
+        }
+
+        [Fact]
+        public void InstallPackageInstallUnlistedPackageIfVersionIsSet()
+        {
+            // Arrange
+            var packageA1 = PackageUtility.CreatePackage("A", "1.0.0");
+            var packageA2 = PackageUtility.CreatePackage("A", "2.0.0", listed: false);
+            var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
+            sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
+            sharedRepository.Setup(s => s.AddPackage(packageA2));
+
+            var packageRepository = new MockPackageRepository { packageA1, packageA2 };
+            var recentPackageRepository = new Mock<IRecentPackageRepository>();
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
+
+            // Act
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, new Mock<IHttpClientEvents>().Object, null);
+            cmdlet.Id = "A";
+            cmdlet.Version = new SemanticVersion("2.0.0");
+            cmdlet.Execute();
+
+            // Assert
+            sharedRepository.Verify(s => s.AddPackage(packageA1), Times.Never());
+            sharedRepository.Verify(s => s.AddPackage(packageA2), Times.Once());
+        }
+
+        [Fact]
+        public void InstallPackageInstallUnlistedPrereleasePackageIfVersionIsSet()
+        {
+            // Arrange
+            var packageA1 = PackageUtility.CreatePackage("A", "1.0.0");
+            var packageA2 = PackageUtility.CreatePackage("A", "1.0.0-ReleaseCandidate", listed: false);
+            var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
+            sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
+            sharedRepository.Setup(s => s.AddPackage(packageA2));
+
+            var packageRepository = new MockPackageRepository { packageA1, packageA2 };
+            var recentPackageRepository = new Mock<IRecentPackageRepository>();
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
+
+            // Act
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, new Mock<IHttpClientEvents>().Object, null);
+            cmdlet.Id = "A";
+            cmdlet.Version = new SemanticVersion("1.0.0-ReleaseCandidate");
+            cmdlet.IncludePrerelease = true;
+            cmdlet.Execute();
+
+            // Assert
+            sharedRepository.Verify(s => s.AddPackage(packageA1), Times.Never());
+            sharedRepository.Verify(s => s.AddPackage(packageA2), Times.Once());
+        }
+
+        [Fact]
+        public void InstallPackageInstallUnlistedPackageAsADependency()
+        {
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0.0", dependencies: new [] { new PackageDependency("B") });
+            var packageB = PackageUtility.CreatePackage("B", "1.0.0", listed: false);
+            var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
+            sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
+            sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
+            sharedRepository.Setup(s => s.AddPackage(packageB)).Verifiable();
+
+            var packageRepository = new MockPackageRepository { packageA, packageB };
+            var recentPackageRepository = new Mock<IRecentPackageRepository>();
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
+
+            // Act
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, new Mock<IHttpClientEvents>().Object, null);
+            cmdlet.Id = "A";
+            cmdlet.Execute();
+
+            // Assert
+            sharedRepository.Verify();
+        }
+
+        [Theory]
+        [InlineData("1.0.0", "1.0.0-gamma")]
+        [InlineData("1.0.0-beta", "2.0.0")]
+        public void InstallPackageInstallUnlistedPrereleasePackageAsADependency(string versionA, string versionB)
+        {
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", versionA, dependencies: new[] { new PackageDependency("B") });
+            var packageB = PackageUtility.CreatePackage("B", versionB, listed: false);
+            var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
+            sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
+            sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
+            sharedRepository.Setup(s => s.AddPackage(packageB)).Verifiable();
+
+            var packageRepository = new MockPackageRepository { packageA, packageB };
+            var recentPackageRepository = new Mock<IRecentPackageRepository>();
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
+
+            // Act
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, new Mock<IHttpClientEvents>().Object, null);
+            cmdlet.Id = "A";
+            cmdlet.IncludePrerelease = true;
+            cmdlet.Execute();
+
+            // Assert
+            sharedRepository.Verify();
+        }
+
+        [Fact]
+        public void InstallPackageShouldPickListedPackagesOverUnlistedOnesAsDependency()
+        {
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0", dependencies: new[] { new PackageDependency("B", new VersionSpec { MinVersion = new SemanticVersion("0.5")})});
+            var packageB1 = PackageUtility.CreatePackage("B", "1.0.0", listed: true);
+            var packageB2 = PackageUtility.CreatePackage("B", "1.0.2", listed: false);
+            var sharedRepository = new Mock<ISharedPackageRepository>();
+            sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
+            sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
+            sharedRepository.Setup(s => s.AddPackage(packageB1)).Verifiable();
+
+            var packageRepository = new MockPackageRepository { packageA, packageB1, packageB2 };
+            var recentPackageRepository = new Mock<IRecentPackageRepository>();
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
+
+            // Act
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, new Mock<IHttpClientEvents>().Object, null);
+            cmdlet.Id = "A";
+            cmdlet.Execute();
+
+            // Assert
+            sharedRepository.Verify();
+            sharedRepository.Verify(s => s.AddPackage(packageB2), Times.Never());
+        }
+
+        [Fact]
+        public void InstallPackageShouldPickListedPackagesOverUnlistedOnesAsDependency2()
+        {
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0", dependencies: new[] { new PackageDependency("B", new VersionSpec { MinVersion = new SemanticVersion("0.5") }) });
+            var packageB1 = PackageUtility.CreatePackage("B", "1.0.0", listed: true);
+            var packageB2 = PackageUtility.CreatePackage("B", "1.0.2-alpha", listed: true);
+            var packageB3 = PackageUtility.CreatePackage("B", "1.0.2", listed: false);
+            var sharedRepository = new Mock<ISharedPackageRepository>();
+            sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
+            sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
+            sharedRepository.Setup(s => s.AddPackage(packageB2)).Verifiable();
+
+            var packageRepository = new MockPackageRepository { packageA, packageB1, packageB2, packageB3 };
+            var recentPackageRepository = new Mock<IRecentPackageRepository>();
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
+
+            // Act
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, new Mock<IHttpClientEvents>().Object, null);
+            cmdlet.Id = "A";
+            cmdlet.IncludePrerelease = true;
+            cmdlet.Execute();
+
+            // Assert
+            sharedRepository.Verify();
+            sharedRepository.Verify(s => s.AddPackage(packageB1), Times.Never());
+            sharedRepository.Verify(s => s.AddPackage(packageB3), Times.Never());
+        }
+
+        [Fact]
+        public void InstallPackageShouldPickUnListedPackagesIfItSatisfiesContrainsAndOthersAreNot()
+        {
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0", dependencies: new[] { new PackageDependency("B", new VersionSpec { MinVersion = new SemanticVersion("1.0"), IsMinInclusive = true }) });
+            var packageB1 = PackageUtility.CreatePackage("B", "0.0.9", listed: true);
+            var packageB2 = PackageUtility.CreatePackage("B", "1.0.0", listed: false);
+            var sharedRepository = new Mock<ISharedPackageRepository>();
+            sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
+            sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
+            sharedRepository.Setup(s => s.AddPackage(packageB2)).Verifiable();
+
+            var packageRepository = new MockPackageRepository { packageA, packageB1, packageB2 };
+            var recentPackageRepository = new Mock<IRecentPackageRepository>();
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
+
+            // Act
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, new Mock<IHttpClientEvents>().Object, null);
+            cmdlet.Id = "A";
+            cmdlet.Execute();
+
+            // Assert
+            sharedRepository.Verify();
+            sharedRepository.Verify(s => s.AddPackage(packageB1), Times.Never());
+        }
+
+        [Fact]
+        public void InstallPackageShouldPickUnListedPrereleasePackagesIfItSatisfiesContrainsAndOthersAreNot()
+        {
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0", dependencies: new[] { new PackageDependency("B", new VersionSpec { MinVersion = new SemanticVersion("1.0"), IsMinInclusive = true }) });
+            var packageB1 = PackageUtility.CreatePackage("B", "0.0.9", listed: true);
+            var packageB2 = PackageUtility.CreatePackage("B", "1.0.1-a", listed: false);
+            var sharedRepository = new Mock<ISharedPackageRepository>();
+            sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
+            sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
+            sharedRepository.Setup(s => s.AddPackage(packageB2)).Verifiable();
+
+            var packageRepository = new MockPackageRepository { packageA, packageB1, packageB2 };
+            var recentPackageRepository = new Mock<IRecentPackageRepository>();
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
+
+            // Act
+            var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, new Mock<IHttpClientEvents>().Object, null);
+            cmdlet.Id = "A";
+            cmdlet.IncludePrerelease = true;
+            cmdlet.Execute();
+
+            // Assert
+            sharedRepository.Verify();
+            sharedRepository.Verify(s => s.AddPackage(packageB1), Times.Never());
         }
 
         [Fact]

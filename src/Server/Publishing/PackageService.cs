@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Web;
 using System.Web.Routing;
@@ -9,6 +10,7 @@ namespace NuGet.Server
 {
     public class PackageService
     {
+        private const string ApiKeyHeader = "X-NUGET-APIKEY";
         private readonly IServerPackageRepository _serverRepository;
         private readonly IPackageAuthenticationService _authenticationService;
 
@@ -22,11 +24,15 @@ namespace NuGet.Server
         public void CreatePackage(HttpContextBase context)
         {
             RouteData routeData = GetRouteData(context);
-            // Get the api key from the route
-            string apiKey = routeData.GetRequiredString("apiKey");
+            var request = context.Request;
+
+            // Get the api key from the header
+            string apiKey = request.Headers[ApiKeyHeader];
 
             // Get the package from the request body
-            var package = new ZipPackage(context.Request.InputStream);
+            Stream stream = request.Files.Count > 0 ? request.Files[0].InputStream : request.InputStream;
+
+            var package = new ZipPackage(stream);
 
             // Make sure they can access this package
             Authenticate(context, apiKey, package.Id,
@@ -40,18 +46,11 @@ namespace NuGet.Server
 
         public void DeletePackage(HttpContextBase context)
         {
-            // Only accept delete requests
-            if (!context.Request.HttpMethod.Equals("DELETE", StringComparison.OrdinalIgnoreCase))
-            {
-                context.Response.StatusCode = 404;
-                return;
-            }
-
             RouteData routeData = GetRouteData(context);
 
             // Extract the apiKey, packageId and make sure the version if a valid version string
             // (fail to parse if it's not)
-            string apiKey = routeData.GetRequiredString("apiKey");
+            string apiKey = context.Request.Headers[ApiKeyHeader];
             string packageId = routeData.GetRequiredString("packageId");
             var version = new SemanticVersion(routeData.GetRequiredString("version"));
 

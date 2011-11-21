@@ -73,6 +73,7 @@
     <Compile Include="PackageReferenceFileTest.cs" />
     <Compile Include="PackageReferenceRepositoryTest.cs" />
     <Compile Include="PackageRepositoryExtensionsTest.cs" />
+    <Compile Include="PackageServerTest.cs" />
     <Compile Include="PackageSorterTest.cs" />
     <Compile Include="PackageSourceProviderTest.cs" />
     <Compile Include="PathResolverTest.cs" />

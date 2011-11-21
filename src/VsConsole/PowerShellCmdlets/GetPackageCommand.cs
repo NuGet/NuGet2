@@ -220,16 +220,15 @@ namespace NuGet.PowerShell.Commands
                 packages = packages.AsBufferedEnumerable(First * 3).AsQueryable();
             }
 
-            IEnumerable<IPackage> packagesToDisplay = packages;
+            IEnumerable<IPackage> packagesToDisplay = packages.AsEnumerable()
+                                                              .Where(PackageExtensions.IsListed);
 
             // When querying a remote source, collapse versions unless AllVersions is specified.
             // We need to do this as the last step of the Queryable as the filtering occurs on the client.
             if (CollapseVersions)
             {
                 // Review: We should perform the Listed check over OData for better perf
-                packagesToDisplay = packages.AsEnumerable()
-                                            .Where(p => p.Listed || p.Published > NuGetConstants.Unpublished)
-                                            .AsCollapsed();
+                packagesToDisplay = packagesToDisplay.AsCollapsed();
             }
 
             if (ListAvailable && !IncludePrerelease)

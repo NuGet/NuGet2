@@ -592,6 +592,16 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to process request. &apos;{0}&apos;. 
+        ///{1}..
+        /// </summary>
+        internal static string PackageServerError {
+            get {
+                return ResourceManager.GetString("PackageServerError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A package version is required..
         /// </summary>
         internal static string PackageVersionRequired {

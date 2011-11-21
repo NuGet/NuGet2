@@ -78,6 +78,7 @@
     <Compile Include="Http\ICredentialCache.cs" />
     <Compile Include="Http\IHttpWebResponse.cs" />
     <Compile Include="Http\IProxyCache.cs" />
+    <Compile Include="Http\MultipartWebRequest.cs" />
     <Compile Include="Http\NullCredentialProvider.cs" />
     <Compile Include="Http\ProxyCache.cs" />
     <Compile Include="Http\RequestHelper.cs" />

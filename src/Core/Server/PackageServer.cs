@@ -1,16 +1,16 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Net;
-using System.Runtime.Serialization.Json;
 using Microsoft.Internal.Web.Utils;
+using NuGet.Resources;
 
 namespace NuGet
 {
     public class PackageServer : IPackageServer
     {
-        private const string CreatePackageService = "PackageFiles";
-        private const string PackageService = "Packages";
-        private const string PublishPackageService = "PublishedPackages/Publish";
+        private const string ServiceEndpoint = "/api/v2/package";
+        private const string ApiKeyHeader = "X-NuGet-ApiKey";
 
         private readonly Lazy<Uri> _baseUri;
         private readonly string _source;
@@ -32,11 +32,9 @@ namespace NuGet
             get { return _source; }
         }
 
-        public void CreatePackage(string apiKey, Stream packageStream)
+        public void PushPackage(string apiKey, Stream packageStream)
         {
-            var url = String.Join("/", CreatePackageService, apiKey, "nupkg");
-
-            HttpClient client = GetClient(url, "POST", "application/octet-stream");
+            HttpClient client = GetClient("", "POST", "application/octet-stream");
 
             client.SendingRequest += (sender, e) =>
             {
@@ -44,35 +42,12 @@ namespace NuGet
 
                 // Set the timeout to the same as the read write timeout (5 mins is the default)
                 request.Timeout = request.ReadWriteTimeout;
-                request.ContentLength = packageStream.Length;
+                request.Headers.Add(ApiKeyHeader, apiKey);
 
-                using (Stream requestStream = request.GetRequestStream())
-                {
-                    packageStream.CopyTo(requestStream);
-                }
-            };
+                var multiPartRequest = new MultipartWebRequest();
+                multiPartRequest.AddFile(() => packageStream, "package");
 
-            EnsureSuccessfulResponse(client);
-        }
-
-        public void PublishPackage(string apiKey, string packageId, string packageVersion)
-        {
-            HttpClient client = GetClient(PublishPackageService, "POST", "application/json");
-
-            client.SendingRequest += (sender, e) =>
-            {
-                using (Stream requestStream = e.Request.GetRequestStream())
-                {
-                    var data = new PublishData
-                    {
-                        Key = apiKey,
-                        Id = packageId,
-                        Version = packageVersion
-                    };
-
-                    var jsonSerializer = new DataContractJsonSerializer(typeof(PublishData));
-                    jsonSerializer.WriteObject(requestStream, data);
-                }
+                multiPartRequest.CreateMultipartRequest(request);
             };
 
             EnsureSuccessfulResponse(client);
@@ -80,24 +55,28 @@ namespace NuGet
 
         public void DeletePackage(string apiKey, string packageId, string packageVersion)
         {
-            var url = String.Join("/", PackageService, apiKey, packageId, packageVersion);
-
+            // Review: Do these values need to be encoded in any way?
+            var url = String.Join("/", packageId, packageVersion);
             HttpClient client = GetClient(url, "DELETE", "text/html");
-
+            
             client.SendingRequest += (sender, e) =>
             {
-                e.Request.ContentLength = 0;
+                var request = (HttpWebRequest)e.Request;
+                request.Headers.Add(ApiKeyHeader, apiKey);
             };
-
             EnsureSuccessfulResponse(client);
         }
 
-        private HttpClient GetClient(string url, string method, string contentType)
+        private HttpClient GetClient(string path, string method, string contentType)
         {
-            var uri = new Uri(_baseUri.Value, url);
-            var client = new HttpClient(uri);
-            client.ContentType = contentType;
-            client.Method = method;
+            var baseUrl = _baseUri.Value;
+            Uri requestUri = GetServiceEndpointUrl(baseUrl, path);
+
+            var client = new HttpClient(requestUri)
+            {
+                ContentType = contentType,
+                Method = method
+            };
 
             if (!String.IsNullOrEmpty(_userAgent))
             {
@@ -105,6 +84,21 @@ namespace NuGet
             }
 
             return client;
+        }
+
+        internal static Uri GetServiceEndpointUrl(Uri baseUrl, string path)
+        {
+            Uri requestUri;
+            if (String.IsNullOrEmpty(baseUrl.AbsolutePath.TrimStart('/')))
+            {
+                // If there's no host portion specified, append the url to the client.
+                requestUri = new Uri(baseUrl, ServiceEndpoint + '/' + path);
+            }
+            else
+            {
+                requestUri = new Uri(baseUrl, path);
+            }
+            return requestUri;
         }
 
         private static void EnsureSuccessfulResponse(HttpClient client)
@@ -124,13 +118,10 @@ namespace NuGet
                 response = e.Response;
 
                 var httpResponse = (HttpWebResponse)e.Response;
-                string errorMessage = String.Empty;
-                using (var stream = httpResponse.GetResponseStream())
+                if (httpResponse != null && httpResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    errorMessage = stream.ReadToEnd().Trim();
+                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageServerError, httpResponse.StatusDescription, e.Message), e);
                 }
-
-                throw new WebException(errorMessage, e, e.Status, e.Response);
             }
             finally
             {

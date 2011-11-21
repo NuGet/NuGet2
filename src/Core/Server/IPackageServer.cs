@@ -6,8 +6,7 @@ namespace NuGet
     {
         string Source { get; }
 
-        void CreatePackage(string apiKey, Stream packageStream);
-        void PublishPackage(string apiKey, string packageId, string packageVersion);
+        void PushPackage(string apiKey, Stream packageStream);
         void DeletePackage(string apiKey, string packageId, string packageVersion);
     }
 }

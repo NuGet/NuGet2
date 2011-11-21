@@ -231,14 +231,8 @@
   <data name="PushCommandDescription" xml:space="preserve">
     <value>Pushes a package to the server and optionally publishes it.</value>
   </data>
-  <data name="PushCommandInvalidResponse" xml:space="preserve">
-    <value>{0}: {1}</value>
-  </data>
   <data name="PushCommandNoSourceError" xml:space="preserve">
     <value>There is no default source, please specify a source.</value>
-  </data>
-  <data name="PushCommandPackageCreated" xml:space="preserve">
-    <value>Your package was uploaded to '{0}' but not published.</value>
   </data>
   <data name="PushCommandCreateOnlyDescription" xml:space="preserve">
     <value>Specifies if the package should be created and uploaded to the server but not published to the server. False by default.</value>
@@ -453,9 +447,6 @@
   <data name="PackageDoesNotExist" xml:space="preserve">
     <value>Unable to locate '{0} {1}'. Make sure all packages exist in the packages folder before running update.</value>
   </data>
-  <data name="SkippingUpdateCheck" xml:space="preserve">
-    <value>Skipping update check for '{0} {1}'. Update supported for packages that only contain binaries.</value>
-  </data>
   <data name="UnableToFindPackages" xml:space="preserve">
     <value>Unable to find '{0}'. Make sure they are specified in packages.config.</value>
   </data>
@@ -482,21 +473,6 @@
   </data>
   <data name="UpdatingPackage" xml:space="preserve">
     <value>Updating '{0}' to '{1}'.</value>
-  </data>
-  <data name="AddingAssemblyReference" xml:space="preserve">
-    <value>Adding assembly reference '{0}'.</value>
-  </data>
-  <data name="AddingPackageReference" xml:space="preserve">
-    <value>Adding package reference '{0}'.</value>
-  </data>
-  <data name="RemovingAssemblyReference" xml:space="preserve">
-    <value>Removing assembly reference '{0}'.</value>
-  </data>
-  <data name="RemovingPackageReference" xml:space="preserve">
-    <value>Removing package reference '{0}'.</value>
-  </data>
-  <data name="PushingPackage" xml:space="preserve">
-    <value>Pushing: {0}%</value>
   </data>
   <data name="FoundProjects" xml:space="preserve">
     <value>Found {0} projects with a packages.config file. ({1})</value>
@@ -736,6 +712,12 @@ nuget update -Self</value>
   </data>
   <data name="UpdateCommandPrerelease" xml:space="preserve">
     <value>Allows updating to prerelease versions. This flag is not required when updating prerelease packages that are already installed.</value>
+  </data>
+  <data name="CommandApiKey" xml:space="preserve">
+    <value>The API key for the server.</value>
+  </data>
+  <data name="Warning_PublishPackageDeprecated" xml:space="preserve">
+    <value>Unpublished packages are no longer supported. Associated commands and properties would be removed in future versions.</value>
   </data>
   <data name="PackageCommandFileFromDependencyIsChanged" xml:space="preserve">
     <value>File from dependency is changed. Adding file '{0}'.</value>

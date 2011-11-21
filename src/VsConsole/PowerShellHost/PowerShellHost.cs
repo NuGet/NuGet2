@@ -21,7 +21,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation
         private readonly IRunspaceManager _runspaceManager;
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly ISolutionManager _solutionManager;
-        private readonly IVsPackageManagerFactory _packageManagerFactory;
 
         private string _targetDir;
         private bool _updateWorkingDirectoryPending;
@@ -44,7 +43,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             // TODO: Take these as ctor arguments
             _packageSourceProvider = ServiceLocator.GetInstance<IVsPackageSourceProvider>();
             _solutionManager = ServiceLocator.GetInstance<ISolutionManager>();
-            _packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
 
             _name = name;
             IsCommandEnabled = true;
@@ -241,8 +239,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                 }
                 try
                 {
-                    var packageManager = (VsPackageManager)_packageManagerFactory.CreatePackageManager(ServiceLocator.GetInstance<IPackageRepository>(), useFallbackForDependencies: false);
-                    var localRepository = packageManager.LocalRepository;
+                    var localRepository = new LocalPackageRepository(_solutionManager.SolutionDirectory);
 
                     // invoke init.ps1 files in the order of package dependency.
                     // if A -> B, we invoke B's init.ps1 before A's.
@@ -252,7 +249,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
                     foreach (var package in sortedPackages)
                     {
-                        string installPath = packageManager.PathResolver.GetInstallPath(package);
+                        string installPath = localRepository.PathResolver.GetInstallPath(package);
 
                         AddPathToEnvironment(Path.Combine(installPath, "tools"));
                         Runspace.ExecuteScript(installPath, "tools\\init.ps1", package);

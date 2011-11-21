@@ -81,7 +81,7 @@ namespace NuGet
                 foreach (var dependency in package.Dependencies)
                 {
                     // Try to resolve the dependency from the visited packages first
-                    IPackage resolvedDependency = Marker.ResolveDependency(dependency, AllowPrereleaseVersions) ??
+                    IPackage resolvedDependency = Marker.ResolveDependency(dependency, AllowPrereleaseVersions, preferListedPackages: false) ??
                                                   ResolveDependency(dependency);
 
                     if (resolvedDependency == null)

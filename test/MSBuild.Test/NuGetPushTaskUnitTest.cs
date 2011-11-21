@@ -55,9 +55,7 @@ namespace NuGet.Test.MSBuild
                 .Setup(x => x.GetValues(It.IsAny<string>()))
                 .Returns(new List<KeyValuePair<string, string>> { new KeyValuePair<string, string>(task.Source, "shshshshs") });
             packageServerStub
-                .Setup(x => x.CreatePackage(It.IsAny<string>(), It.IsAny<Stream>()));
-            packageServerStub
-                .Setup(x => x.PublishPackage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()));
+                .Setup(x => x.PushPackage(It.IsAny<string>(), It.IsAny<Stream>()));
 
             bool actualResult = task.Execute();
 
@@ -72,9 +70,7 @@ namespace NuGet.Test.MSBuild
             NuGetPush task = CreateTaskWithDefaultStubs(packageServerStub: packageServerStub);
 
             packageServerStub
-                .Setup(x => x.CreatePackage(It.IsAny<string>(), It.IsAny<Stream>()));
-            packageServerStub
-                .Setup(x => x.PublishPackage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()));
+                .Setup(x => x.PushPackage(It.IsAny<string>(), It.IsAny<Stream>()));
 
             bool actualResult = task.Execute();
 
@@ -87,13 +83,9 @@ namespace NuGet.Test.MSBuild
             var packageServerStub = new Mock<IPackageServer>();
 
             NuGetPush task = CreateTaskWithDefaultStubs(packageServerStub: packageServerStub);
-            task.CreateOnly = true;
-
+            
             packageServerStub
-                .Setup(x => x.CreatePackage(It.IsAny<string>(), It.IsAny<Stream>()));
-            packageServerStub
-                .Setup(x => x.PublishPackage(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .Throws(new Exception());
+                .Setup(x => x.PushPackage(It.IsAny<string>(), It.IsAny<Stream>()));
 
             bool actualResult = task.Execute();
 

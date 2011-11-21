@@ -349,8 +349,7 @@ namespace NuGet.Dialog.Providers
                 {
                     // If we are connecting to an older gallery implementation, we need to use the Published field. 
                     // For newer gallery, the package is never unpublished, it is only unlisted.
-                    _query = _query.Where(p => p.Listed || p.Published > NuGetConstants.Unpublished)
-                                   .AsCollapsed();
+                    _query = _query.Where(PackageExtensions.IsListed).AsCollapsed();
                 }
             }
 

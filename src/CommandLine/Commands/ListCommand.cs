@@ -76,7 +76,7 @@ namespace NuGet.Commands
 
             return packages.OrderBy(p => p.Id)
                            .AsEnumerable()
-                           .Where(p => p.Listed || p.Published > NuGetConstants.Unpublished)
+                           .Where(PackageExtensions.IsListed)
                            .Where(p => Prerelease || p.IsReleaseVersion())
                            .AsCollapsed();
         }
