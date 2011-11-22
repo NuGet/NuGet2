@@ -127,6 +127,7 @@ namespace NuGet.Commands
             {
                 Console.WriteWarning(NuGetResources.Warning_PublishPackageDeprecated);
             }
+            Console.WriteLine(NuGetResources.PushCommandPackagePushed);
         }
 
         private string GetApiKey(string source, bool throwIfNotFound = true)

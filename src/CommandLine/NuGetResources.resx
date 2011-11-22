@@ -719,4 +719,7 @@ nuget update -Self</value>
   <data name="Warning_PublishPackageDeprecated" xml:space="preserve">
     <value>Unpublished packages are no longer supported. Associated commands and properties would be removed in future versions.</value>
   </data>
+  <data name="PushCommandPackagePushed" xml:space="preserve">
+    <value>Your package was pushed.</value>
+  </data>
 </root>
