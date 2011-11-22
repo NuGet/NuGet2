@@ -119,7 +119,7 @@ namespace NuGet.Server
             context.Response.StatusCode = (int)statusCode;
             if (!String.IsNullOrEmpty(body))
             {
-                context.Response.Write(body);
+                context.Response.StatusDescription = body;
             }
         }
 
