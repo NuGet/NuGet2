@@ -97,6 +97,7 @@
         <Button guid="guidPackagesRestoreGroup" id="cmdidRestorePackages" priority="0x001" type="Button">
             <Parent guid="guidPackagesRestoreGroup" id="idPackagesRestoreGroup" />
             <Icon guid="guidToolbarImages" id="bmpPackageRestore" />
+            <CommandFlag>DefaultInvisible</CommandFlag>
             <CommandFlag>DynamicVisibility</CommandFlag>
             <Strings>
                 <CommandName>cmdRestorePackages</CommandName>
@@ -152,6 +153,7 @@
   <VisibilityConstraints>
     <VisibilityItem guid="guidDialogCmdSet" id="cmdidAddPackages" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
     <VisibilityItem guid="guidDialogCmdSet" id="cmdidAddPackagesForSolution" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
+    <VisibilityItem guid="guidPackagesRestoreGroup" id="cmdidRestorePackages" context="UICONTEXT_SolutionExistsAndNotBuildingAndNotDebugging" />
     <VisibilityItem guid="guidToolsGroup" id="cmdIdVisualizer" context="UICONTEXT_SolutionExists" />
   </VisibilityConstraints>
 
