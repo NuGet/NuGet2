@@ -55,6 +55,7 @@
     <Compile Include="CommandManagerTests.cs" />
     <Compile Include="CommandTest.cs" />
     <Compile Include="DefaultSpecValuesRuleTest.cs" />
+    <Compile Include="DeleteCommandTest.cs" />
     <Compile Include="InstallCommandTest.cs" />
     <Compile Include="ListCommandTests.cs" />
     <Compile Include="OptionAttributeTests.cs" />
