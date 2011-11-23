@@ -196,7 +196,14 @@ namespace NuGet
             if (fileTransformers.TryGetValue(extension, out transformer))
             {
                 // Remove the transformer extension (e.g. .pp, .transform)
-                path = RemoveExtension(path);
+                string truncatedPath = RemoveExtension(path);
+
+                // Bug 1686: Don't allow transforming packages.config.transform
+                string fileName = Path.GetFileName(truncatedPath);
+                if (!PackageReferenceRepository.PackageReferenceFile.Equals(fileName, StringComparison.OrdinalIgnoreCase))
+                {
+                    path = truncatedPath;
+                }
             }
 
             return path;
@@ -215,7 +222,20 @@ namespace NuGet
             if (fileTransformers.TryGetValue(extension, out transformer))
             {
                 // Remove the transformer extension (e.g. .pp, .transform)
-                path = RemoveExtension(path);
+                string truncatedPath = RemoveExtension(path);
+
+                // Bug 1686: Don't allow transforming packages.config.transform,
+                // but we still want to copy packages.config.transform as-is into the project.
+                string fileName = Path.GetFileName(truncatedPath);
+                if (PackageReferenceRepository.PackageReferenceFile.Equals(fileName, StringComparison.OrdinalIgnoreCase))
+                {
+                    // setting to null means no pre-processing of this file
+                    transformer = null;
+                }
+                else
+                {
+                    path = truncatedPath;
+                }
             }
 
             return projectSystem.ResolvePath(path);
