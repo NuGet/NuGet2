@@ -246,6 +246,14 @@ namespace NuGet.Dialog.Providers
             }
         }
 
+        public override string NoItemsMessage
+        {
+            get
+            {
+                return Resources.Dialog_SolutionInstalledProviderNoItem;
+            }
+        }
+
         /// <summary>
         /// Get a list of projects which has the specified package installed.
         /// </summary>
