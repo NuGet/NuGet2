@@ -9,9 +9,26 @@ using Xunit;
 
 namespace NuGet.Test.VisualStudio
 {
-
     public class VsPackageManagerTest
     {
+        //[Fact]
+        //public void GetProjectManagerDoNotThrowWhenActivePackageSourceIsNull()
+        //{
+        //    // Arrange
+        //    var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+        //    var sourceRepository = new MockPackageRepository();
+        //    var projectSystem = new MockProjectSystem();
+        //    var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, projectSystem, localRepository, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+
+        //    var project = new Mock<Project>();
+
+        //    // Act
+        //    var projectManager = packageManager.GetProjectManager(project.Object);
+
+        //    // Assert
+        //    Assert.NotNull(projectManager);
+        //}
+
         [Fact]
         public void InstallPackageInstallsIntoProjectAndPackageManager()
         {

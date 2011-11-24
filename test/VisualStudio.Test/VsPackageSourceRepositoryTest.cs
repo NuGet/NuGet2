@@ -21,7 +21,7 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
-        public void NullActivePackageSourceThrows()
+        public void NullActivePackageSourceThrowsForAddPackageAndRemovePackage()
         {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
@@ -31,9 +31,27 @@ namespace NuGet.VisualStudio.Test
             var repository = new VsPackageSourceRepository(mockRepositoryFactory.Object, mockSourceProvider.Object);
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => repository.GetPackages(), "Unable to retrieve package list because no source was specified.");
             ExceptionAssert.Throws<InvalidOperationException>(() => repository.AddPackage(null), "Unable to retrieve package list because no source was specified.");
             ExceptionAssert.Throws<InvalidOperationException>(() => repository.RemovePackage(null), "Unable to retrieve package list because no source was specified.");
+        }
+
+        [Fact]
+        public void NullActivePackageSourceDoesNotThrowForOtherMethods()
+        {
+            // Arrange
+            var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
+            var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
+            mockSourceProvider.Setup(m => m.ActivePackageSource).Returns((PackageSource)null);
+            mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns(new MockPackageRepository());
+            var repository = new VsPackageSourceRepository(mockRepositoryFactory.Object, mockSourceProvider.Object);
+
+            // Act & Assert
+            Assert.NotNull(repository.Clone());
+            Assert.Empty(repository.GetPackages());
+            Assert.False(repository.SupportsPrereleasePackages);
+            Assert.Empty(repository.FindPackagesById("A"));
+            Assert.Null(repository.FindPackage("A", new SemanticVersion("1.0")));
+            Assert.Empty(repository.Search("web", new string[] { "net40" }, true));
         }
 
         [Fact]

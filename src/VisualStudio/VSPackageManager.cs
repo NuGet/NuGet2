@@ -26,7 +26,6 @@ namespace NuGet.VisualStudio
                 VsPackageInstallerEvents packageEvents) :
             base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository)
         {
-
             _solutionManager = solutionManager;
             _sharedRepository = sharedRepository;
             _recentPackagesRepository = recentPackagesRepository;

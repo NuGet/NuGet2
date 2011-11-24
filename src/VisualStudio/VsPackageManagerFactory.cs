@@ -142,7 +142,7 @@ namespace NuGet.VisualStudio
             var vsPackageSourceRepository = repository as VsPackageSourceRepository;
             if (vsPackageSourceRepository != null)
             {
-                return IsAggregateRepository(vsPackageSourceRepository.ActiveRepository);
+                return IsAggregateRepository(vsPackageSourceRepository.GetActiveRepository());
             }
             return false;
         }
