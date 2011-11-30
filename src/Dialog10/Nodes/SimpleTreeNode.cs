@@ -4,7 +4,6 @@ using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuGet.Dialog.Providers
 {
-
     /// <summary>
     /// This tree node lists all packages from a fixed repository.
     /// </summary>
@@ -24,7 +23,6 @@ namespace NuGet.Dialog.Providers
         public SimpleTreeNode(PackagesProviderBase provider, string category, IVsExtensionsTreeNode parent, IPackageRepository repository, bool collapseVersion = true) :
             base(parent, provider, collapseVersion)
         {
-
             if (category == null)
             {
                 throw new ArgumentNullException("category");

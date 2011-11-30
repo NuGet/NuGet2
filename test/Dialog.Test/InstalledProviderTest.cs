@@ -28,6 +28,16 @@ namespace NuGet.Dialog.Test
         }
 
         [Fact]
+        public void ShowPrereleaseComboBoxIsFalse()
+        {
+            // Arrange
+            var provider = CreateInstalledProvider();
+
+            // Act & Assert
+            Assert.False(provider.ShowPrereleaseComboBox);
+        }
+
+        [Fact]
         public void RefresOnNodeSelectionPropertyIsCorrect()
         {
             // Arrange

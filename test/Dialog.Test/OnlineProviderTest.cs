@@ -37,6 +37,16 @@ namespace NuGet.Dialog.Test
         }
 
         [Fact]
+        public void ShowPrereleaseComboBoxIsTrue()
+        {
+            // Arrange
+            var provider = CreateOnlineProvider();
+
+            // Act & Assert
+            Assert.True(provider.ShowPrereleaseComboBox);
+        }
+
+        [Fact]
         public void VerifySortDescriptors()
         {
             // Arrange

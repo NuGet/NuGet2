@@ -20,7 +20,6 @@ namespace NuGet.Dialog.Providers
             IPackageRepository sourceRepository) :
             base(provider, category, parent, sourceRepository)
         {
-
             _localRepository = localRepository;
         }
 
@@ -28,7 +27,7 @@ namespace NuGet.Dialog.Providers
         {
             // We need to call ToList() here so that we don't evaluate the enumerable twice
             // when trying to count it.
-            IList<IPackage> updateCandidates = Repository.GetUpdates(_localRepository.GetPackages(), includePrerelease: false, includeAllVersions: false).ToList();
+            IList<IPackage> updateCandidates = Repository.GetUpdates(_localRepository.GetPackages(), includePrerelease: Provider.IncludePrerelease, includeAllVersions: false).ToList();
 
             IList<FrameworkName> solutionFrameworks = Provider.SupportedFrameworks.Select(s => new FrameworkName(s)).ToList();
 

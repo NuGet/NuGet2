@@ -8,10 +8,8 @@ using Xunit;
 
 namespace NuGet.Dialog.Test
 {
-
     public class SimpleTreeNodeTest
     {
-
         [Fact]
         public void PropertyNameIsCorrect()
         {
@@ -20,7 +18,7 @@ namespace NuGet.Dialog.Test
             MockPackageRepository repository = new MockPackageRepository();
 
             string category = "Mock node";
-            SimpleTreeNode node = CreateSimpleTreeNode(repository, category);
+            SimpleTreeNode node = CreateSimpleTreeNode(repository, category: category);
 
             // Act & Assert
             Assert.Equal(category, node.Name);
@@ -37,6 +35,34 @@ namespace NuGet.Dialog.Test
             for (int i = 0; i < numberOfPackages; i++)
             {
                 packages[i] = PackageUtility.CreatePackage("A" + i, "1.0");
+                repository.AddPackage(packages[i]);
+            }
+
+            SimpleTreeNode node = CreateSimpleTreeNode(repository);
+
+            // Act
+            var producedPackages = node.GetPackages().ToList();
+
+            // Assert
+            Assert.Equal(packages.Length, producedPackages.Count);
+
+            for (int i = 0; i < numberOfPackages; i++)
+            {
+                Assert.Same(packages[i], producedPackages[i]);
+            }
+        }
+
+        [Fact]
+        public void GetPackagesReturnPrereleasePackages()
+        {
+            // Arrange
+            MockPackageRepository repository = new MockPackageRepository();
+
+            int numberOfPackages = 3;
+            IPackage[] packages = new IPackage[numberOfPackages];
+            for (int i = 0; i < numberOfPackages; i++)
+            {
+                packages[i] = PackageUtility.CreatePackage("A" + i, "1.0-alpha");
                 repository.AddPackage(packages[i]);
             }
 

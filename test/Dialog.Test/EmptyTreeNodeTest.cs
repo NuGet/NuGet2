@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Microsoft.VisualStudio.ExtensionsExplorer;
+﻿using Microsoft.VisualStudio.ExtensionsExplorer;
 using Moq;
 using NuGet.Dialog.Providers;
 using NuGet.Test.Mocks;
@@ -7,14 +6,11 @@ using Xunit;
 
 namespace NuGet.Dialog.Test
 {
-
     public class EmptyTreeNodeTest
     {
-
         [Fact]
         public void PropertyNameIsCorrect()
         {
-
             // Arrange
             MockPackageRepository repository = new MockPackageRepository();
 
@@ -32,10 +28,10 @@ namespace NuGet.Dialog.Test
             EmptyTreeNode node = CreateEmptyTreeNode();
 
             // Act
-            var producedPackages = node.GetPackages().ToList();
+            var producedPackages = node.GetPackages();
 
             // Assert
-            Assert.Equal(0, producedPackages.Count);
+            Assert.Empty(producedPackages);
         }
 
         private static EmptyTreeNode CreateEmptyTreeNode(string category = "Mock node")

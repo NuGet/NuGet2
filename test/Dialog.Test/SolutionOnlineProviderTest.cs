@@ -14,6 +14,17 @@ namespace NuGet.Dialog.Test
 {
     public class SolutionOnlineProviderTest
     {
+
+        [Fact]
+        public void ShowPrereleaseComboBoxIsTrue()
+        {
+            // Arrange
+            var provider = CreateSolutionOnlineProvider();
+
+            // Act & Assert
+            Assert.True(provider.ShowPrereleaseComboBox);
+        }
+
         [Fact]
         public void ExecuteMethodCallsInstallPackageMethodOnPackageManager()
         {
