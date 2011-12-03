@@ -37,6 +37,8 @@ namespace NuGet.Server
             // Make sure they can access this package
             Authenticate(context, apiKey, package.Id,
                          () => _serverRepository.AddPackage(package));
+
+            WriteStatus(context, HttpStatusCode.Created, "");
         }
 
         public void PublishPackage(HttpContextBase context)

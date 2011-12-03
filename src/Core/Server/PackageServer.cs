@@ -12,7 +12,6 @@ namespace NuGet
     {
         private const string ServiceEndpoint = "/api/v2/package";
         private const string ApiKeyHeader = "X-NuGet-ApiKey";
-        private static readonly HttpStatusCode[] AcceptableStatusCodes = new[] { HttpStatusCode.OK, HttpStatusCode.Created };
 
         private readonly Lazy<Uri> _baseUri;
         private readonly string _source;
@@ -52,7 +51,7 @@ namespace NuGet
                 multiPartRequest.CreateMultipartRequest(request);
             };
 
-            EnsureSuccessfulResponse(client);
+            EnsureSuccessfulResponse(client, HttpStatusCode.Created);
         }
 
         public void DeletePackage(string apiKey, string packageId, string packageVersion)
@@ -103,12 +102,16 @@ namespace NuGet
             return requestUri;
         }
 
-        private static void EnsureSuccessfulResponse(HttpClient client)
+        private static void EnsureSuccessfulResponse(HttpClient client, HttpStatusCode expectedStatusCode = HttpStatusCode.OK)
         {
-            WebResponse response = null;
+            HttpWebResponse response = null;
             try
             {
-                response = client.GetResponse();
+                response = (HttpWebResponse)client.GetResponse();
+                if (response != null && expectedStatusCode != response.StatusCode)
+                {
+                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageServerError, response.StatusDescription, String.Empty));
+                }
             }
             catch (WebException e)
             {
@@ -116,13 +119,10 @@ namespace NuGet
                 {
                     throw;
                 }
-
-                response = e.Response;
-
-                var httpResponse = (HttpWebResponse)e.Response;
-                if (httpResponse != null && !AcceptableStatusCodes.Contains(httpResponse.StatusCode))
+                response = (HttpWebResponse)e.Response;
+                if (response != null && expectedStatusCode != response.StatusCode)
                 {
-                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageServerError, httpResponse.StatusDescription, e.Message), e);
+                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageServerError, response.StatusDescription, e.Message), e);
                 }
             }
             finally

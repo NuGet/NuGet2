@@ -352,7 +352,7 @@
     <value>Id must not exceed 100 characters.</value>
   </data>
   <data name="PackageServerError" xml:space="preserve">
-    <value>Unable to process request. '{0}'. 
+    <value>Failed to process request. '{0}'. 
 {1}.</value>
   </data>
 </root>
