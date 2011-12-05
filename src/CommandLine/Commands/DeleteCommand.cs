@@ -59,7 +59,7 @@ namespace NuGet.Commands
 
         }
 
-        private string GetApiKey(string source)
+        internal string GetApiKey(string source)
         {
             string apiKey = null;
 
@@ -69,9 +69,9 @@ namespace NuGet.Commands
             }
 
             // Second argument, if present, should be the API Key
-            if (Arguments.Count > 1)
+            if (Arguments.Count > 2)
             {
-                apiKey = Arguments[1];
+                apiKey = Arguments[2];
             }
 
             // If the user did not pass an API Key look in the config file

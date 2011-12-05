@@ -1043,6 +1043,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your package was pushed..
+        /// </summary>
+        internal static string PushCommandPackagePushed {
+            get {
+                return ResourceManager.GetString("PushCommandPackagePushed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Pushing {0} to {1}....
         /// </summary>
         internal static string PushCommandPushingPackage {

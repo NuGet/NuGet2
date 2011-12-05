@@ -22,7 +22,7 @@ namespace NuGet.Server
             // Route to create a new package
             routes.MapDelegate("CreatePackage",
                                "api/v2/package",
-                               new { httpMethod = new HttpMethodConstraint("POST") },
+                               new { httpMethod = new HttpMethodConstraint("PUT") },
                                context => CreatePackageService().CreatePackage(context.HttpContext));
 
             // Route to delete packages

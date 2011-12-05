@@ -721,6 +721,9 @@ nuget update -Self</value>
   </data>
   <data name="PackageCommandFileFromDependencyIsChanged" xml:space="preserve">
     <value>File from dependency is changed. Adding file '{0}'.</value>
+    </data>
+  <data name="PushCommandPackagePushed" xml:space="preserve">
+    <value>Your package was pushed.</value>
   </data>
   <data name="PackageCommandFileFromDependencyIsNotChanged" xml:space="preserve">
     <value>File from dependency is not changed. File '{0}' is not added.</value>
