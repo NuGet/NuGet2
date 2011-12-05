@@ -11,8 +11,8 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 #if !FIXED_ASSEMBLY_VERSION
-[assembly: AssemblyVersion("1.6.0.0")]
-[assembly: AssemblyInformationalVersion("1.6.0")]
+[assembly: AssemblyVersion("1.7.0.0")]
+[assembly: AssemblyInformationalVersion("1.7.0")]
 #endif
 
 [assembly: NeutralResourcesLanguage("en-US")]
