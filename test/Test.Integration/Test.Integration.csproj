@@ -60,7 +60,6 @@
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="MSBuild\NuGetTaskIntegrationTest.cs" />
     <Compile Include="CommandRunner.cs" />
     <Compile Include="NuGetCommandLine\NuGetCommandLineTest.cs" />
     <Compile Include="NuGetCommandLine\NuSpecFileContext.cs" />
@@ -76,10 +75,6 @@
     <ProjectReference Include="..\..\src\Core\Core.csproj">
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\MSBuild\MSBuild.csproj">
-      <Project>{74CD9786-C226-4A58-A250-2DBC9EE29670}</Project>
-      <Name>MSBuild</Name>
     </ProjectReference>
     <ProjectReference Include="..\Test.Utility\Test.Utility.csproj">
       <Project>{F016882A-C798-4446-BB75-D3C393A38B32}</Project>

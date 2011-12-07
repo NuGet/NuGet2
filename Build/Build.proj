@@ -24,9 +24,6 @@
         <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
         <ILMergeArtifactDirectory>$(ArtifactDropDirectory)\ILMerge</ILMergeArtifactDirectory>
         <ILMergeInternalizeIgnoreFile>$(NuGetRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
-        <MSBuildBuildDirectory>$(NuGetSrcRoot)\MSBuild\bin\$(Configuration)</MSBuildBuildDirectory>
-        <MSBuildDropDirectory>$(NuGetDropDirectory)\MSBuild</MSBuildDropDirectory>
-        <MSBuildILMergeFileFinalName>NuGet.MSBuild.dll</MSBuildILMergeFileFinalName>
     </PropertyGroup>
     
     <PropertyGroup>
@@ -68,13 +65,13 @@
         </RegexTransform>
     </ItemGroup>
     
-    <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyBootStrapperOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyMSBuildOutputToDropDirectory; CopyLicenseToAllDirectories; ILMergeMSBuild; BuildPackages">
+    <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyBootStrapperOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; BuildPackages">
     </Target>
     
     <Target Name="CheckFxCop">
         <Error 
-        Condition="!Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll') " 
-        Text="FxCop not found at $(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll. Cannot proceed" /> 
+            Condition="!Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll') "
+            Text="FxCop not found at $(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll. Cannot proceed" />
     </Target>
 
     <Target Name="UpdateVsixVersion" Condition="'$(BUILD_NUMBER)' != ''">
@@ -92,7 +89,6 @@
         <MSBuild Projects="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Targets="RunTests" BuildInParallel="true" />
         <MSBuild Projects="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" Targets="RunTests" BuildInParallel="true" />
         <MSBuild Projects="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" Targets="RunTests" BuildInParallel="true" />
-        <MSBuild Projects="$(NuGetTestRoot)\MSBuild.Test\MSBuild.Test.csproj" Targets="RunTests" BuildInParallel="true" />
         <MSBuild Projects="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" Targets="RunTests" BuildInParallel="true" />
         <MSBuild Projects="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" Targets="RunTests" BuildInParallel="true" />
     </Target>
@@ -114,7 +110,6 @@
         <MakeDir Directories="$(BootStrapperDropDirectory)" Condition="!Exists('$(BootStrapperDropDirectory)')" />
         <MakeDir Directories="$(VisualStudioAddInDropDirectory)" Condition="!Exists('$(VisualStudioAddInDropDirectory)')" />
         <MakeDir Directories="$(ServerDropDirectory)" Condition="!Exists('$(ServerDropDirectory)')" />
-        <MakeDir Directories="$(MSBuildDropDirectory)" Condition="!Exists('$(MSBuildDropDirectory)')" />
         <MakeDir Directories="$(NuGetCoreDropDirectory)" Condition="!Exists('$(NuGetCoreDropDirectory)')" />
     </Target>
 
@@ -150,15 +145,7 @@
         <Exec Command="&quot;$(ZipExe)&quot; a ..\server.zip" WorkingDirectory="$(ServerDropDirectory)\www" />
         <RemoveDir Directories="$(ServerDropDirectory)\www" />
     </Target>
-    
-    <Target Name="CopyMSBuildOutputToDropDirectory">
-      <ItemGroup>
-        <MSBuildOutputItems Exclude="$(MSBuildBuildDirectory)\**\*.pdb" Include="$(MSBuildBuildDirectory)\**\*.*" />
-      </ItemGroup>
-      <Message Text="Copying NuGet.MSBuild.dll output to $(MSBuildDropDirectory)" />
-      <Copy ContinueOnError="false" SourceFiles="@(MSBuildOutputItems)" DestinationFiles="@(MSBuildOutputItems ->'$(MSBuildDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
-    </Target>
-    
+        
     <Target Name="CopyLicenseToAllDirectories">
         <ItemGroup>
             <LicenseFileItems Include="$(MSBuildProjectDirectory)\..\LICENSE.txt" />
@@ -169,17 +156,6 @@
         <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(ServerDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
   
-    <Target Name="ILMergeMSBuild">
-      <ItemGroup>
-        <MSBuildILMergeItems Include="$(MSBuildDropDirectory)\NuGet.Core.dll" />
-      </ItemGroup>
-      <MakeDir Directories="$(ILMergeArtifactDirectory)" Condition="!Exists('$(ILMergeArtifactDirectory)')" />
-      <!-- ILMerge does not yet support .NET 4.0  http://nitoprograms.blogspot.com/2010/09/using-ilmerge-with-net-40-andor-rx.html /targetplatform:v4,"%ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" -->
-      <Exec Command="&quot;$(ILMergeExe)&quot; /targetplatform:&quot;v4, %ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0&quot; /internalize:&quot;$(ILMergeInternalizeIgnoreFile)&quot; /target:dll /out:$(MSBuildILMergeFileFinalName) /log:&quot;$(ILMergeArtifactDirectory)\ilmerge.msbuild.log&quot; /ndebug /allowDup $(MSBuildILMergeFileFinalName) %(MSBuildILMergeItems.FileName)%(MSBuildILMergeItems.Extension)" WorkingDirectory="$(MSBuildDropDirectory)" />
-      <!-- For some reason ILMerge is not deleting files that are merged in - but they are merging in just fine -->
-      <Delete Files="@(MSBuildILMergeItems)" />
-    </Target>
-
     <Target Name="BuildPackages">
         <PropertyGroup>
             <NuGetExe>$(ExeDropDirectory)\NuGet.exe</NuGetExe>
