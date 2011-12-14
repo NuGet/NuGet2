@@ -325,9 +325,9 @@
     <value>No packages are installed in the current solution.</value>
   </data>
   <data name="Filter_IncludePrerelease" xml:space="preserve">
-    <value>Include prerelease packages</value>
+    <value>Include prerelease</value>
   </data>
   <data name="Filter_StablePackages" xml:space="preserve">
-    <value>Stable packages only</value>
+    <value>Stable only</value>
   </data>
 </root>
