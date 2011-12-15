@@ -239,6 +239,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                 }
 
                 IRepositorySettings repositorySettings = ServiceLocator.GetInstance<IRepositorySettings>();
+                Debug.Assert(repositorySettings != null);
                 if (repositorySettings == null)
                 {
                     return;

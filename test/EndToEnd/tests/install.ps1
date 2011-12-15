@@ -155,7 +155,6 @@ function Test-InstallPackageInvokeInstallScriptAndInitScript {
 #
 #    # Now close the solution and reopen it
 #    $solutionDir = $dte.Solution.FullName
-#    Write-Host "hehe $solutionDir"
 #    Close-Solution
 #    Remove-Item function:\Get-World
 #    Assert-False (Test-Path function:\Get-World)
