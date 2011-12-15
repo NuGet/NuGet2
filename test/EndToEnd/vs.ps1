@@ -22,6 +22,26 @@ function Ensure-Solution {
     }
 }
 
+function Close-Solution 
+{
+    if ($dte.Solution -and $dte.Solution.IsOpen) 
+    {
+        $dte.Solution.Close()
+    }
+}
+
+function Open-Solution 
+{
+    param
+    (
+        [string]
+        [parameter(Mandatory = $true)]
+        $Path
+    )
+    
+    $dte.Solution.Open($Path)
+}
+
 function Ensure-Dir {
     param(
         [string]

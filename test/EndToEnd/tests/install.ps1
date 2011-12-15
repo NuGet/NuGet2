@@ -136,8 +136,35 @@ function Test-InstallPackageInvokeInstallScriptAndInitScript {
     # Assert
 
     # This asserts init.ps1 gets called
-    Assert-NotNull (Get-ChildItem function:\Get-World)
+    Assert-True (Test-Path function:\Get-World)
 }
+
+# TODO: We need to modify our console host to allow creating nested pipeline
+#       in order for this test to run successfully.
+#
+#function Test-OpeningExistingSolutionInvokeInitScriptIfAny {
+#    param(
+#        $context
+#    )
+#    
+#    # Arrange
+#    $p = New-ConsoleApplication
+#
+#    # Act
+#    Install-Package PackageWithScripts -Source $context.RepositoryRoot
+#
+#    # Now close the solution and reopen it
+#    $solutionDir = $dte.Solution.FullName
+#    Write-Host "hehe $solutionDir"
+#    Close-Solution
+#    Remove-Item function:\Get-World
+#    Assert-False (Test-Path function:\Get-World)
+#    
+#    Open-Solution $solutionDir
+#
+#    # This asserts init.ps1 gets called
+#    Assert-True (Test-Path function:\Get-World)
+#}
 
 function Test-InstallPackageResolvesDependenciesAcrossSources {
     param(
