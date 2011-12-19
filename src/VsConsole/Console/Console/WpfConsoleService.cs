@@ -36,6 +36,10 @@ namespace NuGetConsole.Implementation.Console
         internal ITextFormatClassifierProvider TextFormatClassifierProvider { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        [Import]
+        internal ITextEditorFactoryService TextEditorFactoryService { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         [ImportMany(typeof(ICommandExpansionProvider))]
         internal List<Lazy<ICommandExpansionProvider, IHostNameMetadata>> CommandExpansionProviders { get; set; }
 
