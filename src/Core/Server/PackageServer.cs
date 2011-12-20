@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet
 {
@@ -159,6 +160,7 @@ namespace NuGet
             return EnsureTrailingSlash(uri);
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want to throw an exception from inside an exception")]
         private static string ReadResponseBody(HttpWebResponse response)
         {
             try
