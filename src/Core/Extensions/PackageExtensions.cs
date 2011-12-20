@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Versioning;
+using Microsoft.Internal.Web.Utils;
 
 namespace NuGet
 {
@@ -168,19 +169,35 @@ namespace NuGet
             return source.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
         }
 
+        /// <summary>
+        /// Returns packages where the search text appears in the default set of properties to search. The default set includes Id, Description and Tags.
+        /// </summary>
         public static IQueryable<T> Find<T>(this IQueryable<T> packages, string searchText) where T : IPackage
         {
+            return Find(packages, _packagePropertiesToSearch, searchText);
+        }
+
+        /// <summary>
+        /// Returns packages where the search text appears in any of the properties to search. 
+        /// Note that not all properties can be successfully queried via this method particularly over a OData feed. Verify indepedently if it works for the properties that need to be searched.
+        /// </summary>
+        public static IQueryable<T> Find<T>(this IQueryable<T> packages, IEnumerable<string> propertiesToSearch, string searchText) where T : IPackage
+        {
+            if (propertiesToSearch.IsEmpty())
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "propertiesToSearch");
+            }
+
             if (String.IsNullOrEmpty(searchText))
             {
                 return packages;
             }
-
-            return Find(packages, searchText.Split());
+            return Find(packages, propertiesToSearch, searchText.Split());
         }
 
-        private static IQueryable<T> Find<T>(this IQueryable<T> packages, params string[] searchTerms) where T : IPackage
+        private static IQueryable<T> Find<T>(this IQueryable<T> packages, IEnumerable<string> propertiesToSearch, IEnumerable<string> searchTerms) where T : IPackage
         {
-            if (searchTerms == null)
+            if (!searchTerms.Any())
             {
                 return packages;
             }
@@ -191,19 +208,19 @@ namespace NuGet
                 return packages;
             }
 
-            return packages.Where(BuildSearchExpression<T>(nonNullTerms));
+            return packages.Where(BuildSearchExpression<T>(propertiesToSearch, nonNullTerms));
         }
 
         /// <summary>
         /// Constructs an expression to search for individual tokens in a search term in the Id and Description of packages
         /// </summary>
-        private static Expression<Func<T, bool>> BuildSearchExpression<T>(IEnumerable<string> searchTerms) where T : IPackage
+        private static Expression<Func<T, bool>> BuildSearchExpression<T>(IEnumerable<string> propertiesToSearch, IEnumerable<string> searchTerms) where T : IPackage
         {
             Debug.Assert(searchTerms != null);
             var parameterExpression = Expression.Parameter(typeof(IPackageMetadata));
             // package.Id.ToLower().Contains(term1) || package.Id.ToLower().Contains(term2)  ...
             Expression condition = (from term in searchTerms
-                                    from property in _packagePropertiesToSearch
+                                    from property in propertiesToSearch
                                     select BuildExpressionForTerm(parameterExpression, term, property)).Aggregate(Expression.OrElse);
             return Expression.Lambda<Func<T, bool>>(condition, parameterExpression);
         }

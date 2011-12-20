@@ -124,7 +124,8 @@ namespace NuGet.Test
                                                         downloadCount: 0,
                                                         description: null,
                                                         summary: null,
-                                                        listed: true);
+                                                        listed: true,
+                                                        tags: null);
             projectManager.LocalRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageA);
             projectManager.LocalRepository.AddPackage(packageB);
@@ -1343,7 +1344,8 @@ namespace NuGet.Test
                 downloadCount: 0,
                 description: null,
                 summary: null,
-                listed: true);
+                listed: true,
+                tags: null);
 
             projectManager.LocalRepository.AddPackage(packageA);
 

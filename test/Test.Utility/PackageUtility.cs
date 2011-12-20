@@ -24,7 +24,8 @@ namespace NuGet.Test
                                               int downloadCount = 0,
                                               string description = null,
                                               string summary = null,
-                                              bool listed = true)
+                                              bool listed = true,
+                                              string tags = "")
         {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
             return CreatePackage(id,
@@ -36,7 +37,8 @@ namespace NuGet.Test
                                  downloadCount,
                                  description,
                                  summary,
-                                 listed);
+                                 listed,
+                                 tags);
         }
 
         public static IPackage CreatePackage(string id,
@@ -48,7 +50,8 @@ namespace NuGet.Test
                                               int downloadCount,
                                               string description,
                                               string summary,
-                                              bool listed)
+                                              bool listed,
+                                              string tags)
         {
             content = content ?? Enumerable.Empty<string>();
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>();
@@ -77,7 +80,7 @@ namespace NuGet.Test
             mockPackage.Setup(m => m.LicenseUrl).Returns(new Uri("ftp://test/somelicense.txts"));
             mockPackage.Setup(m => m.Summary).Returns(summary);
             mockPackage.Setup(m => m.FrameworkAssemblies).Returns(Enumerable.Empty<FrameworkAssemblyReference>());
-            mockPackage.Setup(m => m.Tags).Returns(String.Empty);
+            mockPackage.Setup(m => m.Tags).Returns(tags);
             mockPackage.Setup(m => m.Title).Returns(String.Empty);
             mockPackage.Setup(m => m.DownloadCount).Returns(downloadCount);
             mockPackage.Setup(m => m.RequireLicenseAcceptance).Returns(false);

@@ -68,6 +68,7 @@
     <Compile Include="Mocks\MockUserSettingsManager.cs" />
     <Compile Include="NullFileSystemTest.cs" />
     <Compile Include="PackageDependencyTest.cs" />
+    <Compile Include="PackageExtensionsTest.cs" />
     <Compile Include="PackageHelperTest.cs" />
     <Compile Include="PackageIdValidatorTest.cs" />
     <Compile Include="PackageReferenceFileTest.cs" />
