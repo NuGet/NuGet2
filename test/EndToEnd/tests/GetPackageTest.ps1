@@ -528,7 +528,7 @@ function Test-GetPackageUpdatesReturnPrereleasePackagesIfFlagIsSpecified {
 }
 
 function Test-GetPackageDoesNotThrowIfSolutionIsTemporary {
-    param($context) 
+    param($context)
 
     # Arrange
     New-TextFile
@@ -547,19 +547,16 @@ function Test-GetPackageUpdatesReturnAllVersionsIfFlagIsSpecified
     # Arrange
     $p = New-ClassLibrary
 
-    $p | Install-Package PrereleaseTestPackage -Version 1.0.0a -Source $context.RepositoryRoot -Prerelease
-    Assert-Package $p 'PrereleaseTestPackage' '1.0.0a'
+    $p | Install-Package PrereleaseTestPackage -Version '1.0.0-a' -Source $context.RepositoryRoot -Prerelease
+    Assert-Package $p 'PrereleaseTestPackage' '1.0.0-a'
     
     # Act
     $updates = @(Get-Package -Updates -AllVersions -Source $context.RepositoryRoot)
 
     # Assert
-    Assert-AreEqual 2 $updates.Count
+    Assert-AreEqual 1 $updates.Count
     Assert-AreEqual 'PrereleaseTestPackage' $updates[0].Id
     Assert-AreEqual '1.0.0' $updates[0].Version
-
-    Assert-AreEqual 'PrereleaseTestPackage' $updates[1].Id
-    Assert-AreEqual '2.0.0' $updates[1].Version
 }
 
 function Test-GetPackageUpdatesReturnAllVersionsAndPrereleaseVersionsIfTwoFlagsAreSpecified 
@@ -572,21 +569,18 @@ function Test-GetPackageUpdatesReturnAllVersionsAndPrereleaseVersionsIfTwoFlagsA
     # Arrange
     $p = New-ClassLibrary
 
-    $p | Install-Package PrereleaseTestPackage -Version 1.0.0b -Source $context.RepositoryRoot -Prerelease
-    Assert-Package $p 'PrereleaseTestPackage' '1.0.0b'
+    $p | Install-Package PrereleaseTestPackage -Version '1.0.0-b' -Source $context.RepositoryRoot -Prerelease
+    Assert-Package $p 'PrereleaseTestPackage' '1.0.0-b'
     
     # Act
     $updates = @(Get-Package -Updates -AllVersions -Prerelease -Source $context.RepositoryRoot)
 
     # Assert
-    Assert-AreEqual 3 $updates.Count
+    Assert-AreEqual 2 $updates.Count
 
     Assert-AreEqual 'PrereleaseTestPackage' $updates[0].Id
     Assert-AreEqual '1.0.0' $updates[0].Version
 
     Assert-AreEqual 'PrereleaseTestPackage' $updates[1].Id
-    Assert-AreEqual '1.0.1a' $updates[1].Version
-
-    Assert-AreEqual 'PrereleaseTestPackage' $updates[2].Id
-    Assert-AreEqual '2.0.0' $updates[2].Version
+    Assert-AreEqual '1.0.1-a' $updates[1].Version
 }

@@ -51,7 +51,9 @@ function global:Run-Test {
         [parameter(ParameterSetName="Test", Position=0)]
         [string]$Test,
         [parameter(ParameterSetName="File", Mandatory=$true, Position=0)]
-        [string]$File
+        [string]$File,
+        [parameter(Position=1)]
+        [bool]$LaunchResultsOnFailure=$true
     )
     
     if(!(Test-Path $generatePackagesExePath)) {
@@ -201,7 +203,7 @@ function global:Run-Test {
         # Set focus back to powershell
         $window.SetFocus()              
                
-        Write-TestResults $testRunId $results $testRunResultsFile
+        Write-TestResults $testRunId $results $testRunResultsFile $LaunchResultsOnFailure
 
         # Clear out the setting when the tests are done running
         [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "")
@@ -212,7 +214,8 @@ function Write-TestResults {
     param(
         $TestRunId,
         $Results,
-        $Path
+        $Path,
+        $LaunchResultsOnFailure
     )
 
     # Show failed tests first
@@ -344,7 +347,7 @@ function Write-TestResults {
     [String]::Format($resultsTemplate, $TestRunId, (Split-Path $Path), $Results.Count, $pass, $fail, $skipped, [String]::Join("", $rows)) | Out-File $Path | Out-Null
     Write-Host "Ran $($Results.Count) Tests, $pass Passed, $fail Failed, $skipped Skipped. See $Path for more details"
 
-    if ($fail -gt 0) 
+    if (($fail -gt 0) -and $LaunchResultsOnFailure) 
     {
         [System.Diagnostics.Process]::Start($Path)
     }
