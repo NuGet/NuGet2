@@ -122,7 +122,8 @@ namespace NuGet
                 var httpResponse = (HttpWebResponse)e.Response;
                 if (httpResponse != null && !AcceptableStatusCodes.Contains(httpResponse.StatusCode))
                 {
-                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageServerError, httpResponse.StatusDescription, e.Message), e);
+                    string body = ReadResponseBody(httpResponse);
+                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageServerError, httpResponse.StatusDescription, body), e);
                 }
             }
             finally
@@ -156,6 +157,19 @@ namespace NuGet
             }
 
             return EnsureTrailingSlash(uri);
+        }
+
+        private static string ReadResponseBody(HttpWebResponse response)
+        {
+            try
+            {
+                return response.GetResponseStream().ReadToEnd();
+            }
+            catch
+            {
+                // We don't want to throw an exception when trying to read the exceptional response's body.
+                return String.Empty;
+            }
         }
 
         private static Uri EnsureTrailingSlash(Uri uri)
