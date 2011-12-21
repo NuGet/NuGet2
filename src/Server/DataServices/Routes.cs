@@ -20,12 +20,22 @@ namespace NuGet.Server
         private static void MapRoutes(RouteCollection routes)
         {
             // Route to create a new package
+            routes.MapDelegate("CreatePackage-Root",
+                               "",
+                               new { httpMethod = new HttpMethodConstraint("PUT") },
+                               context => CreatePackageService().CreatePackage(context.HttpContext));
+
             routes.MapDelegate("CreatePackage",
                                "api/v2/package",
                                new { httpMethod = new HttpMethodConstraint("PUT") },
                                context => CreatePackageService().CreatePackage(context.HttpContext));
-
+            
             // Route to delete packages
+            routes.MapDelegate("DeletePackage-Root",
+                                           "{packageId}/{version}",
+                                           new { httpMethod = new HttpMethodConstraint("DELETE") },
+                                           context => CreatePackageService().DeletePackage(context.HttpContext));
+            
             routes.MapDelegate("DeletePackage",
                                "api/v2/package/{packageId}/{version}",
                                new { httpMethod = new HttpMethodConstraint("DELETE") },
