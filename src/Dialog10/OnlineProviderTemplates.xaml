@@ -3,8 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:self="clr-namespace:NuGet.Dialog.PackageManagerUI;assembly=NuGet.DialogServices"
     xmlns:resources="clr-namespace:NuGet.Dialog;assembly=NuGet.DialogServices"
-    xmlns:eml="clr-namespace:Microsoft.VisualStudio.ExtensionManager.UI;assembly=Microsoft.VisualStudio.ExtensionManager.Implementation"
-    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    xmlns:eml="clr-namespace:Microsoft.VisualStudio.ExtensionManager.UI;assembly=Microsoft.VisualStudio.ExtensionManager.Implementation">
     
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="TemplateStyles.xaml" />
@@ -201,6 +200,7 @@
                 
                 <TextBox
                     Text="{Binding Description, Converter={StaticResource NormalizeTextConverter}, Mode=OneWay}"
+                    Background="{x:Null}"
                     BorderThickness="0"
                     IsReadOnly="True"
                     TextWrapping="Wrap"
