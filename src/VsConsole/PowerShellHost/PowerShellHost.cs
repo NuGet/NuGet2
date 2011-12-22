@@ -233,13 +233,21 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             // Fix for Bug 1426 Disallow ExecuteInitScripts from being executed concurrently by multiple threads.
             lock (_initScriptsLock)
             {
-                if (String.IsNullOrEmpty(_solutionManager.SolutionDirectory))
+                if (!_solutionManager.IsSolutionOpen)
                 {
                     return;
                 }
+
+                IRepositorySettings repositorySettings = ServiceLocator.GetInstance<IRepositorySettings>();
+                Debug.Assert(repositorySettings != null);
+                if (repositorySettings == null)
+                {
+                    return;
+                }
+
                 try
                 {
-                    var localRepository = new LocalPackageRepository(_solutionManager.SolutionDirectory);
+                    var localRepository = new LocalPackageRepository(repositorySettings.RepositoryPath);
 
                     // invoke init.ps1 files in the order of package dependency.
                     // if A -> B, we invoke B's init.ps1 before A's.
