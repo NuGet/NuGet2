@@ -112,22 +112,30 @@ namespace NuGet.Commands
         {
             var packageServer = new PackageServer(source, CommandLineConstants.UserAgent);
 
-            // Push the package to the server
-            var package = new ZipPackage(packagePath);
+            string[] packagesToPush = Directory.GetFiles(@".\", packagePath, SearchOption.TopDirectoryOnly);
 
-            string sourceName = CommandLineUtility.GetSourceDisplayName(source);
-            Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), sourceName);
-
-            using (Stream stream = package.GetStream())
+            foreach (string packageToPush in packagesToPush)
             {
-                packageServer.PushPackage(apiKey, stream);
-            }
+                if (string.Compare(Path.GetExtension(packageToPush), ".nupkg", true) == 0)
+                {
+                    // Push the package to the server
+                    var package = new ZipPackage(packageToPush);
 
-            if (CreateOnly)
-            {
-                Console.WriteWarning(NuGetResources.Warning_PublishPackageDeprecated);
+                    string sourceName = CommandLineUtility.GetSourceDisplayName(source);
+                    Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), sourceName);
+
+                    using (Stream stream = package.GetStream())
+                    {
+                        packageServer.PushPackage(apiKey, stream);
+                    }
+
+                    if (CreateOnly)
+                    {
+                        Console.WriteWarning(NuGetResources.Warning_PublishPackageDeprecated);
+                    }
+                    Console.WriteLine(NuGetResources.PushCommandPackagePushed);
+                }
             }
-            Console.WriteLine(NuGetResources.PushCommandPackagePushed);
         }
 
         private string GetApiKey(string source, bool throwIfNotFound = true)
@@ -138,7 +146,7 @@ namespace NuGet.Commands
             }
 
             string apiKey = null;
-            
+
             // Second argument, if present, should be the API Key
             if (Arguments.Count > 1)
             {
