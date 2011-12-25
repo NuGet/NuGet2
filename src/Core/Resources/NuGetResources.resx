@@ -286,7 +286,7 @@
     <value>Downloading {0} {1}...</value>
   </data>
   <data name="UserSettings_UnableToParseConfigFile" xml:space="preserve">
-    <value>Unable to parse config file.</value>
+    <value>Unable to parse config file '{0}'.</value>
   </data>
   <data name="UnknownPackageSpecificVersion" xml:space="preserve">
     <value>Unable to find version '{1}' of package '{0}'.</value>

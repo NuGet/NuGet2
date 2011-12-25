@@ -728,7 +728,7 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to parse config file..
+        ///   Looks up a localized string similar to Unable to parse config file &apos;{0}&apos;..
         /// </summary>
         internal static string UserSettings_UnableToParseConfigFile {
             get {

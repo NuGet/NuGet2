@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
@@ -26,10 +27,12 @@ namespace NuGet
 
         public static ISettings DefaultSettings
         {
-            get
-            {
-                return _defaultSettings.Value;
-            }
+            get { return _defaultSettings.Value; }
+        }
+
+        public string ConfigFilePath
+        {
+            get { return Path.Combine(_fileSystem.Root, Constants.SettingsFileName); }
         }
 
         public string GetValue(string section, string key)
@@ -44,29 +47,22 @@ namespace NuGet
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "key");
             }
 
-            try
+            // Get the section and return null if it doesn't exist
+            var sectionElement = _config.Root.Element(section);
+            if (sectionElement == null)
             {
-                // Get the section and return null if it doesn't exist
-                var sectionElement = _config.Root.Element(section);
-                if (sectionElement == null)
-                {
-                    return null;
-                }
-
-                // Get the add element that matches the key and return null if it doesn't exist
-                var element = sectionElement.Elements("add").Where(s => s.GetOptionalAttributeValue("key") == key).FirstOrDefault();
-                if (element == null)
-                {
-                    return null;
-                }
-
-                // Return the optional value which if not there will be null;
-                return element.GetOptionalAttributeValue("value");
+                return null;
             }
-            catch (Exception e)
+
+            // Get the add element that matches the key and return null if it doesn't exist
+            var element = FindElementByKey(sectionElement, key);
+            if (element == null)
             {
-                throw new InvalidOperationException(NuGetResources.UserSettings_UnableToParseConfigFile, e);
+                return null;
             }
+
+            // Return the optional value which if not there will be null;
+            return element.GetOptionalAttributeValue("value");
         }
 
         public IList<KeyValuePair<string, string>> GetValues(string section)
@@ -76,36 +72,21 @@ namespace NuGet
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
             }
 
-            try
+            var sectionElement = _config.Root.Element(section);
+            if (sectionElement == null)
             {
-                var sectionElement = _config.Root.Element(section);
-                if (sectionElement == null)
-                {
-                    return null;
-                }
-
-                var kvps = new List<KeyValuePair<string, string>>();
-                foreach (var e in sectionElement.Elements("add"))
-                {
-                    var key = e.GetOptionalAttributeValue("key");
-                    var value = e.GetOptionalAttributeValue("value");
-                    if (!String.IsNullOrEmpty(key) && value != null)
-                    {
-                        kvps.Add(new KeyValuePair<string, string>(key, value));
-                    }
-                }
-                return kvps.AsReadOnly();
+                return null;
             }
-            catch (Exception e)
-            {
-                throw new InvalidOperationException(NuGetResources.UserSettings_UnableToParseConfigFile, e);
-            }
+            return sectionElement.Elements("add")
+                                 .Select(ReadValue)
+                                 .ToList()
+                                 .AsReadOnly();
         }
 
         public void SetValue(string section, string key, string value)
         {
             SetValueInternal(section, key, value);
-            Save(_config);
+            Save();
         }
 
         public void SetValues(string section, IList<KeyValuePair<string, string>> values)
@@ -119,7 +100,7 @@ namespace NuGet
             {
                 SetValueInternal(section, kvp.Key, kvp.Value);
             }
-            Save(_config);
+            Save();
         }
 
         private void SetValueInternal(string section, string key, string value)
@@ -144,22 +125,16 @@ namespace NuGet
                 _config.Root.Add(sectionElement);
             }
 
-            foreach (var e in sectionElement.Elements("add"))
+            var element = FindElementByKey(sectionElement, key);
+            if (element != null)
             {
-                var tempKey = e.GetOptionalAttributeValue("key");
-
-                if (tempKey == key)
-                {
-                    e.SetAttributeValue("value", value);
-                    Save(_config);
-                    return;
-                }
+                element.SetAttributeValue("value", value);
+                Save();
             }
-
-            var addElement = new XElement("add");
-            addElement.SetAttributeValue("key", key);
-            addElement.SetAttributeValue("value", value);
-            sectionElement.Add(addElement);
+            else
+            {
+                sectionElement.Add(new XElement("add", new XAttribute("key", key), new XAttribute("value", value)));
+            }
         }
 
         public bool DeleteValue(string section, string key)
@@ -179,24 +154,14 @@ namespace NuGet
                 return false;
             }
 
-            XElement elementToDelete = null;
-            foreach (var e in sectionElement.Elements("add"))
-            {
-                if (e.GetOptionalAttributeValue("key") == key)
-                {
-                    elementToDelete = e;
-                    break;
-                }
-            }
+            var elementToDelete = FindElementByKey(sectionElement, key);
             if (elementToDelete == null)
             {
                 return false;
             }
-
             elementToDelete.Remove();
-            Save(_config);
+            Save();
             return true;
-
         }
 
         public bool DeleteSection(string section)
@@ -213,13 +178,32 @@ namespace NuGet
             }
 
             sectionElement.Remove();
-            Save(_config);
+            Save();
             return true;
         }
 
-        private void Save(XDocument document)
+        private void Save()
         {
-            _fileSystem.AddFile(Constants.SettingsFileName, document.Save);
+            _fileSystem.AddFile(Constants.SettingsFileName, _config.Save);
+        }
+
+        private KeyValuePair<string, string> ReadValue(XElement element)
+        {
+            var keyAttribute = element.Attribute("key");
+            var valueAttribute = element.Attribute("value");
+
+            if (keyAttribute == null || String.IsNullOrEmpty(keyAttribute.Value) || valueAttribute == null)
+            {
+                throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UserSettings_UnableToParseConfigFile, ConfigFilePath));
+            }
+
+            return new KeyValuePair<string, string>(keyAttribute.Value, valueAttribute.Value);
+        }
+
+        private static XElement FindElementByKey(XElement sectionElement, string key)
+        {
+            return sectionElement.Elements("add")
+                                        .FirstOrDefault(s => key.Equals(s.GetOptionalAttributeValue("key"), StringComparison.OrdinalIgnoreCase));
         }
 
         private static ISettings CreateDefaultSettings()

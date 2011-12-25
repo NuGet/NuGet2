@@ -11,7 +11,14 @@ namespace NuGet.Test.Mocks
         private ILogger _logger;
 
         public MockFileSystem()
+            : this(@"C:\MockFileSystem\")
         {
+
+        }
+
+        public MockFileSystem(string root)
+        {
+            Root = root;
             Paths = new Dictionary<string, Func<Stream>>(StringComparer.OrdinalIgnoreCase);
             Deleted = new HashSet<string>();
         }
@@ -30,10 +37,7 @@ namespace NuGet.Test.Mocks
 
         public virtual string Root
         {
-            get
-            {
-                return @"C:\MockFileSystem\";
-            }
+            get; private set; 
         }
 
         public virtual IDictionary<string, Func<Stream>> Paths

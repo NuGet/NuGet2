@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using Moq;
 using Xunit;
+using NuGet.Test.Mocks;
 
 namespace NuGet.Test
 {
-
-    public class UserSettingsTests
+    public class SettingsTests
     {
-
         [Fact]
         public void UserSettings_CallingCtroWithNullFileSystemWithThrowException()
         {
@@ -104,28 +103,43 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void UserSettings_CallingGetValuesWithSectionButNoValidValuesReturnsEmptyDictionary()
+        public void UserSettings_CallingGetValuesWithSectionWithInvalidAddItemsThrows()
         {
             // Arrange
-            var mockFileSystem = new Mock<IFileSystem>();
-            var nugetConfigPath = "NuGet.Config";
-            mockFileSystem.Setup(m => m.FileExists(nugetConfigPath)).Returns(true);
-            string config = @"
+            var config = @"
 <configuration>
     <SectionName>
-        <Notadd key='key1' value='value1' />
         <add Key='key2' Value='value2' />
     </SectionName>
 </configuration>";
-            mockFileSystem.Setup(m => m.OpenFile(nugetConfigPath)).Returns(config.AsStream());
-            Settings settings = new Settings(mockFileSystem.Object);
+            var nugetConfigPath = "NuGet.Config";
+            var mockFileSystem = new MockFileSystem(@"x:\test");
+            mockFileSystem.AddFile(nugetConfigPath, config.AsStream());
+            Settings settings = new Settings(mockFileSystem);
 
-            // Act
-            var result = settings.GetValues("SectionName");
+            // Act and Assert
+            ExceptionAssert.Throws<InvalidDataException>(() => settings.GetValues("SectionName"), @"Unable to parse config file 'x:\test\NuGet.Config'.");
+        }
 
-            // Assert 
-            Assert.NotNull(result);
-            Assert.Equal(0, result.Count);
+        [Fact]
+        public void GetValuesThrowsIfSettingsIsMissingKeys()
+        {
+            var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+<packageSources>
+<add key="""" value=""C:\Temp\Nuget"" />
+</packageSources>
+<activePackageSource>
+<add key=""test2"" value=""C:\Temp\Nuget"" />
+</activePackageSource>
+</configuration>";
+            var nugetConfigPath = "NuGet.Config";
+            var mockFileSystem = new MockFileSystem(@"x:\test");
+            mockFileSystem.AddFile(nugetConfigPath, config.AsStream());
+            Settings settings = new Settings(mockFileSystem);
+
+            // Act and Assert
+            ExceptionAssert.Throws<InvalidDataException>(() => settings.GetValues("packageSources"), @"Unable to parse config file 'x:\test\NuGet.Config'.");
         }
 
         [Fact]
