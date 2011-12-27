@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Moq;
 using NuGet.Commands;
@@ -124,22 +125,34 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             var fileSystem = new MockFileSystem();
-            fileSystem.AddFile(@"dir\packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+            fileSystem.AddFile(@"x:\test\packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""Foo"" version=""1.0"" />
   <package id=""Baz"" version=""0.7"" />
 </packages>");
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
-            installCommand.Arguments.Add(@"dir\packages.config");
+            installCommand.Arguments.Add(@"x:\test\packages.config");
 
             // Act
             installCommand.ExecuteCommand();
 
             // Assert
             Assert.Equal(3, fileSystem.Paths.Count);
-            Assert.Equal(@"dir\packages.config", fileSystem.Paths.ElementAt(0).Key);
+            Assert.Equal(@"x:\test\packages.config", fileSystem.Paths.ElementAt(0).Key);
             Assert.Equal(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.ElementAt(1).Key);
             Assert.Equal(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.ElementAt(2).Key);
+        }
+
+        [Fact]
+        public void InstallCommandThrowsIfConfigFileDoesNotExist()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
+            installCommand.Arguments.Add(@"x:\test\packages.config");
+
+            // Act and Assert
+            ExceptionAssert.Throws<FileNotFoundException>(() => installCommand.ExecuteCommand(), @"x:\test\packages.config not found.");
         }
 
         [Fact]
@@ -264,7 +277,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             var fileSystem = new MockFileSystem();
-            fileSystem.AddFile(@"packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+            fileSystem.AddFile(@"X:\test\packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""Foo"" version=""1.0.0"" />
   <package id=""Qux"" version=""2.3.56-beta"" />
@@ -282,7 +295,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 
             // Act
             var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object);
-            installCommand.Arguments.Add("packages.config");
+            installCommand.Arguments.Add(@"X:\test\packages.config");
             installCommand.Execute();
 
             // Assert

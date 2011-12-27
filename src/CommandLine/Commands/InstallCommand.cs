@@ -75,7 +75,11 @@ namespace NuGet.Commands
             if (Path.GetFileName(Arguments[0]).Equals(PackageReferenceRepository.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
             {
                 Prerelease = true;
-                InstallPackagesFromConfigFile(fileSystem, GetPackageReferenceFile(Arguments[0]));
+                var configFilePath = Path.GetFullPath(Arguments[0]);
+                // By default the PackageReferenceFile does not throw if the file does not exist at the specified path.
+                // We'll try reading from the file so that the file system throws a file not found
+                EnsureFileExists(fileSystem, configFilePath);
+                InstallPackagesFromConfigFile(fileSystem, GetPackageReferenceFile(configFilePath));
             }
             else
             {
@@ -180,6 +184,14 @@ namespace NuGet.Commands
             string installPath = OutputDirectory ?? Directory.GetCurrentDirectory();
 
             return new PhysicalFileSystem(installPath);
+        }
+
+        private static void EnsureFileExists(IFileSystem fileSystem, string configFilePath)
+        {
+            using (var stream = fileSystem.OpenFile(configFilePath))
+            {
+                // Do nothing
+            }
         }
 
         // Do a very quick check of whether a package in installed by checked whether the nupkg file exists
