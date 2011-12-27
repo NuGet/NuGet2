@@ -12,22 +12,27 @@ namespace NuGet.VisualStudio
     [Export(typeof(IPackageSourceProvider))]
     public class VsPackageSourceProvider : IVsPackageSourceProvider
     {
+        private static readonly string OfficialFeedName = Resources.VsResources.OfficialSourceName;
+        private static readonly PackageSource _defaultSource = new PackageSource(NuGetConstants.DefaultFeedUrl, OfficialFeedName);
+        private static readonly Dictionary<PackageSource, PackageSource> _feedsToMigrate = new Dictionary<PackageSource, PackageSource>
+        {
+            { new PackageSource(NuGetConstants.V1FeedUrl, OfficialFeedName), _defaultSource },
+        };
         internal const string ActivePackageSourceSectionName = "activePackageSource";
-        internal static readonly string OfficialFeedName = Resources.VsResources.OfficialSourceName;
         private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly ISettings _settings;
+        private bool _initialized;
         private List<PackageSource> _packageSources;
         private PackageSource _activePackageSource;
 
         [ImportingConstructor]
         public VsPackageSourceProvider(ISettings settings) :
-            this(settings, new PackageSourceProvider(settings))
+            this(settings, new PackageSourceProvider(settings, new[] { _defaultSource }, _feedsToMigrate))
         {
         }
 
         internal VsPackageSourceProvider(ISettings settings, IPackageSourceProvider packageSourceProvider)
         {
-
             if (settings == null)
             {
                 throw new ArgumentNullException("settings");
@@ -40,21 +45,19 @@ namespace NuGet.VisualStudio
 
             _packageSourceProvider = packageSourceProvider;
             _settings = settings;
-            _packageSources = _packageSourceProvider.LoadPackageSources().ToList();
-
-            DeserializeActivePackageSource();
-            AddOfficialPackageSourceIfNeeded();
-            MigrateActivePackageSource();
         }
 
         public PackageSource ActivePackageSource
         {
             get
             {
+                EnsureInitialized();
                 return _activePackageSource;
             }
             set
             {
+                EnsureInitialized();
+
                 if (value != null &&
                     !IsAggregateSource(value) &&
                     !_packageSources.Contains(value) &&
@@ -64,56 +67,26 @@ namespace NuGet.VisualStudio
                 }
 
                 _activePackageSource = value;
-                PersistActivePackageSource();
+                PersistActivePackageSource(_settings, _activePackageSource);
             }
+        }
+
+        internal static IEnumerable<PackageSource> DefaultSources 
+        {
+            get { return new[] { _defaultSource }; }
+        }
+
+        internal static Dictionary<PackageSource, PackageSource> FeedsToMigrate
+        { 
+            get { return _feedsToMigrate; } 
         }
 
         public IEnumerable<PackageSource> LoadPackageSources()
         {
+            EnsureInitialized();
             // assert that we are not returning aggregate source
             Debug.Assert(_packageSources == null || !_packageSources.Any(p => IsAggregateSource(p)));
             return _packageSources;
-        }
-
-        internal void AddPackageSource(PackageSource source)
-        {
-            if (source == null)
-            {
-                throw new ArgumentNullException("source");
-            }
-
-            if (!_packageSources.Contains(source) && !IsAggregateSource(source))
-            {
-                _packageSources.Add(source);
-
-                // if the package source that we just added is the only one, make it the default
-                if (ActivePackageSource == null && _packageSources.Count == 1)
-                {
-                    ActivePackageSource = source;
-                }
-
-                PersistPackageSources();
-            }
-        }
-
-        internal bool RemovePackageSource(PackageSource source)
-        {
-            if (source == null)
-            {
-                throw new ArgumentNullException("source");
-            }
-
-            bool result = _packageSources.Remove(source);
-            if (result)
-            {
-                PersistPackageSources();
-                if (source.Equals(ActivePackageSource))
-                {
-                    ActivePackageSource = null;
-                }
-            }
-
-            return result;
         }
 
         public void SavePackageSources(IEnumerable<PackageSource> sources)
@@ -123,38 +96,67 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("sources");
             }
 
-            Debug.Assert(!sources.Any(p => IsAggregateSource(p)));
+            EnsureInitialized();
+            Debug.Assert(!sources.Any(IsAggregateSource));
 
             ActivePackageSource = null;
             _packageSources.Clear();
-            _packageSources.AddRange(sources.Where(p => !IsAggregateSource(p)));
+            _packageSources.AddRange(sources);
 
-            PersistPackageSources();
+            PersistPackageSources(_packageSourceProvider, _packageSources);
         }
 
-        private void PersistPackageSources()
+        private void EnsureInitialized()
         {
-            // Starting from version 1.3, we persist the package sources to the nuget.config file instead of VS registry.
-
-            // assert that we are not saving aggregate source
-            Debug.Assert(!_packageSources.Any(p => IsAggregateSource(p.Name, p.Source)));
-            _packageSourceProvider.SavePackageSources(_packageSources);
-        }
-
-        private void PersistActivePackageSource()
-        {
-            // Starting from version 1.3, we persist the package sources to the nuget.config file instead of VS registry.
-            _settings.DeleteSection(ActivePackageSourceSectionName);
-
-            if (_activePackageSource != null)
+            if (!_initialized)
             {
-                _settings.SetValue(ActivePackageSourceSectionName, _activePackageSource.Name, _activePackageSource.Source);
+                _initialized = true;
+                _packageSources = _packageSourceProvider.LoadPackageSources().ToList();
+
+                InitializeActivePackageSource();
             }
         }
 
-        private void DeserializeActivePackageSource()
+        private void InitializeActivePackageSource()
         {
-            var settingValues = _settings.GetValues(ActivePackageSourceSectionName);
+            _activePackageSource = DeserializeActivePackageSource(_settings);
+
+            PackageSource migratedActiveSource;
+            bool activeSourceChanged = false;
+            if (_activePackageSource == null)
+            {
+                // If there are no sources, pick the first source that's enabled.
+                activeSourceChanged = true;
+                _activePackageSource = _defaultSource;
+            }
+            else if (_feedsToMigrate.TryGetValue(_activePackageSource, out migratedActiveSource))
+            {
+                // Check if we need to migrate the active source.
+                activeSourceChanged = true;
+                _activePackageSource = migratedActiveSource;
+            }
+
+            if (activeSourceChanged)
+            {
+                PersistActivePackageSource(_settings, _activePackageSource);
+            }
+        }
+        
+        private static void PersistActivePackageSource(ISettings settings, PackageSource activePackageSource)
+        {
+            if (activePackageSource != null)
+            {
+                settings.SetValue(ActivePackageSourceSectionName, activePackageSource.Name, activePackageSource.Source);
+            }
+            else
+            {
+                settings.DeleteSection(ActivePackageSourceSectionName);
+            }
+        }
+
+        private static PackageSource DeserializeActivePackageSource(ISettings settings)
+        {
+            var settingValues = settings.GetValues(ActivePackageSourceSectionName);
 
             PackageSource packageSource = null;
             if (settingValues != null && settingValues.Any())
@@ -172,81 +174,28 @@ namespace NuGet.VisualStudio
 
             if (packageSource != null)
             {
-                // active package source must be enabled. 
-                Debug.Assert(packageSource.IsEnabled);
-
                 // guard against corrupted data if the active package source is not enabled
                 packageSource.IsEnabled = true;
-
-                ActivePackageSource = packageSource;
             }
+            return packageSource;
         }
 
-        private void MigrateActivePackageSource()
+        private static void PersistPackageSources(IPackageSourceProvider packageSourceProvider, List<PackageSource> packageSources)
         {
-            // migrate the active source from the V1 feed to the V2 feed if applicable
-            if (ActivePackageSource != null &&
-                ActivePackageSource.Source.Equals(NuGetConstants.V1FeedUrl, StringComparison.OrdinalIgnoreCase) &&
-                ActivePackageSource.Name.Equals(OfficialFeedName, StringComparison.CurrentCultureIgnoreCase))
-            {
-
-                ActivePackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl, OfficialFeedName);
-            }
+            // Starting from version 1.3, we persist the package sources to the nuget.config file instead of VS registry.
+            // assert that we are not saving aggregate source
+            Debug.Assert(!packageSources.Any(p => IsAggregateSource(p.Name, p.Source)));
+            packageSourceProvider.SavePackageSources(packageSources);
         }
 
-        private void AddOfficialPackageSourceIfNeeded()
-        {
-            // Look for an official source by name
-            PackageSource officialFeed = _packageSources.FirstOrDefault(ps => ps.Name == OfficialFeedName);
-            bool isOfficialFeedEnabled = true;
-
-            if (officialFeed == null)
-            {
-                // There is no official feed currently registered
-
-                // Don't register our feed unless the list is empty (other than the aggregate). This is the first-run scenario.
-                // It also applies if user deletes all their feeds, in which case bringing back the official feed makes sense.
-                if (_packageSources.Count > 1)
-                {
-                    return;
-                }
-
-            }
-            else
-            {
-                // If there is an official feed that already points to the right place, we're done
-                if (NuGetConstants.DefaultFeedUrl.Equals(officialFeed.Source, StringComparison.OrdinalIgnoreCase))
-                {
-                    return;
-                }
-
-                // It doesn't point to the right place (e.g. came from previous build), so get rid of it
-                RemovePackageSource(officialFeed);
-                // in this case, we want to preserve the IsEnabled property of the official Feed
-                isOfficialFeedEnabled = officialFeed.IsEnabled;
-            }
-
-            // Insert it at first position
-            officialFeed = new PackageSource(NuGetConstants.DefaultFeedUrl, OfficialFeedName, isOfficialFeedEnabled);
-            _packageSources.Insert(0, officialFeed);
-
-            // Only make it the active source if there isn't one already
-            if (ActivePackageSource == null)
-            {
-                ActivePackageSource = officialFeed;
-            }
-
-            PersistPackageSources();
-        }
-
-        private bool IsAggregateSource(string name, string source)
+        private static bool IsAggregateSource(string name, string source)
         {
             PackageSource aggregate = AggregatePackageSource.Instance;
             return aggregate.Name.Equals(name, StringComparison.CurrentCultureIgnoreCase) ||
                 aggregate.Source.Equals(source, StringComparison.InvariantCultureIgnoreCase);
         }
 
-        private bool IsAggregateSource(PackageSource packageSource)
+        private static bool IsAggregateSource(PackageSource packageSource)
         {
             return IsAggregateSource(packageSource.Name, packageSource.Source);
         }

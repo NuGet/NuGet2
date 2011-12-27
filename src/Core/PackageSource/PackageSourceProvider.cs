@@ -67,29 +67,35 @@ namespace NuGet
 
                 if (_migratePackageSources != null)
                 {
-                    bool hasChanges = false;
-                    // doing migration
-                    for (int i = 0; i < loadedPackageSources.Count; i++)
-                    {
-                        PackageSource ps = loadedPackageSources[i];
-                        if (_migratePackageSources.ContainsKey(ps))
-                        {
-                            loadedPackageSources[i] = _migratePackageSources[ps];
-                            // make sure we preserve the IsEnabled property when migrating package sources
-                            loadedPackageSources[i].IsEnabled = ps.IsEnabled;
-                            hasChanges = true;
-                        }
-                    }
-
-                    if (hasChanges)
-                    {
-                        SavePackageSources(loadedPackageSources);
-                    }
+                    MigrateSources(loadedPackageSources);
                 }
 
                 return loadedPackageSources;
             }
             return _defaultPackageSources;
+        }
+
+        private void MigrateSources(List<PackageSource> loadedPackageSources)
+        {
+            bool hasChanges = false;
+            // doing migration
+            for (int i = 0; i < loadedPackageSources.Count; i++)
+            {
+                PackageSource ps = loadedPackageSources[i];
+                PackageSource targetPackageSource;
+                if (_migratePackageSources.TryGetValue(ps, out targetPackageSource))
+                {
+                    loadedPackageSources[i] = targetPackageSource;
+                    // make sure we preserve the IsEnabled property when migrating package sources
+                    loadedPackageSources[i].IsEnabled = ps.IsEnabled;
+                    hasChanges = true;
+                }
+            }
+
+            if (hasChanges)
+            {
+                SavePackageSources(loadedPackageSources);
+            }
         }
 
         public void SavePackageSources(IEnumerable<PackageSource> sources)

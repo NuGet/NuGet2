@@ -17,7 +17,7 @@ namespace NuGet.VisualStudio
 
         [ImportingConstructor]
         public VsSettings(ISolutionManager solutionManager)
-            : this(solutionManager, Settings.DefaultSettings, new PhysicalFileSystemProvider())
+            : this(solutionManager, Settings.LoadDefaultSettings(), new PhysicalFileSystemProvider())
         {
         }
 

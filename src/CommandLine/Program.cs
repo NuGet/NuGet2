@@ -178,7 +178,7 @@ namespace NuGet
             {
                 return new Settings(workingDirectory);
             }
-            return Settings.DefaultSettings;
+            return Settings.LoadDefaultSettings();
         }
     }
 }

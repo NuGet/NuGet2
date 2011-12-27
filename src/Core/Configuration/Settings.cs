@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
@@ -11,7 +12,6 @@ namespace NuGet
 {
     public class Settings : ISettings
     {
-        private static Lazy<ISettings> _defaultSettings = new Lazy<ISettings>(CreateDefaultSettings);
         private readonly XDocument _config;
         private readonly IFileSystem _fileSystem;
 
@@ -25,14 +25,31 @@ namespace NuGet
             _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, Constants.SettingsFileName);
         }
 
-        public static ISettings DefaultSettings
-        {
-            get { return _defaultSettings.Value; }
-        }
-
         public string ConfigFilePath
         {
             get { return Path.Combine(_fileSystem.Root, Constants.SettingsFileName); }
+        }
+
+        public static ISettings LoadDefaultSettings()
+        {
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            if (!String.IsNullOrEmpty(appDataPath))
+            {
+                var defaultSettingsPath = Path.Combine(appDataPath, "NuGet");
+                var fileSystem = new PhysicalFileSystem(defaultSettingsPath);
+                try
+                {
+                    return new Settings(fileSystem);
+                }
+                catch (XmlException)
+                {
+                    // Work Item 1531: If the config file is malformed and the constructor throws, NuGet fails to load in VS. 
+                    // Returning a null instance prevents us from silently failing.
+                }
+            }
+
+            // If there is no AppData folder, use a null file system to make the Settings object do nothing
+            return NullSettings.Instance;
         }
 
         public string GetValue(string section, string key)
@@ -204,24 +221,6 @@ namespace NuGet
         {
             return sectionElement.Elements("add")
                                         .FirstOrDefault(s => key.Equals(s.GetOptionalAttributeValue("key"), StringComparison.OrdinalIgnoreCase));
-        }
-
-        private static ISettings CreateDefaultSettings()
-        {
-            IFileSystem fileSystem;
-            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            if (String.IsNullOrEmpty(appDataPath))
-            {
-                // If there is no AppData folder, use a null file system to make the Settings object do nothing
-                return NullSettings.Instance;
-            }
-            else
-            {
-                string defaultSettingsPath = Path.Combine(appDataPath, "NuGet");
-                fileSystem = new PhysicalFileSystem(defaultSettingsPath);
-            }
-
-            return new Settings(fileSystem);
         }
     }
 }

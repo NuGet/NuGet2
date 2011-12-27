@@ -5,28 +5,15 @@ using Xunit;
 
 namespace NuGet.VisualStudio.Test
 {
-
     public class VsPackageSourceProviderTest
     {
-        [Fact]
-        public void AddSourceThrowsIfSourceIsNull()
-        {
-            // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            var packageSourceProvider = new MockPackageSourceProvider();
-            var provider = new VsPackageSourceProvider(userSettingsManager, packageSourceProvider);
-
-            // Act
-            ExceptionAssert.ThrowsArgNull(() => provider.AddPackageSource(null), "source");
-        }
-
         [Fact]
         public void CtorIfFirstRunningAddsDefaultSource()
         {
             // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            var packageSourceProvider = new MockPackageSourceProvider();
-            var provider = new VsPackageSourceProvider(userSettingsManager, packageSourceProvider);
+            var userSettings = new MockUserSettingsManager();
+            var packageSourceProvider = CreateDefaultSourceProvider(userSettings);
+            var provider = new VsPackageSourceProvider(userSettings, packageSourceProvider);
 
             // Act
             var sources = provider.LoadPackageSources().ToList();
@@ -41,13 +28,13 @@ namespace NuGet.VisualStudio.Test
         public void CtorMigrateV1FeedToV2Feed()
         {
             // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            userSettingsManager.SetValue(
+            var userSettings = new MockUserSettingsManager();
+            userSettings.SetValue(
                 PackageSourceProvider.PackageSourcesSectionName,
                 "NuGet official package source",
                 "https://go.microsoft.com/fwlink/?LinkID=206669");
-
-            var provider = new VsPackageSourceProvider(userSettingsManager);
+            var sourceProvider = CreateDefaultSourceProvider(userSettings);
+            var provider = new VsPackageSourceProvider(userSettings, sourceProvider);
 
             // Act
             var sources = provider.LoadPackageSources().ToList();
@@ -61,19 +48,19 @@ namespace NuGet.VisualStudio.Test
         public void CtorMigrateV1FeedToV2FeedAndPreserveIsEnabledProperty()
         {
             // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            userSettingsManager.SetValue(
+            var userSettings = new MockUserSettingsManager();
+            userSettings.SetValue(
                 PackageSourceProvider.PackageSourcesSectionName,
                 "NuGet official package source",
                 "https://go.microsoft.com/fwlink/?LinkID=206669");
 
             // disable the official source
-            userSettingsManager.SetValue(
+            userSettings.SetValue(
                 PackageSourceProvider.DisabledPackageSourcesSectionName,
                 "NuGet official package source",
                 "true");
 
-            var provider = new VsPackageSourceProvider(userSettingsManager);
+            var provider = new VsPackageSourceProvider(userSettings);
 
             // Act
             var sources = provider.LoadPackageSources().ToList();
@@ -88,17 +75,17 @@ namespace NuGet.VisualStudio.Test
         public void PreserveActiveSourceWhileMigratingNuGetFeed()
         {
             // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            userSettingsManager.SetValues(
+            var userSettings = new MockUserSettingsManager();
+            userSettings.SetValues(
                 PackageSourceProvider.PackageSourcesSectionName,
                 new KeyValuePair<string, string>[] {
                     new KeyValuePair<string, string>("NuGet official package source", "https://go.microsoft.com/fwlink/?LinkID=206669"),
                     new KeyValuePair<string, string>("one", "onesource"),
                 }
             );
-            userSettingsManager.SetValue(VsPackageSourceProvider.ActivePackageSourceSectionName, "one", "onesource");
+            userSettings.SetValue(VsPackageSourceProvider.ActivePackageSourceSectionName, "one", "onesource");
 
-            var provider = new VsPackageSourceProvider(userSettingsManager);
+            var provider = new VsPackageSourceProvider(userSettings);
 
             // Act
             var activeSource = provider.ActivePackageSource;
@@ -111,9 +98,9 @@ namespace NuGet.VisualStudio.Test
         public void CtorAddsAggregrateIfNothingWasPersistedIntoSettingsManager()
         {
             // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            var packageSourceProvider = new MockPackageSourceProvider();
-            var provider = new VsPackageSourceProvider(userSettingsManager, packageSourceProvider);
+            var userSettings = new MockUserSettingsManager();
+            var packageSourceProvider = CreateDefaultSourceProvider(userSettings);
+            var provider = new VsPackageSourceProvider(userSettings, packageSourceProvider);
 
             // Act
             var sources = provider.LoadPackageSources().ToList();
@@ -121,32 +108,6 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Equal(1, sources.Count);
             Assert.Equal("NuGet official package source", sources[0].Name);
-        }
-
-        [Fact]
-        public void AddSourceSetsPersistsSourcesToSettingsManager()
-        {
-            // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            var packageSourceProvider = new MockPackageSourceProvider();
-            var provider = new VsPackageSourceProvider(userSettingsManager, packageSourceProvider);
-
-            // Act
-            for (int i = 0; i < 10; i++)
-            {
-                provider.AddPackageSource(new PackageSource("source" + i, "name" + i));
-            }
-
-            // Assert
-            var values = packageSourceProvider.LoadPackageSources().ToList();
-
-            // 11 = 10 package sources that we added + NuGet official source
-            Assert.Equal(11, values.Count);
-            Assert.Equal(Resources.VsResources.OfficialSourceName, values[0].Name);
-            for (int i = 0; i < 10; i++)
-            {
-                AssertPackageSource(values[i + 1], "name" + i, "source" + i);
-            }
         }
 
         [Fact]
@@ -171,100 +132,29 @@ namespace NuGet.VisualStudio.Test
         public void SetActivePackageSourcePersistsItToSettingsManager()
         {
             // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            var packageSourceProvider = new MockPackageSourceProvider();
+            var userSettings = new MockUserSettingsManager();
+            var packageSourceProvider = CreateDefaultSourceProvider(userSettings);
             packageSourceProvider.SavePackageSources(new[] { new PackageSource("source", "name"), new PackageSource("source1", "name1") });
-            var provider = new VsPackageSourceProvider(userSettingsManager, packageSourceProvider);
+            var provider = new VsPackageSourceProvider(userSettings, packageSourceProvider);
 
             // Act
             provider.ActivePackageSource = new PackageSource("source", "name");
 
             // Assert
-            var activeValue = userSettingsManager.GetValue(VsPackageSourceProvider.ActivePackageSourceSectionName, "name");
+            var activeValue = userSettings.GetValue(VsPackageSourceProvider.ActivePackageSourceSectionName, "name");
             Assert.Equal("source", activeValue);
 
-            var invalidActiveValue = userSettingsManager.GetValue(VsPackageSourceProvider.ActivePackageSourceSectionName, "invalidName");
+            var invalidActiveValue = userSettings.GetValue(VsPackageSourceProvider.ActivePackageSourceSectionName, "invalidName");
             Assert.Null(invalidActiveValue);
-        }
-
-        [Fact]
-        public void RemoveSourceThrowsIfSourceIsNull()
-        {
-            // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            var packageSourceProvider = new MockPackageSourceProvider();
-            var provider = new VsPackageSourceProvider(userSettingsManager, packageSourceProvider);
-
-            // Act
-            ExceptionAssert.ThrowsArgNull(() => provider.RemovePackageSource(null), "source");
-        }
-
-        [Fact]
-        public void RemovingUnknownPackageSourceReturnsFalse()
-        {
-            // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            var packageSourceProvider = new MockPackageSourceProvider();
-            var provider = new VsPackageSourceProvider(userSettingsManager, packageSourceProvider);
-
-            // Act
-            bool result = provider.RemovePackageSource(new PackageSource("a", "a"));
-
-            // Assert
-            Assert.False(result);
-        }
-
-        [Fact]
-        public void RemovingExistingPackageSourceReturnsFalse()
-        {
-            // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            var packageSource = new PackageSource("a", "a");
-            var packageSourceProvider = new MockPackageSourceProvider();
-            packageSourceProvider.SavePackageSources(new[] { packageSource });
-            var provider = new VsPackageSourceProvider(userSettingsManager, packageSourceProvider);
-
-            // Act
-            bool result = provider.RemovePackageSource(packageSource);
-
-            // Assert
-            Assert.True(result);
-
-            // values should be null because we don't persist aggregate source into user settings file
-            var values = userSettingsManager.GetValues(PackageSourceProvider.PackageSourcesSectionName);
-            Assert.Null(values);
-        }
-
-        [Fact]
-        public void RemovingActivePackageSourceSetsActivePackageSourceToNull()
-        {
-            // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            var packageSourceProvider = new MockPackageSourceProvider();
-            var provider = new VsPackageSourceProvider(userSettingsManager, packageSourceProvider);
-            var packageSource = new PackageSource("a", "a");
-            provider.SavePackageSources(new[] { packageSource });
-            provider.ActivePackageSource = packageSource;
-
-            // Act
-            bool result = provider.RemovePackageSource(packageSource);
-
-            // Assert
-            Assert.True(result);
-            Assert.Null(provider.ActivePackageSource);
-
-            // values should be null because we don't persist aggregate source into user settings file
-            var values = userSettingsManager.GetValues(PackageSourceProvider.PackageSourcesSectionName);
-            Assert.Null(values);
         }
 
         [Fact]
         public void SettingActivePackageSourceToNonExistantSourceThrows()
         {
             // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            var packageSourceProvider = new MockPackageSourceProvider();
-            var provider = new VsPackageSourceProvider(userSettingsManager, packageSourceProvider);
+            var userSettings = new MockUserSettingsManager();
+            var packageSourceProvider = CreateDefaultSourceProvider(userSettings);
+            var provider = new VsPackageSourceProvider(userSettings, packageSourceProvider);
 
             // Act
             ExceptionAssert.ThrowsArgumentException(() => provider.ActivePackageSource = new PackageSource("a", "a"), "value", "The package source does not belong to the collection of available sources.");
@@ -274,9 +164,9 @@ namespace NuGet.VisualStudio.Test
         public void SettingsWithMoreThanOneAggregateSourceAreModifiedToNotHaveOne()
         {
             // Arrange
-            var userSettingsManager = new MockUserSettingsManager();
-            var packageSourceProvider = new MockPackageSourceProvider();
-            var provider = new VsPackageSourceProvider(userSettingsManager, packageSourceProvider);
+            var userSettings = new MockUserSettingsManager();
+            var packageSourceProvider = CreateDefaultSourceProvider(userSettings);
+            var provider = new VsPackageSourceProvider(userSettings, packageSourceProvider);
 
             // Act
             var sources = provider.LoadPackageSources().ToList();
@@ -286,11 +176,15 @@ namespace NuGet.VisualStudio.Test
             Assert.Equal("NuGet official package source", sources[0].Name);
         }
 
-        private void AssertPackageSource(PackageSource ps, string name, string source)
+        private static void AssertPackageSource(PackageSource ps, string name, string source)
         {
             Assert.Equal(name, ps.Name);
             Assert.Equal(source, ps.Source);
         }
 
+        private static PackageSourceProvider CreateDefaultSourceProvider(ISettings settings)
+        {
+            return new PackageSourceProvider(settings, VsPackageSourceProvider.DefaultSources, VsPackageSourceProvider.FeedsToMigrate);
+        }
     }
 }
