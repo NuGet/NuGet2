@@ -33,6 +33,7 @@ namespace NuGet.VisualStudio
                                                                           VsConstants.VbProjectTypeGuid,
                                                                           VsConstants.JsProjectTypeGuid,
                                                                           VsConstants.FsharpProjectTypeGuid,
+                                                                          VsConstants.NemerleProjectTypeGuid,
                                                                           VsConstants.WixProjectTypeGuid };
 
         private static readonly HashSet<string> _unsupportedProjectTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
@@ -42,7 +43,7 @@ namespace NuGet.VisualStudio
         // List of project types that cannot have references added to them
         private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[] { VsConstants.WixProjectTypeGuid };
         // List of project types that cannot have binding redirects added
-        private static readonly string[] _unsupportedProjectTypesForBindingRedirects = new[] { VsConstants.WixProjectTypeGuid, VsConstants.JsProjectTypeGuid };
+        private static readonly string[] _unsupportedProjectTypesForBindingRedirects = new[] { VsConstants.WixProjectTypeGuid, VsConstants.JsProjectTypeGuid, VsConstants.NemerleProjectTypeGuid };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
         // Get the ProjectItems for a folder path

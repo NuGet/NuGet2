@@ -20,6 +20,7 @@ namespace NuGet.VisualStudio
 
         // All unloaded projects have this Kind value
         internal const string UnloadedProjectTypeGuid = "{67294A52-A4F0-11D2-AA88-00C04F688DDE}";
+        internal const string NemerleProjectTypeGuid = "{edcc3b85-0bad-11db-bc1a-00112fde8b61}";
 
         internal const string NuGetSolutionSettingsFolder = ".nuget";
 

@@ -175,7 +175,19 @@ namespace NuGet.VisualStudio
                 }
 
                 // Always set copy local to true for references that we add
-                reference.CopyLocal = true;
+                try
+                {
+                  reference.CopyLocal = true;
+                }
+                catch (NotSupportedException)
+                {
+
+                }
+                catch (NotImplementedException)
+                {
+
+                }
+
 
                 // This happens if the assembly appears in any of the search paths that VS uses to locate assembly references.
                 // Most commonly, it happens if this assembly is in the GAC or in the output path.

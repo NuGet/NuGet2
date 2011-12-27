@@ -41,6 +41,7 @@ namespace NuGet.Commands
             ".csproj",
             ".vbproj",
             ".fsproj",
+            ".nproj"
         };
 
         [Option(typeof(NuGetResources), "PackageCommandOutputDirDescription")]
