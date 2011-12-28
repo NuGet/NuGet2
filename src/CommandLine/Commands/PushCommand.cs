@@ -112,11 +112,11 @@ namespace NuGet.Commands
         {
             var packageServer = new PackageServer(source, CommandLineConstants.UserAgent);
 
-            string[] packagesToPush = Directory.GetFiles(@".\", packagePath, SearchOption.TopDirectoryOnly);
+            string[] packagesToPush = Directory.GetFiles(Environment.CurrentDirectory, packagePath, SearchOption.TopDirectoryOnly);
 
             foreach (string packageToPush in packagesToPush)
             {
-                if (string.Compare(Path.GetExtension(packageToPush), ".nupkg", true) == 0)
+                if (string.Equals(Path.GetExtension(packageToPush), NuGet.Constants.PackageExtension, StringComparison.OrdinalIgnoreCase))
                 {
                     // Push the package to the server
                     var package = new ZipPackage(packageToPush);
