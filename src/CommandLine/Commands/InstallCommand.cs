@@ -14,6 +14,7 @@ namespace NuGet.Commands
         UsageExampleResourceName = "InstallCommandUsageExamples")]
     public class InstallCommand : Command
     {
+        private readonly IPackageRepository _cacheRepository;
         private readonly List<string> _sources = new List<string>();
 
         [Option(typeof(NuGetResources), "InstallCommandSourceDescription")]
@@ -34,6 +35,9 @@ namespace NuGet.Commands
         [Option(typeof(NuGetResources), "InstallCommandPrerelease")]
         public bool Prerelease { get; set; }
 
+        [Option(typeof(NuGetResources), "InstallCommandNoCache")]
+        public bool NoCache { get; set; }
+
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }
 
         public IPackageSourceProvider SourceProvider { get; private set; }
@@ -41,7 +45,10 @@ namespace NuGet.Commands
         /// <remarks>
         /// Meant for unit testing.
         /// </remarks>
-        protected IPackageRepository CacheRepository { get; set; }
+        protected IPackageRepository CacheRepository
+        {
+            get { return _cacheRepository; }
+        }
 
         private bool AllowMultipleVersions
         {
@@ -50,6 +57,12 @@ namespace NuGet.Commands
 
         [ImportingConstructor]
         public InstallCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider)
+            : this(packageRepositoryFactory, sourceProvider, MachineCache.Default)
+        {
+
+        }
+
+        protected internal InstallCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider, IPackageRepository cacheRepository)
         {
             if (packageRepositoryFactory == null)
             {
@@ -63,7 +76,7 @@ namespace NuGet.Commands
 
             RepositoryFactory = packageRepositoryFactory;
             SourceProvider = sourceProvider;
-            CacheRepository = MachineCache.Default;
+            _cacheRepository = cacheRepository;
         }
 
         public override void ExecuteCommand()
@@ -103,6 +116,11 @@ namespace NuGet.Commands
         private IPackageRepository GetRepository()
         {
             var repository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
+            bool ignoreFailingRepositories = repository.IgnoreFailingRepositories;
+            if (!NoCache)
+            {
+                repository = new AggregateRepository(new[] { CacheRepository, repository }) { IgnoreFailingRepositories = ignoreFailingRepositories };
+            }
             repository.Logger = Console;
             return repository;
         }

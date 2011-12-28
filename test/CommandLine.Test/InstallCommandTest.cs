@@ -173,6 +173,51 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         }
 
         [Fact]
+        public void InstallCommandUsesLocalCacheIfNoCacheIsFalse()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var localCache = new Mock<IPackageRepository>(MockBehavior.Strict);
+            localCache.Setup(c => c.GetPackages()).Returns(new[] { PackageUtility.CreatePackage("Gamma") }.AsQueryable()).Verifiable();
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, machineCacheRepository: localCache.Object)
+            {
+                NoCache = false
+            };
+            installCommand.Arguments.Add("Gamma");
+            installCommand.Source.Add("Some Source name");
+            installCommand.Source.Add("Some other Source");
+
+            // Act
+            installCommand.ExecuteCommand();
+
+            // Assert
+            Assert.Equal(@"Gamma.1.0\Gamma.1.0.nupkg", fileSystem.Paths.Single().Key);
+            localCache.Verify();
+        }
+
+        [Fact]
+        public void InstallCommandDoesNotUseLocalCacheIfNoCacheIsTrue()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var localCache = new Mock<IPackageRepository>(MockBehavior.Strict);
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, machineCacheRepository: localCache.Object)
+            {
+                NoCache = true
+            };
+            installCommand.Arguments.Add("Baz");
+            installCommand.Source.Add("Some Source name");
+            installCommand.Source.Add("Some other Source");
+
+            // Act
+            installCommand.ExecuteCommand();
+
+            // Assert
+            Assert.Equal(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.Single().Key);
+            localCache.Verify(c => c.GetPackages(), Times.Never());
+        }
+
+        [Fact]
         public void InstallCommandInstallsPrereleasePackageIfFlagIsSpecified()
         {
             // Arrange
@@ -329,7 +374,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             throw new InvalidOperationException("Boom");
         }
 
-        private class TestInstallCommand : InstallCommand
+        private sealed class TestInstallCommand : InstallCommand
         {
             private readonly IFileSystem _fileSystem;
             private readonly IPackageManager _packageManager;
@@ -339,11 +384,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                                       IFileSystem fileSystem,
                                       IPackageManager packageManager = null,
                                       IPackageRepository machineCacheRepository = null)
-                : base(factory, sourceProvider)
+                : base(factory, sourceProvider, machineCacheRepository ?? new MockPackageRepository())
             {
                 _fileSystem = fileSystem;
                 _packageManager = packageManager;
-                CacheRepository = machineCacheRepository ?? new MockPackageRepository();
             }
 
             protected override IFileSystem CreateFileSystem()

@@ -384,6 +384,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Disable the use of machine cache as a package repository. .
+        /// </summary>
+        internal static string InstallCommandNoCache {
+            get {
+                return ResourceManager.GetString("InstallCommandNoCache", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to All packages listed in {0} are already installed..
         /// </summary>
         internal static string InstallCommandNothingToInstall {
@@ -748,7 +757,7 @@ namespace NuGet {
                 return ResourceManager.GetString("PackageCommandFileFromDependencyIsNotChanged", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Description: {0}.
         /// </summary>
@@ -1478,11 +1487,10 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File does not exists ({0})..
+        ///   Looks up a localized string similar to File does not exist ({0})..
         /// </summary>
         internal static string UnableToFindFile {
-            get 
-			{
+            get {
                 return ResourceManager.GetString("UnableToFindFile", resourceCulture);
             }
         }
