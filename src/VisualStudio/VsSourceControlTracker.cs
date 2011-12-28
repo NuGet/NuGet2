@@ -109,25 +109,32 @@ namespace NuGet.VisualStudio
                 return;
             }
 
-            string solutionRepositoryPath = RepositorySettings.Value.RepositoryPath;
-            if (Directory.Exists(solutionRepositoryPath))
+            try
             {
-                IFileSystem activeFileSystem = _fileSystemProvider.GetFileSystem(solutionRepositoryPath);
-                // only proceed if the file system in use is a source-control file system.
-                if (activeFileSystem.GetType() != typeof(PhysicalFileSystem))
+                string solutionRepositoryPath = RepositorySettings.Value.RepositoryPath;
+                if (Directory.Exists(solutionRepositoryPath))
                 {
-                    IEnumerable<string> allFiles = Directory.EnumerateFiles(solutionRepositoryPath, "*.*",
-                                                                            SearchOption.AllDirectories);
-                    foreach (string file in allFiles)
+                    IFileSystem activeFileSystem = _fileSystemProvider.GetFileSystem(solutionRepositoryPath);
+                    // only proceed if the file system in use is a source-control file system.
+                    if (activeFileSystem.GetType() != typeof(PhysicalFileSystem))
                     {
-                        activeFileSystem.AddFile(MakeRelativePath(file, solutionRepositoryPath), File.OpenRead(file), overrideIfExists: false);
+                        IEnumerable<string> allFiles = Directory.EnumerateFiles(solutionRepositoryPath, "*.*",
+                                                                                SearchOption.AllDirectories);
+                        foreach (string file in allFiles)
+                        {
+                            activeFileSystem.AddFile(MakeRelativePath(file, solutionRepositoryPath), File.OpenRead(file),
+                                                     overrideIfExists: false);
+                        }
                     }
                 }
             }
+            finally
+            {
+                StopTracking();
 
-            StopTracking();
-
-            SolutionBoundToSourceControl(this, EventArgs.Empty);
+                // raise event
+                SolutionBoundToSourceControl(this, EventArgs.Empty);
+            }
         }
 
         private static string MakeRelativePath(string fullPath, string root)
@@ -158,10 +165,13 @@ namespace NuGet.VisualStudio
                 if (cProjects > 0 && 
                     cFiles > 0 && 
                     rgdwSccStatus != null &&
-                    rgdwSccStatus.Any(f => (f & 0x1F) != 0))
+                    rgdwSccStatus.Any(f => (f & 0x1F) != 0) &&
+                    rgpszMkDocuments != null &&
+                    rgpszMkDocuments.Any(s => s.EndsWith(".sln", StringComparison.OrdinalIgnoreCase)))
                 {
                     _parent.OnSourceControlBound();
                 }
+
                 return VsConstants.S_OK;
             }
 

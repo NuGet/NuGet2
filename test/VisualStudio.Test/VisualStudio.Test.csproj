@@ -53,6 +53,7 @@
     </Compile>
     <Compile Include="FallbackRepositoryTest.cs" />
     <Compile Include="MockProjectPackageRepository.cs" />
+    <Compile Include="Mocks\MockIVsTrackProjectDocuments.cs" />
     <Compile Include="Mocks\MockPackageSourceProvider.cs" />
     <Compile Include="Mocks\MockProjects.cs" />
     <Compile Include="Mocks\MockSolutionManager.cs" />

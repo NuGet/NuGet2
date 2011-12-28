@@ -30,7 +30,7 @@ namespace NuGet.TeamFoundationServer
             var pendingDeletes = pendingChanges.Where(p => p.IsDelete);
             Workspace.Undo(pendingDeletes);
 
-            if (base.FileExists(path) && !pendingAddOrEdit)
+            if (!pendingAddOrEdit && base.FileExists(path) && Workspace.ItemExists(path))
             {
                 // If the file exists, but there is not pending edit then edit the file (if it is under source control)
                 pendingAddOrEdit = Workspace.PendEdit(fullPath);
@@ -40,6 +40,7 @@ namespace NuGet.TeamFoundationServer
 
             if (!pendingAddOrEdit)
             {
+                EnsureDirectory(Path.GetDirectoryName(path));
                 Workspace.PendAdd(fullPath);
             }
         }

@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.Shell.Interop;
 using Moq;
 using NuGet.Test.Mocks;
+using NuGet.VisualStudio.Test.Mocks;
 using Xunit;
 
 namespace NuGet.VisualStudio.Test
@@ -137,6 +138,36 @@ namespace NuGet.VisualStudio.Test
                 Times.Once());
         }
 
+        [Fact]
+        public void RaiseEventWhenSourceControlStateChanged()
+        {
+            // Arrange
+            var solutionManager = new Mock<ISolutionManager>();
+            var fileSystemProvider = new Mock<IFileSystemProvider>();
+            var projectDocumentsEvents = new MockIVsTrackProjectDocuments();
 
+            solutionManager.Setup(s => s.IsSolutionOpen).Returns(true);
+            solutionManager.Setup(s => s.SolutionDirectory).Returns("baz:\\foo");
+
+            var repositorySettings = new Mock<IRepositorySettings>();
+            repositorySettings.Setup(r => r.RepositoryPath).Returns("x:\non");
+            var repositorySettingsLazy = new Lazy<IRepositorySettings>(() => repositorySettings.Object);
+
+            var scTracker = new VsSourceControlTracker(
+                solutionManager.Object, fileSystemProvider.Object, projectDocumentsEvents)
+                                {
+                                    RepositorySettings = repositorySettingsLazy
+                                };
+
+            bool eventRaised = false;
+            scTracker.SolutionBoundToSourceControl += (o, e) => eventRaised = true;
+
+            // Act
+            projectDocumentsEvents.OnAfterSccStatusChanged(new Mock<IVsProject>().Object, 1, new[] {"sol.sln"},
+                                                           new[] {(uint) 2});
+
+            // Assert
+            Assert.True(eventRaised);
+        }
     }
 }
