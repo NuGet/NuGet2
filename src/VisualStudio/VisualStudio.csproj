@@ -25,6 +25,7 @@
     <Compile Include="Extensibility\IVsPackageInstallerEvents.cs" />
     <Compile Include="Extensibility\IVsPackageInstallerServices.cs" />
     <Compile Include="IPackageRestoreManager.cs" />
+    <Compile Include="IVsSourceControlTracker.cs" />
     <Compile Include="IVsTemplateWizard.cs" />
     <Compile Include="IWindowSettingsManager.cs" />
     <Compile Include="MessageHelper.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="Extensibility\VsPackageInstallerServices.cs" />
     <Compile Include="VsSettings.cs" />
     <Compile Include="VSRequestCredentialProvider.cs" />
+    <Compile Include="VsSourceControlTracker.cs" />
     <Compile Include="VsTemplateWizard.cs" />
     <Compile Include="VsTemplateWizardInstallerConfiguration.cs" />
     <Compile Include="VsTemplateWizardPackageInfo.cs" />

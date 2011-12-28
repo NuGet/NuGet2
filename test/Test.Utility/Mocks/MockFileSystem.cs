@@ -145,12 +145,17 @@ namespace NuGet.Test.Mocks
             AddFile(path, content.AsStream());
         }
 
-        public virtual void AddFile(string path, Stream stream)
+        public virtual void AddFile(string path, Stream stream, bool overrideIfExists)
         {
             var ms = new MemoryStream((int)stream.Length);
             stream.CopyTo(ms);
             byte[] buffer = ms.ToArray();
             Paths[path] = () => new MemoryStream(buffer);
+        }
+
+        public virtual void AddFile(string path, Stream stream)
+        {
+            AddFile(path, stream, overrideIfExists: true);
         }
 
         public virtual void AddFile(string path, Func<Stream> getStream)

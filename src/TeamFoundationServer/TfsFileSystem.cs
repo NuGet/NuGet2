@@ -19,7 +19,7 @@ namespace NuGet.TeamFoundationServer
 
         public ITfsWorkspace Workspace { get; private set; }
 
-        public override void AddFile(string path, Stream stream)
+        public override void AddFile(string path, Stream stream, bool overrideIfExists)
         {
             string fullPath = GetFullPath(path);
             // See if there are any pending changes for this file
@@ -36,7 +36,7 @@ namespace NuGet.TeamFoundationServer
                 pendingAddOrEdit = Workspace.PendEdit(fullPath);
             }
 
-            base.AddFile(path, stream);
+            base.AddFile(path, stream, overrideIfExists);
 
             if (!pendingAddOrEdit)
             {

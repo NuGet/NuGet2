@@ -1,14 +1,13 @@
 ﻿using System;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-
 using EnvDTE;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio.Resources;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
-using System.Diagnostics;
 
 namespace NuGet.VisualStudio
 {

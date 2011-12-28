@@ -22,7 +22,7 @@ namespace NuGet.VisualStudio
         private readonly IFileSystemProvider _fileSystemProvider;
 
         [ImportingConstructor]
-        public RepositorySettings(ISolutionManager solutionManager, IFileSystemProvider fileSystemProvider)
+        public RepositorySettings(ISolutionManager solutionManager, IFileSystemProvider fileSystemProvider, IVsSourceControlTracker sourceControlTracker)
         {
             if (solutionManager == null)
             {
@@ -34,15 +34,23 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("fileSystemProvider");
             }
 
+            if (sourceControlTracker == null)
+            {
+                throw new ArgumentNullException("sourceControlTracker");
+            }
+
             _solutionManager = solutionManager;
             _fileSystemProvider = fileSystemProvider;
 
-            _solutionManager.SolutionClosing += (sender, e) =>
+            EventHandler resetConfiguration = (sender, e) =>
             {
                 // Kill our configuration cache when someone closes the solution
                 _configurationPath = null;
                 _fileSystem = null;
             };
+
+            _solutionManager.SolutionClosing += resetConfiguration;
+            sourceControlTracker.SolutionBoundToSourceControl += resetConfiguration;
         }
 
         public string RepositoryPath

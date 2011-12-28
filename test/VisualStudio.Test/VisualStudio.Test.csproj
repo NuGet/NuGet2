@@ -73,6 +73,7 @@
     <Compile Include="TestUtils.cs" />
     <Compile Include="VsProjectSystemTest.cs" />
     <Compile Include="VsSettingsTest.cs" />
+    <Compile Include="VsSourceControlTrackerTest.cs" />
     <Compile Include="VsTemplateWizardTest.cs" />
     <Compile Include="VsUninstallerTest.cs" />
   </ItemGroup>
