@@ -11,6 +11,7 @@ namespace NuGet.VisualStudio
         internal const string JsProjectTypeGuid = "{262852C6-CD72-467D-83FE-5EEB1973A190}";
         internal const string WixProjectTypeGuid = "{930C7802-8A8C-48F9-8165-68863BCCD9DD}";
         internal const string LightSwitchProjectTypeGuid = "{ECD6D718-D1CF-4119-97F3-97C25A0DFBF9}";
+        internal const string NemerleProjectTypeGuid = "{edcc3b85-0bad-11db-bc1a-00112fde8b61}";
 
         // Copied from EnvDTE.Constants since that type can't be embedded
         internal const string VsProjectItemKindPhysicalFile = "{6BB5F8EE-4483-11D3-8BCF-00C04F8EC28C}";
@@ -20,8 +21,7 @@ namespace NuGet.VisualStudio
 
         // All unloaded projects have this Kind value
         internal const string UnloadedProjectTypeGuid = "{67294A52-A4F0-11D2-AA88-00C04F688DDE}";
-        internal const string NemerleProjectTypeGuid = "{edcc3b85-0bad-11db-bc1a-00112fde8b61}";
-
+        
         internal const string NuGetSolutionSettingsFolder = ".nuget";
 
         // HResults
