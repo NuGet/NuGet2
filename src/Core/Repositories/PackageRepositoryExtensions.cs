@@ -155,6 +155,34 @@ namespace NuGet
         }
 
         /// <summary>
+        /// Gets the package with the specified Id and IsLatestVersion = true from the specified repository.
+        /// </summary>
+        public static IPackage GetLatestPackageById(this IPackageRepository repository, string packageId)
+        {
+            var findPackagesRepository = repository as IFindPackagesRepository;
+            if (findPackagesRepository != null)
+            {
+                return findPackagesRepository.FindPackagesById(packageId).FirstOrDefault(p => p.IsLatestVersion);
+            }
+            else
+            {
+                var cultureRepository = repository as ICultureAwareRepository;
+                if (cultureRepository != null)
+                {
+                    packageId = packageId.ToLower(cultureRepository.Culture);
+                }
+                else
+                {
+                    packageId = packageId.ToLower(CultureInfo.CurrentCulture);
+                }
+                
+                // Warning: Do NOT try to do FirstOrDefault(p => p.Id.ToLower() == packageId && p.IsLatestVersion)
+                // because WCF data service doesn't support that overload.
+                return repository.GetPackages().Where(p => p.Id.ToLower() == packageId && p.IsLatestVersion).FirstOrDefault();
+            }
+        }
+
+        /// <summary>
         /// Since Odata dies when our query for updates is too big. We query for updates 10 packages at a time
         /// and return the full list of packages.
         /// </summary>

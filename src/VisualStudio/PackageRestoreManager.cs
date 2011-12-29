@@ -24,6 +24,7 @@ namespace NuGet.VisualStudio
         private readonly ISolutionManager _solutionManager;
         private readonly IPackageRepositoryFactory _packageRepositoryFactory;
         private readonly IVsThreadedWaitDialogFactory _waitDialogFactory;
+        private readonly IPackageRepository _localCacheRepository;
         private readonly DTE _dte;
 
         [ImportingConstructor]
@@ -36,6 +37,7 @@ namespace NuGet.VisualStudio
                  solutionManager,
                  fileSystemProvider,
                  packageRepositoryFactory,
+                 MachineCache.Default,
                  ServiceLocator.GetGlobalService<SVsThreadedWaitDialogFactory, IVsThreadedWaitDialogFactory>())
         {
         }
@@ -45,15 +47,17 @@ namespace NuGet.VisualStudio
             ISolutionManager solutionManager,
             IFileSystemProvider fileSystemProvider,
             IPackageRepositoryFactory packageRepositoryFactory,
+            IPackageRepository localCacheRepository,
             IVsThreadedWaitDialogFactory waitDialogFactory)
         {
 
-            System.Diagnostics.Debug.Assert(solutionManager != null);
+            Debug.Assert(solutionManager != null);
             _dte = dte;
             _fileSystemProvider = fileSystemProvider;
             _solutionManager = solutionManager;
             _packageRepositoryFactory = packageRepositoryFactory;
             _waitDialogFactory = waitDialogFactory;
+            _localCacheRepository = localCacheRepository;
             _solutionManager.ProjectAdded += OnProjectAdded;
         }
 
@@ -189,10 +193,8 @@ namespace NuGet.VisualStudio
 
             // adds an <Import> element to this project file.
             if (buildProject.Xml.Imports == null ||
-                buildProject.Xml.Imports.All(
-                    import => !targetsPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase)))
+                buildProject.Xml.Imports.All(import => !targetsPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase)))
             {
-
                 buildProject.Xml.AddImport(targetsPath);
                 project.Save();
                 buildProject.ReevaluateIfNecessary();
@@ -201,21 +203,21 @@ namespace NuGet.VisualStudio
 
         private void AddSolutionDirProperty(Project project, MsBuildProject buildProject)
         {
-            const string SolutionDirProperty = "SolutionDir";
+            const string solutiondir = "SolutionDir";
 
             if (buildProject.Xml.Properties == null ||
-                buildProject.Xml.Properties.All(p => p.Name != SolutionDirProperty))
+                buildProject.Xml.Properties.All(p => p.Name != solutiondir))
             {
 
                 string relativeSolutionPath = PathUtility.GetRelativePath(project.FullName, PathUtility.EnsureTrailingSlash(_solutionManager.SolutionDirectory));
                 relativeSolutionPath = PathUtility.EnsureTrailingSlash(relativeSolutionPath);
 
-                var solutionDirProperty = buildProject.Xml.AddProperty(SolutionDirProperty, relativeSolutionPath);
+                var solutionDirProperty = buildProject.Xml.AddProperty(solutiondir, relativeSolutionPath);
                 solutionDirProperty.Condition =
                     String.Format(
                         CultureInfo.InvariantCulture,
                         @"$({0}) == '' Or $({0}) == '*Undefined*'",
-                        SolutionDirProperty);
+                        solutiondir);
 
                 project.Save();
             }
@@ -243,20 +245,19 @@ namespace NuGet.VisualStudio
                 !fileSystem.FileExists(NuGetExeFile) ||
                 !fileSystem.FileExists(NuGetTargetsFile))
             {
-
                 // download NuGet.Build and NuGet.CommandLine packages into the .nuget folder
                 IPackageRepository nugetRepository = _packageRepositoryFactory.CreateRepository(NuGetConstants.DefaultFeedUrl);
                 var installPackages = new string[] { NuGetBuildPackageName, NuGetCommandLinePackageName };
-                foreach (var packageName in installPackages)
+                foreach (var packageId in installPackages)
                 {
-                    IPackage package = nugetRepository.FindPackage(packageName);
+                    IPackage package = GetPackage(nugetRepository, packageId); 
                     if (package == null)
                     {
                         throw new InvalidOperationException(
                             String.Format(
                                 CultureInfo.InvariantCulture,
                                 VsResources.PackageRestoreDownloadPackageFailed,
-                                packageName));
+                                packageId));
                     }
 
                     fileSystem.AddFiles(package.GetFiles(Constants.ToolsDirectory), DotNuGetFolder, preserveFilePath: false);
@@ -267,6 +268,53 @@ namespace NuGet.VisualStudio
 
                 DisableSourceControlMode();
             }
+        }
+
+        /// <summary>
+        /// Try to retrieve the package with the specified Id from machine cache first. 
+        /// If not found, download it from the specified repository and add to machine cache.
+        /// </summary>
+        private IPackage GetPackage(IPackageRepository repository, string packageId)
+        {
+            // first, find the package from the remote repository
+            IPackage package = repository.GetLatestPackageById(packageId);
+            if (package == null)
+            {
+                return null;
+            }
+
+            bool fromCache = false;
+
+            IPackage cachedPackage = _localCacheRepository.FindPackage(packageId, package.Version);
+            if (cachedPackage != null)
+            {
+                var dataServicePackage = package as DataServicePackage;
+                if (dataServicePackage != null)
+                {
+                    if (dataServicePackage.PackageHash == cachedPackage.GetHash())
+                    {
+                        // if the remote package has the same hash as with the one in the machine cache, use the one from machine cache
+                        package = cachedPackage;
+                        fromCache = true;
+                    }
+                    else
+                    {
+                        // if the hash has changed, delete the stale package
+                        _localCacheRepository.RemovePackage(cachedPackage);
+                    }
+                }
+            }
+
+            if (!fromCache)
+            {
+                _localCacheRepository.AddPackage(package);
+
+                // swap to the Zip package to avoid potential downloading package twice
+                package = _localCacheRepository.FindPackage(package.Id, package.Version);
+                Debug.Assert(package != null);
+            }
+
+            return package;
         }
 
         private void DisableSourceControlMode()
