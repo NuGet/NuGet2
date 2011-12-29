@@ -21,6 +21,12 @@ namespace NuGet.Options
 
             _recentPackageRepository = ServiceLocator.GetInstance<IRecentPackageRepository>();
             Debug.Assert(_recentPackageRepository != null);
+
+            if (!VsVersionHelper.IsVisualStudio2010)
+            {
+                // Starting from VS11, we don't need to check for updates anymore because VS will do it.
+                Controls.Remove(updatePanel);
+            }
         }
 
         private void OnClearRecentPackagesClick(object sender, EventArgs e)

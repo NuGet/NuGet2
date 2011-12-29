@@ -40,7 +40,9 @@
             this.PackagesCacheHeaderDivider = new System.Windows.Forms.GroupBox();
             this.PackagesCacheHeader = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.updatePanel = new System.Windows.Forms.Panel();
             this.tableLayoutPanel1.SuspendLayout();
+            this.updatePanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // ClearButton
@@ -110,22 +112,30 @@
             this.tableLayoutPanel1.Controls.Add(this.browsePackageCacheButton, 1, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             // 
+            // updatePanel
+            // 
+            this.updatePanel.Controls.Add(this.checkForUpdate);
+            this.updatePanel.Controls.Add(this.UpdateHeader);
+            this.updatePanel.Controls.Add(this.UpdateHeaderDivider);
+            resources.ApplyResources(this.updatePanel, "updatePanel");
+            this.updatePanel.Name = "updatePanel";
+            // 
             // GeneralOptionControl
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.UpdateHeader);
-            this.Controls.Add(this.UpdateHeaderDivider);
-            this.Controls.Add(this.checkForUpdate);
             this.Controls.Add(this.RecentPackagesHeader);
             this.Controls.Add(this.RecentPackagesHeaderDivider);
             this.Controls.Add(this.ClearButton);
             this.Controls.Add(this.PackagesCacheHeader);
             this.Controls.Add(this.PackagesCacheHeaderDivider);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Controls.Add(this.updatePanel);
             this.Name = "GeneralOptionControl";
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
+            this.updatePanel.ResumeLayout(false);
+            this.updatePanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -144,5 +154,6 @@
         private System.Windows.Forms.GroupBox PackagesCacheHeaderDivider;
         private System.Windows.Forms.Label PackagesCacheHeader;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.Panel updatePanel;
     }
 }
