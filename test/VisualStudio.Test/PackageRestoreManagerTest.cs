@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using EnvDTE;
 using EnvDTE80;
@@ -525,13 +526,166 @@ namespace NuGet.VisualStudio.Test
             Assert.Null(exception);
         }
 
+        [Fact]
+        public void CallingEnableCurrentSolutionWillAddPackagesToMachineCache()
+        {
+            // Arrange
+            string tempSolutionPath = CreateTempFolder();
+
+            // setup SolutionManager
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(p => p.IsSolutionOpen).Returns(true);
+            solutionManager.Setup(p => p.SolutionDirectory).Returns(tempSolutionPath);
+
+            // setup file system
+            var fileSystem = new PhysicalFileSystem(tempSolutionPath);
+            var fileSystemProvider = new Mock<IFileSystemProvider>();
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem);
+
+            var nugetFolderFileSystem = new PhysicalFileSystem(tempSolutionPath + "\\.nuget");
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath + "\\.nuget")).Returns(nugetFolderFileSystem);
+
+            // setup DTE
+            var dte = new Mock<DTE>();
+
+            var projectItems = new Mock<ProjectItems>();
+            var solutionFolder = new Mock<Project>();
+            solutionFolder.Setup(s => s.Name).Returns(".nuget");
+            solutionFolder.SetupGet(s => s.ProjectItems).Returns(projectItems.Object);
+
+            var solution = new Mock<Solution>();
+            solution.As<Solution2>().Setup(p => p.AddSolutionFolder(".nuget")).Returns(solutionFolder.Object);
+
+            var projects = new MockProjects(new Project[0]);
+            solution.As<Solution2>().Setup(s => s.Projects).Returns(projects);
+            dte.SetupGet(p => p.Solution).Returns(solution.Object);
+
+            // setup package repository
+            var packageRepository = new MockPackageRepository();
+            packageRepository.Add(PackageUtility.CreatePackage(
+                "NuGet.Build",
+                version: "1.0",
+                tools: new string[] { "NuGet.targets" },
+                dependencies: new PackageDependency[] { new PackageDependency("NuGet.CommandLine") }));
+            packageRepository.Add(PackageUtility.CreatePackage(
+                "NuGet.CommandLine",
+                version: "2.0",
+                tools: new string[] { "NuGet.exe" }));
+            var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
+            packageRepositoryFactory.Setup(p => p.CreateRepository(NuGetConstants.DefaultFeedUrl)).Returns(packageRepository);
+
+            var localCache = new MockPackageRepository();
+
+            var packageRestore = CreateInstance(
+                dte.Object,
+                solutionManager.Object,
+                fileSystemProvider.Object,
+                packageRepositoryFactory.Object,
+                localCache: localCache);
+
+            // Act 
+            packageRestore.EnableCurrentSolutionForRestore(quietMode: true);
+
+            // Assert
+            var cachePackages = localCache.GetPackages().ToList();
+            Assert.Equal(2, cachePackages.Count);
+            Assert.Equal("NuGet.Build", cachePackages[0].Id);
+            Assert.Equal(new SemanticVersion("1.0"), cachePackages[0].Version);
+            Assert.Equal("NuGet.CommandLine", cachePackages[1].Id);
+            Assert.Equal(new SemanticVersion("2.0"), cachePackages[1].Version);
+            // clean up
+            Directory.Delete(tempSolutionPath, recursive: true);
+        }
+
+        [Fact]
+        public void CallingEnableCurrentSolutionDoNotDownloadPackageIfPresentInLocalCache()
+        {
+            // Arrange
+            string tempSolutionPath = CreateTempFolder();
+
+            // setup SolutionManager
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(p => p.IsSolutionOpen).Returns(true);
+            solutionManager.Setup(p => p.SolutionDirectory).Returns(tempSolutionPath);
+
+            // setup file system
+            var fileSystem = new PhysicalFileSystem(tempSolutionPath);
+            var fileSystemProvider = new Mock<IFileSystemProvider>();
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem);
+
+            var nugetFolderFileSystem = new PhysicalFileSystem(tempSolutionPath + "\\.nuget");
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath + "\\.nuget")).Returns(nugetFolderFileSystem);
+
+            // setup DTE
+            var dte = new Mock<DTE>();
+
+            var projectItems = new Mock<ProjectItems>();
+            var solutionFolder = new Mock<Project>();
+            solutionFolder.Setup(s => s.Name).Returns(".nuget");
+            solutionFolder.SetupGet(s => s.ProjectItems).Returns(projectItems.Object);
+
+            var solution = new Mock<Solution>();
+            solution.As<Solution2>().Setup(p => p.AddSolutionFolder(".nuget")).Returns(solutionFolder.Object);
+
+            var projects = new MockProjects(new Project[0]);
+            solution.As<Solution2>().Setup(s => s.Projects).Returns(projects);
+            dte.SetupGet(p => p.Solution).Returns(solution.Object);
+
+            // setup package repository
+            var packageRepository = new MockPackageRepository();
+            var packageA = new Mock<IPackage>(MockBehavior.Strict);
+            packageA.Setup(p => p.Id).Returns("NuGet.Build");
+            packageA.Setup(p => p.Version).Returns(new SemanticVersion("1.0"));
+            packageA.Setup(p => p.IsLatestVersion).Returns(true);
+
+            var packageB = new Mock<IPackage>(MockBehavior.Strict);
+            packageB.Setup(p => p.Id).Returns("NuGet.CommandLine");
+            packageB.Setup(p => p.Version).Returns(new SemanticVersion("2.0"));
+            packageB.Setup(p => p.IsLatestVersion).Returns(true);
+
+            packageRepository.AddPackage(packageA.Object);
+            packageRepository.AddPackage(packageB.Object);
+
+            var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
+            packageRepositoryFactory.Setup(p => p.CreateRepository(NuGetConstants.DefaultFeedUrl)).Returns(packageRepository);
+
+            var localCache = new MockPackageRepository();
+            localCache.Add(PackageUtility.CreatePackage(
+               "NuGet.Build",
+               version: "1.0",
+               tools: new string[] { "NuGet.targets" },
+               dependencies: new PackageDependency[] { new PackageDependency("NuGet.CommandLine") }));
+            localCache.Add(PackageUtility.CreatePackage(
+                "NuGet.CommandLine",
+                version: "2.0",
+                tools: new string[] { "NuGet.exe" }));
+
+            var packageRestore = CreateInstance(
+                dte.Object,
+                solutionManager.Object,
+                fileSystemProvider.Object,
+                packageRepositoryFactory.Object,
+                localCache: localCache);
+
+            // Act 
+            packageRestore.EnableCurrentSolutionForRestore(quietMode: true);
+
+            // Assert
+            packageA.Verify(p => p.GetFiles(), Times.Never());
+            packageB.Verify(p => p.GetFiles(), Times.Never());
+
+            // clean up
+            Directory.Delete(tempSolutionPath, recursive: true);
+        }
+
         private PackageRestoreManager CreateInstance(
             DTE dte = null,
             ISolutionManager solutionManager = null,
             IFileSystemProvider fileSystemProvider = null,
             IPackageRepositoryFactory packageRepositoryFactory = null,
             IVsThreadedWaitDialogFactory waitDialogFactory = null,
-            IVsPackageManagerFactory packageManagerFactory = null)
+            IVsPackageManagerFactory packageManagerFactory = null,
+            IPackageRepository localCache = null)
         {
 
             if (dte == null)
@@ -580,12 +734,18 @@ namespace NuGet.VisualStudio.Test
                 packageManagerFactory = new Mock<IVsPackageManagerFactory>().Object;
             }
 
+            if (localCache == null)
+            {
+                localCache = new MockPackageRepository();
+            }
+
             return new PackageRestoreManager(
                 dte,
                 solutionManager,
                 fileSystemProvider,
                 packageRepositoryFactory,
                 packageManagerFactory,
+                localCache,
                 waitDialogFactory);
         }
 

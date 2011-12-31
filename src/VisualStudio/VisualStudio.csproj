@@ -25,7 +25,7 @@
     <Compile Include="IOptionsPageActivator.cs" />
     <Compile Include="Extensibility\IVsPackageInstallerEvents.cs" />
     <Compile Include="Extensibility\IVsPackageInstallerServices.cs" />
-    <Compile Include="PackageRestore\IPackageRestoreManager.cs" />
+    <Compile Include="IVsSourceControlTracker.cs" />
     <Compile Include="IVsTemplateWizard.cs" />
     <Compile Include="IWindowSettingsManager.cs" />
     <Compile Include="MessageHelper.cs" />
@@ -34,6 +34,7 @@
     <Compile Include="IPackageOperationEventListener.cs" />
     <Compile Include="OptionsPage.cs" />
     <Compile Include="OptionsPageActivator.cs" />
+    <Compile Include="PackageRestore\IPackageRestoreManager.cs" />
     <Compile Include="PackageRestore\PackageRestoreBar.xaml.cs">
       <DependentUpon>PackageRestoreBar.xaml</DependentUpon>
     </Compile>
@@ -76,6 +77,7 @@
     <Compile Include="VsCommonOperations.cs" />
     <Compile Include="VsSettings.cs" />
     <Compile Include="VSRequestCredentialProvider.cs" />
+    <Compile Include="VsSourceControlTracker.cs" />
     <Compile Include="VsTemplateWizard.cs" />
     <Compile Include="VsTemplateWizardInstallerConfiguration.cs" />
     <Compile Include="VsTemplateWizardPackageInfo.cs" />

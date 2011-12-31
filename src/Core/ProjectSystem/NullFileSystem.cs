@@ -75,6 +75,11 @@ namespace NuGet
             // Do nothing
         }
 
+        public void AddFile(string path, Stream stream, bool overrideIfExists)
+        {
+            
+        }
+
         public Stream OpenFile(string path)
         {
             return Stream.Null;

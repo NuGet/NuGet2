@@ -38,7 +38,7 @@ namespace NuGet.TeamFoundationServer
 
             // Get the local files for the server files
             var items = new HashSet<string>(from item in itemSet.Items
-                                            select GetLocalItemForServerItem(item.ServerItem),
+                                            select TryGetLocalItemForServerItem(item.ServerItem),
                                             StringComparer.OrdinalIgnoreCase);
 
             // Remove the path from the list if we're looking for folders
@@ -87,6 +87,11 @@ namespace NuGet.TeamFoundationServer
         public string GetLocalItemForServerItem(string path)
         {
             return _workspace.GetLocalItemForServerItem(path);
+        }
+
+        public string TryGetLocalItemForServerItem(string path)
+        {
+            return _workspace.TryGetLocalItemForServerItem(path);
         }
 
         public void Undo(IEnumerable<PendingChange> pendingChanges)

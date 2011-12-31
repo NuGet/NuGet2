@@ -14,7 +14,6 @@ namespace NuGet.VisualStudio
         private readonly IRecentPackageRepository _recentPackageRepository;
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly VsPackageInstallerEvents _packageEvents;
-        private readonly IPackageRepository _cacheRepository;
 
         private RepositoryInfo _repositoryInfo;
 
@@ -25,19 +24,7 @@ namespace NuGet.VisualStudio
                                        IFileSystemProvider fileSystemProvider,
                                        IRepositorySettings repositorySettings,
                                        IRecentPackageRepository recentPackagesRepository,
-                                       VsPackageInstallerEvents packageEvents) :
-            this(solutionManager, repositoryFactory, packageSourceProvider, fileSystemProvider, repositorySettings, recentPackagesRepository, packageEvents, MachineCache.Default)
-        {
-        }
-
-        public VsPackageManagerFactory(ISolutionManager solutionManager,
-                                       IPackageRepositoryFactory repositoryFactory,
-                                       IVsPackageSourceProvider packageSourceProvider,
-                                       IFileSystemProvider fileSystemProvider,
-                                       IRepositorySettings repositorySettings,
-                                       IRecentPackageRepository recentPackagesRepository,
-                                       VsPackageInstallerEvents packageEvents,
-                                       IPackageRepository cacheRepository)
+                                       VsPackageInstallerEvents packageEvents)
         {
             if (solutionManager == null)
             {
@@ -59,10 +46,6 @@ namespace NuGet.VisualStudio
             {
                 throw new ArgumentNullException("repositorySettings");
             }
-            if (cacheRepository == null)
-            {
-                throw new ArgumentNullException("cacheRepository");
-            }
 
             if (packageEvents == null)
             {
@@ -76,7 +59,6 @@ namespace NuGet.VisualStudio
             _recentPackageRepository = recentPackagesRepository;
             _packageSourceProvider = packageSourceProvider;
             _packageEvents = packageEvents;
-            _cacheRepository = cacheRepository;
 
             _solutionManager.SolutionClosing += (sender, e) =>
             {
