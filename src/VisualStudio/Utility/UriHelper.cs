@@ -7,7 +7,7 @@ namespace NuGet.VisualStudio
     {
         public static void OpenExternalLink(Uri url)
         {
-            if (url == null)
+            if (url == null || !url.IsAbsoluteUri)
             {
                 return;
             }

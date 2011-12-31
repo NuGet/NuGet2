@@ -172,23 +172,22 @@
                     <eml:TextBlockControl Text="{Binding PackageIdentity.DownloadCount}" Style="{StaticResource DetailMetadataValueStyle}"  />
                 </StackPanel>
 
-
                 <!-- View License link -->
-                <TextBlock Visibility="{Binding LicenseUrl, Converter={StaticResource NullToVisibilityConverter}}">
+                <TextBlock Visibility="{Binding LicenseUrl, Converter={StaticResource urlConverter}}">
                     <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding LicenseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                         <Run Text="{x:Static resources:Resources.License_ViewLicense}" />
                     </Hyperlink>
                 </TextBlock>
 
                 <!-- Project Url -->
-                <TextBlock Visibility="{Binding PackageIdentity.ProjectUrl, Converter={StaticResource NullToVisibilityConverter}}">
+                <TextBlock Visibility="{Binding PackageIdentity.ProjectUrl, Converter={StaticResource urlConverter}}">
                     <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.ProjectUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                         <Run Text="{x:Static resources:Resources.Dialog_MoreInfo}" />
                     </Hyperlink>
                 </TextBlock>
 
                 <!-- Report Abuse Url -->
-                <TextBlock Visibility="{Binding PackageIdentity.ReportAbuseUrl, Converter={StaticResource NullToVisibilityConverter}}">
+                <TextBlock Visibility="{Binding PackageIdentity.ReportAbuseUrl, Converter={StaticResource urlConverter}}">
                     <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.ReportAbuseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                         <Run Text="{x:Static resources:Resources.Dialog_ReportAbuse}" />
                     </Hyperlink>
