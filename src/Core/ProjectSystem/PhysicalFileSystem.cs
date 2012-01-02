@@ -188,20 +188,22 @@ namespace NuGet
 
         public virtual DateTimeOffset GetLastModified(string path)
         {
-            if (DirectoryExists(path))
+            path = GetFullPath(path);
+            if (Directory.Exists(path))
             {
-                return new DirectoryInfo(GetFullPath(path)).LastWriteTimeUtc;
+                return Directory.GetLastWriteTimeUtc(path);
             }
-            return new FileInfo(GetFullPath(path)).LastWriteTimeUtc;
+            return File.GetLastAccessTimeUtc(path);
         }
 
         public DateTimeOffset GetCreated(string path)
         {
-            if (DirectoryExists(path))
+            path = GetFullPath(path);
+            if (Directory.Exists(path))
             {
-                return Directory.GetCreationTimeUtc(GetFullPath(path));
+                return Directory.GetCreationTimeUtc(path);
             }
-            return File.GetCreationTimeUtc(GetFullPath(path));
+            return File.GetCreationTimeUtc(path);
         }
 
         public virtual bool FileExists(string path)

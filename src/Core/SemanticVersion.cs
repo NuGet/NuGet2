@@ -248,14 +248,15 @@ namespace NuGet
 
         public bool Equals(SemanticVersion other)
         {
-            return other != null && Version.Equals(other.Version)
-                                 && SpecialVersion.Equals(other.SpecialVersion, StringComparison.OrdinalIgnoreCase);
+            return !Object.ReferenceEquals(null, other) &&
+                   Version.Equals(other.Version) &&
+                   SpecialVersion.Equals(other.SpecialVersion, StringComparison.OrdinalIgnoreCase);
         }
 
         public override bool Equals(object obj)
         {
             SemanticVersion semVer = obj as SemanticVersion;
-            return semVer != null && Equals(semVer);
+            return !Object.ReferenceEquals(null, semVer) && Equals(semVer);
         }
 
         public override int GetHashCode()

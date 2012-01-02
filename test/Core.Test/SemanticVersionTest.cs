@@ -139,12 +139,28 @@ namespace NuGet.Test
             // Arrange
             var itemA = new SemanticVersion(versionA);
             var itemB = new SemanticVersion(versionB);
+            object objectB = itemB;
 
             // Act and Assert
             Assert.True(itemA < itemB);
             Assert.True(itemA <= itemB);
             Assert.True(itemB > itemA);
             Assert.True(itemB >= itemA);
+            Assert.False(itemA.Equals(itemB));
+            Assert.False(itemA.Equals(objectB));
+        }
+
+        [Theory]
+        [InlineData(new object[] { 1 })]
+        [InlineData(new object[] { "1.0.0" })]
+        [InlineData(new object[] { new object[0] })]
+        public void EqualsReturnsFalseIfComparingANonSemVerType(object other)
+        {
+            // Arrange
+            var semVer = new SemanticVersion("1.0.0");
+
+            // Act and Assert
+            Assert.False(semVer.Equals(other));
         }
 
         [Fact]
@@ -173,9 +189,12 @@ namespace NuGet.Test
             // Arrange
             var itemA = new SemanticVersion(versionA);
             var itemB = new SemanticVersion(versionB);
+            object objectB = itemB;
 
             // Act and Assert
             Assert.True(itemA == itemB);
+            Assert.True(itemA.Equals(itemB));
+            Assert.True(itemA.Equals(objectB));
             Assert.True(itemA <= itemB);
             Assert.True(itemB == itemA);
             Assert.True(itemB >= itemA);
