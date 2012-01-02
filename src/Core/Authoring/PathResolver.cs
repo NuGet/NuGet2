@@ -15,7 +15,7 @@ namespace NuGet
         /// <param name="getPath">Function that returns the path to filter a package file </param>
         /// <param name="wildcard">The wildcard to apply to match the path with.</param>
         /// <returns></returns>
-        public static IEnumerable<T> GetMatches<T>(IEnumerable<T> source, Func<T, string> getPath, IEnumerable<string> wildcards) where T : IPackageFile
+        public static IEnumerable<T> GetMatches<T>(IEnumerable<T> source, Func<T, string> getPath, IEnumerable<string> wildcards)
         {
             var filters = wildcards.Select(WildcardToRegex);
             return source.Where(item =>
@@ -28,7 +28,7 @@ namespace NuGet
         /// <summary>
         /// Removes files from the source that match any wildcard.
         /// </summary>
-        public static void FilterPackageFiles<T>(ICollection<T> source, Func<T, string> getPath, IEnumerable<string> wildcards) where T : IPackageFile
+        public static void FilterPackageFiles<T>(ICollection<T> source, Func<T, string> getPath, IEnumerable<string> wildcards)
         {
             var matchedFiles = new HashSet<T>(GetMatches(source, getPath, wildcards));
             source.RemoveAll(p => matchedFiles.Contains(p));
@@ -53,13 +53,32 @@ namespace NuGet
 
         internal static IEnumerable<PhysicalPackageFile> ResolveSearchPattern(string basePath, string searchPath, string targetPath)
         {
+            string normalizedBasePath;
+            IEnumerable<string> files = PerformWildcardSearchInternal(basePath, searchPath, out normalizedBasePath);
+
+            return from file in files
+                   select new PhysicalPackageFile
+                   {
+                       SourcePath = file,
+                       TargetPath = ResolvePackagePath(normalizedBasePath, searchPath, file, targetPath)
+                   };
+        }
+
+        public static IEnumerable<string> PerformWildcardSearch(string basePath, string searchPath)
+        {
+            string normalizedBasePath;
+            return PerformWildcardSearchInternal(basePath, searchPath, out normalizedBasePath);
+        }
+
+        private static IEnumerable<string> PerformWildcardSearchInternal(string basePath, string searchPath, out string normalizedBasePath)
+        {
             if (!searchPath.StartsWith(@"\\", StringComparison.OrdinalIgnoreCase))
             {
                 // If we aren't dealing with network paths, trim the leading slash. 
                 searchPath = searchPath.TrimStart(Path.DirectorySeparatorChar);
             }
             basePath = NormalizeBasePath(basePath, ref searchPath);
-            string basePathToEnumerate = GetPathToEnumerateFrom(basePath, searchPath);
+            normalizedBasePath = GetPathToEnumerateFrom(basePath, searchPath);
 
             // Append the basePath to searchPattern and get the search regex. We need to do this because the search regex is matched from line start.
             Regex searchRegex = WildcardToRegex(Path.Combine(basePath, searchPath));
@@ -77,14 +96,9 @@ namespace NuGet
             }
 
             // Starting from the base path, enumerate over all files and match it using the wildcard expression provided by the user.
-            var files = Directory.EnumerateFiles(basePathToEnumerate, "*.*", searchOption);
-            return from file in files
+            return from file in Directory.EnumerateFiles(normalizedBasePath, "*.*", searchOption)
                    where searchRegex.IsMatch(file)
-                   select new PhysicalPackageFile
-                   {
-                       SourcePath = file,
-                       TargetPath = ResolvePackagePath(basePathToEnumerate, searchPath, file, targetPath)
-                   };
+                   select file;
         }
 
         internal static string GetPathToEnumerateFrom(string basePath, string searchPath)

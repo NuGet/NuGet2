@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using NuGet.Common;
 
 namespace NuGet.Commands
@@ -111,31 +114,68 @@ namespace NuGet.Commands
         private void PushPackage(string packagePath, string source, string apiKey)
         {
             var packageServer = new PackageServer(source, CommandLineConstants.UserAgent);
+            IEnumerable<string> packagesToPush = GetPackagesToPush(packagePath);
 
-            string[] packagesToPush = Directory.GetFiles(Environment.CurrentDirectory, packagePath, SearchOption.TopDirectoryOnly);
+            if (!packagesToPush.Any())
+            {
+                Console.WriteError(String.Format(CultureInfo.CurrentCulture, NuGetResources.UnableToFindFile, packagePath));
+                return;
+            }
 
             foreach (string packageToPush in packagesToPush)
             {
-                if (string.Equals(Path.GetExtension(packageToPush), NuGet.Constants.PackageExtension, StringComparison.OrdinalIgnoreCase))
-                {
-                    // Push the package to the server
-                    var package = new ZipPackage(packageToPush);
-
-                    string sourceName = CommandLineUtility.GetSourceDisplayName(source);
-                    Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), sourceName);
-
-                    using (Stream stream = package.GetStream())
-                    {
-                        packageServer.PushPackage(apiKey, stream);
-                    }
-
-                    if (CreateOnly)
-                    {
-                        Console.WriteWarning(NuGetResources.Warning_PublishPackageDeprecated);
-                    }
-                    Console.WriteLine(NuGetResources.PushCommandPackagePushed);
-                }
+                PushPackageCore(source, apiKey, packageServer, packageToPush);
             }
+        }
+
+        private void PushPackageCore(string source, string apiKey, PackageServer packageServer, string packageToPush)
+        {
+            // Push the package to the server
+            var package = new ZipPackage(packageToPush);
+
+            string sourceName = CommandLineUtility.GetSourceDisplayName(source);
+            Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), sourceName);
+
+            using (Stream stream = package.GetStream())
+            {
+                packageServer.PushPackage(apiKey, stream);
+            }
+
+            if (CreateOnly)
+            {
+                Console.WriteWarning(NuGetResources.Warning_PublishPackageDeprecated);
+            }
+            Console.WriteLine(NuGetResources.PushCommandPackagePushed);
+        }
+
+        private static IEnumerable<string> GetPackagesToPush(string packagePath)
+        {
+            // Ensure packagePath ends with *.nupkg
+            packagePath = EnsurePackageExtension(packagePath);
+            return PathResolver.PerformWildcardSearch(Environment.CurrentDirectory, packagePath);
+        }
+
+        internal static string EnsurePackageExtension(string packagePath)
+        {
+            if (packagePath.IndexOf('*') == -1)
+            {
+                // If there's no wildcard in the path to begin with, assume that it's an absolute path.
+                return packagePath;
+            }
+            // If the path does not contain wildcards, we need to add *.nupkg to it.
+            if (!packagePath.EndsWith(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase))
+            {
+                if (packagePath.EndsWith("**", StringComparison.OrdinalIgnoreCase))
+                {
+                    packagePath = packagePath + Path.DirectorySeparatorChar + '*';
+                }
+                else if (!packagePath.EndsWith("*", StringComparison.OrdinalIgnoreCase))
+                {
+                    packagePath = packagePath + '*';
+                }
+                packagePath = packagePath + Constants.PackageExtension;
+            }
+            return packagePath;
         }
 
         private string GetApiKey(string source, bool throwIfNotFound = true)
