@@ -421,6 +421,10 @@ Returns a list of recently installed packages.
           <maml:name>RemoveDependencies</maml:name>
         </command:parameter>
         <command:parameter required="false" position="named">
+          <maml:name>ProjectName</maml:name>
+          <command:parameterValue required="true">string</command:parameterValue>
+        </command:parameter>
+        <command:parameter required="false" position="named">
           <maml:name>Force</maml:name>
         </command:parameter>
         <command:parameter required="false" position="named">
@@ -456,6 +460,12 @@ Returns a list of recently installed packages.
         <command:parameterValue required="true">
           string
         </command:parameterValue>
+      </command:parameter>
+      <command:parameter required="false" position="named">
+        <maml:name>Force</maml:name>
+        <maml:description>
+          <maml:para>Forces an uninstall of the package even if another package depends on it.</maml:para>
+        </maml:description>
       </command:parameter>
       <command:parameter required="false" position="named">
         <maml:name>Version</maml:name>
