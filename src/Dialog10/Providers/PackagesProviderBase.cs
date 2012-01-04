@@ -26,7 +26,6 @@ namespace NuGet.Dialog.Providers
         private readonly IPackageRepository _localRepository;
         private readonly ProviderServices _providerServices;
         private Dictionary<Project, Exception> _failedProjects;
-        private string _readmeFile, _originalPackageId;
 
         private object _mediumIconDataTemplate;
         private object _detailViewDataTemplate;
@@ -594,23 +593,6 @@ namespace NuGet.Dialog.Providers
                 {
                     throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
                 }
-            }
-        }
-
-        private void PrepareOpenReadMeFile(PackageOperationEventArgs e)
-        {
-            // only open the read me file for the first package that initiates this operation.
-            if (e.Package.Id.Equals(_originalPackageId, StringComparison.OrdinalIgnoreCase) && e.Package.HasReadMeFileAtRoot())
-            {
-                _readmeFile = Path.Combine(e.InstallPath, NuGetConstants.ReadmeFileName);
-            }
-        }
-
-        private void OpenReadMeFile()
-        {
-            if (_readmeFile != null)
-            {
-                _providerServices.VsCommonOperations.OpenFile(_readmeFile);
             }
         }
 

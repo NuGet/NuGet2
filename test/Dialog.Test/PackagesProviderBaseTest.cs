@@ -219,3 +219,4 @@ namespace NuGet.Dialog.Test
             }
         }
     }
+}

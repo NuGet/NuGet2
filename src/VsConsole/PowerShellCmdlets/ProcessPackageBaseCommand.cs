@@ -21,7 +21,6 @@ namespace NuGet.PowerShell.Commands
         // project managers since the same cmdlet instance can be used across invocations.
         private readonly Dictionary<string, IProjectManager> _projectManagers = new Dictionary<string, IProjectManager>();
         private readonly Dictionary<IProjectManager, Project> _projectManagerToProject = new Dictionary<IProjectManager, Project>();
-        private string _readmeFile;
         private readonly IVsCommonOperations _vsCommonOperations;
         private IDisposable _expandedNodesDisposable;
 
@@ -175,23 +174,6 @@ namespace NuGet.PowerShell.Commands
         {
             AddToolsFolderToEnvironmentPath(e.InstallPath);
             ExecuteScript(e.InstallPath, PowerShellScripts.Init, e.Package, null);
-        }
-
-        private void PrepareOpenReadMeFile(PackageOperationEventArgs e)
-        {
-            // only open the read me file for the first package that initiates this operation.
-            if (e.Package.Id.Equals(this.Id, StringComparison.OrdinalIgnoreCase) && e.Package.HasReadMeFileAtRoot()) 
-            {
-                _readmeFile = Path.Combine(e.InstallPath, NuGetConstants.ReadmeFileName);
-            }
-        }
-
-        private void OpenReadMeFile()
-        {
-            if (_readmeFile != null )
-            {
-                _vsCommonOperations.OpenFile(_readmeFile);
-            }
         }
 
         protected virtual void AddToolsFolderToEnvironmentPath(string installPath)

@@ -46,7 +46,8 @@ namespace NuGet.Dialog
                  ServiceLocator.GetInstance<ISelectedProviderSettings>(),
                  ServiceLocator.GetInstance<IProductUpdateService>(),
                  ServiceLocator.GetInstance<ISolutionManager>(),
-                 ServiceLocator.GetInstance<IOptionsPageActivator>())
+                 ServiceLocator.GetInstance<IOptionsPageActivator>(),
+                 ServiceLocator.GetInstance<IVsCommonOperations>())
         {
         }
 
@@ -62,7 +63,8 @@ namespace NuGet.Dialog
                                     ISelectedProviderSettings selectedProviderSettings,
                                     IProductUpdateService productUpdateService,
                                     ISolutionManager solutionManager,
-                                    IOptionsPageActivator optionPageActivator)
+                                    IOptionsPageActivator optionPageActivator,
+                                    IVsCommonOperations commonOperations)
             : base(F1Keyword)
         {
 
@@ -91,8 +93,10 @@ namespace NuGet.Dialog
             providerServices = new ProviderServices(
                 providerServices.WindowServices,
                 providerServices.ProgressWindow,
+                providerServices.SelectedProviderSettings,                
                 providerServices.ScriptExecutor,
-                _smartOutputConsoleProvider);
+                _smartOutputConsoleProvider,
+                commonOperations);
 
             SetupProviders(
                 project,

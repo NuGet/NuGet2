@@ -28,6 +28,7 @@ namespace NuGet.Dialog.Providers
         public ProviderServices(
             IUserNotifierServices userNotifierServices,
             IProgressWindowOpener progressWindow,
+            ISelectedProviderSettings selectedProviderSettings,
             IScriptExecutor scriptExecutor,
             IOutputConsoleProvider outputConsoleProvider,
             IVsCommonOperations vsCommonOperations)
