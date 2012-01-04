@@ -142,8 +142,7 @@ namespace NuGet.VisualStudio
 
         private void PerformPackageInstall(IVsPackageInstaller packageInstaller, Project project, string packageRepositoryPath, IEnumerable<VsTemplateWizardPackageInfo> packages)
         {
-            var failedPackages = new List<VsTemplateWizardPackageInfo>();
-
+            var failedPackageErrors = new List<string>();
             foreach (var package in packages)
             {
                 try
@@ -154,19 +153,19 @@ namespace NuGet.VisualStudio
                     // REVIEW We need to figure out if we can break IVsPackageInstaller interface by modifying it to accept a SemVer and still allow MVC 3 projects to work
                     packageInstaller.InstallPackage(packageRepositoryPath, project, package.Id, package.Version, ignoreDependencies: true);
                 }
-                catch (InvalidOperationException)
+                catch (InvalidOperationException exception)
                 {
-                    failedPackages.Add(package);
+                    failedPackageErrors.Add(package.Id + "." + package.Version + " : " + exception.Message);
                 }
             }
 
-            if (failedPackages.Any())
+            if (failedPackageErrors.Any())
             {
                 var errorString = new StringBuilder();
                 errorString.AppendFormat(VsResources.TemplateWizard_FailedToInstallPackage, packageRepositoryPath);
                 errorString.AppendLine();
                 errorString.AppendLine();
-                errorString.Append(String.Join(Environment.NewLine, failedPackages.Select(p => p.Id + "." + p.Version)));
+                errorString.Append(String.Join(Environment.NewLine, failedPackageErrors));
                 ShowErrorMessage(errorString.ToString());
             }
         }
