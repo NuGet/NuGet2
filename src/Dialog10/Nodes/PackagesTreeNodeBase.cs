@@ -240,7 +240,6 @@ namespace NuGet.Dialog.Providers
         /// <summary>
         /// Helper function to raise property changed events
         /// </summary>
-        /// <param name="info"></param>
         private void NotifyPropertyChanged()
         {
             if (PageDataChanged != null)
@@ -347,6 +346,10 @@ namespace NuGet.Dialog.Providers
 
                 // Execute the total count query
                 _totalCount = query.Count();
+
+                // make sure we don't query a page that is greater than the maximum page number.
+                int maximumPages = (_totalCount + PageSize - 1)/PageSize;
+                pageNumber = Math.Min(pageNumber, maximumPages);
 
                 token.ThrowIfCancellationRequested();
 
@@ -463,30 +466,55 @@ namespace NuGet.Dialog.Providers
                 else
                 {
                     LoadPageResult result = task.Result;
-                    IEnumerable<IPackage> packages = result.Packages;
 
-                    _extensions.Clear();
-                    foreach (IPackage package in packages)
-                    {
-                        _extensions.Add(Provider.CreateExtension(package));
-                    }
-
-                    if (_extensions.Count > 0)
-                    {
-                        ((IVsExtension)_extensions[0]).IsSelected = true;
-                    }
-
+                    UpdateNewPackages(result.Packages.ToList());
+                    
                     int totalPages = (result.TotalCount + PageSize - 1) / PageSize;
-                    int pageNumber = result.PageNumber;
-
                     TotalPages = Math.Max(1, totalPages);
-                    CurrentPage = Math.Max(1, pageNumber);
+                    CurrentPage = Math.Max(1, result.PageNumber);
 
                     HideProgressPane();
                 }
             }
 
             PackageLoadCompleted(this, EventArgs.Empty);
+        }
+
+        private void UpdateNewPackages(IList<IPackage> packages)
+        {
+            int newPackagesIndex = 0;
+            int oldPackagesIndex = 0;
+            while (oldPackagesIndex < _extensions.Count)
+            {
+                if (newPackagesIndex >= packages.Count)
+                {
+                    _extensions.RemoveAt(oldPackagesIndex);
+                }
+                else
+                {
+                    PackageItem currentOldItem = (PackageItem)_extensions[oldPackagesIndex];
+                    if (PackageEqualityComparer.IdAndVersion.Equals(packages[newPackagesIndex], currentOldItem.PackageIdentity))
+                    {
+                        newPackagesIndex++;
+                        oldPackagesIndex++;
+                    }
+                    else
+                    {
+                        _extensions.RemoveAt(oldPackagesIndex);
+                    }
+                }
+            }
+
+            while (newPackagesIndex < packages.Count)
+            {
+                _extensions.Add(Provider.CreateExtension(packages[newPackagesIndex++]));
+            }
+           
+            if (_extensions.Count > 0)
+            {
+                // select the first package by default
+                ((IVsExtension)_extensions[0]).IsSelected = true;
+            }
         }
 
         protected void OnNotifyPropertyChanged(string propertyName)

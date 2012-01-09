@@ -259,27 +259,15 @@ namespace NuGet.Dialog.Providers
 
         protected override void OnExecuteCompleted(PackageItem item)
         {
-            base.OnExecuteCompleted(item);
-
             if (SelectedNode != null)
             {
-#if VS10
-                IList<IVsExtension> allExtensions = SelectedNode.Extensions;
-                // if a package has been uninstalled, remove it from the Installed tab
-                allExtensions.RemoveAll(extension => !LocalRepository.Exists(((PackageItem)extension).PackageIdentity));
-#else
-                // if a package has been uninstalled, remove it from the Installed tab
-                IList<PackageItem> allExtensions = SelectedNode.Extensions.Cast<PackageItem>().ToList();
-                foreach (var extension in allExtensions) {
-                    if (!LocalRepository.Exists(extension.PackageIdentity)) {
-                        SelectedNode.Extensions.Remove(extension);
-                    }
-                }
-#endif
-
-                // the PackagesTreeNodeBase caches the list of packages in each tree node. For this provider,
-                // we don't want it to do so, because after every uninstall, we remove uninstalled packages.
-                SelectedNode.ResetQuery();
+                // after every uninstall operation, just refresh the current node because
+                // when packages are uninstalled, the number of pages may decrease.
+                SelectedNode.Refresh(resetQueryBeforeRefresh: true);
+            }
+            else
+            {
+                base.OnExecuteCompleted(item);
             }
         }
 

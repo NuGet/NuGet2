@@ -13,8 +13,8 @@ namespace NuGet.Dialog.PackageManagerUI
         private readonly Dispatcher _uiDispatcher;
         private DateTime _lastShowTime = DateTime.MinValue;
 
-        private Lazy<DispatcherTimer> _closeTimer;
-        private Lazy<DispatcherTimer> _showTimer;
+        private readonly Lazy<DispatcherTimer> _closeTimer;
+        private readonly Lazy<DispatcherTimer> _showTimer;
 
         public ProgressWindowOpener()
         {
@@ -181,7 +181,7 @@ namespace NuGet.Dialog.PackageManagerUI
             if (elapsed >= DelayInterval)
             {
                 // if the dialog has been shown for more than 500ms, just close it
-                if (_currentWindow.IsVisible)
+                if (_currentWindow != null && _currentWindow.IsVisible)
                 {
                     if (hideOnly)
                     {

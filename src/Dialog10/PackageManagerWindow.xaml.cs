@@ -8,7 +8,6 @@ using System.Windows.Input;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
-using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
@@ -19,7 +18,7 @@ namespace NuGet.Dialog
     {
         internal static PackageManagerWindow CurrentInstance;
         private const string DialogUserAgentClient = "NuGet Add Package Dialog";
-        private Lazy<string> _dialogUserAgent = new Lazy<string>(() => HttpUtility.CreateUserAgentString(DialogUserAgentClient));
+        private readonly Lazy<string> _dialogUserAgent = new Lazy<string>(() => HttpUtility.CreateUserAgentString(DialogUserAgentClient));
 
         private const string F1Keyword = "vs.ExtensionManager";
 
@@ -28,7 +27,6 @@ namespace NuGet.Dialog
         private ComboBox _prereleaseComboBox;
 
         private readonly SmartOutputConsoleProvider _smartOutputConsoleProvider;
-        private readonly IVsUIShell _vsUIShell;
         private readonly IProviderSettings _providerSettings;
         private readonly IProductUpdateService _productUpdateService;
         private readonly IOptionsPageActivator _optionsPageActivator;
@@ -37,7 +35,6 @@ namespace NuGet.Dialog
         public PackageManagerWindow(Project project) :
             this(project,
                  ServiceLocator.GetInstance<DTE>(),
-                 ServiceLocator.GetGlobalService<SVsUIShell, IVsUIShell>(),
                  ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                  ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                  ServiceLocator.GetInstance<IPackageSourceProvider>(),
@@ -52,7 +49,6 @@ namespace NuGet.Dialog
 
         private PackageManagerWindow(Project project,
                                      DTE dte,
-                                     IVsUIShell vsUIShell,
                                      IVsPackageManagerFactory packageManagerFactory,
                                      IPackageRepositoryFactory repositoryFactory,
                                      IPackageSourceProvider packageSourceProvider,
@@ -73,7 +69,6 @@ namespace NuGet.Dialog
                 _httpClientEvents.SendingRequest += OnSendingRequest;
             }
 
-            _vsUIShell = vsUIShell;
             _productUpdateService = productUpdateService;
             _optionsPageActivator = optionPageActivator;
             _activeProject = project;
@@ -511,7 +506,7 @@ namespace NuGet.Dialog
             return null;
         }
 
-        private UIElement FindChildElementByNameOrType(Grid parent, string childName, Type childType)
+        private static UIElement FindChildElementByNameOrType(Grid parent, string childName, Type childType)
         {
             UIElement element = parent.FindName(childName) as UIElement;
             if (element != null)
