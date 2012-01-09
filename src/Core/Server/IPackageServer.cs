@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace NuGet
 {
@@ -6,7 +7,7 @@ namespace NuGet
     {
         string Source { get; }
 
-        void PushPackage(string apiKey, Stream packageStream);
+        void PushPackage(string apiKey, Stream packageStream, TimeSpan timeout);
         void DeletePackage(string apiKey, string packageId, string packageVersion);
     }
 }

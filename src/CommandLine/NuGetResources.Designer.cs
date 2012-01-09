@@ -1079,6 +1079,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Specifies the timeout for pushing to a server in seconds. Defaults to 300 seconds (5 minutes)..
+        /// </summary>
+        internal static string PushCommandTimeoutDescription {
+            get {
+                return ResourceManager.GetString("PushCommandTimeoutDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Specify the path to the package and your API key to push the package to the server..
         /// </summary>
         internal static string PushCommandUsageDescription {
@@ -1094,7 +1103,9 @@ namespace NuGet {
         ///
         ///nuget push foo.nupkg
         ///
-        ///nuget push foo.nupkg.symbols.
+        ///nuget push foo.nupkg.symbols
+        ///
+        ///nuget push foo.nupkg -Timeout 360.
         /// </summary>
         internal static string PushCommandUsageExamples {
             get {

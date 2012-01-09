@@ -34,7 +34,7 @@ namespace NuGet
             get { return _source; }
         }
 
-        public void PushPackage(string apiKey, Stream packageStream)
+        public void PushPackage(string apiKey, Stream packageStream, TimeSpan timeout)
         {
             HttpClient client = GetClient("", "PUT", "application/octet-stream");
 
@@ -42,8 +42,9 @@ namespace NuGet
             {
                 var request = (HttpWebRequest)e.Request;
 
-                // Set the timeout to the same as the read write timeout (5 mins is the default)
-                request.Timeout = request.ReadWriteTimeout;
+                // Set the timeout
+                request.Timeout = Convert.ToInt32(timeout.TotalMilliseconds);
+                request.ReadWriteTimeout = Convert.ToInt32(timeout.TotalMilliseconds);
                 request.Headers.Add(ApiKeyHeader, apiKey);
 
                 var multiPartRequest = new MultipartWebRequest();
@@ -60,7 +61,7 @@ namespace NuGet
             // Review: Do these values need to be encoded in any way?
             var url = String.Join("/", packageId, packageVersion);
             HttpClient client = GetClient(url, "DELETE", "text/html");
-            
+
             client.SendingRequest += (sender, e) =>
             {
                 var request = (HttpWebRequest)e.Request;

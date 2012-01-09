@@ -9,7 +9,7 @@ using NuGet.Common;
 namespace NuGet.Commands
 {
     [Command(typeof(NuGetResources), "push", "PushCommandDescription",
-        MinArgs = 1, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
+        MinArgs = 1, MaxArgs = 3, UsageDescriptionResourceName = "PushCommandUsageDescription",
         UsageSummaryResourceName = "PushCommandUsageSummary", UsageExampleResourceName = "PushCommandUsageExamples")]
     public class PushCommand : Command
     {
@@ -21,6 +21,9 @@ namespace NuGet.Commands
 
         [Option(typeof(NuGetResources), "CommandApiKey")]
         public string ApiKey { get; set; }
+
+        [Option(typeof(NuGetResources), "PushCommandTimeoutDescription")]
+        public int Timeout { get; set; }
 
         public IPackageSourceProvider SourceProvider { get; private set; }
 
@@ -47,11 +50,17 @@ namespace NuGet.Commands
                 throw new CommandLineException(NuGetResources.NoApiKeyFound, CommandLineUtility.GetSourceDisplayName(source));
             }
 
-            PushPackage(packagePath, source, apiKey);
+            var timeout = TimeSpan.FromSeconds(Math.Abs(Timeout));
+            if (timeout.Seconds <= 0)
+            {
+                timeout = TimeSpan.FromMinutes(5); // Default to 5 minutes
+            }
+
+            PushPackage(packagePath, source, apiKey, timeout);
 
             if (source.Equals(NuGetConstants.DefaultGalleryServerUrl, StringComparison.OrdinalIgnoreCase))
             {
-                PushSymbols(packagePath);
+                PushSymbols(packagePath, timeout);
             }
         }
 
@@ -77,7 +86,7 @@ namespace NuGet.Commands
             return source;
         }
 
-        private void PushSymbols(string packagePath)
+        private void PushSymbols(string packagePath, TimeSpan timeout)
         {
             // Get the symbol package for this package
             string symbolPackagePath = GetSymbolsPath(packagePath);
@@ -96,7 +105,7 @@ namespace NuGet.Commands
                 }
                 else
                 {
-                    PushPackage(symbolPackagePath, source, apiKey);
+                    PushPackage(symbolPackagePath, source, apiKey, timeout);
                 }
             }
         }
@@ -111,7 +120,7 @@ namespace NuGet.Commands
             return Path.Combine(packageDir, symbolPath);
         }
 
-        private void PushPackage(string packagePath, string source, string apiKey)
+        private void PushPackage(string packagePath, string source, string apiKey, TimeSpan timeout)
         {
             var packageServer = new PackageServer(source, CommandLineConstants.UserAgent);
             IEnumerable<string> packagesToPush = GetPackagesToPush(packagePath);
@@ -124,11 +133,11 @@ namespace NuGet.Commands
 
             foreach (string packageToPush in packagesToPush)
             {
-                PushPackageCore(source, apiKey, packageServer, packageToPush);
+                PushPackageCore(source, apiKey, packageServer, packageToPush, timeout);
             }
         }
 
-        private void PushPackageCore(string source, string apiKey, PackageServer packageServer, string packageToPush)
+        private void PushPackageCore(string source, string apiKey, PackageServer packageServer, string packageToPush, TimeSpan timeout)
         {
             // Push the package to the server
             var package = new ZipPackage(packageToPush);
@@ -138,7 +147,7 @@ namespace NuGet.Commands
 
             using (Stream stream = package.GetStream())
             {
-                packageServer.PushPackage(apiKey, stream);
+                packageServer.PushPackage(apiKey, stream, timeout);
             }
 
             if (CreateOnly)
