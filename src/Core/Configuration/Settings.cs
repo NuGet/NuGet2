@@ -54,7 +54,7 @@ namespace NuGet
                 }
 
                 // Get the add element that matches the key and return null if it doesn't exist
-                var element = sectionElement.Elements("add").Where(s => s.GetOptionalAttributeValue("key") == key).FirstOrDefault();
+                var element = sectionElement.Elements("add").FirstOrDefault(s => s.GetOptionalAttributeValue("key") == key);
                 if (element == null)
                 {
                     return null;

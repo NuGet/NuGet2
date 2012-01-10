@@ -31,8 +31,7 @@ namespace NuGet.VisualStudio
         public PackageRestoreManager(
             ISolutionManager solutionManager,
             IFileSystemProvider fileSystemProvider,
-            IPackageRepositoryFactory packageRepositoryFactory,
-            ISettings settings) :
+            IPackageRepositoryFactory packageRepositoryFactory) :
             this(ServiceLocator.GetInstance<DTE>(),
                  solutionManager,
                  fileSystemProvider,
