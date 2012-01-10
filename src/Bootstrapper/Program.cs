@@ -9,7 +9,7 @@ namespace Bootstrapper
     public class Program
     {
         private const string NuGetCommandLinePackageId = "nuget.commandline";
-        private const string GalleryUrl = "http://packages.nuget.org/v1/FeedService.svc";
+        private const string GalleryUrl = "http://nuget.org/api/v2/";
         private const string NuGetExeFilePath = "/tools/NuGet.exe";
 
         public static int Main(string[] args)

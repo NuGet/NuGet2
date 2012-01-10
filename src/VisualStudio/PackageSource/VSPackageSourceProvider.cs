@@ -17,6 +17,7 @@ namespace NuGet.VisualStudio
         private static readonly Dictionary<PackageSource, PackageSource> _feedsToMigrate = new Dictionary<PackageSource, PackageSource>
         {
             { new PackageSource(NuGetConstants.V1FeedUrl, OfficialFeedName), _defaultSource },
+            { new PackageSource(NuGetConstants.V2LegacyFeedUrl, OfficialFeedName), _defaultSource },
         };
         internal const string ActivePackageSourceSectionName = "activePackageSource";
         private readonly IPackageSourceProvider _packageSourceProvider;

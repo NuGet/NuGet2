@@ -95,12 +95,14 @@ namespace NuGet
 
                     var officialPackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl, NuGetResources.OfficialPackageSourceName);
                     var v1PackageSource = new PackageSource(NuGetConstants.V1FeedUrl, NuGetResources.OfficialPackageSourceName);
+                    var legacyV2PackageSource = new PackageSource(NuGetConstants.V2LegacyFeedUrl, NuGetResources.OfficialPackageSourceName);
 
                     var packageSourceProvider = new PackageSourceProvider(
                         settings,
                         new[] { defaultPackageSource },
                         new Dictionary<PackageSource, PackageSource> { 
-                            { v1PackageSource, officialPackageSource }
+                            { v1PackageSource, officialPackageSource },
+                            { legacyV2PackageSource, officialPackageSource }
                         }
                     );
 

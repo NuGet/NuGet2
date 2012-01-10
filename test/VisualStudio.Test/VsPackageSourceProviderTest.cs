@@ -21,7 +21,7 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             Assert.Equal(1, sources.Count);
-            Assert.Equal("https://go.microsoft.com/fwlink/?LinkID=230477", sources[0].Source);
+            Assert.Equal("https://nuget.org/api/v2/", sources[0].Source);
         }
 
         [Fact]
@@ -41,7 +41,27 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             Assert.Equal(1, sources.Count);
-            Assert.Equal("https://go.microsoft.com/fwlink/?LinkID=230477", sources[0].Source);
+            Assert.Equal("https://nuget.org/api/v2/", sources[0].Source);
+        }
+
+        [Fact]
+        public void CtorMigrateV2LegacyFeedToV2Feed()
+        {
+            // Arrange
+            var userSettings = new MockUserSettingsManager();
+            userSettings.SetValue(
+                PackageSourceProvider.PackageSourcesSectionName,
+                "NuGet official package source",
+                "https://go.microsoft.com/fwlink/?LinkID=230477");
+            var sourceProvider = CreateDefaultSourceProvider(userSettings);
+            var provider = new VsPackageSourceProvider(userSettings, sourceProvider);
+
+            // Act
+            var sources = provider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.Equal(1, sources.Count);
+            Assert.Equal("https://nuget.org/api/v2/", sources[0].Source);
         }
 
         [Fact]
@@ -67,7 +87,7 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             Assert.Equal(1, sources.Count);
-            Assert.Equal("https://go.microsoft.com/fwlink/?LinkID=230477", sources[0].Source);
+            Assert.Equal("https://nuget.org/api/v2/", sources[0].Source);
             Assert.False(sources[0].IsEnabled);
         }
 
@@ -125,7 +145,7 @@ namespace NuGet.VisualStudio.Test
             PackageSource activePackageSource = provider.ActivePackageSource;
 
             // Assert
-            AssertPackageSource(activePackageSource, "NuGet official package source", "https://go.microsoft.com/fwlink/?LinkID=230477");
+            AssertPackageSource(activePackageSource, "NuGet official package source", "https://nuget.org/api/v2/");
         }
 
         [Fact]
