@@ -182,7 +182,7 @@ namespace NuGet.VisualStudio
 
         private void RunFinished()
         {
-            if (_projectItem != null && _project == null)
+            if (_projectItem != null)
             {
                 _project = _projectItem.ContainingProject;
             }
@@ -207,6 +207,11 @@ namespace NuGet.VisualStudio
             DTE = (DTE)automationObject;
             var vsTemplatePath = (string)customParams[0];
             _configuration = GetConfigurationFromVsTemplateFile(vsTemplatePath);
+
+            // we need to reset these to null every time the template runs so that we can distinguish 
+            // between ItemTemplate and ProjectTemplate
+            _project = null;
+            _projectItem = null;
         }
 
         internal virtual void ShowErrorMessage(string message)
