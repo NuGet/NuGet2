@@ -32,7 +32,7 @@ namespace NuGet.VisualStudio.Test
 
             var package = NuGet.Test.PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" }, tools: new[] { "init.ps1", "install.ps1" });
             sourceRepository.AddPackage(package);
-            var installer = new VsPackageInstaller(packageManagerFactory.Object, scriptExecutor.Object, packageRepositoryFactory.Object);
+            var installer = new VsPackageInstaller(packageManagerFactory.Object, scriptExecutor.Object, packageRepositoryFactory.Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object);
 
             // Act
             installer.InstallPackage(@"x:\test", project, "foo", new Version("1.0"), ignoreDependencies: false);
@@ -64,7 +64,7 @@ namespace NuGet.VisualStudio.Test
 
             var package = NuGet.Test.PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" }, tools: new[] { "init.ps1", "install.ps1" });
             sourceRepository.AddPackage(package);
-            var installer = new VsPackageInstaller(packageManagerFactory.Object, scriptExecutor.Object, new Mock<IPackageRepositoryFactory>().Object);
+            var installer = new VsPackageInstaller(packageManagerFactory.Object, scriptExecutor.Object, new Mock<IPackageRepositoryFactory>().Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object);
 
             // Act
             installer.InstallPackage(sourceRepository, project, "foo", new SemanticVersion("1.0"), ignoreDependencies: false);
@@ -97,7 +97,7 @@ namespace NuGet.VisualStudio.Test
 
             var package = NuGet.Test.PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" }, tools: new[] { "init.ps1", "install.ps1" });
             sourceRepository.AddPackage(package);
-            var installer = new VsPackageInstaller(packageManagerFactory.Object, scriptExecutor.Object, new Mock<IPackageRepositoryFactory>().Object);
+            var installer = new VsPackageInstaller(packageManagerFactory.Object, scriptExecutor.Object, new Mock<IPackageRepositoryFactory>().Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object);
 
             // Act
             installer.InstallPackage(sourceRepository, project, "foo", new SemanticVersion("1.0"), ignoreDependencies: false);
@@ -131,7 +131,7 @@ namespace NuGet.VisualStudio.Test
 
             var package = NuGet.Test.PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" }, tools: new[] { "init.ps1", "install.ps1" });
             sourceRepository.AddPackage(package);
-            var installer = new VsPackageInstaller(packageManagerFactory.Object, scriptExecutor.Object, new Mock<IPackageRepositoryFactory>().Object);
+            var installer = new VsPackageInstaller(packageManagerFactory.Object, scriptExecutor.Object, new Mock<IPackageRepositoryFactory>().Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object);
 
             // Act
             installer.InstallPackage(sourceRepository, project, "foo", new SemanticVersion("1.0"), ignoreDependencies: false);
