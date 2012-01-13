@@ -340,7 +340,7 @@ namespace NuGet.Tools
         {
             get
             {
-                if (!_isVisualizerSupported == null)
+                if (_isVisualizerSupported == null)
                 {
                     _isVisualizerSupported = _visualizerSupportedSKUs.Contains(_dte.Edition, StringComparer.OrdinalIgnoreCase);
                 }
