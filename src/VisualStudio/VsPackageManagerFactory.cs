@@ -88,6 +88,7 @@ namespace NuGet.VisualStudio
             RepositoryInfo info = GetRepositoryInfo();
             return new VsPackageManager(_solutionManager,
                                         repository,
+                                        _fileSystemProvider,
                                         info.FileSystem,
                                         info.Repository,
                                         _recentPackageRepository,

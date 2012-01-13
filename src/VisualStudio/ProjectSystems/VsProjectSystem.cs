@@ -16,17 +16,29 @@ using Project = EnvDTE.Project;
 
 namespace NuGet.VisualStudio
 {
-    public class VsProjectSystem : PhysicalFileSystem, IProjectSystem, IVsProjectSystem, IComparer<IPackageFile>
+    public class VsProjectSystem : IProjectSystem, IVsProjectSystem, IComparer<IPackageFile>
     {
         private const string BinDir = "bin";
         private static readonly string[] AssemblyReferencesExtensions = new[] { ".dll", ".exe", ".winmd" };
 
+        private readonly IFileSystem _baseFileSystem;
         private FrameworkName _targetFramework;
 
-        public VsProjectSystem(Project project)
-            : base(project.GetFullPath())
+        public VsProjectSystem(Project project, IFileSystemProvider fileSystemProvider)
         {
             Project = project;
+            _baseFileSystem =  fileSystemProvider.GetFileSystem(project.GetFullPath());
+        }
+
+        public ILogger Logger
+        {
+            get { return _baseFileSystem.Logger; }
+            set { _baseFileSystem.Logger = value; }
+        }
+
+        public string Root
+        {
+            get { return _baseFileSystem.Root; }
         }
 
         protected Project Project
@@ -63,19 +75,19 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public override void AddFile(string path, Stream stream)
+        public virtual void AddFile(string path, Stream stream)
         {
             bool fileExistsInProject = FileExistsInProject(path);
 
             // If the file exists on disk but not in the project then skip it
-            if (base.FileExists(path) && !fileExistsInProject)
+            if (_baseFileSystem.FileExists(path) && !fileExistsInProject)
             {
                 Logger.Log(MessageLevel.Warning, VsResources.Warning_FileAlreadyExists, path);
             }
             else
             {
                 EnsureCheckedOutIfExists(path);
-                base.AddFile(path, stream);
+                _baseFileSystem.AddFile(path, stream);
                 if (!fileExistsInProject)
                 {
                     AddFileToProject(path);
@@ -83,10 +95,10 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public override void DeleteDirectory(string path, bool recursive = false)
+        public void DeleteDirectory(string path, bool recursive = false)
         {
             // Only delete this folder if it is empty and we didn't specify that we want to recurse
-            if (!recursive && (base.GetFiles(path, "*.*").Any() || base.GetDirectories(path).Any()))
+            if (!recursive && (GetFiles(path, "*.*").Any() || GetDirectories(path).Any()))
             {
                 Logger.Log(MessageLevel.Warning, VsResources.Warning_DirectoryNotEmpty, path);
                 return;
@@ -98,7 +110,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public override void DeleteFile(string path)
+        public void DeleteFile(string path)
         {
             if (Project.DeleteProjectItem(path))
             {
@@ -235,15 +247,10 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public override bool FileExists(string path)
+        public bool FileExists(string path)
         {
             // Only check the project system if the file is on disk to begin with
-            if (base.FileExists(path))
-            {
-                // See if the file is in the project system
-                return FileExistsInProject(path);
-            }
-            return false;
+            return _baseFileSystem.FileExists(path) || FileExistsInProject(path);
         }
 
         private bool FileExistsInProject(string path)
@@ -289,14 +296,14 @@ namespace NuGet.VisualStudio
             return path;
         }
 
-        public override IEnumerable<string> GetFiles(string path, string filter)
+        public IEnumerable<string> GetFiles(string path, string filter)
         {
             // Get all physical files
             return from p in Project.GetChildItems(path, filter, VsConstants.VsProjectItemKindPhysicalFile)
                    select p.Name;
         }
 
-        public override IEnumerable<string> GetDirectories(string path)
+        public virtual IEnumerable<string> GetDirectories(string path)
         {
             // Get all physical folders
             return from p in Project.GetChildItems(path, "*.*", VsConstants.VsProjectItemKindPhysicalFolder)
@@ -341,30 +348,6 @@ namespace NuGet.VisualStudio
             return null;
         }
 
-        public int Compare(IPackageFile x, IPackageFile y)
-        {
-            // BUG 636: We sort files so that they are added in the correct order
-            // e.g aspx before aspx.cs
-
-            if (x.Path.Equals(y.Path, StringComparison.OrdinalIgnoreCase))
-            {
-                return 0;
-            }
-
-            // Add files that are prefixes of other files first
-            if (x.Path.StartsWith(y.Path, StringComparison.OrdinalIgnoreCase))
-            {
-                return -1;
-            }
-
-            if (y.Path.StartsWith(x.Path, StringComparison.OrdinalIgnoreCase))
-            {
-                return 1;
-            }
-
-            return y.Path.CompareTo(x.Path);
-        }
-
         public virtual bool IsSupportedFile(string path)
         {
             return !(Path.GetFileName(path).Equals("web.config", StringComparison.OrdinalIgnoreCase));
@@ -407,6 +390,55 @@ namespace NuGet.VisualStudio
 
             // Otherwise consider them equal if either of the values are null
             return true;
+        }
+
+        public string GetFullPath(string path)
+        {
+            return _baseFileSystem.GetFullPath(path);
+        }
+
+        public virtual bool DirectoryExists(string path)
+        {
+            return _baseFileSystem.DirectoryExists(path);
+        }
+
+        public Stream OpenFile(string path)
+        {
+            return _baseFileSystem.OpenFile(path);
+        }
+
+        public DateTimeOffset GetLastModified(string path)
+        {
+            return _baseFileSystem.GetLastModified(path);
+        }
+
+        public DateTimeOffset GetCreated(string path)
+        {
+            return _baseFileSystem.GetCreated(path);
+        }
+
+        public int Compare(IPackageFile x, IPackageFile y)
+        {
+            // BUG 636: We sort files so that they are added in the correct order
+            // e.g aspx before aspx.cs
+
+            if (x.Path.Equals(y.Path, StringComparison.OrdinalIgnoreCase))
+            {
+                return 0;
+            }
+
+            // Add files that are prefixes of other files first
+            if (x.Path.StartsWith(y.Path, StringComparison.OrdinalIgnoreCase))
+            {
+                return -1;
+            }
+
+            if (y.Path.StartsWith(x.Path, StringComparison.OrdinalIgnoreCase))
+            {
+                return 1;
+            }
+
+            return y.Path.CompareTo(x.Path);
         }
     }
 }

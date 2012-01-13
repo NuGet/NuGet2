@@ -22,7 +22,7 @@ namespace NuGet.VisualStudio.Test
             var project = TestUtils.GetProject("Foo");
             var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, projectRepository);
             var scriptExecutor = new Mock<IScriptExecutor>();
-            var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), sourceRepository, fileSystem, localRepository, new Mock<IRecentPackageRepository>().Object, 
+            var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository, new Mock<IRecentPackageRepository>().Object, 
                 new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
@@ -56,7 +56,7 @@ namespace NuGet.VisualStudio.Test
             var project = TestUtils.GetProject("Foo");
             var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, projectRepository);
             var scriptExecutor = new Mock<IScriptExecutor>();
-            var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), sourceRepository, fileSystem, localRepository, new Mock<IRecentPackageRepository>().Object, 
+            var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository, new Mock<IRecentPackageRepository>().Object, 
                 new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), false, false)).Returns(packageManager.Object);
@@ -87,7 +87,7 @@ namespace NuGet.VisualStudio.Test
             var project = TestUtils.GetProject("Foo");
             var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, projectRepository);
             var scriptExecutor = new Mock<IScriptExecutor>();
-            var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), sourceRepository, fileSystem, localRepository, new Mock<IRecentPackageRepository>().Object, 
+            var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository, new Mock<IRecentPackageRepository>().Object, 
                 new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), false, false)).Returns(packageManager.Object);
@@ -121,7 +121,7 @@ namespace NuGet.VisualStudio.Test
             var project = TestUtils.GetProject("Foo");
             var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, projectRepository);
             var scriptExecutor = new Mock<IScriptExecutor>();
-            var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), sourceRepository, fileSystem, localRepository, new Mock<IRecentPackageRepository>().Object, 
+            var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository, new Mock<IRecentPackageRepository>().Object, 
                 new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), false, false)).Returns(packageManager.Object);

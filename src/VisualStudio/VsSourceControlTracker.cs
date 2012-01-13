@@ -123,10 +123,15 @@ namespace NuGet.VisualStudio
                     {
                         IEnumerable<string> allFiles = Directory.EnumerateFiles(solutionRepositoryPath, "*.*",
                                                                                 SearchOption.AllDirectories);
+
                         foreach (string file in allFiles)
                         {
-                            activeFileSystem.AddFile(MakeRelativePath(file, solutionRepositoryPath), File.OpenRead(file),
-                                                     overrideIfExists: false);
+                            if (activeFileSystem.FileExists(file))
+                            {
+                                // If any file exists in source control assume the rest must have also been added.
+                                break;
+                            }
+                            activeFileSystem.AddFile(MakeRelativePath(file, solutionRepositoryPath), File.OpenRead(file));
                         }
                     }
                 }

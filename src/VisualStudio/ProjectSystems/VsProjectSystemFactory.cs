@@ -3,21 +3,22 @@ using System.Collections.Generic;
 using System.Globalization;
 using EnvDTE;
 using NuGet.VisualStudio.Resources;
+using ProjectThunk = System.Func<EnvDTE.Project, NuGet.VisualStudio.IFileSystemProvider, NuGet.IProjectSystem>;
 
 namespace NuGet.VisualStudio
 {
     public static class VsProjectSystemFactory
     {
-        private static Dictionary<string, Func<Project, IProjectSystem>> _factories = new Dictionary<string, Func<Project, IProjectSystem>>(StringComparer.OrdinalIgnoreCase) {
-            { VsConstants.WebApplicationProjectTypeGuid , project => new WebProjectSystem(project) },
-            { VsConstants.WebSiteProjectTypeGuid , project => new WebSiteProjectSystem(project) },
-            { VsConstants.FsharpProjectTypeGuid , project => new FSharpProjectSystem(project) },
-            { VsConstants.WixProjectTypeGuid , project => new WixProjectSystem(project) },
-            { VsConstants.JsProjectTypeGuid , project => new JsProjectSystem(project) },
+        private static Dictionary<string, ProjectThunk> _factories = new Dictionary<string, ProjectThunk>(StringComparer.OrdinalIgnoreCase) {
+            { VsConstants.WebApplicationProjectTypeGuid , (project, fileSystemProvider) => new WebProjectSystem(project, fileSystemProvider) },
+            { VsConstants.WebSiteProjectTypeGuid , (project, fileSystemProvider) => new WebSiteProjectSystem(project, fileSystemProvider) },
+            { VsConstants.FsharpProjectTypeGuid , (project, fileSystemProvider) => new FSharpProjectSystem(project, fileSystemProvider) },
+            { VsConstants.WixProjectTypeGuid , (project, fileSystemProvider) => new WixProjectSystem(project, fileSystemProvider) },
+            { VsConstants.JsProjectTypeGuid , (project, fileSystemProvider) => new JsProjectSystem(project, fileSystemProvider) },
         };
 
 
-        public static IProjectSystem CreateProjectSystem(Project project)
+        public static IProjectSystem CreateProjectSystem(Project project, IFileSystemProvider fileSystemProvider)
         {
             if (project == null)
             {
@@ -34,15 +35,15 @@ namespace NuGet.VisualStudio
             // Try to get a factory for the project type guid            
             foreach (var guid in project.GetProjectTypeGuids())
             {
-                Func<Project, IProjectSystem> factory;
+                ProjectThunk factory;
                 if (_factories.TryGetValue(guid, out factory))
                 {
-                    return factory(project);
+                    return factory(project, fileSystemProvider);
                 }
             }
 
             // Fall back to the default if we have no special project types
-            return new VsProjectSystem(project);
+            return new VsProjectSystem(project, fileSystemProvider);
         }
     }
 }

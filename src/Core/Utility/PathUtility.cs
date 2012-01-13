@@ -5,6 +5,20 @@ namespace NuGet
 {
     public static class PathUtility
     {
+        public static bool IsSubdirectory(string basePath, string path)
+        {
+            if (basePath == null)
+            {
+                throw new ArgumentNullException("basePath");
+            }
+            if (path == null)
+            {
+                throw new ArgumentNullException("path");
+            }
+            basePath = basePath.TrimEnd(Path.DirectorySeparatorChar);
+            return path.StartsWith(basePath, StringComparison.OrdinalIgnoreCase);
+        }
+
         public static string EnsureTrailingSlash(string path)
         {
             if (path == null)
@@ -70,5 +84,20 @@ namespace NuGet
             }
             return path;
         }
+
+        //public static bool PathEquals(string pathA, string pathB)
+        //{
+        //    if (pathA == null)
+        //    {
+        //        throw new ArgumentNullException("pathA");
+        //    }
+
+        //    if (pathB == null)
+        //    {
+        //        throw new ArgumentNullException("pathB");
+        //    }
+
+        //    return pathA.TrimEnd(Path.DirectorySeparatorChar).Equals(pathB.TrimEnd(Path.DirectorySeparatorChar));
+        //}
     }
 }

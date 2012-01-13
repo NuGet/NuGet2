@@ -48,16 +48,6 @@ namespace NuGet
 
         public virtual void AddFile(string path, Stream stream)
         {
-            AddFile(path, stream, overrideIfExists: true);
-        }
-
-        public virtual void AddFile(string path, Stream stream, bool overrideIfExists)
-        {
-            if (FileExists(path) && !overrideIfExists)
-            {
-                return;
-            }
-
             EnsureDirectory(Path.GetDirectoryName(path));
 
             using (Stream outputStream = File.Create(GetFullPath(path)))
