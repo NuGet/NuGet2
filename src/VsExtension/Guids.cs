@@ -11,6 +11,9 @@ namespace NuGet.Tools
         public const string guidNuGetToolsGroupString = "C0D88179-5D25-4982-BFE6-EC5FD59AC103";
         public const string guidNuGetPackagesRestoreGroupString = "B4B288EF-D5B7-4669-9D6A-ACD644F90AC8";
 
+        // any project system that wants to load NuGet when its project opens needs to activate a UI context with this GUID
+        public const string guidAutoLoadNuGetString = "65B1D035-27A5-4BBA-BAB9-5F61C1E2BC4A";
+
         public static readonly Guid guidNuGetConsoleCmdSet = new Guid(guidNuGetConsoleCmdSetString);
         public static readonly Guid guidNuGetDialogCmdSet = new Guid(guidNuGetDialogCmdSetString);
         public static readonly Guid guidNuGetToolsGroupCmdSet = new Guid(guidNuGetToolsGroupString);
