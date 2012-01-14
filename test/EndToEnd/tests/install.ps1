@@ -24,8 +24,9 @@ function Test-WebsiteSimpleInstall {
     # Assert
     Assert-Package $p AntiXSS
     Assert-SolutionPackage AntiXSS
-    Assert-Reference $p AntiXSSLibrary 4.0.0.0
-    Assert-Reference $p HtmlSanitizationLibrary 4.0.0.0}
+    Assert-Reference $p AntiXSSLibrary 4.2.0.0
+    Assert-Reference $p HtmlSanitizationLibrary 4.2.0.0
+}
 
 function Test-DiamondDependencies {
     param(

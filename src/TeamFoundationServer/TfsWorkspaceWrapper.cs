@@ -96,6 +96,7 @@ namespace NuGet.TeamFoundationServer
 
         public bool PendDelete(IEnumerable<string> paths, RecursionType recursionType)
         {
+            paths = paths.ToArray();
             if (paths.Any())
             {
                 return _workspace.PendDelete(paths.ToArray(), recursionType) > 0;
