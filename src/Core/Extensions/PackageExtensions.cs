@@ -169,6 +169,21 @@ namespace NuGet
             return source.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
         }
 
+        public static IQueryable<IPackage> FilterByPrerelease(this IQueryable<IPackage> packages, bool allowPrerelease)
+        {
+            if (packages == null)
+            {
+                return null;
+            }
+
+            if (!allowPrerelease)
+            {
+                packages = packages.Where(p => p.IsReleaseVersion());
+            }
+
+            return packages;
+        }
+
         /// <summary>
         /// Returns packages where the search text appears in the default set of properties to search. The default set includes Id, Description and Tags.
         /// </summary>

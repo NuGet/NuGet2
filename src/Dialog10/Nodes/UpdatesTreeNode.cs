@@ -23,11 +23,11 @@ namespace NuGet.Dialog.Providers
             _localRepository = localRepository;
         }
 
-        public override IQueryable<IPackage> GetPackages()
+        public override IQueryable<IPackage> GetPackages(bool allowPrereleaseVersions)
         {
             // We need to call ToList() here so that we don't evaluate the enumerable twice
             // when trying to count it.
-            IList<IPackage> updateCandidates = Repository.GetUpdates(_localRepository.GetPackages(), includePrerelease: Provider.IncludePrerelease, includeAllVersions: false).ToList();
+            IList<IPackage> updateCandidates = Repository.GetUpdates(_localRepository.GetPackages(), allowPrereleaseVersions, includeAllVersions: false).ToList();
 
             IList<FrameworkName> solutionFrameworks = Provider.SupportedFrameworks.Select(s => new FrameworkName(s)).ToList();
 

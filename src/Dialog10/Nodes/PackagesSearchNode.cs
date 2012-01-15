@@ -4,10 +4,8 @@ using Microsoft.VisualStudio.ExtensionsExplorer;
 
 namespace NuGet.Dialog.Providers
 {
-
     internal class PackagesSearchNode : PackagesTreeNodeBase
     {
-
         private string _searchText;
         private readonly PackagesTreeNodeBase _baseNode;
 
@@ -59,18 +57,18 @@ namespace NuGet.Dialog.Providers
             }
         }
 
-        public override IQueryable<IPackage> GetPackages()
+        public override IQueryable<IPackage> GetPackages(bool allowPrereleaseVersions)
         {
             if (!(_baseNode is UpdatesTreeNode))
             {
                 var simpleNode = _baseNode as SimpleTreeNode;
                 if (simpleNode != null)
                 {
-                    return simpleNode.Repository.Search(_searchText, Provider.SupportedFrameworks, allowPrereleaseVersions: false);
+                    return simpleNode.Repository.Search(_searchText, Provider.SupportedFrameworks, allowPrereleaseVersions);
                 }
             }
 
-            return _baseNode.GetPackages().Find(_searchText);
+            return _baseNode.GetPackages(allowPrereleaseVersions).Find(_searchText);
         }
     }
 }

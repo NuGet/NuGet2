@@ -28,7 +28,7 @@ namespace NuGet.Dialog.Test
             EmptyTreeNode node = CreateEmptyTreeNode();
 
             // Act
-            var producedPackages = node.GetPackages();
+            var producedPackages = node.GetPackages(allowPrereleaseVersions: true);
 
             // Assert
             Assert.Empty(producedPackages);

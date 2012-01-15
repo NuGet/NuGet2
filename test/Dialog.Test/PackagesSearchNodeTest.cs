@@ -40,10 +40,10 @@ namespace NuGet.Dialog.Test
 
             // Act
             node.SetSearchText("B");
-            var packages1 = node.GetPackages().ToList();
+            var packages1 = node.GetPackages(allowPrereleaseVersions: true).ToList();
 
             node.SetSearchText("A1");
-            var packages2 = node.GetPackages().ToList();
+            var packages2 = node.GetPackages(allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(0, packages1.Count);
@@ -59,7 +59,7 @@ namespace NuGet.Dialog.Test
             PackagesSearchNode node = CreatePackagesSearchNode("A", 5);
 
             // Act
-            var packages = node.GetPackages().ToList();
+            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(5, packages.Count);
@@ -88,7 +88,7 @@ namespace NuGet.Dialog.Test
             var node = new PackagesSearchNode(provider, parentTreeNode, baseTreeNode, "Azo");
 
             // Act
-            var packages = node.GetPackages().ToList();
+            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(2, packages.Count);
@@ -106,7 +106,7 @@ namespace NuGet.Dialog.Test
             PackagesSearchNode node = CreatePackagesSearchNode("B", 5);
 
             // Act
-            var packages = node.GetPackages().ToList();
+            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(0, packages.Count);
@@ -131,7 +131,7 @@ namespace NuGet.Dialog.Test
             var searchNode = CreatePackagesSearchNode("B", baseNode: updatesPackageNode);
 
             // Act
-            var packages = searchNode.GetPackages().ToList();
+            var packages = searchNode.GetPackages(allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(1, packages.Count);
@@ -139,20 +139,67 @@ namespace NuGet.Dialog.Test
             Assert.Equal(new SemanticVersion("2.0"), packages[0].Version);
         }
 
+        [Fact]
+        public void GetPackagesReturnPrereleasePackagesIfToldSo()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("Azo1", "2.0"));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("Azo2", "3.0-alpha"));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B1", "2.0"));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B2", "4.0"));
+
+            IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
+            PackagesProviderBase provider = new MockPackagesProvider()
+                                            {
+                                                IncludePrerelease = true
+                                            };
+            var baseNode = new SimpleTreeNode(provider, "Online", parentTreeNode, sourceRepository);
+
+            var searchNode = new PackagesSearchNode(provider, parentTreeNode, baseNode, "Azo");
+
+            // Act
+            var packages = searchNode.GetPackages(allowPrereleaseVersions: true).ToList();
+
+            // Assert
+            Assert.Equal(2, packages.Count);
+            Assert.Equal("Azo1", packages[0].Id);
+            Assert.Equal(new SemanticVersion("2.0"), packages[0].Version);
+
+            Assert.Equal("Azo2", packages[1].Id);
+            Assert.Equal(new SemanticVersion("3.0-alpha"), packages[1].Version);
+        }
+
+        [Fact]
+        public void GetPackagesDoNotReturnPrereleasePackagesIfToldSo()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("Azo1", "2.0"));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("Azo2", "3.0-alpha"));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B1", "2.0"));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B2", "4.0"));
+
+            IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
+            PackagesProviderBase provider = new MockPackagesProvider();
+            var baseNode = new SimpleTreeNode(provider, "Online", parentTreeNode, sourceRepository);
+
+            var searchNode = new PackagesSearchNode(provider, parentTreeNode, baseNode, "Azo");
+
+            // Act
+            var packages = searchNode.GetPackages(allowPrereleaseVersions: false).ToList();
+
+            // Assert
+            Assert.Equal(1, packages.Count);
+            Assert.Equal("Azo1", packages[0].Id);
+            Assert.Equal(new SemanticVersion("2.0"), packages[0].Version);
+        }
+
         private static PackagesSearchNode CreatePackagesSearchNode(string searchTerm, int numberOfPackages = 1, bool collapseVersions = true, PackagesTreeNodeBase baseNode = null)
         {
             PackagesProviderBase provider = new MockPackagesProvider();
-
             IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
-            PackagesTreeNodeBase baseTreeNode;
-            if (baseNode != null)
-            {
-                baseTreeNode = baseNode;
-            }
-            else
-            {
-                baseTreeNode = new MockTreeNode(parentTreeNode, provider, numberOfPackages, collapseVersions);
-            }
+            PackagesTreeNodeBase baseTreeNode = baseNode ?? new MockTreeNode(parentTreeNode, provider, numberOfPackages, collapseVersions);
             return new PackagesSearchNode(provider, parentTreeNode, baseTreeNode, searchTerm);
         }
 

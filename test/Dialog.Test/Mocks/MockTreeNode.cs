@@ -23,7 +23,7 @@ namespace NuGet.Dialog.Test
             }
         }
 
-        public override IQueryable<IPackage> GetPackages()
+        public override IQueryable<IPackage> GetPackages(bool allowPrereleaseVersions)
         {
             if (_packages == null)
             {
@@ -35,13 +35,12 @@ namespace NuGet.Dialog.Test
                 _packages = packages;
             }
 
-            return _packages.AsQueryable();
+            return _packages.AsQueryable().FilterByPrerelease(allowPrereleaseVersions);
         }
 
         public MockTreeNode(IVsExtensionsTreeNode parent, PackagesProviderBase provider, int numberOfPackages, bool collapseVersions)
             : base(parent, provider, collapseVersions)
         {
-
             _numberOfPackages = numberOfPackages;
         }
 

@@ -44,9 +44,9 @@ namespace NuGet.Dialog.Providers
             }
         }
 
-        public override IQueryable<IPackage> GetPackages()
+        public override IQueryable<IPackage> GetPackages(bool allowPrereleaseVersions)
         {
-            return Repository.GetPackages(Provider.SupportedFrameworks);
+            return Repository.Search(searchTerm: null, targetFrameworks: Provider.SupportedFrameworks, allowPrereleaseVersions: allowPrereleaseVersions);
         }
     }
 }

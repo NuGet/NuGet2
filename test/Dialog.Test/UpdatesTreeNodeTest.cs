@@ -41,7 +41,7 @@ namespace NuGet.Dialog.Test
             sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.5"));
 
             // Act
-            var packages = node.GetPackages().ToList();
+            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(1, packages.Count);
@@ -62,7 +62,7 @@ namespace NuGet.Dialog.Test
             sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "1.5"));
 
             // Act
-            var packages = node.GetPackages().ToList();
+            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(0, packages.Count);
@@ -84,7 +84,7 @@ namespace NuGet.Dialog.Test
             sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "0.9"));
 
             // Act
-            var packages = node.GetPackages().ToList();
+            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(1, packages.Count);
@@ -109,7 +109,7 @@ namespace NuGet.Dialog.Test
             sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "2.0"));
 
             // Act
-            var packages = node.GetPackages().ToList();
+            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(2, packages.Count);
@@ -134,7 +134,7 @@ namespace NuGet.Dialog.Test
             sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "2.0"));
 
             // Act
-            var packages = node.GetPackages().ToList();
+            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(2, packages.Count);
@@ -161,7 +161,7 @@ namespace NuGet.Dialog.Test
             var node = new UpdatesTreeNode(provider, "Mock", parentTreeNode, localRepository, sourceRepository);
 
             // Act
-            var packages = node.GetPackages().ToList();
+            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(1, packages.Count);

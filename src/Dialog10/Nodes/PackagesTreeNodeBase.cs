@@ -235,7 +235,7 @@ namespace NuGet.Dialog.Providers
         /// Get all packages belonging to this node.
         /// </summary>
         /// <returns></returns>
-        public abstract IQueryable<IPackage> GetPackages();
+        public abstract IQueryable<IPackage> GetPackages(bool allowPrereleaseVersions);
 
         /// <summary>
         /// Helper function to raise property changed events
@@ -328,7 +328,7 @@ namespace NuGet.Dialog.Providers
 
             if (_query == null)
             {
-                IQueryable<IPackage> query = GetPackages();
+                IQueryable<IPackage> query = GetPackages(Provider.IncludePrerelease);
 
                 if (CollapseVersions)
                 {

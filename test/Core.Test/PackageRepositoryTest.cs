@@ -135,6 +135,25 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void FindPackagesReturnsPrereleasePackagesIfTheFlagIsSetToTrue()
+        {
+            // Arrange
+            var term = "B";
+            var repo = GetRemoteRepository(includePrerelease: true);
+
+            // Act
+            var packages = repo.GetPackages().Find(term);
+
+            // Assert
+            Assert.Equal(packages.Count(), 2);
+            packages = packages.OrderBy(p => p.Id);
+            Assert.Equal(packages.ElementAt(0).Id, "B");
+            Assert.Equal(packages.ElementAt(0).Version, new SemanticVersion("1.0"));
+            Assert.Equal(packages.ElementAt(1).Id, "B");
+            Assert.Equal(packages.ElementAt(1).Version, new SemanticVersion("1.0-beta"));
+        }
+
+        [Fact]
         public void FindPackagesReturnsPackagesWithTerm()
         {
             // Arrange
@@ -362,13 +381,20 @@ namespace NuGet.Test
             return repository.Object;
         }
 
-        private static IPackageRepository GetRemoteRepository()
+        private static IPackageRepository GetRemoteRepository(bool includePrerelease = false)
         {
             Mock<IPackageRepository> repository = new Mock<IPackageRepository>();
-            var packages = new[] { CreateMockPackage("A", "1.0", "scripts style"), 
+            var packages = new List<IPackage> {
+                                   CreateMockPackage("A", "1.0", "scripts style"), 
                                    CreateMockPackage("B", "1.0", "testing"), 
                                    CreateMockPackage("C", "2.0", "xaml"), 
                                    CreateMockPackage("A", "1.2", "a updated desc") };
+            if (includePrerelease)
+            {
+                packages.Add(CreateMockPackage("A", "2.0-alpha", "a prerelease package"));
+                packages.Add(CreateMockPackage("B", "1.0-beta", "another prerelease package"));
+            }
+
             repository.Setup(c => c.GetPackages()).Returns(() => packages.AsQueryable());
             return repository.Object;
         }

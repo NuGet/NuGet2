@@ -33,7 +33,7 @@ namespace NuGet.Dialog.Providers
             }
         }
 
-        public override IQueryable<IPackage> GetPackages()
+        public override IQueryable<IPackage> GetPackages(bool allowPrereleaseVersions)
         {
             return Enumerable.Empty<IPackage>().AsQueryable();
         }
