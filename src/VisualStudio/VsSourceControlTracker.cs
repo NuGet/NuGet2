@@ -15,18 +15,20 @@ namespace NuGet.VisualStudio
         private readonly IVsTrackProjectDocuments2 _projectTracker;
         private readonly ISolutionManager _solutionManager;
         private readonly IFileSystemProvider _fileSystemProvider;
+        private readonly ISettings _solutionSettings;
         private uint? _trackingCookie;
 
         [ImportingConstructor]
-        public VsSourceControlTracker(ISolutionManager solutionManager, IFileSystemProvider fileSystemProvider) :
-            this(solutionManager, fileSystemProvider, ServiceLocator.GetGlobalService<SVsTrackProjectDocuments, IVsTrackProjectDocuments2>())
+        public VsSourceControlTracker(ISolutionManager solutionManager, IFileSystemProvider fileSystemProvider, ISettings solutionSettings) :
+            this(solutionManager, fileSystemProvider, ServiceLocator.GetGlobalService<SVsTrackProjectDocuments, IVsTrackProjectDocuments2>(), solutionSettings)
         {
         }
 
         public VsSourceControlTracker(
             ISolutionManager solutionManager, 
             IFileSystemProvider fileSystemProvider,
-            IVsTrackProjectDocuments2 projectTracker)
+            IVsTrackProjectDocuments2 projectTracker,
+            ISettings solutionSettings)
         {
             if (projectTracker == null)
             {
@@ -36,6 +38,7 @@ namespace NuGet.VisualStudio
             _solutionManager = solutionManager;
             _projectTracker = projectTracker;
             _fileSystemProvider = fileSystemProvider;
+            _solutionSettings = solutionSettings;
             _projectDocumentListener = new TrackProjectDocumentEventListener(this);
 
             _solutionManager.SolutionOpened += OnSolutionOpened;
@@ -79,7 +82,7 @@ namespace NuGet.VisualStudio
             }
 
             // don't do anything if user explicitly disables source control integration
-            if (_fileSystemProvider.IsSourceControlDisabled(_solutionManager.SolutionDirectory))
+            if (_solutionSettings.IsSourceControlDisabled())
             {
                 return;
             }
@@ -120,10 +123,15 @@ namespace NuGet.VisualStudio
                     {
                         IEnumerable<string> allFiles = Directory.EnumerateFiles(solutionRepositoryPath, "*.*",
                                                                                 SearchOption.AllDirectories);
+
                         foreach (string file in allFiles)
                         {
-                            activeFileSystem.AddFile(MakeRelativePath(file, solutionRepositoryPath), File.OpenRead(file),
-                                                     overrideIfExists: false);
+                            if (activeFileSystem.FileExists(file))
+                            {
+                                // If any file exists in source control assume the rest must have also been added.
+                                break;
+                            }
+                            activeFileSystem.AddFile(MakeRelativePath(file, solutionRepositoryPath), File.OpenRead(file));
                         }
                     }
                 }

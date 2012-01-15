@@ -38,6 +38,7 @@ namespace NuGet.Tools
     [ProvideOptionPage(typeof(PackageSourceOptionsPage), "Package Manager", "Package Sources", 113, 114, true)]
     [ProvideOptionPage(typeof(GeneralOptionPage), "Package Manager", "General", 113, 115, true)]
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
+    [ProvideAutoLoad(GuidList.guidAutoLoadNuGetString)]
     [FontAndColorsRegistration(
         "Package Manager Console",
         NuGetConsole.Implementation.GuidList.GuidPackageManagerConsoleFontAndColorCategoryString,
@@ -338,7 +339,7 @@ namespace NuGet.Tools
         {
             get
             {
-                if (!_isVisualizerSupported == null)
+                if (_isVisualizerSupported == null)
                 {
                     _isVisualizerSupported = _visualizerSupportedSKUs.Contains(_dte.Edition, StringComparer.OrdinalIgnoreCase);
                 }

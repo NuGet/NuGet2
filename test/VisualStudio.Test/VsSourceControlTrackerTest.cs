@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.Shell.Interop;
 using Moq;
+using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio.Test.Mocks;
 using Xunit;
@@ -22,7 +23,7 @@ namespace NuGet.VisualStudio.Test
 
             // Act
             var scTracker = new VsSourceControlTracker(
-                solutionManager.Object, fileSystemProvider.Object, projectDocumentsEvents.Object);
+                solutionManager.Object, fileSystemProvider.Object, projectDocumentsEvents.Object, new Mock<ISettings>().Object);
 
             // Assert
             uint cookie;
@@ -46,7 +47,7 @@ namespace NuGet.VisualStudio.Test
 
             // Act
             var scTracker = new VsSourceControlTracker(
-                solutionManager.Object, fileSystemProvider.Object, projectDocumentsEvents.Object);
+                solutionManager.Object, fileSystemProvider.Object, projectDocumentsEvents.Object, new Mock<ISettings>().Object);
             solutionManager.Raise(s => s.SolutionOpened += (o, e) => { }, EventArgs.Empty);
 
             // Assert
@@ -67,14 +68,12 @@ namespace NuGet.VisualStudio.Test
             solutionManager.Setup(s => s.IsSolutionOpen).Returns(true);
             solutionManager.Setup(s => s.SolutionDirectory).Returns("baz:\\foo");
 
-            var fileSystem = new MockFileSystem();
-            fileSystem.AddFile("nuget.config", @"<?xml version=""1.0"" ?><configuration><solution><add key=""disableSourceControlIntegration"" value=""true"" /></solution></configuration>");
-
-            fileSystemProvider.Setup(f => f.GetFileSystem("baz:\\foo\\.nuget")).Returns(fileSystem);
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration")).Returns("true");
 
             // Act
             var scTracker = new VsSourceControlTracker(
-                solutionManager.Object, fileSystemProvider.Object, projectDocumentsEvents.Object);
+                solutionManager.Object, fileSystemProvider.Object, projectDocumentsEvents.Object, settings.Object);
 
             // Assert
             uint cookie;
@@ -94,13 +93,11 @@ namespace NuGet.VisualStudio.Test
             solutionManager.Setup(s => s.IsSolutionOpen).Returns(false);
             solutionManager.Setup(s => s.SolutionDirectory).Returns("baz:\\foo");
 
-            var fileSystem = new MockFileSystem();
-            fileSystem.AddFile("nuget.config", @"<?xml version=""1.0"" ?><configuration><solution><add key=""disableSourceControlIntegration"" value=""true"" /></solution></configuration>");
-
-            fileSystemProvider.Setup(f => f.GetFileSystem("baz:\\foo\\.nuget")).Returns(fileSystem);
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetValue("solution", "disableSourceControlIntegration")).Returns("true");
 
             var scTracker = new VsSourceControlTracker(
-                solutionManager.Object, fileSystemProvider.Object, projectDocumentsEvents.Object);
+                solutionManager.Object, fileSystemProvider.Object, projectDocumentsEvents.Object, settings.Object);
 
             // Act
             solutionManager.Raise(s => s.SolutionOpened += (o, e) => { }, EventArgs.Empty);
@@ -127,7 +124,7 @@ namespace NuGet.VisualStudio.Test
             fileSystemProvider.Setup(f => f.GetFileSystem("baz:\\foo\\.nuget")).Returns(fileSystem);
 
             var scTracker = new VsSourceControlTracker(
-                solutionManager.Object, fileSystemProvider.Object, projectDocumentsEvents.Object);
+                solutionManager.Object, fileSystemProvider.Object, projectDocumentsEvents.Object, new Mock<ISettings>().Object);
 
             // Act
             solutionManager.Raise(s => s.SolutionClosed += (o, e) => { }, EventArgs.Empty);
@@ -154,7 +151,7 @@ namespace NuGet.VisualStudio.Test
             var repositorySettingsLazy = new Lazy<IRepositorySettings>(() => repositorySettings.Object);
 
             var scTracker = new VsSourceControlTracker(
-                solutionManager.Object, fileSystemProvider.Object, projectDocumentsEvents)
+                solutionManager.Object, fileSystemProvider.Object, projectDocumentsEvents, new Mock<ISettings>().Object)
                                 {
                                     RepositorySettings = repositorySettingsLazy
                                 };

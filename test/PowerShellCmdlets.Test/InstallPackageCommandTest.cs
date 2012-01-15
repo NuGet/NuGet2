@@ -292,7 +292,7 @@ namespace NuGet.PowerShell.Commands.Test
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
             var packageRepository = new MockPackageRepository { PackageUtility.CreatePackage("A", "1.0.0-a") };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object,
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object,
                 recentPackageRepository.Object, null);
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
@@ -316,7 +316,7 @@ namespace NuGet.PowerShell.Commands.Test
             sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
             var packageRepository = new MockPackageRepository { packageA };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
@@ -349,7 +349,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             var packageRepository = new MockPackageRepository { packageA1, packageA2 };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
@@ -375,10 +375,11 @@ namespace NuGet.PowerShell.Commands.Test
 
             var packageRepository = new MockPackageRepository { packageA1, packageA2 };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
+            var fileOperations = new Mock<IVsCommonOperations>();
             // Act
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, new Mock<IHttpClientEvents>().Object, null, new Mock<IVsCommonOperations>().Object);
             cmdlet.Id = "A";
@@ -389,6 +390,7 @@ namespace NuGet.PowerShell.Commands.Test
             sharedRepository.Verify(s => s.AddPackage(packageA1), Times.Once());
             sharedRepository.Verify(s => s.AddPackage(packageA2), Times.Never());
         }
+
 
         [Fact]
         public void InstallPackageInstallUnlistedPackageIfVersionIsSet()
@@ -402,7 +404,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             var packageRepository = new MockPackageRepository { packageA1, packageA2 };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
@@ -429,7 +431,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             var packageRepository = new MockPackageRepository { packageA1, packageA2 };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
@@ -458,9 +460,11 @@ namespace NuGet.PowerShell.Commands.Test
 
             var packageRepository = new MockPackageRepository { packageA, packageB };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
+
+            var fileOperations = new Mock<IVsCommonOperations>();
 
             // Act
             var cmdlet = new InstallPackageCommand(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsPackageSourceProvider>().Object, new Mock<IHttpClientEvents>().Object, null, new Mock<IVsCommonOperations>().Object);
@@ -486,7 +490,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             var packageRepository = new MockPackageRepository { packageA, packageB };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
@@ -514,7 +518,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             var packageRepository = new MockPackageRepository { packageA, packageB1, packageB2 };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
@@ -543,7 +547,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             var packageRepository = new MockPackageRepository { packageA, packageB1, packageB2, packageB3 };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
@@ -573,7 +577,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             var packageRepository = new MockPackageRepository { packageA, packageB1, packageB2 };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
@@ -601,7 +605,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             var packageRepository = new MockPackageRepository { packageA, packageB1, packageB2 };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
@@ -634,7 +638,7 @@ namespace NuGet.PowerShell.Commands.Test
             sharedRepository.Setup(s => s.AddPackage(packageA.Object)).Verifiable();
             var packageRepository = new MockPackageRepository { packageA.Object };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new MockFileSystem(), sharedRepository.Object,
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object,
                 recentPackageRepository.Object, new VsPackageInstallerEvents());
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
@@ -688,7 +692,8 @@ namespace NuGet.PowerShell.Commands.Test
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
             var packageManager = new VsPackageManager(
                 TestUtils.GetSolutionManagerWithProjects("foo"), 
-                packageRepository, 
+                packageRepository,
+                new Mock<IFileSystemProvider>().Object,
                 new MockFileSystem(), 
                 sharedRepository.Object,
                 recentPackageRepository.Object, 
@@ -730,7 +735,7 @@ namespace NuGet.PowerShell.Commands.Test
             }
 
             public MockVsPackageManager(IPackageRepository sourceRepository)
-                : base(new Mock<ISolutionManager>().Object, sourceRepository, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object)
+                : base(new Mock<ISolutionManager>().Object, sourceRepository, new Mock<IFileSystemProvider>().Object, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object)
             {
             }
 

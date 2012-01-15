@@ -20,8 +20,8 @@ namespace NuGet.VisualStudio
 
         private static readonly string[] _sourceFileExtensions = new[] { ".cs", ".vb" };
 
-        public WebSiteProjectSystem(Project project)
-            : base(project)
+        public WebSiteProjectSystem(Project project, IFileSystemProvider fileSystemProvider)
+            : base(project, fileSystemProvider)
         {
         }
 

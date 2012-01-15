@@ -71,6 +71,7 @@ namespace NuGet
                 return null;
             }
 
+           
             // Get the add element that matches the key and return null if it doesn't exist
             var element = FindElementByKey(sectionElement, key);
             if (element == null)

@@ -48,16 +48,16 @@ namespace NuGet.Dialog
         }
 
         private PackageManagerWindow(Project project,
-                                     DTE dte,
-                                     IVsPackageManagerFactory packageManagerFactory,
-                                     IPackageRepositoryFactory repositoryFactory,
-                                     IPackageSourceProvider packageSourceProvider,
-                                     IRecentPackageRepository recentPackagesRepository,
-                                     IHttpClientEvents httpClientEvents,
-                                     IProductUpdateService productUpdateService,
-                                     IPackageRestoreManager packageRestoreManager,
-                                     ISolutionManager solutionManager,
-                                     IOptionsPageActivator optionPageActivator)
+                                    DTE dte,
+                                    IVsPackageManagerFactory packageManagerFactory,
+                                    IPackageRepositoryFactory repositoryFactory,
+                                    IPackageSourceProvider packageSourceProvider,
+                                    IRecentPackageRepository recentPackagesRepository,
+                                    IHttpClientEvents httpClientEvents,
+                                    IProductUpdateService productUpdateService,
+                                    IPackageRestoreManager packageRestoreManager,
+                                    ISolutionManager solutionManager,
+                                    IOptionsPageActivator optionPageActivator)
             : base(F1Keyword)
         {
 

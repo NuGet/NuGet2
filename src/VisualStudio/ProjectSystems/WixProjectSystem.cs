@@ -5,8 +5,8 @@ namespace NuGet.VisualStudio
 {
     public class WixProjectSystem : VsProjectSystem
     {
-        public WixProjectSystem(Project project)
-            : base(project)
+        public WixProjectSystem(Project project, IFileSystemProvider fileSystemProvider)
+            : base(project, fileSystemProvider)
         {
         }
 

@@ -14,7 +14,6 @@ namespace NuGet.Dialog.Test
 {
     public class SolutionOnlineProviderTest
     {
-
         [Fact]
         public void ShowPrereleaseComboBoxIsTrue()
         {

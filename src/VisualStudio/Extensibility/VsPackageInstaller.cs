@@ -11,15 +11,21 @@ namespace NuGet.VisualStudio
         private readonly IVsPackageManagerFactory _packageManagerFactory;
         private readonly IScriptExecutor _scriptExecutor;
         private readonly IPackageRepositoryFactory _repositoryFactory;
+        private readonly IVsCommonOperations _vsCommonOperations;
+        private readonly ISolutionManager _solutionManager;
 
         [ImportingConstructor]
         public VsPackageInstaller(IVsPackageManagerFactory packageManagerFactory,
                                   IScriptExecutor scriptExecutor,
-                                  IPackageRepositoryFactory repositoryFactory)
+                                  IPackageRepositoryFactory repositoryFactory,
+                                  IVsCommonOperations vsCommonOperations,
+                                  ISolutionManager solutionManager)
         {
             _packageManagerFactory = packageManagerFactory;
             _scriptExecutor = scriptExecutor;
             _repositoryFactory = repositoryFactory;
+            _vsCommonOperations = vsCommonOperations;
+            _solutionManager = solutionManager;
         }
 
         public void InstallPackage(string source, Project project, string packageId, Version version, bool ignoreDependencies)
@@ -45,30 +51,42 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("project");
             }
 
-            IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager(repository, useFallbackForDependencies: false, addToRecent: false);
-            IProjectManager projectManager = packageManager.GetProjectManager(project);
-
-            EventHandler<PackageOperationEventArgs> installedHandler = (sender, e) =>
+            using (_vsCommonOperations.SaveSolutionExplorerNodeStates(_solutionManager))
             {
-                _scriptExecutor.ExecuteInitScript(e.InstallPath, e.Package, NullLogger.Instance);
-            };
+                IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager(repository,
+                                                                                               useFallbackForDependencies
+                                                                                                   : false,
+                                                                                               addToRecent: false);
+                IProjectManager projectManager = packageManager.GetProjectManager(project);
 
-            EventHandler<PackageOperationEventArgs> addedHandler = (sender, e) =>
-            {
-                _scriptExecutor.ExecuteScript(e.InstallPath, PowerShellScripts.Install, e.Package, project, NullLogger.Instance);
-            };
+                EventHandler<PackageOperationEventArgs> installedHandler = (sender, e) =>
+                                                                               {
+                                                                                   _scriptExecutor.ExecuteInitScript(
+                                                                                       e.InstallPath, e.Package,
+                                                                                       NullLogger.Instance);
+                                                                               };
 
-            try
-            {
-                projectManager.PackageReferenceAdded += addedHandler;
-                packageManager.PackageInstalled += installedHandler;
+                EventHandler<PackageOperationEventArgs> addedHandler = (sender, e) =>
+                                                                           {
+                                                                               _scriptExecutor.ExecuteScript(
+                                                                                   e.InstallPath,
+                                                                                   PowerShellScripts.Install, e.Package,
+                                                                                   project, NullLogger.Instance);
+                                                                           };
 
-                packageManager.InstallPackage(projectManager, packageId, version, ignoreDependencies, allowPrereleaseVersions: true, logger: NullLogger.Instance);
-            }
-            finally
-            {
-                projectManager.PackageReferenceAdded -= addedHandler;
-                packageManager.PackageInstalled -= installedHandler;
+                try
+                {
+                    projectManager.PackageReferenceAdded += addedHandler;
+                    packageManager.PackageInstalled += installedHandler;
+
+                    packageManager.InstallPackage(projectManager, packageId, version, ignoreDependencies,
+                                                  allowPrereleaseVersions: true, logger: NullLogger.Instance);
+                }
+                finally
+                {
+                    projectManager.PackageReferenceAdded -= addedHandler;
+                    packageManager.PackageInstalled -= installedHandler;
+                }
             }
         }
     }

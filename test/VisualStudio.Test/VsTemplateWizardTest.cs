@@ -442,8 +442,8 @@ namespace NuGet.VisualStudio.Test
             // Arrange
             var mockProject = new Mock<Project>().Object;
             var installerMock = new Mock<IVsPackageInstaller>();
-            installerMock.Setup(i => i.InstallPackage(@"C:\Some", mockProject, "MyPackage", new SemanticVersion(1, 0, 0, 0), true)).
-                Throws<InvalidOperationException>();
+            installerMock.Setup(i => i.InstallPackage(@"C:\Some", mockProject, "MyPackage", new SemanticVersion(1, 0, 0, 0), true))
+                .Throws(new InvalidOperationException("But I don't want to be installed."));
             var document = BuildDocument("template",
                 BuildPackageElement("MyPackage", "1.0"),
                 BuildPackageElement("MyOtherPackage", "2.0"));
@@ -466,7 +466,7 @@ namespace NuGet.VisualStudio.Test
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0 to project...");
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0 to project...");
             Assert.Equal(
-                "Could not add all required packages to the project. The following packages failed to install from 'C:\\Some':\r\n\r\nMyPackage.1.0",
+                "Could not add all required packages to the project. The following packages failed to install from 'C:\\Some':\r\n\r\nMyPackage.1.0 : But I don't want to be installed.",
                 templateWizard.ErrorMessages.Single());
         }
 
