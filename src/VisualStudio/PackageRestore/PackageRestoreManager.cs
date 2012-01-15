@@ -35,8 +35,7 @@ namespace NuGet.VisualStudio
             ISolutionManager solutionManager,
             IFileSystemProvider fileSystemProvider,
             IPackageRepositoryFactory packageRepositoryFactory,
-            IVsPackageManagerFactory packageManagerFactory,
-            ISettings settings) :
+            IVsPackageManagerFactory packageManagerFactory) :
             this(ServiceLocator.GetInstance<DTE>(),
                  solutionManager,
                  fileSystemProvider,
