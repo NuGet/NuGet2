@@ -330,38 +330,11 @@ namespace NuGet.Options
             }
         }
 
-        private readonly Color SelectionFocusGradientLightColor = Color.FromArgb(0xF9, 0xFC, 0xFF);
-        private readonly Color SelectionFocusGradientDarkColor = Color.FromArgb(0xC9, 0xE0, 0xFC);
-        private readonly Color SelectionFocusBorderColor = Color.FromArgb(0x89, 0xB0, 0xDF);
-
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Drawing.Graphics.MeasureString(System.String,System.Drawing.Font,System.Int32,System.Drawing.StringFormat)")]
         private void PackageSourcesListBox_DrawItem(object sender, DrawItemEventArgs e)
         {
             Graphics graphics = e.Graphics;
-
-            // Draw the background of the ListBox control for each item.
-            if (e.BackColor.Name == KnownColor.Highlight.ToString())
-            {
-                using (var gradientBrush = new LinearGradientBrush(e.Bounds, SelectionFocusGradientLightColor, SelectionFocusGradientDarkColor, 90.0F))
-                {
-                    graphics.FillRectangle(gradientBrush, e.Bounds);
-                }
-                using (var borderPen = new Pen(SelectionFocusBorderColor))
-                {
-                    graphics.DrawRectangle(borderPen, e.Bounds.Left, e.Bounds.Top, e.Bounds.Width - 1, e.Bounds.Height - 1);
-                }
-            }
-            else
-            {
-                // alternate background color for even/odd rows
-                Color backColor = e.Index % 2 == 0
-                                      ? Color.FromKnownColor(KnownColor.Window)
-                                      : Color.FromArgb(0xF6, 0xF6, 0xF6);
-                using (Brush backBrush = new SolidBrush(backColor))
-                {
-                    graphics.FillRectangle(backBrush, e.Bounds);
-                }
-            }
+            e.DrawBackground();
 
             if (e.Index < 0 || e.Index >= PackageSourcesListBox.Items.Count)
             {
@@ -371,8 +344,7 @@ namespace NuGet.Options
             PackageSource currentItem = (PackageSource)PackageSourcesListBox.Items[e.Index];
 
             using (StringFormat drawFormat = new StringFormat())
-            using (Brush foreBrush = new SolidBrush(Color.FromKnownColor(KnownColor.WindowText)))
-            using (Brush sourceBrush = new SolidBrush(Color.FromKnownColor(KnownColor.Navy)))
+            using (Brush foreBrush = new SolidBrush(e.ForeColor))
             using (Font italicFont = new Font(e.Font, FontStyle.Italic))
             {
                 drawFormat.Alignment = StringAlignment.Near;
@@ -430,7 +402,7 @@ namespace NuGet.Options
                         nameBounds.Bottom,
                         textWidth,
                         e.Bounds.Bottom - nameBounds.Bottom);
-                    graphics.DrawString(currentItem.Source, italicFont, sourceBrush, sourceBounds, drawFormat);
+                    graphics.DrawString(currentItem.Source, italicFont, foreBrush, sourceBounds, drawFormat);
                 }
                 finally
                 {
