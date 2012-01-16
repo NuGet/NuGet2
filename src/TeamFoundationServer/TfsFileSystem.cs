@@ -107,7 +107,7 @@ namespace NuGet.TeamFoundationServer
         public override bool FileExists(string path)
         {
             var fullPath = GetFullPath(path);
-            return base.FileExists(path) && Workspace.ItemExists(fullPath, ItemType.File);
+            return base.FileExists(path) || Workspace.ItemExists(fullPath, ItemType.File);
         }
 
         public override void DeleteDirectory(string path, bool recursive = false)
