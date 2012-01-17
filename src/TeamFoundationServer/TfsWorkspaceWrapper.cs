@@ -109,7 +109,7 @@ namespace NuGet.TeamFoundationServer
             try
             {
                 var serverPath = _workspace.TryGetServerItemForLocalItem(path);
-                return !String.IsNullOrEmpty(serverPath) && _workspace.VersionControlServer.ServerItemExists(serverPath, ItemType.Any);
+                return _workspace.VersionControlServer.ServerItemExists(serverPath, ItemType.Any);
             }
             catch (ItemNotFoundException)
             {
