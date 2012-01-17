@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -29,7 +28,6 @@ namespace NuGet.VisualStudio
         {
             Project = project;
             _baseFileSystem =  fileSystemProvider.GetFileSystem(project.GetFullPath());
-            Debug.Assert(_baseFileSystem != null);
         }
 
         public ILogger Logger
@@ -100,7 +98,7 @@ namespace NuGet.VisualStudio
         public void DeleteDirectory(string path, bool recursive = false)
         {
             // Only delete this folder if it is empty and we didn't specify that we want to recurse
-            if (!recursive && (_baseFileSystem.GetFiles(path, "*.*").Any() || _baseFileSystem.GetDirectories(path).Any()))
+            if (!recursive && (GetFiles(path, "*.*").Any() || GetDirectories(path).Any()))
             {
                 Logger.Log(MessageLevel.Warning, VsResources.Warning_DirectoryNotEmpty, path);
                 return;

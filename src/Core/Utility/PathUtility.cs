@@ -84,5 +84,20 @@ namespace NuGet
             }
             return path;
         }
+
+        //public static bool PathEquals(string pathA, string pathB)
+        //{
+        //    if (pathA == null)
+        //    {
+        //        throw new ArgumentNullException("pathA");
+        //    }
+
+        //    if (pathB == null)
+        //    {
+        //        throw new ArgumentNullException("pathB");
+        //    }
+
+        //    return pathA.TrimEnd(Path.DirectorySeparatorChar).Equals(pathB.TrimEnd(Path.DirectorySeparatorChar));
+        //}
     }
 }
