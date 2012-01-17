@@ -9,6 +9,8 @@
         <MoreInfoUrl>http://docs.nuget.org/</MoreInfoUrl>
         <License>LICENSE.txt</License>
         <GettingStartedGuide>http://docs.nuget.org/docs/start-here/overview</GettingStartedGuide>
+        <Icon>Resources\Package.ico</Icon>
+        <PreviewImage>Resources\PreviewImage.png</PreviewImage>
         <SupportedProducts>
             <VisualStudio Version="10.0">
                 <Edition>Pro</Edition>
