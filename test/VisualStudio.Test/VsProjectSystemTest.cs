@@ -1,7 +1,6 @@
 ﻿using System;
 using EnvDTE;
 using Xunit;
-using Moq;
 
 namespace NuGet.VisualStudio.Test
 {
@@ -12,7 +11,7 @@ namespace NuGet.VisualStudio.Test
         public void GetPropertyValueUnknownPropertyReturnsNull()
         {
             // Arrange
-            VsProjectSystem projectSystem = new VsProjectSystem(TestUtils.GetProject("Name"), new Mock<IFileSystemProvider>().Object);
+            VsProjectSystem projectSystem = new VsProjectSystem(TestUtils.GetProject("Name"));
 
             // Assert
             var value = projectSystem.GetPropertyValue("notexist");
@@ -29,7 +28,7 @@ namespace NuGet.VisualStudio.Test
             // Arrange
             Project project = TestUtils.GetProject("Name",
                                                    propertyGetter: name => { throw new ArgumentException(); });
-            VsProjectSystem projectSystem = new VsProjectSystem(project, new Mock<IFileSystemProvider>().Object);
+            VsProjectSystem projectSystem = new VsProjectSystem(project);
 
             // Assert
             var value = projectSystem.GetPropertyValue("notexist");

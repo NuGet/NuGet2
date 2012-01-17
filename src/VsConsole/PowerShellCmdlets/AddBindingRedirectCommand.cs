@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Management.Automation;
+
 using EnvDTE;
 using NuGet.Runtime;
 using NuGet.VisualStudio;
@@ -13,18 +14,16 @@ namespace NuGet.PowerShell.Commands
     public class AddBindingRedirectCommand : NuGetBaseCommand
     {
         private readonly ISolutionManager _solutionManager;
-        private readonly IFileSystemProvider _fileSystemProvider;
 
         public AddBindingRedirectCommand()
-            : this(ServiceLocator.GetInstance<ISolutionManager>(), ServiceLocator.GetInstance<IHttpClientEvents>(), ServiceLocator.GetInstance<IFileSystemProvider>())
+            : this(ServiceLocator.GetInstance<ISolutionManager>(), ServiceLocator.GetInstance<IHttpClientEvents>())
         {
         }
 
-        public AddBindingRedirectCommand(ISolutionManager solutionManager, IHttpClientEvents httpClientEvents, IFileSystemProvider fileSystemProvider)
+        public AddBindingRedirectCommand(ISolutionManager solutionManager, IHttpClientEvents httpClientEvents)
             : base(solutionManager, null, httpClientEvents)
         {
             _solutionManager = solutionManager;
-            _fileSystemProvider = fileSystemProvider;
         }
 
         [Parameter(Position = 0, ValueFromPipelineByPropertyName = true)]
@@ -67,7 +66,7 @@ namespace NuGet.PowerShell.Commands
             {
                 foreach (Project project in projects)
                 {
-                    var redirects = RuntimeHelpers.AddBindingRedirects(project, _fileSystemProvider, domain);
+                    var redirects = RuntimeHelpers.AddBindingRedirects(project, domain);
 
                     // Print out what we did
                     WriteObject(redirects, enumerateCollection: true);
