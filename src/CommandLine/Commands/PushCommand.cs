@@ -9,7 +9,7 @@ using NuGet.Common;
 namespace NuGet.Commands
 {
     [Command(typeof(NuGetResources), "push", "PushCommandDescription",
-        MinArgs = 1, MaxArgs = 3, UsageDescriptionResourceName = "PushCommandUsageDescription",
+        MinArgs = 1, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
         UsageSummaryResourceName = "PushCommandUsageSummary", UsageExampleResourceName = "PushCommandUsageExamples")]
     public class PushCommand : Command
     {
@@ -147,7 +147,7 @@ namespace NuGet.Commands
 
             using (Stream stream = package.GetStream())
             {
-                packageServer.PushPackage(apiKey, stream, timeout);
+                packageServer.PushPackage(apiKey, stream, timeout.Milliseconds);
             }
 
             if (CreateOnly)

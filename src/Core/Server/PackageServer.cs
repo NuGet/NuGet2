@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
 using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
-using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet
 {
@@ -34,7 +32,13 @@ namespace NuGet
             get { return _source; }
         }
 
-        public void PushPackage(string apiKey, Stream packageStream, TimeSpan timeout)
+        /// <summary>
+        /// Pushes a package to the server that is represented by the stream.
+        /// </summary>
+        /// <param name="apiKey">API key to be used to push the package.</param>
+        /// <param name="packageStream">Stream representing the package.</param>
+        /// <param name="timeout">Time in milliseconds to timeout the server request.</param>
+        public void PushPackage(string apiKey, Stream packageStream, int timeout)
         {
             HttpClient client = GetClient("", "PUT", "application/octet-stream");
 
@@ -43,8 +47,13 @@ namespace NuGet
                 var request = (HttpWebRequest)e.Request;
 
                 // Set the timeout
-                request.Timeout = Convert.ToInt32(timeout.TotalMilliseconds);
-                request.ReadWriteTimeout = Convert.ToInt32(timeout.TotalMilliseconds);
+                if (timeout <= 0)
+                {
+                    timeout = request.ReadWriteTimeout; // Default to 5 minutes if the value is invalid.
+                }
+
+                request.Timeout = timeout;
+                request.ReadWriteTimeout = timeout;
                 request.Headers.Add(ApiKeyHeader, apiKey);
 
                 var multiPartRequest = new MultipartWebRequest();
