@@ -199,12 +199,17 @@ namespace NuGet.VisualStudio.Test
                 tools: new string[] { "NuGet.exe" }));
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
             packageRepositoryFactory.Setup(p => p.CreateRepository(NuGetConstants.DefaultFeedUrl)).Returns(packageRepository);
-
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            packageSourceProvider.Setup(p => p.LoadPackageSources()).Returns(new[]
+                                                                             {
+                                                                                 new PackageSource(NuGetConstants.DefaultFeedUrl)
+                                                                             });
             var packageRestore = CreateInstance(
                 dte.Object,
                 solutionManager.Object,
                 fileSystemProvider.Object,
-                packageRepositoryFactory.Object);
+                packageRepositoryFactory.Object, 
+                packageSourceProvider: packageSourceProvider.Object);
 
             // Act 
             packageRestore.EnableCurrentSolutionForRestore(quietMode: true);
@@ -572,8 +577,14 @@ namespace NuGet.VisualStudio.Test
                 version: "2.0",
                 tools: new string[] { "NuGet.exe" }));
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
-            packageRepositoryFactory.Setup(p => p.CreateRepository(NuGetConstants.DefaultFeedUrl)).Returns(packageRepository);
+            packageRepositoryFactory.Setup(p => p.CreateRepository("x:\\nugetsource")).Returns(packageRepository);
 
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            packageSourceProvider.Setup(p => p.LoadPackageSources()).Returns(new[]
+                                                                             {
+                                                                                 new PackageSource("x:\\nugetsource")
+                                                                             });
+ 
             var localCache = new MockPackageRepository();
 
             var packageRestore = CreateInstance(
@@ -581,7 +592,8 @@ namespace NuGet.VisualStudio.Test
                 solutionManager.Object,
                 fileSystemProvider.Object,
                 packageRepositoryFactory.Object,
-                localCache: localCache);
+                localCache: localCache,
+                packageSourceProvider: packageSourceProvider.Object);
 
             // Act 
             packageRestore.EnableCurrentSolutionForRestore(quietMode: true);
@@ -646,8 +658,15 @@ namespace NuGet.VisualStudio.Test
             packageRepository.AddPackage(packageA.Object);
             packageRepository.AddPackage(packageB.Object);
 
-            var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
-            packageRepositoryFactory.Setup(p => p.CreateRepository(NuGetConstants.DefaultFeedUrl)).Returns(packageRepository);
+            var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
+            packageRepositoryFactory.Setup(p => p.CreateRepository("x:\\nugetsource")).Returns(packageRepository);
+
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            packageSourceProvider.Setup(p => p.LoadPackageSources()).Returns(new[]
+                                                                             {
+                                                                                 new PackageSource("x:\\nugetsource"),
+                                                                                 new PackageSource("y:\\me", "unabled", isEnabled: false), 
+                                                                             });
 
             var localCache = new MockPackageRepository();
             localCache.Add(PackageUtility.CreatePackage(
@@ -665,7 +684,8 @@ namespace NuGet.VisualStudio.Test
                 solutionManager.Object,
                 fileSystemProvider.Object,
                 packageRepositoryFactory.Object,
-                localCache: localCache);
+                localCache: localCache,
+                packageSourceProvider: packageSourceProvider.Object);
 
             // Act 
             packageRestore.EnableCurrentSolutionForRestore(quietMode: true);
@@ -685,7 +705,8 @@ namespace NuGet.VisualStudio.Test
             IPackageRepositoryFactory packageRepositoryFactory = null,
             IVsThreadedWaitDialogFactory waitDialogFactory = null,
             IVsPackageManagerFactory packageManagerFactory = null,
-            IPackageRepository localCache = null)
+            IPackageRepository localCache = null,
+            IPackageSourceProvider packageSourceProvider = null)
         {
 
             if (dte == null)
@@ -739,11 +760,17 @@ namespace NuGet.VisualStudio.Test
                 localCache = new MockPackageRepository();
             }
 
+            if (packageSourceProvider == null)
+            {
+                packageSourceProvider = new Mock<IPackageSourceProvider>().Object;
+            }
+
             return new PackageRestoreManager(
                 dte,
                 solutionManager,
                 fileSystemProvider,
                 packageRepositoryFactory,
+                packageSourceProvider,
                 packageManagerFactory,
                 localCache,
                 waitDialogFactory);

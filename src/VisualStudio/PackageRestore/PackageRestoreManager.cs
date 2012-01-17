@@ -23,6 +23,7 @@ namespace NuGet.VisualStudio
         private const string NuGetCommandLinePackageName = "NuGet.CommandLine";
 
         private readonly IFileSystemProvider _fileSystemProvider;
+        private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly ISolutionManager _solutionManager;
         private readonly IPackageRepositoryFactory _packageRepositoryFactory;
         private readonly IVsThreadedWaitDialogFactory _waitDialogFactory;
@@ -35,11 +36,13 @@ namespace NuGet.VisualStudio
             ISolutionManager solutionManager,
             IFileSystemProvider fileSystemProvider,
             IPackageRepositoryFactory packageRepositoryFactory,
-            IVsPackageManagerFactory packageManagerFactory) :
+            IVsPackageManagerFactory packageManagerFactory,
+            IVsPackageSourceProvider packageSourceProvider) :
             this(ServiceLocator.GetInstance<DTE>(),
                  solutionManager,
                  fileSystemProvider,
                  packageRepositoryFactory,
+                 packageSourceProvider,
                  packageManagerFactory,
                  MachineCache.Default,
                  ServiceLocator.GetGlobalService<SVsThreadedWaitDialogFactory, IVsThreadedWaitDialogFactory>())
@@ -51,6 +54,7 @@ namespace NuGet.VisualStudio
             ISolutionManager solutionManager,
             IFileSystemProvider fileSystemProvider,
             IPackageRepositoryFactory packageRepositoryFactory,
+            IPackageSourceProvider packageSourceProvider,
             IVsPackageManagerFactory packageManagerFactory,
             IPackageRepository localCacheRepository,
             IVsThreadedWaitDialogFactory waitDialogFactory)
@@ -61,6 +65,7 @@ namespace NuGet.VisualStudio
             _fileSystemProvider = fileSystemProvider;
             _solutionManager = solutionManager;
             _packageRepositoryFactory = packageRepositoryFactory;
+            _packageSourceProvider = packageSourceProvider;
             _waitDialogFactory = waitDialogFactory;
             _packageManagerFactory = packageManagerFactory;
             _localCacheRepository = localCacheRepository;
@@ -302,7 +307,10 @@ namespace NuGet.VisualStudio
                 !fileSystem.FileExists(NuGetTargetsFile))
             {
                 // download NuGet.Build and NuGet.CommandLine packages into the .nuget folder
-                IPackageRepository nugetRepository = _packageRepositoryFactory.CreateRepository(NuGetConstants.DefaultFeedUrl);
+                IPackageRepository nugetRepository = new AggregateRepository(
+                    _packageRepositoryFactory, 
+                    _packageSourceProvider.GetEnabledPackageSources().Select(s => s.Source), 
+                    ignoreFailingRepositories: true);
                 var installPackages = new string[] { NuGetBuildPackageName, NuGetCommandLinePackageName };
                 foreach (var packageId in installPackages)
                 {
