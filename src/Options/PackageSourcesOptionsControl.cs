@@ -330,7 +330,6 @@ namespace NuGet.Options
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Drawing.Graphics.MeasureString(System.String,System.Drawing.Font,System.Int32,System.Drawing.StringFormat)")]
         private void PackageSourcesListBox_DrawItem(object sender, DrawItemEventArgs e)
         {
             Graphics graphics = e.Graphics;
