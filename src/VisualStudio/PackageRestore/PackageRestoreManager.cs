@@ -37,13 +37,15 @@ namespace NuGet.VisualStudio
             IFileSystemProvider fileSystemProvider,
             IPackageRepositoryFactory packageRepositoryFactory,
             IVsPackageManagerFactory packageManagerFactory,
-            IVsPackageSourceProvider packageSourceProvider) :
+            IVsPackageSourceProvider packageSourceProvider,
+            IVsPackageInstallerEvents packageInstallerEvents) :
             this(ServiceLocator.GetInstance<DTE>(),
                  solutionManager,
                  fileSystemProvider,
                  packageRepositoryFactory,
                  packageSourceProvider,
                  packageManagerFactory,
+                 packageInstallerEvents,
                  MachineCache.Default,
                  ServiceLocator.GetGlobalService<SVsThreadedWaitDialogFactory, IVsThreadedWaitDialogFactory>())
         {
@@ -56,6 +58,7 @@ namespace NuGet.VisualStudio
             IPackageRepositoryFactory packageRepositoryFactory,
             IPackageSourceProvider packageSourceProvider,
             IVsPackageManagerFactory packageManagerFactory,
+            IVsPackageInstallerEvents packageInstallerEvents,
             IPackageRepository localCacheRepository,
             IVsThreadedWaitDialogFactory waitDialogFactory)
         {
@@ -72,6 +75,7 @@ namespace NuGet.VisualStudio
             _solutionManager.ProjectAdded += OnProjectAdded;
             _solutionManager.SolutionOpened += OnSolutionOpenedOrClosed;
             _solutionManager.SolutionClosed += OnSolutionOpenedOrClosed;
+            packageInstallerEvents.PackageReferenceAdded += OnPackageReferenceAdded;
         }
 
         public bool IsCurrentSolutionEnabledForRestore
@@ -224,10 +228,24 @@ namespace NuGet.VisualStudio
         {
             EnsureNuGetBuild();
 
+            IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager();
             foreach (Project project in _solutionManager.GetProjects())
             {
-                EnablePackageRestore(project);
+                EnablePackageRestore(project, packageManager);
             }
+        }
+
+        private void EnablePackageRestore(Project project, IVsPackageManager packageManager)
+        {
+            var projectManager = packageManager.GetProjectManager(project);
+            if (projectManager.LocalRepository.GetPackages().IsEmpty())
+            {
+                // don't enable package restore for the project if it doesn't have at least one 
+                // nuget package installed
+                return;
+            }
+
+            EnablePackageRestore(project);
         }
 
         private void EnablePackageRestore(Project project)
@@ -291,8 +309,11 @@ namespace NuGet.VisualStudio
 
         private static void SetMsBuildProjectProperty(Project project, MsBuildProject buildProject, string name, string value)
         {
-            buildProject.SetProperty(name, value);
-            project.Save();
+            if (!value.Equals(buildProject.GetPropertyValue(name), StringComparison.OrdinalIgnoreCase))
+            {
+                buildProject.SetProperty(name, value);
+                project.Save();
+            }
         }
 
         private void EnsureNuGetBuild()
@@ -393,8 +414,27 @@ namespace NuGet.VisualStudio
         {
             if (IsCurrentSolutionEnabledForRestore)
             {
-                EnablePackageRestore(e.Project);
+                EnablePackageRestore(e.Project, _packageManagerFactory.CreatePackageManager());
                 CheckForMissingPackages();
+            }
+        }
+
+        private void OnPackageReferenceAdded(IVsPackageMetadata metadata)
+        {
+            if (IsCurrentSolutionEnabledForRestore)
+            {
+                var packageMetadata = (VsPackageMetadata)metadata;
+                var fileSystem = packageMetadata.FileSystem as IVsProjectSystem;
+                if (fileSystem != null )
+                {
+                    var project = _solutionManager.GetProject(fileSystem.UniqueName);
+                    if (project != null)
+                    {
+                        // in this case, we know that this project has at least one nuget package,
+                        // so enable package restore straight away
+                        EnablePackageRestore(project);
+                    }
+                }
             }
         }
 

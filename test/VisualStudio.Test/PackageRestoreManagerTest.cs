@@ -771,7 +771,8 @@ namespace NuGet.VisualStudio.Test
                 fileSystemProvider,
                 packageRepositoryFactory,
                 packageSourceProvider,
-                packageManagerFactory,
+                packageManagerFactory, 
+                new VsPackageInstallerEvents(),
                 localCache,
                 waitDialogFactory);
         }

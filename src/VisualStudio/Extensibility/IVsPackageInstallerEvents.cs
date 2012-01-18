@@ -11,5 +11,7 @@ namespace NuGet.VisualStudio
         event VsPackageEventHandler PackageInstalled;
         event VsPackageEventHandler PackageUninstalling;
         event VsPackageEventHandler PackageUninstalled;
+        event VsPackageEventHandler PackageReferenceAdded;
+        event VsPackageEventHandler PackageReferenceRemoved;
     }
 }

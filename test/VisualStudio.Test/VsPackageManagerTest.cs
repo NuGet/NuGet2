@@ -2,13 +2,14 @@
 using System.Linq;
 using EnvDTE;
 using Moq;
+using NuGet.Test;
 using NuGet.Test.Mocks;
-using NuGet.VisualStudio;
-using NuGet.VisualStudio.Test;
 using Xunit;
 
-namespace NuGet.Test.VisualStudio
+namespace NuGet.VisualStudio.Test
 {
+    using PackageUtility = NuGet.Test.PackageUtility;
+
     public class VsPackageManagerTest
     {
         [Fact]

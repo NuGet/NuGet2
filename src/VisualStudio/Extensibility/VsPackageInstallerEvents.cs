@@ -14,6 +14,10 @@ namespace NuGet.VisualStudio
 
         public event VsPackageEventHandler PackageUninstalled;
 
+        public event VsPackageEventHandler PackageReferenceAdded = delegate { };
+
+        public event VsPackageEventHandler PackageReferenceRemoved = delegate { }; 
+
         internal void NotifyInstalling(PackageOperationEventArgs e)
         {
             if (PackageInstalling != null)
@@ -44,6 +48,16 @@ namespace NuGet.VisualStudio
             {
                 PackageUninstalled(new VsPackageMetadata(e.Package, e.InstallPath));
             }
+        }
+
+        internal void NotifyReferenceAdded(PackageOperationEventArgs e)
+        {
+            PackageReferenceAdded(new VsPackageMetadata(e.Package, e.InstallPath, e.FileSystem));
+        }
+
+        internal void NotifyReferenceRemoved(PackageOperationEventArgs e)
+        {
+            PackageReferenceRemoved(new VsPackageMetadata(e.Package, e.InstallPath, e.FileSystem));
         }
     }
 }

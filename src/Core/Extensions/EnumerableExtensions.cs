@@ -117,7 +117,7 @@ namespace NuGet
         private static bool IsRewritingRequired()
         {
             AppDomain appDomain = AppDomain.CurrentDomain;
-            Assembly assembly = typeof(EnumerableExtensions).Assembly; ;
+            Assembly assembly = typeof(EnumerableExtensions).Assembly;
             return appDomain.IsHomogenous && !appDomain.IsFullyTrusted && assembly.IsFullyTrusted;
         }
     }

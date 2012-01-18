@@ -10,10 +10,10 @@ namespace NuGet
     {
         private ILogger _logger;
 
-        private event EventHandler<PackageOperationEventArgs> _packageInstalling;
-        private event EventHandler<PackageOperationEventArgs> _packageInstalled;
-        private event EventHandler<PackageOperationEventArgs> _packageUninstalling;
-        private event EventHandler<PackageOperationEventArgs> _packageUninstalled;
+        public event EventHandler<PackageOperationEventArgs> PackageInstalling;
+        public event EventHandler<PackageOperationEventArgs> PackageInstalled;
+        public event EventHandler<PackageOperationEventArgs> PackageUninstalling;
+        public event EventHandler<PackageOperationEventArgs> PackageUninstalled;
 
         public PackageManager(IPackageRepository sourceRepository, string path)
             : this(sourceRepository, new DefaultPackagePathResolver(path), new PhysicalFileSystem(path))
@@ -48,54 +48,6 @@ namespace NuGet
             PathResolver = pathResolver;
             FileSystem = fileSystem;
             LocalRepository = localRepository;
-        }
-
-        public event EventHandler<PackageOperationEventArgs> PackageInstalled
-        {
-            add
-            {
-                _packageInstalled += value;
-            }
-            remove
-            {
-                _packageInstalled -= value;
-            }
-        }
-
-        public event EventHandler<PackageOperationEventArgs> PackageInstalling
-        {
-            add
-            {
-                _packageInstalling += value;
-            }
-            remove
-            {
-                _packageInstalling -= value;
-            }
-        }
-
-        public event EventHandler<PackageOperationEventArgs> PackageUninstalling
-        {
-            add
-            {
-                _packageUninstalling += value;
-            }
-            remove
-            {
-                _packageUninstalling -= value;
-            }
-        }
-
-        public event EventHandler<PackageOperationEventArgs> PackageUninstalled
-        {
-            add
-            {
-                _packageUninstalled += value;
-            }
-            remove
-            {
-                _packageUninstalled -= value;
-            }
         }
 
         public IFileSystem FileSystem
@@ -310,33 +262,33 @@ namespace NuGet
 
         private void OnInstalling(PackageOperationEventArgs e)
         {
-            if (_packageInstalling != null)
+            if (PackageInstalling != null)
             {
-                _packageInstalling(this, e);
+                PackageInstalling(this, e);
             }
         }
 
         protected virtual void OnInstalled(PackageOperationEventArgs e)
         {
-            if (_packageInstalled != null)
+            if (PackageInstalled != null)
             {
-                _packageInstalled(this, e);
+                PackageInstalled(this, e);
             }
         }
 
         protected virtual void OnUninstalled(PackageOperationEventArgs e)
         {
-            if (_packageUninstalled != null)
+            if (PackageUninstalled != null)
             {
-                _packageUninstalled(this, e);
+                PackageUninstalled(this, e);
             }
         }
 
         private void OnUninstalling(PackageOperationEventArgs e)
         {
-            if (_packageUninstalling != null)
+            if (PackageUninstalling != null)
             {
-                _packageUninstalling(this, e);
+                PackageUninstalling(this, e);
             }
         }
 

@@ -6,11 +6,18 @@ namespace NuGet.VisualStudio
     {
         private readonly IPackage _package;
         private readonly string _installPath;
+        private readonly IFileSystem _fileSystem;
 
-        public VsPackageMetadata(IPackage package, string installPath)
+        public VsPackageMetadata(IPackage package, string installPath) :
+            this(package, installPath, fileSystem: null)
+        {
+        }
+
+        public VsPackageMetadata(IPackage package, string installPath, IFileSystem fileSystem)
         {
             _package = package;
             _installPath = installPath;
+            _fileSystem = fileSystem;
         }
 
         public string Id
@@ -41,6 +48,11 @@ namespace NuGet.VisualStudio
         public string InstallPath
         {
             get { return _installPath; }
+        }
+
+        public IFileSystem FileSystem
+        {
+            get { return _fileSystem; }
         }
     }
 }

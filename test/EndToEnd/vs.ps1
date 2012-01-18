@@ -325,6 +325,39 @@ function Get-PropertyValue {
     return $null
 }
 
+function Get-MsBuildPropertyValue {
+    param(
+        [parameter(Mandatory = $true)]
+        $Project,
+        [parameter(Mandatory = $true)]
+        [string]$PropertyName
+    )    
+
+    $msBuildProject = Get-MsBuildProject $project
+    return $msBuildProject.GetPropertyValue($PropertyName)
+
+    return $null
+}
+
+function Get-MsBuildProject 
+{
+    param(
+        [parameter(Mandatory = $true)]
+        $project
+    )
+
+    $projectCollection = [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection
+
+    $loadedProjects = $projectCollection.GetLoadedProjects($project.FullName)
+    if ($loadedProjects.Count -gt 0) {
+        foreach ($p in $loadedProjects) {
+            return $p
+        }
+    }
+
+    $projectCollection.LoadProject($project.FullName)
+}
+
 function Get-ProjectDir {
     param(
         [parameter(Mandatory = $true)]
@@ -468,4 +501,15 @@ function Close-Solution {
 
 function Clear-RecentPackageRepository() {
     $host.PrivateData.RecentPackageRepository.Clear() | out-null
+}
+
+function Enable-PackageRestore {
+    if (!$dte.Solution -or !$dte.Solution.IsOpen) 
+    {
+        throw "No solution is available."
+    }
+
+    $componentService = Get-VSComponentModel
+    $packageRestoreManager = $componentService.GetService([NuGet.VisualStudio.IPackageRestoreManager])
+    $packageRestoreManager.EnableCurrentSolutionForRestore($true)
 }

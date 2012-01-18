@@ -105,7 +105,7 @@ namespace NuGet.VisualStudio
 
             if (projects == null)
             {
-                throw new ArgumentNullException("projectManagers");
+                throw new ArgumentNullException("projects");
             }
 
             ExecuteOperationsWithPackage(
@@ -806,11 +806,13 @@ namespace NuGet.VisualStudio
             EventHandler<PackageOperationEventArgs> removeHandler = (sender, e) =>
             {
                 packagesRemoved.Add(e.Package);
+                _packageEvents.NotifyReferenceRemoved(e);
             };
 
             EventHandler<PackageOperationEventArgs> addingHandler = (sender, e) =>
             {
                 packagesAdded.Push(e.Package);
+                _packageEvents.NotifyReferenceAdded(e);
 
                 // If this package doesn't exist at solution level (it might not because of leveling)
                 // then we need to install it.
@@ -976,7 +978,7 @@ namespace NuGet.VisualStudio
                         InitializeLogger(logger, projectManager: null);
 
                         // We might be updating a solution only package
-                        UpdatePackage(newPackage, updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
+                        UpdatePackage(newPackage, updateDependencies, allowPrereleaseVersions);
                     }
                     finally
                     {
@@ -1015,7 +1017,7 @@ namespace NuGet.VisualStudio
             {
                 if (safeUpdate)
                 {
-                    SafeUpdatePackage(package.Id, updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions, logger: logger, eventListener: eventListener);
+                    SafeUpdatePackage(package.Id, updateDependencies, allowPrereleaseVersions, logger, eventListener);
                 }
                 else
                 {
