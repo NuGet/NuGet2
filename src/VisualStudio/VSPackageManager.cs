@@ -603,7 +603,7 @@ namespace NuGet.VisualStudio
                             InitializeLogger(logger, projectManager);
 
                             projectAction(projectManager);
-                            success |= true;
+                            success = true;
                         }
                         catch (Exception ex)
                         {

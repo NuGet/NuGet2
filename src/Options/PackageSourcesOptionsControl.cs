@@ -129,14 +129,7 @@ namespace NuGet.Options
             var updatedActiveSource = packageSources.Find(p => p.IsEnabled && p.Equals(_activeSource));
 
             // restore current active source if it still exists, or reset to aggregate source
-            if (updatedActiveSource != null)
-            {
-                _packageSourceProvider.ActivePackageSource = updatedActiveSource;
-            }
-            else
-            {
-                _packageSourceProvider.ActivePackageSource = AggregatePackageSource.Instance;
-            }
+            _packageSourceProvider.ActivePackageSource = updatedActiveSource ?? AggregatePackageSource.Instance;
             return true;
         }
 

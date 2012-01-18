@@ -95,6 +95,7 @@ namespace NuGetConsole.Host
         /// to be optional.
         /// </summary>
         /// <param name="paramInfo">The parameter info.</param>
+        /// <param name="argValue">The output arg value</param>
         /// <returns>true if the parameter is considered optional.</returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate")]
         protected virtual bool TryGetOptionalArg(ParameterInfo paramInfo, out object argValue)

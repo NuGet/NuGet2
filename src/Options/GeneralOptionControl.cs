@@ -8,9 +8,8 @@ namespace NuGet.Options
 {
     public partial class GeneralOptionControl : UserControl
     {
-
-        private IRecentPackageRepository _recentPackageRepository;
-        private IProductUpdateSettings _productUpdateSettings;
+        private readonly IRecentPackageRepository _recentPackageRepository;
+        private readonly IProductUpdateSettings _productUpdateSettings;
 
         public GeneralOptionControl()
         {

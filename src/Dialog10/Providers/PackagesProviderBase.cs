@@ -34,7 +34,7 @@ namespace NuGet.Dialog.Providers
         private IList<IVsSortDescriptor> _sortDescriptors;
         private readonly IProgressProvider _progressProvider;
         private CultureInfo _uiCulture, _culture;
-        private ISolutionManager _solutionManager;
+        private readonly ISolutionManager _solutionManager;
         private IDisposable _expandedNodesDisposable;
 
         protected PackagesProviderBase(
@@ -229,7 +229,7 @@ namespace NuGet.Dialog.Providers
                 }
                 else
                 {
-                    _searchNode = new PackagesSearchNode(this, this.RootNode, SelectedNode, searchText);
+                    _searchNode = new PackagesSearchNode(this, RootNode, SelectedNode, searchText);
                     AddSearchNode();
                 }
             }
@@ -381,7 +381,7 @@ namespace NuGet.Dialog.Providers
             else
             {
                 // show error message in the progress window in case of error
-                LogCore(MessageLevel.Error, ExceptionUtility.Unwrap(e.Error).Message);
+                Log(MessageLevel.Error, ExceptionUtility.Unwrap(e.Error).Message);
                 _providerServices.ProgressWindow.SetCompleted(successful: false);
             }
 
@@ -493,12 +493,6 @@ namespace NuGet.Dialog.Providers
 
         public void Log(MessageLevel level, string message, params object[] args)
         {
-            var logLevel = (MessageLevel)level;
-            LogCore(logLevel, message, args);
-        }
-
-        private void LogCore(MessageLevel level, string message, params object[] args)
-        {
             string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
 
             // for the dialog we ignore debug messages
@@ -577,7 +571,7 @@ namespace NuGet.Dialog.Providers
             {
                 // Swallow exception for uninstall.ps1. Otherwise, there is no way to uninstall a package.
                 // But we log it as a warning.
-                LogCore(MessageLevel.Warning, ExceptionUtility.Unwrap(ex).Message);
+                Log(MessageLevel.Warning, ExceptionUtility.Unwrap(ex).Message);
             }
         }
 

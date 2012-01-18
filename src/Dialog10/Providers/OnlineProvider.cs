@@ -86,7 +86,7 @@ namespace NuGet.Dialog.Providers
             // create one tree node per package source
             foreach (var source in packageSources)
             {
-                PackagesTreeNodeBase node = null;
+                PackagesTreeNodeBase node;
                 try
                 {
                     var repository = new LazyRepository(_packageRepositoryFactory, source);

@@ -57,13 +57,11 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                     ScopedItemOptions.AllScope | ScopedItemOptions.Constant)
             );
 
-            Tuple<string, object>[] privateData;
-
             // this is used by the functional tests
             var packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
             var pmfTuple = Tuple.Create<string, object>("packageManagerFactory", packageManagerFactory);
 
-            privateData = new Tuple<string, object>[] { pmfTuple };
+            Tuple<string, object>[] privateData = new Tuple<string, object>[] { pmfTuple };
 
 #if DEBUG
             var recentPackageRepository = ServiceLocator.GetInstance<IRecentPackageRepository>();

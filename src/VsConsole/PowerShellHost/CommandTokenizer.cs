@@ -15,7 +15,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                 MapTokenType(t.Type), t.StartLine, t.EndLine, t.StartColumn, t.EndColumn));
         }
 
-        static TokenType[] _tokenTypes = new TokenType[] {
+        private static readonly TokenType[] _tokenTypes = new TokenType[] {
             /* Unknown = 0,             */ TokenType.Other,
             /* Command = 1,             */ TokenType.FormalLanguage,
             /* CommandParameter = 2,    */ TokenType.Other,

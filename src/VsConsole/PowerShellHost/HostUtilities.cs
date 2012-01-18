@@ -150,8 +150,7 @@ namespace NuGetConsole.Host.PowerShell
 
         internal static string GetApplicationBase()
         {
-            string engineKeyPath = MonadRootKeyPath + "\\" +
-                RegistryVersionKey + "\\" + MonadEngineKey;
+            string engineKeyPath = MonadRootKeyPath + "\\" + RegistryVersionKey + "\\" + MonadEngineKey;
 
             using (RegistryKey engineKey = Registry.LocalMachine.OpenSubKey(engineKeyPath))
             {

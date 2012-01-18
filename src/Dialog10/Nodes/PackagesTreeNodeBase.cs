@@ -276,7 +276,7 @@ namespace NuGet.Dialog.Providers
 
             _currentCancellationSource = new CancellationTokenSource();
 
-            TaskScheduler uiScheduler = null;
+            TaskScheduler uiScheduler;
             try
             {
                 uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();

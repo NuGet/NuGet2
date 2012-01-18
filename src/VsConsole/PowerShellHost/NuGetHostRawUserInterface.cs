@@ -7,7 +7,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 {
     class NuGetRawUserInterface : PSHostRawUserInterface
     {
-        private NuGetPSHost _host;
+        private readonly NuGetPSHost _host;
 
         private IConsole Console
         {

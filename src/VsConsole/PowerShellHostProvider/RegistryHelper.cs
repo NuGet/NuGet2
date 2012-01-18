@@ -13,7 +13,7 @@ namespace NuGetConsole.Host.PowerShellProvider
         /// </remarks>
         public static bool CheckIfPowerShell2Installed()
         {
-            string keyPath = @"SOFTWARE\Microsoft\PowerShell\1\PowerShellEngine";
+            const string keyPath = @"SOFTWARE\Microsoft\PowerShell\1\PowerShellEngine";
             RegistryKey currentKey = Registry.LocalMachine;
 
             foreach (string subKeyName in keyPath.Split('\\'))
