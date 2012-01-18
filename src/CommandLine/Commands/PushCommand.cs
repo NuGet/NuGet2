@@ -147,7 +147,7 @@ namespace NuGet.Commands
 
             using (Stream stream = package.GetStream())
             {
-                packageServer.PushPackage(apiKey, stream, timeout.Milliseconds);
+                packageServer.PushPackage(apiKey, stream, Convert.ToInt32(timeout.TotalMilliseconds));
             }
 
             if (CreateOnly)
