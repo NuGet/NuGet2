@@ -161,15 +161,11 @@ namespace NuGet.VisualStudio
 
         public virtual void UninstallPackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool forceRemove, bool removeDependencies, ILogger logger)
         {
-            EventHandler<PackageOperationEventArgs> uninstallingHandler = (sender, e) =>
-            {
-                _packageEvents.NotifyUninstalling(e);
-            };
+            EventHandler<PackageOperationEventArgs> uninstallingHandler =
+                (sender, e) => _packageEvents.NotifyUninstalling(e);
 
-            EventHandler<PackageOperationEventArgs> uninstalledHandler = (sender, e) =>
-            {
-                _packageEvents.NotifyUninstalled(e);
-            };
+            EventHandler<PackageOperationEventArgs> uninstalledHandler = 
+                (sender, e) => _packageEvents.NotifyUninstalled(e);
 
             try
             {
@@ -275,7 +271,7 @@ namespace NuGet.VisualStudio
             }
             finally
             {
-                ClearLogger(logger, projectManager);
+                ClearLogger(projectManager);
             }
         }
 
@@ -654,7 +650,7 @@ namespace NuGet.VisualStudio
             }
             finally
             {
-                ClearLogger(logger, projectManager);
+                ClearLogger(projectManager);
             }
         }
 
@@ -727,7 +723,8 @@ namespace NuGet.VisualStudio
                 projectManager.Project.Logger = logger;
             }
         }
-        private void ClearLogger(ILogger logger, IProjectManager projectManager)
+
+        private void ClearLogger(IProjectManager projectManager)
         {
             // clear logging on all of our objects
             Logger = null;
@@ -957,7 +954,7 @@ namespace NuGet.VisualStudio
                     }
                     finally
                     {
-                        ClearLogger(logger, projectManager);
+                        ClearLogger(projectManager);
                     }
                 }
 
@@ -982,7 +979,7 @@ namespace NuGet.VisualStudio
                     }
                     finally
                     {
-                        ClearLogger(logger, projectManager: null);
+                        ClearLogger(projectManager: null);
                     }
 
                     // Add package to recent repository

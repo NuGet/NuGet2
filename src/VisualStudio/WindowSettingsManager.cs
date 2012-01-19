@@ -29,8 +29,8 @@ namespace NuGet.VisualStudio
             }
 
             string collection = KeyTemplate + windowToken;
-            int width = ReadInt32(collection, "Width", 0);
-            int height = ReadInt32(collection, "Height", 0);
+            int width = ReadInt32(collection, "Width");
+            int height = ReadInt32(collection, "Height");
             return new Size(width, height);
         }
 

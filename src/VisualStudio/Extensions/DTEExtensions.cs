@@ -33,7 +33,7 @@ namespace NuGet.VisualStudio
                 IVsHierarchy hierarchy = Marshal.GetTypedObjectForIUnknown(ppHier, typeof(IVsHierarchy)) as IVsHierarchy;
                 if (hierarchy != null)
                 {
-                    object project = null;
+                    object project;
                     if (hierarchy.GetProperty(VSConstants.VSITEMID_ROOT, (int)__VSHPROPID.VSHPROPID_ExtObject, out project) >= 0)
                     {
                         return (Project)project;

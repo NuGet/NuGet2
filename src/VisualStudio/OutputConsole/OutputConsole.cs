@@ -16,7 +16,7 @@ namespace NuGet.VisualStudio
         private static Guid _outputWindowPaneGuid = new Guid("CEC55EC8-CC51-40E7-9243-57B87A6F6BEB");
         private const string _outputWindowPaneName = "Package Manager";
 
-        private IVsOutputWindow _outputWindow;
+        private readonly IVsOutputWindow _outputWindow;
         private IVsOutputWindowPane _outputWindowPane;
 
         public OutputConsole(IVsOutputWindow outputWindow)

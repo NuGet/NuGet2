@@ -86,7 +86,7 @@ namespace NuGet.VisualStudio
         {
             EnsureInitialized();
             // assert that we are not returning aggregate source
-            Debug.Assert(_packageSources == null || !_packageSources.Any(p => IsAggregateSource(p)));
+            Debug.Assert(_packageSources == null || !_packageSources.Any(IsAggregateSource));
             return _packageSources;
         }
 

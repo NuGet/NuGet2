@@ -10,8 +10,8 @@ namespace NuGet.VisualStudio
     /// </summary>
     internal class VsHierarchyItem : IEquatable<VsHierarchyItem>
     {
-        private uint _vsitemid;
-        private IVsHierarchy _hierarchy;
+        private readonly uint _vsitemid;
+        private readonly IVsHierarchy _hierarchy;
 
         internal delegate int ProcessItemDelegate(VsHierarchyItem item, object callerObject, out object newCallerObject);
 
@@ -52,20 +52,14 @@ namespace NuGet.VisualStudio
             return GetProperty(_vsitemid, (int)propid);
         }
 
-        private object GetProperty(__VSHPROPID2 propid)
-        {
-            return GetProperty(_vsitemid, (int)propid);
-        }
-
         private object GetProperty(uint itemid, int propid)
         {
             try
             {
                 object o = null;
-
                 if (_hierarchy != null)
                 {
-                    int hr = _hierarchy.GetProperty(itemid, propid, out o);
+                    _hierarchy.GetProperty(itemid, propid, out o);
                 }
 
                 return o;
@@ -108,11 +102,10 @@ namespace NuGet.VisualStudio
             // Walk children if there are any
             if (IsExpandable())
             {
-                int returnVal = 0;
                 VsHierarchyItem child = GetFirstChild(fVisible);
                 while (child != null)
                 {
-                    returnVal = child.WalkDepthFirst(fVisible, processCallback, newCallerObject);
+                    int returnVal = child.WalkDepthFirst(fVisible, processCallback, newCallerObject);
                     if (returnVal == -1)
                     {
                         return returnVal;

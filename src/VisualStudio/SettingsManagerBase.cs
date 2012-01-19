@@ -8,7 +8,7 @@ namespace NuGet.VisualStudio
     public abstract class SettingsManagerBase
     {
 
-        private Lazy<SettingsManager> _settingsManager;
+        private readonly Lazy<SettingsManager> _settingsManager;
 
         protected SettingsManagerBase(IServiceProvider serviceProvider)
         {

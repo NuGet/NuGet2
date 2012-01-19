@@ -76,8 +76,7 @@ namespace NuGet.VisualStudio
                 if (binding != null)
                 {
                     fileSystem = providers.Select(provider => GetFileSystemFromProvider(provider, path, binding))
-                                          .Where(fs => fs != null)
-                                          .FirstOrDefault();
+                                          .FirstOrDefault(fs => fs != null);
                 }
             }
 
@@ -91,8 +90,9 @@ namespace NuGet.VisualStudio
             {
                 return provider.GetFileSystem(path, binding);
             }
-            catch
+            catch (Exception exception)
             {
+                ExceptionHelper.WriteToActivityLog(exception);
                 // Ignore exceptions that can happen when some binaries are missing. e.g. TfsSourceControlFileSystemProvider
                 // would throw a jitting error if TFS is not installed
             }

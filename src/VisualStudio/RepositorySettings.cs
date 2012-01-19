@@ -149,7 +149,7 @@ namespace NuGet.VisualStudio
         {
             try
             {
-                XDocument document = null;
+                XDocument document;
                 using (Stream stream = FileSystem.OpenFile(path))
                 {
                     document = XDocument.Load(stream);

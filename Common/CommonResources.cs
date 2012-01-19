@@ -29,7 +29,7 @@ namespace Microsoft.Internal.Web.Utils
                 if (object.ReferenceEquals(resourceMan, null))
                 {
                     // Find the CommonResources.resources file's full resource name in this assembly
-                    string commonResourcesName = Assembly.GetExecutingAssembly().GetManifestResourceNames().Where(s => s.EndsWith("CommonResources.resources", StringComparison.OrdinalIgnoreCase)).Single();
+                    string commonResourcesName = Assembly.GetExecutingAssembly().GetManifestResourceNames().Single(s => s.EndsWith("CommonResources.resources", StringComparison.OrdinalIgnoreCase));
 
                     // Trim off the ".resources"
                     commonResourcesName = commonResourcesName.Substring(0, commonResourcesName.Length - 10);

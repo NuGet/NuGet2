@@ -46,7 +46,7 @@ namespace NuGet.VisualStudio
             var componentModel = ServiceLocator.GetGlobalService<SComponentModel, IComponentModel>();
             var exportProvider = componentModel.DefaultExportProvider;
             var hostProviderExports = exportProvider.GetExports<IHostProvider, IHostMetadata>();
-            var psProvider = hostProviderExports.Where(export => export.Metadata.HostName == PowerShellHostProviderName).Single();
+            var psProvider = hostProviderExports.Single(export => export.Metadata.HostName == PowerShellHostProviderName);
 
             return psProvider.Value;
         }

@@ -6,7 +6,6 @@ using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.Internal.VisualStudio.Shell.Interop;
 
 namespace NuGet.VisualStudio
 {
@@ -133,7 +132,7 @@ namespace NuGet.VisualStudio
                 return false;
             }
 
-            uint expandedStateMask = (uint)__VSHIERARCHYITEMSTATE.HIS_Expanded;
+            const uint expandedStateMask = (uint)__VSHIERARCHYITEMSTATE.HIS_Expanded;
             uint itemState;
 
             uiWindow.GetItemState(hierarchyItem.UIHierarchy(), hierarchyItem.VsItemID, expandedStateMask, out itemState);

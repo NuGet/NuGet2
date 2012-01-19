@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace NuGet
+﻿namespace NuGet
 {
     public static class NuGetConstants
     {
@@ -12,6 +10,5 @@ namespace NuGet
 
         public static readonly string DefaultSymbolServerUrl = "http://nuget.gw.symbolsource.org/Public/NuGet";
         public static readonly string ReadmeFileName = "readme.txt";
-
     }
 }

@@ -54,11 +54,11 @@ namespace NuGet.VisualStudio
 
             if (activeSource.IsAggregate())
             {
-                return packageSourceProvider.GetEnabledPackageSources().Any(s => UriHelper.IsHttpSource(s.Source));
+                return packageSourceProvider.GetEnabledPackageSources().Any(s => IsHttpSource(s.Source));
             }
             else
             {
-                return UriHelper.IsHttpSource(activeSource.Source);
+                return IsHttpSource(activeSource.Source);
             }
         }
 
@@ -66,14 +66,14 @@ namespace NuGet.VisualStudio
         {
             if (source != null)
             {
-                if (UriHelper.IsHttpSource(source))
+                if (IsHttpSource(source))
                 {
                     return true;
                 }
 
                 var packageSource = packageSourceProvider.GetEnabledPackageSourcesWithAggregate()
                                                           .FirstOrDefault(p => p.Name.Equals(source, StringComparison.CurrentCultureIgnoreCase));
-                return (packageSource != null) ? UriHelper.IsHttpSource(packageSource.Source) : false;
+                return (packageSource != null) && IsHttpSource(packageSource.Source);
             }
 
             return IsHttpSource(packageSourceProvider);

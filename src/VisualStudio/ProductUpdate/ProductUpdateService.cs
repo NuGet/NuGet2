@@ -3,7 +3,6 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
-using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ExtensionManager.UI;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
@@ -20,7 +19,6 @@ namespace NuGet.VisualStudio
         private readonly IVsUIShell _vsUIShell;
         private readonly IProductUpdateSettings _productUpdateSettings;
         private IUpdateWorker _updateWorker;
-        private DTE _dte;
 
         private bool _updateDeclined;
         private bool _updateAccepted;
@@ -28,22 +26,17 @@ namespace NuGet.VisualStudio
 
         public ProductUpdateService() :
             this(ServiceLocator.GetGlobalService<SVsUIShell, IVsUIShell>(),
-                 ServiceLocator.GetInstance<IProductUpdateSettings>(),
-                 ServiceLocator.GetInstance<DTE>())
+                 ServiceLocator.GetInstance<IProductUpdateSettings>())
         {
         }
 
-        public ProductUpdateService(
-            IVsUIShell vsUIShell,
-            IProductUpdateSettings productUpdateSettings,
-            DTE dte)
+        public ProductUpdateService(IVsUIShell vsUIShell, IProductUpdateSettings productUpdateSettings)
         {
             if (productUpdateSettings == null)
             {
                 throw new ArgumentNullException("productUpdateSettings");
             }
 
-            _dte = dte;
             _vsUIShell = vsUIShell;
             _productUpdateSettings = productUpdateSettings;
         }

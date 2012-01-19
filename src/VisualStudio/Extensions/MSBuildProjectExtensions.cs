@@ -19,8 +19,9 @@ namespace NuGet.VisualStudio
                 {
                     assemblyName = new AssemblyName(referenceProjectItem.EvaluatedInclude);
                 }
-                catch
+                catch (Exception exception)
                 {
+                    ExceptionHelper.WriteToActivityLog(exception);
                     // Swallow any exceptions we might get because of malformed assembly names
                 }
 

@@ -275,7 +275,7 @@ namespace NuGet.VisualStudio
         protected virtual bool ExcludeFile(string path)
         {
             // Exclude files from the bin directory.
-            return Path.GetDirectoryName(path).Equals(BinDir, StringComparison.OrdinalIgnoreCase);
+            return BinDir.Equals(Path.GetDirectoryName(path), StringComparison.OrdinalIgnoreCase);
         }
 
         protected virtual void AddFileToProject(string path)
@@ -364,7 +364,7 @@ namespace NuGet.VisualStudio
 
         public virtual bool IsSupportedFile(string path)
         {
-            return !(Path.GetFileName(path).Equals("web.config", StringComparison.OrdinalIgnoreCase));
+            return !("web.config".Equals(Path.GetFileName(path), StringComparison.OrdinalIgnoreCase));
         }
 
         private void EnsureCheckedOutIfExists(string path)

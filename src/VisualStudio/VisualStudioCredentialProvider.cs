@@ -7,14 +7,14 @@ namespace NuGet.VisualStudio
 {
     public abstract class VisualStudioCredentialProvider : ICredentialProvider
     {
-        private IVsWebProxy _webProxyService;
+        private readonly IVsWebProxy _webProxyService;
 
-        public VisualStudioCredentialProvider()
+        protected VisualStudioCredentialProvider()
             : this(ServiceLocator.GetGlobalService<SVsWebProxy, IVsWebProxy>())
         {
         }
 
-        public VisualStudioCredentialProvider(IVsWebProxy webProxyService)
+        protected VisualStudioCredentialProvider(IVsWebProxy webProxyService)
         {
             if (webProxyService == null)
             {
@@ -83,7 +83,7 @@ namespace NuGet.VisualStudio
         /// </summary>
         private ICredentials PromptForCredentials(Uri uri)
         {
-            __VsWebProxyState oldState = __VsWebProxyState.VsWebProxyState_PromptForCredentials;
+            const __VsWebProxyState oldState = __VsWebProxyState.VsWebProxyState_PromptForCredentials;
 
             var newState = (uint)__VsWebProxyState.VsWebProxyState_NoCredentials;
             int result = 0;

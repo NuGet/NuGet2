@@ -13,7 +13,7 @@ namespace NuGet.VisualStudio
 
         public override bool IsSupportedFile(string path)
         {
-            if (Path.GetFileName(path).Equals("app.config", StringComparison.OrdinalIgnoreCase))
+            if ("app.config".Equals(Path.GetFileName(path), StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }

@@ -221,7 +221,7 @@ namespace NuGet.VisualStudio
 
         public static bool IsJavaScriptProject(this Project project)
         {
-            return project != null & VsConstants.JsProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
+            return project != null && VsConstants.JsProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
         }
 
         // TODO: Return null for library projects

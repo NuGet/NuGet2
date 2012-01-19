@@ -27,7 +27,7 @@ namespace NuGet.VisualStudio
         private bool _hasLoadedSettingsStore;
         private HashSet<PackageSource> _currentSources;
         private DateTime _latestTime = DateTime.UtcNow;
-        private IPackageRepository _cacheRepository;
+        private readonly IPackageRepository _cacheRepository;
 
         [ImportingConstructor]
         public RecentPackageRepository(
