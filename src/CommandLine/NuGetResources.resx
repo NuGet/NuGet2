@@ -441,9 +441,6 @@
   <data name="InvalidFile" xml:space="preserve">
     <value>No packages.config or solution file specified. Use the -self switch to update NuGet.exe.</value>
   </data>
-  <data name="NoUpdatesAvailable" xml:space="preserve">
-    <value>No updates available for '{0}'.</value>
-  </data>
   <data name="PackageDoesNotExist" xml:space="preserve">
     <value>Unable to locate '{0} {1}'. Make sure all packages exist in the packages folder before running update.</value>
   </data>
@@ -470,9 +467,6 @@
   </data>
   <data name="UpdateCommandSourceDescription" xml:space="preserve">
     <value>A list of package sources to search for updates.</value>
-  </data>
-  <data name="UpdatingPackage" xml:space="preserve">
-    <value>Updating '{0}' to '{1}'.</value>
   </data>
   <data name="FoundProjects" xml:space="preserve">
     <value>Found {0} projects with a packages.config file. ({1})</value>

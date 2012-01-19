@@ -232,15 +232,6 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to framework assemblies.
-        /// </summary>
-        internal static string FrameworkAssemblies {
-            get {
-                return ResourceManager.GetString("FrameworkAssemblies", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The schema version of &apos;{0}&apos; is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942..
         /// </summary>
         internal static string IncompatibleSchema {
@@ -345,15 +336,6 @@ namespace NuGet.Resources {
         internal static string Log_PackageInstalledSuccessfully {
             get {
                 return ResourceManager.GetString("Log_PackageInstalledSuccessfully", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Done..
-        /// </summary>
-        internal static string Log_PackageRetrieveSuccessfully {
-            get {
-                return ResourceManager.GetString("Log_PackageRetrieveSuccessfully", resourceCulture);
             }
         }
         
@@ -471,15 +453,6 @@ namespace NuGet.Resources {
         internal static string Manifest_InvalidSchemaNamespace {
             get {
                 return ResourceManager.GetString("Manifest_InvalidSchemaNamespace", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No namespace was found corresponding to the schema version &apos;{0}&apos;. Add an entry to the VersionToSchemaMappings dictionary in &apos;{1}&apos;..
-        /// </summary>
-        internal static string Manifest_InvalidVersion {
-            get {
-                return ResourceManager.GetString("Manifest_InvalidVersion", resourceCulture);
             }
         }
         
@@ -602,15 +575,6 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A package version is required..
-        /// </summary>
-        internal static string PackageVersionRequired {
-            get {
-                return ResourceManager.GetString("PackageVersionRequired", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0} does not reference &apos;{1}&apos;..
         /// </summary>
         internal static string ProjectDoesNotHaveReference {
@@ -688,15 +652,6 @@ namespace NuGet.Resources {
         internal static string UnableToResolveUri {
             get {
                 return ResourceManager.GetString("UnableToResolveUri", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The package source named &apos;{0}&apos; is either invalid or not available and thus is currently unreachable..
-        /// </summary>
-        internal static string UnavailablePackageSource {
-            get {
-                return ResourceManager.GetString("UnavailablePackageSource", resourceCulture);
             }
         }
         

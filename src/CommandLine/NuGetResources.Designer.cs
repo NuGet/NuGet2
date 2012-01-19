@@ -651,15 +651,6 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No updates available for &apos;{0}&apos;..
-        /// </summary>
-        internal static string NoUpdatesAvailable {
-            get {
-                return ResourceManager.GetString("NoUpdatesAvailable", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to NuGet official package source.
         /// </summary>
         internal static string OfficialPackageSourceName {
@@ -1705,15 +1696,6 @@ namespace NuGet {
         internal static string UpdateCommandVerboseDescription {
             get {
                 return ResourceManager.GetString("UpdateCommandVerboseDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Updating &apos;{0}&apos; to &apos;{1}&apos;..
-        /// </summary>
-        internal static string UpdatingPackage {
-            get {
-                return ResourceManager.GetString("UpdatingPackage", resourceCulture);
             }
         }
         

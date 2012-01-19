@@ -180,7 +180,4 @@
   <data name="Cmdlet_PackageIdAndVersionNotFound" xml:space="preserve">
     <value>Package with the Id '{0}' and version '{1}' is not found in the specified source.</value>
   </data>
-  <data name="Cmdlet_InvalidSource" xml:space="preserve">
-    <value>Unable to resolve package source.</value>
-  </data>
 </root>
