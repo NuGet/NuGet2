@@ -368,6 +368,8 @@ namespace NuGet
         /// </summary>
         /// <param name="repository">The repository to search for updates</param>
         /// <param name="packages">Packages to look for updates</param>
+        /// <param name="includePrerelease">Indicates whether to consider prerelease updates.</param>
+        /// <param name="includeAllVersions">Indicates whether to include all versions of an update as opposed to only including the latest version.</param>
         /// <returns></returns>
         public static IEnumerable<IPackage> GetUpdates(
             this IPackageRepository repository,

@@ -8,9 +8,9 @@ namespace NuGet
 {
     public class UninstallWalker : PackageWalker, IPackageOperationResolver
     {
-        private IDictionary<IPackage, IEnumerable<IPackage>> _forcedRemoved = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageEqualityComparer.IdAndVersion);
-        private IDictionary<IPackage, IEnumerable<IPackage>> _skippedPackages = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageEqualityComparer.IdAndVersion);
-        private bool _removeDependencies;
+        private readonly IDictionary<IPackage, IEnumerable<IPackage>> _forcedRemoved = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageEqualityComparer.IdAndVersion);
+        private readonly IDictionary<IPackage, IEnumerable<IPackage>> _skippedPackages = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageEqualityComparer.IdAndVersion);
+        private readonly bool _removeDependencies;
 
         public UninstallWalker(IPackageRepository repository,
                                IDependentsResolver dependentsResolver,

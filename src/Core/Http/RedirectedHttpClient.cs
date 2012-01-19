@@ -13,8 +13,8 @@ namespace NuGet
     /// </summary>
     public class RedirectedHttpClient : HttpClient
     {
-        private Lazy<IHttpClient> _cachedClient = null;
-        private Uri _originalUri = null;
+        private Lazy<IHttpClient> _cachedClient;
+        private readonly Uri _originalUri;
 
         public RedirectedHttpClient(Uri uri)
             : base(uri)

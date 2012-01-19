@@ -51,8 +51,10 @@ namespace NuGet
                 throw new ArgumentNullException("package");
             }
 
-            var downloadClient = new HttpClient(uri);
-            downloadClient.UserAgent = HttpUtility.CreateUserAgentString(DefaultUserAgentClient);
+            var downloadClient = new HttpClient(uri)
+                                 {
+                                     UserAgent = HttpUtility.CreateUserAgentString(DefaultUserAgentClient)
+                                 };
             return DownloadPackage(downloadClient, packageHash, package);
         }
 
@@ -97,10 +99,7 @@ namespace NuGet
                     throw new InvalidDataException(NuGetResources.PackageContentsVerifyError);
                 }
 
-                return _packageFactory.CreatePackage(() =>
-                {
-                    return new MemoryStream(buffer);
-                });
+                return _packageFactory.CreatePackage(() => new MemoryStream(buffer));
             }
             finally
             {

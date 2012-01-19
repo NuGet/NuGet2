@@ -138,12 +138,8 @@ namespace NuGet
 
         internal IEnumerable<IPackage> GetPackages(Func<string, IPackage> openPackage)
         {
-            foreach (var path in GetPackageFiles())
-            {
-                IPackage package = GetPackage(openPackage, path);
-
-                yield return package;
-            }
+            return from path in GetPackageFiles()
+                   select GetPackage(openPackage, path);
         }
 
         private IPackage GetPackage(Func<string, IPackage> openPackage, string path)
@@ -234,33 +230,33 @@ namespace NuGet
 
         private class PackageName : IEquatable<PackageName>
         {
+            private readonly string _packageId;
+            private readonly SemanticVersion _version;
+
             public PackageName(string packageId, SemanticVersion version)
             {
-                PackageId = packageId;
-                Version = version;
+                _packageId = packageId;
+                _version = version;
             }
-
-            public string PackageId { get; private set; }
-            public SemanticVersion Version { get; private set; }
 
             public bool Equals(PackageName other)
             {
-                return PackageId.Equals(other.PackageId, StringComparison.OrdinalIgnoreCase) &&
-                       Version.Equals(other.Version);
+                return _packageId.Equals(other._packageId, StringComparison.OrdinalIgnoreCase) &&
+                       _version.Equals(other._version);
             }
 
             public override int GetHashCode()
             {
                 var combiner = new HashCodeCombiner();
-                combiner.AddObject(PackageId);
-                combiner.AddObject(Version);
+                combiner.AddObject(_packageId);
+                combiner.AddObject(_version);
 
                 return combiner.CombinedHash;
             }
 
             public override string ToString()
             {
-                return PackageId + " " + Version;
+                return _packageId + " " + _version;
             }
         }
     }

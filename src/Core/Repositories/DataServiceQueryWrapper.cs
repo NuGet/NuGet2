@@ -77,7 +77,7 @@ namespace NuGet
         {
             IEnumerable results = Execute(_query.Execute);
 
-            DataServiceQueryContinuation continuation = null;
+            DataServiceQueryContinuation continuation;
             do
             {
                 lock (_context)
@@ -136,8 +136,9 @@ namespace NuGet
             {
                 var dataServiceClientException = dataServiceQueryException.InnerException as DataServiceClientException;
                 XDocument document;
-                if (dataServiceQueryException != null && XmlUtility.TryParseDocument(dataServiceClientException.Message, out document) 
-                        && document.Root.Name.LocalName.Equals("error", StringComparison.OrdinalIgnoreCase))
+                if (dataServiceQueryException != null && 
+                    XmlUtility.TryParseDocument(dataServiceClientException.Message, out document) && 
+                    document.Root.Name.LocalName.Equals("error", StringComparison.OrdinalIgnoreCase))
                 {
                     return document.Root.GetOptionalElementValue("message");
                 }

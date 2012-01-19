@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 
@@ -51,11 +50,8 @@ namespace NuGet
 
         private static XElement GetXml(IPackageFile file, IProjectSystem projectSystem)
         {
-            using (Stream stream = file.GetStream())
-            {
-                var content = Preprocessor.Process(file, projectSystem);
-                return XElement.Parse(content);
-            }
+            var content = Preprocessor.Process(file, projectSystem);
+            return XElement.Parse(content);
         }
     }
 }

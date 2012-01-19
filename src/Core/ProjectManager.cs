@@ -523,7 +523,7 @@ namespace NuGet
 
         private class PackageFileComparer : IEqualityComparer<IPackageFile>
         {
-            internal static PackageFileComparer Default = new PackageFileComparer();
+            internal readonly static PackageFileComparer Default = new PackageFileComparer();
             private PackageFileComparer()
             {
             }

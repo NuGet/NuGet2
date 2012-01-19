@@ -129,7 +129,7 @@ namespace NuGet
             using (var memoryStream = new MemoryStream())
             {
                 stream.CopyTo(memoryStream);
-                return Crc32.Calculate(memoryStream.ToArray());
+                return Calculate(memoryStream.ToArray());
             }
         }
 

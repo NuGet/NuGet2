@@ -18,6 +18,7 @@ namespace NuGet
         /// </summary>
         /// <param name="uri"></param>
         /// <param name="proxy"></param>
+        /// <param name="credentialType"></param>
         /// <returns></returns>
         ICredentials GetCredentials(Uri uri, IWebProxy proxy, CredentialType credentialType);
     }

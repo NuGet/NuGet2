@@ -11,7 +11,7 @@ namespace NuGet
     {
         public static string GetOptionalAttributeValue(this XElement element, string localName, string namespaceName = null)
         {
-            XAttribute attr = null;
+            XAttribute attr;
             if (String.IsNullOrEmpty(namespaceName))
             {
                 attr = element.Attribute(localName);

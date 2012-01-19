@@ -133,7 +133,7 @@ namespace NuGet
         {
             const int ChunkSize = 1024 * 4; // 4KB
 
-            byte[] buffer = null;
+            byte[] buffer;
             using (var response = GetResponse())
             {
                 // Total response length

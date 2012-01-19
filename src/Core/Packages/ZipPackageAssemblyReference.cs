@@ -8,7 +8,7 @@ namespace NuGet
 {
     internal class ZipPackageAssemblyReference : ZipPackageFile, IPackageAssemblyReference
     {
-        private FrameworkName _targetFramework;
+        private readonly FrameworkName _targetFramework;
 
         public ZipPackageAssemblyReference(IPackageFile file)
             : base(file)

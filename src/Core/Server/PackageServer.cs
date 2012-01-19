@@ -131,7 +131,7 @@ namespace NuGet
                     throw;
                 }
                 response = (HttpWebResponse)e.Response;
-                if (response != null && expectedStatusCode != response.StatusCode)
+                if (expectedStatusCode != response.StatusCode)
                 {
                     throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageServerError, response.StatusDescription, e.Message), e);
                 }
@@ -148,7 +148,7 @@ namespace NuGet
 
         private Uri ResolveBaseUrl()
         {
-            Uri uri = null;
+            Uri uri;
 
             try
             {

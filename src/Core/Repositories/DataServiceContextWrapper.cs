@@ -21,8 +21,10 @@ namespace NuGet
             {
                 throw new ArgumentNullException("serviceRoot");
             }
-            _context = new DataServiceContext(serviceRoot);
-            _context.MergeOption = MergeOption.OverwriteChanges;
+            _context = new DataServiceContext(serviceRoot)
+                       {
+                           MergeOption = MergeOption.OverwriteChanges
+                       };
             _serviceMetadata = GetDataServiceMetadata();
         }
 
@@ -57,7 +59,7 @@ namespace NuGet
                 return null;
             }
 
-            XDocument schemaDocument = null;
+            XDocument schemaDocument;
 
             try
             {

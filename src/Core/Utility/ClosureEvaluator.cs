@@ -14,7 +14,7 @@ namespace NuGet
     {
         // For unit testing. We want to circumvent the assembly check during unit testing since
         // closures will be generated in that assembly.
-        private bool _checkAssemly;
+        private readonly bool _checkAssemly;
 
         internal ClosureEvaluator(bool checkAssembly = true)
         {
@@ -51,11 +51,6 @@ namespace NuGet
 
             // This only happens in the unit test
             return fieldInfo.GetValue(obj);
-        }
-
-        protected override Expression VisitConstant(ConstantExpression node)
-        {
-            return base.VisitConstant(node);
         }
 
         private bool IsGeneratedClosureMember(MemberExpression node)

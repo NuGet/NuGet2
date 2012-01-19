@@ -35,25 +35,9 @@ namespace NuGet
             }
 
             var versionBuilder = new StringBuilder();
-            if (IsMinInclusive)
-            {
-                versionBuilder.Append("[");
-            }
-            else
-            {
-                versionBuilder.Append("(");
-            }
-
+            versionBuilder.Append(IsMinInclusive ? '[' : '(');
             versionBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0}, {1}", MinVersion, MaxVersion);
-
-            if (IsMaxInclusive)
-            {
-                versionBuilder.Append("]");
-            }
-            else
-            {
-                versionBuilder.Append(")");
-            }
+            versionBuilder.Append(IsMaxInclusive ? ']' : ')');
 
             return versionBuilder.ToString();
         }

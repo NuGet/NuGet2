@@ -56,11 +56,11 @@ namespace NuGet
         public override bool Equals(object obj)
         {
             var source = obj as PackageSource;
-            if (obj != null)
+            if (source != null)
             {
                 return Equals(source);
             }
-            return (obj == null) && base.Equals(obj);
+            return base.Equals(obj);
         }
 
         public override string ToString()

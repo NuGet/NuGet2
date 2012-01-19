@@ -74,7 +74,7 @@ namespace NuGet
         {
             foreach (var reference in _packageReferenceFile.GetPackageReferences())
             {
-                IPackage package = null;
+                IPackage package;
 
                 if (String.IsNullOrEmpty(reference.Id) ||
                     reference.Version == null ||

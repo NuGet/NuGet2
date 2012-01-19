@@ -78,15 +78,7 @@ namespace NuGet.Runtime
             assembly.Version = assemblyName.Version;
             assembly.PublicKeyToken = assemblyName.GetPublicKeyTokenString();
             string culture = assemblyName.CultureInfo.ToString();
-
-            if (String.IsNullOrEmpty(culture))
-            {
-                assembly.Culture = "neutral";
-            }
-            else
-            {
-                assembly.Culture = culture;
-            }
+            assembly.Culture = String.IsNullOrEmpty(culture) ? "neutral" : culture;
 
             return assembly;
         }

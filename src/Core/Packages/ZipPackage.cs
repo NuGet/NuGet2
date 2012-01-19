@@ -28,7 +28,7 @@ namespace NuGet
 
         // We don't store the steam itself, just a way to open the stream on demand
         // so we don't have to hold on to that resource
-        private Func<Stream> _streamFactory;
+        private readonly Func<Stream> _streamFactory;
         private HashSet<string> _references;
 
         public ZipPackage(string fileName)

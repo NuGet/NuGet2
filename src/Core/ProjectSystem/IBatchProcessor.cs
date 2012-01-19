@@ -2,7 +2,7 @@
 
 namespace NuGet
 {
-    public interface IBatchProcessor<T>
+    public interface IBatchProcessor<in T>
     {
         void BeginProcessing(IEnumerable<T> batch);
         void EndProcessing();

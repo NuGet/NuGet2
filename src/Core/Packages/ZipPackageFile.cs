@@ -6,7 +6,7 @@ namespace NuGet
 {
     internal class ZipPackageFile : IPackageFile
     {
-        private Func<Stream> _streamFactory;
+        private readonly Func<Stream> _streamFactory;
 
         public ZipPackageFile(PackagePart part)
         {

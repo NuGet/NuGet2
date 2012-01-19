@@ -7,7 +7,7 @@ namespace NuGet
 {
     public static class SettingsExtensions
     {
-        private static string _entropy = "NuGet";
+        private const string _entropy = "NuGet";
 
         public static string GetDecryptedValue(this ISettings settings, string section, string key)
         {

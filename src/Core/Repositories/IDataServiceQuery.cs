@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace NuGet
 {
-    public interface IDataServiceQuery<T> : IDataServiceQuery
+    public interface IDataServiceQuery<out T> : IDataServiceQuery
     {
         IEnumerator<T> GetEnumerator();
     }
