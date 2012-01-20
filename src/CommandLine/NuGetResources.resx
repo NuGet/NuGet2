@@ -728,7 +728,7 @@ nuget update -Self</value>
     <value>File does not exist ({0}).</value>
   </data>
   <data name="InstallCommandNoCache" xml:space="preserve">
-    <value>Disable the use of machine cache as a package repository. </value>
+    <value>Disable looking up packages from local machine cache.</value>
   </data>
   <data name="PushCommandTimeoutDescription" xml:space="preserve">
     <value>Specifies the timeout for pushing to a server in seconds. Defaults to 300 seconds (5 minutes).</value>

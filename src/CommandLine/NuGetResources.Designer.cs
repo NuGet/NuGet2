@@ -384,7 +384,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Disable the use of machine cache as a package repository. .
+        ///   Looks up a localized string similar to Disable looking up packages from local machine cache..
         /// </summary>
         internal static string InstallCommandNoCache {
             get {
