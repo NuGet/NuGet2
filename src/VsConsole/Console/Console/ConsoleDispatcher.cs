@@ -287,7 +287,7 @@ namespace NuGetConsole.Implementation.Console
                 return Tuple.Create(false, false);
             }
 
-            public void PromptNewLine()
+            protected void PromptNewLine()
             {
                 WpfConsole.Write(WpfConsole.Host.Prompt + (char)32);    // 32 is the space
                 WpfConsole.BeginInputLine();
@@ -350,7 +350,7 @@ namespace NuGetConsole.Implementation.Console
         private class AsyncHostConsoleDispatcher : Dispatcher
         {
             private Queue<InputLine> _buffer;
-            private Marshaler _marshaler;
+            private readonly Marshaler _marshaler;
 
             public AsyncHostConsoleDispatcher(ConsoleDispatcher parentDispatcher)
                 : base(parentDispatcher)

@@ -171,9 +171,6 @@ namespace NuGetConsole.Implementation.Console
                         case VSConstants.VSStd2KCmdID.CANCEL: // Handle ESC
                             WpfConsole.Dispatcher.CancelWaitKey();
                             break;
-
-                        default: // ignore everything else
-                            break;
                     }
                     hr = VSConstants.S_OK; // eat everything
                 }
@@ -399,9 +396,9 @@ namespace NuGetConsole.Implementation.Console
             string text = System.Windows.Clipboard.GetText();
             int iLineStart = 0;
             int iNewLine = -1;
-            char c;
             if (!string.IsNullOrEmpty(text) && (iNewLine = text.IndexOfAny(NEWLINE_CHARS)) >= 0)
             {
+                char c;
                 ITextBuffer textBuffer = WpfTextView.TextBuffer;
                 while (iLineStart < text.Length)
                 {

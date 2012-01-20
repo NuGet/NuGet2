@@ -5,11 +5,11 @@ namespace NuGetConsole.Implementation.Console
     /// <summary>
     /// Simple console input history manager.
     /// </summary>
-    class InputHistory
+    internal class InputHistory
     {
-        const int MAX_HISTORY = 50;
+        private const int MAX_HISTORY = 50;
 
-        Queue<string> _inputs = new Queue<string>();
+        private readonly Queue<string> _inputs = new Queue<string>();
 
         public void Add(string input)
         {

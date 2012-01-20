@@ -2,7 +2,6 @@ using System.ComponentModel.Composition;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Classification;
 using Microsoft.VisualStudio.Utilities;
-using NuGetConsole.Implementation.Console;
 
 namespace NuGetConsole.Implementation.PowerConsole
 {

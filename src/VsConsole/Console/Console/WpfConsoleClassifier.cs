@@ -11,8 +11,8 @@ namespace NuGetConsole.Implementation.Console
     class WpfConsoleClassifier : ObjectWithFactory<WpfConsoleService>, IClassifier
     {
         ITextBuffer TextBuffer { get; set; }
-        ComplexCommandSpans _commandLineSpans = new ComplexCommandSpans();
-        OrderedTupleSpans<IClassificationType> _colorSpans = new OrderedTupleSpans<IClassificationType>();
+        private readonly ComplexCommandSpans _commandLineSpans = new ComplexCommandSpans();
+        private readonly OrderedTupleSpans<IClassificationType> _colorSpans = new OrderedTupleSpans<IClassificationType>();
 
         public WpfConsoleClassifier(WpfConsoleService factory, ITextBuffer textBuffer)
             : base(factory)
@@ -203,7 +203,7 @@ namespace NuGetConsole.Implementation.Console
         {
             List<ClassificationSpan> classificationSpans = new List<ClassificationSpan>();
 
-            string[] lines = spans.Select((span) => snapshot.GetText(span)).ToArray();
+            string[] lines = spans.Select(snapshot.GetText).ToArray();
             try
             {
                 IEnumerable<Token> tokens = CommandTokenizer.Tokenize(lines);

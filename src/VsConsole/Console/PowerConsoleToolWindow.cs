@@ -460,10 +460,7 @@ namespace NuGetConsole.Implementation
                     }
                     else
                     {
-                        WpfConsole.Dispatcher.StartCompleted += (sender, args) =>
-                        {
-                            OnDispatcherStartCompleted();
-                        };
+                        WpfConsole.Dispatcher.StartCompleted += (sender, args) => OnDispatcherStartCompleted();
                         WpfConsole.Dispatcher.StartWaitingKey += OnDispatcherStartWaitingKey;
                         WpfConsole.Dispatcher.Start();
                     }

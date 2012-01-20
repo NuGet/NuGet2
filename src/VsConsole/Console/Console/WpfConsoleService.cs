@@ -51,7 +51,7 @@ namespace NuGetConsole.Implementation.Console
         [Import]
         public IStandardClassificationService StandardClassificationService { get; set; }
 
-        private IPrivateConsoleStatus _privateConsoleStatus;
+        private readonly IPrivateConsoleStatus _privateConsoleStatus;
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "MEF export")]
@@ -163,11 +163,6 @@ namespace NuGetConsole.Implementation.Console
 
         private sealed class PrivateConsoleStatus : IPrivateConsoleStatus
         {
-
-            public PrivateConsoleStatus()
-            {
-            }
-
             public void SetBusyState(bool isBusy)
             {
                 IsBusy = isBusy;

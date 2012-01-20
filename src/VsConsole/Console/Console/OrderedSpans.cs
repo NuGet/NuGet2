@@ -11,8 +11,8 @@ namespace NuGetConsole.Implementation.Console
 
     class OrderedSpans<T>
     {
-        List<T> _items = new List<T>();
-        IGetSpan<T> _getSpan;
+        private List<T> _items = new List<T>();
+        private readonly IGetSpan<T> _getSpan;
 
         public OrderedSpans(IGetSpan<T> getSpan)
         {
@@ -118,7 +118,7 @@ namespace NuGetConsole.Implementation.Console
 
         class SpanStartComparer : Comparer<T>
         {
-            IGetSpan<T> _getSpan;
+            private readonly IGetSpan<T> _getSpan;
 
             public SpanStartComparer(IGetSpan<T> getSpan)
             {

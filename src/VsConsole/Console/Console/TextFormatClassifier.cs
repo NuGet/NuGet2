@@ -45,9 +45,9 @@ namespace NuGetConsole.Implementation.Console
 
     class TextFormatClassifier : ObjectWithFactory<TextFormatClassifierProvider>, ITextFormatClassifier
     {
-        ITextView _textView;
+        private readonly ITextView _textView;
 
-        Dictionary<Tuple<Color?, Color?>, IClassificationType> _classificationMap =
+        private readonly Dictionary<Tuple<Color?, Color?>, IClassificationType> _classificationMap =
             new Dictionary<Tuple<Color?, Color?>, IClassificationType>();
 
         public TextFormatClassifier(TextFormatClassifierProvider factory, ITextView textView)
