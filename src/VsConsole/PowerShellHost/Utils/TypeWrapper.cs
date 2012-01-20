@@ -38,7 +38,7 @@ namespace NuGetConsole.Host
         #region object overrides
         public override bool Equals(object obj)
         {
-            return obj != null ? obj.Equals(WrappedObject) : false;
+            return obj != null && obj.Equals(WrappedObject);
         }
 
         public override int GetHashCode()
@@ -52,8 +52,8 @@ namespace NuGetConsole.Host
         }
         #endregion
 
-        Dictionary<Type, T> _interfaceMap = new Dictionary<Type, T>(TypeEquivalenceComparer.Instance);
-        object _interfaceMapLock = new object();
+        private readonly Dictionary<Type, T> _interfaceMap = new Dictionary<Type, T>(TypeEquivalenceComparer.Instance);
+        private readonly object _interfaceMapLock = new object();
 
         /// <summary>
         /// Get an interface to access the wrapped object.

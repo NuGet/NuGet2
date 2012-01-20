@@ -310,7 +310,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
         protected void OnExecuteCommandEnd()
         {
-            if (_updateWorkingDirectoryPending == true)
+            if (_updateWorkingDirectoryPending)
             {
                 Runspace.ChangePSDirectory(_targetDir);
                 _updateWorkingDirectoryPending = false;

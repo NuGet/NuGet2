@@ -7,10 +7,10 @@ namespace NuGetConsole.Host
     /// Represents a complex (multi-line) command. This class builds a complex
     /// command and provides helpers to check command completeness.
     /// </summary>
-    class ComplexCommand
+    internal class ComplexCommand
     {
-        StringBuilder _lines = new StringBuilder();
-        Func<string, string, bool> _checkComplete;
+        private readonly StringBuilder _lines = new StringBuilder();
+        private readonly Func<string, string, bool> _checkComplete;
 
         /// <summary>
         /// Creates a new complex command.

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Management.Automation;
 using NuGet.VisualStudio;
@@ -9,7 +8,6 @@ namespace NuGet.PowerShell.Commands
     /// <summary>
     /// FindPackage is identical to GetPackage except that FindPackage filters packages only by Id and does not consider description or tags.
     /// </summary>
-    [SuppressMessage("Microsoft.PowerShell", "PS1101:AllCmdletsShouldAcceptPipelineInput", Justification = "Will investiage this one.")]
     [Cmdlet(VerbsCommon.Find, "Package", DefaultParameterSetName = "Default")]
     [OutputType(typeof(IPackage))]
     public class FindPackageCommand : GetPackageCommand
@@ -48,7 +46,7 @@ namespace NuGet.PowerShell.Commands
         {
             // Since this is used for intellisense, we need to limit the number of packages that we return. Otherwise,
             // typing InstallPackage TAB would download the entire feed.
-            base.First = MaxReturnedPackages;
+            First = MaxReturnedPackages;
             base.ProcessRecordCore();
         }
 
@@ -89,7 +87,7 @@ namespace NuGet.PowerShell.Commands
                                    .AsQueryable();
         }
 
-        protected override void Log(MessageLevel level, string formattedMessage)
+        protected override void LogCore(MessageLevel level, string formattedMessage)
         {
             // We don't want this cmdlet to print anything
         }

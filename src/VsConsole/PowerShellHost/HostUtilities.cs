@@ -95,7 +95,7 @@ namespace NuGetConsole.Host.PowerShell
         /// <returns>The profile file name matching the parameters.</returns>
         internal static string GetFullProfileFileName(string shellId, bool forCurrentUser, bool useTestProfile)
         {
-            string basePath = null;
+            string basePath;
 
             if (forCurrentUser)
             {
@@ -119,9 +119,7 @@ namespace NuGetConsole.Host.PowerShell
                 profileName = shellId + "_" + profileName;
             }
 
-            string fullPath = basePath = System.IO.Path.Combine(basePath, profileName);
-
-            return fullPath;
+            return Path.Combine(basePath, profileName);
         }
 
         /// <summary>
@@ -170,7 +168,7 @@ namespace NuGetConsole.Host.PowerShell
 
             // FOr unmanaged host apps, look for the SMA dll, if it's not GAC'ed then
             // use it's location as the application base...
-            assem = Assembly.GetAssembly(typeof(System.Management.Automation.PSObject));
+            assem = Assembly.GetAssembly(typeof(PSObject));
             if (assem != null)
             {
                 // For other hosts. 

@@ -7,10 +7,6 @@ namespace NuGetConsole.Host.PowerShellProvider
     /// </summary>
     internal class UnsupportedHost : IHost
     {
-        public UnsupportedHost()
-        {
-        }
-
         public bool IsCommandEnabled
         {
             get

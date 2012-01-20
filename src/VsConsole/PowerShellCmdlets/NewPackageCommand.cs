@@ -181,7 +181,7 @@ namespace NuGet.PowerShell.Commands
         {
             if (!String.IsNullOrEmpty(specFile))
             {
-                ProjectItem projectItem = null;
+                ProjectItem projectItem;
                 projectIns.ProjectItems.TryGetFile(specFile, out projectItem);
                 yield return projectItem;
             }
@@ -190,14 +190,12 @@ namespace NuGet.PowerShell.Commands
                 // Verify if the project has exactly one file with the .nuspec extension. 
                 // If found, use it as the manifest file for package creation.
                 int count = 0;
-                ProjectItem foundItem = null;
 
                 foreach (ProjectItem item in projectIns.ProjectItems)
                 {
                     if (item.Name.EndsWith(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase))
                     {
-                        foundItem = item;
-                        yield return foundItem;
+                        yield return item;
                         count++;
                         if (count > 1)
                         {

@@ -17,7 +17,7 @@ namespace NuGet.PowerShell.Commands
     {
         // User Agent. Do NOT localize
         private const string PSCommandsUserAgentClient = "NuGet Package Manager Console";
-        private Lazy<string> _psCommandsUserAgent = new Lazy<string>(() => HttpUtility.CreateUserAgentString(PSCommandsUserAgentClient));
+        private readonly Lazy<string> _psCommandsUserAgent = new Lazy<string>(() => HttpUtility.CreateUserAgentString(PSCommandsUserAgentClient));
 
         private IVsPackageManager _packageManager;
         private readonly ISolutionManager _solutionManager;
@@ -120,10 +120,10 @@ namespace NuGet.PowerShell.Commands
         /// </summary>
         protected abstract void ProcessRecordCore();
 
-        void ILogger.Log(MessageLevel level, string message, params object[] args)
+        public void Log(MessageLevel level, string message, params object[] args)
         {
             string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
-            Log(level, formattedMessage);
+            LogCore(level, formattedMessage);
         }
 
         internal void Execute()
@@ -165,7 +165,7 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
-        protected virtual void Log(MessageLevel level, string formattedMessage)
+        protected virtual void LogCore(MessageLevel level, string formattedMessage)
         {
             switch (level)
             {

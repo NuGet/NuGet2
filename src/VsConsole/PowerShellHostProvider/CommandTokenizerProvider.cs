@@ -9,7 +9,7 @@ namespace NuGetConsole.Host.PowerShellProvider
     [HostName(PowerShellHostProvider.HostName)]
     internal class CommandTokenizerProvider : ICommandTokenizerProvider
     {
-        private Lazy<CommandTokenizer> _instance = new Lazy<CommandTokenizer>(() => new CommandTokenizer());
+        private readonly Lazy<CommandTokenizer> _instance = new Lazy<CommandTokenizer>(() => new CommandTokenizer());
 
         public ICommandTokenizer Create(IHost host)
         {

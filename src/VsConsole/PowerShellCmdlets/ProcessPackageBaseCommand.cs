@@ -245,7 +245,7 @@ namespace NuGet.PowerShell.Commands
             }
             catch (Exception ex)
             {
-                Log(MessageLevel.Warning, ex.Message);
+                LogCore(MessageLevel.Warning, ex.Message);
             }
         }
 

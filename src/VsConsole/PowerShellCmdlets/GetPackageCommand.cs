@@ -11,7 +11,6 @@ namespace NuGet.PowerShell.Commands
     /// <summary>
     /// This command lists the available packages which are either from a package source or installed in the current solution.
     /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.PowerShell", "PS1101:AllCmdletsShouldAcceptPipelineInput", Justification = "Will investiage this one.")]
     [Cmdlet(VerbsCommon.Get, "Package", DefaultParameterSetName = ParameterAttribute.AllParameterSets)]
     [OutputType(typeof(IPackage))]
     public class GetPackageCommand : NuGetBaseCommand
@@ -181,15 +180,9 @@ namespace NuGet.PowerShell.Commands
                 repository = PackageManager.LocalRepository;
             }
 
-            IQueryable<IPackage> packages;
-            if (Updates.IsPresent)
-            {
-                packages = GetPackagesForUpdate(repository);
-            }
-            else
-            {
-                packages = GetPackages(repository);
-            }
+            IQueryable<IPackage> packages = Updates.IsPresent
+                                                ? GetPackagesForUpdate(repository)
+                                                : GetPackages(repository);
 
             // Apply VersionCollapsing, Skip and Take, in that order.
             var packagesToDisplay = FilterPackages(repository, packages);
@@ -284,16 +277,9 @@ namespace NuGet.PowerShell.Commands
 
         protected virtual IQueryable<IPackage> GetPackages(IPackageRepository sourceRepository)
         {
-            IQueryable<IPackage> packages = null;
-
-            if (String.IsNullOrEmpty(Filter))
-            {
-                packages = sourceRepository.GetPackages();
-            }
-            else
-            {
-                packages = sourceRepository.Search(Filter, IncludePrerelease);
-            }
+            IQueryable<IPackage> packages = String.IsNullOrEmpty(Filter)
+                                                ? sourceRepository.GetPackages()
+                                                : sourceRepository.Search(Filter, IncludePrerelease);
 
             // for recent packages, we want to order by last installed first instead of Id
             if (!Recent.IsPresent)
@@ -342,15 +328,15 @@ namespace NuGet.PowerShell.Commands
             {
                 if (!UseRemoteSource)
                 {
-                    Log(MessageLevel.Info, Resources.Cmdlet_NoPackagesInstalled);
+                    LogCore(MessageLevel.Info, Resources.Cmdlet_NoPackagesInstalled);
                 }
                 else if (Updates.IsPresent)
                 {
-                    Log(MessageLevel.Info, Resources.Cmdlet_NoPackageUpdates);
+                    LogCore(MessageLevel.Info, Resources.Cmdlet_NoPackageUpdates);
                 }
                 else if (Recent.IsPresent)
                 {
-                    Log(MessageLevel.Info, Resources.Cmdlet_NoRecentPackages);
+                    LogCore(MessageLevel.Info, Resources.Cmdlet_NoRecentPackages);
                 }
             }
         }
