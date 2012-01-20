@@ -11,6 +11,7 @@ using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Dialog.Test
 {
@@ -152,8 +153,10 @@ namespace NuGet.Dialog.Test
             Assert.False(canExecuteC);
         }
 
-        [Fact]
-        public void ExecuteMethodCallsUpdatePackageMethodOnPackageManager()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ExecuteMethodCallsUpdatePackageMethodOnPackageManager(bool includePrerelease)
         {
             // Local repository contains Package A 1.0 and Package B
             // Source repository contains Package A 2.0 and Package C
@@ -186,7 +189,7 @@ namespace NuGet.Dialog.Test
 
             var mockWindowServices = new Mock<IUserNotifierServices>();
             var provider = CreateUpdatesProvider(packageManager.Object, localRepository, project: project.Object, userNotifierServices: mockWindowServices.Object, solutionManager: solutionManager.Object);
-
+            provider.IncludePrerelease = includePrerelease;
             var extensionA = new PackageItem(provider, packageA2);
             var extensionC = new PackageItem(provider, packageC);
 
@@ -198,7 +201,7 @@ namespace NuGet.Dialog.Test
             {
                 // Assert
                 mockWindowServices.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
-                packageManager.Verify(p => p.UpdatePackage(projectManager.Object, packageA2, It.IsAny<IEnumerable<PackageOperation>>(), true, false, provider), Times.Once());
+                packageManager.Verify(p => p.UpdatePackage(projectManager.Object, packageA2, It.IsAny<IEnumerable<PackageOperation>>(), true, includePrerelease, provider), Times.Once());
 
                 manualEvent.Set();
             };

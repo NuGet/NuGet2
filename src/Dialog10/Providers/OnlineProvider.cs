@@ -151,7 +151,7 @@ namespace NuGet.Dialog.Providers
         {
             ShowProgressWindow();
 
-            CheckInstallPSScripts(item.PackageIdentity, packageManager.SourceRepository, includePrerelease: false, operations: out operations);
+            CheckInstallPSScripts(item.PackageIdentity, packageManager.SourceRepository, IncludePrerelease, out operations);
             var licensePackages = from o in operations
                                   where o.Action == PackageAction.Install && o.Package.RequireLicenseAcceptance && !packageManager.LocalRepository.Exists(o.Package)
                                   select o.Package;
@@ -194,7 +194,7 @@ namespace NuGet.Dialog.Providers
 
         protected virtual void ExecuteCommand(IProjectManager projectManager, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations)
         {
-            activePackageManager.InstallPackage(projectManager, item.PackageIdentity, operations, ignoreDependencies: false, allowPrereleaseVersions: false, logger: this);
+            activePackageManager.InstallPackage(projectManager, item.PackageIdentity, operations, ignoreDependencies: false, allowPrereleaseVersions: IncludePrerelease, logger: this);
         }
 
         public override bool CanExecute(PackageItem item)

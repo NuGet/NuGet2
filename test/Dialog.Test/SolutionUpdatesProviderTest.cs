@@ -9,6 +9,7 @@ using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Dialog.Test
 {
@@ -24,8 +25,10 @@ namespace NuGet.Dialog.Test
             Assert.True(provider.ShowPrereleaseComboBox);
         }
 
-        [Fact]
-        public void ExecuteMethodCallUpdatePackageOnAllProjects()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ExecuteMethodCallUpdatePackageOnAllProjects(bool includePrerelease)
         {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
@@ -70,6 +73,7 @@ namespace NuGet.Dialog.Test
                 It.IsAny<Predicate<Project>>())).Returns(new Project[] { project1, project2 });
 
             var provider = CreateSolutionUpdatesProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, userNotifierServices: mockWindowService.Object);
+            provider.IncludePrerelease = includePrerelease;
             var extensionTree = provider.ExtensionsTree;
 
             var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
@@ -91,7 +95,7 @@ namespace NuGet.Dialog.Test
                     packageB2,
                     It.IsAny<IEnumerable<PackageOperation>>(),
                     true,
-                    false,
+                    includePrerelease,
                     provider,
                     provider), Times.Once());
 

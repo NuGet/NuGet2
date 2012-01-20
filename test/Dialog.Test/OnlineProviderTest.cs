@@ -10,6 +10,7 @@ using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Dialog.Test
 {
@@ -131,8 +132,10 @@ namespace NuGet.Dialog.Test
             Assert.False(canExecuteA);
         }
 
-        [Fact]
-        public void ExecuteMethodCallsInstallPackageMethodOnPackageManager()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ExecuteMethodCallsInstallPackageMethodOnPackageManager(bool includePrerelease)
         {
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0");
@@ -160,6 +163,7 @@ namespace NuGet.Dialog.Test
             solutionManager.Setup(s => s.GetProject(It.IsAny<string>())).Returns(project.Object);
 
             var provider = CreateOnlineProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, project: project.Object);
+            provider.IncludePrerelease = includePrerelease;
             var extensionTree = provider.ExtensionsTree;
 
             var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
@@ -177,7 +181,7 @@ namespace NuGet.Dialog.Test
             provider.ExecuteCompletedCallback = delegate
             {
                 // Assert
-                mockPackageManager.Verify(p => p.InstallPackage(projectManager.Object, packageB, It.IsAny<IEnumerable<PackageOperation>>(), false, false, provider), Times.Once());
+                mockPackageManager.Verify(p => p.InstallPackage(projectManager.Object, packageB, It.IsAny<IEnumerable<PackageOperation>>(), false, includePrerelease, provider), Times.Once());
 
                 manualEvent.Set();
             };

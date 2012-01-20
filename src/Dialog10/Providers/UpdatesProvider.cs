@@ -79,7 +79,7 @@ namespace NuGet.Dialog.Providers
 
         protected override void ExecuteCommand(IProjectManager projectManager, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations)
         {
-            activePackageManager.UpdatePackage(projectManager, item.PackageIdentity, operations, updateDependencies: true, allowPrereleaseVersions: false, logger: this);
+            activePackageManager.UpdatePackage(projectManager, item.PackageIdentity, operations, updateDependencies: true, allowPrereleaseVersions: IncludePrerelease, logger: this);
         }
 
         public override IVsExtension CreateExtension(IPackage package)

@@ -96,7 +96,7 @@ namespace NuGet.Dialog.Providers
                     item.PackageIdentity,
                     operations,
                     updateDependencies: true,
-                    allowPrereleaseVersions: false,
+                    allowPrereleaseVersions: IncludePrerelease,
                     logger: this,
                     eventListener: this);
             }
