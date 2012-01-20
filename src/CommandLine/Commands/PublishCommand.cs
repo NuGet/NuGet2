@@ -1,7 +1,4 @@
-﻿using System;
-using NuGet.Common;
-
-namespace NuGet.Commands
+﻿namespace NuGet.Commands
 {
     [Command(typeof(NuGetResources), "publish", "PublishCommandDescription",
         MinArgs = 2, MaxArgs = 3, UsageDescriptionResourceName = "PublishCommandUsageDescription",

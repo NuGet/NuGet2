@@ -78,8 +78,7 @@ namespace NuGet.Commands
                 {
                     manifest.Metadata.Authors = Environment.UserName;
                 }
-                manifest.Metadata.Dependencies = new List<ManifestDependency>();
-                manifest.Metadata.Dependencies.Add(SampleManifestDependency);
+                manifest.Metadata.Dependencies = new List<ManifestDependency> {SampleManifestDependency};
             }
 
             manifest.Metadata.ProjectUrl = SampleProjectUrl;

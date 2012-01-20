@@ -98,7 +98,7 @@ namespace NuGet.Commands
 
             // Search recursively for all packages.config files
             var packagesConfigFiles = Directory.GetFiles(solutionDir, PackageReferenceRepository.PackageReferenceFile, SearchOption.AllDirectories);
-            var projects = packagesConfigFiles.Select(p => GetProject(p))
+            var projects = packagesConfigFiles.Select(GetProject)
                                               .Where(p => p.Project != null)
                                               .ToList();
 
@@ -274,8 +274,10 @@ namespace NuGet.Commands
                                      IPackagePathResolver pathResolver,
                                      IProjectSystem project)
         {
-            var projectManager = new ProjectManager(sourceRepository, pathResolver, project, localRepository);
-            projectManager.ConstraintProvider = constraintProvider;
+            var projectManager = new ProjectManager(sourceRepository, pathResolver, project, localRepository)
+                                 {
+                                     ConstraintProvider = constraintProvider
+                                 };
 
             if (Verbose)
             {

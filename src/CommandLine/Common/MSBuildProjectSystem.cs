@@ -87,8 +87,9 @@ namespace NuGet.Common
         {
             name = Path.GetFileNameWithoutExtension(name);
             return GetItems("Reference", name)
-                   .Where(item => new AssemblyName(item.EvaluatedInclude).Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                   .FirstOrDefault();
+                .FirstOrDefault(
+                    item =>
+                    new AssemblyName(item.EvaluatedInclude).Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
         public FrameworkName TargetFramework

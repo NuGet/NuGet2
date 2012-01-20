@@ -210,10 +210,12 @@ namespace NuGet.Commands
                 using (var projectCollection = new ProjectCollection(ToolsetDefinitionLocations.Registry | ToolsetDefinitionLocations.ConfigurationFile))
                 {
                     BuildRequestData requestData = new BuildRequestData(_project.FullPath, Properties, _project.ToolsVersion, new string[0], null);
-                    BuildParameters parameters = new BuildParameters(projectCollection);
-                    parameters.Loggers = new[] { new ConsoleLogger() { Verbosity = LoggerVerbosity.Quiet } };
-                    parameters.NodeExeLocation = typeof(ProjectFactory).Assembly.Location;
-                    parameters.ToolsetDefinitionLocations = projectCollection.ToolsetLocations;
+                    var parameters = new BuildParameters(projectCollection)
+                                     {
+                                         Loggers = new[] { new ConsoleLogger { Verbosity = LoggerVerbosity.Quiet }},
+                                         NodeExeLocation = typeof(ProjectFactory).Assembly.Location,
+                                         ToolsetDefinitionLocations = projectCollection.ToolsetLocations
+                                     };
                     BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, requestData);
                     // Build the project so that the outputs are created
                     if (result.OverallResult == BuildResultCode.Failure)
@@ -321,7 +323,7 @@ namespace NuGet.Commands
                         continue;
                     }
 
-                    string targetFolder = null;
+                    string targetFolder;
 
                     if (IsTool)
                     {

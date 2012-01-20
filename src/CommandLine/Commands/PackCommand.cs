@@ -409,7 +409,7 @@ namespace NuGet.Commands
 
         private string GetInputFile()
         {
-            IEnumerable<string> files = null;
+            IEnumerable<string> files;
 
             if (Arguments.Any())
             {

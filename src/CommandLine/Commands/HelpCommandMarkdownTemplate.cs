@@ -236,7 +236,7 @@ namespace NuGet.Commands
             {
                 return;
             }
-            this.GenerationEnvironment.Append(textToAppend); ;
+            this.GenerationEnvironment.Append(textToAppend);
         }
         public void Write(object value)
         {

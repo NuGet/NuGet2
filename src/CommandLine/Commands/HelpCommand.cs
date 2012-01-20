@@ -134,7 +134,7 @@ namespace NuGet.Commands
 
             if (attribute.UsageDescription != null)
             {
-                int padding = 5;
+                const int padding = 5;
                 Console.PrintJustified(padding, attribute.UsageDescription);
                 Console.WriteLine();
             }

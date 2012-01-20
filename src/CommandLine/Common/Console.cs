@@ -126,16 +126,9 @@ namespace NuGet.Common
 
         public void WriteWarning(bool prependWarningText, string value, params object[] args)
         {
-            string message;
-
-            if (prependWarningText)
-            {
-                message = String.Format(CultureInfo.CurrentCulture, NuGetResources.CommandLine_Warning, value);
-            }
-            else
-            {
-                message = value;
-            }
+            string message = prependWarningText
+                                 ? String.Format(CultureInfo.CurrentCulture, NuGetResources.CommandLine_Warning, value)
+                                 : value;
 
             WriteColor(System.Console.Out, ConsoleColor.Yellow, message, args);
         }
@@ -220,8 +213,6 @@ namespace NuGet.Common
                     break;
                 case MessageLevel.Debug:
                     WriteColor(System.Console.Out, ConsoleColor.Gray, message, args);
-                    break;
-                default:
                     break;
             }
         }

@@ -66,7 +66,7 @@ namespace NuGet.Commands
 
         private string ResolveSource(string packagePath)
         {
-            string source = null;
+            string source;
 
             if (!String.IsNullOrEmpty(Source))
             {

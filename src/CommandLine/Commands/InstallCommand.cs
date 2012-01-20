@@ -190,8 +190,11 @@ namespace NuGet.Commands
         {
             var repository = GetRepository();
             var pathResolver = new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions);
-            var packageManager = new PackageManager(repository, pathResolver, fileSystem, new LocalPackageRepository(pathResolver, fileSystem));
-            packageManager.Logger = Console;
+            var packageManager = new PackageManager(repository, pathResolver, fileSystem,
+                                                    new LocalPackageRepository(pathResolver, fileSystem))
+                                 {
+                                     Logger = Console
+                                 };
 
             return packageManager;
         }
@@ -206,7 +209,7 @@ namespace NuGet.Commands
 
         private static void EnsureFileExists(IFileSystem fileSystem, string configFilePath)
         {
-            using (var stream = fileSystem.OpenFile(configFilePath))
+            using (fileSystem.OpenFile(configFilePath))
             {
                 // Do nothing
             }
