@@ -56,20 +56,6 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void DownloadAndVerifyThrowsIfPackageHashIsNull()
-        {
-            // Arrange
-            var servicePackage = new DataServicePackage
-            {
-                Id = "A",
-                Version = "1.2"
-            };
-
-            // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => servicePackage.DownloadAndVerifyPackage(new MockPackageRepository()), "Failed to download package correctly. The contents of the package could not be verified.");
-        }
-
-        [Fact]
         public void ShouldUpdateReturnsTrueIfOldHashAndPackageHashAreDifferent()
         {
             // Arrange

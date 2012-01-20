@@ -163,6 +163,12 @@ namespace NuGet
             set;
         }
 
+        public string PackageHashAlgorithm
+        {
+            get;
+            set;
+        }
+
         public bool IsLatestVersion
         {
             get;
@@ -290,16 +296,16 @@ namespace NuGet
             return ShouldUpdatePackage(MachineCache.Default);
         }
 
-        internal bool ShouldUpdatePackage(IPackageRepository repository)
+        internal bool ShouldUpdatePackage(IPackageRepository cacheRepository)
         {
-            // If the hash changed re-download the package.
-            if (OldHash != PackageHash)
+            // If we never receieved a hash from the server or the hash changed re-download the package.
+            if (String.IsNullOrEmpty(PackageHash) || !PackageHash.Equals(OldHash, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
 
             // If the package hasn't been cached, then re-download the package.
-            IPackage package = GetPackage(repository);
+            IPackage package = GetPackage(cacheRepository);
 
             if (package == null)
             {
@@ -308,8 +314,8 @@ namespace NuGet
 
             // If the cached package hash isn't the same as incoming package hash
             // then re-download the package.
-            string cachedHash = package.GetHash();
-            if (cachedHash != PackageHash)
+            string cachedHash = package.GetHash(PackageHashAlgorithm);
+            if (!cachedHash.Equals(PackageHash, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -319,33 +325,26 @@ namespace NuGet
 
         private IPackage DownloadAndVerifyPackage()
         {
-            return DownloadAndVerifyPackage(MachineCache.Default);
+            return DownloadPackage(MachineCache.Default);
         }
 
-        internal IPackage DownloadAndVerifyPackage(IPackageRepository repository)
+        internal IPackage DownloadPackage(IPackageRepository cacheRepository)
         {
-            if (String.IsNullOrEmpty(PackageHash))
-            {
-                throw new InvalidOperationException(NuGetResources.PackageContentsVerifyError);
-            }
-
             IPackage package = null;
 
             // If OldHash is null, we're looking at a new instance of the data service package.
             // The package might be stored in the cache so we're going to try the looking there before attempting a download.
             if (OldHash == null)
             {
-                package = GetPackage(repository);
+                package = GetPackage(cacheRepository);
             }
 
             if (package == null)
             {
-                byte[] hashBytes = Convert.FromBase64String(PackageHash);
-
-                package = Downloader.DownloadPackage(DownloadUrl, hashBytes, this);
+                package = Downloader.DownloadPackage(DownloadUrl, this);
 
                 // Add the package to the cache
-                repository.AddPackage(package);
+                cacheRepository.AddPackage(package);
 
                 // Clear the cache for this package
                 ZipPackage.ClearCache(package);

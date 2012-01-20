@@ -10,41 +10,30 @@ namespace NuGet
     {
         private const string DefaultUserAgentClient = "NuGet Visual Studio Extension";
         private readonly IPackageFactory _packageFactory;
-        private readonly IHashProvider _hashProvider;
 
         public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
         public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
 
         public PackageDownloader()
-            : this(new ZipPackageFactory(), new CryptoHashProvider())
+            : this(new ZipPackageFactory())
         {
         }
 
-        public PackageDownloader(IPackageFactory packageFactory, IHashProvider hashProvider)
+        public PackageDownloader(IPackageFactory packageFactory)
         {
             if (packageFactory == null)
             {
                 throw new ArgumentNullException("packageFactory");
             }
 
-            if (hashProvider == null)
-            {
-                throw new ArgumentNullException("hashProvider");
-            }
-
             _packageFactory = packageFactory;
-            _hashProvider = hashProvider;
         }
 
-        public IPackage DownloadPackage(Uri uri, byte[] packageHash, IPackageMetadata package)
+        public IPackage DownloadPackage(Uri uri, IPackageMetadata package)
         {
             if (uri == null)
             {
                 throw new ArgumentNullException("uri");
-            }
-            if (packageHash == null)
-            {
-                throw new ArgumentNullException("packageHash");
             }
             if (package == null)
             {
@@ -55,18 +44,14 @@ namespace NuGet
                                  {
                                      UserAgent = HttpUtility.CreateUserAgentString(DefaultUserAgentClient)
                                  };
-            return DownloadPackage(downloadClient, packageHash, package);
+            return DownloadPackage(downloadClient, package);
         }
 
-        public IPackage DownloadPackage(IHttpClient downloadClient, byte[] packageHash, IPackageMetadata package)
+        public IPackage DownloadPackage(IHttpClient downloadClient, IPackageMetadata package)
         {
             if (downloadClient == null)
             {
                 throw new ArgumentNullException("downloadClient");
-            }
-            if (packageHash == null)
-            {
-                throw new ArgumentNullException("packageHash");
             }
             if (package == null)
             {
@@ -93,11 +78,6 @@ namespace NuGet
 
                 // TODO: This gets held onto in memory which we want to get rid of eventually
                 byte[] buffer = downloadClient.DownloadData();
-
-                if (!_hashProvider.VerifyHash(buffer, packageHash))
-                {
-                    throw new InvalidDataException(NuGetResources.PackageContentsVerifyError);
-                }
 
                 return _packageFactory.CreatePackage(() => new MemoryStream(buffer));
             }

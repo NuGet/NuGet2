@@ -376,7 +376,8 @@ namespace NuGet.VisualStudio
                 var dataServicePackage = package as DataServicePackage;
                 if (dataServicePackage != null)
                 {
-                    if (dataServicePackage.PackageHash == cachedPackage.GetHash())
+                    var cachedHash = cachedPackage.GetHash(dataServicePackage.PackageHashAlgorithm);
+                    if (!dataServicePackage.PackageHash.Equals(cachedHash, StringComparison.OrdinalIgnoreCase))
                     {
                         // if the remote package has the same hash as with the one in the machine cache, use the one from machine cache
                         package = cachedPackage;

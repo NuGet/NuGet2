@@ -61,9 +61,9 @@ namespace NuGet
             return rules.Where(r => r != null).SelectMany(r => r.Validate(package));
         }
 
-        public static string GetHash(this IPackage package)
+        public static string GetHash(this IPackage package, string hashAlgorithm)
         {
-            return GetHash(package, new CryptoHashProvider());
+            return GetHash(package, new CryptoHashProvider(hashAlgorithm));
         }
 
         public static string GetHash(this IPackage package, IHashProvider hashProvider)

@@ -39,6 +39,7 @@ namespace NuGet.Server.DataServices
             Dependencies = String.Join("|", from d in package.Dependencies
                                             select ConvertDependency(d));
             PackageHash = derivedData.PackageHash;
+            PackageHashAlgorithm = "SHA512";
             PackageSize = derivedData.PackageSize;
             LastUpdated = derivedData.LastUpdated.UtcDateTime;
             Published = derivedData.Created.UtcDateTime;
@@ -151,6 +152,12 @@ namespace NuGet.Server.DataServices
         }
 
         public string PackageHash
+        {
+            get;
+            set;
+        }
+
+        public string PackageHashAlgorithm
         {
             get;
             set;

@@ -529,15 +529,6 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to download package correctly. The contents of the package could not be verified..
-        /// </summary>
-        internal static string PackageContentsVerifyError {
-            get {
-                return ResourceManager.GetString("PackageContentsVerifyError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Package does not contain a manifest..
         /// </summary>
         internal static string PackageDoesNotContainManifest {
