@@ -116,7 +116,10 @@ namespace NuGet.Runtime
 
         private static IEnumerable<IAssembly> GetAssemblies(IEnumerable<string> paths, AppDomain domain)
         {
-            return paths.Select(path => RemoteAssembly.LoadAssembly(path, domain));
+            foreach (var path in paths)
+            {
+                yield return RemoteAssembly.LoadAssembly(path, domain);
+            }
         }
     }
 }

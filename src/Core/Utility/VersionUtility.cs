@@ -170,7 +170,7 @@ namespace NuGet
 
                 // Make sure it has at least 2 digits so it parses as a valid version
                 versionPart = versionPart.PadRight(2, '0');
-                versionPart = String.Join(".", versionPart.Select(ch => ch.ToString(CultureInfo.InvariantCulture)));
+                versionPart = String.Join(".", versionPart.ToCharArray());
             }
 
             // If we can't parse the version then use the default

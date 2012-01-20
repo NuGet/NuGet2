@@ -25,6 +25,9 @@ namespace NuGetConsole.Host
         /// </summary>
         internal abstract MethodBinder Binder { get; }
 
+        private readonly Dictionary<Type, T> _interfaceMap = new Dictionary<Type, T>(TypeEquivalenceComparer.Instance);
+        private readonly object _interfaceMapLock = new object();
+
         /// <summary>
         /// Create a new wrapper on an object.
         /// </summary>
@@ -51,9 +54,6 @@ namespace NuGetConsole.Host
             return WrappedObject.ToString();
         }
         #endregion
-
-        private readonly Dictionary<Type, T> _interfaceMap = new Dictionary<Type, T>(TypeEquivalenceComparer.Instance);
-        private readonly object _interfaceMapLock = new object();
 
         /// <summary>
         /// Get an interface to access the wrapped object.

@@ -53,9 +53,9 @@ namespace NuGet
 
             int version = GetPropertyVersion(property);
 
-            if (typeof(IList).IsAssignableFrom(property.PropertyType))
+            var list = value as IList;
+            if (list != null)
             {
-                var list = (IList)value;
                 if (list.Count > 0)
                 {
                     return Math.Max(version, VisitList(list));
@@ -63,9 +63,9 @@ namespace NuGet
                 return version;
             }
 
-            if (property.PropertyType == typeof(string))
+            var stringValue = value as String;
+            if (stringValue != null)
             {
-                var stringValue = (string)value;
                 if (!String.IsNullOrEmpty(stringValue))
                 {
                     return version;

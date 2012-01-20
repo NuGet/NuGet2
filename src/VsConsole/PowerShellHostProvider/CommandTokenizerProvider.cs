@@ -4,7 +4,6 @@ using NuGetConsole.Host.PowerShell.Implementation;
 
 namespace NuGetConsole.Host.PowerShellProvider
 {
-
     [Export(typeof(ICommandTokenizerProvider))]
     [HostName(PowerShellHostProvider.HostName)]
     internal class CommandTokenizerProvider : ICommandTokenizerProvider
