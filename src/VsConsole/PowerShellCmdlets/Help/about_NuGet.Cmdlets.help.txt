@@ -22,9 +22,6 @@ LONG DESCRIPTION
 
         Update-Package			Updates a package and its dependencies to a newer version.
 
-        New-Package				Creates a new package when supplied with a Nuspec package 
-                                specification file.
-
         Add-BindingRedirect		Examines all assemblies within the output path for a project
                                 and adds binding redirects to the application (or web) 
                                 configuration file where necessary.

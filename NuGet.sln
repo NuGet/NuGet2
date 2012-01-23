@@ -59,7 +59,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "framework", "framework", "{
 	ProjectSection(SolutionItems) = preProject
 		test\EndToEnd\assert.ps1 = test\EndToEnd\assert.ps1
 		test\EndToEnd\nuget.assert.ps1 = test\EndToEnd\nuget.assert.ps1
-		test\EndToEnd\NuGet.Tests.psm1 = test\EndToEnd\NuGet.Tests.psm1
 		test\EndToEnd\utility.ps1 = test\EndToEnd\utility.ps1
 		test\EndToEnd\vs.ps1 = test\EndToEnd\vs.ps1
 	EndProjectSection
@@ -70,7 +69,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D617D07A
 		test\EndToEnd\tests\GetProjectTest.ps1 = test\EndToEnd\tests\GetProjectTest.ps1
 		test\EndToEnd\tests\HelpTest.ps1 = test\EndToEnd\tests\HelpTest.ps1
 		test\EndToEnd\tests\install.ps1 = test\EndToEnd\tests\install.ps1
-		test\EndToEnd\tests\NewPackageTest.ps1 = test\EndToEnd\tests\NewPackageTest.ps1
 		test\EndToEnd\tests\OpenPackagePageTest.ps1 = test\EndToEnd\tests\OpenPackagePageTest.ps1
 		test\EndToEnd\tests\PackageRestoreManagerTest.ps1 = test\EndToEnd\tests\PackageRestoreManagerTest.ps1
 		test\EndToEnd\tests\PackTest.ps1 = test\EndToEnd\tests\PackTest.ps1

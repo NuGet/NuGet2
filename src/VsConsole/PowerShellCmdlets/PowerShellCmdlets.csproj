@@ -37,7 +37,6 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IErrorHandler.cs" />
     <Compile Include="InstallPackageCommand.cs" />
-    <Compile Include="NewPackageCommand.cs" />
     <Compile Include="NuGetBaseCommand.cs" />
     <Compile Include="NuGetErrorId.cs" />
     <Compile Include="OpenPackagePageCommand.cs" />
