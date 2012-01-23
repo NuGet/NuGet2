@@ -6,7 +6,7 @@ namespace NuGet.VisualStudio
     /// <summary>
     /// Represents a package repository that implements a dependency provider. 
     /// </summary>
-    public class FallbackRepository : IPackageRepository, IDependencyResolver, ISearchableRepository, IFindPackagesRepository
+    public class FallbackRepository : IPackageRepository, IDependencyResolver, ISearchableRepository
     {
         private readonly IPackageRepository _primaryRepository;
         private readonly IPackageRepository _dependencyResolver;

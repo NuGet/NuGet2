@@ -85,7 +85,6 @@
     <Compile Include="ProjectSystem\IBatchProcessor.cs" />
     <Compile Include="Repositories\ICloneableRepository.cs" />
     <Compile Include="Repositories\ICultureAwareRepository.cs" />
-    <Compile Include="Repositories\IFindPackagesRepository.cs" />
     <Compile Include="Repositories\ISearchableRepository.cs" />
     <Compile Include="Resources\AnalysisResources.Designer.cs">
       <AutoGen>True</AutoGen>

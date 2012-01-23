@@ -362,7 +362,7 @@ namespace NuGet.VisualStudio
         private IPackage GetPackage(IPackageRepository repository, string packageId)
         {
             // first, find the package from the remote repository
-            IPackage package = repository.GetLatestPackageById(packageId);
+            IPackage package = repository.FindPackage(packageId);
             if (package == null)
             {
                 return null;

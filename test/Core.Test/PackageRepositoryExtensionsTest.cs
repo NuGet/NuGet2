@@ -13,7 +13,7 @@ namespace NuGet.Test
         public void FindPackagesByIdRecognizeIFindPackagesRepositoryInterface()
         {
             // Arrange
-            var repository = new Mock<IFindPackagesRepository>();
+            var repository = new Mock<ISearchableRepository>();
             repository.Setup(p => p.FindPackagesById("A")).Returns(new IPackage[0]).Verifiable();
 
             // Act

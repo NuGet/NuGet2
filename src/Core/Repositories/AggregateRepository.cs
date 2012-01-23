@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NuGet
 {
-    public class AggregateRepository : PackageRepositoryBase, IPackageLookup, IDependencyResolver, ISearchableRepository, ICloneableRepository, IFindPackagesRepository
+    public class AggregateRepository : PackageRepositoryBase, IPackageLookup, IDependencyResolver, ISearchableRepository, ICloneableRepository
     {
         /// <summary>
         /// When the ignore flag is set up, this collection keeps track of failing repositories so that the AggregateRepository 

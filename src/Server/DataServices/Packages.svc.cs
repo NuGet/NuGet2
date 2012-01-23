@@ -109,5 +109,13 @@ namespace NuGet.Server.DataServices
             return from package in Repository.Search(searchTerm, targetFrameworks, includePrerelease)
                    select Repository.GetMetadataPackage(package);
         }
+
+        [WebGet]
+        public IQueryable<Package> FindPackagesById(string id)
+        {
+            return Repository.FindPackagesById(id)
+                             .Select(Repository.GetMetadataPackage)
+                             .AsQueryable();
+        }
     }
 }

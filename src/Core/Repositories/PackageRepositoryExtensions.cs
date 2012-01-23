@@ -130,56 +130,33 @@ namespace NuGet
 
         public static IEnumerable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId)
         {
-            var findPackagesRepository = repository as IFindPackagesRepository;
+            var findPackagesRepository = repository as ISearchableRepository;
             if (findPackagesRepository != null)
             {
                 return findPackagesRepository.FindPackagesById(packageId).ToList();
             }
             else
             {
-                var cultureRepository = repository as ICultureAwareRepository;
-                if (cultureRepository != null)
-                {
-                    packageId = packageId.ToLower(cultureRepository.Culture);
-                }
-                else
-                {
-                    packageId = packageId.ToLower(CultureInfo.CurrentCulture);
-                }
-
-                return (from p in repository.GetPackages()
-                        where p.Id.ToLower() == packageId
-                        orderby p.Id
-                        select p).ToList();
+                return FindPackagesByIdCore(repository, packageId);
             }
         }
 
-        /// <summary>
-        /// Gets the package with the specified Id and IsLatestVersion = true from the specified repository.
-        /// </summary>
-        public static IPackage GetLatestPackageById(this IPackageRepository repository, string packageId)
+        internal static IEnumerable<IPackage> FindPackagesByIdCore(IPackageRepository repository, string packageId)
         {
-            var findPackagesRepository = repository as IFindPackagesRepository;
-            if (findPackagesRepository != null)
+            var cultureRepository = repository as ICultureAwareRepository;
+            if (cultureRepository != null)
             {
-                return findPackagesRepository.FindPackagesById(packageId).FirstOrDefault(p => p.IsLatestVersion);
+                packageId = packageId.ToLower(cultureRepository.Culture);
             }
             else
             {
-                var cultureRepository = repository as ICultureAwareRepository;
-                if (cultureRepository != null)
-                {
-                    packageId = packageId.ToLower(cultureRepository.Culture);
-                }
-                else
-                {
-                    packageId = packageId.ToLower(CultureInfo.CurrentCulture);
-                }
-                
-                // Warning: Do NOT try to do FirstOrDefault(p => p.Id.ToLower() == packageId && p.IsLatestVersion)
-                // because WCF data service doesn't support that overload.
-                return repository.GetPackages().Where(p => p.Id.ToLower() == packageId && p.IsLatestVersion).FirstOrDefault();
+                packageId = packageId.ToLower(CultureInfo.CurrentCulture);
             }
+
+            return (from p in repository.GetPackages()
+                    where p.Id.ToLower() == packageId
+                    orderby p.Id
+                    select p).ToList();
         }
 
         /// <summary>

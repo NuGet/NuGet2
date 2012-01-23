@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace NuGet.Dialog.Providers
 {
-    public class LazyRepository : IPackageRepository, ISearchableRepository, IFindPackagesRepository
+    public class LazyRepository : IPackageRepository, ISearchableRepository
     {
         private readonly Lazy<IPackageRepository> _repository;
 

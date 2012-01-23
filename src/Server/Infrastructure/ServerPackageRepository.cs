@@ -82,6 +82,12 @@ namespace NuGet.Server.Infrastructure
             return packages;
         }
 
+        public IEnumerable<IPackage> FindPackagesById(string packageId)
+        {
+            var localRepository = (LocalPackageRepository)this;
+            return localRepository.FindPackagesById(packageId);
+        }
+
         private bool IsCompatible(FrameworkName frameworkName, IPackage package)
         {
             var packageData = _derivedDataLookup[package];

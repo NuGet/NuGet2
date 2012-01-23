@@ -14,6 +14,8 @@ namespace NuGet
         private readonly IHttpClient _httpClient;
         private readonly PackageDownloader _packageDownloader;
         private CultureInfo _culture;
+        private const string FindPackagesByIdSvcMethod = "FindPackagesById";
+        private const string SearchSvcMethod = "Search";
 
         // Just forward calls to the package downloader
         public event EventHandler<ProgressEventArgs> ProgressAvailable
@@ -153,7 +155,7 @@ namespace NuGet
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "OData expects a lower case value.")]
         public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
         {
-            if (!Context.SupportsServiceMethod("Search"))
+            if (!Context.SupportsServiceMethod(SearchSvcMethod))
             {
                 // If there's no search method then we can't filter by target framework
                 return GetPackages().Find(searchTerm).FilterByPrerelease(allowPrereleaseVersions);
@@ -177,8 +179,25 @@ namespace NuGet
             }
 
             // Create a query for the search service method
-            var query = Context.CreateQuery<DataServicePackage>("Search", searchParameters);
-            return new SmartDataServiceQuery<DataServicePackage>(Context, query).AsSafeQueryable();
+            var query = Context.CreateQuery<DataServicePackage>(SearchSvcMethod, searchParameters);
+            return new SmartDataServiceQuery<DataServicePackage>(Context, query);
+        }
+
+        public IEnumerable<IPackage> FindPackagesById(string packageId)
+        {
+            if (!Context.SupportsServiceMethod(FindPackagesByIdSvcMethod))
+            {
+                // If there's no search method then we can't filter by target framework
+                return PackageRepositoryExtensions.FindPackagesByIdCore(this, packageId);
+            }
+
+            var serviceParameters = new Dictionary<string, object> {
+                { "id", "'" + Escape(packageId) + "'" }
+            };
+
+            // Create a query for the search service method
+            var query = Context.CreateQuery<DataServicePackage>(FindPackagesByIdSvcMethod, serviceParameters);
+            return new SmartDataServiceQuery<DataServicePackage>(Context, query);
         }
 
         public IPackageRepository Clone()
