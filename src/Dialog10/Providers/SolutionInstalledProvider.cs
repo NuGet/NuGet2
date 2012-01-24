@@ -210,6 +210,13 @@ namespace NuGet.Dialog.Providers
             // For the solution Installed provider, packages can be installed and uninstalled.
             // It's cumbersome to update the packages incrementally, so we just refresh everything.
             SelectedNode.Refresh(resetQueryBeforeRefresh: true);
+
+            // repopulate the list of project references for all package items
+            foreach (PackageItem packageItem in SelectedNode.Extensions)
+            {
+                packageItem.ReferenceProjects.Clear();
+                packageItem.ReferenceProjects.AddRange(GetReferenceProjects(packageItem.PackageIdentity));
+            }
         }
 
         private void SelectedNode_PackageLoadCompleted(object sender, EventArgs e)
