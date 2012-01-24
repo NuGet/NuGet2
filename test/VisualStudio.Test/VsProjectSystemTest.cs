@@ -1,8 +1,6 @@
 ﻿using System;
 using EnvDTE;
 using Xunit;
-using Moq;
-using NuGet.Test.Mocks;
 
 namespace NuGet.VisualStudio.Test
 {
@@ -13,9 +11,7 @@ namespace NuGet.VisualStudio.Test
         public void GetPropertyValueUnknownPropertyReturnsNull()
         {
             // Arrange
-            var mockFileSystemProvider = new Mock<IFileSystemProvider>();
-            mockFileSystemProvider.Setup(c => c.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
-            VsProjectSystem projectSystem = new VsProjectSystem(TestUtils.GetProject("Name"), mockFileSystemProvider.Object);
+            VsProjectSystem projectSystem = new VsProjectSystem(TestUtils.GetProject("Name"));
 
             // Assert
             var value = projectSystem.GetPropertyValue("notexist");
@@ -30,11 +26,9 @@ namespace NuGet.VisualStudio.Test
             // Vs throws an argument exception when trying to index into an invalid property
 
             // Arrange
-            var mockFileSystemProvider = new Mock<IFileSystemProvider>();
-            mockFileSystemProvider.Setup(c => c.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
             Project project = TestUtils.GetProject("Name",
                                                    propertyGetter: name => { throw new ArgumentException(); });
-            VsProjectSystem projectSystem = new VsProjectSystem(project, mockFileSystemProvider.Object);
+            VsProjectSystem projectSystem = new VsProjectSystem(project);
 
             // Assert
             var value = projectSystem.GetPropertyValue("notexist");

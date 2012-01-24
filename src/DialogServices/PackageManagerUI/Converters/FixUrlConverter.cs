@@ -25,7 +25,7 @@ namespace NuGet.Dialog.PackageManagerUI
             }
             else
             {
-                return null;
+                return source;
             }
         }
 

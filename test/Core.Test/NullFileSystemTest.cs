@@ -4,6 +4,7 @@ using Xunit;
 
 namespace NuGet.Test
 {
+
     public class NullFileSystemTest
     {
         [Fact]
@@ -13,7 +14,7 @@ namespace NuGet.Test
             var instance = NullFileSystem.Instance;
 
             // Act
-            var files = instance.GetFiles("/foo", "*.*");
+            var files = instance.GetFiles("/foo");
             var directories = instance.GetDirectories("/bar");
             var filteredFiles = instance.GetFiles("/foo", "*.txt");
 

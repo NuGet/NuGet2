@@ -16,12 +16,10 @@ namespace NuGet.VisualStudio
         private readonly IDictionary<string, IProjectManager> _projects;
         private readonly ISolutionManager _solutionManager;
         private readonly IRecentPackageRepository _recentPackagesRepository;
-        private readonly IFileSystemProvider _fileSystemProvider;
         private readonly VsPackageInstallerEvents _packageEvents;
 
         public VsPackageManager(ISolutionManager solutionManager, 
-                IPackageRepository sourceRepository,
-                IFileSystemProvider fileSystemProvider,
+                IPackageRepository sourceRepository, 
                 IFileSystem fileSystem, 
                 ISharedPackageRepository sharedRepository, 
                 IRecentPackageRepository recentPackagesRepository, 
@@ -32,7 +30,6 @@ namespace NuGet.VisualStudio
             _sharedRepository = sharedRepository;
             _recentPackagesRepository = recentPackagesRepository;
             _packageEvents = packageEvents;
-            _fileSystemProvider = fileSystemProvider;
 
             _projects = new Dictionary<string, IProjectManager>(StringComparer.OrdinalIgnoreCase);
         }
@@ -61,7 +58,7 @@ namespace NuGet.VisualStudio
         private IProjectManager CreateProjectManager(Project project)
         {
             // Create the project system
-            IProjectSystem projectSystem = VsProjectSystemFactory.CreateProjectSystem(project, _fileSystemProvider);
+            IProjectSystem projectSystem = VsProjectSystemFactory.CreateProjectSystem(project);
 
             var repository = new PackageReferenceRepository(projectSystem, _sharedRepository);
 
@@ -681,7 +678,7 @@ namespace NuGet.VisualStudio
 
             try
             {
-                RuntimeHelpers.AddBindingRedirects(_solutionManager, project, _fileSystemProvider);
+                RuntimeHelpers.AddBindingRedirects(_solutionManager, project);
             }
             catch (Exception e)
             {
