@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
 
 namespace NuGet

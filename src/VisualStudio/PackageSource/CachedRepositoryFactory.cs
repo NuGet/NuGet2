@@ -2,7 +2,6 @@ using System;
 using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
 using System.Globalization;
-using Microsoft.Internal.Web.Utils;
 
 namespace NuGet.VisualStudio
 {

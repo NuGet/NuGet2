@@ -1,4 +1,4 @@
-namespace Microsoft.Internal.Web.Utils
+namespace NuGet
 {
     using System;
     using System.Diagnostics.CodeAnalysis;

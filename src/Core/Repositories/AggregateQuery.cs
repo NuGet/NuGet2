@@ -49,7 +49,7 @@ namespace NuGet
         {
             // Rewrite the expression for aggregation i.e. remove things that don't make sense to apply
             // after all initial expression has been applied.
-            var aggregateQuery = GetAggregateEnumerable().AsSafeQueryable();
+            var aggregateQuery = GetAggregateEnumerable().AsQueryable();
 
             Expression aggregateExpression = RewriteForAggregation(aggregateQuery, Expression);
             return aggregateQuery.Provider.CreateQuery<TVal>(aggregateExpression).GetEnumerator();
@@ -110,7 +110,7 @@ namespace NuGet
         public TResult Execute<TResult>(Expression expression)
         {
             var results = (from queryable in _queryables
-                           select TryExecute<TResult>(queryable, expression)).AsSafeQueryable();
+                           select TryExecute<TResult>(queryable, expression)).AsQueryable();
 
             if (QueryableUtility.IsQueryableMethod(expression, "Count"))
             {

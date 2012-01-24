@@ -89,48 +89,47 @@ namespace NuGet
                 }
                 catch (WebException ex)
                 {
-                    IHttpWebResponse response = GetResponse(ex.Response);
-                    if (response == null &&
-                        ex.Status != WebExceptionStatus.SecureChannelFailure)
+                    using (IHttpWebResponse response = GetResponse(ex.Response))
                     {
-                        // No response, something went wrong so just rethrow
-                        throw;
-                    }
-
-                    // Special case https connections that might require authentication
-                    if (ex.Status == WebExceptionStatus.SecureChannelFailure)
-                    {
-                        if (continueIfFailed)
+                        if (response == null &&
+                            ex.Status != WebExceptionStatus.SecureChannelFailure)
                         {
-                            // Act like we got a 401 so that we prompt for credentials on the next request
-                            previousStatusCode = HttpStatusCode.Unauthorized;
-                            continue;
+                            // No response, something went wrong so just rethrow
+                            throw;
                         }
-                        throw;
-                    }
 
-                    // If we were trying to authenticate the proxy or the request and succeeded, cache the result.
-                    if (previousStatusCode == HttpStatusCode.ProxyAuthenticationRequired &&
-                        response.StatusCode != HttpStatusCode.ProxyAuthenticationRequired)
-                    {
+                        // Special case https connections that might require authentication
+                        if (ex.Status == WebExceptionStatus.SecureChannelFailure)
+                        {
+                            if (continueIfFailed)
+                            {
+                                // Act like we got a 401 so that we prompt for credentials on the next request
+                                previousStatusCode = HttpStatusCode.Unauthorized;
+                                continue;
+                            }
+                            throw;
+                        }
 
-                        proxyCache.Add(request.Proxy);
-                    }
-                    else if (previousStatusCode == HttpStatusCode.Unauthorized &&
-                             response.StatusCode != HttpStatusCode.Unauthorized)
-                    {
+                        // If we were trying to authenticate the proxy or the request and succeeded, cache the result.
+                        if (previousStatusCode == HttpStatusCode.ProxyAuthenticationRequired &&
+                            response.StatusCode != HttpStatusCode.ProxyAuthenticationRequired)
+                        {
 
-                        credentialCache.Add(request.RequestUri, request.Credentials);
-                        credentialCache.Add(response.ResponseUri, request.Credentials);
-                    }
+                            proxyCache.Add(request.Proxy);
+                        }
+                        else if (previousStatusCode == HttpStatusCode.Unauthorized &&
+                                 response.StatusCode != HttpStatusCode.Unauthorized)
+                        {
 
-                    if (!IsAuthenticationResponse(response) || !continueIfFailed)
-                    {
-                        throw;
-                    }
+                            credentialCache.Add(request.RequestUri, request.Credentials);
+                            credentialCache.Add(response.ResponseUri, request.Credentials);
+                        }
 
-                    using (response)
-                    {
+                        if (!IsAuthenticationResponse(response) || !continueIfFailed)
+                        {
+                            throw;
+                        }
+
                         previousStatusCode = response.StatusCode;
                         authType = response.AuthType;
                     }

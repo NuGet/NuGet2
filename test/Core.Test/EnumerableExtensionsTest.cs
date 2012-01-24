@@ -79,55 +79,6 @@ namespace NuGet.Test
 
 
         [Fact]
-        public void SafeQueryableThrowsIfSourceIsNull()
-        {
-            // Arrange
-            IEnumerable<int> source = null;
-
-            // Act 
-            ExceptionAssert.ThrowsArgNull(() => source.AsSafeQueryable(), "source");
-        }
-
-        [Fact]
-        public void SafeQueryableReturnsOriginalIQueryableWhenNotRewritingQueries()
-        {
-            // Arrange
-            IQueryable<int> source = Enumerable.Range(0, 4).AsQueryable();
-
-            // Act 
-            IQueryable<int> result = source.AsSafeQueryable(rewriteQuery: false);
-
-            // Assert
-            Assert.Equal(result, source);
-        }
-
-        [Fact]
-        public void SafeQueryableWrapsIEnumerableWhenNotRewritingQueries()
-        {
-            // Arrange
-            IEnumerable<int> source = Enumerable.Range(0, 4);
-
-            // Act 
-            IQueryable<int> result = source.AsSafeQueryable(rewriteQuery: false);
-
-            // Assert
-            Assert.Equal(result.GetType(), typeof(EnumerableQuery<int>));
-        }
-
-        [Fact]
-        public void SafeQueryableReturnsSafeEnumerableQueryWhenRewriting()
-        {
-            // Arrange
-            IEnumerable<int> source = Enumerable.Range(0, 4);
-
-            // Act 
-            IQueryable<int> result = source.AsSafeQueryable(rewriteQuery: true);
-
-            // Assert
-            Assert.Equal(result.GetType(), typeof(SafeEnumerableQuery<int>));
-        }
-
-        [Fact]
         public void SafeIterateWithFailingElementAtTheBeginningOfSequence()
         {
             // Arrange

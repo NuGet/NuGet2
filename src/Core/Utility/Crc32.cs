@@ -126,11 +126,8 @@ namespace NuGet
         internal static uint Calculate(Stream stream)
         {
             // Copy the stream to a memory steam and get the CRC32 of the bytes
-            using (var memoryStream = new MemoryStream())
-            {
-                stream.CopyTo(memoryStream);
-                return Calculate(memoryStream.ToArray());
-            }
+            byte[] content = stream.ReadAllBytes();
+            return Calculate(content);
         }
 
         internal static uint Calculate(string content)

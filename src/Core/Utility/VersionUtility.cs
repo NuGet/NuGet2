@@ -81,7 +81,7 @@ namespace NuGet
             {
                 // We need to parse the version name out from the mscorlib's assembly name since
                 // we can't call GetName() in medium trust
-                return typeof(string).Assembly.GetNameSafe().Version;
+                return typeof(string).Assembly.GetName().Version;
             }
         }
 

@@ -6,22 +6,9 @@ namespace NuGet
     {
         private long _combinedHash64 = 0x1505L;
 
-        public void AddEnumerable(IEnumerable e)
+        public int CombinedHash
         {
-            if (e == null)
-            {
-                AddInt32(0);
-            }
-            else
-            {
-                int count = 0;
-                foreach (object o in e)
-                {
-                    AddObject(o);
-                    count++;
-                }
-                AddInt32(count);
-            }
+            get { return _combinedHash64.GetHashCode(); }
         }
 
         public void AddInt32(int i)
@@ -33,14 +20,6 @@ namespace NuGet
         {
             int oHashCode = (o != null) ? o.GetHashCode() : 0;
             AddInt32(oHashCode);
-        }
-
-        public int CombinedHash
-        {
-            get
-            {
-                return _combinedHash64.GetHashCode();
-            }
         }
     }
 }

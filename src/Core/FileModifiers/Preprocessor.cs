@@ -33,7 +33,10 @@ namespace NuGet
 
         internal static string Process(IPackageFile file, IPropertyProvider propertyProvider)
         {
-            return Process(file.GetStream(), propertyProvider, throwIfNotFound: false);
+            using (var stream = file.GetStream())
+            {
+                return Process(stream, propertyProvider, throwIfNotFound: false);
+            }
         }
 
         internal static string Process(Stream stream, IPropertyProvider propertyProvider, bool throwIfNotFound = true)

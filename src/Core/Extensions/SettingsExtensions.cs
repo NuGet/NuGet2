@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Internal.Web.Utils;
 
 namespace NuGet
 {

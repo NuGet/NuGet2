@@ -20,7 +20,7 @@ namespace NuGet
 
         public DataServicePackage()
         {
-            _package = new LazyWithRecreate<IPackage>(DownloadAndVerifyPackage, ShouldUpdatePackage);
+            _package = new LazyWithRecreate<IPackage>(DownloadPackage, ShouldUpdatePackage);
         }
 
         public string Id
@@ -323,7 +323,7 @@ namespace NuGet
             return false;
         }
 
-        private IPackage DownloadAndVerifyPackage()
+        private IPackage DownloadPackage()
         {
             return DownloadPackage(MachineCache.Default);
         }

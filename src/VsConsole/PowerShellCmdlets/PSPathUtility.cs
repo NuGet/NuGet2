@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Management.Automation;
-using Microsoft.Internal.Web.Utils;
 using Microsoft.PowerShell.Commands;
 
 namespace NuGet.PowerShell.Commands

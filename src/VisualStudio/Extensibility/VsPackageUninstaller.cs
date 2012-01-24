@@ -2,7 +2,6 @@
 using System.ComponentModel.Composition;
 using System.Globalization;
 using EnvDTE;
-using Microsoft.Internal.Web.Utils;
 
 namespace NuGet.VisualStudio
 {

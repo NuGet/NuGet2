@@ -99,7 +99,7 @@ namespace NuGet
         public override IQueryable<IPackage> GetPackages()
         {
             // We need to follow this pattern in all AggregateRepository methods to ensure it suppresses exceptions that may occur if the Ignore flag is set.  Oh how I despise my code. 
-            var defaultResult = Enumerable.Empty<IPackage>().AsSafeQueryable();
+            var defaultResult = Enumerable.Empty<IPackage>().AsQueryable();
             Func<IPackageRepository, IQueryable<IPackage>> getPackages = Wrap(r => r.GetPackages(), defaultResult);
             return CreateAggregateQuery(Repositories.Select(getPackages));
         }

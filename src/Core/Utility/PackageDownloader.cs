@@ -9,25 +9,9 @@ namespace NuGet
     public class PackageDownloader : IHttpClientEvents
     {
         private const string DefaultUserAgentClient = "NuGet Visual Studio Extension";
-        private readonly IPackageFactory _packageFactory;
 
         public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
         public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
-
-        public PackageDownloader()
-            : this(new ZipPackageFactory())
-        {
-        }
-
-        public PackageDownloader(IPackageFactory packageFactory)
-        {
-            if (packageFactory == null)
-            {
-                throw new ArgumentNullException("packageFactory");
-            }
-
-            _packageFactory = packageFactory;
-        }
 
         public IPackage DownloadPackage(Uri uri, IPackageMetadata package)
         {
@@ -78,8 +62,8 @@ namespace NuGet
 
                 // TODO: This gets held onto in memory which we want to get rid of eventually
                 byte[] buffer = downloadClient.DownloadData();
-
-                return _packageFactory.CreatePackage(() => new MemoryStream(buffer));
+                Func<Stream> streamFactory = () => new MemoryStream(buffer, writable: false);
+                return new ZipPackage(streamFactory, enableCaching: true);
             }
             finally
             {

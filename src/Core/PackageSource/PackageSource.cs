@@ -3,7 +3,6 @@ using System.Runtime.Serialization;
 
 namespace NuGet
 {
-
     [DataContract]
     public class PackageSource : IEquatable<PackageSource>
     {

@@ -85,7 +85,7 @@ namespace NuGet
         IQueryable<IPackage> IPackageRepository.GetPackages()
         {
             // Return visited packages only
-            return Packages.Where(IsVisited).AsSafeQueryable();
+            return Packages.Where(IsVisited).AsQueryable();
         }
 
         void IPackageRepository.AddPackage(IPackage package)

@@ -47,7 +47,7 @@ namespace NuGet.Test.Mocks
 
         public override IQueryable<IPackage> GetPackages()
         {
-            return Packages.Values.SelectMany(p => p).AsSafeQueryable();
+            return Packages.Values.SelectMany(p => p).AsQueryable();
         }
 
         public override void RemovePackage(IPackage package)

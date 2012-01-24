@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace NuGet
@@ -45,20 +46,7 @@ namespace NuGet
         public bool VerifyHash(byte[] data, byte[] hash)
         {
             byte[] dataHash = CalculateHash(data);
-
-            if (dataHash.Length != hash.Length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < dataHash.Length; i++)
-            {
-                if (dataHash[i] != hash[i])
-                {
-                    return false;
-                }
-            }
-            return true;
+            return Enumerable.SequenceEqual(dataHash, hash);
         }
 
         private HashAlgorithm GetHashAlgorithm()

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
 
 namespace NuGet

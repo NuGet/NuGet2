@@ -67,7 +67,7 @@ namespace NuGet
 
         public override IQueryable<IPackage> GetPackages()
         {
-            return GetPackagesCore().AsSafeQueryable();
+            return GetPackagesCore().AsQueryable();
         }
 
         private IEnumerable<IPackage> GetPackagesCore()

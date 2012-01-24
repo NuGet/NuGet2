@@ -510,13 +510,5 @@ namespace NuGet
                     orderby p.Version descending
                     select p).FirstOrDefault();
         }
-
-        // HACK: We need this to avoid a partial trust issue. We need to be able to evaluate closures
-        // within this class. The attributes are necessary to prevent this method from being inlined into ClosureEvaluator 
-        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-        internal static object Eval(FieldInfo fieldInfo, object obj)
-        {
-            return fieldInfo.GetValue(obj);
-        }
     }
 }

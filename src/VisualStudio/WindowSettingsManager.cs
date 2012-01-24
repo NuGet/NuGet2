@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Composition;
 using System.Windows;
-using Microsoft.Internal.Web.Utils;
 
 namespace NuGet.VisualStudio
 {

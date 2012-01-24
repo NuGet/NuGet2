@@ -1,5 +1,4 @@
 using System;
-using Microsoft.Internal.Web.Utils;
 using Xunit;
 
 namespace NuGet.Test

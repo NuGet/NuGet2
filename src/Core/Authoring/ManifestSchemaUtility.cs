@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -37,6 +38,9 @@ namespace NuGet
             { SchemaVersionV3, "NuGet.Authoring.nuspec.xsd" },
         };
 
+        private static readonly ConcurrentDictionary<string, string> _schemaCache = new ConcurrentDictionary<string, string>(
+            concurrencyLevel: 4, capacity: 5, comparer: StringComparer.OrdinalIgnoreCase);
+
         public static string GetSchemaNamespace(int version)
         {
             // Versions are internally 0-indexed but stored with a 1 index so decrement it by 1
@@ -47,7 +51,7 @@ namespace NuGet
             return VersionToSchemaMappings[version - 1];
         }
 
-        public static Stream GetSchemaStream(string schemaNamespace)
+        public static TextReader GetSchemaReader(string schemaNamespace)
         {
             string schemaResourceName;
             if (!SchemaToResourceMappings.TryGetValue(schemaNamespace, out schemaResourceName))
@@ -55,13 +59,19 @@ namespace NuGet
                 throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_InvalidSchemaNamespace,
                     schemaNamespace));
             }
-            // Update the xsd with the right schema namespace
-            var assembly = typeof(Manifest).Assembly;
-            using (var reader = new StreamReader(assembly.GetManifestResourceStream(schemaResourceName)))
+
+            string cachedContent = _schemaCache.GetOrAdd(schemaNamespace, _ =>
             {
-                string content = reader.ReadToEnd();
-                return String.Format(CultureInfo.InvariantCulture, content, schemaNamespace).AsStream();
-            }
+                // Update the xsd with the right schema namespace
+                var assembly = typeof(Manifest).Assembly;
+                using (var reader = new StreamReader(assembly.GetManifestResourceStream(schemaResourceName)))
+                {
+                    string content = reader.ReadToEnd();
+                    return String.Format(CultureInfo.InvariantCulture, content, schemaNamespace);
+                }
+            });
+
+            return new StringReader(cachedContent);
         }
 
         public static bool IsKnownSchema(string schemaNamespace)

@@ -2,12 +2,11 @@
 using System.Globalization;
 using System.IO;
 using System.Net;
-using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
 
 namespace NuGet
 {
-    public class PackageServer : IPackageServer
+    public class PackageServer
     {
         private const string ServiceEndpoint = "/api/v2/package";
         private const string ApiKeyHeader = "X-NuGet-ApiKey";

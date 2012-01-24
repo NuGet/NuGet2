@@ -73,7 +73,7 @@ namespace NuGet
 
         public override IQueryable<IPackage> GetPackages()
         {
-            return GetPackages(OpenPackage).AsSafeQueryable();
+            return GetPackages(OpenPackage).AsQueryable();
         }
 
         public override void AddPackage(IPackage package)

@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet
 {
-    public class PackageEqualityComparer : IEqualityComparer<IPackage>
+    public sealed class PackageEqualityComparer : IEqualityComparer<IPackage>
     {
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "This type isn't mutable")]
         public static readonly PackageEqualityComparer IdAndVersion = new PackageEqualityComparer((x, y) => x.Id.Equals(y.Id, StringComparison.OrdinalIgnoreCase) &&

@@ -15,7 +15,7 @@ namespace NuGet
                 throw new ArgumentNullException("client");
             }
 
-            var version = typeof(HttpUtility).Assembly.GetNameSafe().Version;
+            var version = typeof(HttpUtility).Assembly.GetName().Version;
             return String.Format(CultureInfo.InvariantCulture, UserAgentTemplate, client, version, Environment.OSVersion);
         }
 

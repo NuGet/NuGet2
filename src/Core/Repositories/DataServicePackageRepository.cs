@@ -149,7 +149,7 @@ namespace NuGet
         public override IQueryable<IPackage> GetPackages()
         {
             // REVIEW: Is it ok to assume that the package entity set is called packages?
-            return new SmartDataServiceQuery<DataServicePackage>(Context, Constants.PackageServiceEntitySetName).AsSafeQueryable();
+            return new SmartDataServiceQuery<DataServicePackage>(Context, Constants.PackageServiceEntitySetName);
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "OData expects a lower case value.")]

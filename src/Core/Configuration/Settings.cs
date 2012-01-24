@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-using Microsoft.Internal.Web.Utils;
 using NuGet.Resources;
 
 namespace NuGet

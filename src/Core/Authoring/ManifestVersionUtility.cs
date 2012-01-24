@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 
 namespace NuGet
 {
-    internal class ManifestVersionUtility
+    internal static class ManifestVersionUtility
     {
         private const int DefaultVersion = 1;
         private const int SemverVersion = 3;

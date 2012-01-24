@@ -1,11 +1,9 @@
 ﻿using System;
-using Microsoft.Internal.Web.Utils;
 
 namespace NuGet
 {
     public class PackageIssue
     {
-
         public PackageIssue(string title, string description, string solution) :
             this(title, description, solution, PackageIssueLevel.Warning)
         {

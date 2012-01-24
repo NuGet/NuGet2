@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.Versioning;
-using Microsoft.Internal.Web.Utils;
 
 namespace NuGet
 {

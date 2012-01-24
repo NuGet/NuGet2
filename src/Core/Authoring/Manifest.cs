@@ -252,9 +252,9 @@ namespace NuGet
 
             // Create the schema set
             var schemaSet = new XmlSchemaSet();
-            using (Stream schemaStream = ManifestSchemaUtility.GetSchemaStream(schemaNamespace))
+            using (TextReader reader = ManifestSchemaUtility.GetSchemaReader(schemaNamespace))
             {
-                schemaSet.Add(schemaNamespace, XmlReader.Create(schemaStream));
+                schemaSet.Add(schemaNamespace, XmlReader.Create(reader));
             }
 
             // Validate the document
@@ -293,7 +293,7 @@ namespace NuGet
                             String.Format(CultureInfo.CurrentCulture,
                                           NuGetResources.IncompatibleSchema,
                                           packageId,
-                                          typeof(Manifest).Assembly.GetNameSafe().Version));
+                                          typeof(Manifest).Assembly.GetName().Version));
                 }
             }
         }

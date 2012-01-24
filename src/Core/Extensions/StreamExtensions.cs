@@ -8,10 +8,27 @@ namespace NuGet
     {
         public static byte[] ReadAllBytes(this Stream stream)
         {
-            int length = (int)stream.Length;
-            byte[] buffer = new byte[length];
-            stream.Read(buffer, 0, length);
-            return buffer;
+            var memoryStream = stream as MemoryStream;
+            if (memoryStream != null)
+            {
+                return memoryStream.ToArray();
+            }
+            else if (stream.CanSeek)
+            {
+                int length = (int)stream.Length;
+                byte[] buffer = new byte[length];
+                stream.Read(buffer, 0, length);
+                return buffer;
+            }
+            else
+            {
+                using (memoryStream = new MemoryStream())
+                {
+                    stream.CopyTo(memoryStream);
+                    return memoryStream.ToArray();
+                }
+            }
+
         }
 
         /// <summary>

@@ -88,7 +88,6 @@
     <Compile Include="BindingRedirectResolverTest.cs" />
     <Compile Include="AssemblyBindingTest.cs" />
     <Compile Include="BufferedEnumerableTest.cs" />
-    <Compile Include="ClosureEvaluatorTest.cs" />
     <Compile Include="CryptoHashProviderTest.cs" />
     <Compile Include="PackageWalkerTest.cs" />
     <Compile Include="Mocks\MockAssembly.cs" />

@@ -93,9 +93,7 @@
     </Compile>
     <Compile Include="SemanticVersion.cs" />
     <Compile Include="SemanticVersionTypeConverter.cs" />
-    <Compile Include="Server\PublishData.cs" />
     <Compile Include="Server\PackageServer.cs" />
-    <Compile Include="Server\IPackageServer.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IPackageManager.cs" />
     <Compile Include="IProjectManager.cs" />
@@ -154,7 +152,6 @@
     <Compile Include="Runtime\BindingRedirectResolver.cs" />
     <Compile Include="Runtime\IAssembly.cs" />
     <Compile Include="Runtime\RemoteAssembly.cs" />
-    <Compile Include="Extensions\AssemblyExtensions.cs" />
     <Compile Include="Extensions\CollectionExtensions.cs" />
     <Compile Include="FileModifiers\Preprocessor.cs" />
     <Compile Include="FileModifiers\XmlTransfomer.cs" />
@@ -169,7 +166,6 @@
     <Compile Include="Http\RedirectedHttpClient.cs" />
     <Compile Include="Utility\VersionSpec.cs" />
     <Compile Include="Utility\WebRequestEventArgs.cs" />
-    <Compile Include="Utility\ZipPackageFactory.cs" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -199,16 +195,13 @@
     <Compile Include="ProjectManager.cs" />
     <Compile Include="FileModifiers\IPackageFileTransformer.cs" />
     <Compile Include="Repositories\DataServicePackageRepository.cs" />
-    <Compile Include="Utility\ClosureEvaluator.cs" />
     <Compile Include="Utility\HashCodeCombiner.cs" />
     <Compile Include="Http\HttpClient.cs" />
-    <Compile Include="Utility\IPackageFactory.cs" />
     <Compile Include="Utility\PackageDownloader.cs" />
     <Compile Include="Utility\IHashProvider.cs" />
     <Compile Include="Utility\PackageEqualityComparer.cs" />
     <Compile Include="PackageWalker\PackageMarker.cs" />
     <Compile Include="Packages\ZipPackage.cs" />
-    <Compile Include="Utility\GlobalSuppressions.cs" />
     <Compile Include="Packages\IPackageAssemblyReference.cs" />
     <Compile Include="Packages\ZipPackageAssemblyReference.cs" />
     <Compile Include="PackageWalker\PackageWalker.cs" />
@@ -234,7 +227,6 @@
     <Compile Include="Extensions\StreamExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Utility\PackageUtility.cs" />
-    <Compile Include="Utility\SafeEnumerableQuery.cs" />
     <Compile Include="Utility\XmlUtility.cs" />
     <Compile Include="ProjectSystem\IProjectSystem.cs" />
     <Compile Include="Repositories\PackageRepositoryBase.cs" />
@@ -254,9 +246,6 @@
     <EmbeddedResource Include="Authoring\nuspec.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <None Include="Class diagrams\Packages.cd" />
-    <None Include="Class diagrams\PackageWalkers.cd" />
-    <None Include="Class diagrams\Repositories.cd" />
     <None Include="Properties\NuGet.Core.nuspec" />
   </ItemGroup>
   <ItemGroup>

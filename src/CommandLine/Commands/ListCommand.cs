@@ -90,7 +90,6 @@ namespace NuGet.Commands
 
         public override void ExecuteCommand()
         {
-
             IEnumerable<IPackage> packages = GetPackages();
 
             bool hasPackages = false;

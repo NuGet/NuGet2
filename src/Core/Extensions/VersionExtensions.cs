@@ -2,7 +2,7 @@
 
 namespace NuGet
 {
-    public static class VersionExtensions
+    internal static class VersionExtensions
     {
         public static Func<IPackage, bool> ToDelegate(this IVersionSpec versionInfo)
         {
