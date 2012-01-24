@@ -13,13 +13,6 @@ namespace NuGet
             {
                 return memoryStream.ToArray();
             }
-            else if (stream.CanSeek)
-            {
-                int length = (int)stream.Length;
-                byte[] buffer = new byte[length];
-                stream.Read(buffer, 0, length);
-                return buffer;
-            }
             else
             {
                 using (memoryStream = new MemoryStream())
@@ -28,7 +21,6 @@ namespace NuGet
                     return memoryStream.ToArray();
                 }
             }
-
         }
 
         /// <summary>
