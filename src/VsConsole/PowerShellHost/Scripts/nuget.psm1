@@ -164,7 +164,6 @@ Register-TabExpansion 'Open-PackagePage' @{
     }
 }
 
-Register-TabExpansion 'New-Package' @{ 'ProjectName' = { GetProjectNames } }
 Register-TabExpansion 'Add-BindingRedirect' @{ 'ProjectName' = { GetProjectNames } }
 Register-TabExpansion 'Get-Project' @{ 'Name' = { GetProjectNames } }
 

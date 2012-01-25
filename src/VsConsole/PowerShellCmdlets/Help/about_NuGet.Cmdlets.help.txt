@@ -41,7 +41,6 @@ SEE ALSO
     Install-Package
     Uninstall-Package
     Update-Package
-    New-Package
     Add-BindingRedirect
     Get-Project
     Open-PackagePage
