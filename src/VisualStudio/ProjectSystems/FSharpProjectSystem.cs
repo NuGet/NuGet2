@@ -5,8 +5,8 @@ namespace NuGet.VisualStudio
 {
     public class FSharpProjectSystem : VsProjectSystem
     {
-        public FSharpProjectSystem(Project project)
-            : base(project)
+        public FSharpProjectSystem(Project project, IFileSystemProvider fileSystemProvider)
+            : base(project, fileSystemProvider)
         {
         }
 

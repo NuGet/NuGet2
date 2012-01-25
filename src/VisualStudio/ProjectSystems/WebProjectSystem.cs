@@ -6,8 +6,8 @@ namespace NuGet.VisualStudio
 {
     public class WebProjectSystem : VsProjectSystem
     {
-        public WebProjectSystem(Project project)
-            : base(project)
+        public WebProjectSystem(Project project, IFileSystemProvider fileSystemProvider)
+            : base(project, fileSystemProvider)
         {
         }
 

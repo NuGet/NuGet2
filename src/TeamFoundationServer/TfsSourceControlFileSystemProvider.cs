@@ -12,7 +12,7 @@ namespace NuGet.TeamFoundationServer
     {
         private const string TfsProviderName = "{4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}";
 
-        public IFileSystem GetFileSystem(string path, SourceControlBindings binding)
+        public ISourceControlFileSystem GetFileSystem(string path, SourceControlBindings binding)
         {
             // Return null if this this binding isn't for us then return null
             if (String.IsNullOrEmpty(binding.ProviderName) ||

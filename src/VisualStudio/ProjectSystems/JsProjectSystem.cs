@@ -1,3 +1,4 @@
+using System.IO;
 using EnvDTE;
 
 namespace NuGet.VisualStudio
@@ -7,8 +8,8 @@ namespace NuGet.VisualStudio
     /// </summary>
     public class JsProjectSystem : VsProjectSystem
     {
-        public JsProjectSystem(Project project) :
-            base(project)
+        public JsProjectSystem(Project project, IFileSystemProvider fileSystemProvider) :
+            base(project, fileSystemProvider)
         {
         }
 
@@ -20,9 +21,10 @@ namespace NuGet.VisualStudio
             }
         }
 
-        protected override void EnsureDirectory(string path)
+        public override void AddFile(string path, Stream stream)
         {
             Project.GetProjectItems(path, createIfNotExists: true);
+            base.AddFile(path, stream);
         }
 
         protected override void AddFileToContainer(string fullPath, ProjectItems container)

@@ -20,8 +20,8 @@ namespace NuGet.VisualStudio
 
         private static readonly string[] _sourceFileExtensions = new[] { ".cs", ".vb" };
 
-        public WebSiteProjectSystem(Project project)
-            : base(project)
+        public WebSiteProjectSystem(Project project, IFileSystemProvider fileSystemProvider)
+            : base(project, fileSystemProvider)
         {
         }
 
@@ -92,8 +92,9 @@ namespace NuGet.VisualStudio
             return false;
         }
 
-        public void BeginProcessing(IEnumerable<string> batch)
+        public override void BeginProcessing(IEnumerable<string> batch, PackageAction action)
         {
+            base.BeginProcessing(batch, action);
             var files = batch.OrderBy(path => path)
                              .ToList();
 
@@ -115,8 +116,9 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public void EndProcessing()
+        public override void EndProcessing()
         {
+            base.EndProcessing();
             _excludedCodeFiles.Clear();
         }
 

@@ -4,6 +4,6 @@ namespace NuGet.VisualStudio
 {
     public interface ISourceControlFileSystemProvider
     {
-        IFileSystem GetFileSystem(string path, SourceControlBindings binding);
+        ISourceControlFileSystem GetFileSystem(string path, SourceControlBindings binding);
     }
 }

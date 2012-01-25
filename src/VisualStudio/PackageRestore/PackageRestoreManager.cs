@@ -6,7 +6,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-
 using EnvDTE;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio.Resources;

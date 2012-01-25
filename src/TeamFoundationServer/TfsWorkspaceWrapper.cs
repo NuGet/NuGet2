@@ -25,6 +25,16 @@ namespace NuGet.TeamFoundationServer
             return _workspace.PendAdd(fullPath) > 0;
         }
 
+        public bool PendAdd(IEnumerable<string> fullPaths)
+        {
+            var pathsArray = fullPaths.ToArray();
+            if (pathsArray.Any())
+            {
+                return _workspace.PendAdd(pathsArray, isRecursive: false) > 0;
+            }
+            return false;
+        }
+
         public IEnumerable<string> GetItems(string fullPath)
         {
             return GetItems(fullPath, ItemType.Any);
@@ -74,6 +84,12 @@ namespace NuGet.TeamFoundationServer
             return items;
         }
 
+        public IEnumerable<string> GetItemsRecursive(string fullPath)
+        {
+            return _workspace.VersionControlServer.GetItems(fullPath, TFS.VersionSpec.Latest, RecursionType.Full, DeletedState.NonDeleted, ItemType.File)
+                                                  .Items.Select(i => TryGetLocalItemForServerItem(i.ServerItem));
+        }
+
         public IEnumerable<PendingChange> GetPendingChanges(string fullPath)
         {
             return _workspace.GetPendingChangesEnumerable(fullPath);
@@ -107,13 +123,22 @@ namespace NuGet.TeamFoundationServer
             return _workspace.PendDelete(fullPath, recursionType) > 0;
         }
 
+        public bool PendDelete(IEnumerable<string> fullPaths, RecursionType recursionType)
+        {
+            var pathsArray = fullPaths.ToArray();
+            if (pathsArray.Any())
+            {
+                return _workspace.PendDelete(pathsArray, recursionType) > 0;
+            }
+            return false;
+        }
 
-        public bool ItemExists(string path)
+        public bool ItemExists(string fullPath)
         {
             try
             {
-                // TODO: Find a better way to implement this
-                return GetItems(path).Any();
+                var serverPath = _workspace.TryGetServerItemForLocalItem(fullPath);
+                return !String.IsNullOrEmpty(serverPath) && _workspace.VersionControlServer.ServerItemExists(serverPath, ItemType.File);
             }
             catch (ItemNotFoundException)
             {

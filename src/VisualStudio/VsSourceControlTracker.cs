@@ -117,16 +117,20 @@ namespace NuGet.VisualStudio
                 string solutionRepositoryPath = RepositorySettings.Value.RepositoryPath;
                 if (Directory.Exists(solutionRepositoryPath))
                 {
-                    IFileSystem activeFileSystem = _fileSystemProvider.GetFileSystem(solutionRepositoryPath);
+                    
+                    var activeFileSystem = _fileSystemProvider.GetFileSystem(solutionRepositoryPath) as ISourceControlFileSystem;
+
                     // only proceed if the file system in use is a source-control file system.
-                    if (activeFileSystem.GetType() != typeof(PhysicalFileSystem))
+                    if (activeFileSystem != null)
                     {
                         IEnumerable<string> allFiles = Directory.EnumerateFiles(solutionRepositoryPath, "*.*",
                                                                                 SearchOption.AllDirectories);
-                        foreach (string file in allFiles)
+                        string file = allFiles.FirstOrDefault();
+                        if (file != null && !activeFileSystem.IsSourceControlBound(file))
                         {
-                            activeFileSystem.AddFile(MakeRelativePath(file, solutionRepositoryPath), File.OpenRead(file),
-                                                     overrideIfExists: false);
+                            // If there are any files under the packages directory and any given file (in this case the first one we come across) is not under
+                            // source control, bind it.
+                            activeFileSystem.BindToSourceControl(allFiles);
                         }
                     }
                 }

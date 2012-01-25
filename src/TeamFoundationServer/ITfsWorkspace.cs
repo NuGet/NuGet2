@@ -7,13 +7,17 @@ namespace NuGet.TeamFoundationServer
     {
         bool PendEdit(string fullPath);
         bool PendAdd(string fullPath);
+        bool PendAdd(IEnumerable<string> fullPaths);
         bool PendDelete(string fullPath, RecursionType recursionType);
+        bool PendDelete(IEnumerable<string> fullPaths, RecursionType recursionType);
         string GetLocalItemForServerItem(string path);
-        bool ItemExists(string path);
+        bool ItemExists(string fullPath);
 
         // Change the type to something mockable
         IEnumerable<string> GetItems(string fullPath);
         IEnumerable<string> GetItems(string fullPath, ItemType itemType);
+        IEnumerable<string> GetItemsRecursive(string fullPath);
+
 
         // Change this type to something mockable
         IEnumerable<PendingChange> GetPendingChanges(string fullPath, RecursionType recursionType);

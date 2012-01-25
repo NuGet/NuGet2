@@ -879,6 +879,7 @@ namespace NuGet.PowerShell.Commands.Test
             var packageManager = new VsPackageManager(
                 solutionManager,
                 sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
                 new Mock<IFileSystem>().Object,
                 localRepository.Object,
                 new Mock<IRecentPackageRepository>().Object,
@@ -937,6 +938,7 @@ namespace NuGet.PowerShell.Commands.Test
             var packageManager = new VsPackageManager(
                 solutionManager,
                 sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
                 new Mock<IFileSystem>().Object,
                 localRepository.Object,
                 new Mock<IRecentPackageRepository>().Object,
@@ -1070,7 +1072,7 @@ namespace NuGet.PowerShell.Commands.Test
                             new[] {PackageUtility.CreatePackage("P1", "0.9"), PackageUtility.CreatePackage("P2")};
             localRepo.Setup(c => c.GetPackages()).Returns(localPackages.AsQueryable());
 
-            return new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(), fileSystem.Object,
+            return new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(), new Mock<IFileSystemProvider>().Object, fileSystem.Object,
                                         localRepo.Object, new Mock<IRecentPackageRepository>().Object,
                                         new Mock<VsPackageInstallerEvents>().Object);
         }
@@ -1087,6 +1089,7 @@ namespace NuGet.PowerShell.Commands.Test
             localRepo.Setup(c => c.GetPackages()).Returns(localPackages.AsQueryable());
 
             var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(),
+                                                      new Mock<IFileSystemProvider>().Object, 
                                                       fileSystem.Object, localRepo.Object,
                                                       new Mock<IRecentPackageRepository>().Object,
                                                       new Mock<VsPackageInstallerEvents>().Object);

@@ -33,7 +33,7 @@ namespace NuGet
                 if (batchProcessor != null)
                 {
                     var paths = fileList.Select(file => ResolvePath(fileTransformers, file.Path));
-                    batchProcessor.BeginProcessing(paths);
+                    batchProcessor.BeginProcessing(paths, PackageAction.Install);
                 }
 
                 foreach (IPackageFile file in fileList)
@@ -105,7 +105,7 @@ namespace NuGet
                     if (batchProcessor != null)
                     {
                         var paths = directoryFiles.Select(file => ResolvePath(fileTransformers, file.Path));
-                        batchProcessor.BeginProcessing(paths);
+                        batchProcessor.BeginProcessing(paths, PackageAction.Uninstall);
                     }
 
                     foreach (var file in directoryFiles)

@@ -35,11 +35,6 @@ namespace NuGet
             // Do nothing
         }
 
-        public IEnumerable<string> GetFiles(string path)
-        {
-            return Enumerable.Empty<string>();
-        }
-
         public IEnumerable<string> GetFiles(string path, string filter)
         {
             return Enumerable.Empty<string>();
@@ -73,11 +68,6 @@ namespace NuGet
         public void AddFile(string path, Stream stream)
         {
             // Do nothing
-        }
-
-        public void AddFile(string path, Stream stream, bool overrideIfExists)
-        {
-            
         }
 
         public Stream OpenFile(string path)
