@@ -32,7 +32,6 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             var fileSystem = new MockFileSystem();
-            var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
             installCommand.Arguments.Add("Foo");
 
@@ -139,6 +138,28 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Assert
             Assert.Equal(3, fileSystem.Paths.Count);
             Assert.Equal(@"x:\test\packages.config", fileSystem.Paths.ElementAt(0).Key);
+            Assert.Equal(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.ElementAt(1).Key);
+            Assert.Equal(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.ElementAt(2).Key);
+        }
+
+        [Fact]
+        public void InstallCommandInstallsAllPackagesUsePackagesConfigByDefaultIfNoArgumentIsSpecified()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\\test");
+            fileSystem.AddFile(@"packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""Foo"" version=""1.0"" />
+  <package id=""Baz"" version=""0.7"" />
+</packages>");
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
+
+            // Act
+            installCommand.ExecuteCommand();
+
+            // Assert
+            Assert.Equal(3, fileSystem.Paths.Count);
+            Assert.Equal(@"packages.config", fileSystem.Paths.ElementAt(0).Key);
             Assert.Equal(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.ElementAt(1).Key);
             Assert.Equal(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.ElementAt(2).Key);
         }
@@ -329,7 +350,6 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 </packages>");
 
             var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
-            var package = PackageUtility.CreatePackage("Foo", "1.0.0");
             packageManager.Setup(p => p.InstallPackage("Foo", new SemanticVersion("1.0.0"), true, true)).Verifiable();
             packageManager.Setup(p => p.InstallPackage("Qux", new SemanticVersion("2.3.56-beta"), true, true)).Verifiable();
             packageManager.SetupGet(p => p.PathResolver).Returns(new DefaultPackagePathResolver(fileSystem));

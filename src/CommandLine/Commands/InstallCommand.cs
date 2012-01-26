@@ -9,7 +9,7 @@ using NuGet.Common;
 namespace NuGet.Commands
 {
     [Command(typeof(NuGetResources), "install", "InstallCommandDescription",
-        MinArgs = 1, MaxArgs = 1, UsageSummaryResourceName = "InstallCommandUsageSummary",
+        MinArgs = 0, MaxArgs = 1, UsageSummaryResourceName = "InstallCommandUsageSummary",
         UsageDescriptionResourceName = "InstallCommandUsageDescription",
         UsageExampleResourceName = "InstallCommandUsageExamples")]
     public class InstallCommand : Command
@@ -85,10 +85,10 @@ namespace NuGet.Commands
 
             // If the first argument is a packages.config file, install everything it lists
             // Otherwise, treat the first argument as a package Id
-            if (Path.GetFileName(Arguments[0]).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
+            if (Arguments.Count == 0 || Path.GetFileName(Arguments[0]).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
             {
                 Prerelease = true;
-                var configFilePath = Path.GetFullPath(Arguments[0]);
+                var configFilePath = Arguments.Count == 0 ? Constants.PackageReferenceFile : Path.GetFullPath(Arguments[0]);
                 // By default the PackageReferenceFile does not throw if the file does not exist at the specified path.
                 // We'll try reading from the file so that the file system throws a file not found
                 EnsureFileExists(fileSystem, configFilePath);
