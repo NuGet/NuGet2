@@ -85,7 +85,7 @@ namespace NuGet.Commands
 
             // If the first argument is a packages.config file, install everything it lists
             // Otherwise, treat the first argument as a package Id
-            if (Path.GetFileName(Arguments[0]).Equals(PackageReferenceRepository.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
+            if (Path.GetFileName(Arguments[0]).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
             {
                 Prerelease = true;
                 var configFilePath = Path.GetFullPath(Arguments[0]);
@@ -150,7 +150,7 @@ namespace NuGet.Commands
 
             if (!installedAny && packageReferences.Any())
             {
-                Console.WriteLine(NuGetResources.InstallCommandNothingToInstall, PackageReferenceRepository.PackageReferenceFile);
+                Console.WriteLine(NuGetResources.InstallCommandNothingToInstall, Constants.PackageReferenceFile);
             }
         }
 

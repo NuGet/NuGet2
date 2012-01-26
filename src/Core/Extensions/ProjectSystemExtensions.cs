@@ -200,7 +200,7 @@ namespace NuGet
 
                 // Bug 1686: Don't allow transforming packages.config.transform
                 string fileName = Path.GetFileName(truncatedPath);
-                if (!PackageReferenceRepository.PackageReferenceFile.Equals(fileName, StringComparison.OrdinalIgnoreCase))
+                if (!Constants.PackageReferenceFile.Equals(fileName, StringComparison.OrdinalIgnoreCase))
                 {
                     path = truncatedPath;
                 }
@@ -227,7 +227,7 @@ namespace NuGet
                 // Bug 1686: Don't allow transforming packages.config.transform,
                 // but we still want to copy packages.config.transform as-is into the project.
                 string fileName = Path.GetFileName(truncatedPath);
-                if (PackageReferenceRepository.PackageReferenceFile.Equals(fileName, StringComparison.OrdinalIgnoreCase))
+                if (Constants.PackageReferenceFile.Equals(fileName, StringComparison.OrdinalIgnoreCase))
                 {
                     // setting to null means no pre-processing of this file
                     transformer = null;

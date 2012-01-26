@@ -1493,3 +1493,31 @@ function Test-InstallPackageDontMakeExcessiveNetworkRequests
         Remove-Variable 'numberOfRequests' -Scope 'Global' -ea SilentlyContinue
     }
 }
+
+function Test-InstallPackageCreatesSolutionPackagesConfig
+{
+    param(
+        $context
+    )
+
+    # Arrange
+    $a = New-ClassLibrary
+
+    # Act
+    $a | Install-Package SkypePackage -version 1.0 -source $context.RepositoryRoot
+
+    # Assert
+    $solutionFile = Get-SolutionPath
+    $solutionDir = Split-Path $solutionFile -Parent
+
+    $configFile = "$solutionDir\.nuget\packages.config"
+    
+    Assert-True (Test-Path $configFile)
+
+    $content = Get-Content $configFile
+    Assert-AreEqual 4 $content.Length
+    Assert-AreEqual '<?xml version="1.0" encoding="utf-8"?>' $content[0]
+    Assert-AreEqual '<packages>' $content[1]
+    Assert-AreEqual '  <package id="SkypePackage" version="1.0" />' $content[2]
+    Assert-AreEqual '</packages>' $content[3]
+}

@@ -584,3 +584,76 @@ function Test-UninstallPackageInvokeInstallScriptWhenProjectNameHasBrackets {
     # Clean up
     Remove-Variable UninstallPackageMessages -Scope Global
 }
+
+function Test-UninstallPackageRemoveSolutionPackagesConfig
+{
+    param(
+        $context
+    )
+
+    # Arrange
+    $a = New-ClassLibrary
+
+    $a | Install-Package SkypePackage -version 1.0 -source $context.RepositoryRoot
+    
+    $solutionFile = Get-SolutionPath
+    $solutionDir = Split-Path $solutionFile -Parent
+
+    $configFile = "$solutionDir\.nuget\packages.config"
+    
+    Assert-True (Test-Path $configFile)
+
+    $content = Get-Content $configFile
+    Assert-AreEqual 4 $content.Length
+    Assert-AreEqual '<?xml version="1.0" encoding="utf-8"?>' $content[0]
+    Assert-AreEqual '<packages>' $content[1]
+    Assert-AreEqual '  <package id="SkypePackage" version="1.0" />' $content[2]
+    Assert-AreEqual '</packages>' $content[3]
+
+    # Act
+    $a | Uninstall-Package SkypePackage
+
+    # Assert
+    Assert-False (Test-Path $configFile)
+}
+
+function Test-UninstallPackageRemoveEntryFromSolutionPackagesConfig
+{
+    param(
+        $context
+    )
+
+    # Arrange
+    $a = New-ClassLibrary
+
+    $a | Install-Package SkypePackage -version 1.0 -source $context.RepositoryRoot
+    $a | Install-Package PackageWithTextFile -version 2.0 -source $context.RepositoryRoot
+    
+    $solutionFile = Get-SolutionPath
+    $solutionDir = Split-Path $solutionFile -Parent
+
+    $configFile = "$solutionDir\.nuget\packages.config"
+    
+    Assert-True (Test-Path $configFile)
+
+    $content = Get-Content $configFile
+    Assert-AreEqual 5 $content.Length
+    Assert-AreEqual '<?xml version="1.0" encoding="utf-8"?>' $content[0]
+    Assert-AreEqual '<packages>' $content[1]
+    Assert-AreEqual '  <package id="PackageWithTextFile" version="2.0" />' $content[2]
+    Assert-AreEqual '  <package id="SkypePackage" version="1.0" />' $content[3]
+    Assert-AreEqual '</packages>' $content[4]
+
+    # Act
+    $a | Uninstall-Package SkypePackage
+
+    # Assert
+     Assert-True (Test-Path $configFile)
+
+    $content = Get-Content $configFile
+    Assert-AreEqual 4 $content.Length
+    Assert-AreEqual '<?xml version="1.0" encoding="utf-8"?>' $content[0]
+    Assert-AreEqual '<packages>' $content[1]
+    Assert-AreEqual '  <package id="PackageWithTextFile" version="2.0" />' $content[2]
+    Assert-AreEqual '</packages>' $content[3]
+}

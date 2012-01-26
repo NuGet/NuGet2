@@ -61,6 +61,24 @@ namespace NuGet.VisualStudio
             }
         }
 
+        public string ConfigFolderPath
+        {
+            get
+            {
+                return GetConfigFolderPath();
+            }
+        }
+
+        private string GetConfigFolderPath()
+        {
+            if (String.IsNullOrEmpty(_solutionManager.SolutionDirectory))
+            {
+                throw new InvalidOperationException(VsResources.SolutionDirectoryNotAvailable);
+            }
+
+            return Path.Combine(_solutionManager.SolutionDirectory, VsConstants.NuGetSolutionSettingsFolder);
+        }
+
         private IFileSystem FileSystem
         {
             get

@@ -72,7 +72,7 @@ namespace NuGet.Commands
                 {
                     throw new CommandLineException(NuGetResources.InvalidFile);
                 }
-                else if (inputFile.EndsWith(PackageReferenceRepository.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
+                else if (inputFile.EndsWith(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
                 {
                     UpdatePackages(inputFile);
                 }
@@ -97,7 +97,7 @@ namespace NuGet.Commands
             Console.WriteLine(NuGetResources.ScanningForProjects);
 
             // Search recursively for all packages.config files
-            var packagesConfigFiles = Directory.GetFiles(solutionDir, PackageReferenceRepository.PackageReferenceFile, SearchOption.AllDirectories);
+            var packagesConfigFiles = Directory.GetFiles(solutionDir, Constants.PackageReferenceFile, SearchOption.AllDirectories);
             var projects = packagesConfigFiles.Select(GetProject)
                                               .Where(p => p.Project != null)
                                               .ToList();
@@ -178,7 +178,7 @@ namespace NuGet.Commands
 
         private static string GetPackagesConfigPath(string path)
         {
-            if (path.EndsWith(PackageReferenceRepository.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
+            if (path.EndsWith(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
             {
                 return Path.GetFullPath(path);
             }

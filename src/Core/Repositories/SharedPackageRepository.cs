@@ -12,15 +12,22 @@ namespace NuGet
     public class SharedPackageRepository : LocalPackageRepository, ISharedPackageRepository
     {
         private const string StoreFilePath = "repositories.config";
+        private readonly PackageReferenceFile _packageReferenceFile;
 
         public SharedPackageRepository(string path)
             : base(path)
         {
         }
 
-        public SharedPackageRepository(IPackagePathResolver resolver, IFileSystem fileSystem)
+        public SharedPackageRepository(IPackagePathResolver resolver, IFileSystem fileSystem, IFileSystem configSettingsFileSystem)
             : base(resolver, fileSystem)
         {
+            if (configSettingsFileSystem == null)
+            {
+                throw new ArgumentNullException("configSettingsFileSystem");
+            }
+
+            _packageReferenceFile = new PackageReferenceFile(configSettingsFileSystem, Constants.PackageReferenceFile);
         }
 
         public override bool SupportsPrereleasePackages
@@ -42,6 +49,26 @@ namespace NuGet
         {
             // See if this package exists in any other repository before we remove it
             return GetRepositories().Any(r => r.Exists(packageId, version));
+        }
+
+        public override void AddPackage(IPackage package)
+        {
+            base.AddPackage(package);
+
+            if (_packageReferenceFile != null)
+            {
+                _packageReferenceFile.AddEntry(package.Id, package.Version);
+            }
+        }
+
+        public override void RemovePackage(IPackage package)
+        {
+            base.RemovePackage(package);
+
+            if (_packageReferenceFile != null)
+            {
+                _packageReferenceFile.DeleteEntry(package.Id, package.Version);
+            }
         }
 
         protected virtual IPackageRepository CreateRepository(string path)

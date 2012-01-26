@@ -11,7 +11,6 @@ namespace NuGet
     /// </summary>
     public class PackageReferenceRepository : PackageRepositoryBase, IPackageLookup, IPackageConstraintProvider
     {
-        public static readonly string PackageReferenceFile = "packages.config";
         private readonly PackageReferenceFile _packageReferenceFile;
         private readonly string _fullPath;
 
@@ -25,8 +24,8 @@ namespace NuGet
             {
                 throw new ArgumentNullException("sourceRepository");
             }
-            _packageReferenceFile = new PackageReferenceFile(fileSystem, PackageReferenceFile);
-            _fullPath = fileSystem.GetFullPath(PackageReferenceFile);
+            _packageReferenceFile = new PackageReferenceFile(fileSystem, Constants.PackageReferenceFile);
+            _fullPath = fileSystem.GetFullPath(Constants.PackageReferenceFile);
             SourceRepository = sourceRepository;
         }
 
@@ -34,7 +33,7 @@ namespace NuGet
         {
             get
             {
-                return PackageReferenceFile;
+                return Constants.PackageReferenceFile;
             }
         }
 

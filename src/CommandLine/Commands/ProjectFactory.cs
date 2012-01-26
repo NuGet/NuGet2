@@ -21,7 +21,7 @@ namespace NuGet.Commands
 
         // Files we want to always exclude from the resulting package
         private static readonly HashSet<string> _excludeFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
-            PackageReferenceRepository.PackageReferenceFile,
+            Constants.PackageReferenceFile,
             "Web.Debug.config",
             "Web.Release.config"
         };
@@ -567,7 +567,7 @@ namespace NuGet.Commands
 
         private string GetPackagesConfig()
         {
-            return GetContentOrNone(file => Path.GetFileName(file).Equals(PackageReferenceRepository.PackageReferenceFile, StringComparison.OrdinalIgnoreCase));
+            return GetContentOrNone(file => Path.GetFileName(file).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase));
         }
 
         private string GetContentOrNone(Func<string, bool> matcher)

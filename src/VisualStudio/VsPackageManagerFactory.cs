@@ -134,13 +134,18 @@ namespace NuGet.VisualStudio
         {
             // Update the path if it needs updating
             string path = _repositorySettings.RepositoryPath;
+            string configFolderPath = _repositorySettings.ConfigFolderPath;
 
-            if (_repositoryInfo == null || !_repositoryInfo.Path.Equals(path))
+            if (_repositoryInfo == null || 
+                !_repositoryInfo.Path.Equals(path, StringComparison.OrdinalIgnoreCase) ||
+                !_repositoryInfo.ConfigFolderPath.Equals(configFolderPath, StringComparison.OrdinalIgnoreCase))
             {
                 IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(path);
-                ISharedPackageRepository repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem);
+                IFileSystem configSettingsFileSystem = _fileSystemProvider.GetFileSystem(configFolderPath);
+                ISharedPackageRepository repository = new SharedPackageRepository(
+                    new DefaultPackagePathResolver(fileSystem), fileSystem, configSettingsFileSystem);
 
-                _repositoryInfo = new RepositoryInfo(path, fileSystem, repository);
+                _repositoryInfo = new RepositoryInfo(path, configFolderPath, fileSystem, repository);
             }
 
             return _repositoryInfo;
@@ -148,15 +153,17 @@ namespace NuGet.VisualStudio
 
         private class RepositoryInfo
         {
-            public RepositoryInfo(string path, IFileSystem fileSystem, ISharedPackageRepository repository)
+            public RepositoryInfo(string path, string configFolderPath, IFileSystem fileSystem, ISharedPackageRepository repository)
             {
                 Path = path;
                 FileSystem = fileSystem;
                 Repository = repository;
+                ConfigFolderPath = configFolderPath;
             }
 
             public IFileSystem FileSystem { get; private set; }
             public string Path { get; private set; }
+            public string ConfigFolderPath { get; private set; }
             public ISharedPackageRepository Repository { get; private set; }
         }
     }
