@@ -30,6 +30,11 @@ namespace NuGet
             _packageReferenceFile = new PackageReferenceFile(configSettingsFileSystem, Constants.PackageReferenceFile);
         }
 
+        public PackageReferenceFile PackageReferenceFile
+        {
+            get { return _packageReferenceFile; }
+        }
+
         public override bool SupportsPrereleasePackages
         {
             get { return true; }

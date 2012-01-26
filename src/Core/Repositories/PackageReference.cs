@@ -2,7 +2,7 @@
 
 namespace NuGet
 {
-    public class PackageReference
+    public class PackageReference : IEquatable<PackageReference>
     {
         public PackageReference(string id, SemanticVersion version, IVersionSpec versionConstraint)
         {
@@ -20,8 +20,7 @@ namespace NuGet
             var reference = obj as PackageReference;
             if (reference != null)
             {
-                return Id.Equals(reference.Id, StringComparison.OrdinalIgnoreCase) &&
-                       Version.Equals(reference.Version);
+                return Equals(reference);
             }
 
             return false;
@@ -29,10 +28,7 @@ namespace NuGet
 
         public override int GetHashCode()
         {
-            var combiner = new HashCodeCombiner();
-            combiner.AddObject(Id);
-            combiner.AddObject(Version);
-            return combiner.CombinedHash;
+            return Id.GetHashCode()*3137 + Version.GetHashCode();
         }
 
         public override string ToString()
@@ -42,6 +38,12 @@ namespace NuGet
                 return Id + " " + Version;
             }
             return Id + " " + Version + " (" + VersionConstraint + ")";
+        }
+
+        public bool Equals(PackageReference other)
+        {
+            return Id.Equals(other.Id, StringComparison.OrdinalIgnoreCase) &&
+                   Version == other.Version;
         }
     }
 }

@@ -458,13 +458,25 @@ namespace NuGet.VisualStudio
         }
 
         /// <summary>
-        /// Gets all package references in all projects of the current solution.
+        /// Gets all package references in all projects of the current solution plus package 
+        /// references specified in the solution packages.config
         /// </summary>
         private IEnumerable<PackageReference> GetAllPackageReferences(IVsPackageManager packageManager)
         {
-            return from project in _solutionManager.GetProjects()
-                   from reference in GetPackageReferences(packageManager.GetProjectManager(project))
-                   select reference;
+            IEnumerable<PackageReference> projectReferences = from project in _solutionManager.GetProjects()
+                                                              from reference in
+                                                                  GetPackageReferences(
+                                                                      packageManager.GetProjectManager(project))
+                                                              select reference;
+
+            var localRepository = packageManager.LocalRepository as SharedPackageRepository;
+            if (localRepository != null)
+            {
+                IEnumerable<PackageReference> solutionReferences = localRepository.PackageReferenceFile.GetPackageReferences();
+                return projectReferences.Concat(solutionReferences).Distinct();
+            }
+
+            return projectReferences.Distinct();
         }
 
         /// <summary>
