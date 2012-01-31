@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Xunit;
-using Moq;
 using System.Net;
-using Xunit.Extensions;
-using System.Security.Cryptography;
+using Moq;
+using Xunit;
 
 namespace NuGet.Test
 {
@@ -81,6 +76,36 @@ namespace NuGet.Test
             var sourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
             sourceProvider.Setup(s => s.LoadPackageSources())
                           .Returns(new[] { new PackageSource("https://nuget.org") { UserName = userName, Password = password } })
+                          .Verifiable();
+            var underlyingProvider = new Mock<ICredentialProvider>(MockBehavior.Strict);
+            var settingsCredentialProvider = new SettingsCredentialProvider(underlyingProvider.Object, sourceProvider.Object);
+
+            // Act
+            var value = settingsCredentialProvider.GetCredentials(new Uri("https://nuget.org"), new Mock<IWebProxy>().Object, CredentialType.RequestCredentials);
+
+            // Assert
+            sourceProvider.Verify();
+            Assert.IsType<NetworkCredential>(value);
+            var networkCredential = (NetworkCredential)value;
+            Assert.Equal(userName, networkCredential.UserName);
+            Assert.Equal(password, networkCredential.Password);
+        }
+
+        [Fact]
+        public void GetCredentialQueriesReturnsCredentialsFromSourceProviderIfAvailableWhenSourceListContainsPhysicalUris()
+        {
+            // Arrange
+            string userName = "User";
+            string password = "My precious!";
+
+            var sourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+            sourceProvider.Setup(s => s.LoadPackageSources())
+                          .Returns(new[] 
+                                  { 
+                                    new PackageSource(@"x:\build-outputs\packages") { UserName = userName, Password = password },
+                                    new PackageSource(@"\\ci-drive\outputs\release\packages\") { UserName = userName, Password = password },
+                                    new PackageSource("https://nuget.org") { UserName = userName, Password = password },
+                                  })
                           .Verifiable();
             var underlyingProvider = new Mock<ICredentialProvider>(MockBehavior.Strict);
             var settingsCredentialProvider = new SettingsCredentialProvider(underlyingProvider.Object, sourceProvider.Object);

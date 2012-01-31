@@ -105,6 +105,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UriHelperTest.cs" />
     <Compile Include="SettingsTests.cs" />
+    <Compile Include="UriUtilityTest.cs" />
     <Compile Include="VersionSpecTest.cs" />
     <Compile Include="VersionUtilityTest.cs" />
     <Compile Include="XmlExtensionsTest.cs" />

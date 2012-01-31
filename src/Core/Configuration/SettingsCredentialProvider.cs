@@ -49,9 +49,15 @@ namespace NuGet
 
         private bool TryGetCredentials(Uri uri, out NetworkCredential configurationCredentials)
         {
-            var uriString = uri.OriginalString.TrimEnd('/');
-            var source = _packageSourceProvider.LoadPackageSources().FirstOrDefault(p => uriString.Equals(p.Source.TrimEnd('/'), StringComparison.OrdinalIgnoreCase));
-            if (source == null || String.IsNullOrEmpty(source.UserName) || String.IsNullOrEmpty(source.Password))
+            var source = _packageSourceProvider.LoadPackageSources().FirstOrDefault(p =>
+            {
+                Uri sourceUri;
+                return !String.IsNullOrEmpty(p.UserName) 
+                    && !String.IsNullOrEmpty(p.Password) 
+                    && Uri.TryCreate(p.Source, UriKind.Absolute, out sourceUri) 
+                    && UriUtility.UriEquals(sourceUri, uri);
+            });
+            if (source == null)
             {
                 // The source is not in the config file
                 configurationCredentials = null;
