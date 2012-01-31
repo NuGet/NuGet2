@@ -30,12 +30,13 @@
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="WindowsBase" />
-    <Reference Include="xunit, Version=1.8.0.1549, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+    <Reference Include="xunit, Version=1.9.0.1566, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\xunit.1.8.0.1549\lib\xunit.dll</HintPath>
+      <HintPath>..\..\packages\xunit.1.9.0.1566\lib\xunit.dll</HintPath>
     </Reference>
-    <Reference Include="xunit.extensions">
-      <HintPath>..\..\packages\xunit.extensions.1.8.0.1549\lib\xunit.extensions.dll</HintPath>
+    <Reference Include="xunit.extensions, Version=1.9.0.1566, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\xunit.extensions.1.9.0.1566\lib\xunit.extensions.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -47,9 +48,6 @@
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\Core.Test\Mocks\MockUserSettingsManager.cs">
-      <Link>MockUserSettingsManager.cs</Link>
-    </Compile>
     <Compile Include="CommandAttributeTests.cs" />
     <Compile Include="CommandLinePaserTests.cs" />
     <Compile Include="CommandManagerTests.cs" />
@@ -59,6 +57,7 @@
     <Compile Include="DeleteCommandTest.cs" />
     <Compile Include="InstallCommandTest.cs" />
     <Compile Include="ListCommandTests.cs" />
+    <Compile Include="MockConsole.cs" />
     <Compile Include="OptionAttributeTests.cs" />
     <Compile Include="PackCommandTest.cs" />
     <Compile Include="ProgramTest.cs" />

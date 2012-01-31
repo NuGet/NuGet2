@@ -58,6 +58,7 @@ namespace NuGet
             set;
         }
 
+        // TODO: Get rid of this. Horrid to have static properties like this especially in a code path that does not look thread safe.
         public static ICredentialProvider DefaultCredentialProvider
         {
             get

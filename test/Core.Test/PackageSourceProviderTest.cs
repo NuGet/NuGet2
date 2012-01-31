@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using Moq;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test
 {
-
     public class PackageSourceProviderTest
     {
         [Fact]
@@ -26,8 +28,8 @@ namespace NuGet.Test
         public void LoadPackageSourcesReturnsEmptySequenceIfDefaultPackageSourceIsNull()
         {
             // Arrange
-            var settings = new MockUserSettingsManager();
-            var provider = new PackageSourceProvider(settings, defaultSources: null);
+            var settings = new Mock<ISettings>();
+            var provider = new PackageSourceProvider(settings.Object, defaultSources: null);
 
             // Act
             var values = provider.LoadPackageSources();
@@ -40,8 +42,8 @@ namespace NuGet.Test
         public void LoadPackageSourcesReturnsEmptySequenceIfDefaultPackageSourceIsEmpty()
         {
             // Arrange
-            var settings = new MockUserSettingsManager();
-            var provider = new PackageSourceProvider(settings, defaultSources: new PackageSource[] { });
+            var settings = new Mock<ISettings>();
+            var provider = new PackageSourceProvider(settings.Object, defaultSources: new PackageSource[] { });
 
             // Act
             var values = provider.LoadPackageSources();
@@ -54,7 +56,7 @@ namespace NuGet.Test
         public void LoadPackageSourcesReturnsDefaultSourcesIfSpecified()
         {
             // Arrange
-            var settings = new MockUserSettingsManager();
+            var settings = new Mock<ISettings>().Object;
             var provider = new PackageSourceProvider(settings, defaultSources: new[] { new PackageSource("A"), new PackageSource("B") });
 
             // Act
@@ -70,10 +72,9 @@ namespace NuGet.Test
         public void LoadPackageSourcesPerformMigrationIfSpecified()
         {
             // Arrange
-            var settings = new MockUserSettingsManager();
-            settings.SetValues(
-                PackageSourceProvider.PackageSourcesSectionName,
-                new KeyValuePair<string, string>[] { 
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetValues("packageSources")).Returns(
+                new[] { 
                     new KeyValuePair<string, string>("one", "onesource"),
                     new KeyValuePair<string, string>("two", "twosource"),
                     new KeyValuePair<string, string>("three", "threesource"),
@@ -81,13 +82,14 @@ namespace NuGet.Test
             );
 
             // disable package "three"
-            settings.SetValue(
-                PackageSourceProvider.DisabledPackageSourcesSectionName,
-                "three",
-                "threesource");
+            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new[] { new KeyValuePair<string, string>("three", "true" ) });
 
-            var provider = new PackageSourceProvider(
-                settings,
+            IList<KeyValuePair<string, string>> savedSettingValues = null;
+            settings.Setup(s => s.SetValues("packageSources", It.IsAny<IList<KeyValuePair<string, string>>>()))
+                    .Callback<string, IList<KeyValuePair<string, string>>>((_, savedVals) => { savedSettingValues = savedVals; })
+                    .Verifiable();
+
+            var provider = new PackageSourceProvider(settings.Object,
                 null,
                 new Dictionary<PackageSource, PackageSource> {
                     { new PackageSource("onesource", "one"), new PackageSource("goodsource", "good") },
@@ -105,7 +107,6 @@ namespace NuGet.Test
             AssertPackageSource(values[1], "two", "twosource", true);
             AssertPackageSource(values[2], "awesome", "awesomesource", false);
 
-            var savedSettingValues = settings.GetValues(PackageSourceProvider.PackageSourcesSectionName);
             Assert.Equal(3, savedSettingValues.Count);
             Assert.Equal("good", savedSettingValues[0].Key);
             Assert.Equal("goodsource", savedSettingValues[0].Value);
@@ -119,19 +120,51 @@ namespace NuGet.Test
         public void CallSaveMethodAndLoadMethodShouldReturnTheSamePackageSet()
         {
             // Arrange
-            var provider = CreatePackageSourceProvider();
+            var expectedSources = new[] { new PackageSource("one", "one"), new PackageSource("two", "two"), new PackageSource("three", "three") };
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            settings.Setup(s => s.GetValues("packageSources"))
+                    .Returns(new[] { new KeyValuePair<string, string>("one", "one"), 
+                                     new KeyValuePair<string, string>("two", "two"), 
+                                     new KeyValuePair<string, string>("three", "three")
+                                })
+                    .Verifiable();
+            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.DeleteSection("packageSources")).Returns(true).Verifiable();
+            settings.Setup(s => s.DeleteSection("disabledPackageSources")).Returns(true).Verifiable();
+            settings.Setup(s => s.DeleteSection("packageSourceCredentials")).Returns(true).Verifiable();
+            settings.Setup(s => s.SetValues("packageSources", It.IsAny<IList<KeyValuePair<string, string>>>()))
+                    .Callback((string section, IList<KeyValuePair<string, string>> values) =>
+                    {
+                        Assert.Equal(3, values.Count);
+                        Assert.Equal("one", values[0].Key);
+                        Assert.Equal("one", values[0].Value);
+                        Assert.Equal("two", values[1].Key);
+                        Assert.Equal("two", values[1].Value);
+                        Assert.Equal("three", values[2].Key);
+                        Assert.Equal("three", values[2].Value);
+                    })
+                    .Verifiable();
 
-            var sources = new[] { new PackageSource("one"), new PackageSource("two"), new PackageSource("three") };
-            provider.SavePackageSources(sources);
+            settings.Setup(s => s.SetValues("disabledPackageSources", It.IsAny<IList<KeyValuePair<string, string>>>()))
+                .Callback((string section, IList<KeyValuePair<string, string>> values) =>
+                {
+                    Assert.Empty(values);
+                })
+                .Verifiable();
+
+            var provider = CreatePackageSourceProvider(settings.Object);
 
             // Act
-            var values = provider.LoadPackageSources().ToList();
+            var sources = provider.LoadPackageSources().ToList();
+            provider.SavePackageSources(sources);
 
             // Assert
-            Assert.Equal(sources.Length, values.Count);
-            for (int i = 0; i < sources.Length; i++)
+            settings.Verify();
+            Assert.Equal(3, sources.Count);
+            for (int i = 0; i < sources.Count; i++)
             {
-                AssertPackageSource(values[i], sources[i].Name, sources[i].Source, true);
+                AssertPackageSource(expectedSources[i], sources[i].Name, sources[i].Source, true);
             }
         }
 
@@ -139,15 +172,17 @@ namespace NuGet.Test
         public void LoadPackageSourcesReturnCorrectDataFromSettings()
         {
             // Arrange
-            var settings = new MockUserSettingsManager();
-            settings.SetValues(PackageSourceProvider.PackageSourcesSectionName,
-                new[] {
-                    new KeyValuePair<string, string>("one", "onesource"),
-                    new KeyValuePair<string, string>("two", "twosource"),
-                    new KeyValuePair<string, string>("three", "threesource")
-                });
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            settings.Setup(s => s.GetValues("packageSources"))
+                    .Returns(new[] { new KeyValuePair<string, string>("one", "onesource"), 
+                                     new KeyValuePair<string, string>("two", "twosource"), 
+                                     new KeyValuePair<string, string>("three", "threesource")
+                                })
+                    .Verifiable();
+            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
 
-            var provider = CreatePackageSourceProvider(settings);
+            var provider = CreatePackageSourceProvider(settings.Object);
 
             // Act
             var values = provider.LoadPackageSources().ToList();
@@ -163,19 +198,17 @@ namespace NuGet.Test
         public void LoadPackageSourcesReturnCorrectDataFromSettingsWhenSomePackageSourceIsDisabled()
         {
             // Arrange
-            var settings = new MockUserSettingsManager();
-            settings.SetValues(PackageSourceProvider.PackageSourcesSectionName,
-                new[] {
-                    new KeyValuePair<string, string>("one", "onesource"),
-                    new KeyValuePair<string, string>("two", "twosource"),
-                    new KeyValuePair<string, string>("three", "threesource")
-                });
-            settings.SetValues(PackageSourceProvider.DisabledPackageSourcesSectionName,
-                new[] {
-                    new KeyValuePair<string, string>("two", "true")
-                });
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            settings.Setup(s => s.GetValues("packageSources"))
+                    .Returns(new[] { new KeyValuePair<string, string>("one", "onesource"), 
+                                     new KeyValuePair<string, string>("two", "twosource"), 
+                                     new KeyValuePair<string, string>("three", "threesource")
+                                });
 
-            var provider = CreatePackageSourceProvider(settings);
+            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new[] { new KeyValuePair<string, string>("two", "true") });
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+
+            var provider = CreatePackageSourceProvider(settings.Object);
 
             // Act
             var values = provider.LoadPackageSources().ToList();
@@ -187,49 +220,163 @@ namespace NuGet.Test
             AssertPackageSource(values[2], "three", "threesource", true);
         }
 
+        [Theory]
+        [InlineData(new object[] { null, "abcd" })]
+        [InlineData(new object[] { "", "abcd" })]
+        [InlineData(new object[] { "abcd", null })]
+        [InlineData(new object[] { "abcd", "" })]
+        public void LoadPackageSourcesIgnoresInvalidCredentialPairs(string userName, string password)
+        {
+            // Arrange
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetValues("packageSources"))
+                    .Returns(new[] { new KeyValuePair<string, string>("one", "onesource"), 
+                                     new KeyValuePair<string, string>("two", "twosource"), 
+                                     new KeyValuePair<string, string>("three", "threesource")
+                                });
+
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", "two"))
+                    .Returns(new [] { new KeyValuePair<string, string>("Username", userName), new KeyValuePair<string, string>("Password", password) });
+
+            var provider = CreatePackageSourceProvider(settings.Object);
+
+            // Act
+            var values = provider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.Equal(3, values.Count);
+            AssertPackageSource(values[1], "two", "twosource", true);
+            Assert.Null(values[1].UserName);
+            Assert.Null(values[1].Password);
+        }
+
+        [Fact]
+        public void LoadPackageSourcesReadsCredentialPairs()
+        {
+            // Arrange
+            string encryptedPassword = SettingsExtensions.EncryptString("topsecret");
+           
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetValues("packageSources"))
+                    .Returns(new[] { new KeyValuePair<string, string>("one", "onesource"), 
+                                     new KeyValuePair<string, string>("two", "twosource"), 
+                                     new KeyValuePair<string, string>("three", "threesource")
+                                });
+
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", "two"))
+                    .Returns(new[] { new KeyValuePair<string, string>("Username", "user1"), new KeyValuePair<string, string>("Password", encryptedPassword) });
+
+            var provider = CreatePackageSourceProvider(settings.Object);
+
+            // Act
+            var values = provider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.Equal(3, values.Count);
+            AssertPackageSource(values[1], "two", "twosource", true);
+            Assert.Equal("user1", values[1].UserName);
+            Assert.Equal("topsecret", values[1].Password);
+        }
+
         [Fact]
         public void SavePackageSourcesSaveCorrectDataToSettings()
         {
             // Arrange
-            var settings = new MockUserSettingsManager();
-            var provider = CreatePackageSourceProvider(settings);
-
             var sources = new[] { new PackageSource("one"), new PackageSource("two"), new PackageSource("three") };
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            settings.Setup(s => s.DeleteSection("packageSources")).Returns(true).Verifiable();
+            settings.Setup(s => s.DeleteSection("disabledPackageSources")).Returns(true).Verifiable();
+            settings.Setup(s => s.DeleteSection("packageSourceCredentials")).Returns(true).Verifiable();
+
+            settings.Setup(s => s.SetValues("packageSources", It.IsAny<IList<KeyValuePair<string, string>>>()))
+                    .Callback((string section, IList<KeyValuePair<string, string>> values) =>
+                    {
+                        Assert.Equal(3, values.Count);
+                        Assert.Equal("one", values[0].Key);
+                        Assert.Equal("one", values[0].Value);
+                        Assert.Equal("two", values[1].Key);
+                        Assert.Equal("two", values[1].Value);
+                        Assert.Equal("three", values[2].Key);
+                        Assert.Equal("three", values[2].Value);
+                    })
+                    .Verifiable();
+
+            settings.Setup(s => s.SetValues("disabledPackageSources", It.IsAny<IList<KeyValuePair<string, string>>>()))
+                    .Callback((string section, IList<KeyValuePair<string, string>> values) =>
+                    {
+                        Assert.Empty(values);
+                    })
+                    .Verifiable();
+
+            var provider = CreatePackageSourceProvider(settings.Object);
+
 
             // Act
             provider.SavePackageSources(sources);
 
             // Assert
-            var values = settings.GetValues(PackageSourceProvider.PackageSourcesSectionName);
-            Assert.Equal(3, values.Count);
-            Assert.Equal("one", values[0].Key);
-            Assert.Equal("two", values[1].Key);
-            Assert.Equal("three", values[2].Key);
+            settings.Verify();
         }
 
         [Fact]
-        public void SavePackageSourcesSaveCorrectDataToSettingsWhenSomePackgeSourceIsDisabled()
+        public void SavePackageSourcesSaveCorrectDataToSettingsWhenSomePackageSourceIsDisabled()
         {
             // Arrange
-            var settings = new MockUserSettingsManager();
-            var provider = CreatePackageSourceProvider(settings);
+            var sources = new[] { new PackageSource("one"), new PackageSource("two", "two", isEnabled: false), new PackageSource("three") };
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.DeleteSection("disabledPackageSources")).Returns(true).Verifiable();
+            settings.Setup(s => s.SetValues("disabledPackageSources", It.IsAny<IList<KeyValuePair<string, string>>>()))
+                    .Callback((string section, IList<KeyValuePair<string, string>> values) =>
+                    {
+                        Assert.Equal(1, values.Count);
+                        Assert.Equal("two", values[0].Key);
+                        Assert.Equal("true", values[0].Value);
+                    })
+                    .Verifiable();
 
-            var sources = new[] { new PackageSource("one"), new PackageSource("two"), new PackageSource("three", "three", isEnabled: false) };
+            var provider = CreatePackageSourceProvider(settings.Object);
 
             // Act
             provider.SavePackageSources(sources);
 
             // Assert
-            var values = settings.GetValues(PackageSourceProvider.PackageSourcesSectionName);
-            Assert.Equal(3, values.Count);
-            Assert.Equal("one", values[0].Key);
-            Assert.Equal("two", values[1].Key);
-            Assert.Equal("three", values[2].Key);
+            settings.Verify();
+        }
 
-            var disabledValues = settings.GetValues(PackageSourceProvider.DisabledPackageSourcesSectionName);
-            Assert.NotNull(disabledValues);
-            Assert.Equal(1, disabledValues.Count);
-            Assert.Equal("three", disabledValues[0].Key);
+        [Fact]
+        public void SavePackageSourcesSavesCredentials()
+        {
+            // Arrange
+            var entropyBytes = Encoding.UTF8.GetBytes("NuGet");
+            var sources = new[] { new PackageSource("one"), 
+                                  new PackageSource("twosource", "twoname") { UserName = "User", Password = "password" }, 
+                                  new PackageSource("three") 
+            };
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.DeleteSection("packageSources")).Returns(true).Verifiable();
+            settings.Setup(s => s.DeleteSection("packageSourceCredentials")).Returns(true).Verifiable();
+
+            settings.Setup(s => s.SetNestedValues("packageSourceCredentials", It.IsAny<string>(), It.IsAny<IList<KeyValuePair<string, string>>>()))
+                    .Callback((string section, string key, IList<KeyValuePair<string, string>> values) =>
+                    {
+                        Assert.Equal("twoname", key);
+                        Assert.Equal(2, values.Count);
+                        AssertKVP(new KeyValuePair<string, string>("Username", "User"), values[0]);
+                        Assert.Equal("Password", values[1].Key);
+                        string decryptedPassword = Encoding.UTF8.GetString(
+                            ProtectedData.Unprotect(Convert.FromBase64String(values[1].Value), entropyBytes, DataProtectionScope.CurrentUser));
+                        Assert.Equal("Password", values[1].Key);
+                        Assert.Equal("password", decryptedPassword);
+                    })
+                    .Verifiable();
+
+            var provider = CreatePackageSourceProvider(settings.Object);
+
+            // Act
+            provider.SavePackageSources(sources);
+
+            // Assert
+            settings.Verify();
         }
 
         [Fact]
@@ -421,8 +568,14 @@ namespace NuGet.Test
 
         private IPackageSourceProvider CreatePackageSourceProvider(ISettings settings = null)
         {
-            settings = settings ?? new MockUserSettingsManager();
+            settings = settings ?? new Mock<ISettings>().Object;
             return new PackageSourceProvider(settings);
+        }
+
+        private static void AssertKVP(KeyValuePair<string, string> expected, KeyValuePair<string, string> actual)
+        {
+            Assert.Equal(expected.Key, actual.Key);
+            Assert.Equal(expected.Value, actual.Value);
         }
     }
 }

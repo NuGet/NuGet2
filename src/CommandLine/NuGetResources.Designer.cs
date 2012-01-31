@@ -1305,6 +1305,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Password to be used when connecting to an authenticated source..
+        /// </summary>
+        internal static string SourcesCommandPasswordDescription {
+            get {
+                return ResourceManager.GetString("SourcesCommandPasswordDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Registered Sources:.
         /// </summary>
         internal static string SourcesCommandRegisteredSources {
@@ -1386,11 +1395,29 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;List|Add|Remove|Enable|Disable&gt; -Name [name] -Source [source].
+        ///   Looks up a localized string similar to Package source &quot;{0}&quot; was successfully updated..
+        /// </summary>
+        internal static string SourcesCommandUpdateSuccessful {
+            get {
+                return ResourceManager.GetString("SourcesCommandUpdateSuccessful", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;List|Add|Remove|Enable|Disable|Update&gt; -Name [name] -Source [source].
         /// </summary>
         internal static string SourcesCommandUsageSummary {
             get {
                 return ResourceManager.GetString("SourcesCommandUsageSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UserName to be used when connecting to an authenticated source..
+        /// </summary>
+        internal static string SourcesCommandUserNameDescription {
+            get {
+                return ResourceManager.GetString("SourcesCommandUserNameDescription", resourceCulture);
             }
         }
         

@@ -1,4 +1,5 @@
 ﻿using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.VisualStudio.Test
 {
@@ -25,11 +26,13 @@ namespace NuGet.VisualStudio.Test
             Assert.True(isValid);
         }
 
-        [Fact]
-        public void IsValidFilePathReturnsFalseForInvalidLocalPathFormat()
+        [Theory]
+        [InlineData(new object[] { @"ABC:\Path\To\Source" })]
+        [InlineData(new object[] { @"C:\Path\<\Source" })]
+        public void IsValidFilePathReturnsFalseForInvalidLocalPathFormat(string path)
         {
             // Act
-            var isValid = PathValidator.IsValidLocalPath(@"ABC:\Path\To\Source");
+            var isValid = PathValidator.IsValidLocalPath(path);
 
             // Assert
             Assert.False(isValid);

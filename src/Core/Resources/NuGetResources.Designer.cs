@@ -593,6 +593,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Using credentials from config. UserName: {0}.
+        /// </summary>
+        internal static string SettingsCredentials_UsingSavedCredentials {
+            get {
+                return ResourceManager.GetString("SettingsCredentials_UsingSavedCredentials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The replacement token &apos;{0}&apos; has no value..
         /// </summary>
         internal static string TokenHasNoValue {

@@ -632,7 +632,7 @@ nuget update -Self</value>
     <value>Path to the package(s) source.</value>
   </data>
   <data name="SourcesCommandUsageSummary" xml:space="preserve">
-    <value>&lt;List|Add|Remove|Enable|Disable&gt; -Name [name] -Source [source]</value>
+    <value>&lt;List|Add|Remove|Enable|Disable|Update&gt; -Name [name] -Source [source]</value>
   </data>
   <data name="SourcesCommandDescription" xml:space="preserve">
     <value>Provides the ability to manage list of sources located in  %AppData%\NuGet\NuGet.config</value>
@@ -732,5 +732,14 @@ nuget update -Self</value>
   </data>
   <data name="PushCommandTimeoutDescription" xml:space="preserve">
     <value>Specifies the timeout for pushing to a server in seconds. Defaults to 300 seconds (5 minutes).</value>
+  </data>
+  <data name="SourcesCommandUpdateSuccessful" xml:space="preserve">
+    <value>Package source "{0}" was successfully updated.</value>
+  </data>
+  <data name="SourcesCommandPasswordDescription" xml:space="preserve">
+    <value>Password to be used when connecting to an authenticated source.</value>
+  </data>
+  <data name="SourcesCommandUserNameDescription" xml:space="preserve">
+    <value>UserName to be used when connecting to an authenticated source.</value>
   </data>
 </root>

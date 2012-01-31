@@ -15,7 +15,6 @@ namespace NuGet
         Uri Uri
         {
             get;
-            set;
         }
 
         bool AcceptCompression

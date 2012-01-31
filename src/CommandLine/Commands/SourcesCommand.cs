@@ -9,6 +9,7 @@ namespace NuGet.Commands
         MinArgs = 0, MaxArgs = 1)]
     public class SourcesCommand : Command
     {
+        private readonly IPackageSourceProvider _sourceProvider;
 
         [Option(typeof(NuGetResources), "SourcesCommandNameDescription")]
         public string Name { get; set; }
@@ -16,7 +17,11 @@ namespace NuGet.Commands
         [Option(typeof(NuGetResources), "SourcesCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
-        public IPackageSourceProvider SourceProvider { get; private set; }
+        [Option(typeof(NuGetResources), "SourcesCommandUserNameDescription")]
+        public string UserName { get; set; }
+
+        [Option(typeof(NuGetResources), "SourcesCommandPasswordDescription")]
+        public string Password { get; set; }
 
         [ImportingConstructor]
         public SourcesCommand(IPackageSourceProvider sourceProvider)
@@ -25,116 +30,169 @@ namespace NuGet.Commands
             {
                 throw new ArgumentNullException("sourceProvider");
             }
-            SourceProvider = sourceProvider;
+            _sourceProvider = sourceProvider;
         }
 
         public override void ExecuteCommand()
         {
             // Convert to update
-            var action = Arguments.Any() ? Arguments.First().ToUpperInvariant() : null;
-            switch (action)
+            var action = Arguments.FirstOrDefault();
+
+            // TODO: Change these in to switches so we don't have to parse them here.
+            if (String.IsNullOrEmpty(action) || action.Equals("List", StringComparison.OrdinalIgnoreCase))
             {
-                case null:
-                case "LIST":
-                    PrintRegisteredSources();
-                    break;
-                case "ADD":
-                    AddNewSource(Name, Source);
-                    break;
-                case "REMOVE":
-                    RemoveSource(Name);
-                    break;
-                case "ENABLE":
-                    EnableOrDisableSource(Name, enabled: true);
-                    break;
-                case "DISABLE":
-                    EnableOrDisableSource(Name, enabled: false);
-                    break;
+                PrintRegisteredSources();
+            }
+            else if (action.Equals("Add", StringComparison.OrdinalIgnoreCase))
+            {
+                AddNewSource();
+            }
+            else if (action.Equals("Remove", StringComparison.OrdinalIgnoreCase))
+            {
+                RemoveSource();
+            }
+            else if (action.Equals("Enable", StringComparison.OrdinalIgnoreCase))
+            {
+                EnableOrDisableSource(enabled: true);
+            }
+            else if (action.Equals("Disable", StringComparison.OrdinalIgnoreCase))
+            {
+                EnableOrDisableSource(enabled: false);
+            }
+            else if (action.Equals("Update", StringComparison.OrdinalIgnoreCase))
+            {
+                UpdatePackageSource();
             }
         }
 
-        private void EnableOrDisableSource(string name, bool enabled)
+        private void EnableOrDisableSource(bool enabled)
         {
-            if (String.IsNullOrWhiteSpace(name))
+            if (String.IsNullOrEmpty(Name))
             {
                 throw new CommandLineException(NuGetResources.SourcesCommandNameRequired);
             }
 
-            List<PackageSource> sourceList = SourceProvider.LoadPackageSources().ToList();
-            List<PackageSource> existingSource = sourceList.Where(ps => String.Equals(name, ps.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+            List<PackageSource> sourceList = _sourceProvider.LoadPackageSources().ToList();
+            var existingSource = sourceList.Where(ps => String.Equals(Name, ps.Name, StringComparison.OrdinalIgnoreCase));
             if (!existingSource.Any())
             {
-                throw new CommandLineException(NuGetResources.SourcesCommandNoMatchingSourcesFound, name);
+                throw new CommandLineException(NuGetResources.SourcesCommandNoMatchingSourcesFound, Name);
             }
 
-            existingSource.ForEach(p => p.IsEnabled = enabled);
+            foreach (var source in existingSource)
+            {
+                source.IsEnabled = enabled;
+            }
 
-            SourceProvider.SavePackageSources(sourceList);
+            _sourceProvider.SavePackageSources(sourceList);
             Console.WriteLine(
                 enabled ? NuGetResources.SourcesCommandSourceEnabledSuccessfully : NuGetResources.SourcesCommandSourceDisabledSuccessfully,
-                name);
+                Name);
         }
 
-        private void RemoveSource(string name)
+        private void RemoveSource()
         {
-            if (String.IsNullOrWhiteSpace(name))
+            if (String.IsNullOrEmpty(Name))
             {
                 throw new CommandLineException(NuGetResources.SourcesCommandNameRequired);
             }
             // Check to see if we already have a registered source with the same name or source
-            var sourceList = SourceProvider.LoadPackageSources().ToList();
-            var existingSource = sourceList.Where(ps => String.Equals(name, ps.Name, StringComparison.OrdinalIgnoreCase)).ToList();
-            if (!existingSource.Any())
+            var sourceList = _sourceProvider.LoadPackageSources().ToList();
+            var matchingSources = sourceList.Where(ps => String.Equals(Name, ps.Name, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (!matchingSources.Any())
             {
-                throw new CommandLineException(NuGetResources.SourcesCommandNoMatchingSourcesFound, name);
+                throw new CommandLineException(NuGetResources.SourcesCommandNoMatchingSourcesFound, Name);
             }
 
-            existingSource.ForEach(source => sourceList.Remove(source));
-            SourceProvider.SavePackageSources(sourceList);
-            Console.WriteLine(NuGetResources.SourcesCommandSourceRemovedSuccessfully, name);
+            sourceList.RemoveAll(matchingSources.Contains);
+            _sourceProvider.SavePackageSources(sourceList);
+            Console.WriteLine(NuGetResources.SourcesCommandSourceRemovedSuccessfully, Name);
         }
 
-        private void AddNewSource(string name, string source)
+        private void AddNewSource()
         {
-            if (String.IsNullOrWhiteSpace(name))
+            if (String.IsNullOrEmpty(Name))
             {
                 throw new CommandLineException(NuGetResources.SourcesCommandNameRequired);
             }
-            if (String.Equals(name, NuGetResources.ReservedPackageNameAll))
+            if (String.Equals(Name, NuGetResources.ReservedPackageNameAll))
             {
                 throw new CommandLineException(NuGetResources.SourcesCommandAllNameIsReserved);
             }
-            if (String.IsNullOrWhiteSpace(source))
+            if (String.IsNullOrEmpty(Source))
             {
                 throw new CommandLineException(NuGetResources.SourcesCommandSourceRequired);
             }
             // Make sure that the Source given is a valid one.
-            if (!PathValidator.IsValidSource(source))
+            if (!PathValidator.IsValidSource(Source))
             {
                 throw new CommandLineException(NuGetResources.SourcesCommandInvalidSource);
             }
+
             // Check to see if we already have a registered source with the same name or source
-            var sourceList = SourceProvider.LoadPackageSources().ToList();
-            bool hasName = sourceList.Any(ps => String.Equals(name, ps.Name, StringComparison.OrdinalIgnoreCase));
+            var sourceList = _sourceProvider.LoadPackageSources().ToList();
+            bool hasName = sourceList.Any(ps => String.Equals(Name, ps.Name, StringComparison.OrdinalIgnoreCase));
             if (hasName)
             {
                 throw new CommandLineException(NuGetResources.SourcesCommandUniqueName);
             }
-            bool hasSource = sourceList.Any(ps => String.Equals(source, ps.Source, StringComparison.OrdinalIgnoreCase));
+            bool hasSource = sourceList.Any(ps => String.Equals(Source, ps.Source, StringComparison.OrdinalIgnoreCase));
             if (hasSource)
             {
                 throw new CommandLineException(NuGetResources.SourcesCommandUniqueSource);
             }
 
-            var newPackageSource = new PackageSource(source, name);
+            var newPackageSource = new PackageSource(Source, Name) { UserName = UserName, Password = Password };
             sourceList.Add(newPackageSource);
-            SourceProvider.SavePackageSources(sourceList);
-            Console.WriteLine(NuGetResources.SourcesCommandSourceAddedSuccessfully, name);
+            _sourceProvider.SavePackageSources(sourceList);
+            Console.WriteLine(NuGetResources.SourcesCommandSourceAddedSuccessfully, Name);
         }
+
+        private void UpdatePackageSource()
+        {
+            if (String.IsNullOrEmpty(Name))
+            {
+                throw new CommandLineException(NuGetResources.SourcesCommandNameRequired);
+            }
+
+            List<PackageSource> sourceList = _sourceProvider.LoadPackageSources().ToList();
+            int existingSourceIndex = sourceList.FindIndex(ps => Name.Equals(ps.Name, StringComparison.OrdinalIgnoreCase));
+            if (existingSourceIndex == -1)
+            {
+                throw new CommandLineException(NuGetResources.SourcesCommandNoMatchingSourcesFound, Name);
+            }
+            var existingSource = sourceList[existingSourceIndex];
+
+            if (!String.IsNullOrEmpty(Source) && !existingSource.Source.Equals(Source, StringComparison.OrdinalIgnoreCase))
+            {
+                if (!PathValidator.IsValidSource(Source))
+                {
+                    throw new CommandLineException(NuGetResources.SourcesCommandInvalidSource);
+                }
+
+                // If the user is updating the source, verify we don't have a duplicate.
+                bool duplicateSource = sourceList.Any(ps => String.Equals(Source, ps.Source, StringComparison.OrdinalIgnoreCase));
+                if (duplicateSource)
+                {
+                    throw new CommandLineException(NuGetResources.SourcesCommandUniqueSource);
+                }
+                existingSource = new PackageSource(Source, existingSource.Name);
+            }
+            
+
+            sourceList.RemoveAt(existingSourceIndex);
+            existingSource.UserName = UserName;
+            existingSource.Password = Password;
+            
+            sourceList.Insert(existingSourceIndex, existingSource);
+            _sourceProvider.SavePackageSources(sourceList);
+            Console.WriteLine(NuGetResources.SourcesCommandUpdateSuccessful, Name);
+        }
+
 
         private void PrintRegisteredSources()
         {
-            var sourcesList = SourceProvider.LoadPackageSources().ToList();
+            var sourcesList = _sourceProvider.LoadPackageSources().ToList();
             if (!sourcesList.Any())
             {
                 Console.WriteLine(NuGetResources.SourcesCommandNoSources);
@@ -156,7 +214,6 @@ namespace NuGet.Commands
                     source.IsEnabled ? NuGetResources.SourcesCommandEnabled : NuGetResources.SourcesCommandDisabled);
                 Console.WriteLine("{0}{1}", sourcePadding, source.Source);
             }
-
         }
     }
 }

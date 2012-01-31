@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Security;
-using Console = System.Console;
 
 namespace NuGet
 {
@@ -13,7 +12,6 @@ namespace NuGet
             {
                 throw new ArgumentNullException("uri");
             }
-
             string message = credentialType == CredentialType.ProxyCredentials ? NuGetResources.Credentials_ProxyCredentials : NuGetResources.Credentials_RequestCredentials;
             Console.WriteLine(message, uri.OriginalString);
             Console.Write(NuGetResources.Credentials_UserName);

@@ -68,6 +68,16 @@ namespace NuGet.VisualStudio
             return _defaultSettings.GetValues(section);
         }
 
+        public IList<KeyValuePair<string, string>> GetNestedValues(string section, string key)
+        {
+            if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
+            {
+                EnsureSolutionSettings();
+                return _solutionSettings.GetNestedValues(section, key);
+            }
+            return _defaultSettings.GetNestedValues(section, key);
+        }
+
         public void SetValue(string section, string key, string value)
         {
             if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
@@ -86,6 +96,16 @@ namespace NuGet.VisualStudio
                 _solutionSettings.SetValues(section, values);
             }
             _defaultSettings.SetValues(section, values);
+        }
+
+        public void SetNestedValues(string section, string key, IList<KeyValuePair<string, string>> values)
+        {
+            if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
+            {
+                EnsureSolutionSettings();
+                _solutionSettings.SetNestedValues(section, key, values);
+            }
+            _defaultSettings.SetNestedValues(section, key, values);
         }
 
         public bool DeleteValue(string section, string key)

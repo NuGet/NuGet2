@@ -60,7 +60,10 @@ namespace NuGet.Tools
 
         public NuGetPackage()
         {
-            HttpClient.DefaultCredentialProvider = new VSRequestCredentialProvider();
+            // TODO: We should be using the exported ISettings instead of doing this.
+            var settings = Settings.LoadDefaultSettings();
+            var packageSourceProvider = new PackageSourceProvider(settings);
+            HttpClient.DefaultCredentialProvider = new SettingsCredentialProvider(new VSRequestCredentialProvider(), packageSourceProvider);
         }
 
         /// <summary>

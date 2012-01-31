@@ -14,6 +14,10 @@ namespace NuGet
 
         public bool IsEnabled { get; set; }
 
+        public string UserName { get; set; }
+
+        public string Password { get; set; }
+
         public PackageSource(string source) :
             this(source, source, isEnabled: true)
         {
@@ -74,7 +78,7 @@ namespace NuGet
 
         public PackageSource Clone()
         {
-            return new PackageSource(Source, Name, IsEnabled);
+            return new PackageSource(Source, Name, IsEnabled) { UserName = UserName, Password = Password };
         }
     }
 }

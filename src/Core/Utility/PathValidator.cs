@@ -7,6 +7,7 @@ namespace NuGet
 {
     public static class PathValidator
     {
+        private static readonly char[] _invalidPathChars = Path.GetInvalidPathChars();
         /// <summary>
         /// Validates that a source is a valid path or url.
         /// </summary>
@@ -31,7 +32,7 @@ namespace NuGet
         {
             try
             {
-                return Regex.IsMatch(path.Trim(), @"^[A-Za-z]:\\") && Path.IsPathRooted(path);
+                return Regex.IsMatch(path.Trim(), @"^[A-Za-z]:\\") && Path.IsPathRooted(path) && (path.IndexOfAny(_invalidPathChars) == -1);
             }
             catch
             {

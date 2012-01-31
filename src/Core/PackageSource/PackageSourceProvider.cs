@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace NuGet
 {
     public class PackageSourceProvider : IPackageSourceProvider
     {
-        internal const string PackageSourcesSectionName = "packageSources";
-        internal const string DisabledPackageSourcesSectionName = "disabledPackageSources";
+        private const string PackageSourcesSectionName = "packageSources";
+        private const string DisabledPackageSourcesSectionName = "disabledPackageSources";
+        private const string CredentialsSectionName = "packageSourceCredentials";
+        private const string UsernameToken = "Username";
+        private const string PasswordToken = "Password";
         private readonly ISettings _settingsManager;
         private readonly IEnumerable<PackageSource> _defaultPackageSources;
         private readonly IDictionary<PackageSource, PackageSource> _migratePackageSources;
@@ -48,22 +52,27 @@ namespace NuGet
         public IEnumerable<PackageSource> LoadPackageSources()
         {
             IList<KeyValuePair<string, string>> settingsValue = _settingsManager.GetValues(PackageSourcesSectionName);
-            if (settingsValue != null && settingsValue.Any())
+            if (!settingsValue.IsEmpty())
             {
                 // put disabled package source names into the hash set
-                var disabledSources = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
-                IList<KeyValuePair<string, string>> disabledSourcesValues = _settingsManager.GetValues(DisabledPackageSourcesSectionName);
-                if (disabledSourcesValues != null)
-                {
-                    foreach (var pair in disabledSourcesValues)
-                    {
-                        disabledSources.Add(pair.Key);
-                    }
-                }
 
+                IEnumerable<KeyValuePair<string, string>> disabledSourcesValues = _settingsManager.GetValues(DisabledPackageSourcesSectionName) ??
+                                                                                  Enumerable.Empty<KeyValuePair<string, string>>();
+                var disabledSources = new HashSet<string>(disabledSourcesValues.Select(s => s.Key), StringComparer.CurrentCultureIgnoreCase);
                 var loadedPackageSources = settingsValue.
-                                           Select(p => new PackageSource(p.Value, p.Key, isEnabled: !disabledSources.Contains(p.Key))).
-                                           ToList();
+                                           Select(p =>
+                                           {
+                                               string name = p.Key;
+                                               string src = p.Value;
+                                               NetworkCredential creds = ReadCredential(name);
+
+                                               return new PackageSource(src, name, isEnabled: !disabledSources.Contains(name))
+                                               {
+                                                   UserName = creds != null ? creds.UserName : null,
+                                                   Password = creds != null ? creds.Password : null
+                                               };
+
+                                           }).ToList();
 
                 if (_migratePackageSources != null)
                 {
@@ -73,6 +82,22 @@ namespace NuGet
                 return loadedPackageSources;
             }
             return _defaultPackageSources;
+        }
+
+        private NetworkCredential ReadCredential(string sourceName)
+        {
+            var values = _settingsManager.GetNestedValues(CredentialsSectionName, sourceName);
+            if (!values.IsEmpty())
+            {
+                string userName = values.FirstOrDefault(k => k.Key.Equals(UsernameToken, StringComparison.OrdinalIgnoreCase)).Value;
+                string password = values.FirstOrDefault(k => k.Key.Equals(PasswordToken, StringComparison.OrdinalIgnoreCase)).Value;
+
+                if (!String.IsNullOrEmpty(userName) && !String.IsNullOrEmpty(password))
+                {
+                    return new NetworkCredential(userName, SettingsExtensions.DecryptString(password));
+                }
+            }
+            return null;
         }
 
         private void MigrateSources(List<PackageSource> loadedPackageSources)
@@ -114,6 +139,19 @@ namespace NuGet
             _settingsManager.SetValues(
                 DisabledPackageSourcesSectionName,
                 sources.Where(p => !p.IsEnabled).Select(p => new KeyValuePair<string, string>(p.Name, "true")).ToList());
+
+            // Overwrite the <packageSourceCredentials> section
+            _settingsManager.DeleteSection(CredentialsSectionName);
+
+
+            var sourceWithCredentials = sources.Where(s => !String.IsNullOrEmpty(s.UserName) && !String.IsNullOrEmpty(s.Password));
+            foreach (var source in sourceWithCredentials)
+            {
+                _settingsManager.SetNestedValues(CredentialsSectionName, source.Name, new[] {
+                    new KeyValuePair<string, string>(UsernameToken, source.UserName),
+                    new KeyValuePair<string, string>(PasswordToken, SettingsExtensions.EncryptString(source.Password)) 
+                });
+            }
         }
     }
 }

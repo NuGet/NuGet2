@@ -21,7 +21,12 @@ namespace NuGet
 
         public IList<KeyValuePair<string, string>> GetValues(string section)
         {
-            return new List<KeyValuePair<string, string>>();
+            return new List<KeyValuePair<string, string>>().AsReadOnly();
+        }
+
+        public IList<KeyValuePair<string, string>> GetNestedValues(string section, string key)
+        {
+            return new List<KeyValuePair<string, string>>().AsReadOnly();
         }
 
         public void SetValue(string section, string key, string value)
@@ -32,6 +37,11 @@ namespace NuGet
         public void SetValues(string section, IList<KeyValuePair<string, string>> values)
         {
             throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InvalidNullSettingsOperation, "SetValues"));
+        }
+
+        public void SetNestedValues(string section, string key, IList<KeyValuePair<string, string>> values)
+        {
+            throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InvalidNullSettingsOperation, "SetNestedValues"));
         }
 
         public bool DeleteValue(string section, string key)

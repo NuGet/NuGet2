@@ -337,4 +337,7 @@
     <value>Failed to process request. '{0}'. 
 {1}.</value>
   </data>
+  <data name="SettingsCredentials_UsingSavedCredentials" xml:space="preserve">
+    <value>Using credentials from config. UserName: {0}</value>
+  </data>
 </root>

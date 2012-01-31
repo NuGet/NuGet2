@@ -1,11 +1,9 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using System.Globalization;
 using System.IO;
 
 namespace NuGet.Common
 {
-    [Export(typeof(IConsole))]
     public class Console : IConsole
     {
         public int CursorLeft

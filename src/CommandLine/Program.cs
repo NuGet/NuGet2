@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using NuGet.Commands;
+using NuGet.Common;
 
 namespace NuGet
 {
@@ -30,7 +31,7 @@ namespace NuGet
 
         public static int Main(string[] args)
         {
-            var console = new NuGet.Common.Console();
+            var console = new Common.Console();
             var fileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
             try
             {
@@ -39,11 +40,7 @@ namespace NuGet
 
                 // Import Dependencies  
                 var p = new Program();
-                p.Initialize(fileSystem);
-
-                // Register an additional provider for the console specific application so that the user
-                // will be prompted if a proxy is set and credentials are required
-                HttpClient.DefaultCredentialProvider = new ConsoleCredentialProvider();
+                p.Initialize(fileSystem, console);
 
                 // Add commands to the manager
                 foreach (ICommand cmd in p.Commands)
@@ -63,7 +60,7 @@ namespace NuGet
                     string commandName = command.CommandAttribute.CommandName;
 
                     // Print invalid command then show help
-                    Console.WriteLine(NuGetResources.InvalidArguments, commandName);
+                    console.WriteLine(NuGetResources.InvalidArguments, commandName);
 
                     p.HelpCommand.ViewHelpForCommand(commandName);
                 }
@@ -80,7 +77,7 @@ namespace NuGet
             return 0;
         }
 
-        private void Initialize(IFileSystem fileSystem)
+        private void Initialize(IFileSystem fileSystem, IConsole console)
         {
             using (var catalog = new AggregateCatalog(new AssemblyCatalog(GetType().Assembly)))
             {
@@ -106,9 +103,16 @@ namespace NuGet
                         }
                     );
 
+                    // Register an additional provider for the console specific application so that the user
+                    // will be prompted if a proxy is set and credentials are required
+                    var credentialProvider = new SettingsCredentialProvider(new ConsoleCredentialProvider(), packageSourceProvider, console);
+                    HttpClient.DefaultCredentialProvider = credentialProvider;
+
+                    container.ComposeExportedValue<IConsole>(console);
                     container.ComposeExportedValue<ISettings>(settings);
                     container.ComposeExportedValue<IPackageRepositoryFactory>(new NuGet.Common.CommandLineRepositoryFactory());
                     container.ComposeExportedValue<IPackageSourceProvider>(packageSourceProvider);
+                    container.ComposeExportedValue<ICredentialProvider>(credentialProvider);
                     container.ComposeParts(this);
                 }
             }
