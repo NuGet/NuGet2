@@ -30,7 +30,9 @@ namespace NuGet
                     break;
                 }
 
-                if (!option.StartsWith("/", StringComparison.OrdinalIgnoreCase) && !option.StartsWith("-", StringComparison.OrdinalIgnoreCase))
+                if (!(option.StartsWith("/", StringComparison.OrdinalIgnoreCase) &&
+                                        !(Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX))
+                    && !option.StartsWith("-", StringComparison.OrdinalIgnoreCase))
                 {
                     arguments.Add(option);
                     continue;
