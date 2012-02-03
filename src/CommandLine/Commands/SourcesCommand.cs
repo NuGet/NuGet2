@@ -194,10 +194,10 @@ namespace NuGet.Commands
 
         private void ValidateCredentials()
         {
-            int userNameEmpty = String.IsNullOrEmpty(UserName) ? 1 : 0;
-            int passwordEmpty = String.IsNullOrEmpty(Password) ? 1 : 0;
+            bool userNameEmpty = String.IsNullOrEmpty(UserName);
+            bool passwordEmpty = String.IsNullOrEmpty(Password);
 
-            if ((userNameEmpty ^ passwordEmpty) == 1)
+            if (userNameEmpty ^ passwordEmpty)
             {
                 // If only one of them is set, throw.
                 throw new CommandLineException(NuGetResources.SourcesCommandCredentialsRequired);
