@@ -129,6 +129,8 @@ namespace NuGet.Commands
                 throw new CommandLineException(NuGetResources.SourcesCommandInvalidSource);
             }
 
+            ValidateCredentials();
+
             // Check to see if we already have a registered source with the same name or source
             var sourceList = _sourceProvider.LoadPackageSources().ToList();
             bool hasName = sourceList.Any(ps => String.Equals(Name, ps.Name, StringComparison.OrdinalIgnoreCase));
@@ -178,7 +180,8 @@ namespace NuGet.Commands
                 }
                 existingSource = new PackageSource(Source, existingSource.Name);
             }
-            
+
+            ValidateCredentials();
 
             sourceList.RemoveAt(existingSourceIndex);
             existingSource.UserName = UserName;
@@ -189,6 +192,17 @@ namespace NuGet.Commands
             Console.WriteLine(NuGetResources.SourcesCommandUpdateSuccessful, Name);
         }
 
+        private void ValidateCredentials()
+        {
+            int userNameEmpty = String.IsNullOrEmpty(UserName) ? 1 : 0;
+            int passwordEmpty = String.IsNullOrEmpty(Password) ? 1 : 0;
+
+            if ((userNameEmpty ^ passwordEmpty) == 1)
+            {
+                // If only one of them is set, throw.
+                throw new CommandLineException(NuGetResources.SourcesCommandCredentialsRequired);
+            }
+        }
 
         private void PrintRegisteredSources()
         {

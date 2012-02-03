@@ -166,6 +166,28 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "The source specified has already been added to the list of available package sources. Please provide a unique source.");
         }
 
+        [Theory]
+        [InlineData(new object[] { null, "password" })]
+        [InlineData(new object[] { "", "password" })]
+        [InlineData(new object[] { "user1", null })]
+        [InlineData(new object[] { "user1", "" })]
+        public void AddCommandThrowsIfOnlyOneOfUsernameOrPasswordIsSpecified(string userName, string password)
+        {
+            // Arrange
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            {
+                Name = "TestName",
+                Source = "http://TestSource",
+                UserName = userName,
+                Password = password
+            };
+            sourceCommand.Arguments.Add("ADD");
+
+            // Act and Assert
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "Both UserName and Password must be specified.");
+        }
+
         [Fact]
         public void AddCommandAddsSourceToSourceProvider()
         {
@@ -321,6 +343,28 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Act and Assert
             ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, 
                 "The source specified has already been added to the list of available package sources. Please provide a unique source.");
+        }
+
+        [Theory]
+        [InlineData(new object[] { null, "password" })]
+        [InlineData(new object[] { "", "password" })]
+        [InlineData(new object[] { "user1", null })]
+        [InlineData(new object[] { "user1", "" })]
+        public void UpdateThrowsIfOnlyOneOfUsernameOrPasswordIsSpecified(string userName, string password)
+        {
+            // Arrange
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            packageSourceProvider.Setup(s => s.LoadPackageSources()).Returns(new[] { new PackageSource("http://testsource") });
+            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            {
+                Name = "http://TestSource",
+                UserName = userName,
+                Password = password
+            };
+            sourceCommand.Arguments.Add("UPDATE");
+
+            // Act and Assert
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "Both UserName and Password must be specified.");
         }
 
         [Fact]

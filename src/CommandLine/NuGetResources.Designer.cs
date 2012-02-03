@@ -1233,6 +1233,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Both UserName and Password must be specified..
+        /// </summary>
+        internal static string SourcesCommandCredentialsRequired {
+            get {
+                return ResourceManager.GetString("SourcesCommandCredentialsRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Provides the ability to manage list of sources located in  %AppData%\NuGet\NuGet.config.
         /// </summary>
         internal static string SourcesCommandDescription {
