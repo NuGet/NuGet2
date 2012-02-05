@@ -10,6 +10,14 @@ namespace NuGet
     public class CommandLineParser
     {
         private readonly ICommandManager _commandManager;
+        private static readonly bool _supportSlashAsSwitch;
+
+        static CommandLineParser()
+        {
+            // On Unix or MacOSX slash as a switch indicator would interfere with the path separator
+            _supportSlashAsSwitch = !(Environment.OSVersion.Platform == PlatformID.Unix
+                                      || Environment.OSVersion.Platform == PlatformID.MacOSX);
+        }
 
         public CommandLineParser(ICommandManager manager)
         {
@@ -30,8 +38,7 @@ namespace NuGet
                     break;
                 }
 
-                if (!(option.StartsWith("/", StringComparison.OrdinalIgnoreCase) &&
-                                        !(Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX))
+                if (!(option.StartsWith("/", StringComparison.OrdinalIgnoreCase) && _supportSlashAsSwitch)
                     && !option.StartsWith("-", StringComparison.OrdinalIgnoreCase))
                 {
                     arguments.Add(option);
