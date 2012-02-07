@@ -153,7 +153,7 @@ if ((Test-Path Function:\DefaultTabExpansion2) -eq $false -and (Test-Path Functi
     Rename-Item Function:\TabExpansion2 DefaultTabExpansion2
 }
 
-function TabExpansion($line, $lastWord) {
+function TabExpansion([string] $line, [string] $lastWord) {
     $nugetSuggestions = & (Get-Module NuGet) NuGetTabExpansion $line $lastWord
 
     if ($nugetSuggestions.NoResult) {
