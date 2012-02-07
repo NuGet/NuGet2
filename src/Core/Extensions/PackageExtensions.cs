@@ -108,7 +108,7 @@ namespace NuGet
         /// <summary>
         /// Calculates the canonical list of operations.
         /// </summary>
-        internal static IEnumerable<PackageOperation> Reduce(this IEnumerable<PackageOperation> operations)
+        internal static IList<PackageOperation> Reduce(this IEnumerable<PackageOperation> operations)
         {
             // Convert the list of operations to a dictionary from (Action, Id, Version) -> [Operations]
             // We keep track of the index so that we preserve the ordering of the operations
@@ -144,7 +144,8 @@ namespace NuGet
             // Create the final list of operations and order them by their original index
             return operationLookup.SelectMany(o => o.Value)
                                   .OrderBy(o => o.Index)
-                                  .Select(o => o.Operation);
+                                  .Select(o => o.Operation)
+                                  .ToList();
         }
 
         private static Tuple<PackageAction, string, SemanticVersion> GetOperationKey(PackageOperation operation)

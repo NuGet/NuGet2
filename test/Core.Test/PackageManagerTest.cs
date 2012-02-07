@@ -414,6 +414,32 @@ namespace NuGet.Test
 
         }
 
+        [Fact]
+        public void InstallPackageNotifiesBatchProcessorWhenExpandingPackageFiles()
+        {
+            // Arrange
+            var package = PackageUtility.CreatePackage("B", "0.5.0", content: new[] { "content.txt" }, assemblyReferences: new[] { "Ref.dll" });
+
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var fileSystem = new Mock<MockFileSystem> { CallBase = true };
+            var batchProcessor = fileSystem.As<IBatchProcessor<string>>();
+            batchProcessor.Setup(s => s.BeginProcessing(It.IsAny<IEnumerable<string>>(), PackageAction.Install))
+                          .Callback((IEnumerable<string> files, PackageAction _) => Assert.Equal(new[] { @"content\content.txt", "Ref.dll" }, files))
+                          .Verifiable();
+            batchProcessor.Setup(s => s.EndProcessing()).Verifiable();
+
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object, localRepository);
+            sourceRepository.AddPackage(package);
+
+            // Act 
+            packageManager.InstallPackage("B");
+            
+            // Assert
+            Assert.True(localRepository.Exists(package));
+            batchProcessor.Verify();
+        }
+
         private PackageManager CreatePackageManager()
         {
             var projectSystem = new MockProjectSystem();

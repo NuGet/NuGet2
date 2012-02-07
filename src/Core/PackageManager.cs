@@ -123,6 +123,7 @@ namespace NuGet
             }
             else if (LocalRepository.Exists(package))
             {
+                // If the package wasn't installed by our set of operations, notify the user.
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageAlreadyInstalled, package.GetFullName());
             }
         }
@@ -173,10 +174,29 @@ namespace NuGet
 
         private void ExpandFiles(IPackage package)
         {
-            string packageDirectory = PathResolver.GetPackageDirectory(package);
+            var batchProcessor = FileSystem as IBatchProcessor<string>;
+            try
+            {
+                var files = package.GetFiles().ToList();
+                if (batchProcessor != null)
+                {
+                    // Notify the batch processor that the files are being added. This is to allow source controlled file systems 
+                    // to manage previously uninstalled files.
+                    batchProcessor.BeginProcessing(files.Select(p => p.Path), PackageAction.Install);
+                }
 
-            // Add files
-            FileSystem.AddFiles(package.GetFiles(), packageDirectory);
+                string packageDirectory = PathResolver.GetPackageDirectory(package);
+
+                // Add files
+                FileSystem.AddFiles(files, packageDirectory);
+            }
+            finally
+            {
+                if (batchProcessor != null)
+                {
+                    batchProcessor.EndProcessing();
+                }
+            }
         }
 
         public void UninstallPackage(string packageId)
