@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -10,14 +11,10 @@ namespace NuGet
     public class CommandLineParser
     {
         private readonly ICommandManager _commandManager;
-        private static readonly bool _supportSlashAsSwitch;
-
-        static CommandLineParser()
-        {
-            // On Unix or MacOSX slash as a switch indicator would interfere with the path separator
-            _supportSlashAsSwitch = !(Environment.OSVersion.Platform == PlatformID.Unix
-                                      || Environment.OSVersion.Platform == PlatformID.MacOSX);
-        }
+        
+        // On Unix or MacOSX slash as a switch indicator would interfere with the path separator
+        [SuppressMessage("Microsoft.Performance", "CA1802:UseLiteralsWhereAppropriate")]
+        private static readonly bool _supportSlashAsSwitch = (Environment.OSVersion.Platform != PlatformID.Unix) && (Environment.OSVersion.Platform != PlatformID.MacOSX);
 
         public CommandLineParser(ICommandManager manager)
         {
