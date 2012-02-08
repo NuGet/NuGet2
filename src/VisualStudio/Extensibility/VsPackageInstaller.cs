@@ -27,8 +27,6 @@ namespace NuGet.VisualStudio
             _solutionManager = solutionManager;
         }
 
-        public bool BindingRedirectDisabled { get; set; }
-
         public void InstallPackage(string source, Project project, string packageId, Version version, bool ignoreDependencies)
         {
             InstallPackage(source, project, packageId, new SemanticVersion(version), ignoreDependencies);
@@ -75,19 +73,18 @@ namespace NuGet.VisualStudio
                                                                                    project, NullLogger.Instance);
                                                                            };
 
-                bool oldBindingRedirectValue = packageManager.BindingRedirectDisabled;
+                bool oldBindingRedirectValue = packageManager.BindingRedirectEnabled;
                 try
                 {
                     projectManager.PackageReferenceAdded += addedHandler;
                     packageManager.PackageInstalled += installedHandler;
-                    // minor perf improvement: disable binding redirects since we don't need it for new projects
-                    packageManager.BindingRedirectDisabled = BindingRedirectDisabled;
+                    packageManager.BindingRedirectEnabled = false;
                     packageManager.InstallPackage(projectManager, packageId, version, ignoreDependencies,
                                                   allowPrereleaseVersions: true, logger: NullLogger.Instance);
                 }
                 finally
                 {
-                    packageManager.BindingRedirectDisabled = oldBindingRedirectValue;
+                    packageManager.BindingRedirectEnabled = oldBindingRedirectValue;
                     projectManager.PackageReferenceAdded -= addedHandler;
                     packageManager.PackageInstalled -= installedHandler;
                 }

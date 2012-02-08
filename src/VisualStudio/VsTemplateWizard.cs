@@ -22,14 +22,16 @@ namespace NuGet.VisualStudio
         private VsTemplateWizardInstallerConfiguration _configuration;
         private Project _project;
         private ProjectItem _projectItem;
-
-        private DTE DTE { get; set; }
+        private DTE _dte;
 
         [ImportingConstructor]
         public VsTemplateWizard(IVsPackageInstaller installer)
         {
             _installer = installer;
         }
+
+        [Import]
+        public Lazy<IRepositorySettings> RepositorySettings { get; set; }
 
         private VsTemplateWizardInstallerConfiguration GetConfigurationFromVsTemplateFile(string vsTemplatePath)
         {
@@ -147,7 +149,8 @@ namespace NuGet.VisualStudio
             {
                 try
                 {
-                    DTE.StatusBar.Text = String.Format(CultureInfo.CurrentCulture, VsResources.TemplateWizard_PackageInstallStatus, package.Id, package.Version);
+                    _dte.StatusBar.Text = String.Format(CultureInfo.CurrentCulture, VsResources.TemplateWizard_PackageInstallStatus, package.Id, package.Version);
+
                     // TODO review parameters and installer call
                     // REVIEW is it OK to ignoreDependencies? The expectation is that the vstemplate will list all the required packages
                     // REVIEW We need to figure out if we can break IVsPackageInstaller interface by modifying it to accept a SemVer and still allow MVC 3 projects to work
@@ -196,7 +199,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        private void RunStarted(object automationObject, WizardRunKind runKind, object[] customParams)
+        private void RunStarted(object automationObject, Dictionary<string, string> replacementsDictionary, WizardRunKind runKind, object[] customParams)
         {
             if (runKind != WizardRunKind.AsNewProject && runKind != WizardRunKind.AsNewItem)
             {
@@ -204,9 +207,28 @@ namespace NuGet.VisualStudio
                 throw new WizardBackoutException();
             }
 
-            DTE = (DTE)automationObject;
+            _dte = (DTE)automationObject;
             var vsTemplatePath = (string)customParams[0];
             _configuration = GetConfigurationFromVsTemplateFile(vsTemplatePath);
+
+            if (replacementsDictionary != null)
+            {
+                // add the $nugetpackagesfolder$ parameter which returns relative path to the solution's packages folder.
+                // this is used by project templates to include assembly references directly inside the template project file
+                // without relying on nuget to install the actual packages. 
+                string targetInstallDir;
+                if (replacementsDictionary.TryGetValue("$destinationdirectory$", out targetInstallDir))
+                {
+                    string solutionRepositoryPath = RepositorySettings.Value.RepositoryPath;
+                    targetInstallDir = PathUtility.EnsureTrailingSlash(targetInstallDir);
+                    replacementsDictionary["$nugetpackagesfolder$"] =
+                        PathUtility.EnsureTrailingSlash(PathUtility.GetRelativePath(targetInstallDir,
+                                                                                    solutionRepositoryPath));
+                }
+
+                // provide a current timpestamp (for use by universal provider)
+                replacementsDictionary["$timestamp$"] = DateTime.Now.ToString("yyyyMMddHHmmss");
+            }
 
             // we need to reset these to null every time the template runs so that we can distinguish 
             // between ItemTemplate and ProjectTemplate
@@ -242,7 +264,7 @@ namespace NuGet.VisualStudio
         void IWizard.RunStarted(object automationObject, Dictionary<string, string> replacementsDictionary, WizardRunKind runKind, object[] customParams)
         {
             // TODO REVIEW alternatively could get body of WizardData element from replacementsDictionary["$wizarddata$"] instead of parsing vstemplate file.
-            RunStarted(automationObject, runKind, customParams);
+            RunStarted(automationObject, replacementsDictionary, runKind, customParams);
         }
 
         bool IWizard.ShouldAddProjectItem(string filePath)

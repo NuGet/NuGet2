@@ -18,6 +18,7 @@ namespace NuGet.VisualStudio
         private readonly IRecentPackageRepository _recentPackagesRepository;
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly VsPackageInstallerEvents _packageEvents;
+        private bool _bindingRedirectEnabled = true;
 
         public VsPackageManager(ISolutionManager solutionManager, 
                 IPackageRepository sourceRepository, 
@@ -37,7 +38,11 @@ namespace NuGet.VisualStudio
             _projects = new Dictionary<string, IProjectManager>(StringComparer.OrdinalIgnoreCase);
         }
 
-        public bool BindingRedirectDisabled { get; set; }
+        public bool BindingRedirectEnabled
+        {
+            get { return _bindingRedirectEnabled; }
+            set { _bindingRedirectEnabled = value; }
+        }
 
         internal bool AddToRecent { get; set; }
 
@@ -847,7 +852,7 @@ namespace NuGet.VisualStudio
 
                 action();
 
-                if (!BindingRedirectDisabled)
+                if (!BindingRedirectEnabled)
                 {
                     // Only add binding redirects if install was successful
                     AddBindingRedirects(projectManager);
