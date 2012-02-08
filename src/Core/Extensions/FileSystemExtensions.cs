@@ -152,7 +152,6 @@ namespace NuGet
 
         internal static void AddFileWithCheck(this IFileSystem fileSystem, string path, Func<Stream> streamFactory)
         {
-            // Don't overwrite file if it exists if force wasn't set to true
             if (fileSystem.FileExists(path))
             {
                 fileSystem.Logger.Log(MessageLevel.Warning, NuGetResources.Warning_FileAlreadyExists, path);

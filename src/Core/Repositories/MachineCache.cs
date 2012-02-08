@@ -15,10 +15,7 @@ namespace NuGet
         private const int MaxPackages = 100;
         private const string NuGetCachePathEnvironmentVariable = "NuGetCachePath";
 
-        private static readonly Lazy<MachineCache> _instance = new Lazy<MachineCache>(
-            () => CreateDefault(
-                () => GetCachePath(
-                    () => Environment.GetEnvironmentVariable(NuGetCachePathEnvironmentVariable))));
+        private static readonly Lazy<MachineCache> _instance = new Lazy<MachineCache>(() => CreateDefault(GetCachePath));
 
         internal MachineCache(IFileSystem fileSystem)
             : base(new DefaultPackagePathResolver(fileSystem), fileSystem, enableCaching: false)
@@ -33,7 +30,6 @@ namespace NuGet
         /// <summary>
         /// Creates a Machine Cache instance, assigns it to the instance variable and returns it.
         /// </summary>
-        /// <param name="getCachePath">The method to call to retrieve the path to store files in.</param>
         internal static MachineCache CreateDefault(Func<string> getCachePath)
         {
             IFileSystem fileSystem;
@@ -65,45 +61,32 @@ namespace NuGet
             var files = GetPackageFiles().ToList();
             if (files.Count >= MaxPackages)
             {
-                Clear(files);
+                TryClear(files.ToList());
             }
 
             // We don't want to call RemovePackage here since that does a lot more than we need to
-            DeletePackage(package);
-            base.AddPackage(package);
-        }
-
-        private void DeletePackage(IPackage package)
-        {
             string path = GetPackageFilePath(package);
             if (FileSystem.FileExists(path))
             {
-                // Remove the file if it exists
-                FileSystem.DeleteFile(path);
+                TryAct(() => FileSystem.DeleteFile(path));
+            }
+
+            using (var stream = package.GetStream())
+            {
+                TryAct(() => FileSystem.AddFile(path, stream));
             }
         }
 
         public void Clear()
         {
-            Clear(GetPackageFiles().ToList());
+            TryClear(GetPackageFiles().ToList());
         }
 
-        private void Clear(IEnumerable<string> files)
+        private void TryClear(IEnumerable<string> files)
         {
             foreach (var packageFile in files)
             {
-                try
-                {
-                    FileSystem.DeleteFile(packageFile);
-                }
-                catch (FileNotFoundException)
-                {
-
-                }
-                catch (UnauthorizedAccessException)
-                {
-
-                }
+               TryAct(() => FileSystem.DeleteFileSafe(packageFile));
             }
         }
 
@@ -118,20 +101,48 @@ namespace NuGet
         }
 
         /// <summary>
-        /// The cache path is %LocalAppData%\NuGet\Cache by default
+        /// Determines the cache path to use for NuGet.exe. By default, NuGet caches files under %LocalAppData%\NuGet\Cache.
+        /// This path can be overridden by specifying a value in the NuGetCachePath environment variable.
         /// </summary>
-        internal static string GetCachePath(Func<string> getCacheOverride) {
-            string cacheOverride = getCacheOverride();
-            if (!String.IsNullOrEmpty(cacheOverride)){
+        private static string GetCachePath() {
+            return GetCachePath(Environment.GetEnvironmentVariable, Environment.GetFolderPath);
+        }
+
+        internal static string GetCachePath(Func<string, string> getEnvironmentVariable, Func<System.Environment.SpecialFolder, string> getFolderPath)
+        {
+            string cacheOverride = getEnvironmentVariable(NuGetCachePathEnvironmentVariable);
+            if (!String.IsNullOrEmpty(cacheOverride))
+            {
                 return cacheOverride;
             }
-            else{
-                string localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                if (String.IsNullOrEmpty(localAppDataPath)){
+            else
+            {
+                string localAppDataPath = getFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                if (String.IsNullOrEmpty(localAppDataPath))
+                {
                     return null;
                 }
                 return Path.Combine(localAppDataPath, "NuGet", "Cache");
-           }
+            }
+        }
+
+        /// <remarks>
+        /// We use this method instead of the "safe" methods in FileSystem because it attempts to retry multiple times with delays.
+        /// In our case, if we are unable to perform IO over the machine cache, we want to quit trying immediately.
+        /// </summary>
+        private static void TryAct(Action action)
+        {
+            try
+            {
+                action();
+            }
+            catch (IOException)
+            { 
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Do nothing if this fails. 
+            }
         }
     }
 }

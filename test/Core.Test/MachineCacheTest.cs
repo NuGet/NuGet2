@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Security;
+using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
 
@@ -26,6 +27,48 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal(1, cache.GetPackageFiles().Count());
+        }
+
+        [Fact]
+        public void AddPackageDoesNotThrowIfUnderlyingFileSystemThrowsOnAdd()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            mockFileSystem.Setup(f => f.AddFile(It.IsAny<string>(), It.IsAny<Stream>()))
+                          .Throws(new UnauthorizedAccessException("Can't touch me."))
+                          .Verifiable();
+            var cache = new MachineCache(mockFileSystem.Object);
+
+            // Act
+            cache.AddPackage(PackageUtility.CreatePackage("B"));
+
+            // Assert
+            mockFileSystem.Verify();
+        }
+
+        [Fact]
+        public void AddPackageDoesNotThrowIfUnderlyingFileSystemIsReadonly()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<IFileSystem>();
+            mockFileSystem.Setup(f => f.AddFile(It.IsAny<string>(), It.IsAny<Stream>()))
+                          .Throws(new UnauthorizedAccessException("Can't touch me."))
+                          .Verifiable();
+
+            mockFileSystem.Setup(f => f.FileExists(It.IsAny<string>()))
+                          .Returns(true)
+                          .Verifiable();
+
+            mockFileSystem.Setup(f => f.DeleteFile(It.IsAny<string>()))
+                          .Throws(new UnauthorizedAccessException("Can't touch me."))
+                          .Verifiable();
+            var cache = new MachineCache(mockFileSystem.Object);
+
+            // Act
+            cache.AddPackage(PackageUtility.CreatePackage("B"));
+
+            // Assert
+            mockFileSystem.Verify();
         }
 
         [Fact]
@@ -81,10 +124,10 @@ namespace NuGet.Test
         public void MachineCacheUsesEnvironmentSpecifiedLocationIfProvided()
         {
             // Arrange
+            var expectedPath = @"c:\temp\some\directory";
 
             // Act
-            var cachePath = MachineCache.GetCachePath(() => @"c:\temp\some\directory");
-            var expectedPath = @"c:\temp\some\directory";
+            var cachePath = MachineCache.GetCachePath(_ => @"c:\temp\some\directory", _ => { throw new Exception("This shouldn't be called."); });
 
             // Assert
             Assert.Equal(expectedPath, cachePath);
@@ -94,10 +137,11 @@ namespace NuGet.Test
         public void MachineCacheDoesntUseEnvironmentSpecifiedLocationIfNotProvided()
         {
             // Arrange
+            string appDataPath = @"x:\user\the-dude\the-dude's-stash";
+            string expectedPath = @"x:\user\the-dude\the-dude's-stash\NuGet\Cache";
 
             // Act
-            var cachePath = MachineCache.GetCachePath(() => string.Empty);
-            var expectedPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"NuGet\Cache");
+            var cachePath = MachineCache.GetCachePath(_ => "", _ => appDataPath);
 
             // Assert
             Assert.Equal(expectedPath, cachePath);
