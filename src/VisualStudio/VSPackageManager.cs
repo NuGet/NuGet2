@@ -37,6 +37,8 @@ namespace NuGet.VisualStudio
             _projects = new Dictionary<string, IProjectManager>(StringComparer.OrdinalIgnoreCase);
         }
 
+        public bool BindingRedirectDisabled { get; set; }
+
         internal bool AddToRecent { get; set; }
 
         internal void EnsureCached(Project project)
@@ -845,8 +847,11 @@ namespace NuGet.VisualStudio
 
                 action();
 
-                // Only add binding redirects if install was successful
-                AddBindingRedirects(projectManager);
+                if (!BindingRedirectDisabled)
+                {
+                    // Only add binding redirects if install was successful
+                    AddBindingRedirects(projectManager);
+                }
             }
             catch
             {

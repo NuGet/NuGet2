@@ -5,6 +5,8 @@ namespace NuGet.VisualStudio
 {
     public interface IVsPackageManager : IPackageManager
     {
+        bool BindingRedirectDisabled { get; set; }
+
         bool IsProjectLevel(IPackage package);
 
         IProjectManager GetProjectManager(Project project);
