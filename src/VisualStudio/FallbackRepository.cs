@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using NuGet;
 
 namespace NuGet.VisualStudio
 {
     /// <summary>
     /// Represents a package repository that implements a dependency provider. 
     /// </summary>
-    public class FallbackRepository : IPackageRepository, IDependencyResolver, ISearchableRepository
+    public class FallbackRepository : IPackageRepository, IDependencyResolver, ISearchableRepository, IPackageLookup
     {
         private readonly IPackageRepository _primaryRepository;
         private readonly IPackageRepository _dependencyResolver;
@@ -70,6 +71,11 @@ namespace NuGet.VisualStudio
         public IEnumerable<IPackage> FindPackagesById(string packageId)
         {
             return _primaryRepository.FindPackagesById(packageId);
+        }
+
+        public IPackage FindPackage(string packageId, SemanticVersion version)
+        {
+            return _primaryRepository.FindPackage(packageId, version);
         }
     }
 }
