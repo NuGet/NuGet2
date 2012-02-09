@@ -106,16 +106,6 @@ namespace NuGet.VisualStudio
             return activeRepository.FindPackagesById(packageId);
         }
 
-        IPackage IPackageLookup.FindPackage(string packageId, SemanticVersion version)
-        {
-            var activeRepository = GetActiveRepository();
-            if (activeRepository == null)
-            {
-                return null;
-            }
-            return activeRepository.FindPackage(packageId, version);
-        }
-
         internal IPackageRepository GetActiveRepository()
         {
             if (_packageSourceProvider.ActivePackageSource == null)

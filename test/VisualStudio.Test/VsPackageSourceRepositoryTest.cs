@@ -75,5 +75,32 @@ namespace NuGet.VisualStudio.Test
             Assert.Equal("A", packages[0].Id);
             Assert.Equal(new SemanticVersion("1.0"), packages[0].Version);
         }
+
+        [Fact]
+        public void FindPackageCallsFindPackageFromActiveSource()
+        {
+            // Arrange
+            var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
+            var mockSourceProvider = new Mock<IVsPackageSourceProvider>();
+            
+            var mockRepository = new Mock<IPackageRepository>(MockBehavior.Strict);
+            var source = new PackageSource("bar", "foo");
+            mockRepository.As<IPackageLookup>()
+                          .Setup(p => p.FindPackage("A", new SemanticVersion("1.0")))
+                          .Returns(PackageUtility.CreatePackage("A", "1.0"))
+                          .Verifiable();
+
+            mockSourceProvider.Setup(m => m.ActivePackageSource).Returns(source);
+            mockRepositoryFactory.Setup(m => m.CreateRepository(source.Source)).Returns(mockRepository.Object);
+            var repository = new VsPackageSourceRepository(mockRepositoryFactory.Object, mockSourceProvider.Object);
+
+            // Act
+            IPackage package = repository.FindPackage("A", new SemanticVersion("1.0"));
+
+            // Assert
+            mockRepository.VerifyAll();
+            Assert.Equal("A", package.Id);
+            Assert.Equal(new SemanticVersion("1.0"), package.Version);
+        }
     }
 }

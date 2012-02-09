@@ -348,5 +348,24 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Same(resolvedPackage, packageA11);
         }
+
+        [Fact]
+        public void FallbackRepositoryCallsPackagesFindPackageOnThePrimaryRepository()
+        {
+            // Arrange
+            var primaryRepository = new Mock<IPackageRepository>(MockBehavior.Strict);
+            IPackage package = PackageUtility.CreatePackage("A", "1.0");
+
+            primaryRepository.As<IPackageLookup>().Setup(p => p.FindPackage("A", new SemanticVersion("1.0"))).Returns(package).Verifiable();
+
+            var fallbackRepository = new FallbackRepository(primaryRepository.Object, new MockPackageRepository());
+
+            // Act
+            IPackage foundPackage = fallbackRepository.FindPackage("A", new SemanticVersion("1.0"));
+
+            // Assert
+            primaryRepository.VerifyAll();
+            Assert.Same(package, foundPackage);
+        }
     }
 }
