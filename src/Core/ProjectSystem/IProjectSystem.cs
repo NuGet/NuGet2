@@ -23,5 +23,6 @@ namespace NuGet
         void RemoveReference(string name);
         bool IsSupportedFile(string path);
         string ResolvePath(string path);
+        bool IsBindingRedirectSupported { get; }
     }
 }

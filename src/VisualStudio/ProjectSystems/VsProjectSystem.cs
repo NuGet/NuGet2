@@ -77,6 +77,16 @@ namespace NuGet.VisualStudio
             }
         }
 
+        public virtual bool IsBindingRedirectSupported
+        {
+            get
+            {
+                // Silverlight projects and Windows Phone projects do not support binding redirect. 
+                // They both share the same identifier as "Silverlight"
+                return !"Silverlight".Equals(TargetFramework.Identifier, StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
         public virtual void AddFile(string path, Stream stream)
         {
             bool fileExistsInProject = FileExistsInProject(path);

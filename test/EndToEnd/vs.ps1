@@ -256,6 +256,15 @@ function New-SilverlightClassLibrary {
     $SolutionFolder | New-Project SilverlightClassLibrary $ProjectName
 }
 
+function New-SilverlightApplication {
+    param(        
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $SolutionFolder | New-Project SilverlightProject $ProjectName
+}
+
 function New-WindowsPhoneClassLibrary {
     param(        
         [string]$ProjectName,

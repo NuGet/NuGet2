@@ -852,7 +852,7 @@ namespace NuGet.VisualStudio
 
                 action();
 
-                if (BindingRedirectEnabled)
+                if (BindingRedirectEnabled && projectManager.Project.IsBindingRedirectSupported)
                 {
                     // Only add binding redirects if install was successful
                     AddBindingRedirects(projectManager);

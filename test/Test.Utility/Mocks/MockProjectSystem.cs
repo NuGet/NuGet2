@@ -20,6 +20,14 @@ namespace NuGet.Test.Mocks
             References = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
+        public bool IsBindingRedirectSupported
+        {
+            get
+            {
+                return true;
+            }
+        }
+
         public virtual Dictionary<string, string> References
         {
             get;

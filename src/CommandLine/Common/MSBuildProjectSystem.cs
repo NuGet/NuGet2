@@ -16,6 +16,14 @@ namespace NuGet.Common
             Project = GetProject(projectFile);
         }
 
+        public bool IsBindingRedirectSupported
+        {
+            get
+            {
+                return true;
+            }
+        }
+
         private Project Project
         {
             get;

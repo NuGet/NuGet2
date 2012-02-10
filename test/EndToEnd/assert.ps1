@@ -202,3 +202,36 @@ function Assert-BindingRedirect {
 
     Assert-True ($bindings.Count -eq 1) "Unable to find binding redirect matching $Name, $OldVersion, $NewVersion"
 }
+
+function Assert-NoBindingRedirect {
+    param(
+        [parameter(Mandatory = $true)]
+        $Project,
+        [parameter(Mandatory = $true)]
+        $ConfigPath,
+        [parameter(Mandatory = $true)]
+        $Name,
+        [parameter(Mandatory = $true)]
+        $OldVersion,
+        [parameter(Mandatory = $true)]
+        $NewVersion
+    )
+    $itemPath = (Get-ProjectItemPath $Project $ConfigPath)
+	if (!$itemPath) {
+		return
+	}
+
+    $config = [xml](Get-Content $itemPath)
+
+    if (!$config.configuration.runtime -or
+        !$config.configuration.runtime.assemblyBinding -or
+        !$config.configuration.runtime.assemblyBinding.dependentAssembly) {
+        return
+    }
+
+    $bindings = @($config.configuration.runtime.assemblyBinding.dependentAssembly | ?{ $_.assemblyIdentity.name -eq $Name -and 
+                                                                                    $_.bindingRedirect.oldVersion -eq $OldVersion -and
+                                                                                    $_.bindingRedirect.newVersion -eq $NewVersion })
+
+    Assert-True ($bindings.Count -eq 0) "Binding redirect matching $Name, $OldVersion, $NewVersion found in project $($Project.Name)"
+}

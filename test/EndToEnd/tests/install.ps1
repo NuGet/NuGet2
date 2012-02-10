@@ -565,6 +565,23 @@ function Test-SimpleBindingRedirects {
     Assert-BindingRedirect $c app.config D '0.0.0.0-2.0.0.0' '2.0.0.0'
 }
 
+function Test-BindingRedirectDoesNotAddToSilverlightProject {
+    param(
+        $context
+    )
+    # Arrange
+    $c = New-SilverlightApplication
+
+    # Act
+    $c | Install-Package TestSL -Version 1.0 -Source $context.RepositoryRoot
+
+    # Assert
+    $c | %{ Assert-Reference $_ TestSL 1.0.0.0; 
+            Assert-Reference $_ HostSL 1.0.1.0; }
+
+    Assert-NoBindingRedirect $c app.config HostSL '0.0.0.0-1.0.1.0' '1.0.1.0'
+}
+
 function Test-SimpleBindingRedirectsClassLibraryReference {
     param(
         $context

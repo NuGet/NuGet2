@@ -14,6 +14,15 @@ namespace NuGet.VisualStudio
         private const string OutputName = "OutputName";
         private const string DefaultNamespace = "WiX";
 
+        public override bool IsBindingRedirectSupported
+        {
+            get
+            {
+                // Binding redirect just doesn't make sense in Wix project
+                return false;
+            }
+        }
+
         public override void AddReference(string referencePath, System.IO.Stream stream)
         {
             // References aren't allowed for WiX projects
