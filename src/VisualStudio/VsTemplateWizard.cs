@@ -20,8 +20,6 @@ namespace NuGet.VisualStudio
     {
         private readonly IVsPackageInstaller _installer;
         private VsTemplateWizardInstallerConfiguration _configuration;
-        private Project _project;
-        private ProjectItem _projectItem;
         private DTE _dte;
 
         [ImportingConstructor]
@@ -175,27 +173,20 @@ namespace NuGet.VisualStudio
 
         private void ProjectFinishedGenerating(Project project)
         {
-            _project = project;
+            TemplateFinishedGenerating(project);
         }
 
         private void ProjectItemFinishedGenerating(ProjectItem projectItem)
         {
-            _projectItem = projectItem;
+            TemplateFinishedGenerating(projectItem.ContainingProject);
         }
 
-        private void RunFinished()
+        private void TemplateFinishedGenerating(Project project)
         {
-            if (_projectItem != null)
-            {
-                _project = _projectItem.ContainingProject;
-            }
-
-            Debug.Assert(_project != null);
-            Debug.Assert(_configuration != null);
             if (_configuration.Packages.Any())
             {
                 string repositoryPath = _configuration.RepositoryPath;
-                PerformPackageInstall(_installer, _project, repositoryPath, _configuration.Packages);
+                PerformPackageInstall(_installer, project, repositoryPath, _configuration.Packages);
             }
         }
 
@@ -213,27 +204,25 @@ namespace NuGet.VisualStudio
 
             if (replacementsDictionary != null)
             {
-                // add the $nugetpackagesfolder$ parameter which returns relative path to the solution's packages folder.
-                // this is used by project templates to include assembly references directly inside the template project file
-                // without relying on nuget to install the actual packages. 
-                string targetInstallDir;
-                if (replacementsDictionary.TryGetValue("$destinationdirectory$", out targetInstallDir))
+                if (_dte.Solution != null && _dte.Solution.IsOpen)
                 {
-                    string solutionRepositoryPath = RepositorySettings.Value.RepositoryPath;
-                    targetInstallDir = PathUtility.EnsureTrailingSlash(targetInstallDir);
-                    replacementsDictionary["$nugetpackagesfolder$"] =
-                        PathUtility.EnsureTrailingSlash(PathUtility.GetRelativePath(targetInstallDir,
-                                                                                    solutionRepositoryPath));
+                    // add the $nugetpackagesfolder$ parameter which returns relative path to the solution's packages folder.
+                    // this is used by project templates to include assembly references directly inside the template project file
+                    // without relying on nuget to install the actual packages. 
+                    string targetInstallDir;
+                    if (replacementsDictionary.TryGetValue("$destinationdirectory$", out targetInstallDir))
+                    {
+                        string solutionRepositoryPath = RepositorySettings.Value.RepositoryPath;
+                        targetInstallDir = PathUtility.EnsureTrailingSlash(targetInstallDir);
+                        replacementsDictionary["$nugetpackagesfolder$"] =
+                            PathUtility.EnsureTrailingSlash(PathUtility.GetRelativePath(targetInstallDir,
+                                                                                        solutionRepositoryPath));
+                    }
                 }
 
                 // provide a current timpestamp (for use by universal provider)
                 replacementsDictionary["$timestamp$"] = DateTime.Now.ToString("yyyyMMddHHmmss");
             }
-
-            // we need to reset these to null every time the template runs so that we can distinguish 
-            // between ItemTemplate and ProjectTemplate
-            _project = null;
-            _projectItem = null;
         }
 
         internal virtual void ShowErrorMessage(string message)
@@ -258,7 +247,6 @@ namespace NuGet.VisualStudio
 
         void IWizard.RunFinished()
         {
-            RunFinished();
         }
 
         void IWizard.RunStarted(object automationObject, Dictionary<string, string> replacementsDictionary, WizardRunKind runKind, object[] customParams)
