@@ -269,6 +269,9 @@ namespace NuGet.Dialog.Providers
 
             EnsureExtensionCollection();
 
+            // Bug #1930: this will clear the content of details pane
+            Extensions.Clear();
+
             ShowProgressPane();
 
             // avoid more than one loading occurring at the same time
