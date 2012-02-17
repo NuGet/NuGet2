@@ -11,9 +11,9 @@ namespace NuGet.Dialog.Test
     /// </summary>
     internal class MockTreeNode : PackagesTreeNodeBase
     {
-
         private int _numberOfPackages;
         private IEnumerable<IPackage> _packages;
+        private readonly bool _supportsPrereleasePackages;
 
         public override string Name
         {
@@ -21,6 +21,11 @@ namespace NuGet.Dialog.Test
             {
                 return "Mock Tree Node";
             }
+        }
+
+        public override bool SupportsPrereleasePackages
+        {
+            get { return _supportsPrereleasePackages; }
         }
 
         public override IQueryable<IPackage> GetPackages(bool allowPrereleaseVersions)
@@ -38,16 +43,17 @@ namespace NuGet.Dialog.Test
             return _packages.AsQueryable().FilterByPrerelease(allowPrereleaseVersions);
         }
 
-        public MockTreeNode(IVsExtensionsTreeNode parent, PackagesProviderBase provider, int numberOfPackages, bool collapseVersions)
+        public MockTreeNode(IVsExtensionsTreeNode parent, PackagesProviderBase provider, int numberOfPackages, bool collapseVersions, bool supportsPrereleasePackages = true)
             : base(parent, provider, collapseVersions)
         {
             _numberOfPackages = numberOfPackages;
+            _supportsPrereleasePackages = supportsPrereleasePackages;
         }
 
-        public MockTreeNode(IVsExtensionsTreeNode parent, PackagesProviderBase provider, IEnumerable<IPackage> packages, bool collapseVersions)
+        public MockTreeNode(IVsExtensionsTreeNode parent, PackagesProviderBase provider, IEnumerable<IPackage> packages, bool collapseVersions, bool supportsPrereleasePackages = true)
             : base(parent, provider, collapseVersions)
         {
-
+            _supportsPrereleasePackages = supportsPrereleasePackages;
             _packages = packages;
         }
     }

@@ -9,14 +9,6 @@ namespace NuGet.Dialog.Providers
         private string _searchText;
         private readonly PackagesTreeNodeBase _baseNode;
 
-        public PackagesTreeNodeBase BaseNode
-        {
-            get
-            {
-                return _baseNode;
-            }
-        }
-
         public PackagesSearchNode(PackagesProviderBase provider, IVsExtensionsTreeNode parent, PackagesTreeNodeBase baseNode, string searchText) :
             base(parent, provider, baseNode.CollapseVersions)
         {
@@ -31,6 +23,19 @@ namespace NuGet.Dialog.Providers
 
             // Mark this node as a SearchResults node to assist navigation in ExtensionsExplorer
             IsSearchResultsNode = true;
+        }
+
+        public PackagesTreeNodeBase BaseNode
+        {
+            get
+            {
+                return _baseNode;
+            }
+        }
+
+        public override bool SupportsPrereleasePackages
+        {
+            get { return BaseNode.SupportsPrereleasePackages; }
         }
 
         public override string Name

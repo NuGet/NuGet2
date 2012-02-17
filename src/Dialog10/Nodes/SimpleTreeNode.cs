@@ -44,6 +44,14 @@ namespace NuGet.Dialog.Providers
             }
         }
 
+        public override bool SupportsPrereleasePackages
+        {
+            get 
+            {
+                return Repository.SupportsPrereleasePackages;
+            }
+        }
+
         public override IQueryable<IPackage> GetPackages(bool allowPrereleaseVersions)
         {
             return Repository.Search(searchTerm: null, targetFrameworks: Provider.SupportedFrameworks, allowPrereleaseVersions: allowPrereleaseVersions);

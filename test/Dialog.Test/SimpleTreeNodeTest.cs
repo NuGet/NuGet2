@@ -5,6 +5,7 @@ using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Dialog.Test
 {
@@ -13,7 +14,6 @@ namespace NuGet.Dialog.Test
         [Fact]
         public void PropertyNameIsCorrect()
         {
-
             // Arrange
             MockPackageRepository repository = new MockPackageRepository();
 
@@ -22,6 +22,21 @@ namespace NuGet.Dialog.Test
 
             // Act & Assert
             Assert.Equal(category, node.Name);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SupportsPrereleasePackagesMatchRepositoryBehavior(bool supportsPrereleasePackage)
+        {
+            // Arrange
+            var repository = new Mock<IPackageRepository>();
+            repository.Setup(r => r.SupportsPrereleasePackages).Returns(supportsPrereleasePackage);
+
+            SimpleTreeNode node = CreateSimpleTreeNode(repository.Object);
+
+            // Act && Assert
+            Assert.Equal(supportsPrereleasePackage, node.SupportsPrereleasePackages);
         }
 
         [Fact]

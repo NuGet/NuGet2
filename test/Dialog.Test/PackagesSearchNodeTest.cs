@@ -5,13 +5,12 @@ using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Dialog.Test
 {
-
     public class PackagesSearchNodeTest
     {
-
         [Fact]
         public void NamePropertyIsValid()
         {
@@ -20,6 +19,25 @@ namespace NuGet.Dialog.Test
 
             // Act && Assert
             Assert.Equal("Search Results", node.Name);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void SupportsPrereleasePackagesMatchBehaviorOfBaseNode(bool supportsPrereleasePackages)
+        {
+            // Arrange
+            var baseNode = new MockTreeNode(
+                new Mock<IVsExtensionsTreeNode>().Object, 
+                new MockPackagesProvider(), 
+                10, 
+                true, 
+                supportsPrereleasePackages);
+            
+            PackagesSearchNode node = CreatePackagesSearchNode("xxx", baseNode: baseNode);
+
+            // Act & Assert
+            Assert.Equal(supportsPrereleasePackages, node.SupportsPrereleasePackages);
         }
 
         [Fact]

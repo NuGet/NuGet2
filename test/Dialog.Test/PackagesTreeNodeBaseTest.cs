@@ -313,6 +313,42 @@ namespace NuGet.Dialog.Test
                                });
         }
 
+        [Fact]
+        public void PrereleasePackagesAreNotLoadedIfSupportsPrereleaseIsFalse()
+        {
+            // Arrange
+            var node = CreatePackagesTreeNodeBase(new[]{
+                    PackageUtility.CreatePackage("A", "1.0-alpha", downloadCount: 1),
+                    PackageUtility.CreatePackage("A", "2.0", downloadCount: 1),
+                    PackageUtility.CreatePackage("A", "3.0", downloadCount: 1),
+                    PackageUtility.CreatePackage("B", "1.0-beta", downloadCount: 2),
+                    PackageUtility.CreatePackage("B", "2.0", downloadCount: 2),
+                    PackageUtility.CreatePackage("C", "4.0", downloadCount: 3)
+                },
+                parentTreeNode: null,
+                collapseVersions: true,
+                supportsPrereleasePackages: false);
+
+            // Act
+            TreeNodeActionTest(node,
+                               n => n.LoadPage(1),
+                               n =>
+                               {
+                                   // Assert
+                                   Assert.Equal(1, n.TotalPages);
+                                   Assert.Equal(1, n.CurrentPage);
+                                   Assert.Equal(3, n.Extensions.Count);
+                                   Assert.Equal("C", n.Extensions[0].Name);
+                                   Assert.Equal("4.0", ((PackageItem)n.Extensions[0]).Version);
+                                   
+                                   Assert.Equal("B", n.Extensions[1].Name);
+                                   Assert.Equal("2.0", ((PackageItem)n.Extensions[1]).Version);
+                                   
+                                   Assert.Equal("A", n.Extensions[2].Name);
+                                   Assert.Equal("3.0", ((PackageItem)n.Extensions[2]).Version);
+                               });
+        }
+
         private static void TreeNodeActionTest(Action<PackagesTreeNodeBase> treeNodeAction,
                                                Action<PackagesTreeNodeBase> callback,
                                                int? pageSize = null,
@@ -387,7 +423,11 @@ namespace NuGet.Dialog.Test
             ExceptionAssert.ThrowsArgOutOfRange(() => node.LoadPage(0), "pageNumber", 1, null, true);
         }
 
-        private static PackagesTreeNodeBase CreatePackagesTreeNodeBase(IVsExtensionsTreeNode parentTreeNode = null, int numberOfPackages = 1, bool collapseVersions = true)
+        private static PackagesTreeNodeBase CreatePackagesTreeNodeBase(
+            IVsExtensionsTreeNode parentTreeNode = null, 
+            int numberOfPackages = 1, 
+            bool collapseVersions = true,
+            bool supportsPrereleasePackages = true)
         {
             if (parentTreeNode == null)
             {
@@ -395,11 +435,15 @@ namespace NuGet.Dialog.Test
             }
 
             PackagesProviderBase provider = new MockPackagesProvider();
-            return new MockTreeNode(parentTreeNode, provider, numberOfPackages, collapseVersions);
+            return new MockTreeNode(parentTreeNode, provider, numberOfPackages, collapseVersions, supportsPrereleasePackages);
 
         }
 
-        private static PackagesTreeNodeBase CreatePackagesTreeNodeBase(IEnumerable<IPackage> packages, IVsExtensionsTreeNode parentTreeNode = null, bool collapseVersions = true)
+        private static PackagesTreeNodeBase CreatePackagesTreeNodeBase(
+            IEnumerable<IPackage> packages, 
+            IVsExtensionsTreeNode parentTreeNode = null, 
+            bool collapseVersions = true,
+            bool supportsPrereleasePackages = true)
         {
             if (parentTreeNode == null)
             {
@@ -407,7 +451,8 @@ namespace NuGet.Dialog.Test
             }
 
             PackagesProviderBase provider = new MockPackagesProvider();
-            return new MockTreeNode(parentTreeNode, provider, packages, collapseVersions)
+            provider.IncludePrerelease = true;
+            return new MockTreeNode(parentTreeNode, provider, packages, collapseVersions, supportsPrereleasePackages)
             {
                 IsSelected = true
             };
