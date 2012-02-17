@@ -34,7 +34,7 @@ namespace NuGet.Dialog.Test
                 true, 
                 supportsPrereleasePackages);
             
-            PackagesSearchNode node = CreatePackagesSearchNode("xxx", baseNode: baseNode);
+            PackagesSearchNode node = CreatePackagesSearchNode("yyy", baseNode: baseNode);
 
             // Act & Assert
             Assert.Equal(supportsPrereleasePackages, node.SupportsPrereleasePackages);
