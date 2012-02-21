@@ -4,7 +4,6 @@ using System.Data.Services.Common;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using NuGet.Resources;
 
 namespace NuGet
 {
@@ -16,12 +15,8 @@ namespace NuGet
     [CLSCompliant(false)]
     public class DataServicePackage : IPackage
     {
-        private readonly LazyWithRecreate<IPackage> _package;
-
-        public DataServicePackage()
-        {
-            _package = new LazyWithRecreate<IPackage>(DownloadPackage, ShouldUpdatePackage);
-        }
+        private IPackage _package;
+        private IHashProvider _hashProvider;
 
         public string Id
         {
@@ -181,10 +176,21 @@ namespace NuGet
             set;
         }
 
-        internal string OldHash
+        public string Copyright
         {
             get;
             set;
+        }
+
+        private string OldHash { get; set; }
+
+        internal IPackage Package
+        {
+            get
+            {
+                EnsurePackage(MachineCache.Default);
+                return _package;
+            }
         }
 
         internal IDataServiceContext Context
@@ -195,10 +201,10 @@ namespace NuGet
 
         internal PackageDownloader Downloader { get; set; }
 
-        public string Copyright
+        internal IHashProvider HashProvider
         {
-            get;
-            set;
+            get { return _hashProvider ?? new CryptoHashProvider(PackageHashAlgorithm); }
+            set { _hashProvider = value; }
         }
 
         bool IPackage.Listed
@@ -264,7 +270,7 @@ namespace NuGet
         {
             get
             {
-                return _package.Value.AssemblyReferences;
+                return Package.AssemblyReferences;
             }
         }
 
@@ -272,18 +278,18 @@ namespace NuGet
         {
             get
             {
-                return _package.Value.FrameworkAssemblies;
+                return Package.FrameworkAssemblies;
             }
         }
 
         public IEnumerable<IPackageFile> GetFiles()
         {
-            return _package.Value.GetFiles();
+            return Package.GetFiles();
         }
 
         public Stream GetStream()
         {
-            return _package.Value.GetStream();
+            return Package.GetStream();
         }
 
         public override string ToString()
@@ -291,69 +297,36 @@ namespace NuGet
             return this.GetFullName();
         }
 
-        private bool ShouldUpdatePackage()
+        internal void EnsurePackage(IPackageRepository cacheRepository)
         {
-            return ShouldUpdatePackage(MachineCache.Default);
-        }
+            // OData caches instances of DataServicePackage while updating their property values. As a result, 
+            // the ZipPackage that we downloaded may no longer be valid (as indicated by a newer hash). 
+            bool refreshPackage = _package == null || !String.Equals(OldHash, PackageHash, StringComparison.OrdinalIgnoreCase);
 
-        internal bool ShouldUpdatePackage(IPackageRepository cacheRepository)
-        {
-            // If we never receieved a hash from the server or the hash changed re-download the package.
-            if (String.IsNullOrEmpty(PackageHash) || !PackageHash.Equals(OldHash, StringComparison.OrdinalIgnoreCase))
+            if (refreshPackage && TryGetPackage(cacheRepository, this, out _package))
             {
-                return true;
+                // If our in-memory copy needs to be refreshed, check the machine cache and verify if we have a newer copy locally available.
+                var newHash = _package.GetHash(HashProvider);
+
+                refreshPackage = !String.Equals(newHash, PackageHash, StringComparison.OrdinalIgnoreCase);
+
+                OldHash = newHash;
             }
 
-            // If the package hasn't been cached, then re-download the package.
-            IPackage package = GetPackage(cacheRepository);
-
-            if (package == null)
+            if (refreshPackage)
             {
-                return true;
-            }
+                // We either do not have a package available locally or they are invalid. Download the package from the server.
+                _package = Downloader.DownloadPackage(DownloadUrl, this);
 
-            // If the cached package hash isn't the same as incoming package hash
-            // then re-download the package.
-            string cachedHash = package.GetHash(PackageHashAlgorithm);
-            if (!cachedHash.Equals(PackageHash, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        private IPackage DownloadPackage()
-        {
-            return DownloadPackage(MachineCache.Default);
-        }
-
-        internal IPackage DownloadPackage(IPackageRepository cacheRepository)
-        {
-            IPackage package = null;
-
-            // If OldHash is null, we're looking at a new instance of the data service package.
-            // The package might be stored in the cache so we're going to try the looking there before attempting a download.
-            if (OldHash == null)
-            {
-                package = GetPackage(cacheRepository);
-            }
-
-            if (package == null)
-            {
-                package = Downloader.DownloadPackage(DownloadUrl, this);
+                // We're assuming that the feed's hash for the package is in sync with the actual file.
+                OldHash = PackageHash;
 
                 // Add the package to the cache
-                cacheRepository.AddPackage(package);
+                cacheRepository.AddPackage(_package);
 
-                // Clear the cache for this package
-                ZipPackage.ClearCache(package);
+                // Clear any cached items for this package
+                ZipPackage.ClearCache(_package);
             }
-
-            // Update the hash
-            OldHash = PackageHash;
-
-            return package;
         }
 
         /// <summary>
@@ -388,50 +361,18 @@ namespace NuGet
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to return null if any error occurred while trying to find the package.")]
-        private IPackage GetPackage(IPackageRepository repository)
+        private static bool TryGetPackage(IPackageRepository repository, IPackageMetadata packageMetadata, out IPackage package)
         {
             try
             {
-                return repository.FindPackage(Id, ((IPackageMetadata)this).Version);
+                package = repository.FindPackage(packageMetadata.Id, packageMetadata.Version);
             }
             catch
             {
                 // If the package in the repository is corrupted then return null
-                return null;
+                package = null;
             }
-        }
-
-        /// <summary>
-        /// We can't use the built in Lazy for 2 reasons:
-        /// 1. It caches the exception if any is thrown from the creator func (this means it won't retry calling the function).
-        /// 2. There's no way to force a retry or expiration of the cache.
-        /// </summary>
-        private class LazyWithRecreate<T>
-        {
-            private readonly Func<T> _creator;
-            private readonly Func<bool> _shouldRecreate;
-            private T _value;
-            private bool _isValueCreated;
-
-            public LazyWithRecreate(Func<T> creator, Func<bool> shouldRecreate)
-            {
-                _creator = creator;
-                _shouldRecreate = shouldRecreate;
-            }
-
-            public T Value
-            {
-                get
-                {
-                    if (_shouldRecreate() || !_isValueCreated)
-                    {
-                        _value = _creator();
-                        _isValueCreated = true;
-                    }
-
-                    return _value;
-                }
-            }
+            return package != null;
         }
     }
 }
