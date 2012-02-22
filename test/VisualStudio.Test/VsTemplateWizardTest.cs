@@ -33,7 +33,7 @@ namespace NuGet.VisualStudio.Test
             return BuildDocument(repository, BuildPackageElement("pack", "1.0"), additionalChild);
         }
 
-        private static XElement BuildPackageElement(string id = null, string version = null)
+        private static XElement BuildPackageElement(string id = null, string version = null, bool createRefreshFilesInBin = false)
         {
             var packageElement = new XElement(VSTemplateNamespace + "package");
             if (id != null)
@@ -44,6 +44,10 @@ namespace NuGet.VisualStudio.Test
             {
                 packageElement.Add(new XAttribute("version", version));
             }
+            if (createRefreshFilesInBin)
+            {
+                packageElement.Add(new XAttribute("createRefreshFilesInBin", createRefreshFilesInBin.ToString()));
+            }
             return packageElement;
         }
 
@@ -52,7 +56,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var document = new XDocument(new XElement(VSTemplateNamespace + "VSTemplate"));
-            var wizard = new VsTemplateWizard(null);
+            var wizard = new VsTemplateWizard(null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -70,7 +74,7 @@ namespace NuGet.VisualStudio.Test
                 new XElement(VSTemplateNamespace + "VSTemplate",
                     new XElement(VSTemplateNamespace + "WizardData")
                     ));
-            var wizard = new VsTemplateWizard(null);
+            var wizard = new VsTemplateWizard(null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -85,7 +89,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var document = BuildDocument(null);
-            var wizard = new VsTemplateWizard(null);
+            var wizard = new VsTemplateWizard(null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -100,7 +104,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var document = BuildDocumentWithPackage("template");
-            var wizard = new VsTemplateWizard(null);
+            var wizard = new VsTemplateWizard(null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -115,7 +119,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var document = BuildDocumentWithPackage("extension", new XAttribute("repositoryId", "myExtensionId"));
-            var wizard = new VsTemplateWizard(null);
+            var wizard = new VsTemplateWizard(null, null);
             var extensionManagerMock = new Mock<IVsExtensionManager>();
             var extensionMock = new Mock<IInstalledExtension>();
             extensionMock.Setup(e => e.InstallPath).Returns(@"C:\Extension\Dir");
@@ -236,7 +240,7 @@ namespace NuGet.VisualStudio.Test
         private static void VerifyParsedPackages(XDocument document, IEnumerable<VsTemplateWizardPackageInfo> expectedPackages)
         {
             // Arrange
-            var wizard = new VsTemplateWizard(null);
+            var wizard = new VsTemplateWizard(null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -471,9 +475,86 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
+        public void CreateRefreshesFilesForWebsites()
+        {
+            // Arrange
+            var mockProject = new Mock<Project>();
+            mockProject.Setup(s => s.Kind).Returns(VsConstants.WebSiteProjectTypeGuid);
+
+            var installerMock = new Mock<IVsPackageInstaller>();
+            var websiteHandler = new Mock<IVsWebsiteHandler>();
+            websiteHandler.Setup(h =>
+                h.AddRefreshFilesForReferences(
+                    mockProject.Object,
+                    It.IsAny<IFileSystem>(),
+                    It.Is<IEnumerable<PackageName>>(names => names.Count() == 2 && names.First().Id == "MyPackage" && names.Last().Id == "YourPackage")
+                )).Verifiable();
+
+            var document = BuildDocument("template",
+                BuildPackageElement("MyPackage", "1.0", createRefreshFilesInBin: true),
+                BuildPackageElement("MyOtherPackage", "2.0"),
+                BuildPackageElement("YourPackage", "3.0-alpha", createRefreshFilesInBin: true),
+                BuildPackageElement("YourOtherPackage", "2.0"));
+
+            var repositorySettings = new Mock<IRepositorySettings>();
+            repositorySettings.Setup(s => s.RepositoryPath).Returns("x:\\packages");
+
+            var templateWizard = new TestableVsTemplateWizard(installerMock.Object, loadDocumentCallback: p => document, websiteHandler: websiteHandler.Object)
+            {
+                RepositorySettings = new Lazy<IRepositorySettings>(() => repositorySettings.Object)
+            };
+            var wizard = (IWizard)templateWizard;
+            var dteMock = new Mock<DTE>();
+            dteMock.SetupProperty(dte => dte.StatusBar.Text);
+            wizard.RunStarted(dteMock.Object, null, WizardRunKind.AsNewProject,
+                new object[] { @"C:\Some\file.vstemplate" });
+
+            // Act
+            wizard.ProjectFinishedGenerating(mockProject.Object);
+
+            // Verify
+            websiteHandler.Verify();
+        }
+
+        [Fact]
+        public void DoNoteCreateRefreshesFilesForNonWebsites()
+        {
+            // Arrange
+            var mockProject = new Mock<Project>();
+
+            var installerMock = new Mock<IVsPackageInstaller>();
+            var websiteHandler = new Mock<IVsWebsiteHandler>(MockBehavior.Strict);
+
+            var document = BuildDocument("template",
+                BuildPackageElement("MyPackage", "1.0", createRefreshFilesInBin: true),
+                BuildPackageElement("MyOtherPackage", "2.0"),
+                BuildPackageElement("YourPackage", "3.0-alpha", createRefreshFilesInBin: true),
+                BuildPackageElement("YourOtherPackage", "2.0"));
+
+            var repositorySettings = new Mock<IRepositorySettings>();
+            repositorySettings.Setup(s => s.RepositoryPath).Returns("x:\\packages");
+
+            var templateWizard = new TestableVsTemplateWizard(installerMock.Object, loadDocumentCallback: p => document, websiteHandler: websiteHandler.Object)
+            {
+                RepositorySettings = new Lazy<IRepositorySettings>(() => repositorySettings.Object)
+            };
+            var wizard = (IWizard)templateWizard;
+            var dteMock = new Mock<DTE>();
+            dteMock.SetupProperty(dte => dte.StatusBar.Text);
+            wizard.RunStarted(dteMock.Object, null, WizardRunKind.AsNewProject,
+                new object[] { @"C:\Some\file.vstemplate" });
+
+            // Act
+            wizard.ProjectFinishedGenerating(mockProject.Object);
+
+            // Verify
+            websiteHandler.Verify();
+        }
+
+        [Fact]
         public void ShouldAddProjectItem_AlwaysReturnsTrue()
         {
-            IWizard wizard = new VsTemplateWizard(null);
+            IWizard wizard = new VsTemplateWizard(null, null);
 
             Assert.True(wizard.ShouldAddProjectItem(null));
             Assert.True(wizard.ShouldAddProjectItem(""));
@@ -484,9 +565,11 @@ namespace NuGet.VisualStudio.Test
         {
             private readonly Func<string, XDocument> _loadDocumentCallback;
 
-            public TestableVsTemplateWizard(IVsPackageInstaller installer = null,
-                Func<string, XDocument> loadDocumentCallback = null)
-                : base(installer)
+            public TestableVsTemplateWizard(
+                IVsPackageInstaller installer = null,
+                Func<string, XDocument> loadDocumentCallback = null,
+                IVsWebsiteHandler websiteHandler = null)
+                : base(installer, websiteHandler)
             {
                 ErrorMessages = new List<string>();
                 _loadDocumentCallback = loadDocumentCallback ?? (path => null);

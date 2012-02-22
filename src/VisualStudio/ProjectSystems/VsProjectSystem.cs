@@ -20,7 +20,6 @@ namespace NuGet.VisualStudio
     public class VsProjectSystem : IVsProjectSystem, IBatchProcessor<string>, IComparer<IPackageFile>
     {
         private const string BinDir = "bin";
-        private static readonly string[] AssemblyReferencesExtensions = new[] { ".dll", ".exe", ".winmd" };
 
         private FrameworkName _targetFramework;
         private readonly IFileSystem _baseFileSystem;
@@ -328,7 +327,7 @@ namespace NuGet.VisualStudio
             {
                 string referenceName = name;
 
-                if (AssemblyReferencesExtensions.Contains(Path.GetExtension(name), StringComparer.OrdinalIgnoreCase))
+                if (Constants.AssemblyReferencesExtensions.Contains(Path.GetExtension(name), StringComparer.OrdinalIgnoreCase))
                 {
                     // Get the reference name without extension
                     referenceName = Path.GetFileNameWithoutExtension(name);

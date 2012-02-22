@@ -18,8 +18,6 @@ namespace NuGet
 
         private readonly bool _enableCaching;
 
-        private static readonly string[] AssemblyReferencesExtensions = new[] { ".dll", ".exe", ".winmd" };
-
         private static readonly TimeSpan CacheTimeout = TimeSpan.FromSeconds(15);
 
         // paths to exclude
@@ -326,7 +324,7 @@ namespace NuGet
             return path.StartsWith(AssemblyReferencesDir, StringComparison.OrdinalIgnoreCase) &&
                 // Exclude resource assemblies
                    !path.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
-                   AssemblyReferencesExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase) &&
+                   Constants.AssemblyReferencesExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase) &&
                 // If references are listed, ensure that the file is listed in it.
                    (references.IsEmpty() || references.Contains(fileName));
         }

@@ -227,37 +227,5 @@ namespace NuGet
             public IPackage Package { get; private set; }
             public DateTimeOffset LastModifiedTime { get; private set; }
         }
-
-        private class PackageName : IEquatable<PackageName>
-        {
-            private readonly string _packageId;
-            private readonly SemanticVersion _version;
-
-            public PackageName(string packageId, SemanticVersion version)
-            {
-                _packageId = packageId;
-                _version = version;
-            }
-
-            public bool Equals(PackageName other)
-            {
-                return _packageId.Equals(other._packageId, StringComparison.OrdinalIgnoreCase) &&
-                       _version.Equals(other._version);
-            }
-
-            public override int GetHashCode()
-            {
-                var combiner = new HashCodeCombiner();
-                combiner.AddObject(_packageId);
-                combiner.AddObject(_version);
-
-                return combiner.CombinedHash;
-            }
-
-            public override string ToString()
-            {
-                return _packageId + " " + _version;
-            }
-        }
     }
 }

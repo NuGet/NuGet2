@@ -38,8 +38,7 @@ namespace NuGet.VisualStudio
                     foreach (Project project in solutionManager.GetProjects())
                     {
                         ISet<VsHierarchyItem> expandedNodes;
-                        if (
-                            ignoreNodes.TryGetValue(project.UniqueName, out expandedNodes) &&
+                        if (ignoreNodes.TryGetValue(project.UniqueName, out expandedNodes) &&
                             expandedNodes != null)
                         {
                             CollapseProjectHierarchyItems(project, expandedNodes);

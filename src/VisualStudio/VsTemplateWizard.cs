@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -19,13 +18,15 @@ namespace NuGet.VisualStudio
     public class VsTemplateWizard : IVsTemplateWizard
     {
         private readonly IVsPackageInstaller _installer;
+        private readonly IVsWebsiteHandler _websiteHandler;
         private VsTemplateWizardInstallerConfiguration _configuration;
         private DTE _dte;
 
         [ImportingConstructor]
-        public VsTemplateWizard(IVsPackageInstaller installer)
+        public VsTemplateWizard(IVsPackageInstaller installer, IVsWebsiteHandler websiteHandler)
         {
             _installer = installer;
+            _websiteHandler = websiteHandler;
         }
 
         [Import]
@@ -68,14 +69,18 @@ namespace NuGet.VisualStudio
             var declarations = (from packageElement in packagesElement.ElementsNoNamespace("package")
                                 let id = packageElement.GetOptionalAttributeValue("id")
                                 let version = packageElement.GetOptionalAttributeValue("version")
-                                select new { id, version }).ToList();
+                                let createRefreshFilesInBin = packageElement.GetOptionalAttributeValue("createRefreshFilesInBin")
+                                select new { id, version, createRefreshFilesInBin }).ToList();
 
             SemanticVersion semVer;
+            bool createRefreshFilesInBinValue;
             var missingOrInvalidAttributes = from declaration in declarations
                                              where
                                                  String.IsNullOrWhiteSpace(declaration.id) ||
                                                  String.IsNullOrWhiteSpace(declaration.version) ||
-                                                 !SemanticVersion.TryParse(declaration.version, out semVer)
+                                                 !SemanticVersion.TryParse(declaration.version, out semVer) ||
+                                                 (declaration.createRefreshFilesInBin != null && 
+                                                  !Boolean.TryParse(declaration.createRefreshFilesInBin, out createRefreshFilesInBinValue))
                                              select declaration;
 
             if (missingOrInvalidAttributes.Any())
@@ -86,7 +91,11 @@ namespace NuGet.VisualStudio
             }
 
             return from declaration in declarations
-                   select new VsTemplateWizardPackageInfo(declaration.id, declaration.version);
+                   select new VsTemplateWizardPackageInfo(
+                       declaration.id, 
+                       declaration.version, 
+                       declaration.createRefreshFilesInBin != null && Boolean.Parse(declaration.createRefreshFilesInBin)
+                    );
         }
 
         private string GetRepositoryPath(XElement packagesElement, RepositoryType repositoryType, string vsTemplatePath, object vsExtensionManager)
@@ -187,6 +196,24 @@ namespace NuGet.VisualStudio
             {
                 string repositoryPath = _configuration.RepositoryPath;
                 PerformPackageInstall(_installer, project, repositoryPath, _configuration.Packages);
+
+                // RepositorySettings = null in unit tests
+                if (RepositorySettings != null)
+                {
+                    CreatingRefreshFilesInBin(
+                        project, 
+                        RepositorySettings.Value.RepositoryPath, 
+                        _configuration.Packages.Where(p => p.CreateRefreshFilesInBin));
+                }
+            }
+        }
+
+        private void CreatingRefreshFilesInBin(Project project, string repositoryPath, IEnumerable<VsTemplateWizardPackageInfo> packageInfos)
+        {
+            if (project.IsWebSite())
+            {
+                IEnumerable<PackageName> packageNames = packageInfos.Select(pi => new PackageName(pi.Id, pi.Version));
+                _websiteHandler.AddRefreshFilesForReferences(project, new PhysicalFileSystem(repositoryPath), packageNames);
             }
         }
 

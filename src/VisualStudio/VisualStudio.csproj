@@ -26,8 +26,10 @@
     <Compile Include="IOptionsPageActivator.cs" />
     <Compile Include="Extensibility\IVsPackageInstallerEvents.cs" />
     <Compile Include="Extensibility\IVsPackageInstallerServices.cs" />
+    <Compile Include="IProjectSystemFactory.cs" />
     <Compile Include="IVsSourceControlTracker.cs" />
     <Compile Include="IVsTemplateWizard.cs" />
+    <Compile Include="IVsWebsiteHandler.cs" />
     <Compile Include="IWindowSettingsManager.cs" />
     <Compile Include="MessageHelper.cs" />
     <Compile Include="NativeMethods.cs" />
@@ -82,6 +84,7 @@
     <Compile Include="VsTemplateWizard.cs" />
     <Compile Include="VsTemplateWizardInstallerConfiguration.cs" />
     <Compile Include="VsTemplateWizardPackageInfo.cs" />
+    <Compile Include="VsWebsiteHandler.cs" />
     <Compile Include="WindowSettingsManager.cs" />
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">
       <Link>Common\CommonResources.resx</Link>

@@ -148,7 +148,7 @@ namespace NuGet.Test.Mocks
         {
             AddFile(path, content.AsStream());
         }
-
+            
         public virtual void AddFile(string path, Stream stream, bool overrideIfExists)
         {
             var ms = new MemoryStream((int)stream.Length);

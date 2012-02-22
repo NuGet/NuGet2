@@ -451,7 +451,7 @@ namespace NuGet
             return name + "-" + profile;
         }
 
-        internal static FrameworkName ParseFrameworkFolderName(string path)
+        public static FrameworkName ParseFrameworkFolderName(string path)
         {
             // The path for a reference might look like this for assembly foo.dll:            
             // foo.dll

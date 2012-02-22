@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="FallbackRepositoryTest.cs" />
     <Compile Include="MockProjectPackageRepository.cs" />
+    <Compile Include="Mocks\MockDteProperties.cs" />
     <Compile Include="Mocks\MockIVsTrackProjectDocuments.cs" />
     <Compile Include="Mocks\MockPackageSourceProvider.cs" />
     <Compile Include="Mocks\MockProjects.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="RecentPackageTest.cs" />
     <Compile Include="RepositorySettingsTest.cs" />
     <Compile Include="SourceControlHelperTest.cs" />
+    <Compile Include="TestVsWebsiteHandler.cs" />
     <Compile Include="UriHelperTest.cs" />
     <Compile Include="VsFileSystemProviderTest.cs" />
     <Compile Include="VsInstallerTest.cs" />
