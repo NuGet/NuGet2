@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using EnvDTE;
+using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio
 {
@@ -22,6 +25,33 @@ namespace NuGet.VisualStudio
             return from package in packageManager.LocalRepository.GetPackages()
                    select new VsPackageMetadata(package,
                                                 packageManager.PathResolver.GetInstallPath(package));
+        }
+
+        public bool IsPackageInstalled(Project project, string packageId)
+        {
+            return IsPackageInstalled(project, packageId, version: null);
+        }
+
+        public bool IsPackageInstalled(Project project, string packageId, SemanticVersion version)
+        {
+            if (project == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (String.IsNullOrEmpty(packageId))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
+            }
+
+            var packageManager = _packageManagerFactory.CreatePackageManager();
+            IProjectManager projectManager = packageManager.GetProjectManager(project);
+            if (projectManager == null)
+            {
+                throw new ArgumentException(VsResources.DTE_InvalidProject, "project");
+            }
+
+            return projectManager.LocalRepository.Exists(packageId, version);
         }
     }
 }

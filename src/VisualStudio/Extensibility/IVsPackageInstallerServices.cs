@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using EnvDTE;
 
 namespace NuGet.VisualStudio
 {
@@ -8,5 +9,7 @@ namespace NuGet.VisualStudio
     public interface IVsPackageInstallerServices
     {
         IEnumerable<IVsPackageMetadata> GetInstalledPackages();
+        bool IsPackageInstalled(Project project, string id);
+        bool IsPackageInstalled(Project project, string id, SemanticVersion version);
     }
 }
