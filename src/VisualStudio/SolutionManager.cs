@@ -98,8 +98,6 @@ namespace NuGet.VisualStudio
         /// Checks whether the current solution is saved to disk, as opposed to be in memory. 
         /// The latter case happens when we do File - New File without saving the solution.
         /// </summary>
-        /// <remarks>
-        /// </remarks>
         private bool IsSolutionSavedAsRequired()
         {
             object value;
@@ -261,7 +259,7 @@ namespace NuGet.VisualStudio
 
         private void OnSolutionOpened()
         {
-            // although the SolutionOpened even fires, the solution may be only in memory (e.g. when
+            // although the SolutionOpened event fires, the solution may be only in memory (e.g. when
             // doing File - New File). In that case, we don't want to act on the event.
             if (!IsSolutionOpen)
             {
