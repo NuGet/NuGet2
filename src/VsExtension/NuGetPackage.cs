@@ -57,6 +57,7 @@ namespace NuGet.Tools
         private IVsMonitorSelection _vsMonitorSelection;
         private bool? _isVisualizerSupported;
         private IPackageRestoreManager _packageRestoreManager;
+        private ISolutionManager _solutionManager;
 
         public NuGetPackage()
         {
@@ -85,9 +86,13 @@ namespace NuGet.Tools
             _vsMonitorSelection.GetCmdUIContextCookie(ref solutionBuildingContextGuid, out _solutionBuildingContextCookie);
 
             _dte = ServiceLocator.GetInstance<DTE>();
+            Debug.Assert(_dte != null);
             _consoleStatus = ServiceLocator.GetInstance<IConsoleStatus>();
+            Debug.Assert(_consoleStatus != null);
             _packageRestoreManager = ServiceLocator.GetInstance<IPackageRestoreManager>();
             Debug.Assert(_packageRestoreManager != null);
+            _solutionManager = ServiceLocator.GetInstance<ISolutionManager>();
+            Debug.Assert(_solutionManager != null);
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             AddMenuCommandHandlers();
@@ -244,7 +249,7 @@ namespace NuGet.Tools
         private void QueryStatusEnablePackagesRestore(object sender, EventArgs args)
         {
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = IsSolutionOpen && !_packageRestoreManager.IsCurrentSolutionEnabledForRestore;
+            command.Visible = _solutionManager.IsSolutionOpen && !_packageRestoreManager.IsCurrentSolutionEnabledForRestore;
             command.Enabled = !_consoleStatus.IsBusy;
         }
 
@@ -253,7 +258,7 @@ namespace NuGet.Tools
             bool isSolutionSelected = _vsMonitorSelection.GetIsSolutionNodeSelected();
 
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = !IsIDEInDebuggingOrBuildingContext() && (isSolutionSelected || HasActiveLoadedSupportedProject);
+            command.Visible = _solutionManager.IsSolutionOpen && !IsIDEInDebuggingOrBuildingContext() && (isSolutionSelected || HasActiveLoadedSupportedProject);
             // disable the dialog menu if the console is busy executing a command;
             command.Enabled = !_consoleStatus.IsBusy;
             if (command.Visible)
@@ -265,7 +270,7 @@ namespace NuGet.Tools
         private void BeforeQueryStatusForAddPackageForSolutionDialog(object sender, EventArgs args)
         {
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = IsSolutionOpen && !IsIDEInDebuggingOrBuildingContext();
+            command.Visible = _solutionManager.IsSolutionOpen && !IsIDEInDebuggingOrBuildingContext();
             // disable the dialog menu if the console is busy executing a command;
             command.Enabled = !_consoleStatus.IsBusy;
         }
@@ -273,7 +278,7 @@ namespace NuGet.Tools
         private void QueryStatusForVisualizer(object sender, EventArgs args)
         {
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = IsSolutionOpen && IsVisualizerSupported;
+            command.Visible = _solutionManager.IsSolutionOpen && IsVisualizerSupported;
         }
 
         private bool IsIDEInDebuggingOrBuildingContext()
@@ -327,14 +332,6 @@ namespace NuGet.Tools
             {
                 Project project = _vsMonitorSelection.GetActiveProject();
                 return project != null && !project.IsUnloaded() && project.IsSupported();
-            }
-        }
-
-        private bool IsSolutionOpen
-        {
-            get
-            {
-                return _dte != null && _dte.Solution != null && _dte.Solution.IsOpen;
             }
         }
 

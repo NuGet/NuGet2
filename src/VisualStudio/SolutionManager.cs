@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuGet.VisualStudio
 {
@@ -17,15 +18,16 @@ namespace NuGet.VisualStudio
     {
         private readonly DTE _dte;
         private readonly SolutionEvents _solutionEvents;
+        private IVsSolution _vsSolution;
 
         private ProjectCache _projectCache;
 
         public SolutionManager()
-            : this(ServiceLocator.GetInstance<DTE>())
+            : this(ServiceLocator.GetInstance<DTE>(), ServiceLocator.GetGlobalService<SVsSolution, IVsSolution>())
         {
         }
 
-        private SolutionManager(DTE dte)
+        private SolutionManager(DTE dte, IVsSolution vsSolution)
         {
             if (dte == null)
             {
@@ -33,6 +35,7 @@ namespace NuGet.VisualStudio
             }
 
             _dte = dte;
+            _vsSolution = vsSolution;
 
             // Keep a reference to SolutionEvents so that it doesn't get GC'ed. Otherwise, we won't receive events.
             _solutionEvents = _dte.Events.SolutionEvents;
@@ -84,8 +87,24 @@ namespace NuGet.VisualStudio
         {
             get
             {
-                return _dte != null && _dte.Solution != null && _dte.Solution.IsOpen;
+                return _dte != null && 
+                       _dte.Solution != null && 
+                       _dte.Solution.IsOpen &&
+                       !IsSolutionSavedAsRequired();
             }
+        }
+
+        /// <summary>
+        /// Checks whether the current solution is saved to disk, as opposed to be in memory. 
+        /// The latter case happens when we do File - New File without saving the solution.
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
+        private bool IsSolutionSavedAsRequired()
+        {
+            object value;
+            _vsSolution.GetProperty((int)(__VSPROPID.VSPROPID_IsSolutionSaveAsRequired), out value);
+            return (bool)value;
         }
 
         public string SolutionDirectory
@@ -242,6 +261,13 @@ namespace NuGet.VisualStudio
 
         private void OnSolutionOpened()
         {
+            // although the SolutionOpened even fires, the solution may be only in memory (e.g. when
+            // doing File - New File). In that case, we don't want to act on the event.
+            if (!IsSolutionOpen)
+            {
+                return;
+            }
+
             EnsureProjectCache();
             SetDefaultProject();
             if (SolutionOpened != null)
