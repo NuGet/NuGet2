@@ -29,7 +29,7 @@ namespace NuGet.VisualStudio
 
         public void InstallPackage(string source, Project project, string packageId, Version version, bool ignoreDependencies)
         {
-            InstallPackage(source, project, packageId, new SemanticVersion(version), ignoreDependencies);
+            InstallPackage(source, project, packageId, version == null ? (SemanticVersion)null : new SemanticVersion(version), ignoreDependencies);
         }
 
         public void InstallPackage(string source, Project project, string packageId, SemanticVersion version, bool ignoreDependencies)
