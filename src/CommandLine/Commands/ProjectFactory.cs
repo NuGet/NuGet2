@@ -13,6 +13,7 @@ using NuGet.Common;
 
 namespace NuGet.Commands
 {
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
     internal class ProjectFactory : IPropertyProvider
     {
         private readonly Project _project;

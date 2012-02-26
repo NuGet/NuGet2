@@ -27,6 +27,9 @@
       <Word>vbproj</Word>
       <Word>fsproj</Word>
       <Word>semver</Word>
+      <Word>Auth</Word>
+      <Word>api</Word>
+       <Word>Dir</Word>
     </Recognized>
     <Deprecated>
       <Term PreferredAlternate=""></Term>

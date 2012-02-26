@@ -11,9 +11,11 @@ using Microsoft.VisualStudio.PlatformUI;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet.Dialog
 {
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
     public partial class PackageManagerWindow : DialogWindow
     {
         internal static PackageManagerWindow CurrentInstance;
@@ -127,6 +129,7 @@ namespace NuGet.Dialog
             }
         }
 
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         private void SetupProviders(Project activeProject,
                                     DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,
@@ -265,6 +268,7 @@ namespace NuGet.Dialog
             explorer.SelectedProvider = explorer.Providers[selectedProvider];
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't care about exception handling here.")]
         private void CanExecuteCommandOnPackage(object sender, CanExecuteRoutedEventArgs e)
         {
             if (OperationCoordinator.IsBusy)
@@ -297,6 +301,7 @@ namespace NuGet.Dialog
             }
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't care about exception handling here.")]
         private void ExecutedPackageCommand(object sender, ExecutedRoutedEventArgs e)
         {
             if (OperationCoordinator.IsBusy)
