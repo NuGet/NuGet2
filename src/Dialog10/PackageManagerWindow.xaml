@@ -93,7 +93,7 @@
             x:Name="DisclaimerText"
             Grid.Row="1"
             Width="220"
-            Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
+            Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}"
             HorizontalAlignment="Left"
             VerticalAlignment="Bottom"
             BorderBrush="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}" 
