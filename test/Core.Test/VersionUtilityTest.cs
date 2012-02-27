@@ -476,34 +476,28 @@ namespace NuGet.Test
             Assert.Null(versionInfo);
         }
 
-        [Fact]
-        public void TrimVersionTrimsRevisionIfZero()
+        public static IEnumerable<object[]> TrimVersionData
         {
-            // Act
-            var version = VersionUtility.TrimVersion(new Version("1.2.3.0"));
+            get
+            {
+                yield return new object[] { new Version(1, 2, 3, 0), new Version(1, 2, 3) };
+                yield return new object[] { new Version("1.2.3.0"), new Version("1.2.3") };
+                yield return new object[] { new Version(1, 2, 0, 0), new Version(1, 2) };
+                yield return new object[] { new Version("1.2.0.0"), new Version("1.2") };
+                yield return new object[] { new Version(1, 2, 0, 5), new Version(1, 2, 0, 5) };
 
-            // Assert
-            Assert.Equal(new Version("1.2.3"), version);
+            }
         }
 
-        [Fact]
-        public void TrimVersionTrimsRevisionAndBuildIfZero()
+        [Theory]
+        [PropertyData("TrimVersionData")]
+        public void TrimVersionTrimsRevisionIfZero(Version version, Version expected)
         {
             // Act
-            var version = VersionUtility.TrimVersion(new Version("1.2.0.0"));
+            var result = VersionUtility.TrimVersion(version);
 
             // Assert
-            Assert.Equal(new Version("1.2"), version);
-        }
-
-        [Fact]
-        public void TrimVersionTrimsBuildIfRevisionIsNonZero()
-        {
-            // Act
-            var version = VersionUtility.TrimVersion(new Version("1.2.0.5"));
-
-            // Assert
-            Assert.Equal(new Version("1.2.0.5"), version);
+            Assert.Equal(expected, result);
         }
 
         [Fact]
@@ -520,10 +514,7 @@ namespace NuGet.Test
             var versions = VersionUtility.GetPossibleVersions(new SemanticVersion("1.1")).ToList();
 
             // Assert
-            foreach (var v in expectedVersions)
-            {
-                Assert.True(versions.Contains(v));
-            }
+            Assert.Equal(expectedVersions, versions);
         }
 
         [Fact]
@@ -533,17 +524,14 @@ namespace NuGet.Test
             var expectedVersions = new[] { 
                 new SemanticVersion("1.0"), 
                 new SemanticVersion("1.0.0"),
-                new SemanticVersion("1.0.0.0")
+                new SemanticVersion("1.0.0.0"),
             };
 
             // Act
             var versions = VersionUtility.GetPossibleVersions(new SemanticVersion("1.0.0")).ToList();
 
             // Assert
-            foreach (var v in expectedVersions)
-            {
-                Assert.True(versions.Contains(v));
-            }
+            Assert.Equal(expectedVersions, versions);
         }
 
         [Fact]
@@ -553,17 +541,20 @@ namespace NuGet.Test
             var expectedVersions = new[] { 
                 new SemanticVersion("1.0"), 
                 new SemanticVersion("1.0.0"),
-                new SemanticVersion("1.0.0.0")
+                new SemanticVersion("1.0.0.0"),
+            };
+            var expectedVersionStrings = new[] {
+                "1.0", 
+                "1.0.0",
+                "1.0.0.0"
             };
 
             // Act
             var versions = VersionUtility.GetPossibleVersions(new SemanticVersion("1.0.0.0")).ToList();
 
             // Assert
-            foreach (var v in expectedVersions)
-            {
-                Assert.True(versions.Contains(v));
-            }
+            Assert.Equal(expectedVersions, versions);
+            Assert.Equal(expectedVersionStrings, versions.Select(v => v.ToString()));
         }
 
         [Fact]
@@ -574,15 +565,18 @@ namespace NuGet.Test
                 new SemanticVersion("1.0.1"), 
                 new SemanticVersion("1.0.1.0")
             };
+            var expectedVersionStrings = new[] 
+            {
+                "1.0.1",
+                "1.0.1.0",
+            };
 
             // Act
             var versions = VersionUtility.GetPossibleVersions(new SemanticVersion("1.0.1")).ToList();
 
             // Assert
-            foreach (var v in expectedVersions)
-            {
-                Assert.True(versions.Contains(v));
-            }
+            Assert.Equal(expectedVersions, versions);
+            Assert.Equal(expectedVersionStrings, versions.Select(v => v.ToString()));
         }
 
         [Fact]
@@ -590,19 +584,23 @@ namespace NuGet.Test
         {
             // Arrange
             var expectedVersions = new[] { 
-                new SemanticVersion("1.1.0.0"), 
+                new SemanticVersion("1.1"),
                 new SemanticVersion("1.1.0"),
-                new SemanticVersion("1.1")
+                new SemanticVersion("1.1.0.0"),
+            };
+            var expectedVersionStrings = new[] 
+            {
+                "1.1",
+                "1.1.0",
+                "1.1.0.0",
             };
 
             // Act
             var versions = VersionUtility.GetPossibleVersions(new SemanticVersion("1.1.0.0")).ToList();
 
             // Assert
-            foreach (var v in expectedVersions)
-            {
-                Assert.True(versions.Contains(v));
-            }
+            Assert.Equal(expectedVersions, versions);
+            Assert.Equal(expectedVersionStrings, versions.Select(v => v.ToString()));
         }
 
         [Fact]

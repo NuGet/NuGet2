@@ -348,11 +348,44 @@ namespace NuGet.Test.NuGetCommandLine.Commands
   <package id=""Foo"" version=""1.0.0"" />
   <package id=""Qux"" version=""2.3.56-beta"" />
 </packages>");
-
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
             var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
             packageManager.Setup(p => p.InstallPackage("Foo", new SemanticVersion("1.0.0"), true, true)).Verifiable();
             packageManager.Setup(p => p.InstallPackage("Qux", new SemanticVersion("2.3.56-beta"), true, true)).Verifiable();
-            packageManager.SetupGet(p => p.PathResolver).Returns(new DefaultPackagePathResolver(fileSystem));
+            packageManager.SetupGet(p => p.PathResolver).Returns(pathResolver);
+            packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
+            packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
+            var repository = new MockPackageRepository();
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
+            var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+
+            // Act
+            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object);
+            installCommand.Arguments.Add(@"X:\test\packages.config");
+            installCommand.Execute();
+
+            // Assert
+            packageManager.Verify();
+        }
+
+        [Fact]
+        public void InstallCommandFromConfigPerformsQuickCheckForFiles()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"X:\test\packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""Foo"" version=""1.8.0"" />
+  <package id=""Qux"" version=""2.3.56-beta"" />
+</packages>");
+            fileSystem.AddFile("Foo.1.8.nupkg");
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
+            packageManager.Setup(p => p.InstallPackage("Qux", new SemanticVersion("2.3.56-beta"), true, true)).Verifiable();
+            packageManager.SetupGet(p => p.PathResolver).Returns(pathResolver);
+            packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
+            packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
             var repository = new MockPackageRepository();
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);

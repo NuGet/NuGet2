@@ -524,7 +524,8 @@ namespace NuGet
             // Trim the version so things like 1.0.0.0 end up being 1.0
             Version version = TrimVersion(semVer.Version);
 
-            yield return semVer;
+            yield return new SemanticVersion(version, semVer.SpecialVersion);
+
             if (version.Build == -1 && version.Revision == -1)
             {
                 yield return new SemanticVersion(new Version(version.Major, version.Minor, 0), semVer.SpecialVersion);
