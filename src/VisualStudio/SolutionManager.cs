@@ -95,13 +95,20 @@ namespace NuGet.VisualStudio
         }
 
         /// <summary>
-        /// Checks whether the current solution is saved to disk, as opposed to be in memory. 
-        /// The latter case happens when we do File - New File without saving the solution.
+        /// Checks whether the current solution is saved to disk, as opposed to be in memory.
         /// </summary>
         private bool IsSolutionSavedAsRequired()
         {
+            // Check if user is doing File - New File without saving the solution.
             object value;
             _vsSolution.GetProperty((int)(__VSPROPID.VSPROPID_IsSolutionSaveAsRequired), out value);
+            if ((bool)value)
+            {
+                return true;
+            }
+
+            // Check if user unchecks the "Tools - Options - Project & Soltuions - Save new projects when created" option
+            _vsSolution.GetProperty((int)(__VSPROPID2.VSPROPID_DeferredSaveSolution), out value);
             return (bool)value;
         }
 
