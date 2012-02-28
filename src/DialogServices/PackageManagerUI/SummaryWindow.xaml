@@ -5,6 +5,7 @@
     xmlns:self="clr-namespace:NuGet.Dialog.PackageManagerUI"
     xmlns:resources="clr-namespace:NuGet.Dialog"
     xmlns:pfui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.10.0"
+    xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
     MinWidth="350"
     MinHeight="300"
     Width="350"
@@ -12,6 +13,7 @@
     ShowInTaskbar="False"
     WindowStyle="SingleBorderWindow"
     WindowStartupLocation="CenterOwner"
+    Background="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}"
     Title="{x:Static resources:Resources.Dialog_SummaryWindowTitle}">
     
     <Window.Resources>
