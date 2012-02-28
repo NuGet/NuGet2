@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -100,7 +101,7 @@ namespace NuGet.Commands
                 string packageId = Arguments[0];
                 SemanticVersion version = Version != null ? new SemanticVersion(Version) : null;
 
-                bool result = InstallPackage(packageManager, fileSystem, packageId, version, ignoreDependencies: false);
+                bool result = InstallPackage(packageManager, packageId, version, ignoreDependencies: false);
                 if (!result)
                 {
                     Console.WriteLine(NuGetResources.InstallCommandPackageAlreadyExists, packageId);
@@ -145,7 +146,7 @@ namespace NuGet.Commands
                 }
 
                 // Note that we ignore dependencies here because packages.config already contains the full closure
-                installedAny |= InstallPackage(packageManager, fileSystem, package.Id, package.Version, ignoreDependencies: true);
+                installedAny |= InstallPackage(packageManager, package.Id, package.Version, ignoreDependencies: true);
             }
 
             if (!installedAny && packageReferences.Any())
@@ -154,14 +155,9 @@ namespace NuGet.Commands
             }
         }
 
-        internal bool InstallPackage(IPackageManager packageManager, IFileSystem fileSystem, string packageId, SemanticVersion version, bool ignoreDependencies)
+        internal bool InstallPackage(IPackageManager packageManager, string packageId, SemanticVersion version, bool ignoreDependencies)
         {
-            if (AllowMultipleVersions && IsPackageInstalled(packageId, version, packageManager, fileSystem))
-            {
-                // Use a fast check to verify if the package is already installed. We'll do this by checking if the package directory exists on disk.
-                return false;
-            }
-            else if (!AllowMultipleVersions)
+            if (!AllowMultipleVersions)
             {
                 var installedPackage = packageManager.LocalRepository.FindPackage(packageId);
                 if (installedPackage != null)
@@ -180,6 +176,17 @@ namespace NuGet.Commands
                         // However, before uninstalling, make sure the package exists in the source repository. 
                         packageManager.UninstallPackage(installedPackage, forceRemove: false, removeDependencies: true);
                     }
+                }
+            } 
+            else if (version != null)
+            {
+                // If we know exactly what package to lookup, check if it's already installed locally. 
+                // We'll do this by checking if the package directory exists on disk.
+                var localRepository = packageManager.LocalRepository as LocalPackageRepository;
+                Debug.Assert(localRepository != null, "The PackageManager's local repository instance is necessary a LocalPackageRepository instance.");
+                if (IsPackageInstalled(localRepository, packageManager.FileSystem, packageId, version))
+                {
+                    return false;
                 }
             }
             packageManager.InstallPackage(packageId, version, ignoreDependencies: ignoreDependencies, allowPrereleaseVersions: Prerelease);
@@ -216,14 +223,10 @@ namespace NuGet.Commands
         }
 
         // Do a very quick check of whether a package in installed by checked whether the nupkg file exists
-        private static bool IsPackageInstalled(string packageId, SemanticVersion version, IPackageManager packageManager, IFileSystem fileSystem)
+        private static bool IsPackageInstalled(LocalPackageRepository packageRepository, IFileSystem fileSystem, string packageId, SemanticVersion version)
         {
-            var packageDir = packageManager.PathResolver.GetPackageDirectory(packageId, version);
-            var packageFile = packageManager.PathResolver.GetPackageFileName(packageId, version);
-
-            string packagePath = Path.Combine(packageDir, packageFile);
-
-            return fileSystem.FileExists(packagePath);
+            var packagePaths = packageRepository.GetPackageLookupPaths(packageId, version);
+            return packagePaths.Any(fileSystem.FileExists);
         }
     }
 }

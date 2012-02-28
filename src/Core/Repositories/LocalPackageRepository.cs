@@ -105,16 +105,7 @@ namespace NuGet
             return FindPackage(OpenPackage, packageId, version);
         }
 
-        internal IPackage FindPackage(Func<string, IPackage> openPackage, string packageId, SemanticVersion version)
-        {
-            return (from path in GetAllPackagePaths(packageId, version)
-                    where FileSystem.FileExists(path)
-                    let package = GetPackage(openPackage, path)
-                    where package.Version == version
-                    select package).FirstOrDefault();
-        }
-
-        private IEnumerable<string> GetAllPackagePaths(string packageId, SemanticVersion version)
+        public IEnumerable<string> GetPackageLookupPaths(string packageId, SemanticVersion version)
         {
             // Since we look at the file system to determine if a package is installed,
             // we need to enumerate the list of possible versions and check the path for
@@ -122,6 +113,15 @@ namespace NuGet
             return (from v in VersionUtility.GetPossibleVersions(version)
                     from path in GetPackagePaths(packageId, v)
                     select path).Distinct();
+        }
+
+        internal IPackage FindPackage(Func<string, IPackage> openPackage, string packageId, SemanticVersion version)
+        {
+            return (from path in GetPackageLookupPaths(packageId, version)
+                    where FileSystem.FileExists(path)
+                    let package = GetPackage(openPackage, path)
+                    where package.Version == version
+                    select package).FirstOrDefault();
         }
 
         private IEnumerable<string> GetPackagePaths(string packageId, SemanticVersion version)
