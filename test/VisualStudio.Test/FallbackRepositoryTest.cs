@@ -40,17 +40,18 @@ namespace NuGet.VisualStudio.Test
                 }
             });
 
-            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, null, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManagerFactory = new Mock<VsPackageManagerFactory>(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, null, new Mock<VsPackageInstallerEvents>().Object);
+            packageManagerFactory.Setup(f => f.GetConfigSettingsFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
 
             // Act
-            var packageManager = packageManagerFactory.CreatePackageManager(mockRepository1, useFallbackForDependencies: false);
+            var packageManager = packageManagerFactory.Object.CreatePackageManager(mockRepository1, useFallbackForDependencies: false);
 
             // Assert
             Assert.Equal(mockRepository1, packageManager.SourceRepository);
         }
 
         [Fact]
-        public void CreatePackageManagerUsesFallbackRepositoryyAsdependencyResolverIfUseFallbackIsTrue()
+        public void CreatePackageManagerUsesFallbackRepositoryyAsDependencyResolverIfUseFallbackIsTrue()
         {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
@@ -78,10 +79,11 @@ namespace NuGet.VisualStudio.Test
                 }
             });
 
-            var packageManagerFactory = new VsPackageManagerFactory(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, null, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManagerFactory = new Mock<VsPackageManagerFactory>(new Mock<ISolutionManager>().Object, mockRepositoryFactory.Object, mockSourceProvider.Object, mockFileSystemProvider.Object, new Mock<IRepositorySettings>().Object, null, new Mock<VsPackageInstallerEvents>().Object);
+            packageManagerFactory.Setup(f => f.GetConfigSettingsFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
 
             // Act
-            var packageManager = packageManagerFactory.CreatePackageManager(mockRepository1, useFallbackForDependencies: true);
+            var packageManager = packageManagerFactory.Object.CreatePackageManager(mockRepository1, useFallbackForDependencies: true);
 
             // Assert
             Assert.IsType(typeof(FallbackRepository), packageManager.SourceRepository);

@@ -81,6 +81,46 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void AddPackageAddsReferencesToSolutionLevelPackagesToSolutionConfigFile()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+            var solutionPackage = PackageUtility.CreatePackage("SolutionLevel", tools: new[] { "Install.ps1" });
+
+            // Act
+            repository.AddPackage(solutionPackage);
+
+            // Assert
+            Assert.True(configFileSystem.FileExists("packages.config"));
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""SolutionLevel"" version=""1.0"" />
+</packages>", configFileSystem.ReadAllText("packages.config"));
+        }
+
+        [Fact]
+        public void RemovingAllSolutionLevelPackageDeletesConfigFile()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+            var solutionPackage = PackageUtility.CreatePackage("SolutionLevel", tools: new[] { "Install.ps1" });
+            configFileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""SolutionLevel"" version=""1.0"" />
+</packages>");
+
+            // Act
+            repository.RemovePackage(solutionPackage);
+
+            // Assert
+            Assert.True(configFileSystem.Deleted.Contains("packages.config"));
+        }
+
+        [Fact]
         public void CallRemovePackageWillRemoveEntryFromPackageConfigWhenPackageConfigAlreadyExists()
         {
             // Arrange

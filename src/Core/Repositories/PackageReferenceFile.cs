@@ -168,7 +168,7 @@ namespace NuGet
             document.Root.RemoveAll();
 
             // Re-add them sorted
-            packageElements.ForEach(e => document.Root.Add(e));
+            document.Root.Add(packageElements);
 
             FileSystem.AddFile(_path, document.Save);
         }
@@ -191,16 +191,14 @@ namespace NuGet
                 element.Remove();
 
                 // Remove the file if there are no more elements
+                // Always try and save the document, this works around a source control issue for solution-level packages.config.
+                SaveDocument(document);
+
                 if (!document.Root.HasElements)
                 {
                     FileSystem.DeleteFile(_path);
 
                     return true;
-                }
-                else
-                {
-                    // Otherwise save the updated document
-                    SaveDocument(document);
                 }
             }
 

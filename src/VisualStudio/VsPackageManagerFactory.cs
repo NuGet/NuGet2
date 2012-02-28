@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.Composition;
+using EnvDTE;
 
 namespace NuGet.VisualStudio
 {
@@ -141,7 +142,7 @@ namespace NuGet.VisualStudio
                 !_repositoryInfo.ConfigFolderPath.Equals(configFolderPath, StringComparison.OrdinalIgnoreCase))
             {
                 IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(path);
-                IFileSystem configSettingsFileSystem = _fileSystemProvider.GetFileSystem(configFolderPath);
+                IFileSystem configSettingsFileSystem = GetConfigSettingsFileSystem(configFolderPath);
                 ISharedPackageRepository repository = new SharedPackageRepository(
                     new DefaultPackagePathResolver(fileSystem), fileSystem, configSettingsFileSystem);
 
@@ -149,6 +150,11 @@ namespace NuGet.VisualStudio
             }
 
             return _repositoryInfo;
+        }
+
+        protected internal virtual IFileSystem GetConfigSettingsFileSystem(string configFolderPath)
+        {
+            return new SolutionFolderFileSystem(ServiceLocator.GetInstance<DTE>().Solution, VsConstants.NuGetSolutionSettingsFolder, configFolderPath);
         }
 
         private class RepositoryInfo
