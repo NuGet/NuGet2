@@ -13,7 +13,7 @@ namespace NuGet
     {
         private static readonly MethodInfo _executeMethodInfo = typeof(DataServiceContext).GetMethod("Execute", new[] { typeof(Uri) });
         private readonly DataServiceContext _context;
-        private readonly DataServiceMetadata _serviceMetadata;
+        private readonly Lazy<DataServiceMetadata> _serviceMetadata;
 
         public DataServiceContextWrapper(Uri serviceRoot)
         {
@@ -25,13 +25,12 @@ namespace NuGet
                        {
                            MergeOption = MergeOption.OverwriteChanges
                        };
-            _serviceMetadata = GetDataServiceMetadata();
+            Uri metadataUri = _context.GetMetadataUri();
+            _serviceMetadata = new Lazy<DataServiceMetadata>(() => GetDataServiceMetadata(metadataUri));
         }
 
-        private DataServiceMetadata GetDataServiceMetadata()
+        private static DataServiceMetadata GetDataServiceMetadata(Uri metadataUri)
         {
-            Uri metadataUri = _context.GetMetadataUri();
-
             if (metadataUri == null)
             {
                 return null;
@@ -118,6 +117,11 @@ namespace NuGet
             }
         }
 
+        private DataServiceMetadata ServiceMetadata
+        {
+            get { return _serviceMetadata.Value; }
+        }
+
         public IDataServiceQuery<T> CreateQuery<T>(string entitySetName, IDictionary<string, object> queryOptions)
         {
             var query = _context.CreateQuery<T>(entitySetName);
@@ -157,12 +161,12 @@ namespace NuGet
 
         public bool SupportsServiceMethod(string methodName)
         {
-            return _serviceMetadata != null && _serviceMetadata.SupportedMethodNames.Contains(methodName);
+            return _serviceMetadata != null && ServiceMetadata.SupportedMethodNames.Contains(methodName);
         }
 
         public bool SupportsProperty(string propertyName)
         {
-            return _serviceMetadata != null && _serviceMetadata.SupportedProperties.Contains(propertyName);
+            return _serviceMetadata != null && ServiceMetadata.SupportedProperties.Contains(propertyName);
         }
 
         internal sealed class DataServiceMetadata
