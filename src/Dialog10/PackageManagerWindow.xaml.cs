@@ -65,6 +65,11 @@ namespace NuGet.Dialog
 
             InitializeComponent();
 
+#if !VS10
+            // set unique search guid for VS11
+            explorer.SearchCategory = new Guid("{85566D5F-E585-411F-B299-5BF006E9F11E}");
+#endif
+
             _httpClientEvents = httpClientEvents;
             if (_httpClientEvents != null)
             {
