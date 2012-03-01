@@ -40,8 +40,8 @@ namespace NuGet.VisualStudio
                                                                             VsConstants.LightSwitchProjectTypeGuid
                                                                         };
 
-        private static readonly HashSet<string> _fileKinds = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { VsConstants.VsProjectItemKindPhysicalFile, VsConstants.VsProjectItemKindSolutionItem };
-        private static readonly HashSet<string> _folderKinds = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { VsConstants.VsProjectItemKindPhysicalFolder };
+        private static readonly IEnumerable<string> _fileKinds = new[] { VsConstants.VsProjectItemKindPhysicalFile, VsConstants.VsProjectItemKindSolutionItem };
+        private static readonly IEnumerable<string> _folderKinds = new[] { VsConstants.VsProjectItemKindPhysicalFolder };
 
         // List of project types that cannot have references added to them
         private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[] { VsConstants.WixProjectTypeGuid };
@@ -239,17 +239,12 @@ namespace NuGet.VisualStudio
             return project.IsWebProject() ? WebConfig : AppConfig;
         }
 
-        //private static ProjectItem GetProjectItem(ProjectItems projectItems, string name, string kind)
-        //{
-        //    return GetProjectItems(
-        //}
-
-        private static ProjectItem GetProjectItem(this ProjectItems projectItems, string name, HashSet<string> allowedItemKinds)
+        private static ProjectItem GetProjectItem(this ProjectItems projectItems, string name, IEnumerable<string> allowedItemKinds)
         {
             try
             {
                 ProjectItem projectItem = projectItems.Item(name);
-                if (projectItem != null && allowedItemKinds.Contains(projectItem.Kind))
+                if (projectItem != null && allowedItemKinds.Contains(projectItem.Kind, StringComparer.OrdinalIgnoreCase))
                 {
                     return projectItem;
                 }
@@ -636,6 +631,20 @@ namespace NuGet.VisualStudio
 
             Project parentProject = project.ParentProjectItem.ContainingProject;
             return parentProject.IsExplicitlyUnsupported();
+        }
+
+        public static void EnsureCheckedOutIfExists(this Project project, IFileSystem fileSystem, string path)
+        {
+            var fullPath = fileSystem.GetFullPath(path);
+            if (fileSystem.FileExists(path) &&
+                project.DTE.SourceControl != null &&
+                project.DTE.SourceControl.IsItemUnderSCC(fullPath) &&
+                !project.DTE.SourceControl.IsItemCheckedOut(fullPath))
+            {
+
+                // Check out the item
+                project.DTE.SourceControl.CheckOutItem(fullPath);
+            }
         }
 
         /// <summary>

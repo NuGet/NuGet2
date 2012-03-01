@@ -190,12 +190,12 @@ namespace NuGet
                 // Remove the element from the xml dom
                 element.Remove();
 
-                // Remove the file if there are no more elements
                 // Always try and save the document, this works around a source control issue for solution-level packages.config.
                 SaveDocument(document);
 
                 if (!document.Root.HasElements)
                 {
+                    // Remove the file if there are no more elements
                     FileSystem.DeleteFile(_path);
 
                     return true;

@@ -371,17 +371,7 @@ namespace NuGet.VisualStudio
                 // This would only matter if we're dealing with PhysicalFileSystem over a source control system that we do not support.
                 return;
             }
-
-            string fullPath = GetFullPath(path);
-            if (FileExists(path) &&
-                Project.DTE.SourceControl != null &&
-                Project.DTE.SourceControl.IsItemUnderSCC(fullPath) &&
-                !Project.DTE.SourceControl.IsItemCheckedOut(fullPath))
-            {
-
-                // Check out the item
-                Project.DTE.SourceControl.CheckOutItem(fullPath);
-            }
+            Project.EnsureCheckedOutIfExists(this, path);
         }
 
         private static bool AssemblyNamesMatch(AssemblyName name1, AssemblyName name2)

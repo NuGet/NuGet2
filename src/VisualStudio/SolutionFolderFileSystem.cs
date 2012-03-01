@@ -27,7 +27,7 @@ namespace NuGet.VisualStudio
                 if (fileExistsInProject)
                 {
                     // If the file already exists, check it out.
-                    EnsureCheckedOutIfExists(path);
+                    _solutionFolder.EnsureCheckedOutIfExists(this, path);
                 }
                 base.AddFile(path, stream);
                 
@@ -62,20 +62,6 @@ namespace NuGet.VisualStudio
         private bool FileExistsInProject(string path)
         {
             return _solutionFolder.GetProjectItem(path) != null;
-        }
-
-        private void EnsureCheckedOutIfExists(string path)
-        {
-            string fullPath = GetFullPath(path);
-            if (FileExists(path) &&
-                _solutionFolder.DTE.SourceControl != null &&
-                _solutionFolder.DTE.SourceControl.IsItemUnderSCC(fullPath) &&
-                !_solutionFolder.DTE.SourceControl.IsItemCheckedOut(fullPath))
-            {
-
-                // Check out the item
-                _solutionFolder.DTE.SourceControl.CheckOutItem(fullPath);
-            }
         }
     }
 }
