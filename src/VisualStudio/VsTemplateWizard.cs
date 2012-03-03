@@ -228,28 +228,6 @@ namespace NuGet.VisualStudio
             _dte = (DTE)automationObject;
             var vsTemplatePath = (string)customParams[0];
             _configuration = GetConfigurationFromVsTemplateFile(vsTemplatePath);
-
-            if (replacementsDictionary != null)
-            {
-                if (_dte.Solution != null && _dte.Solution.IsOpen)
-                {
-                    // add the $nugetpackagesfolder$ parameter which returns relative path to the solution's packages folder.
-                    // this is used by project templates to include assembly references directly inside the template project file
-                    // without relying on nuget to install the actual packages. 
-                    string targetInstallDir;
-                    if (replacementsDictionary.TryGetValue("$destinationdirectory$", out targetInstallDir))
-                    {
-                        string solutionRepositoryPath = RepositorySettings.Value.RepositoryPath;
-                        targetInstallDir = PathUtility.EnsureTrailingSlash(targetInstallDir);
-                        replacementsDictionary["$nugetpackagesfolder$"] =
-                            PathUtility.EnsureTrailingSlash(PathUtility.GetRelativePath(targetInstallDir,
-                                                                                        solutionRepositoryPath));
-                    }
-                }
-
-                // provide a current timpestamp (for use by universal provider)
-                replacementsDictionary["$timestamp$"] = DateTime.Now.ToString("yyyyMMddHHmmss");
-            }
         }
 
         internal virtual void ShowErrorMessage(string message)
