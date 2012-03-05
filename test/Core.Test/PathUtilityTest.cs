@@ -266,7 +266,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void GetCanonicalPathReturnsCorrectUrlWithQuerystring()
+        public void GetCanonicalPathReturnsCorrectUrlWithQueryString()
         {
             // Arrange
             string basePath = @"http://www.example.com/nuget/index.html?abc=123";
@@ -280,17 +280,17 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void GetCanonicalPathReturnsCorrectUrlWithEncodedQuerystring()
+        public void GetCanonicalPathReturnsCorrectUrlWithEncodedQueryString()
         {
             // Arrange
             string basePath = @"http://www.example.com/nuget/index.html?abc%3D123";
-            string canonicalPath = @"http://www.example.com/nuget/index.html?abc=123";
+            string canonicalPath = @"http://www.example.com/nuget/index.html?abc%3D123";
 
             // Act
             string targetPath = PathUtility.GetCanonicalPath(basePath);
 
             // Assert
-            Assert.Equal(targetPath, canonicalPath);
+            Assert.Equal(canonicalPath, targetPath);
         }
     }
 }

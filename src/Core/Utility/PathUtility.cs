@@ -80,7 +80,7 @@ namespace NuGet
             {
                 var url = new Uri(path);
                 // return canonical representation of Uri
-                return url.ToString();
+                return url.AbsoluteUri;
             }
             return path;
         }
