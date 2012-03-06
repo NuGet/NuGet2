@@ -199,8 +199,20 @@ namespace NuGet.Dialog.Providers
 
         public override bool CanExecute(PackageItem item)
         {
-            // Only enable command on a Package in the Online provider if it is not installed yet
-            return !LocalRepository.Exists(item.PackageIdentity);
+            var latestPackageLookup = LocalRepository as ILatestPackageLookup;
+            if (latestPackageLookup != null)
+            {
+                // in this case, we mark this package as installed if the current project has 
+                // any lower-or-equal-versioned package with the same id installed.
+                SemanticVersion installedVersion;
+                return !latestPackageLookup.TryFindLatestPackageById(item.Id, out installedVersion) ||
+                       installedVersion < item.PackageIdentity.Version;
+            }
+            else
+            {
+                // Only enable command on a Package in the Online provider if it is not installed yet
+                return !LocalRepository.Exists(item.PackageIdentity);
+            }
         }
 
         public override IVsExtension CreateExtension(IPackage package)

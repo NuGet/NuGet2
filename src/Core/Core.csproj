@@ -83,6 +83,7 @@
     <Compile Include="Http\NullCredentialProvider.cs" />
     <Compile Include="Http\ProxyCache.cs" />
     <Compile Include="Http\RequestHelper.cs" />
+    <Compile Include="Repositories\ILatestPackageLookup.cs" />
     <Compile Include="ProjectSystem\IBatchProcessor.cs" />
     <Compile Include="Repositories\ICloneableRepository.cs" />
     <Compile Include="Repositories\ICultureAwareRepository.cs" />

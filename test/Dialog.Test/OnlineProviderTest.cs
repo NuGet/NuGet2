@@ -132,6 +132,45 @@ namespace NuGet.Dialog.Test
             Assert.False(canExecuteA);
         }
 
+        [Fact]
+        public void CanExecuteReturnsCorrectResultWhenLoweredVersionPackageIsInstalled()
+        {
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+            var packageB = PackageUtility.CreatePackage("B", "2.0");
+            var packageC = PackageUtility.CreatePackage("C", "3.0");
+
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageC);
+            sourceRepository.AddPackage(packageB);
+
+            var localRepository = new MockPackageRepository();
+            // these are installed packages
+            localRepository.AddPackage(PackageUtility.CreatePackage("A", "2.0"));
+            localRepository.AddPackage(PackageUtility.CreatePackage("B", "1.0-beta"));
+            localRepository.AddPackage(PackageUtility.CreatePackage("C", "3.0-beta"));
+
+            var packageManager = new Mock<IVsPackageManager>();
+            packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
+
+            var provider = CreateOnlineProvider(packageManager.Object, localRepository);
+
+            var extensionA = new PackageItem(provider, packageA);
+            var extensionB = new PackageItem(provider, packageB);
+            var extensionC = new PackageItem(provider, packageC);
+
+            // Act
+            bool canExecuteA = provider.CanExecute(extensionA);
+            bool canExecuteB = provider.CanExecute(extensionB);
+            bool canExecuteC = provider.CanExecute(extensionC);
+
+            // Assert
+            Assert.False(canExecuteA);
+            Assert.True(canExecuteB);
+            Assert.True(canExecuteC);
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]

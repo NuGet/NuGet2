@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace NuGet
@@ -9,7 +10,7 @@ namespace NuGet
     /// it also has a reference to the repository that actually contains the packages. It keeps track
     /// of packages in an xml file at the project root (packages.xml).
     /// </summary>
-    public class PackageReferenceRepository : PackageRepositoryBase, IPackageLookup, IPackageConstraintProvider
+    public class PackageReferenceRepository : PackageRepositoryBase, IPackageLookup, IPackageConstraintProvider, ILatestPackageLookup
     {
         private readonly PackageReferenceFile _packageReferenceFile;
         private readonly string _fullPath;
@@ -137,6 +138,22 @@ namespace NuGet
                 return reference.VersionConstraint;
             }
             return null;
+        }
+
+        public bool TryFindLatestPackageById(string id, out SemanticVersion latestVersion)
+        {
+            PackageName packageName = _packageReferenceFile.FindEntryWithLatestVersionById(id);
+            if (packageName == null)
+            {
+                latestVersion = null;
+                return false;
+            }
+            else
+            {
+                latestVersion = packageName.Version;
+                Debug.Assert(latestVersion != null);
+                return true;
+            }
         }
     }
 }

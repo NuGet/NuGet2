@@ -316,5 +316,123 @@ namespace NuGet.Test
             // Assert
             Assert.Equal(0, packages.Count);
         }
+
+        [Fact]
+        public void PackageReferenceRepositoryImplementsILatestPackageLookupInterface()
+        {
+            // Arrange
+            var repository = new PackageReferenceRepository(new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object);
+
+            // Assert
+            Assert.True(repository is ILatestPackageLookup);
+        }
+
+        [Fact]
+        public void PackageReferenceRepositoryImplementsILatestPackageLookupInterfaceCorrectly()
+        {
+            // Arrange
+            var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+            var packageB = PackageUtility.CreatePackage("B", "2.0");
+            var packageC = PackageUtility.CreatePackage("A", "1.5");
+            var packageD = PackageUtility.CreatePackage("A", "2.0-beta");
+            repository.Object.AddPackage(packageA);
+            repository.Object.AddPackage(packageB);
+            repository.Object.AddPackage(packageC);
+            repository.Object.AddPackage(packageD);
+
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+  <package id=""B"" version=""2.0"" />
+  <package id=""A"" version=""1.5"" />
+  <package id=""A"" version=""2.0-beta"" />
+</packages>");
+
+            ILatestPackageLookup referenceRepository = new PackageReferenceRepository(
+                fileSystem, 
+                repository.Object);
+
+            // Act
+            SemanticVersion latestVersion;
+            bool result = referenceRepository.TryFindLatestPackageById("A", out latestVersion);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal(new SemanticVersion("2.0-beta"), latestVersion);
+        }
+
+        [Fact]
+        public void PackageReferenceRepositoryFindTheOnlyPackageAsLatestPackage()
+        {
+            // Arrange
+            var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+            var packageB = PackageUtility.CreatePackage("B", "2.0");
+            var packageC = PackageUtility.CreatePackage("A", "1.5");
+            var packageD = PackageUtility.CreatePackage("A", "2.0-beta");
+            repository.Object.AddPackage(packageA);
+            repository.Object.AddPackage(packageB);
+            repository.Object.AddPackage(packageC);
+            repository.Object.AddPackage(packageD);
+
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+  <package id=""B"" version=""2.0"" />
+  <package id=""A"" version=""1.5"" />
+  <package id=""A"" version=""2.0-beta"" />
+</packages>");
+
+            ILatestPackageLookup referenceRepository = new PackageReferenceRepository(
+                fileSystem,
+                repository.Object);
+
+            // Act
+            SemanticVersion latestVersion;
+            bool result = referenceRepository.TryFindLatestPackageById("B", out latestVersion);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal(new SemanticVersion("2.0"), latestVersion);
+        }
+
+        [Fact]
+        public void PackageReferenceRepositoryDoNotFindLatestPackageIfItDoesNotExist()
+        {
+            // Arrange
+            var repository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+            var packageB = PackageUtility.CreatePackage("B", "2.0");
+            var packageC = PackageUtility.CreatePackage("A", "1.5");
+            var packageD = PackageUtility.CreatePackage("A", "2.0-beta");
+            repository.Object.AddPackage(packageA);
+            repository.Object.AddPackage(packageB);
+            repository.Object.AddPackage(packageC);
+            repository.Object.AddPackage(packageD);
+
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" />
+  <package id=""B"" version=""2.0"" />
+  <package id=""A"" version=""1.5"" />
+  <package id=""A"" version=""2.0-beta"" />
+</packages>");
+
+            ILatestPackageLookup referenceRepository = new PackageReferenceRepository(
+                fileSystem,
+                repository.Object);
+
+            // Act
+            SemanticVersion latestVersion;
+            bool result = referenceRepository.TryFindLatestPackageById("C", out latestVersion);
+
+            // Assert
+            Assert.False(result);
+            Assert.Null(latestVersion);
+        }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace NuGet.Test.Mocks
 {
-    public class MockPackageRepository : PackageRepositoryBase, ICollection<IPackage>
+    public class MockPackageRepository : PackageRepositoryBase, ICollection<IPackage>, ILatestPackageLookup
     {
         private readonly string _source;
         public MockPackageRepository()
@@ -129,6 +129,23 @@ namespace NuGet.Test.Mocks
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        public bool TryFindLatestPackageById(string id, out SemanticVersion latestVersion)
+        {
+            List<IPackage> packages;
+            bool result = Packages.TryGetValue(id, out packages);
+            if (result && packages.Count > 0)
+            {
+                packages.Sort((a, b) => b.Version.CompareTo(a.Version));
+                latestVersion = packages[0].Version;
+                return true;
+            }
+            else
+            {
+                latestVersion = null;
+                return false;
+            }
         }
     }
 }
