@@ -28,6 +28,7 @@
   <Content>
     <MefComponent>|TeamFoundationServer|</MefComponent>
     <MefComponent>|PowerShellHostProvider|</MefComponent>
+    <MefComponent>|TeamFoundationServer10|</MefComponent>
     <MefComponent>|Console|</MefComponent>
     <VsPackage>|%CurrentProject%;PkgdefProjectOutputGroup|</VsPackage>
     <MefComponent>|VisualStudio|</MefComponent>

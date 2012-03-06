@@ -15,12 +15,18 @@ namespace NuGet.TeamFoundationServer
         public ISourceControlFileSystem GetFileSystem(string path, SourceControlBindings binding)
         {
             // Return null if this this binding isn't for us then return null
-            if (String.IsNullOrEmpty(binding.ProviderName) ||
+            if ((ProviderConstants.SupportedVsVersion != VsVersionHelper.VsMajorVersion) ||
+                String.IsNullOrEmpty(binding.ProviderName) ||
                 !binding.ProviderName.Equals(TfsProviderName, StringComparison.OrdinalIgnoreCase))
             {
                 return null;
             }
 
+            return GetFileSystemInternal(path, binding);
+        }
+
+        private static ISourceControlFileSystem GetFileSystemInternal(string path, SourceControlBindings binding)
+        {
             TfsTeamProjectCollection projectCollection = TfsTeamProjectCollectionFactory.GetTeamProjectCollection(new Uri(binding.ServerName));
             var versionControl = projectCollection.GetService<VersionControlServer>();
             Workspace workspace = versionControl.TryGetWorkspace(binding.LocalBinding);
