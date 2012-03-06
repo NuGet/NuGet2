@@ -28,28 +28,12 @@ namespace NuGet
         [XmlElement("metadata", IsNullable = false)]
         public ManifestMetadata Metadata { get; set; }
 
-        [Browsable(false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [XmlElement("files", IsNullable = true)]
-        public ManifestFileList FilesList { get; set; }
-
         [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
-        [XmlIgnore]
         public List<ManifestFile> Files
         {
-            get
-            {
-                return FilesList != null ? FilesList.Items : null;
-            }
-            set
-            {
-                if (FilesList == null)
-                {
-                    FilesList = new ManifestFileList();
-                }
-                FilesList.Items = value;
-            }
+            get;
+            set;
         }
 
         public void Save(Stream stream)
@@ -77,16 +61,6 @@ namespace NuGet
             serializer.Serialize(stream, this, ns);
         }
 
-        // http://msdn.microsoft.com/en-us/library/53b8022e(VS.71).aspx
-        [Browsable(false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public bool ShouldSerializeFilesList()
-        {
-            // This is to prevent the XML serializer from serializing 'null' value of FilesList as 
-            // <files xsi:nil="true" /> 
-            return FilesList != null;
-        }
-
         public static Manifest ReadFrom(Stream stream)
         {
             return ReadFrom(stream, NullPropertyProvider.Instance);
@@ -94,45 +68,32 @@ namespace NuGet
 
         public static Manifest ReadFrom(Stream stream, IPropertyProvider propertyProvider)
         {
-            string content = Preprocessor.Process(stream, propertyProvider);
+            XDocument document;
+            if (propertyProvider == NullPropertyProvider.Instance)
+            {
+                document = XDocument.Load(stream);
+            }
+            else
+            {
+                string content = Preprocessor.Process(stream, propertyProvider);
+                document = XDocument.Parse(content);
+            }
 
-            // Read the document
-            XDocument document = XDocument.Parse(content);
-            string schemeNamespace = GetSchemaNamespace(document);
-
+            string schemaNamespace = GetSchemaNamespace(document);
             foreach (var e in document.Descendants())
             {
                 // Assign the schema namespace derived to all nodes in the document.
-                e.Name = XName.Get(e.Name.LocalName, schemeNamespace);
+                e.Name = XName.Get(e.Name.LocalName, schemaNamespace);
             }
 
             // Validate the schema
-            ValidateManifestSchema(document, schemeNamespace);
+            ValidateManifestSchema(document, schemaNamespace);
 
-            var serializer = new XmlSerializer(typeof(Manifest), schemeNamespace);
-            var manifest = (Manifest)serializer.Deserialize(document.CreateReader());
-
-            // Convert <file source="Foo.cs;.\src\bar.cs" target="content" /> to multiple individual items.
-            // Do this before validating to ensure validation for files still works as before.
-            manifest.SplitManifestFiles();
+            // Serialize it
+            var manifest = ManifestReader.ReadManifest(document);
 
             // Validate before returning
             Validate(manifest);
-
-            // Trim fields in case they have extra whitespace
-            manifest.Metadata.Id = manifest.Metadata.Id.SafeTrim();
-
-            // validate the package Id early to avoid any further processing
-            PackageIdValidator.ValidatePackageId(manifest.Metadata.Id);
-            manifest.Metadata.Title = manifest.Metadata.Title.SafeTrim();
-            manifest.Metadata.Authors = manifest.Metadata.Authors.SafeTrim();
-            manifest.Metadata.Owners = manifest.Metadata.Owners.SafeTrim();
-            manifest.Metadata.Description = manifest.Metadata.Description.SafeTrim();
-            manifest.Metadata.Summary = manifest.Metadata.Summary.SafeTrim();
-            manifest.Metadata.ReleaseNotes = manifest.Metadata.ReleaseNotes.SafeTrim();
-            manifest.Metadata.Language = manifest.Metadata.Language.SafeTrim();
-            manifest.Metadata.Tags = manifest.Metadata.Tags.SafeTrim();
-            manifest.Metadata.Copyright = manifest.Metadata.Copyright.SafeTrim();
 
             return manifest;
         }
@@ -146,26 +107,6 @@ namespace NuGet
                 schemaNamespace = rootNameSpace.NamespaceName;
             }
             return schemaNamespace;
-        }
-
-        private void SplitManifestFiles()
-        {
-            if (Files == null)
-            {
-                return;
-            }
-            int length = Files.Count;
-            for (int i = 0; i < length; i++)
-            {
-                var manifestFile = Files[i];
-                // Multiple sources can be specified by using semi-colon separated values. 
-                var sources = manifestFile.Source.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                // Set the source value of the current manifest file to the first item in the list of values
-                manifestFile.Source = sources.FirstOrDefault();
-                // Add a ManifestFile for all other items
-                Files.AddRange(from item in sources.Skip(1)
-                               select new ManifestFile { Source = item, Target = manifestFile.Target });
-            }
         }
 
         public static Manifest Create(IPackageMetadata metadata)

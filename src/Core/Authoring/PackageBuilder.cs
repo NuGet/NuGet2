@@ -332,7 +332,10 @@ namespace NuGet
 
             Dependencies.AddRange(metadata.Dependencies);
             FrameworkReferences.AddRange(metadata.FrameworkAssemblies);
-            PackageAssemblyReferences.AddRange(manifestMetadata.References.Select(reference => reference.File));
+            if (manifestMetadata.References != null)
+            {
+                PackageAssemblyReferences.AddRange(manifestMetadata.References.Select(reference => reference.File));
+            }
         }
 
         public void PopulateFiles(string basePath, IEnumerable<ManifestFile> files)

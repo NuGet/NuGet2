@@ -598,7 +598,6 @@ namespace NuGet.Test.Integration.PathResolver
         /// Source: sample\test.dll
         /// Search: ;;
         /// Target: lib
-        /// Expected: lib\foo.dll, lib\bar.dll, lib\test.dll
         /// </summary>
         [Fact]
         public void ManifestThrowsIfFirstFileSourceValuesInSemiColonSeparatedListsAreEmpty()
@@ -618,7 +617,6 @@ namespace NuGet.Test.Integration.PathResolver
         /// Source: sample\test.dll
         /// Search: ;;
         /// Target: lib
-        /// Expected: lib\foo.dll, lib\bar.dll, lib\test.dll
         /// </summary>
         [Fact]
         public void ManifestIgnoresEmptyItemsInSemiColonSeparatedList()

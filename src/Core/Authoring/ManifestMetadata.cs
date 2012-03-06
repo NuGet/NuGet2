@@ -200,6 +200,18 @@ namespace NuGet
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
+            if (!String.IsNullOrEmpty(Id))
+            {
+                if (Id.Length > PackageIdValidator.MaxPackageIdLength)
+                {
+                    yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_IdMaxLengthExceeded));
+                }
+                else if(!PackageIdValidator.IsValidPackageId(Id))
+                {
+                    yield return new ValidationResult(String.Format(CultureInfo.CurrentCulture, NuGetResources.InvalidPackageId, Id));
+                }
+            }
+
             if (LicenseUrl == String.Empty)
             {
                 yield return new ValidationResult(
@@ -226,7 +238,7 @@ namespace NuGet
 
         private static IEnumerable<FrameworkName> ParseFrameworkNames(string frameworkNames)
         {
-            if (String.IsNullOrEmpty(frameworkNames.SafeTrim()))
+            if (String.IsNullOrEmpty(frameworkNames))
             {
                 return Enumerable.Empty<FrameworkName>();
             }

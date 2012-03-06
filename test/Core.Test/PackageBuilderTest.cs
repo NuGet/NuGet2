@@ -409,7 +409,7 @@ Description is required.");
   </metadata></package>";
 
             // Act & Assert
-            ExceptionAssert.Throws<ArgumentException>(() => new PackageBuilder(spec.AsStream(), null), "Id must not exceed 100 characters.");
+            ExceptionAssert.Throws<ValidationException>(() => new PackageBuilder(spec.AsStream(), null), "Id must not exceed 100 characters.");
         }
 
         [Fact]

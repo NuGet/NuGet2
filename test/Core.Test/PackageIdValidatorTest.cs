@@ -157,21 +157,5 @@ namespace NuGet.Test
                 () => PackageIdValidator.ValidatePackageId(packageId),
                 "Id must not exceed 100 characters.");
         }
-
-        [Theory]
-        [InlineData(101, false)]
-        [InlineData(102, false)]
-        [InlineData(200, false)]
-        [InlineData(64, true)]
-        [InlineData(90, true)]
-        [InlineData(99, true)]
-        public void ValidatesCheckIdLength(int idTestLength, bool expectedResult)
-        {
-            // Arrange
-            string packageId = new string('d', idTestLength);
-
-            // Act && Assert
-            Assert.Equal(expectedResult, PackageIdValidator.IsValidPackageId(packageId));
-        }
     }
 }

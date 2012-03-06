@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using Xunit;
 
 namespace NuGet.Test
 {
-
     public class ManifestTest
     {
         [Fact]
@@ -133,6 +135,274 @@ namespace NuGet.Test
 
             // Act and Assert
             ExceptionAssert.Throws<ValidationException>(() => Manifest.Validate(manifest), "Dependency Id is required.");
+        }
+
+        [Fact]
+        public void ReadFromReadsRequiredValues()
+        {
+            // Arrange
+            var manifestStream = CreateManifest();
+            var expectedManifest = new Manifest
+            {
+                Metadata = new ManifestMetadata { Id = "Test-Pack", Version = "1.0.0", Description = "Test description", Authors = "NuGet Test" }
+            };
+
+            // Act 
+            var manifest = Manifest.ReadFrom(manifestStream);
+
+            // Assert
+            AssertManifest(expectedManifest, manifest);
+        }
+
+        [Fact]
+        public void ReadFromReadsAllMetadataValues()
+        {
+            // Arrange
+            var manifestStream = CreateManifest(id: "Test-Pack2", version: "1.0.0-alpha", title: "blah", authors: "Outercurve",
+                licenseUrl: "http://nuget.org/license", projectUrl: "http://nuget.org/project", iconUrl: "https://nuget.org/icon",
+                requiresLicenseAcceptance: true, description: "This is not a description", summary: "This is a summary", releaseNotes: "Release notes",
+                copyright: "Copyright 2012", language: "fr-FR", tags: "Test Unit",
+                dependencies: new[] { new ManifestDependency { Id = "Test", Version = "1.2.0" } },
+                assemblyReference: new[] { new ManifestFrameworkAssembly { AssemblyName = "System.Data", TargetFramework = "4.0" } },
+                references: new[] { "Test.dll" }
+            );
+
+            var expectedManifest = new Manifest
+            {
+                Metadata = new ManifestMetadata
+                {
+                    Id = "Test-Pack2",
+                    Version = "1.0.0-alpha",
+                    Description = "This is not a description",
+                    Authors = "Outercurve",
+                    LicenseUrl = "http://nuget.org/license",
+                    ProjectUrl = "http://nuget.org/project",
+                    IconUrl = "https://nuget.org/icon",
+                    RequireLicenseAcceptance = true,
+                    Summary = "This is a summary",
+                    ReleaseNotes = "Release notes",
+                    Copyright = "Copyright 2012",
+                    Language = "fr-FR",
+                    Tags = "Test Unit",
+                    Dependencies = new List<ManifestDependency> { new ManifestDependency { Id = "Test", Version = "1.2.0" } },
+                    FrameworkAssemblies = new List<ManifestFrameworkAssembly> { new ManifestFrameworkAssembly { AssemblyName = "System.Data", TargetFramework = "4.0" } },
+                    References = new List<ManifestReference> { new ManifestReference { File = "Test.dll" } }
+                }
+            };
+
+            // Act 
+            var manifest = Manifest.ReadFrom(manifestStream);
+
+            // Assert
+            AssertManifest(expectedManifest, manifest);
+        }
+
+        [Fact]
+        public void ReadFromReadsFilesAndExpandsDelimitedFileList()
+        {
+            // Arrange
+            var manifestStream = CreateManifest(files: new[] { 
+                    new ManifestFile { Source = "Foo.cs", Target = "src" }, 
+                    new ManifestFile { Source = @"**\bin\*.dll;**\bin\*.exe", Target = @"lib\net40", Exclude = @"**\*Test*" }
+            });
+
+            var expectedManifest = new Manifest
+            {
+                Metadata = new ManifestMetadata { Id = "Test-Pack", Version = "1.0.0", Description = "Test description", Authors = "NuGet Test" },
+                Files = new List<ManifestFile> { 
+                    new ManifestFile { Source = "Foo.cs", Target = "src" }, 
+                    new ManifestFile { Source = @"**\bin\*.dll", Target = @"lib\net40", Exclude = @"**\*Test*" },
+                    new ManifestFile { Source = @"**\bin\*.exe", Target = @"lib\net40", Exclude = @"**\*Test*" },
+                }
+            };
+
+            // Act 
+            var manifest = Manifest.ReadFrom(manifestStream);
+
+            // Assert
+            AssertManifest(expectedManifest, manifest);
+        }
+
+
+        private void AssertManifest(Manifest expected, Manifest actual)
+        {
+            Assert.Equal(expected.Metadata.Id, actual.Metadata.Id);
+            Assert.Equal(expected.Metadata.Version, actual.Metadata.Version);
+            Assert.Equal(expected.Metadata.Description, actual.Metadata.Description);
+            Assert.Equal(expected.Metadata.Authors, actual.Metadata.Authors);
+            Assert.Equal(expected.Metadata.Copyright, actual.Metadata.Copyright);
+            Assert.Equal(expected.Metadata.IconUrl, actual.Metadata.IconUrl);
+            Assert.Equal(expected.Metadata.Language, actual.Metadata.Language);
+            Assert.Equal(expected.Metadata.LicenseUrl, actual.Metadata.LicenseUrl);
+            Assert.Equal(expected.Metadata.Owners, actual.Metadata.Owners);
+            Assert.Equal(expected.Metadata.ProjectUrl, actual.Metadata.ProjectUrl);
+            Assert.Equal(expected.Metadata.ReleaseNotes, actual.Metadata.ReleaseNotes);
+            Assert.Equal(expected.Metadata.RequireLicenseAcceptance, actual.Metadata.RequireLicenseAcceptance);
+            Assert.Equal(expected.Metadata.Summary, actual.Metadata.Summary);
+            Assert.Equal(expected.Metadata.Tags, actual.Metadata.Tags);
+
+            if (expected.Metadata.Dependencies != null)
+            {
+                for (int i = 0; i < expected.Metadata.Dependencies.Count; i++)
+                {
+                    AssertDependency(expected.Metadata.Dependencies[i], actual.Metadata.Dependencies[i]);
+                }
+            }
+            if (expected.Metadata.FrameworkAssemblies != null)
+            {
+                for (int i = 0; i < expected.Metadata.FrameworkAssemblies.Count; i++)
+                {
+                    AssertFrameworkAssemblies(expected.Metadata.FrameworkAssemblies[i], actual.Metadata.FrameworkAssemblies[i]);
+                }
+            }
+            if (expected.Metadata.References != null)
+            {
+                for (int i = 0; i < expected.Metadata.References.Count; i++)
+                {
+                    AssertReference(expected.Metadata.References[i], actual.Metadata.References[i]);
+                }
+            }
+            if (expected.Files != null)
+            {
+                for (int i = 0; i < expected.Files.Count; i++)
+                {
+                    AssertFile(expected.Files[i], actual.Files[i]);
+                }
+            }
+        }
+
+        private void AssertFile(ManifestFile expected, ManifestFile actual)
+        {
+            Assert.Equal(expected.Source, actual.Source);
+            Assert.Equal(expected.Target, actual.Target);
+            Assert.Equal(expected.Exclude, actual.Exclude);
+        }
+
+        private static void AssertDependency(ManifestDependency expected, ManifestDependency actual)
+        {
+            Assert.Equal(expected.Id, actual.Id);
+            Assert.Equal(expected.Version, actual.Version);
+        }
+
+        private static void AssertFrameworkAssemblies(ManifestFrameworkAssembly expected, ManifestFrameworkAssembly actual)
+        {
+            Assert.Equal(expected.AssemblyName, actual.AssemblyName);
+            Assert.Equal(expected.TargetFramework, actual.TargetFramework);
+        }
+
+        private static void AssertReference(ManifestReference expected, ManifestReference actual)
+        {
+            Assert.Equal(expected.File, actual.File);
+        }
+
+        public static Stream CreateManifest(string id = "Test-Pack",
+                                            string version = "1.0.0",
+                                            string title = null,
+                                            string authors = "NuGet Test",
+                                            string owners = null,
+                                            string licenseUrl = null,
+                                            string projectUrl = null,
+                                            string iconUrl = null,
+                                            bool? requiresLicenseAcceptance = null,
+                                            string description = "Test description",
+                                            string summary = null,
+                                            string releaseNotes = null,
+                                            string copyright = null,
+                                            string language = null,
+                                            string tags = null,
+                                            IEnumerable<ManifestDependency> dependencies = null,
+                                            IEnumerable<ManifestFrameworkAssembly> assemblyReference = null,
+                                            IEnumerable<string> references = null,
+                                            IEnumerable<ManifestFile> files = null)
+        {
+            var document = new XDocument(new XElement("package"));
+            var metadata = new XElement("metadata", new XElement("id", id), new XElement("version", version),
+                                                    new XElement("description", description), new XElement("authors", authors));
+            document.Root.Add(metadata);
+
+            if (title != null)
+            {
+                metadata.Add(new XElement("title", title));
+            }
+            if (owners != null)
+            {
+                metadata.Add(new XElement("owners", owners));
+            }
+            if (licenseUrl != null)
+            {
+                metadata.Add(new XElement("licenseUrl", licenseUrl));
+            }
+            if (projectUrl != null)
+            {
+                metadata.Add(new XElement("projectUrl", projectUrl));
+            }
+            if (iconUrl != null)
+            {
+                metadata.Add(new XElement("iconUrl", iconUrl));
+            }
+            if (requiresLicenseAcceptance != null)
+            {
+                metadata.Add(new XElement("requireLicenseAcceptance", requiresLicenseAcceptance.ToString().ToLowerInvariant()));
+            }
+            if (summary != null)
+            {
+                metadata.Add(new XElement("summary", summary));
+            }
+            if (releaseNotes != null)
+            {
+                metadata.Add(new XElement("releaseNotes", releaseNotes));
+            }
+            if (copyright != null)
+            {
+                metadata.Add(new XElement("copyright", copyright));
+            }
+            if (language != null)
+            {
+                metadata.Add(new XElement("language", language));
+            }
+            if (tags != null)
+            {
+                metadata.Add(new XElement("tags", tags));
+            }
+            if (dependencies != null)
+            {
+                metadata.Add(new XElement("dependencies",
+                    dependencies.Select(d => new XElement("dependency", new XAttribute("id", d.Id), new XAttribute("version", d.Version)))));
+            }
+            if (assemblyReference != null)
+            {
+                metadata.Add(new XElement("frameworkAssemblies",
+                    assemblyReference.Select(r => new XElement("frameworkAssembly",
+                        new XAttribute("assemblyName", r.AssemblyName), new XAttribute("targetFramework", r.TargetFramework)))));
+            }
+            if (references != null)
+            {
+                metadata.Add(new XElement("references", references.Select(r => new XElement("reference", new XAttribute("file", r)))));
+            }
+            if (files != null)
+            {
+                var filesNode = new XElement("files");
+                foreach (var file in files)
+                {
+                    var fileNode = new XElement("file", new XAttribute("src", file.Source));
+                    if (file.Target != null)
+                    {
+                        fileNode.Add(new XAttribute("target", file.Target));
+                    }
+                    if (file.Exclude != null)
+                    {
+                        fileNode.Add(new XAttribute("exclude", file.Exclude));
+                    }
+
+                    filesNode.Add(fileNode);
+                }
+                document.Root.Add(filesNode);
+            }
+
+            var stream = new MemoryStream();
+            document.Save(stream);
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
         }
     }
 }

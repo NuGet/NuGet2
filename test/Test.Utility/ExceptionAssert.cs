@@ -22,7 +22,7 @@ namespace NuGet.Test
 
         public static void Throws<TException>(Assert.ThrowsDelegate action, string expectedMessage) where TException : Exception
         {
-            Throws<TException>(action, ex => Assert.Equal(ex.Message, expectedMessage));
+            Throws<TException>(action, ex => Assert.Equal(expectedMessage, ex.Message));
         }
 
         public static void ThrowsArgNull(Assert.ThrowsDelegate act, string paramName)
