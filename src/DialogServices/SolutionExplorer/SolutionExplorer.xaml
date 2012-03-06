@@ -22,7 +22,6 @@
     <Window.Resources>
         <BitmapImage x:Key="OpenFolderImage" UriSource="/NuGet.DialogServices;component/SolutionExplorer/Images/folderopen.png" />
         <BitmapImage x:Key="CloseFolderImage" UriSource="/NuGet.DialogServices;component/SolutionExplorer/Images/folderclose.png" />
-        <BitmapImage x:Key="SolutionImage" UriSource="/NuGet.DialogServices;component/SolutionExplorer/Images/solution.png" />
         
         <self:ProjectToIconConverter x:Key="ProjectToIconConverter" />
         
@@ -57,7 +56,7 @@
                     <Setter TargetName="FolderImage" Property="Source" Value="{StaticResource OpenFolderImage}" />
                 </MultiDataTrigger>
                 <DataTrigger Binding="{Binding IsRootFolder}" Value="true">
-                    <Setter TargetName="FolderImage" Property="Source" Value="{StaticResource SolutionImage}" />
+                    <Setter TargetName="FolderImage" Property="Source" Value="{x:Static local:ProjectUtilities.SolutionImage}" />
                 </DataTrigger>
             </HierarchicalDataTemplate.Triggers>
         </HierarchicalDataTemplate>
