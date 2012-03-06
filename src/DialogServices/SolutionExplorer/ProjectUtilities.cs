@@ -12,7 +12,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuGet.Dialog
 {
-    public static class ProjectUtilities
+    internal static class ProjectUtilities
     {
         private static Lazy<ImageSource> _solutionImage = new Lazy<ImageSource>(GetSolutionImage);
 
@@ -24,7 +24,7 @@ namespace NuGet.Dialog
             }
         }
 
-        internal static ImageSource GetSolutionImage()
+        public static ImageSource GetSolutionImage()
         {
             IVsSolution solution = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
             IVsHierarchy solutionHierachy = solution as IVsHierarchy;
@@ -39,7 +39,7 @@ namespace NuGet.Dialog
             return null;
         }
 
-        internal static ImageSource GetImage(Project project)
+        public static ImageSource GetImage(Project project)
         {
             IVsSolution solution = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
             IVsHierarchy hierarchy;
