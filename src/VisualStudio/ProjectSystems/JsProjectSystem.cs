@@ -23,7 +23,8 @@ namespace NuGet.VisualStudio
 
         public override void AddFile(string path, Stream stream)
         {
-            Project.GetProjectItems(path, createIfNotExists: true);
+            // ensure the parent folder is created before adding file to the project
+            Project.GetProjectItems(Path.GetDirectoryName(path), createIfNotExists: true);
             base.AddFile(path, stream);
         }
 
