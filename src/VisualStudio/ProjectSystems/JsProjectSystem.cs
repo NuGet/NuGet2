@@ -32,5 +32,21 @@ namespace NuGet.VisualStudio
         {
             container.AddFromFile(fullPath);
         }
+
+        public override void DeleteDirectory(string path, bool recursive = false)
+        {
+            base.DeleteDirectory(path, recursive);
+
+            // In Win8Express beta, there is a bug that causes an empty folder to be removed
+            // from project. As a result, VsProjectSystem fails to delete empty folders. 
+            // Here, we check if the directory exists on disk and is empty, then we go ahead 
+            // and delete it
+            if (BaseFileSystem.DirectoryExists(path) &&
+                BaseFileSystem.GetFiles(path, "*.*").IsEmpty() &&
+                BaseFileSystem.GetDirectories(path).IsEmpty())
+            {
+                BaseFileSystem.DeleteDirectory(path, recursive: false);
+            }
+        }
     }
 }

@@ -48,6 +48,14 @@ namespace NuGet.VisualStudio
             private set;
         }
 
+        protected IFileSystem BaseFileSystem
+        {
+            get
+            {
+                return _baseFileSystem;
+            }
+        }
+
         public virtual string ProjectName
         {
             get
@@ -106,7 +114,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public void DeleteDirectory(string path, bool recursive = false)
+        public virtual void DeleteDirectory(string path, bool recursive = false)
         {
             // Only delete this folder if it is empty and we didn't specify that we want to recurse
             if (!recursive && (_baseFileSystem.GetFiles(path, "*.*").Any() || _baseFileSystem.GetDirectories(path).Any()))
