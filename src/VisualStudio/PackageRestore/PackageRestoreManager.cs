@@ -291,8 +291,9 @@ namespace NuGet.VisualStudio
             if (buildProject.Xml.Properties == null ||
                 buildProject.Xml.Properties.All(p => p.Name != solutiondir))
             {
-
-                string relativeSolutionPath = PathUtility.GetRelativePath(project.FullName, _solutionManager.SolutionDirectory);
+                string relativeSolutionPath = PathUtility.GetRelativePath(
+                    project.FullName, 
+                    PathUtility.EnsureTrailingSlash(_solutionManager.SolutionDirectory));
                 relativeSolutionPath = PathUtility.EnsureTrailingSlash(relativeSolutionPath);
 
                 var solutionDirProperty = buildProject.Xml.AddProperty(solutiondir, relativeSolutionPath);
@@ -362,14 +363,11 @@ namespace NuGet.VisualStudio
         {
             // first, find the package from the remote repository
             IPackage package = repository.FindPackage(packageId);
-            if (package == null)
-            {
-                return null;
-            }
 
             bool fromCache = false;
 
-            IPackage cachedPackage = _localCacheRepository.FindPackage(packageId, package.Version);
+            // if package == null, we use whatever version is in the machine cache
+            IPackage cachedPackage = _localCacheRepository.FindPackage(packageId, package != null ? package.Version : null);
             if (cachedPackage != null)
             {
                 var dataServicePackage = package as DataServicePackage;
@@ -388,6 +386,18 @@ namespace NuGet.VisualStudio
                         _localCacheRepository.RemovePackage(cachedPackage);
                     }
                 }
+                else if (package == null)
+                {
+                    // in this case, we didn't find the package from remote repository.
+                    // fallback to using the one in the machine cache.
+                    package = cachedPackage;
+                    fromCache = true;
+                }
+            }
+
+            if (package == null)
+            {
+                return null;
             }
 
             if (!fromCache)
