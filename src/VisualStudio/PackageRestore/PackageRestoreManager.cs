@@ -290,8 +290,9 @@ namespace NuGet.VisualStudio
             if (buildProject.Xml.Properties == null ||
                 buildProject.Xml.Properties.All(p => p.Name != solutiondir))
             {
-
-                string relativeSolutionPath = PathUtility.GetRelativePath(project.FullName, _solutionManager.SolutionDirectory);
+                string relativeSolutionPath = PathUtility.GetRelativePath(
+                    project.FullName,
+                    PathUtility.EnsureTrailingSlash(_solutionManager.SolutionDirectory));
                 relativeSolutionPath = PathUtility.EnsureTrailingSlash(relativeSolutionPath);
 
                 var solutionDirProperty = buildProject.Xml.AddProperty(solutiondir, relativeSolutionPath);
