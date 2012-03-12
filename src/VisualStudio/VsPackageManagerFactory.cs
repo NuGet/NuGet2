@@ -47,7 +47,6 @@ namespace NuGet.VisualStudio
             {
                 throw new ArgumentNullException("repositorySettings");
             }
-
             if (packageEvents == null)
             {
                 throw new ArgumentNullException("packageEvents");
@@ -139,7 +138,8 @@ namespace NuGet.VisualStudio
 
             if (_repositoryInfo == null || 
                 !_repositoryInfo.Path.Equals(path, StringComparison.OrdinalIgnoreCase) ||
-                !_repositoryInfo.ConfigFolderPath.Equals(configFolderPath, StringComparison.OrdinalIgnoreCase))
+                !_repositoryInfo.ConfigFolderPath.Equals(configFolderPath, StringComparison.OrdinalIgnoreCase) ||
+                _solutionManager.IsSourceControlBound != _repositoryInfo.IsSourceControlBound)
             {
                 IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(path);
                 IFileSystem configSettingsFileSystem = GetConfigSettingsFileSystem(configFolderPath);
@@ -165,6 +165,14 @@ namespace NuGet.VisualStudio
                 FileSystem = fileSystem;
                 Repository = repository;
                 ConfigFolderPath = configFolderPath;
+            }
+
+            public bool IsSourceControlBound
+            {
+                get
+                {
+                    return FileSystem is ISourceControlFileSystem;
+                }
             }
 
             public IFileSystem FileSystem { get; private set; }

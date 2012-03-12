@@ -120,26 +120,8 @@ namespace NuGet.VisualStudio
                 {
                     return null;
                 }
-                // Use .Properties.Item("Path") instead of .FullName because .FullName might not be
-                // available if the solution is just being created
-                string solutionFilePath = null;
 
-                Property property = _dte.Solution.Properties.Item("Path");
-                if (property == null)
-                {
-                    return null;
-                }
-                try
-                {
-                    // When using a temporary solution, (such as by saying File -> New File), querying this value throws.
-                    // Since we wouldn't be able to do manage any packages at this point, we return null. Consumers of this property typically 
-                    // use a String.IsNullOrEmpty check either way, so it's alright.
-                    solutionFilePath = property.Value;
-                }
-                catch (COMException)
-                {
-                    return null;
-                }
+                string solutionFilePath = GetSolutionFilePath();
 
                 if (String.IsNullOrEmpty(solutionFilePath))
                 {
@@ -147,6 +129,55 @@ namespace NuGet.VisualStudio
                 }
                 return Path.GetDirectoryName(solutionFilePath);
             }
+        }
+
+        private string GetSolutionFilePath()
+        {
+            // Use .Properties.Item("Path") instead of .FullName because .FullName might not be
+            // available if the solution is just being created
+            string solutionFilePath = null;
+
+            Property property = _dte.Solution.Properties.Item("Path");
+            if (property == null)
+            {
+                return null;
+            }
+            try
+            {
+                // When using a temporary solution, (such as by saying File -> New File), querying this value throws.
+                // Since we wouldn't be able to do manage any packages at this point, we return null. Consumers of this property typically 
+                // use a String.IsNullOrEmpty check either way, so it's alright.
+                solutionFilePath = property.Value;
+            }
+            catch (COMException)
+            {
+                return null;
+            }
+
+            return solutionFilePath;
+        }
+
+        public bool IsSourceControlBound
+        {
+            get
+            {
+                return GetIsSourceControlBound();
+            }
+        }
+
+        private bool GetIsSourceControlBound()
+        {
+            if (!IsSolutionOpen)
+            {
+                return false;
+            }
+
+            string solutionFilePath = GetSolutionFilePath();
+            Debug.Assert(!String.IsNullOrEmpty(solutionFilePath));
+
+            SourceControl2 sourceControl = (SourceControl2)_dte.SourceControl;
+            return sourceControl != null &&
+                   sourceControl.GetBindings(solutionFilePath) != null;
         }
 
         /// <summary>

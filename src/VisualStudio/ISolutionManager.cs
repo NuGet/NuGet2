@@ -31,5 +31,7 @@ namespace NuGet.VisualStudio
         IEnumerable<Project> GetDependentProjects(Project project);
 
         bool IsSolutionOpen { get; }
+
+        bool IsSourceControlBound { get; }
     }
 }
