@@ -84,5 +84,10 @@ namespace NuGet
         {
             return DateTimeOffset.MinValue;
         }
+ 
+        public DateTimeOffset GetLastAccessed(string path)
+        {
+            return DateTimeOffset.MinValue;
+        }
     }
 }

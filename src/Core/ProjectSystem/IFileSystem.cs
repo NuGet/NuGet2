@@ -19,5 +19,6 @@ namespace NuGet
         Stream OpenFile(string path);
         DateTimeOffset GetLastModified(string path);
         DateTimeOffset GetCreated(string path);
+        DateTimeOffset GetLastAccessed(string path);
     }
 }

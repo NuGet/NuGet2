@@ -8,7 +8,6 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 {
     public class NuGetCommandLineTest : IDisposable, IUseFixture<NugetProgramStatic>
     {
-        private const string DefaultRepoUrl = "https://go.microsoft.com/fwlink/?LinkID=206669";
         private const string NoSpecsfolder = @".\nospecs\";
         private const string OneSpecfolder = @".\onespec\";
         private const string TwoSpecsFolder = @".\twospecs\";
@@ -998,7 +997,8 @@ public class Cl_{0} {{
         [Fact]
         public void PackageCommand_SpecifyingProjectFileAndHaveDependenciesSkipContentFromDependencies()
         {
-            // Arrange  
+            // Arrange
+            string packagePath = SavePackage("Test.ContentPackage", "1.6.4");
             string expectedPackage = "ProjectWithDependenciesWithContent.1.2.0.0.nupkg";
             WriteAssemblyInfo("ProjectWithDependenciesWithContent",
                                "1.2.0.0",
@@ -1006,47 +1006,78 @@ public class Cl_{0} {{
                                  "Project with content",
                                 "Title of Package");
 
-            //add dummy .sln file to let NuGet find the /packages/ folder and dependency package  
+            // add dummy .sln file to let NuGet find the /packages/ folder and dependency package  
             WriteProjectFile("ProjectWithDependenciesWithContent.sln", "");
             WriteProjectFile("foo.aspx", "");
             WriteProjectFile("foo.cs", "public class Foo { }");
-            //packages.config for dependencies  
+            
+            // packages.config for dependencies  
             WriteProjectFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>  
 <packages>  
-   <package id=""jQuery"" version=""1.6.4"" />  
+   <package id=""Test.ContentPackage"" version=""1.6.4"" />  
 </packages>");
 
-            //added by jquery-package, but we have done local changes to this file 
-            WriteProjectFile("Scripts/jQuery-1.6.4.js", @"This is a file that is changed in this project. Therefore this file should be included in this package!");
+            // added by Test.ContentPackage, but we have done local changes to this file 
+            WriteProjectFile("MyContentFile.js", 
+                @"This is a file that is changed in this project. Therefore this file should be included in this package!");
 
-            CreateProject("ProjectWithDependenciesWithContent", 
-                          content: new[] { "foo.aspx", "packages.config", "Scripts/jquery-1.6.4.min.js", "Scripts/jquery-1.6.4.js", "Scripts/jquery-1.6.4-vsdoc.js" },
+            CreateProject("ProjectWithDependenciesWithContent",
+                          content: new[] { "foo.aspx", "packages.config", "MyContentFile.js", "MyContentFile2.js" },
                           compile: new[] { "foo.cs" });
 
             Directory.SetCurrentDirectory(ProjectFilesFolder);
 
             // Act  
 
-            //install packages from packages.config  
-            int result = Program.Main(new[] { "install", "packages.config", "-OutputDirectory", "packages", "-source", DefaultRepoUrl });
+            // install packages from packages.config  
+            Program.Main(new[] { "install", "packages.config", "-OutputDirectory", "packages", "-source", Path.GetDirectoryName(packagePath) });
 
-            //copy content from jquery package (to ensure no changes to the file)
-            File.Copy(@"packages\jQuery.1.6.4\Content\Scripts\jquery-1.6.4.min.js", @"Scripts\jquery-1.6.4.min.js");
-            File.Copy(@"packages\jQuery.1.6.4\Content\Scripts\jquery-1.6.4-vsdoc.js", @"Scripts\jquery-1.6.4-vsdoc.js");
+            // copy content from the test package (to ensure no changes to the file)
+            File.Copy(@"packages\Test.ContentPackage.1.6.4\Content\MyContentFile2.js", @"MyContentFile2.js");
 
-            //execute main program (pack)
-            result = Program.Main(new[] { "pack", "ProjectWithDependenciesWithContent.csproj", "-Build", "-Verbose" });
+            // execute main program (pack)
+            int result = Program.Main(new[] { "pack", "ProjectWithDependenciesWithContent.csproj", "-Build", "-Verbose" });
 
             // Assert  
             Assert.Equal(0, result);
             Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
             Assert.True(File.Exists(expectedPackage));
 
-            //package should not contain content from jquery package that we have not changed
-            var package = VerifyPackageContents(expectedPackage, new[] { @"content\foo.aspx", @"content\Scripts\jquery-1.6.4.js", @"lib\net40\ProjectWithDependenciesWithContent.dll" });
-            var dependencies = package.Dependencies.ToList();
-            Assert.Equal(1, dependencies.Count);
-            Assert.Equal("jQuery", dependencies[0].Id);
+            // package should not contain content from jquery package that we have not changed
+            var package = VerifyPackageContents(expectedPackage, new[] { @"content\foo.aspx", @"content\MyContentFile.js", 
+                                                                         @"lib\net40\ProjectWithDependenciesWithContent.dll" });
+            Assert.Equal("Test.ContentPackage", package.Dependencies.Single().Id);
+        }
+
+        private static string SavePackage(string id, string version)
+        {
+            string tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(tempPath);
+            var builder = new PackageBuilder();
+            builder.Id = id;
+            builder.Version = new SemanticVersion(version);
+            builder.Description = "test desc";
+            builder.Authors.Add("test");
+
+            File.WriteAllText(Path.Combine(tempPath, "MyContentFile.js"), "My content file text");
+            builder.Files.Add(new PhysicalPackageFile
+            {
+                SourcePath = Path.Combine(tempPath, "MyContentFile.js"),
+                TargetPath = @"content\MyContentFile.js"
+            });
+            File.WriteAllText(Path.Combine(tempPath, "MyContentFile2.js"), "My content file2 text");
+            builder.Files.Add(new PhysicalPackageFile
+            {
+                SourcePath = Path.Combine(tempPath, "MyContentFile2.js"),
+                TargetPath = @"content\MyContentFile2.js"
+            });
+
+            string packagePath = Path.Combine(tempPath, id + "." + version + ".nupkg");
+            using (var stream = File.Create(packagePath))
+            {
+                builder.Save(stream);
+            }
+            return packagePath;
         }
 
         [Fact]

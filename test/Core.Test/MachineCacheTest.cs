@@ -11,7 +11,7 @@ namespace NuGet.Test
     public class MachineCacheTest
     {
         [Fact]
-        public void AddingMoreThanPackageLimitClearsCache()
+        public void AddingMoreThanPackageLimitRemovesExcessFiles()
         {
             // Arrange
             var mockFileSystem = new MockFileSystem();
@@ -21,11 +21,14 @@ namespace NuGet.Test
                 cache.AddPackage(PackageUtility.CreatePackage("A", i + ".0"));
             }
 
+            // Assert - 1
+            Assert.Equal(100, cache.GetPackageFiles().Count());
+
             // Act
             cache.AddPackage(PackageUtility.CreatePackage("B"));
 
             // Assert
-            Assert.Equal(1, cache.GetPackageFiles().Count());
+            Assert.Equal(81, cache.GetPackageFiles().Count());
         }
 
         [Fact]
@@ -54,13 +57,6 @@ namespace NuGet.Test
                           .Throws(new UnauthorizedAccessException("Can't touch me."))
                           .Verifiable();
 
-            mockFileSystem.Setup(f => f.FileExists(It.IsAny<string>()))
-                          .Returns(true)
-                          .Verifiable();
-
-            mockFileSystem.Setup(f => f.DeleteFile(It.IsAny<string>()))
-                          .Throws(new UnauthorizedAccessException("Can't touch me."))
-                          .Verifiable();
             var cache = new MachineCache(mockFileSystem.Object);
 
             // Act

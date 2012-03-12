@@ -186,5 +186,10 @@ namespace NuGet.Test.Mocks
         {
             return DateTime.UtcNow;
         }
+
+        public virtual DateTimeOffset GetLastAccessed(string path)
+        {
+            return DateTime.UtcNow;
+        }
     }
 }

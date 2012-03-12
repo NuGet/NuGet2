@@ -11,8 +11,11 @@ namespace NuGet
     /// </summary>
     public class MachineCache : LocalPackageRepository
     {
-        // Maximum number of packages that can live in this cache.
+        /// <summary>
+        /// Maximum number of packages that can live in this cache.
+        /// </summary>
         private const int MaxPackages = 100;
+        
         private const string NuGetCachePathEnvironmentVariable = "NuGetCachePath";
 
         private static readonly Lazy<MachineCache> _instance = new Lazy<MachineCache>(() => CreateDefault(GetCachePath));
@@ -57,20 +60,19 @@ namespace NuGet
 
         public override void AddPackage(IPackage package)
         {
-            // If we exceed the package count then clear the cache
+            // If we exceed the package count then clear the cache.
             var files = GetPackageFiles().ToList();
             if (files.Count >= MaxPackages)
             {
-                TryClear(files.ToList());
+                // It's expensive to hit the file system to get the last accessed date for files
+                // To reduce this cost from occuring frequently, we'll purge packages in batches allowing for a 20% buffer.
+                var filesToDelete = files.OrderBy(FileSystem.GetLastAccessed)
+                                         .Take(files.Count - (int)(0.8 * MaxPackages))
+                                         .ToList();
+                TryClear(filesToDelete);
             }
 
-            // We don't want to call RemovePackage here since that does a lot more than we need to
             string path = GetPackageFilePath(package);
-            if (FileSystem.FileExists(path))
-            {
-                TryAct(() => FileSystem.DeleteFile(path));
-            }
-
             using (var stream = package.GetStream())
             {
                 TryAct(() => FileSystem.AddFile(path, stream));
@@ -104,7 +106,7 @@ namespace NuGet
         /// Determines the cache path to use for NuGet.exe. By default, NuGet caches files under %LocalAppData%\NuGet\Cache.
         /// This path can be overridden by specifying a value in the NuGetCachePath environment variable.
         /// </summary>
-        private static string GetCachePath() {
+        internal static string GetCachePath() {
             return GetCachePath(Environment.GetEnvironmentVariable, Environment.GetFolderPath);
         }
 
