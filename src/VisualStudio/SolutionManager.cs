@@ -176,8 +176,18 @@ namespace NuGet.VisualStudio
             Debug.Assert(!String.IsNullOrEmpty(solutionFilePath));
 
             SourceControl2 sourceControl = (SourceControl2)_dte.SourceControl;
-            return sourceControl != null &&
-                   sourceControl.GetBindings(solutionFilePath) != null;
+            if (sourceControl != null)
+            {
+                try
+                {
+                    return sourceControl.GetBindings(solutionFilePath) != null;
+                }
+                catch (NotImplementedException)
+                {
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
