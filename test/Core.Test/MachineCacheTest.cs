@@ -8,7 +8,6 @@ using Xunit;
 
 namespace NuGet.Test
 {
-
     public class MachineCacheTest
     {
         [Fact]

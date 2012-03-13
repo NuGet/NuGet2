@@ -3,10 +3,26 @@ namespace NuGet
 {
     public interface IPackageManager
     {
+        /// <summary>
+        /// File system used to perform local operations in.
+        /// </summary>
         IFileSystem FileSystem { get; set; }
+
+        /// <summary>
+        /// Local repository to install and reference packages.
+        /// </summary>
         IPackageRepository LocalRepository { get; }
+
         ILogger Logger { get; set; }
+        
+        /// <summary>
+        /// Remote repository to install packages from.
+        /// </summary>
         IPackageRepository SourceRepository { get; }
+
+        /// <summary>
+        /// PathResolver used to determine paths for installed packages.
+        /// </summary>
         IPackagePathResolver PathResolver { get; }
 
         event EventHandler<PackageOperationEventArgs> PackageInstalled;

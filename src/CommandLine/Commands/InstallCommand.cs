@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using NuGet.Common;
 
 namespace NuGet.Commands
@@ -177,19 +179,22 @@ namespace NuGet.Commands
                         packageManager.UninstallPackage(installedPackage, forceRemove: false, removeDependencies: true);
                     }
                 }
-            } 
+            }
             else if (version != null)
             {
                 // If we know exactly what package to lookup, check if it's already installed locally. 
                 // We'll do this by checking if the package directory exists on disk.
                 var localRepository = packageManager.LocalRepository as LocalPackageRepository;
-                Debug.Assert(localRepository != null, "The PackageManager's local repository instance is necessary a LocalPackageRepository instance.");
+                Debug.Assert(localRepository != null, "The PackageManager's local repository instance is necessarily a LocalPackageRepository instance.");
                 if (IsPackageInstalled(localRepository, packageManager.FileSystem, packageId, version))
                 {
                     return false;
                 }
             }
-            packageManager.InstallPackage(packageId, version, ignoreDependencies: ignoreDependencies, allowPrereleaseVersions: Prerelease);
+            // During package restore with parallel build, multiple projects would try to write to disk simultaneously which results in write contentions.
+            // We work around this issue by ensuring only one instance of the exe installs the package.
+            var uniqueToken = GenerateUniqueToken(packageManager, packageId, version);
+            ExecuteLocked(uniqueToken, () => packageManager.InstallPackage(packageId, version, ignoreDependencies: ignoreDependencies, allowPrereleaseVersions: Prerelease));
             return true;
         }
 
@@ -227,6 +232,46 @@ namespace NuGet.Commands
         {
             var packagePaths = packageRepository.GetPackageLookupPaths(packageId, version);
             return packagePaths.Any(fileSystem.FileExists);
+        }
+
+        /// <summary>
+        /// We want to base the lock name off of the full path of the package, however, the Mutex looks for files on disk if a path is given.
+        /// Additionally, it also fails if the string is longer than 256 characters. Therefore we obtain a base-64 encoded hash of the path.
+        /// </summary>
+        /// <seealso cref="http://social.msdn.microsoft.com/forums/en-us/clr/thread/D0B3BF82-4D23-47C8-8706-CC847157AC81"/>
+        private static string GenerateUniqueToken(IPackageManager packageManager, string packageId, SemanticVersion version)
+        {
+            var packagePath = packageManager.FileSystem.GetFullPath(packageManager.PathResolver.GetPackageFileName(packageId, version));
+            var pathBytes = Encoding.UTF8.GetBytes(packagePath);
+            var hashProvider = new CryptoHashProvider("SHA1");
+
+            return Convert.ToBase64String(hashProvider.CalculateHash(pathBytes)).ToUpperInvariant();
+        }
+
+        private static void ExecuteLocked(string name, Action action)
+        {
+            bool created;
+            using (var mutex = new Mutex(initiallyOwned: true, name: name, createdNew: out created))
+            {
+                // We need to ensure only one instance of the executable performs the install. All other instances need to wait 
+                // for the package to be installed. We'd cap the waiting duration so that other instances aren't waiting indefinitely.
+                if (created)
+                {
+                    try
+                    {
+                        action();
+                    }
+                    finally
+                    {
+                        mutex.ReleaseMutex();
+                    }
+                }
+                else
+                {
+                    // 
+                    mutex.WaitOne(TimeSpan.FromSeconds(30));
+                }
+            }
         }
     }
 }
