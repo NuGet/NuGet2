@@ -139,6 +139,27 @@ namespace NuGet
             SaveDocument(document);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Justification="I know what I'm doing.")]
+        public bool GetEntryVersion(string id, out SemanticVersion version)
+        {
+            version = null;
+
+            XDocument document = GetDocument();
+            if (document == null)
+            {
+                return false;
+            }
+
+            XElement element = FindEntry(document, id, version: null);
+            if (element == null)
+            {
+                return false;
+            }
+
+            string versionString = element.GetOptionalAttributeValue("version");
+            return SemanticVersion.TryParse(versionString, out version);
+        }
+
         private static XElement FindEntry(XDocument document, string id, SemanticVersion version)
         {
             if (String.IsNullOrEmpty(id))
@@ -150,7 +171,7 @@ namespace NuGet
                     let entryId = e.GetOptionalAttributeValue("id")
                     let entryVersion = SemanticVersion.ParseOptionalVersion(e.GetOptionalAttributeValue("version"))
                     where entryId != null && entryVersion != null
-                    where id.Equals(entryId, StringComparison.OrdinalIgnoreCase) && entryVersion.Equals(version)
+                    where id.Equals(entryId, StringComparison.OrdinalIgnoreCase) && (version == null || entryVersion.Equals(version))
                     select e).FirstOrDefault();
         }
 
