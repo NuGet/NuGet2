@@ -29,7 +29,8 @@ namespace NuGet.VisualStudio
         {
             get
             {
-                return Path.GetFileName(Path.GetDirectoryName(Project.FullName));
+                string path = Project.GetFullPath();
+                return Path.GetFileName(path);
             }
         }
 
