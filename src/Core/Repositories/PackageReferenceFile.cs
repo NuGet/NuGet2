@@ -172,7 +172,7 @@ namespace NuGet
                     let entryId = e.GetOptionalAttributeValue("id")
                     let entryVersion = SemanticVersion.ParseOptionalVersion(e.GetOptionalAttributeValue("version"))
                     where entryId != null && entryVersion != null
-                    where id.Equals(entryId, StringComparison.OrdinalIgnoreCase) && entryVersion.Equals(version)
+                    where id.Equals(entryId, StringComparison.OrdinalIgnoreCase) && (version == null || entryVersion.Equals(version))
                     select e).FirstOrDefault();
         }
 
@@ -190,7 +190,7 @@ namespace NuGet
             document.Root.RemoveAll();
 
             // Re-add them sorted
-            packageElements.ForEach(e => document.Root.Add(e));
+            document.Root.Add(packageElements);
 
             FileSystem.AddFile(_path, document.Save);
         }
@@ -212,17 +212,15 @@ namespace NuGet
                 // Remove the element from the xml dom
                 element.Remove();
 
-                // Remove the file if there are no more elements
+                // Always try and save the document, this works around a source control issue for solution-level packages.config.
+                SaveDocument(document);
+
                 if (!document.Root.HasElements)
                 {
+                    // Remove the file if there are no more elements
                     FileSystem.DeleteFile(_path);
 
                     return true;
-                }
-                else
-                {
-                    // Otherwise save the updated document
-                    SaveDocument(document);
                 }
             }
 

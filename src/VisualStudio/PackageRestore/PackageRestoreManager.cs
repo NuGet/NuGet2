@@ -93,8 +93,7 @@ namespace NuGet.VisualStudio
                 }
 
                 IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(solutionDirectory);
-                return fileSystem.DirectoryExists(VsConstants.NuGetSolutionSettingsFolder) &&
-                       fileSystem.FileExists(NuGetExeFile) &&
+                return fileSystem.FileExists(NuGetExeFile) &&
                        fileSystem.FileExists(NuGetTargetsFile);
             }
         }
@@ -292,7 +291,7 @@ namespace NuGet.VisualStudio
                 buildProject.Xml.Properties.All(p => p.Name != solutiondir))
             {
                 string relativeSolutionPath = PathUtility.GetRelativePath(
-                    project.FullName, 
+                    project.FullName,
                     PathUtility.EnsureTrailingSlash(_solutionManager.SolutionDirectory));
                 relativeSolutionPath = PathUtility.EnsureTrailingSlash(relativeSolutionPath);
 
@@ -328,19 +327,16 @@ namespace NuGet.VisualStudio
                 !fileSystem.FileExists(NuGetTargetsFile))
             {
                 // download NuGet.Build and NuGet.CommandLine packages into the .nuget folder
-                IPackageRepository nugetRepository = new AggregateRepository(
-                    _packageRepositoryFactory, 
-                    _packageSourceProvider.GetEnabledPackageSources().Select(s => s.Source), 
-                    ignoreFailingRepositories: true);
+                IPackageRepository repository = _packageSourceProvider.GetAggregate(_packageRepositoryFactory, ignoreFailingRepositories: true);
                 var installPackages = new string[] { NuGetBuildPackageName, NuGetCommandLinePackageName };
                 foreach (var packageId in installPackages)
                 {
-                    IPackage package = GetPackage(nugetRepository, packageId);
+                    IPackage package = GetPackage(repository, packageId);
                     if (package == null)
                     {
                         throw new InvalidOperationException(
                             String.Format(
-                                CultureInfo.InvariantCulture,
+                                CultureInfo.CurrentCulture,
                                 VsResources.PackageRestoreDownloadPackageFailed,
                                 packageId));
                     }

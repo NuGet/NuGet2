@@ -60,7 +60,7 @@ namespace NuGet
         {
             base.AddPackage(package);
 
-            if (_packageReferenceFile != null)
+            if (_packageReferenceFile != null && !package.HasProjectContent())
             {
                 _packageReferenceFile.AddEntry(package.Id, package.Version);
             }

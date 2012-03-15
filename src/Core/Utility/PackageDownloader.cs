@@ -13,7 +13,7 @@ namespace NuGet
         public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
         public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
 
-        public virtual IPackage DownloadPackage(Uri uri, IPackageMetadata package)
+        public IPackage DownloadPackage(Uri uri, IPackageMetadata package)
         {
             if (uri == null)
             {

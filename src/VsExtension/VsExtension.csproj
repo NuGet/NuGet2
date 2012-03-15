@@ -125,6 +125,10 @@
       <Project>{53AB7187-CDF3-48B5-B90E-8919D3CB904D}</Project>
       <Name>Options</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TeamFoundationServer10\TeamFoundationServer10.csproj">
+      <Project>{3F786922-B4F3-4C6E-B22F-3D764BA5B3B8}</Project>
+      <Name>TeamFoundationServer10</Name>
+    </ProjectReference>
     <ProjectReference Include="..\VisualStudio.Interop\VisualStudio.Interop.csproj">
       <Project>{7DB43FE1-75E1-49F9-B2C8-06A552BA2144}</Project>
       <Name>VisualStudio.Interop</Name>

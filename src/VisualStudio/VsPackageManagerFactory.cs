@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.Composition;
+using EnvDTE;
 
 namespace NuGet.VisualStudio
 {
@@ -46,7 +47,6 @@ namespace NuGet.VisualStudio
             {
                 throw new ArgumentNullException("repositorySettings");
             }
-
             if (packageEvents == null)
             {
                 throw new ArgumentNullException("packageEvents");
@@ -138,10 +138,11 @@ namespace NuGet.VisualStudio
 
             if (_repositoryInfo == null || 
                 !_repositoryInfo.Path.Equals(path, StringComparison.OrdinalIgnoreCase) ||
-                !_repositoryInfo.ConfigFolderPath.Equals(configFolderPath, StringComparison.OrdinalIgnoreCase))
+                !_repositoryInfo.ConfigFolderPath.Equals(configFolderPath, StringComparison.OrdinalIgnoreCase) ||
+                _solutionManager.IsSourceControlBound != _repositoryInfo.IsSourceControlBound)
             {
                 IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(path);
-                IFileSystem configSettingsFileSystem = _fileSystemProvider.GetFileSystem(configFolderPath);
+                IFileSystem configSettingsFileSystem = GetConfigSettingsFileSystem(configFolderPath);
                 ISharedPackageRepository repository = new SharedPackageRepository(
                     new DefaultPackagePathResolver(fileSystem), fileSystem, configSettingsFileSystem);
 
@@ -149,6 +150,11 @@ namespace NuGet.VisualStudio
             }
 
             return _repositoryInfo;
+        }
+
+        protected internal virtual IFileSystem GetConfigSettingsFileSystem(string configFolderPath)
+        {
+            return new SolutionFolderFileSystem(ServiceLocator.GetInstance<DTE>().Solution, VsConstants.NuGetSolutionSettingsFolder, configFolderPath);
         }
 
         private class RepositoryInfo
@@ -159,6 +165,14 @@ namespace NuGet.VisualStudio
                 FileSystem = fileSystem;
                 Repository = repository;
                 ConfigFolderPath = configFolderPath;
+            }
+
+            public bool IsSourceControlBound
+            {
+                get
+                {
+                    return FileSystem is ISourceControlFileSystem;
+                }
             }
 
             public IFileSystem FileSystem { get; private set; }

@@ -71,7 +71,7 @@ namespace NuGet.VisualStudio
             return solution.Properties.Item("Name").Value;
         }
 
-        public static void AddFolderToSolution(this Solution solution, string solutionFolderName, string physicalFolderPath)
+        public static Project GetSolutionFolder(this Solution solution, string solutionFolderName)
         {
             Solution2 solution2 = (Solution2)solution;
 
@@ -88,10 +88,14 @@ namespace NuGet.VisualStudio
                 {
                     // VWD doesn't allow adding solution folder.
                     // In that case, just silently ignore and return
-                    return;
                 }
             }
+            return project;
+        }
 
+        public static void AddFolderToSolution(this Solution solution, string solutionFolderName, string physicalFolderPath)
+        {
+            var project = solution.GetSolutionFolder(solutionFolderName);
             if (project != null)
             {
                 foreach (string file in Directory.EnumerateFiles(physicalFolderPath))

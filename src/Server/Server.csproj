@@ -109,7 +109,7 @@
         <WebProjectProperties>
           <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>54272</DevelopmentServerPort>
+          <DevelopmentServerPort>1425</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
           <IISUrl>http://localhost:40221/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>

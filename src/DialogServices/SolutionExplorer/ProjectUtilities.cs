@@ -14,13 +14,41 @@ namespace NuGet.Dialog
 {
     internal static class ProjectUtilities
     {
+        private static Lazy<ImageSource> _solutionImage = new Lazy<ImageSource>(GetSolutionImage);
+
+        public static ImageSource SolutionImage 
+        {
+            get
+            {
+                return _solutionImage.Value;
+            }
+        }
+
+        public static ImageSource GetSolutionImage()
+        {
+            IVsSolution solution = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
+            IVsHierarchy solutionHierachy = solution as IVsHierarchy;
+            if (solutionHierachy != null)
+            {
+                return GetImageFromHierarchy(
+                    new HierarchyItemIdentity(solutionHierachy, VSConstants.VSITEMID_ROOT), 
+                    (int)__VSHPROPID.VSHPROPID_IconIndex, 
+                    (int)__VSHPROPID.VSHPROPID_IconHandle);
+            }
+
+            return null;
+        }
+
         public static ImageSource GetImage(Project project)
         {
             IVsSolution solution = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
             IVsHierarchy hierarchy;
             if (ErrorHandler.Succeeded(solution.GetProjectOfUniqueName(project.UniqueName, out hierarchy)))
             {
-                return GetImageFromHierarchy(new HierarchyItemIdentity(hierarchy, VSConstants.VSITEMID_ROOT), (int)__VSHPROPID.VSHPROPID_IconIndex, (int)__VSHPROPID.VSHPROPID_IconHandle);
+                return GetImageFromHierarchy(
+                    new HierarchyItemIdentity(hierarchy, VSConstants.VSITEMID_ROOT), 
+                    (int)__VSHPROPID.VSHPROPID_IconIndex, 
+                    (int)__VSHPROPID.VSHPROPID_IconHandle);
             }
             return null;
         }

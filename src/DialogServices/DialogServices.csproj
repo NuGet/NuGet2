@@ -143,9 +143,6 @@
     <Resource Include="SolutionExplorer\Images\folderopen.png" />
     <Resource Include="SolutionExplorer\Images\folderclose.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Resource Include="SolutionExplorer\Images\solution.png" />
-  </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

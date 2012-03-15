@@ -5,21 +5,29 @@ namespace NuGet.VisualStudio
 {
     public static class VsVersionHelper
     {
-        private static bool? _isVS2010;
+        private const int MaxVsVersion = 11;
+        private static readonly Lazy<int> _vsMajorVersion = new Lazy<int>(GetMajorVsVersion);
+
+        public static int VsMajorVersion
+        {
+            get { return _vsMajorVersion.Value; }
+        }
 
         public static bool IsVisualStudio2010
         {
-            get
-            {
-                if (_isVS2010 == null)
-                {
-                    DTE dte = ServiceLocator.GetInstance<DTE>();
-                    string vsVersion = dte.Version;
-                    _isVS2010 = vsVersion.StartsWith("10", StringComparison.InvariantCultureIgnoreCase);
-                }
+            get { return VsMajorVersion == 10; }
+        }
 
-                return _isVS2010.Value;
+        private static int GetMajorVsVersion()
+        {
+            DTE dte = ServiceLocator.GetInstance<DTE>();
+            string vsVersion = dte.Version;
+            Version version;
+            if (Version.TryParse(vsVersion, out version))
+            {
+                return version.Major;
             }
+            return MaxVsVersion;
         }
     }
 }

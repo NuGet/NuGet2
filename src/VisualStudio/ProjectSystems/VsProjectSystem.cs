@@ -48,6 +48,14 @@ namespace NuGet.VisualStudio
             private set;
         }
 
+        protected IFileSystem BaseFileSystem
+        {
+            get
+            {
+                return _baseFileSystem;
+            }
+        }
+
         public virtual string ProjectName
         {
             get
@@ -106,7 +114,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public void DeleteDirectory(string path, bool recursive = false)
+        public virtual void DeleteDirectory(string path, bool recursive = false)
         {
             // Only delete this folder if it is empty and we didn't specify that we want to recurse
             if (!recursive && (_baseFileSystem.GetFiles(path, "*.*").Any() || _baseFileSystem.GetDirectories(path).Any()))
@@ -371,17 +379,7 @@ namespace NuGet.VisualStudio
                 // This would only matter if we're dealing with PhysicalFileSystem over a source control system that we do not support.
                 return;
             }
-
-            string fullPath = GetFullPath(path);
-            if (FileExists(path) &&
-                Project.DTE.SourceControl != null &&
-                Project.DTE.SourceControl.IsItemUnderSCC(fullPath) &&
-                !Project.DTE.SourceControl.IsItemCheckedOut(fullPath))
-            {
-
-                // Check out the item
-                Project.DTE.SourceControl.CheckOutItem(fullPath);
-            }
+            Project.EnsureCheckedOutIfExists(this, path);
         }
 
         private static bool AssemblyNamesMatch(AssemblyName name1, AssemblyName name2)

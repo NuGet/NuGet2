@@ -40,15 +40,24 @@ namespace NuGet.VisualStudio
                                                                             VsConstants.LightSwitchProjectTypeGuid
                                                                         };
 
+        private static readonly IEnumerable<string> _fileKinds = new[] { VsConstants.VsProjectItemKindPhysicalFile, VsConstants.VsProjectItemKindSolutionItem };
+        private static readonly IEnumerable<string> _folderKinds = new[] { VsConstants.VsProjectItemKindPhysicalFolder };
+
         // List of project types that cannot have references added to them
         private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[] { VsConstants.WixProjectTypeGuid };
         // List of project types that cannot have binding redirects added
         private static readonly string[] _unsupportedProjectTypesForBindingRedirects = new[] { VsConstants.WixProjectTypeGuid, VsConstants.JsProjectTypeGuid, VsConstants.NemerleProjectTypeGuid };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
+        
         // Get the ProjectItems for a folder path
         public static ProjectItems GetProjectItems(this Project project, string folderPath, bool createIfNotExists = false)
         {
+            if (String.IsNullOrEmpty(folderPath))
+            {
+                return project.ProjectItems;
+            }
+
             // Traverse the path to get at the directory
             string[] pathParts = folderPath.Split(PathSeparatorChars, StringSplitOptions.RemoveEmptyEntries);
 
@@ -136,14 +145,14 @@ namespace NuGet.VisualStudio
 
         public static bool TryGetFolder(this ProjectItems projectItems, string name, out ProjectItem projectItem)
         {
-            projectItem = GetProjectItem(projectItems, name, VsConstants.VsProjectItemKindPhysicalFolder);
+            projectItem = GetProjectItem(projectItems, name, _folderKinds);
 
             return projectItem != null;
         }
 
         public static bool TryGetFile(this ProjectItems projectItems, string name, out ProjectItem projectItem)
         {
-            projectItem = GetProjectItem(projectItems, name, VsConstants.VsProjectItemKindPhysicalFile);
+            projectItem = GetProjectItem(projectItems, name, _fileKinds);
 
             if (projectItem == null)
             {
@@ -169,12 +178,12 @@ namespace NuGet.VisualStudio
 
             // If it's not one of the known nested files then we're going to look up prefixes backwards
             // i.e. if we're looking for foo.aspx.cs then we look for foo.aspx then foo.aspx.cs as a nested file
-            ProjectItem parentProjectItem = GetProjectItem(projectItems, parentFileName, VsConstants.VsProjectItemKindPhysicalFile);
+            ProjectItem parentProjectItem = GetProjectItem(projectItems, parentFileName, _fileKinds);
 
             if (parentProjectItem != null)
             {
                 // Now try to find the nested file
-                projectItem = GetProjectItem(parentProjectItem.ProjectItems, name, VsConstants.VsProjectItemKindPhysicalFile);
+                projectItem = GetProjectItem(parentProjectItem.ProjectItems, name, _fileKinds);
             }
             else
             {
@@ -230,12 +239,12 @@ namespace NuGet.VisualStudio
             return project.IsWebProject() ? WebConfig : AppConfig;
         }
 
-        private static ProjectItem GetProjectItem(ProjectItems projectItems, string name, string kind)
+        private static ProjectItem GetProjectItem(this ProjectItems projectItems, string name, IEnumerable<string> allowedItemKinds)
         {
             try
             {
                 ProjectItem projectItem = projectItems.Item(name);
-                if (projectItem != null && kind.Equals(projectItem.Kind, StringComparison.OrdinalIgnoreCase))
+                if (projectItem != null && allowedItemKinds.Contains(projectItem.Kind, StringComparer.OrdinalIgnoreCase))
                 {
                     return projectItem;
                 }
@@ -256,10 +265,10 @@ namespace NuGet.VisualStudio
                 return Enumerable.Empty<ProjectItem>();
             }
 
-            Regex matcher = GetFilterRegex(filter);
+            Regex matcher = filter.Equals("*.*", StringComparison.OrdinalIgnoreCase) ? null : GetFilterRegex(filter);
 
             return from ProjectItem p in projectItems
-                   where kinds.Contains(p.Kind) && matcher.IsMatch(p.Name)
+                   where kinds.Contains(p.Kind) && (matcher == null || matcher.IsMatch(p.Name))
                    select p;
         }
 
@@ -314,7 +323,7 @@ namespace NuGet.VisualStudio
         private static Regex GetFilterRegex(string wildcard)
         {
             string pattern = String.Join(String.Empty, wildcard.Split('.').Select(GetPattern));
-            return new Regex(pattern, RegexOptions.IgnoreCase);
+            return new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
         }
 
         private static string GetPattern(string token)
@@ -379,6 +388,11 @@ namespace NuGet.VisualStudio
         public static bool IsSolutionFolder(this Project project)
         {
             return project.Kind != null && project.Kind.Equals(VsConstants.VsProjectItemKindSolutionFolder, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool IsTopLevelSolutionFolder(this Project project)
+        {
+            return IsSolutionFolder(project) && project.ParentProjectItem == null;
         }
 
         public static bool SupportsReferences(this Project project)
@@ -472,11 +486,11 @@ namespace NuGet.VisualStudio
             }
             else if (!String.IsNullOrEmpty(project.Kind))
             {
-                return new String[] { project.Kind };
+                return new[] { project.Kind };
             }
             else
             {
-                return new String[0];
+                return new string[0];
             }
         }
 
@@ -617,6 +631,20 @@ namespace NuGet.VisualStudio
 
             Project parentProject = project.ParentProjectItem.ContainingProject;
             return parentProject.IsExplicitlyUnsupported();
+        }
+
+        public static void EnsureCheckedOutIfExists(this Project project, IFileSystem fileSystem, string path)
+        {
+            var fullPath = fileSystem.GetFullPath(path);
+            if (fileSystem.FileExists(path) &&
+                project.DTE.SourceControl != null &&
+                project.DTE.SourceControl.IsItemUnderSCC(fullPath) &&
+                !project.DTE.SourceControl.IsItemCheckedOut(fullPath))
+            {
+
+                // Check out the item
+                project.DTE.SourceControl.CheckOutItem(fullPath);
+            }
         }
 
         /// <summary>

@@ -1510,7 +1510,7 @@ function Test-InstallPackageDontMakeExcessiveNetworkRequests
     }
 }
 
-function Test-InstallPackageCreatesSolutionPackagesConfig
+function Test-InstallingSolutionLevelPackagesAddsRecordToSolutionLevelConfig
 {
     param(
         $context
@@ -1520,6 +1520,7 @@ function Test-InstallPackageCreatesSolutionPackagesConfig
     $a = New-ClassLibrary
 
     # Act
+    $a | Install-Package SolutionLevelPkg -version 1.0.0 -source $context.RepositoryRoot
     $a | Install-Package SkypePackage -version 1.0 -source $context.RepositoryRoot
 
     # Assert
@@ -1531,9 +1532,41 @@ function Test-InstallPackageCreatesSolutionPackagesConfig
     Assert-True (Test-Path $configFile)
 
     $content = Get-Content $configFile
-    Assert-AreEqual 4 $content.Length
-    Assert-AreEqual '<?xml version="1.0" encoding="utf-8"?>' $content[0]
-    Assert-AreEqual '<packages>' $content[1]
-    Assert-AreEqual '  <package id="SkypePackage" version="1.0" />' $content[2]
-    Assert-AreEqual '</packages>' $content[3]
+	$expected = @"
+<?xml version="1.0" encoding="utf-8"?> <packages>   <package id="SolutionLevelPkg" version="1.0.0" /> </packages>
+"@
+
+	Assert-AreEqual $expected $content
+}
+
+function Test-InstallingPackageaAfterNuGetDirectoryIsRenamedContinuesUsingDirectory
+{
+    param(
+        $context
+    )
+
+    # Arrange
+	$f = New-SolutionFolder '.nuget'
+    $a = New-ClassLibrary
+	$aName = $a.Name
+
+    # Act
+    $a | Install-Package SkypePackage -version 1.0 -source $context.RepositoryRoot
+	$f.Name = "test"
+	$a | Install-Package SolutionLevelPkg -version 1.0.0 -source $context.RepositoryRoot
+
+    # Assert
+    $solutionFile = Get-SolutionPath
+    $solutionDir = Split-Path $solutionFile -Parent
+
+    $configFile = "$solutionDir\.nuget\packages.config"
+    
+    Assert-True (Test-Path $configFile)
+
+    $content = Get-Content $configFile
+	$expected = @"
+<?xml version="1.0" encoding="utf-8"?> <packages>   <package id="SolutionLevelPkg" version="1.0.0" /> </packages>
+"@
+
+	Assert-AreEqual $expected $content
 }

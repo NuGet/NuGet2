@@ -71,5 +71,10 @@ namespace NuGet.VisualStudio.Test.Mocks
         {
             throw new NotImplementedException();
         }
+
+        public bool IsSourceControlBound
+        {
+            get { return false; }
+        }
     }
 }

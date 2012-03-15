@@ -73,6 +73,18 @@ namespace NuGet.Dialog.Providers
 
             // the specified package can be updated if the local repository contains a package 
             // with matching id and smaller version number.
+
+            // Optimization due to bug #2008: if the LocalRepository is backed by a packages.config file, 
+            // check the packages information directly from the file, instead of going through
+            // the IPackageRepository interface, which could potentially connect to TFS.
+            var packageLookup = LocalRepository as ILatestPackageLookup;
+            if (packageLookup != null)
+            {
+                SemanticVersion localPackageVersion; 
+                return packageLookup.TryFindLatestPackageById(item.Id, out localPackageVersion) &&
+                       localPackageVersion < package.Version;
+            }
+            
             return LocalRepository.GetPackages().Any(
                 p => p.Id.Equals(package.Id, StringComparison.OrdinalIgnoreCase) && p.Version < package.Version);
         }

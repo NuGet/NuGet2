@@ -77,6 +77,18 @@ namespace NuGet.Dialog.Providers
             }
         }
 
+        internal override bool IncludePrerelease
+        {
+            get
+            {
+                // we always shows prerelease packages in the Installed tab
+                return true;
+            }
+            set
+            {
+            }
+        }
+
         public override bool RefreshOnNodeSelection
         {
             get

@@ -117,7 +117,7 @@ namespace NuGet.Dialog.Providers
             }
         }
 
-        internal bool IncludePrerelease
+        internal virtual bool IncludePrerelease
         {
             get;
             set;
