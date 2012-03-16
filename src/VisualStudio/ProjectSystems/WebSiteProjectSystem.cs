@@ -92,9 +92,8 @@ namespace NuGet.VisualStudio
             return false;
         }
 
-        public override void BeginProcessing(IEnumerable<string> batch, PackageAction action)
+        public void BeginProcessing(IEnumerable<string> batch, PackageAction action)
         {
-            base.BeginProcessing(batch, action);
             var files = batch.OrderBy(path => path)
                              .ToList();
 
@@ -116,9 +115,8 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public override void EndProcessing()
+        public void EndProcessing()
         {
-            base.EndProcessing();
             _excludedCodeFiles.Clear();
         }
 
