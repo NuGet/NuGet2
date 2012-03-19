@@ -1002,6 +1002,56 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void LocalizedIntelliSenseFileCountsAsProjectTarget()
+        {
+            // Arrange
+            var mockRepository = new MockPackageRepository();
+            var walker = new TestWalker(mockRepository);
+
+            IPackage runtimePackage = PackageUtility.CreatePackage("A", "1.0",
+                                                            assemblyReferences: new[] { @"lib\A.dll", @"lib\A.xml" });
+
+            IPackage satellitePackage = PackageUtility.CreatePackage("A.fr-fr", "1.0",
+                                                            dependencies: new[] { new PackageDependency("A") },
+                                                            satelliteAssemblies: new[] { @"lib\fr-fr\A.xml" },
+                                                            language: "fr-fr");
+
+            mockRepository.AddPackage(runtimePackage);
+            mockRepository.AddPackage(satellitePackage);
+
+            // Act
+            walker.Walk(satellitePackage);
+
+            // Assert
+            Assert.Equal(PackageTargets.Project, walker.GetPackageInfo(satellitePackage).Target);
+        }
+
+        [Fact]
+        public void AfterPackageWalkSatellitePackageIsClassifiedTheSameAsDependencies()
+        {
+            // Arrange
+            var mockRepository = new MockPackageRepository();
+            var walker = new TestWalker(mockRepository);
+
+            IPackage runtimePackage = PackageUtility.CreatePackage("A", "1.0",
+                                                            assemblyReferences: new[] { @"lib\A.dll" });
+
+            IPackage satellitePackage = PackageUtility.CreatePackage("A.fr-fr", "1.0",
+                                                            dependencies: new[] { new PackageDependency("A") },
+                                                            satelliteAssemblies: new[] { @"lib\fr-fr\A.resources.dll" },
+                                                            language: "fr-fr");
+
+            mockRepository.AddPackage(runtimePackage);
+            mockRepository.AddPackage(satellitePackage);
+
+            // Act
+            walker.Walk(satellitePackage);
+
+            // Assert
+            Assert.Equal(PackageTargets.Project, walker.GetPackageInfo(satellitePackage).Target);
+        }
+
+        [Fact]
         public void MetaPackageWithMixedTargetsThrows()
         {
             // Arrange

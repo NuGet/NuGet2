@@ -25,9 +25,13 @@ namespace NuGet.Test
                                               string description = null,
                                               string summary = null,
                                               bool listed = true,
-                                              string tags = "")
+                                              string tags = "",
+                                              string language = null,
+                                              IEnumerable<string> satelliteAssemblies = null)
         {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
+            satelliteAssemblies = satelliteAssemblies ?? Enumerable.Empty<string>();
+
             return CreatePackage(id,
                                  version,
                                  content,
@@ -38,7 +42,9 @@ namespace NuGet.Test
                                  description,
                                  summary,
                                  listed,
-                                 tags);
+                                 tags,
+                                 language,
+                                 CreateAssemblyReferences(satelliteAssemblies));
         }
 
         public static IPackage CreatePackage(string id,
@@ -53,8 +59,38 @@ namespace NuGet.Test
                                               bool listed,
                                               string tags)
         {
+            return CreatePackage(id,
+                                 version,
+                                 content,
+                                 assemblyReferences,
+                                 tools,
+                                 dependencies,
+                                 downloadCount,
+                                 description,
+                                 summary,
+                                 listed,
+                                 tags,
+                                 language: null,
+                                 satelliteAssemblies: null);
+        }
+
+        public static IPackage CreatePackage(string id,
+                                              string version,
+                                              IEnumerable<string> content,
+                                              IEnumerable<IPackageAssemblyReference> assemblyReferences,
+                                              IEnumerable<string> tools,
+                                              IEnumerable<PackageDependency> dependencies,
+                                              int downloadCount,
+                                              string description,
+                                              string summary,
+                                              bool listed,
+                                              string tags,
+                                              string language,
+                                              IEnumerable<IPackageAssemblyReference> satelliteAssemblies)
+        {
             content = content ?? Enumerable.Empty<string>();
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>();
+            satelliteAssemblies = satelliteAssemblies ?? Enumerable.Empty<IPackageAssemblyReference>();
             dependencies = dependencies ?? Enumerable.Empty<PackageDependency>();
             tools = tools ?? Enumerable.Empty<string>();
             description = description ?? "Mock package " + id;
@@ -63,6 +99,7 @@ namespace NuGet.Test
             allFiles.AddRange(CreateFiles(content, "content"));
             allFiles.AddRange(CreateFiles(tools, "tools"));
             allFiles.AddRange(assemblyReferences);
+            allFiles.AddRange(satelliteAssemblies);
 
             var mockPackage = new Mock<IPackage>(MockBehavior.Strict) { CallBase = true };
             mockPackage.Setup(m => m.IsAbsoluteLatestVersion).Returns(true);
@@ -85,6 +122,7 @@ namespace NuGet.Test
             mockPackage.Setup(m => m.DownloadCount).Returns(downloadCount);
             mockPackage.Setup(m => m.RequireLicenseAcceptance).Returns(false);
             mockPackage.Setup(m => m.Listed).Returns(listed);
+            mockPackage.Setup(m => m.Language).Returns(language);
             if (!listed)
             {
                 mockPackage.Setup(m => m.Published).Returns(Constants.Unpublished);

@@ -136,7 +136,98 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void UnInstallingPackageUninstallsPackageButNotDependencies()
+        public void InstallPackageCopiesSatellitePackageFilesIntoRuntimePackageFolderWhenRuntimeIsInstalledAsADependency()
+        {
+            // Arrange
+            // Create a runtime package and a satellite package that has a dependency on the runtime package, and uses the
+            // local suffix convention.
+            var runtimePackage = PackageUtility.CreatePackage("foo", "1.0.0", assemblyReferences: new[] { @"lib\foo.dll" });
+
+            var satellitePackage = PackageUtility.CreatePackage("foo.ja-jp", "1.0.0", language: "ja-jp",
+                                                    satelliteAssemblies: new[] { @"lib\ja-jp\foo.resources.dll", @"lib\ja-jp\foo.xml" },
+                                                    dependencies: new[] { new PackageDependency("foo") });
+
+            var fileSystem = new MockFileSystem();
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, localRepository);
+            sourceRepository.AddPackage(runtimePackage);
+            sourceRepository.AddPackage(satellitePackage);
+
+            // Act
+            packageManager.InstallPackage("foo.ja-jp");
+
+            // Assert
+            Assert.True(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\foo.dll"));
+            Assert.True(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
+            Assert.True(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\ja-jp\foo.xml"));
+            Assert.True(fileSystem.Paths.ContainsKey(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
+        }
+
+        [Fact]
+        public void InstallPackageCopiesSatellitePackageFilesIntoRuntimePackageFolderWhenRuntimeIsAlreadyInstalled()
+        {
+            // Arrange
+            // Create a runtime package and a satellite package that has a dependency on the runtime package, and uses the
+            // local suffix convention.
+            var runtimePackage = PackageUtility.CreatePackage("foo", "1.0.0", assemblyReferences: new[] { @"lib\foo.dll" });
+
+            var satellitePackage = PackageUtility.CreatePackage("foo.ja-jp", "1.0.0", language: "ja-jp",
+                                                    satelliteAssemblies: new[] { @"lib\ja-jp\foo.resources.dll", @"lib\ja-jp\foo.xml" },
+                                                    dependencies: new[] { new PackageDependency("foo") });
+
+            var fileSystem = new MockFileSystem();
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, localRepository);
+            sourceRepository.AddPackage(runtimePackage);
+            sourceRepository.AddPackage(satellitePackage);
+
+            // Act
+            packageManager.InstallPackage("foo");
+            packageManager.InstallPackage("foo.ja-jp");
+
+            // Assert
+            Assert.True(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\foo.dll"));
+            Assert.True(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
+            Assert.True(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\ja-jp\foo.xml"));
+            Assert.True(fileSystem.Paths.ContainsKey(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
+        }
+
+        [Fact]
+        public void UninstallingPackageRemovesSatellitePackageFilesFromRuntimePackageFolder()
+        {
+            // Arrange
+            // Create a runtime package and a satellite package that has a dependency on the runtime package, and uses the
+            // local suffix convention.
+            var runtimePackage = PackageUtility.CreatePackage("foo", "1.0.0", assemblyReferences: new[] { @"lib\foo.dll" });
+
+            var satellitePackage = PackageUtility.CreatePackage("foo.ja-jp", "1.0.0", language: "ja-jp",
+                                                    satelliteAssemblies: new[] { @"lib\ja-jp\foo.resources.dll", @"lib\ja-jp\foo.xml" },
+                                                    dependencies: new[] { new PackageDependency("foo") });
+
+            var fileSystem = new MockFileSystem();
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, localRepository);
+            sourceRepository.AddPackage(runtimePackage);
+            sourceRepository.AddPackage(satellitePackage);
+
+            // Act
+            packageManager.InstallPackage("foo");
+            packageManager.InstallPackage("foo.ja-jp");
+
+            packageManager.UninstallPackage("foo.ja-jp");
+
+            // Assert
+            Assert.True(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\foo.dll"));
+            Assert.False(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
+            Assert.False(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\ja-jp\foo.xml"));
+            Assert.False(fileSystem.Paths.ContainsKey(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
+        }
+
+        [Fact]
+        public void UninstallingPackageUninstallsPackageButNotDependencies()
         {
             // Arrange
             var localRepository = new MockPackageRepository();

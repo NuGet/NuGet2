@@ -45,6 +45,11 @@ namespace NuGet
             return package.GetFiles(Constants.ContentDirectory);
         }
 
+        public static IEnumerable<IPackageFile> GetLibFiles(this IPackage package)
+        {
+            return package.GetFiles(Constants.LibDirectory);
+        }
+
         public static IEnumerable<PackageIssue> Validate(this IPackage package, IEnumerable<IPackageRule> rules)
         {
             if (package == null)
@@ -81,7 +86,8 @@ namespace NuGet
         {
             return package.FrameworkAssemblies.Any() ||
                    package.AssemblyReferences.Any() ||
-                   package.GetContentFiles().Any();
+                   package.GetContentFiles().Any() ||
+                   package.GetLibFiles().Any();
         }
 
         public static IEnumerable<FrameworkName> GetSupportedFrameworks(this IPackage package)
