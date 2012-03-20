@@ -199,15 +199,61 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void InstallPackageCopiesSatellitePackageFilesOverwritingRuntimePackageFiles()
+        {
+            // Arrange
+            // Create a runtime package and a satellite package that has a dependency on the runtime package, and uses the
+            // local suffix convention.
+            var runtimePackage = PackageUtility.CreatePackage("foo", "1.0.0", content: new[] { @"index.htm", "english.htm" });
+
+            var satellitePackage = PackageUtility.CreatePackage("foo.ja-jp", "1.0.0", language: "ja-jp",
+                                                    content: new[] { @"index.htm", "japanese.htm" },
+                                                    dependencies: new[] { new PackageDependency("foo") });
+
+            var fileCounts = new Dictionary<string, int>();
+            var projectSystem = new Mock<IProjectSystem>();
+            projectSystem.Setup(p => p.Root).Returns(@"C:\MockProjectSystem");
+            projectSystem.Setup(p => p.AddFile(It.IsAny<string>(), It.IsAny<Stream>())).Callback<String, Stream>((f, s) =>
+            {
+                if (fileCounts.ContainsKey(f))
+                {
+                    fileCounts[f] += 1;
+                }
+                else
+                {
+                    fileCounts.Add(f, 1);
+                }
+            });
+
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object, localRepository);
+            sourceRepository.AddPackage(runtimePackage);
+            sourceRepository.AddPackage(satellitePackage);
+
+            // Act
+            packageManager.InstallPackage("foo");
+            packageManager.InstallPackage("foo.ja-jp");
+
+            // Assert
+            Assert.Equal(2, fileCounts[@"foo.1.0.0\content\index.htm"]);
+            Assert.Equal(1, fileCounts[@"foo.1.0.0\content\english.htm"]);
+            Assert.Equal(1, fileCounts[@"foo.1.0.0\content\japanese.htm"]);
+            Assert.Equal(1, fileCounts[@"foo.ja-jp.1.0.0\content\index.htm"]);
+            Assert.Equal(1, fileCounts[@"foo.ja-jp.1.0.0\content\japanese.htm"]);
+        }
+
+        [Fact]
         public void UninstallingPackageRemovesSatellitePackageFilesFromRuntimePackageFolder()
         {
             // Arrange
             // Create a runtime package and a satellite package that has a dependency on the runtime package, and uses the
             // local suffix convention.
-            var runtimePackage = PackageUtility.CreatePackage("foo", "1.0.0", assemblyReferences: new[] { @"lib\foo.dll" });
+            var runtimePackage = PackageUtility.CreatePackage("foo", "1.0.0", assemblyReferences: new[] { @"lib\foo.dll" }, content: new[] { @"index.htm" });
 
             var satellitePackage = PackageUtility.CreatePackage("foo.ja-jp", "1.0.0", language: "ja-jp",
                                                     satelliteAssemblies: new[] { @"lib\ja-jp\foo.resources.dll", @"lib\ja-jp\foo.xml" },
+                                                    content: new[] { @"index.htm" },
                                                     dependencies: new[] { new PackageDependency("foo") });
 
             var projectSystem = new MockProjectSystem();
@@ -230,6 +276,7 @@ namespace NuGet.Test
             Assert.False(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.xml"));
             Assert.False(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.resources.dll"));
             Assert.False(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
+            Assert.False(projectSystem.FileExists(@"foo.1.0.0\content\index.htm"));
         }
 
         [Fact]
