@@ -302,4 +302,13 @@ Packages installed into Website projects will not be restored during build. Cons
   <data name="PackageRestoreErrorTryAgain" xml:space="preserve">
     <value>An error occurred while trying to restore packages. Please try again.</value>
   </data>
+  <data name="TemplateWizard_InvalidRegistryValue" xml:space="preserve">
+    <value>The project template has a reference to a missing Registry value. Could not find a Registry key with name '{0}' under '{1}'.</value>
+  </data>
+  <data name="TemplateWizard_MissingRegistryKeyName" xml:space="preserve">
+    <value>The project template is configured to use a Registry-provided package repository but the Registry value name has not been specified. Use the "keyName" attribute to specify the Registry value.</value>
+  </data>
+  <data name="TemplateWizard_RegistryKeyError" xml:space="preserve">
+    <value>The project template is configured to use a Registry-provided package repository but there was an error accessing Registry key '{0}'.</value>
+  </data>
 </root>

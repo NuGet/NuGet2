@@ -11,12 +11,15 @@ using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TemplateWizard;
 using NuGet.VisualStudio.Resources;
+using System.Diagnostics;
 
 namespace NuGet.VisualStudio
 {
     [Export(typeof(IVsTemplateWizard))]
     public class VsTemplateWizard : IVsTemplateWizard
     {
+        private const string RegistryKeyRoot = @"SOFTWARE\NuGet\Repository";
+
         private readonly IVsPackageInstaller _installer;
         private readonly IVsWebsiteHandler _websiteHandler;
         private VsTemplateWizardInstallerConfiguration _configuration;
@@ -39,7 +42,8 @@ namespace NuGet.VisualStudio
             return GetConfigurationFromXmlDocument(document, vsTemplatePath);
         }
 
-        internal VsTemplateWizardInstallerConfiguration GetConfigurationFromXmlDocument(XDocument document, string vsTemplatePath, object vsExtensionManager = null)
+        internal VsTemplateWizardInstallerConfiguration GetConfigurationFromXmlDocument(XDocument document, string vsTemplatePath,
+            object vsExtensionManager = null, IEnumerable<IRegistryKey> registryKeys = null)
         {
             IEnumerable<VsTemplateWizardPackageInfo> packages = Enumerable.Empty<VsTemplateWizardPackageInfo>();
             string repositoryPath = null;
@@ -57,7 +61,7 @@ namespace NuGet.VisualStudio
                 if (packages.Any())
                 {
                     repositoryPath = GetRepositoryPath(packagesElement, repositoryType, vsTemplatePath,
-                        vsExtensionManager);
+                        vsExtensionManager, registryKeys);
                 }
             }
 
@@ -79,7 +83,7 @@ namespace NuGet.VisualStudio
                                                  String.IsNullOrWhiteSpace(declaration.id) ||
                                                  String.IsNullOrWhiteSpace(declaration.version) ||
                                                  !SemanticVersion.TryParse(declaration.version, out semVer) ||
-                                                 (declaration.createRefreshFilesInBin != null && 
+                                                 (declaration.createRefreshFilesInBin != null &&
                                                   !Boolean.TryParse(declaration.createRefreshFilesInBin, out createRefreshFilesInBinValue))
                                              select declaration;
 
@@ -92,39 +96,111 @@ namespace NuGet.VisualStudio
 
             return from declaration in declarations
                    select new VsTemplateWizardPackageInfo(
-                       declaration.id, 
-                       declaration.version, 
+                       declaration.id,
+                       declaration.version,
                        declaration.createRefreshFilesInBin != null && Boolean.Parse(declaration.createRefreshFilesInBin)
                     );
         }
 
-        private string GetRepositoryPath(XElement packagesElement, RepositoryType repositoryType, string vsTemplatePath, object vsExtensionManager)
+        private string GetRepositoryPath(XElement packagesElement, RepositoryType repositoryType, string vsTemplatePath,
+            object vsExtensionManager, IEnumerable<IRegistryKey> registryKeys)
         {
             switch (repositoryType)
             {
                 case RepositoryType.Template:
                     return Path.GetDirectoryName(vsTemplatePath);
+
                 case RepositoryType.Extension:
-                    string repositoryId = packagesElement.GetOptionalAttributeValue("repositoryId");
-                    if (repositoryId == null)
-                    {
-                        ShowErrorMessage(VsResources.TemplateWizard_MissingExtensionId);
-                        throw new WizardBackoutException();
-                    }
+                    return GetExtensionRepositoryPath(packagesElement, vsExtensionManager);
 
-
-                    var extensionManagerShim = new ExtensionManagerShim(vsExtensionManager);
-                    string installPath;
-                    if (!extensionManagerShim.TryGetExtensionInstallPath(repositoryId, out installPath))
-                    {
-                        ShowErrorMessage(String.Format(VsResources.TemplateWizard_InvalidExtensionId,
-                            repositoryId));
-                        throw new WizardBackoutException();
-                    }
-                    return Path.Combine(installPath, "Packages");
+                case RepositoryType.Registry:
+                    return GetRegistryRepositoryPath(packagesElement, registryKeys);
             }
             // should not happen
             return null;
+        }
+
+        private string GetExtensionRepositoryPath(XElement packagesElement, object vsExtensionManager)
+        {
+            string repositoryId = packagesElement.GetOptionalAttributeValue("repositoryId");
+            if (repositoryId == null)
+            {
+                ShowErrorMessage(VsResources.TemplateWizard_MissingExtensionId);
+                throw new WizardBackoutException();
+            }
+
+
+            var extensionManagerShim = new ExtensionManagerShim(vsExtensionManager);
+            string installPath;
+            if (!extensionManagerShim.TryGetExtensionInstallPath(repositoryId, out installPath))
+            {
+                ShowErrorMessage(String.Format(VsResources.TemplateWizard_InvalidExtensionId,
+                    repositoryId));
+                throw new WizardBackoutException();
+            }
+            return Path.Combine(installPath, "Packages");
+        }
+
+        private string GetRegistryRepositoryPath(XElement packagesElement, IEnumerable<IRegistryKey> registryKeys)
+        {
+            // When pulling the repository from the registry, use CurrentUser first, falling back onto LocalMachine
+            registryKeys = registryKeys ??
+                new[] {
+                            new RegistryKeyWrapper(Microsoft.Win32.Registry.CurrentUser),
+                            new RegistryKeyWrapper(Microsoft.Win32.Registry.LocalMachine)
+                        };
+
+            string keyName = packagesElement.GetOptionalAttributeValue("keyName");
+
+            if (keyName == null)
+            {
+                ShowErrorMessage(VsResources.TemplateWizard_MissingRegistryKeyName);
+                throw new WizardBackoutException();
+            }
+
+            IRegistryKey repositoryKey = null;
+            string repositoryValue = null;
+
+            if (registryKeys != null)
+            {
+                // Find the first registry key that supplies the necessary subkey/value
+                foreach (var registryKey in registryKeys)
+                {
+                    repositoryKey = registryKey.OpenSubKey(RegistryKeyRoot);
+
+                    if (repositoryKey != null)
+                    {
+                        repositoryValue = repositoryKey.GetValue(keyName) as string;
+
+                        if (!String.IsNullOrEmpty(repositoryValue))
+                        {
+                            break;
+                        }
+
+                        repositoryKey.Close();
+                    }
+                }
+            }
+
+            if (repositoryKey == null)
+            {
+                ShowErrorMessage(String.Format(VsResources.TemplateWizard_RegistryKeyError, RegistryKeyRoot));
+                throw new WizardBackoutException();
+            }
+
+            if (String.IsNullOrEmpty(repositoryValue))
+            {
+                ShowErrorMessage(String.Format(VsResources.TemplateWizard_InvalidRegistryValue, keyName, RegistryKeyRoot));
+                throw new WizardBackoutException();
+            }
+
+            // Ensure a trailing slash so that the path always gets read as a directory
+            if (!repositoryValue.EndsWith(@"\"))
+            {
+                repositoryValue += @"\";
+            }
+
+            return Path.GetDirectoryName(repositoryValue);
         }
 
         private RepositoryType GetRepositoryType(XElement packagesElement)
@@ -134,6 +210,8 @@ namespace NuGet.VisualStudio
             {
                 case "extension":
                     return RepositoryType.Extension;
+                case "registry":
+                    return RepositoryType.Registry;
                 case "template":
                 case null:
                     return RepositoryType.Template;
@@ -201,8 +279,8 @@ namespace NuGet.VisualStudio
                 if (RepositorySettings != null)
                 {
                     CreatingRefreshFilesInBin(
-                        project, 
-                        RepositorySettings.Value.RepositoryPath, 
+                        project,
+                        RepositorySettings.Value.RepositoryPath,
                         _configuration.Packages.Where(p => p.CreateRefreshFilesInBin));
                 }
             }
@@ -276,6 +354,11 @@ namespace NuGet.VisualStudio
             /// Cache location relative to the VSIX that packages the project template
             /// </summary>
             Extension,
+
+            /// <summary>
+            /// Cache location stored in the registry
+            /// </summary>
+            Registry,
         }
 
         private class ExtensionManagerShim
