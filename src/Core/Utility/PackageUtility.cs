@@ -28,14 +28,14 @@ namespace NuGet
 
             runtimePackage = null;
 
-            if (!string.IsNullOrEmpty(package.Language) && package.Id.EndsWith("." + package.Language, StringComparison.OrdinalIgnoreCase))
+            if (!String.IsNullOrEmpty(package.Language) && package.Id.EndsWith("." + package.Language, StringComparison.OrdinalIgnoreCase))
             {
-                var runtimePackageId = package.Id.Substring(0, package.Id.Length - (package.Language.Length + 1));
-                var dependency = package.FindDependency(runtimePackageId);
+                string runtimePackageId = package.Id.Substring(0, package.Id.Length - (package.Language.Length + 1));
+                PackageDependency dependency = package.FindDependency(runtimePackageId);
 
                 if (dependency != null)
                 {
-                    runtimePackage = repository.FindPackagesById(runtimePackageId).SingleOrDefault();
+                    runtimePackage = repository.FindPackage(runtimePackageId);
                 }
             }
 

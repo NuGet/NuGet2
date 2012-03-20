@@ -85,7 +85,6 @@ namespace NuGet
         public static bool HasProjectContent(this IPackage package)
         {
             return package.FrameworkAssemblies.Any() ||
-                   package.AssemblyReferences.Any() ||
                    package.GetContentFiles().Any() ||
                    package.GetLibFiles().Any();
         }

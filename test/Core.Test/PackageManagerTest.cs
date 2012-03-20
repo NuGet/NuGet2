@@ -147,10 +147,10 @@ namespace NuGet.Test
                                                     satelliteAssemblies: new[] { @"lib\ja-jp\foo.resources.dll", @"lib\ja-jp\foo.xml" },
                                                     dependencies: new[] { new PackageDependency("foo") });
 
-            var fileSystem = new MockFileSystem();
+            var projectSystem = new MockProjectSystem();
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, localRepository);
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
             sourceRepository.AddPackage(runtimePackage);
             sourceRepository.AddPackage(satellitePackage);
 
@@ -158,10 +158,12 @@ namespace NuGet.Test
             packageManager.InstallPackage("foo.ja-jp");
 
             // Assert
-            Assert.True(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\foo.dll"));
-            Assert.True(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
-            Assert.True(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\ja-jp\foo.xml"));
-            Assert.True(fileSystem.Paths.ContainsKey(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
+            Assert.Equal(5, projectSystem.Paths.Count);
+            Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\foo.dll"));
+            Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
+            Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.xml"));
+            Assert.True(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.resources.dll"));
+            Assert.True(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
         }
 
         [Fact]
@@ -176,10 +178,10 @@ namespace NuGet.Test
                                                     satelliteAssemblies: new[] { @"lib\ja-jp\foo.resources.dll", @"lib\ja-jp\foo.xml" },
                                                     dependencies: new[] { new PackageDependency("foo") });
 
-            var fileSystem = new MockFileSystem();
+            var projectSystem = new MockProjectSystem();
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, localRepository);
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
             sourceRepository.AddPackage(runtimePackage);
             sourceRepository.AddPackage(satellitePackage);
 
@@ -188,10 +190,12 @@ namespace NuGet.Test
             packageManager.InstallPackage("foo.ja-jp");
 
             // Assert
-            Assert.True(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\foo.dll"));
-            Assert.True(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
-            Assert.True(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\ja-jp\foo.xml"));
-            Assert.True(fileSystem.Paths.ContainsKey(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
+            Assert.Equal(5, projectSystem.Paths.Count);
+            Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\foo.dll"));
+            Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
+            Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.xml"));
+            Assert.True(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.resources.dll"));
+            Assert.True(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
         }
 
         [Fact]
@@ -206,10 +210,10 @@ namespace NuGet.Test
                                                     satelliteAssemblies: new[] { @"lib\ja-jp\foo.resources.dll", @"lib\ja-jp\foo.xml" },
                                                     dependencies: new[] { new PackageDependency("foo") });
 
-            var fileSystem = new MockFileSystem();
+            var projectSystem = new MockProjectSystem();
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, localRepository);
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
             sourceRepository.AddPackage(runtimePackage);
             sourceRepository.AddPackage(satellitePackage);
 
@@ -220,10 +224,12 @@ namespace NuGet.Test
             packageManager.UninstallPackage("foo.ja-jp");
 
             // Assert
-            Assert.True(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\foo.dll"));
-            Assert.False(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
-            Assert.False(fileSystem.Paths.ContainsKey(@"foo.1.0.0\lib\ja-jp\foo.xml"));
-            Assert.False(fileSystem.Paths.ContainsKey(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
+            Assert.Equal(1, projectSystem.Paths.Count);
+            Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\foo.dll"));
+            Assert.False(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
+            Assert.False(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.xml"));
+            Assert.False(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.resources.dll"));
+            Assert.False(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
         }
 
         [Fact]
