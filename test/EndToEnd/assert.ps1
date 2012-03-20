@@ -107,6 +107,18 @@ function Assert-PathExists {
     }
 }
 
+function Assert-PathNotExists {
+    param(
+          [parameter(Mandatory = $true)]
+          [string]$Path, 
+          [string]$Message
+    )
+    
+    if((Test-Path $Path)) {
+        Write-Error (Get-AssertError "The path `"$Path`" DOES exist" $Message)
+    }
+}
+
 function Assert-Reference {
     param(
          [parameter(Mandatory = $true)]

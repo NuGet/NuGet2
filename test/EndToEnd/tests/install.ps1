@@ -1570,3 +1570,21 @@ function Test-InstallingPackageaAfterNuGetDirectoryIsRenamedContinuesUsingDirect
 
 	Assert-AreEqual $expected $content
 }
+
+function Test-InstallSatellitePackage {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+    $solutionDir = Get-SolutionDir
+
+    # Act (PackageWithStrongNamedLib is version 1.1, even though the file name is 1.0)
+    $p | Install-Package PackageWithStrongNamedLib -Source $context.RepositoryRoot
+    $p | Install-Package PackageWithStrongNamedLib.ja-jp -Source $context.RepositoryRoot
+
+    # Assert (the resources from the satellite package are copied into the runtime package's folder)
+    Assert-PathExists (Join-Path $solutionDir packages\PackageWithStrongNamedLib.1.1\lib\ja-jp\Core.resources.dll)
+    Assert-PathExists (Join-Path $solutionDir packages\PackageWithStrongNamedLib.1.1\lib\ja-jp\Core.xml)
+}
