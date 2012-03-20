@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Diagnostics;
+using System.Security;
 using Microsoft.Win32;
 
 namespace NuGet.VisualStudio
@@ -12,16 +10,24 @@ namespace NuGet.VisualStudio
 
         public RegistryKeyWrapper(RegistryKey registryKey)
         {
+            Debug.Assert(registryKey != null);
             _registryKey = registryKey;
         }
 
         public IRegistryKey OpenSubKey(string name)
         {
-            var key = _registryKey.OpenSubKey(name);
-
-            if (key != null)
+            try
             {
-                return new RegistryKeyWrapper(key);
+                var key = _registryKey.OpenSubKey(name);
+
+                if (key != null)
+                {
+                    return new RegistryKeyWrapper(key);
+                }
+            }
+            catch (SecurityException)
+            {
+                // If the user doesn't have access to the registry, then we'll return null
             }
 
             return null;
@@ -29,12 +35,24 @@ namespace NuGet.VisualStudio
 
         public object GetValue(string name)
         {
-            return _registryKey.GetValue(name);
+            try
+            {
+                return _registryKey.GetValue(name);
+            }
+            catch (SecurityException)
+            {
+                // If the user doesn't have access to the registry, then we'll return null
+                return null;
+            }
         }
 
         public void Close()
         {
-            _registryKey.Close();
+            if (_registryKey != null)
+            {
+                // Note that according to MSDN, this method does nothing if you call it on an instance of RegistryKey that is already closed.
+                _registryKey.Close();
+            }
         }
     }
 }

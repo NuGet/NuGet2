@@ -11,7 +11,6 @@ using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TemplateWizard;
 using NuGet.VisualStudio.Resources;
-using System.Diagnostics;
 
 namespace NuGet.VisualStudio
 {
@@ -152,7 +151,7 @@ namespace NuGet.VisualStudio
 
             string keyName = packagesElement.GetOptionalAttributeValue("keyName");
 
-            if (keyName == null)
+            if (String.IsNullOrEmpty(keyName))
             {
                 ShowErrorMessage(VsResources.TemplateWizard_MissingRegistryKeyName);
                 throw new WizardBackoutException();
@@ -195,10 +194,7 @@ namespace NuGet.VisualStudio
             }
 
             // Ensure a trailing slash so that the path always gets read as a directory
-            if (!repositoryValue.EndsWith(@"\"))
-            {
-                repositoryValue += @"\";
-            }
+            repositoryValue = PathUtility.EnsureTrailingSlash(repositoryValue);
 
             return Path.GetDirectoryName(repositoryValue);
         }
