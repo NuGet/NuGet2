@@ -50,6 +50,23 @@ namespace NuGet
             return package.GetFiles(Constants.LibDirectory);
         }
 
+        /// <summary>
+        /// Returns the list of files from a satellite package that are considered satellite files.
+        /// </summary>
+        /// <remarks>
+        /// This method must only be called for packages that specify a language
+        /// </remarks>
+        /// <param name="package">The package to get satellite files from.</param>
+        /// <returns>The list of satellite files, which may be an empty list.</returns>
+        public static IEnumerable<IPackageFile> GetSatelliteFiles(this IPackage package)
+        {
+            Debug.Assert(!String.IsNullOrEmpty(package.Language));
+
+            // Satellite files are those within the Lib folder that have a culture-specific subfolder anywhere in the path
+            return package.GetLibFiles().Where(file => file.Path.Split(Path.DirectorySeparatorChar)
+                                                                .Contains(package.Language, StringComparer.OrdinalIgnoreCase));
+        }
+
         public static IEnumerable<PackageIssue> Validate(this IPackage package, IEnumerable<IPackageRule> rules)
         {
             if (package == null)

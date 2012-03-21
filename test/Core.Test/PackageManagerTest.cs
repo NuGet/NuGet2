@@ -136,7 +136,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void InstallPackageCopiesSatellitePackageFilesIntoRuntimePackageFolderWhenRuntimeIsInstalledAsADependency()
+        public void InstallSatellitePackageCopiesFilesIntoRuntimePackageFolderWhenRuntimeIsInstalledAsADependency()
         {
             // Arrange
             // Create a runtime package and a satellite package that has a dependency on the runtime package, and uses the
@@ -167,7 +167,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void InstallPackageCopiesSatellitePackageFilesIntoRuntimePackageFolderWhenRuntimeIsAlreadyInstalled()
+        public void InstallSatellitePackageCopiesFilesIntoRuntimePackageFolderWhenRuntimeIsAlreadyInstalled()
         {
             // Arrange
             // Create a runtime package and a satellite package that has a dependency on the runtime package, and uses the
@@ -199,35 +199,31 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void InstallPackageCopiesSatellitePackageFilesOverwritingRuntimePackageFiles()
+        public void InstallingSatellitePackageOnlyCopiesCultureSpecificLibFolderContents()
         {
             // Arrange
             // Create a runtime package and a satellite package that has a dependency on the runtime package, and uses the
             // local suffix convention.
-            var runtimePackage = PackageUtility.CreatePackage("foo", "1.0.0", content: new[] { @"index.htm", "english.htm" });
+            var runtimePackage = PackageUtility.CreatePackage("foo", "1.0.0",
+                                                    assemblyReferences: new[] {
+                                                        @"lib\foo.dll" },
+                                                    content: new[] {
+                                                        @"english.txt" });
 
             var satellitePackage = PackageUtility.CreatePackage("foo.ja-jp", "1.0.0", language: "ja-jp",
-                                                    content: new[] { @"index.htm", "japanese.htm" },
+                                                    satelliteAssemblies: new[] {
+                                                        @"lib\ja-jp\foo.resources.dll",
+                                                        @"lib\ja-jp\foo.xml",
+                                                        @"lib\japanese.xml" },
+                                                    content: new[] {
+                                                        @"english.txt",
+                                                        @"japanese.txt" },
                                                     dependencies: new[] { new PackageDependency("foo") });
 
-            var fileCounts = new Dictionary<string, int>();
-            var projectSystem = new Mock<IProjectSystem>();
-            projectSystem.Setup(p => p.Root).Returns(@"C:\MockProjectSystem");
-            projectSystem.Setup(p => p.AddFile(It.IsAny<string>(), It.IsAny<Stream>())).Callback<String, Stream>((f, s) =>
-            {
-                if (fileCounts.ContainsKey(f))
-                {
-                    fileCounts[f] += 1;
-                }
-                else
-                {
-                    fileCounts.Add(f, 1);
-                }
-            });
-
+            var projectSystem = new MockProjectSystem();
             var localRepository = new MockPackageRepository();
             var sourceRepository = new MockPackageRepository();
-            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object, localRepository);
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
             sourceRepository.AddPackage(runtimePackage);
             sourceRepository.AddPackage(satellitePackage);
 
@@ -236,24 +232,42 @@ namespace NuGet.Test
             packageManager.InstallPackage("foo.ja-jp");
 
             // Assert
-            Assert.Equal(2, fileCounts[@"foo.1.0.0\content\index.htm"]);
-            Assert.Equal(1, fileCounts[@"foo.1.0.0\content\english.htm"]);
-            Assert.Equal(1, fileCounts[@"foo.1.0.0\content\japanese.htm"]);
-            Assert.Equal(1, fileCounts[@"foo.ja-jp.1.0.0\content\index.htm"]);
-            Assert.Equal(1, fileCounts[@"foo.ja-jp.1.0.0\content\japanese.htm"]);
+            Assert.Equal(9, projectSystem.Paths.Count);
+            Assert.True(projectSystem.FileExists(@"foo.1.0.0\content\english.txt"));
+            Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\foo.dll"));
+            Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
+            Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.xml"));
+
+            Assert.True(projectSystem.FileExists(@"foo.ja-jp.1.0.0\content\english.txt")); 
+            Assert.True(projectSystem.FileExists(@"foo.ja-jp.1.0.0\content\japanese.txt"));
+            Assert.True(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\japanese.xml"));
+            Assert.True(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.resources.dll"));
+            Assert.True(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
+
+            Assert.False(projectSystem.FileExists(@"foo.1.0.0\lib\japanese.xml"));
+            Assert.False(projectSystem.FileExists(@"foo.1.0.0\content\japanese.txt"));
         }
 
         [Fact]
-        public void UninstallingPackageRemovesSatellitePackageFilesFromRuntimePackageFolder()
+        public void UninstallingSatellitePackageRemovesFilesFromRuntimePackageFolder()
         {
             // Arrange
             // Create a runtime package and a satellite package that has a dependency on the runtime package, and uses the
             // local suffix convention.
-            var runtimePackage = PackageUtility.CreatePackage("foo", "1.0.0", assemblyReferences: new[] { @"lib\foo.dll" }, content: new[] { @"index.htm" });
+            var runtimePackage = PackageUtility.CreatePackage("foo", "1.0.0",
+                                                    assemblyReferences: new[] {
+                                                        @"lib\foo.dll" },
+                                                    content: new[] {
+                                                        @"english.txt" });
 
             var satellitePackage = PackageUtility.CreatePackage("foo.ja-jp", "1.0.0", language: "ja-jp",
-                                                    satelliteAssemblies: new[] { @"lib\ja-jp\foo.resources.dll", @"lib\ja-jp\foo.xml" },
-                                                    content: new[] { @"index.htm" },
+                                                    satelliteAssemblies: new[] {
+                                                        @"lib\ja-jp\foo.resources.dll",
+                                                        @"lib\ja-jp\foo.xml",
+                                                        @"lib\japanese.xml" },
+                                                    content: new[] {
+                                                        @"english.txt",
+                                                        @"japanese.txt" },
                                                     dependencies: new[] { new PackageDependency("foo") });
 
             var projectSystem = new MockProjectSystem();
@@ -270,13 +284,20 @@ namespace NuGet.Test
             packageManager.UninstallPackage("foo.ja-jp");
 
             // Assert
-            Assert.Equal(1, projectSystem.Paths.Count);
+            Assert.Equal(2, projectSystem.Paths.Count);
+            Assert.True(projectSystem.FileExists(@"foo.1.0.0\content\english.txt"));
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\foo.dll"));
             Assert.False(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
             Assert.False(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.xml"));
+
+            Assert.False(projectSystem.FileExists(@"foo.ja-jp.1.0.0\content\english.txt"));
+            Assert.False (projectSystem.FileExists(@"foo.ja-jp.1.0.0\content\japanese.txt"));
+            Assert.False(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\japanese.xml"));
             Assert.False(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.resources.dll"));
             Assert.False(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
-            Assert.False(projectSystem.FileExists(@"foo.1.0.0\content\index.htm"));
+
+            Assert.False(projectSystem.FileExists(@"foo.1.0.0\lib\japanese.xml"));
+            Assert.False(projectSystem.FileExists(@"foo.1.0.0\content\japanese.txt"));
         }
 
         [Fact]

@@ -190,12 +190,13 @@ namespace NuGet
                 // Add files
                 FileSystem.AddFiles(files, packageDirectory);
 
-                // If this is a Satellite Package, then copy the files into the related runtime package folder too
+                // If this is a Satellite Package, then copy the satellite files into the related runtime package folder too
                 IPackage runtimePackage;
                 if (PackageUtility.IsSatellitePackage(package, LocalRepository, out runtimePackage))
                 {
+                    var satelliteFiles = package.GetSatelliteFiles();
                     var runtimePath = PathResolver.GetPackageDirectory(runtimePackage);
-                    FileSystem.AddFiles(files, runtimePath);
+                    FileSystem.AddFiles(satelliteFiles, runtimePath);
                 }
             }
             finally
@@ -291,8 +292,9 @@ namespace NuGet
             IPackage runtimePackage;
             if (PackageUtility.IsSatellitePackage(package, LocalRepository, out runtimePackage))
             {
+                var satelliteFiles = package.GetSatelliteFiles();
                 var runtimePath = PathResolver.GetPackageDirectory(runtimePackage);
-                FileSystem.DeleteFiles(files, runtimePath);
+                FileSystem.DeleteFiles(satelliteFiles, runtimePath);
             }
 
         }
