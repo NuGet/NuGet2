@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Media;
 using EnvDTE;
 
 namespace NuGet.Dialog
@@ -10,9 +11,11 @@ namespace NuGet.Dialog
         private readonly ICollection<ProjectNodeBase> _children;
         private bool _suppressPropagatingIsSelectedProperty;
         private bool _isExpanded = true;
+        private readonly Project _project;
+        private static ImageSource _expandedIcon, _collapsedIcon;
 
-        public FolderNode(string name, ICollection<ProjectNodeBase> children) :
-            base(name)
+        public FolderNode(Project project, string name, ICollection<ProjectNodeBase> children) 
+            : base(name)
         {
 
             if (children == null)
@@ -20,6 +23,7 @@ namespace NuGet.Dialog
                 throw new ArgumentNullException("children");
             }
             _children = children;
+            _project = project;
 
             if (children.Count > 0)
             {
@@ -29,6 +33,14 @@ namespace NuGet.Dialog
                 }
                 OnChildSelectedChanged();
                 OnChildEnabledChanged();
+            }
+        }
+
+        public Project Project
+        {
+            get
+            {
+                return _project;
             }
         }
 
@@ -48,6 +60,34 @@ namespace NuGet.Dialog
             }
         }
 
+        public ImageSource Icon
+        {
+            get
+            {
+                if (IsRootFolder)
+                {
+                    return ProjectUtilities.GetSolutionImage();
+                }
+
+                if (IsExpanded)
+                {
+                    if (_expandedIcon == null)
+                    {
+                        _expandedIcon = ProjectUtilities.GetImage(Project, folderExpandedView: true);
+                    }
+                    return _expandedIcon;
+                }
+                else
+                {
+                    if (_collapsedIcon == null)
+                    {
+                        _collapsedIcon = ProjectUtilities.GetImage(Project);
+                    }
+                    return _collapsedIcon;
+                }
+            }
+        }
+
         public bool IsExpanded
         {
             get
@@ -60,6 +100,7 @@ namespace NuGet.Dialog
                 {
                     _isExpanded = value;
                     OnPropertyChanged("IsExpanded");
+                    OnPropertyChanged("Icon");
                 }
             }
         }

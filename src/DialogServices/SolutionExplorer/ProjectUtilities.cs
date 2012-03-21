@@ -39,18 +39,30 @@ namespace NuGet.Dialog
             return null;
         }
 
-        public static ImageSource GetImage(Project project)
+        public static ImageSource GetImage(Project project, bool folderExpandedView = false)
         {
+            ImageSource icon = null;
             IVsSolution solution = Package.GetGlobalService(typeof(SVsSolution)) as IVsSolution;
             IVsHierarchy hierarchy;
             if (ErrorHandler.Succeeded(solution.GetProjectOfUniqueName(project.UniqueName, out hierarchy)))
             {
-                return GetImageFromHierarchy(
-                    new HierarchyItemIdentity(hierarchy, VSConstants.VSITEMID_ROOT), 
-                    (int)__VSHPROPID.VSHPROPID_IconIndex, 
-                    (int)__VSHPROPID.VSHPROPID_IconHandle);
+                if (folderExpandedView)
+                {
+                    icon = GetImageFromHierarchy(
+                        new HierarchyItemIdentity(hierarchy, VSConstants.VSITEMID_ROOT),
+                        (int)__VSHPROPID.VSHPROPID_OpenFolderIconIndex,
+                        (int)__VSHPROPID.VSHPROPID_OpenFolderIconHandle);
+                }
+                
+                if (icon == null)
+                {
+                    icon = GetImageFromHierarchy(
+                        new HierarchyItemIdentity(hierarchy, VSConstants.VSITEMID_ROOT),
+                        (int)__VSHPROPID.VSHPROPID_IconIndex,
+                        (int)__VSHPROPID.VSHPROPID_IconHandle);
+                }
             }
-            return null;
+            return icon;
         }
 
         static uint UnboxAsUInt32(object var)

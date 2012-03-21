@@ -39,6 +39,7 @@ namespace NuGet.Dialog
             Array.Sort(children, ProjectNodeComparer.Default);
 
             return new FolderNode(
+                null,
                 String.Format(CultureInfo.CurrentCulture, Resources.Dialog_SolutionNode, solution.GetName()),
                 children);
         }
@@ -79,7 +80,7 @@ namespace NuGet.Dialog
                         {
                             Array.Sort(children, ProjectNodeComparer.Default);
                             // only create a folder node if it has at least one child
-                            yield return new FolderNode(project.Name, children);
+                            yield return new FolderNode(project, project.Name, children);
                         }
                     }
                 }

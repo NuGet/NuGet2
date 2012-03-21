@@ -43,22 +43,9 @@
         <HierarchicalDataTemplate DataType="{x:Type local:FolderNode}" ItemsSource="{Binding Children}">
             <StackPanel Orientation="Horizontal" Margin="2,0">
                 <CheckBox IsChecked="{Binding IsSelected}" VerticalAlignment="Center" />
-                <Image x:Name="FolderImage" Source="{StaticResource CloseFolderImage}" Margin="2,0" />
+                <Image x:Name="FolderImage" Margin="2,0" Stretch="None" Source="{Binding Icon}" />
                 <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" />
             </StackPanel>
-
-            <HierarchicalDataTemplate.Triggers>
-                <MultiDataTrigger >
-                    <MultiDataTrigger.Conditions>
-                        <Condition Binding="{Binding IsExpanded, Mode=OneWay}" Value="true"  />
-                        <Condition Binding="{Binding IsRootFolder, Mode=OneWay}" Value="false" />
-                    </MultiDataTrigger.Conditions>
-                    <Setter TargetName="FolderImage" Property="Source" Value="{StaticResource OpenFolderImage}" />
-                </MultiDataTrigger>
-                <DataTrigger Binding="{Binding IsRootFolder}" Value="true">
-                    <Setter TargetName="FolderImage" Property="Source" Value="{x:Static local:ProjectUtilities.SolutionImage}" />
-                </DataTrigger>
-            </HierarchicalDataTemplate.Triggers>
         </HierarchicalDataTemplate>
     </Window.Resources>
     

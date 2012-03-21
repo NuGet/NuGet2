@@ -12,6 +12,11 @@ namespace NuGet.Dialog.PackageManagerUI
 
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
+            if (value == null)
+            {
+                return null;
+            }
+
             Project project = (Project)value;
             string kind = project.Kind;
 

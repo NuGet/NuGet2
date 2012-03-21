@@ -86,7 +86,7 @@ namespace NuGet.Dialog.Test.SolutionExplorer
                 children[i] = node;
             }
 
-            var folder = new FolderNode("A", children);
+            var folder = new FolderNode(null, "A", children);
 
             // Act
             folder.IsSelected = true;
@@ -136,7 +136,7 @@ namespace NuGet.Dialog.Test.SolutionExplorer
                 children[i] = node;
             }
 
-            var folder = new FolderNode("A", children);
+            var folder = new FolderNode(null, "A", children);
 
             Assert.True(children[0].IsSelected == true);
             Assert.True(children[1].IsSelected == true);
@@ -230,10 +230,10 @@ namespace NuGet.Dialog.Test.SolutionExplorer
                 children[i] = node;
             }
 
-            var folder = new FolderNode("A", children);
+            var folder = new FolderNode(null, "A", children);
 
             // Act
-            var root = new FolderNode("Root", new[] { folder });
+            var root = new FolderNode(null, "Root", new[] { folder });
 
             // Assert
             Assert.Null(folder.IsSelected);
@@ -263,7 +263,7 @@ namespace NuGet.Dialog.Test.SolutionExplorer
             }
 
             // Act
-            var folder = new FolderNode("A", children);
+            var folder = new FolderNode(null, "A", children);
 
             // Assert
             Assert.False(folder.IsEnabled);
@@ -287,7 +287,7 @@ namespace NuGet.Dialog.Test.SolutionExplorer
             }
 
             // Act
-            var folder = new FolderNode("A", children);
+            var folder = new FolderNode(null, "A", children);
 
             // Assert
             Assert.True(folder.IsEnabled);
@@ -307,7 +307,7 @@ namespace NuGet.Dialog.Test.SolutionExplorer
                 }
             }
 
-            return new FolderNode(name, children);
+            return new FolderNode(null, name, children);
         }
     }
 }
