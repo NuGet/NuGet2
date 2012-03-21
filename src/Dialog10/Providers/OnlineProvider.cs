@@ -200,6 +200,16 @@ namespace NuGet.Dialog.Providers
         public override bool CanExecute(PackageItem item)
         {
             // Only enable command on a Package in the Online provider if it is not installed yet
+
+            // Optimization due to bug #2008: if the LocalRepository is backed by a packages.config file, 
+            // check the packages information directly from the file, instead of going through
+            // the IPackageRepository interface, which could potentially connect to TFS.
+            var packageReferenceRepository = LocalRepository as PackageReferenceRepository;
+            if (packageReferenceRepository != null)
+            {
+                return !packageReferenceRepository.ReferenceFile.EntryExists(item.Id, item.PackageIdentity.Version);
+            }
+
             return !LocalRepository.Exists(item.PackageIdentity);
         }
 
