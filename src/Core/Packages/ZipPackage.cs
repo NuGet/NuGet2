@@ -8,25 +8,22 @@ using NuGet.Resources;
 
 namespace NuGet
 {
-    public class ZipPackage : IPackage
+    public class ZipPackage : LocalPackage
     {
-        private const string AssemblyReferencesDir = "lib";
-        private const string ResourceAssemblyExtension = ".resources.dll";
         private const string CacheKeyFormat = "NUGET_ZIP_PACKAGE_{0}_{1}{2}";
         private const string AssembliesCacheKey = "ASSEMBLIES";
         private const string FilesCacheKey = "FILES";
 
         private readonly bool _enableCaching;
-
+          
         private static readonly TimeSpan CacheTimeout = TimeSpan.FromSeconds(15);
 
         // paths to exclude
-        private static readonly string[] _excludePaths = new[] { "_rels", "package" };
+        private static readonly string[] ExcludePaths = new[] { "_rels", "package" };
 
-        // We don't store the steam itself, just a way to open the stream on demand
+        // We don't store the stream itself, just a way to open the stream on demand
         // so we don't have to hold on to that resource
         private readonly Func<Stream> _streamFactory;
-        private HashSet<string> _references;
 
         public ZipPackage(string fileName)
             : this(fileName, enableCaching: false)
@@ -66,167 +63,16 @@ namespace NuGet
             EnsureManifest();
         }
 
-        public string Id
+        protected override IEnumerable<IPackageAssemblyReference> GetAssemblyReferencesBase()
         {
-            get;
-            set;
-        }
-
-        public SemanticVersion Version
-        {
-            get;
-            set;
-        }
-
-        public string Title
-        {
-            get;
-            set;
-        }
-
-        public IEnumerable<string> Authors
-        {
-            get;
-            set;
-        }
-
-        public IEnumerable<string> Owners
-        {
-            get;
-            set;
-        }
-
-        public Uri IconUrl
-        {
-            get;
-            set;
-        }
-
-        public Uri LicenseUrl
-        {
-            get;
-            set;
-        }
-
-        public Uri ProjectUrl
-        {
-            get;
-            set;
-        }
-
-        public Uri ReportAbuseUrl
-        {
-            get
+            if (_enableCaching)
             {
-                return null;
+                return MemoryCache.Instance.GetOrAdd(GetAssembliesCacheKey(), GetAssembliesNoCache, CacheTimeout);
             }
+            return GetAssembliesNoCache();
         }
 
-        public int DownloadCount
-        {
-            get
-            {
-                return -1;
-            }
-        }
-
-        public bool RequireLicenseAcceptance
-        {
-            get;
-            set;
-        }
-
-        public string Description
-        {
-            get;
-            set;
-        }
-
-        public string Summary
-        {
-            get;
-            set;
-        }
-
-        public string ReleaseNotes
-        {
-            get;
-            set;
-        }
-
-        public string Language
-        {
-            get;
-            set;
-        }
-
-        public string Tags
-        {
-            get;
-            set;
-        }
-
-        public bool IsAbsoluteLatestVersion
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        public bool IsLatestVersion
-        {
-            get
-            {
-                return this.IsReleaseVersion();
-            }
-        }
-
-        public bool Listed
-        {
-            get
-            {
-                return true;
-            }
-        }
-
-        public DateTimeOffset? Published
-        {
-            get;
-            set;
-        }
-
-        public string Copyright
-        {
-            get;
-            set;
-        }
-
-        public IEnumerable<PackageDependency> Dependencies
-        {
-            get;
-            set;
-        }
-
-        public IEnumerable<IPackageAssemblyReference> AssemblyReferences
-        {
-            get
-            {
-                if (_enableCaching)
-                {
-                    return MemoryCache.Instance.GetOrAdd(GetAssembliesCacheKey(), GetAssembliesNoCache, CacheTimeout);
-                }
-                return GetAssembliesNoCache();
-            }
-        }
-
-        public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies
-        {
-            get;
-            set;
-        }
-
-        public IEnumerable<IPackageFile> GetFiles()
+        protected override IEnumerable<IPackageFile> GetFilesBase()
         {
             if (_enableCaching)
             {
@@ -235,7 +81,7 @@ namespace NuGet
             return GetFilesNoCache();
         }
 
-        public Stream GetStream()
+        public override Stream GetStream()
         {
             return _streamFactory();
         }
@@ -243,9 +89,8 @@ namespace NuGet
         private List<IPackageAssemblyReference> GetAssembliesNoCache()
         {
             return (from file in GetFiles()
-                    where IsAssemblyReference(file, _references)
-                    select (IPackageAssemblyReference)new ZipPackageAssemblyReference(file)
-                   ).ToList();
+                    where IsAssemblyReference(file)
+                    select (IPackageAssemblyReference)new ZipPackageAssemblyReference(file)).ToList();
         }
 
         private List<IPackageFile> GetFilesNoCache()
@@ -282,64 +127,9 @@ namespace NuGet
 
                 using (Stream manifestStream = manifestPart.GetStream())
                 {
-                    Manifest manifest = Manifest.ReadFrom(manifestStream);
-                    IPackageMetadata metadata = manifest.Metadata;
-
-                    Id = metadata.Id;
-                    Version = metadata.Version;
-                    Title = metadata.Title;
-                    Authors = metadata.Authors;
-                    Owners = metadata.Owners;
-                    IconUrl = metadata.IconUrl;
-                    LicenseUrl = metadata.LicenseUrl;
-                    ProjectUrl = metadata.ProjectUrl;
-                    RequireLicenseAcceptance = metadata.RequireLicenseAcceptance;
-                    Description = metadata.Description;
-                    Summary = metadata.Summary;
-                    ReleaseNotes = metadata.ReleaseNotes;
-                    Language = metadata.Language;
-                    Tags = metadata.Tags;
-                    Dependencies = metadata.Dependencies;
-                    FrameworkAssemblies = metadata.FrameworkAssemblies;
-                    Copyright = metadata.Copyright;
-
-                    IEnumerable<string> references = (manifest.Metadata.References ?? Enumerable.Empty<ManifestReference>()).Select(c => c.File);
-                    _references = new HashSet<string>(references, StringComparer.OrdinalIgnoreCase);
-
-                    // Ensure tags start and end with an empty " " so we can do contains filtering reliably
-                    if (!String.IsNullOrEmpty(Tags))
-                    {
-                        Tags = " " + Tags + " ";
-                    }
+                    ReadManifest(manifestStream);
                 }
             }
-        }
-
-        internal static bool IsAssemblyReference(IPackageFile file, IEnumerable<string> references)
-        {
-            // Assembly references are in lib/ and have a .dll/.exe/.winmd extension
-            var path = file.Path;
-            var fileName = Path.GetFileName(path);
-
-            return path.StartsWith(AssemblyReferencesDir, StringComparison.OrdinalIgnoreCase) &&
-                // Exclude resource assemblies
-                   !path.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
-                   Constants.AssemblyReferencesExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase) &&
-                // If references are listed, ensure that the file is listed in it.
-                   (references.IsEmpty() || references.Contains(fileName));
-        }
-
-        private static bool IsPackageFile(PackagePart part)
-        {
-            string path = UriUtility.GetPath(part.Uri);
-            // We exclude any opc files and the manifest file (.nuspec)
-            return !_excludePaths.Any(p => path.StartsWith(p, StringComparison.OrdinalIgnoreCase)) &&
-                   !PackageUtility.IsManifest(path);
-        }
-
-        public override string ToString()
-        {
-            return this.GetFullName();
         }
 
         private string GetFilesCacheKey()
@@ -350,6 +140,14 @@ namespace NuGet
         private string GetAssembliesCacheKey()
         {
             return String.Format(CultureInfo.InvariantCulture, CacheKeyFormat, AssembliesCacheKey, Id, Version);
+        }
+
+        protected static bool IsPackageFile(PackagePart part)
+        {
+            string path = UriUtility.GetPath(part.Uri);
+            // We exclude any opc files and the manifest file (.nuspec)
+            return !ExcludePaths.Any(p => path.StartsWith(p, StringComparison.OrdinalIgnoreCase)) &&
+                   !PackageUtility.IsManifest(path);
         }
 
         internal static void ClearCache(IPackage package)

@@ -5,6 +5,17 @@ namespace NuGet
 {
     public sealed class PhysicalPackageFile : IPackageFile
     {
+        private readonly Func<Stream> _streamFactory;
+
+        public PhysicalPackageFile()
+        {
+        }
+
+        internal PhysicalPackageFile(Func<Stream> streamFactory)
+        {
+            _streamFactory = streamFactory;
+        }
+
         /// <summary>
         /// Path on disk
         /// </summary>
@@ -33,7 +44,7 @@ namespace NuGet
 
         public Stream GetStream()
         {
-            return File.OpenRead(SourcePath);
+            return _streamFactory != null ? _streamFactory() : File.OpenRead(SourcePath);
         }
 
         public override string ToString()

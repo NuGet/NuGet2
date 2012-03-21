@@ -15,12 +15,11 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         private const string OutputFolder = @".\output\";
         private const string SpecificFilesFolder = @".\specific_files\";
         private const string ProjectFilesFolder = @".\projects\";
-        private const string NugetExePath = @".\NuGet.exe";
 
-        private StringWriter consoleOutput;
-        private TextWriter originalConsoleOutput;
-        private TextWriter originalErrorConsoleOutput;
-        private string startingDirectory;
+        private readonly StringWriter consoleOutput;
+        private readonly TextWriter originalConsoleOutput;
+        private readonly TextWriter originalErrorConsoleOutput;
+        private readonly string startingDirectory;
 
         public NuGetCommandLineTest()
         {

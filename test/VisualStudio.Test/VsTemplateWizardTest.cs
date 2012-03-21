@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TemplateWizard;
 using Moq;
 using NuGet.Test;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.VisualStudio.Test
 {
@@ -64,6 +65,27 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Equal(0, result.Packages.Count);
             Assert.Equal(null, result.RepositoryPath);
+        }
+
+        [Theory]
+        [InlineData("true", true)]
+        [InlineData("false", false)]
+        public void GetConfigurationRecognizeIsPreunzippedAttribute(string preunzippedValue, bool expectedResult)
+        {
+            // Arrange
+            var document = BuildDocument();
+            document.Element("VSTemplate")
+                    .Element(VSTemplateNamespace + "WizardData")
+                    .Element(VSTemplateNamespace + "packages")
+                    .Add(new XAttribute("isPreunzipped", preunzippedValue));
+
+            var wizard = new VsTemplateWizard(null, null);
+
+            // Act
+            var result = wizard.GetConfigurationFromXmlDocument(document, @"c:\some\file.vstemplate");
+
+            // Assert
+            Assert.Equal(expectedResult, result.IsPreunzipped);
         }
 
         [Fact]
@@ -560,6 +582,49 @@ namespace NuGet.VisualStudio.Test
             // Assert
             installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyPackage", new SemanticVersion(1, 0, 0, 0), true));
             installerMock.Verify(i => i.InstallPackage(@"C:\Some", mockProject, "MyOtherPackage", new SemanticVersion(2, 0, 0, 0), true));
+            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0 to project...");
+            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0 to project...");
+        }
+
+        [Fact]
+        public void RunFinished_ForProject_InstallsPackagesUseUnzippedPackageRepositoryWhenIsPreunzippedAttributeIsTrue()
+        {
+            // Arrange
+            var mockProject = new Mock<Project>().Object;
+            var installerMock = new Mock<IVsPackageInstaller>();
+            var document = BuildDocument("template",
+                BuildPackageElement("MyPackage", "1.0"),
+                BuildPackageElement("MyOtherPackage", "2.0"));
+
+            document.Element("VSTemplate")
+                    .Element(VSTemplateNamespace + "WizardData")
+                    .Element(VSTemplateNamespace + "packages")
+                    .Add(new XAttribute("isPreunzipped", true));
+
+            var templateWizard = new TestableVsTemplateWizard(installerMock.Object, loadDocumentCallback: p => document);
+            var wizard = (IWizard)templateWizard;
+            var dteMock = new Mock<DTE>();
+            dteMock.SetupProperty(dte => dte.StatusBar.Text);
+            wizard.RunStarted(dteMock.Object, null, WizardRunKind.AsNewProject,
+                new object[] { @"C:\Some\file.vstemplate" });
+            wizard.ProjectFinishedGenerating(mockProject);
+
+            // Act
+            wizard.RunFinished();
+
+            // Assert
+            installerMock.Verify(i => i.InstallPackage(
+                It.Is<IPackageRepository>(p => p is UnzippedPackageRepository && p.Source == @"C:\Some"), 
+                mockProject, 
+                "MyPackage", 
+                new SemanticVersion(1, 0, 0, 0), 
+                true));
+            installerMock.Verify(i => i.InstallPackage(
+                It.Is<IPackageRepository>(p => p is UnzippedPackageRepository && p.Source == @"C:\Some"), 
+                mockProject, 
+                "MyOtherPackage", 
+                new SemanticVersion(2, 0, 0, 0), 
+                true));
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0 to project...");
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0 to project...");
         }

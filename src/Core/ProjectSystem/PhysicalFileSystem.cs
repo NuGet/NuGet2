@@ -122,12 +122,17 @@ namespace NuGet
             }
         }
 
-        public virtual IEnumerable<string> GetFiles(string path)
+        public virtual IEnumerable<string> GetFiles(string path, bool recursive)
         {
-            return GetFiles(path, "*.*");
+            return GetFiles(path, "*.*", recursive);
         }
 
         public virtual IEnumerable<string> GetFiles(string path, string filter)
+        {
+            return GetFiles(path, filter, recursive: false);
+        }
+
+        public virtual IEnumerable<string> GetFiles(string path, string filter, bool recursive)
         {
             path = EnsureTrailingSlash(GetFullPath(path));
             try
@@ -136,7 +141,7 @@ namespace NuGet
                 {
                     return Enumerable.Empty<string>();
                 }
-                return Directory.EnumerateFiles(path, filter)
+                return Directory.EnumerateFiles(path, filter, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
                                 .Select(MakeRelativePath);
             }
             catch (UnauthorizedAccessException)

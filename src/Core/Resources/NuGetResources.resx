@@ -340,4 +340,7 @@
   <data name="SettingsCredentials_UsingSavedCredentials" xml:space="preserve">
     <value>Using credentials from config. UserName: {0}</value>
   </data>
+  <data name="Manifest_NotAvailable" xml:space="preserve">
+    <value>The manifest of this package has not been read. Call ReadManifest() before calling this method.</value>
+  </data>
 </root>

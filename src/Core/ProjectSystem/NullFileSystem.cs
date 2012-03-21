@@ -40,6 +40,11 @@ namespace NuGet
             return Enumerable.Empty<string>();
         }
 
+        public IEnumerable<string> GetFiles(string path, string filter, bool recursive)
+        {
+            return Enumerable.Empty<string>();
+        }
+
         public IEnumerable<string> GetDirectories(string path)
         {
             return Enumerable.Empty<string>();

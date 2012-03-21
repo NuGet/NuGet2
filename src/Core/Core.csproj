@@ -83,12 +83,15 @@
     <Compile Include="Http\NullCredentialProvider.cs" />
     <Compile Include="Http\ProxyCache.cs" />
     <Compile Include="Http\RequestHelper.cs" />
+    <Compile Include="Packages\LocalPackage.cs" />
+    <Compile Include="Packages\UnzippedPackage.cs" />
     <Compile Include="Repositories\ILatestPackageLookup.cs" />
     <Compile Include="ProjectSystem\IBatchProcessor.cs" />
     <Compile Include="Repositories\ICloneableRepository.cs" />
     <Compile Include="Repositories\ICultureAwareRepository.cs" />
     <Compile Include="Repositories\ISearchableRepository.cs" />
     <Compile Include="Repositories\PackageName.cs" />
+    <Compile Include="Repositories\UnzippedPackageRepository.cs" />
     <Compile Include="Resources\AnalysisResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

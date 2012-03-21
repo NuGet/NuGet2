@@ -314,6 +314,19 @@ namespace NuGet.VisualStudio
             return path;
         }
 
+        public IEnumerable<string> GetFiles(string path, string filter, bool recursive)
+        {
+            if (recursive)
+            {
+                // TODO: implement this when we really need it
+                throw new NotSupportedException();
+            }
+            else
+            {
+                return GetFiles(path, filter);
+            }
+        }
+
         public IEnumerable<string> GetFiles(string path, string filter)
         {
             // Get all physical files

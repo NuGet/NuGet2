@@ -41,11 +41,15 @@ namespace NuGet.VisualStudio
             return GetConfigurationFromXmlDocument(document, vsTemplatePath);
         }
 
-        internal VsTemplateWizardInstallerConfiguration GetConfigurationFromXmlDocument(XDocument document, string vsTemplatePath,
-            object vsExtensionManager = null, IEnumerable<IRegistryKey> registryKeys = null)
+        internal VsTemplateWizardInstallerConfiguration GetConfigurationFromXmlDocument(
+            XDocument document, 
+            string vsTemplatePath,
+            object vsExtensionManager = null, 
+            IEnumerable<IRegistryKey> registryKeys = null)
         {
-            IEnumerable<VsTemplateWizardPackageInfo> packages = Enumerable.Empty<VsTemplateWizardPackageInfo>();
+            IList<VsTemplateWizardPackageInfo> packages = new VsTemplateWizardPackageInfo[0];
             string repositoryPath = null;
+            bool isPreunzipped = false;
 
             // Ignore XML namespaces since VS does not check them either when loading vstemplate files.
             XElement packagesElement = document.Root.ElementsNoNamespace("WizardData")
@@ -54,17 +58,22 @@ namespace NuGet.VisualStudio
 
             if (packagesElement != null)
             {
-                RepositoryType repositoryType = GetRepositoryType(packagesElement);
+                 string isPreunzippedString = packagesElement.GetOptionalAttributeValue("isPreunzipped");
+                 if (!String.IsNullOrEmpty(isPreunzippedString))
+                 {
+                     Boolean.TryParse(isPreunzippedString, out isPreunzipped);
+                 }
+
                 packages = GetPackages(packagesElement).ToList();
 
-                if (packages.Any())
+                if (packages.Count > 0)
                 {
-                    repositoryPath = GetRepositoryPath(packagesElement, repositoryType, vsTemplatePath,
-                        vsExtensionManager, registryKeys);
+                     RepositoryType repositoryType = GetRepositoryType(packagesElement);
+                     repositoryPath = GetRepositoryPath(packagesElement, repositoryType, vsTemplatePath, vsExtensionManager, registryKeys);
                 }
             }
 
-            return new VsTemplateWizardInstallerConfiguration(repositoryPath, packages);
+            return new VsTemplateWizardInstallerConfiguration(repositoryPath, packages, isPreunzipped);
         }
 
         private IEnumerable<VsTemplateWizardPackageInfo> GetPackages(XElement packagesElement)
@@ -101,8 +110,12 @@ namespace NuGet.VisualStudio
                     );
         }
 
-        private string GetRepositoryPath(XElement packagesElement, RepositoryType repositoryType, string vsTemplatePath,
-            object vsExtensionManager, IEnumerable<IRegistryKey> registryKeys)
+        private string GetRepositoryPath(
+            XElement packagesElement, 
+            RepositoryType repositoryType, 
+            string vsTemplatePath,
+            object vsExtensionManager, 
+            IEnumerable<IRegistryKey> registryKeys)
         {
             switch (repositoryType)
             {
@@ -223,19 +236,29 @@ namespace NuGet.VisualStudio
             return XDocument.Load(path);
         }
 
-        private void PerformPackageInstall(IVsPackageInstaller packageInstaller, Project project, string packageRepositoryPath, IEnumerable<VsTemplateWizardPackageInfo> packages)
+        private void PerformPackageInstall(
+            IVsPackageInstaller packageInstaller, 
+            Project project, 
+            VsTemplateWizardInstallerConfiguration configuration)
         {
+            string repositoryPath = configuration.RepositoryPath;
             var failedPackageErrors = new List<string>();
-            foreach (var package in packages)
+            foreach (var package in configuration.Packages)
             {
                 try
                 {
                     _dte.StatusBar.Text = String.Format(CultureInfo.CurrentCulture, VsResources.TemplateWizard_PackageInstallStatus, package.Id, package.Version);
 
-                    // TODO review parameters and installer call
-                    // REVIEW is it OK to ignoreDependencies? The expectation is that the vstemplate will list all the required packages
-                    // REVIEW We need to figure out if we can break IVsPackageInstaller interface by modifying it to accept a SemVer and still allow MVC 3 projects to work
-                    packageInstaller.InstallPackage(packageRepositoryPath, project, package.Id, package.Version, ignoreDependencies: true);
+                     if (configuration.IsPreunzipped)
+                     {
+                         // for preunzipped repository, use UnzippedPackageRepository instead of LocalPackageRepository
+                         var repository = new UnzippedPackageRepository(repositoryPath);
+                         packageInstaller.InstallPackage(repository, project, package.Id, package.Version, ignoreDependencies: true);
+                     }
+                     else
+                     {
+                         packageInstaller.InstallPackage(repositoryPath, project, package.Id, package.Version, ignoreDependencies: true);
+                     }
                 }
                 catch (InvalidOperationException exception)
                 {
@@ -246,7 +269,7 @@ namespace NuGet.VisualStudio
             if (failedPackageErrors.Any())
             {
                 var errorString = new StringBuilder();
-                errorString.AppendFormat(VsResources.TemplateWizard_FailedToInstallPackage, packageRepositoryPath);
+                errorString.AppendFormat(VsResources.TemplateWizard_FailedToInstallPackage, repositoryPath);
                 errorString.AppendLine();
                 errorString.AppendLine();
                 errorString.Append(String.Join(Environment.NewLine, failedPackageErrors));
@@ -268,8 +291,7 @@ namespace NuGet.VisualStudio
         {
             if (_configuration.Packages.Any())
             {
-                string repositoryPath = _configuration.RepositoryPath;
-                PerformPackageInstall(_installer, project, repositoryPath, _configuration.Packages);
+                PerformPackageInstall(_installer, project, _configuration);
 
                 // RepositorySettings = null in unit tests
                 if (RepositorySettings != null)
@@ -346,6 +368,7 @@ namespace NuGet.VisualStudio
             /// Cache location relative to the template (inside the same folder as the vstemplate file)
             /// </summary>
             Template,
+            
             /// <summary>
             /// Cache location relative to the VSIX that packages the project template
             /// </summary>

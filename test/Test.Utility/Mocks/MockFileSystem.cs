@@ -74,17 +74,32 @@ namespace NuGet.Test.Mocks
             return Path.Combine(Root, path);
         }
 
-        public virtual IEnumerable<string> GetFiles(string path)
+        public virtual IEnumerable<string> GetFiles(string path, bool recursive)
         {
-            return Paths.Select(f => f.Key)
-                        .Where(f => Path.GetDirectoryName(f).Equals(path, StringComparison.OrdinalIgnoreCase));
+            var files = Paths.Select(f => f.Key);
+            if (recursive)
+            {
+                path = PathUtility.EnsureTrailingSlash(path);
+                files = files.Where(f => f.StartsWith(path, StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                files = files.Where(f => Path.GetDirectoryName(f).Equals(path, StringComparison.OrdinalIgnoreCase));
+            }
+                             
+            return files;
         }
 
-        public virtual IEnumerable<string> GetFiles(string path, string filter)
+        public IEnumerable<string> GetFiles(string path, string filter)
+        {
+            return GetFiles(path, filter, recursive: false);
+        }
+
+        public virtual IEnumerable<string> GetFiles(string path, string filter, bool recursive)
         {
             Regex matcher = GetFilterRegex(filter);
 
-            return GetFiles(path).Where(f => matcher.IsMatch(f));
+            return GetFiles(path, recursive).Where(f => matcher.IsMatch(f));
         }
 
         private static Regex GetFilterRegex(string wildcard)

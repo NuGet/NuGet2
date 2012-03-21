@@ -43,7 +43,7 @@ namespace NuGet.VisualStudio
             InstallPackage(repository, project, packageId, version, ignoreDependencies);
         }
 
-        internal void InstallPackage(IPackageRepository repository, Project project, string packageId, SemanticVersion version, bool ignoreDependencies)
+        public void InstallPackage(IPackageRepository repository, Project project, string packageId, SemanticVersion version, bool ignoreDependencies)
         {
             if (project == null)
             {
