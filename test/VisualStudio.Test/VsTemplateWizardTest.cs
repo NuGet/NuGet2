@@ -191,7 +191,7 @@ namespace NuGet.VisualStudio.Test
             hkcu.Setup(r => r.OpenSubKey(registryPath)).Returns(hkcu_repository.Object);
 
             // Act
-            var result = wizard.GetConfigurationFromXmlDocument(document, registryPath, registryKeys: new[] { hkcu.Object });
+            var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object });
 
             // Assert
             Assert.Equal(registryValue, result.RepositoryPath);
@@ -219,7 +219,7 @@ namespace NuGet.VisualStudio.Test
             hklm.Setup(r => r.OpenSubKey(registryPath)).Returns(hklm_repository.Object);
 
             // Act
-            var result = wizard.GetConfigurationFromXmlDocument(document, registryPath, registryKeys: new[] { hkcu.Object, hklm.Object });
+            var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object, hklm.Object });
 
             // Assert
             Assert.Equal(registryValue, result.RepositoryPath);
@@ -250,7 +250,7 @@ namespace NuGet.VisualStudio.Test
             hklm.Setup(r => r.OpenSubKey(registryPath)).Returns(hklm_repository.Object);
 
             // Act
-            var result = wizard.GetConfigurationFromXmlDocument(document, registryPath, registryKeys: new[] { hkcu.Object, hklm.Object });
+            var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object, hklm.Object });
 
             // Assert
             Assert.Equal(registryValue, result.RepositoryPath);
@@ -261,15 +261,15 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var registryPath = @"SOFTWARE\NuGet\Repository";
-            var registryKey = "AspNetMvc4";
+            var registryKeyName = "AspNetMvc4";
             var registryValue = @"C:\AspNetMvc4\Packages";
 
-            var document = BuildDocumentWithPackage("registry", new XAttribute("keyName", registryKey));
+            var document = BuildDocumentWithPackage("registry", new XAttribute("keyName", registryKeyName));
             var wizard = new VsTemplateWizard(null, null);
 
             // HKCU key exists, but the value does not
             var hkcu_repository = new Mock<IRegistryKey>();
-            hkcu_repository.Setup(r => r.GetValue(registryKey)).Returns(String.Empty);
+            hkcu_repository.Setup(r => r.GetValue(registryKeyName)).Returns(String.Empty);
 
             var hkcu = new Mock<IRegistryKey>();
             hkcu.Setup(r => r.OpenSubKey(registryPath)).Returns(hkcu_repository.Object);
@@ -277,11 +277,11 @@ namespace NuGet.VisualStudio.Test
             // HKLM key is configured
             var hklm_repository = new Mock<IRegistryKey>();
             var hklm = new Mock<IRegistryKey>();
-            hklm_repository.Setup(k => k.GetValue(registryKey)).Returns(registryValue);
+            hklm_repository.Setup(k => k.GetValue(registryKeyName)).Returns(registryValue);
             hklm.Setup(r => r.OpenSubKey(registryPath)).Returns(hklm_repository.Object);
 
             // Act
-            var result = wizard.GetConfigurationFromXmlDocument(document, registryPath, registryKeys: new[] { hkcu.Object, hklm.Object });
+            var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object, hklm.Object });
 
             // Assert
             Assert.Equal(registryValue, result.RepositoryPath);
@@ -291,14 +291,13 @@ namespace NuGet.VisualStudio.Test
         public void GetConfigurationFromXmlDocument_ShowErrorForMissingKeyNameAttributeWhenInRegistryRepositoryMode()
         {
             // Arrange
-            var registryPath = @"SOFTWARE\NuGet\Repository";
             var document = BuildDocumentWithPackage("registry");
             var wizard = new TestableVsTemplateWizard();
 
             // Act
             ExceptionAssert.Throws<WizardBackoutException>(() =>
                                                            wizard.GetConfigurationFromXmlDocument(document,
-                                                               registryPath, registryKeys: Enumerable.Empty<IRegistryKey>()));
+                                                               @"C:\Some\file.vstemplate", registryKeys: Enumerable.Empty<IRegistryKey>()));
 
             // Assert
             Assert.Equal(
@@ -310,14 +309,21 @@ namespace NuGet.VisualStudio.Test
         public void GetConfigurationFromXmlDocument_ShowErrorForMissingRegistryKeyWhenInRegistryRepositoryMode()
         {
             // Arrange
-            var registryPath = @"ThisRegistryKeyDoesNotExist";
-            var document = BuildDocumentWithPackage("registry", new XAttribute("keyName", "AspNetMvc4"));
+            var registryPath = @"SOFTWARE\NuGet\Repository";
+            var registryKeyName = @"ThisRegistryKeyDoesNotExist";
+            var document = BuildDocumentWithPackage("registry", new XAttribute("keyName", registryKeyName));
             var wizard = new TestableVsTemplateWizard();
+
+            var hkcu = new Mock<IRegistryKey>();
+            hkcu.Setup(r => r.OpenSubKey(registryPath)).Returns<IRegistryKey>(null);
+
+            var registryKey = new Mock<IRegistryKey>();
+            registryKey.Setup(r => r.OpenSubKey(registryPath)).Returns<IRegistryKey>(null);
 
             // Act
             ExceptionAssert.Throws<WizardBackoutException>(() =>
                                                            wizard.GetConfigurationFromXmlDocument(document,
-                                                               registryPath, registryKeys: Enumerable.Empty<IRegistryKey>()));
+                                                               @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object }));
 
             // Assert
             Assert.Equal(
@@ -329,7 +335,7 @@ namespace NuGet.VisualStudio.Test
         public void GetConfigurationFromXmlDocument_ShowErrorForMissingRegistryValueWhenInRegistryRepositoryMode()
         {
             // Arrange
-            var registryPath = @"ThisRegistryKeyExists";
+            var registryPath = @"SOFTWARE\NuGet\Repository";
             var registryKey = "ThisRegistryKeyDoesNotExist";
             var document = BuildDocumentWithPackage("registry", new XAttribute("keyName", registryKey));
             var wizard = new TestableVsTemplateWizard();
@@ -346,7 +352,7 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             Assert.Equal(
-                String.Format("The project template has a reference to a missing Registry value. Could not find a Registry key with name '{0}'.", registryKey),
+                String.Format("The project template has a reference to a missing Registry value. Could not find a Registry key with name '{0}' under '{1}'.", registryKey, registryPath),
                 wizard.ErrorMessages.Single());
         }
 
