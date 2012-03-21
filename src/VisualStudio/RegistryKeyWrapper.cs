@@ -25,9 +25,10 @@ namespace NuGet.VisualStudio
                     return new RegistryKeyWrapper(key);
                 }
             }
-            catch (SecurityException)
+            catch (SecurityException ex)
             {
                 // If the user doesn't have access to the registry, then we'll return null
+                ExceptionHelper.WriteToActivityLog(ex);
             }
 
             return null;
@@ -39,9 +40,10 @@ namespace NuGet.VisualStudio
             {
                 return _registryKey.GetValue(name);
             }
-            catch (SecurityException)
+            catch (SecurityException ex)
             {
                 // If the user doesn't have access to the registry, then we'll return null
+                ExceptionHelper.WriteToActivityLog(ex);
                 return null;
             }
         }
