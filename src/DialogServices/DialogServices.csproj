@@ -137,9 +137,6 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="PackageManagerUI\packageicon.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="SolutionExplorer\Images\folderopen.png" />
     <Resource Include="SolutionExplorer\Images\folderclose.png" />
   </ItemGroup>
