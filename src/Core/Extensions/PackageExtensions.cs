@@ -101,7 +101,13 @@ namespace NuGet
         /// </summary>
         public static bool HasProjectContent(this IPackage package)
         {
+            // Note that while checking for both AssemblyReferences and LibFiles seems redundant,
+            // there are tests that directly inject items into the AssemblyReferences collection
+            // without having those files represented in the Lib folder.  We keep the redundant
+            // check to play it on the safe side.
+
             return package.FrameworkAssemblies.Any() ||
+                   package.AssemblyReferences.Any() ||
                    package.GetContentFiles().Any() ||
                    package.GetLibFiles().Any();
         }
