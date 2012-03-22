@@ -107,7 +107,7 @@ namespace NuGet.VisualStudio
         public override void DeleteDirectory(string path, bool recursive = false)
         {
             // Only delete this folder if it is empty and we didn't specify that we want to recurse
-            if (!recursive && (base.GetFiles(path, "*.*").Any() || base.GetDirectories(path).Any()))
+            if (!recursive && (base.GetFiles(path, "*.*", recursive).Any() || base.GetDirectories(path).Any()))
             {
                 Logger.Log(MessageLevel.Warning, VsResources.Warning_DirectoryNotEmpty, path);
                 return;
@@ -299,7 +299,7 @@ namespace NuGet.VisualStudio
             return path;
         }
 
-        public IEnumerable<string> GetFiles(string path, string filter, bool recursive)
+        public override IEnumerable<string> GetFiles(string path, string filter, bool recursive)
         {
             if (recursive)
             {
