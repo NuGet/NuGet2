@@ -283,10 +283,9 @@ namespace NuGet
         private void RemoveFiles(IPackage package)
         {
             string packageDirectory = PathResolver.GetPackageDirectory(package);
-            var files = package.GetFiles().ToList();
 
             // Remove resource files
-            FileSystem.DeleteFiles(files, packageDirectory);
+            FileSystem.DeleteFiles(package.GetFiles(), packageDirectory);
 
             // If this is a Satellite Package, then remove the files from the related runtime package folder too
             IPackage runtimePackage;

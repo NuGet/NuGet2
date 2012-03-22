@@ -60,10 +60,13 @@ namespace NuGet
         /// <returns>The list of satellite files, which may be an empty list.</returns>
         public static IEnumerable<IPackageFile> GetSatelliteFiles(this IPackage package)
         {
-            Debug.Assert(!String.IsNullOrEmpty(package.Language));
+            if (String.IsNullOrEmpty(package.Language))
+            {
+                return Enumerable.Empty<IPackageFile>();
+            }
 
             // Satellite files are those within the Lib folder that have a culture-specific subfolder anywhere in the path
-            return package.GetLibFiles().Where(file => file.Path.Split(Path.DirectorySeparatorChar)
+            return package.GetLibFiles().Where(file => Path.GetDirectoryName(file.Path).Split(Path.DirectorySeparatorChar)
                                                                 .Contains(package.Language, StringComparer.OrdinalIgnoreCase));
         }
 

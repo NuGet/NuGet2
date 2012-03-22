@@ -136,7 +136,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void InstallSatellitePackageCopiesFilesIntoRuntimePackageFolderWhenRuntimeIsInstalledAsADependency()
+        public void InstallingSatellitePackageCopiesFilesIntoRuntimePackageFolderWhenRuntimeIsInstalledAsADependency()
         {
             // Arrange
             // Create a runtime package and a satellite package that has a dependency on the runtime package, and uses the
@@ -167,7 +167,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void InstallSatellitePackageCopiesFilesIntoRuntimePackageFolderWhenRuntimeIsAlreadyInstalled()
+        public void InstallingSatellitePackageCopiesFilesIntoRuntimePackageFolderWhenRuntimeIsAlreadyInstalled()
         {
             // Arrange
             // Create a runtime package and a satellite package that has a dependency on the runtime package, and uses the
@@ -298,6 +298,52 @@ namespace NuGet.Test
 
             Assert.False(projectSystem.FileExists(@"foo.1.0.0\lib\japanese.xml"));
             Assert.False(projectSystem.FileExists(@"foo.1.0.0\content\japanese.txt"));
+        }
+
+        /// <summary>
+        /// This test demonstrates that satellite packages that have satellite files
+        /// that match the files in the runtime package can cause the runtime package's
+        /// file to be removed when the satellite package is uninstalled.
+        /// </summary>
+        /// <remarks>
+        /// This is an acceptable limitation of the design: during uninstallation of the satellite package,
+        /// we don't check the runtime package to see if files qualified as satellite files
+        /// already existed in the runtime package.
+        /// <para>
+        /// And as the uninstall.ps1 end-to-end tests demonstrate, the only way this collision can cause the
+        /// runtime package's file to be removed is when the files are exact matches of one another.  Otherwise,
+        /// the file will be recognized as different, and it won't be uninstalled when uninstalling ja-jp.
+        /// </para>
+        /// </remarks>
+        [Fact]
+        public void UninstallingSatellitePackageRemovesCollidingRuntimeFiles()
+        {
+            // Arrange
+            // Create a runtime package and a satellite package that has a dependency on the runtime package, and uses the
+            // local suffix convention.
+            var runtimePackage = PackageUtility.CreatePackage("foo", "1.0.0",
+                                                    assemblyReferences: new[] { @"lib\ja-jp\collision.txt" });
+
+            var satellitePackage = PackageUtility.CreatePackage("foo.ja-jp", "1.0.0", language: "ja-jp",
+                                                    satelliteAssemblies: new[] { @"lib\ja-jp\collision.txt" },
+                                                    dependencies: new[] { new PackageDependency("foo") });
+
+            var projectSystem = new MockProjectSystem();
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var packageManager = new PackageManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            sourceRepository.AddPackage(runtimePackage);
+            sourceRepository.AddPackage(satellitePackage);
+
+            // Act
+            packageManager.InstallPackage("foo");
+            packageManager.InstallPackage("foo.ja-jp");
+
+            packageManager.UninstallPackage("foo.ja-jp");
+
+            // Assert
+            Assert.Equal(0, projectSystem.Paths.Count);
+            Assert.False(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\collision.txt"));
         }
 
         [Fact]
