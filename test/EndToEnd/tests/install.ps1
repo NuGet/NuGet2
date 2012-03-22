@@ -19,7 +19,7 @@ function Test-WebsiteSimpleInstall {
     $p = New-WebSite
     
     # Act
-    Install-Package AntiXSS -Project $p.Name -Version 4.2.0.0
+    Install-Package AntiXSS -Project $p.Name -Version 4.2.1.0
     
     # Assert
     Assert-Package $p AntiXSS

@@ -534,7 +534,7 @@ function Test-GetPackageDoesNotThrowIfSolutionIsTemporary {
     New-TextFile
     
     # Act and Assert
-    Assert-Throws { Get-Package } "Unable to locate the solution directory. Please ensure that the solution has been saved."
+    Assert-Throws { Get-Package } "The current environment doesn't have a solution open."
 }
 
 function Test-GetPackageUpdatesReturnAllVersionsIfFlagIsSpecified 

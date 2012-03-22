@@ -594,7 +594,7 @@ function Test-UninstallPackageRemoveSolutionPackagesConfig
     # Arrange
     $a = New-ClassLibrary
 
-    $a | Install-Package SkypePackage -version 1.0 -source $context.RepositoryRoot
+    $a | Install-Package SolutionOnlyPackage -version 1.0 -source $context.RepositoryRoot
     
     $solutionFile = Get-SolutionPath
     $solutionDir = Split-Path $solutionFile -Parent
@@ -607,11 +607,11 @@ function Test-UninstallPackageRemoveSolutionPackagesConfig
     Assert-AreEqual 4 $content.Length
     Assert-AreEqual '<?xml version="1.0" encoding="utf-8"?>' $content[0]
     Assert-AreEqual '<packages>' $content[1]
-    Assert-AreEqual '  <package id="SkypePackage" version="1.0" />' $content[2]
+    Assert-AreEqual '  <package id="SolutionOnlyPackage" version="1.0" />' $content[2]
     Assert-AreEqual '</packages>' $content[3]
 
     # Act
-    $a | Uninstall-Package SkypePackage
+    $a | Uninstall-Package SolutionOnlyPackage
 
     # Assert
     Assert-False (Test-Path $configFile)
@@ -637,11 +637,11 @@ function Test-UninstallPackageRemoveEntryFromSolutionPackagesConfig
     Assert-True (Test-Path $configFile)
 
     $content = Get-Content $configFile
-    Assert-AreEqual 4 $content.Length
+    Assert-AreEqual 5 $content.Length
     Assert-AreEqual '<?xml version="1.0" encoding="utf-8"?>' $content[0]
     Assert-AreEqual '<packages>' $content[1]
-    Assert-AreEqual '  <package id="SolutionLevelPkg" version="1.0.0" />' $content[2]
-    Assert-AreEqual '  <package id="RazorGenerator.MsBuild" version="1.3.2" />' $content[3]
+    Assert-AreEqual '  <package id="RazorGenerator.MsBuild" version="1.3.2.0" />' $content[2]
+    Assert-AreEqual '  <package id="SolutionLevelPkg" version="1.0.0" />' $content[3]
     Assert-AreEqual '</packages>' $content[4]
 
     # Act
