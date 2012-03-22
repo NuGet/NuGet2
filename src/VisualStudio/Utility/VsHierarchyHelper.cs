@@ -52,6 +52,12 @@ namespace NuGet.VisualStudio
             VsHierarchyItem projectHierarchyItem = GetHierarchyItemForProject(project);
             IVsUIHierarchyWindow solutionExplorerWindow = GetSolutionExplorerHierarchyWindow();
 
+            if (solutionExplorerWindow == null)
+            {
+                // If the solution explorer is collapsed since opening VS, this value is null. In such a case, simply exit early.
+                return new VsHierarchyItem[0];
+            }
+
             var expandedItems = new List<VsHierarchyItem>();
 
             // processCallback return values: 
@@ -79,6 +85,12 @@ namespace NuGet.VisualStudio
         {
             VsHierarchyItem projectHierarchyItem = GetHierarchyItemForProject(project);
             IVsUIHierarchyWindow solutionExplorerWindow = GetSolutionExplorerHierarchyWindow();
+
+            if (solutionExplorerWindow == null)
+            {
+                // If the solution explorer is collapsed since opening VS, this value is null. In such a case, simply exit early.
+                return;
+            }
 
             // processCallback return values:
             //     0   continue, 

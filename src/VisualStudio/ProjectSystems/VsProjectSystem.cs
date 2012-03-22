@@ -17,29 +17,19 @@ using Project = EnvDTE.Project;
 
 namespace NuGet.VisualStudio
 {
-    public class VsProjectSystem : IVsProjectSystem, IBatchProcessor<string>, IComparer<IPackageFile>
+    public class VsProjectSystem : PhysicalFileSystem, IVsProjectSystem, IComparer<IPackageFile>
     {
         private const string BinDir = "bin";
 
         private FrameworkName _targetFramework;
         private readonly IFileSystem _baseFileSystem;
 
-        public VsProjectSystem(Project project, IFileSystemProvider fileSystemProvider)
+        public VsProjectSystem(Project project, IFileSystemProvider fileSystemProvider) 
+            : base(project.GetFullPath())
         {
             Project = project;
-            _baseFileSystem =  fileSystemProvider.GetFileSystem(project.GetFullPath());
+            _baseFileSystem = fileSystemProvider.GetFileSystem(project.GetFullPath());
             Debug.Assert(_baseFileSystem != null);
-        }
-
-        public ILogger Logger
-        {
-            get { return _baseFileSystem.Logger; }
-            set { _baseFileSystem.Logger = value; }
-        }
-
-        public string Root
-        {
-            get { return _baseFileSystem.Root; }
         }
 
         protected Project Project
@@ -94,19 +84,19 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public virtual void AddFile(string path, Stream stream)
+        public override void AddFile(string path, Stream stream)
         {
             bool fileExistsInProject = FileExistsInProject(path);
 
             // If the file exists on disk but not in the project then skip it
-            if (_baseFileSystem.FileExists(path) && !fileExistsInProject)
+            if (base.FileExists(path) && !fileExistsInProject)
             {
                 Logger.Log(MessageLevel.Warning, VsResources.Warning_FileAlreadyExists, path);
             }
             else
             {
                 EnsureCheckedOutIfExists(path);
-                _baseFileSystem.AddFile(path, stream);
+                base.AddFile(path, stream);
                 if (!fileExistsInProject)
                 {
                     AddFileToProject(path);
@@ -114,22 +104,23 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public virtual void DeleteDirectory(string path, bool recursive = false)
+        public override void DeleteDirectory(string path, bool recursive = false)
         {
             // Only delete this folder if it is empty and we didn't specify that we want to recurse
-            if (!recursive && (_baseFileSystem.GetFiles(path, "*.*").Any() || _baseFileSystem.GetDirectories(path).Any()))
+            if (!recursive && (base.GetFiles(path, "*.*").Any() || base.GetDirectories(path).Any()))
             {
                 Logger.Log(MessageLevel.Warning, VsResources.Warning_DirectoryNotEmpty, path);
                 return;
             }
 
-            if (Project.DeleteProjectItem(path))
+            // Workaround for TFS update issue. If we're bound to TFS, do not try and delete directories.
+            if (!(_baseFileSystem is ISourceControlFileSystem) && Project.DeleteProjectItem(path))
             {
                 Logger.Log(MessageLevel.Debug, VsResources.Debug_RemovedFolder, path);
             }
         }
 
-        public void DeleteFile(string path)
+        public override void DeleteFile(string path)
         {
             if (Project.DeleteProjectItem(path))
             {
@@ -265,12 +256,6 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public bool FileExists(string path)
-        {
-            // Only check the project system if the file is on disk to begin with
-            return _baseFileSystem.FileExists(path) || FileExistsInProject(path);
-        }
-
         private bool FileExistsInProject(string path)
         {
             return Project.GetProjectItem(path) != null;
@@ -329,7 +314,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public virtual IEnumerable<string> GetDirectories(string path)
+        public override IEnumerable<string> GetDirectories(string path)
         {
             // Get all physical folders
             return from p in Project.GetChildItems(path, "*.*", VsConstants.VsProjectItemKindPhysicalFolder)
@@ -381,15 +366,7 @@ namespace NuGet.VisualStudio
 
         private void EnsureCheckedOutIfExists(string path)
         {
-            if (_baseFileSystem is ISourceControlFileSystem)
-            {
-                // A source controlled file system would know how to checkout file on add\edit.
-                // This would only matter if we're dealing with PhysicalFileSystem over a source control system that we do not support.
-                return;
-            }
-            Project.EnsureCheckedOutIfExists(this, path);
-        }
-
+            Project.EnsureCheckedOutIfExists(this, path);        }
         private static bool AssemblyNamesMatch(AssemblyName name1, AssemblyName name2)
         {
             return name1.Name.Equals(name2.Name, StringComparison.OrdinalIgnoreCase) &&
@@ -413,49 +390,6 @@ namespace NuGet.VisualStudio
 
             // Otherwise consider them equal if either of the values are null
             return true;
-        }
-
-        public string GetFullPath(string path)
-        {
-            return _baseFileSystem.GetFullPath(path);
-        }
-
-        public virtual bool DirectoryExists(string path)
-        {
-            return _baseFileSystem.DirectoryExists(path);
-        }
-
-        public Stream OpenFile(string path)
-        {
-            return _baseFileSystem.OpenFile(path);
-        }
-
-        public DateTimeOffset GetLastModified(string path)
-        {
-            return _baseFileSystem.GetLastModified(path);
-        }
-
-        public DateTimeOffset GetCreated(string path)
-        {
-            return _baseFileSystem.GetCreated(path);
-        }
-
-        public virtual void BeginProcessing(IEnumerable<string> batch, PackageAction action)
-        {
-            var batchProcessor = _baseFileSystem as IBatchProcessor<string>;
-            if (batchProcessor != null)
-            {
-                batchProcessor.BeginProcessing(batch, action);
-            }
-        }
-
-        public virtual void EndProcessing()
-        {
-            var batchProcessor = _baseFileSystem as IBatchProcessor<string>;
-            if (batchProcessor != null)
-            {
-                batchProcessor.EndProcessing();
-            }
         }
 
         public int Compare(IPackageFile x, IPackageFile y)
