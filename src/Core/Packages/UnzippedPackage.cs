@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using NuGet.Resources;
 
 namespace NuGet
 {
@@ -61,6 +63,12 @@ namespace NuGet
         {
             // we look for the .nuspec file at jQuery.1.4\jQuery.1.4.nuspec
             string manifestFile = Path.Combine(_packageName, _packageName + Constants.ManifestExtension);
+            if (!_repositoryFileSystem.FileExists(manifestFile))
+            {
+                throw new InvalidOperationException(
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_NotFound, _repositoryFileSystem.GetFullPath(manifestFile)));
+            }
+
             using (Stream manifestStream = _repositoryFileSystem.OpenFile(manifestFile))
             {
                 ReadManifest(manifestStream);

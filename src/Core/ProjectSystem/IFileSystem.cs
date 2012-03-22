@@ -9,7 +9,6 @@ namespace NuGet
         ILogger Logger { get; set; }
         string Root { get; }
         void DeleteDirectory(string path, bool recursive);
-        IEnumerable<string> GetFiles(string path, string filter);
         IEnumerable<string> GetFiles(string path, string filter, bool recursive);
         IEnumerable<string> GetDirectories(string path);
         string GetFullPath(string path);

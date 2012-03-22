@@ -24,6 +24,18 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void MissingManifestFileThrows()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.CreateDirectory("jQuery.2.0.0");
+            fileSystem.AddFile("jQuery.2.0.0.nupkg");
+
+            // Act & Assert
+            Assert.Throws(typeof(InvalidOperationException), () => new UnzippedPackage(fileSystem, "jQuery.2.0.0"));
+        }
+
+        [Fact]
         public void EnsureManifestIsParsedCorrectly()
         {
             // Arrange

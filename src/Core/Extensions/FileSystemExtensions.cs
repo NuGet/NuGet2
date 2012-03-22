@@ -10,6 +10,11 @@ namespace NuGet
 {
     public static class FileSystemExtensions
     {
+        public static IEnumerable<string> GetFiles(this IFileSystem fileSystem, string path, string filter)
+        {
+            return fileSystem.GetFiles(path, filter, recursive: false);
+        }
+
         public static void AddFiles(this IFileSystem fileSystem, IEnumerable<IPackageFile> files)
         {
             AddFiles(fileSystem, files, String.Empty);

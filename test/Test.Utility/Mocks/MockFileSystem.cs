@@ -90,11 +90,6 @@ namespace NuGet.Test.Mocks
             return files;
         }
 
-        public IEnumerable<string> GetFiles(string path, string filter)
-        {
-            return GetFiles(path, filter, recursive: false);
-        }
-
         public virtual IEnumerable<string> GetFiles(string path, string filter, bool recursive)
         {
             Regex matcher = GetFilterRegex(filter);

@@ -35,11 +35,6 @@ namespace NuGet
             // Do nothing
         }
 
-        public IEnumerable<string> GetFiles(string path, string filter)
-        {
-            return Enumerable.Empty<string>();
-        }
-
         public IEnumerable<string> GetFiles(string path, string filter, bool recursive)
         {
             return Enumerable.Empty<string>();

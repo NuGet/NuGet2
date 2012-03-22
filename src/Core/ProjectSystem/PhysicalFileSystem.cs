@@ -127,11 +127,6 @@ namespace NuGet
             return GetFiles(path, "*.*", recursive);
         }
 
-        public virtual IEnumerable<string> GetFiles(string path, string filter)
-        {
-            return GetFiles(path, filter, recursive: false);
-        }
-
         public virtual IEnumerable<string> GetFiles(string path, string filter, bool recursive)
         {
             path = EnsureTrailingSlash(GetFullPath(path));

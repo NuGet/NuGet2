@@ -343,4 +343,7 @@
   <data name="Manifest_NotAvailable" xml:space="preserve">
     <value>The manifest of this package has not been read. Call ReadManifest() before calling this method.</value>
   </data>
+  <data name="Manifest_NotFound" xml:space="preserve">
+    <value>Could not find manifest file at '{0}'.</value>
+  </data>
 </root>

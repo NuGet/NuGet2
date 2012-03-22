@@ -323,15 +323,10 @@ namespace NuGet.VisualStudio
             }
             else
             {
-                return GetFiles(path, filter);
+                // Get all physical files
+                return from p in Project.GetChildItems(path, filter, VsConstants.VsProjectItemKindPhysicalFile)
+                       select p.Name;
             }
-        }
-
-        public IEnumerable<string> GetFiles(string path, string filter)
-        {
-            // Get all physical files
-            return from p in Project.GetChildItems(path, filter, VsConstants.VsProjectItemKindPhysicalFile)
-                   select p.Name;
         }
 
         public virtual IEnumerable<string> GetDirectories(string path)

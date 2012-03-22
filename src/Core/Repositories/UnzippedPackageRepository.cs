@@ -41,18 +41,18 @@ namespace NuGet
         public override IQueryable<IPackage> GetPackages()
         {
             return (from file in FileSystem.GetFiles("", "*" + Constants.PackageExtension)
-                    let fileName = Path.GetFileNameWithoutExtension(file)
-                    where FileSystem.DirectoryExists(fileName)
-                    select new UnzippedPackage(FileSystem, fileName)).AsQueryable();
+                    let packageName = Path.GetFileNameWithoutExtension(file)
+                    where FileSystem.DirectoryExists(packageName)
+                    select new UnzippedPackage(FileSystem, packageName)).AsQueryable();
         }
 
         public IPackage FindPackage(string packageId, SemanticVersion version)
         {
-            string directoryName = packageId + "." + version.ToString(); 
-            string fileName = directoryName + Constants.PackageExtension;
-            if (FileSystem.FileExists(fileName) && FileSystem.DirectoryExists(directoryName))
+            string packageName = packageId + "." + version.ToString(); 
+            string packageFile = packageName + Constants.PackageExtension;
+            if (FileSystem.FileExists(packageFile) && FileSystem.DirectoryExists(packageName))
             {
-                return new UnzippedPackage(FileSystem, directoryName);
+                return new UnzippedPackage(FileSystem, packageName);
             }
 
             return null;
