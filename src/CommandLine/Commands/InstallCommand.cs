@@ -19,6 +19,7 @@ namespace NuGet.Commands
     {
         private readonly IPackageRepository _cacheRepository;
         private readonly List<string> _sources = new List<string>();
+        private readonly ISettings _configSettings;
 
         [Option(typeof(NuGetResources), "InstallCommandSourceDescription")]
         public ICollection<string> Source
@@ -59,13 +60,16 @@ namespace NuGet.Commands
         }
 
         [ImportingConstructor]
-        public InstallCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider)
-            : this(packageRepositoryFactory, sourceProvider, MachineCache.Default)
+        public InstallCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider, ISettings settings)
+            : this(packageRepositoryFactory, sourceProvider, settings, MachineCache.Default)
         {
-
         }
 
-        protected internal InstallCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider, IPackageRepository cacheRepository)
+        protected internal InstallCommand(
+            IPackageRepositoryFactory packageRepositoryFactory, 
+            IPackageSourceProvider sourceProvider, 
+            ISettings configSettings,
+            IPackageRepository cacheRepository)
         {
             if (packageRepositoryFactory == null)
             {
@@ -77,9 +81,15 @@ namespace NuGet.Commands
                 throw new ArgumentNullException("sourceProvider");
             }
 
+            if (configSettings == null)
+            {
+                throw new ArgumentNullException("configSettings");
+            }
+
             RepositoryFactory = packageRepositoryFactory;
             SourceProvider = sourceProvider;
             _cacheRepository = cacheRepository;
+            _configSettings = configSettings;
         }
 
         public override void ExecuteCommand()
@@ -90,6 +100,8 @@ namespace NuGet.Commands
             // Otherwise, treat the first argument as a package Id
             if (Arguments.Count == 0 || Path.GetFileName(Arguments[0]).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
             {
+                CheckForPackageRestoreConsent();
+
                 Prerelease = true;
                 var configFilePath = Arguments.Count == 0 ? Constants.PackageReferenceFile : Path.GetFullPath(Arguments[0]);
                 // By default the PackageReferenceFile does not throw if the file does not exist at the specified path.
@@ -108,6 +120,15 @@ namespace NuGet.Commands
                 {
                     Console.WriteLine(NuGetResources.InstallCommandPackageAlreadyExists, packageId);
                 }
+            }
+        }
+
+        private void CheckForPackageRestoreConsent()
+        {
+            var packageRestore = new PackageRestoreConsent(_configSettings);
+            if (!packageRestore.IsGranted)
+            {
+                throw new InvalidOperationException(NuGetResources.InstallCommandPackageRestoreConsentNotFound);
             }
         }
 

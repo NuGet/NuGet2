@@ -41,6 +41,9 @@
             this.PackagesCacheHeader = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.updatePanel = new System.Windows.Forms.Panel();
+            this.PackageRestoreHeader = new System.Windows.Forms.Label();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.packageRestoreConsentCheckBox = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.updatePanel.SuspendLayout();
             this.SuspendLayout();
@@ -120,6 +123,23 @@
             resources.ApplyResources(this.updatePanel, "updatePanel");
             this.updatePanel.Name = "updatePanel";
             // 
+            // PackageRestoreHeader
+            // 
+            resources.ApplyResources(this.PackageRestoreHeader, "PackageRestoreHeader");
+            this.PackageRestoreHeader.Name = "PackageRestoreHeader";
+            // 
+            // groupBox1
+            // 
+            resources.ApplyResources(this.groupBox1, "groupBox1");
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.TabStop = false;
+            // 
+            // packageRestoreConsentCheckBox
+            // 
+            resources.ApplyResources(this.packageRestoreConsentCheckBox, "packageRestoreConsentCheckBox");
+            this.packageRestoreConsentCheckBox.Name = "packageRestoreConsentCheckBox";
+            this.packageRestoreConsentCheckBox.UseVisualStyleBackColor = true;
+            // 
             // GeneralOptionControl
             // 
             resources.ApplyResources(this, "$this");
@@ -130,6 +150,9 @@
             this.Controls.Add(this.PackagesCacheHeader);
             this.Controls.Add(this.PackagesCacheHeaderDivider);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Controls.Add(this.PackageRestoreHeader);
+            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.packageRestoreConsentCheckBox);
             this.Controls.Add(this.updatePanel);
             this.Name = "GeneralOptionControl";
             this.tableLayoutPanel1.ResumeLayout(false);
@@ -155,5 +178,8 @@
         private System.Windows.Forms.Label PackagesCacheHeader;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Panel updatePanel;
+        private System.Windows.Forms.Label PackageRestoreHeader;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.CheckBox packageRestoreConsentCheckBox;
     }
 }

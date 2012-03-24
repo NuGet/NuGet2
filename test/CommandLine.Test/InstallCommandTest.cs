@@ -28,6 +28,20 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         }
 
         [Fact]
+        public void InstallCommandForPackageReferenceFileThrowsIfPackageRestoreNotAvailable()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
+                                                        allowPackageRestore: false);
+            installCommand.Arguments.Add("packages.config");
+
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => installCommand.ExecuteCommand());
+        }
+
+        [Fact]
         public void InstallCommandInstallsPackageSuccessfullyIfCacheRepositoryIsNotSet()
         {
             // Arrange
@@ -436,8 +450,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                                       IPackageSourceProvider sourceProvider,
                                       IFileSystem fileSystem,
                                       IPackageManager packageManager = null,
-                                      IPackageRepository machineCacheRepository = null)
-                : base(factory, sourceProvider, machineCacheRepository ?? new MockPackageRepository())
+                                      IPackageRepository machineCacheRepository = null,
+                                      bool allowPackageRestore = true)
+                : base(factory, sourceProvider, new MockSettings(allowPackageRestore), machineCacheRepository ?? new MockPackageRepository())
             {
                 _fileSystem = fileSystem;
                 _packageManager = packageManager;
@@ -456,6 +471,61 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             protected override PackageReferenceFile GetPackageReferenceFile(string path)
             {
                 return new PackageReferenceFile(_fileSystem, path);
+            }
+        }
+
+        private sealed class MockSettings : ISettings
+        {
+            private readonly bool _allowPackageRestore;
+
+            public MockSettings(bool allowPackageRestore)
+            {
+                _allowPackageRestore = allowPackageRestore;
+            }
+
+            public string GetValue(string section, string key)
+            {
+                if (section == "packageRestore" && key == "enabled")
+                {
+                    return _allowPackageRestore ? "true" : "false";
+                }
+
+                return null;
+            }
+
+            public IList<KeyValuePair<string, string>> GetValues(string section)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IList<KeyValuePair<string, string>> GetNestedValues(string section, string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetValue(string section, string key, string value)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetValues(string section, IList<KeyValuePair<string, string>> values)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void SetNestedValues(string section, string key, IList<KeyValuePair<string, string>> values)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool DeleteValue(string section, string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool DeleteSection(string section)
+            {
+                throw new NotImplementedException();
             }
         }
     }

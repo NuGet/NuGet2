@@ -67,6 +67,7 @@
     <Compile Include="Configuration\ISettings.cs" />
     <Compile Include="Configuration\NullSettings.cs" />
     <Compile Include="Configuration\Settings.cs" />
+    <Compile Include="EnvironmentVariableWrapper.cs" />
     <Compile Include="Extensions\CredentialProviderExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
@@ -83,6 +84,8 @@
     <Compile Include="Http\NullCredentialProvider.cs" />
     <Compile Include="Http\ProxyCache.cs" />
     <Compile Include="Http\RequestHelper.cs" />
+    <Compile Include="IEnvironmentVariableReader.cs" />
+    <Compile Include="PackageRestoreConsent.cs" />
     <Compile Include="Packages\LocalPackage.cs" />
     <Compile Include="Packages\UnzippedPackage.cs" />
     <Compile Include="Repositories\ILatestPackageLookup.cs" />
