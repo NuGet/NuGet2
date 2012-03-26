@@ -67,7 +67,7 @@ namespace NuGet.VisualStudio.Test
             var installer = new VsPackageInstaller(packageManagerFactory.Object, scriptExecutor.Object, new Mock<IPackageRepositoryFactory>().Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object);
 
             // Act
-            installer.InstallPackage(sourceRepository, project, "foo", new SemanticVersion("1.0"), ignoreDependencies: false);
+            installer.InstallPackage(sourceRepository, project, "foo", new SemanticVersion("1.0"), ignoreDependencies: false, skipAssemblyReferences: false);
 
             // Assert
             scriptExecutor.Verify(e => e.Execute(It.IsAny<string>(), PowerShellScripts.Init, It.IsAny<IPackage>(), It.IsAny<Project>(), It.IsAny<ILogger>()), Times.Once());
@@ -103,7 +103,7 @@ namespace NuGet.VisualStudio.Test
             var installer = new VsPackageInstaller(packageManagerFactory.Object, scriptExecutor.Object, new Mock<IPackageRepositoryFactory>().Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object);
 
             // Act
-            installer.InstallPackage(sourceRepository, project, "foo", new SemanticVersion("1.0"), ignoreDependencies: false);
+            installer.InstallPackage(sourceRepository, project, "foo", new SemanticVersion("1.0"), ignoreDependencies: false, skipAssemblyReferences: false);
 
             // Assert
             // state = 4 means that BindingRedirectEnabled is set to 'false', then to 'true', in that order.
@@ -139,7 +139,7 @@ namespace NuGet.VisualStudio.Test
             var installer = new VsPackageInstaller(packageManagerFactory.Object, scriptExecutor.Object, new Mock<IPackageRepositoryFactory>().Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object);
 
             // Act
-            installer.InstallPackage(sourceRepository, project, "foo", new SemanticVersion("1.0"), ignoreDependencies: false);
+            installer.InstallPackage(sourceRepository, project, "foo", new SemanticVersion("1.0"), ignoreDependencies: false, skipAssemblyReferences: false);
 
             // Assert
             packageManagerFactory.Verify(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), false, false), Times.Once());
@@ -173,7 +173,7 @@ namespace NuGet.VisualStudio.Test
             var installer = new VsPackageInstaller(packageManagerFactory.Object, scriptExecutor.Object, new Mock<IPackageRepositoryFactory>().Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object);
 
             // Act
-            installer.InstallPackage(sourceRepository, project, "foo", new SemanticVersion("1.0"), ignoreDependencies: false);
+            installer.InstallPackage(sourceRepository, project, "foo", new SemanticVersion("1.0"), ignoreDependencies: false, skipAssemblyReferences: false);
 
             // Assert
             packageManagerFactory.Verify(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), false, false), Times.Once());

@@ -15,6 +15,7 @@ namespace NuGet.VisualStudio
         void InstallPackage(IEnumerable<Project> projects, IPackage package, IEnumerable<PackageOperation> operations, bool ignoreDependencies, bool allowPrereleaseVersions,
             ILogger logger, IPackageOperationEventListener eventListener);
         void InstallPackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions, ILogger logger);
+        void InstallPackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions, bool skipAssemblyReferences, ILogger logger);
         void InstallPackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool ignoreDependencies, bool allowPrereleaseVersions, ILogger logger);
 
         // Uninstall

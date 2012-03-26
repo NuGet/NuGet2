@@ -42,9 +42,9 @@ namespace NuGet.VisualStudio
         }
 
         internal VsTemplateWizardInstallerConfiguration GetConfigurationFromXmlDocument(
-            XDocument document, 
+            XDocument document,
             string vsTemplatePath,
-            object vsExtensionManager = null, 
+            object vsExtensionManager = null,
             IEnumerable<IRegistryKey> registryKeys = null)
         {
             IList<VsTemplateWizardPackageInfo> packages = new VsTemplateWizardPackageInfo[0];
@@ -58,18 +58,18 @@ namespace NuGet.VisualStudio
 
             if (packagesElement != null)
             {
-                 string isPreunzippedString = packagesElement.GetOptionalAttributeValue("isPreunzipped");
-                 if (!String.IsNullOrEmpty(isPreunzippedString))
-                 {
-                     Boolean.TryParse(isPreunzippedString, out isPreunzipped);
-                 }
+                string isPreunzippedString = packagesElement.GetOptionalAttributeValue("isPreunzipped");
+                if (!String.IsNullOrEmpty(isPreunzippedString))
+                {
+                    Boolean.TryParse(isPreunzippedString, out isPreunzipped);
+                }
 
                 packages = GetPackages(packagesElement).ToList();
 
                 if (packages.Count > 0)
                 {
-                     RepositoryType repositoryType = GetRepositoryType(packagesElement);
-                     repositoryPath = GetRepositoryPath(packagesElement, repositoryType, vsTemplatePath, vsExtensionManager, registryKeys);
+                    RepositoryType repositoryType = GetRepositoryType(packagesElement);
+                    repositoryPath = GetRepositoryPath(packagesElement, repositoryType, vsTemplatePath, vsExtensionManager, registryKeys);
                 }
             }
 
@@ -81,18 +81,18 @@ namespace NuGet.VisualStudio
             var declarations = (from packageElement in packagesElement.ElementsNoNamespace("package")
                                 let id = packageElement.GetOptionalAttributeValue("id")
                                 let version = packageElement.GetOptionalAttributeValue("version")
-                                let createRefreshFilesInBin = packageElement.GetOptionalAttributeValue("createRefreshFilesInBin")
-                                select new { id, version, createRefreshFilesInBin }).ToList();
+                                let skipAssemblyReferences = packageElement.GetOptionalAttributeValue("skipAssemblyReferences")
+                                select new { id, version, skipAssemblyReferences }).ToList();
 
             SemanticVersion semVer;
-            bool createRefreshFilesInBinValue;
+            bool skipAssemblyReferencesValue;
             var missingOrInvalidAttributes = from declaration in declarations
                                              where
                                                  String.IsNullOrWhiteSpace(declaration.id) ||
                                                  String.IsNullOrWhiteSpace(declaration.version) ||
                                                  !SemanticVersion.TryParse(declaration.version, out semVer) ||
-                                                 (declaration.createRefreshFilesInBin != null &&
-                                                  !Boolean.TryParse(declaration.createRefreshFilesInBin, out createRefreshFilesInBinValue))
+                                                 (declaration.skipAssemblyReferences != null &&
+                                                  !Boolean.TryParse(declaration.skipAssemblyReferences, out skipAssemblyReferencesValue))
                                              select declaration;
 
             if (missingOrInvalidAttributes.Any())
@@ -106,15 +106,15 @@ namespace NuGet.VisualStudio
                    select new VsTemplateWizardPackageInfo(
                        declaration.id,
                        declaration.version,
-                       declaration.createRefreshFilesInBin != null && Boolean.Parse(declaration.createRefreshFilesInBin)
+                       declaration.skipAssemblyReferences != null && Boolean.Parse(declaration.skipAssemblyReferences)
                     );
         }
 
         private string GetRepositoryPath(
-            XElement packagesElement, 
-            RepositoryType repositoryType, 
+            XElement packagesElement,
+            RepositoryType repositoryType,
             string vsTemplatePath,
-            object vsExtensionManager, 
+            object vsExtensionManager,
             IEnumerable<IRegistryKey> registryKeys)
         {
             switch (repositoryType)
@@ -155,15 +155,7 @@ namespace NuGet.VisualStudio
 
         private string GetRegistryRepositoryPath(XElement packagesElement, IEnumerable<IRegistryKey> registryKeys)
         {
-            // When pulling the repository from the registry, use CurrentUser first, falling back onto LocalMachine
-            registryKeys = registryKeys ??
-                new[] {
-                            new RegistryKeyWrapper(Microsoft.Win32.Registry.CurrentUser),
-                            new RegistryKeyWrapper(Microsoft.Win32.Registry.LocalMachine)
-                        };
-
             string keyName = packagesElement.GetOptionalAttributeValue("keyName");
-
             if (String.IsNullOrEmpty(keyName))
             {
                 ShowErrorMessage(VsResources.TemplateWizard_MissingRegistryKeyName);
@@ -173,24 +165,28 @@ namespace NuGet.VisualStudio
             IRegistryKey repositoryKey = null;
             string repositoryValue = null;
 
-            if (registryKeys != null)
+            // When pulling the repository from the registry, use CurrentUser first, falling back onto LocalMachine
+            registryKeys = registryKeys ??
+                new[] {
+                            new RegistryKeyWrapper(Microsoft.Win32.Registry.CurrentUser),
+                            new RegistryKeyWrapper(Microsoft.Win32.Registry.LocalMachine)
+                      };
+
+            // Find the first registry key that supplies the necessary subkey/value
+            foreach (var registryKey in registryKeys)
             {
-                // Find the first registry key that supplies the necessary subkey/value
-                foreach (var registryKey in registryKeys)
+                repositoryKey = registryKey.OpenSubKey(RegistryKeyRoot);
+
+                if (repositoryKey != null)
                 {
-                    repositoryKey = registryKey.OpenSubKey(RegistryKeyRoot);
+                    repositoryValue = repositoryKey.GetValue(keyName) as string;
 
-                    if (repositoryKey != null)
+                    if (!String.IsNullOrEmpty(repositoryValue))
                     {
-                        repositoryValue = repositoryKey.GetValue(keyName) as string;
-
-                        if (!String.IsNullOrEmpty(repositoryValue))
-                        {
-                            break;
-                        }
-
-                        repositoryKey.Close();
+                        break;
                     }
+
+                    repositoryKey.Close();
                 }
             }
 
@@ -237,28 +233,23 @@ namespace NuGet.VisualStudio
         }
 
         private void PerformPackageInstall(
-            IVsPackageInstaller packageInstaller, 
-            Project project, 
+            IVsPackageInstaller packageInstaller,
+            Project project,
             VsTemplateWizardInstallerConfiguration configuration)
         {
             string repositoryPath = configuration.RepositoryPath;
             var failedPackageErrors = new List<string>();
+
+            IPackageRepository repository = configuration.IsPreunzipped
+                                                ? (IPackageRepository)new UnzippedPackageRepository(repositoryPath)
+                                                : (IPackageRepository)new LocalPackageRepository(repositoryPath);
+
             foreach (var package in configuration.Packages)
             {
                 try
                 {
                     _dte.StatusBar.Text = String.Format(CultureInfo.CurrentCulture, VsResources.TemplateWizard_PackageInstallStatus, package.Id, package.Version);
-
-                     if (configuration.IsPreunzipped)
-                     {
-                         // for preunzipped repository, use UnzippedPackageRepository instead of LocalPackageRepository
-                         var repository = new UnzippedPackageRepository(repositoryPath);
-                         packageInstaller.InstallPackage(repository, project, package.Id, package.Version, ignoreDependencies: true);
-                     }
-                     else
-                     {
-                         packageInstaller.InstallPackage(repositoryPath, project, package.Id, package.Version, ignoreDependencies: true);
-                     }
+                    packageInstaller.InstallPackage(repository, project, package.Id, package.Version, ignoreDependencies: true, skipAssemblyReferences: package.SkipAssemblyReferences);
                 }
                 catch (InvalidOperationException exception)
                 {
@@ -299,7 +290,7 @@ namespace NuGet.VisualStudio
                     CreatingRefreshFilesInBin(
                         project,
                         RepositorySettings.Value.RepositoryPath,
-                        _configuration.Packages.Where(p => p.CreateRefreshFilesInBin));
+                        _configuration.Packages.Where(p => p.SkipAssemblyReferences));
                 }
             }
         }
@@ -324,6 +315,33 @@ namespace NuGet.VisualStudio
             _dte = (DTE)automationObject;
             var vsTemplatePath = (string)customParams[0];
             _configuration = GetConfigurationFromVsTemplateFile(vsTemplatePath);
+
+            if (replacementsDictionary != null)
+            {
+                AddTemplateParameters(replacementsDictionary);
+            }
+        }
+
+        private void AddTemplateParameters(Dictionary<string, string> replacementsDictionary)
+        {
+            if (_dte.Solution != null && _dte.Solution.IsOpen)
+            {
+                // add the $nugetpackagesfolder$ parameter which returns relative path to the solution's packages folder.
+                // this is used by project templates to include assembly references directly inside the template project file
+                // without relying on nuget to install the actual packages. 
+                string targetInstallDir;
+                if (replacementsDictionary.TryGetValue("$destinationdirectory$", out targetInstallDir))
+                {
+                    string solutionRepositoryPath = RepositorySettings.Value.RepositoryPath;
+                    targetInstallDir = PathUtility.EnsureTrailingSlash(targetInstallDir);
+                    replacementsDictionary["$nugetpackagesfolder$"] =
+                        PathUtility.EnsureTrailingSlash(PathUtility.GetRelativePath(targetInstallDir,
+                                                                                    solutionRepositoryPath));
+                }
+            }
+
+            // provide a current timpestamp (for use by universal provider)
+            replacementsDictionary["$timestamp$"] = DateTime.Now.ToString("yyyyMMddHHmmss");
         }
 
         internal virtual void ShowErrorMessage(string message)
@@ -352,7 +370,7 @@ namespace NuGet.VisualStudio
 
         void IWizard.RunStarted(object automationObject, Dictionary<string, string> replacementsDictionary, WizardRunKind runKind, object[] customParams)
         {
-            // TODO REVIEW alternatively could get body of WizardData element from replacementsDictionary["$wizarddata$"] instead of parsing vstemplate file.
+            // alternatively could get body of WizardData element from replacementsDictionary["$wizarddata$"] instead of parsing vstemplate file.
             RunStarted(automationObject, replacementsDictionary, runKind, customParams);
         }
 
@@ -368,7 +386,7 @@ namespace NuGet.VisualStudio
             /// Cache location relative to the template (inside the same folder as the vstemplate file)
             /// </summary>
             Template,
-            
+
             /// <summary>
             /// Cache location relative to the VSIX that packages the project template
             /// </summary>

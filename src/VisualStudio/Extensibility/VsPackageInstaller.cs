@@ -40,10 +40,10 @@ namespace NuGet.VisualStudio
             }
 
             IPackageRepository repository = _repositoryFactory.CreateRepository(source);
-            InstallPackage(repository, project, packageId, version, ignoreDependencies);
+            InstallPackage(repository, project, packageId, version, ignoreDependencies, skipAssemblyReferences: false);
         }
 
-        public void InstallPackage(IPackageRepository repository, Project project, string packageId, SemanticVersion version, bool ignoreDependencies)
+        public void InstallPackage(IPackageRepository repository, Project project, string packageId, SemanticVersion version, bool ignoreDependencies, bool skipAssemblyReferences)
         {
             if (project == null)
             {
@@ -79,8 +79,14 @@ namespace NuGet.VisualStudio
                     projectManager.PackageReferenceAdded += addedHandler;
                     packageManager.PackageInstalled += installedHandler;
                     packageManager.BindingRedirectEnabled = false;
-                    packageManager.InstallPackage(projectManager, packageId, version, ignoreDependencies,
-                                                  allowPrereleaseVersions: true, logger: NullLogger.Instance);
+                    packageManager.InstallPackage(
+                        projectManager, 
+                        packageId, 
+                        version, 
+                        ignoreDependencies,
+                        allowPrereleaseVersions: true, 
+                        skipAssemblyReferences: skipAssemblyReferences, 
+                        logger: NullLogger.Instance);
                 }
                 finally
                 {

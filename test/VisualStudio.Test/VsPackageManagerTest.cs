@@ -35,6 +35,52 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
+        public void InstallPackageWithSkipAssemblyReferencesInstallsIntoProjectAndPackageManager()
+        {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, new MockPackageRepository());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+
+            var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" }, new [] { "assembly.dll" });
+            sourceRepository.AddPackage(package);
+
+            // Act
+            packageManager.InstallPackage(projectManager, "foo", new SemanticVersion("1.0"), ignoreDependencies: false, allowPrereleaseVersions: false, skipAssemblyReferences: true, logger: NullLogger.Instance);
+
+            // Assert
+            Assert.True(packageManager.LocalRepository.Exists(package));
+            Assert.True(projectManager.LocalRepository.Exists(package));
+            Assert.Equal(0, projectSystem.References.Count);
+        }
+
+        [Fact]
+        public void InstallPackageWithSkipAssemblyReferencesFalseInstallsIntoProjectAndPackageManager()
+        {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, new MockPackageRepository());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+
+            var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" }, new[] { "assembly.dll" });
+            sourceRepository.AddPackage(package);
+
+            // Act
+            packageManager.InstallPackage(projectManager, "foo", new SemanticVersion("1.0"), ignoreDependencies: false, allowPrereleaseVersions: false, skipAssemblyReferences: false, logger: NullLogger.Instance);
+
+            // Assert
+            Assert.True(packageManager.LocalRepository.Exists(package));
+            Assert.True(projectManager.LocalRepository.Exists(package));
+            Assert.Equal(1, projectSystem.References.Count);
+        }
+
+        [Fact]
         public void InstallPackageWithOperationsExecuteAllOperations()
         {
             // Arrange 

@@ -161,7 +161,6 @@ namespace NuGet
         public virtual void AddPackageReference(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)
         {
             IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, NullConstraintProvider.Instance, packageId, version, allowPrereleaseVersions);
-
             AddPackageReference(package, ignoreDependencies, allowPrereleaseVersions);
         }
 

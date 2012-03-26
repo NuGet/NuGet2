@@ -124,16 +124,40 @@ namespace NuGet.VisualStudio
                 packageOperationEventListener);
         }
 
-        public virtual void InstallPackage(IProjectManager projectManager, string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions, ILogger logger)
+        public virtual void InstallPackage(
+            IProjectManager projectManager, 
+            string packageId, 
+            SemanticVersion version, 
+            bool ignoreDependencies, 
+            bool allowPrereleaseVersions, 
+            ILogger logger)
+        {
+            InstallPackage(projectManager, packageId, version, ignoreDependencies, allowPrereleaseVersions,
+                           skipAssemblyReferences: false, logger: logger);
+        }
+
+        public void InstallPackage(
+            IProjectManager projectManager, 
+            string packageId, 
+            SemanticVersion version, 
+            bool ignoreDependencies, 
+            bool allowPrereleaseVersions, 
+            bool skipAssemblyReferences, 
+            ILogger logger)
         {
             InitializeLogger(logger, projectManager);
 
             IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
+            if (skipAssemblyReferences)
+            {
+                package = new SkipAssemblyReferencesPackage(package);
+            }
 
             RunSolutionAction(() =>
             {
                 InstallPackage(package, ignoreDependencies, allowPrereleaseVersions);
-                AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies, allowPrereleaseVersions);
+
+                AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
             });
 
             // Add package to recent repository
@@ -579,6 +603,11 @@ namespace NuGet.VisualStudio
         private void AddPackageReference(IProjectManager projectManager, string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)
         {
             RunProjectAction(projectManager, () => projectManager.AddPackageReference(packageId, version, ignoreDependencies, allowPrereleaseVersions));
+        }
+
+        private void AddPackageReference(IProjectManager projectManager, IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions)
+        {
+            RunProjectAction(projectManager, () => projectManager.AddPackageReference(package, ignoreDependencies, allowPrereleaseVersions));
         }
 
         private void ExecuteOperationsWithPackage(IEnumerable<Project> projects, IPackage package, IEnumerable<PackageOperation> operations, Action<IProjectManager> projectAction, ILogger logger, IPackageOperationEventListener eventListener)
