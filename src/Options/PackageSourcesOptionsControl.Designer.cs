@@ -48,6 +48,7 @@ namespace NuGet.Options
             this.PackageSourcesListBox = new System.Windows.Forms.ListBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.imageList2 = new System.Windows.Forms.ImageList(this.components);
             this.PackageSourcesContextMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -174,6 +175,14 @@ namespace NuGet.Options
             this.tableLayoutPanel2.Controls.Add(this.MoveDownButton, 2, 0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             // 
+            // imageList2
+            // 
+            this.imageList2.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList2.ImageStream")));
+            this.imageList2.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList2.Images.SetKeyName(0, "uparrow.png");
+            this.imageList2.Images.SetKeyName(1, "downarrow.png");
+            this.imageList2.Images.SetKeyName(2, "delete.png");
+            // 
             // PackageSourcesOptionsControl
             // 
             resources.ApplyResources(this, "$this");
@@ -208,5 +217,6 @@ namespace NuGet.Options
         private Label NewPackageNameLabel;
         private TableLayoutPanel tableLayoutPanel2;
         private ImageList imageList1;
+        private ImageList imageList2;
     }
 }

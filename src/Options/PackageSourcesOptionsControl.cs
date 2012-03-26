@@ -40,6 +40,12 @@ namespace NuGet.Options
         {
             InitializeComponent();
 
+            if (!VsVersionHelper.IsVisualStudio2010)
+            {
+                MoveUpButton.ImageList = MoveDownButton.ImageList = removeButton.ImageList = imageList2;
+                MoveUpButton.Padding = MoveDownButton.Padding = removeButton.Padding = new Padding(3);
+            }
+
             _serviceProvider = serviceProvider;
             _packageSourceProvider = packageSourceProvider;
             SetupEventHandlers();
