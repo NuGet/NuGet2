@@ -1010,6 +1010,10 @@ public class Cl_{0} {{
             WriteProjectFile("ProjectWithDependenciesWithContent.sln", "");
             WriteProjectFile("foo.aspx", "");
             WriteProjectFile("foo.cs", "public class Foo { }");
+
+             // temporarily enable package restore for the test to pass 
+            string oldEnvironmentVariable = Environment.GetEnvironmentVariable("EnableNuGetPackageRestore", EnvironmentVariableTarget.User); 
+            Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", "1", EnvironmentVariableTarget.User); 
             
             // packages.config for dependencies  
             WriteProjectFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>  
@@ -1047,6 +1051,10 @@ public class Cl_{0} {{
             var package = VerifyPackageContents(expectedPackage, new[] { @"content\foo.aspx", @"content\MyContentFile.js", 
                                                                          @"lib\net40\ProjectWithDependenciesWithContent.dll" });
             Assert.Equal("Test.ContentPackage", package.Dependencies.Single().Id);
+
+            
+            // clean up 
+            Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", oldEnvironmentVariable, EnvironmentVariableTarget.User); 
         }
 
         private static string SavePackage(string id, string version)
