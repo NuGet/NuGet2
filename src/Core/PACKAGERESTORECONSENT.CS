@@ -44,7 +44,7 @@ namespace NuGet
                         _environmentReader.GetEnvironmentVariable(EnvironmentVariableName, EnvironmentVariableTarget.Machine);
                 }
 
-                return "true".Equals(value, StringComparison.OrdinalIgnoreCase) ||
+                return Boolean.TrueString.Equals(value, StringComparison.OrdinalIgnoreCase) ||
                        "1".Equals(value, StringComparison.OrdinalIgnoreCase);
             }
             set

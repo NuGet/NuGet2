@@ -1012,49 +1012,64 @@ public class Cl_{0} {{
             WriteProjectFile("foo.cs", "public class Foo { }");
 
              // temporarily enable package restore for the test to pass 
-            string oldEnvironmentVariable = Environment.GetEnvironmentVariable("EnableNuGetPackageRestore", EnvironmentVariableTarget.User); 
-            Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", "1", EnvironmentVariableTarget.User); 
-            
-            // packages.config for dependencies  
-            WriteProjectFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>  
+            string oldEnvironmentVariable = Environment.GetEnvironmentVariable("EnableNuGetPackageRestore", EnvironmentVariableTarget.User);
+            try
+            {
+                Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", "1", EnvironmentVariableTarget.User);
+
+                // packages.config for dependencies  
+                WriteProjectFile("packages.config",
+                                 @"<?xml version=""1.0"" encoding=""utf-8""?>  
 <packages>  
    <package id=""Test.ContentPackage"" version=""1.6.4"" />  
 </packages>");
 
-            // added by Test.ContentPackage, but we have done local changes to this file 
-            WriteProjectFile("MyContentFile.js", 
-                @"This is a file that is changed in this project. Therefore this file should be included in this package!");
+                // added by Test.ContentPackage, but we have done local changes to this file 
+                WriteProjectFile("MyContentFile.js",
+                                 @"This is a file that is changed in this project. Therefore this file should be included in this package!");
 
-            CreateProject("ProjectWithDependenciesWithContent",
-                          content: new[] { "foo.aspx", "packages.config", "MyContentFile.js", "MyContentFile2.js" },
-                          compile: new[] { "foo.cs" });
+                CreateProject("ProjectWithDependenciesWithContent",
+                              content: new[] { "foo.aspx", "packages.config", "MyContentFile.js", "MyContentFile2.js" },
+                              compile: new[] { "foo.cs" });
 
-            Directory.SetCurrentDirectory(ProjectFilesFolder);
+                Directory.SetCurrentDirectory(ProjectFilesFolder);
 
-            // Act  
+                // Act  
 
-            // install packages from packages.config  
-            Program.Main(new[] { "install", "packages.config", "-OutputDirectory", "packages", "-source", Path.GetDirectoryName(packagePath) });
+                // install packages from packages.config  
+                Program.Main(new[]
+                             {
+                                 "install", "packages.config", "-OutputDirectory", "packages", "-source",
+                                 Path.GetDirectoryName(packagePath)
+                             });
 
-            // copy content from the test package (to ensure no changes to the file)
-            File.Copy(@"packages\Test.ContentPackage.1.6.4\Content\MyContentFile2.js", @"MyContentFile2.js");
+                // copy content from the test package (to ensure no changes to the file)
+                File.Copy(@"packages\Test.ContentPackage.1.6.4\Content\MyContentFile2.js", @"MyContentFile2.js");
 
-            // execute main program (pack)
-            int result = Program.Main(new[] { "pack", "ProjectWithDependenciesWithContent.csproj", "-Build", "-Verbose" });
+                // execute main program (pack)
+                int result =
+                    Program.Main(new[] { "pack", "ProjectWithDependenciesWithContent.csproj", "-Build", "-Verbose" });
 
-            // Assert  
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
+                // Assert  
+                Assert.Equal(0, result);
+                Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+                Assert.True(File.Exists(expectedPackage));
 
-            // package should not contain content from jquery package that we have not changed
-            var package = VerifyPackageContents(expectedPackage, new[] { @"content\foo.aspx", @"content\MyContentFile.js", 
-                                                                         @"lib\net40\ProjectWithDependenciesWithContent.dll" });
-            Assert.Equal("Test.ContentPackage", package.Dependencies.Single().Id);
-
-            
-            // clean up 
-            Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", oldEnvironmentVariable, EnvironmentVariableTarget.User); 
+                // package should not contain content from jquery package that we have not changed
+                var package = VerifyPackageContents(expectedPackage, new[]
+                                                                     {
+                                                                         @"content\foo.aspx",
+                                                                         @"content\MyContentFile.js",
+                                                                         @"lib\net40\ProjectWithDependenciesWithContent.dll"
+                                                                     });
+                Assert.Equal("Test.ContentPackage", package.Dependencies.Single().Id);
+            }
+            finally
+            {
+                // clean up 
+                Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", oldEnvironmentVariable,
+                                                   EnvironmentVariableTarget.User);
+            }
         }
 
         private static string SavePackage(string id, string version)
