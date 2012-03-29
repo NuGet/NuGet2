@@ -84,7 +84,8 @@
                 IsSmallIconsViewButtonVisible="False"
                 IsLargeIconsViewButtonVisible="False"
                 CategorySelectionChanged="OnCategorySelectionChanged"
-                ProviderSelectionChanged="OnProviderSelectionChanged" />
+                ProviderSelectionChanged="OnProviderSelectionChanged"
+                Grid.IsSharedSizeScope="True" />
         </Border>
 
         <Border 

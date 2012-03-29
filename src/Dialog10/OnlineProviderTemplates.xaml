@@ -54,7 +54,7 @@
     <DataTemplate x:Key="PackageItemTemplate">
         <Grid Style="{StaticResource TileTemplateGridStyle}">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="38" />
+                <ColumnDefinition Width="Auto" MinWidth="38" SharedSizeGroup="IconColumn" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
