@@ -98,7 +98,7 @@ namespace NuGet.Dialog.Test
         }
 
         [Fact]
-        public void CanExecuteReturnsCorrectResult()
+        public void CanExecuteAlwaysReturnTrue()
         {
 
             // Local repository contains Package A and Package B
@@ -126,7 +126,7 @@ namespace NuGet.Dialog.Test
 
             // Assert
             Assert.True(canExecuteA);
-            Assert.False(canExecuteC);
+            Assert.True(canExecuteC);
         }
 
         [Fact]
