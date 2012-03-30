@@ -64,12 +64,6 @@ namespace NuGet.TeamFoundationServer
             }
         }
 
-        public override bool FileExists(string path)
-        {
-            var fullPath = GetFullPath(path);
-            return base.FileExists(path) && !Workspace.GetPendingChanges(fullPath, RecursionType.None).Any(c => c.IsDelete);
-        }
-
         public bool BindToSourceControl(IEnumerable<string> paths)
         {
             paths = paths.Select(GetFullPath);

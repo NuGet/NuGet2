@@ -33,12 +33,7 @@ namespace NuGet.Dialog.Providers
             _solutionManager = solutionManager;
             _userNotifierServices = providerServices.UserNotifierServices;
         }
-
-        public override bool CanExecute(PackageItem item)
-        {
-            return true;
-        }
-
+        
         protected override void FillRootNodes()
         {
             var allNode = new SimpleTreeNode(
