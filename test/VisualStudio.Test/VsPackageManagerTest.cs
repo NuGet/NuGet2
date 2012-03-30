@@ -576,6 +576,37 @@ namespace NuGet.VisualStudio.Test
             Assert.True(packageManager.LocalRepository.Exists(package3_11B));
         }
 
+        [Fact]
+        public void UpdatePackageShowWarningIfThereIsOrphanedPackageUnderPackagesFolder()
+        {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(), 
+                sourceRepository, 
+                new Mock<IFileSystemProvider>().Object, 
+                projectSystem, 
+                localRepository, 
+                new Mock<IRecentPackageRepository>().Object, 
+                new Mock<VsPackageInstallerEvents>().Object);
+
+            var orphanPackage = PackageUtility.CreatePackage("orphan", "1.0", new [] { "content" });
+            localRepository.AddPackage(orphanPackage);
+
+            var logger = new Mock<ILogger>();
+            logger.Setup(l => l.Log(MessageLevel.Warning, "'orphan' was not installed in any project. Update failed.")).Verifiable();
+
+            // Act
+            packageManager.UpdatePackages(updateDependencies: true, allowPrereleaseVersions: true, logger: logger.Object, eventListener: new Mock<IPackageOperationEventListener>().Object);
+
+            // Assert
+            logger.Verify();
+        }
+
         // This repository better simulates what happens when we're running the package manager in vs
         private class MockProjectPackageRepository : MockPackageRepository
         {

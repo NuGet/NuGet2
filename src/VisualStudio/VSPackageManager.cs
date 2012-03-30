@@ -528,7 +528,7 @@ namespace NuGet.VisualStudio
             {
                 // If this package applies to a project but isn't installed in any project then 
                 // it's probably a borked install.
-                throw new InvalidOperationException(
+                throw new PackageNotInstalledException(
                     String.Format(CultureInfo.CurrentCulture,
                     VsResources.PackageNotInstalledInAnyProject, packageId));
             }
@@ -1077,6 +1077,10 @@ namespace NuGet.VisualStudio
                     try
                     {
                         updateAction(package);
+                    }
+                    catch (PackageNotInstalledException e)
+                    {
+                        logger.Log(MessageLevel.Warning, ExceptionUtility.Unwrap(e).Message);
                     }
                     catch (Exception e)
                     {

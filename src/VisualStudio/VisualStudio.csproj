@@ -38,6 +38,7 @@
     <Compile Include="IPackageOperationEventListener.cs" />
     <Compile Include="OptionsPage.cs" />
     <Compile Include="OptionsPageActivator.cs" />
+    <Compile Include="PackageNotInstalledException.cs" />
     <Compile Include="PackageRestore\IPackageRestoreManager.cs" />
     <Compile Include="PackageRestore\PackageRestoreBar.xaml.cs">
       <DependentUpon>PackageRestoreBar.xaml</DependentUpon>
