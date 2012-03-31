@@ -53,7 +53,7 @@ namespace NuGet
         {
             if (_hashAlgorithm.Equals(SHA512HashAlgorithm, StringComparison.OrdinalIgnoreCase))
             {
-                return _useSHA512Cng ? SHA512Cng.Create() : SHA512CryptoServiceProvider.Create();
+                return _useSHA512Cng ? (HashAlgorithm)new SHA512Cng() : (HashAlgorithm)new SHA512CryptoServiceProvider();
             }
             return HashAlgorithm.Create(_hashAlgorithm);
         }
