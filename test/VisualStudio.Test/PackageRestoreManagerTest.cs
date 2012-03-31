@@ -171,6 +171,10 @@ namespace NuGet.VisualStudio.Test
             var nugetFolderFileSystem = new PhysicalFileSystem(tempSolutionPath + "\\.nuget");
             fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath + "\\.nuget")).Returns(nugetFolderFileSystem);
 
+            // default app settings
+            var defaultAppSettings = new Mock<ISettings>();
+            defaultAppSettings.Setup(s => s.GetValue("packageRestore", "enabled")).Returns("false");
+
             // setup DTE
             var dte = new Mock<DTE>();
 
@@ -209,7 +213,8 @@ namespace NuGet.VisualStudio.Test
                 solutionManager.Object,
                 fileSystemProvider.Object,
                 packageRepositoryFactory.Object, 
-                packageSourceProvider: packageSourceProvider.Object);
+                packageSourceProvider: packageSourceProvider.Object,
+                defaultSettings: defaultAppSettings.Object);
 
             // Act 
             packageRestore.EnableCurrentSolutionForRestore(quietMode: true);
@@ -229,6 +234,10 @@ namespace NuGet.VisualStudio.Test
             // verify that the Source Control mode is disabled
             var settings = new Settings(nugetFolderFileSystem);
             Assert.True(settings.IsSourceControlDisabled());
+
+            // verify that package restore consent is set
+            defaultAppSettings.Verify(
+                s => s.SetValue("packageRestore", "enabled", It.Is<string>(v => v == "true" || v == "1")), Times.Once());
 
             // clean up
             Directory.Delete(tempSolutionPath, recursive: true);
@@ -706,7 +715,8 @@ namespace NuGet.VisualStudio.Test
             IVsThreadedWaitDialogFactory waitDialogFactory = null,
             IVsPackageManagerFactory packageManagerFactory = null,
             IPackageRepository localCache = null,
-            IPackageSourceProvider packageSourceProvider = null)
+            IPackageSourceProvider packageSourceProvider = null,
+            ISettings defaultSettings = null)
         {
 
             if (dte == null)
@@ -765,6 +775,11 @@ namespace NuGet.VisualStudio.Test
                 packageSourceProvider = new Mock<IPackageSourceProvider>().Object;
             }
 
+            if (defaultSettings == null)
+            {
+                defaultSettings = new Mock<ISettings>().Object;
+            }
+
             return new PackageRestoreManager(
                 dte,
                 solutionManager,
@@ -774,7 +789,8 @@ namespace NuGet.VisualStudio.Test
                 packageManagerFactory, 
                 new VsPackageInstallerEvents(),
                 localCache,
-                waitDialogFactory);
+                waitDialogFactory,
+                defaultSettings);
         }
 
         private string CreateTempFolder()

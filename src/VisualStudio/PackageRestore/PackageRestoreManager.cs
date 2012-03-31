@@ -29,6 +29,7 @@ namespace NuGet.VisualStudio
         private readonly IPackageRepository _localCacheRepository;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
         private readonly DTE _dte;
+        private readonly ISettings _defaultSettings;
 
         [ImportingConstructor]
         public PackageRestoreManager(
@@ -46,7 +47,8 @@ namespace NuGet.VisualStudio
                  packageManagerFactory,
                  packageInstallerEvents,
                  MachineCache.Default,
-                 ServiceLocator.GetGlobalService<SVsThreadedWaitDialogFactory, IVsThreadedWaitDialogFactory>())
+                 ServiceLocator.GetGlobalService<SVsThreadedWaitDialogFactory, IVsThreadedWaitDialogFactory>(),
+                 Settings.LoadDefaultSettings())
         {
         }
 
@@ -59,7 +61,8 @@ namespace NuGet.VisualStudio
             IVsPackageManagerFactory packageManagerFactory,
             IVsPackageInstallerEvents packageInstallerEvents,
             IPackageRepository localCacheRepository,
-            IVsThreadedWaitDialogFactory waitDialogFactory)
+            IVsThreadedWaitDialogFactory waitDialogFactory,
+            ISettings defaultSettings)
         {
 
             Debug.Assert(solutionManager != null);
@@ -71,6 +74,7 @@ namespace NuGet.VisualStudio
             _waitDialogFactory = waitDialogFactory;
             _packageManagerFactory = packageManagerFactory;
             _localCacheRepository = localCacheRepository;
+            _defaultSettings = defaultSettings;
             _solutionManager.ProjectAdded += OnProjectAdded;
             _solutionManager.SolutionOpened += OnSolutionOpenedOrClosed;
             _solutionManager.SolutionClosed += OnSolutionOpenedOrClosed;
@@ -225,11 +229,21 @@ namespace NuGet.VisualStudio
         private void EnablePackageRestore()
         {
             EnsureNuGetBuild();
+            SetPackageRestoreConsent();
 
             IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager();
             foreach (Project project in _solutionManager.GetProjects())
             {
                 EnablePackageRestore(project, packageManager);
+            }
+        }
+
+        private void SetPackageRestoreConsent()
+        {
+            var consent = new PackageRestoreConsent(_defaultSettings);
+            if (!consent.IsGranted)
+            {
+                consent.IsGranted = true;
             }
         }
 
