@@ -78,6 +78,38 @@ namespace NuGet.VisualStudio
         }
 
         /// <summary>
+        /// Copies the native binaries to the project's bin folder.
+        /// </summary>
+        /// <param name="project">The project.</param>
+        /// <param name="packagesFileSystem">The packages file system.</param>
+        /// <param name="packageNames">The package names.</param>
+        public void CopyNativeBinaries(Project project, IFileSystem packagesFileSystem, IEnumerable<PackageName> packageNames)
+        {
+            if (project == null)
+            {
+                throw new ArgumentNullException("project");
+            }
+
+            if (packagesFileSystem == null)
+            {
+                throw new ArgumentNullException("packagesFileSystem");
+            }
+
+            if (packageNames.IsEmpty())
+            {
+                return;
+            }
+
+            IProjectSystem projectSystem = _projectSystemFactory != null ? _projectSystemFactory.CreateProjectSystem(project, _fileSystemProvider)
+                                                                          : VsProjectSystemFactory.CreateProjectSystem(project, _fileSystemProvider);
+
+            foreach (PackageName packageName in packageNames)
+            {
+                CopyNativeBinaries(projectSystem, packagesFileSystem, packageName);
+            }
+        }
+
+        /// <summary>
         /// Gets all assembly references for a package
         /// </summary>
         private IEnumerable<IPackageAssemblyReference> GetAssemblyReferences(
@@ -129,6 +161,22 @@ namespace NuGet.VisualStudio
                 {
                     // log IO permission error
                     ExceptionHelper.WriteToActivityLog(exception);
+                }
+            }
+        }
+
+        private void CopyNativeBinaries(IProjectSystem projectSystem, IFileSystem packagesFileSystem, PackageName packageName)
+        {
+            const string nativeBinariesFolder = "NativeBinaries";
+
+            string nativeBinariesPath = Path.Combine(packageName.Name, nativeBinariesFolder);
+            if (packagesFileSystem.DirectoryExists(nativeBinariesPath))
+            {
+                IEnumerable<string> nativeFiles = packagesFileSystem.GetFiles(nativeBinariesPath, "*.*", recursive: true);
+                foreach (string file in nativeFiles)
+                {
+                    string targetPath = Path.Combine(Constants.BinDirectory, file.Substring(nativeBinariesPath.Length + 1));  // skip over NativeBinaries/ word
+                    projectSystem.AddFile(targetPath, packagesFileSystem.OpenFile(file));
                 }
             }
         }

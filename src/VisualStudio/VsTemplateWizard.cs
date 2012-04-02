@@ -285,23 +285,29 @@ namespace NuGet.VisualStudio
                 PerformPackageInstall(_installer, project, _configuration);
 
                 // RepositorySettings = null in unit tests
-                if (RepositorySettings != null)
+                if (project.IsWebSite() && RepositorySettings != null)
                 {
                     CreatingRefreshFilesInBin(
                         project,
                         RepositorySettings.Value.RepositoryPath,
                         _configuration.Packages.Where(p => p.SkipAssemblyReferences));
+
+                    CopyNativeBinariesToBin(project, RepositorySettings.Value.RepositoryPath, _configuration.Packages);
                 }
             }
         }
 
         private void CreatingRefreshFilesInBin(Project project, string repositoryPath, IEnumerable<VsTemplateWizardPackageInfo> packageInfos)
         {
-            if (project.IsWebSite())
-            {
-                IEnumerable<PackageName> packageNames = packageInfos.Select(pi => new PackageName(pi.Id, pi.Version));
-                _websiteHandler.AddRefreshFilesForReferences(project, new PhysicalFileSystem(repositoryPath), packageNames);
-            }
+            IEnumerable<PackageName> packageNames = packageInfos.Select(pi => new PackageName(pi.Id, pi.Version));
+            _websiteHandler.AddRefreshFilesForReferences(project, new PhysicalFileSystem(repositoryPath), packageNames);
+        }
+
+        private void CopyNativeBinariesToBin(Project project, string repositoryPath, IEnumerable<VsTemplateWizardPackageInfo> packageInfos)
+        {
+            // By convention, we copy all files under the NativeBinaries folder under package root to the bin folder of the website
+            IEnumerable<PackageName> packageNames = packageInfos.Select(pi => new PackageName(pi.Id, pi.Version));
+            _websiteHandler.CopyNativeBinaries(project, new PhysicalFileSystem(repositoryPath), packageNames);
         }
 
         private void RunStarted(object automationObject, Dictionary<string, string> replacementsDictionary, WizardRunKind runKind, object[] customParams)

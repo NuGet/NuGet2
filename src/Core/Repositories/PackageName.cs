@@ -26,6 +26,14 @@ namespace NuGet
             _version = version;
         }
 
+        public string Name 
+        {
+            get 
+            {
+                return _packageId + "." + _version.ToString();
+            }
+        }
+
         public bool Equals(PackageName other)
         {
             return _packageId.Equals(other._packageId, StringComparison.OrdinalIgnoreCase) &&

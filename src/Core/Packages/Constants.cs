@@ -11,6 +11,7 @@ namespace NuGet
         public static readonly string ContentDirectory = "content";
         public static readonly string LibDirectory = "lib";
         public static readonly string ToolsDirectory = "tools";
+        public static readonly string BinDirectory = "bin";
         public static readonly string SettingsFileName = "NuGet.Config";
         public static readonly string PackageReferenceFile = "packages.config";
 

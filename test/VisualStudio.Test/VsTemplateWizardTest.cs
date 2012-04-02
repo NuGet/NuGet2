@@ -831,6 +831,79 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
+        public void CopyNativeBinariesForWebsites()
+        {
+            // Arrange
+            var mockProject = new Mock<Project>();
+            mockProject.Setup(s => s.Kind).Returns(VsConstants.WebSiteProjectTypeGuid);
+
+            var installerMock = new Mock<IVsPackageInstaller>();
+            var websiteHandler = new Mock<IVsWebsiteHandler>();
+            websiteHandler.Setup(h =>
+                h.CopyNativeBinaries(
+                    mockProject.Object,
+                    It.IsAny<IFileSystem>(),
+                    It.Is<IEnumerable<PackageName>>(names => names.Count() == 2 && names.First().Id == "MyPackage" && names.Last().Id == "YourPackage")
+                )).Verifiable();
+
+            var document = BuildDocument("template",
+                BuildPackageElement("MyPackage", "1.0", skipAssemblyReferences: true),
+                BuildPackageElement("YourPackage", "3.0-alpha", skipAssemblyReferences: false));
+
+            var repositorySettings = new Mock<IRepositorySettings>();
+            repositorySettings.Setup(s => s.RepositoryPath).Returns("x:\\packages");
+
+            var templateWizard = new TestableVsTemplateWizard(installerMock.Object, loadDocumentCallback: p => document, websiteHandler: websiteHandler.Object)
+            {
+                RepositorySettings = new Lazy<IRepositorySettings>(() => repositorySettings.Object)
+            };
+            var wizard = (IWizard)templateWizard;
+            var dteMock = new Mock<DTE>();
+            dteMock.SetupProperty(dte => dte.StatusBar.Text);
+            wizard.RunStarted(dteMock.Object, null, WizardRunKind.AsNewProject,
+                new object[] { @"C:\Some\file.vstemplate" });
+
+            // Act
+            wizard.ProjectFinishedGenerating(mockProject.Object);
+
+            // Verify
+            websiteHandler.Verify();
+        }
+
+        [Fact]
+        public void DoNotCopyNativeBinariesForNonWebsites()
+        {
+            // Arrange
+            var mockProject = new Mock<Project>();
+
+            var installerMock = new Mock<IVsPackageInstaller>();
+            var websiteHandler = new Mock<IVsWebsiteHandler>(MockBehavior.Strict);
+
+            var document = BuildDocument("template",
+                BuildPackageElement("MyPackage", "1.0", skipAssemblyReferences: true),
+                BuildPackageElement("YourPackage", "3.0-alpha", skipAssemblyReferences: false));
+
+            var repositorySettings = new Mock<IRepositorySettings>();
+            repositorySettings.Setup(s => s.RepositoryPath).Returns("x:\\packages");
+
+            var templateWizard = new TestableVsTemplateWizard(installerMock.Object, loadDocumentCallback: p => document, websiteHandler: websiteHandler.Object)
+            {
+                RepositorySettings = new Lazy<IRepositorySettings>(() => repositorySettings.Object)
+            };
+            var wizard = (IWizard)templateWizard;
+            var dteMock = new Mock<DTE>();
+            dteMock.SetupProperty(dte => dte.StatusBar.Text);
+            wizard.RunStarted(dteMock.Object, null, WizardRunKind.AsNewProject,
+                new object[] { @"C:\Some\file.vstemplate" });
+
+            // Act
+            wizard.ProjectFinishedGenerating(mockProject.Object);
+
+            // Verify
+            websiteHandler.Verify();
+        }
+
+        [Fact]
         public void ShouldAddProjectItem_AlwaysReturnsTrue()
         {
             IWizard wizard = new VsTemplateWizard(null, null);
