@@ -4,7 +4,7 @@ using System;
 using System.Text;
 using System.Reflection;
 
-[assembly: AssemblyVersion("<#= Package.FullName.Version #>")]
+[assembly: AssemblyVersion("<#= Package.FullName.Version.Version #>")]
 
 namespace <#= Package.Id #> {
     public static class SomeClass {

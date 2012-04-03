@@ -12,80 +12,23 @@ namespace GenerateTestPackages
     using System;
     
     
-    #line 1 "C:\dev\codeplex\nuget\main\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
+    #line 1 "D:\work\nuget\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
     [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "10.0.0.0")]
     public partial class AssemblySourceFileGenerator : AssemblySourceFileGeneratorBase
     {
-        #region ToString Helpers
-        /// <summary>
-        /// Utility class to produce culture-oriented representation of an object as a string.
-        /// </summary>
-        public class ToStringInstanceHelper
-        {
-            private System.IFormatProvider formatProviderField  = global::System.Globalization.CultureInfo.InvariantCulture;
-            /// <summary>
-            /// Gets or sets format provider to be used by ToStringWithCulture method.
-            /// </summary>
-            public System.IFormatProvider FormatProvider
-            {
-                get
-                {
-                    return this.formatProviderField ;
-                }
-                set
-                {
-                    if ((value != null))
-                    {
-                        this.formatProviderField  = value;
-                    }
-                }
-            }
-            /// <summary>
-            /// This is called from the compile/run appdomain to convert objects within an expression block to a string
-            /// </summary>
-            public string ToStringWithCulture(object objectToConvert)
-            {
-                if ((objectToConvert == null))
-                {
-                    throw new global::System.ArgumentNullException("objectToConvert");
-                }
-                System.Type t = objectToConvert.GetType();
-                System.Reflection.MethodInfo method = t.GetMethod("ToString", new System.Type[] {
-                            typeof(System.IFormatProvider)});
-                if ((method == null))
-                {
-                    return objectToConvert.ToString();
-                }
-                else
-                {
-                    return ((string)(method.Invoke(objectToConvert, new object[] {
-                                this.formatProviderField })));
-                }
-            }
-        }
-        private ToStringInstanceHelper toStringHelperField = new ToStringInstanceHelper();
-        public ToStringInstanceHelper ToStringHelper
-        {
-            get
-            {
-                return this.toStringHelperField;
-            }
-        }
-        #endregion
         public virtual string TransformText()
         {
-            this.GenerationEnvironment = null;
             this.Write("\r\nusing System;\r\nusing System.Text;\r\nusing System.Reflection;\r\n\r\n[assembly: Assem" +
                     "blyVersion(\"");
             
-            #line 7 "C:\dev\codeplex\nuget\main\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(Package.FullName.Version));
+            #line 7 "D:\work\nuget\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(Package.FullName.Version.Version));
             
             #line default
             #line hidden
             this.Write("\")]\r\n\r\nnamespace ");
             
-            #line 9 "C:\dev\codeplex\nuget\main\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
+            #line 9 "D:\work\nuget\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Package.Id));
             
             #line default
@@ -93,28 +36,28 @@ namespace GenerateTestPackages
             this.Write(" {\r\n    public static class SomeClass {\r\n        public static string SomeString " +
                     "{\r\n            get  {\r\n                return \"");
             
-            #line 13 "C:\dev\codeplex\nuget\main\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
+            #line 13 "D:\work\nuget\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(Package.FullName));
             
             #line default
             #line hidden
             this.Write(" (\"\r\n");
             
-            #line 14 "C:\dev\codeplex\nuget\main\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
+            #line 14 "D:\work\nuget\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
  foreach (var dependency in Package.Dependencies) { 
             
             #line default
             #line hidden
             this.Write("                    + ");
             
-            #line 15 "C:\dev\codeplex\nuget\main\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
+            #line 15 "D:\work\nuget\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(dependency.Id));
             
             #line default
             #line hidden
             this.Write(".SomeClass.SomeString + \" \"\r\n");
             
-            #line 16 "C:\dev\codeplex\nuget\main\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
+            #line 16 "D:\work\nuget\Tools\NuGet\GenerateTestPackages\AssemblySourceFileGenerator.tt"
  } 
             
             #line default
@@ -335,6 +278,62 @@ namespace GenerateTestPackages
         {
             this.indentLengths.Clear();
             this.currentIndentField = "";
+        }
+        #endregion
+        #region ToString Helpers
+        /// <summary>
+        /// Utility class to produce culture-oriented representation of an object as a string.
+        /// </summary>
+        public class ToStringInstanceHelper
+        {
+            private System.IFormatProvider formatProviderField  = global::System.Globalization.CultureInfo.InvariantCulture;
+            /// <summary>
+            /// Gets or sets format provider to be used by ToStringWithCulture method.
+            /// </summary>
+            public System.IFormatProvider FormatProvider
+            {
+                get
+                {
+                    return this.formatProviderField ;
+                }
+                set
+                {
+                    if ((value != null))
+                    {
+                        this.formatProviderField  = value;
+                    }
+                }
+            }
+            /// <summary>
+            /// This is called from the compile/run appdomain to convert objects within an expression block to a string
+            /// </summary>
+            public string ToStringWithCulture(object objectToConvert)
+            {
+                if ((objectToConvert == null))
+                {
+                    throw new global::System.ArgumentNullException("objectToConvert");
+                }
+                System.Type t = objectToConvert.GetType();
+                System.Reflection.MethodInfo method = t.GetMethod("ToString", new System.Type[] {
+                            typeof(System.IFormatProvider)});
+                if ((method == null))
+                {
+                    return objectToConvert.ToString();
+                }
+                else
+                {
+                    return ((string)(method.Invoke(objectToConvert, new object[] {
+                                this.formatProviderField })));
+                }
+            }
+        }
+        private ToStringInstanceHelper toStringHelperField = new ToStringInstanceHelper();
+        public ToStringInstanceHelper ToStringHelper
+        {
+            get
+            {
+                return this.toStringHelperField;
+            }
         }
         #endregion
     }

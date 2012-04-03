@@ -231,9 +231,11 @@ namespace NuGet
         public static IEnumerable<IPackage> FindCompatiblePackages(this IPackageRepository repository,
                                                                    IPackageConstraintProvider constraintProvider,
                                                                    IEnumerable<string> packageIds,
-                                                                   IPackage package)
+                                                                   IPackage package,
+                                                                   bool allowPrereleaseVersions)
         {
             return (from p in repository.FindPackages(packageIds)
+                    where allowPrereleaseVersions || p.IsReleaseVersion()
                     let dependency = p.FindDependency(package.Id)
                     let otherConstaint = constraintProvider.GetConstraint(p.Id)
                     where dependency != null &&

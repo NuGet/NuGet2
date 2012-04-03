@@ -7,15 +7,18 @@ using System.Xml.Linq;
 using Microsoft.CSharp;
 using NuGet;
 
-namespace GenerateTestPackages {
-    class Program {
+namespace GenerateTestPackages
+{
+    class Program
+    {
         const string keyFileName = "TestPackageKey.snk";
 
         static Dictionary<string, PackageInfo> _packages = new Dictionary<string, PackageInfo>();
 
-        static void Main(string[] args) {
+        static void Main(string[] args)
+        {
 
-            var document = XDocument.Load(new StreamReader(args[0]));
+            var document = XDocument.Load(args[0]);
 
             XNamespace ns = "http://schemas.microsoft.com/vs/2009/dgml";
 
@@ -27,19 +30,36 @@ namespace GenerateTestPackages {
 
             // Add all the packages that only exist as targets to the dictionary
             var allPackageNames = _packages.Values.SelectMany(p => p.Dependencies).Select(dep => dep.FullName.ToString()).Distinct().ToList();
-            foreach (var dependency in allPackageNames) {
-                if (!_packages.ContainsKey(dependency)) {
+            foreach (var dependency in allPackageNames)
+            {
+                if (!_packages.ContainsKey(dependency))
+                {
                     _packages.Add(dependency, new PackageInfo(dependency));
                 }
             }
 
             // Process all the packages
-            foreach (var p in _packages.Values) {
+            foreach (var p in _packages.Values)
+            {
                 EnsurePackageProcessed(p);
+            }
+
+            // Add all packages that are simply listed as Nodes.
+            var remainders = document.Root.Elements(ns + "Nodes")
+                                          .Elements()
+                                          .Select(s => new PackageInfo(s.Attribute("Id").Value));
+
+            foreach (var package in remainders)
+            {
+                if (!_packages.ContainsKey(package.FullName.ToString()))
+                {
+                    EnsurePackageProcessed(package);
+                }
             }
         }
 
-        static DependencyInfo GetDependencyInfoFromLinkTag(XElement linkTag) {
+        static DependencyInfo GetDependencyInfoFromLinkTag(XElement linkTag)
+        {
             var label = linkTag.Attribute("Label");
 
             return new DependencyInfo(
@@ -47,20 +67,25 @@ namespace GenerateTestPackages {
                 label != null ? VersionUtility.ParseVersionSpec(label.Value) : null);
         }
 
-        static void EnsurePackageProcessed(string fullName) {
+        static void EnsurePackageProcessed(string fullName)
+        {
             EnsurePackageProcessed(_packages[fullName]);
         }
 
-        static void EnsurePackageProcessed(PackageInfo package) {
-            if (!package.Processed) {
+        static void EnsurePackageProcessed(PackageInfo package)
+        {
+            if (!package.Processed)
+            {
                 ProcessPackage(package);
                 package.Processed = true;
             }
         }
 
-        static void ProcessPackage(PackageInfo package) {
+        static void ProcessPackage(PackageInfo package)
+        {
             // Make sure all its dependencies are processed first
-            foreach (var dependency in package.Dependencies) {
+            foreach (var dependency in package.Dependencies)
+            {
                 EnsurePackageProcessed(dependency.FullName.ToString());
             }
 
@@ -69,24 +94,29 @@ namespace GenerateTestPackages {
             CreatePackage(package);
         }
 
-        static void CreateAssembly(PackageInfo package) {
+        static void CreateAssembly(PackageInfo package)
+        {
 
             // Save the snk file from the embedded resource to the disk so we can use it when we compile
-            using (var resStream = typeof(Program).Assembly.GetManifestResourceStream("GenerateTestPackages." + keyFileName)) {
-                using (var snkStream = File.Create(keyFileName)) {
+            using (var resStream = typeof(Program).Assembly.GetManifestResourceStream("GenerateTestPackages." + keyFileName))
+            {
+                using (var snkStream = File.Create(keyFileName))
+                {
                     resStream.CopyTo(snkStream);
                 }
             }
 
 
             var codeProvider = new CSharpCodeProvider();
-            var compilerParams = new CompilerParameters() {
+            var compilerParams = new CompilerParameters()
+            {
                 OutputAssembly = Path.GetFullPath(GetAssemblyFullPath(package.FullName)),
                 CompilerOptions = "/keyfile:" + keyFileName
             };
 
             // Add all the dependencies as referenced assemblies
-            foreach (DependencyInfo dependency in package.Dependencies) {
+            foreach (DependencyInfo dependency in package.Dependencies)
+            {
                 compilerParams.ReferencedAssemblies.Add(GetAssemblyFullPath(dependency.FullName));
             }
 
@@ -94,15 +124,18 @@ namespace GenerateTestPackages {
             var generator = new AssemblySourceFileGenerator() { Package = package };
             CompilerResults results = codeProvider.CompileAssemblyFromSource(compilerParams, generator.TransformText());
 
-            if (results.Errors.HasErrors) {
+            if (results.Errors.HasErrors)
+            {
                 Console.WriteLine(results.Errors[0]);
             }
 
             File.Delete(keyFileName);
         }
 
-        static void CreatePackage(PackageInfo package) {
-            var packageBuilder = new PackageBuilder() {
+        static void CreatePackage(PackageInfo package)
+        {
+            var packageBuilder = new PackageBuilder()
+            {
                 Id = package.Id,
                 Version = package.Version,
                 Description = "Some test package"
@@ -111,28 +144,33 @@ namespace GenerateTestPackages {
             packageBuilder.Authors.Add("Outercurve Foundation");
 
             string assemblySourcePath = GetAssemblyFullPath(package.FullName);
-            packageBuilder.Files.Add(new PhysicalPackageFile() {
+            packageBuilder.Files.Add(new PhysicalPackageFile()
+            {
                 SourcePath = assemblySourcePath,
                 TargetPath = @"lib\" + Path.GetFileName(assemblySourcePath)
             });
 
-            foreach (DependencyInfo dependency in package.Dependencies) {
+            foreach (DependencyInfo dependency in package.Dependencies)
+            {
                 packageBuilder.Dependencies.Add(new PackageDependency(dependency.Id, dependency.VersionSpec));
             }
 
-            using (var stream = File.Create(GetPackageFileFullPath(package))) {
+            using (var stream = File.Create(GetPackageFileFullPath(package)))
+            {
                 packageBuilder.Save(stream);
             }
         }
 
-        static string GetAssemblyFullPath(FullPackageName fullName) {
+        static string GetAssemblyFullPath(FullPackageName fullName)
+        {
             string relativeDir = String.Format(@"Assemblies\{0}\{1}", fullName.Id, fullName.Version);
             string fullDir = Path.GetFullPath(relativeDir);
             Directory.CreateDirectory(fullDir);
             return Path.Combine(fullDir, fullName.Id + ".dll");
         }
 
-        static string GetPackageFileFullPath(PackageInfo package) {
+        static string GetPackageFileFullPath(PackageInfo package)
+        {
             string packagesFolder = Path.GetFullPath("Packages");
             Directory.CreateDirectory(packagesFolder);
             string packageFileName = String.Format("{0}.{1}.nupkg", package.Id, package.Version);
@@ -140,8 +178,10 @@ namespace GenerateTestPackages {
         }
     }
 
-    class PackageInfo {
-        public PackageInfo(string nameAndVersion, IEnumerable<DependencyInfo> dependencies = null) {
+    class PackageInfo
+    {
+        public PackageInfo(string nameAndVersion, IEnumerable<DependencyInfo> dependencies = null)
+        {
             FullName = new FullPackageName(nameAndVersion);
 
             Dependencies = dependencies != null ? dependencies : Enumerable.Empty<DependencyInfo>();
@@ -153,14 +193,17 @@ namespace GenerateTestPackages {
         public IEnumerable<DependencyInfo> Dependencies { get; private set; }
         public bool Processed { get; set; }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return FullName.ToString();
         }
     }
 
     // Contains at least an exact id:version, and optionally a fuller version spec
-    class DependencyInfo {
-        public DependencyInfo(FullPackageName fullName, IVersionSpec versionSpec) {
+    class DependencyInfo
+    {
+        public DependencyInfo(FullPackageName fullName, IVersionSpec versionSpec)
+        {
             FullName = fullName;
 
             // Default to the simple version (which means min-version)
@@ -172,8 +215,10 @@ namespace GenerateTestPackages {
         public string Id { get { return FullName.Id; } }
     }
 
-    class FullPackageName {
-        public FullPackageName(string nameAndVersion) {
+    class FullPackageName
+    {
+        public FullPackageName(string nameAndVersion)
+        {
             var parts = nameAndVersion.Split(':');
             Id = parts[0];
             Version = new SemanticVersion(parts[1]);
@@ -182,7 +227,8 @@ namespace GenerateTestPackages {
         public string Id { get; private set; }
         public SemanticVersion Version { get; private set; }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return Id + ":" + Version;
         }
     }

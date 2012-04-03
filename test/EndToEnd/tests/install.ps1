@@ -1627,3 +1627,27 @@ function Test-InstallingSatellitePackageOnlyCopiesCultureSpecificLibFolderConten
     Assert-PathNotExists (Join-Path $solutionDir packages\PackageWithStrongNamedLib.1.1\content\ja-jp.txt)
     Assert-PathNotExists (Join-Path $solutionDir packages\PackageWithStrongNamedLib.1.1\lib\ja-jp.txt)
 }
+
+function Test-InstallWithConflictDoesNotUpdateToPrerelease {
+	param(
+        $context
+    )
+
+	Write-Host $context.RepositoryPath
+
+	# Arrange
+	$a = New-ClassLibrary
+
+	# Act 1
+	$a | Install-Package A -Version 1.0.0 -Source $context.RepositoryPath
+
+	# Assert 1
+	Assert-Package $a A 1.0.0
+
+	# Act 2
+	$a | Install-Package B -Version 1.0.0 -Source $context.RepositoryPath
+
+	# Assert 2
+	Assert-Package $a A 1.1.0 
+	Assert-Package $a B 1.0.0 
+}
