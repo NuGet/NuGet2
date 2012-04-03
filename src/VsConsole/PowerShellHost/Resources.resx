@@ -127,6 +127,9 @@
   <data name="PowerShellHostTitle" xml:space="preserve">
     <value>Package Manager Console Host Version {0}</value>
   </data>
+  <data name="PowerShellInitializationTimeoutError" xml:space="preserve">
+    <value>Timed out waiting for PowerShell initialization. Try restarting Visual Studio.</value>
+  </data>
   <data name="PromptForChoiceSuffix" xml:space="preserve">
     <value>[?] Help (default is "{0}"):</value>
     <comment>{0} = defaultChoice</comment>

@@ -37,7 +37,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             // and set up at the same time, they'll wait in line.
             var signaled = _runspaceMutex.WaitOne(TimeSpan.FromSeconds(30));
             if (!signaled)
-                throw new TimeoutException("Timed out waiting for PowerShell initialization. Try restarting Visual Studio.");
+                throw new TimeoutException(Resources.PowerShellInitializationTimeoutError);
             
             try
             {
