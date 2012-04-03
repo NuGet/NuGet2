@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Reflection;
+using System.Threading;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.PowerShell;
@@ -15,6 +17,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
     internal class RunspaceManager : IRunspaceManager
     {
         private const string PSModulePathEnvVariable = "PSModulePath";
+        private static readonly Mutex _runspaceMutex = new Mutex(false, "NuGetConsoleRunspace");
 
         // Cache Runspace by name. There should be only one Runspace instance created though.
         private readonly ConcurrentDictionary<string, Tuple<Runspace, NuGetPSHost>> _runspaceCache = new ConcurrentDictionary<string, Tuple<Runspace, NuGetPSHost>>();
@@ -29,15 +32,26 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
         private static Tuple<Runspace, NuGetPSHost> CreateAndSetupRunspace(IConsole console, string hostName)
         {
-            // set up powershell environment variable for module search path
-            // ensuring our own Modules folder is searched before system or user-level 
-            AddPowerShellModuleSearchPath();
+            // There appears to be a synchronization bug in the runspace API. To work around it, we use 
+            // a named system mutex to ensure that if multiple versions of the console are being created 
+            // and set up at the same time, they'll wait in line. We allow up to 10 seconds.
+            _runspaceMutex.WaitOne(TimeSpan.FromSeconds(10));
+            try
+            {
+                // set up powershell environment variable for module search path
+                // ensuring our own Modules folder is searched before system or user-level 
+                AddPowerShellModuleSearchPath();
 
-            Tuple<Runspace, NuGetPSHost> runspace = CreateRunspace(console, hostName);
-            LoadModules(runspace.Item1);
-            LoadProfilesIntoRunspace(runspace.Item1);
+                Tuple<Runspace, NuGetPSHost> runspace = CreateRunspace(console, hostName);
+                LoadModules(runspace.Item1);
+                LoadProfilesIntoRunspace(runspace.Item1);
 
-            return runspace;
+                return runspace;
+            }
+            finally
+            {
+                _runspaceMutex.ReleaseMutex();
+            }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -109,7 +123,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                 policy != ExecutionPolicy.RemoteSigned &&
                 policy != ExecutionPolicy.Bypass)
             {
-
                 ExecutionPolicy machinePolicy = runspace.GetExecutionPolicy(ExecutionPolicyScope.MachinePolicy);
                 ExecutionPolicy userPolicy = runspace.GetExecutionPolicy(ExecutionPolicyScope.UserPolicy);
 
@@ -121,6 +134,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
             runspace.ImportModule(NuGetCoreModuleName);
 #if DEBUG
+
             if (File.Exists(DebugConstants.TestModulePath))
             {
                 runspace.ImportModule(DebugConstants.TestModulePath);
