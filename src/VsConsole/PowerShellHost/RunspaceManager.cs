@@ -34,8 +34,11 @@ namespace NuGetConsole.Host.PowerShell.Implementation
         {
             // There appears to be a synchronization bug in the runspace API. To work around it, we use 
             // a named system mutex to ensure that if multiple versions of the console are being created 
-            // and set up at the same time, they'll wait in line. We allow up to 10 seconds.
-            _runspaceMutex.WaitOne(TimeSpan.FromSeconds(10));
+            // and set up at the same time, they'll wait in line.
+            var signaled = _runspaceMutex.WaitOne(TimeSpan.FromSeconds(30));
+            if (!signaled)
+                throw new TimeoutException("Timed out waiting for runspace creation and set up synchronization.");
+            
             try
             {
                 // set up powershell environment variable for module search path
