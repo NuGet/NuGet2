@@ -42,7 +42,8 @@ namespace NuGet.Dialog.Providers
 
             ShowProgressWindow();
             IList<Project> selectedProjectsList;
-            if (_activePackageManager.IsProjectLevel(item.PackageIdentity))
+            bool isProjectLevel = _activePackageManager.IsProjectLevel(item.PackageIdentity);
+            if (isProjectLevel)
             {
                 HideProgressWindow();
                 var selectedProjects = _userNotifierServices.ShowProjectSelectorWindow(
@@ -85,6 +86,18 @@ namespace NuGet.Dialog.Providers
             if (!acceptLicense)
             {
                 return false;
+            }
+
+            if (!isProjectLevel && operations.Any())
+            {
+                // When dealing with solution level packages, only the set of actions specified under operations are executed. 
+                // In such a case, no operation to uninstall the current package is specified. We'll identify the package that is being updated and
+                // explicitly add a uninstall operation.
+                var packageToUpdate = _activePackageManager.LocalRepository.FindPackage(item.Id);
+                if (packageToUpdate != null)
+                {
+                    operations.Insert(0, new PackageOperation(packageToUpdate, PackageAction.Uninstall));
+                }
             }
 
             try

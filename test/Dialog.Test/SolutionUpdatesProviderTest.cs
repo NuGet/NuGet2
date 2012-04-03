@@ -194,6 +194,78 @@ namespace NuGet.Dialog.Test
             manualEvent.Wait();
         }
 
+        [Fact]
+        public void ExecuteUninstallsSolutionLevelPackageWhenUpdating()
+        {
+            // Arrange
+            var packageA_10 = PackageUtility.CreatePackage("A", "1.0", content: null, assemblyReferences: null, tools: new[] { "init.ps1" }, dependencies: null);
+            var packageA_12 = PackageUtility.CreatePackage("A", "1.2", content: null, assemblyReferences: null, tools: new[] { "init.ps1" }, dependencies: null);
+            
+
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(packageA_12);
+
+            var localRepository = new MockPackageRepository();
+            localRepository.AddPackage(packageA_10);
+
+            var projectManager1 = new Mock<IProjectManager>();
+            projectManager1.Setup(p => p.LocalRepository).Returns(localRepository);
+
+            var project1 = MockProjectUtility.CreateMockProject("Project1");
+
+            var packageManager = new Mock<IVsPackageManager>();
+            packageManager.Setup(p => p.LocalRepository).Returns(localRepository);
+            packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project1))).Returns(projectManager1.Object);
+            packageManager.Setup(p => p.IsProjectLevel(packageA_12)).Returns(false);
+
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(p => p.GetProject(It.Is<string>(s => s == "Project1"))).Returns(project1);
+            solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1 });
+
+            var mockWindowService = new Mock<IUserNotifierServices>();
+            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(
+                It.IsAny<string>(),
+                It.IsAny<IPackage>(),
+                It.IsAny<Predicate<Project>>(),
+                It.IsAny<Predicate<Project>>())).Returns(new Project[0]);
+
+            var provider = CreateSolutionUpdatesProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, userNotifierServices: mockWindowService.Object);
+            var extensionTree = provider.ExtensionsTree;
+
+            var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
+            firstTreeNode.Repository.AddPackage(packageA_10);
+
+            provider.SelectedNode = firstTreeNode;
+            IVsPackageManager activePackageManager = provider.GetActivePackageManager();
+            Mock<IVsPackageManager> mockPackageManager = Mock.Get<IVsPackageManager>(activePackageManager);
+
+            var manualEvent = new ManualResetEventSlim(false);
+
+            provider.ExecuteCompletedCallback = delegate
+            {
+                // Assert
+                mockPackageManager.Verify(p => p.UpdatePackage(
+                    new Project[0],
+                    packageA_12,
+                    new [] { new PackageOperation(packageA_10, PackageAction.Uninstall), new PackageOperation(packageA_12, PackageAction.Install) },
+                    true,
+                    false,
+                    provider,
+                    provider), Times.Once());
+
+                manualEvent.Set();
+            };
+
+            var extensionA_12 = new PackageItem(provider, packageA_12);
+
+            // Act
+            provider.Execute(extensionA_12);
+
+            // do not allow the method to return
+            manualEvent.Wait();
+        }
+
         private static SolutionUpdatesProvider CreateSolutionUpdatesProvider(
             IVsPackageManager packageManager = null,
             IPackageRepository localRepository = null,
