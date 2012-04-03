@@ -59,10 +59,13 @@ namespace NuGet
         public override void AddPackage(IPackage package)
         {
             base.AddPackage(package);
+        }
 
-            if (_packageReferenceFile != null && !package.HasProjectContent())
+        public void AddPackageReferenceEntry(string packageId, SemanticVersion version)
+        {
+            if (_packageReferenceFile != null)
             {
-                _packageReferenceFile.AddEntry(package.Id, package.Version);
+                _packageReferenceFile.AddEntry(packageId, version);
             }
         }
 

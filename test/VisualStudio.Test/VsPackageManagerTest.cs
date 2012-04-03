@@ -5,6 +5,7 @@ using Moq;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.VisualStudio.Test
 {
@@ -606,6 +607,206 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             logger.Verify();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void InstallMetaPackageDoesNotAddEntryToSolutionPackagesConfig(bool allowPrerelease)
+        {
+            // Arrange
+            // Source repository has A -> B, where B is a project-level package and A is a meta-package.
+            // We want to make sure A is added to the packages.config of the project, and NOT packages.config of the solution
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            
+            var sourceRepository = new MockPackageRepository();
+            var packageB = PackageUtility.CreatePackage("B", "1.0", new string[] {"hello.txt"});
+            var packageA = PackageUtility.CreatePackage("A", "2.0", dependencies: new [] { new PackageDependency("B")});
+            sourceRepository.Add(packageA);
+            sourceRepository.Add(packageB);
+
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                projectSystem,
+                localRepository.Object,
+                new Mock<IRecentPackageRepository>().Object,
+                new Mock<VsPackageInstallerEvents>().Object);
+
+            var projectRepository = new MockProjectPackageRepository(localRepository.Object);
+            var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
+
+            localRepository.Setup(r => r.IsReferenced(It.IsAny<string>(), It.IsAny<SemanticVersion>())).
+                Returns((string id, SemanticVersion version) => projectRepository.Exists(id, version));
+
+            // Act
+            packageManager.InstallPackage(
+                projectManager, 
+                "A", 
+                new SemanticVersion("2.0"), 
+                ignoreDependencies: false, 
+                allowPrereleaseVersions: allowPrerelease, 
+                logger: null);
+
+            // Assert
+            Assert.True(projectRepository.Exists("A", new SemanticVersion("2.0")));
+            Assert.True(projectRepository.Exists("B", new SemanticVersion("1.0")));
+
+            // assert that packages.config for solution-level is not created.
+            localRepository.Verify(r => r.AddPackageReferenceEntry(It.IsAny<string>(), It.IsAny<SemanticVersion>()), Times.Never());
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void InstallMetaPackageDoesNotAddEntryToSolutionPackagesConfig2(bool skipAssemblyReferences)
+        {
+            // Arrange
+            // Source repository has A -> B, where B is a project-level package and A is a meta-package.
+            // We want to make sure A is added to the packages.config of the project, and NOT packages.config of the solution
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+
+            var sourceRepository = new MockPackageRepository();
+            var packageB = PackageUtility.CreatePackage("B", "1.0", new string[] { "hello.txt" });
+            var packageA = PackageUtility.CreatePackage("A", "2.0", dependencies: new[] { new PackageDependency("B") });
+            sourceRepository.Add(packageA);
+            sourceRepository.Add(packageB);
+
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                projectSystem,
+                localRepository.Object,
+                new Mock<IRecentPackageRepository>().Object,
+                new Mock<VsPackageInstallerEvents>().Object);
+
+            var projectRepository = new MockProjectPackageRepository(localRepository.Object);
+            var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
+
+            localRepository.Setup(r => r.IsReferenced(It.IsAny<string>(), It.IsAny<SemanticVersion>())).
+                Returns((string id, SemanticVersion version) => projectRepository.Exists(id, version));
+
+            // Act
+            packageManager.InstallPackage(
+                projectManager, 
+                "A", 
+                new SemanticVersion("2.0"), 
+                ignoreDependencies: false, 
+                allowPrereleaseVersions: true, 
+                skipAssemblyReferences: skipAssemblyReferences, 
+                logger: null);
+
+            // Assert
+            Assert.True(projectRepository.Exists("A", new SemanticVersion("2.0")));
+            Assert.True(projectRepository.Exists("B", new SemanticVersion("1.0")));
+
+            // assert that packages.config for solution-level is not created.
+            localRepository.Verify(r => r.AddPackageReferenceEntry(It.IsAny<string>(), It.IsAny<SemanticVersion>()), Times.Never());
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void InstallSolutionLevelPackageAddEntryToSolutionPackagesConfig(bool allowPrerelease)
+        {
+            // Arrange
+            // Source repository has A -> B, where B is a project-level package and A is a meta-package.
+            // We want to make sure A is added to the packages.config of the project, and NOT packages.config of the solution
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+
+            var sourceRepository = new MockPackageRepository();
+            var packageA = PackageUtility.CreatePackage("A", "2.0", tools: new[] { "install.ps1" });
+            sourceRepository.Add(packageA);
+
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                projectSystem,
+                localRepository.Object,
+                new Mock<IRecentPackageRepository>().Object,
+                new Mock<VsPackageInstallerEvents>().Object);
+
+            var projectRepository = new MockProjectPackageRepository(localRepository.Object);
+            var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
+
+            localRepository.Setup(r => r.IsReferenced(It.IsAny<string>(), It.IsAny<SemanticVersion>())).
+                Returns((string id, SemanticVersion version) => projectRepository.Exists(id, version));
+
+            // Act
+            packageManager.InstallPackage(
+                projectManager,
+                "A",
+                new SemanticVersion("2.0"),
+                ignoreDependencies: false,
+                allowPrereleaseVersions: allowPrerelease,
+                logger: null);
+
+            // Assert
+            Assert.True(!projectRepository.Exists("A", new SemanticVersion("2.0")));
+
+            // assert that packages.config for solution-level is created.
+            localRepository.Verify(r => r.AddPackageReferenceEntry("A", new SemanticVersion("2.0")), Times.Once());
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void InstallSolutionLevelPackageAddEntryToSolutionPackagesConfig2(bool skipAssemblyReferences)
+        {
+            // Arrange
+            // Source repository has A -> B, where B is a project-level package and A is a meta-package.
+            // We want to make sure A is added to the packages.config of the project, and NOT packages.config of the solution
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+
+            var sourceRepository = new MockPackageRepository();
+            var packageA = PackageUtility.CreatePackage("A", "2.0", tools: new[] { "install.ps1" });
+            sourceRepository.Add(packageA);
+
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                projectSystem,
+                localRepository.Object,
+                new Mock<IRecentPackageRepository>().Object,
+                new Mock<VsPackageInstallerEvents>().Object);
+
+            var projectRepository = new MockProjectPackageRepository(localRepository.Object);
+            var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
+
+            localRepository.Setup(r => r.IsReferenced(It.IsAny<string>(), It.IsAny<SemanticVersion>())).
+                Returns((string id, SemanticVersion version) => projectRepository.Exists(id, version));
+
+            // Act
+            packageManager.InstallPackage(
+                projectManager,
+                "A",
+                new SemanticVersion("2.0"),
+                ignoreDependencies: false,
+                allowPrereleaseVersions: true,
+                skipAssemblyReferences: skipAssemblyReferences,
+                logger: null);
+
+            // Assert
+            Assert.True(!projectRepository.Exists("A", new SemanticVersion("2.0")));
+
+            // assert that packages.config for solution-level is created.
+            localRepository.Verify(r => r.AddPackageReferenceEntry("A", new SemanticVersion("2.0")), Times.Once());
         }
 
         // This repository better simulates what happens when we're running the package manager in vs

@@ -2,7 +2,6 @@
 using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
-using System.IO;
 
 namespace NuGet.Test
 {
@@ -10,7 +9,7 @@ namespace NuGet.Test
     public class SharedPackageRepositoryTest
     {
         [Fact]
-        public void CallAddPackageWillCreatePackageConfigAddEntryToPackageConfig()
+        public void CallAddPackageWillNotCreatePackageConfigEntryToPackageConfig()
         {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
@@ -22,15 +21,11 @@ namespace NuGet.Test
             repository.AddPackage(PackageUtility.CreatePackage("A", "2.0"));
 
             // Assert
-            Assert.True(configFileSystem.FileExists("packages.config"));
-            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
-<packages>
-  <package id=""A"" version=""2.0"" />
-</packages>", configFileSystem.ReadAllText("packages.config"));
+            Assert.False(configFileSystem.FileExists("packages.config"));
         }
 
         [Fact]
-        public void CallAddPackageWillAddEntryToPackageConfigWhenPackageConfigAlreadyExists()
+        public void CallAddPackageWillNotAddEntryToPackageConfigWhenPackageConfigAlreadyExists()
         {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
@@ -44,6 +39,30 @@ namespace NuGet.Test
 
             // Act
             repository.AddPackage(PackageUtility.CreatePackage("B", "1.0"));
+
+            // Assert
+            Assert.True(configFileSystem.FileExists("packages.config"));
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""2.0"" />
+</packages>", configFileSystem.ReadAllText("packages.config"));
+        }
+
+        [Fact]
+        public void CallAddPackageReferenceEntryWillAddEntryToPackageConfigWhenPackageConfigAlreadyExists()
+        {
+            // Arrange
+            var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
+            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\");
+            var configFileSystem = new MockFileSystem();
+            configFileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""2.0"" />
+</packages>");
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object, configFileSystem);
+
+            // Act
+            repository.AddPackageReferenceEntry("B", new SemanticVersion("1.0"));
 
             // Assert
             Assert.True(configFileSystem.FileExists("packages.config"));
@@ -81,7 +100,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackageAddsReferencesToSolutionLevelPackagesToSolutionConfigFile()
+        public void AddPackageDoesNotAddReferencesToSolutionLevelPackagesToSolutionConfigFile()
         {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -93,7 +112,20 @@ namespace NuGet.Test
             repository.AddPackage(solutionPackage);
 
             // Assert
-            Assert.True(configFileSystem.FileExists("packages.config"));
+            Assert.False(configFileSystem.FileExists("packages.config"));
+        }
+
+        [Fact]
+        public void AddPackageReferenceEntryAddsReferenceToPackagesConfigFile()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+            var solutionPackage = PackageUtility.CreatePackage("SolutionLevel", tools: new[] { "Install.ps1" });
+
+            // Act
+            repository.AddPackageReferenceEntry(solutionPackage.Id, solutionPackage.Version);
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""SolutionLevel"" version=""1.0"" />

@@ -158,6 +158,8 @@ namespace NuGet.VisualStudio
                 InstallPackage(package, ignoreDependencies, allowPrereleaseVersions);
 
                 AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
+
+                AddSolutionPackageConfigEntry(package);
             });
 
             // Add package to recent repository
@@ -623,7 +625,7 @@ namespace NuGet.VisualStudio
                 operations,
                 () =>
                 {
-                    bool success = false;
+                    bool successfulAtLeastOnce = false;
 
                     foreach (var project in projects)
                     {
@@ -635,7 +637,7 @@ namespace NuGet.VisualStudio
                             InitializeLogger(logger, projectManager);
 
                             projectAction(projectManager);
-                            success = true;
+                            successfulAtLeastOnce = true;
                         }
                         catch (Exception ex)
                         {
@@ -649,7 +651,7 @@ namespace NuGet.VisualStudio
 
                     // Throw an exception only if all the update failed for all projects
                     // so we rollback any solution level operations that might have happened
-                    if (projects.Any() && !success)
+                    if (projects.Any() && !successfulAtLeastOnce)
                     {
                         throw new InvalidOperationException(VsResources.OperationFailed);
                     }
@@ -679,6 +681,8 @@ namespace NuGet.VisualStudio
                     }
 
                     action();
+
+                    AddSolutionPackageConfigEntry(package);
                 });
 
                 // Add package to recent repository
@@ -847,7 +851,7 @@ namespace NuGet.VisualStudio
                 packagesAdded.Push(e.Package);
                 _packageEvents.NotifyReferenceAdded(e);
 
-                // If this package doesn't exist at solution level (it might not because of leveling)
+                // If this package doesn't exist at solution level (it might not be because of leveling)
                 // then we need to install it.
                 if (!LocalRepository.Exists(e.Package))
                 {
@@ -1087,6 +1091,15 @@ namespace NuGet.VisualStudio
                         logger.Log(MessageLevel.Error, ExceptionUtility.Unwrap(e).Message);
                     }
                 }
+            }
+        }
+
+        private void AddSolutionPackageConfigEntry(IPackage package)
+        {
+            var sharedPackageRepository = LocalRepository as ISharedPackageRepository;
+            if (sharedPackageRepository != null && !IsProjectLevel(package))
+            {
+                sharedPackageRepository.AddPackageReferenceEntry(package.Id, package.Version);
             }
         }
 

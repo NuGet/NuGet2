@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using EnvDTE;
@@ -13,7 +14,6 @@ using Xunit.Extensions;
 namespace NuGet.PowerShell.Commands.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
-    using System.IO;
 
     public class InstallPackageCommandTest
     {
@@ -315,6 +315,7 @@ namespace NuGet.PowerShell.Commands.Test
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
+            sharedRepository.Setup(s => s.IsReferenced("A", new SemanticVersion("1.0.0-a"))).Returns(true);
             var packageRepository = new MockPackageRepository { packageA };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
             var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, recentPackageRepository.Object, new VsPackageInstallerEvents());
@@ -347,6 +348,7 @@ namespace NuGet.PowerShell.Commands.Test
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA1));
+            sharedRepository.Setup(s => s.IsReferenced("A", new SemanticVersion("1.0.0"))).Returns(true);
 
             var packageRepository = new MockPackageRepository { packageA1, packageA2 };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
@@ -373,6 +375,7 @@ namespace NuGet.PowerShell.Commands.Test
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA1));
+            sharedRepository.Setup(s => s.IsReferenced("A", new SemanticVersion("1.0.0"))).Returns(true);
 
             var packageRepository = new MockPackageRepository { packageA1, packageA2 };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
@@ -402,6 +405,7 @@ namespace NuGet.PowerShell.Commands.Test
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA2));
+            sharedRepository.Setup(s => s.IsReferenced("A", new SemanticVersion("2.0.0"))).Returns(true);
 
             var packageRepository = new MockPackageRepository { packageA1, packageA2 };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
@@ -429,6 +433,7 @@ namespace NuGet.PowerShell.Commands.Test
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA2));
+            sharedRepository.Setup(s => s.IsReferenced("A", new SemanticVersion("1.0.0-ReleaseCandidate"))).Returns(true);
 
             var packageRepository = new MockPackageRepository { packageA1, packageA2 };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
@@ -458,6 +463,8 @@ namespace NuGet.PowerShell.Commands.Test
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
             sharedRepository.Setup(s => s.AddPackage(packageB)).Verifiable();
+            sharedRepository.Setup(s => s.IsReferenced("A", new SemanticVersion("1.0.0"))).Returns(true);
+            sharedRepository.Setup(s => s.IsReferenced("B", new SemanticVersion("1.0.0"))).Returns(true);
 
             var packageRepository = new MockPackageRepository { packageA, packageB };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
@@ -488,6 +495,8 @@ namespace NuGet.PowerShell.Commands.Test
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
             sharedRepository.Setup(s => s.AddPackage(packageB)).Verifiable();
+            sharedRepository.Setup(s => s.IsReferenced("A", new SemanticVersion(versionA))).Returns(true);
+            sharedRepository.Setup(s => s.IsReferenced("B", new SemanticVersion(versionB))).Returns(true);
 
             var packageRepository = new MockPackageRepository { packageA, packageB };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
@@ -637,6 +646,8 @@ namespace NuGet.PowerShell.Commands.Test
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA.Object)).Verifiable();
+            sharedRepository.Setup(s => s.IsReferenced("A", new SemanticVersion("1.0"))).Returns(true);
+
             var packageRepository = new MockPackageRepository { packageA.Object };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
             var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object,
@@ -689,6 +700,9 @@ namespace NuGet.PowerShell.Commands.Test
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA.Object));
             sharedRepository.Setup(s => s.AddPackage(packageB.Object));
+            sharedRepository.Setup(s => s.IsReferenced("A", new SemanticVersion("1.0"))).Returns(true);
+            sharedRepository.Setup(s => s.IsReferenced("B", new SemanticVersion("1.0"))).Returns(true);
+
             var packageRepository = new MockPackageRepository { packageA.Object, packageB.Object };
             var recentPackageRepository = new Mock<IRecentPackageRepository>();
             var packageManager = new VsPackageManager(
