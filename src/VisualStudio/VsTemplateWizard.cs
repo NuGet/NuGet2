@@ -287,7 +287,7 @@ namespace NuGet.VisualStudio
                 // RepositorySettings = null in unit tests
                 if (project.IsWebSite() && RepositorySettings != null)
                 {
-                    CreatingRefreshFilesInBin(
+                    CreateRefreshFilesInBin(
                         project,
                         RepositorySettings.Value.RepositoryPath,
                         _configuration.Packages.Where(p => p.SkipAssemblyReferences));
@@ -297,7 +297,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        private void CreatingRefreshFilesInBin(Project project, string repositoryPath, IEnumerable<VsTemplateWizardPackageInfo> packageInfos)
+        private void CreateRefreshFilesInBin(Project project, string repositoryPath, IEnumerable<VsTemplateWizardPackageInfo> packageInfos)
         {
             IEnumerable<PackageName> packageNames = packageInfos.Select(pi => new PackageName(pi.Id, pi.Version));
             _websiteHandler.AddRefreshFilesForReferences(project, new PhysicalFileSystem(repositoryPath), packageNames);

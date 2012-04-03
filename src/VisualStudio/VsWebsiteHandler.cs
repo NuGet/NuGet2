@@ -176,7 +176,10 @@ namespace NuGet.VisualStudio
                 foreach (string file in nativeFiles)
                 {
                     string targetPath = Path.Combine(Constants.BinDirectory, file.Substring(nativeBinariesPath.Length + 1));  // skip over NativeBinaries/ word
-                    projectSystem.AddFile(targetPath, packagesFileSystem.OpenFile(file));
+                    using (Stream stream = packagesFileSystem.OpenFile(file)) 
+                    {
+                        projectSystem.AddFile(targetPath, stream);
+                    }
                 }
             }
         }
