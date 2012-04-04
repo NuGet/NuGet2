@@ -13,12 +13,12 @@ namespace NuGet.VisualStudio
         private readonly ISolutionManager _solutionManager;
         private readonly ISettings _defaultSettings;
         private readonly IFileSystemProvider _fileSystemProvider;
-        private ISettings _solutionSettings;
 
         [ImportingConstructor]
         public VsSettings(ISolutionManager solutionManager)
             : this(solutionManager, Settings.LoadDefaultSettings(), new PhysicalFileSystemProvider())
         {
+            // Review: Do we need to pass in the VsFileSystemProvider here instead of hardcoding PhysicalFileSystems?
         }
 
         public VsSettings(ISolutionManager solutionManager, ISettings defaultSettings, IFileSystemProvider fileSystemProvider)
@@ -39,21 +39,31 @@ namespace NuGet.VisualStudio
             _solutionManager = solutionManager;
             _defaultSettings = defaultSettings;
             _fileSystemProvider = fileSystemProvider;
+        }
 
-            EventHandler eventHandler = (src, eventArgs) =>
+        private ISettings SolutionSettings
+        {
+            get
             {
-                _solutionSettings = null;
-            };
-            _solutionManager.SolutionOpened += eventHandler;
-            _solutionManager.SolutionClosed += eventHandler;
+                if (_solutionManager.IsSolutionOpen && !String.IsNullOrEmpty(_solutionManager.SolutionDirectory))
+                {
+                    var nugetSettingsDirectory = Path.Combine(_solutionManager.SolutionDirectory, VsConstants.NuGetSolutionSettingsFolder);
+                    var fileSystem = _fileSystemProvider.GetFileSystem(nugetSettingsDirectory);
+
+                    if (fileSystem.FileExists(Constants.SettingsFileName))
+                    {
+                        return new Settings(fileSystem);
+                    }
+                }
+                return NullSettings.Instance;
+            }
         }
 
         public string GetValue(string section, string key)
         {
             if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
             {
-                EnsureSolutionSettings();
-                return _solutionSettings.GetValue(section, key);
+                return SolutionSettings.GetValue(section, key);
             }
             return _defaultSettings.GetValue(section, key);
         }
@@ -62,8 +72,7 @@ namespace NuGet.VisualStudio
         {
             if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
             {
-                EnsureSolutionSettings();
-                return _solutionSettings.GetValues(section);
+                return SolutionSettings.GetValues(section);
             }
             return _defaultSettings.GetValues(section);
         }
@@ -72,8 +81,7 @@ namespace NuGet.VisualStudio
         {
             if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
             {
-                EnsureSolutionSettings();
-                return _solutionSettings.GetNestedValues(section, key);
+                return SolutionSettings.GetNestedValues(section, key);
             }
             return _defaultSettings.GetNestedValues(section, key);
         }
@@ -82,38 +90,43 @@ namespace NuGet.VisualStudio
         {
             if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
             {
-                EnsureSolutionSettings();
-                _solutionSettings.SetValue(section, key, value);
+                SolutionSettings.SetValue(section, key, value);
             }
-            _defaultSettings.SetValue(section, key, value);
+            else
+            {
+                _defaultSettings.SetValue(section, key, value);
+            }
         }
 
         public void SetValues(string section, IList<KeyValuePair<string, string>> values)
         {
             if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
             {
-                EnsureSolutionSettings();
-                _solutionSettings.SetValues(section, values);
+                SolutionSettings.SetValues(section, values);
             }
-            _defaultSettings.SetValues(section, values);
+            else
+            {
+                _defaultSettings.SetValues(section, values);
+            }
         }
 
         public void SetNestedValues(string section, string key, IList<KeyValuePair<string, string>> values)
         {
             if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
             {
-                EnsureSolutionSettings();
-                _solutionSettings.SetNestedValues(section, key, values);
+                SolutionSettings.SetNestedValues(section, key, values);
             }
-            _defaultSettings.SetNestedValues(section, key, values);
+            else
+            {
+                _defaultSettings.SetNestedValues(section, key, values);
+            }
         }
 
         public bool DeleteValue(string section, string key)
         {
             if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
             {
-                EnsureSolutionSettings();
-                return _solutionSettings.DeleteValue(section, key);
+                return SolutionSettings.DeleteValue(section, key);
             }
             return _defaultSettings.DeleteValue(section, key);
         }
@@ -122,31 +135,9 @@ namespace NuGet.VisualStudio
         {
             if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
             {
-                EnsureSolutionSettings();
-                return _solutionSettings.DeleteSection(section);
+                return SolutionSettings.DeleteSection(section);
             }
             return _defaultSettings.DeleteSection(section);
-        }
-
-        private void EnsureSolutionSettings()
-        {
-            if (_solutionManager.IsSolutionOpen && !String.IsNullOrEmpty(_solutionManager.SolutionDirectory))
-            {
-                if (_solutionSettings != null)
-                {
-                    // We already have a cached config in memory. Do nothing.
-                    return;
-                }
-
-                var nugetSettingsDirectory = Path.Combine(_solutionManager.SolutionDirectory, VsConstants.NuGetSolutionSettingsFolder);
-                var fileSystem = _fileSystemProvider.GetFileSystem(nugetSettingsDirectory);
-                if (fileSystem.FileExists(Constants.SettingsFileName))
-                {
-                    _solutionSettings = new Settings(fileSystem);
-                    return;
-                }
-            }
-            _solutionSettings = NullSettings.Instance;
         }
 
         private sealed class PhysicalFileSystemProvider : IFileSystemProvider

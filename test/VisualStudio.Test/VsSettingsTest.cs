@@ -170,5 +170,31 @@ namespace NuGet.VisualStudio.Test
             Assert.Equal("barA", valueA);
             Assert.Equal("barB", valueB);
         }
+
+        [Fact]
+        public void VsSettingDoesNotCacheSolutionSettings()
+        {
+            // Arrange
+            var solutionManager = new Mock<MockSolutionManager>();
+            solutionManager.Setup(s => s.IsSolutionOpen).Returns(true).Verifiable();
+            solutionManager.Setup(s => s.SolutionDirectory).Returns(@"x:\solution").Verifiable();
+            var defaultSettings = new Mock<ISettings>(MockBehavior.Strict);
+
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("nuget.config", @"<?xml version=""1.0"" ?><configuration><solution><add key=""foo"" value=""bar"" /></solution></configuration>");
+
+            var fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
+            fileSystemProvider.Setup(f => f.GetFileSystem(@"x:\solution\.nuget")).Returns(fileSystem).Verifiable();
+
+            // Act
+            var vsSettings = new VsSettings(solutionManager.Object, defaultSettings.Object, fileSystemProvider.Object);
+            var valueA = vsSettings.GetValue("solution", "foo");
+            fileSystem.AddFile("nuget.config", @"<?xml version=""1.0"" ?><configuration><solution><add key=""foo"" value=""qux"" /></solution></configuration>");
+            var valueB = vsSettings.GetValue("solution", "foo");
+
+            // Assert
+            Assert.Equal("bar", valueA);
+            Assert.Equal("qux", valueB);
+        }
     }
 }
