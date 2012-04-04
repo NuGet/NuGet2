@@ -471,7 +471,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
         public string[] GetExpansions(string line, string lastWord)
         {
             var query = from s in Runspace.Invoke(
-                            "$__pc_args=@(); $input|%{$__pc_args+=$_}; TabExpansion $__pc_args[0] $__pc_args[1]; Remove-Variable __pc_args -Scope 0",
+                            @"$__pc_args=@();$input|%{$__pc_args+=$_};if(Test-Path Function:\TabExpansion2){(TabExpansion2 $__pc_args[0] $__pc_args[0].length).CompletionMatches|%{$_.CompletionText}}else{TabExpansion $__pc_args[0] $__pc_args[1]};Remove-Variable __pc_args -Scope 0;",
                             new string[] { line, lastWord },
                             outputResults: false)
                         select (s == null ? null : s.ToString());

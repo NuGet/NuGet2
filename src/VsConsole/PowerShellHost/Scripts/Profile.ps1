@@ -143,35 +143,30 @@ function Get-VSComponentModel
 # Set initial directory
 Set-Location "$env:USERPROFILE"
 
-# Backup the original tab expansion function
+# For PowerShell v2, we need to create a reference to the default TabExpansion function
+# so we can delegate back to it in our custom function. This isn't needed in PowerShell v3, 
+# as omitting output in a custom TabExpansion function signals to TabExpansion2 that it 
+# should use it's own completion list.
 if ((Test-Path Function:\DefaultTabExpansion) -eq $false -and (Test-Path Function:\TabExpansion)) {
     Rename-Item Function:\TabExpansion DefaultTabExpansion
 }
 
-# Backup the original tab expansion function
-if ((Test-Path Function:\DefaultTabExpansion2) -eq $false -and (Test-Path Function:\TabExpansion2)) {
-    Rename-Item Function:\TabExpansion2 DefaultTabExpansion2
-}
-
-function TabExpansion([string] $line, [string] $lastWord) {
-    $nugetSuggestions = & (Get-Module NuGet) NuGetTabExpansion $line $lastWord
-
-    if ($nugetSuggestions.NoResult) {
-        $line = $line.ToUpperInvariant()
-        $lastWord = $lastWord.ToUpperInvariant()
-
-		if (Test-Path Function:\DefaultTabExpansion) 
-		{
-			return DefaultTabExpansion $line $lastWord
-		}
-		elseif (Test-Path Function:\DefaultTabExpansion2) 
-		{
-			return DefaultTabExpansion2 $line $line.Length
-		}
-    }
-    else {
-        return $nugetSuggestions
-    }
+function TabExpansion([string]$line, [string]$lastWord) {
+       $nugetSuggestions = & (Get-Module NuGet) NuGetTabExpansion $line $lastWord
+       
+       if ($nugetSuggestions.NoResult) {
+              # We only want to delegate back to the default tab completion in PowerShell v2.
+              # PowerShell v3's TabExpansion2 will use its own command completion list if the
+              # custom TabExpansion doesn't return anything.
+              if (Test-Path Function:\DefaultTabExpansion) {
+                     $line = $line.ToUpperInvariant()
+                     $lastWord = $lastWord.ToUpperInvariant()
+                     return DefaultTabExpansion $line $lastWord
+              }
+       }
+       else {
+              return $nugetSuggestions
+       }
 }
 
 # default prompt
