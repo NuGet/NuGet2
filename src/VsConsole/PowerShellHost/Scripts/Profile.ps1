@@ -146,7 +146,7 @@ Set-Location "$env:USERPROFILE"
 # For PowerShell v2, we need to create a reference to the default TabExpansion function
 # so we can delegate back to it in our custom function. This isn't needed in PowerShell v3, 
 # as omitting output in a custom TabExpansion function signals to TabExpansion2 that it 
-# should use it's own completion list.
+# should use its own completion list.
 if ((Test-Path Function:\DefaultTabExpansion) -eq $false -and (Test-Path Function:\TabExpansion)) {
     Rename-Item Function:\TabExpansion DefaultTabExpansion
 }
