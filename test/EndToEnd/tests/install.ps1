@@ -15,15 +15,23 @@
 }
 
 function Test-WebsiteSimpleInstall {
+    param(
+        $context
+    )
     # Arrange
     $p = New-WebSite
     
     # Act
-    Install-Package AntiXSS -Project $p.Name -Version 4.2.1.0
+    Install-Package -Source $context.RepositoryRoot -Project $p.Name MyAwesomeLibrary
     
     # Assert
-    Assert-Package $p AntiXSS
-    Assert-SolutionPackage AntiXSS
+    Assert-Package $p MyAwesomeLibrary
+    Assert-SolutionPackage MyAwesomeLibrary
+    
+    $refreshFilePath = Join-Path $p.FullName "bin\MyAwesomeLibrary.dll.refresh"
+    $content = Get-Content $refreshFilePath
+    
+    Assert-AreEqual "..\packages\MyAwesomeLibrary.1.0\lib\net40\MyAwesomeLibrary.dll" $content
 }
 
 function Test-DiamondDependencies {

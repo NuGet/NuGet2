@@ -737,3 +737,20 @@ function Test-UninstallingSatellitePackageThenRuntimePackageRemoveCollidingRunti
     # Assert (the resources from the satellite package are copied into the runtime package's folder)
     Assert-PathNotExists (Join-Path $solutionDir packages\PackageWithStrongNamedLib.1.1\lib\ja-jp\collision-differences.txt)
 }
+
+function Test-WebSiteSimpleUninstall
+{
+	param(
+		$context
+	)
+
+	# Arrange
+	$p = New-Website
+	
+	# Act
+	$p | Install-Package MyAwesomeLibrary -Source $context.RepositoryRoot
+	$p | Uninstall-Package MyAwesomeLibrary
+
+	# Assert
+	Assert-PathNotExists (Join-Path $p.FullName "bin\AwesomeLibrary.dll.refresh")
+}

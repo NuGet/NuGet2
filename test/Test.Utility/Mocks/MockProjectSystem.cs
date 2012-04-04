@@ -14,7 +14,8 @@ namespace NuGet.Test.Mocks
         {
         }
 
-        public MockProjectSystem(FrameworkName frameworkName)
+        public MockProjectSystem(FrameworkName frameworkName, string root = @"x:\MockFileSystem")
+            : base(root)
         {
             _frameworkName = frameworkName;
             References = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

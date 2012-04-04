@@ -217,7 +217,7 @@ namespace NuGet.Test
             Assert.Equal(0, projectSystem.Paths.Count);
             Assert.Equal(1, projectSystem.References.Count);
             Assert.True(projectSystem.References.ContainsKey(@"reference.dll"));
-            Assert.True(projectSystem.References.ContainsValue(@"B.1.0\reference.dll"));
+            Assert.True(projectSystem.References.ContainsValue(@"MockFileSystem\B.1.0\reference.dll"));
             Assert.True(localRepository.Exists("A"));
             Assert.True(localRepository.Exists("B"));
         }
@@ -236,14 +236,14 @@ namespace NuGet.Test
             projectManager.PackageReferenceAdding += (sender, e) =>
             {
                 // Assert
-                Assert.Equal(e.InstallPath, @"C:\MockFileSystem\A.1.0");
+                Assert.Equal(e.InstallPath, @"x:\MockFileSystem\A.1.0");
                 Assert.Same(e.Package, packageA);
             };
 
             projectManager.PackageReferenceAdded += (sender, e) =>
             {
                 // Assert
-                Assert.Equal(e.InstallPath, @"C:\MockFileSystem\A.1.0");
+                Assert.Equal(e.InstallPath, @"x:\MockFileSystem\A.1.0");
                 Assert.Same(e.Package, packageA);
             };
 
@@ -265,14 +265,14 @@ namespace NuGet.Test
             projectManager.PackageReferenceRemoving += (sender, e) =>
             {
                 // Assert
-                Assert.Equal(e.InstallPath, @"C:\MockFileSystem\A.1.0");
+                Assert.Equal(e.InstallPath, @"x:\MockFileSystem\A.1.0");
                 Assert.Same(e.Package, packageA);
             };
 
             projectManager.PackageReferenceRemoved += (sender, e) =>
             {
                 // Assert
-                Assert.Equal(e.InstallPath, @"C:\MockFileSystem\A.1.0");
+                Assert.Equal(e.InstallPath, @"x:\MockFileSystem\A.1.0");
                 Assert.Same(e.Package, packageA);
             };
 
@@ -697,7 +697,7 @@ namespace NuGet.Test
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), @"C:\MockFileSystem\ does not reference 'A'.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.UpdatePackageReference("A"), @"x:\MockFileSystem does not reference 'A'.");
         }
 
         [Fact]

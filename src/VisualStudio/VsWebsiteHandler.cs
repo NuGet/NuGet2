@@ -70,8 +70,11 @@ namespace NuGet.VisualStudio
                 {
                     foreach (var assemblyReference in compatibleAssemblyReferences)
                     {
+                        // Get the absolute path to the assembly being added. 
+                        string assemblyPath = Path.Combine(packageDirectory, assemblyReference.Path); ;
+
                         // create one refresh file for each assembly reference, as per required by Website projects
-                        CreateRefereshFile(projectSystem, assemblyReference, packageDirectory);
+                        projectSystem.CreateRefreshFile(assemblyPath);
                     }
                 }
             }
@@ -123,10 +126,12 @@ namespace NuGet.VisualStudio
                 if (fileSystem.DirectoryExists(libFolderPath))
                 {
                     packageDirectory = fileSystem.GetFullPath(packageName);
+                    // TODO: SearchFilesWithinOneSubFolders seems fragile. In the event conventions in the lib directory change to allow more than one level of nesting, it would 
+                    // not work. We should let VS perform a regular install instead of doing this. 
                     return Constants.AssemblyReferencesExtensions
                                     .Select(extension => "*" + extension)
                                     .SelectMany(extension => SearchFilesWithinOneSubFolders(fileSystem, libFolderPath, extension))
-                                    .Select(assembly => new FileAssemblyReference(assembly.Substring(packageName.Length).Trim(Path.DirectorySeparatorChar), fileSystem));
+                                    .Select(assembly => new FileAssemblyReference(assembly.Substring(packageName.Length).Trim(Path.DirectorySeparatorChar)));
                 }
             }
 
@@ -139,30 +144,6 @@ namespace NuGet.VisualStudio
             // get files directly under 'folder' or files under subfolders of 'folder'
             return fileSystem.GetFiles(folder, extension)
                              .Concat(fileSystem.GetDirectories(folder).SelectMany(subFolder => fileSystem.GetFiles(subFolder, extension)));
-        }
-
-        private void CreateRefereshFile(IProjectSystem project, IPackageAssemblyReference assemblyReference, string packageInstallPath)
-        {
-            string refreshFilePath = Path.Combine("bin", assemblyReference.Name + ".refresh");
-            if (!project.FileExists(refreshFilePath))
-            {
-                string projectPath = PathUtility.EnsureTrailingSlash(project.GetFullPath("."));
-
-                // this is the full path to the assembly file (under 'packages' folder) being referenced
-                string assemblyPath = Path.Combine(packageInstallPath, assemblyReference.Path);
-                // convert to relative path that is relative to the project
-                string relativeAssemblyPath = PathUtility.GetRelativePath(projectPath, assemblyPath);
-
-                try
-                {
-                    project.AddFile(refreshFilePath, relativeAssemblyPath.AsStream());
-                }
-                catch (UnauthorizedAccessException exception)
-                {
-                    // log IO permission error
-                    ExceptionHelper.WriteToActivityLog(exception);
-                }
-            }
         }
 
         private void CopyNativeBinaries(IProjectSystem projectSystem, IFileSystem packagesFileSystem, PackageName packageName)
@@ -189,18 +170,16 @@ namespace NuGet.VisualStudio
             return project.GetTargetFrameworkName() ?? VersionUtility.DefaultTargetFramework;
         }
 
-        private class FileAssemblyReference : IPackageAssemblyReference
+        private sealed class FileAssemblyReference : IPackageAssemblyReference
         {
             private readonly string _path;
-            private readonly string _fullPath;
             private FrameworkName _targetFramework;
 
-            public FileAssemblyReference(string assemblyPath, IFileSystem fileSystem)
+            public FileAssemblyReference(string assemblyPath)
             {
                 Debug.Assert(assemblyPath.StartsWith(Constants.LibDirectory, StringComparison.OrdinalIgnoreCase));
 
                 _path = assemblyPath;
-                _fullPath = fileSystem.GetFullPath(assemblyPath);
 
                 string pathExcludeLib = assemblyPath.Substring(Constants.LibDirectory.Length).Trim(System.IO.Path.DirectorySeparatorChar);
                 _targetFramework = VersionUtility.ParseFrameworkFolderName(pathExcludeLib);
@@ -223,7 +202,7 @@ namespace NuGet.VisualStudio
 
             public Stream GetStream()
             {
-                return File.OpenRead(_fullPath);
+                throw new NotSupportedException();
             }
 
             public IEnumerable<FrameworkName> SupportedFrameworks
