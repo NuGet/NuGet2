@@ -346,6 +346,24 @@ namespace NuGet.Test
             repo2.Verify(r => r.GetPackages(), Times.AtMostOnce());
         }
 
+        [Fact]
+        public void ExistsReturnsTrueIfAnyRepositoryContainsPackage()
+        {
+            // Arrange
+            var package = PackageUtility.CreatePackage("Abc");
+            var repo1 = new MockPackageRepository();
+            var repo2 = new MockPackageRepository();
+            repo2.Add(package);
+
+            var aggregateRepository = new AggregateRepository(new[] { repo1, repo2 });
+
+            // Act 
+            var exists = aggregateRepository.Exists("Abc", new SemanticVersion("1.0"));
+
+            // Assert
+            Assert.True(exists);
+        }
+
         private static IEnumerable<IPackage> GetPackagesWithException()
         {
             yield return PackageUtility.CreatePackage("A");
@@ -355,6 +373,11 @@ namespace NuGet.Test
         public abstract class PackageLookupBase : IPackageLookup
         {
             public virtual IPackage FindPackage(string packageId, SemanticVersion version)
+            {
+                throw new NotImplementedException();
+            }
+
+            public virtual bool Exists(string packageId, SemanticVersion version)
             {
                 throw new NotImplementedException();
             }

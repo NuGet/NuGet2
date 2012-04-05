@@ -113,6 +113,14 @@ namespace NuGet
                                .FirstOrDefault(p => p != null);
         }
 
+        public bool Exists(string packageId, SemanticVersion version)
+        {
+            // When we're looking for an exact package, we can optimize but searching each
+            // repository one by one until we find the package that matches.
+            Func<IPackageRepository, bool> exists = Wrap(r => r.Exists(packageId, version));
+            return Repositories.Any(exists);
+        }
+
         public IPackage ResolveDependency(PackageDependency dependency, IPackageConstraintProvider constraintProvider, bool allowPrereleaseVersions, bool preferListedPackages)
         {
             if (ResolveDependenciesVertically)

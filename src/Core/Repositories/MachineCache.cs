@@ -79,6 +79,12 @@ namespace NuGet
             }
         }
 
+        public override bool Exists(string packageId, SemanticVersion version)
+        {
+            string packagePath = GetPackageFilePath(packageId, version);
+            return FileSystem.FileExists(packagePath);
+        }
+
         public void Clear()
         {
             TryClear(GetPackageFiles().ToList());

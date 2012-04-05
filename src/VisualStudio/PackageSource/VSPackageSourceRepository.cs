@@ -59,6 +59,12 @@ namespace NuGet.VisualStudio
             return activeRepository == null ? null : activeRepository.FindPackage(packageId, version);
         }
 
+        public bool Exists(string packageId, SemanticVersion version)
+        {
+            var activeRepository = GetActiveRepository();
+            return activeRepository != null ? activeRepository.Exists(packageId, version) : false;
+        }
+
         public void AddPackage(IPackage package)
         {
             var activeRepository = GetActiveRepository();

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using NuGet;
 
 namespace NuGet.VisualStudio
 {
@@ -76,6 +75,11 @@ namespace NuGet.VisualStudio
         public IPackage FindPackage(string packageId, SemanticVersion version)
         {
             return _primaryRepository.FindPackage(packageId, version);
+        }
+
+        public bool Exists(string packageId, SemanticVersion version)
+        {
+            return _primaryRepository.Exists(packageId, version);
         }
     }
 }

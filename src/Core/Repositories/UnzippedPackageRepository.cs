@@ -48,14 +48,24 @@ namespace NuGet
 
         public IPackage FindPackage(string packageId, SemanticVersion version)
         {
-            string packageName = packageId + "." + version.ToString(); 
-            string packageFile = packageName + Constants.PackageExtension;
-            if (FileSystem.FileExists(packageFile) && FileSystem.DirectoryExists(packageName))
+            string packageName = GetPackageFileName(packageId, version); 
+            if (Exists(packageId, version))
             {
                 return new UnzippedPackage(FileSystem, packageName);
             }
-
             return null;
+        }
+
+        public bool Exists(string packageId, SemanticVersion version)
+        {
+            string packageName = GetPackageFileName(packageId, version);
+            string packageFile = packageName + Constants.PackageExtension;
+            return FileSystem.FileExists(packageFile) && FileSystem.DirectoryExists(packageName);
+        }
+
+        private static string GetPackageFileName(string packageId, SemanticVersion version)
+        {
+            return packageId + "." + version.ToString();
         }
     }
 }

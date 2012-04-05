@@ -105,6 +105,11 @@ namespace NuGet
             return FindPackage(OpenPackage, packageId, version);
         }
 
+        public virtual bool Exists(string packageId, SemanticVersion version)
+        {
+            return FindPackage(packageId, version) != null;
+        }
+
         public IEnumerable<string> GetPackageLookupPaths(string packageId, SemanticVersion version)
         {
             // Since we look at the file system to determine if a package is installed,

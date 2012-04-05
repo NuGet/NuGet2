@@ -121,6 +121,11 @@ namespace NuGet
             return SourceRepository.FindPackage(packageId, version);
         }
 
+        public bool Exists(string packageId, SemanticVersion version)
+        {
+            return _packageReferenceFile.EntryExists(packageId, version);
+        }
+
         public void RegisterIfNecessary()
         {
             if (GetPackages().Any())

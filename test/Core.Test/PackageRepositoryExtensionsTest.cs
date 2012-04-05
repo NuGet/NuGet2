@@ -2,15 +2,15 @@
 using System.Linq;
 using System.Threading;
 using Moq;
-using Xunit;
 using NuGet.Test.Mocks;
+using Xunit;
 
 namespace NuGet.Test
 {
     public class PackageRepositoryExtensionsTest
     {
         [Fact]
-        public void FindPackagesByIdRecognizeIFindPackagesRepositoryInterface()
+        public void FindPackagesByIdUsesSearchableRepositoryIfAvailable()
         {
             // Arrange
             var repository = new Mock<ISearchableRepository>();
@@ -20,6 +20,25 @@ namespace NuGet.Test
             PackageRepositoryExtensions.FindPackagesById(repository.As<IPackageRepository>().Object, "A");
 
             // Assert
+            repository.Verify();
+        }
+
+        [Fact]
+        public void ExistsMethodUsesIPackageLookupIfUnderlyingRepositorySupportsIt()
+        {
+            // Arrange
+            var repository = new Mock<IPackageRepository>(MockBehavior.Strict);
+
+            repository.As<IPackageLookup>()
+                      .Setup(p => p.Exists("A", new SemanticVersion("1.0")))
+                      .Returns(true)
+                      .Verifiable();
+
+            // Act
+            bool result = PackageRepositoryExtensions.Exists(repository.Object, "A", new SemanticVersion("1.0"));
+
+            // Assert
+            Assert.True(result);
             repository.Verify();
         }
 
