@@ -69,7 +69,9 @@ namespace NuGet.Server.Infrastructure
 
         public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
         {
-            var packages = GetPackages().Find(searchTerm).FilterByPrerelease(allowPrereleaseVersions);
+            var packages = GetPackages().Find(searchTerm)
+                                        .FilterByPrerelease(allowPrereleaseVersions)
+                                        .AsQueryable();
 
             // TODO: Enable this when we can make it faster
             //if (targetFrameworks.Any()) {

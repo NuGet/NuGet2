@@ -158,7 +158,9 @@ namespace NuGet
             if (!Context.SupportsServiceMethod(SearchSvcMethod))
             {
                 // If there's no search method then we can't filter by target framework
-                return GetPackages().Find(searchTerm).FilterByPrerelease(allowPrereleaseVersions);
+                return GetPackages().Find(searchTerm)
+                                    .FilterByPrerelease(allowPrereleaseVersions)
+                                    .AsQueryable();
             }
 
             // Convert the list of framework names into short names
