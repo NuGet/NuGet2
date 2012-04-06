@@ -9,7 +9,7 @@ using NuGet.Resources;
 
 namespace NuGet
 {
-    public class SharedPackageRepository : LocalPackageRepository, ISharedPackageRepository
+    public class SharedPackageRepository : LocalPackageRepository, ISharedPackageRepository, IFastExistenceLookup
     {
         private const string StoreFilePath = "repositories.config";
         private readonly PackageReferenceFile _packageReferenceFile;
@@ -56,9 +56,19 @@ namespace NuGet
             return GetRepositories().Any(r => r.Exists(packageId, version));
         }
 
-        public override void AddPackage(IPackage package)
+        public bool Exists(string packageId, SemanticVersion version)
         {
-            base.AddPackage(package);
+            if (version != null)
+            {
+                // optimization: if we find the sub-directory with the name "id.version", consider it exists
+                string folderPath = packageId + "." + version.ToString();
+                if (FileSystem.DirectoryExists(folderPath))
+                {
+                    return true;
+                }
+            }
+
+            return FindPackage(packageId, version) != null;
         }
 
         public void AddPackageReferenceEntry(string packageId, SemanticVersion version)

@@ -4,6 +4,7 @@ using System.Threading;
 using Moq;
 using Xunit;
 using NuGet.Test.Mocks;
+using Xunit.Extensions;
 
 namespace NuGet.Test
 {
@@ -91,6 +92,23 @@ namespace NuGet.Test
 
             Assert.Equal("A", foundPackages[2].Id);
             Assert.Equal(new SemanticVersion("3.0-alpha"), foundPackages[2].Version);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ExistsCheckForIFastExistenceLookup(bool returnValue)
+        {
+            // Arrange
+            var repository = new Mock<IFastExistenceLookup>(MockBehavior.Strict);
+            repository.Setup(p => p.Exists("A", new SemanticVersion("1.0"))).Returns(returnValue).Verifiable();
+
+            // Act
+            bool exists = repository.Object.Exists("A", new SemanticVersion("1.0"));
+
+            // Assert
+            repository.Verify();
+            Assert.Equal(returnValue, exists);
         }
     }
 }

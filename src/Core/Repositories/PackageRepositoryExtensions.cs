@@ -23,6 +23,12 @@ namespace NuGet
 
         public static bool Exists(this IPackageRepository repository, string packageId, SemanticVersion version)
         {
+            var existenceLookup = repository as IFastExistenceLookup;
+            if (existenceLookup != null)
+            {
+                return existenceLookup.Exists(packageId, version);
+            }
+
             return repository.FindPackage(packageId, version) != null;
         }
 
