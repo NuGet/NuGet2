@@ -200,7 +200,7 @@ namespace NuGet
             return source.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
         }
 
-        public static IQueryable<IPackage> FilterByPrerelease(this IQueryable<IPackage> packages, bool allowPrerelease)
+        public static IEnumerable<IPackage> FilterByPrerelease(this IEnumerable<IPackage> packages, bool allowPrerelease)
         {
             if (packages == null)
             {

@@ -40,7 +40,8 @@ namespace NuGet.Dialog.Test
                 _packages = packages;
             }
 
-            return _packages.AsQueryable().FilterByPrerelease(allowPrereleaseVersions);
+            return _packages.FilterByPrerelease(allowPrereleaseVersions)
+                            .AsQueryable();
         }
 
         public MockTreeNode(IVsExtensionsTreeNode parent, PackagesProviderBase provider, int numberOfPackages, bool collapseVersions, bool supportsPrereleasePackages = true)
