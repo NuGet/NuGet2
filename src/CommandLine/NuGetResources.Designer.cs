@@ -429,7 +429,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to By default, package restore is disabled. You need to enable it by setting the key &apos;packageRestore\enabled&apos; to &apos;true&apos; in nuget.config or setting the environment variable &apos;EnableNuGetPackageRestore&apos; to &apos;true&apos;..
+        ///   Looks up a localized string similar to Package restore is disabled by default. To give consent open the Visual Studio Options dialog, click on Package Manager node and check “Allow NuGet to download missing packages during build.”  You can also give consent by setting the environment variable &apos;EnableNuGetPackageRestore&apos; to &apos;true&apos;..
         /// </summary>
         internal static string InstallCommandPackageRestoreConsentNotFound {
             get {
