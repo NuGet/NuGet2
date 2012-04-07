@@ -16,6 +16,11 @@ namespace NuGet.VisualStudio
     // REVIEW: Make this internal 
     public static class ServiceLocator
     {
+        public static IServiceProvider PackageServiceProvider
+        {
+            get;
+            set;
+        }
 
         public static TService GetInstance<TService>() where TService : class
         {
@@ -26,13 +31,22 @@ namespace NuGet.VisualStudio
             }
 
             // then try to find the service as a global service, then try dte then try component model
-            return GetGlobalService<TService, TService>() ??
-                   GetDTEService<TService>() ??
-                   GetComponentModelService<TService>();
+            return GetDTEService<TService>() ??
+                   GetComponentModelService<TService>() ?? 
+                   GetGlobalService<TService, TService>();
         }
 
-        public static TInterface GetGlobalService<TService, TInterface>()
+        public static TInterface GetGlobalService<TService, TInterface>() where TInterface : class
         {
+            if (PackageServiceProvider != null) 
+            {
+                TInterface service = PackageServiceProvider.GetService(typeof(TService)) as TInterface;
+                if (service != null)
+                {
+                    return service;
+                }
+            }
+
             return (TInterface)Package.GetGlobalService(typeof(TService));
         }
 
