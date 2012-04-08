@@ -23,7 +23,6 @@ namespace NuGet.Options
     /// </remarks>
     public partial class PackageSourcesOptionsControl : UserControl
     {
-        private readonly PackageSource _officialSource = new PackageSource(NuGetConstants.DefaultFeedUrl, VsResources.OfficialSourceName);
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private PackageSource _activeSource;
         private BindingSource _allPackageSources;
@@ -70,7 +69,7 @@ namespace NuGet.Options
             MoveDownButton.Enabled = selectedSource != null &&
                                      PackageSourcesListBox.SelectedIndex < PackageSourcesListBox.Items.Count - 1;
             // do not allow deleting the official NuGet source
-            removeButton.Enabled = selectedSource != null && !selectedSource.Equals(_officialSource);
+            removeButton.Enabled = selectedSource != null && !selectedSource.IsOfficial;
         }
 
         private void MoveSelectedItem(int offset)
@@ -206,6 +205,17 @@ namespace NuGet.Options
             }
 
             var sourcesList = (IEnumerable<PackageSource>)_allPackageSources.List;
+
+            // Check to see if the name is an official package source name.
+            // If so, and if there is already an official package source, don't allow a second to be added.
+            var isOfficialName = name.Equals(VsResources.OfficialSourceName, StringComparison.CurrentCultureIgnoreCase)
+                || name.Equals(VsResources.VisualStudioExpressForWindows8SourceName, StringComparison.CurrentCultureIgnoreCase);
+            if (isOfficialName && sourcesList.Any(packageSource => packageSource.IsOfficial))
+            {
+                MessageHelper.ShowWarningMessage(Resources.ShowWarning_OfficialSourceName, Resources.ShowWarning_Title);
+                SelectAndFocus(NewPackageSource);
+                return TryAddSourceResults.InvalidSource;
+            }
 
             // check to see if name has already been added
             // also make sure it's not the same as the aggregate source ('All')

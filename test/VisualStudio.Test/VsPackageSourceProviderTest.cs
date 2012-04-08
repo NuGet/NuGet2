@@ -14,7 +14,7 @@ namespace NuGet.VisualStudio.Test
             // Arrange
             var userSettings = new Mock<ISettings>();
             var packageSourceProvider = CreateDefaultSourceProvider(userSettings.Object);
-            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider);
+            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider, new Mock<IVsShellInfo>().Object);
 
             // Act
             var sources = provider.LoadPackageSources().ToList();
@@ -32,7 +32,7 @@ namespace NuGet.VisualStudio.Test
             userSettings.Setup(s => s.GetValues("packageSources"))
                     .Returns(new[] { new KeyValuePair<string, string>("NuGet official package source", "https://go.microsoft.com/fwlink/?LinkID=206669") });
             var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
-            var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider);
+            var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
 
             // Act
             var sources = provider.LoadPackageSources().ToList();
@@ -50,7 +50,7 @@ namespace NuGet.VisualStudio.Test
             userSettings.Setup(s => s.GetValues("packageSources"))
                         .Returns(new[] { new KeyValuePair<string, string>("NuGet official package source", "https://go.microsoft.com/fwlink/?LinkID=230477") });
             var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
-            var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider);
+            var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
 
             // Act
             var sources = provider.LoadPackageSources().ToList();
@@ -72,7 +72,7 @@ namespace NuGet.VisualStudio.Test
             userSettings.Setup(s => s.GetValues("disabledPackageSources"))
                         .Returns(new[] { new KeyValuePair<string, string>("NuGet official package source", "true") });
 
-            var provider = new VsPackageSourceProvider(userSettings.Object);
+            var provider = new VsPackageSourceProvider(userSettings.Object, new Mock<IVsShellInfo>().Object);
 
             // Act
             var sources = provider.LoadPackageSources().ToList();
@@ -96,7 +96,7 @@ namespace NuGet.VisualStudio.Test
             userSettings.Setup(s => s.GetValues("activePackageSource"))
                         .Returns(new[] { new KeyValuePair<string, string>("one", "onesource") });
 
-            var provider = new VsPackageSourceProvider(userSettings.Object);
+            var provider = new VsPackageSourceProvider(userSettings.Object, new Mock<IVsShellInfo>().Object);
 
             // Act
             var activeSource = provider.ActivePackageSource;
@@ -111,7 +111,7 @@ namespace NuGet.VisualStudio.Test
             // Arrange
             var userSettings = new Mock<ISettings>();
             var packageSourceProvider = CreateDefaultSourceProvider(userSettings.Object);
-            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider);
+            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider, new Mock<IVsShellInfo>().Object);
 
             // Act
             var sources = provider.LoadPackageSources().ToList();
@@ -128,7 +128,7 @@ namespace NuGet.VisualStudio.Test
             var settings = new Mock<ISettings>();
             settings.Setup(s => s.GetValue("activePackageSource", "NuGet official package source"))
                     .Returns("https://go.microsoft.com/fwlink/?LinkID=206669");
-            var provider = new VsPackageSourceProvider(settings.Object);
+            var provider = new VsPackageSourceProvider(settings.Object, new Mock<IVsShellInfo>().Object);
 
             // Act
             PackageSource activePackageSource = provider.ActivePackageSource;
@@ -147,7 +147,7 @@ namespace NuGet.VisualStudio.Test
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
             packageSourceProvider.Setup(s => s.LoadPackageSources())
                                  .Returns(new[] { new PackageSource("source", "name"), new PackageSource("source1", "name1") });
-            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object);
+            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, new Mock<IVsShellInfo>().Object);
 
             // Act
             provider.ActivePackageSource = new PackageSource("source", "name");
@@ -162,7 +162,7 @@ namespace NuGet.VisualStudio.Test
             // Arrange
             var userSettings = new Mock<ISettings>();
             var packageSourceProvider = CreateDefaultSourceProvider(userSettings.Object);
-            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider);
+            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider, new Mock<IVsShellInfo>().Object);
 
             // Act
             ExceptionAssert.ThrowsArgumentException(() => provider.ActivePackageSource = new PackageSource("a", "a"), "value",
@@ -175,7 +175,7 @@ namespace NuGet.VisualStudio.Test
             // Arrange
             var userSettings = new Mock<ISettings>();
             var packageSourceProvider = CreateDefaultSourceProvider(userSettings.Object);
-            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider);
+            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider, new Mock<IVsShellInfo>().Object);
 
             // Act
             var sources = provider.LoadPackageSources().ToList();
@@ -183,6 +183,184 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Equal(1, sources.Count);
             Assert.Equal("NuGet official package source", sources[0].Name);
+        }
+
+        [Fact]
+        public void GetActivePackageSourceWillSwapInTheWindows8ExpressSourceWhenRunningWindows8Express()
+        {
+            // Arrange
+            var userSettings = new Mock<ISettings>();
+            userSettings.Setup(_ => _.GetValues(It.IsAny<string>())).Returns(new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("NuGet official package source", "https://nuget.org/api/v2/")
+            });
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            var vsShellInfo = new Mock<IVsShellInfo>();
+            vsShellInfo.Setup(_ => _.IsVisualStudioExpressForWindows8).Returns(true);
+            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
+
+            // Act
+            var source = provider.ActivePackageSource;
+
+            // Assert
+            Assert.Equal("Visual Studio Express for Windows 8 official package source", source.Name);
+        }
+
+        [Fact]
+        public void GetActivePackageSourceWillNotSwapInTheWindows8ExpressSourceWhenNotRunningWindows8Express()
+        {
+            // Arrange
+            var userSettings = new Mock<ISettings>();
+            userSettings.Setup(_ => _.GetValues(It.IsAny<string>())).Returns(new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("NuGet official package source", "theActiveSource")
+            });
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            var vsShellInfo = new Mock<IVsShellInfo>();
+            vsShellInfo.Setup(_ => _.IsVisualStudioExpressForWindows8).Returns(false);
+            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
+
+            // Act
+            var source = provider.ActivePackageSource;
+
+            // Assert
+            Assert.Equal("NuGet official package source", source.Name);
+        }
+
+        [Fact]
+        public void SetActivePackageSourceWillSwapInTheDefaultSourceWhenRunningWindows8Express()
+        {
+            // Arrange
+            var userSettings = new Mock<ISettings>();
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            packageSourceProvider.Setup(_ => _.LoadPackageSources()).Returns(new[]
+            {
+                new PackageSource("theFirstSource", "theFirstFeed"),
+                new PackageSource("https://nuget.org/api/v2/", "NuGet official package source"),
+                new PackageSource("theThirdSource", "theThirdFeed"),
+            });
+            var vsShellInfo = new Mock<IVsShellInfo>();
+            vsShellInfo.Setup(_ => _.IsVisualStudioExpressForWindows8).Returns(true);
+            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
+
+            // Act
+            provider.ActivePackageSource = new PackageSource(NuGetConstants.VisualStudioExpressForWindows8FeedUrl, "Visual Studio Express for Windows 8 official package source");
+
+            // Assert
+            userSettings.Verify(_ => _.SetValue(It.IsAny<string>(), "NuGet official package source", It.IsAny<string>()));
+        }
+
+        [Fact]
+        public void SetActivePackageSourceWillNotSwapInTheDefaultSourceWhenNotRunningWindows8Express()
+        {
+            // Arrange
+            var userSettings = new Mock<ISettings>();
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            packageSourceProvider.Setup(_ => _.LoadPackageSources()).Returns(new[]
+            {
+                new PackageSource("theFirstSource", "theFirstFeed"),
+                new PackageSource("https://nuget.org/api/v2/curated-feeds/express-for-windows8/", "Visual Studio Express for Windows 8 official package source"),
+                new PackageSource("theThirdSource", "theThirdFeed"),
+            });
+            var vsShellInfo = new Mock<IVsShellInfo>();
+            vsShellInfo.Setup(_ => _.IsVisualStudioExpressForWindows8).Returns(false);
+            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
+
+            // Act
+            provider.ActivePackageSource = new PackageSource(NuGetConstants.VisualStudioExpressForWindows8FeedUrl, "Visual Studio Express for Windows 8 official package source");
+
+            // Assert
+            userSettings.Verify(_ => _.SetValue(It.IsAny<string>(), "Visual Studio Express for Windows 8 official package source", It.IsAny<string>()));
+        }
+
+        [Fact]
+        public void LoadPackageSourcesWillSwapInTheWindows8SourceForTheDefaultSourceWhenRunningWindows8Express()
+        {
+            // Arrange
+            var userSettings = new Mock<ISettings>();
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            packageSourceProvider.Setup(_ => _.LoadPackageSources()).Returns(new[]
+            {
+                new PackageSource("theFirstSource", "theFirstFeed"),
+                new PackageSource("https://nuget.org/api/v2/", "NuGet official package source"),
+                new PackageSource("theThirdSource", "theThirdFeed"),
+            });
+            var vsShellInfo = new Mock<IVsShellInfo>();
+            vsShellInfo.Setup(_ => _.IsVisualStudioExpressForWindows8).Returns(true);
+            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
+
+            // Act
+            var sources = provider.LoadPackageSources();
+
+            // Assert
+            Assert.Equal("Visual Studio Express for Windows 8 official package source", sources.ElementAt(1).Name);
+        }
+
+        [Fact]
+        public void LoadPackageSourcesWillNotSwapInTheWindows8SourceForTheDefaultSourceWhenNotRunningWindows8Express()
+        {
+            // Arrange
+            var userSettings = new Mock<ISettings>();
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            packageSourceProvider.Setup(_ => _.LoadPackageSources()).Returns(new[]
+            {
+                new PackageSource("theFirstSource", "theFirstFeed"),
+                new PackageSource("https://nuget.org/api/v2/", "NuGet official package source"),
+                new PackageSource("theThirdSource", "theThirdFeed"),
+            });
+            var vsShellInfo = new Mock<IVsShellInfo>();
+            vsShellInfo.Setup(_ => _.IsVisualStudioExpressForWindows8).Returns(false);
+            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
+
+            // Act
+            var sources = provider.LoadPackageSources();
+
+            // Assert
+            Assert.Equal("NuGet official package source", sources.ElementAt(1).Name);
+        }
+
+        [Fact]
+        public void SavePackageSourcesWillSwapInTheDefaultFeedForTheWindows8ExpressFeedWhenRunningWindows8Express()
+        {
+            // Arrange
+            var userSettings = new Mock<ISettings>();
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            var vsShellInfo = new Mock<IVsShellInfo>();
+            vsShellInfo.Setup(_ => _.IsVisualStudioExpressForWindows8).Returns(true);
+            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
+
+            // Act
+            provider.SavePackageSources(new[]
+            {
+                new PackageSource("theFirstSource", "theFirstFeed"),
+                new PackageSource("https://nuget.org/api/v2/curated-feeds/express-for-windows8/", "Visual Studio Express for Windows 8 official package source"){ IsOfficial = true },
+                new PackageSource("theThirdSource", "theThirdFeed"),
+            });
+
+            // Assert
+            packageSourceProvider.Verify(_ => _.SavePackageSources(It.Is<IEnumerable<PackageSource>>(packageSources => packageSources.ElementAt(1).Name == "NuGet official package source")));
+        }
+
+        [Fact]
+        public void SavePackageSourcesWillNotSwapInTheDefaultFeedForTheWindows8ExpressFeedWhenNotRunningWindows8Express()
+        {
+            // Arrange
+            var userSettings = new Mock<ISettings>();
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            var vsShellInfo = new Mock<IVsShellInfo>();
+            vsShellInfo.Setup(_ => _.IsVisualStudioExpressForWindows8).Returns(false);
+            var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
+
+            // Act
+            provider.SavePackageSources(new[]
+            {
+                new PackageSource("theFirstSource", "theFirstFeed"),
+                new PackageSource("https://nuget.org/api/v2/curated-feeds/express-for-windows8/", "Visual Studio Express for Windows 8 official package source"){ IsOfficial = true },
+                new PackageSource("theThirdSource", "theThirdFeed"),
+            });
+
+            // Assert
+            packageSourceProvider.Verify(_ => _.SavePackageSources(It.Is<IEnumerable<PackageSource>>(packageSources => packageSources.ElementAt(1).Name == "Visual Studio Express for Windows 8 official package source")));
         }
 
         private static void AssertPackageSource(PackageSource ps, string name, string source)

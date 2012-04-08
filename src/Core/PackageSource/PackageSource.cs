@@ -12,6 +12,8 @@ namespace NuGet
         [DataMember]
         public string Source { get; private set; }
 
+        public bool IsOfficial { get; set; }
+
         public bool IsEnabled { get; set; }
 
         public string UserName { get; set; }
@@ -29,6 +31,11 @@ namespace NuGet
         }
 
         public PackageSource(string source, string name, bool isEnabled)
+            : this(source, name, isEnabled, isOfficial: false)
+        {
+        }
+
+        public PackageSource(string source, string name, bool isEnabled, bool isOfficial)
         {
             if (source == null)
             {
@@ -43,6 +50,7 @@ namespace NuGet
             Name = name;
             Source = source;
             IsEnabled = isEnabled;
+            IsOfficial = isOfficial;
         }
 
         public bool Equals(PackageSource other)
@@ -78,7 +86,7 @@ namespace NuGet
 
         public PackageSource Clone()
         {
-            return new PackageSource(Source, Name, IsEnabled) { UserName = UserName, Password = Password };
+            return new PackageSource(Source, Name, IsEnabled, IsOfficial) { UserName = UserName, Password = Password };
         }
     }
 }

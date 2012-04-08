@@ -66,7 +66,8 @@ namespace NuGet
                                                string src = p.Value;
                                                NetworkCredential creds = ReadCredential(name);
 
-                                               return new PackageSource(src, name, isEnabled: !disabledSources.Contains(name))
+                                               // We always set the isOfficial bit to false here, as Core doesn't have the concept of an official package source.
+                                               return new PackageSource(src, name, isEnabled: !disabledSources.Contains(name), isOfficial: false)
                                                {
                                                    UserName = creds != null ? creds.UserName : null,
                                                    Password = creds != null ? creds.Password : null
