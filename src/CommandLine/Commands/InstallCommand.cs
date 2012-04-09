@@ -283,23 +283,18 @@ namespace NuGet.Commands
             bool created;
             using (var mutex = new Mutex(initiallyOwned: true, name: name, createdNew: out created))
             {
-                // We need to ensure only one instance of the executable performs the install. All other instances need to wait 
-                // for the package to be installed. We'd cap the waiting duration so that other instances aren't waiting indefinitely.
-                if (created)
+                try
                 {
-                    try
+                    // We need to ensure only one instance of the executable performs the install. All other instances need to wait 
+                    // for the package to be installed. We'd cap the waiting duration so that other instances aren't waiting indefinitely.
+                    if (created || mutex.WaitOne())
                     {
                         action();
                     }
-                    finally
-                    {
-                        mutex.ReleaseMutex();
-                    }
                 }
-                else
+                finally
                 {
-                    // 
-                    mutex.WaitOne(TimeSpan.FromSeconds(30));
+                    mutex.ReleaseMutex();
                 }
             }
         }
