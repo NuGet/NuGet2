@@ -60,8 +60,8 @@ namespace NuGet.Commands
         }
 
         [ImportingConstructor]
-        public InstallCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider, ISettings settings)
-            : this(packageRepositoryFactory, sourceProvider, settings, MachineCache.Default)
+        public InstallCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider)
+            : this(packageRepositoryFactory, sourceProvider, Settings.LoadDefaultSettings(), MachineCache.Default)
         {
         }
 
@@ -100,8 +100,6 @@ namespace NuGet.Commands
             // Otherwise, treat the first argument as a package Id
             if (Arguments.Count == 0 || Path.GetFileName(Arguments[0]).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
             {
-                CheckForPackageRestoreConsent();
-
                 Prerelease = true;
                 var configFilePath = Arguments.Count == 0 ? Constants.PackageReferenceFile : Path.GetFullPath(Arguments[0]);
                 // By default the PackageReferenceFile does not throw if the file does not exist at the specified path.
@@ -123,10 +121,9 @@ namespace NuGet.Commands
             }
         }
 
-        private void CheckForPackageRestoreConsent()
+        private static void CheckForPackageRestoreConsent(PackageRestoreConsent packageRestore)
         {
-            var packageRestore = new PackageRestoreConsent(_configSettings);
-            if (!packageRestore.IsGranted)
+            if (packageRestore != null && !packageRestore.IsGranted)
             {
                 throw new InvalidOperationException(NuGetResources.InstallCommandPackageRestoreConsentNotFound);
             }
@@ -154,6 +151,8 @@ namespace NuGet.Commands
             var packageReferences = file.GetPackageReferences().ToList();
             IPackageManager packageManager = CreatePackageManager(fileSystem);
 
+            var packageRestore = new PackageRestoreConsent(_configSettings);
+
             bool installedAny = false;
             foreach (var package in packageReferences)
             {
@@ -169,7 +168,7 @@ namespace NuGet.Commands
                 }
 
                 // Note that we ignore dependencies here because packages.config already contains the full closure
-                installedAny |= InstallPackage(packageManager, package.Id, package.Version, ignoreDependencies: true);
+                installedAny |= InstallPackage(packageManager, package.Id, package.Version, ignoreDependencies: true, packageRestoreConsent: packageRestore);
             }
 
             if (!installedAny && packageReferences.Any())
@@ -178,7 +177,12 @@ namespace NuGet.Commands
             }
         }
 
-        internal bool InstallPackage(IPackageManager packageManager, string packageId, SemanticVersion version, bool ignoreDependencies)
+        private bool InstallPackage(
+            IPackageManager packageManager, 
+            string packageId, 
+            SemanticVersion version, 
+            bool ignoreDependencies, 
+            PackageRestoreConsent packageRestoreConsent = null)
         {
             if (!AllowMultipleVersions)
             {
@@ -192,6 +196,8 @@ namespace NuGet.Commands
                     }
                     else if (packageManager.SourceRepository.Exists(packageId, version))
                     {
+                        CheckForPackageRestoreConsent(packageRestoreConsent);
+
                         // If the package is already installed, but
                         // (a) the version we require is different from the one that is installed, 
                         // (b) side-by-side is disabled
@@ -212,6 +218,9 @@ namespace NuGet.Commands
                     return false;
                 }
             }
+
+            CheckForPackageRestoreConsent(packageRestoreConsent);
+
             // During package restore with parallel build, multiple projects would try to write to disk simultaneously which results in write contentions.
             // We work around this issue by ensuring only one instance of the exe installs the package.
             var uniqueToken = GenerateUniqueToken(packageManager, packageId, version);
