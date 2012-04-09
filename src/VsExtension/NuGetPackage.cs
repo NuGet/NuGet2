@@ -61,7 +61,7 @@ namespace NuGet.Tools
 
         public NuGetPackage()
         {
-            ServiceLocator.PackageServiceProvider = this;
+            ServiceLocator.InitializePackageServiceProvider(this);
         }
 
         private IVsMonitorSelection VsMonitorSelection 
@@ -143,12 +143,11 @@ namespace NuGet.Tools
             Debug.Assert(_dte != null);
 
             // set default credential provider for the HttpClient
-            IVsWebProxy webProxy = (IVsWebProxy)GetService(typeof(SVsWebProxy));
+            var webProxy = (IVsWebProxy)GetService(typeof(SVsWebProxy));
             Debug.Assert(webProxy != null);
 
             var settings = Settings.LoadDefaultSettings();
             var packageSourceProvider = new PackageSourceProvider(settings);
-
             HttpClient.DefaultCredentialProvider = new SettingsCredentialProvider(new VSRequestCredentialProvider(webProxy), packageSourceProvider);
 
             // when NuGet loads, if the current solution has package 
