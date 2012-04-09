@@ -103,7 +103,7 @@ namespace NuGet.Tools
             // the <Import> element added.
             if (_packageRestoreManager.IsCurrentSolutionEnabledForRestore)
             {
-                _packageRestoreManager.EnableCurrentSolutionForRestore(quietMode: true);
+                _packageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: false);
             }
         }
 
@@ -243,7 +243,7 @@ namespace NuGet.Tools
 
         private void EnablePackagesRestore(object sender, EventArgs args)
         {
-            _packageRestoreManager.EnableCurrentSolutionForRestore(quietMode: false);
+            _packageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: true);
         }
 
         private void QueryStatusEnablePackagesRestore(object sender, EventArgs args)

@@ -148,7 +148,7 @@ namespace NuGet.VisualStudio.Test
             var packageRestore = CreateInstance(solutionManager: solutionManager.Object);
 
             // Act & Assert
-            Exception exception = Assert.Throws<InvalidOperationException>(() => packageRestore.EnableCurrentSolutionForRestore(quietMode: true));
+            Exception exception = Assert.Throws<InvalidOperationException>(() => packageRestore.EnableCurrentSolutionForRestore(fromActivation: false));
             Assert.Equal("The current environment does not have a solution loaded.", exception.Message);
         }
 
@@ -217,7 +217,7 @@ namespace NuGet.VisualStudio.Test
                 defaultSettings: defaultAppSettings.Object);
 
             // Act 
-            packageRestore.EnableCurrentSolutionForRestore(quietMode: true);
+            packageRestore.EnableCurrentSolutionForRestore(fromActivation: false);
 
             // Assert
 
@@ -235,9 +235,9 @@ namespace NuGet.VisualStudio.Test
             var settings = new Settings(nugetFolderFileSystem);
             Assert.True(settings.IsSourceControlDisabled());
 
-            // verify that package restore consent is set
+            // verify that package restore consent is not set
             defaultAppSettings.Verify(
-                s => s.SetValue("packageRestore", "enabled", It.Is<string>(v => v == "true" || v == "1")), Times.Once());
+                s => s.SetValue("packageRestore", "enabled", It.Is<string>(v => v == "true" || v == "1")), Times.Never());
 
             // clean up
             Directory.Delete(tempSolutionPath, recursive: true);
@@ -605,7 +605,7 @@ namespace NuGet.VisualStudio.Test
                 packageSourceProvider: packageSourceProvider.Object);
 
             // Act 
-            packageRestore.EnableCurrentSolutionForRestore(quietMode: true);
+            packageRestore.EnableCurrentSolutionForRestore(fromActivation: false);
 
             // Assert
             var cachePackages = localCache.GetPackages().ToList();
@@ -697,7 +697,7 @@ namespace NuGet.VisualStudio.Test
                 packageSourceProvider: packageSourceProvider.Object);
 
             // Act 
-            packageRestore.EnableCurrentSolutionForRestore(quietMode: true);
+            packageRestore.EnableCurrentSolutionForRestore(fromActivation: false);
 
             // Assert
             packageA.Verify(p => p.GetFiles(), Times.Never());
