@@ -175,6 +175,9 @@ namespace NuGet.VisualStudio.Test
             var defaultAppSettings = new Mock<ISettings>();
             defaultAppSettings.Setup(s => s.GetValue("packageRestore", "enabled")).Returns("false");
 
+            var defaultAppSettingsProvider = new Mock<ISettingsProvider>();
+            defaultAppSettingsProvider.Setup(d => d.LoadUserSettings()).Returns(defaultAppSettings.Object);
+
             // setup DTE
             var dte = new Mock<DTE>();
 
@@ -214,7 +217,7 @@ namespace NuGet.VisualStudio.Test
                 fileSystemProvider.Object,
                 packageRepositoryFactory.Object, 
                 packageSourceProvider: packageSourceProvider.Object,
-                defaultSettings: defaultAppSettings.Object);
+                defaultSettingsProvider: defaultAppSettingsProvider.Object);
 
             // Act 
             packageRestore.EnableCurrentSolutionForRestore(fromActivation: false);
@@ -716,7 +719,7 @@ namespace NuGet.VisualStudio.Test
             IVsPackageManagerFactory packageManagerFactory = null,
             IPackageRepository localCache = null,
             IPackageSourceProvider packageSourceProvider = null,
-            ISettings defaultSettings = null)
+            ISettingsProvider defaultSettingsProvider = null)
         {
 
             if (dte == null)
@@ -775,9 +778,9 @@ namespace NuGet.VisualStudio.Test
                 packageSourceProvider = new Mock<IPackageSourceProvider>().Object;
             }
 
-            if (defaultSettings == null)
+            if (defaultSettingsProvider == null)
             {
-                defaultSettings = new Mock<ISettings>().Object;
+                defaultSettingsProvider = new Mock<ISettingsProvider>().Object;
             }
 
             return new PackageRestoreManager(
@@ -790,7 +793,7 @@ namespace NuGet.VisualStudio.Test
                 new VsPackageInstallerEvents(),
                 localCache,
                 waitDialogFactory,
-                defaultSettings);
+                defaultSettingsProvider);
         }
 
         private string CreateTempFolder()

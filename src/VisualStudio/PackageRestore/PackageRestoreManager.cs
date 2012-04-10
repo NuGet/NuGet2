@@ -29,7 +29,7 @@ namespace NuGet.VisualStudio
         private readonly IPackageRepository _localCacheRepository;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
         private readonly DTE _dte;
-        private readonly ISettings _defaultSettings;
+        private readonly ISettingsProvider _defaultSettingsProvider;
 
         [ImportingConstructor]
         public PackageRestoreManager(
@@ -48,7 +48,7 @@ namespace NuGet.VisualStudio
                  packageInstallerEvents,
                  MachineCache.Default,
                  ServiceLocator.GetGlobalService<SVsThreadedWaitDialogFactory, IVsThreadedWaitDialogFactory>(),
-                 Settings.LoadDefaultSettings())
+                 NuGetConfigSettingsProvider.Default)
         {
         }
 
@@ -62,7 +62,7 @@ namespace NuGet.VisualStudio
             IVsPackageInstallerEvents packageInstallerEvents,
             IPackageRepository localCacheRepository,
             IVsThreadedWaitDialogFactory waitDialogFactory,
-            ISettings defaultSettings)
+            ISettingsProvider defaultSettingsProvider)
         {
 
             Debug.Assert(solutionManager != null);
@@ -74,7 +74,7 @@ namespace NuGet.VisualStudio
             _waitDialogFactory = waitDialogFactory;
             _packageManagerFactory = packageManagerFactory;
             _localCacheRepository = localCacheRepository;
-            _defaultSettings = defaultSettings;
+            _defaultSettingsProvider = defaultSettingsProvider;
             _solutionManager.ProjectAdded += OnProjectAdded;
             _solutionManager.SolutionOpened += OnSolutionOpenedOrClosed;
             _solutionManager.SolutionClosed += OnSolutionOpenedOrClosed;
@@ -245,7 +245,7 @@ namespace NuGet.VisualStudio
 
         private void SetPackageRestoreConsent()
         {
-            var consent = new PackageRestoreConsent(_defaultSettings);
+            var consent = new PackageRestoreConsent(_defaultSettingsProvider.LoadUserSettings());
             if (!consent.IsGranted)
             {
                 consent.IsGranted = true;

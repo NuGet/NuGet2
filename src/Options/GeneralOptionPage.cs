@@ -25,6 +25,12 @@ namespace NuGet.Options
             }
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            GeneralControl.OnClosed();
+            base.OnClosed(e);
+        }
+
         protected override void OnActivate(CancelEventArgs e)
         {
             base.OnActivate(e);

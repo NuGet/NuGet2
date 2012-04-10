@@ -55,7 +55,7 @@ namespace NuGet
                 }
                 else
                 {
-                    _settings.DeleteValue(PackageRestoreSection, PackageRestoreConsentKey);
+                    _settings.DeleteSection(PackageRestoreSection);
                 }
             }
         }

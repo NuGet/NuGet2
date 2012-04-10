@@ -102,5 +102,39 @@ namespace NuGet.Test
             // Assert
             Assert.True(isGranted);
         }
+
+        [Fact]
+        public void SettingIsGrantedToFalseDeleteTheSectionInConfigFile()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetValue("packageRestore", "enabled")).Returns("true");
+            var environmentReader = new Mock<IEnvironmentVariableReader>();
+
+            var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
+
+            // Act
+            packageRestore.IsGranted = false;
+
+            // Assert
+            settings.Verify(s => s.DeleteSection("packageRestore"), Times.Once());
+        }
+
+        [Fact]
+        public void SettingIsGrantedToTrueSetTheFlagInConfigFile()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetValue("packageRestore", "enabled"));
+            var environmentReader = new Mock<IEnvironmentVariableReader>();
+
+            var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
+
+            // Act
+            packageRestore.IsGranted = true;
+
+            // Assert
+            settings.Verify(s => s.SetValue("packageRestore", "enabled", "true"), Times.Once());
+        }
     }
 }
