@@ -16,21 +16,6 @@ namespace NuGet.VisualStudio
     // REVIEW: Make this internal 
     public static class ServiceLocator
     {
-        public static void InitializePackageServiceProvider(IServiceProvider provider)
-        {
-            if (provider == null)
-            {
-                throw new ArgumentNullException("provider");
-            }
-
-            PackageServiceProvider = provider;
-        }
-
-        public static IServiceProvider PackageServiceProvider
-        {
-            get;
-            private set;
-        }
 
         public static TService GetInstance<TService>() where TService : class
         {
@@ -43,22 +28,13 @@ namespace NuGet.VisualStudio
             // then try to find the service as a component model, then try dte then lastly try global service
             // Per bug #2072, avoid calling GetGlobalService() from within the Initialize() method of NuGetPackage class. 
             // Doing so is illegal and may cause VS to hang. As a result of that, we defer calling GetGlobalService to the last option.
-            return GetDTEService<TService>() ??
-                   GetComponentModelService<TService>() ?? 
-                   GetGlobalService<TService, TService>();
+            return GetGlobalService<TService, TService>() ??
+                   GetDTEService<TService>() ??
+                   GetComponentModelService<TService>();
         }
 
-        public static TInterface GetGlobalService<TService, TInterface>() where TInterface : class
+        public static TInterface GetGlobalService<TService, TInterface>()
         {
-            if (PackageServiceProvider != null) 
-            {
-                TInterface service = PackageServiceProvider.GetService(typeof(TService)) as TInterface;
-                if (service != null)
-                {
-                    return service;
-                }
-            }
-
             return (TInterface)Package.GetGlobalService(typeof(TService));
         }
 

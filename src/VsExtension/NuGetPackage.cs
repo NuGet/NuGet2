@@ -61,68 +61,10 @@ namespace NuGet.Tools
 
         public NuGetPackage()
         {
-            ServiceLocator.InitializePackageServiceProvider(this);
-        }
-
-        private IVsMonitorSelection VsMonitorSelection 
-        {
-            get
-            {
-                if (_vsMonitorSelection == null)
-                {
-                    // get the UI context cookie for the debugging mode
-                    _vsMonitorSelection = (IVsMonitorSelection)GetService(typeof(IVsMonitorSelection));
-
-                    // get debugging context cookie
-                    Guid debuggingContextGuid = VSConstants.UICONTEXT_Debugging;
-                    _vsMonitorSelection.GetCmdUIContextCookie(ref debuggingContextGuid, out _debuggingContextCookie);
-
-                    // get the solution building cookie
-                    Guid solutionBuildingContextGuid = VSConstants.UICONTEXT_SolutionBuilding;
-                    _vsMonitorSelection.GetCmdUIContextCookie(ref solutionBuildingContextGuid, out _solutionBuildingContextCookie);
-                }
-                return _vsMonitorSelection;
-            }
-        }
-
-        private IConsoleStatus ConsoleStatus
-        {
-            get
-            {
-                if (_consoleStatus == null)
-                {
-                    _consoleStatus = ServiceLocator.GetInstance<IConsoleStatus>();
-                    Debug.Assert(_consoleStatus != null);
-                }
-
-                return _consoleStatus;
-            }
-        }
-
-        private IPackageRestoreManager PackageRestoreManager
-        {
-            get
-            {
-                if (_packageRestoreManager == null)
-                {
-                    _packageRestoreManager = ServiceLocator.GetInstance<IPackageRestoreManager>();
-                    Debug.Assert(_packageRestoreManager != null);
-                }
-                return _packageRestoreManager;
-            }
-        }
-
-        private ISolutionManager SolutionManager
-        {
-            get
-            {
-                if (_solutionManager == null)
-                {
-                    _solutionManager = ServiceLocator.GetInstance<ISolutionManager>();
-                    Debug.Assert(_solutionManager != null);
-                }
-                return _solutionManager;
-            }
+            // TODO: We should be using the exported ISettings instead of doing this.
+            var settings = Settings.LoadDefaultSettings();
+            var packageSourceProvider = new PackageSourceProvider(settings);
+            HttpClient.DefaultCredentialProvider = new SettingsCredentialProvider(new VSRequestCredentialProvider(), packageSourceProvider);
         }
 
         /// <summary>
@@ -133,28 +75,33 @@ namespace NuGet.Tools
         {
             base.Initialize();
 
+            // get the UI context cookie for the debugging mode
+            _vsMonitorSelection = (IVsMonitorSelection)GetService(typeof(IVsMonitorSelection));
+            // get debugging context cookie
+            Guid debuggingContextGuid = VSConstants.UICONTEXT_Debugging;
+            _vsMonitorSelection.GetCmdUIContextCookie(ref debuggingContextGuid, out _debuggingContextCookie);
+
+            // get the solution building cookie
+            Guid solutionBuildingContextGuid = VSConstants.UICONTEXT_SolutionBuilding;
+            _vsMonitorSelection.GetCmdUIContextCookie(ref solutionBuildingContextGuid, out _solutionBuildingContextCookie);
+
+            _dte = ServiceLocator.GetInstance<DTE>();
+            Debug.Assert(_dte != null);
+            _consoleStatus = ServiceLocator.GetInstance<IConsoleStatus>();
+            Debug.Assert(_consoleStatus != null);
+            _packageRestoreManager = ServiceLocator.GetInstance<IPackageRestoreManager>();
+            Debug.Assert(_packageRestoreManager != null);
+            _solutionManager = ServiceLocator.GetInstance<ISolutionManager>();
+            Debug.Assert(_solutionManager != null);
+
             // Add our command handlers for menu (commands must exist in the .vsct file)
             AddMenuCommandHandlers();
-
-            // IMPORTANT: Do NOT do anything that can lead to a call to ServiceLocator.GetGlobalService(). 
-            // Doing so is illegal and may cause VS to hang.
-
-            _dte = (DTE)GetService(typeof(SDTE));
-            Debug.Assert(_dte != null);
-
-            // set default credential provider for the HttpClient
-            var webProxy = (IVsWebProxy)GetService(typeof(SVsWebProxy));
-            Debug.Assert(webProxy != null);
-
-            var settings = Settings.LoadDefaultSettings();
-            var packageSourceProvider = new PackageSourceProvider(settings);
-            HttpClient.DefaultCredentialProvider = new SettingsCredentialProvider(new VSRequestCredentialProvider(webProxy), packageSourceProvider);
 
             // when NuGet loads, if the current solution has package 
             // restore mode enabled, we make sure every thing is set up correctly.
             // For example, projects which were added outside of VS need to have
             // the <Import> element added.
-            if (PackageRestoreManager.IsCurrentSolutionEnabledForRestore)
+            if (_packageRestoreManager.IsCurrentSolutionEnabledForRestore)
             {
                 _packageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: false);
             }
@@ -230,13 +177,13 @@ namespace NuGet.Tools
 
         private void ShowManageLibraryPackageDialog(object sender, EventArgs e)
         {
-            if (VsMonitorSelection.GetIsSolutionNodeSelected())
+            if (_vsMonitorSelection.GetIsSolutionNodeSelected())
             {
                 ShowManageLibraryPackageDialog(null);
             }
             else
             {
-                Project project = VsMonitorSelection.GetActiveProject();
+                Project project = _vsMonitorSelection.GetActiveProject();
                 if (project != null && !project.IsUnloaded() && project.IsSupported())
                 {
                     ShowManageLibraryPackageDialog(project);
@@ -302,18 +249,18 @@ namespace NuGet.Tools
         private void QueryStatusEnablePackagesRestore(object sender, EventArgs args)
         {
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = SolutionManager.IsSolutionOpen && !PackageRestoreManager.IsCurrentSolutionEnabledForRestore;
-            command.Enabled = !ConsoleStatus.IsBusy;
+            command.Visible = _solutionManager.IsSolutionOpen && !_packageRestoreManager.IsCurrentSolutionEnabledForRestore;
+            command.Enabled = !_consoleStatus.IsBusy;
         }
 
         private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args)
         {
-            bool isSolutionSelected = VsMonitorSelection.GetIsSolutionNodeSelected();
+            bool isSolutionSelected = _vsMonitorSelection.GetIsSolutionNodeSelected();
 
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = SolutionManager.IsSolutionOpen && !IsIDEInDebuggingOrBuildingContext() && (isSolutionSelected || HasActiveLoadedSupportedProject);
+            command.Visible = _solutionManager.IsSolutionOpen && !IsIDEInDebuggingOrBuildingContext() && (isSolutionSelected || HasActiveLoadedSupportedProject);
             // disable the dialog menu if the console is busy executing a command;
-            command.Enabled = !ConsoleStatus.IsBusy;
+            command.Enabled = !_consoleStatus.IsBusy;
             if (command.Visible)
             {
                 command.Text = isSolutionSelected ? Resources.ManagePackageForSolutionLabel : Resources.ManagePackageLabel;
@@ -323,27 +270,27 @@ namespace NuGet.Tools
         private void BeforeQueryStatusForAddPackageForSolutionDialog(object sender, EventArgs args)
         {
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = SolutionManager.IsSolutionOpen && !IsIDEInDebuggingOrBuildingContext();
+            command.Visible = _solutionManager.IsSolutionOpen && !IsIDEInDebuggingOrBuildingContext();
             // disable the dialog menu if the console is busy executing a command;
-            command.Enabled = !ConsoleStatus.IsBusy;
+            command.Enabled = !_consoleStatus.IsBusy;
         }
 
         private void QueryStatusForVisualizer(object sender, EventArgs args)
         {
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = SolutionManager.IsSolutionOpen && IsVisualizerSupported;
+            command.Visible = _solutionManager.IsSolutionOpen && IsVisualizerSupported;
         }
 
         private bool IsIDEInDebuggingOrBuildingContext()
         {
             int pfActive;
-            int result = VsMonitorSelection.IsCmdUIContextActive(_debuggingContextCookie, out pfActive);
+            int result = _vsMonitorSelection.IsCmdUIContextActive(_debuggingContextCookie, out pfActive);
             if (result == VSConstants.S_OK && pfActive > 0)
             {
                 return true;
             }
 
-            result = VsMonitorSelection.IsCmdUIContextActive(_solutionBuildingContextCookie, out pfActive);
+            result = _vsMonitorSelection.IsCmdUIContextActive(_solutionBuildingContextCookie, out pfActive);
             if (result == VSConstants.S_OK && pfActive > 0)
             {
                 return true;
@@ -383,7 +330,7 @@ namespace NuGet.Tools
         {
             get
             {
-                Project project = VsMonitorSelection.GetActiveProject();
+                Project project = _vsMonitorSelection.GetActiveProject();
                 return project != null && !project.IsUnloaded() && project.IsSupported();
             }
         }

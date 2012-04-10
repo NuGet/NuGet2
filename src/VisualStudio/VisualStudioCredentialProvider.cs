@@ -9,6 +9,11 @@ namespace NuGet.VisualStudio
     {
         private readonly IVsWebProxy _webProxyService;
 
+        protected VisualStudioCredentialProvider()
+            : this(ServiceLocator.GetGlobalService<SVsWebProxy, IVsWebProxy>())
+        {
+        }
+
         protected VisualStudioCredentialProvider(IVsWebProxy webProxyService)
         {
             if (webProxyService == null)
