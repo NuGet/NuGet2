@@ -4,8 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace NuGet
 {
@@ -24,10 +22,10 @@ namespace NuGet
         public static bool Exists(this IPackageRepository repository, string packageId, SemanticVersion version)
         {
             var existenceLookup = repository as IFastExistenceLookup;
-            if (existenceLookup != null)
+            if (!String.IsNullOrEmpty(packageId) && (version != null) && (existenceLookup != null))
             {
                 return existenceLookup.Exists(packageId, version);
-            }
+            }   
 
             return repository.FindPackage(packageId, version) != null;
         }
@@ -56,11 +54,11 @@ namespace NuGet
         }
 
         public static IPackage FindPackage(
-            this IPackageRepository repository, 
-            string packageId, 
-            SemanticVersion version, 
-            IPackageConstraintProvider constraintProvider, 
-            bool allowPrereleaseVersions, 
+            this IPackageRepository repository,
+            string packageId,
+            SemanticVersion version,
+            IPackageConstraintProvider constraintProvider,
+            bool allowPrereleaseVersions,
             bool allowUnlisted)
         {
             if (repository == null)
@@ -190,10 +188,10 @@ namespace NuGet
         }
 
         public static IEnumerable<IPackage> FindPackages(
-            this IPackageRepository repository, 
-            string packageId, 
-            IVersionSpec versionSpec, 
-            bool allowPrereleaseVersions, 
+            this IPackageRepository repository,
+            string packageId,
+            IVersionSpec versionSpec,
+            bool allowPrereleaseVersions,
             bool allowUnlisted)
         {
             if (repository == null)
@@ -225,10 +223,10 @@ namespace NuGet
         }
 
         public static IPackage FindPackage(
-            this IPackageRepository repository, 
-            string packageId, 
-            IVersionSpec versionSpec, 
-            bool allowPrereleaseVersions, 
+            this IPackageRepository repository,
+            string packageId,
+            IVersionSpec versionSpec,
+            bool allowPrereleaseVersions,
             bool allowUnlisted)
         {
             return repository.FindPackages(packageId, versionSpec, allowPrereleaseVersions, allowUnlisted).FirstOrDefault();
@@ -297,10 +295,10 @@ namespace NuGet
         }
 
         internal static IPackage ResolveDependencyCore(
-            this IPackageRepository repository, 
+            this IPackageRepository repository,
             PackageDependency dependency,
-            IPackageConstraintProvider constraintProvider, 
-            bool allowPrereleaseVersions, 
+            IPackageConstraintProvider constraintProvider,
+            bool allowPrereleaseVersions,
             bool preferListedPackages)
         {
             if (repository == null)
@@ -476,8 +474,8 @@ namespace NuGet
         }
 
         private static IEnumerable<IPackage> FilterPackagesByConstraints(
-            IPackageConstraintProvider constraintProvider, 
-            IEnumerable<IPackage> packages, 
+            IPackageConstraintProvider constraintProvider,
+            IEnumerable<IPackage> packages,
             string packageId,
             bool allowPrereleaseVersions)
         {
