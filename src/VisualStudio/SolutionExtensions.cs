@@ -24,7 +24,10 @@ namespace NuGet.VisualStudio
             var projects = new Stack<Project>();
             foreach (Project project in solution.Projects)
             {
-                projects.Push(project);
+                if (!project.IsExplicitlyUnsupported())
+                {
+                    projects.Push(project);
+                }
             }
 
             while (projects.Any())
@@ -57,9 +60,18 @@ namespace NuGet.VisualStudio
                 {
                     foreach (ProjectItem projectItem in projectItems)
                     {
-                        if (projectItem.SubProject != null)
+                        try
                         {
-                            projects.Push(projectItem.SubProject);
+                            if (projectItem.SubProject != null)
+                            {
+                                projects.Push(projectItem.SubProject);
+                            }
+                        }
+                        catch (NotImplementedException)
+                        {
+                            // Some project system don't implement the SubProject property,
+                            // just ignore those
+                            continue;
                         }
                     }
                 }

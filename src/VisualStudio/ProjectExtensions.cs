@@ -37,7 +37,8 @@ namespace NuGet.VisualStudio
                                                                           VsConstants.WixProjectTypeGuid };
 
         private static readonly HashSet<string> _unsupportedProjectTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
-                                                                            VsConstants.LightSwitchProjectTypeGuid
+                                                                            VsConstants.LightSwitchProjectTypeGuid,
+                                                                            VsConstants.InstallShieldLimitedEditionTypeGuid
                                                                         };
 
         private static readonly IEnumerable<string> _fileKinds = new[] { VsConstants.VsProjectItemKindPhysicalFile, VsConstants.VsProjectItemKindSolutionItem };
