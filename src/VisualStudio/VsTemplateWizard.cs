@@ -330,15 +330,29 @@ namespace NuGet.VisualStudio
 
         private void AddTemplateParameters(Dictionary<string, string> replacementsDictionary)
         {
-            if (_dte.Solution != null && _dte.Solution.IsOpen)
+            // add the $nugetpackagesfolder$ parameter which returns relative path to the solution's packages folder.
+            // this is used by project templates to include assembly references directly inside the template project file
+            // without relying on nuget to install the actual packages. 
+            string targetInstallDir;
+            if (replacementsDictionary.TryGetValue("$destinationdirectory$", out targetInstallDir))
             {
-                // add the $nugetpackagesfolder$ parameter which returns relative path to the solution's packages folder.
-                // this is used by project templates to include assembly references directly inside the template project file
-                // without relying on nuget to install the actual packages. 
-                string targetInstallDir;
-                if (replacementsDictionary.TryGetValue("$destinationdirectory$", out targetInstallDir))
+                string solutionRepositoryPath = null;
+                if (_dte.Solution != null && _dte.Solution.IsOpen)
                 {
-                    string solutionRepositoryPath = RepositorySettings.Value.RepositoryPath;
+                    solutionRepositoryPath = RepositorySettings.Value.RepositoryPath;
+                }
+                else
+                {
+                    // the $solutiondirectory$ parameter is available in VS11 RC and later
+                    string solutionDir;
+                    if (replacementsDictionary.TryGetValue("$solutiondirectory$", out solutionDir))
+                    {
+                        solutionRepositoryPath = Path.Combine(solutionDir, NuGet.VisualStudio.RepositorySettings.DefaultRepositoryDirectory);
+                    }
+                }
+
+                if (solutionRepositoryPath != null)
+                {
                     targetInstallDir = PathUtility.EnsureTrailingSlash(targetInstallDir);
                     replacementsDictionary["$nugetpackagesfolder$"] =
                         PathUtility.EnsureTrailingSlash(PathUtility.GetRelativePath(targetInstallDir,

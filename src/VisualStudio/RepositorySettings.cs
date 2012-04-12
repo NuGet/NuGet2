@@ -13,7 +13,7 @@ namespace NuGet.VisualStudio
     [Export(typeof(IRepositorySettings))]
     public class RepositorySettings : IRepositorySettings
     {
-        private const string DefaultRepositoryDirectory = "packages";
+        internal const string DefaultRepositoryDirectory = "packages";
         private const string NuGetConfig = "nuget.config";
 
         private string _configurationPath;
