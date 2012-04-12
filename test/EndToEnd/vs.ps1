@@ -520,5 +520,5 @@ function Enable-PackageRestore {
 
     $componentService = Get-VSComponentModel
     $packageRestoreManager = $componentService.GetService([NuGet.VisualStudio.IPackageRestoreManager])
-    $packageRestoreManager.EnableCurrentSolutionForRestore($true)
+    $packageRestoreManager.EnableCurrentSolutionForRestore($false)
 }
