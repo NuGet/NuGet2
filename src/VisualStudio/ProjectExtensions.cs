@@ -7,6 +7,8 @@ using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using EnvDTE;
 using Microsoft.Build.Evaluation;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using VSLangProj;
 using VsWebSite;
@@ -62,19 +64,26 @@ namespace NuGet.VisualStudio
             // Traverse the path to get at the directory
             string[] pathParts = folderPath.Split(PathSeparatorChars, StringSplitOptions.RemoveEmptyEntries);
 
-            ProjectItems cursor = project.ProjectItems;
-            string parentPath = project.GetFullPath();
+            // 'cursor' can contain a reference to either a Project instance or ProjectItem instance. 
+            // Both types have the ProjectItems property that we want to access.
+            dynamic cursor = project;
+
+            string fullPath = project.GetFullPath();
+            string folderRelativePath = String.Empty;
+
             foreach (string part in pathParts)
             {
-                cursor = GetOrCreateFolder(cursor, parentPath, part, createIfNotExists);
+                fullPath = Path.Combine(fullPath, part);
+                folderRelativePath = Path.Combine(folderRelativePath, part);
+
+                cursor = GetOrCreateFolder(project, cursor, fullPath, folderRelativePath, part, createIfNotExists);
                 if (cursor == null)
                 {
                     return null;
                 }
-                parentPath = Path.Combine(parentPath, part);
             }
 
-            return cursor;
+            return cursor.ProjectItems;
         }
 
         public static ProjectItem GetProjectItem(this Project project, string path)
@@ -332,37 +341,88 @@ namespace NuGet.VisualStudio
             return token == "*" ? @"(.*)" : @"(" + token + ")";
         }
 
-        private static ProjectItems GetOrCreateFolder(ProjectItems projectItems, string parentPath, string folderName, bool createIfNotExists)
+        // 'parentItem' can be either a Project or ProjectItem
+        private static ProjectItem GetOrCreateFolder(
+            Project project,
+            dynamic parentItem,
+            string fullPath,
+            string folderRelativePath,
+            string folderName,
+            bool createIfNotExists)
         {
-            if (projectItems == null)
+            if (parentItem == null)
             {
                 return null;
             }
 
             ProjectItem subFolder;
+
+            ProjectItems projectItems = parentItem.ProjectItems;
             if (projectItems.TryGetFolder(folderName, out subFolder))
             {
                 // Get the sub folder
-                return subFolder.ProjectItems;
+                return subFolder;
             }
             else if (createIfNotExists)
             {
-                // Get the full path of this folder on disk and add it
-                string fullPath = Path.Combine(parentPath, folderName);
+                // The JS Metro project system has a bug whereby calling AddFolder() to an existing folder that
+                // does not belong to the project will throw. To work around that, we have to manually include 
+                // it into our project.
+                if (project.IsJavaScriptProject() && Directory.Exists(fullPath))
+                {
+                    bool succeeded = IncludeExistingFolderToProject(project, folderRelativePath);
+                    if (succeeded)
+                    {
+                        // IMPORTANT: after including the folder into project, we need to get 
+                        // a new ProjectItems snapshot from the parent item. Otheriwse, reusing 
+                        // the old snapshot from above won't have access to the added folder.
+                        projectItems = parentItem.ProjectItems;
+                        if (projectItems.TryGetFolder(folderName, out subFolder))
+                        {
+                            // Get the sub folder
+                            return subFolder;
+                        }
+                    }
+                    return null;
+                }
 
                 try
                 {
-                    return projectItems.AddFromDirectory(fullPath).ProjectItems;
+                    return projectItems.AddFromDirectory(fullPath);
                 }
                 catch (NotImplementedException)
                 {
                     // This is the case for F#'s project system, we can't add from directory so we fall back
                     // to this impl
-                    return projectItems.AddFolder(folderName).ProjectItems;
+                    return projectItems.AddFolder(folderName);
                 }
             }
 
             return null;
+        }
+
+        private static bool IncludeExistingFolderToProject(Project project, string folderRelativePath)
+        {
+            IVsUIHierarchy projectHierarchy = (IVsUIHierarchy)project.ToVsHierarchy();
+
+            uint itemId;
+            int hr = projectHierarchy.ParseCanonicalName(folderRelativePath, out itemId);
+            if (!ErrorHandler.Succeeded(hr))
+            {
+                return false;
+            }
+
+            // Execute command to include the existing folder into project. Must do this on UI thread.
+            hr = ThreadHelper.Generic.Invoke(() =>
+                    projectHierarchy.ExecCommand(
+                        itemId,
+                        ref VsMenus.guidStandardCommandSet2K,
+                        (int)VSConstants.VSStd2KCmdID.INCLUDEINPROJECT,
+                        0,
+                        IntPtr.Zero,
+                        IntPtr.Zero));
+
+            return ErrorHandler.Succeeded(hr);
         }
 
         public static bool IsWebProject(this Project project)
