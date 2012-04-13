@@ -377,7 +377,7 @@ namespace NuGet.VisualStudio
         private IPackage GetPackage(IPackageRepository repository, string packageId)
         {
             // first, find the package from the remote repository
-            IPackage package = repository.FindPackage(packageId);
+            IPackage package = repository.FindPackage(packageId, version: null, allowPrereleaseVersions: true, allowUnlisted: false);
 
             bool fromCache = false;
 
