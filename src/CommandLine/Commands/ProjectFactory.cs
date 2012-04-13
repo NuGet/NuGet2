@@ -100,7 +100,7 @@ namespace NuGet.Commands
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to continue regardless of any error we encounter extracting metadata.")]
-        public PackageBuilder CreateBuilder()
+        public PackageBuilder CreateBuilder(string basePath)
         {
             BuildProject();
 
@@ -142,7 +142,7 @@ namespace NuGet.Commands
             }
 
             // If the package contains a nuspec file then use it for metadata
-            Manifest manifest = ProcessNuspec(builder);
+            Manifest manifest = ProcessNuspec(builder, basePath);
 
             // Remove the extra author
             if (builder.Authors.Count > 1)
@@ -525,7 +525,7 @@ namespace NuGet.Commands
             return PackagesFolder;
         }
 
-        private Manifest ProcessNuspec(PackageBuilder builder)
+        private Manifest ProcessNuspec(PackageBuilder builder, string basePath)
         {
             string nuspecFile = GetNuspec();
 
@@ -545,7 +545,7 @@ namespace NuGet.Commands
 
                 if (manifest.Files != null)
                 {
-                    string basePath = Path.GetDirectoryName(nuspecFile);
+                    basePath = String.IsNullOrEmpty(basePath) ? Path.GetDirectoryName(nuspecFile) : basePath;
                     builder.PopulateFiles(basePath, manifest.Files);
                 }
 

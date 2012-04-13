@@ -337,7 +337,7 @@ namespace NuGet.Commands
             }
 
             // Create a builder for the main package as well as the sources/symbols package
-            PackageBuilder mainPackageBuilder = factory.CreateBuilder();
+            PackageBuilder mainPackageBuilder = factory.CreateBuilder(BasePath);
 
             // Build the main package
             IPackage package = BuildPackage(path, mainPackageBuilder);
@@ -352,7 +352,7 @@ namespace NuGet.Commands
             Console.WriteLine(NuGetResources.PackageCommandAttemptingToBuildSymbolsPackage, Path.GetFileName(path));
 
             factory.IncludeSymbols = true;
-            PackageBuilder symbolsBuilder = factory.CreateBuilder();
+            PackageBuilder symbolsBuilder = factory.CreateBuilder(BasePath);
             symbolsBuilder.Version = mainPackageBuilder.Version;
 
             // Get the file name for the sources package and build it
