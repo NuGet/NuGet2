@@ -56,9 +56,19 @@ namespace NuGet
             return GetRepositories().Any(r => r.Exists(packageId, version));
         }
 
-        public override void AddPackage(IPackage package)
+        public override bool Exists(string packageId, SemanticVersion version)
         {
-            base.AddPackage(package);
+            if (version != null)
+            {
+                // optimization: if we find the sub-directory with the name "id.version", consider it exists
+                string folderPath = packageId + "." + version.ToString();
+                if (FileSystem.DirectoryExists(folderPath))
+                {
+                    return true;
+                }
+            }
+
+            return FindPackage(packageId, version) != null;
         }
 
         public void AddPackageReferenceEntry(string packageId, SemanticVersion version)

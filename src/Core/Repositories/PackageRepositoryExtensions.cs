@@ -273,7 +273,9 @@ namespace NuGet
             }
 
             // Ignore the target framework if the repository doesn't support searching
-            return repository.GetPackages().Find(searchTerm).FilterByPrerelease(allowPrereleaseVersions);
+            return repository.GetPackages().Find(searchTerm)
+                                           .FilterByPrerelease(allowPrereleaseVersions)
+                                           .AsQueryable();
         }
 
         public static IPackage ResolveDependency(this IPackageRepository repository, PackageDependency dependency, bool allowPrereleaseVersions, bool preferListedPackages)

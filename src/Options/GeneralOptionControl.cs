@@ -10,7 +10,8 @@ namespace NuGet.Options
     {
         private readonly IRecentPackageRepository _recentPackageRepository;
         private readonly IProductUpdateSettings _productUpdateSettings;
-        private readonly PackageRestoreConsent _packageRestoreConsent;
+        private PackageRestoreConsent _packageRestoreConsent;
+        private bool _initialized;
 
         public GeneralOptionControl()
         {
@@ -21,9 +22,6 @@ namespace NuGet.Options
 
             _recentPackageRepository = ServiceLocator.GetInstance<IRecentPackageRepository>();
             Debug.Assert(_recentPackageRepository != null);
-
-            ISettings configSettings = ServiceLocator.GetInstance<ISettings>();
-            _packageRestoreConsent = new PackageRestoreConsent(configSettings);
 
             if (!VsVersionHelper.IsVisualStudio2010)
             {
@@ -40,15 +38,31 @@ namespace NuGet.Options
 
         internal void OnActivated()
         {
-            checkForUpdate.Checked = _productUpdateSettings.ShouldCheckForUpdate;
             browsePackageCacheButton.Enabled = clearPackageCacheButton.Enabled = Directory.Exists(MachineCache.Default.Source);
-            packageRestoreConsentCheckBox.Checked = _packageRestoreConsent.IsGranted;
+
+            if (!_initialized)
+            {
+                _packageRestoreConsent = new PackageRestoreConsent(Settings.LoadDefaultSettings());
+                packageRestoreConsentCheckBox.Checked = _packageRestoreConsent.IsGranted;
+
+                checkForUpdate.Checked = _productUpdateSettings.ShouldCheckForUpdate;
+            }
+
+            _initialized = true;
         }
 
         internal void OnApply()
         {
             _productUpdateSettings.ShouldCheckForUpdate = checkForUpdate.Checked;
+
+            _packageRestoreConsent = new PackageRestoreConsent(Settings.LoadDefaultSettings());
             _packageRestoreConsent.IsGranted = packageRestoreConsentCheckBox.Checked;
+        }
+
+        internal void OnClosed()
+        {
+            _initialized = false;
+            _packageRestoreConsent = null;
         }
 
         private void OnClearPackageCacheClick(object sender, EventArgs e)

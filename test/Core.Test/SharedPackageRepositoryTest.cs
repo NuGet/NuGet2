@@ -2,6 +2,7 @@
 using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test
 {
@@ -325,6 +326,21 @@ namespace NuGet.Test
             Assert.True(repository.Object.IsReferenced("A", new SemanticVersion("1.0")));
             Assert.True(repository.Object.IsReferenced("B", new SemanticVersion("1.0")));
             Assert.False(repository.Object.IsReferenced("C", new SemanticVersion("1.0")));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ExistsMethodChecksForFolderNameExistsAsOptimization(bool exists)
+        {
+            // Arrange
+            var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
+            fileSystem.Setup(m => m.DirectoryExists("A.1.0.0")).Returns(exists);
+            
+            var repository = new Mock<MockSharedRepository>(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object) { CallBase = true };
+
+            // Act && Assert
+            Assert.Equal(exists, repository.Object.Exists("A", new SemanticVersion("1.0.0")));
         }
 
         public class MockSharedRepository : SharedPackageRepository

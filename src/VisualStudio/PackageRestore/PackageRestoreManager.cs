@@ -29,7 +29,7 @@ namespace NuGet.VisualStudio
         private readonly IPackageRepository _localCacheRepository;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
         private readonly DTE _dte;
-        private readonly ISettings _defaultSettings;
+        private readonly ISettingsProvider _defaultSettingsProvider;
 
         [ImportingConstructor]
         public PackageRestoreManager(
@@ -48,7 +48,7 @@ namespace NuGet.VisualStudio
                  packageInstallerEvents,
                  MachineCache.Default,
                  ServiceLocator.GetGlobalService<SVsThreadedWaitDialogFactory, IVsThreadedWaitDialogFactory>(),
-                 Settings.LoadDefaultSettings())
+                 NuGetConfigSettingsProvider.Default)
         {
         }
 
@@ -62,7 +62,7 @@ namespace NuGet.VisualStudio
             IVsPackageInstallerEvents packageInstallerEvents,
             IPackageRepository localCacheRepository,
             IVsThreadedWaitDialogFactory waitDialogFactory,
-            ISettings defaultSettings)
+            ISettingsProvider defaultSettingsProvider)
         {
 
             Debug.Assert(solutionManager != null);
@@ -74,7 +74,7 @@ namespace NuGet.VisualStudio
             _waitDialogFactory = waitDialogFactory;
             _packageManagerFactory = packageManagerFactory;
             _localCacheRepository = localCacheRepository;
-            _defaultSettings = defaultSettings;
+            _defaultSettingsProvider = defaultSettingsProvider;
             _solutionManager.ProjectAdded += OnProjectAdded;
             _solutionManager.SolutionOpened += OnSolutionOpenedOrClosed;
             _solutionManager.SolutionClosed += OnSolutionOpenedOrClosed;
@@ -102,14 +102,14 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public void EnableCurrentSolutionForRestore(bool quietMode)
+        public void EnableCurrentSolutionForRestore(bool fromActivation)
         {
             if (!_solutionManager.IsSolutionOpen)
             {
                 throw new InvalidOperationException(VsResources.SolutionNotAvailable);
             }
 
-            if (!quietMode)
+            if (fromActivation)
             {
                 // if not in quiet mode, ask user for confirmation before proceeding
                 bool? result = MessageHelper.ShowQueryMessage(
@@ -138,6 +138,12 @@ namespace NuGet.VisualStudio
                     fIsCancelable: false,
                     fShowMarqueeProgress: true);
 
+                if (fromActivation)
+                {
+                    // only enable package restore consent if this is called as a result of user enabling package restore
+                    SetPackageRestoreConsent();
+                }
+
                 EnablePackageRestore();
             }
             catch (Exception ex)
@@ -151,7 +157,7 @@ namespace NuGet.VisualStudio
                 waitDialog.EndWaitDialog(out canceled);
             }
 
-            if (!quietMode)
+            if (fromActivation)
             {
                 if (exception != null)
                 {
@@ -229,7 +235,6 @@ namespace NuGet.VisualStudio
         private void EnablePackageRestore()
         {
             EnsureNuGetBuild();
-            SetPackageRestoreConsent();
 
             IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager();
             foreach (Project project in _solutionManager.GetProjects())
@@ -240,7 +245,7 @@ namespace NuGet.VisualStudio
 
         private void SetPackageRestoreConsent()
         {
-            var consent = new PackageRestoreConsent(_defaultSettings);
+            var consent = new PackageRestoreConsent(_defaultSettingsProvider.LoadUserSettings());
             if (!consent.IsGranted)
             {
                 consent.IsGranted = true;

@@ -28,17 +28,38 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         }
 
         [Fact]
-        public void InstallCommandForPackageReferenceFileThrowsIfPackageRestoreNotAvailable()
+        public void InstallCommandForPackageReferenceFileDoesNotThrowIfThereIsNoPackageToInstall()
         {
             // Arrange
             var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"x:\test\packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+</packages>".AsStream());
 
-            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
-                                                        allowPackageRestore: false);
-            installCommand.Arguments.Add("packages.config");
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, allowPackageRestore: false);
+            installCommand.Arguments.Add(@"x:\test\packages.config");
+
+            // Act & Assert
+            installCommand.ExecuteCommand();
+        }
+
+        public void InstallCommandForPackageReferenceFileThrowIfThereIsPackageToInstallAndConsentIsNotGranted()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"x:\test\packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""Foo"" version=""1.0"" />
+  <package id=""Baz"" version=""0.7"" />
+</packages>");
+
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, allowPackageRestore: false);
+            installCommand.Arguments.Add(@"x:\test\packages.config");
 
             // Act & Assert
             Assert.Throws<InvalidOperationException>(() => installCommand.ExecuteCommand());
+            Assert.Equal(1, fileSystem.Paths.Count);
+            Assert.Equal(@"x:\test\packages.config", fileSystem.Paths.ElementAt(0).Key);
         }
 
         [Fact]

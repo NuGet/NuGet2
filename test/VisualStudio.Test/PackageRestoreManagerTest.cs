@@ -148,7 +148,7 @@ namespace NuGet.VisualStudio.Test
             var packageRestore = CreateInstance(solutionManager: solutionManager.Object);
 
             // Act & Assert
-            Exception exception = Assert.Throws<InvalidOperationException>(() => packageRestore.EnableCurrentSolutionForRestore(quietMode: true));
+            Exception exception = Assert.Throws<InvalidOperationException>(() => packageRestore.EnableCurrentSolutionForRestore(fromActivation: false));
             Assert.Equal("The current environment does not have a solution loaded.", exception.Message);
         }
 
@@ -174,6 +174,9 @@ namespace NuGet.VisualStudio.Test
             // default app settings
             var defaultAppSettings = new Mock<ISettings>();
             defaultAppSettings.Setup(s => s.GetValue("packageRestore", "enabled")).Returns("false");
+
+            var defaultAppSettingsProvider = new Mock<ISettingsProvider>();
+            defaultAppSettingsProvider.Setup(d => d.LoadUserSettings()).Returns(defaultAppSettings.Object);
 
             // setup DTE
             var dte = new Mock<DTE>();
@@ -214,10 +217,10 @@ namespace NuGet.VisualStudio.Test
                 fileSystemProvider.Object,
                 packageRepositoryFactory.Object, 
                 packageSourceProvider: packageSourceProvider.Object,
-                defaultSettings: defaultAppSettings.Object);
+                defaultSettingsProvider: defaultAppSettingsProvider.Object);
 
             // Act 
-            packageRestore.EnableCurrentSolutionForRestore(quietMode: true);
+            packageRestore.EnableCurrentSolutionForRestore(fromActivation: false);
 
             // Assert
 
@@ -235,9 +238,9 @@ namespace NuGet.VisualStudio.Test
             var settings = new Settings(nugetFolderFileSystem);
             Assert.True(settings.IsSourceControlDisabled());
 
-            // verify that package restore consent is set
+            // verify that package restore consent is not set
             defaultAppSettings.Verify(
-                s => s.SetValue("packageRestore", "enabled", It.Is<string>(v => v == "true" || v == "1")), Times.Once());
+                s => s.SetValue("packageRestore", "enabled", It.Is<string>(v => v == "true" || v == "1")), Times.Never());
 
             // clean up
             Directory.Delete(tempSolutionPath, recursive: true);
@@ -605,7 +608,7 @@ namespace NuGet.VisualStudio.Test
                 packageSourceProvider: packageSourceProvider.Object);
 
             // Act 
-            packageRestore.EnableCurrentSolutionForRestore(quietMode: true);
+            packageRestore.EnableCurrentSolutionForRestore(fromActivation: false);
 
             // Assert
             var cachePackages = localCache.GetPackages().ToList();
@@ -697,7 +700,7 @@ namespace NuGet.VisualStudio.Test
                 packageSourceProvider: packageSourceProvider.Object);
 
             // Act 
-            packageRestore.EnableCurrentSolutionForRestore(quietMode: true);
+            packageRestore.EnableCurrentSolutionForRestore(fromActivation: false);
 
             // Assert
             packageA.Verify(p => p.GetFiles(), Times.Never());
@@ -716,7 +719,7 @@ namespace NuGet.VisualStudio.Test
             IVsPackageManagerFactory packageManagerFactory = null,
             IPackageRepository localCache = null,
             IPackageSourceProvider packageSourceProvider = null,
-            ISettings defaultSettings = null)
+            ISettingsProvider defaultSettingsProvider = null)
         {
 
             if (dte == null)
@@ -775,9 +778,9 @@ namespace NuGet.VisualStudio.Test
                 packageSourceProvider = new Mock<IPackageSourceProvider>().Object;
             }
 
-            if (defaultSettings == null)
+            if (defaultSettingsProvider == null)
             {
-                defaultSettings = new Mock<ISettings>().Object;
+                defaultSettingsProvider = new Mock<ISettingsProvider>().Object;
             }
 
             return new PackageRestoreManager(
@@ -790,7 +793,7 @@ namespace NuGet.VisualStudio.Test
                 new VsPackageInstallerEvents(),
                 localCache,
                 waitDialogFactory,
-                defaultSettings);
+                defaultSettingsProvider);
         }
 
         private string CreateTempFolder()

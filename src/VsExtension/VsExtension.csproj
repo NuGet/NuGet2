@@ -76,11 +76,9 @@
     <None Include="Resources\nugetAbout.ico" />
     <Content Include="Resources\Package.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="Resources\PreviewImage.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="..\VsConsole\PowerShellHost\Scripts\NuGet.psd1">
       <Link>Modules\NuGet\NuGet.psd1</Link>

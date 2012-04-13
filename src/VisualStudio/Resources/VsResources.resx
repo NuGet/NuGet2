@@ -311,4 +311,7 @@ Packages installed into Website projects will not be restored during build. Cons
   <data name="TemplateWizard_RegistryKeyError" xml:space="preserve">
     <value>The project template is configured to use a Registry-provided package repository but there was an error accessing Registry key '{0}'.</value>
   </data>
+  <data name="VisualStudioExpressForWindows8SourceName" xml:space="preserve">
+    <value>Visual Studio Express for Windows 8 official package source</value>
+  </data>
 </root>
