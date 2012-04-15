@@ -65,7 +65,22 @@
         </RegexTransform>
     </ItemGroup>
     
-    <Target Name="Go" DependsOnTargets="CheckFxCop; UpdateVsixVersion; Build; ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyBootStrapperOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; BuildPackages">
+    <ItemGroup>
+        <TestProjects Include="$(NuGetTestRoot)\Dialog.Test\Dialog.Test.csproj" />
+        <TestProjects Include="$(NuGetTestRoot)\CommandLine.Test\CommandLine.Test.csproj" />
+        <TestProjects Include="$(NuGetTestRoot)\Core.Test\Core.Test.csproj" />
+        <TestProjects Include="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" />
+        <TestProjects Include="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" />
+        <TestProjects Include="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" />
+        <TestProjects Include="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" />
+        <TestProjects Include="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" />
+    </ItemGroup>
+    
+    
+    <Target Name="Go" 
+        DependsOnTargets="CheckFxCop; UpdateVsixVersion; RestorePackages; Build; 
+                                    ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyBootStrapperOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; 
+                                    CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; BuildPackages">
     </Target>
     
     <Target Name="CheckFxCop">
@@ -73,9 +88,23 @@
             Condition="!Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll') "
             Text="FxCop not found at $(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll. Cannot proceed" />
     </Target>
-
+    
     <Target Name="UpdateVsixVersion" Condition="'$(BUILD_NUMBER)' != ''">
         <RegexTransform Items="@(RegexTransform)" />
+    </Target>
+    
+    <Target Name="RestorePackages">
+        <MsBuild Projects="$(NuGetRoot)\src\CommandLine\CommandLine.csproj" 
+                   Condition=" !Exists('$(ExeBuildDirectory)\NuGet.exe') "/>
+          <ItemGroup>
+            <RestorePackageProjects Include="@(TestProjects)" />
+            <RestorePackageProjects Include="$(NuGetRoot)\test\Test.Utility\Test.Utility.csproj" />
+            <RestorePackageProjects Include="$(NuGetRoot)\src\Server\Server.csproj" />
+          </ItemGroup>
+          <MsBuild Projects="@(RestorePackageProjects)" 
+                     Targets="RestorePackages"
+                     Properties="NuGetExePath=$(ExeBuildDirectory)\NuGet.exe;NuGetRoot=$(NuGetRoot)" 
+                     BuildInParallel="false" />
     </Target>
 
     <Target Name="Build">
@@ -83,14 +112,9 @@
     </Target>
 
     <Target Name="RunTests">
-        <MSBuild Projects="$(NuGetTestRoot)\Dialog.Test\Dialog.Test.csproj" Targets="RunTests" BuildInParallel="true" />
-        <MSBuild Projects="$(NuGetTestRoot)\CommandLine.Test\CommandLine.Test.csproj" Targets="RunTests" BuildInParallel="true" />
-        <MSBuild Projects="$(NuGetTestRoot)\Core.Test\Core.Test.csproj" Targets="RunTests" BuildInParallel="true" />
-        <MSBuild Projects="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Targets="RunTests" BuildInParallel="true" />
-        <MSBuild Projects="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" Targets="RunTests" BuildInParallel="true" />
-        <MSBuild Projects="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" Targets="RunTests" BuildInParallel="true" />
-        <MSBuild Projects="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" Targets="RunTests" BuildInParallel="true" />
-        <MSBuild Projects="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" Targets="RunTests" BuildInParallel="true" />
+        <MsBuild Projects="@(TestProjects)" 
+                  Targets="RunTests" 
+                  BuildInParallel="false" />
     </Target>
     
     <Target Name="ReportFxCopResults">

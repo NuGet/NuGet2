@@ -39,6 +39,7 @@
         <Coverage>true</Coverage>
         <DefineConstants>$(DefineConstants);CODE_COVERAGE</DefineConstants> 
     </PropertyGroup>
-
+    
+    <Import Project="$(MsBuildThisFileDirectory)\NuGet.Restore.targets"/>
     <Import Project="$(AdditionalSettingsImport)" Condition="Exists('$(AdditionalSettingsImport)')" />
 </Project>
