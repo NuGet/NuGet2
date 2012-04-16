@@ -8,6 +8,7 @@
         <DockPanel Margin="0,4,0,6" LastChildFill="False">
             <TextBlock x:Name="StatusMessage" Text="{x:Static resx:VsResources.AskForRestoreMessage}" DockPanel.Dock="Left" TextOptions.TextFormattingMode="Display" VerticalAlignment="Center" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.InfoTextKey}}" Margin="5,0,5,0" />
             <Button x:Name="RestoreButton" DockPanel.Dock="Left" Content="{x:Static resx:VsResources.RestoreButtonLabel}" Click="OnRestoreLinkClick" Margin="5,0,0,0" Padding="8,2,8,2" />
+            <ProgressBar x:Name="ProgressBar" IsIndeterminate="True" Height="{Binding ActualHeight, ElementName=RestoreButton, Mode=OneWay}" DockPanel.Dock="Left" Width="170" Margin="5,0,0,0" />
         </DockPanel>
     </Border>
 </UserControl>

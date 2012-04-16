@@ -36,32 +36,51 @@ namespace NuGet.VisualStudio
             
             if (packagesMissing)
             {
-                RestoreButton.IsEnabled = true;
-                StatusMessage.Text = VsResources.AskForRestoreMessage;
+                ResetUI();
             }
         }
 
         private void OnRestoreLinkClick(object sender, RoutedEventArgs e)
         {
+            ShowProgressUI();
             RestorePackages();
         }
 
         private void RestorePackages()
         {
-            RestoreButton.IsEnabled = false;
-
             TaskScheduler uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
             _packageRestoreManager.RestoreMissingPackages().ContinueWith(
                 task =>
                 {
                     if (task.IsFaulted)
                     {
-                        // re-enable the Restore button to allow users to try again
-                        RestoreButton.IsEnabled = true;
-                        StatusMessage.Text = VsResources.PackageRestoreErrorTryAgain;
+                        ShowErrorUI();
+                        
                     }                    
                 }, 
                 uiScheduler);
+        }
+
+        private void ResetUI()
+        {
+            RestoreButton.Visibility = Visibility.Visible;
+            ProgressBar.Visibility = Visibility.Collapsed;
+            StatusMessage.Text = VsResources.AskForRestoreMessage;
+        }
+
+        private void ShowProgressUI()
+        {
+            RestoreButton.Visibility = Visibility.Collapsed;
+            ProgressBar.Visibility = Visibility.Visible;
+            StatusMessage.Text = VsResources.PackageRestoreProgressMessage;
+        }
+
+        private void ShowErrorUI()
+        {
+            // re-enable the Restore button to allow users to try again
+            RestoreButton.Visibility = Visibility.Visible;
+            ProgressBar.Visibility = Visibility.Collapsed;
+            StatusMessage.Text = VsResources.PackageRestoreErrorTryAgain;
         }
     }
 }
