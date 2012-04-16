@@ -22,12 +22,27 @@ namespace NuGet.Analysis.Rules
                 }
             }
 
-            return set.Where(IsInvalidFrameworkName).Select(CreatePackageIssue);
+            return set.Where(s => !IsValidFrameworkName(s) && !IsValidCultureName(package, s))
+                      .Select(CreatePackageIssue);
         }
 
-        private bool IsInvalidFrameworkName(string name)
+        private static bool IsValidFrameworkName(string name)
         {
-            return VersionUtility.ParseFrameworkName(name) == VersionUtility.UnsupportedFrameworkName;
+            return VersionUtility.ParseFrameworkName(name) != VersionUtility.UnsupportedFrameworkName;
+        }
+
+        private static bool IsValidCultureName(IPackage package, string name)
+        {
+            // starting from NuGet 1.8, we support localized packages, which 
+            // can have a culture folder under lib, e.g. lib\fr-FR\strings.resources.dll
+
+            if (String.IsNullOrEmpty(package.Language))
+            {
+                return false;
+            }
+
+            // the folder name is considered valid if it matches the package's Language property.
+            return name.Equals(package.Language, StringComparison.OrdinalIgnoreCase);
         }
 
         private PackageIssue CreatePackageIssue(string target)
