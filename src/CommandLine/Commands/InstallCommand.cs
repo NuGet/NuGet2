@@ -287,9 +287,13 @@ namespace NuGet.Commands
                 {
                     // We need to ensure only one instance of the executable performs the install. All other instances need to wait 
                     // for the package to be installed. We'd cap the waiting duration so that other instances aren't waiting indefinitely.
-                    if (created || mutex.WaitOne())
+                    if (created)
                     {
                         action();
+                    }
+                    else
+                    {
+                        mutex.WaitOne(TimeSpan.FromMinutes(2));
                     }
                 }
                 finally
