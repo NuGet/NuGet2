@@ -94,8 +94,10 @@
     </Target>
     
     <Target Name="RestorePackages">
-        <MsBuild Projects="$(NuGetRoot)\src\CommandLine\CommandLine.csproj" 
-                   Condition=" !Exists('$(ExeBuildDirectory)\NuGet.exe') "/>
+        <MsBuild Projects="$(NuGetRoot)\src\Core\Core.csproj;$(NuGetRoot)\src\CommandLine\CommandLine.csproj" 
+                   Condition=" !Exists('$(ExeBuildDirectory)\NuGet.exe') "
+                   Targets="Build"
+                   Properties="DefineConstants=CODE_ANALYSIS" />
           <ItemGroup>
             <RestorePackageProjects Include="@(TestProjects)" />
             <RestorePackageProjects Include="$(NuGetRoot)\test\Test.Utility\Test.Utility.csproj" />
