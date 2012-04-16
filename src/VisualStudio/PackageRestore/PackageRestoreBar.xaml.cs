@@ -50,10 +50,12 @@ namespace NuGet.VisualStudio
                 {
                     if (task.IsFaulted)
                     {
-                        // re-enable the Restore button to allow users to try again
-                        RestoreButton.IsEnabled = true;
                         StatusMessage.Text = VsResources.PackageRestoreErrorTryAgain;
                     }
+
+                    // re-enable the Restore button to allow users to try again
+                    // and to make sure the button is enabled the next time the restore bar is displayed
+                    RestoreButton.IsEnabled = true;
                 }, 
                 uiScheduler);
         }
