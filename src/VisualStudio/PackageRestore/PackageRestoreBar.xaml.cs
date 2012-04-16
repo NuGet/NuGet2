@@ -33,6 +33,12 @@ namespace NuGet.VisualStudio
         private void UpdateRestoreBar(bool packagesMissing)
         {
             RestoreBar.Visibility = packagesMissing ? Visibility.Visible : Visibility.Collapsed;
+            
+            if (packagesMissing)
+            {
+                RestoreButton.IsEnabled = true;
+                StatusMessage.Text = VsResources.AskForRestoreMessage;
+            }
         }
 
         private void OnRestoreLinkClick(object sender, RoutedEventArgs e)
@@ -50,12 +56,10 @@ namespace NuGet.VisualStudio
                 {
                     if (task.IsFaulted)
                     {
+                        // re-enable the Restore button to allow users to try again
+                        RestoreButton.IsEnabled = true;
                         StatusMessage.Text = VsResources.PackageRestoreErrorTryAgain;
-                    }
-
-                    // re-enable the Restore button to allow users to try again
-                    // and to make sure the button is enabled the next time the restore bar is displayed
-                    RestoreButton.IsEnabled = true;
+                    }                    
                 }, 
                 uiScheduler);
         }
