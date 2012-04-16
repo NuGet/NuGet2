@@ -26,8 +26,9 @@ namespace NuGet.Dialog.Providers
             ResourceDictionary resources,
             ProviderServices providerServices,
             IProgressProvider progressProvider,
-            ISolutionManager solutionManager)
-            : base(packageManager, null, localRepository, resources, providerServices, progressProvider, solutionManager)
+            ISolutionManager solutionManager,
+            IPackageRestoreManager packageRestoreManager)
+            : base(packageManager, null, localRepository, resources, providerServices, progressProvider, solutionManager, packageRestoreManager)
         {
 
             _solutionManager = solutionManager;

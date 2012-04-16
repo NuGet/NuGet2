@@ -22,6 +22,7 @@ namespace NuGet.Dialog.Providers
         private readonly IVsPackageManager _packageManager;
         private readonly Project _project;
         private readonly IUserNotifierServices _userNotifierServices;
+        private readonly IPackageRestoreManager _packageRestoreManager;
 
         public InstalledProvider(
             IVsPackageManager packageManager,
@@ -30,7 +31,8 @@ namespace NuGet.Dialog.Providers
             ResourceDictionary resources,
             ProviderServices providerServices,
             IProgressProvider progressProvider,
-            ISolutionManager solutionManager)
+            ISolutionManager solutionManager,
+            IPackageRestoreManager packageRestoreManager)
             : base(localRepository, resources, providerServices, progressProvider, solutionManager)
         {
 
@@ -38,10 +40,12 @@ namespace NuGet.Dialog.Providers
             {
                 throw new ArgumentNullException("packageManager");
             }
-
+            
             _packageManager = packageManager;
             _project = project;
             _userNotifierServices = providerServices.UserNotifierServices;
+            _packageRestoreManager = packageRestoreManager;
+            _packageRestoreManager.PackagesMissingStatusChanged += OnMissPackagesChanged;
         }
 
         protected IVsPackageManager PackageManager
@@ -108,10 +112,11 @@ namespace NuGet.Dialog.Providers
 
         protected override IList<IVsSortDescriptor> CreateSortDescriptors()
         {
-            return new List<IVsSortDescriptor> {
+            return new List<IVsSortDescriptor> 
+                   {
                         new PackageSortDescriptor(String.Format(CultureInfo.CurrentCulture, "{0}: {1}", Resources.Dialog_SortOption_Name, Resources.Dialog_SortAscending), new[] { "Title", "Id" }, ListSortDirection.Ascending),
                         new PackageSortDescriptor(String.Format(CultureInfo.CurrentCulture, "{0}: {1}", Resources.Dialog_SortOption_Name, Resources.Dialog_SortDescending), new[] { "Title", "Id" }, ListSortDirection.Descending)
-                  };
+                   };
         }
 
         protected override void FillRootNodes()
@@ -309,6 +314,26 @@ namespace NuGet.Dialog.Providers
         protected override string GetProgressMessage(IPackage package)
         {
             return Resources.Dialog_UninstallProgress + package.ToString();
+        }
+
+        private void OnMissPackagesChanged(object sender, PackagesMissingStatusEventArgs e)
+        {
+            // after packages are restored, refresh the installed tab to show those packages.
+            if (!e.PackagesMissing)
+            {
+                if (SelectedNode != null)
+                {
+                    SelectedNode.Refresh(resetQueryBeforeRefresh: true);
+                }
+            }
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            // to avoid memory leak, we need to unsubscribe from the event
+            _packageRestoreManager.PackagesMissingStatusChanged -= OnMissPackagesChanged;           
         }
     }
 }

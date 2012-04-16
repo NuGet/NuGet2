@@ -219,7 +219,7 @@ namespace NuGet.Dialog.Providers
         /// <summary>
         /// Refresh the list of packages belong to this node
         /// </summary>
-        public void Refresh(bool resetQueryBeforeRefresh = false)
+        public virtual void Refresh(bool resetQueryBeforeRefresh = false)
         {
             if (resetQueryBeforeRefresh)
             {

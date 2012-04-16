@@ -18,7 +18,7 @@ namespace NuGet.Dialog.Providers
     /// <summary>
     /// Base class for all tree node types.
     /// </summary>
-    internal abstract class PackagesProviderBase : VsExtensionsProvider, ILogger
+    internal abstract class PackagesProviderBase : VsExtensionsProvider, ILogger, IDisposable
     {
         private PackagesSearchNode _searchNode;
         private PackagesTreeNodeBase _lastSelectedNode;
@@ -639,6 +639,10 @@ namespace NuGet.Dialog.Providers
                 _expandedNodesDisposable.Dispose();
                 _expandedNodesDisposable = null;
             }
+        }
+
+        public virtual void Dispose()
+        {
         }
     }
 }

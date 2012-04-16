@@ -102,7 +102,8 @@ namespace NuGet.Dialog
                 providerServices,
                 recentPackagesRepository,
                 httpClientEvents,
-                solutionManager);
+                solutionManager,
+                packageRestoreManager);
         }
 
         private void AddUpdateBar(IProductUpdateService productUpdateService)
@@ -143,7 +144,8 @@ namespace NuGet.Dialog
                                     ProviderServices providerServices,
                                     IPackageRepository recentPackagesRepository,
                                     IHttpClientEvents httpClientEvents,
-                                    ISolutionManager solutionManager)
+                                    ISolutionManager solutionManager,
+                                    IPackageRestoreManager packageRestoreManager)
         {
 
             // This package manager is not used for installing from a remote source, and therefore does not need a fallback repository for resolving dependencies
@@ -175,13 +177,15 @@ namespace NuGet.Dialog
                     providerServices,
                     httpClientEvents,
                     solutionManager);
+
                 installedProvider = new SolutionInstalledProvider(
                     packageManager,
                     localRepository,
                     Resources,
                     providerServices,
                     httpClientEvents,
-                    solutionManager);
+                    solutionManager,
+                    packageRestoreManager);
 
                 updatesProvider = new SolutionUpdatesProvider(
                     localRepository,
@@ -232,7 +236,8 @@ namespace NuGet.Dialog
                     Resources,
                     providerServices,
                     httpClientEvents,
-                    solutionManager);
+                    solutionManager,
+                    packageRestoreManager);
 
                 updatesProvider = new UpdatesProvider(
                     activeProject,
@@ -409,6 +414,12 @@ namespace NuGet.Dialog
 
         private void OnDialogWindowClosed(object sender, EventArgs e)
         {
+            foreach (PackagesProviderBase provider in explorer.Providers)
+            {
+                // give each provider a chance to clean up itself
+                provider.Dispose();
+            }
+
             explorer.Providers.Clear();
 
             // flush output messages to the Output console at once when the dialog is closed.

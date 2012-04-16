@@ -237,12 +237,51 @@ namespace NuGet.Dialog.Test
             manualEvent.Wait();
         }
 
+        [Fact]
+        public void InstalledProviderRefreshWhenPackagesAreRestored()
+        {
+            // Arrange
+            var restoreManager = new Mock<IPackageRestoreManager>();
+
+            var provider = CreateInstalledProvider(packageRestoreManager: restoreManager.Object);
+
+            var treeNode = new Mock<PackagesTreeNodeBase>(null, provider, true);
+            provider.SelectedNode = treeNode.Object;
+
+            // Act
+            restoreManager.Raise(m => m.PackagesMissingStatusChanged += null, new PackagesMissingStatusEventArgs(false)); 
+
+            // Assert that the event is unsubscribed
+            treeNode.Verify(t => t.Refresh(true), Times.Once());
+        }
+
+        [Fact]
+        public void InstalledProviderUnsubscribeToEventWhenDisposed()
+        {
+            // Arrange
+            var restoreManager = new Mock<IPackageRestoreManager>();
+
+            var provider = CreateInstalledProvider(packageRestoreManager: restoreManager.Object);
+
+            var treeNode = new Mock<PackagesTreeNodeBase>(null, provider, true);
+            provider.SelectedNode = treeNode.Object;
+
+            provider.Dispose();
+
+            // Act
+            restoreManager.Raise(m => m.PackagesMissingStatusChanged += null, new PackagesMissingStatusEventArgs(false));
+
+            // Assert that the event is unsubscribed
+            treeNode.Verify(t => t.Refresh(It.IsAny<bool>()), Times.Never());
+        }
+
         private static InstalledProvider CreateInstalledProvider(
             IVsPackageManager packageManager = null,
             IPackageRepository localRepository = null,
             Project project = null,
             IScriptExecutor scriptExecutor = null,
-            ISolutionManager solutionManager = null)
+            ISolutionManager solutionManager = null,
+            IPackageRestoreManager packageRestoreManager = null)
         {
             if (packageManager == null)
             {
@@ -280,6 +319,11 @@ namespace NuGet.Dialog.Test
                 solutionManager = new Mock<ISolutionManager>().Object;
             }
 
+            if (packageRestoreManager == null)
+            {
+                packageRestoreManager = new Mock<IPackageRestoreManager>().Object;
+            }
+
             return new InstalledProvider(
                 packageManager,
                 project,
@@ -287,7 +331,8 @@ namespace NuGet.Dialog.Test
                 new System.Windows.ResourceDictionary(),
                 services,
                 new Mock<IProgressProvider>().Object,
-                solutionManager);
+                solutionManager,
+                packageRestoreManager);
         }
 
         private static ProjectManager CreateProjectManager(IPackageRepository localRepository)
