@@ -18,7 +18,7 @@ namespace NuGet.Test
         public void ConstructorThrowsIfSettingsIsNull()
         {
             // Act and Assert
-            ExceptionAssert.ThrowsArgNull(() => new SettingsCredentialProvider(credentialProvider: NullCredentialProvider.Instance, packageSourceProvider: null), 
+            ExceptionAssert.ThrowsArgNull(() => new SettingsCredentialProvider(credentialProvider: NullCredentialProvider.Instance, packageSourceProvider: null),
                 "packageSourceProvider");
         }
 
@@ -27,14 +27,14 @@ namespace NuGet.Test
         {
             // Arrange
             var underlyingProvider = new Mock<ICredentialProvider>(MockBehavior.Strict);
-            underlyingProvider.Setup(p => p.GetCredentials(It.IsAny<Uri>(), It.IsAny<IWebProxy>(), CredentialType.ProxyCredentials))
+            underlyingProvider.Setup(p => p.GetCredentials(It.IsAny<Uri>(), It.IsAny<IWebProxy>(), CredentialType.ProxyCredentials, false))
                               .Returns<ICredentials>(null).Verifiable();
 
             var packageSourceProvider = new PackageSourceProvider(NullSettings.Instance);
             var settingsCredentialProvider = new SettingsCredentialProvider(underlyingProvider.Object, packageSourceProvider);
 
             // Act
-            var value = settingsCredentialProvider.GetCredentials(new Uri("http://nuget.org"), new Mock<IWebProxy>().Object, CredentialType.ProxyCredentials);
+            var value = settingsCredentialProvider.GetCredentials(new Uri("http://nuget.org"), new Mock<IWebProxy>().Object, CredentialType.ProxyCredentials, false);
 
             // Assert
             Assert.Null(value);
@@ -46,19 +46,19 @@ namespace NuGet.Test
         {
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
-            packageSourceProvider.Setup(s => s.LoadPackageSources())    
+            packageSourceProvider.Setup(s => s.LoadPackageSources())
                                  .Returns(new[] { new PackageSource("https://not-nuget.org", "Official") { UserName = "user", Password = "pass" } })
                                  .Verifiable();
 
             var underlyingProvider = new Mock<ICredentialProvider>(MockBehavior.Strict);
-            underlyingProvider.Setup(p => p.GetCredentials(It.IsAny<Uri>(), It.IsAny<IWebProxy>(), CredentialType.RequestCredentials))
+            underlyingProvider.Setup(p => p.GetCredentials(It.IsAny<Uri>(), It.IsAny<IWebProxy>(), CredentialType.RequestCredentials, false))
                               .Returns<ICredentials>(null).Verifiable();
-            
-            
+
+
             var settingsCredentialProvider = new SettingsCredentialProvider(underlyingProvider.Object, packageSourceProvider.Object);
 
             // Act
-            var value = settingsCredentialProvider.GetCredentials(new Uri("https://nuget.org"), new Mock<IWebProxy>().Object, CredentialType.RequestCredentials);
+            var value = settingsCredentialProvider.GetCredentials(new Uri("https://nuget.org"), new Mock<IWebProxy>().Object, CredentialType.RequestCredentials, false);
 
             // Assert
             Assert.Null(value);
@@ -81,10 +81,38 @@ namespace NuGet.Test
             var settingsCredentialProvider = new SettingsCredentialProvider(underlyingProvider.Object, sourceProvider.Object);
 
             // Act
-            var value = settingsCredentialProvider.GetCredentials(new Uri("https://nuget.org"), new Mock<IWebProxy>().Object, CredentialType.RequestCredentials);
+            var value = settingsCredentialProvider.GetCredentials(new Uri("https://nuget.org"), new Mock<IWebProxy>().Object, CredentialType.RequestCredentials, false);
 
             // Assert
             sourceProvider.Verify();
+            Assert.IsType<NetworkCredential>(value);
+            var networkCredential = (NetworkCredential)value;
+            Assert.Equal(userName, networkCredential.UserName);
+            Assert.Equal(password, networkCredential.Password);
+        }
+
+        [Fact]
+        public void GetCredentialQueriesReturnsCredentialsFromSourceProviderIfRetrying()
+        {
+            // Arrange
+            string userName = "User";
+            string password = "My precious!";
+
+            var sourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+            sourceProvider.Setup(s => s.LoadPackageSources())
+                          .Returns(new[] { new PackageSource("https://nuget.org") { UserName = userName, Password = password } })
+                          .Verifiable();
+            var underlyingProvider = new Mock<ICredentialProvider>(MockBehavior.Strict);
+            underlyingProvider.Setup(s => s.GetCredentials(new Uri("https://nuget.org"), It.IsAny<IWebProxy>(), CredentialType.RequestCredentials, true))
+                              .Returns(new NetworkCredential(userName, password))
+                              .Verifiable();
+            var settingsCredentialProvider = new SettingsCredentialProvider(underlyingProvider.Object, sourceProvider.Object);
+
+            // Act
+            var value = settingsCredentialProvider.GetCredentials(new Uri("https://nuget.org"), new Mock<IWebProxy>().Object, CredentialType.RequestCredentials, true);
+
+            // Assert
+            underlyingProvider.Verify();
             Assert.IsType<NetworkCredential>(value);
             var networkCredential = (NetworkCredential)value;
             Assert.Equal(userName, networkCredential.UserName);
@@ -111,7 +139,7 @@ namespace NuGet.Test
             var settingsCredentialProvider = new SettingsCredentialProvider(underlyingProvider.Object, sourceProvider.Object);
 
             // Act
-            var value = settingsCredentialProvider.GetCredentials(new Uri("https://nuget.org"), new Mock<IWebProxy>().Object, CredentialType.RequestCredentials);
+            var value = settingsCredentialProvider.GetCredentials(new Uri("https://nuget.org"), new Mock<IWebProxy>().Object, CredentialType.RequestCredentials, false);
 
             // Assert
             sourceProvider.Verify();

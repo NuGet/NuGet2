@@ -16,10 +16,6 @@ namespace NuGet
         /// The proxy instance if passed will be used to ensure that the request goes through the proxy
         /// to ensure successful connection to the destination Uri.
         /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="proxy"></param>
-        /// <param name="credentialType"></param>
-        /// <returns></returns>
-        ICredentials GetCredentials(Uri uri, IWebProxy proxy, CredentialType credentialType);
+        ICredentials GetCredentials(Uri uri, IWebProxy proxy, CredentialType credentialType, bool retrying);
     }
 }

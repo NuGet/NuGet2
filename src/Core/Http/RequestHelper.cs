@@ -18,7 +18,8 @@ namespace NuGet
             HttpStatusCode? previousStatusCode = null;
             string authType = null;
             bool continueIfFailed = true;
-
+            int proxyCredentialsRetryCount = 0;
+            int credentialsRetryCount = 0;
             while (true)
             {
                 // Create the request
@@ -42,15 +43,19 @@ namespace NuGet
                 }
                 else if (previousStatusCode == HttpStatusCode.ProxyAuthenticationRequired)
                 {
-                    request.Proxy.Credentials = credentialProvider.GetCredentials(request, CredentialType.ProxyCredentials);
+                    request.Proxy.Credentials = credentialProvider.GetCredentials(request, CredentialType.ProxyCredentials, retrying: proxyCredentialsRetryCount > 0);
 
                     continueIfFailed = request.Proxy.Credentials != null;
+
+                    proxyCredentialsRetryCount++;
                 }
                 else if (previousStatusCode == HttpStatusCode.Unauthorized)
                 {
-                    request.Credentials = credentialProvider.GetCredentials(request, CredentialType.RequestCredentials);
+                    request.Credentials = credentialProvider.GetCredentials(request, CredentialType.RequestCredentials, retrying: credentialsRetryCount > 0);
 
                     continueIfFailed = request.Credentials != null;
+
+                    credentialsRetryCount++;
                 }
 
                 try

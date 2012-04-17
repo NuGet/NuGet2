@@ -36,15 +36,16 @@ namespace NuGet
             _logger = logger;
         }
 
-        public ICredentials GetCredentials(Uri uri, IWebProxy proxy, CredentialType credentialType)
+        public ICredentials GetCredentials(Uri uri, IWebProxy proxy, CredentialType credentialType, bool retrying)
         {
             NetworkCredential credentials;
-            if ((credentialType == CredentialType.RequestCredentials) && TryGetCredentials(uri, out credentials))
+            // If we are retrying, the stored credentials must be invalid. 
+            if (!retrying && (credentialType == CredentialType.RequestCredentials) && TryGetCredentials(uri, out credentials))
             {
                 _logger.Log(MessageLevel.Info, NuGetResources.SettingsCredentials_UsingSavedCredentials, credentials.UserName);
                 return credentials;
             }
-            return _credentialProvider.GetCredentials(uri, proxy, credentialType);
+            return _credentialProvider.GetCredentials(uri, proxy, credentialType, retrying);
         }
 
         private bool TryGetCredentials(Uri uri, out NetworkCredential configurationCredentials)

@@ -22,7 +22,7 @@ namespace NuGet.VisualStudio
         /// Returns an ICredentials instance that the consumer would need in order
         /// to properly authenticate to the given Uri.
         /// </summary>
-        public ICredentials GetCredentials(Uri uri, IWebProxy proxy, CredentialType credentialType)
+        public ICredentials GetCredentials(Uri uri, IWebProxy proxy, CredentialType credentialType, bool retrying)
         {
             if (uri == null)
             {

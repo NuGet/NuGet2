@@ -6,7 +6,7 @@ namespace NuGet
 {
     public class ConsoleCredentialProvider : ICredentialProvider
     {
-        public ICredentials GetCredentials(Uri uri, IWebProxy proxy, CredentialType credentialType)
+        public ICredentials GetCredentials(Uri uri, IWebProxy proxy, CredentialType credentialType, bool retrying)
         {
             if (uri == null)
             {
