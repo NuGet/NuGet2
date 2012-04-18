@@ -59,5 +59,10 @@ namespace NuGet
         {
             return provider.LoadPackageSources().Where(p => p.IsEnabled);
         }
+
+        public static bool ContainsSource(this IPackageSourceProvider provider, string source)
+        {
+            return provider.GetEnabledPackageSources().Any(p => p.Source.Equals(source, StringComparison.OrdinalIgnoreCase));
+        }
     }
 }

@@ -30,6 +30,7 @@ namespace NuGet.VisualStudio
         private readonly IVsPackageManagerFactory _packageManagerFactory;
         private readonly DTE _dte;
         private readonly ISettingsProvider _defaultSettingsProvider;
+        private IPackageRepository _officialNuGetRepository;
 
         [ImportingConstructor]
         public PackageRestoreManager(
@@ -144,7 +145,7 @@ namespace NuGet.VisualStudio
                     SetPackageRestoreConsent();
                 }
 
-                EnablePackageRestore();
+                EnablePackageRestore(fromActivation);
             }
             catch (Exception ex)
             {
@@ -232,9 +233,9 @@ namespace NuGet.VisualStudio
             PackagesMissingStatusChanged(this, new PackagesMissingStatusEventArgs(missing));
         }
 
-        private void EnablePackageRestore()
+        private void EnablePackageRestore(bool fromActivation)
         {
-            EnsureNuGetBuild();
+            EnsureNuGetBuild(fromActivation);
 
             IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager();
             foreach (Project project in _solutionManager.GetProjects())
@@ -334,7 +335,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        private void EnsureNuGetBuild()
+        private void EnsureNuGetBuild(bool fromActivation)
         {
             string solutionDirectory = _solutionManager.SolutionDirectory;
             string nugetFolderPath = Path.Combine(solutionDirectory, VsConstants.NuGetSolutionSettingsFolder);
@@ -347,10 +348,11 @@ namespace NuGet.VisualStudio
             {
                 // download NuGet.Build and NuGet.CommandLine packages into the .nuget folder
                 IPackageRepository repository = _packageSourceProvider.GetAggregate(_packageRepositoryFactory, ignoreFailingRepositories: true);
+
                 var installPackages = new string[] { NuGetBuildPackageName, NuGetCommandLinePackageName };
                 foreach (var packageId in installPackages)
                 {
-                    IPackage package = GetPackage(repository, packageId);
+                    IPackage package = GetPackage(repository, packageId, fromActivation);
                     if (package == null)
                     {
                         throw new InvalidOperationException(
@@ -374,10 +376,26 @@ namespace NuGet.VisualStudio
         /// Try to retrieve the package with the specified Id from machine cache first. 
         /// If not found, download it from the specified repository and add to machine cache.
         /// </summary>
-        private IPackage GetPackage(IPackageRepository repository, string packageId)
+        private IPackage GetPackage(IPackageRepository repository, string packageId, bool fromActivation)
         {
             // first, find the package from the remote repository
             IPackage package = repository.FindPackage(packageId);
+            
+            if (package == null && fromActivation)
+            {
+                // if we can't find the package from the remote repositories, look for it
+                // from nuget.org feed, provided that it's not already specified in one of the remote repositories
+                if (!_packageSourceProvider.ContainsSource(NuGetConstants.DefaultFeedUrl) &&
+                    !_packageSourceProvider.ContainsSource(NuGetConstants.V2LegacyFeedUrl))
+                {
+                    if (_officialNuGetRepository == null)
+                    {
+                        _officialNuGetRepository = _packageRepositoryFactory.CreateRepository(NuGetConstants.DefaultFeedUrl);
+                    }
+                    
+                    package = _officialNuGetRepository.FindPackage(packageId, version: null, allowPrereleaseVersions: true, allowUnlisted: false);
+                }
+            }
 
             bool fromCache = false;
 
