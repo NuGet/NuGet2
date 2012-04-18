@@ -385,8 +385,8 @@ namespace NuGet.VisualStudio
             {
                 // if we can't find the package from the remote repositories, look for it
                 // from nuget.org feed, provided that it's not already specified in one of the remote repositories
-                if (!_packageSourceProvider.ContainsSource(NuGetConstants.DefaultFeedUrl) &&
-                    !_packageSourceProvider.ContainsSource(NuGetConstants.V2LegacyFeedUrl))
+                if (!ContainsSource(_packageSourceProvider, NuGetConstants.DefaultFeedUrl) &&
+                    !ContainsSource(_packageSourceProvider, NuGetConstants.V2LegacyFeedUrl))
                 {
                     if (_officialNuGetRepository == null)
                     {
@@ -443,6 +443,11 @@ namespace NuGet.VisualStudio
             }
 
             return package;
+        }
+
+        private static bool ContainsSource(IPackageSourceProvider provider, string source)
+        {
+            return provider.GetEnabledPackageSources().Any(p => p.Source.Equals(source, StringComparison.OrdinalIgnoreCase));
         }
 
         private void DisableSourceControlMode()
