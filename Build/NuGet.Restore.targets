@@ -1,0 +1,11 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <PackageSources>http://nuget.org/api/v2/</PackageSources>
+    </PropertyGroup>
+    <Target Name="RestorePackages">
+        <Error Condition=" '$(NuGetExePath)' == '' " Text="Property 'NuGetExePath' not specified." />
+        <Error Condition=" '$(NuGetRoot)' == '' " Text="Property 'NuGetRoot' not specified." />
+
+        <Exec Command="$(NuGetExePath) install $(MsBuildProjectDirectory)\packages.config -Source $(PackageSources) -out $(NuGetRoot)\packages " />
+    </Target>
+</Project> 

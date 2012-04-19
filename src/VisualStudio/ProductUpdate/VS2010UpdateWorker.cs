@@ -36,7 +36,7 @@ namespace NuGet.VisualStudio
         public bool CheckForUpdate(out Version installedVersion, out Version newVersion)
         {
             // Find the vsix on the vs gallery
-            VSGalleryEntry nugetVsix = _extensionRepository.CreateQuery<VSGalleryEntry>()
+            VSGalleryEntry nugetVsix = _extensionRepository.CreateQuery<VSGalleryEntry>(includeTypeInQuery: false, includeSkuInQuery: true)
                                                       .Where(e => e.VsixID == NuGetVSIXId)
                                                       .AsEnumerable()
                                                       .FirstOrDefault();

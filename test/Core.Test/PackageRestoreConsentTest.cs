@@ -1,5 +1,4 @@
-﻿using System;
-using Moq;
+﻿using Moq;
 using Xunit;
 using Xunit.Extensions;
 
@@ -69,7 +68,7 @@ namespace NuGet.Test
 
             var environmentReader = new Mock<IEnvironmentVariableReader>();
             environmentReader.Setup(
-                r => r.GetEnvironmentVariable("EnableNuGetPackageRestore", It.IsAny<EnvironmentVariableTarget>())).
+                r => r.GetEnvironmentVariable("EnableNuGetPackageRestore")).
                 Returns(environmentValue);
 
             var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
@@ -83,15 +82,19 @@ namespace NuGet.Test
 
         [Theory]
         [InlineData("1")]
+        [InlineData("   1")]
+        [InlineData("1  ")]
         [InlineData("true")]
+        [InlineData(" True")]
+        [InlineData(" True   ")]
         public void CorrectEnvironmentVariableReturnsTrueForIsGranted(string environmentValue)
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            
+
             var environmentReader = new Mock<IEnvironmentVariableReader>();
             environmentReader.Setup(
-                r => r.GetEnvironmentVariable("EnableNuGetPackageRestore", It.IsAny<EnvironmentVariableTarget>())).
+                r => r.GetEnvironmentVariable("EnableNuGetPackageRestore")).
                 Returns(environmentValue);
 
             var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
