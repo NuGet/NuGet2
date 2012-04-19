@@ -65,7 +65,6 @@ namespace NuGet.VisualStudio
             IVsThreadedWaitDialogFactory waitDialogFactory,
             ISettingsProvider defaultSettingsProvider)
         {
-
             Debug.Assert(solutionManager != null);
             _dte = dte;
             _fileSystemProvider = fileSystemProvider;
@@ -268,9 +267,11 @@ namespace NuGet.VisualStudio
 
         private void EnablePackageRestore(Project project)
         {
-            if (project.IsWebSite())
+            if (project.IsWebSite() || project.IsJavaScriptProject())
             {
                 // Can't do anything with Website
+                // Also, the Javascript Metro project system has some weird bugs 
+                // that cause havoc with the package restore mechanism
                 return;
             }
 
