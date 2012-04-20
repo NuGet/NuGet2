@@ -13,8 +13,8 @@
     ShowInTaskbar="False"
     WindowStyle="SingleBorderWindow"
     WindowStartupLocation="CenterOwner"
-    Background="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}"
-    Title="{x:Static resources:Resources.Dialog_SummaryWindowTitle}">
+    Title="{x:Static resources:Resources.Dialog_SummaryWindowTitle}"
+    Background="{DynamicResource {x:Static resources:UIResources.WindowBackgroundBrushKey}}">
     
     <Window.Resources>
         <self:ProjectToIconConverter x:Key="ProjectToIconConverter" />
