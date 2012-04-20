@@ -353,7 +353,6 @@ namespace NuGet.Options
 
             using (StringFormat drawFormat = new StringFormat())
             using (Brush foreBrush = new SolidBrush(e.ForeColor))
-            using (Font italicFont = new Font(e.Font, FontStyle.Italic))
             {
                 drawFormat.Alignment = StringAlignment.Near;
                 drawFormat.Trimming = StringTrimming.EllipsisCharacter;
@@ -410,7 +409,7 @@ namespace NuGet.Options
                         nameBounds.Bottom,
                         textWidth,
                         e.Bounds.Bottom - nameBounds.Bottom);
-                    graphics.DrawString(currentItem.Source, italicFont, foreBrush, sourceBounds, drawFormat);
+                    graphics.DrawString(currentItem.Source, e.Font, foreBrush, sourceBounds, drawFormat);
                 }
                 finally
                 {
