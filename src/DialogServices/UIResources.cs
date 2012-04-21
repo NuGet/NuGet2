@@ -20,7 +20,6 @@ namespace NuGet.Dialog
             {
                 if (VsVersionHelper.IsVisualStudio2010)
                 {
-
                     return VsBrushes.NewProjectBackgroundKey;
                 }
                 else
@@ -29,7 +28,8 @@ namespace NuGet.Dialog
                     {
                         _windowBackgroundBrushKey = GetObject(
                             "Microsoft.VisualStudio.ExtensionsExplorer.UI.ColorResources, Microsoft.VisualStudio.ExtensionsExplorer.UI", // Class Name, Assembly Name
-                            "BackgroundBrushKey");  // Property Name
+                            "BackgroundBrushKey", // Property Name
+                            VsBrushes.NewProjectBackgroundKey);  
                     }
 
                     return _windowBackgroundBrushKey;
@@ -54,7 +54,8 @@ namespace NuGet.Dialog
                     {
                         _contentBackgroundBrushKey = GetObject(
                             "Microsoft.VisualStudio.ExtensionsExplorer.UI.ColorResources, Microsoft.VisualStudio.ExtensionsExplorer.UI", // Class Name, Assembly Name
-                            "WonderbarBrushKey");   // Property Name
+                            "WonderbarBrushKey",    // Property Name
+                            VsBrushes.WindowKey);   
                     }
 
                     return _contentBackgroundBrushKey;
@@ -62,15 +63,21 @@ namespace NuGet.Dialog
             }
         }
 
-        private static object GetObject(string fullClassName, string property)
+        private static object GetObject(string fullClassName, string property, object defaultValue)
         {
             Type type = Type.GetType(fullClassName);
             if (type == null)
             {
-                return null;
+                return defaultValue;
             }
+
             PropertyInfo propertyInfo = type.GetProperty(property, BindingFlags.Public | BindingFlags.Static);
-            return propertyInfo != null ? propertyInfo.GetValue(null, null) : null;
+            if (propertyInfo == null)
+            {
+                return defaultValue;
+            }
+                
+            return propertyInfo.GetValue(null, null) ?? defaultValue;
         }
     }
 }
