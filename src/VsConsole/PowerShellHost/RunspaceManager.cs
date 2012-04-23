@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Reflection;
-using System.Threading;
 using EnvDTE;
 using EnvDTE80;
 using Microsoft.PowerShell;
@@ -16,14 +13,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 {
     internal class RunspaceManager : IRunspaceManager
     {
-        private const string PSModulePathEnvVariable = "PSModulePath";
-        private static readonly Mutex _runspaceMutex = new Mutex(false, "NuGetConsoleRunspace");
-
         // Cache Runspace by name. There should be only one Runspace instance created though.
         private readonly ConcurrentDictionary<string, Tuple<Runspace, NuGetPSHost>> _runspaceCache = new ConcurrentDictionary<string, Tuple<Runspace, NuGetPSHost>>();
 
         public const string ProfilePrefix = "NuGet";
-        public const string NuGetCoreModuleName = "NuGet";
 
         public Tuple<Runspace, NuGetPSHost> GetRunspace(IConsole console, string hostName)
         {
@@ -32,29 +25,12 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
         private static Tuple<Runspace, NuGetPSHost> CreateAndSetupRunspace(IConsole console, string hostName)
         {
-            // There appears to be a synchronization bug in the runspace API. To work around it, we use 
-            // a named system mutex to ensure that if multiple versions of the console are being created 
-            // and set up at the same time, they'll wait in line.
-            var signaled = _runspaceMutex.WaitOne(TimeSpan.FromSeconds(30));
-            if (!signaled)
-                throw new TimeoutException(Resources.PowerShellInitializationTimeoutError);
-            
-            try
-            {
-                // set up powershell environment variable for module search path
-                // ensuring our own Modules folder is searched before system or user-level 
-                AddPowerShellModuleSearchPath();
+            Tuple<Runspace, NuGetPSHost> runspace = CreateRunspace(console, hostName);
+            SetupExecutionPolicy(runspace.Item1);
+            LoadModules(runspace.Item1);
+            LoadProfilesIntoRunspace(runspace.Item1);
 
-                Tuple<Runspace, NuGetPSHost> runspace = CreateRunspace(console, hostName);
-                LoadModules(runspace.Item1);
-                LoadProfilesIntoRunspace(runspace.Item1);
-
-                return runspace;
-            }
-            finally
-            {
-                _runspaceMutex.ReleaseMutex();
-            }
+            return runspace;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -108,18 +84,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             return Tuple.Create(runspace, host);
         }
 
-        private static void AddPowerShellModuleSearchPath()
-        {
-            string psModulePath = Environment.GetEnvironmentVariable(PSModulePathEnvVariable) ?? String.Empty;
-            string extensionRoot = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-            // EnvironmentPermission demand?
-            Environment.SetEnvironmentVariable(PSModulePathEnvVariable,
-                                               String.Format(CultureInfo.InvariantCulture, "{0}\\Modules\\;{1}", extensionRoot, psModulePath),
-                                               EnvironmentVariableTarget.Process);
-        }
-
-        private static void LoadModules(Runspace runspace)
+        private static void SetupExecutionPolicy(Runspace runspace)
         {
             ExecutionPolicy policy = runspace.GetEffectiveExecutionPolicy();
             if (policy != ExecutionPolicy.Unrestricted &&
@@ -134,10 +99,16 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                     runspace.SetExecutionPolicy(ExecutionPolicy.RemoteSigned, ExecutionPolicyScope.Process);
                 }
             }
+        }
 
-            runspace.ImportModule(NuGetCoreModuleName);
+        private static void LoadModules(Runspace runspace)
+        {
+            // We store our PS module file at <extension root>\Modules\NuGet\NuGet.psd1
+            string extensionRoot = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string modulePath = Path.Combine(extensionRoot, "Modules", "NuGet", "NuGet.psd1");
+            runspace.ImportModule(modulePath);
+
 #if DEBUG
-
             if (File.Exists(DebugConstants.TestModulePath))
             {
                 runspace.ImportModule(DebugConstants.TestModulePath);
