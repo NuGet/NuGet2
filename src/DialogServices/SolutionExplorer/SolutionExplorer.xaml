@@ -17,12 +17,9 @@
     WindowStartupLocation="CenterOwner"
     Title="{x:Static resources:Resources.Dialog_ProjectSelectorTitle}"
     local:WindowSizePersistenceHelper.WindowToken="SolutionExplorer"
-    Background="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}">
+    Background="{DynamicResource {x:Static local:UIResources.WindowBackgroundBrushKey}}">
     
-    <Window.Resources>
-        <BitmapImage x:Key="OpenFolderImage" UriSource="/NuGet.DialogServices;component/SolutionExplorer/Images/folderopen.png" />
-        <BitmapImage x:Key="CloseFolderImage" UriSource="/NuGet.DialogServices;component/SolutionExplorer/Images/folderclose.png" />
-        
+    <Window.Resources>        
         <self:ProjectToIconConverter x:Key="ProjectToIconConverter" />
         
         <Style TargetType="{x:Type Button}">

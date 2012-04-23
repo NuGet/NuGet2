@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:pfui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.10.0"
     xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
-    xmlns:local="clr-namespace:NuGet.Dialog"
+    xmlns:resources="clr-namespace:NuGet.Dialog"
     x:Name="Root"
     WindowStyle="SingleBorderWindow" 
     WindowStartupLocation="CenterOwner" 
@@ -14,13 +14,13 @@
     Height="250" 
     MinHeight="230" 
     MinWidth="300"
-    local:WindowSizePersistenceHelper.WindowToken="ProgressWindow"
-    Background="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}">
+    resources:WindowSizePersistenceHelper.WindowToken="ProgressWindow"
+    Background="{DynamicResource {x:Static resources:UIResources.WindowBackgroundBrushKey}}">
     
     <DockPanel>
         <TextBlock DockPanel.Dock="Top" Text="{Binding Title, ElementName=Root}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" FontWeight="Bold" Margin="10" x:Name="StatusText" />
         <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" Margin="20,0,20,5" Height="26" Width="Auto" x:Name="ProgressBar" />
-        <Button DockPanel.Dock="Bottom" HorizontalAlignment="Right" Margin="10,10,21,10" Padding="20,2,20,2" Content="{x:Static local:Resources.Dialog_Close}" IsCancel="True" IsEnabled="False" x:Name="OkButton" Click="OkButton_Click" />
+        <Button DockPanel.Dock="Bottom" HorizontalAlignment="Right" Margin="10,10,21,10" Padding="20,2,20,2" Content="{x:Static resources:Resources.Dialog_Close}" IsCancel="True" IsEnabled="False" x:Name="OkButton" Click="OkButton_Click" />
         <RichTextBox Margin="20, 5, 20, 5" AcceptsReturn="True" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" x:Name="MessagePane">
         </RichTextBox>
     </DockPanel>

@@ -470,7 +470,7 @@ namespace NuGetConsole.Implementation
                     // hide the text "initialize host" when an error occurs.
                     ConsoleParentPane.NotifyInitializationCompleted();
 
-                    WpfConsole.WriteLine(x.ToString());
+                    WpfConsole.WriteLine(x.GetBaseException().ToString());
                     ExceptionHelper.WriteToActivityLog(x);
                 }
             }

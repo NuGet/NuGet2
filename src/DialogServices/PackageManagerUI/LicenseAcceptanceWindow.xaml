@@ -3,7 +3,6 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:self="clr-namespace:NuGet.Dialog.PackageManagerUI"
-    xmlns:local="clr-namespace:NuGet.Dialog"
     xmlns:resources="clr-namespace:NuGet.Dialog"
     xmlns:pfui="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.10.0"
     xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0"
@@ -15,9 +14,9 @@
     ShowInTaskbar="False"
     WindowStyle="SingleBorderWindow"
     WindowStartupLocation="CenterOwner"
-    local:WindowSizePersistenceHelper.WindowToken="LicenseWindow"
-    Background="{DynamicResource {x:Static vsfx:VsBrushes.NewProjectBackgroundKey}}"
-    Title="{x:Static resources:Resources.License_DialogTitle}">
+    resources:WindowSizePersistenceHelper.WindowToken="LicenseWindow"
+    Title="{x:Static resources:Resources.License_DialogTitle}"
+    Background="{DynamicResource {x:Static resources:UIResources.WindowBackgroundBrushKey}}">
     
     <Window.Resources>
         <Style TargetType="{x:Type Button}">

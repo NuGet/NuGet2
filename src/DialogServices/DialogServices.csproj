@@ -93,6 +93,7 @@
     <Compile Include="SolutionExplorer\ProjectNode.cs" />
     <Compile Include="SolutionExplorer\SolutionExplorerViewModel.cs" />
     <Compile Include="SolutionExplorer\SolutionWalker.cs" />
+    <Compile Include="UIResources.cs" />
     <Compile Include="Visualizer\Visualizer.cs" />
     <Compile Include="WindowSizePersistenceHelper.cs" />
   </ItemGroup>
