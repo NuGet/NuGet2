@@ -2,15 +2,28 @@
 
 namespace NuGet
 {
-    internal static class VersionExtensions
+    public static class VersionExtensions
     {
         public static Func<IPackage, bool> ToDelegate(this IVersionSpec versionInfo)
         {
+            if (versionInfo == null)
+            {
+                throw new ArgumentNullException("versionInfo");
+            }
             return versionInfo.ToDelegate<IPackage>(p => p.Version);
         }
 
         public static Func<T, bool> ToDelegate<T>(this IVersionSpec versionInfo, Func<T, SemanticVersion> extractor)
         {
+            if (versionInfo == null)
+            {
+                throw new ArgumentNullException("versionInfo");
+            }
+            if (extractor == null)
+            {
+                throw new ArgumentNullException("extractor");
+            }
+
             return p =>
             {
                 SemanticVersion version = extractor(p);
