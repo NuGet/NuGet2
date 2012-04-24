@@ -199,6 +199,12 @@ namespace NuGet.Server.DataServices
             set;
         }
 
+        public int VersionDownloadCount
+        {
+            get;
+            set;
+        }
+
         private string ConvertDependency(PackageDependency dependency)
         {
             return String.Format("{0}:{1}", dependency.Id, dependency.VersionSpec);
