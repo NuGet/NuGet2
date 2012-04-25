@@ -11,9 +11,10 @@ namespace NuGet
 {
     public class DataServiceContextWrapper : IDataServiceContext
     {
+        private const string MetadataKey = "DataServiceMetadata|";
         private static readonly MethodInfo _executeMethodInfo = typeof(DataServiceContext).GetMethod("Execute", new[] { typeof(Uri) });
         private readonly DataServiceContext _context;
-        private readonly Lazy<DataServiceMetadata> _serviceMetadata;
+        private readonly Uri _metadataUri;
 
         public DataServiceContextWrapper(Uri serviceRoot)
         {
@@ -25,52 +26,7 @@ namespace NuGet
                        {
                            MergeOption = MergeOption.OverwriteChanges
                        };
-            Uri metadataUri = _context.GetMetadataUri();
-            _serviceMetadata = new Lazy<DataServiceMetadata>(() => GetDataServiceMetadata(metadataUri));
-        }
-
-        private static DataServiceMetadata GetDataServiceMetadata(Uri metadataUri)
-        {
-            if (metadataUri == null)
-            {
-                return null;
-            }
-
-            // Make a request to the metadata uri and get the schema
-            var client = new HttpClient(metadataUri);
-            byte[] data = client.DownloadData();
-
-            if (data == null)
-            {
-                return null;
-            }
-
-            string schema = Encoding.UTF8.GetString(data);
-
-            return ExtractMetadataFromSchema(schema);
-        }
-
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "If the docuument is in fails to parse in any way, we want to not fail.")]
-        internal static DataServiceMetadata ExtractMetadataFromSchema(string schema)
-        {
-            if (String.IsNullOrEmpty(schema))
-            {
-                return null;
-            }
-
-            XDocument schemaDocument;
-
-            try
-            {
-                schemaDocument = XDocument.Parse(schema);
-            }
-            catch
-            {
-                // If the schema is malformed (for some reason) then just return empty list
-                return null;
-            }
-
-            return ExtractMetadataInternal(schemaDocument);
+            _metadataUri = _context.GetMetadataUri();
         }
 
         public Uri BaseUri
@@ -119,7 +75,10 @@ namespace NuGet
 
         private DataServiceMetadata ServiceMetadata
         {
-            get { return _serviceMetadata.Value; }
+            get
+            {
+                return MemoryCache.Instance.GetOrAdd(GetServiceMetadataKey(), () => GetDataServiceMetadata(_metadataUri), TimeSpan.FromMinutes(15));
+            }
         }
 
         public IDataServiceQuery<T> CreateQuery<T>(string entitySetName, IDictionary<string, object> queryOptions)
@@ -161,12 +120,12 @@ namespace NuGet
 
         public bool SupportsServiceMethod(string methodName)
         {
-            return _serviceMetadata != null && ServiceMetadata.SupportedMethodNames.Contains(methodName);
+            return ServiceMetadata != null && ServiceMetadata.SupportedMethodNames.Contains(methodName);
         }
 
         public bool SupportsProperty(string propertyName)
         {
-            return _serviceMetadata != null && ServiceMetadata.SupportedProperties.Contains(propertyName);
+            return ServiceMetadata != null && ServiceMetadata.SupportedProperties.Contains(propertyName);
         }
 
         internal sealed class DataServiceMetadata
@@ -174,6 +133,55 @@ namespace NuGet
             public HashSet<string> SupportedMethodNames { get; set; }
 
             public HashSet<string> SupportedProperties { get; set; }
+        }
+
+        private string GetServiceMetadataKey()
+        {
+            return MetadataKey + _metadataUri.OriginalString;
+        }
+
+        private static DataServiceMetadata GetDataServiceMetadata(Uri metadataUri)
+        {
+            if (metadataUri == null)
+            {
+                return null;
+            }
+
+            // Make a request to the metadata uri and get the schema
+            var client = new HttpClient(metadataUri);
+            byte[] data = client.DownloadData();
+
+            if (data == null)
+            {
+                return null;
+            }
+
+            string schema = Encoding.UTF8.GetString(data);
+
+            return ExtractMetadataFromSchema(schema);
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "If the docuument is in fails to parse in any way, we want to not fail.")]
+        internal static DataServiceMetadata ExtractMetadataFromSchema(string schema)
+        {
+            if (String.IsNullOrEmpty(schema))
+            {
+                return null;
+            }
+
+            XDocument schemaDocument;
+
+            try
+            {
+                schemaDocument = XDocument.Parse(schema);
+            }
+            catch
+            {
+                // If the schema is malformed (for some reason) then just return empty list
+                return null;
+            }
+
+            return ExtractMetadataInternal(schemaDocument);
         }
 
         private static DataServiceMetadata ExtractMetadataInternal(XDocument schemaDocument)

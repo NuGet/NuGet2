@@ -13,14 +13,20 @@ namespace NuGet
     /// </summary>
     public class RedirectedHttpClient : HttpClient
     {
-        private Lazy<IHttpClient> _cachedClient;
+        private const string RedirectedClientCacheKey = "RedirectedHttpClient|";
         private readonly Uri _originalUri;
+        private readonly MemoryCache _memoryCache;
 
         public RedirectedHttpClient(Uri uri)
+            : this(uri, MemoryCache.Instance)
+        {
+        }
+
+        public RedirectedHttpClient(Uri uri, MemoryCache memoryCache) 
             : base(uri)
         {
             _originalUri = uri;
-            _cachedClient = new Lazy<IHttpClient>(EnsureClient);
+            _memoryCache = memoryCache;
         }
 
         public override WebResponse GetResponse()
@@ -36,30 +42,36 @@ namespace NuGet
             }
         }
 
-        private IHttpClient CachedClient
+        internal IHttpClient CachedClient
         {
             get
             {
-                // Reset the Lazy IHttpClient instance if we catch an Exception so that
+                string cacheKey = GetCacheKey();
+                // Reset the IHttpClient instance if we catch an Exception so that
                 // subsequent requests are able to try and create it again in case there
                 // was some issue with authentication or some other request related configuration
                 // If we don't do it here then the exception is always thrown as soon as we
-                // try to access _cachedClient.Value property.
+                // try to access the cached value property since it's backed up by Lazy<T>.
                 try
                 {
-                    return _cachedClient.Value;
+                    return _memoryCache.GetOrAdd(cacheKey, EnsureClient, TimeSpan.FromHours(1));
                 }
                 catch (Exception)
                 {
-                    // Re-initialize the lazy object and throw the exception so that we can
+                    // Re-initialize the cache and throw the exception so that we can 
                     // see what happened.
-                    _cachedClient = new Lazy<IHttpClient>(EnsureClient);
+                    _memoryCache.Remove(cacheKey);
                     throw;
                 }
             }
         }
 
-        private IHttpClient EnsureClient()
+        private string GetCacheKey()
+        {
+            return RedirectedClientCacheKey + _originalUri.OriginalString;
+        }
+
+        protected internal virtual IHttpClient EnsureClient()
         {
             var originalClient = new HttpClient(_originalUri);
             return new HttpClient(GetResponseUri(originalClient));
