@@ -164,8 +164,9 @@ namespace NuGet.Dialog.Test
             var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
 
             // Assert
-            Assert.Equal(1, packages.Count);
-            AssertPackage(packages[0], "B", "2.0");
+            Assert.Equal(2, packages.Count);
+            AssertPackage(packages[0], "A", "1.5");
+            AssertPackage(packages[1], "B", "2.0");
         }
 
         private static void AssertPackage(IPackage package, string id, string version = null)

@@ -384,10 +384,9 @@ namespace NuGet
                                                                             .ToLookup(package => package.Id, StringComparer.OrdinalIgnoreCase);
 
             var updates = from package in packageList
-                          let supportedFrameworks = package.GetSupportedFrameworks().ToArray()
                           from candidate in sourcePackages[package.Id]
                           where (candidate.Version > package.Version) &&
-                                 SupportsTargetFrameworks(targetFramework, supportedFrameworks)
+                                 SupportsTargetFrameworks(targetFramework, candidate)
                           select candidate;
 
             if (!includeAllVersions)
@@ -397,9 +396,9 @@ namespace NuGet
             return updates;
         }
 
-        private static bool SupportsTargetFrameworks(IEnumerable<FrameworkName> targetFramework, IEnumerable<FrameworkName> packageFrameworks)
+        private static bool SupportsTargetFrameworks(IEnumerable<FrameworkName> targetFramework, IPackage package)
         {
-            return targetFramework.IsEmpty() || targetFramework.Any(t => VersionUtility.IsCompatible(t, packageFrameworks));
+            return targetFramework.IsEmpty() || targetFramework.Any(t => VersionUtility.IsCompatible(t, package.GetSupportedFrameworks()));
         }
 
         public static IPackageRepository Clone(this IPackageRepository repository)
