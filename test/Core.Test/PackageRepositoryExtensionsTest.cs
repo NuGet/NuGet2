@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading;
 using Moq;
 using NuGet.Test.Mocks;
@@ -13,7 +14,7 @@ namespace NuGet.Test
         public void FindPackagesByIdUsesSearchableRepositoryIfAvailable()
         {
             // Arrange
-            var repository = new Mock<ISearchableRepository>();
+            var repository = new Mock<IServiceBasedRepository>();
             repository.Setup(p => p.FindPackagesById("A")).Returns(new IPackage[0]).Verifiable();
 
             // Act
@@ -47,7 +48,7 @@ namespace NuGet.Test
         {
             var turkeyCulture = new CultureInfo("tr-TR");
             string smallPackageName = "YUI".ToLower(turkeyCulture);
-            
+
             // Arrange
             var packages = new IPackage[] 
             { 
@@ -65,7 +66,7 @@ namespace NuGet.Test
             {
                 // simulate running on Turkish locale
                 Thread.CurrentThread.CurrentCulture = turkeyCulture;
-                
+
                 // Act
                 // notice the lowercase Turkish I character in the packageId to search for
                 var foundPackages = PackageRepositoryExtensions.FindPackagesById(repository.Object, "yuı").ToList();
@@ -97,7 +98,8 @@ namespace NuGet.Test
             };
 
             // Act
-            var foundPackages = PackageRepositoryExtensions.GetUpdates(sourceRepository, packages, includePrerelease: true, includeAllVersions: true).ToList();
+            var foundPackages = PackageRepositoryExtensions.GetUpdates(sourceRepository, packages, includePrerelease: true, targetFramework: Enumerable.Empty<FrameworkName>(),
+                                                                       includeAllVersions: true).ToList();
 
             // Assert
             Assert.Equal(3, foundPackages.Count);

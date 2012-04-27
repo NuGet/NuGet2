@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
@@ -206,7 +207,7 @@ namespace NuGet.Test
             // Arrange
             var repo = new Mock<MockPackageRepository>(MockBehavior.Strict);
             repo.Setup(m => m.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
-            repo.As<ISearchableRepository>().Setup(m => m.Search(It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), false))
+            repo.As<IServiceBasedRepository>().Setup(m => m.Search(It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), false))
                                             .Returns(new[] { PackageUtility.CreatePackage("A") }.AsQueryable());
 
             // Act

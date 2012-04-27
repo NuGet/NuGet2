@@ -337,14 +337,7 @@ namespace NuGet.Dialog.Providers
 
                 if (CollapseVersions)
                 {
-                    if (Provider.IncludePrerelease && SupportsPrereleasePackages)
-                    {
-                        query = query.Where(p => p.IsAbsoluteLatestVersion);
-                    }
-                    else
-                    {
-                        query = query.Where(p => p.IsLatestVersion);
-                    }
+                    query = CollapsePackageVersions(query);
                 }
 
                 token.ThrowIfCancellationRequested();
@@ -384,6 +377,18 @@ namespace NuGet.Dialog.Providers
             token.ThrowIfCancellationRequested();
 
             return new LoadPageResult(packages, pageNumber, _totalCount);
+        }
+
+        protected virtual IQueryable<IPackage> CollapsePackageVersions(IQueryable<IPackage> packages)
+        {
+            if (Provider.IncludePrerelease && SupportsPrereleasePackages)
+            {
+                return packages.Where(p => p.IsAbsoluteLatestVersion);
+            }
+            else
+            {
+                return packages.Where(p => p.IsLatestVersion);
+            }
         }
 
         private IOrderedQueryable<IPackage> ApplyOrdering(IQueryable<IPackage> query)

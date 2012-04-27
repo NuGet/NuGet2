@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
@@ -362,6 +363,55 @@ namespace NuGet.Test
 
             // Assert
             Assert.True(exists);
+        }
+
+        [Fact]
+        public void GetUpdatesReturnsAggregateOfUpdates()
+        {
+            // Arrange
+            var package_10 = PackageUtility.CreatePackage("A", "1.0");
+            var package_11 = PackageUtility.CreatePackage("A", "1.1");
+            var package_12 = PackageUtility.CreatePackage("A", "1.2");
+
+            var repo1 = new MockPackageRepository();
+            repo1.Add(package_11);
+            var repo2 = new MockPackageRepository();
+            repo2.Add(package_12);
+
+            var aggregateRepository = new AggregateRepository(new[] { repo1, repo2 });
+
+            // Act
+            var updates = aggregateRepository.GetUpdates(new[] { package_10 }, false, includeAllVersions: true);
+
+            // Assert
+            Assert.Equal(2, updates.Count());
+            Assert.Same(package_11, updates.ElementAt(0));
+            Assert.Same(package_12, updates.ElementAt(1));
+        }
+
+        [Fact]
+        public void GetUpdatesReturnsDistinctSetOfPackages()
+        {
+            // Arrange
+            var package_10 = PackageUtility.CreatePackage("A", "1.0");
+            var package_11 = PackageUtility.CreatePackage("A", "1.1");
+            var package_12 = PackageUtility.CreatePackage("A", "1.2");
+
+            var repo1 = new MockPackageRepository();
+            repo1.Add(package_12);
+            repo1.Add(package_11);
+            var repo2 = new MockPackageRepository();
+            repo2.Add(package_12);
+
+            var aggregateRepository = new AggregateRepository(new[] { repo1, repo2 });
+
+            // Act
+            var updates = aggregateRepository.GetUpdates(new[] { package_10 }, includePrerelease: false, includeAllVersions: true);
+
+            // Assert
+            Assert.Equal(2, updates.Count());
+            Assert.Same(package_11, updates.ElementAt(0));
+            Assert.Same(package_12, updates.ElementAt(1));
         }
 
         private static IEnumerable<IPackage> GetPackagesWithException()

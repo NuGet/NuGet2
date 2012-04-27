@@ -52,17 +52,22 @@ namespace NuGet.PowerShell.Commands
 
         protected override IQueryable<IPackage> GetPackages(IPackageRepository sourceRepository)
         {
-            var packages = sourceRepository.GetPackages();
+            IQueryable<IPackage> packages;
             if (!String.IsNullOrEmpty(Filter))
             {
                 if (ExactMatch)
                 {
-                    packages = packages.Where(p => p.Id.ToLower() == Filter.ToLower());
+                    packages = sourceRepository.FindPackagesById(Filter).AsQueryable();
                 }
                 else
                 {
-                    packages = packages.Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
+                    packages = sourceRepository.GetPackages()
+                                               .Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
                 }
+            }
+            else
+            {
+                packages = sourceRepository.GetPackages();
             }
 
             return packages.OrderByDescending(p => p.DownloadCount)
@@ -78,10 +83,10 @@ namespace NuGet.PowerShell.Commands
 
             if (!String.IsNullOrEmpty(Filter))
             {
-                packagesToUpdate = packagesToUpdate.Where(p => p.Id.ToLower().StartsWith(Filter.ToLower()));
+                packagesToUpdate = packagesToUpdate.Where(p => p.Id.StartsWith(Filter, StringComparison.OrdinalIgnoreCase));
             }
 
-            return sourceRepository.GetUpdates(packagesToUpdate, IncludePrerelease, AllVersions)
+            return sourceRepository.GetUpdates(packagesToUpdate, IncludePrerelease, includeAllVersions: AllVersions)
                                    .OrderByDescending(p => p.DownloadCount)
                                    .ThenBy(p => p.Id)
                                    .AsQueryable();

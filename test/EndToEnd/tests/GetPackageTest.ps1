@@ -29,8 +29,8 @@ function Test-GetPackageWithUpdatesListsUpdates {
     $p = New-WebApplication
     
     # Act
-    Install-Package Antlr -Version 3.1.1 -Project $p.Name
-    Install-Package jQuery -Version 1.4.1 -Project $p.Name    
+    Install-Package NuGet.Core -Version 1.6.0 -Project $p.Name
+    Install-Package NuGet.CommandLine -Version 1.6.0 -Project $p.Name    
     $packages = Get-Package -Updates
     
     # Assert

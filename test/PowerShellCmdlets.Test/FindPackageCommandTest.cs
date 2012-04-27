@@ -1,16 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
+using System.Runtime.Versioning;
 using Moq;
+using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Test;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.PowerShell.Commands.Test
 {
-
     using PackageUtility = NuGet.Test.PackageUtility;
-
 
     public class FindPackageCommandTest
     {
@@ -99,6 +100,37 @@ namespace NuGet.PowerShell.Commands.Test
             AssertPackageResultsEqual(packages.First(), new { Id = "Pack2", Version = new SemanticVersion("1.2") });
         }
 
+        [Theory]
+        [InlineData(new object[] { false, false })]
+        [InlineData(new object[] { false, true })]
+        [InlineData(new object[] { true, false })]
+        [InlineData(new object[] { true, true })]
+        public void FindPackageReturnsUpdatesForServiceBasedRepositories(bool prerelease, bool allVersions)
+        {
+            // Arrange 
+            var updates = new[] { 
+                PackageUtility.CreatePackage("Pack2", "1.3"), 
+                PackageUtility.CreatePackage("Pack2", "1.4")
+            };
+            var packageRepository = new Mock<IServiceBasedRepository>(MockBehavior.Strict);
+            packageRepository.Setup(s => s.GetUpdates(It.IsAny<IEnumerable<IPackage>>(), prerelease, allVersions, It.IsAny<IEnumerable<FrameworkName>>()))
+                             .Returns(updates)
+                             .Verifiable();
+
+            var cmdlet = BuildCmdlet(repository: packageRepository.As<IPackageRepository>().Object);
+            cmdlet.Source = "foo";
+            cmdlet.Updates = true;
+            cmdlet.Filter = "Pac";
+            cmdlet.AllVersions = allVersions;
+            cmdlet.IncludePrerelease = prerelease;
+
+            // Act
+            var packages = cmdlet.GetResults<dynamic>();
+
+            // Assert
+            packageRepository.Verify();
+        }
+
         [Fact]
         public void FindPackageReturnsAllVersionsForSpecificPackage()
         {
@@ -110,8 +142,8 @@ namespace NuGet.PowerShell.Commands.Test
                 PackageUtility.CreatePackage("Not-Awesome", "0.6", description: "Awesome"),
             };
 
-
-            var cmdlet = BuildCmdlet(packages: packages);
+            var repository = GetPackageRepository(packages);
+            var cmdlet = BuildCmdlet(repository: repository);
             cmdlet.Filter = "Awesome";
             cmdlet.Source = "foo";
 
@@ -135,8 +167,8 @@ namespace NuGet.PowerShell.Commands.Test
                 PackageUtility.CreatePackage("Not-Awesome", "0.6", description: "Awesome"),
             };
 
-
-            var cmdlet = BuildCmdlet(packages: packages);
+            var repository = GetPackageRepository(packages);
+            var cmdlet = BuildCmdlet(repository: repository);
             cmdlet.Filter = "Awesome";
             cmdlet.Source = "foosource";
 
@@ -161,8 +193,8 @@ namespace NuGet.PowerShell.Commands.Test
                 PackageUtility.CreatePackage("Not-Awesome", "0.6", description: "Awesome"),
             };
 
-
-            var cmdlet = BuildCmdlet(packages: packages);
+            var repository = GetPackageRepository(packages);
+            var cmdlet = BuildCmdlet(repository: repository);
             cmdlet.Filter = "Awe";
             cmdlet.Source = "foo";
 
@@ -188,8 +220,8 @@ namespace NuGet.PowerShell.Commands.Test
                 PackageUtility.CreatePackage("Not-Awesome", "0.6", description: "Awesome"),
             };
 
-
-            var cmdlet = BuildCmdlet(packages: packages);
+            var repository = GetPackageRepository(packages);
+            var cmdlet = BuildCmdlet(repository: repository);
             cmdlet.Filter = "Awe";
             cmdlet.Source = "foosource";
 
@@ -215,8 +247,8 @@ namespace NuGet.PowerShell.Commands.Test
                 PackageUtility.CreatePackage("Not-Awesome", "0.6", description: "Awesome"),
             };
 
-
-            var cmdlet = BuildCmdlet(packages: packages);
+            var repository = GetPackageRepository(packages);
+            var cmdlet = BuildCmdlet(repository: repository);
             cmdlet.ExactMatch = true;
             cmdlet.Filter = "Awesome";
             cmdlet.Source = "foo";
@@ -242,7 +274,8 @@ namespace NuGet.PowerShell.Commands.Test
                 PackageUtility.CreatePackage("Not-Awesome", "0.6", description: "Awesome"),
             };
 
-            var cmdlet = BuildCmdlet(packages: packages);
+            var repository = GetPackageRepository(packages);
+            var cmdlet = BuildCmdlet(repository: repository);
             cmdlet.ExactMatch = true;
             cmdlet.Filter = "Awesome";
             cmdlet.Source = "foosource";
@@ -272,12 +305,13 @@ namespace NuGet.PowerShell.Commands.Test
             Assert.Equal(a.Version, b.Version);
         }
 
-        private static FindPackageCommand BuildCmdlet(bool isSolutionOpen = true, IEnumerable<IPackage> packages = null)
+        private static FindPackageCommand BuildCmdlet(bool isSolutionOpen = true, IPackageRepository repository = null)
         {
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(GetPackageManager);
             return new FindPackageCommand(
-                GetRepositoryFactory(packages),
+                GetRepositoryFactory(repository),
                 GetSourceProvider(),
                 TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen),
                 packageManagerFactory.Object,
@@ -285,15 +319,21 @@ namespace NuGet.PowerShell.Commands.Test
                 null);
         }
 
-        private static IPackageRepositoryFactory GetRepositoryFactory(IEnumerable<IPackage> packages = null)
+        private static IPackageRepository GetPackageRepository(IEnumerable<IPackage> packages = null)
         {
-            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
-            var repository = new Mock<IPackageRepository>();
+            var repository = new MockPackageRepository();
             packages = packages ?? new[] { PackageUtility.CreatePackage("P1", "1.4"), PackageUtility.CreatePackage("P6") };
-            repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
+            repository.AddRange(packages);
+            return repository;
+        }
 
-            repositoryFactory.Setup(c => c.CreateRepository("foosource")).Returns(repository.Object);
-            repositoryFactory.Setup(c => c.CreateRepository("foo")).Returns(repository.Object);
+        private static IPackageRepositoryFactory GetRepositoryFactory(IPackageRepository repository = null)
+        {
+            repository = repository ?? GetPackageRepository();
+
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(c => c.CreateRepository("foosource")).Returns(repository);
+            repositoryFactory.Setup(c => c.CreateRepository("foo")).Returns(repository);
 
             return repositoryFactory.Object;
         }

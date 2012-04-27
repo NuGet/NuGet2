@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 
 namespace NuGet.Dialog.Providers
 {
-    public class LazyRepository : IPackageRepository, ISearchableRepository
+    public class LazyRepository : IPackageRepository, IServiceBasedRepository
     {
         private readonly Lazy<IPackageRepository> _repository;
 
@@ -60,6 +61,11 @@ namespace NuGet.Dialog.Providers
         public IEnumerable<IPackage> FindPackagesById(string packageId)
         {
             return Repository.FindPackagesById(packageId);
+        }
+
+        public IEnumerable<IPackage> GetUpdates(IEnumerable<IPackage> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFramework)
+        {
+            return Repository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFramework);
         }
     }
 }

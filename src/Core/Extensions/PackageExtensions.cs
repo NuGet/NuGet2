@@ -200,6 +200,16 @@ namespace NuGet
             return source.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
         }
 
+
+        /// <summary>
+        /// Collapses the packages by Id picking up the highest version for each Id that it encounters
+        /// </summary>
+        internal static IEnumerable<IPackage> CollapseById(this IEnumerable<IPackage> source)
+        {
+            return source.GroupBy(p => p.Id, StringComparer.OrdinalIgnoreCase)
+                         .Select(g => g.OrderByDescending(p => p.Version).First());
+        }
+
         public static IEnumerable<IPackage> FilterByPrerelease(this IEnumerable<IPackage> packages, bool allowPrerelease)
         {
             if (packages == null)

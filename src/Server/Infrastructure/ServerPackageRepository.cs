@@ -90,6 +90,11 @@ namespace NuGet.Server.Infrastructure
             return localRepository.FindPackagesById(packageId);
         }
 
+        public IEnumerable<IPackage> GetUpdates(IEnumerable<IPackage> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFramework)
+        {
+            return this.GetUpdatesCore(packages, includePrerelease, includeAllVersions, targetFramework);
+        }
+
         private bool IsCompatible(FrameworkName frameworkName, IPackage package)
         {
             var packageData = _derivedDataLookup[package];
