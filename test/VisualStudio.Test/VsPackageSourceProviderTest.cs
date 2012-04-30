@@ -203,7 +203,7 @@ namespace NuGet.VisualStudio.Test
             var source = provider.ActivePackageSource;
 
             // Assert
-            Assert.Equal("Visual Studio Express for Windows 8 official package source", source.Name);
+            Assert.Equal("Windows 8 Packages", source.Name);
         }
 
         [Fact]
@@ -244,7 +244,7 @@ namespace NuGet.VisualStudio.Test
             var provider = new VsPackageSourceProvider(userSettings.Object, packageSourceProvider.Object, vsShellInfo.Object);
 
             // Act
-            provider.ActivePackageSource = new PackageSource(NuGetConstants.VisualStudioExpressForWindows8FeedUrl, "Visual Studio Express for Windows 8 official package source");
+            provider.ActivePackageSource = new PackageSource(NuGetConstants.VisualStudioExpressForWindows8FeedUrl, "Windows 8 packages");
 
             // Assert
             userSettings.Verify(_ => _.SetValue(It.IsAny<string>(), "NuGet official package source", It.IsAny<string>()));
@@ -259,7 +259,7 @@ namespace NuGet.VisualStudio.Test
             packageSourceProvider.Setup(_ => _.LoadPackageSources()).Returns(new[]
             {
                 new PackageSource("theFirstSource", "theFirstFeed"),
-                new PackageSource("https://nuget.org/api/v2/curated-feeds/express-for-windows8/", "Visual Studio Express for Windows 8 official package source"),
+                new PackageSource("https://nuget.org/api/v2/curated-feeds/windows8-packages/", "Visual Studio Express for Windows 8 official package source"),
                 new PackageSource("theThirdSource", "theThirdFeed"),
             });
             var vsShellInfo = new Mock<IVsShellInfo>();
@@ -293,7 +293,7 @@ namespace NuGet.VisualStudio.Test
             var sources = provider.LoadPackageSources();
 
             // Assert
-            Assert.Equal("Visual Studio Express for Windows 8 official package source", sources.ElementAt(1).Name);
+            Assert.Equal("Windows 8 Packages", sources.ElementAt(1).Name);
         }
 
         [Fact]

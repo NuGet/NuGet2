@@ -612,7 +612,7 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Visual Studio Express for Windows 8 official package source.
+        ///   Looks up a localized string similar to Windows 8 Packages.
         /// </summary>
         public static string VisualStudioExpressForWindows8SourceName {
             get {

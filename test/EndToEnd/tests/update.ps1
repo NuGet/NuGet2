@@ -430,11 +430,11 @@ function Test-UpdatePackageInAllProjects {
     Update-Package Ninject
 
     # Assert
-    Assert-SolutionPackage Ninject 2.2.1.4
-    Assert-Package $p1 Ninject 2.2.1.4
-    Assert-Package $p2 Ninject 2.2.1.4
-    Assert-Package $p3 Ninject 2.2.1.4
-    Assert-Package $p4 Ninject 2.2.1.4
+    Assert-SolutionPackage Ninject 3.0.0.15
+    Assert-Package $p1 Ninject 3.0.0.15
+    Assert-Package $p2 Ninject 3.0.0.15
+    Assert-Package $p3 Ninject 3.0.0.15
+    Assert-Package $p4 Ninject 3.0.0.15
     Assert-Null (Get-SolutionPackage Ninject 2.0.1.0)
     Assert-Null (Get-SolutionPackage Ninject 2.1.0.76)
     Assert-Null (Get-SolutionPackage Ninject 2.2.0.0)
