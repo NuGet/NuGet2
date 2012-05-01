@@ -42,13 +42,27 @@ namespace NuGet
 
         private static Regex WildcardToRegex(string wildcard)
         {
-            return new Regex('^'
-               + Regex.Escape(wildcard)
-                .Replace(@"\*\*\\", ".*") //For recursive wildcards \**\, include the current directory.
-                .Replace(@"\*\*", ".*") // For recursive wildcards that don't end in a slash e.g. **.txt would be treated as a .txt file at any depth
-                .Replace(@"\*", @"[^\\]*(\\)?") // For non recursive searches, limit it any character that is not a directory separator
-                .Replace(@"\?", ".") // ? translates to a single any character
-               + '$', RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
+            var pattern = Regex.Escape(wildcard);
+            if (Path.DirectorySeparatorChar == '/')
+            {
+                // regex wildcard adjustments for *nix-style file systems
+                pattern = pattern
+                    .Replace(@"\*\*/", ".*") //For recursive wildcards /**/, include the current directory.
+                    .Replace(@"\*\*", ".*") // For recursive wildcards that don't end in a slash e.g. **.txt would be treated as a .txt file at any depth
+                    .Replace(@"\*", @"[^/]*(/)?") // For non recursive searches, limit it any character that is not a directory separator
+                    .Replace(@"\?", "."); // ? translates to a single any character
+            }
+            else
+            {
+                // regex wildcard adjustments for Windows-style file systems
+                pattern = pattern
+                    .Replace(@"\*\*\\", ".*") //For recursive wildcards \**\, include the current directory.
+                    .Replace(@"\*\*", ".*") // For recursive wildcards that don't end in a slash e.g. **.txt would be treated as a .txt file at any depth
+                    .Replace(@"\*", @"[^\\]*(\\)?") // For non recursive searches, limit it any character that is not a directory separator
+                    .Replace(@"\?", "."); // ? translates to a single any character
+            }
+            
+            return new Regex('^' + pattern + '$', RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
         }
 
         internal static IEnumerable<PhysicalPackageFile> ResolveSearchPattern(string basePath, string searchPath, string targetPath)
@@ -96,7 +110,7 @@ namespace NuGet
             }
 
             // Starting from the base path, enumerate over all files and match it using the wildcard expression provided by the user.
-            return from file in Directory.EnumerateFiles(normalizedBasePath, "*.*", searchOption)
+            return from file in Directory.GetFiles(normalizedBasePath, "*.*", searchOption)
                    where searchRegex.IsMatch(file)
                    select file;
         }
