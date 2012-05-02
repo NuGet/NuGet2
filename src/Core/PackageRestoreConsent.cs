@@ -35,9 +35,11 @@ namespace NuGet
         {
             get
             {
-                string value = _settings.GetValue(PackageRestoreSection, PackageRestoreConsentKey) ??
-                               _environmentReader.GetEnvironmentVariable(EnvironmentVariableName);
-
+                string value = _settings.GetValue(PackageRestoreSection, PackageRestoreConsentKey).SafeTrim();
+                if (String.IsNullOrEmpty(value))
+                {
+                    value = _environmentReader.GetEnvironmentVariable(EnvironmentVariableName).SafeTrim();
+                }
 
                 if (!String.IsNullOrEmpty(value))
                 {
