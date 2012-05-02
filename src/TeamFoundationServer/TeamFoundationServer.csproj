@@ -36,9 +36,11 @@
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="ITfsPendingChange.cs" />
     <Compile Include="ITfsWorkspace.cs" />
     <Compile Include="ProviderConstants.cs" />
     <Compile Include="TfsFileSystem.cs" />
+    <Compile Include="TfsPendingChangeWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TfsSourceControlFileSystemProvider.cs" />
     <Compile Include="TfsWorkspaceWrapper.cs" />

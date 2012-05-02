@@ -74,6 +74,7 @@
         <TestProjects Include="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" />
         <TestProjects Include="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" />
         <TestProjects Include="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" />
+        <TestProjects Include="$(NuGetTestRoot)\TeamFoundationServer.Test\TeamFoundationServer.Test.csproj" />
         <TestProjects Include="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" />
     </ItemGroup>
     

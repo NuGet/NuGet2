@@ -10,8 +10,14 @@ namespace NuGet.TeamFoundationServer
     public class TfsWorkspaceWrapper : ITfsWorkspace
     {
         private readonly Workspace _workspace;
+
         public TfsWorkspaceWrapper(Workspace workspace)
         {
+            if (workspace == null)
+            {
+                throw new ArgumentNullException("workspace");
+            }
+
             _workspace = workspace;
         }
 
@@ -27,8 +33,13 @@ namespace NuGet.TeamFoundationServer
 
         public bool PendAdd(IEnumerable<string> fullPaths)
         {
+            if (fullPaths == null)
+            {
+                throw new ArgumentNullException("fullPaths");
+            }
+
             var pathsArray = fullPaths.ToArray();
-            if (pathsArray.Any())
+            if (pathsArray.Length > 0)
             {
                 return _workspace.PendAdd(pathsArray, isRecursive: false) > 0;
             }
@@ -90,14 +101,16 @@ namespace NuGet.TeamFoundationServer
                                                   .Items.Select(i => TryGetLocalItemForServerItem(i.ServerItem));
         }
 
-        public IEnumerable<PendingChange> GetPendingChanges(string fullPath)
+        public IEnumerable<ITfsPendingChange> GetPendingChanges(string fullPath)
         {
-            return _workspace.GetPendingChangesEnumerable(fullPath);
+            return _workspace.GetPendingChangesEnumerable(fullPath)
+                .Select(p => new TfsPendingChangeWrapper(p));
         }
 
-        public IEnumerable<PendingChange> GetPendingChanges(string fullPath, RecursionType recursionType)
+        public IEnumerable<ITfsPendingChange> GetPendingChanges(string fullPath, RecursionType recursionType)
         {
-            return _workspace.GetPendingChangesEnumerable(fullPath, recursionType);
+            return _workspace.GetPendingChangesEnumerable(fullPath, recursionType)
+                .Select(p => new TfsPendingChangeWrapper(p));
         }
 
         public string GetLocalItemForServerItem(string path)
@@ -110,11 +123,21 @@ namespace NuGet.TeamFoundationServer
             return _workspace.TryGetLocalItemForServerItem(path);
         }
 
-        public void Undo(IEnumerable<PendingChange> pendingChanges)
+        public void Undo(IEnumerable<ITfsPendingChange> pendingChanges)
         {
+            if (pendingChanges == null)
+            {
+                throw new ArgumentNullException("pendingChanges");
+            }
+
             if (pendingChanges.Any())
             {
-                _workspace.Undo(pendingChanges.ToArray());
+                var wrappedChanges = pendingChanges
+                    .OfType<TfsPendingChangeWrapper>()
+                    .Select((p) => p.PendingChange)
+                    .ToArray();
+
+                _workspace.Undo(wrappedChanges);
             }
         }
 
@@ -125,8 +148,13 @@ namespace NuGet.TeamFoundationServer
 
         public bool PendDelete(IEnumerable<string> fullPaths, RecursionType recursionType)
         {
+            if (fullPaths == null)
+            {
+                throw new ArgumentNullException("fullPaths");
+            }
+
             var pathsArray = fullPaths.ToArray();
-            if (pathsArray.Any())
+            if (pathsArray.Length > 0)
             {
                 return _workspace.PendDelete(pathsArray, recursionType) > 0;
             }

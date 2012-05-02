@@ -28,6 +28,12 @@
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\TeamFoundationServer\ITfsPendingChange.cs">
+      <Link>ITfsPendingChange.cs</Link>
+    </Compile>
+    <Compile Include="..\TeamFoundationServer\TfsPendingChangeWrapper.cs">
+      <Link>TfsPendingChangeWrapper.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\TeamFoundationServer\GlobalSuppressions.cs" />
     <Compile Include="..\TeamFoundationServer\ITfsWorkspace.cs" />

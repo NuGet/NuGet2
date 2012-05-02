@@ -17,6 +17,11 @@ namespace NuGet.TeamFoundationServer
         public TfsFileSystem(ITfsWorkspace workspace, string path)
             : base(path)
         {
+            if (workspace == null)
+            {
+                throw new ArgumentNullException("workspace");
+            }
+
             Workspace = workspace;
         }
 
@@ -24,6 +29,11 @@ namespace NuGet.TeamFoundationServer
 
         public override void AddFile(string path, Stream stream)
         {
+            if (stream == null)
+            {
+                throw new ArgumentNullException("stream");
+            }
+
             string fullPath = GetFullPath(path);
 
             // See if there are any pending changes for this file
@@ -64,8 +74,19 @@ namespace NuGet.TeamFoundationServer
             }
         }
 
+        public override bool FileExists(string path)
+        {
+            var fullPath = GetFullPath(path);
+            return base.FileExists(path) && !Workspace.GetPendingChanges(fullPath, RecursionType.None).Any(c => c.IsDelete);
+        }
+
         public bool BindToSourceControl(IEnumerable<string> paths)
         {
+            if (paths == null)
+            {
+                throw new ArgumentNullException("paths");
+            }
+
             paths = paths.Select(GetFullPath);
             return Workspace.PendAdd(paths);
         }
@@ -88,7 +109,8 @@ namespace NuGet.TeamFoundationServer
         {
             string fullPath = GetFullPath(path);
 
-            var pendingChanges = Workspace.GetPendingChanges(fullPath);
+            var pendingChanges = Workspace.GetPendingChanges(fullPath, recursionType);
+
             // If there are any pending deletes then do nothing
             if (pendingChanges.Any(c => c.IsDelete))
             {
@@ -110,6 +132,11 @@ namespace NuGet.TeamFoundationServer
         {
             if (action == PackageAction.Install)
             {
+                if (batch == null)
+                {
+                    throw new ArgumentNullException("batch");
+                }
+
                 var batchSet = new HashSet<string>(batch.Select(GetFullPath), StringComparer.OrdinalIgnoreCase);
                 var batchFolders = batchSet.Select(Path.GetDirectoryName)
                                       .Distinct()

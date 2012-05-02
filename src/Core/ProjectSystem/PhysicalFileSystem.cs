@@ -51,9 +51,16 @@ namespace NuGet
 
         public virtual void AddFile(string path, Stream stream)
         {
+            if (stream == null)
+            {
+                throw new ArgumentNullException("stream");
+            }
+
             EnsureDirectory(Path.GetDirectoryName(path));
 
-            using (Stream outputStream = File.Create(GetFullPath(path)))
+            string fullPath = GetFullPath(path);
+
+            using (Stream outputStream = File.Create(fullPath))
             {
                 stream.CopyTo(outputStream);
             }

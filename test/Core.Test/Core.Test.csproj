@@ -85,6 +85,7 @@
     <Compile Include="PathResolverTest.cs" />
     <Compile Include="PathUtilityTest.cs" />
     <Compile Include="PathValidatorTest.cs" />
+    <Compile Include="PhysicalFileSystemTest.cs" />
     <Compile Include="ProjectSystemExtensionsTest.cs" />
     <Compile Include="ProxyCacheTest.cs" />
     <Compile Include="RedirectedHttpClientTest.cs" />

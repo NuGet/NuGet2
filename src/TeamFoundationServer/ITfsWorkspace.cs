@@ -17,11 +17,8 @@ namespace NuGet.TeamFoundationServer
         IEnumerable<string> GetItems(string fullPath);
         IEnumerable<string> GetItems(string fullPath, ItemType itemType);
         IEnumerable<string> GetItemsRecursive(string fullPath);
-
-
-        // Change this type to something mockable
-        IEnumerable<PendingChange> GetPendingChanges(string fullPath, RecursionType recursionType);
-        IEnumerable<PendingChange> GetPendingChanges(string fullPath);
-        void Undo(IEnumerable<PendingChange> pendingChanges);
+        IEnumerable<ITfsPendingChange> GetPendingChanges(string fullPath, RecursionType recursionType);
+        IEnumerable<ITfsPendingChange> GetPendingChanges(string fullPath);
+        void Undo(IEnumerable<ITfsPendingChange> pendingChanges);
     }
 }
