@@ -370,8 +370,21 @@ namespace NuGet
             {
                 using (Stream stream = file.GetStream())
                 {
-                    CreatePart(package, file.Path, stream);
+                    try
+                    {
+                        CreatePart(package, file.Path, stream);
+                    }
+                    catch 
+                    {
+                        Console.WriteLine(file.Path);
+                        throw;
+                    }
                 }
+            }
+
+            foreach (var file in package.GetParts().GroupBy(s => s.Uri).Where(_ => _.Count() > 1))
+            {
+                Console.WriteLine(file.Key);
             }
         }
 

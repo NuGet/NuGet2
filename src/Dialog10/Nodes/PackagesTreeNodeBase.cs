@@ -263,7 +263,6 @@ namespace NuGet.Dialog.Providers
                     String.Format(CultureInfo.CurrentCulture, CommonResources.Argument_Must_Be_GreaterThanOrEqualTo, 1));
             }
 
-            Debug.WriteLine("Dialog loading page: " + pageNumber);
             if (_loadingInProgress)
             {
                 return;

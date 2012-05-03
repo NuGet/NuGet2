@@ -128,17 +128,14 @@ namespace NuGet.Test
         public void FindPackageMatchesExactVersionIfSideBySideIsEnabled()
         {
             // Arrange
-            var fileSystem = new Mock<MockProjectSystem> { CallBase = true };
-            fileSystem.Setup(c => c.FileExists(It.Is<string>(a => a.Equals(@"A.1.0\A.1.0.nupkg")))).Returns(false);
-            fileSystem.Setup(c => c.FileExists(It.Is<string>(a => a.Equals(@"A.0.8\A.0.8.nupkg")))).Returns(false);
-            fileSystem.Setup(c => c.FileExists(It.Is<string>(a => a.Equals(@"A.1.1\A.1.1.nupkg")))).Returns(true);
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"A.1.1\A.1.1.nupkg");
 
-            var repository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem.Object, useSideBySidePaths: true), fileSystem.Object, enableCaching: false);
+            var repository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: true), fileSystem, enableCaching: false);
             var searchedPaths = new List<string>();
             Func<string, IPackage> openPackage = p =>
             {
                 searchedPaths.Add(p);
-                string id = Path.GetFileNameWithoutExtension(p);
                 return PackageUtility.CreatePackage("A", "1.1");
             };
 
@@ -155,8 +152,6 @@ namespace NuGet.Test
             Assert.Equal(@"A.1.1\A.1.1.nupkg", searchedPaths.Single());
             Assert.Equal("A", result.Id);
             Assert.Equal(new SemanticVersion("1.1"), result.Version);
-
-            fileSystem.Verify();
         }
 
         [Fact]

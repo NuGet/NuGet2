@@ -92,20 +92,31 @@ namespace NuGet.Test.Mocks
 
         public virtual IEnumerable<string> GetFiles(string path, string filter, bool recursive)
         {
-            Regex matcher = GetFilterRegex(filter);
+            if (String.IsNullOrEmpty(filter) || filter == "*.*")
+            {
+                filter = "*";
+            }
+            
+            // TODO: This is just flaky. We need to make it closer to the implementation that Directory.Enumerate supports perhaps by using PathResolver.
+            var files = GetFiles(path, recursive);
+            if (!filter.Contains("*"))
+            {
+                return files.Where(f => f.Equals(Path.Combine(path, filter), StringComparison.OrdinalIgnoreCase));
+            }
 
-            return GetFiles(path, recursive).Where(f => matcher.IsMatch(f));
+            Regex matcher = GetFilterRegex(filter);
+            return files.Where(f => matcher.IsMatch(f));
         }
 
         private static Regex GetFilterRegex(string wildcard)
         {
-            string pattern = String.Join(String.Empty, wildcard.Split('.').Select(GetPattern));
-            return new Regex(pattern, RegexOptions.IgnoreCase);
+            string pattern = '^' + String.Join(@"\.", wildcard.Split('.').Select(GetPattern)) + '$';
+            return new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
         }
 
         private static string GetPattern(string token)
         {
-            return token == "*" ? @"(.*)" : @"(" + token + ")";
+            return token.Replace("*", "(.*)");
         }
 
         public virtual void DeleteFile(string path)
@@ -145,7 +156,7 @@ namespace NuGet.Test.Mocks
             return Paths.GroupBy(f => Path.GetDirectoryName(f.Key))
                         .SelectMany(g => FileSystemExtensions.GetDirectories(g.Key))
                         .Where(f => !String.IsNullOrEmpty(f) &&
-                               Path.GetDirectoryName(f).Equals(path, StringComparison.OrdinalIgnoreCase))
+                               path.Equals(Path.GetDirectoryName(f), StringComparison.OrdinalIgnoreCase))
                         .Distinct();
         }
 

@@ -8,12 +8,13 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 {
     public class NuGetCommandLineTest : IDisposable, IUseFixture<NugetProgramStatic>
     {
-        private const string NoSpecsfolder = @".\nospecs\";
-        private const string OneSpecfolder = @".\onespec\";
-        private const string TwoSpecsFolder = @".\twospecs\";
-        private const string OutputFolder = @".\output\";
-        private const string SpecificFilesFolder = @".\specific_files\";
-        private const string ProjectFilesFolder = @".\projects\";
+        private static readonly string _testRootDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        private static readonly string NoSpecsfolder = Path.Combine(_testRootDirectory, @"nospecs");
+        private static readonly string OneSpecfolder = Path.Combine(_testRootDirectory, @"onespec");
+        private static readonly string TwoSpecsFolder = Path.Combine(_testRootDirectory, @"twospecs");
+        private static readonly string OutputFolder = Path.Combine(_testRootDirectory, @"output");
+        private static readonly string SpecificFilesFolder = Path.Combine(_testRootDirectory, @"specific_files");
+        private static readonly string ProjectFilesFolder = Path.Combine(_testRootDirectory, @"projects");
 
         private readonly StringWriter consoleOutput;
         private readonly TextWriter originalConsoleOutput;
@@ -22,8 +23,6 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 
         public NuGetCommandLineTest()
         {
-            DeleteDirs();
-
             Directory.CreateDirectory(NoSpecsfolder);
             Directory.CreateDirectory(OneSpecfolder);
             Directory.CreateDirectory(TwoSpecsFolder);
@@ -41,10 +40,14 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 
         public void Dispose()
         {
-            DeleteDirs();
             System.Console.SetOut(originalConsoleOutput);
             System.Console.SetError(originalErrorConsoleOutput);
             Directory.SetCurrentDirectory(startingDirectory);
+            try
+            {
+                Directory.Delete(_testRootDirectory, recursive: true);
+            }
+            catch { }
         }
 
         [Fact]
@@ -1011,11 +1014,11 @@ public class Cl_{0} {{
             WriteProjectFile("foo.aspx", "");
             WriteProjectFile("foo.cs", "public class Foo { }");
 
-             // temporarily enable package restore for the test to pass 
-            string oldEnvironmentVariable = Environment.GetEnvironmentVariable("EnableNuGetPackageRestore", EnvironmentVariableTarget.User);
+            // temporarily enable package restore for the test to pass 
+            string oldEnvironmentVariable = Environment.GetEnvironmentVariable("EnableNuGetPackageRestore", EnvironmentVariableTarget.Process);
             try
             {
-                Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", "1", EnvironmentVariableTarget.User);
+                Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", "1", EnvironmentVariableTarget.Process);
 
                 // packages.config for dependencies  
                 WriteProjectFile("packages.config",
@@ -1074,7 +1077,7 @@ public class Cl_{0} {{
 
         private static string SavePackage(string id, string version)
         {
-            string tempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            string tempPath = Path.Combine(_testRootDirectory, Path.GetRandomFileName());
             Directory.CreateDirectory(tempPath);
             var builder = new PackageBuilder();
             builder.Id = id;
@@ -1314,42 +1317,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion(""{1}"")]
 [assembly: AssemblyFileVersion(""{1}"")]
 ", assemblyName, version, author, description, title);
-        }
-
-        private static void DeleteDirs()
-        {
-            DeleteDir(NoSpecsfolder);
-            DeleteDir(OneSpecfolder);
-            DeleteDir(TwoSpecsFolder);
-            DeleteDir(SpecificFilesFolder);
-            DeleteDir(OutputFolder);
-            DeleteDir(ProjectFilesFolder);
-        }
-
-        private static void DeleteDir(string directory)
-        {
-            try
-            {
-                if (Directory.Exists(directory))
-                {
-                    foreach (var file in Directory.GetFiles(directory))
-                    {
-                        try
-                        {
-                            File.Delete(file);
-                        }
-                        catch (FileNotFoundException)
-                        {
-
-                        }
-                    }
-                    Directory.Delete(directory, recursive: true);
-                }
-            }
-            catch (DirectoryNotFoundException)
-            {
-
-            }
         }
 
         public void SetFixture(NugetProgramStatic data)

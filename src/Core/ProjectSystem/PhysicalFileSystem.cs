@@ -42,6 +42,10 @@ namespace NuGet
 
         public virtual string GetFullPath(string path)
         {
+            if (String.IsNullOrEmpty(path))
+            {
+                return Root;
+            }
             return Path.Combine(Root, path);
         }
 
@@ -124,12 +128,16 @@ namespace NuGet
 
         public virtual IEnumerable<string> GetFiles(string path, bool recursive)
         {
-            return GetFiles(path, "*.*", recursive);
+            return GetFiles(path, null, recursive);
         }
 
         public virtual IEnumerable<string> GetFiles(string path, string filter, bool recursive)
         {
             path = EnsureTrailingSlash(GetFullPath(path));
+            if (String.IsNullOrEmpty(filter))
+            {
+                filter = "*.*";
+            }
             try
             {
                 if (!Directory.Exists(path))

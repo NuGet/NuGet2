@@ -62,6 +62,7 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="CommandRunner.cs" />
+    <Compile Include="Core\LocalPackageRepositoryTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetCommandLineTest.cs" />
     <Compile Include="NuGetCommandLine\NuSpecFileContext.cs" />
     <Compile Include="Core\PathResolverTest.cs" />
