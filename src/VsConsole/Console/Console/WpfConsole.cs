@@ -284,12 +284,13 @@ namespace NuGetConsole.Implementation.Console
             {
                 if (_view == null)
                 {
-                    var textViewRoleSet = Factory.TextEditorFactoryService.CreateTextViewRoleSet(
-                        PredefinedTextViewRoles.Interactive,
-                        PredefinedTextViewRoles.Editable,
-                        PredefinedTextViewRoles.Analyzable);
+					var textViewRoleSet = Factory.TextEditorFactoryService.CreateTextViewRoleSet(
+						PredefinedTextViewRoles.Interactive,
+						PredefinedTextViewRoles.Editable,
+						PredefinedTextViewRoles.Analyzable,
+						PredefinedTextViewRoles.Zoomable);
 
-                    _view = Factory.VsEditorAdaptersFactoryService.CreateVsTextViewAdapter(OleServiceProvider, textViewRoleSet);
+					_view = Factory.VsEditorAdaptersFactoryService.CreateVsTextViewAdapter(OleServiceProvider, textViewRoleSet);
                     _view.Initialize(
                         VsTextBuffer as IVsTextLines,
                         IntPtr.Zero,
