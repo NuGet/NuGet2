@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.IO.Packaging;
+using System.Linq;
 
 namespace NuGet
 {
@@ -24,7 +25,11 @@ namespace NuGet
 
         internal static Uri CreatePartUri(string path)
         {
-            return PackUriHelper.CreatePartUri(new Uri(Uri.EscapeDataString(path), UriKind.Relative));
+            // Only the segments between the path separators should be escaped
+            var segments = path.Split(new[] { "/" }, StringSplitOptions.None)
+                               .Select(Uri.EscapeDataString);
+            var escapedPath = String.Join("/", segments);
+            return PackUriHelper.CreatePartUri(new Uri(escapedPath, UriKind.Relative));
         }
 
         internal static Uri GetRootUri(Uri uri)
