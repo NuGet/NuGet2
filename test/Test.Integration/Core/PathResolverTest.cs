@@ -10,8 +10,9 @@ namespace NuGet.Test.Integration.PathResolver
     /// <summary>
     /// Tests based on scenarios specified in http://nuget.codeplex.com/wikipage?title=File%20Element%20Specification
     /// </summary>
-    public class PathResolverTest
+    public class PathResolverTest : IDisposable
     {
+        private static readonly string _root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
         /// <summary>
         /// Foo.dll at basePath. target="lib"
@@ -1076,6 +1077,15 @@ namespace NuGet.Test.Integration.PathResolver
             Assert.Equal(@"lib\MyProject.dll", package.Files[0].Path);
         }
 
+        public void Dispose()
+        {
+            try
+            {
+                Directory.Delete(_root, recursive: true);
+            }
+            catch { }
+        }
+
         private string CreateExclusionProject()
         {
             return CreateFileSystem(new File("MyProject.csproj"),
@@ -1117,9 +1127,9 @@ namespace NuGet.Test.Integration.PathResolver
         }
 
         //not as elegant as the mstest version as xUnit does not appear to give similar context about the "context" of the test being invoked
-        private string CreateFileSystem(params File[] files)
+        private static string CreateFileSystem(params File[] files)
         {
-            string rootDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            string rootDir = Path.Combine(_root, Path.GetRandomFileName());
             new Dir(rootDir, files).Create();
             return rootDir;
         }
