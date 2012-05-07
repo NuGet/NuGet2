@@ -21,7 +21,6 @@ namespace NuGet.Commands
     {
         private readonly IPackageRepository _cacheRepository;
         private readonly List<string> _sources = new List<string>();
-        private readonly ISettings _configSettings;
 
         [Option(typeof(NuGetResources), "InstallCommandSourceDescription")]
         public ICollection<string> Source
@@ -63,14 +62,13 @@ namespace NuGet.Commands
 
         [ImportingConstructor]
         public InstallCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider)
-            : this(packageRepositoryFactory, sourceProvider, Settings.LoadDefaultSettings(), MachineCache.Default)
+            : this(packageRepositoryFactory, sourceProvider, MachineCache.Default)
         {
         }
 
         protected internal InstallCommand(
             IPackageRepositoryFactory packageRepositoryFactory,
             IPackageSourceProvider sourceProvider,
-            ISettings configSettings,
             IPackageRepository cacheRepository)
         {
             if (packageRepositoryFactory == null)
@@ -83,15 +81,9 @@ namespace NuGet.Commands
                 throw new ArgumentNullException("sourceProvider");
             }
 
-            if (configSettings == null)
-            {
-                throw new ArgumentNullException("configSettings");
-            }
-
             RepositoryFactory = packageRepositoryFactory;
             SourceProvider = sourceProvider;
             _cacheRepository = cacheRepository;
-            _configSettings = configSettings;
         }
 
         public override void ExecuteCommand()
@@ -114,7 +106,7 @@ namespace NuGet.Commands
                 string packageId = Arguments[0];
                 SemanticVersion version = Version != null ? new SemanticVersion(Version) : null;
 
-                bool result = InstallPackage(fileSystem, packageId, version, ignoreDependencies: false, packageRestoreConsent: true);
+                bool result = InstallPackage(fileSystem, packageId, version, ignoreDependencies: false);
                 if (!result)
                 {
                     Console.WriteLine(NuGetResources.InstallCommandPackageAlreadyExists, packageId);
@@ -179,7 +171,6 @@ namespace NuGet.Commands
 
         private bool ExecuteInParallel(IFileSystem fileSystem, List<PackageReference> packageReferences)
         {
-            bool packageRestore = new PackageRestoreConsent(_configSettings).IsGranted;
             int defaultConnectionLimit = ServicePointManager.DefaultConnectionLimit;
             if (packageReferences.Count > defaultConnectionLimit)
             {
@@ -187,7 +178,7 @@ namespace NuGet.Commands
             }
 
             var tasks = packageReferences.Select(package =>
-                            Task.Factory.StartNew(() => InstallPackage(fileSystem, package.Id, package.Version, ignoreDependencies: true, packageRestoreConsent: packageRestore))).ToArray();
+                            Task.Factory.StartNew(() => InstallPackage(fileSystem, package.Id, package.Version, ignoreDependencies: true))).ToArray();
 
             Task.WaitAll(tasks);
             return tasks.All(p => !p.IsFaulted && p.Result);
@@ -197,8 +188,7 @@ namespace NuGet.Commands
             IFileSystem fileSystem,
             string packageId,
             SemanticVersion version,
-            bool ignoreDependencies,
-            bool packageRestoreConsent)
+            bool ignoreDependencies)
         {
             var packageManager = CreatePackageManager(fileSystem);
             if (!AllowMultipleVersions)
@@ -213,8 +203,6 @@ namespace NuGet.Commands
                     }
                     else if (packageManager.SourceRepository.Exists(packageId, version))
                     {
-                        EnsurePackageRestoreConsent(packageRestoreConsent);
-
                         // If the package is already installed, but
                         // (a) the version we require is different from the one that is installed, 
                         // (b) side-by-side is disabled
@@ -235,8 +223,6 @@ namespace NuGet.Commands
                     return false;
                 }
             }
-
-            EnsurePackageRestoreConsent(packageRestoreConsent);
 
             // During package restore with parallel build, multiple projects would try to write to disk simultaneously which results in write contentions.
             // We work around this issue by ensuring only one instance of the exe installs the package.
@@ -271,14 +257,6 @@ namespace NuGet.Commands
             using (fileSystem.OpenFile(configFilePath))
             {
                 // Do nothing
-            }
-        }
-
-        private static void EnsurePackageRestoreConsent(bool packageRestoreConsent)
-        {
-            if (!packageRestoreConsent)
-            {
-                throw new InvalidOperationException(NuGetResources.InstallCommandPackageRestoreConsentNotFound);
             }
         }
 
