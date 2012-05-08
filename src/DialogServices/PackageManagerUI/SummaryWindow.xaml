@@ -23,7 +23,7 @@
     
     <DockPanel Margin="10">
         <TextBlock DockPanel.Dock="Top" Text="{x:Static resources:Resources.Dialog_SummaryErrorMessage}" TextWrapping="Wrap" />
-        <Button DockPanel.Dock="Bottom" HorizontalAlignment="Right" Content="{x:Static resources:Resources.Dialog_OK}" IsDefault="True" IsCancel="True" Margin="6,6,0,3" Padding="4,0" MinWidth="60" Click="OKButtonClicked" />
+        <Button AutomationProperties.AutomationId="OkButton" DockPanel.Dock="Bottom" HorizontalAlignment="Right" Content="{x:Static resources:Resources.Dialog_OK}" IsDefault="True" IsCancel="True" Margin="6,6,0,3" Padding="4,0" MinWidth="60" Click="OKButtonClicked" />
 
         <Border 
             Margin="0,5"

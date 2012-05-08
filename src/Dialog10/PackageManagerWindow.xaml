@@ -110,7 +110,8 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
-            <Button 
+            <Button
+                AutomationProperties.AutomationId="SettingsButton"
                 Grid.Column="0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
@@ -122,6 +123,7 @@
                 Content="{x:Static resources:Resources.Dialog_Settings}" />
 
             <Button 
+                AutomationProperties.AutomationId="CloseButton"
                 Grid.Column="1"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"

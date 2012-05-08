@@ -50,8 +50,8 @@
         <TextBlock x:Name="InstructionText" DockPanel.Dock="Top" TextWrapping="Wrap" Margin="0,0,0,3" />
         
         <UniformGrid DockPanel.Dock="Bottom" HorizontalAlignment="Right" Columns="2">
-            <Button Content="{x:Static resources:Resources.Dialog_OK}" IsDefault="True" Click="OnOKButtonClicked" />
-            <Button Content="{x:Static resources:Resources.Dialog_Cancel}" IsCancel="True" Click="OnCancelButtonClicked" />
+            <Button AutomationProperties.AutomationId="OkButton" Content="{x:Static resources:Resources.Dialog_OK}" IsDefault="True" Click="OnOKButtonClicked" />
+            <Button AutomationProperties.AutomationId="CancelButton" Content="{x:Static resources:Resources.Dialog_Cancel}" IsCancel="True" Click="OnCancelButtonClicked" />
         </UniformGrid>
 
         <TreeView ItemsSource="{Binding ProjectNodes}">
