@@ -1,68 +1,45 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
-using System.IO.Packaging;
-using System.Linq;
 using NuGet;
 
 namespace Bootstrapper
 {
     public class Program
     {
-        private const string NuGetCommandLinePackageId = "nuget.commandline";
-        private const string GalleryUrl = "http://nuget.org/api/v2/";
-        private const string NuGetExeFilePath = "/tools/NuGet.exe";
-
         public static int Main(string[] args)
         {
+            string _exePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"NuGet\NuGet.exe");
             try
             {
-                Console.WriteLine("NuGet bootstrapper {0}", typeof(Program).Assembly.GetName().Version);
-
-                // Setup the proxy for gallery requests
-                Uri galleryUri = new Uri(GalleryUrl);
-
-                // Register a console based credentials provider so that the user get's prompted if a password
-                // is required for the proxy
-                HttpClient.DefaultCredentialProvider = new ConsoleCredentialProvider();
-                // Setup IHttpClient for the Gallery to locate packages
-                var httpClient = new HttpClient(galleryUri);
-
-                // Get the package from the feed
-                var repository = new DataServicePackageRepository(httpClient);
-                var packageMetadata = repository.GetPackages().Where(p => p.Id.ToLower() == NuGetCommandLinePackageId)
-                    .AsEnumerable()
-                    .OrderByDescending(p => Version.Parse(p.Version))
-                    .FirstOrDefault();
-
-                if (packageMetadata != null)
+                var processInfo = new ProcessStartInfo(_exePath)
                 {
-                    Console.WriteLine("Found NuGet.exe version {0}.", packageMetadata.Version);
-                    Console.WriteLine("Downloading...");
+                    UseShellExecute = false,
+                    WorkingDirectory = Environment.CurrentDirectory
+                };
 
-                    Uri uri = repository.GetReadStreamUri(packageMetadata);
-                    var downloadClient = new HttpClient(uri);
-                    var packageStream = new MemoryStream(downloadClient.DownloadData());
+                if (!File.Exists(_exePath))
+                {
+                    // Register a console based credentials provider so that the user get's prompted if a password
+                    // is required for the proxy
+                    HttpClient.DefaultCredentialProvider = new ConsoleCredentialProvider();
 
-                    using (Package package = Package.Open(packageStream))
-                    {
-                        var fileUri = PackUriHelper.CreatePartUri(new Uri(NuGetExeFilePath, UriKind.Relative));
-                        PackagePart nugetExePart = package.GetPart(fileUri);
+                    // Setup IHttpClient for the Gallery to locate packages
+                    var httpClient = new HttpClient(new Uri("http://nuget.org/NuGet.exe"));
+                    httpClient.UserAgent = "Bootstrapper/" + typeof(Program).Assembly.GetName().Version;
 
-                        if (nugetExePart != null)
-                        {
-                            // Get the exe path and move it to a temp file (NuGet.exe.old) so we can replace the running exe with the bits we got 
-                            // from the package repository
-                            string exePath = typeof(Program).Assembly.Location;
-                            string renamedPath = exePath + ".old";
-                            Move(exePath, renamedPath);
-
-                            // Update the file
-                            UpdateFile(exePath, nugetExePart);
-                            Console.WriteLine("Update complete.");
-                        }
-                    }
+                    File.WriteAllBytes(_exePath, httpClient.DownloadData());
+                }
+                else if ((DateTime.UtcNow - File.GetLastWriteTime(_exePath)).TotalDays > 10)
+                {
+                    // Check for updates to the exe every 10 days
+                    processInfo.Arguments = "update -self";
+                    RunProcess(processInfo);
+                    File.SetLastAccessTimeUtc(_exePath, DateTime.UtcNow);
                 }
 
+                processInfo.Arguments = ParseArgs();
+                RunProcess(processInfo);
                 return 0;
             }
             catch (Exception e)
@@ -71,6 +48,29 @@ namespace Bootstrapper
             }
 
             return 1;
+        }
+
+        private static void RunProcess(ProcessStartInfo processInfo)
+        {
+            using (var process = Process.Start(processInfo))
+            {
+                process.WaitForExit();
+            }
+        }
+
+        private static string ParseArgs()
+        {
+            // Extract the arguments to be passed to the actual NuGet.exe
+            // The first argument of GetCommandLineArgs is the current exe. 
+            string exePath = Environment.GetCommandLineArgs()[0];
+
+            // Find the first occurence of the exe in the CommandLine string.
+            int exeIndex = Environment.CommandLine.IndexOf(exePath);
+
+            // The first space that follows after the exe's path is the beginning of the remaining arguments.
+            int argsStartIndex = Environment.CommandLine.IndexOf(' ', exeIndex + exePath.Length);
+
+            return Environment.CommandLine.Substring(argsStartIndex + 1);
         }
 
         private static void WriteError(Exception e)
@@ -85,31 +85,6 @@ namespace Bootstrapper
             {
                 Console.ForegroundColor = currentColor;
             }
-        }
-
-        private static void UpdateFile(string exePath, PackagePart part)
-        {
-            using (Stream fromStream = part.GetStream(), toStream = File.Create(exePath))
-            {
-                fromStream.CopyTo(toStream);
-            }
-        }
-
-        private static void Move(string oldPath, string newPath)
-        {
-            try
-            {
-                if (File.Exists(newPath))
-                {
-                    File.Delete(newPath);
-                }
-            }
-            catch (FileNotFoundException)
-            {
-
-            }
-
-            File.Move(oldPath, newPath);
         }
     }
 }

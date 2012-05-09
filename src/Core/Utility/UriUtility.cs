@@ -32,11 +32,6 @@ namespace NuGet
             return PackUriHelper.CreatePartUri(new Uri(escapedPath, UriKind.Relative));
         }
 
-        internal static Uri GetRootUri(Uri uri)
-        {
-            return new Uri(uri.GetComponents(UriComponents.SchemeAndServer, UriFormat.SafeUnescaped));
-        }
-
         /// <summary>
         /// Determines if the scheme, server and path of two Uris are identical.
         /// </summary>

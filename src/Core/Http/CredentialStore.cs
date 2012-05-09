@@ -20,7 +20,7 @@ namespace NuGet
 
         public ICredentials GetCredentials(Uri uri)
         {
-            Uri rootUri = UriUtility.GetRootUri(uri);
+            Uri rootUri = GetRootUri(uri);
 
             ICredentials credentials;
             if (_credentialCache.TryGetValue(uri, out credentials) ||
@@ -34,9 +34,14 @@ namespace NuGet
 
         public void Add(Uri uri, ICredentials credentials)
         {
-            Uri rootUri = UriUtility.GetRootUri(uri);
+            Uri rootUri = GetRootUri(uri);
             _credentialCache.TryAdd(uri, credentials);
             _credentialCache.AddOrUpdate(rootUri, credentials, (u, c) => credentials);
+        }
+
+        internal static Uri GetRootUri(Uri uri)
+        {
+            return new Uri(uri.GetComponents(UriComponents.SchemeAndServer, UriFormat.SafeUnescaped));
         }
     }
 }
