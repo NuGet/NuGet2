@@ -94,6 +94,37 @@ function Assert-Package {
     Assert-NotNull ([NuGet.PackageRepositoryExtensions]::Exists($repository, $Id, $actualVersion)) "Package $Id $Version is not referenced in $($Project.Name)"
 }
 
+function Assert-NoPackage {
+    param(
+        [parameter(Mandatory = $true)]
+        $Project,
+        [parameter(Mandatory = $true)]
+        [string]$Id,
+        [string]$Version
+    )
+    
+    # Check for existance on disk of packages.config
+    if ((Join-Path (Get-ProjectDir $Project) packages.config) -eq $false)
+	{
+		return
+	}
+    
+    # Check for the project item
+    # Assert-NotNull (Get-ProjectItem $Project packages.config) "packages.config does not exist in $($Project.Name)"
+    
+    $repository = Get-ProjectRepository $Project
+	if (!$repository) 
+	{
+		return
+	}
+    
+    if($Version) {
+        $actualVersion = [NuGet.SemanticVersion]::Parse($Version)
+    }
+    
+    Assert-False ([NuGet.PackageRepositoryExtensions]::Exists($repository, $Id, $actualVersion)) "Package $Id $Version is referenced in $($Project.Name)"
+}
+
 function Assert-SolutionPackage {
     param(
         [parameter(Mandatory = $true)]

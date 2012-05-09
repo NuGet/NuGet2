@@ -517,6 +517,36 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void InstallPackageDisregardTargetFrameworkOfDependencies()
+        {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var packageManager = new PackageManager(
+                sourceRepository, 
+                new DefaultPackagePathResolver(projectSystem), 
+                projectSystem, 
+                localRepository);
+
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0.0",
+                                                             dependencies: new[] {
+                                                                 new PackageDependency("C", null)
+                                                             });
+
+            IPackage packageC = PackageUtility.CreatePackage("C", "1.0.0");
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageC);
+
+            // Act
+            packageManager.InstallPackage("A", version: null, ignoreDependencies: false, allowPrereleaseVersions: true);
+
+            // Assert
+            Assert.True(localRepository.Exists(packageA));
+            Assert.True(localRepository.Exists(packageC));
+        }
+
+        [Fact]
         public void InstallPackageInstallsPackagesWithPrereleaseDependenciesIfFlagIsSet()
         {
             // Arrange

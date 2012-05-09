@@ -1,6 +1,7 @@
 using System;
 using System.Data.Services.Common;
 using System.Linq;
+using System.Runtime.Versioning;
 using NuGet.Server.Infrastructure;
 
 namespace NuGet.Server.DataServices
@@ -36,7 +37,8 @@ namespace NuGet.Server.DataServices
             Summary = package.Summary;
             ReleaseNotes = package.ReleaseNotes;
             Tags = package.Tags;
-            Dependencies = String.Join("|", from d in package.Dependencies
+            Dependencies = String.Join("|", from d in package.DependencySets
+                                                             .SelectMany(d => d.Dependencies.Select(p => Tuple.Create(p, d.TargetFramework)))
                                             select ConvertDependency(d));
             PackageHash = derivedData.PackageHash;
             PackageHashAlgorithm = "SHA512";
@@ -205,9 +207,16 @@ namespace NuGet.Server.DataServices
             set;
         }
 
-        private string ConvertDependency(PackageDependency dependency)
+        private string ConvertDependency(Tuple<PackageDependency, FrameworkName> pair)
         {
-            return String.Format("{0}:{1}", dependency.Id, dependency.VersionSpec);
+            if (pair.Item2 == null)
+            {
+                return String.Format("{0}:{1}", pair.Item1.Id, pair.Item1.VersionSpec);
+            }
+            else
+            {
+                return String.Format("{0}:{1}:{2}", pair.Item1.Id, pair.Item1.VersionSpec, pair.Item2.ToString());
+            }
         }
     }
 }

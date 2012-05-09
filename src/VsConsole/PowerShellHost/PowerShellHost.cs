@@ -252,7 +252,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                     // invoke init.ps1 files in the order of package dependency.
                     // if A -> B, we invoke B's init.ps1 before A's.
 
-                    var sorter = new PackageSorter();
+                    var sorter = new PackageSorter(targetFramework: null);
                     var sortedPackages = sorter.GetPackagesByDependencyOrder(localRepository);
 
                     foreach (var package in sortedPackages)

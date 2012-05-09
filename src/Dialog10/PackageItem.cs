@@ -92,7 +92,7 @@ namespace NuGet.Dialog.Providers
         {
             get
             {
-                return _packageIdentity.Dependencies;
+                return _packageIdentity.GetCompatiblePackageDependencies(targetFramework: null);
             }
         }
 

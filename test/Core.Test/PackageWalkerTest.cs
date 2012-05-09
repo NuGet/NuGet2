@@ -275,12 +275,12 @@ namespace NuGet.Test
             sourceRepository.AddPackage(packageE10);
 
             IPackageOperationResolver projectResolver = new UpdateWalker(localRepository,
-                                                                                sourceRepository,
-                                                                                new DependentsWalker(localRepository),
-                                                                                NullConstraintProvider.Instance,
-                                                                                NullLogger.Instance,
-                                                                                updateDependencies: true,
-                                                                                allowPrereleaseVersions: false);
+                                                                         sourceRepository,
+                                                                         new DependentsWalker(localRepository),
+                                                                         NullConstraintProvider.Instance,
+                                                                         NullLogger.Instance,
+                                                                         updateDependencies: true,
+                                                                         allowPrereleaseVersions: false);
 
             IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                                    sourceRepository,
@@ -531,6 +531,7 @@ namespace NuGet.Test
             IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                                    sourceRepository,
                                                                    constraintProvider.Object,
+                                                                   null,
                                                                    NullLogger.Instance,
                                                                    ignoreDependencies: false,
                                                                    allowPrereleaseVersions: false);

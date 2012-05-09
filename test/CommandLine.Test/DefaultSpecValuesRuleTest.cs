@@ -142,7 +142,12 @@ namespace NuGet.Test
             var dependencies = new List<PackageDependency> {
                 new PackageDependency("SampleDependency", new VersionSpec(new SemanticVersion("1.0")))
             };
-            package.Setup(c => c.Dependencies).Returns(dependencies);
+
+            var dependencySets = new List<PackageDependencySet> {
+                new PackageDependencySet(null, dependencies)
+            };
+
+            package.Setup(c => c.DependencySets).Returns(dependencySets);
             var rule = new DefaultManifestValuesRule();
 
             // Act

@@ -127,8 +127,14 @@ namespace NuGet.Test
                     Version = "1.0",
                     Authors = "test-author",
                     Description = "desc",
-                    Dependencies = new List<ManifestDependency> {
-                        new ManifestDependency { Id = null }
+                    DependencySets = new List<ManifestDependencySet> {
+                            new ManifestDependencySet {
+                                TargetFramework = null,
+                                Dependencies = new List<ManifestDependency> 
+                                    {
+                                        new ManifestDependency { Id = null }
+                                    }
+                            }
                     }
                 }
             };
@@ -184,7 +190,15 @@ namespace NuGet.Test
                     Copyright = "Copyright 2012",
                     Language = "fr-FR",
                     Tags = "Test Unit",
-                    Dependencies = new List<ManifestDependency> { new ManifestDependency { Id = "Test", Version = "1.2.0" } },
+                    DependencySets = new List<ManifestDependencySet> {
+                            new ManifestDependencySet {
+                                TargetFramework = null,
+                                Dependencies = new List<ManifestDependency> 
+                                    {
+                                        new ManifestDependency { Id = "Test", Version = "1.2.0" }
+                                    }
+                            }
+                    },
                     FrameworkAssemblies = new List<ManifestFrameworkAssembly> { new ManifestFrameworkAssembly { AssemblyName = "System.Data", TargetFramework = "4.0" } },
                     References = new List<ManifestReference> { new ManifestReference { File = "Test.dll" } }
                 }
@@ -241,11 +255,11 @@ namespace NuGet.Test
             Assert.Equal(expected.Metadata.Summary, actual.Metadata.Summary);
             Assert.Equal(expected.Metadata.Tags, actual.Metadata.Tags);
 
-            if (expected.Metadata.Dependencies != null)
+            if (expected.Metadata.DependencySets != null)
             {
-                for (int i = 0; i < expected.Metadata.Dependencies.Count; i++)
+                for (int i = 0; i < expected.Metadata.DependencySets.Count; i++)
                 {
-                    AssertDependency(expected.Metadata.Dependencies[i], actual.Metadata.Dependencies[i]);
+                    AssertDependencySet(expected.Metadata.DependencySets[i], actual.Metadata.DependencySets[i]);
                 }
             }
             if (expected.Metadata.FrameworkAssemblies != null)
@@ -276,6 +290,16 @@ namespace NuGet.Test
             Assert.Equal(expected.Source, actual.Source);
             Assert.Equal(expected.Target, actual.Target);
             Assert.Equal(expected.Exclude, actual.Exclude);
+        }
+
+        private static void AssertDependencySet(ManifestDependencySet expected, ManifestDependencySet actual)
+        {
+            Assert.Equal(expected.TargetFramework, actual.TargetFramework);
+            Assert.Equal(expected.Dependencies.Count, actual.Dependencies.Count);
+            for (int i = 0; i < expected.Dependencies.Count; i++)
+            {
+                AssertDependency(expected.Dependencies[i], actual.Dependencies[i]);
+            }
         }
 
         private static void AssertDependency(ManifestDependency expected, ManifestDependency actual)

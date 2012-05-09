@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
@@ -129,15 +130,6 @@ namespace NuGet.Dialog.Providers
             {
                 yield break;
             }
-        }
-
-        protected static string GetTargetFramework(Project project)
-        {
-            if (project == null)
-            {
-                return null;
-            }
-            return project.GetTargetFramework();
         }
 
         public override IVsExtensionsTreeNode ExtensionsTree
@@ -584,6 +576,7 @@ namespace NuGet.Dialog.Providers
         protected void CheckInstallPSScripts(
             IPackage package,
             IPackageRepository sourceRepository,
+            FrameworkName targetFramework,
             bool includePrerelease,
             out IList<PackageOperation> operations)
         {
@@ -591,6 +584,7 @@ namespace NuGet.Dialog.Providers
             var walker = new InstallWalker(
                 LocalRepository,
                 sourceRepository,
+                targetFramework,
                 this,
                 ignoreDependencies: false,
                 allowPrereleaseVersions: includePrerelease);

@@ -1069,7 +1069,7 @@ namespace NuGet.VisualStudio
 
         private void UpdatePackages(IPackageRepository localRepository, Action<IPackage> updateAction, ILogger logger)
         {
-            var packageSorter = new PackageSorter();
+            var packageSorter = new PackageSorter(targetFramework: null);
             // Get the packages in reverse dependency order then run update on each one i.e. if A -> B run Update(A) then Update(B)
             var packages = packageSorter.GetPackagesByDependencyOrder(localRepository).Reverse();
             foreach (var package in packages)

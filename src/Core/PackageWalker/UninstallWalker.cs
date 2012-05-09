@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Versioning;
 using NuGet.Resources;
 
 namespace NuGet
@@ -12,11 +13,23 @@ namespace NuGet
         private readonly IDictionary<IPackage, IEnumerable<IPackage>> _skippedPackages = new Dictionary<IPackage, IEnumerable<IPackage>>(PackageEqualityComparer.IdAndVersion);
         private readonly bool _removeDependencies;
 
+        // this ctor is used for unit tests
+        internal UninstallWalker(IPackageRepository repository,
+                        IDependentsResolver dependentsResolver,
+                        ILogger logger,
+                        bool removeDependencies,
+                        bool forceRemove) 
+            : this(repository, dependentsResolver, null, logger, removeDependencies, forceRemove)
+        {
+        }
+
         public UninstallWalker(IPackageRepository repository,
                                IDependentsResolver dependentsResolver,
+                               FrameworkName targetFramework,
                                ILogger logger,
                                bool removeDependencies,
-                               bool forceRemove)
+                               bool forceRemove) 
+            : base(targetFramework)
         {
             if (dependentsResolver == null)
             {

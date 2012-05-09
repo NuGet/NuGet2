@@ -168,8 +168,9 @@ namespace NuGet
         {
             Execute(package, new UpdateWalker(LocalRepository,
                                               SourceRepository,
-                                              new DependentsWalker(LocalRepository),
+                                              new DependentsWalker(LocalRepository, Project.TargetFramework),
                                               ConstraintProvider,
+                                              Project.TargetFramework,
                                               NullLogger.Instance,
                                               !ignoreDependencies,
                                               allowPrereleaseVersions)
@@ -238,18 +239,24 @@ namespace NuGet
         protected virtual void ExtractPackageFilesToProject(IPackage package)
         {
             // BUG 491: Installing a package with incompatible binaries still does a partial install.
-            // Resolve assembly references first so that if this fails we never do anything to the project
+            // Resolve assembly references and content files first so that if this fails we never do anything to the project
             IEnumerable<IPackageAssemblyReference> assemblyReferences = GetCompatibleItems(Project, package.AssemblyReferences, package.GetFullName());
             IEnumerable<FrameworkAssemblyReference> frameworkReferences = Project.GetCompatibleItemsCore(package.FrameworkAssemblies);
+            IEnumerable<IPackageFile> contentFiles = Project.GetCompatibleItemsCore(package.GetContentFiles());
 
             try
             {
                 // Add content files
-                Project.AddFiles(package.GetContentFiles(), _fileTransformers);
+                Project.AddFiles(contentFiles, _fileTransformers);
 
                 // Add the references to the reference path
                 foreach (IPackageAssemblyReference assemblyReference in assemblyReferences)
                 {
+                    if (assemblyReference.IsEmptyFolder())
+                    {
+                        continue;
+                    }
+
                     // Get the physical path of the assembly reference
                     string referencePath = Path.Combine(PathResolver.GetInstallPath(package), assemblyReference.Path);
                     string relativeReferencePath = PathUtility.GetRelativePath(Project.Root, referencePath);
@@ -321,7 +328,8 @@ namespace NuGet
         public virtual void RemovePackageReference(IPackage package, bool forceRemove, bool removeDependencies)
         {
             Execute(package, new UninstallWalker(LocalRepository,
-                                                 new DependentsWalker(LocalRepository),
+                                                 new DependentsWalker(LocalRepository, Project.TargetFramework),
+                                                 Project.TargetFramework,
                                                  NullLogger.Instance,
                                                  removeDependencies,
                                                  forceRemove));
@@ -352,13 +360,13 @@ namespace NuGet
             // Get content files from other packages
             // Exclude transform files since they are treated specially
             var otherContentFiles = from p in otherPackages
-                                    from file in p.GetContentFiles()
+                                    from file in Project.GetCompatibleItemsCore(p.GetContentFiles())
                                     where !_fileTransformers.ContainsKey(Path.GetExtension(file.Path))
                                     select file;
 
             // Get the files and references for this package, that aren't in use by any other packages so we don't have to do reference counting
             var assemblyReferencesToDelete = Project.GetCompatibleItemsCore(package.AssemblyReferences).Except(otherAssemblyReferences, PackageFileComparer.Default);
-            var contentFilesToDelete = package.GetContentFiles()
+            var contentFilesToDelete = Project.GetCompatibleItemsCore(package.GetContentFiles())
                                               .Except(otherContentFiles, PackageFileComparer.Default);
 
             // Delete the content files
@@ -528,7 +536,11 @@ namespace NuGet
 
             public bool Equals(IPackageFile x, IPackageFile y)
             {
-                return x.Path.Equals(y.Path, StringComparison.OrdinalIgnoreCase);
+                // technically, this check will fail if, for example, 'x' is a content file and 'y' is a lib file.
+                // However, because we only use this comparer to compare files within the same folder type, 
+                // this check is sufficient.
+                return x.TargetFramework == y.TargetFramework &&
+                       x.EffectivePath.Equals(y.EffectivePath, StringComparison.OrdinalIgnoreCase);
             }
 
             public int GetHashCode(IPackageFile obj)

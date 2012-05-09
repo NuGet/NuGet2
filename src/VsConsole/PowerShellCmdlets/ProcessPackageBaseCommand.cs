@@ -178,7 +178,7 @@ namespace NuGet.PowerShell.Commands
         private void OnPackageInstalled(object sender, PackageOperationEventArgs e)
         {
             AddToolsFolderToEnvironmentPath(e.InstallPath);
-            ExecuteScript(e.InstallPath, PowerShellScripts.Init, e.Package, null);
+            ExecuteScript(e.InstallPath, PowerShellScripts.Init, e.Package, project: null);
             PrepareOpenReadMeFile(e);
         }
 
@@ -249,13 +249,26 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
-        protected virtual void ExecuteScript(string rootPath, string scriptFileName, IPackage package, Project project)
+        protected void ExecuteScript(
+            string rootPath, 
+            string scriptFileName, 
+            IPackage package, 
+            Project project)
         {
-            string toolsPath = Path.Combine(rootPath, "tools");
-            string fullPath = Path.Combine(toolsPath, scriptFileName);
+            string scriptPath, fullPath;
+            if (package.FindCompatibleToolFiles(scriptFileName, project.GetTargetFrameworkName(), out scriptPath))
+            {
+                fullPath = Path.Combine(rootPath, scriptPath);
+            }
+            else
+            {
+                return;
+            }
+            
             if (File.Exists(fullPath))
             {
                 var psVariable = SessionState.PSVariable;
+                string toolsPath = Path.Combine(rootPath, "tools");
 
                 // set temp variables to pass to the script
                 psVariable.Set("__rootPath", rootPath);

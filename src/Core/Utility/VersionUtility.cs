@@ -20,9 +20,9 @@ namespace NuGet
         private const string GreaterThanOrEqualTo = "\u2265";
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Security", 
+            "Microsoft.Security",
             "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes",
-            Justification="The type FrameworkName is immutable.")]
+            Justification = "The type FrameworkName is immutable.")]
         public static readonly FrameworkName UnsupportedFrameworkName = new FrameworkName("Unsupported", new Version());
         private static readonly Version _emptyVersion = new Version();
 
@@ -451,7 +451,48 @@ namespace NuGet
             return name + "-" + profile;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#")]
+        public static FrameworkName ParseFrameworkNameFromFilePath(string filePath, out string effectivePath)
+        {
+            var knownFolders = new string[] 
+            { 
+                Constants.ContentDirectory,
+                Constants.LibDirectory,
+                Constants.ToolsDirectory
+            };
+
+            for (int i = 0; i < knownFolders.Length; i++)
+            {
+                string folderPrefix = knownFolders[i] + System.IO.Path.DirectorySeparatorChar;
+                if (filePath.Length > folderPrefix.Length &&
+                    filePath.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    return VersionUtility.ParseFrameworkFolderName(
+                        filePath.Substring(folderPrefix.Length),
+                        strictParsing: knownFolders[i] != Constants.ContentDirectory,
+                        effectivePath: out effectivePath);
+                }
+            }
+
+            effectivePath = filePath;
+            return null;
+        }
+
         public static FrameworkName ParseFrameworkFolderName(string path)
+        {
+            string effectivePath;
+            return ParseFrameworkFolderName(path, strictParsing: true, effectivePath: out effectivePath);
+        }
+
+        /// <summary>
+        /// Parses the specified string into FrameworkName object.
+        /// </summary>
+        /// <param name="path">The string to be parse.</param>
+        /// <param name="strictParsing">if set to <c>true</c>, parse the first folder of path even if it is unrecognized framework.</param>
+        /// <param name="effectivePath">returns the path after the parsed target framework</param>
+        /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
+        public static FrameworkName ParseFrameworkFolderName(string path, bool strictParsing, out string effectivePath)
         {
             // The path for a reference might look like this for assembly foo.dll:            
             // foo.dll
@@ -461,11 +502,21 @@ namespace NuGet
             // {FrameworkName}{Version}\sub1\sub2\foo.dll
 
             // Get the target framework string if specified
-            string targetFrameworkString = Path.GetDirectoryName(path).Split(Path.DirectorySeparatorChar).FirstOrDefault();
+            string targetFrameworkString = Path.GetDirectoryName(path).Split(Path.DirectorySeparatorChar).First();
 
-            if (!String.IsNullOrEmpty(targetFrameworkString))
+            effectivePath = path;
+
+            if (String.IsNullOrEmpty(targetFrameworkString))
             {
-                return VersionUtility.ParseFrameworkName(targetFrameworkString);
+                return null;
+            }
+
+            var targetFramework = ParseFrameworkName(targetFrameworkString);
+            if (strictParsing || targetFramework != UnsupportedFrameworkName)
+            {
+                // skip past the framework folder and the character \
+                effectivePath = path.Substring(targetFrameworkString.Length + 1);
+                return targetFramework;
             }
 
             return null;
@@ -487,7 +538,7 @@ namespace NuGet
             // item -> [Framework1, Framework2, Framework3] into
             // [{item, Framework1}, {item, Framework2}, {item, Framework3}]
             var normalizedItems = from item in items
-                                  let frameworks = item.SupportedFrameworks.Any() ? item.SupportedFrameworks : new FrameworkName[] { null }
+                                  let frameworks = (item.SupportedFrameworks != null && item.SupportedFrameworks.Any()) ? item.SupportedFrameworks : new FrameworkName[] { null }
                                   from framework in frameworks
                                   select new
                                   {
