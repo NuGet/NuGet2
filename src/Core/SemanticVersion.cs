@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using NuGet.Resources;
@@ -10,6 +11,7 @@ namespace NuGet
     /// allow older 4-digit versioning schemes to continue working.
     /// </summary>
     [Serializable]
+    [TypeConverter(typeof(SemanticVersionTypeConverter))]
     public sealed class SemanticVersion : IComparable, IComparable<SemanticVersion>, IEquatable<SemanticVersion>
     {
         private const RegexOptions _flags = RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture;

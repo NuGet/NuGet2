@@ -4,7 +4,6 @@ using System.Globalization;
 
 namespace NuGet
 {
-    [TypeConverter(typeof(SemanticVersionTypeConverter))]
     public class SemanticVersionTypeConverter : TypeConverter
     {
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
