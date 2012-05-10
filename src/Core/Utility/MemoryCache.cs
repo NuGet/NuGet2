@@ -28,19 +28,34 @@ namespace NuGet
             }
         }
 
-        internal T GetOrAdd<T>(object cacheKey, Func<T> factory, TimeSpan slidingExpiration) where T : class
+        internal T GetOrAdd<T>(object cacheKey, Func<T> factory, TimeSpan expiration, bool absoluteExpiration = false) where T : class
         {
             // Although this method would return values that have expired while also elavating them to unexpired entries,
             // none of the data that we cache is time sensitive. At worst, an item will be cached for an extra _cleanupInterval duration.
 
-            CacheItem cacheFactory = new CacheItem(factory);
+            CacheItem cacheFactory = new CacheItem(factory, expiration, absoluteExpiration);
 
             var cachedItem = _cache.GetOrAdd(cacheKey, cacheFactory);
 
             // Increase the expiration time
-            cachedItem.UpdateUsage(slidingExpiration);
+            cachedItem.UpdateUsage(expiration);
 
             return (T)cachedItem.Value;
+        }
+
+        internal bool TryGetValue<T>(object cacheKey, out T value) where T : class
+        {
+            CacheItem cacheItem;
+            if (_cache.TryGetValue(cacheKey, out cacheItem))
+            {
+                value = (T)cacheItem.Value;
+                return true;
+            }
+            else
+            {
+                value = null;
+                return false;
+            }
         }
 
         internal void Remove(object cacheKey)
@@ -75,11 +90,14 @@ namespace NuGet
         private sealed class CacheItem
         {
             private readonly Lazy<object> _valueFactory;
+            private readonly bool _absoluteExpiration;
             private long _expires;
 
-            public CacheItem(Func<object> valueFactory)
+            public CacheItem(Func<object> valueFactory, TimeSpan expires, bool absoluteExpiration)
             {
                 _valueFactory = new Lazy<object>(valueFactory);
+                _absoluteExpiration = absoluteExpiration;
+                _expires = expires.Ticks;
             }
 
             public object Value
@@ -92,7 +110,10 @@ namespace NuGet
 
             public void UpdateUsage(TimeSpan slidingExpiration)
             {
-                _expires = DateTime.UtcNow.Ticks + slidingExpiration.Ticks;
+                if (!_absoluteExpiration)
+                {
+                    _expires = DateTime.UtcNow.Ticks + slidingExpiration.Ticks;
+                }
             }
 
             public bool Expired

@@ -79,6 +79,9 @@
     <Compile Include="..\Core\Utility\IProgressProvider.cs">
       <Link>IProgressProvider.cs</Link>
     </Compile>
+    <Compile Include="..\Core\Http\HttpUtility.cs">
+      <Link>HttpUtility.cs</Link>
+    </Compile>
     <Compile Include="..\Core\Utility\WebRequestEventArgs.cs">
       <Link>WebRequestEventArgs.cs</Link>
     </Compile>
@@ -89,6 +92,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="STSAuthHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="NuGetResources.resx">

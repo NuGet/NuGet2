@@ -346,4 +346,7 @@
   <data name="Manifest_NotFound" xml:space="preserve">
     <value>Could not find manifest file at '{0}'.</value>
   </data>
+  <data name="UnableToLocateWIF" xml:space="preserve">
+    <value>Connection to feed '{0}' requires the Windows Identity Foundation runtime to be installed. </value>
+  </data>
 </root>

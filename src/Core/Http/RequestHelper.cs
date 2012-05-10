@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Net;
 
 namespace NuGet
@@ -15,31 +16,30 @@ namespace NuGet
                                                 ICredentialCache credentialCache,
                                                 ICredentialProvider credentialProvider)
         {
+            IHttpWebResponse previousResponse = null;
             HttpStatusCode? previousStatusCode = null;
-            string authType = null;
+            bool usingSTSAuth = false;
             bool continueIfFailed = true;
             int proxyCredentialsRetryCount = 0;
             int credentialsRetryCount = 0;
+
             while (true)
             {
                 // Create the request
-                WebRequest request = createRequest();
+                var request = (HttpWebRequest)createRequest();
                 request.Proxy = proxyCache.GetProxy(request.RequestUri);
                 if (request.Proxy != null && request.Proxy.Credentials == null)
                 {
                     request.Proxy.Credentials = CredentialCache.DefaultCredentials;
                 }
 
-                if (previousStatusCode == null)
+                if (previousResponse == null)
                 {
                     // Try to use the cached credentials (if any, for the first request)
                     request.Credentials = credentialCache.GetCredentials(request.RequestUri);
 
-                    if (request.Credentials == null)
-                    {
-                        // If there are no cached credentials, use the default ones
-                        request.UseDefaultCredentials = true;
-                    }
+                    // If there are no cached credentials, use the default ones
+                    request.UseDefaultCredentials = (request.Credentials == null);
                 }
                 else if (previousStatusCode == HttpStatusCode.ProxyAuthenticationRequired)
                 {
@@ -49,8 +49,9 @@ namespace NuGet
 
                     proxyCredentialsRetryCount++;
                 }
-                else if (previousStatusCode == HttpStatusCode.Unauthorized)
+                else if ((previousStatusCode == HttpStatusCode.Unauthorized) && !usingSTSAuth)
                 {
+                    // If we are using STS, the auth's being performed by a request header. We do not need to ask the user for credentials at this point.
                     request.Credentials = credentialProvider.GetCredentials(request, CredentialType.RequestCredentials, retrying: credentialsRetryCount > 0);
 
                     continueIfFailed = request.Credentials != null;
@@ -62,16 +63,12 @@ namespace NuGet
                 {
                     ICredentials credentials = request.Credentials;
 
-                    // KeepAlive is required for NTLM and Kerberos authentication.
-                    // REVIEW: The WWW-Authenticate header is tricky to parse so a Equals might not be correct
-                    if (!String.Equals(authType, "NTLM", StringComparison.OrdinalIgnoreCase) &&
-                        !String.Equals(authType, "Kerberos", StringComparison.OrdinalIgnoreCase))
+                    SetKeepAliveHeaders(request, previousResponse);
+
+                    if (usingSTSAuth)
                     {
-                        // This is to work around the "The underlying connection was closed: An unexpected error occurred on a receive."
-                        // exception.
-                        var httpRequest = (HttpWebRequest)request;
-                        httpRequest.KeepAlive = false;
-                        httpRequest.ProtocolVersion = HttpVersion.Version10;
+                        // Add request headers if the server requires STS based auth.
+                        STSAuthHelper.PrepareSTSRequest(request);
                     }
 
                     // Prepare the request, we do something like write to the request stream
@@ -125,18 +122,18 @@ namespace NuGet
                         else if (previousStatusCode == HttpStatusCode.Unauthorized &&
                                  response.StatusCode != HttpStatusCode.Unauthorized)
                         {
-
                             credentialCache.Add(request.RequestUri, request.Credentials);
                             credentialCache.Add(response.ResponseUri, request.Credentials);
                         }
-
+                        usingSTSAuth = STSAuthHelper.TryRetrieveSTSToken(request.RequestUri, response);
+                        
                         if (!IsAuthenticationResponse(response) || !continueIfFailed)
                         {
                             throw;
                         }
 
-                        previousStatusCode = response.StatusCode;
-                        authType = response.AuthType;
+                        previousResponse = response;
+                        previousStatusCode = previousResponse.StatusCode;
                     }
                 }
             }
@@ -162,6 +159,22 @@ namespace NuGet
         {
             return response.StatusCode == HttpStatusCode.Unauthorized ||
                    response.StatusCode == HttpStatusCode.ProxyAuthenticationRequired;
+        }
+
+        private static void SetKeepAliveHeaders(HttpWebRequest request, IHttpWebResponse previousResponse)
+        {
+            // KeepAlive is required for NTLM and Kerberos authentication. If we've never been authenticated or are using a different auth, we 
+            // should not require KeepAlive.
+            // REVIEW: The WWW-Authenticate header is tricky to parse so a Equals might not be correct. 
+            if (previousResponse == null ||
+                (!String.Equals(previousResponse.AuthType, "NTLM", StringComparison.OrdinalIgnoreCase) &&
+                !String.Equals(previousResponse.AuthType, "Kerberos", StringComparison.OrdinalIgnoreCase)))
+            {
+                // This is to work around the "The underlying connection was closed: An unexpected error occurred on a receive."
+                // exception.
+                request.KeepAlive = false;
+                request.ProtocolVersion = HttpVersion.Version10;
+            }
         }
 
         private class HttpWebResponseWrapper : IHttpWebResponse
@@ -193,6 +206,14 @@ namespace NuGet
                 get
                 {
                     return _response.ResponseUri;
+                }
+            }
+
+            public NameValueCollection Headers
+            {
+                get
+                {
+                    return _response.Headers;
                 }
             }
 
