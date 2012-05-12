@@ -34,7 +34,7 @@ namespace NuGet.TeamFoundationServer
             var target = new TfsFileSystem(workspace, root);
 
             Assert.Equal<string>(root, target.Root, StringComparer.Ordinal);
-            Assert.True(object.ReferenceEquals(workspace, target.Workspace), "TfsFileSystem.Workspace is incorrect.");
+            Assert.Same(workspace, target.Workspace);
         }
 
         [Fact]
@@ -65,7 +65,7 @@ namespace NuGet.TeamFoundationServer
         [Fact]
         public void FileAddedIfPendingDelete()
         {
-            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             string path = Path.GetRandomFileName();
             string fullPath = Path.Combine(root, path);
 
@@ -124,7 +124,7 @@ namespace NuGet.TeamFoundationServer
         [Fact]
         public void FileAddedIfPendingAdd()
         {
-            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             string path = Path.GetRandomFileName();
             string fullPath = Path.Combine(root, path);
 
@@ -183,7 +183,7 @@ namespace NuGet.TeamFoundationServer
         [Fact]
         public void FileAddedIfNoPendingAddAndNotInSourceControl()
         {
-            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             string path = Path.GetRandomFileName();
             string fullPath = Path.Combine(root, path);
 
@@ -233,7 +233,7 @@ namespace NuGet.TeamFoundationServer
         [Fact]
         public void FileAddedIfPendingEdit()
         {
-            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             string path = Path.GetRandomFileName();
             string fullPath = Path.Combine(root, path);
 
@@ -292,7 +292,7 @@ namespace NuGet.TeamFoundationServer
         [Fact]
         public void FileAddedIfNoPendingChanges()
         {
-            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             string path = Path.GetRandomFileName();
             string fullPath = Path.Combine(root, path);
 
@@ -350,7 +350,7 @@ namespace NuGet.TeamFoundationServer
         [Fact]
         public void FileExistsThrowsArgumentNullExceptionIfPathIsNull()
         {
-            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var target = new TfsFileSystem(Mock.Of<ITfsWorkspace>(), root);
 
             var exception = Assert.Throws<ArgumentNullException>(() => target.FileExists(null));
@@ -360,7 +360,7 @@ namespace NuGet.TeamFoundationServer
         [Fact]
         public void FileExistsReturnsFalseIfPathIsEmptyString()
         {
-            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var target = new TfsFileSystem(Mock.Of<ITfsWorkspace>(), root);
 
             bool result = target.FileExists(string.Empty);
@@ -371,7 +371,7 @@ namespace NuGet.TeamFoundationServer
         [Fact]
         public void FileExistsReturnsFalseIfFileDoesNotExist()
         {
-            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var target = new TfsFileSystem(Mock.Of<ITfsWorkspace>(), root);
             var path = Path.Combine(root, Path.GetRandomFileName());
 
@@ -461,7 +461,7 @@ namespace NuGet.TeamFoundationServer
         [Fact]
         public void DeleteFileThrowsArgumentNullExceptionIfPathIsNull()
         {
-            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var target = new TfsFileSystem(Mock.Of<ITfsWorkspace>(), root);
 
             var exception = Assert.Throws<ArgumentNullException>(() => target.DeleteFile(null));
@@ -658,7 +658,7 @@ namespace NuGet.TeamFoundationServer
         [Fact]
         public void BindToSourceControlThrowsArgumentNullExceptionIfPathIsNull()
         {
-            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var target = new TfsFileSystem(Mock.Of<ITfsWorkspace>(), root);
 
             var exception = Assert.Throws<ArgumentNullException>(() => target.BindToSourceControl(null));
@@ -668,7 +668,7 @@ namespace NuGet.TeamFoundationServer
         [Fact]
         public void BindToSourceControlAddsPaths()
         {
-            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
 
             // Use short paths for the names to test that full paths are used
             var paths = new string[]
@@ -698,7 +698,7 @@ namespace NuGet.TeamFoundationServer
         [Fact]
         public void IsSourceControlBoundThrowsArgumentNullExceptionIfPathIsNull()
         {
-            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var target = new TfsFileSystem(Mock.Of<ITfsWorkspace>(), root);
 
             var exception = Assert.Throws<ArgumentNullException>(() => target.IsSourceControlBound(null));
@@ -892,7 +892,7 @@ namespace NuGet.TeamFoundationServer
         [Fact]
         public void BeginProcessingThrowsArgumentNullExceptionIfPathIsNull()
         {
-            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var target = new TfsFileSystem(Mock.Of<ITfsWorkspace>(), root);
 
             var exception = Assert.Throws<ArgumentNullException>(() => target.BeginProcessing(null, PackageAction.Install));
@@ -902,7 +902,7 @@ namespace NuGet.TeamFoundationServer
         [Fact]
         public void BeginProcessingAllowsNullBatchForUninstall()
         {
-            var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var target = new TfsFileSystem(Mock.Of<ITfsWorkspace>(), root);
             
             target.BeginProcessing(null, PackageAction.Uninstall);

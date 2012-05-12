@@ -10,24 +10,24 @@ namespace NuGet.Test
         public void ConstructorThrowsArgumentExceptionIfRootIsNull()
         {
             var exception = Assert.Throws<ArgumentException>(() => new PhysicalFileSystem(null));
-            Assert.Equal<string>("root", exception.ParamName, StringComparer.Ordinal);
+            Assert.Equal("root", exception.ParamName, StringComparer.Ordinal);
         }
 
         [Fact]
         public void ConstructorThrowsArgumentExceptionIfRootIsTheEmptyString()
         {
             var exception = Assert.Throws<ArgumentException>(() => new PhysicalFileSystem(string.Empty));
-            Assert.Equal<string>("root", exception.ParamName, StringComparer.Ordinal);
+            Assert.Equal("root", exception.ParamName, StringComparer.Ordinal);
         }
 
         [Fact]
         public void ConstructorInitializesInstance()
         {
-            var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var root = @"X:\MyRoot\MyDir";
             
             var target = new PhysicalFileSystem(root);
 
-            Assert.Equal<string>(root, target.Root, StringComparer.Ordinal);
+            Assert.Equal(root, target.Root, StringComparer.Ordinal);
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace NuGet.Test
 
             string result = target.GetFullPath(path);
 
-            Assert.Equal<string>(Path.Combine(root, path), result, StringComparer.Ordinal);
+            Assert.Equal(Path.Combine(root, path), result, StringComparer.Ordinal);
         }
 
         [Fact]
@@ -48,8 +48,7 @@ namespace NuGet.Test
             var root = Path.GetRandomFileName();
             var target = new PhysicalFileSystem(root);
 
-            var exception = Assert.Throws<ArgumentNullException>(() => target.AddFile(Path.GetRandomFileName(), null));
-            Assert.Equal<string>("stream", exception.ParamName, StringComparer.Ordinal);
+            ExceptionAssert.ThrowsArgNull(() => target.AddFile(Path.GetRandomFileName(), null), "stream");
         }
 
         [Fact]
@@ -58,8 +57,7 @@ namespace NuGet.Test
             var root = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
             var target = new PhysicalFileSystem(root);
 
-            var exception = Assert.Throws<ArgumentNullException>(() => target.GetFullPath(null));
-            Assert.Equal<string>("path", exception.ParamName, StringComparer.Ordinal);
+            ExceptionAssert.ThrowsArgNull(() => target.GetFullPath(null), "path");
         }
     }
 }

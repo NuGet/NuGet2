@@ -133,7 +133,7 @@ namespace NuGet.TeamFoundationServer
             if (pendingChanges.Any())
             {
                 var wrappedChanges = pendingChanges
-                    .OfType<TfsPendingChangeWrapper>()
+                    .Cast<TfsPendingChangeWrapper>()
                     .Select((p) => p.PendingChange)
                     .ToArray();
 

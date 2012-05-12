@@ -74,12 +74,6 @@ namespace NuGet.TeamFoundationServer
             }
         }
 
-        public override bool FileExists(string path)
-        {
-            var fullPath = GetFullPath(path);
-            return base.FileExists(path) && !Workspace.GetPendingChanges(fullPath, RecursionType.None).Any(c => c.IsDelete);
-        }
-
         public bool BindToSourceControl(IEnumerable<string> paths)
         {
             if (paths == null)
@@ -130,11 +124,17 @@ namespace NuGet.TeamFoundationServer
 
         public void BeginProcessing(IEnumerable<string> batch, PackageAction action)
         {
+            if (batch == null)
+            {
+                throw new ArgumentNullException("batch");
+            }
+
             if (action == PackageAction.Install)
             {
-                if (batch == null)
+                if (!batch.Any())
                 {
-                    throw new ArgumentNullException("batch");
+                    // Short-circuit if nothing specified
+                    return;
                 }
 
                 var batchSet = new HashSet<string>(batch.Select(GetFullPath), StringComparer.OrdinalIgnoreCase);
