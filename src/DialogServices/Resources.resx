@@ -330,4 +330,7 @@
   <data name="Filter_StablePackages" xml:space="preserve">
     <value>Stable Only</value>
   </data>
+  <data name="Dialog_PackagePrereleaseLabel" xml:space="preserve">
+    <value>Prerelease</value>
+  </data>
 </root>

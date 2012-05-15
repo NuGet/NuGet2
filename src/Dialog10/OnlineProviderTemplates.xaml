@@ -64,7 +64,7 @@
                 </Image>
 
                 <TextBlock 
-                    Text="Prerelease"
+                    Text="{x:Static resources:Resources.Dialog_PackagePrereleaseLabel}"
                     FontStyle="Italic"
                     FontSize="9"
                     Margin="0,4"
