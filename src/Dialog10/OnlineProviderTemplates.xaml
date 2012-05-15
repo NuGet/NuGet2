@@ -146,7 +146,7 @@
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
                     <eml:TextBlockControl Text="{x:Static resources:Resources.Dialog_IdLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
                     <eml:TextBlockControl x:Name="IdTextBlock" Style="{StaticResource DetailMetadataValueStyle}">
-                        <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.GalleryDetailsUrl, Mode=OneTime, FallbackValue={x:Null}}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                        <Hyperlink AutomationProperties.AutomationId="IdLink" Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.GalleryDetailsUrl, Mode=OneTime, FallbackValue={x:Null}}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                             <Run Text="{Binding Id, Mode=OneWay}" />
                         </Hyperlink>
                     </eml:TextBlockControl>
@@ -156,7 +156,7 @@
                 <!-- Version -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
                     <eml:TextBlockControl Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <eml:TextBlockControl Text="{Binding Version, Mode=OneWay}" Style="{StaticResource DetailMetadataValueStyle}" />
+                    <eml:TextBlockControl AutomationProperties.AutomationId="VersionText" Text="{Binding Version, Mode=OneWay}" Style="{StaticResource DetailMetadataValueStyle}" />
                     <eml:TextBlockControl Margin="3,0,0,0" Text="(prerelease)" Foreground="DarkRed" Visibility="{Binding IsPrerelease, Converter={StaticResource boolToVis}}" />
                 </StackPanel>
 
@@ -173,22 +173,22 @@
                 </StackPanel>
 
                 <!-- View License link -->
-                <TextBlock Visibility="{Binding LicenseUrl, Converter={StaticResource urlConverter}}">
-                    <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding LicenseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                <TextBlock AutomationProperties.AutomationId="LicenseLinkContainer" Visibility="{Binding LicenseUrl, Converter={StaticResource urlConverter}}">
+                    <Hyperlink AutomationProperties.AutomationId="LicenseLink" Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding LicenseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                         <Run Text="{x:Static resources:Resources.License_ViewLicense}" />
                     </Hyperlink>
                 </TextBlock>
 
                 <!-- Project Url -->
-                <TextBlock Visibility="{Binding PackageIdentity.ProjectUrl, Converter={StaticResource urlConverter}}">
-                    <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.ProjectUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                <TextBlock AutomationProperties.AutomationId="ProjectInfoLinkContainer" Visibility="{Binding PackageIdentity.ProjectUrl, Converter={StaticResource urlConverter}}">
+                    <Hyperlink AutomationProperties.AutomationId="ProjectInfoLink" Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.ProjectUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                         <Run Text="{x:Static resources:Resources.Dialog_MoreInfo}" />
                     </Hyperlink>
                 </TextBlock>
 
                 <!-- Report Abuse Url -->
-                <TextBlock Visibility="{Binding PackageIdentity.ReportAbuseUrl, Converter={StaticResource urlConverter}}">
-                    <Hyperlink Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.ReportAbuseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                <TextBlock AutomationProperties.AutomationId="ReportAbuseLinkContainer" Visibility="{Binding PackageIdentity.ReportAbuseUrl, Converter={StaticResource urlConverter}}">
+                    <Hyperlink AutomationProperties.AutomationId="ReportAbuseLink" Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PackageIdentity.ReportAbuseUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
                         <Run Text="{x:Static resources:Resources.Dialog_ReportAbuse}" />
                     </Hyperlink>
                 </TextBlock>
