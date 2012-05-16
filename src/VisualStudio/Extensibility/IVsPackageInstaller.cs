@@ -9,7 +9,7 @@ namespace NuGet.VisualStudio
     public interface IVsPackageInstaller
     {
         void InstallPackage(string source, Project project, string packageId, Version version, bool ignoreDependencies);
-        void InstallPackage(string source, Project project, string packageId, SemanticVersion version, bool ignoreDependencies);
-        void InstallPackage(IPackageRepository repository, Project project, string packageId, SemanticVersion version, bool ignoreDependencies, bool skipAssemblyReferences);
+        void InstallPackage(string source, Project project, string packageId, string version, bool ignoreDependencies);
+        void InstallPackage(IPackageRepository repository, Project project, string packageId, string version, bool ignoreDependencies, bool skipAssemblyReferences);
     }
 }

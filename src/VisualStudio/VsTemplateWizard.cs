@@ -249,7 +249,7 @@ namespace NuGet.VisualStudio
                 try
                 {
                     _dte.StatusBar.Text = String.Format(CultureInfo.CurrentCulture, VsResources.TemplateWizard_PackageInstallStatus, package.Id, package.Version);
-                    packageInstaller.InstallPackage(repository, project, package.Id, package.Version, ignoreDependencies: true, skipAssemblyReferences: package.SkipAssemblyReferences);
+                    packageInstaller.InstallPackage(repository, project, package.Id, package.Version.ToString(), ignoreDependencies: true, skipAssemblyReferences: package.SkipAssemblyReferences);
                 }
                 catch (InvalidOperationException exception)
                 {

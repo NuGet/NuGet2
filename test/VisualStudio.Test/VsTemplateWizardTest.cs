@@ -580,8 +580,8 @@ namespace NuGet.VisualStudio.Test
             wizard.RunFinished();
 
             // Assert
-            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyPackage", new SemanticVersion(1, 0, 0, 0), true, false));
-            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyOtherPackage", new SemanticVersion(2, 0, 0, 0), true, false));
+            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyPackage", "1.0", true, false));
+            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyOtherPackage", "2.0", true, false));
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0 to project...");
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0 to project...");
         }
@@ -617,14 +617,14 @@ namespace NuGet.VisualStudio.Test
                 It.Is<IPackageRepository>(p => p is UnzippedPackageRepository && p.Source == @"C:\Some"), 
                 mockProject, 
                 "MyPackage", 
-                new SemanticVersion(1, 0, 0, 0), 
+				"1.0",
                 true, 
                 false));
             installerMock.Verify(i => i.InstallPackage(
                 It.Is<IPackageRepository>(p => p is UnzippedPackageRepository && p.Source == @"C:\Some"), 
                 mockProject, 
                 "MyOtherPackage", 
-                new SemanticVersion(2, 0, 0, 0), 
+                "2.0",
                 true,
                 false));
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0 to project...");
@@ -654,8 +654,8 @@ namespace NuGet.VisualStudio.Test
             wizard.RunFinished();
 
             // Assert
-            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyPackage", new SemanticVersion(1, 0, 0, 0), true, false));
-            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyOtherPackage", new SemanticVersion(2, 0, 0, 0), true, false));
+            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyPackage", "1.0", true, false));
+            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyOtherPackage", "2.0", true, false));
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0 to project...");
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0 to project...");
         }
@@ -683,8 +683,8 @@ namespace NuGet.VisualStudio.Test
             wizard.RunFinished();
 
             // Assert
-            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyPackage", new SemanticVersion(1, 0, 0, 0), true, true));
-            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyOtherPackage", new SemanticVersion(2, 0, 0, 0), true, false));
+            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyPackage", "1.0", true, true));
+            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyOtherPackage", "2.0", true, false));
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0 to project...");
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0 to project...");
         }
@@ -712,8 +712,8 @@ namespace NuGet.VisualStudio.Test
             wizard.RunFinished();
 
             // Assert
-            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyPackage", new SemanticVersion(1, 0, 0, "ctp-1"), true, false));
-            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyOtherPackage", new SemanticVersion(2, 0, 3, 4), true, false));
+            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyPackage", "1.0.0-ctp-1", true, false));
+            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyOtherPackage", "2.0.3.4", true, false));
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0.0-ctp-1 to project...");
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0.3.4 to project...");
         }
@@ -724,7 +724,7 @@ namespace NuGet.VisualStudio.Test
             // Arrange
             var mockProject = new Mock<Project>().Object;
             var installerMock = new Mock<IVsPackageInstaller>();
-            installerMock.Setup(i => i.InstallPackage(It.IsAny<IPackageRepository>(), mockProject, "MyPackage", new SemanticVersion(1, 0, 0, 0), true, false))
+            installerMock.Setup(i => i.InstallPackage(It.IsAny<IPackageRepository>(), mockProject, "MyPackage", "1.0", true, false))
                 .Throws(new InvalidOperationException("But I don't want to be installed."));
             var document = BuildDocument("template",
                 BuildPackageElement("MyPackage", "1.0"),
@@ -743,9 +743,9 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             installerMock.Verify(
-                i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyPackage", new SemanticVersion(1, 0, 0, 0), true, false));
+                i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyPackage", "1.0", true, false));
             installerMock.Verify(
-                i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyOtherPackage", new SemanticVersion(2, 0, 0, 0), true, false));
+                i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyOtherPackage", "2.0", true, false));
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0 to project...");
             dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0 to project...");
             Assert.Equal(

@@ -32,18 +32,25 @@ namespace NuGet.VisualStudio
             InstallPackage(source, project, packageId, version == null ? (SemanticVersion)null : new SemanticVersion(version), ignoreDependencies);
         }
 
-        public void InstallPackage(string source, Project project, string packageId, SemanticVersion version, bool ignoreDependencies)
-        {
-            if (String.IsNullOrEmpty(source))
-            {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "source");
-            }
+		public void InstallPackage(string source, Project project, string packageId, string version, bool ignoreDependencies) {
+			InstallPackage(source, project, packageId, ToSemanticVersion(version), ignoreDependencies);
+		}
 
-            IPackageRepository repository = _repositoryFactory.CreateRepository(source);
-            InstallPackage(repository, project, packageId, version, ignoreDependencies, skipAssemblyReferences: false);
-        }
+		public void InstallPackage(IPackageRepository repository, Project project, string packageId, string version, bool ignoreDependencies, bool skipAssemblyReferences) 
+		{
+			InstallPackage(repository, project, packageId, ToSemanticVersion(version), ignoreDependencies, skipAssemblyReferences: false);
+		}
 
-        public void InstallPackage(IPackageRepository repository, Project project, string packageId, SemanticVersion version, bool ignoreDependencies, bool skipAssemblyReferences)
+		internal void InstallPackage(string source, Project project, string packageId, SemanticVersion version, bool ignoreDependencies) {
+			if (String.IsNullOrEmpty(source)) {
+				throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "source");
+			}
+
+			IPackageRepository repository = _repositoryFactory.CreateRepository(source);
+			InstallPackage(repository, project, packageId, version, ignoreDependencies, skipAssemblyReferences: false);
+		}
+
+        internal void InstallPackage(IPackageRepository repository, Project project, string packageId, SemanticVersion version, bool ignoreDependencies, bool skipAssemblyReferences)
         {
             if (project == null)
             {
@@ -96,5 +103,9 @@ namespace NuGet.VisualStudio
                 }
             }
         }
+
+		private static SemanticVersion ToSemanticVersion(string version) {
+			return version == null ? (SemanticVersion)null : new SemanticVersion(version);
+		}
     }
 }
