@@ -12,9 +12,10 @@ using Xunit;
 namespace NuGet.VisualStudio.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
-
-    public class PackageRestoreManagerTest
+    public class PackageRestoreManagerTest : IDisposable
     {
+        private static readonly string _testRoot = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+
         [Fact]
         public void IsCurrentSolutionEnabledReturnsFalseIfSolutionIsNotOpen()
         {
@@ -175,9 +176,6 @@ namespace NuGet.VisualStudio.Test
             var defaultAppSettings = new Mock<ISettings>();
             defaultAppSettings.Setup(s => s.GetValue("packageRestore", "enabled")).Returns("false");
 
-            var defaultAppSettingsProvider = new Mock<ISettingsProvider>();
-            defaultAppSettingsProvider.Setup(d => d.LoadUserSettings()).Returns(defaultAppSettings.Object);
-
             // setup DTE
             var dte = new Mock<DTE>();
 
@@ -216,8 +214,8 @@ namespace NuGet.VisualStudio.Test
                 solutionManager.Object,
                 fileSystemProvider.Object,
                 packageRepositoryFactory.Object, 
-                packageSourceProvider: packageSourceProvider.Object,
-                defaultSettingsProvider: defaultAppSettingsProvider.Object);
+                packageSourceProvider: packageSourceProvider.Object, 
+                settings: defaultAppSettings.Object);
 
             // Act 
             packageRestore.EnableCurrentSolutionForRestore(fromActivation: false);
@@ -617,8 +615,6 @@ namespace NuGet.VisualStudio.Test
             Assert.Equal(new SemanticVersion("1.0"), cachePackages[0].Version);
             Assert.Equal("NuGet.CommandLine", cachePackages[1].Id);
             Assert.Equal(new SemanticVersion("2.0"), cachePackages[1].Version);
-            // clean up
-            Directory.Delete(tempSolutionPath, recursive: true);
         }
 
         [Fact]
@@ -709,9 +705,6 @@ namespace NuGet.VisualStudio.Test
             // Assert
             packageA.Verify(p => p.GetFiles(), Times.Never());
             packageB.Verify(p => p.GetFiles(), Times.Never());
-
-            // clean up
-            Directory.Delete(tempSolutionPath, recursive: true);
         }
 
         [Fact]
@@ -736,9 +729,6 @@ namespace NuGet.VisualStudio.Test
             // default app settings
             var defaultAppSettings = new Mock<ISettings>();
             defaultAppSettings.Setup(s => s.GetValue("packageRestore", "enabled")).Returns("false");
-
-            var defaultAppSettingsProvider = new Mock<ISettingsProvider>();
-            defaultAppSettingsProvider.Setup(d => d.LoadUserSettings()).Returns(defaultAppSettings.Object);
 
             // setup DTE
             var dte = new Mock<DTE>();
@@ -790,7 +780,7 @@ namespace NuGet.VisualStudio.Test
                 fileSystemProvider.Object,
                 packageRepositoryFactory.Object,
                 packageSourceProvider: packageSourceProvider.Object,
-                defaultSettingsProvider: defaultAppSettingsProvider.Object);
+                settings: defaultAppSettings.Object);
 
             // Act 
             packageRestore.EnableCurrentSolutionForRestore(fromActivation: false);
@@ -814,9 +804,6 @@ namespace NuGet.VisualStudio.Test
             // verify that package restore consent is not set
             defaultAppSettings.Verify(
                 s => s.SetValue("packageRestore", "enabled", It.Is<string>(v => v == "true" || v == "1")), Times.Never());
-
-            // clean up
-            Directory.Delete(tempSolutionPath, recursive: true);
         }
 
         private PackageRestoreManager CreateInstance(
@@ -828,7 +815,7 @@ namespace NuGet.VisualStudio.Test
             IVsPackageManagerFactory packageManagerFactory = null,
             IPackageRepository localCache = null,
             IPackageSourceProvider packageSourceProvider = null,
-            ISettingsProvider defaultSettingsProvider = null)
+            ISettings settings = null)
         {
 
             if (dte == null)
@@ -887,9 +874,9 @@ namespace NuGet.VisualStudio.Test
                 packageSourceProvider = new Mock<IPackageSourceProvider>().Object;
             }
 
-            if (defaultSettingsProvider == null)
+            if (settings == null)
             {
-                defaultSettingsProvider = new Mock<ISettingsProvider>().Object;
+                settings = Mock.Of<ISettings>();
             }
 
             return new PackageRestoreManager(
@@ -902,25 +889,28 @@ namespace NuGet.VisualStudio.Test
                 new VsPackageInstallerEvents(),
                 localCache,
                 waitDialogFactory,
-                defaultSettingsProvider);
+                settings);
         }
 
         private string CreateTempFolder()
         {
-            string folderPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
+            string folderPath = Path.Combine(_testRoot, Path.GetRandomFileName());
+            Directory.CreateDirectory(folderPath);
             return folderPath;
         }
 
         private void CreateEmptyFile(string path)
         {
-            using (FileStream fs = File.Create(path))
+            File.WriteAllBytes(path, new byte[0]);
+        }
+
+        public void Dispose()
+        {
+            try
             {
-                fs.WriteByte(0);
+                Directory.Delete(_testRoot, recursive: true);
             }
+            catch { }
         }
     }
 }

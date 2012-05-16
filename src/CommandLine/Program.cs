@@ -71,7 +71,7 @@ namespace NuGet
             }
             catch (Exception e)
             {
-                console.WriteError(e.Message);
+                console.WriteError(ExceptionUtility.Unwrap(e).Message);
                 return 1;
             }
             return 0;

@@ -10,7 +10,7 @@ namespace NuGet.Options
     {
         private readonly IRecentPackageRepository _recentPackageRepository;
         private readonly IProductUpdateSettings _productUpdateSettings;
-        private PackageRestoreConsent _packageRestoreConsent;
+        private readonly ISettings _settings;
         private bool _initialized;
 
         public GeneralOptionControl()
@@ -22,6 +22,9 @@ namespace NuGet.Options
 
             _recentPackageRepository = ServiceLocator.GetInstance<IRecentPackageRepository>();
             Debug.Assert(_recentPackageRepository != null);
+
+            _settings = ServiceLocator.GetInstance<ISettings>();
+            Debug.Assert(_settings != null);
 
             if (!VsVersionHelper.IsVisualStudio2010)
             {
@@ -42,8 +45,8 @@ namespace NuGet.Options
 
             if (!_initialized)
             {
-                _packageRestoreConsent = new PackageRestoreConsent(Settings.LoadDefaultSettings());
-                packageRestoreConsentCheckBox.Checked = _packageRestoreConsent.IsGranted;
+                var packageRestoreConsent = new PackageRestoreConsent(_settings);
+                packageRestoreConsentCheckBox.Checked = packageRestoreConsent.IsGranted;
 
                 checkForUpdate.Checked = _productUpdateSettings.ShouldCheckForUpdate;
             }
@@ -55,14 +58,13 @@ namespace NuGet.Options
         {
             _productUpdateSettings.ShouldCheckForUpdate = checkForUpdate.Checked;
 
-            _packageRestoreConsent = new PackageRestoreConsent(Settings.LoadDefaultSettings());
-            _packageRestoreConsent.IsGranted = packageRestoreConsentCheckBox.Checked;
+            var packageRestoreConsent = new PackageRestoreConsent(_settings);
+            packageRestoreConsent.IsGranted = packageRestoreConsentCheckBox.Checked;
         }
 
         internal void OnClosed()
         {
             _initialized = false;
-            _packageRestoreConsent = null;
         }
 
         private void OnClearPackageCacheClick(object sender, EventArgs e)

@@ -29,7 +29,7 @@ namespace NuGet.VisualStudio
         private readonly IPackageRepository _localCacheRepository;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
         private readonly DTE _dte;
-        private readonly ISettingsProvider _defaultSettingsProvider;
+        private readonly ISettings _settings;
         private IPackageRepository _officialNuGetRepository;
 
         [ImportingConstructor]
@@ -39,7 +39,8 @@ namespace NuGet.VisualStudio
             IPackageRepositoryFactory packageRepositoryFactory,
             IVsPackageManagerFactory packageManagerFactory,
             IVsPackageSourceProvider packageSourceProvider,
-            IVsPackageInstallerEvents packageInstallerEvents) :
+            IVsPackageInstallerEvents packageInstallerEvents,
+            ISettings settings) :
             this(ServiceLocator.GetInstance<DTE>(),
                  solutionManager,
                  fileSystemProvider,
@@ -49,7 +50,7 @@ namespace NuGet.VisualStudio
                  packageInstallerEvents,
                  MachineCache.Default,
                  ServiceLocator.GetGlobalService<SVsThreadedWaitDialogFactory, IVsThreadedWaitDialogFactory>(),
-                 NuGetConfigSettingsProvider.Default)
+                 settings)
         {
         }
 
@@ -63,7 +64,7 @@ namespace NuGet.VisualStudio
             IVsPackageInstallerEvents packageInstallerEvents,
             IPackageRepository localCacheRepository,
             IVsThreadedWaitDialogFactory waitDialogFactory,
-            ISettingsProvider defaultSettingsProvider)
+            ISettings settings)
         {
             Debug.Assert(solutionManager != null);
             _dte = dte;
@@ -74,7 +75,7 @@ namespace NuGet.VisualStudio
             _waitDialogFactory = waitDialogFactory;
             _packageManagerFactory = packageManagerFactory;
             _localCacheRepository = localCacheRepository;
-            _defaultSettingsProvider = defaultSettingsProvider;
+            _settings = settings;
             _solutionManager.ProjectAdded += OnProjectAdded;
             _solutionManager.SolutionOpened += OnSolutionOpenedOrClosed;
             _solutionManager.SolutionClosed += OnSolutionOpenedOrClosed;
@@ -131,8 +132,8 @@ namespace NuGet.VisualStudio
                 waitDialog.StartWaitDialog(
                     VsResources.DialogTitle,
                     VsResources.PackageRestoreWaitMessage,
-                    String.Empty, 
-                    varStatusBmpAnim: null, 
+                    String.Empty,
+                    varStatusBmpAnim: null,
                     szStatusBarText: null,
                     iDelayToShowDialog: 0,
                     fIsCancelable: false,
@@ -194,7 +195,8 @@ namespace NuGet.VisualStudio
                 uiScheduler = TaskScheduler.Default;
             }
 
-            Task task = Task.Factory.StartNew(() => {
+            Task task = Task.Factory.StartNew(() =>
+            {
                 IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager();
                 IPackageRepository localRepository = packageManager.LocalRepository;
                 var projectReferences = GetAllPackageReferences(packageManager);
@@ -213,7 +215,7 @@ namespace NuGet.VisualStudio
                 {
                     ExceptionHelper.WriteToActivityLog(originalTask.Exception);
                 }
-                else 
+                else
                 {
                     // we don't allow canceling
                     Debug.Assert(!originalTask.IsCanceled);
@@ -245,7 +247,7 @@ namespace NuGet.VisualStudio
 
         private void SetPackageRestoreConsent()
         {
-            var consent = new PackageRestoreConsent(_defaultSettingsProvider.LoadUserSettings());
+            var consent = new PackageRestoreConsent(_settings);
             if (!consent.IsGranted)
             {
                 consent.IsGranted = true;
@@ -381,7 +383,7 @@ namespace NuGet.VisualStudio
         {
             // first, find the package from the remote repository
             IPackage package = repository.FindPackage(packageId, version: null, allowPrereleaseVersions: true, allowUnlisted: false);
-            
+
             if (package == null && fromActivation)
             {
                 // if we can't find the package from the remote repositories, look for it
@@ -393,7 +395,7 @@ namespace NuGet.VisualStudio
                     {
                         _officialNuGetRepository = _packageRepositoryFactory.CreateRepository(NuGetConstants.DefaultFeedUrl);
                     }
-                    
+
                     package = _officialNuGetRepository.FindPackage(packageId, version: null, allowPrereleaseVersions: true, allowUnlisted: false);
                 }
             }
@@ -474,7 +476,7 @@ namespace NuGet.VisualStudio
             {
                 var packageMetadata = (VsPackageMetadata)metadata;
                 var fileSystem = packageMetadata.FileSystem as IVsProjectSystem;
-                if (fileSystem != null )
+                if (fileSystem != null)
                 {
                     var project = _solutionManager.GetProject(fileSystem.UniqueName);
                     if (project != null)

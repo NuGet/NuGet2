@@ -35,9 +35,11 @@ namespace NuGet
         {
             get
             {
-                string value = _settings.GetValue(PackageRestoreSection, PackageRestoreConsentKey) ??
-                               _environmentReader.GetEnvironmentVariable(EnvironmentVariableName);
-
+                string value = _settings.GetValue(PackageRestoreSection, PackageRestoreConsentKey).SafeTrim();
+                if (String.IsNullOrEmpty(value))
+                {
+                    value = _environmentReader.GetEnvironmentVariable(EnvironmentVariableName).SafeTrim();
+                }
 
                 if (!String.IsNullOrEmpty(value))
                 {
@@ -53,14 +55,7 @@ namespace NuGet
             }
             set
             {
-                if (value)
-                {
-                    _settings.SetValue(PackageRestoreSection, PackageRestoreConsentKey, "true");
-                }
-                else
-                {
-                    _settings.DeleteSection(PackageRestoreSection);
-                }
+                _settings.SetValue(PackageRestoreSection, PackageRestoreConsentKey, value.ToString());
             }
         }
     }
