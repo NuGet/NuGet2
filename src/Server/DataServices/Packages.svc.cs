@@ -31,10 +31,16 @@ namespace NuGet.Server.DataServices
         {
             config.SetEntitySetAccessRule("Packages", EntitySetRights.AllRead);
             config.SetEntitySetPageSize("Packages", 100);
-            config.SetServiceOperationAccessRule("Search", ServiceOperationRights.AllRead);
-
             config.DataServiceBehavior.MaxProtocolVersion = DataServiceProtocolVersion.V2;
             config.UseVerboseErrors = true;
+            RegisterServices(config);
+        }
+
+        internal static void RegisterServices(IDataServiceConfiguration config)
+        {
+            config.SetServiceOperationAccessRule("Search", ServiceOperationRights.AllRead);
+            config.SetServiceOperationAccessRule("FindPackagesById", ServiceOperationRights.AllRead);
+            config.SetServiceOperationAccessRule("GetUpdates", ServiceOperationRights.AllRead);
         }
 
         protected override PackageContext CreateDataSource()
@@ -116,6 +122,25 @@ namespace NuGet.Server.DataServices
             return Repository.FindPackagesById(id)
                              .Select(Repository.GetMetadataPackage)
                              .AsQueryable();
+        }
+
+        [WebGet]
+        public IQueryable<Package> GetUpdates(string packageIds, string versions, bool includePrerelease, bool includeAllVersions, string targetFrameworks)
+        {
+            var idValues = packageIds.Split('|');
+            var versionValues = versions.Split('|');
+            var targetFrameworkValues = String.IsNullOrEmpty(targetFrameworks) ? null :
+                                                                                 targetFrameworks.Split('|').Select(VersionUtility.ParseFrameworkName).ToList();
+
+            var packagesToUpdate = new List<IPackageMetadata>();
+            for (int i = 0; i < idValues.Length; i++)
+            {
+                packagesToUpdate.Add(new PackageBuilder { Id = idValues[i], Version = new SemanticVersion(versionValues[i]) });
+            }
+
+
+            return from package in Repository.GetUpdatesCore(packagesToUpdate, includePrerelease, includeAllVersions, targetFrameworkValues).AsQueryable()
+                   select Repository.GetMetadataPackage(package);
         }
     }
 }
