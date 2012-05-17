@@ -869,5 +869,53 @@ namespace NuGet.Test
             Assert.Null(result);
         }
 
+        [Fact]
+        public void GetConfigSettingReadsValueFromConfigSection()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            settings.Setup(s => s.GetValue("config", "foo"))
+                    .Returns("bar")
+                    .Verifiable();
+
+            // Act
+            var result = settings.Object.GetConfigValue("foo");
+
+            // Assert
+            Assert.Equal("bar", result);
+            settings.Verify();
+        }
+
+        [Fact]
+        public void SetConfigSettingWritesValueToConfigSection()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            settings.Setup(s => s.SetValue("config", "foo", "bar"))
+                    .Verifiable();
+
+            // Act
+            settings.Object.SetConfigValue("foo", "bar");
+
+            // Assert
+            settings.Verify();
+        }
+
+        [Fact]
+        public void DeleteConfigSettingDeletesValueFromConfigSection()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            settings.Setup(s => s.DeleteValue("config", "foo"))
+                    .Returns(true)
+                    .Verifiable();
+
+            // Act
+            bool result = settings.Object.DeleteConfigValue("foo");
+
+            // Assert
+            Assert.True(result);
+            settings.Verify();
+        }
     }
 }

@@ -748,4 +748,20 @@ nuget update -Self</value>
   <data name="InstallCommandPackageRestoreConsentNotFound" xml:space="preserve">
     <value>Package restore is disabled by default. To give consent, open the Visual Studio Options dialog, click on Package Manager node and check 'Allow NuGet to download missing packages during build.' You can also give consent by setting the environment variable 'EnableNuGetPackageRestore' to 'true'.</value>
   </data>
+  <data name="ConfigCommandDesc" xml:space="preserve">
+    <value>Gets or sets NuGet config values.</value>
+  </data>
+  <data name="ConfigCommandExamples" xml:space="preserve">
+    <value>nuget config -Set HTTP_PROXY=http://127.0.0.1 -Set HTTP_PROXY.USER=domain\user
+nuget.config HTTP_PROXY</value>
+  </data>
+  <data name="ConfigCommandKeyNotFound" xml:space="preserve">
+    <value>Key '{0}' not found.</value>
+  </data>
+  <data name="ConfigCommandSetDesc" xml:space="preserve">
+    <value>One on more key-value pairs to be set in config.</value>
+  </data>
+  <data name="ConfigCommandSummary" xml:space="preserve">
+    <value>-Set name=value</value>
+  </data>
 </root>

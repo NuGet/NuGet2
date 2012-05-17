@@ -43,6 +43,7 @@
     <Compile Include="CommandLineParser.cs" />
     <Compile Include="CommandManager.cs" />
     <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\ConfigCommand.cs" />
     <Compile Include="Commands\HelpCommandMarkdownTemplate.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -133,10 +134,7 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="MergeExecutable"
-        Inputs="$(OutputPath)\NuGet.Core.dll;$(OutputPath)\NuGet.exe"
-        Outputs="$(OutputPath)Merged\NuGet.exe"
-    >
+  <Target Name="MergeExecutable" Inputs="$(OutputPath)\NuGet.Core.dll;$(OutputPath)\NuGet.exe" Outputs="$(OutputPath)Merged\NuGet.exe">
     <PropertyGroup>
       <NuGetRoot>$(MsBuildProjectDirectory)\..\..</NuGetRoot>
       <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>

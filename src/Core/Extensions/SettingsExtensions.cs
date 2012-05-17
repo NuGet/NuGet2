@@ -6,6 +6,7 @@ namespace NuGet
 {
     public static class SettingsExtensions
     {
+        private const string ConfigSection = "config";
         private static readonly byte[] _entropyBytes = StringToBytes("NuGet");
 
         public static string GetDecryptedValue(this ISettings settings, string section, string key)
@@ -56,6 +57,21 @@ namespace NuGet
                 var encryptedString = EncryptString(value);
                 settings.SetValue(section, key, encryptedString);
             }
+        }
+
+        public static string GetConfigValue(this ISettings settings, string key)
+        {
+            return settings.GetValue(ConfigSection, key);
+        }
+
+        public static void SetConfigValue(this ISettings settings, string key, string value)
+        {
+            settings.SetValue(ConfigSection, key, value);
+        }
+
+        public static bool DeleteConfigValue(this ISettings settings, string key)
+        {
+            return settings.DeleteValue(ConfigSection, key);
         }
 
         internal static string EncryptString(string value)
