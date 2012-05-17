@@ -167,14 +167,14 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
             installCommand.Arguments.Add(@"x:\test\packages.config");
 
-            // Act
+            // Actt
             installCommand.ExecuteCommand();
 
             // Assert
             Assert.Equal(3, fileSystem.Paths.Count);
             Assert.Equal(@"x:\test\packages.config", fileSystem.Paths.ElementAt(0).Key);
-            Assert.Equal(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.ElementAt(1).Key);
-            Assert.Equal(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.ElementAt(2).Key);
+            Assert.Contains(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.Keys);
+            Assert.Contains(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.Keys);
         }
 
         [Fact]
@@ -195,8 +195,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Assert
             Assert.Equal(3, fileSystem.Paths.Count);
             Assert.Equal(@"packages.config", fileSystem.Paths.ElementAt(0).Key);
-            Assert.Equal(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.ElementAt(1).Key);
-            Assert.Equal(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.ElementAt(2).Key);
+            Assert.Contains(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.Keys);
+            Assert.Contains(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.Keys);
         }
 
         [Fact]
@@ -427,12 +427,50 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
 
             // Act
-            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object);
+            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object)
+            {
+                Console = new MockConsole()
+            };
             installCommand.Arguments.Add(@"X:\test\packages.config");
             installCommand.Execute();
 
             // Assert
             packageManager.Verify();
+        }
+
+        [Fact]
+        public void InstallCommandFromConfigListsAllMessagesInAggregateException()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"X:\test\packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""Abc"" version=""1.0.0"" />
+  <package id=""Efg"" version=""2.0.0"" />
+  <package id=""Pqr"" version=""3.0.0"" />
+</packages>");
+            fileSystem.AddFile("Foo.1.8.nupkg");
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
+            packageManager.Setup(p => p.InstallPackage("Efg", new SemanticVersion("2.0.0"), true, true)).Throws(new Exception("Efg exception!!"));
+            packageManager.Setup(p => p.InstallPackage("Pqr", new SemanticVersion("3.0.0"), true, true)).Throws(new Exception("No package restore consent for you!"));
+            packageManager.SetupGet(p => p.PathResolver).Returns(pathResolver);
+            packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
+            packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
+            var repository = new MockPackageRepository();
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
+            var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+            var console = new MockConsole();
+
+            // Act and Assert
+            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object);
+            installCommand.Arguments.Add(@"X:\test\packages.config");
+            installCommand.Console = console;
+
+            ExceptionAssert.Throws<AggregateException>(installCommand.Execute);
+            Assert.Contains("No package restore consent for you!", console.Output);
+            Assert.Contains("Efg exception!!", console.Output);
         }
 
         private static IPackageRepositoryFactory GetFactory()
@@ -473,10 +511,18 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                                       IPackageManager packageManager = null,
                                       IPackageRepository machineCacheRepository = null,
                                       bool allowPackageRestore = true)
-                : base(factory, sourceProvider, new MockSettings(allowPackageRestore), machineCacheRepository ?? new MockPackageRepository())
+                : base(factory, sourceProvider, CreateSettings(allowPackageRestore), machineCacheRepository ?? new MockPackageRepository())
             {
                 _fileSystem = fileSystem;
                 _packageManager = packageManager;
+            }
+
+            private static ISettings CreateSettings(bool allowPackageRestore)
+            {
+                var settings = new Mock<ISettings>();
+                settings.Setup(s => s.GetValue("enablePackageRestore", "enabled"))
+                        .Returns(allowPackageRestore.ToString());
+                return settings.Object;
             }
 
             protected override IFileSystem CreateFileSystem()
@@ -492,61 +538,6 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             protected override PackageReferenceFile GetPackageReferenceFile(string path)
             {
                 return new PackageReferenceFile(_fileSystem, path);
-            }
-        }
-
-        private sealed class MockSettings : ISettings
-        {
-            private readonly bool _allowPackageRestore;
-
-            public MockSettings(bool allowPackageRestore)
-            {
-                _allowPackageRestore = allowPackageRestore;
-            }
-
-            public string GetValue(string section, string key)
-            {
-                if (section == "packageRestore" && key == "enabled")
-                {
-                    return _allowPackageRestore ? "true" : "false";
-                }
-
-                return null;
-            }
-
-            public IList<KeyValuePair<string, string>> GetValues(string section)
-            {
-                throw new NotImplementedException();
-            }
-
-            public IList<KeyValuePair<string, string>> GetNestedValues(string section, string key)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void SetValue(string section, string key, string value)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void SetValues(string section, IList<KeyValuePair<string, string>> values)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void SetNestedValues(string section, string key, IList<KeyValuePair<string, string>> values)
-            {
-                throw new NotImplementedException();
-            }
-
-            public bool DeleteValue(string section, string key)
-            {
-                throw new NotImplementedException();
-            }
-
-            public bool DeleteSection(string section)
-            {
-                throw new NotImplementedException();
             }
         }
     }

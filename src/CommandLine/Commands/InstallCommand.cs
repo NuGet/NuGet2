@@ -5,8 +5,10 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using NuGet.Common;
 
 namespace NuGet.Commands
@@ -109,23 +111,14 @@ namespace NuGet.Commands
             }
             else
             {
-                IPackageManager packageManager = CreatePackageManager(fileSystem);
                 string packageId = Arguments[0];
                 SemanticVersion version = Version != null ? new SemanticVersion(Version) : null;
 
-                bool result = InstallPackage(packageManager, packageId, version, ignoreDependencies: false);
+                bool result = InstallPackage(fileSystem, packageId, version, ignoreDependencies: false, packageRestoreConsent: true);
                 if (!result)
                 {
                     Console.WriteLine(NuGetResources.InstallCommandPackageAlreadyExists, packageId);
                 }
-            }
-        }
-
-        private static void CheckForPackageRestoreConsent(PackageRestoreConsent packageRestore)
-        {
-            if (packageRestore != null && !packageRestore.IsGranted)
-            {
-                throw new InvalidOperationException(NuGetResources.InstallCommandPackageRestoreConsentNotFound);
             }
         }
 
@@ -149,11 +142,6 @@ namespace NuGet.Commands
         private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile file)
         {
             var packageReferences = file.GetPackageReferences().ToList();
-            IPackageManager packageManager = CreatePackageManager(fileSystem);
-
-            var packageRestore = new PackageRestoreConsent(_configSettings);
-
-            bool installedAny = false;
             foreach (var package in packageReferences)
             {
                 if (String.IsNullOrEmpty(package.Id))
@@ -166,24 +154,53 @@ namespace NuGet.Commands
                 {
                     throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InstallCommandPackageReferenceInvalidVersion, package.Id));
                 }
-
-                // Note that we ignore dependencies here because packages.config already contains the full closure
-                installedAny |= InstallPackage(packageManager, package.Id, package.Version, ignoreDependencies: true, packageRestoreConsent: packageRestore);
             }
 
-            if (!installedAny && packageReferences.Any())
+            try
             {
-                Console.WriteLine(NuGetResources.InstallCommandNothingToInstall, Constants.PackageReferenceFile);
+                bool installedAny = ExecuteInParallel(fileSystem, packageReferences);
+                if (!installedAny && packageReferences.Any())
+                {
+                    Console.WriteLine(NuGetResources.InstallCommandNothingToInstall, Constants.PackageReferenceFile);
+                }
+            }
+            catch (AggregateException exception)
+            {
+                if (ExceptionUtility.Unwrap(exception) == exception)
+                {
+                    // If the AggregateException contains more than one InnerException, it cannot be unwrapped. In which case, simply print out individual error messages
+                    var messages = exception.InnerExceptions.Select(ex => ex.Message)
+                                                            .Distinct(StringComparer.CurrentCulture);
+                    Console.WriteError(String.Join("\n", messages));
+                }
+                throw;
             }
         }
 
+        private bool ExecuteInParallel(IFileSystem fileSystem, List<PackageReference> packageReferences)
+        {
+            bool packageRestore = new PackageRestoreConsent(_configSettings).IsGranted;
+            int defaultConnectionLimit = ServicePointManager.DefaultConnectionLimit;
+            if (packageReferences.Count > defaultConnectionLimit)
+            {
+                ServicePointManager.DefaultConnectionLimit = Math.Min(10, packageReferences.Count);
+            }
+
+            var tasks = packageReferences.Select(package =>
+                            Task.Factory.StartNew(() => InstallPackage(fileSystem, package.Id, package.Version, ignoreDependencies: true, packageRestoreConsent: packageRestore))).ToArray();
+
+            Task.WaitAll(tasks);
+            return tasks.All(p => !p.IsFaulted && p.Result);
+        }
+
         private bool InstallPackage(
-            IPackageManager packageManager,
+            IFileSystem fileSystem,
             string packageId,
             SemanticVersion version,
             bool ignoreDependencies,
-            PackageRestoreConsent packageRestoreConsent = null)
+            bool packageRestoreConsent)
         {
+            var packageManager = CreatePackageManager(fileSystem);
             if (!AllowMultipleVersions)
             {
                 var installedPackage = packageManager.LocalRepository.FindPackage(packageId);
@@ -196,7 +213,7 @@ namespace NuGet.Commands
                     }
                     else if (packageManager.SourceRepository.Exists(packageId, version))
                     {
-                        CheckForPackageRestoreConsent(packageRestoreConsent);
+                        EnsurePackageRestoreConsent(packageRestoreConsent);
 
                         // If the package is already installed, but
                         // (a) the version we require is different from the one that is installed, 
@@ -213,13 +230,13 @@ namespace NuGet.Commands
                 // We'll do this by checking if the package directory exists on disk.
                 var localRepository = packageManager.LocalRepository as LocalPackageRepository;
                 Debug.Assert(localRepository != null, "The PackageManager's local repository instance is necessarily a LocalPackageRepository instance.");
-                if (IsPackageInstalled(localRepository, packageId, version))
+                if (IsPackageInstalled(localRepository, packageManager.FileSystem, packageId, version))
                 {
                     return false;
                 }
             }
 
-            CheckForPackageRestoreConsent(packageRestoreConsent);
+            EnsurePackageRestoreConsent(packageRestoreConsent);
 
             // During package restore with parallel build, multiple projects would try to write to disk simultaneously which results in write contentions.
             // We work around this issue by ensuring only one instance of the exe installs the package.
@@ -257,10 +274,19 @@ namespace NuGet.Commands
             }
         }
 
-        // Do a very quick check of whether a package in installed by checked whether the nupkg file exists
-        private static bool IsPackageInstalled(LocalPackageRepository packageRepository, string packageId, SemanticVersion version)
+        private static void EnsurePackageRestoreConsent(bool packageRestoreConsent)
         {
-            return packageRepository.GetPackageLookupPaths(packageId, version).Any();
+            if (!packageRestoreConsent)
+            {
+                throw new InvalidOperationException(NuGetResources.InstallCommandPackageRestoreConsentNotFound);
+            }
+        }
+
+        // Do a very quick check of whether a package in installed by checked whether the nupkg file exists
+        private static bool IsPackageInstalled(LocalPackageRepository packageRepository, IFileSystem fileSystem, string packageId, SemanticVersion version)
+        {
+            var packagePaths = packageRepository.GetPackageLookupPaths(packageId, version);
+            return packagePaths.Any(fileSystem.FileExists);
         }
 
         /// <summary>
