@@ -9,6 +9,7 @@ using Moq;
 using NuGet.Test;
 using Xunit;
 using Xunit.Extensions;
+using NuGetConsole;
 
 namespace NuGet.VisualStudio.Test
 {
@@ -57,7 +58,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var document = new XDocument(new XElement(VSTemplateNamespace + "VSTemplate"));
-            var wizard = new VsTemplateWizard(null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -79,7 +80,7 @@ namespace NuGet.VisualStudio.Test
                     .Element(VSTemplateNamespace + "packages")
                     .Add(new XAttribute("isPreunzipped", preunzippedValue));
 
-            var wizard = new VsTemplateWizard(null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"c:\some\file.vstemplate");
@@ -96,7 +97,7 @@ namespace NuGet.VisualStudio.Test
                 new XElement(VSTemplateNamespace + "VSTemplate",
                     new XElement(VSTemplateNamespace + "WizardData")
                     ));
-            var wizard = new VsTemplateWizard(null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -111,7 +112,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var document = BuildDocument(null);
-            var wizard = new VsTemplateWizard(null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -126,7 +127,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var document = BuildDocumentWithPackage("template");
-            var wizard = new VsTemplateWizard(null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -141,7 +142,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var document = BuildDocumentWithPackage("extension", new XAttribute("repositoryId", "myExtensionId"));
-            var wizard = new VsTemplateWizard(null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null);
             var extensionManagerMock = new Mock<IVsExtensionManager>();
             var extensionMock = new Mock<IInstalledExtension>();
             extensionMock.Setup(e => e.InstallPath).Returns(@"C:\Extension\Dir");
@@ -205,7 +206,7 @@ namespace NuGet.VisualStudio.Test
             var registryValue = @"C:\AspNetMvc4\Packages";
 
             var document = BuildDocumentWithPackage("registry", new XAttribute("keyName", registryKey));
-            var wizard = new VsTemplateWizard(null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null);
 
             var hkcu_repository = new Mock<IRegistryKey>();
             var hkcu = new Mock<IRegistryKey>();
@@ -228,7 +229,7 @@ namespace NuGet.VisualStudio.Test
             var registryValue = @"C:\AspNetMvc4\Packages";
 
             var document = BuildDocumentWithPackage("registry", new XAttribute("keyName", registryKey));
-            var wizard = new VsTemplateWizard(null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null);
 
             // HKCU key doesn't exist
             var hkcu = new Mock<IRegistryKey>();
@@ -256,7 +257,7 @@ namespace NuGet.VisualStudio.Test
             var registryValue = @"C:\AspNetMvc4\Packages";
 
             var document = BuildDocumentWithPackage("registry", new XAttribute("keyName", registryKey));
-            var wizard = new VsTemplateWizard(null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null);
 
             // HKCU key exists, but the value does not
             var hkcu_repository = new Mock<IRegistryKey>();
@@ -287,7 +288,7 @@ namespace NuGet.VisualStudio.Test
             var registryValue = @"C:\AspNetMvc4\Packages";
 
             var document = BuildDocumentWithPackage("registry", new XAttribute("keyName", registryKeyName));
-            var wizard = new VsTemplateWizard(null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null);
 
             // HKCU key exists, but the value does not
             var hkcu_repository = new Mock<IRegistryKey>();
@@ -444,7 +445,7 @@ namespace NuGet.VisualStudio.Test
         private static void VerifyParsedPackages(XDocument document, IEnumerable<VsTemplateWizardPackageInfo> expectedPackages)
         {
             // Arrange
-            var wizard = new VsTemplateWizard(null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -719,6 +720,94 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
+        public void RunFinished_ForItem_SilentlyIgnoresPackageIsExactVersionAlreadyInstalled()
+        {
+            // Arrange
+            var mockProject = new Mock<Project>().Object;
+            var projectItemMock = new Mock<ProjectItem>();
+            projectItemMock.Setup(i => i.ContainingProject).Returns(mockProject);
+            var installerMock = new Mock<IVsPackageInstaller>();
+            var servicesMock = new Mock<IVsPackageInstallerServices>();
+            var consoleProviderMock = new Mock<IOutputConsoleProvider>();
+            var document = BuildDocument("template",
+                BuildPackageElement("MyPackage", "1.0.0-ctp-1"),
+                BuildPackageElement("MyOtherPackage", "2.0.3-beta4"),
+                BuildPackageElement("YetAnotherPackage", "3.0.2.1"));
+            var templateWizard = new TestableVsTemplateWizard(installerMock.Object, loadDocumentCallback: p => document, packageServices: servicesMock.Object, consoleProvider: consoleProviderMock.Object);
+            var wizard = (IWizard)templateWizard;
+            var dteMock = new Mock<DTE>();
+            
+            // * Setup mocks
+            dteMock.SetupProperty(dte => dte.StatusBar.Text);
+            servicesMock.Setup(s => s.IsPackageInstalled(mockProject, "MyOtherPackage")).Returns(true);
+            servicesMock.Setup(s => s.IsPackageInstalled(mockProject, "MyOtherPackage", new SemanticVersion("2.0.3-beta4"))).Returns(true);
+
+            // * Setup wizard
+            wizard.RunStarted(dteMock.Object, null, WizardRunKind.AsNewProject,
+                new object[] { @"C:\Some\file.vstemplate" });
+
+            // Act
+            wizard.ProjectItemFinishedGenerating(projectItemMock.Object);
+            wizard.RunFinished();
+
+            // Assert
+            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyPackage", "1.0.0-ctp-1", true, false));
+            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "YetAnotherPackage", "3.0.2.1", true, false));
+            installerMock.Verify(
+                i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyOtherPackage", "2.0.3-beta4", true, false),
+                Times.Never());
+            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0.0-ctp-1 to project...");
+            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding YetAnotherPackage.3.0.2.1 to project...");
+            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0.3-beta4 to project...", Times.Never());
+            consoleProviderMock.Verify(c => c.CreateOutputConsole(It.IsAny<bool>()), Times.Never());
+        }
+
+        [Fact]
+        public void RunFinished_ForItem_PrintsWarningIfInstalledVersionDoesntMatchRequestedVersion()
+        {
+            // Arrange
+            var mockProject = new Mock<Project>().Object;
+            var projectItemMock = new Mock<ProjectItem>();
+            projectItemMock.Setup(i => i.ContainingProject).Returns(mockProject);
+            var installerMock = new Mock<IVsPackageInstaller>();
+            var servicesMock = new Mock<IVsPackageInstallerServices>();
+            var consoleProviderMock = new Mock<IOutputConsoleProvider>();
+            var consoleMock = new Mock<IConsole>();
+            var document = BuildDocument("template",
+                BuildPackageElement("MyPackage", "1.0.0-ctp-1"),
+                BuildPackageElement("MyOtherPackage", "2.0.3-beta4"),
+                BuildPackageElement("YetAnotherPackage", "3.0.2.1"));
+            var templateWizard = new TestableVsTemplateWizard(installerMock.Object, loadDocumentCallback: p => document, packageServices: servicesMock.Object, consoleProvider: consoleProviderMock.Object);
+            var wizard = (IWizard)templateWizard;
+            var dteMock = new Mock<DTE>();
+
+            // * Setup mocks
+            consoleProviderMock.Setup(cp => cp.CreateOutputConsole(false)).Returns(consoleMock.Object);
+            dteMock.SetupProperty(dte => dte.StatusBar.Text);
+            servicesMock.Setup(s => s.IsPackageInstalled(mockProject, "MyOtherPackage")).Returns(true);
+            servicesMock.Setup(s => s.IsPackageInstalled(mockProject, "MyOtherPackage", new SemanticVersion("2.0.3-beta4"))).Returns(false);
+
+            // * Setup wizard
+            wizard.RunStarted(dteMock.Object, null, WizardRunKind.AsNewProject,
+                new object[] { @"C:\Some\file.vstemplate" });
+
+            // Act
+            wizard.ProjectItemFinishedGenerating(projectItemMock.Object);
+            wizard.RunFinished();
+
+            // Assert
+            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyPackage", "1.0.0-ctp-1", true, false));
+            installerMock.Verify(i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "YetAnotherPackage", "3.0.2.1", true, false));
+            installerMock.Verify(
+                i => i.InstallPackage(It.Is<LocalPackageRepository>(p => p.Source == @"C:\Some"), mockProject, "MyOtherPackage", "2.0.3-beta4", true, false),
+                Times.Never());
+            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyPackage.1.0.0-ctp-1 to project...");
+            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding YetAnotherPackage.3.0.2.1 to project...");
+            dteMock.VerifySet(dte => dte.StatusBar.Text = "Adding MyOtherPackage.2.0.3-beta4 to project...", Times.Never());
+            consoleMock.Verify(c => c.WriteLine("Attempting to install version '2.0.3-beta4' of 'MyOtherPackage' but the project already includes a different version. Skipping..."));
+        }
+
+        [Fact]
         public void RunFinished_InstallsValidPackages_ReportsInstallationErrors()
         {
             // Arrange
@@ -906,7 +995,7 @@ namespace NuGet.VisualStudio.Test
         [Fact]
         public void ShouldAddProjectItem_AlwaysReturnsTrue()
         {
-            IWizard wizard = new VsTemplateWizard(null, null);
+            IWizard wizard = new VsTemplateWizard(null, null, null, null);
 
             Assert.True(wizard.ShouldAddProjectItem(null));
             Assert.True(wizard.ShouldAddProjectItem(""));
@@ -920,8 +1009,10 @@ namespace NuGet.VisualStudio.Test
             public TestableVsTemplateWizard(
                 IVsPackageInstaller installer = null,
                 Func<string, XDocument> loadDocumentCallback = null,
-                IVsWebsiteHandler websiteHandler = null)
-                : base(installer, websiteHandler)
+                IVsWebsiteHandler websiteHandler = null,
+                IVsPackageInstallerServices packageServices = null,
+                IOutputConsoleProvider consoleProvider = null)
+                : base(installer, websiteHandler, packageServices ?? new Mock<IVsPackageInstallerServices>().Object, consoleProvider ?? new Mock<IOutputConsoleProvider>().Object)
             {
                 ErrorMessages = new List<string>();
                 _loadDocumentCallback = loadDocumentCallback ?? (path => null);

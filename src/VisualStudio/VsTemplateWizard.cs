@@ -11,6 +11,7 @@ using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TemplateWizard;
 using NuGet.VisualStudio.Resources;
+using NuGetConsole;
 
 namespace NuGet.VisualStudio
 {
@@ -23,12 +24,16 @@ namespace NuGet.VisualStudio
         private readonly IVsWebsiteHandler _websiteHandler;
         private VsTemplateWizardInstallerConfiguration _configuration;
         private DTE _dte;
-
+        private IVsPackageInstallerServices _packageServices;
+        private IOutputConsoleProvider _consoleProvider;
+        
         [ImportingConstructor]
-        public VsTemplateWizard(IVsPackageInstaller installer, IVsWebsiteHandler websiteHandler)
+        public VsTemplateWizard(IVsPackageInstaller installer, IVsWebsiteHandler websiteHandler, IVsPackageInstallerServices packageServices, IOutputConsoleProvider consoleProvider)
         {
             _installer = installer;
             _websiteHandler = websiteHandler;
+            _packageServices = packageServices;
+            _consoleProvider = consoleProvider;
         }
 
         [Import]
@@ -246,14 +251,28 @@ namespace NuGet.VisualStudio
 
             foreach (var package in configuration.Packages)
             {
-                try
+                // Does the project already have this package installed?
+                if (_packageServices.IsPackageInstalled(project, package.Id))
                 {
-                    _dte.StatusBar.Text = String.Format(CultureInfo.CurrentCulture, VsResources.TemplateWizard_PackageInstallStatus, package.Id, package.Version);
-                    packageInstaller.InstallPackage(repository, project, package.Id, package.Version.ToString(), ignoreDependencies: true, skipAssemblyReferences: package.SkipAssemblyReferences);
+                    // If so, is it the right version?
+                    if (!_packageServices.IsPackageInstalled(project, package.Id, package.Version))
+                    {
+                        // No? OK, write a message to the Output window and ignore this package.
+                        ShowWarningMessage(String.Format(VsResources.TemplateWizard_VersionConflict, package.Id, package.Version));
+                    }
+                    // Yes? Just silently ignore this package!
                 }
-                catch (InvalidOperationException exception)
+                else
                 {
-                    failedPackageErrors.Add(package.Id + "." + package.Version + " : " + exception.Message);
+                    try
+                    {
+                        _dte.StatusBar.Text = String.Format(CultureInfo.CurrentCulture, VsResources.TemplateWizard_PackageInstallStatus, package.Id, package.Version);
+                        packageInstaller.InstallPackage(repository, project, package.Id, package.Version.ToString(), ignoreDependencies: true, skipAssemblyReferences: package.SkipAssemblyReferences);
+                    }
+                    catch (InvalidOperationException exception)
+                    {
+                        failedPackageErrors.Add(package.Id + "." + package.Version + " : " + exception.Message);
+                    }
                 }
             }
 
@@ -367,6 +386,12 @@ namespace NuGet.VisualStudio
         internal virtual void ShowErrorMessage(string message)
         {
             MessageHelper.ShowErrorMessage(message, VsResources.TemplateWizard_ErrorDialogTitle);
+        }
+
+        internal virtual void ShowWarningMessage(string message)
+        {
+            IConsole console = _consoleProvider.CreateOutputConsole(requirePowerShellHost: false);
+            console.WriteLine(message);
         }
 
         void IWizard.BeforeOpeningFile(ProjectItem projectItem)

@@ -318,6 +318,6 @@ Packages installed into Website projects will not be restored during build. Cons
     <value>Downloading missing packages...</value>
   </data>
   <data name="TemplateWizard_VersionConflict" xml:space="preserve">
-    <value>Attempting to install version '{2}' of '{0}' but the project already includes '{1}'. Skipping...</value>
+    <value>Attempting to install version '{1}' of '{0}' but the project already includes a different version. Skipping...</value>
   </data>
 </root>

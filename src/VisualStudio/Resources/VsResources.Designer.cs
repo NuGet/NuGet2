@@ -585,7 +585,7 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Attempting to install version &apos;{2}&apos; of &apos;{0}&apos; but the project already includes &apos;{1}&apos;. Skipping....
+        ///   Looks up a localized string similar to Attempting to install version &apos;{1}&apos; of &apos;{0}&apos; but the project already includes a different version. Skipping....
         /// </summary>
         public static string TemplateWizard_VersionConflict {
             get {
