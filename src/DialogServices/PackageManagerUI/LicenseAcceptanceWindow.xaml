@@ -33,8 +33,8 @@
                     <Run Text=" " />
                     <Run Text="{Binding Authors, Mode=OneTime, StringFormat={x:Static resources:Resources.License_AuthorFormatString}, Converter={StaticResource authorNamesConverter}}" />
                 </TextBlock>
-                <TextBlock>
-                    <Hyperlink NavigateUri="{Binding LicenseUrl, Mode=OneTime}" RequestNavigate="OnViewLicenseTermsRequestNavigate">
+                <TextBlock AutomationProperties.AutomationId="{Binding Id, Mode=OneWay, StringFormat='LicenseTerm_{0}'}">
+                    <Hyperlink AutomationProperties.AutomationId="{Binding Id, Mode=OneWay, StringFormat='LicenseTermLink_{0}'}" NavigateUri="{Binding LicenseUrl, Mode=OneTime}" RequestNavigate="OnViewLicenseTermsRequestNavigate">
                         <Run Text="{x:Static resources:Resources.License_ViewLicense}" />
                     </Hyperlink>
                 </TextBlock>
