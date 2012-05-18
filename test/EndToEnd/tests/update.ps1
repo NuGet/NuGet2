@@ -628,11 +628,11 @@ function Test-UpdateAllPackagesInASingleProjectWithMultipleProjects {
     # Arrange
     $p1 = New-WebApplication
     $p2 = New-WebApplication
-    $p1, $p2 | Install-Package jQuery -Version 1.5.1 -Source $context.RepositoryRoot
-    $p1, $p2 | Install-Package jQuery.UI.Combined  -Version 1.8.11 -Source $context.RepositoryRoot
+    $p1, $p2 | Install-Package jQuery -Version 1.5.1 -Source $context.RepositoryPath
+    $p1, $p2 | Install-Package jQuery.UI.Combined  -Version 1.8.11 -Source $context.RepositoryPath
 
     # Act
-    $p1 | Update-Package -Source $context.RepositoryRoot
+    $p1 | Update-Package -Source $context.RepositoryPath
 
     # Assert
     Assert-Package $p1 jQuery 1.6.1
@@ -649,11 +649,11 @@ function Test-UpdateAllPackagesInASingleProjectWithSafeFlagAndMultipleProjects {
     # Arrange
     $p1 = New-WebApplication
     $p2 = New-WebApplication
-    $p1, $p2 | Install-Package jQuery -Version 1.5.1 -Source $context.RepositoryRoot
-    $p1, $p2 | Install-Package jQuery.UI.Combined  -Version 1.8.11 -Source $context.RepositoryRoot
+    $p1, $p2 | Install-Package jQuery -Version 1.5.1 -Source $context.RepositoryPath
+    $p1, $p2 | Install-Package jQuery.UI.Combined  -Version 1.8.11 -Source $context.RepositoryPath
 
     # Act
-    $p1 | Update-Package -Safe -Source $context.RepositoryRoot
+    $p1 | Update-Package -Safe -Source $context.RepositoryPath
 
     # Assert
     Assert-Package $p1 jQuery 1.5.2
@@ -693,7 +693,7 @@ function Test-UpdatePackageInOneProjectDoesNotCheckAllPackagesInSolution {
     # Arrange
     $p1 = New-ConsoleApplication
     $p2 = New-ConsoleApplication
-    $p1 | Install-Package jQuery -Version 1.5.1 -Source $context.RepositoryRoot
+    $p1 | Install-Package jQuery -Version 1.5.1 -Source $context.RepositoryPath
 
     # Act
     $p2 | Update-Package -Source $context.RepositoryRoot

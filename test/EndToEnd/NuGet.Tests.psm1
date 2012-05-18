@@ -140,7 +140,7 @@ function global:Run-Test {
                 pushd 
                 Set-Location $repositoryPath
                 # Generate any packages that might be in the repository dir
-                Get-ChildItem $repositoryPath -Filter *.dgml | %{
+				Get-ChildItem $repositoryPath\* -Include *.dgml,*.nuspec | %{
                     & $generatePackagesExePath $_.FullName | Out-Null
                 } 
                 popd

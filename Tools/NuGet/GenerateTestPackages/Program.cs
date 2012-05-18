@@ -17,8 +17,92 @@ namespace GenerateTestPackages
 
         static void Main(string[] args)
         {
+            string path = args[0];
+            var extension = Path.GetExtension(path);
+            bool signBinaries = args.Length > 1 && Boolean.Parse(args[1]);
 
-            var document = XDocument.Load(args[0]);
+            if (extension.Equals(".nuspec", StringComparison.OrdinalIgnoreCase))
+            {
+                BuildPackage(path, signBinaries);
+            }
+            else
+            {
+                BuildDependency(path);
+            }
+        }
+
+        private static void BuildPackage(string nuspecPath, bool signBinaries)
+        {
+            var repositoryPath = Path.GetDirectoryName(nuspecPath);
+            var basePath = Path.Combine(repositoryPath, "files");
+            Directory.CreateDirectory(basePath);
+            
+            var createdFiles = new List<string>();
+            bool deleteDir = true;
+            using (var fileStream = File.OpenRead(nuspecPath))
+            {
+                var manifest = Manifest.ReadFrom(fileStream);
+                foreach (var file in manifest.Files)
+                {
+                    string outputPath = Path.Combine(basePath, file.Source);
+                    if (File.Exists(outputPath))
+                    {
+                        deleteDir = false;
+                        // A user created file exists. Continue to next file.
+                        continue;
+                    }
+                    
+                    createdFiles.Add(outputPath);
+                    string outputDir = Path.GetDirectoryName(outputPath);
+                    if (!Directory.Exists(outputDir))
+                    {
+                        Directory.CreateDirectory(outputDir);
+                    }
+
+                    if (file.Source.StartsWith(@"lib" + Path.DirectorySeparatorChar))
+                    {
+                        var name = Path.GetFileNameWithoutExtension(file.Source);
+                        CreateAssembly(new PackageInfo(manifest.Metadata.Id + ":" + manifest.Metadata.Version),
+                                       outputPath: outputPath);
+                    }
+                    else
+                    {
+                        File.WriteAllBytes(outputPath, new byte[0]);
+                    }
+                }
+
+                var packageBuilder = new PackageBuilder();
+                packageBuilder.Populate(manifest.Metadata);
+                packageBuilder.PopulateFiles(basePath, manifest.Files);
+                
+                string nupkgDirectory = Path.GetFullPath("packages");
+                Directory.CreateDirectory(nupkgDirectory);
+                string nupkgPath = Path.Combine(nupkgDirectory, Path.GetFileNameWithoutExtension(nuspecPath)) + ".nupkg";
+                using (var nupkgStream = File.Create(nupkgPath))
+                {
+                    packageBuilder.Save(nupkgStream);
+                }
+                
+                
+            }
+            try
+            {
+                if (deleteDir)
+                {
+                    Directory.Delete(basePath, recursive: true);
+                }
+                else 
+                {
+                    // Delete files that we created.
+                    createdFiles.ForEach(File.Delete);
+                }
+            }
+            catch { }
+        }
+
+        private static void BuildDependency(string path)
+        {
+            var document = XDocument.Load(path);
 
             XNamespace ns = "http://schemas.microsoft.com/vs/2009/dgml";
 
@@ -94,7 +178,7 @@ namespace GenerateTestPackages
             CreatePackage(package);
         }
 
-        static void CreateAssembly(PackageInfo package)
+        static void CreateAssembly(PackageInfo package, string outputPath = null)
         {
 
             // Save the snk file from the embedded resource to the disk so we can use it when we compile
@@ -110,7 +194,7 @@ namespace GenerateTestPackages
             var codeProvider = new CSharpCodeProvider();
             var compilerParams = new CompilerParameters()
             {
-                OutputAssembly = Path.GetFullPath(GetAssemblyFullPath(package.FullName)),
+                OutputAssembly = outputPath ?? Path.GetFullPath(GetAssemblyFullPath(package.FullName)),
                 CompilerOptions = "/keyfile:" + keyFileName
             };
 

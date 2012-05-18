@@ -22,7 +22,7 @@ function Test-WebsiteSimpleInstall {
     $p = New-WebSite
     
     # Act
-    Install-Package -Source $context.RepositoryRoot -Project $p.Name MyAwesomeLibrary
+    Install-Package -Source $context.RepositoryPath -Project $p.Name MyAwesomeLibrary
     
     # Assert
     Assert-Package $p MyAwesomeLibrary
@@ -109,7 +109,7 @@ function Test-FailedInstallRollsBackInstall {
     $p = New-ClassLibrary
 
     # Act
-    Install-Package haack.metaweblog -Project $p.Name -Source $context.RepositoryRoot
+    Install-Package haack.metaweblog -Project $p.Name -Source $context.RepositoryPath
 
     # Assert
     Assert-NotNull (Get-ProjectPackage $p haack.metaweblog 0.1.0)
@@ -124,7 +124,7 @@ function Test-PackageWithIncompatibleAssembliesRollsInstallBack {
     $p = New-WebApplication
 
     # Act & Assert
-    Assert-Throws { Install-Package BingMapAppSDK -Project $p.Name -Source $context.RepositoryRoot } "Could not install package 'BingMapAppSDK 1.0.1011.1716'. You are trying to install this package into a project that targets '.NETFramework,Version=v4.0', but the package does not contain any assembly references that are compatible with that framework. For more information, contact the package author."
+    Assert-Throws { Install-Package BingMapAppSDK -Project $p.Name -Source $context.RepositoryPath } "Could not install package 'BingMapAppSDK 1.0.1011.1716'. You are trying to install this package into a project that targets '.NETFramework,Version=v4.0', but the package does not contain any assembly references that are compatible with that framework. For more information, contact the package author."
     Assert-Null (Get-ProjectPackage $p BingMapAppSDK 1.0.1011.1716)
     Assert-Null (Get-SolutionPackage BingMapAppSDK 1.0.1011.1716)
 }
@@ -217,7 +217,7 @@ function Test-InstallComplexPackageStructure {
     $p = New-WebApplication
 
     # Act
-    Install-Package MyFirstPackage -Project $p.Name -Source $context.RepositoryRoot
+    Install-Package MyFirstPackage -Project $p.Name -Source $context.RepositoryPath
 
     # Assert
     Assert-NotNull (Get-ProjectItem $p Pages\Blocks\Help\Security)
@@ -256,7 +256,7 @@ function Test-FSharpSimpleInstallWithContentFiles {
     $p = New-FSharpLibrary
     
     # Act
-    Install-Package jquery -Version 1.5 -Project $p.Name -Source $context.RepositoryRoot
+    Install-Package jquery -Version 1.5 -Project $p.Name -Source $context.RepositoryPath
     
     # Assert
     Assert-Package $p jquery
@@ -426,7 +426,7 @@ function Test-InstallPackageWithResourceAssemblies {
     $p = New-ClassLibrary
     
     # Act
-    $p | Install-Package FluentValidation -Source $context.RepositoryRoot
+    $p | Install-Package FluentValidation -Source $context.RepositoryPath
     
     # Assert
     Assert-Reference $p FluentValidation
@@ -473,7 +473,7 @@ function Test-PackageWithClientProfileAndFullFrameworkPicksClient {
     $p = New-ConsoleApplication
 
     # Arrange
-    $p | Install-Package MyAwesomeLibrary -Source $context.RepositoryRoot
+    $p | Install-Package MyAwesomeLibrary -Source $context.RepositoryPath
 
     # Assert
     Assert-Reference $p MyAwesomeLibrary
@@ -581,7 +581,7 @@ function Test-BindingRedirectDoesNotAddToSilverlightProject {
     $c = New-SilverlightApplication
 
     # Act
-    $c | Install-Package TestSL -Version 1.0 -Source $context.RepositoryRoot
+    $c | Install-Package TestSL -Version 1.0 -Source $context.RepositoryPath
 
     # Assert
     $c | %{ Assert-Reference $_ TestSL 1.0.0.0; 
@@ -909,10 +909,10 @@ function Test-InstallPackageAfterRenaming {
 
     # Act
     $p1.Name = "ProjectX"
-    Install-Package jquery -Version 1.5 -Source $context.RepositoryRoot -project "Folder1\Folder2\ProjectX"
+    Install-Package jquery -Version 1.5 -Source $context.RepositoryPath -project "Folder1\Folder2\ProjectX"
 
     $f.Name = "Folder3"
-    Install-Package jquery -Version 1.5 -Source $context.RepositoryRoot -project "Folder1\Folder3\ProjectB"
+    Install-Package jquery -Version 1.5 -Source $context.RepositoryPath -project "Folder1\Folder3\ProjectB"
 
     # Assert
     Assert-NotNull (Get-ProjectItem $p1 scripts\jquery-1.5.js)
@@ -942,9 +942,8 @@ function Test-InstallingPackageWithDependencyThatFailsShouldRollbackSuccessfully
     $p = New-WebApplication
 
     # Act
-    Assert-Throws { $p | Install-Package GoodPackageWithBadDependency -Source $context.RepositoryRoot } "NOT #WINNING"
+    Assert-Throws { $p | Install-Package GoodPackageWithBadDependency -Source $context.RepositoryPath } "NOT #WINNING"
 
-    # Assert    
     Assert-Null (Get-ProjectPackage $p GoodPackageWithBadDependency)
     Assert-Null (Get-SolutionPackage GoodPackageWithBadDependency)
     Assert-Null (Get-ProjectPackage $p PackageWithBadDependency)

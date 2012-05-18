@@ -137,10 +137,10 @@ function Test-TabExpansionForUpdatePackageShowSuggestionsForCustomSource {
     )
     # Arrange
     $project = New-ConsoleApplication
-    Install-Package jQuery -Project $project.Name -Source $context.RepositoryRoot
+    Install-Package jQuery -Project $project.Name -Source $context.RepositoryPath
 
     # Act
-    $suggestions = @(TabExpansion "Update-Package -Source $($context.RepositoryRoot) " '')
+    $suggestions = @(TabExpansion "Update-Package -Source $($context.RepositoryPath) " '')
 
     # Assert
     Assert-NotNull $suggestions

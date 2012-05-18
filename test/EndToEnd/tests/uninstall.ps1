@@ -92,7 +92,7 @@ function Test-UninstallPackageWithNestedContentFiles {
 
     # Arrange
     $p = New-WebApplication
-    Install-Package NestedFolders -Project $p.Name -Source $context.RepositoryRoot
+    Install-Package NestedFolders -Project $p.Name -Source $context.RepositoryPath
 
     # Act    
     Uninstall-Package NestedFolders -Project $p.Name
@@ -319,11 +319,11 @@ function Test-UninstallPackageAfterRenaming {
     $p2 = $f | New-ClassLibrary 'ProjectB'
 
     # Act
-    $p1 | Install-Package NestedFolders -Source $context.RepositoryRoot 
+    $p1 | Install-Package NestedFolders -Source $context.RepositoryPath 
     $p1.Name = "ProjectX"
     Uninstall-Package NestedFolders -Project Folder1\Folder2\ProjectX
 
-    $p2 | Install-Package NestedFolders -Source $context.RepositoryRoot 
+    $p2 | Install-Package NestedFolders -Source $context.RepositoryPath 
     $f.Name = "Folder3"
     Uninstall-Package NestedFolders -Project Folder1\Folder3\ProjectB
 
@@ -748,7 +748,7 @@ function Test-WebSiteSimpleUninstall
 	$p = New-Website
 	
 	# Act
-	$p | Install-Package MyAwesomeLibrary -Source $context.RepositoryRoot
+	$p | Install-Package MyAwesomeLibrary -Source $context.RepositoryPath
 	$p | Uninstall-Package MyAwesomeLibrary
 
 	# Assert

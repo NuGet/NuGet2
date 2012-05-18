@@ -8,7 +8,7 @@ function Test-EnablePackageRestoreOnlyModifyProjectsThatHaveInstalledPackages
     $p1 = New-ClassLibrary
     $p2 = New-ConsoleApplication
 
-    $p1 | Install-Package jQuery -Source $context.RepositoryRoot
+    $p1 | Install-Package jQuery -Source $context.RepositoryPath
     $p1.Save()
     $p2.Save()
 
@@ -31,7 +31,7 @@ function Test-EnablePackageRestoreModifyProjectThatInstallNewPackages
     Assert-Null (Get-MsBuildPropertyValue $p "RestorePackages")
 
     # Act
-    $p | Install-Package jQuery -Source $context.RepositoryRoot
+    $p | Install-Package jQuery -Source $context.RepositoryPath
 
     # Assert
     Assert-AreEqual "true" (Get-MsBuildPropertyValue $p "RestorePackages")

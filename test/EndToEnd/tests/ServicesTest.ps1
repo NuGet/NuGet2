@@ -24,7 +24,7 @@ function Test-VsPackageInstallerServices {
     $installerServices = $cm.GetService([NuGet.VisualStudio.IVsPackageInstallerServices])
     
     # Act
-    $p | Install-Package jquery -Version 1.5 -Source $context.RepositoryRoot
+    $p | Install-Package jquery -Version 1.5 -Source $context.RepositoryPath
     $packages = @($installerServices.GetInstalledPackages())
 
     # Assert
@@ -75,7 +75,7 @@ function Test-VsPackageInstallerEvents {
         $installerEvents.add_PackageUninstalled($uninstalledHandler)
 
         # Act
-        $p | Install-Package jquery -Version 1.5 -Source $context.RepositoryRoot
+        $p | Install-Package jquery -Version 1.5 -Source $context.RepositoryPath
         $p | Uninstall-Package jquery
         
         # Assert
