@@ -333,4 +333,16 @@
   <data name="Dialog_PackagePrereleaseLabel" xml:space="preserve">
     <value>Prerelease</value>
   </data>
+  <data name="Visualizer_PackageDependency" xml:space="preserve">
+    <value>Package Dependency</value>
+  </data>
+  <data name="Visualizer_InstalledPackage" xml:space="preserve">
+    <value>Installed Package</value>
+  </data>
+  <data name="Visualizer_Package" xml:space="preserve">
+    <value>Package</value>
+  </data>
+  <data name="Visualizer_Project" xml:space="preserve">
+    <value>Project</value>
+  </data>
 </root>

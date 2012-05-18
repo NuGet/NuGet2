@@ -45,11 +45,11 @@ namespace NuGet.Dialog
                     continue;
                 }
                 // Project has packages. Add a node for it
-                nodes.Add(new DGMLNode { Name = project.GetCustomUniqueName(), Label = project.GetDisplayName(), Category = "Project" });
+                nodes.Add(new DGMLNode { Name = project.GetCustomUniqueName(), Label = project.GetDisplayName(), Category = Resources.Visualizer_Project });
 
                 var dependencies = VisitProjectPackages(nodes, links, repo);
                 var installedPackages = repo.GetPackages().Except(dependencies);
-                links.AddRange(installedPackages.Select(c => new DGMLLink { SourceName = project.GetCustomUniqueName(), DestName = c.GetFullName(), Category = "Installed Package" }));
+                links.AddRange(installedPackages.Select(c => new DGMLLink { SourceName = project.GetCustomUniqueName(), DestName = c.GetFullName(), Category = Resources.Visualizer_InstalledPackage }));
             }
         }
 
@@ -60,7 +60,7 @@ namespace NuGet.Dialog
             foreach (var package in repo.GetPackages())
             {
                 var packageName = package.GetFullName();
-                nodes.Add(new DGMLNode { Name = packageName, Label = packageName, Category = "Package" });
+                nodes.Add(new DGMLNode { Name = packageName, Label = packageName, Category = Resources.Visualizer_Package });
 
                 foreach (var dependency in package.Dependencies)
                 {
@@ -68,7 +68,7 @@ namespace NuGet.Dialog
                     if (mapping.TryGetValue(dependency.Id, out dependentPackage))
                     {
                         dependencies.Add(dependentPackage);
-                        links.Add(new DGMLLink { SourceName = packageName, DestName = dependentPackage.GetFullName(), Category = "Package Dependency" });
+                        links.Add(new DGMLLink { SourceName = packageName, DestName = dependentPackage.GetFullName(), Category = Resources.Visualizer_PackageDependency });
                     }
                 }
             }
@@ -77,7 +77,7 @@ namespace NuGet.Dialog
 
         private string GenerateDGML(List<DGMLNode> nodes, List<DGMLLink> links)
         {
-            bool hasDependencies = links.Any(l => l.Category == "Package Dependency");
+            bool hasDependencies = links.Any(l => l.Category == Resources.Visualizer_PackageDependency);
             var document = new XDocument(
                 new XElement(XName.Get("DirectedGraph", dgmlNS),
                     new XAttribute("GraphDirection", "LeftToRight"),

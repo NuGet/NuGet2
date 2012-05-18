@@ -707,5 +707,41 @@ namespace NuGet.Dialog {
                 return ResourceManager.GetString("PackageHasDependents", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Installed Package.
+        /// </summary>
+        public static string Visualizer_InstalledPackage {
+            get {
+                return ResourceManager.GetString("Visualizer_InstalledPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package.
+        /// </summary>
+        public static string Visualizer_Package {
+            get {
+                return ResourceManager.GetString("Visualizer_Package", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package Dependency.
+        /// </summary>
+        public static string Visualizer_PackageDependency {
+            get {
+                return ResourceManager.GetString("Visualizer_PackageDependency", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Project.
+        /// </summary>
+        public static string Visualizer_Project {
+            get {
+                return ResourceManager.GetString("Visualizer_Project", resourceCulture);
+            }
+        }
     }
 }
