@@ -155,6 +155,37 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void FindPackageVerifiesPackageFileExistsOnFileSystemWhenCaching()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"A.1.0.0.nupkg");
+
+            var repository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: true), fileSystem, enableCaching: true);
+            var searchedPaths = new List<string>();
+            Func<string, IPackage> openPackage = p =>
+            {
+                searchedPaths.Add(p);
+                return PackageUtility.CreatePackage("A", "1.0");
+            };
+
+            // Act - 1
+            IPackage result = repository.FindPackage(openPackage, "A", new SemanticVersion("1.0"));
+
+            // Assert - 1
+            Assert.NotNull(result);
+            Assert.Equal("A", result.Id);
+            Assert.Equal(new SemanticVersion("1.0"), result.Version);
+
+            // Act - 2
+            fileSystem.DeleteFile("A.1.0.0.nupkg");
+            result = repository.FindPackage(openPackage, "A", new SemanticVersion("1.0"));
+
+            // Assert - 2
+            Assert.Null(result);
+        }
+
+        [Fact]
         public void AddPackageAddsFileToFileSystem()
         {
             // Arrange

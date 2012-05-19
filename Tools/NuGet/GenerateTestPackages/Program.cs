@@ -34,7 +34,7 @@ namespace GenerateTestPackages
         private static void BuildPackage(string nuspecPath, bool signBinaries)
         {
             var repositoryPath = Path.GetDirectoryName(nuspecPath);
-            var basePath = Path.Combine(repositoryPath, "files");
+            var basePath = Path.Combine(repositoryPath, "files", Path.GetFileNameWithoutExtension(nuspecPath));
             Directory.CreateDirectory(basePath);
             
             var createdFiles = new List<string>();

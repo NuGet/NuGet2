@@ -1640,8 +1640,6 @@ function Test-InstallWithConflictDoesNotUpdateToPrerelease {
         $context
     )
 
-	Write-Host $context.RepositoryPath
-
 	# Arrange
 	$a = New-ClassLibrary
 
@@ -1657,4 +1655,32 @@ function Test-InstallWithConflictDoesNotUpdateToPrerelease {
 	# Assert 2
 	Assert-Package $a A 1.1.0 
 	Assert-Package $a B 1.0.0 
+}
+
+
+function Test-ReinstallingAnUninstallPackageIsNotExcessivelyCached {
+	param(
+        $context
+    )
+
+		# Arrange
+	$a = New-ClassLibrary
+
+	# Act 1
+	$a | Install-Package netfx-Guard -Version 1.2 -Source $context.RepositoryRoot
+
+	# Assert 1
+	Assert-Package $a netfx-Guard 1.2
+
+	# Act 2
+	$a | Uninstall-Package netfx-Guard
+
+	# Assert 2
+	Assert-Null (Get-Package netfx-Guard)
+
+	# Act 3
+	$a | Install-Package netfx-Guard -Version 1.2.0 -Source $context.RepositoryRoot
+
+	# Assert 3
+	Assert-Package $a netfx-Guard 1.2 
 }

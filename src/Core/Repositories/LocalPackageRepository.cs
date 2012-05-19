@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Diagnostics;
 
 namespace NuGet
 {
@@ -146,8 +144,12 @@ namespace NuGet
         {
             var lookupPackageName = new PackageName(packageId, version);
             string packagePath;
-            if (_packagePathLookup.TryGetValue(lookupPackageName, out packagePath))
+            // If caching is enabled, check if we have a cached path. Additionally, verify that the file actually exists on disk since it might have moved.
+            if (_enableCaching && 
+                _packagePathLookup.TryGetValue(lookupPackageName, out packagePath) &&
+                FileSystem.FileExists(packagePath))
             {
+                // When depending on the cached path, verify the file exists on disk.
                 return GetPackage(openPackage, packagePath);
             }
 
@@ -247,7 +249,7 @@ namespace NuGet
         {
             var name = Path.GetFileNameWithoutExtension(path);
             SemanticVersion parsedVersion;
-            
+
             // When matching by pattern, we will always have a version token. Packages without versions would be matched early on by the version-less path resolver 
             // when doing an exact match.
             return name.Length > packageId.Length &&
