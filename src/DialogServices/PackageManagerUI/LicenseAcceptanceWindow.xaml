@@ -16,7 +16,9 @@
     WindowStartupLocation="CenterOwner"
     resources:WindowSizePersistenceHelper.WindowToken="LicenseWindow"
     Title="{x:Static resources:Resources.License_DialogTitle}"
-    Background="{DynamicResource {x:Static resources:UIResources.WindowBackgroundBrushKey}}">
+    Background="{DynamicResource {x:Static resources:UIResources.WindowBackgroundBrushKey}}"
+    AutomationProperties.AutomationId="NuGetLicenseWindow"
+    >
     
     <Window.Resources>
         <Style TargetType="{x:Type Button}">

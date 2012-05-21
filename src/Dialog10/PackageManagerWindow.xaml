@@ -25,7 +25,9 @@
     dialogServices:WindowSizePersistenceHelper.WindowToken="MainWindow"
     Loaded="OnDialogWindowLoaded"
     Closing="OnDialogWindowClosing"
-    Closed="OnDialogWindowClosed">
+    Closed="OnDialogWindowClosed"
+    AutomationProperties.AutomationId="NuGetMainWindow"
+    >
     
     <Window.Resources>
         <ResourceDictionary>

@@ -15,7 +15,9 @@
     MinHeight="230" 
     MinWidth="300"
     resources:WindowSizePersistenceHelper.WindowToken="ProgressWindow"
-    Background="{DynamicResource {x:Static resources:UIResources.WindowBackgroundBrushKey}}">
+    Background="{DynamicResource {x:Static resources:UIResources.WindowBackgroundBrushKey}}"
+    AutomationProperties.AutomationId="NuGetProgressWindow"
+    >
     
     <DockPanel>
         <TextBlock DockPanel.Dock="Top" Text="{Binding Title, ElementName=Root}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" FontWeight="Bold" Margin="10" x:Name="StatusText" />
