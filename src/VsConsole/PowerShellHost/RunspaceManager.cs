@@ -14,23 +14,27 @@ namespace NuGetConsole.Host.PowerShell.Implementation
     internal class RunspaceManager : IRunspaceManager
     {
         // Cache Runspace by name. There should be only one Runspace instance created though.
-        private readonly ConcurrentDictionary<string, Tuple<Runspace, NuGetPSHost>> _runspaceCache = new ConcurrentDictionary<string, Tuple<Runspace, NuGetPSHost>>();
+        private readonly ConcurrentDictionary<string, Tuple<RunspaceDispatcher, NuGetPSHost>> _runspaceCache = new ConcurrentDictionary<string, Tuple<RunspaceDispatcher, NuGetPSHost>>();
 
         public const string ProfilePrefix = "NuGet";
 
-        public Tuple<Runspace, NuGetPSHost> GetRunspace(IConsole console, string hostName)
+        public Tuple<RunspaceDispatcher, NuGetPSHost> GetRunspace(IConsole console, string hostName)
         {
             return _runspaceCache.GetOrAdd(hostName, name => CreateAndSetupRunspace(console, name));
         }
 
-        private static Tuple<Runspace, NuGetPSHost> CreateAndSetupRunspace(IConsole console, string hostName)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Reliability",
+            "CA2000:Dispose objects before losing scope",
+            Justification = "We can't dispose it if we want to return it.")]
+        private static Tuple<RunspaceDispatcher, NuGetPSHost> CreateAndSetupRunspace(IConsole console, string hostName)
         {
             Tuple<Runspace, NuGetPSHost> runspace = CreateRunspace(console, hostName);
             SetupExecutionPolicy(runspace.Item1);
             LoadModules(runspace.Item1);
             LoadProfilesIntoRunspace(runspace.Item1);
 
-            return runspace;
+            return Tuple.Create(new RunspaceDispatcher(runspace.Item1), runspace.Item2);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
