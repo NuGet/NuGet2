@@ -59,16 +59,43 @@ namespace NuGet
             }
         }
 
-        public static string GetConfigValue(this ISettings settings, string key)
+        /// <summary>
+        /// Retrieves a config value for the specified key
+        /// </summary>
+        /// <param name="settings">The settings instance to retrieve </param>
+        /// <param name="key">The key to look up</param>
+        /// <param name="decrypt">Determines if the retrieved value needs to be decrypted.</param>
+        /// <returns>Null if the key was not found, value from config otherwise.</returns>
+        public static string GetConfigValue(this ISettings settings, string key, bool decrypt = false)
         {
-            return settings.GetValue(ConfigSection, key);
+            return decrypt ? settings.GetDecryptedValue(ConfigSection, key) : settings.GetValue(ConfigSection, key);
         }
 
-        public static void SetConfigValue(this ISettings settings, string key, string value)
+        /// <summary>
+        /// Sets a config value in the setting.
+        /// </summary>
+        /// <param name="settings">The settings instance to store the key-value in.</param>
+        /// <param name="key">The key to store.</param>
+        /// <param name="value">The value to store.</param>
+        /// <param name="encrypt">Determines if the value needs to be encrypted prior to storing.</param>
+        public static void SetConfigValue(this ISettings settings, string key, string value, bool encrypt = false)
         {
-            settings.SetValue(ConfigSection, key, value);
+            if (encrypt == true)
+            {
+                settings.SetEncryptedValue(ConfigSection, key, value);
+            }
+            else
+            {
+                settings.SetValue(ConfigSection, key, value);
+            }
         }
 
+        /// <summary>
+        /// Deletes a config value from settings
+        /// </summary>
+        /// <param name="settings">The settings instance to delete the key from.</param>
+        /// <param name="key">The key to delete.</param>
+        /// <returns>True if the value was deleted, false otherwise.</returns>
         public static bool DeleteConfigValue(this ISettings settings, string key)
         {
             return settings.DeleteValue(ConfigSection, key);

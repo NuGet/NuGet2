@@ -887,6 +887,24 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void GetConfigSettingReadsEncryptedValueFromConfigSection()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            var value = SettingsExtensions.EncryptString("hello world");
+            settings.Setup(s => s.GetValue("config", "foo"))
+                    .Returns(value)
+                    .Verifiable();
+
+            // Act
+            var result = settings.Object.GetConfigValue("foo", decrypt: true);
+
+            // Assert
+            Assert.Equal("hello world", result);
+            settings.Verify();
+        }
+
+        [Fact]
         public void SetConfigSettingWritesValueToConfigSection()
         {
             // Arrange
@@ -899,6 +917,24 @@ namespace NuGet.Test
 
             // Assert
             settings.Verify();
+        }
+
+        [Fact]
+        public void SetConfigSettingWritesEncryptedValueToConfigSection()
+        {
+            // Arrange
+            string value = null;
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            settings.Setup(s => s.SetValue("config", "foo", It.IsAny<string>()))
+                    .Callback<string, string, string>((_, __, v) => value = v)
+                    .Verifiable();
+
+            // Act
+            settings.Object.SetConfigValue("foo", "bar", encrypt: true);
+
+            // Assert
+            settings.Verify();
+            Assert.Equal("bar", SettingsExtensions.DecryptString(value));
         }
 
         [Fact]

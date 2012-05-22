@@ -9,6 +9,7 @@ namespace NuGet.Commands
             UsageSummaryResourceName = "ConfigCommandSummary", UsageExampleResourceName = "ConfigCommandExamples")]
     public class ConfigCommand : Command
     {
+        private const string HttpPasswordKey = "http_proxy.password";
         private readonly Dictionary<string, string> _setValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly ISettings _settings;
 
@@ -41,7 +42,9 @@ namespace NuGet.Commands
                     }
                     else
                     {
-                        _settings.SetConfigValue(property.Key, property.Value);
+                        // Hack: Need a nicer way for the user to say encrypt this.
+                        bool encrypt = HttpPasswordKey.Equals(property.Key, StringComparison.OrdinalIgnoreCase);
+                        _settings.SetConfigValue(property.Key, property.Value, encrypt);
                     }
                 }
             }

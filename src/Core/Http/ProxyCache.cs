@@ -6,6 +6,10 @@ namespace NuGet
 {
     internal class ProxyCache : IProxyCache
     {
+        private const string HostKey = "http_proxy";
+        private const string UserKey = "http_proxy.user";
+        private const string PasswordKey = "http_proxy.password";
+
         /// <summary>
         /// Capture the default System Proxy so that it can be re-used by the IProxyFinder
         /// because we can't rely on WebRequest.DefaultWebProxy since someone can modify the DefaultWebProxy
@@ -17,18 +21,51 @@ namespace NuGet
 
         private readonly ConcurrentDictionary<Uri, WebProxy> _cache = new ConcurrentDictionary<Uri, WebProxy>();
 
-        private static readonly ProxyCache _instance = new ProxyCache();
+#if BOOTSTRAPPER
+        // Temporarily commenting these out until we can figure out a nicer way of doing this in the bootstrapper.
+
+        private static readonly Lazy<ProxyCache> _instance = new Lazy<ProxyCache>(() => new ProxyCache());
+                public ProxyCache()
+        {
+
+        }
+#else 
+        private static readonly Lazy<ProxyCache> _instance = new Lazy<ProxyCache>(() => new ProxyCache(Settings.LoadDefaultSettings(), new EnvironmentVariableWrapper()));
+
+        private readonly ISettings _settings;
+        private readonly IEnvironmentVariableReader _environment;
+
+        public ProxyCache(ISettings settings, IEnvironmentVariableReader environment)
+        {
+            _settings = settings;
+            _environment = environment;
+        }
+#endif
 
         internal static ProxyCache Instance
         {
             get
             {
-                return _instance;
+                return _instance.Value;
             }
         }
 
         public IWebProxy GetProxy(Uri uri)
         {
+#if !BOOTSTRAPPER
+            // Check if the user has configured proxy details in settings or in the environment.
+            WebProxy configuredProxy = GetUserConfiguredProxy();
+            if (configuredProxy != null)
+            {
+                // If a proxy was cached, it means the stored credentials are incorrect. Use the cached one in this case.
+                WebProxy actualProxy;
+                if (_cache.TryGetValue(configuredProxy.Address, out actualProxy))
+                {
+                    return actualProxy;
+                }
+                return configuredProxy;
+            }
+#endif 
             if (!IsSystemProxySet(uri))
             {
                 return null;
@@ -45,6 +82,45 @@ namespace NuGet
 
             return systemProxy;
         }
+
+#if !BOOTSTRAPPER
+        internal WebProxy GetUserConfiguredProxy()
+        {
+            // Try reading from the settings. The values are stored as 3 config values http_proxy, http_proxy_user, http_proxy_password
+            var host = _settings.GetConfigValue(HostKey);
+            if (!String.IsNullOrEmpty(host))
+            {
+                // The host is the minimal value we need to assume a user configured proxy. 
+                var webProxy = new WebProxy(host);
+                string userName = _settings.GetConfigValue(UserKey);
+                string password = _settings.GetConfigValue(PasswordKey, decrypt: true);
+
+                if (!String.IsNullOrEmpty(userName) && !String.IsNullOrEmpty(password))
+                {
+                    webProxy.Credentials = new NetworkCredential(userName, password);
+                }
+                return webProxy;
+            }
+
+            // Next try reading from the environment variable http_proxy. This would be specified as http://<username>:<password>@proxy.com
+            host = _environment.GetEnvironmentVariable(HostKey);
+            Uri uri;
+            if (!String.IsNullOrEmpty(host) && Uri.TryCreate(host, UriKind.Absolute, out uri))
+            {
+                var webProxy = new WebProxy(uri.GetComponents(UriComponents.HttpRequestUrl, UriFormat.SafeUnescaped));
+                if (!String.IsNullOrEmpty(uri.UserInfo))
+                {
+                    var credentials = uri.UserInfo.Split(':');
+                    if (credentials.Length > 1)
+                    {
+                        webProxy.Credentials = new NetworkCredential(userName: credentials[0], password: credentials[1]);
+                    }
+                }
+                return webProxy;
+            }
+            return null;
+        }
+#endif
 
         public void Add(IWebProxy proxy)
         {
