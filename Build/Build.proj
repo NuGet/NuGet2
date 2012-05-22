@@ -156,6 +156,14 @@
     <Target Name="CopyVisualStudioAddInOutputToDropDirectory">
         <ItemGroup>
             <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\*.vsix" />
+            <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\NuGet.VisualStudio.dll" />
+            <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\NuGet.VisualStudio.pdb" />
+            <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\NuGet.VisualStudio.Interop.dll" />
+            <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\NuGet.VisualStudio.Interop.pdb" />
+            <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\NuGetConsole.Host.PowerShell.dll" />
+            <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\NuGetConsole.Host.PowerShell.pdb" />
+            <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\NuGetConsole.Host.PowerShellProvider.dll" />
+            <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\NuGetConsole.Host.PowerShellProvider.pdb" />
         </ItemGroup>
         <Message Text="Copying the NuGet Visual Studio Add-In output to $(VisualStudioAddInDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(VisualStudioAddInOutputItems)" DestinationFiles="@(VisualStudioAddInOutputItems ->'$(VisualStudioAddInDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
