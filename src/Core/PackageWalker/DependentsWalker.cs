@@ -73,7 +73,6 @@ namespace NuGet
             return base.OnAfterResolveDependency(package, dependency);
         }
 
-
         public IEnumerable<IPackage> GetDependents(IPackage package)
         {
             if (DependentsLookup == null)

@@ -95,6 +95,7 @@
     <Compile Include="ProjectSystem\IBatchProcessor.cs" />
     <Compile Include="Repositories\ICloneableRepository.cs" />
     <Compile Include="Repositories\ICultureAwareRepository.cs" />
+    <Compile Include="Repositories\IPackageReferenceRepository.cs" />
     <Compile Include="Repositories\IServiceBasedRepository.cs" />
     <Compile Include="Repositories\PackageName.cs" />
     <Compile Include="Repositories\UnzippedPackageRepository.cs" />

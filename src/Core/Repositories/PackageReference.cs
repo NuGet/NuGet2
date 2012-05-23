@@ -1,19 +1,22 @@
 ﻿using System;
+using System.Runtime.Versioning;
 
 namespace NuGet
 {
     public class PackageReference : IEquatable<PackageReference>
     {
-        public PackageReference(string id, SemanticVersion version, IVersionSpec versionConstraint)
+        public PackageReference(string id, SemanticVersion version, IVersionSpec versionConstraint, FrameworkName targetFramework)
         {
             Id = id;
             Version = version;
             VersionConstraint = versionConstraint;
+            TargetFramework = targetFramework;
         }
 
         public string Id { get; private set; }
         public SemanticVersion Version { get; private set; }
         public IVersionSpec VersionConstraint { get; set; }
+        public FrameworkName TargetFramework { get; private set; }
 
         public override bool Equals(object obj)
         {

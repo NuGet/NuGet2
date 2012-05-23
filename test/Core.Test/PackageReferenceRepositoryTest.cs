@@ -318,16 +318,6 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void PackageReferenceRepositoryImplementsILatestPackageLookupInterface()
-        {
-            // Arrange
-            var repository = new PackageReferenceRepository(new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object);
-
-            // Assert
-            Assert.True(repository is ILatestPackageLookup);
-        }
-
-        [Fact]
         public void PackageReferenceRepositoryImplementsILatestPackageLookupInterfaceCorrectly()
         {
             // Arrange

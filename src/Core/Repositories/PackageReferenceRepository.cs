@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Versioning;
 
 namespace NuGet
 {
@@ -10,7 +11,7 @@ namespace NuGet
     /// it also has a reference to the repository that actually contains the packages. It keeps track
     /// of packages in an xml file at the project root (packages.xml).
     /// </summary>
-    public class PackageReferenceRepository : PackageRepositoryBase, IPackageLookup, IPackageConstraintProvider, ILatestPackageLookup
+    public class PackageReferenceRepository : PackageRepositoryBase, IPackageReferenceRepository, IPackageLookup, IPackageConstraintProvider, ILatestPackageLookup
     {
         private readonly PackageReferenceFile _packageReferenceFile;
         private readonly string _fullPath;
@@ -93,13 +94,7 @@ namespace NuGet
 
         public override void AddPackage(IPackage package)
         {
-            _packageReferenceFile.AddEntry(package.Id, package.Version);
-
-            // Notify the source repository every time we add a new package to the repository.
-            // This doesn't really need to happen on every package add, but this is over agressive
-            // to combat scenarios where the 2 repositories get out of sync. If this repository is already 
-            // registered in the source then this will be ignored
-            SourceRepository.RegisterRepository(PackageReferenceFileFullPath);
+            AddPackage(package.Id, package.Version, targetFramework: null);
         }
 
         public override void RemovePackage(IPackage package)
@@ -137,12 +132,20 @@ namespace NuGet
         public IVersionSpec GetConstraint(string packageId)
         {
             // Find the reference entry for this package
-            PackageReference reference = _packageReferenceFile.GetPackageReferences().FirstOrDefault(p => p.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase));
+            var reference = GetPackageReference(packageId);
             if (reference != null)
             {
                 return reference.VersionConstraint;
             }
             return null;
+        }
+
+        private PackageReference GetPackageReference(string packageId)
+        {
+            PackageReference reference =
+                _packageReferenceFile.GetPackageReferences().FirstOrDefault(
+                    p => p.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase));
+            return reference;
         }
 
         public bool TryFindLatestPackageById(string id, out SemanticVersion latestVersion)
@@ -159,6 +162,27 @@ namespace NuGet
                 Debug.Assert(latestVersion != null);
                 return true;
             }
+        }
+
+        public void AddPackage(string packageId, SemanticVersion version, FrameworkName targetFramework)
+        {
+            _packageReferenceFile.AddEntry(packageId, version, targetFramework);
+
+            // Notify the source repository every time we add a new package to the repository.
+            // This doesn't really need to happen on every package add, but this is over agressive
+            // to combat scenarios where the 2 repositories get out of sync. If this repository is already 
+            // registered in the source then this will be ignored
+            SourceRepository.RegisterRepository(PackageReferenceFileFullPath);
+        }
+
+        public FrameworkName GetPackageTargetFramework(string packageId)
+        {
+            var reference = GetPackageReference(packageId);
+            if (reference != null)
+            {
+                return reference.TargetFramework;
+            }
+            return null;
         }
     }
 }

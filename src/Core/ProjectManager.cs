@@ -4,8 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
+using System.Runtime.Versioning;
 using System.Xml.Linq;
 using NuGet.Resources;
 
@@ -13,15 +12,15 @@ namespace NuGet
 {
     public class ProjectManager : IProjectManager
     {
-        private event EventHandler<PackageOperationEventArgs> _packageReferenceAdding;
-        private event EventHandler<PackageOperationEventArgs> _packageReferenceAdded;
-        private event EventHandler<PackageOperationEventArgs> _packageReferenceRemoving;
-        private event EventHandler<PackageOperationEventArgs> _packageReferenceRemoved;
+        public event EventHandler<PackageOperationEventArgs> PackageReferenceAdding;
+        public event EventHandler<PackageOperationEventArgs> PackageReferenceAdded;
+        public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoving;
+        public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoved;
 
         private ILogger _logger;
         private IPackageConstraintProvider _constraintProvider;
+        private readonly IPackageReferenceRepository _packageReferenceRepository;
 
-        // REVIEW: These should be externally pluggable
         private static readonly IDictionary<string, IPackageFileTransformer> _fileTransformers = new Dictionary<string, IPackageFileTransformer>(StringComparer.OrdinalIgnoreCase) {
             { ".transform", new XmlTransfomer(GetConfigMappings()) },
             { ".pp", new Preprocessor() }
@@ -50,6 +49,7 @@ namespace NuGet
             Project = project;
             PathResolver = pathResolver;
             LocalRepository = localRepository;
+            _packageReferenceRepository = LocalRepository as IPackageReferenceRepository;
         }
 
         public IPackagePathResolver PathResolver
@@ -100,54 +100,6 @@ namespace NuGet
             }
         }
 
-        public event EventHandler<PackageOperationEventArgs> PackageReferenceAdding
-        {
-            add
-            {
-                _packageReferenceAdding += value;
-            }
-            remove
-            {
-                _packageReferenceAdding -= value;
-            }
-        }
-
-        public event EventHandler<PackageOperationEventArgs> PackageReferenceAdded
-        {
-            add
-            {
-                _packageReferenceAdded += value;
-            }
-            remove
-            {
-                _packageReferenceAdded -= value;
-            }
-        }
-
-        public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoving
-        {
-            add
-            {
-                _packageReferenceRemoving += value;
-            }
-            remove
-            {
-                _packageReferenceRemoving -= value;
-            }
-        }
-
-        public event EventHandler<PackageOperationEventArgs> PackageReferenceRemoved
-        {
-            add
-            {
-                _packageReferenceRemoved += value;
-            }
-            remove
-            {
-                _packageReferenceRemoved -= value;
-            }
-        }
-
         public virtual void AddPackageReference(string packageId)
         {
             AddPackageReference(packageId, version: null, ignoreDependencies: false, allowPrereleaseVersions: false);
@@ -168,7 +120,7 @@ namespace NuGet
         {
             Execute(package, new UpdateWalker(LocalRepository,
                                               SourceRepository,
-                                              new DependentsWalker(LocalRepository, Project.TargetFramework),
+                                              new DependentsWalker(LocalRepository, GetPackageTargetFramework(package.Id)),
                                               ConstraintProvider,
                                               Project.TargetFramework,
                                               NullLogger.Instance,
@@ -283,11 +235,19 @@ namespace NuGet
             }
             finally
             {
-                // Add package to local repository in the finally so that the user can uninstall it
-                // if any exception occurs. This is easier than rolling back since the user can just
-                // manually uninstall things that may have failed.
-                // If this fails then the user is out of luck.
-                LocalRepository.AddPackage(package);
+                if (_packageReferenceRepository != null)
+                {
+                    // save the used project's framework if the repository supports it.
+                    _packageReferenceRepository.AddPackage(package.Id, package.Version, Project.TargetFramework);
+                }
+                else
+                {
+                    // Add package to local repository in the finally so that the user can uninstall it
+                    // if any exception occurs. This is easier than rolling back since the user can just
+                    // manually uninstall things that may have failed.
+                    // If this fails then the user is out of luck.
+                    LocalRepository.AddPackage(package);
+                }
             }
         }
 
@@ -327,9 +287,10 @@ namespace NuGet
 
         public virtual void RemovePackageReference(IPackage package, bool forceRemove, bool removeDependencies)
         {
+            FrameworkName targetFramework = GetPackageTargetFramework(package.Id);
             Execute(package, new UninstallWalker(LocalRepository,
-                                                 new DependentsWalker(LocalRepository, Project.TargetFramework),
-                                                 Project.TargetFramework,
+                                                 new DependentsWalker(LocalRepository, targetFramework),
+                                                 targetFramework,
                                                  NullLogger.Instance,
                                                  removeDependencies,
                                                  forceRemove));
@@ -466,34 +427,44 @@ namespace NuGet
 
         private void OnPackageReferenceAdding(PackageOperationEventArgs e)
         {
-            if (_packageReferenceAdding != null)
+            if (PackageReferenceAdding != null)
             {
-                _packageReferenceAdding(this, e);
+                PackageReferenceAdding(this, e);
             }
         }
 
         private void OnPackageReferenceAdded(PackageOperationEventArgs e)
         {
-            if (_packageReferenceAdded != null)
+            if (PackageReferenceAdded != null)
             {
-                _packageReferenceAdded(this, e);
+                PackageReferenceAdded(this, e);
             }
         }
 
         private void OnPackageReferenceRemoved(PackageOperationEventArgs e)
         {
-            if (_packageReferenceRemoved != null)
+            if (PackageReferenceRemoved != null)
             {
-                _packageReferenceRemoved(this, e);
+                PackageReferenceRemoved(this, e);
             }
         }
 
         private void OnPackageReferenceRemoving(PackageOperationEventArgs e)
         {
-            if (_packageReferenceRemoving != null)
+            if (PackageReferenceRemoving != null)
             {
-                _packageReferenceRemoving(this, e);
+                PackageReferenceRemoving(this, e);
             }
+        }
+
+        private FrameworkName GetPackageTargetFramework(string packageId)
+        {
+            if (_packageReferenceRepository != null)
+            {
+                return _packageReferenceRepository.GetPackageTargetFramework(packageId) ?? Project.TargetFramework;
+            }
+
+            return Project.TargetFramework;
         }
 
         private PackageOperationEventArgs CreateOperation(IPackage package)
