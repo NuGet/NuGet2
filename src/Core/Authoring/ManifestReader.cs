@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
+using NuGet.Resources;
 
 namespace NuGet
 {
@@ -136,13 +138,21 @@ namespace NuGet
                 return new List<ManifestDependencySet>();
             }
 
+            // Disallow the <dependencies> element to contain both <dependency> and 
+            // <group> child elements. Unfortunately, this cannot be enforced by XSD.
+            if (dependenciesElement.ElementsNoNamespace("dependency").Any() &&
+                dependenciesElement.ElementsNoNamespace("group").Any())
+            {
+                throw new InvalidDataException(NuGetResources.Manifest_DependenciesHasMixedElements);
+            }
+
             var dependencies = ReadDependencies(dependenciesElement);
             if (dependencies.Count > 0)
             {
                 // old format, <dependency> is direct child of <dependencies>
                 var dependencySet = new ManifestDependencySet
                 {
-                    Dependencies = ReadDependencies(dependenciesElement)
+                    Dependencies = dependencies
                 };
                 return new List<ManifestDependencySet> { dependencySet };
             }
