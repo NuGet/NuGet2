@@ -71,7 +71,7 @@ namespace NuGet
                 // TODO: We need to figure out a way to cache the token for the duration of the token's validity (which is available as part of it's result).
                 MemoryCache.Instance.GetOrAdd(cacheKey,
                                         () => GetSTSToken(endPoint, realm),
-                                        TimeSpan.FromMinutes(10),
+                                        TimeSpan.FromMinutes(30),
                                         absoluteExpiration: true);
             }
             catch (TypeLoadException ex)
