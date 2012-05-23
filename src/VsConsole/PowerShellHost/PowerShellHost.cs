@@ -15,7 +15,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 {
     internal abstract class PowerShellHost : IHost, IPathExpansion, IDisposable
     {
-        private static readonly object _lockObject = new object();
         private static readonly object _initScriptsLock = new object();
         private readonly string _name;
         private readonly IRunspaceManager _runspaceManager;
@@ -25,7 +24,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
         private string _targetDir;
         private bool _updateWorkingDirectoryPending;
         private IConsole _activeConsole;
-        private Runspace _runspace;
+        private RunspaceDispatcher _runspace;
         private NuGetPSHost _nugetHost;
         // indicates whether this host has been initialized. 
         // null = not initilized, true = initialized successfully, false = initialized unsuccessfully
@@ -76,7 +75,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             private set;
         }
 
-        protected Runspace Runspace
+        protected RunspaceDispatcher Runspace
         {
             get
             {
@@ -163,10 +162,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             {
                 try
                 {
-                    Tuple<Runspace, NuGetPSHost> tuple = _runspaceManager.GetRunspace(console, _name);
-                    _runspace = tuple.Item1;
-                    _nugetHost = tuple.Item2;
-
+                    Tuple<RunspaceDispatcher, NuGetPSHost> result = _runspaceManager.GetRunspace(console, _name);
+                    _runspace = result.Item1;
+                    _nugetHost = result.Item2;
+                    
                     _initialized = true;
 
                     if (console.ShowDisclaimerHeader)
@@ -346,22 +345,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
         public void SetDefaultRunspace()
         {
-            if (Runspace.DefaultRunspace == null)
-            {
-                lock (_lockObject)
-                {
-                    if (Runspace.DefaultRunspace == null)
-                    {
-                        // Set this runspace as DefaultRunspace so I can script DTE events.
-                        //
-                        // WARNING: MSDN says this is unsafe. The runspace must not be shared across
-                        // threads. I need this to be able to use ScriptBlock for DTE events. The
-                        // ScriptBlock event handlers execute on DefaultRunspace.
-
-                        Runspace.DefaultRunspace = Runspace;
-                    }
-                }
-            }
+            Runspace.MakeDefault();
         }
 
         private void DisplayDisclaimerAndHelpText()

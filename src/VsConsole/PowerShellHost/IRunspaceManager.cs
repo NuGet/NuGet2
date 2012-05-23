@@ -5,6 +5,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 {
     internal interface IRunspaceManager
     {
-        Tuple<Runspace, NuGetPSHost> GetRunspace(IConsole console, string hostName);
+        Tuple<RunspaceDispatcher, NuGetPSHost> GetRunspace(IConsole console, string hostName);
     }
 }

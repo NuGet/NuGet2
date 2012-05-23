@@ -46,6 +46,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PSTypeWrapper.cs" />
+    <Compile Include="RunspaceDispatcher.cs" />
     <Compile Include="RunspaceExtensions.cs" />
     <Compile Include="RunspaceManager.cs" />
     <Compile Include="SyncPowerShellHost.cs" />
