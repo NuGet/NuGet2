@@ -38,7 +38,7 @@ namespace NuGet.VisualStudio
 
 		public void InstallPackage(IPackageRepository repository, Project project, string packageId, string version, bool ignoreDependencies, bool skipAssemblyReferences) 
 		{
-			InstallPackage(repository, project, packageId, ToSemanticVersion(version), ignoreDependencies, skipAssemblyReferences: false);
+			InstallPackage(repository, project, packageId, ToSemanticVersion(version), ignoreDependencies, skipAssemblyReferences: skipAssemblyReferences);
 		}
 
 		internal void InstallPackage(string source, Project project, string packageId, SemanticVersion version, bool ignoreDependencies) {

@@ -59,7 +59,7 @@ namespace GenerateTestPackages
                         Directory.CreateDirectory(outputDir);
                     }
 
-                    if (file.Source.StartsWith(@"lib" + Path.DirectorySeparatorChar))
+                    if (file.Source.StartsWith(@"lib" + Path.DirectorySeparatorChar) && !file.Source.EndsWith("resources.dll"))
                     {
                         var name = Path.GetFileNameWithoutExtension(file.Source);
                         CreateAssembly(new PackageInfo(manifest.Metadata.Id + ":" + manifest.Metadata.Version),

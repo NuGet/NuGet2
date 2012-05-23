@@ -748,7 +748,7 @@ function Test-WebSiteSimpleUninstall
     $p = New-Website
     
     # Act
-    $p | Install-Package MyAwesomeLibrary -Source $context.RepositoryRoot
+    $p | Install-Package MyAwesomeLibrary -Source $context.RepositoryPath
     $p | Uninstall-Package MyAwesomeLibrary
 
     # Assert

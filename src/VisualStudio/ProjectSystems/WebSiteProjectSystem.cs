@@ -40,7 +40,10 @@ namespace NuGet.VisualStudio
             string name = Path.GetFileNameWithoutExtension(referencePath);
             try
             {
-                // Add a reference to the project
+                Project.Object.References.AddFromFile(PathUtility.GetAbsolutePath(Root, referencePath));
+                
+                // Always create a refresh file. Vs does this for us in most cases, however for GACed binaries, it resorts to adding a web.config entry instead.
+                // This may result in deployment issues. To work around ths, we'll always attempt to add a file to the bin.
                 this.CreateRefreshFile(PathUtility.GetAbsolutePath(Root, referencePath));
 
                 Logger.Log(MessageLevel.Debug, VsResources.Debug_AddReference, name, ProjectName);
@@ -53,9 +56,12 @@ namespace NuGet.VisualStudio
 
         public override void RemoveReference(string name)
         {
-            // Remove the reference from the project
+            // Remove the reference via DTE.
+            base.RemoveReference(name);
+            
+            // For GACed binaries, VS would not clear the refresh files for us since it assumes the reference exists in web.config. 
+            // We'll clean up any remaining .refresh files.
             var refreshFilePath = Path.Combine("bin", Path.GetFileName(name) + ".refresh");
-                
             if (FileExists(refreshFilePath))
             {
                 try
@@ -66,12 +72,6 @@ namespace NuGet.VisualStudio
                 {
                     Logger.Log(MessageLevel.Warning, e.Message);
                 }
-            }
-            else
-            {
-                // If a refresh file does not exist, it might be a reference added via an earlier version of NuGet. Use the base's code path to try and 
-                // remove the reference via DTE.
-                base.RemoveReference(name);
             }
         }
 

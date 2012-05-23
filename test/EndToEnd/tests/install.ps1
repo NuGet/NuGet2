@@ -1861,3 +1861,24 @@ function Test-InstallPackageInstallCorrectDependencyPackageBasedOnTargetFramewor
 	Assert-NoPackage $project TestEmptyContentFolder
 	Assert-NoPackage $project TestEmptyToolsFolder
 }
+
+function Test-InstallingSatellitePackageToWebsiteCopiesResourcesToBin
+{
+	param($context)
+
+	# Arrange
+	$p = New-Website
+
+	# Act
+	$p | Install-Package Test.fr-FR -Source $context.RepositoryPath
+
+	# Assert
+	Assert-Package $p Test.fr-FR
+	Assert-Package $p Test
+	
+	$projectPath = $p.FullName
+	Assert-PathExists (Join-Path $projectPath "bin\Test.dll.refresh")
+	Assert-PathExists (Join-Path $projectPath "bin\Test.dll")
+	Assert-PathExists (Join-Path $projectPath "bin\fr-FR\Test.resources.dll")
+
+}
