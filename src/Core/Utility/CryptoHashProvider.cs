@@ -1,22 +1,23 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
+using NuGet.Resources;
 
 namespace NuGet
 {
     public class CryptoHashProvider : IHashProvider
     {
-        /// <remarks>
-        /// TODO: Eventually we need to change the server to start using MD5
-        /// </remarks>
+        /// <summary>
+        /// Server token used to represent that the hash being used is SHA 512
+        /// </summary>
         private const string SHA512HashAlgorithm = "SHA512";
 
-        /// <remarks>
-        /// SHA512CNG is much faster in Windows Vista and higher.
-        /// </remarks>
-        private static readonly bool _useSHA512Cng = Environment.OSVersion.Version >= new Version(6, 0);
+        /// <summary>
+        /// Server token used to represent that the hash being used is SHA 256
+        /// </summary>
+        private const string SHA256HashAlgorithm = "SHA256";
 
-        
         private readonly string _hashAlgorithm;
 
         public CryptoHashProvider()
@@ -31,6 +32,13 @@ namespace NuGet
             {
                 hashAlgorithm = SHA512HashAlgorithm;
             }
+            else if (!hashAlgorithm.Equals(SHA512HashAlgorithm, StringComparison.OrdinalIgnoreCase) &&
+                    !hashAlgorithm.Equals(SHA256HashAlgorithm, StringComparison.OrdinalIgnoreCase))
+            {
+                // Only support a vetted list of hash algorithms.
+                throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UnsupportedHashAlgorithm, hashAlgorithm), "hashAlgorithm");
+            }
+
             _hashAlgorithm = hashAlgorithm;
         }
 
@@ -51,11 +59,11 @@ namespace NuGet
 
         private HashAlgorithm GetHashAlgorithm()
         {
-            if (_hashAlgorithm.Equals(SHA512HashAlgorithm, StringComparison.OrdinalIgnoreCase))
+            if (_hashAlgorithm.Equals(SHA256HashAlgorithm, StringComparison.OrdinalIgnoreCase))
             {
-                return _useSHA512Cng ? (HashAlgorithm)new SHA512Cng() : (HashAlgorithm)new SHA512CryptoServiceProvider();
+                return CryptoConfig.AllowOnlyFipsAlgorithms ? (HashAlgorithm)new SHA256CryptoServiceProvider() : (HashAlgorithm)new SHA256Managed();
             }
-            return HashAlgorithm.Create(_hashAlgorithm);
+            return CryptoConfig.AllowOnlyFipsAlgorithms ? (HashAlgorithm)new SHA512CryptoServiceProvider() : (HashAlgorithm)new SHA512Managed();
         }
     }
 }

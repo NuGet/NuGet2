@@ -346,4 +346,7 @@
   <data name="Manifest_NotFound" xml:space="preserve">
     <value>Could not find manifest file at '{0}'.</value>
   </data>
+  <data name="UnsupportedHashAlgorithm" xml:space="preserve">
+    <value>Hash algorithm '{0}' is unsupported. Supported algorithms include: SHA512 and SHA256.</value>
+  </data>
 </root>
