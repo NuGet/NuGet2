@@ -224,7 +224,8 @@ namespace NuGet.Dialog.Providers
         {
             return new PackageItem(this, package)
             {
-                CommandName = Resources.Dialog_InstallButton
+                CommandName = Resources.Dialog_InstallButton,
+                TargetFramework = _project.GetTargetFrameworkName()
             };
         }
 

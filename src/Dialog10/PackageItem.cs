@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.Versioning;
 using System.Windows.Media.Imaging;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
@@ -67,6 +68,12 @@ namespace NuGet.Dialog.Providers
             }
         }
 
+        public FrameworkName TargetFramework
+        {
+            get;
+            set;
+        }
+
         public string Description
         {
             get
@@ -92,7 +99,7 @@ namespace NuGet.Dialog.Providers
         {
             get
             {
-                return _packageIdentity.GetCompatiblePackageDependencies(targetFramework: null);
+                return _packageIdentity.GetCompatiblePackageDependencies(TargetFramework);
             }
         }
 

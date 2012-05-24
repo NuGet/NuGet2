@@ -294,7 +294,8 @@ namespace NuGet.Dialog.Providers
         {
             return new PackageItem(this, package)
             {
-                CommandName = Resources.Dialog_UninstallButton
+                CommandName = Resources.Dialog_UninstallButton,
+                TargetFramework = _project.GetTargetFrameworkName()
             };
         }
 
