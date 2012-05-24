@@ -106,15 +106,6 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Gets or sets config settings.
-        /// </summary>
-        internal static string ConfigCommandDesc {
-            get {
-                return ResourceManager.GetString("ConfigCommandDesc", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Updating &apos;{0}&apos; to &apos;{1}&apos; failed. Unable to find a version of &apos;{2}&apos; that is compatible with &apos;{1}&apos;..
         /// </summary>
         internal static string ConflictErrorWithDependent {
@@ -724,6 +715,15 @@ namespace NuGet.Resources {
         internal static string UnknownSchemaVersion {
             get {
                 return ResourceManager.GetString("UnknownSchemaVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hash algorithm &apos;{0}&apos; is unsupported. Supported algorithms include: SHA512 and SHA256..
+        /// </summary>
+        internal static string UnsupportedHashAlgorithm {
+            get {
+                return ResourceManager.GetString("UnsupportedHashAlgorithm", resourceCulture);
             }
         }
         

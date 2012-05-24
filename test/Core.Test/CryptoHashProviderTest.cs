@@ -2,6 +2,7 @@
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test
 {
@@ -20,6 +21,35 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal(actualHash, Convert.FromBase64String(expectedHash));
+        }
+
+        [Theory]
+        [InlineData("md5")]
+        [InlineData("MD5")]
+        [InlineData("SHA1")]
+        [InlineData("SHA2561")]
+        public void CryptoHashProviderThrowsIfHashAlgorithmIsNotSHA512orSHA256(string hashAlgorithm)
+        {
+            // Act and Assert
+            ExceptionAssert.ThrowsArgumentException(() => new CryptoHashProvider(hashAlgorithm), "hashAlgorithm",
+                String.Format("Hash algorithm '{0}' is unsupported. Supported algorithms include: SHA512 and SHA256.", hashAlgorithm));
+        }
+
+        [Theory]
+        [InlineData("sha512", "xy/brd+/mxheBbyBL7i8Oyy62P2ZRteaIkfc4yA8ncH1MYkbDo+XwBcZsOBY2YeaOucrdLJj5odPvozD430w2g==")]
+        [InlineData("SHA512", "xy/brd+/mxheBbyBL7i8Oyy62P2ZRteaIkfc4yA8ncH1MYkbDo+XwBcZsOBY2YeaOucrdLJj5odPvozD430w2g==")]
+        [InlineData("sha256", "F7qs6AZmrGdFSsAc/EpRjjIgkhlW8M92djz8ySt48EM=")]
+        public void CryptoHashProviderAllowsSHA512orSHA256(string hashAlgorithm, string expectedHash)
+        {
+            // Arrange
+            byte[] testBytes = Encoding.UTF8.GetBytes("There is no butter knife");
+            var hashProvider = new CryptoHashProvider(hashAlgorithm);
+
+            // Act
+            string result = Convert.ToBase64String(hashProvider.CalculateHash(testBytes));
+
+            // Assert
+            Assert.Equal(expectedHash, result);
         }
 
         [Fact]

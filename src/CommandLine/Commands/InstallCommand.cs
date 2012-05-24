@@ -298,7 +298,7 @@ namespace NuGet.Commands
         {
             var packagePath = packageManager.FileSystem.GetFullPath(packageManager.PathResolver.GetPackageFileName(packageId, version));
             var pathBytes = Encoding.UTF8.GetBytes(packagePath);
-            var hashProvider = new CryptoHashProvider("SHA1");
+            var hashProvider = new CryptoHashProvider("SHA256");
 
             return Convert.ToBase64String(hashProvider.CalculateHash(pathBytes)).ToUpperInvariant();
         }
