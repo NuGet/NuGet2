@@ -28,6 +28,16 @@
     <Compile Include="..\..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="..\..\..\common\CommonResources.cs">
+      <Link>Common\CommonResources.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\common\CommonResources.designer.cs">
+      <Link>Common\CommonResources.designer.cs</Link>
+      <DependentUpon>CommonResources.cs</DependentUpon>
+    </Compile>
+    <Compile Include="..\..\..\common\GlobalSuppressions.cs">
+      <Link>Common\GlobalSuppressions.cs</Link>
+    </Compile>
     <Compile Include="..\Console\Utils\CommonExtensionMethods.cs">
       <Link>Utils\CommonExtensionMethods.cs</Link>
     </Compile>
@@ -47,7 +57,6 @@
     </Compile>
     <Compile Include="PSTypeWrapper.cs" />
     <Compile Include="RunspaceDispatcher.cs" />
-    <Compile Include="RunspaceExtensions.cs" />
     <Compile Include="RunspaceManager.cs" />
     <Compile Include="SyncPowerShellHost.cs" />
     <Compile Include="Utils\CommandExpansion.cs" />
@@ -70,6 +79,12 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\..\..\common\CommonResources.resx">
+      <Link>Common\CommonResources.resx</Link>
+      <DependentUpon>CommonResources.cs</DependentUpon>
+      <LastGenOutput>CommonResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Management.Automation.Runspaces;
-using NuGetConsole.Host.PowerShell.Implementation;
 using System.Collections.ObjectModel;
-using System.Management.Automation;
-using System.Threading;
-using Microsoft.PowerShell;
 using System.Globalization;
 using System.IO;
-using NuGet.VisualStudio;
+using System.Management.Automation;
+using System.Management.Automation.Runspaces;
+using System.Threading;
+using Microsoft.PowerShell;
 using NuGet;
+using NuGet.VisualStudio;
 
-namespace NuGetConsole.Host.PowerShell
+namespace NuGetConsole.Host.PowerShell.Implementation
 {
     /// <summary>
     /// Wraps a runspace and protects the invoke method from being called on multiple threads through blocking.
@@ -24,10 +21,16 @@ namespace NuGetConsole.Host.PowerShell
     /// </remarks>
     internal class RunspaceDispatcher : IDisposable
     {
-        private Runspace _runspace;
-        private object _dispatcherLock = new object();
+        private readonly Runspace _runspace;
+        private readonly object _dispatcherLock = new object();
 
-        public RunspaceAvailability RunspaceAvailability { get { return _runspace.RunspaceAvailability; } }
+        public RunspaceAvailability RunspaceAvailability
+        {
+            get
+            {
+                return _runspace.RunspaceAvailability;
+            }
+        }
         
         public RunspaceDispatcher(Runspace runspace)
         {
@@ -54,9 +57,27 @@ namespace NuGetConsole.Host.PowerShell
             }
         }
 
+        public void InvokeCommands(PSCommand[] profileCommands)
+        {
+            lock (_dispatcherLock)
+            {
+                using (var powerShell = System.Management.Automation.PowerShell.Create())
+                {
+                    powerShell.Runspace = _runspace;
+
+                    foreach (PSCommand command in profileCommands)
+                    {
+                        powerShell.Commands = command;
+                        powerShell.AddCommand("out-default");
+                        powerShell.Invoke();
+                    }
+                }
+            }
+        }
+
         public Collection<PSObject> Invoke(string command, object[] inputs, bool outputResults)
         {
-            if (string.IsNullOrEmpty(command))
+            if (String.IsNullOrEmpty(command))
             {
                 throw new ArgumentNullException("command");
             }
@@ -78,9 +99,9 @@ namespace NuGetConsole.Host.PowerShell
             EventHandler<PipelineStateEventArgs> pipelineStateChanged)
         {
 
-            if (string.IsNullOrEmpty(command))
+            if (String.IsNullOrEmpty(command))
             {
-                throw new ArgumentNullException("command");
+                throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, CommonResources.Argument_Cannot_Be_Null_Or_Empty, command), "command");
             }
 
             Pipeline pipeline = CreatePipeline(command, outputResults);
@@ -106,11 +127,11 @@ namespace NuGetConsole.Host.PowerShell
 
         public string ExtractErrorFromErrorRecord(ErrorRecord record)
         {
-            Pipeline pipeline = _runspace.CreatePipeline("$input", false);
+            Pipeline pipeline = _runspace.CreatePipeline(command: "$input", addToHistory: false);
             pipeline.Commands.Add("out-string");
 
             Collection<PSObject> result;
-            using (PSDataCollection<object> inputCollection = new PSDataCollection<object>())
+            using (var inputCollection = new PSDataCollection<object>())
             {
                 inputCollection.Add(record);
                 inputCollection.Complete();
@@ -123,11 +144,21 @@ namespace NuGetConsole.Host.PowerShell
                 if (!string.IsNullOrEmpty(str))
                 {
                     // Remove \r\n, which is added by the Out-String cmdlet.
-                    return str.Substring(0, str.Length - 2);
+                    return str.TrimEnd(new [] { '\r', '\n' });
                 }
             }
 
             return String.Empty;
+        }
+
+        public ExecutionPolicy GetEffectiveExecutionPolicy()
+        {
+            return GetExecutionPolicy("Get-ExecutionPolicy");
+        }
+
+        public ExecutionPolicy GetExecutionPolicy(ExecutionPolicyScope scope)
+        {
+            return GetExecutionPolicy("Get-ExecutionPolicy -Scope " + scope);
         }
 
         private Pipeline CreatePipeline(string command, bool outputResults)
@@ -141,19 +172,9 @@ namespace NuGetConsole.Host.PowerShell
             return pipeline;
         }
 
-        public ExecutionPolicy GetEffectiveExecutionPolicy()
-        {
-            return GetExecutionPolicy("Get-ExecutionPolicy");
-        }
-
-        public ExecutionPolicy GetExecutionPolicy(ExecutionPolicyScope scope)
-        {
-            return GetExecutionPolicy("Get-ExecutionPolicy -Scope " + scope);
-        }
-
         private ExecutionPolicy GetExecutionPolicy(string command)
         {
-            Collection<PSObject> results = _runspace.Invoke(command, null, false);
+            Collection<PSObject> results = Invoke(command, inputs: null, outputResults: false);
             if (results.Count > 0)
             {
                 return (ExecutionPolicy)results[0].BaseObject;
@@ -168,7 +189,7 @@ namespace NuGetConsole.Host.PowerShell
         {
             string command = string.Format(CultureInfo.InvariantCulture, "Set-ExecutionPolicy {0} -Scope {1} -Force", policy.ToString(), scope.ToString());
             
-            Invoke(command, null, false);
+            Invoke(command, inputs: null, outputResults: false);
         }
 
         public void ExecuteScript(string installPath, string scriptPath, IPackage package)
@@ -223,7 +244,6 @@ namespace NuGetConsole.Host.PowerShell
                     case PipelineState.Stopped:
                         // Release the dispatcher lock
                         Monitor.Exit(_dispatcherLock);
-                        Monitor.Pulse(_dispatcherLock);
                         break;
                 }
             };
@@ -239,7 +259,16 @@ namespace NuGetConsole.Host.PowerShell
             // Take the dispatcher lock and invoke the pipeline
             // REVIEW: This could probably be done in a Task so that we can return to the caller before even taking the dispatcher lock
             Monitor.Enter(_dispatcherLock);
-            pipeline.InvokeAsync();
+            try
+            {
+                pipeline.InvokeAsync();
+            }
+            catch
+            {
+                // Don't care about the exception, rethrow it, but first release the lock
+                Monitor.Exit(_dispatcherLock);
+                throw;
+            }
         }
     }
 }
