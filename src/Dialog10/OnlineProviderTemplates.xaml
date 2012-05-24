@@ -157,7 +157,7 @@
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
                     <eml:TextBlockControl Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
                     <eml:TextBlockControl AutomationProperties.AutomationId="VersionText" Text="{Binding Version, Mode=OneWay}" Style="{StaticResource DetailMetadataValueStyle}" />
-                    <eml:TextBlockControl Margin="3,0,0,0" Text="(prerelease)" Foreground="DarkRed" Visibility="{Binding IsPrerelease, Converter={StaticResource boolToVis}}" />
+                    <eml:TextBlockControl Margin="3,0,0,0" Text="{Binding Mode=OneWay, Source={x:Static resources:Resources.Dialog_PackagePrereleaseLabel}, StringFormat='({0})'}" Foreground="DarkRed" Visibility="{Binding IsPrerelease, Converter={StaticResource boolToVis}}" />
                 </StackPanel>
 
                 <!-- Last Updated -->
