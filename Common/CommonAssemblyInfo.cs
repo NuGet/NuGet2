@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 
 #if !FIXED_ASSEMBLY_VERSION
 [assembly: AssemblyVersion("1.8.0.0")]
-[assembly: AssemblyInformationalVersion("1.8.0")]
+[assembly: AssemblyInformationalVersion("1.8.1")]
 #endif
 
 [assembly: NeutralResourcesLanguage("en-US")]
