@@ -4,7 +4,6 @@ using System.Data.Services.Common;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Runtime.Versioning;
 
 namespace NuGet
 {
@@ -241,16 +240,18 @@ namespace NuGet
             }
         }
 
-        public IEnumerable<PackageDependencySet> DependencySets
+        IEnumerable<PackageDependency> IPackageMetadata.Dependencies
         {
             get
             {
                 if (String.IsNullOrEmpty(Dependencies))
                 {
-                    return Enumerable.Empty<PackageDependencySet>();
+                    return Enumerable.Empty<PackageDependency>();
                 }
-
-                return ParseDependencySet(Dependencies);
+                return from d in Dependencies.Split('|')
+                       let dependency = ParseDependency(d)
+                       where dependency != null
+                       select dependency;
             }
         }
 
@@ -338,27 +339,11 @@ namespace NuGet
             }
         }
 
-        private static List<PackageDependencySet> ParseDependencySet(string value)
-        {
-            var dependencySets = new List<PackageDependencySet>();
-
-            var dependencies = value.Split('|').Select(ParseDependency).ToList();
-
-            // grouping the dependencies by target framework
-            var groups = dependencies.GroupBy(d => d.Item2);
-
-            dependencySets.AddRange(
-                groups.Select(g => new PackageDependencySet(
-                                           g.Key,   // target framework 
-                                           g.Select(pair => pair.Item1))));     // dependencies by that target framework
-            return dependencySets;
-        }
-
         /// <summary>
         /// Parses a dependency from the feed in the format:
         /// id:versionSpec or id
         /// </summary>
-        private static Tuple<PackageDependency, FrameworkName> ParseDependency(string value)
+        private static PackageDependency ParseDependency(string value)
         {
             if (String.IsNullOrWhiteSpace(value))
             {
@@ -382,9 +367,7 @@ namespace NuGet
                 VersionUtility.TryParseVersionSpec(tokens[1], out versionSpec);
             }
 
-            var targetFramework = tokens.Length > 2 ? VersionUtility.ParseFrameworkName(tokens[2]) : null;
-
-            return Tuple.Create(new PackageDependency(id, versionSpec), targetFramework);
+            return new PackageDependency(id, versionSpec);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to return null if any error occurred while trying to find the package.")]

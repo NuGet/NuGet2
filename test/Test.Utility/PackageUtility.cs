@@ -74,38 +74,6 @@ namespace NuGet.Test
                                  satelliteAssemblies: null);
         }
 
-        public static IPackage CreatePackage2(string id,
-                                              string version = "1.0",
-                                              IEnumerable<string> content = null,
-                                              IEnumerable<string> assemblyReferences = null,
-                                              IEnumerable<string> tools = null,
-                                              IEnumerable<PackageDependencySet> dependencySets = null,
-                                              int downloadCount = 0,
-                                              string description = null,
-                                              string summary = null,
-                                              bool listed = true,
-                                              string tags = "",
-                                              string language = null,
-                                              IEnumerable<string> satelliteAssemblies = null)
-        {
-            assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
-            satelliteAssemblies = satelliteAssemblies ?? Enumerable.Empty<string>();
-
-            return CreatePackage(id,
-                                 version,
-                                 content,
-                                 CreateAssemblyReferences(assemblyReferences),
-                                 tools,
-                                 dependencySets,
-                                 downloadCount,
-                                 description,
-                                 summary,
-                                 listed,
-                                 tags,
-                                 language,
-                                 CreateAssemblyReferences(satelliteAssemblies));
-        }
-
         public static IPackage CreatePackage(string id,
                                               string version,
                                               IEnumerable<string> content,
@@ -120,44 +88,10 @@ namespace NuGet.Test
                                               string language,
                                               IEnumerable<IPackageAssemblyReference> satelliteAssemblies)
         {
-            var dependencySets = new List<PackageDependencySet>
-            {
-                new PackageDependencySet(null, dependencies ?? Enumerable.Empty<PackageDependency>())
-            };
-
-            return CreatePackage(id,
-                                 version,
-                                 content,
-                                 assemblyReferences,
-                                 tools,
-                                 dependencySets,
-                                 downloadCount,
-                                 description,
-                                 summary,
-                                 listed,
-                                 tags,
-                                 language,
-                                 satelliteAssemblies);
-        }
-
-        public static IPackage CreatePackage(string id,
-                                              string version,
-                                              IEnumerable<string> content,
-                                              IEnumerable<IPackageAssemblyReference> assemblyReferences,
-                                              IEnumerable<string> tools,
-                                              IEnumerable<PackageDependencySet> dependencySets,
-                                              int downloadCount,
-                                              string description,
-                                              string summary,
-                                              bool listed,
-                                              string tags,
-                                              string language,
-                                              IEnumerable<IPackageAssemblyReference> satelliteAssemblies)
-        {
             content = content ?? Enumerable.Empty<string>();
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>();
             satelliteAssemblies = satelliteAssemblies ?? Enumerable.Empty<IPackageAssemblyReference>();
-            dependencySets = dependencySets ?? Enumerable.Empty<PackageDependencySet>();
+            dependencies = dependencies ?? Enumerable.Empty<PackageDependency>();
             tools = tools ?? Enumerable.Empty<string>();
             description = description ?? "Mock package " + id;
 
@@ -175,7 +109,7 @@ namespace NuGet.Test
             mockPackage.Setup(m => m.Version).Returns(new SemanticVersion(version));
             mockPackage.Setup(m => m.GetFiles()).Returns(allFiles);
             mockPackage.Setup(m => m.AssemblyReferences).Returns(assemblyReferences);
-            mockPackage.Setup(m => m.DependencySets).Returns(dependencySets);
+            mockPackage.Setup(m => m.Dependencies).Returns(dependencies);
             mockPackage.Setup(m => m.Description).Returns(description);
             mockPackage.Setup(m => m.Language).Returns("en-US");
             mockPackage.Setup(m => m.Authors).Returns(new[] { "Tester" });
@@ -207,18 +141,10 @@ namespace NuGet.Test
                 mockAssemblyReference.Setup(m => m.Path).Returns(fileName);
                 mockAssemblyReference.Setup(m => m.Name).Returns(Path.GetFileName(fileName));
 
-
-                string effectivePath;
-                FrameworkName fn = ParseFrameworkName(fileName, out effectivePath);
+                FrameworkName fn = ParseFrameworkName(fileName);
                 if (fn != null)
                 {
-                    mockAssemblyReference.Setup(m => m.EffectivePath).Returns(effectivePath);
-                    mockAssemblyReference.Setup(m => m.TargetFramework).Returns(fn);
                     mockAssemblyReference.Setup(m => m.SupportedFrameworks).Returns(new[] { fn });
-                }
-                else
-                {
-                    mockAssemblyReference.Setup(m => m.EffectivePath).Returns(fileName);
                 }
 
                 assemblyReferences.Add(mockAssemblyReference.Object);
@@ -226,15 +152,14 @@ namespace NuGet.Test
             return assemblyReferences;
         }
 
-        private static FrameworkName ParseFrameworkName(string fileName, out string effectivePath)
+        private static FrameworkName ParseFrameworkName(string fileName)
         {
             if (fileName.StartsWith("lib\\"))
             {
                 fileName = fileName.Substring(4);
-                return VersionUtility.ParseFrameworkFolderName(fileName, strictParsing: false, effectivePath: out effectivePath);
+                return VersionUtility.ParseFrameworkFolderName(fileName);
             }
 
-            effectivePath = fileName;
             return null;
         }
 
@@ -258,14 +183,6 @@ namespace NuGet.Test
                 var mockFile = new Mock<IPackageFile>();
                 mockFile.Setup(m => m.Path).Returns(path);
                 mockFile.Setup(m => m.GetStream()).Returns(() => new MemoryStream(Encoding.Default.GetBytes(path)));
-
-                string effectivePath;
-                FrameworkName fn = VersionUtility.ParseFrameworkNameFromFilePath(path, out effectivePath);
-                mockFile.Setup(m => m.TargetFramework).Returns(fn);
-                mockFile.Setup(m => m.EffectivePath).Returns(effectivePath);
-                mockFile.Setup(m => m.SupportedFrameworks).Returns(
-                    fn == null ? new FrameworkName[0] : new FrameworkName[] { fn });
-
                 files.Add(mockFile.Object);
             }
             return files;

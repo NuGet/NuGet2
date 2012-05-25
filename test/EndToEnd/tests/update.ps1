@@ -961,29 +961,3 @@ function Test-UpdatePackageDontMakeExcessiveNetworkRequests
         Remove-Variable 'numberOfRequests' -Scope 'Global' -ea SilentlyContinue
     }
 }
-
-function Test-UpdatePackageInstallCorrectDependencyPackageBasedOnTargetFramework
-{
-	param($context)
-
-	# Arrange
-	$project = New-ClassLibrary
-
-	$global:InstallVar = 0
-
-	Install-Package TestDependencyTargetFramework -Version 1.0 -Project $project.Name -Source $context.RepositoryPath
-
-	Assert-Package $project TestDependencyTargetFramework -Version 1.0
-	Assert-Package $project TestEmptyLibFolder
-	Assert-NoPackage $project TestEmptyContentFolder
-	Assert-NoPackage $project TestEmptyToolsFolder
-
-	# Act
-	Update-Package TestDependencyTargetFramework -Version 2.0 -Project $project.Name -Source $context.RepositoryPath
-
-	# Assert
-	Assert-Package $project TestDependencyTargetFramework -Version 2.0
-	Assert-Package $project TestEmptyToolsFolder
-	Assert-NoPackage $project TestEmptyLibFolder
-	Assert-NoPackage $project TestEmptyContentFolder
-}

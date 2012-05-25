@@ -14,7 +14,7 @@ namespace NuGet.Test
 
             // Act
             IPackage runtimePackage;
-            var isSatellite = NuGet.PackageUtility.IsSatellitePackage(package, repository, null, out runtimePackage);
+            var isSatellite = NuGet.PackageUtility.IsSatellitePackage(package, repository, out runtimePackage);
 
             // Assert
             Assert.False(isSatellite);
@@ -30,7 +30,7 @@ namespace NuGet.Test
 
             // Act
             IPackage runtimePackage;
-            var isSatellite = NuGet.PackageUtility.IsSatellitePackage(package, repository, null, out runtimePackage);
+            var isSatellite = NuGet.PackageUtility.IsSatellitePackage(package, repository, out runtimePackage);
 
             // Assert
             Assert.False(isSatellite);
@@ -46,7 +46,7 @@ namespace NuGet.Test
 
             // Act
             IPackage runtimePackage;
-            var isSatellite = NuGet.PackageUtility.IsSatellitePackage(package, repository, null, out runtimePackage);
+            var isSatellite = NuGet.PackageUtility.IsSatellitePackage(package, repository, out runtimePackage);
 
             // Assert
             Assert.False(isSatellite);
@@ -62,7 +62,7 @@ namespace NuGet.Test
 
             // Act
             IPackage runtimePackage;
-            var isSatellite = NuGet.PackageUtility.IsSatellitePackage(package, repository, null, out runtimePackage);
+            var isSatellite = NuGet.PackageUtility.IsSatellitePackage(package, repository, out runtimePackage);
 
             // Assert
             Assert.False(isSatellite);
@@ -78,7 +78,7 @@ namespace NuGet.Test
 
             // Act
             IPackage runtimePackage;
-            var isSatellite = NuGet.PackageUtility.IsSatellitePackage(package, repository, targetFramework: null, runtimePackage: out runtimePackage);
+            var isSatellite = NuGet.PackageUtility.IsSatellitePackage(package, repository, out runtimePackage);
 
             // Assert
             Assert.False(isSatellite);
@@ -97,7 +97,7 @@ namespace NuGet.Test
 
             // Act
             IPackage runtimePackage;
-            var isSatellite = NuGet.PackageUtility.IsSatellitePackage(package, repository, null, out runtimePackage);
+            var isSatellite = NuGet.PackageUtility.IsSatellitePackage(package, repository, out runtimePackage);
 
             // Assert
             Assert.True(isSatellite);
@@ -116,7 +116,7 @@ namespace NuGet.Test
 
             // Act
             IPackage runtimePackage;
-            var isSatellite = NuGet.PackageUtility.IsSatellitePackage(package, repository, null, out runtimePackage);
+            var isSatellite = NuGet.PackageUtility.IsSatellitePackage(package, repository, out runtimePackage);
 
             // Assert
             Assert.True(isSatellite);

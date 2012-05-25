@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.Versioning;
 using NuGet.Resources;
 
 namespace NuGet
@@ -11,25 +10,10 @@ namespace NuGet
     public abstract class PackageWalker
     {
         private readonly Dictionary<IPackage, PackageWalkInfo> _packageLookup = new Dictionary<IPackage, PackageWalkInfo>();
-        private readonly FrameworkName _targetFramework;
 
         protected PackageWalker()
-            : this(targetFramework: null)
         {
-        }
-
-        protected PackageWalker(FrameworkName targetFramework)
-        {
-            _targetFramework = targetFramework;
             Marker = new PackageMarker();
-        }
-
-        protected FrameworkName TargetFramework
-        {
-            get
-            {
-                return _targetFramework;
-            }
         }
 
         protected virtual bool RaiseErrorOnCycle
@@ -94,7 +78,7 @@ namespace NuGet
 
             if (!IgnoreDependencies)
             {
-                foreach (var dependency in package.GetCompatiblePackageDependencies(TargetFramework))
+                foreach (var dependency in package.Dependencies)
                 {
                     // Try to resolve the dependency from the visited packages first
                     IPackage resolvedDependency = Marker.ResolveDependency(dependency, AllowPrereleaseVersions, preferListedPackages: false) ??
@@ -150,6 +134,7 @@ namespace NuGet
 
             // Mark the package as visited
             Marker.MarkVisited(package);
+
 
             ProcessPackageTarget(package);
 

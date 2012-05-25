@@ -234,9 +234,10 @@ namespace GenerateTestPackages
                 TargetPath = @"lib\" + Path.GetFileName(assemblySourcePath)
             });
 
-            var set = new PackageDependencySet(VersionUtility.DefaultTargetFramework, 
-                package.Dependencies.Select(dependency => new PackageDependency(dependency.Id, dependency.VersionSpec)));
-            packageBuilder.DependencySets.Add(set);
+            foreach (DependencyInfo dependency in package.Dependencies)
+            {
+                packageBuilder.Dependencies.Add(new PackageDependency(dependency.Id, dependency.VersionSpec));
+            }
 
             using (var stream = File.Create(GetPackageFileFullPath(package)))
             {

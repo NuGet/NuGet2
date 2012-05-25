@@ -105,7 +105,7 @@ namespace NuGet.Dialog.Providers
         {
             get
             {
-                string targetFramework = _project.GetTargetFramework();
+                string targetFramework = GetTargetFramework(_project);
                 return targetFramework != null ? new[] { targetFramework } : new string[0];
             }
         }
@@ -151,13 +151,11 @@ namespace NuGet.Dialog.Providers
 
         protected bool? AskRemoveDependencyAndCheckUninstallPSScript(IPackage package, bool checkDependents)
         {
-            var targetFramework = _project.GetTargetFrameworkName();
-
             if (checkDependents)
             {
                 // check if there is any other package depends on this package.
                 // if there is, throw to cancel the uninstallation
-                var dependentsWalker = new DependentsWalker(LocalRepository, targetFramework);
+                var dependentsWalker = new DependentsWalker(LocalRepository);
                 IList<IPackage> dependents = dependentsWalker.GetDependents(package).ToList();
                 if (dependents.Count > 0)
                 {
@@ -172,11 +170,10 @@ namespace NuGet.Dialog.Providers
                     );
                 }
             }
-            
+
             var uninstallWalker = new UninstallWalker(
                 LocalRepository,
-                new DependentsWalker(LocalRepository, targetFramework),
-                targetFramework,
+                new DependentsWalker(LocalRepository),
                 logger: NullLogger.Instance,
                 removeDependencies: true,
                 forceRemove: false)
@@ -294,8 +291,7 @@ namespace NuGet.Dialog.Providers
         {
             return new PackageItem(this, package)
             {
-                CommandName = Resources.Dialog_UninstallButton,
-                TargetFramework = _project.GetTargetFrameworkName()
+                CommandName = Resources.Dialog_UninstallButton
             };
         }
 

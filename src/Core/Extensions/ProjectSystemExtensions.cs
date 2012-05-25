@@ -32,23 +32,18 @@ namespace NuGet
             {
                 if (batchProcessor != null)
                 {
-                    var paths = fileList.Select(file => ResolvePath(fileTransformers, file.EffectivePath));
+                    var paths = fileList.Select(file => ResolvePath(fileTransformers, file.Path));
                     batchProcessor.BeginProcessing(paths, PackageAction.Install);
                 }
 
                 foreach (IPackageFile file in fileList)
                 {
-                    if (file.IsEmptyFolder())
-                    {
-                        continue;
-                    }
-
                     IPackageFileTransformer transformer;
 
                     // Resolve the target path
                     string path = ResolveTargetPath(project,
                                                     fileTransformers,
-                                                    file.EffectivePath,
+                                                    file.Path,
                                                     out transformer);
 
                     if (project.IsSupportedFile(path))
@@ -85,7 +80,8 @@ namespace NuGet
 
             IPackageFileTransformer transformer;
             // First get all directories that contain files
-            var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(ResolveTargetPath(project, fileTransformers, p.EffectivePath, out transformer)));
+            var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(ResolveTargetPath(project, fileTransformers, p.Path, out transformer)));
+
 
             // Get all directories that this package may have added
             var directories = from grouping in directoryLookup
@@ -108,21 +104,16 @@ namespace NuGet
                 {
                     if (batchProcessor != null)
                     {
-                        var paths = directoryFiles.Select(file => ResolvePath(fileTransformers, file.EffectivePath));
+                        var paths = directoryFiles.Select(file => ResolvePath(fileTransformers, file.Path));
                         batchProcessor.BeginProcessing(paths, PackageAction.Uninstall);
                     }
 
                     foreach (var file in directoryFiles)
                     {
-                        if (file.IsEmptyFolder())
-                        {
-                            continue;
-                        }
-
                         // Resolve the path
                         string path = ResolveTargetPath(project,
                                                         fileTransformers,
-                                                        file.EffectivePath,
+                                                        file.Path,
                                                         out transformer);
 
                         if (project.IsSupportedFile(path))
@@ -130,8 +121,8 @@ namespace NuGet
                             if (transformer != null)
                             {
                                 var matchingFiles = from p in otherPackages
-                                                    from otherFile in project.GetCompatibleItemsCore(p.GetContentFiles())
-                                                    where otherFile.EffectivePath.Equals(file.EffectivePath, StringComparison.OrdinalIgnoreCase)
+                                                    from otherFile in p.GetContentFiles()
+                                                    where otherFile.Path.Equals(file.Path, StringComparison.OrdinalIgnoreCase)
                                                     select otherFile;
 
                                 try
@@ -193,39 +184,45 @@ namespace NuGet
             return Enumerable.Empty<T>();
         }
 
-        private static string ResolvePath(IDictionary<string, IPackageFileTransformer> fileTransformers, string effectivePath)
+        private static string ResolvePath(IDictionary<string, IPackageFileTransformer> fileTransformers, string path)
         {
+            // Remove the content folder
+            path = RemoveContentDirectory(path);
+
             // Try to get the package file modifier for the extension
-            string extension = Path.GetExtension(effectivePath);
+            string extension = Path.GetExtension(path);
 
             IPackageFileTransformer transformer;
             if (fileTransformers.TryGetValue(extension, out transformer))
             {
                 // Remove the transformer extension (e.g. .pp, .transform)
-                string truncatedPath = RemoveExtension(effectivePath);
+                string truncatedPath = RemoveExtension(path);
 
                 // Bug 1686: Don't allow transforming packages.config.transform
                 string fileName = Path.GetFileName(truncatedPath);
                 if (!Constants.PackageReferenceFile.Equals(fileName, StringComparison.OrdinalIgnoreCase))
                 {
-                    effectivePath = truncatedPath;
+                    path = truncatedPath;
                 }
             }
 
-            return effectivePath;
+            return path;
         }
 
         private static string ResolveTargetPath(IProjectSystem projectSystem,
                                                 IDictionary<string, IPackageFileTransformer> fileTransformers,
-                                                string effectivePath,
+                                                string path,
                                                 out IPackageFileTransformer transformer)
         {
+            // Remove the content folder
+            path = RemoveContentDirectory(path);
+
             // Try to get the package file modifier for the extension
-            string extension = Path.GetExtension(effectivePath);
+            string extension = Path.GetExtension(path);
             if (fileTransformers.TryGetValue(extension, out transformer))
             {
                 // Remove the transformer extension (e.g. .pp, .transform)
-                string truncatedPath = RemoveExtension(effectivePath);
+                string truncatedPath = RemoveExtension(path);
 
                 // Bug 1686: Don't allow transforming packages.config.transform,
                 // but we still want to copy packages.config.transform as-is into the project.
@@ -237,11 +234,18 @@ namespace NuGet
                 }
                 else
                 {
-                    effectivePath = truncatedPath;
+                    path = truncatedPath;
                 }
             }
 
-            return projectSystem.ResolvePath(effectivePath);
+            return projectSystem.ResolvePath(path);
+        }
+
+        private static string RemoveContentDirectory(string path)
+        {
+            Debug.Assert(path.StartsWith(Constants.ContentDirectory, StringComparison.OrdinalIgnoreCase));
+
+            return path.Substring(Constants.ContentDirectory.Length).TrimStart(Path.DirectorySeparatorChar);
         }
 
         private static string RemoveExtension(string path)

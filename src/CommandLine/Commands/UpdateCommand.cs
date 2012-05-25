@@ -399,7 +399,7 @@ namespace NuGet.Commands
 
                 packages = packages.Where(r => idSet.Contains(r.Id));
             }
-            var packageSorter = new PackageSorter(targetFramework: null);
+            var packageSorter = new PackageSorter();
             return packageSorter.GetPackagesByDependencyOrder(new ReadOnlyPackageRepository(packages)).Reverse();
         }
 

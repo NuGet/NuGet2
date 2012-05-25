@@ -1,4 +1,3 @@
-using System.Runtime.Versioning;
 
 namespace NuGet
 {
@@ -6,27 +5,14 @@ namespace NuGet
     {
         private readonly IDependentsResolver _dependentsResolver;
 
-        // this ctor is used for unit tests
-        internal UpdateWalker(IPackageRepository localRepository,
-                            IPackageRepository sourceRepository,
-                            IDependentsResolver dependentsResolver,
-                            IPackageConstraintProvider constraintProvider,
-                            ILogger logger,
-                            bool updateDependencies,
-                            bool allowPrereleaseVersions)
-            : this(localRepository, sourceRepository, dependentsResolver, constraintProvider, null, logger, updateDependencies, allowPrereleaseVersions)
-        {
-        }
-
         public UpdateWalker(IPackageRepository localRepository,
                             IPackageRepository sourceRepository,
                             IDependentsResolver dependentsResolver,
                             IPackageConstraintProvider constraintProvider,
-                            FrameworkName targetFramework, 
                             ILogger logger,
                             bool updateDependencies,
                             bool allowPrereleaseVersions)
-            : base(localRepository, sourceRepository, constraintProvider, targetFramework, logger, !updateDependencies, allowPrereleaseVersions)
+            : base(localRepository, sourceRepository, constraintProvider, logger, !updateDependencies, allowPrereleaseVersions)
         {
             _dependentsResolver = dependentsResolver;
             AcceptedTargets = PackageTargets.All;

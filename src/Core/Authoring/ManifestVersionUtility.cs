@@ -3,38 +3,27 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Serialization;
-using System.Collections.Generic;
 
 namespace NuGet
 {
     internal static class ManifestVersionUtility
     {
-        public const int DefaultVersion = 1;
-        public const int SemverVersion = 3;
-        public const int TargetFrameworkSupportVersion = 4;
+        private const int DefaultVersion = 1;
+        private const int SemverVersion = 3;
         private static readonly Type[] _xmlAttributes = new[] { typeof(XmlElementAttribute), typeof(XmlAttributeAttribute), typeof(XmlArrayAttribute) };
 
         public static int GetManifestVersion(ManifestMetadata metadata)
         {
-            return Math.Max(VisitObject(metadata), GetVersionFromMetadata(metadata));
+            return Math.Max(VisitObject(metadata), GetVersionPropertyVersion(metadata));
         }
 
-        private static int GetVersionFromMetadata(ManifestMetadata metadata)
+        private static int GetVersionPropertyVersion(ManifestMetadata metadata)
         {
-            bool dependencyHasTargetFramework =
-                metadata.DependencySets != null &&
-                metadata.DependencySets.Any(d => d.TargetFramework != null);
-            if (dependencyHasTargetFramework)
-            {
-                return TargetFrameworkSupportVersion;
-            }
-
             SemanticVersion semanticVersion;
             if (SemanticVersion.TryParse(metadata.Version, out semanticVersion) && !String.IsNullOrEmpty(semanticVersion.SpecialVersion))
             {
                 return SemverVersion;
             }
-
             return DefaultVersion;
         }
 

@@ -62,7 +62,7 @@ namespace NuGet.Dialog
                 var packageName = package.GetFullName();
                 nodes.Add(new DGMLNode { Name = packageName, Label = packageName, Category = Resources.Visualizer_Package });
 
-                foreach (var dependency in package.GetCompatiblePackageDependencies(targetFramework: null))
+                foreach (var dependency in package.Dependencies)
                 {
                     IPackage dependentPackage;
                     if (mapping.TryGetValue(dependency.Id, out dependentPackage))

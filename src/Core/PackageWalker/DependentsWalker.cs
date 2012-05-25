@@ -2,20 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Versioning;
 
 namespace NuGet
 {
     public class DependentsWalker : PackageWalker, IDependentsResolver
     {
-        // this constructor is used for unit tests
-        internal DependentsWalker(IPackageRepository repository) 
-            : this(repository, targetFramework: null)
-        {
-        }
-
-        public DependentsWalker(IPackageRepository repository, FrameworkName targetFramework) 
-            : base(targetFramework)
+        public DependentsWalker(IPackageRepository repository)
         {
             if (repository == null)
             {
@@ -72,6 +64,7 @@ namespace NuGet
             values.Add(package);
             return base.OnAfterResolveDependency(package, dependency);
         }
+
 
         public IEnumerable<IPackage> GetDependents(IPackage package)
         {

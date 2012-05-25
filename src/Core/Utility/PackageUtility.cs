@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.Versioning;
 
 namespace NuGet
 {
@@ -19,11 +18,7 @@ namespace NuGet
                    path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
         }
 
-        public static bool IsSatellitePackage(
-            IPackage package, 
-            IPackageRepository repository,
-            FrameworkName targetFramework,
-            out IPackage runtimePackage)
+        public static bool IsSatellitePackage(IPackage package, IPackageRepository repository, out IPackage runtimePackage)
         {
             // A satellite package has the following properties:
             //     1) A package suffix that matches the package's language, with a dot preceding it
@@ -33,11 +28,10 @@ namespace NuGet
 
             runtimePackage = null;
 
-            if (!String.IsNullOrEmpty(package.Language) && 
-                package.Id.EndsWith("." + package.Language, StringComparison.OrdinalIgnoreCase))
+            if (!String.IsNullOrEmpty(package.Language) && package.Id.EndsWith("." + package.Language, StringComparison.OrdinalIgnoreCase))
             {
                 string runtimePackageId = package.Id.Substring(0, package.Id.Length - (package.Language.Length + 1));
-                PackageDependency dependency = package.FindDependency(runtimePackageId, targetFramework);
+                PackageDependency dependency = package.FindDependency(runtimePackageId);
 
                 if (dependency != null)
                 {

@@ -681,8 +681,7 @@ namespace NuGet.PowerShell.Commands.Test
             var packageA = new Mock<IPackage>();
             packageA.Setup(p => p.Id).Returns("A");
             packageA.Setup(p => p.Version).Returns(new SemanticVersion("1.0"));
-            var depSet = new PackageDependencySet(null, new[] { new PackageDependency("B") });
-            packageA.Setup(p => p.DependencySets).Returns(new[] { depSet });
+            packageA.Setup(p => p.Dependencies).Returns(new[] { new PackageDependency("B") });
             packageA.Setup(p => p.Listed).Returns(true);
             var readme = new Mock<IPackageFile>();
             readme.Setup(f => f.Path).Returns("readMe.txt");

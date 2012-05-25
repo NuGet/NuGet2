@@ -125,12 +125,7 @@ namespace NuGet.Dialog.Providers
             if (hasInstallWork)
             {
                 IList<PackageOperation> operations;
-                CheckInstallPSScripts(
-                    package, 
-                    PackageManager.SourceRepository,
-                    targetFramework: null,
-                    includePrerelease: true,
-                    operations: out operations);
+                CheckInstallPSScripts(package, PackageManager.SourceRepository, includePrerelease: true, operations: out operations);
             }
 
             if (hasUninstallWork)

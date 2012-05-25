@@ -55,7 +55,6 @@
     <Compile Include="Mocks\MockPackageSourceProvider.cs" />
     <Compile Include="Mocks\MockProjects.cs" />
     <Compile Include="Mocks\MockSolutionManager.cs" />
-    <Compile Include="PackageExtensionsTest.cs" />
     <Compile Include="PackageRestoreManagerTest.cs" />
     <Compile Include="PathHelperTest.cs" />
     <Compile Include="ProjectExtensionsTest.cs" />

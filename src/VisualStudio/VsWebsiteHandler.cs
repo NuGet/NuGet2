@@ -173,8 +173,7 @@ namespace NuGet.VisualStudio
         private sealed class FileAssemblyReference : IPackageAssemblyReference
         {
             private readonly string _path;
-            private readonly string _effectivePath;
-            private readonly FrameworkName _targetFramework;
+            private FrameworkName _targetFramework;
 
             public FileAssemblyReference(string assemblyPath)
             {
@@ -183,7 +182,7 @@ namespace NuGet.VisualStudio
                 _path = assemblyPath;
 
                 string pathExcludeLib = assemblyPath.Substring(Constants.LibDirectory.Length).Trim(System.IO.Path.DirectorySeparatorChar);
-                _targetFramework = VersionUtility.ParseFrameworkFolderName(pathExcludeLib, strictParsing: true, effectivePath: out _effectivePath);
+                _targetFramework = VersionUtility.ParseFrameworkFolderName(pathExcludeLib);
             }
 
             public FrameworkName TargetFramework
@@ -199,14 +198,6 @@ namespace NuGet.VisualStudio
             public string Path
             {
                 get { return _path; }
-            }
-
-            public string EffectivePath
-            {
-                get
-                {
-                    return _effectivePath;
-                }
             }
 
             public Stream GetStream()

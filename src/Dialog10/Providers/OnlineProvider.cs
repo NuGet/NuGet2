@@ -70,7 +70,7 @@ namespace NuGet.Dialog.Providers
         {
             get
             {
-                string targetFramework = _project.GetTargetFramework();
+                string targetFramework = GetTargetFramework(_project);
                 return targetFramework != null ? new[] { targetFramework } : new string[0];
             }
         }
@@ -151,12 +151,7 @@ namespace NuGet.Dialog.Providers
         {
             ShowProgressWindow();
 
-            CheckInstallPSScripts(
-                item.PackageIdentity, 
-                packageManager.SourceRepository,
-                _project.GetTargetFrameworkName(),
-                IncludePrerelease, 
-                out operations);
+            CheckInstallPSScripts(item.PackageIdentity, packageManager.SourceRepository, IncludePrerelease, out operations);
             var licensePackages = from o in operations
                                   where o.Action == PackageAction.Install && o.Package.RequireLicenseAcceptance && !packageManager.LocalRepository.Exists(o.Package)
                                   select o.Package;
@@ -224,8 +219,7 @@ namespace NuGet.Dialog.Providers
         {
             return new PackageItem(this, package)
             {
-                CommandName = Resources.Dialog_InstallButton,
-                TargetFramework = _project.GetTargetFrameworkName()
+                CommandName = Resources.Dialog_InstallButton
             };
         }
 

@@ -27,8 +27,8 @@ namespace NuGet
         IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies { get; }
 
         /// <summary>
-        /// Specifies sets other packages that the package depends on.
+        /// Specifies other packages that the package depends on.
         /// </summary>
-        IEnumerable<PackageDependencySet> DependencySets { get; }
+        IEnumerable<PackageDependency> Dependencies { get; }
     }
 }

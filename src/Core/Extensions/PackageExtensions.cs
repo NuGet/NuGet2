@@ -25,12 +25,6 @@ namespace NuGet
             return package.Listed || package.Published > Constants.Unpublished;
         }
 
-        public static bool IsEmptyFolder(this IPackageFile packageFile)
-        {
-            return packageFile != null && 
-                   Constants.PackageEmptyFileName.Equals(Path.GetFileName(packageFile.Path), StringComparison.OrdinalIgnoreCase);
-        }
-
         public static IEnumerable<IPackage> FindByVersion(this IEnumerable<IPackage> source, IVersionSpec versionSpec)
         {
             if (versionSpec == null)
@@ -49,11 +43,6 @@ namespace NuGet
         public static IEnumerable<IPackageFile> GetContentFiles(this IPackage package)
         {
             return package.GetFiles(Constants.ContentDirectory);
-        }
-
-        public static IEnumerable<IPackageFile> GetToolFiles(this IPackage package)
-        {
-            return package.GetFiles(Constants.ToolsDirectory);
         }
 
         public static IEnumerable<IPackageFile> GetLibFiles(this IPackage package)
@@ -128,27 +117,10 @@ namespace NuGet
 
         public static IEnumerable<FrameworkName> GetSupportedFrameworks(this IPackage package)
         {
-            // The supported frameworks of a package is the union of the supported frameworks
-            // of Content/Lib/Tools folders and those of Framework Assemblies.
             return package.FrameworkAssemblies
                           .SelectMany(a => a.SupportedFrameworks)
-                          .Concat(package.GetFiles().SelectMany(a => a.SupportedFrameworks))
+                          .Concat(package.AssemblyReferences.SelectMany(a => a.SupportedFrameworks))
                           .Distinct();
-        }
-
-        public static IEnumerable<PackageDependency> GetCompatiblePackageDependencies(this IPackageMetadata package, FrameworkName targetFramework)
-        {
-            IEnumerable<PackageDependencySet> compatibleDependencySets;
-            if (targetFramework == null)
-            {
-                compatibleDependencySets = package.DependencySets;
-            }
-            else if (!VersionUtility.TryGetCompatibleItems(targetFramework, package.DependencySets, out compatibleDependencySets))
-            {
-                compatibleDependencySets = new PackageDependencySet[0];
-            }
-
-            return compatibleDependencySets.SelectMany(d => d.Dependencies);
         }
 
         /// <summary>
@@ -156,8 +128,7 @@ namespace NuGet
         /// </summary>
         public static bool IsDependencyOnly(this IPackage package)
         {
-            return !package.GetFiles().Any() && 
-                   package.DependencySets.SelectMany(d => d.Dependencies).Any();
+            return !package.GetFiles().Any() && package.Dependencies.Any();
         }
 
         public static string GetFullName(this IPackageMetadata package)

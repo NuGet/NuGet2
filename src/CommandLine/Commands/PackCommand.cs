@@ -164,9 +164,9 @@ namespace NuGet.Commands
             {
                 Console.WriteLine("Tags: {0}", package.Tags.Trim());
             }
-            if (package.DependencySets.Any())
+            if (package.Dependencies.Any())
             {
-                Console.WriteLine("Dependencies: {0}", String.Join(", ", package.DependencySets.SelectMany(d => d.Dependencies).Select(d => d.ToString())));
+                Console.WriteLine("Dependencies: {0}", String.Join(", ", package.Dependencies.Select(d => d.ToString())));
             }
             else
             {

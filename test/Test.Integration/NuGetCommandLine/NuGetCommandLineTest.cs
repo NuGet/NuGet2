@@ -434,7 +434,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
 
             ZipPackage package = VerifyPackageContents(expectedPackage, new[] { @"file1.txt" });
 
-            Assert.False(package.DependencySets.Any());
+            Assert.False(package.Dependencies.Any());
         }
 
         [Fact]
@@ -693,9 +693,7 @@ public class Cl_{0} {{
             Assert.Equal("Title of Package", package.Title);
             Assert.Equal("David", package.Authors.First());
             Assert.Equal("Description from nuspec", package.Description);
-            var dependencySets = package.DependencySets.ToList();
-            Assert.Equal(1, dependencySets.Count);
-            var dependencies = dependencySets[0].Dependencies.ToList();
+            var dependencies = package.Dependencies.ToList();
             Assert.Equal(1, dependencies.Count);
             Assert.Equal("elmah", dependencies[0].Id);
             var frameworkAssemblies = package.FrameworkAssemblies.ToList();
@@ -1067,9 +1065,7 @@ public class Cl_{0} {{
                                                                          @"content\MyContentFile.js",
                                                                          @"lib\net40\ProjectWithDependenciesWithContent.dll"
                                                                      });
-                var dependencySets = package.DependencySets.ToList();
-                Assert.Equal(1, dependencySets.Count);
-                Assert.Equal("Test.ContentPackage", package.DependencySets.ElementAt(0).Dependencies.Single().Id);
+                Assert.Equal("Test.ContentPackage", package.Dependencies.Single().Id);
             }
             finally
             {

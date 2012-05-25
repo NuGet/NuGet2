@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.IO;
-using System.IO.Packaging;
 using System.Linq;
-using System.Runtime.Versioning;
 using System.Xml;
 using Moq;
 using Xunit;
@@ -13,6 +11,7 @@ using Xunit.Extensions;
 
 namespace NuGet.Test
 {
+
     public class PackageBuilderTest
     {
         [Fact]
@@ -150,233 +149,6 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void CreatePackageUsesV2SchemaNamespaceIfDependecyHasNoTargetFramework()
-        {
-            // Arrange
-            PackageBuilder builder = new PackageBuilder()
-            {
-                Id = "A",
-                Version = new SemanticVersion("1.0"),
-                Description = "Descriptions",
-            };
-            builder.Authors.Add("Luan");
-
-            var dependencies = new PackageDependency[] { 
-                new PackageDependency("B")
-            };
-
-            builder.DependencySets.Add(new PackageDependencySet(null, dependencies));
-            var ms = new MemoryStream();
-
-            // Act
-            Manifest.Create(builder).Save(ms);
-            ms.Seek(0, SeekOrigin.Begin);
-
-            // Assert
-            Assert.Equal(@"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
-  <metadata>
-    <id>A</id>
-    <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Descriptions</description>
-    <dependencies>
-      <dependency id=""B"" />
-    </dependencies>
-  </metadata>
-</package>", ms.ReadToEnd());
-        }
-
-        [Fact]
-        public void CreatePackageUsesV4SchemaNamespaceIfDependecyHasTargetFramework()
-        {
-            // Arrange
-            PackageBuilder builder = new PackageBuilder()
-            {
-                Id = "A",
-                Version = new SemanticVersion("1.0"),
-                Description = "Descriptions",
-            };
-            builder.Authors.Add("Luan");
-
-            var fx = new FrameworkName("Silverlight", new Version("4.0"));
-            var dependencies = new PackageDependency[] { 
-                new PackageDependency("B", null)
-            };
-            builder.DependencySets.Add(new PackageDependencySet(fx, dependencies));
-
-            var ms = new MemoryStream();
-
-            // Act
-            Manifest.Create(builder).Save(ms);
-            ms.Seek(0, SeekOrigin.Begin);
-
-            // Assert
-            Assert.Equal(@"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd"">
-  <metadata>
-    <id>A</id>
-    <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Descriptions</description>
-    <dependencies>
-      <group targetFramework=""Silverlight4.0"">
-        <dependency id=""B"" />
-      </group>
-    </dependencies>
-  </metadata>
-</package>", ms.ReadToEnd());
-        }
-
-        [Fact]
-        public void CreatePackageUsesV4SchemaNamespaceIfContentHasTargetFramework()
-        {
-            // Arrange
-            PackageBuilder builder = new PackageBuilder()
-            {
-                Id = "A",
-                Version = new SemanticVersion("1.0"),
-                Description = "Descriptions",
-            };
-            builder.Authors.Add("Luan");
-            builder.Files.Add(CreatePackageFile("content\\winrt53\\one.txt"));
-
-            using (var ms = new MemoryStream())
-            {
-                builder.Save(ms);
-
-                ms.Seek(0, SeekOrigin.Begin);
-
-                var manifestStream = GetManifestStream(ms);
-
-                // Assert
-                Assert.Equal(@"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd"">
-  <metadata>
-    <id>A</id>
-    <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Descriptions</description>
-  </metadata>
-</package>", manifestStream.ReadToEnd());
-            }
-        }
-
-        [Fact]
-        public void CreatePackageUsesV4SchemaNamespaceIfLibHasTargetFrameworkAndUseBrackets()
-        {
-            // Arrange
-            PackageBuilder builder = new PackageBuilder()
-            {
-                Id = "A",
-                Version = new SemanticVersion("1.0"),
-                Description = "Descriptions",
-            };
-            builder.Authors.Add("Luan");
-            builder.Files.Add(CreatePackageFile("tools\\[sl4]\\one.dll"));
-
-            using (var ms = new MemoryStream())
-            {
-                builder.Save(ms);
-
-                ms.Seek(0, SeekOrigin.Begin);
-
-                var manifestStream = GetManifestStream(ms);
-
-                // Assert
-                Assert.Equal(@"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd"">
-  <metadata>
-    <id>A</id>
-    <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Descriptions</description>
-  </metadata>
-</package>", manifestStream.ReadToEnd());
-            }
-        }
-
-        [Fact]
-        public void CreatePackageUsesV2SchemaNamespaceIfLibHasTargetFrameworkButDoNotUseBrackets()
-        {
-            // Arrange
-            PackageBuilder builder = new PackageBuilder()
-            {
-                Id = "A",
-                Version = new SemanticVersion("1.0"),
-                Description = "Descriptions",
-            };
-            builder.Authors.Add("Luan");
-            builder.Files.Add(CreatePackageFile("lib\\sl4\\one.dll"));
-
-            using (var ms = new MemoryStream())
-            {
-                builder.Save(ms);
-
-                ms.Seek(0, SeekOrigin.Begin);
-
-                var manifestStream = GetManifestStream(ms);
-
-                // Assert
-                Assert.Equal(@"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
-  <metadata>
-    <id>A</id>
-    <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Descriptions</description>
-  </metadata>
-</package>", manifestStream.ReadToEnd());
-            }
-        }
-
-        [Fact]
-        public void CreatePackageUsesV4SchemaNamespaceIfToolsHasTargetFramework()
-        {
-            // Arrange
-            PackageBuilder builder = new PackageBuilder()
-            {
-                Id = "A",
-                Version = new SemanticVersion("1.0"),
-                Description = "Descriptions",
-            };
-            builder.Authors.Add("Luan");
-            builder.Files.Add(CreatePackageFile("tools\\[sl4]\\one.dll"));
-
-            using (var ms = new MemoryStream())
-            {
-                builder.Save(ms);
-
-                ms.Seek(0, SeekOrigin.Begin);
-
-                var manifestStream = GetManifestStream(ms);
-
-                // Assert
-                Assert.Equal(@"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd"">
-  <metadata>
-    <id>A</id>
-    <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Descriptions</description>
-  </metadata>
-</package>", manifestStream.ReadToEnd());
-            }
-        }
-
-        [Fact]
         public void CreatePackageTrimsExtraWhitespace()
         {
             // Arrange
@@ -394,10 +166,7 @@ namespace NuGet.Test
             builder.Tags.Add("t1");
             builder.Tags.Add("t2");
             builder.Tags.Add("t3");
-            var dependencies = new PackageDependency[] { 
-                new PackageDependency("    X     ")
-            };
-            builder.DependencySets.Add(new PackageDependencySet(null, dependencies));
+            builder.Dependencies.Add(new PackageDependency("     X   "));
             var ms = new MemoryStream();
 
             // Act
@@ -437,23 +206,17 @@ namespace NuGet.Test
                 Summary = "Summary",
             };
             builder.Authors.Add("David");
-            
-            var dependencySet = new PackageDependencySet(null, new [] {
-                new PackageDependency("B", new VersionSpec
-                    {
-                        MinVersion = new SemanticVersion("1.0"),
-                        IsMinInclusive = true
-                    }),
-                new PackageDependency("C", new VersionSpec
-                {
-                    MinVersion = new SemanticVersion("1.0"),
-                    MaxVersion = new SemanticVersion("5.0"),
-                    IsMinInclusive = false
-                })
-            });
-
-            builder.DependencySets.Add(dependencySet);
-
+            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec
+            {
+                MinVersion = new SemanticVersion("1.0"),
+                IsMinInclusive = true
+            }));
+            builder.Dependencies.Add(new PackageDependency("C", new VersionSpec
+            {
+                MinVersion = new SemanticVersion("1.0"),
+                MaxVersion = new SemanticVersion("5.0"),
+                IsMinInclusive = false
+            }));
             var ms = new MemoryStream();
 
             // Act
@@ -492,23 +255,17 @@ namespace NuGet.Test
                 Summary = "Summary",
             };
             builder.Authors.Add("David");
-
-            var dependencySet = new PackageDependencySet(null, new[] {
-                new PackageDependency("B", new VersionSpec
-                    {
-                        MinVersion = new SemanticVersion("1.0"),
-                        IsMinInclusive = true
-                    }),
-                new PackageDependency("B", new VersionSpec
-                {
-                    MinVersion = new SemanticVersion("1.0"),
-                    MaxVersion = new SemanticVersion("5.0"),
-                    IsMinInclusive = false
-                })
-            });
-
-            builder.DependencySets.Add(dependencySet);
-
+            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec
+            {
+                MinVersion = new SemanticVersion("1.0"),
+                IsMinInclusive = true
+            }));
+            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec
+            {
+                MinVersion = new SemanticVersion("1.0"),
+                MaxVersion = new SemanticVersion("5.0"),
+                IsMinInclusive = false
+            }));
             var ms = new MemoryStream();
 
             // Act
@@ -527,17 +284,11 @@ namespace NuGet.Test
                 Summary = "Summary",
             };
             builder.Authors.Add("David");
-
-            var dependencySet = new PackageDependencySet(null, new[] {
-                new PackageDependency("B", new VersionSpec
-                {
-                    MinVersion = new SemanticVersion("1.0"),
-                    MaxVersion = new SemanticVersion("1.0")
-                })
-            });
-
-            builder.DependencySets.Add(dependencySet);
-
+            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec
+            {
+                MinVersion = new SemanticVersion("1.0"),
+                MaxVersion = new SemanticVersion("1.0")
+            }));
             var ms = new MemoryStream();
 
             // Act
@@ -574,18 +325,11 @@ namespace NuGet.Test
                 Summary = "Summary",
             };
             builder.Authors.Add("David");
-
-            var dependencySet = new PackageDependencySet(null, new[] {
-                new PackageDependency("B", new VersionSpec
-                {
-                    MinVersion = new SemanticVersion("2.0"),
-                    MaxVersion = new SemanticVersion("1.0")
-                })
-            });
-
-            builder.DependencySets.Add(dependencySet);
-
-
+            builder.Dependencies.Add(new PackageDependency("B", new VersionSpec
+            {
+                MinVersion = new SemanticVersion("2.0"),
+                MaxVersion = new SemanticVersion("1.0")
+            }));
             var ms = new MemoryStream();
 
             // Act
@@ -968,10 +712,7 @@ Description is required.");
             Assert.Equal(new Uri("http://somesite/somelicense.txt"), builder.LicenseUrl);
             Assert.True(builder.RequireLicenseAcceptance);
 
-            Assert.Equal(1, builder.DependencySets.Count);
-            var dependencySet = builder.DependencySets[0];
-
-            IDictionary<string, IVersionSpec> dependencies = dependencySet.Dependencies.ToDictionary(p => p.Id, p => p.VersionSpec);
+            IDictionary<string, IVersionSpec> dependencies = builder.Dependencies.ToDictionary(p => p.Id, p => p.VersionSpec);
             // <dependency id="A" version="[1.0]" />
             Assert.True(dependencies["A"].IsMinInclusive);
             Assert.True(dependencies["A"].IsMaxInclusive);
@@ -1072,12 +813,8 @@ Description is required.");
             };
             var packageVersion = new SemanticVersion("1.0.0");
 
-            var dependencySets = new PackageDependencySet[] {
-                new PackageDependencySet(null, dependencies)
-            };
-
             // Act and Assert
-            ExceptionAssert.Throws<InvalidDataException>(() => PackageBuilder.ValidateDependencySets(packageVersion, dependencySets),
+            ExceptionAssert.Throws<InvalidDataException>(() => PackageBuilder.ValidateDependencies(packageVersion, dependencies),
                 String.Format(CultureInfo.InvariantCulture,
                     "A stable release of a package should not have on a prerelease dependency. Either modify the version spec of dependency \"{0}\" or update the version field.",
                     badDependency));
@@ -1094,12 +831,8 @@ Description is required.");
             };
             var packageVersion = new SemanticVersion("1.0.0-beta");
 
-            var dependencySets = new PackageDependencySet[] {
-                new PackageDependencySet(null, dependencies)
-            };
-
             // Act
-            PackageBuilder.ValidateDependencySets(packageVersion, dependencySets);
+            PackageBuilder.ValidateDependencies(packageVersion, dependencies);
 
             // Assert
             // If we've got this far, no exceptions were thrown.
@@ -1116,12 +849,8 @@ Description is required.");
             };
             var packageVersion = new SemanticVersion("1.0.0");
 
-            var dependencySets = new PackageDependencySet[] {
-                new PackageDependencySet(null, dependencies)
-            };
-
             // Act
-            PackageBuilder.ValidateDependencySets(packageVersion, dependencySets);
+            PackageBuilder.ValidateDependencies(packageVersion, dependencies);
 
             // Assert
             // If we've got this far, no exceptions were thrown.
@@ -1228,11 +957,7 @@ Enabling license acceptance requires a license url.");
                 Description = "Description"
             };
             builder.Authors.Add("Me");
-
-            var dependencies = new PackageDependency[] {
-                new PackageDependency("X")
-            };
-            builder.DependencySets.Add(new PackageDependencySet(null, dependencies));
+            builder.Dependencies.Add(new PackageDependency("X"));
 
             // Act & Assert            
             ExceptionAssert.Throws<InvalidOperationException>(() => builder.Save(new MemoryStream()), "The special version part cannot exceed 20 characters.");
@@ -1408,21 +1133,7 @@ Enabling license acceptance requires a license url.");
             var file = new Mock<IPackageFile>();
             file.SetupGet(f => f.Path).Returns(name);
             file.Setup(f => f.GetStream()).Returns(new MemoryStream());
-
-            string effectivePath;
-            var fx = VersionUtility.ParseFrameworkNameFromFilePath(name, out effectivePath);
-            file.SetupGet(f => f.EffectivePath).Returns(effectivePath);
-            file.SetupGet(f => f.TargetFramework).Returns(fx);
-
             return file.Object;
-        }
-
-        private Stream GetManifestStream(Stream packageStream)
-        {
-            Package package = Package.Open(packageStream);
-            PackageRelationship relationshipType = package.GetRelationshipsByType(Constants.PackageRelationshipNamespace + PackageBuilder.ManifestRelationType).SingleOrDefault();
-            PackagePart manifestPart = package.GetPart(relationshipType.TargetUri);
-            return manifestPart.GetStream();
         }
     }
 }

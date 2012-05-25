@@ -151,7 +151,7 @@ namespace NuGet
             set;
         }
 
-        public IEnumerable<PackageDependencySet> DependencySets
+        public IEnumerable<PackageDependency> Dependencies
         {
             get;
             set;
@@ -209,7 +209,7 @@ namespace NuGet
             ReleaseNotes = metadata.ReleaseNotes;
             Language = metadata.Language;
             Tags = metadata.Tags;
-            DependencySets = metadata.DependencySets;
+            Dependencies = metadata.Dependencies;
             FrameworkAssemblies = metadata.FrameworkAssemblies;
             Copyright = metadata.Copyright;
             ManifestReferences = manifest.Metadata.References;
@@ -251,17 +251,15 @@ namespace NuGet
 
         internal static bool IsAssemblyReference(string filePath, IEnumerable<string> references)
         {
-            // Assembly references are in lib/ and have a .dll/.exe/.winmd extension OR if it is an empty folder.
+            // Assembly references are in lib/ and have a .dll/.exe/.winmd extension
             var fileName = Path.GetFileName(filePath);
 
             return filePath.StartsWith(Constants.LibDirectory, StringComparison.OrdinalIgnoreCase) &&
-                    // empty file
-                   (fileName == Constants.PackageEmptyFileName || 
-                    // Exclude resource assemblies
-                    !filePath.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
-                    Constants.AssemblyReferencesExtensions.Contains(Path.GetExtension(filePath), StringComparer.OrdinalIgnoreCase) &&
-                    // If references are listed, ensure that the file is listed in it.
-                    (references.IsEmpty() || references.Contains(fileName)));
+                   // Exclude resource assemblies
+                   !filePath.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
+                   Constants.AssemblyReferencesExtensions.Contains(Path.GetExtension(filePath), StringComparer.OrdinalIgnoreCase) &&
+                   // If references are listed, ensure that the file is listed in it.
+                   (references.IsEmpty() || references.Contains(fileName));
         }
 
         public override string ToString()

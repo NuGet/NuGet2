@@ -53,7 +53,6 @@
     <Compile Include="Authoring\AssemblyMetadataExtractor.cs" />
     <Compile Include="Authoring\IPackageBuilder.cs" />
     <Compile Include="Authoring\IPropertyProvider.cs" />
-    <Compile Include="Authoring\ManifestDependencySet.cs" />
     <Compile Include="Authoring\ManifestFrameworkAssembly.cs" />
     <Compile Include="Authoring\ManifestDependency.cs" />
     <Compile Include="Authoring\ManifestFile.cs" />
@@ -64,7 +63,6 @@
     <Compile Include="Authoring\ManifestVersionAttribute.cs" />
     <Compile Include="Authoring\ManifestVersionUtility.cs" />
     <Compile Include="Authoring\NullPropertyProvider.cs" />
-    <Compile Include="Authoring\PackageDependencySet.cs" />
     <Compile Include="Configuration\SettingsCredentialProvider.cs" />
     <Compile Include="Configuration\ISettings.cs" />
     <Compile Include="Configuration\NullSettings.cs" />
@@ -95,7 +93,6 @@
     <Compile Include="ProjectSystem\IBatchProcessor.cs" />
     <Compile Include="Repositories\ICloneableRepository.cs" />
     <Compile Include="Repositories\ICultureAwareRepository.cs" />
-    <Compile Include="Repositories\IPackageReferenceRepository.cs" />
     <Compile Include="Repositories\IServiceBasedRepository.cs" />
     <Compile Include="Repositories\PackageName.cs" />
     <Compile Include="Repositories\UnzippedPackageRepository.cs" />

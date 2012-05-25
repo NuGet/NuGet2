@@ -389,11 +389,10 @@ namespace NuGet.Commands
             // Add the transform file to the package builder
             ProcessTransformFiles(builder, packages.SelectMany(GetTransformFiles));
 
-            var dependencies = builder.GetCompatiblePackageDependencies(targetFramework: null)
-                                      .ToDictionary(d => d.Id, StringComparer.OrdinalIgnoreCase);
+            var dependencies = builder.Dependencies.ToDictionary(d => d.Id, StringComparer.OrdinalIgnoreCase);
 
             // Reduce the set of packages we want to include as dependencies to the minimal set.
-            // Normally, packages.config has the full closure included, we only add top level
+            // Normally, packages.config has the full closure included, we to only add top level
             // packages, i.e. packages with in-degree 0
             foreach (var package in GetMinimumSet(packages))
             {
@@ -408,10 +407,12 @@ namespace NuGet.Commands
                 dependencies[dependency.Id] = dependency;
             }
 
-            // TO FIX: when we persist the target framework into packages.config file, 
-            // we need to pull that info into building the PackageDependencySet object
-            builder.DependencySets.Clear();
-            builder.DependencySets.Add(new PackageDependencySet(null, dependencies.Values));
+            // Clear all dependencies
+            builder.Dependencies.Clear();
+            foreach (var d in dependencies.Values)
+            {
+                builder.Dependencies.Add(d);
+            }
         }
 
         private static IVersionSpec GetVersionConstraint(IDictionary<Tuple<string, SemanticVersion>, PackageReference> packageReferences, IPackage package)
@@ -428,9 +429,9 @@ namespace NuGet.Commands
             return packageReference.VersionConstraint ?? defaultVersionConstraint;
         }
 
-        private IEnumerable<IPackage> GetMinimumSet(List<IPackage> packages)
+        private static IEnumerable<IPackage> GetMinimumSet(List<IPackage> packages)
         {
-            return new Walker(packages, TargetFramework).GetMinimalSet();
+            return new Walker(packages).GetMinimalSet();
         }
 
         private static void ProcessTransformFiles(PackageBuilder builder, IEnumerable<IPackageFile> transformFiles)
@@ -670,8 +671,7 @@ namespace NuGet.Commands
             private readonly IPackageRepository _repository;
             private readonly List<IPackage> _packages;
 
-            public Walker(List<IPackage> packages, FrameworkName targetFramework) :
-                base(targetFramework)
+            public Walker(List<IPackage> packages)
             {
                 _packages = packages;
                 _repository = new ReadOnlyPackageRepository(packages.ToList());
@@ -701,27 +701,17 @@ namespace NuGet.Commands
         private class ReverseTransformFormFile : IPackageFile
         {
             private readonly Lazy<Func<Stream>> _streamFactory;
-            private readonly string _effectivePath;
 
             public ReverseTransformFormFile(IPackageFile file, IEnumerable<IPackageFile> transforms)
             {
                 Path = file.Path + ".transform";
                 _streamFactory = new Lazy<Func<Stream>>(() => ReverseTransform(file, transforms), isThreadSafe: false);
-                TargetFramework = VersionUtility.ParseFrameworkNameFromFilePath(Path, out _effectivePath);
             }
 
             public string Path
             {
                 get;
                 private set;
-            }
-
-            public string EffectivePath
-            {
-                get
-                {
-                    return _effectivePath;
-                }
             }
 
             public Stream GetStream()
@@ -753,25 +743,6 @@ namespace NuGet.Commands
                 using (Stream stream = file.GetStream())
                 {
                     return XElement.Load(stream);
-                }
-            }
-
-
-            public FrameworkName TargetFramework
-            {
-                get;
-                private set;
-            }
-
-            IEnumerable<FrameworkName> IFrameworkTargetable.SupportedFrameworks
-            {
-                get
-                {
-                    if (TargetFramework != null)
-                    {
-                        yield return TargetFramework;
-                    }
-                    yield break;
                 }
             }
         }

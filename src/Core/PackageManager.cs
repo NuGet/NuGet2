@@ -106,10 +106,9 @@ namespace NuGet
         {
             Execute(package, new InstallWalker(LocalRepository,
                                                SourceRepository,
-                                               targetFramework: null,
-                                               logger: Logger,
-                                               ignoreDependencies: ignoreDependencies,
-                                               allowPrereleaseVersions: allowPrereleaseVersions));
+                                               Logger,
+                                               ignoreDependencies,
+                                               allowPrereleaseVersions));
         }
 
         private void Execute(IPackage package, IPackageOperationResolver resolver)
@@ -193,7 +192,7 @@ namespace NuGet
 
                 // If this is a Satellite Package, then copy the satellite files into the related runtime package folder too
                 IPackage runtimePackage;
-                if (PackageUtility.IsSatellitePackage(package, LocalRepository, targetFramework: null, runtimePackage: out runtimePackage))
+                if (PackageUtility.IsSatellitePackage(package, LocalRepository, out runtimePackage))
                 {
                     var satelliteFiles = package.GetSatelliteFiles();
                     var runtimePath = PathResolver.GetPackageDirectory(runtimePackage);
@@ -256,11 +255,10 @@ namespace NuGet
         public virtual void UninstallPackage(IPackage package, bool forceRemove, bool removeDependencies)
         {
             Execute(package, new UninstallWalker(LocalRepository,
-                                                 new DependentsWalker(LocalRepository, targetFramework: null),
-                                                 targetFramework: null,
-                                                 logger: Logger,
-                                                 removeDependencies: removeDependencies,
-                                                 forceRemove: forceRemove));
+                                                 new DependentsWalker(LocalRepository),
+                                                 Logger,
+                                                 removeDependencies,
+                                                 forceRemove));
         }
 
         protected virtual void ExecuteUninstall(IPackage package)
@@ -291,7 +289,7 @@ namespace NuGet
 
             // If this is a Satellite Package, then remove the files from the related runtime package folder too
             IPackage runtimePackage;
-            if (PackageUtility.IsSatellitePackage(package, LocalRepository, targetFramework: null, runtimePackage: out runtimePackage))
+            if (PackageUtility.IsSatellitePackage(package, LocalRepository, out runtimePackage))
             {
                 var satelliteFiles = package.GetSatelliteFiles();
                 var runtimePath = PathResolver.GetPackageDirectory(runtimePackage);
@@ -389,12 +387,11 @@ namespace NuGet
         {
             Execute(newPackage, new UpdateWalker(LocalRepository,
                                                 SourceRepository,
-                                                new DependentsWalker(LocalRepository, targetFramework: null),
+                                                new DependentsWalker(LocalRepository),
                                                 NullConstraintProvider.Instance,
-                                                targetFramework: null,
-                                                logger: Logger,
-                                                updateDependencies: updateDependencies,
-                                                allowPrereleaseVersions: allowPrereleaseVersions));
+                                                Logger,
+                                                updateDependencies,
+                                                allowPrereleaseVersions));
         }
     }
 }

@@ -49,7 +49,6 @@
     <Compile Include="PackageRestore\PackagesMissingStatusEventArgs.cs" />
     <Compile Include="PackageSource\AggregatePackageSource.cs" />
     <Compile Include="PackageSource\IVsPackageSourceProvider.cs" />
-    <Compile Include="PowershellScripts.cs" />
     <Compile Include="ProductUpdate\IProductUpdateService.cs" />
     <Compile Include="ProductUpdate\IProductUpdateSettings.cs" />
     <Compile Include="ProductUpdate\IUpdateWorker.cs" />
@@ -171,6 +170,7 @@
     <Compile Include="OutputConsole\OutputConsole.cs" />
     <Compile Include="OutputConsole\OutputConsoleProvider.cs" />
     <Compile Include="Extensions\PackageExtensions.cs" />
+    <Compile Include="PowerShellScripts.cs" />
     <Compile Include="ProjectSystems\FSharpProjectSystem.cs" />
     <Compile Include="PSScriptExecutor.cs" />
     <Compile Include="RecentRepository\IPersistencePackageSettingsManager.cs" />
