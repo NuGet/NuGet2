@@ -4,7 +4,6 @@ using System.ComponentModel.Composition;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using NuGet.Common;
-using System.Diagnostics;
 
 namespace NuGet.Commands
 {

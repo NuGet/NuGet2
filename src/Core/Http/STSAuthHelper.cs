@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Net;
 using System.ServiceModel;
 using System.ServiceModel.Security;
@@ -74,7 +75,7 @@ namespace NuGet
                                         TimeSpan.FromMinutes(30),
                                         absoluteExpiration: true);
             }
-            catch (TypeLoadException ex)
+            catch (FileNotFoundException ex)
             {
                 throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UnableToLocateWIF, requestUri), ex);
             }
@@ -100,7 +101,7 @@ namespace NuGet
         private static object CreateInstance(string typeName, params object[] args)
         {
             typeName = QualifyTypeName(typeName);
-            return Activator.CreateInstance(Type.GetType(typeName), args);
+            return Activator.CreateInstance(Type.GetType(typeName, throwOnError: true), args);
         }
 
         private static TVal GetFieldValue<TVal>(string typeName, string fieldName)
