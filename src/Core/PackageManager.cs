@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Versioning;
 using NuGet.Resources;
 
 namespace NuGet
@@ -104,12 +105,17 @@ namespace NuGet
 
         public virtual void InstallPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions)
         {
+            InstallPackage(package, targetFramework: null, ignoreDependencies: ignoreDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
+        }
+
+        protected void InstallPackage(IPackage package, FrameworkName targetFramework, bool ignoreDependencies, bool allowPrereleaseVersions)
+        {
             Execute(package, new InstallWalker(LocalRepository,
                                                SourceRepository,
-                                               targetFramework: null,
-                                               logger: Logger,
-                                               ignoreDependencies: ignoreDependencies,
-                                               allowPrereleaseVersions: allowPrereleaseVersions));
+                                               targetFramework,
+                                               Logger,
+                                               ignoreDependencies,
+                                               allowPrereleaseVersions));
         }
 
         private void Execute(IPackage package, IPackageOperationResolver resolver)

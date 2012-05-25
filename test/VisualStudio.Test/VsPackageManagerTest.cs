@@ -10,6 +10,7 @@ using Xunit.Extensions;
 namespace NuGet.VisualStudio.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
+    using System.Runtime.Versioning;
 
     public class VsPackageManagerTest
     {
@@ -33,6 +34,119 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.True(packageManager.LocalRepository.Exists(package));
             Assert.True(projectManager.LocalRepository.Exists(package));
+        }
+
+        [Fact]
+        public void InstallPackageUsesProjectTargetFramework()
+        {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5"));
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, new MockPackageRepository());
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(), 
+                sourceRepository, 
+                new Mock<IFileSystemProvider>().Object, 
+                projectSystem, 
+                localRepository, 
+                new Mock<IRecentPackageRepository>().Object, 
+                new Mock<VsPackageInstallerEvents>().Object);
+
+            var dependencySets = new PackageDependencySet[] {
+                new PackageDependencySet(
+                    new FrameworkName(".NETFramework, Version=4.5"),
+                    new [] { new PackageDependency("B") }),
+
+                new PackageDependencySet(
+                    new FrameworkName(".NETFramework, Version=4.0"),
+                    new [] { new PackageDependency("C") })
+            };
+
+            var package = PackageUtility.CreatePackage2(
+                "foo", 
+                "1.0", 
+                new[] { "hello" },
+                dependencySets: dependencySets);
+
+            var packageB = PackageUtility.CreatePackage("B", "2.0", new[] { "good morning" });
+            var packageC = PackageUtility.CreatePackage("C", "2.0", new[] { "good morning" });
+            sourceRepository.AddPackage(package);
+            sourceRepository.AddPackage(packageB);
+            sourceRepository.AddPackage(packageC);
+
+            // Act
+            packageManager.InstallPackage(projectManager, "foo", new SemanticVersion("1.0"), ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance);
+
+            // Assert
+            Assert.True(packageManager.LocalRepository.Exists(package));
+            Assert.True(packageManager.LocalRepository.Exists(packageB));
+            Assert.False(packageManager.LocalRepository.Exists(packageC));
+            Assert.True(projectManager.LocalRepository.Exists(package));
+            Assert.True(projectManager.LocalRepository.Exists(packageB));
+        }
+
+        /// <summary>
+        /// This test is exactly the same as the previous one but calls a different overload
+        /// of VsPackageManager.
+        /// </summary>
+        [Fact]
+        public void InstallPackageUsesProjectTargetFramework2()
+        {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5"));
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, new MockPackageRepository());
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                projectSystem,
+                localRepository,
+                new Mock<IRecentPackageRepository>().Object,
+                new Mock<VsPackageInstallerEvents>().Object);
+
+            var dependencySets = new PackageDependencySet[] {
+                new PackageDependencySet(
+                    new FrameworkName(".NETFramework, Version=4.5"),
+                    new [] { new PackageDependency("B") }),
+
+                new PackageDependencySet(
+                    new FrameworkName(".NETFramework, Version=4.0"),
+                    new [] { new PackageDependency("C") })
+            };
+
+            var package = PackageUtility.CreatePackage2(
+                "foo",
+                "1.0",
+                new[] { "hello" },
+                dependencySets: dependencySets);
+
+            var packageB = PackageUtility.CreatePackage("B", "2.0", new[] { "good morning" });
+            var packageC = PackageUtility.CreatePackage("C", "2.0", new[] { "good morning" });
+            sourceRepository.AddPackage(package);
+            sourceRepository.AddPackage(packageB);
+            sourceRepository.AddPackage(packageC);
+
+            // Act
+            packageManager.InstallPackage(
+                projectManager, 
+                "foo", 
+                new SemanticVersion("1.0"), 
+                ignoreDependencies: false, 
+                allowPrereleaseVersions: false,
+                skipAssemblyReferences: false,
+                logger: NullLogger.Instance);
+
+            // Assert
+            Assert.True(packageManager.LocalRepository.Exists(package));
+            Assert.True(packageManager.LocalRepository.Exists(packageB));
+            Assert.False(packageManager.LocalRepository.Exists(packageC));
+            Assert.True(projectManager.LocalRepository.Exists(package));
+            Assert.True(projectManager.LocalRepository.Exists(packageB));
         }
 
         [Fact]
