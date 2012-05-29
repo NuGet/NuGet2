@@ -22,7 +22,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
     internal class RunspaceDispatcher : IDisposable
     {
         private readonly Runspace _runspace;
-        private readonly object _dispatcherLock = new object();
+        private readonly SemaphoreSlim _dispatcherLock = new SemaphoreSlim(1, 1);
 
         public RunspaceAvailability RunspaceAvailability
         {
@@ -41,7 +41,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
         {
             if (Runspace.DefaultRunspace == null)
             {
-                lock (_dispatcherLock)
+                WithLock(() =>
                 {
                     if (Runspace.DefaultRunspace == null)
                     {
@@ -53,13 +53,13 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
                         Runspace.DefaultRunspace = _runspace;
                     }
-                }
+                });
             }
         }
 
         public void InvokeCommands(PSCommand[] profileCommands)
         {
-            lock (_dispatcherLock)
+            WithLock(() =>
             {
                 using (var powerShell = System.Management.Automation.PowerShell.Create())
                 {
@@ -72,7 +72,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                         powerShell.Invoke();
                     }
                 }
-            }
+            });
         }
 
         public Collection<PSObject> Invoke(string command, object[] inputs, bool outputResults)
@@ -106,22 +106,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
             Pipeline pipeline = CreatePipeline(command, outputResults);
 
-            pipeline.StateChanged += (sender, e) =>
-            {
-                pipelineStateChanged.Raise(sender, e);
-
-                // Dispose Pipeline object upon completion
-                switch (e.PipelineStateInfo.State)
-                {
-                    case PipelineState.Completed:
-                    case PipelineState.Failed:
-                    case PipelineState.Stopped:
-                        ((Pipeline)sender).Dispose();
-                        break;
-                }
-            };
-
-            InvokeCoreAsync(pipeline, inputs);
+            InvokeCoreAsync(pipeline, inputs, pipelineStateChanged);
             return pipeline;
         }
 
@@ -225,26 +210,43 @@ namespace NuGetConsole.Host.PowerShell.Implementation
         }
 
         // Dispatcher synchronization methods
-        private Collection<PSObject> InvokeCore(Pipeline pipeline, IEnumerable<object> inputs)
+        private void WithLock(Action act)
         {
-            lock (_dispatcherLock)
-            {
-                return inputs == null ? pipeline.Invoke() : pipeline.Invoke(inputs);
-            }
+            _dispatcherLock.Wait();
+            act();
+            _dispatcherLock.Release();
         }
 
-        private void InvokeCoreAsync(Pipeline pipeline, IEnumerable<object> inputs)
+        private Collection<PSObject> InvokeCore(Pipeline pipeline, IEnumerable<object> inputs)
+        {
+            Collection<PSObject> output = null;
+            WithLock(() =>
+            {
+                output = inputs == null ? pipeline.Invoke() : pipeline.Invoke(inputs);
+            });
+            return output;
+        }
+
+        private void InvokeCoreAsync(Pipeline pipeline, IEnumerable<object> inputs, EventHandler<PipelineStateEventArgs> pipelineStateChanged)
         {
             pipeline.StateChanged += (sender, e) =>
             {
-                switch (e.PipelineStateInfo.State)
+                // Release the lock ASAP
+                bool finished = e.PipelineStateInfo.State == PipelineState.Completed ||
+                                e.PipelineStateInfo.State == PipelineState.Failed ||
+                                e.PipelineStateInfo.State == PipelineState.Stopped;
+                if(finished)
                 {
-                    case PipelineState.Completed:
-                    case PipelineState.Failed:
-                    case PipelineState.Stopped:
-                        // Release the dispatcher lock
-                        Monitor.Exit(_dispatcherLock);
-                        break;
+                    // Release the dispatcher lock
+                    _dispatcherLock.Release();
+                }
+
+                pipelineStateChanged.Raise(sender, e);
+
+                // Dispose Pipeline object upon completion
+                if (finished)
+                {
+                    ((Pipeline)sender).Dispose();
                 }
             };
 
@@ -258,7 +260,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
             // Take the dispatcher lock and invoke the pipeline
             // REVIEW: This could probably be done in a Task so that we can return to the caller before even taking the dispatcher lock
-            Monitor.Enter(_dispatcherLock);
+            _dispatcherLock.Wait();
             try
             {
                 pipeline.InvokeAsync();
@@ -266,7 +268,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             catch
             {
                 // Don't care about the exception, rethrow it, but first release the lock
-                Monitor.Exit(_dispatcherLock);
+                _dispatcherLock.Release();
                 throw;
             }
         }
