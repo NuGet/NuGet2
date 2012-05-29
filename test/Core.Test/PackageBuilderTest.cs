@@ -269,78 +269,6 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void CreatePackageUsesV4SchemaNamespaceIfLibHasTargetFrameworkAndUseBrackets()
-        {
-            // Arrange
-            PackageBuilder builder = new PackageBuilder()
-            {
-                Id = "A",
-                Version = new SemanticVersion("1.0"),
-                Description = "Descriptions",
-            };
-            builder.Authors.Add("Luan");
-            builder.Files.Add(CreatePackageFile("tools\\[sl4]\\one.dll"));
-
-            using (var ms = new MemoryStream())
-            {
-                builder.Save(ms);
-
-                ms.Seek(0, SeekOrigin.Begin);
-
-                var manifestStream = GetManifestStream(ms);
-
-                // Assert
-                Assert.Equal(@"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd"">
-  <metadata>
-    <id>A</id>
-    <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Descriptions</description>
-  </metadata>
-</package>", manifestStream.ReadToEnd());
-            }
-        }
-
-        [Fact]
-        public void CreatePackageUsesV2SchemaNamespaceIfLibHasTargetFrameworkButDoNotUseBrackets()
-        {
-            // Arrange
-            PackageBuilder builder = new PackageBuilder()
-            {
-                Id = "A",
-                Version = new SemanticVersion("1.0"),
-                Description = "Descriptions",
-            };
-            builder.Authors.Add("Luan");
-            builder.Files.Add(CreatePackageFile("lib\\sl4\\one.dll"));
-
-            using (var ms = new MemoryStream())
-            {
-                builder.Save(ms);
-
-                ms.Seek(0, SeekOrigin.Begin);
-
-                var manifestStream = GetManifestStream(ms);
-
-                // Assert
-                Assert.Equal(@"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
-  <metadata>
-    <id>A</id>
-    <version>1.0</version>
-    <authors>Luan</authors>
-    <owners>Luan</owners>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Descriptions</description>
-  </metadata>
-</package>", manifestStream.ReadToEnd());
-            }
-        }
-
-        [Fact]
         public void CreatePackageUsesV4SchemaNamespaceIfToolsHasTargetFramework()
         {
             // Arrange
@@ -351,7 +279,7 @@ namespace NuGet.Test
                 Description = "Descriptions",
             };
             builder.Authors.Add("Luan");
-            builder.Files.Add(CreatePackageFile("tools\\[sl4]\\one.dll"));
+            builder.Files.Add(CreatePackageFile("tools\\sl4\\one.dll"));
 
             using (var ms = new MemoryStream())
             {
@@ -982,6 +910,117 @@ Description is required.");
             Assert.False(dependencies["B"].IsMaxInclusive);
             Assert.Equal(new SemanticVersion("1.0"), dependencies["B"].MinVersion);
             Assert.Equal(new SemanticVersion("2.5"), dependencies["B"].MaxVersion);
+        }
+
+        [Fact]
+        public void ReadingPackageManifestRecognizeDependencyWithTargetFramework()
+        {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>SuperPackage</id>
+    <version>2.5</version>
+    <authors>Luan</authors>
+    <description>description</description>
+    <dependencies>
+        <group targetFramework=""sl4"">
+            <dependency id=""A"" />
+        </group>
+    </dependencies>
+  </metadata>
+</package>";
+
+            // Act
+            PackageBuilder builder = new PackageBuilder(spec.AsStream(), null);
+
+            // Assert
+            Assert.Equal(1, builder.DependencySets.Count);
+            var dependencySet = builder.DependencySets[0];
+
+            Assert.Equal(new FrameworkName("Silverlight, Version=4.0"), dependencySet.TargetFramework);
+            var dependencies = dependencySet.Dependencies.ToList();
+            Assert.Equal(1, dependencies.Count);
+            Assert.Equal("A", dependencies[0].Id);
+            Assert.Null(dependencies[0].VersionSpec);
+        }
+
+        [Fact]
+        public void ReadingPackageManifestRecognizeMultipleDependenciesWithTargetFramework()
+        {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>SuperPackage</id>
+    <version>2.5</version>
+    <authors>Luan</authors>
+    <description>description</description>
+    <dependencies>
+        <group targetFramework=""sl4"">
+            <dependency id=""A"" />
+        </group>
+        <group targetFramework=""net1"">
+            <dependency id=""B"" />
+            <dependency id=""C"" />
+        </group>
+        <group targetFramework=""net40-client"">
+        </group>
+    </dependencies>
+  </metadata>
+</package>";
+
+            // Act
+            PackageBuilder builder = new PackageBuilder(spec.AsStream(), null);
+
+            // Assert
+            Assert.Equal(3, builder.DependencySets.Count);
+            var dependencySet1 = builder.DependencySets[0];
+            var dependencySet2 = builder.DependencySets[1];
+            var dependencySet3 = builder.DependencySets[2];
+
+            Assert.Equal(new FrameworkName("Silverlight, Version=4.0"), dependencySet1.TargetFramework);
+            var dependencies1 = dependencySet1.Dependencies.ToList();
+            Assert.Equal(1, dependencies1.Count);
+            Assert.Equal("A", dependencies1[0].Id);
+            Assert.Null(dependencies1[0].VersionSpec);
+
+            Assert.Equal(new FrameworkName(".NETFramework, Version=1.0"), dependencySet2.TargetFramework);
+            var dependencies2 = dependencySet2.Dependencies.ToList();
+            Assert.Equal(2, dependencies2.Count);
+            Assert.Equal("B", dependencies2[0].Id);
+            Assert.Null(dependencies2[0].VersionSpec);
+            Assert.Equal("C", dependencies2[1].Id);
+            Assert.Null(dependencies2[0].VersionSpec);
+
+            Assert.Equal(new FrameworkName(".NETFramework, Version=4.0, Profile=Client"), dependencySet3.TargetFramework);
+            Assert.False(dependencySet3.Dependencies.Any());
+        }
+
+        [Fact]
+        public void PackageBuilderThrowsWhenDependenciesHasMixedDependencyAndGroupChildren()
+        {
+            // Arrange
+            string spec =
+                @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>SuperPackage</id>
+    <version>2.5</version>
+    <authors>Luan</authors>
+    <description>description</description>
+    <dependencies>
+        <dependency id=""A"" />
+        <group targetFramework=""net40-client"">
+        </group>
+    </dependencies>
+  </metadata>
+</package>";
+
+            // Act
+            ExceptionAssert.Throws<InvalidDataException>(
+                () => { new PackageBuilder(spec.AsStream(), null); },
+                "<dependencies> element must not contain both <group> and <dependency> child elements.");
         }
 
         [Fact]
