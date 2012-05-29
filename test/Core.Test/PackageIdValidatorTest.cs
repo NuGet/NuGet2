@@ -144,6 +144,22 @@ namespace NuGet.Test
         }
 
         [Theory]
+        [InlineData(@"Test$Bad")]
+        [InlineData(@"Test:Bad")]
+        [InlineData(@"Test\Bad")]
+        [InlineData(@"Test/Bad")]
+        [InlineData(@"Test@Bad")]
+        [InlineData(@"Test@*Bad")]
+        public void PackageWithInvalidCharactersAreNotValid(string id)
+        {
+            // Act
+            bool isValid = PackageIdValidator.IsValidPackageId(id);
+
+            // Assert
+            Assert.False(isValid);
+        }
+
+        [Theory]
         [InlineData(101)]
         [InlineData(102)]
         [InlineData(200)]

@@ -962,6 +962,66 @@ function Test-UpdatePackageDontMakeExcessiveNetworkRequests
     }
 }
 
+function Test-UpdatingPackageWithSatelliteReferencesCorrectlyReplacesThem 
+{
+	param(
+        $context
+    )
+
+    # Arrange
+    $p = New-ClassLibrary
+
+	# Act - 1
+	$p | Install-Package -Source $context.RepositoryPath Localized -Version 1.0
+	$p | Install-Package -Source $context.RepositoryPath Localized.fr-Fr -Version 1.0
+
+	# Assert - 1
+	Assert-Package $p Localized 1.0
+	Assert-Package $p Localized.fr-Fr 1.0
+
+	# Act - 2 
+	$p | Update-Package -Source $context.RepositoryPath Localized
+
+	# Assert-2
+	Assert-Package $p Localized 2.0
+
+	$solutionDir = Get-SolutionDir
+	$packageDir = (Join-Path $solutionDir packages\Localized.2.0)
+	Assert-PathExists (Join-Path $packageDir 'lib\net40\fr-FR\Main.resources.dll')
+}
+
+function Test-UpdatingPackageWithSatelliteReferencesCorrectlyReplacesThemForUpdateCommandWithoutProjectParam 
+{
+	param(
+        $context
+    )
+
+    # Arrange
+    $p1 = New-ClassLibrary
+    $p2 = New-ClassLibrary
+
+	# Act - 1
+	$p1 | Install-Package -Source $context.RepositoryPath Localized -Version 1.0
+	$p2 | Install-Package -Source $context.RepositoryPath Localized -Version 1.0
+	$p1 | Install-Package -Source $context.RepositoryPath Localized.fr-Fr -Version 1.0
+	$p2 | Install-Package -Source $context.RepositoryPath Localized.fr-Fr -Version 1.0
+
+	# Assert - 1
+	Assert-Package $p1 Localized 1.0
+	Assert-Package $p2 Localized 1.0
+
+	# Act - 2 
+	Update-Package -Source $context.RepositoryPath Localized
+
+	# Assert-2
+	Assert-Package $p1 Localized 2.0
+	Assert-Package $p2 Localized 2.0
+
+	$solutionDir = Get-SolutionDir
+	$packageDir = (Join-Path $solutionDir packages\Localized.2.0)
+	Assert-PathExists (Join-Path $packageDir 'lib\net40\fr-FR\Main.resources.dll')
+}
+
 function Test-UpdatePackageInstallCorrectDependencyPackageBasedOnTargetFramework
 {
 	param($context)

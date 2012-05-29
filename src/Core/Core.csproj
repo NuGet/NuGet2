@@ -104,6 +104,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>AnalysisResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SatellitePackageManager.cs" />
     <Compile Include="SemanticVersion.cs" />
     <Compile Include="SemanticVersionTypeConverter.cs" />
     <Compile Include="Server\PackageServer.cs" />

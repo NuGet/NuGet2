@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using NuGet.Resources;
@@ -8,6 +9,7 @@ namespace NuGet
 {
     public class PackageManager : IPackageManager
     {
+        private readonly SatellitePackageManager _satellitePackageManager;
         private ILogger _logger;
 
         public event EventHandler<PackageOperationEventArgs> PackageInstalling;
@@ -48,6 +50,7 @@ namespace NuGet
             PathResolver = pathResolver;
             FileSystem = fileSystem;
             LocalRepository = localRepository;
+            _satellitePackageManager = new SatellitePackageManager(localRepository, fileSystem, pathResolver);
         }
 
         public IFileSystem FileSystem
@@ -84,6 +87,11 @@ namespace NuGet
             {
                 _logger = value;
             }
+        }
+
+        protected SatellitePackageManager SatellitePackageManager
+        {
+            get { return _satellitePackageManager; }
         }
 
         public void InstallPackage(string packageId)
@@ -198,13 +206,7 @@ namespace NuGet
                 FileSystem.AddFiles(files, packageDirectory);
 
                 // If this is a Satellite Package, then copy the satellite files into the related runtime package folder too
-                IPackage runtimePackage;
-                if (PackageUtility.IsSatellitePackage(package, LocalRepository, targetFramework: null, runtimePackage: out runtimePackage))
-                {
-                    var satelliteFiles = package.GetSatelliteFiles();
-                    var runtimePath = PathResolver.GetPackageDirectory(runtimePackage);
-                    FileSystem.AddFiles(satelliteFiles, runtimePath);
-                }
+                _satellitePackageManager.ExpandSatellitePackage(package);
             }
             finally
             {
@@ -292,18 +294,10 @@ namespace NuGet
         {
             string packageDirectory = PathResolver.GetPackageDirectory(package);
 
+            _satellitePackageManager.RemoveSatelliteReferences(package);
+
             // Remove resource files
             FileSystem.DeleteFiles(package.GetFiles(), packageDirectory);
-
-            // If this is a Satellite Package, then remove the files from the related runtime package folder too
-            IPackage runtimePackage;
-            if (PackageUtility.IsSatellitePackage(package, LocalRepository, targetFramework: null, runtimePackage: out runtimePackage))
-            {
-                var satelliteFiles = package.GetSatelliteFiles();
-                var runtimePath = PathResolver.GetPackageDirectory(runtimePackage);
-                FileSystem.DeleteFiles(satelliteFiles, runtimePath);
-            }
-
         }
 
         private void OnInstalling(PackageOperationEventArgs e)
@@ -383,7 +377,9 @@ namespace NuGet
 
             if (newPackage != null && oldPackage.Version != newPackage.Version)
             {
+                var satelliteReferences = SatellitePackageManager.GetSatelliteReferences(oldPackage);
                 UpdatePackage(newPackage, updateDependencies, allowPrereleaseVersions);
+                SatellitePackageManager.ExpandSatellitePackages(satelliteReferences);
             }
             else
             {
