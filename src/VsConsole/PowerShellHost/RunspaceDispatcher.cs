@@ -207,6 +207,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
         public void Dispose()
         {
             _runspace.Dispose();
+            _dispatcherLock.Dispose();
         }
 
         // Dispatcher synchronization methods
