@@ -7,7 +7,7 @@ namespace NuGet.Test.Mocks
 {
     public class MockProjectSystem : MockFileSystem, IProjectSystem
     {
-        private readonly FrameworkName _frameworkName;
+        private FrameworkName _frameworkName;
 
         public MockProjectSystem()
             : this(VersionUtility.DefaultTargetFramework)
@@ -81,10 +81,14 @@ namespace NuGet.Test.Mocks
             References[name] = name;
         }
 
-
         public virtual string ResolvePath(string path)
         {
             return path;
+        }
+
+        public void ChangeTargetFramework(FrameworkName newTargetFramework)
+        {
+            _frameworkName = newTargetFramework;
         }
     }
 }
