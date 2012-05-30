@@ -809,3 +809,96 @@ function Test-UninstallPackageExecuteCorrectUninstallScriptsAccordingToTargetFra
     # Clean up
     Remove-Variable UnInstallVar -Scope Global
 }
+
+function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToRemoveContentFiles
+{
+	param($context)
+
+	# Arrange
+	$p = New-ClassLibrary
+
+	$p | Install-Package PackageA -Source $context.RepositoryPath
+	
+	Assert-Package $p 'packageA'
+	Assert-Package $p 'packageB'
+
+	Assert-NotNull (Get-ProjectItem $p testA4.txt)
+	Assert-NotNull (Get-ProjectItem $p testB4.txt)
+
+	# Act (change the target framework of the project to 3.5 and verifies that it still removes the content files correctly )
+
+	$projectName = $p.Name
+	$p.Properties.Item("TargetFrameworkMoniker").Value = '.NETFramework,Version=3.5'
+
+	$p = Get-Project $projectName
+
+	Uninstall-Package 'PackageA' -Project $projectName -RemoveDependencies
+	
+	# Assert
+	Assert-NoPackage $p 'PackageA'
+	Assert-NoPackage $p 'PackageB'
+	
+	Assert-Null (Get-ProjectItem $p testA4.txt)
+	Assert-Null (Get-ProjectItem $p testB4.txt)
+}
+
+function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToRemoveAssemblyReferences
+{
+	param($context)
+
+	# Arrange
+	$p = New-ClassLibrary
+
+	$p | Install-Package PackageA -Source $context.RepositoryPath
+	
+	Assert-Package $p 'packageA'
+	Assert-Package $p 'packageB'
+
+	Assert-Reference $p testA4
+	Assert-Reference $p testB4
+
+	# Act (change the target framework of the project to 3.5 and verifies that it still removes the assembly references correctly )
+
+	$projectName = $p.Name
+	$p.Properties.Item("TargetFrameworkMoniker").Value = '.NETFramework,Version=3.5'
+
+	$p = Get-Project $projectName
+
+	Uninstall-Package 'PackageA' -Project $projectName -RemoveDependencies
+	
+	# Assert
+	Assert-NoPackage $p 'PackageA'
+	Assert-NoPackage $p 'PackageB'
+	
+	Assert-Null (Get-AssemblyReference $p testA4.dll)
+	Assert-Null (Get-AssemblyReference $p testB4.dll)
+}
+
+function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToInvokeUninstallScript
+{
+	param($context)
+
+	# Arrange
+	$p = New-ClassLibrary
+
+	$p | Install-Package PackageA -Source $context.RepositoryPath
+	
+	Assert-Package $p 'packageA'
+
+	# Act (change the target framework of the project to 3.5 and verifies that it invokes the correct uninstall.ps1 file in 'net40' folder )
+
+	$projectName = $p.Name
+	$p.Properties.Item("TargetFrameworkMoniker").Value = '.NETFramework,Version=3.5'
+
+	$global:UninstallVar = 0
+
+	$p = Get-Project $projectName
+	Uninstall-Package 'PackageA' -Project $projectName
+	
+	# Assert
+	Assert-NoPackage $p 'PackageA'
+	
+	Assert-AreEqual 1 $global:UninstallVar
+
+	Remove-Variable UninstallVar -Scope Global
+}

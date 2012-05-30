@@ -1882,3 +1882,26 @@ function Test-InstallingSatellitePackageToWebsiteCopiesResourcesToBin
 	Assert-PathExists (Join-Path $projectPath "bin\fr-FR\Test.resources.dll")
 
 }
+
+function Test-InstallPackagePersistTargetFrameworkToPackagesConfig
+{
+	param($context)
+
+	# Arrange
+	$p = New-ClassLibrary
+
+	# Act
+	$p | Install-Package PackageA -Source $context.RepositoryPath
+	
+	# Assert
+	Assert-Package $p 'packageA'
+	Assert-Package $p 'packageB'
+
+	$content = [xml](Get-Content (Get-ProjectItemPath $p 'packages.config'))
+
+	$entryA = $content.packages.package[0]
+	$entryB = $content.packages.package[1]
+
+	Assert-AreEqual 'net40' $entryA.targetFramework
+	Assert-AreEqual 'net40' $entryB.targetFramework
+}

@@ -547,7 +547,13 @@ namespace NuGet.Dialog.Providers
         {
             Project project = FindProjectFromFileSystem(e.FileSystem);
             Debug.Assert(project != null);
-            _providerServices.ScriptExecutor.ExecuteScript(e.InstallPath, PowerShellScripts.Install, e.Package, project, this);
+            _providerServices.ScriptExecutor.ExecuteScript(
+                e.InstallPath, 
+                PowerShellScripts.Install, 
+                e.Package, 
+                project,
+                project.GetTargetFrameworkName(),
+                this);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -557,7 +563,13 @@ namespace NuGet.Dialog.Providers
             Debug.Assert(project != null);
             try
             {
-                _providerServices.ScriptExecutor.ExecuteScript(e.InstallPath, PowerShellScripts.Uninstall, e.Package, project, this);
+                _providerServices.ScriptExecutor.ExecuteScript(
+                    e.InstallPath, 
+                    PowerShellScripts.Uninstall, 
+                    e.Package, 
+                    project,
+                    GetTargetFrameworkForPackage(e.Package.Id) ?? project.GetTargetFrameworkName(),
+                    this);
             }
             catch (Exception ex)
             {
@@ -565,6 +577,17 @@ namespace NuGet.Dialog.Providers
                 // But we log it as a warning.
                 Log(MessageLevel.Warning, ExceptionUtility.Unwrap(ex).Message);
             }
+        }
+
+        private FrameworkName GetTargetFrameworkForPackage(string packageId)
+        {
+            var packageReferenceRepository = LocalRepository as PackageReferenceRepository;
+            if (packageReferenceRepository != null)
+            {
+                return packageReferenceRepository.GetPackageTargetFramework(packageId);
+            }
+
+            return null;
         }
 
         private Project FindProjectFromFileSystem(IFileSystem fileSystem)

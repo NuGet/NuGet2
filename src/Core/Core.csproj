@@ -177,6 +177,7 @@
     <Compile Include="Utility\PackageIdValidator.cs" />
     <Compile Include="Utility\PathValidator.cs" />
     <Compile Include="Http\RedirectedHttpClient.cs" />
+    <Compile Include="Utility\ProjectManagerExtensions.cs" />
     <Compile Include="Utility\VersionSpec.cs" />
     <Compile Include="Utility\WebRequestEventArgs.cs" />
     <Reference Include="System" />

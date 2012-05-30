@@ -2,6 +2,7 @@
 using System.ComponentModel.Composition;
 using System.Globalization;
 using System.IO;
+using System.Runtime.Versioning;
 using EnvDTE;
 using NuGet.VisualStudio.Resources;
 using NuGetConsole;
@@ -35,8 +36,13 @@ namespace NuGet.VisualStudio
 
         public bool Execute(string installPath, string scriptFileName, IPackage package, Project project, ILogger logger)
         {
+            return Execute(installPath, scriptFileName, package, project, project.GetTargetFrameworkName(), logger);
+        }
+
+        public bool Execute(string installPath, string scriptFileName, IPackage package, Project project, FrameworkName targetFramework, ILogger logger)
+        {
             string scriptPath, fullPath;
-            if (package.FindCompatibleToolFiles(scriptFileName, project.GetTargetFrameworkName(), out scriptPath))
+            if (package.FindCompatibleToolFiles(scriptFileName, targetFramework, out scriptPath))
             {
                 fullPath = Path.Combine(installPath, scriptPath);
             }
