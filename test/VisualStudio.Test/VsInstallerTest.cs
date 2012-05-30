@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.Versioning;
 using EnvDTE;
 using Moq;
 using NuGet.Test.Mocks;
@@ -38,8 +39,8 @@ namespace NuGet.VisualStudio.Test
             installer.InstallPackage(@"x:\test", project, "foo", new Version("1.0"), ignoreDependencies: false);
 
             // Assert
-            scriptExecutor.Verify(e => e.Execute(It.IsAny<string>(), PowerShellScripts.Init, It.IsAny<IPackage>(), It.IsAny<Project>(), It.IsAny<ILogger>()), Times.Once());
-            scriptExecutor.Verify(e => e.Execute(It.IsAny<string>(), PowerShellScripts.Install, It.IsAny<IPackage>(), It.IsAny<Project>(), It.IsAny<ILogger>()), Times.Once());
+            scriptExecutor.Verify(e => e.Execute(It.IsAny<string>(), PowerShellScripts.Init, It.IsAny<IPackage>(), null, null, It.IsAny<ILogger>()), Times.Once());
+            scriptExecutor.Verify(e => e.Execute(It.IsAny<string>(), PowerShellScripts.Install, It.IsAny<IPackage>(), It.IsAny<Project>(), It.IsAny<FrameworkName>(), It.IsAny<ILogger>()), Times.Once());
             packageRepositoryFactory.Verify();
         }
 
@@ -70,8 +71,8 @@ namespace NuGet.VisualStudio.Test
             installer.InstallPackage(sourceRepository, project, "foo", new SemanticVersion("1.0"), ignoreDependencies: false, skipAssemblyReferences: false);
 
             // Assert
-            scriptExecutor.Verify(e => e.Execute(It.IsAny<string>(), PowerShellScripts.Init, It.IsAny<IPackage>(), It.IsAny<Project>(), It.IsAny<ILogger>()), Times.Once());
-            scriptExecutor.Verify(e => e.Execute(It.IsAny<string>(), PowerShellScripts.Install, It.IsAny<IPackage>(), It.IsAny<Project>(), It.IsAny<ILogger>()), Times.Once());
+            scriptExecutor.Verify(e => e.Execute(It.IsAny<string>(), PowerShellScripts.Init, It.IsAny<IPackage>(), null, null, It.IsAny<ILogger>()), Times.Once());
+            scriptExecutor.Verify(e => e.Execute(It.IsAny<string>(), PowerShellScripts.Install, It.IsAny<IPackage>(), It.IsAny<Project>(), It.IsAny<FrameworkName>(), It.IsAny<ILogger>()), Times.Once());
         }
 
         [Fact]

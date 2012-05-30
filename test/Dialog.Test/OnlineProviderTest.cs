@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading;
 using EnvDTE;
 using Moq;
@@ -296,7 +297,7 @@ namespace NuGet.Dialog.Test
                 try
                 {
                     // Assert
-                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), PowerShellScripts.Install, packageB, project.Object, It.IsAny<ILogger>()), Times.Once());
+                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), PowerShellScripts.Install, packageB, project.Object, It.IsAny<FrameworkName>(), It.IsAny<ILogger>()), Times.Once());
                 }
                 finally
                 {
@@ -373,7 +374,7 @@ namespace NuGet.Dialog.Test
                     // Assert
 
                     // init.ps1 should be executed
-                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), PowerShellScripts.Init, packageB, null, It.IsAny<ILogger>()), Times.Once());
+                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), PowerShellScripts.Init, packageB, null, null, It.IsAny<ILogger>()), Times.Once());
 
                     // InstallPackage() should get called
                     packageManager.Verify(p => p.InstallPackage(
