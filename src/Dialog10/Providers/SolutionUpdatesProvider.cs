@@ -39,88 +39,90 @@ namespace NuGet.Dialog.Providers
         protected override bool ExecuteCore(PackageItem item)
         {
             _activePackageManager = GetActivePackageManager();
-
-            ShowProgressWindow();
-            IList<Project> selectedProjectsList;
-            bool isProjectLevel = _activePackageManager.IsProjectLevel(item.PackageIdentity);
-            if (isProjectLevel)
+            using (_activePackageManager.SourceRepository.StartOperation(RepositoryOperationNames.Update))
             {
-                HideProgressWindow();
-                var selectedProjects = _userNotifierServices.ShowProjectSelectorWindow(
-                    Resources.Dialog_UpdatesSolutionInstruction,
-                    item.PackageIdentity,
-                    // Selector function to return the initial checkbox state for a Project.
-                    // We check a project if it has the current package installed by Id, but not version
-                    project => _activePackageManager.GetProjectManager(project).LocalRepository.Exists(item.Id),
-                    project =>
+                ShowProgressWindow();
+                IList<Project> selectedProjectsList;
+                bool isProjectLevel = _activePackageManager.IsProjectLevel(item.PackageIdentity);
+                if (isProjectLevel)
+                {
+                    HideProgressWindow();
+                    var selectedProjects = _userNotifierServices.ShowProjectSelectorWindow(
+                        Resources.Dialog_UpdatesSolutionInstruction,
+                        item.PackageIdentity,
+                        // Selector function to return the initial checkbox state for a Project.
+                        // We check a project if it has the current package installed by Id, but not version
+                        project => _activePackageManager.GetProjectManager(project).LocalRepository.Exists(item.Id),
+                        project =>
+                        {
+                            var localRepository = _activePackageManager.GetProjectManager(project).LocalRepository;
+
+                            // for the Updates solution dialog, we only enable a project if it has an old version of 
+                            // the package installed.
+                            return localRepository.Exists(item.Id) &&
+                                   !localRepository.Exists(item.Id, item.PackageIdentity.Version);
+                        }
+                    );
+
+                    if (selectedProjects == null)
                     {
-                        var localRepository = _activePackageManager.GetProjectManager(project).LocalRepository;
-
-                        // for the Updates solution dialog, we only enable a project if it has an old version of 
-                        // the package installed.
-                        return localRepository.Exists(item.Id) &&
-                               !localRepository.Exists(item.Id, item.PackageIdentity.Version);
+                        // user presses Cancel button on the Solution dialog
+                        return false;
                     }
-                );
 
-                if (selectedProjects == null)
+                    selectedProjectsList = selectedProjects.ToList();
+                    if (selectedProjectsList.Count == 0)
+                    {
+                        return false;
+                    }
+                }
+                else
                 {
-                    // user presses Cancel button on the Solution dialog
+                    // solution package. just update into the solution
+                    selectedProjectsList = new Project[0];
+                }
+
+                IList<PackageOperation> operations;
+                bool acceptLicense = isProjectLevel ? CheckPSScriptAndShowLicenseAgreement(item, selectedProjectsList, _activePackageManager, out operations)
+                                                    : CheckPSScriptAndShowLicenseAgreement(item, _activePackageManager, out operations);
+
+                if (!acceptLicense)
+                {
                     return false;
                 }
 
-                selectedProjectsList = selectedProjects.ToList();
-                if (selectedProjectsList.Count == 0)
+                if (!isProjectLevel && operations.Any())
                 {
-                    return false;
+                    // When dealing with solution level packages, only the set of actions specified under operations are executed. 
+                    // In such a case, no operation to uninstall the current package is specified. We'll identify the package that is being updated and
+                    // explicitly add a uninstall operation.
+                    var packageToUpdate = _activePackageManager.LocalRepository.FindPackage(item.Id);
+                    if (packageToUpdate != null)
+                    {
+                        operations.Insert(0, new PackageOperation(packageToUpdate, PackageAction.Uninstall));
+                    }
                 }
-            }
-            else
-            {
-                // solution package. just update into the solution
-                selectedProjectsList = new Project[0];
-            }
 
-            IList<PackageOperation> operations;
-            bool acceptLicense = isProjectLevel ? CheckPSScriptAndShowLicenseAgreement(item, selectedProjectsList, _activePackageManager, out operations)
-                                                : CheckPSScriptAndShowLicenseAgreement(item, _activePackageManager, out operations);
-                        
-            if (!acceptLicense)
-            {
-                return false;
-            }
-
-            if (!isProjectLevel && operations.Any())
-            {
-                // When dealing with solution level packages, only the set of actions specified under operations are executed. 
-                // In such a case, no operation to uninstall the current package is specified. We'll identify the package that is being updated and
-                // explicitly add a uninstall operation.
-                var packageToUpdate = _activePackageManager.LocalRepository.FindPackage(item.Id);
-                if (packageToUpdate != null)
+                try
                 {
-                    operations.Insert(0, new PackageOperation(packageToUpdate, PackageAction.Uninstall));
+                    RegisterPackageOperationEvents(_activePackageManager, null);
+
+                    _activePackageManager.UpdatePackage(
+                        selectedProjectsList,
+                        item.PackageIdentity,
+                        operations,
+                        updateDependencies: true,
+                        allowPrereleaseVersions: IncludePrerelease,
+                        logger: this,
+                        eventListener: this);
                 }
-            }
+                finally
+                {
+                    UnregisterPackageOperationEvents(_activePackageManager, null);
+                }
 
-            try
-            {
-                RegisterPackageOperationEvents(_activePackageManager, null);
-
-                _activePackageManager.UpdatePackage(
-                    selectedProjectsList,
-                    item.PackageIdentity,
-                    operations,
-                    updateDependencies: true,
-                    allowPrereleaseVersions: IncludePrerelease,
-                    logger: this,
-                    eventListener: this);
+                return true;
             }
-            finally
-            {
-                UnregisterPackageOperationEvents(_activePackageManager, null);
-            }
-
-            return true;
         }
 
         protected bool CheckPSScriptAndShowLicenseAgreement(

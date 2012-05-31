@@ -111,57 +111,60 @@ namespace NuGet.PowerShell.Commands
                 SubscribeToProgressEvents();
                 if (PackageManager != null)
                 {
-                    IProjectManager projectManager = ProjectManager;
-                    if (!String.IsNullOrEmpty(Id))
+                    using (PackageManager.SourceRepository.StartOperation(RepositoryOperationNames.Update))
                     {
-                        // If a package id was specified, but no project was specified, then update this package in all projects
-                        if (String.IsNullOrEmpty(ProjectName))
+                        IProjectManager projectManager = ProjectManager;
+                        if (!String.IsNullOrEmpty(Id))
                         {
-                            if (Safe.IsPresent)
-                            {
-                                PackageManager.SafeUpdatePackage(Id, !IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
-                            }
-                            else
-                            {
-                                PackageManager.UpdatePackage(Id, Version, !IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
-                            }
-                        }
-                        else if (projectManager != null)
-                        {
-                            // If there was a project specified, then update the package in that project
-                            if (Safe.IsPresent)
-                            {
-                                PackageManager.SafeUpdatePackage(projectManager, Id, !IgnoreDependencies, IncludePrerelease, this);
-                            }
-                            else
-                            {
-                                PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, IncludePrerelease, this);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // if no id was specified then update all packages in the solution
-                        if (Safe.IsPresent)
-                        {
+                            // If a package id was specified, but no project was specified, then update this package in all projects
                             if (String.IsNullOrEmpty(ProjectName))
                             {
-                                PackageManager.SafeUpdatePackages(!IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
+                                if (Safe.IsPresent)
+                                {
+                                    PackageManager.SafeUpdatePackage(Id, !IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
+                                }
+                                else
+                                {
+                                    PackageManager.UpdatePackage(Id, Version, !IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
+                                }
                             }
                             else if (projectManager != null)
                             {
-                                PackageManager.SafeUpdatePackages(projectManager, !IgnoreDependencies.IsPresent, IncludePrerelease, this);
+                                // If there was a project specified, then update the package in that project
+                                if (Safe.IsPresent)
+                                {
+                                    PackageManager.SafeUpdatePackage(projectManager, Id, !IgnoreDependencies, IncludePrerelease, this);
+                                }
+                                else
+                                {
+                                    PackageManager.UpdatePackage(projectManager, Id, Version, !IgnoreDependencies, IncludePrerelease, this);
+                                }
                             }
                         }
                         else
                         {
-                            if (String.IsNullOrEmpty(ProjectName))
+                            // if no id was specified then update all packages in the solution
+                            if (Safe.IsPresent)
                             {
-                                PackageManager.UpdatePackages(!IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
+                                if (String.IsNullOrEmpty(ProjectName))
+                                {
+                                    PackageManager.SafeUpdatePackages(!IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
+                                }
+                                else if (projectManager != null)
+                                {
+                                    PackageManager.SafeUpdatePackages(projectManager, !IgnoreDependencies.IsPresent, IncludePrerelease, this);
+                                }
                             }
-                            else if (projectManager != null)
+                            else
                             {
-                                PackageManager.UpdatePackages(projectManager, !IgnoreDependencies.IsPresent, IncludePrerelease, this);
+                                if (String.IsNullOrEmpty(ProjectName))
+                                {
+                                    PackageManager.UpdatePackages(!IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
+                                }
+                                else if (projectManager != null)
+                                {
+                                    PackageManager.UpdatePackages(projectManager, !IgnoreDependencies.IsPresent, IncludePrerelease, this);
+                                }
                             }
                         }
                     }

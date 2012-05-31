@@ -1,12 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace NuGet.Test.Mocks
 {
-    public class MockPackageRepository : PackageRepositoryBase, ICollection<IPackage>, ILatestPackageLookup
+    public class MockPackageRepository : PackageRepositoryBase, ICollection<IPackage>, ILatestPackageLookup, IOperationAwareRepository
     {
         private readonly string _source;
+
+        public string LastOperation { get; private set; }
+
         public MockPackageRepository()
             : this("")
         {
@@ -146,6 +150,12 @@ namespace NuGet.Test.Mocks
                 latestVersion = null;
                 return false;
             }
+        }
+
+        public IDisposable StartOperation(string operation)
+        {
+            LastOperation = null;
+            return new DisposableAction(() => { LastOperation = operation; });
         }
     }
 }

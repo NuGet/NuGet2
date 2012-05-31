@@ -8,7 +8,7 @@ using System.Runtime.Versioning;
 
 namespace NuGet
 {
-    public class DataServicePackageRepository : PackageRepositoryBase, IHttpClientEvents, IServiceBasedRepository, ICloneableRepository, ICultureAwareRepository
+    public class DataServicePackageRepository : PackageRepositoryBase, IHttpClientEvents, IServiceBasedRepository, ICloneableRepository, ICultureAwareRepository, IOperationAwareRepository
     {
         private IDataServiceContext _context;
         private readonly IHttpClient _httpClient;
@@ -50,6 +50,8 @@ namespace NuGet
             get { return _packageDownloader; }
         }
 
+        public string CurrentOperation { get; private set; }
+
         public DataServicePackageRepository(Uri serviceRoot)
             : this(new HttpClient(serviceRoot))
         {
@@ -75,6 +77,14 @@ namespace NuGet
             _httpClient.AcceptCompression = true;
 
             _packageDownloader = packageDownloader;
+
+            SendingRequest += (sender, e) =>
+            {
+                if (!String.IsNullOrEmpty(CurrentOperation))
+                {
+                    e.Request.Headers[RepositoryOperationNames.OperationHeaderName] = CurrentOperation;
+                }
+            };
         }
 
         public CultureInfo Culture
@@ -231,6 +241,16 @@ namespace NuGet
         public IPackageRepository Clone()
         {
             return new DataServicePackageRepository(_httpClient, _packageDownloader);
+        }
+
+        public IDisposable StartOperation(string operation)
+        {
+            string oldOperation = CurrentOperation;
+            CurrentOperation = operation;
+            return new DisposableAction(() =>
+            {
+                CurrentOperation = oldOperation;
+            });
         }
 
         /// <summary>

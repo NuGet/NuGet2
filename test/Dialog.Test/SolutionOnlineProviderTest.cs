@@ -82,6 +82,8 @@ namespace NuGet.Dialog.Test
             provider.ExecuteCompletedCallback = delegate
             {
                 // Assert
+                Assert.Equal(RepositoryOperationNames.Install, sourceRepository.LastOperation);
+
                 mockPackageManager.Verify(p => p.InstallPackage(
                     new Project[] { project1, project2 },
                     packageB,

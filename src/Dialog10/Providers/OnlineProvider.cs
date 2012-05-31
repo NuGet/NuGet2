@@ -75,6 +75,11 @@ namespace NuGet.Dialog.Providers
             }
         }
 
+        public virtual string OperationName
+        {
+            get { return RepositoryOperationNames.Install; }
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
@@ -136,15 +141,18 @@ namespace NuGet.Dialog.Providers
             IVsPackageManager activePackageManager = GetActivePackageManager();
             Debug.Assert(activePackageManager != null);
 
-            IList<PackageOperation> operations;
-            bool acceptLicense = CheckPSScriptAndShowLicenseAgreement(item, activePackageManager, out operations);
-            if (!acceptLicense)
+            using (activePackageManager.SourceRepository.StartOperation(OperationName))
             {
-                return false;
-            }
+                IList<PackageOperation> operations;
+                bool acceptLicense = CheckPSScriptAndShowLicenseAgreement(item, activePackageManager, out operations);
+                if (!acceptLicense)
+                {
+                    return false;
+                }
 
-            ExecuteCommandOnProject(_project, item, activePackageManager, operations);
-            return true;
+                ExecuteCommandOnProject(_project, item, activePackageManager, operations);
+                return true;
+            }
         }
 
         protected bool CheckPSScriptAndShowLicenseAgreement(PackageItem item, IVsPackageManager packageManager, out IList<PackageOperation> operations)

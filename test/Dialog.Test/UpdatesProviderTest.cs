@@ -201,6 +201,8 @@ namespace NuGet.Dialog.Test
             provider.ExecuteCompletedCallback = delegate
             {
                 // Assert
+                Assert.Equal(RepositoryOperationNames.Update, sourceRepository.LastOperation);
+
                 mockWindowServices.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
                 packageManager.Verify(p => p.UpdatePackage(projectManager.Object, packageA2, It.IsAny<IEnumerable<PackageOperation>>(), true, includePrerelease, provider), Times.Once());
 

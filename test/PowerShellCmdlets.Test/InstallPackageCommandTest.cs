@@ -14,7 +14,7 @@ using Xunit.Extensions;
 namespace NuGet.PowerShell.Commands.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
-
+    
     public class InstallPackageCommandTest
     {
         [Fact]
@@ -80,6 +80,33 @@ namespace NuGet.PowerShell.Commands.Test
             // Assert
             Assert.Equal("my-id", vsPackageManager.PackageId);
             Assert.Equal(new SemanticVersion("2.8"), vsPackageManager.Version);
+        }
+
+        [Fact]
+        public void InstallPackageCmdletSpecifiesInstallOperationDuringExecution()
+        {
+            // Arrange
+            var repo = new MockPackageRepository();
+            var vsPackageManager = new MockVsPackageManager(repo);
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
+
+            var cmdlet = new InstallPackageCommand(
+                TestUtils.GetSolutionManager(),
+                packageManagerFactory.Object,
+                null,
+                new Mock<IVsPackageSourceProvider>().Object,
+                null,
+                null,
+                new Mock<IVsCommonOperations>().Object);
+            cmdlet.Id = "my-id";
+            cmdlet.Version = new SemanticVersion("2.8");
+
+            // Act
+            cmdlet.Execute();
+
+            // Assert
+            Assert.Equal(RepositoryOperationNames.Install, repo.LastOperation);
         }
 
         [Fact]

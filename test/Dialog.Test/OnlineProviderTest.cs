@@ -220,6 +220,8 @@ namespace NuGet.Dialog.Test
             provider.ExecuteCompletedCallback = delegate
             {
                 // Assert
+                Assert.Equal(RepositoryOperationNames.Install, sourceRepository.LastOperation);
+
                 mockPackageManager.Verify(p => p.InstallPackage(projectManager.Object, packageB, It.IsAny<IEnumerable<PackageOperation>>(), false, includePrerelease, provider), Times.Once());
 
                 manualEvent.Set();

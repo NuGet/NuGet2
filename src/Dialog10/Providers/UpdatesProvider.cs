@@ -60,6 +60,14 @@ namespace NuGet.Dialog.Providers
             }
         }
 
+        public override string OperationName
+        {
+            get
+            {
+                return RepositoryOperationNames.Update;
+            }
+        }
+
         protected override PackagesTreeNodeBase CreateTreeNodeForPackageSource(PackageSource source, IPackageRepository sourceRepository)
         {
             return new UpdatesTreeNode(this, source.Name, RootNode, LocalRepository, sourceRepository);

@@ -28,6 +28,24 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         }
 
         [Fact]
+        public void InstallCommandUsesInstallOperationIfArgumentIsNotPackageReferenceFile()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var mockRepo = new MockPackageRepository() { PackageUtility.CreatePackage("Foo") };
+            var mockFactory = new Mock<IPackageRepositoryFactory>();
+            mockFactory.Setup(r => r.CreateRepository(It.IsAny<string>())).Returns(mockRepo);
+            var installCommand = new TestInstallCommand(mockFactory.Object, GetSourceProvider(), fileSystem);
+            installCommand.Arguments.Add("Foo");
+
+            // Act
+            installCommand.ExecuteCommand();
+
+            // Assert
+            Assert.Equal(RepositoryOperationNames.Install, mockRepo.LastOperation);
+        }
+
+        [Fact]
         public void InstallCommandForPackageReferenceFileDoesNotThrowIfThereIsNoPackageToInstall()
         {
             // Arrange
@@ -175,6 +193,28 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             Assert.Equal(@"x:\test\packages.config", fileSystem.Paths.ElementAt(0).Key);
             Assert.Contains(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.Keys);
             Assert.Contains(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.Keys);
+        }
+
+        [Fact]
+        public void InstallCommandUsesRestoreOperationIfArgumentIsPackageReferenceFile()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"x:\test\packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""Foo"" version=""1.0"" />
+</packages>");
+            var mockRepo = new MockPackageRepository() { PackageUtility.CreatePackage("Foo") };
+            var mockFactory = new Mock<IPackageRepositoryFactory>();
+            mockFactory.Setup(r => r.CreateRepository(It.IsAny<string>())).Returns(mockRepo);
+            var installCommand = new TestInstallCommand(mockFactory.Object, GetSourceProvider(), fileSystem);
+            installCommand.Arguments.Add(@"x:\test\packages.config");
+
+            // Act
+            installCommand.ExecuteCommand();
+
+            // Assert
+            Assert.Equal(RepositoryOperationNames.Restore, mockRepo.LastOperation);
         }
 
         [Fact]
@@ -385,12 +425,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 </packages>");
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
             var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
+            var repository = new MockPackageRepository();
             packageManager.Setup(p => p.InstallPackage("Foo", new SemanticVersion("1.0.0"), true, true)).Verifiable();
             packageManager.Setup(p => p.InstallPackage("Qux", new SemanticVersion("2.3.56-beta"), true, true)).Verifiable();
             packageManager.SetupGet(p => p.PathResolver).Returns(pathResolver);
             packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
             packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
-            var repository = new MockPackageRepository();
+            packageManager.SetupGet(p => p.SourceRepository).Returns(repository);
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
@@ -417,11 +458,12 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             fileSystem.AddFile("Foo.1.8.nupkg");
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
             var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
+            var repository = new MockPackageRepository();
             packageManager.Setup(p => p.InstallPackage("Qux", new SemanticVersion("2.3.56-beta"), true, true)).Verifiable();
             packageManager.SetupGet(p => p.PathResolver).Returns(pathResolver);
             packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
             packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
-            var repository = new MockPackageRepository();
+            packageManager.SetupGet(p => p.SourceRepository).Returns(repository);
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
@@ -452,12 +494,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             fileSystem.AddFile("Foo.1.8.nupkg");
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
             var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
+            var repository = new MockPackageRepository();
             packageManager.Setup(p => p.InstallPackage("Efg", new SemanticVersion("2.0.0"), true, true)).Throws(new Exception("Efg exception!!"));
             packageManager.Setup(p => p.InstallPackage("Pqr", new SemanticVersion("3.0.0"), true, true)).Throws(new Exception("No package restore consent for you!"));
             packageManager.SetupGet(p => p.PathResolver).Returns(pathResolver);
             packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
             packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
-            var repository = new MockPackageRepository();
+            packageManager.SetupGet(p => p.SourceRepository).Returns(repository);
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);

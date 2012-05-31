@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NuGet
 {
-    public class AggregateRepository : PackageRepositoryBase, IPackageLookup, IDependencyResolver, IServiceBasedRepository, ICloneableRepository
+    public class AggregateRepository : PackageRepositoryBase, IPackageLookup, IDependencyResolver, IServiceBasedRepository, ICloneableRepository, IOperationAwareRepository
     {
         /// <summary>
         /// When the ignore flag is set up, this collection keeps track of failing repositories so that the AggregateRepository 
@@ -268,6 +268,12 @@ namespace NuGet
             }
 
             return allPackages.CollapseById();
+        }
+
+        public IDisposable StartOperation(string operation)
+        {
+            return DisposableAction.All(
+                Repositories.Select(r => r.StartOperation(operation)));
         }
     }
 }

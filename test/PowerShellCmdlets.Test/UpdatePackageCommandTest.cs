@@ -79,6 +79,29 @@ namespace NuGet.PowerShell.Commands.Test
         }
 
         [Fact]
+        public void UpdatePackageCmdletSpecifiesUpdateOperationDuringExecution()
+        {
+            // Arrange
+            var mockPackageRepository = new MockPackageRepository();
+            var vsPackageManager = new MockVsPackageManager(mockPackageRepository);
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
+            var sourceProvider = GetPackageSourceProvider(new PackageSource("somesource"));
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(c => c.CreateRepository(It.Is<string>(s => s == "somesource"))).Returns(mockPackageRepository);
+            var cmdlet = new UpdatePackageCommand(TestUtils.GetSolutionManagerWithProjects("foo"), packageManagerFactory.Object, repositoryFactory.Object, sourceProvider, null, null, new Mock<IVsCommonOperations>().Object);
+            cmdlet.Id = "my-id";
+            cmdlet.Version = new SemanticVersion("2.8");
+            cmdlet.ProjectName = "foo";
+
+            // Act
+            cmdlet.Execute();
+
+            // Assert
+            Assert.Equal(RepositoryOperationNames.Update, mockPackageRepository.LastOperation);
+        }
+
+        [Fact]
         public void UpdatePackageCmdletPassesIgnoreDependencySwitchCorrectly()
         {
             // Arrange

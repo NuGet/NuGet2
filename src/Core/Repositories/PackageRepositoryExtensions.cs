@@ -10,6 +10,16 @@ namespace NuGet
 {
     public static class PackageRepositoryExtensions
     {
+        public static IDisposable StartOperation(this IPackageRepository self, string operation)
+        {
+            IOperationAwareRepository repo = self as IOperationAwareRepository;
+            if (repo != null)
+            {
+                return repo.StartOperation(operation);
+            }
+            return DisposableAction.NoOp;
+        }
+
         public static bool Exists(this IPackageRepository repository, IPackageMetadata package)
         {
             return repository.Exists(package.Id, package.Version);

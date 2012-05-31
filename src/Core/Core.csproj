@@ -85,9 +85,11 @@
     <Compile Include="Http\MultipartWebRequest.cs" />
     <Compile Include="Http\NullCredentialProvider.cs" />
     <Compile Include="Http\ProxyCache.cs" />
+    <Compile Include="Http\RepositoryOperationNames.cs" />
     <Compile Include="Http\RequestHelper.cs" />
     <Compile Include="Http\STSAuthHelper.cs" />
     <Compile Include="IEnvironmentVariableReader.cs" />
+    <Compile Include="Operation.cs" />
     <Compile Include="PackageRestoreConsent.cs" />
     <Compile Include="Packages\LocalPackage.cs" />
     <Compile Include="Packages\UnzippedPackage.cs" />
@@ -96,6 +98,7 @@
     <Compile Include="Repositories\ICloneableRepository.cs" />
     <Compile Include="Repositories\ICultureAwareRepository.cs" />
     <Compile Include="Repositories\IPackageReferenceRepository.cs" />
+    <Compile Include="Repositories\IOperationAwareRepository.cs" />
     <Compile Include="Repositories\IServiceBasedRepository.cs" />
     <Compile Include="Repositories\PackageName.cs" />
     <Compile Include="Repositories\UnzippedPackageRepository.cs" />
@@ -142,6 +145,7 @@
     <Compile Include="Utility\CredentialResult.cs" />
     <Compile Include="Utility\CredentialState.cs" />
     <Compile Include="Utility\CustomAttributeProviderExtensions.cs" />
+    <Compile Include="Utility\DisposableAction.cs" />
     <Compile Include="Utility\ExceptionUtility.cs" />
     <Compile Include="Http\HttpUtility.cs" />
     <Compile Include="Http\ICredentialProvider.cs" />
