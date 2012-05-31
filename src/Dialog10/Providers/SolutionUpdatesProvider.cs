@@ -56,7 +56,7 @@ namespace NuGet.Dialog.Providers
                     {
                         var localRepository = _activePackageManager.GetProjectManager(project).LocalRepository;
 
-                        // for the Updates solution dialog, we only enable a project if it has a old version of 
+                        // for the Updates solution dialog, we only enable a project if it has an old version of 
                         // the package installed.
                         return localRepository.Exists(item.Id) &&
                                !localRepository.Exists(item.Id, item.PackageIdentity.Version);
@@ -82,7 +82,9 @@ namespace NuGet.Dialog.Providers
             }
 
             IList<PackageOperation> operations;
-            bool acceptLicense = CheckPSScriptAndShowLicenseAgreement(item, _activePackageManager, out operations);
+            bool acceptLicense = isProjectLevel ? CheckPSScriptAndShowLicenseAgreement(item, selectedProjectsList, _activePackageManager, out operations)
+                                                : CheckPSScriptAndShowLicenseAgreement(item, _activePackageManager, out operations);
+                        
             if (!acceptLicense)
             {
                 return false;
@@ -119,6 +121,35 @@ namespace NuGet.Dialog.Providers
             }
 
             return true;
+        }
+
+        protected bool CheckPSScriptAndShowLicenseAgreement(
+            PackageItem item, IList<Project> projects, IVsPackageManager packageManager, out IList<PackageOperation> operations)
+        {
+            ShowProgressWindow();
+
+            // combine the operations of all selected project
+            var allOperations = new List<PackageOperation>();
+            foreach (Project project in projects)
+            {
+                IProjectManager projectManager = packageManager.GetProjectManager(project);
+
+                IList<PackageOperation> projectOperations;
+                CheckInstallPSScripts(
+                    item.PackageIdentity,
+                    projectManager.LocalRepository,
+                    packageManager.SourceRepository,
+                    project.GetTargetFrameworkName(),
+                    IncludePrerelease,
+                    out projectOperations);
+
+                allOperations.AddRange(projectOperations);
+            }
+
+            // reduce the operations before checking for license agreements
+            operations = allOperations.Reduce();
+
+            return ShowLicenseAgreement(packageManager, operations);
         }
 
         public void OnBeforeAddPackageReference(Project project)

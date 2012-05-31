@@ -603,9 +603,26 @@ namespace NuGet.Dialog.Providers
             bool includePrerelease,
             out IList<PackageOperation> operations)
         {
+            CheckInstallPSScripts(
+                package,
+                LocalRepository,
+                sourceRepository,
+                targetFramework,
+                includePrerelease,
+                out operations);
+        }
+
+        protected void CheckInstallPSScripts(
+            IPackage package,
+            IPackageRepository localRepository,
+            IPackageRepository sourceRepository,
+            FrameworkName targetFramework,
+            bool includePrerelease,
+            out IList<PackageOperation> operations)
+        {
             // Review: Is there any way the user could get into a position that we would need to allow pre release versions here?
             var walker = new InstallWalker(
-                LocalRepository,
+                localRepository,
                 sourceRepository,
                 targetFramework,
                 this,
