@@ -466,10 +466,12 @@ namespace NuGet
                 if (filePath.Length > folderPrefix.Length &&
                     filePath.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase))
                 {
+                    string frameworkPart = filePath.Substring(folderPrefix.Length);
+
                     try
                     {
                         return VersionUtility.ParseFrameworkFolderName(
-                            filePath.Substring(folderPrefix.Length),
+                            frameworkPart,
                             strictParsing: knownFolders[i] != Constants.ContentDirectory,
                             effectivePath: out effectivePath);
                     }
@@ -477,6 +479,8 @@ namespace NuGet
                     {
                         // if the parsing fails, we treat it as if this file
                         // doesn't have target framework.
+                        effectivePath = frameworkPart;
+                        return null;
                     }
                 }
             }

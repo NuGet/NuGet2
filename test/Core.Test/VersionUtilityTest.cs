@@ -127,9 +127,9 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData("content\\-\\wow\\cool.txt")]
-        [InlineData("content\\-world\\x.dll")]
-        public void ParseFrameworkNameFromFilePathDoesNotThrowIfPathHasADash(string path)
+        [InlineData("content\\-\\wow\\cool.txt", "-\\wow\\cool.txt")]
+        [InlineData("content\\-world\\x.dll", "-world\\x.dll")]
+        public void ParseFrameworkNameFromFilePathDoesNotThrowIfPathHasADash(string path, string expectedPath)
         {
             // Act
             string effectivePath;
@@ -137,7 +137,7 @@ namespace NuGet.Test
             
             // Assert
             Assert.Null(framework);
-            Assert.Equal(path, effectivePath);
+            Assert.Equal(expectedPath, effectivePath);
         }
 
         [Fact]
