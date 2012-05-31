@@ -438,7 +438,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             packageManager.Verify();
         }
 
-        [Fact]
+        [Fact(Skip = "Bug in Moq when running in multi-threaded paths.")]
         public void InstallCommandFromConfigListsAllMessagesInAggregateException()
         {
             // Arrange
