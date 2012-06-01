@@ -312,23 +312,26 @@ namespace NuGet
                                                   where p.Id != package.Id
                                                   select p;
 
+
+
             // Get other references
             var otherAssemblyReferences = from p in otherPackages
-                                          let assemblyReferences = Project.GetCompatibleItemsCore(p.AssemblyReferences)
+                                          let assemblyReferences = GetCompatibleItemsForPackage(p.Id, p.AssemblyReferences)
                                           from assemblyReference in assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>() // This can happen if package installed left the project in a bad state
                                           select assemblyReference;
 
             // Get content files from other packages
             // Exclude transform files since they are treated specially
             var otherContentFiles = from p in otherPackages
-                                    from file in Project.GetCompatibleItemsCore(p.GetContentFiles())
+                                    from file in GetCompatibleItemsForPackage(p.Id, p.GetContentFiles())
                                     where !_fileTransformers.ContainsKey(Path.GetExtension(file.Path))
                                     select file;
 
             // Get the files and references for this package, that aren't in use by any other packages so we don't have to do reference counting
-            var assemblyReferencesToDelete = Project.GetCompatibleItemsCore(package.AssemblyReferences).Except(otherAssemblyReferences, PackageFileComparer.Default);
-            var contentFilesToDelete = Project.GetCompatibleItemsCore(package.GetContentFiles())
-                                              .Except(otherContentFiles, PackageFileComparer.Default);
+            var assemblyReferencesToDelete = GetCompatibleItemsForPackage(package.Id, package.AssemblyReferences)
+                                             .Except(otherAssemblyReferences, PackageFileComparer.Default);
+            var contentFilesToDelete = GetCompatibleItemsForPackage(package.Id, package.GetContentFiles())
+                                       .Except(otherContentFiles, PackageFileComparer.Default);
 
             // Delete the content files
             Project.DeleteFiles(contentFilesToDelete, otherPackages, _fileTransformers);
@@ -465,6 +468,22 @@ namespace NuGet
             }
 
             return Project.TargetFramework;
+        }
+
+        private IEnumerable<T> GetCompatibleItemsForPackage<T>(string packageId, IEnumerable<T> items) where T : IFrameworkTargetable
+        {
+            FrameworkName packageFramework = GetPackageTargetFramework(packageId);
+            if (packageFramework == null)
+            {
+                return items;
+            }
+
+            IEnumerable<T> compatibleItems;
+            if (VersionUtility.TryGetCompatibleItems(packageFramework, items, out compatibleItems))
+            {
+                return compatibleItems;
+            }
+            return Enumerable.Empty<T>();
         }
 
         private PackageOperationEventArgs CreateOperation(IPackage package)

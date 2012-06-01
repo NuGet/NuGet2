@@ -168,7 +168,7 @@ namespace NuGet
         /// <summary>
         /// Calculates the canonical list of operations.
         /// </summary>
-        internal static IList<PackageOperation> Reduce(this IEnumerable<PackageOperation> operations)
+        public static IList<PackageOperation> Reduce(this IEnumerable<PackageOperation> operations)
         {
             // Convert the list of operations to a dictionary from (Action, Id, Version) -> [Operations]
             // We keep track of the index so that we preserve the ordering of the operations

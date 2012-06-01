@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
+using System.Runtime.Versioning;
 using EnvDTE;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
@@ -178,7 +179,7 @@ namespace NuGet.PowerShell.Commands
         private void OnPackageInstalled(object sender, PackageOperationEventArgs e)
         {
             AddToolsFolderToEnvironmentPath(e.InstallPath);
-            ExecuteScript(e.InstallPath, PowerShellScripts.Init, e.Package, project: null);
+            ExecuteScript(e.InstallPath, PowerShellScripts.Init, e.Package, targetFramework: null, project: null);
             PrepareOpenReadMeFile(e);
         }
 
@@ -225,7 +226,7 @@ namespace NuGet.PowerShell.Commands
                 throw new ArgumentException(Resources.Cmdlet_InvalidProjectManagerInstance, "sender");
             }
 
-            ExecuteScript(e.InstallPath, PowerShellScripts.Install, e.Package, project);
+            ExecuteScript(e.InstallPath, PowerShellScripts.Install, e.Package, project.GetTargetFrameworkName(), project);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -241,7 +242,12 @@ namespace NuGet.PowerShell.Commands
 
             try
             {
-                ExecuteScript(e.InstallPath, PowerShellScripts.Uninstall, e.Package, project);
+                ExecuteScript(
+                    e.InstallPath, 
+                    PowerShellScripts.Uninstall, 
+                    e.Package, 
+                    projectManager.GetTargetFrameworkForPackage(e.Package.Id), 
+                    project);
             }
             catch (Exception ex)
             {
@@ -253,10 +259,11 @@ namespace NuGet.PowerShell.Commands
             string rootPath, 
             string scriptFileName, 
             IPackage package, 
+            FrameworkName targetFramework,
             Project project)
         {
             string scriptPath, fullPath;
-            if (package.FindCompatibleToolFiles(scriptFileName, project.GetTargetFrameworkName(), out scriptPath))
+            if (package.FindCompatibleToolFiles(scriptFileName, targetFramework, out scriptPath))
             {
                 fullPath = Path.Combine(rootPath, scriptPath);
             }

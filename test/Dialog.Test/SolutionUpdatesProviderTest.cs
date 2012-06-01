@@ -200,7 +200,6 @@ namespace NuGet.Dialog.Test
             // Arrange
             var packageA_10 = PackageUtility.CreatePackage("A", "1.0", content: null, assemblyReferences: null, tools: new[] { "init.ps1" }, dependencies: null);
             var packageA_12 = PackageUtility.CreatePackage("A", "1.2", content: null, assemblyReferences: null, tools: new[] { "init.ps1" }, dependencies: null);
-            
 
             var sourceRepository = new MockPackageRepository();
             sourceRepository.AddPackage(packageA_12);
@@ -242,19 +241,30 @@ namespace NuGet.Dialog.Test
 
             var manualEvent = new ManualResetEventSlim(false);
 
+            Exception exception = null;
+
             provider.ExecuteCompletedCallback = delegate
             {
-                // Assert
-                mockPackageManager.Verify(p => p.UpdatePackage(
-                    new Project[0],
-                    packageA_12,
-                    new [] { new PackageOperation(packageA_10, PackageAction.Uninstall), new PackageOperation(packageA_12, PackageAction.Install) },
-                    true,
-                    false,
-                    provider,
-                    provider), Times.Once());
-
-                manualEvent.Set();
+                try
+                {
+                    // Assert
+                    mockPackageManager.Verify(p => p.UpdatePackage(
+                        new Project[0],
+                        packageA_12,
+                        new[] { new PackageOperation(packageA_10, PackageAction.Uninstall), new PackageOperation(packageA_12, PackageAction.Install) },
+                        true,
+                        false,
+                        provider,
+                        provider), Times.Once());
+                }
+                catch (Exception e)
+                {
+                    exception = e;
+                }
+                finally
+                {
+                    manualEvent.Set();
+                }
             };
 
             var extensionA_12 = new PackageItem(provider, packageA_12);
@@ -264,6 +274,8 @@ namespace NuGet.Dialog.Test
 
             // do not allow the method to return
             manualEvent.Wait();
+
+            Assert.Null(exception);
         }
 
         private static SolutionUpdatesProvider CreateSolutionUpdatesProvider(

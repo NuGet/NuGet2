@@ -38,7 +38,13 @@ namespace NuGet.VisualStudio
 
             EventHandler<PackageOperationEventArgs> uninstalledHandler = (sender, e) =>
             {
-                _scriptExecutor.Execute(e.InstallPath, PowerShellScripts.Uninstall, e.Package, project, NullLogger.Instance);
+                _scriptExecutor.Execute(
+                    e.InstallPath, 
+                    PowerShellScripts.Uninstall, 
+                    e.Package, 
+                    project, 
+                    projectManager.GetTargetFrameworkForPackage(packageId), 
+                    NullLogger.Instance);
             };
 
             try

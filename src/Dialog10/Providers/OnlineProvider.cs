@@ -157,8 +157,16 @@ namespace NuGet.Dialog.Providers
                 _project.GetTargetFrameworkName(),
                 IncludePrerelease, 
                 out operations);
+
+            return ShowLicenseAgreement(packageManager, operations);
+        }
+
+        protected bool ShowLicenseAgreement(IVsPackageManager packageManager, IEnumerable<PackageOperation> operations)
+        {
             var licensePackages = from o in operations
-                                  where o.Action == PackageAction.Install && o.Package.RequireLicenseAcceptance && !packageManager.LocalRepository.Exists(o.Package)
+                                  where o.Action == PackageAction.Install && 
+                                        o.Package.RequireLicenseAcceptance && 
+                                        !packageManager.LocalRepository.Exists(o.Package)
                                   select o.Package;
 
             // display license window if necessary

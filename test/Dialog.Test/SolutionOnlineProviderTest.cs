@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Versioning;
 using System.Threading;
 using EnvDTE;
 using Moq;
@@ -164,7 +165,7 @@ namespace NuGet.Dialog.Test
                 try
                 {
                     // Assert
-                    scriptExecutor.Verify(p => p.Execute("x:\\nuget", "init.ps1", packageB, null, It.IsAny<ILogger>()), Times.Once());
+                    scriptExecutor.Verify(p => p.Execute("x:\\nuget", "init.ps1", packageB, null, null, It.IsAny<ILogger>()), Times.Once());
                 }
                 catch (Exception exception)
                 {
@@ -267,7 +268,7 @@ namespace NuGet.Dialog.Test
                 try
                 {
                     // Assert
-                    scriptExecutor.Verify(p => p.Execute("x:\\nuget", "install.ps1", packageB, project1, It.IsAny<ILogger>()), Times.Once());
+                    scriptExecutor.Verify(p => p.Execute("x:\\nuget", "install.ps1", packageB, project1, It.IsAny<FrameworkName>(), It.IsAny<ILogger>()), Times.Once());
                 }
                 catch (Exception exception)
                 {

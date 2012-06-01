@@ -99,7 +99,6 @@ namespace NuGet.VisualStudio
             ILogger logger,
             IPackageOperationEventListener packageOperationEventListener)
         {
-
             if (package == null)
             {
                 throw new ArgumentNullException("package");
@@ -155,7 +154,11 @@ namespace NuGet.VisualStudio
 
             RunSolutionAction(() =>
             {
-                InstallPackage(package, ignoreDependencies, allowPrereleaseVersions);
+                InstallPackage(
+                    package, 
+                    projectManager != null ? projectManager.Project.TargetFramework : null, 
+                    ignoreDependencies, 
+                    allowPrereleaseVersions);
 
                 AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
 

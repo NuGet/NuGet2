@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
@@ -46,43 +47,15 @@ namespace NuGet.Dialog.Providers
             RootNode.Nodes.Add(allNode);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity"), System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design",
-            "CA1031:DoNotCatchGeneralExceptionTypes",
-            Justification = "We don't want one failed project to affect the other projects.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want one failed project to affect the other projects.")]
         protected override bool ExecuteCore(PackageItem item)
         {
             IPackage package = item.PackageIdentity;
 
-            bool? removeDepedencies = false;
-
             // treat solution-level packages specially
-            if (!PackageManager.IsProjectLevel(item.PackageIdentity))
+            if (!PackageManager.IsProjectLevel(package))
             {
-                removeDepedencies = AskRemoveDependencyAndCheckUninstallPSScript(package, checkDependents: true);
-                if (removeDepedencies == null)
-                {
-                    // user presses Cancel
-                    return false;
-                }
-
-                ShowProgressWindow();
-                try
-                {
-                    RegisterPackageOperationEvents(PackageManager, null);
-                    PackageManager.UninstallPackage(
-                        null,
-                        item.PackageIdentity.Id,
-                        item.PackageIdentity.Version,
-                        forceRemove: false,
-                        removeDependencies: (bool)removeDepedencies,
-                        logger: this);
-                }
-                finally
-                {
-                    UnregisterPackageOperationEvents(PackageManager, null);
-                }
-                return true;
+                return UninstallSolutionPackage(package);
             }
 
             // display the Manage dialog to allow user to pick projects to install/uninstall
@@ -122,20 +95,29 @@ namespace NuGet.Dialog.Providers
                 return false;
             }
 
-            if (hasInstallWork)
-            {
-                IList<PackageOperation> operations;
-                CheckInstallPSScripts(
-                    package, 
-                    PackageManager.SourceRepository,
-                    targetFramework: null,
-                    includePrerelease: true,
-                    operations: out operations);
-            }
-
+            var uninstallRepositories = new List<IPackageRepository>();
+            var uninstallFrameworks = new List<FrameworkName>();
+            var uninstallProjects = new List<Project>();
+            
+            bool? removeDepedencies = false;
             if (hasUninstallWork)
             {
-                removeDepedencies = AskRemoveDependencyAndCheckUninstallPSScript(package, checkDependents: false);
+                // Starting in 2.0, each project can have a different set of dependencies (because of different target frameworks).
+                // To keep the UI simple, we aggregate all the dependencies from all uninstall projects
+                // and ask if user wants to uninstall them all.
+                
+                foreach (Project project in allProjects)
+                {
+                    // check if user wants to uninstall the package in this project
+                    if (!selectedProjectsSet.Contains(project.UniqueName))
+                    {
+                        uninstallProjects.Add(project);
+                        uninstallRepositories.Add(PackageManager.GetProjectManager(project).LocalRepository);
+                        uninstallFrameworks.Add(project.GetTargetFrameworkName());
+                    }
+                }
+
+                removeDepedencies = AskRemoveDependencyAndCheckUninstallPSScript(package, uninstallRepositories, uninstallFrameworks);
                 if (removeDepedencies == null)
                 {
                     // user cancels the operation.
@@ -150,38 +132,77 @@ namespace NuGet.Dialog.Providers
             // to avoid the package file being deleted before an install.
             foreach (Project project in allProjects)
             {
-                try
+                if (selectedProjectsSet.Contains(project.UniqueName))
                 {
-                    if (selectedProjectsSet.Contains(project.UniqueName))
+                    try
                     {
+                        IList<PackageOperation> operations;
+                        CheckInstallPSScripts(
+                            package,
+                            PackageManager.GetProjectManager(project).LocalRepository,
+                            PackageManager.SourceRepository,
+                            targetFramework: project.GetTargetFrameworkName(),
+                            includePrerelease: true,
+                            operations: out operations);
+
                         // if the project is checked, install package into it  
                         InstallPackageToProject(project, item, includePrerelease: true);
                     }
-                }
-                catch (Exception ex)
-                {
-                    AddFailedProject(project, ex);
+                    catch (Exception ex)
+                    {
+                        AddFailedProject(project, ex);
+                    }
                 }
             }
 
             // now uninstall the packages that are unchecked.            
-            foreach (Project project in allProjects)
+            for (int i=0; i < uninstallProjects.Count; ++i)
             {
                 try
                 {
-                    if (!selectedProjectsSet.Contains(project.UniqueName))
-                    {
-                        // if the project is unchecked, uninstall package from it
-                        UninstallPackageFromProject(project, item, (bool)removeDepedencies);
-                    }
+                    CheckDependentPackages(package, uninstallRepositories[i], uninstallFrameworks[i]); 
+                    UninstallPackageFromProject(uninstallProjects[i], item, (bool)removeDepedencies);
                 }
                 catch (Exception ex)
                 {
-                    AddFailedProject(project, ex);
+                    AddFailedProject(uninstallProjects[i], ex);
                 }
             }
 
             HideProgressWindow();
+            return true;
+        }
+
+        private bool UninstallSolutionPackage(IPackage package)
+        {
+            CheckDependentPackages(package, LocalRepository, targetFramework: null);
+            bool? result = AskRemoveDependencyAndCheckUninstallPSScript(
+                package,
+                new[] { LocalRepository },
+                new FrameworkName[] { null });
+
+            if (result == null)
+            {
+                // user presses Cancel
+                return false;
+            }
+
+            ShowProgressWindow();
+            try
+            {
+                RegisterPackageOperationEvents(PackageManager, null);
+                PackageManager.UninstallPackage(
+                    null,
+                    package.Id,
+                    package.Version,
+                    forceRemove: false,
+                    removeDependencies: (bool)result,
+                    logger: this);
+            }
+            finally
+            {
+                UnregisterPackageOperationEvents(PackageManager, null);
+            }
             return true;
         }
 

@@ -317,7 +317,6 @@ namespace NuGet
                 return false;
             }
 
-
             // If there is only one piece, we use it for both min and max
             string minVersionString = parts[0];
             string maxVersionString = (parts.Length == 2) ? parts[1] : parts[0];
@@ -467,10 +466,22 @@ namespace NuGet
                 if (filePath.Length > folderPrefix.Length &&
                     filePath.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    return VersionUtility.ParseFrameworkFolderName(
-                        filePath.Substring(folderPrefix.Length),
-                        strictParsing: knownFolders[i] != Constants.ContentDirectory,
-                        effectivePath: out effectivePath);
+                    string frameworkPart = filePath.Substring(folderPrefix.Length);
+
+                    try
+                    {
+                        return VersionUtility.ParseFrameworkFolderName(
+                            frameworkPart,
+                            strictParsing: knownFolders[i] != Constants.ContentDirectory,
+                            effectivePath: out effectivePath);
+                    }
+                    catch (ArgumentException)
+                    {
+                        // if the parsing fails, we treat it as if this file
+                        // doesn't have target framework.
+                        effectivePath = frameworkPart;
+                        return null;
+                    }
                 }
             }
 

@@ -9,123 +9,136 @@ namespace NuGet.Test
 {
     public class VersionUtilityTest
     {
-        //[Theory]
-        //[InlineData("net40\\foo.dll")]
-        //[InlineData("sl45\\sub\\sub2\\foo.dll")]
-        //[InlineData("netcf40\\bar.dll")]
-        //public void ParseFrameworkFolderNameStrictRejectPathWithoutBrackets(string path)
-        //{
-        //    // Act
-        //    string effectivePath;
-        //    var frameworkName = VersionUtility.ParseFrameworkFolderName(
-        //        path, strictParsing: true, effectivePath: out effectivePath);
+        [Theory]
+        [InlineData("boo\\foo.dll", "foo.dll")]
+        [InlineData("far\\sub\\sub2\\foo.dll", "sub\\sub2\\foo.dll")]
+        [InlineData("netum\\who\\bar.dll", "who\\bar.dll")]
+        public void ParseFrameworkFolderNameStrictReturnsUnsupportedFxIfParsingFails(string path, string expectedEffectivePath)
+        {
+            // Act
+            string effectivePath;
+            var frameworkName = VersionUtility.ParseFrameworkFolderName(
+                path, strictParsing: true, effectivePath: out effectivePath);
 
-        //    // Assert
-        //    Assert.Null(frameworkName);
-        //    Assert.Equal(path, effectivePath);
-        //}
+            // Assert
+            Assert.Equal(VersionUtility.UnsupportedFrameworkName, frameworkName);
+            Assert.Equal(expectedEffectivePath, effectivePath);
+        }
 
-        //[Theory]
-        //[InlineData("lib\\[net40]\\foo.dll", "4.0", ".NETFramework", "foo.dll")]
-        //[InlineData("lib\\net40\\sub\\foo.dll", "4.0", ".NETFramework", "sub\\foo.dll")]
-        //[InlineData("lib\\foo.dll", null, null, "foo.dll")]
-        //[InlineData("content\\[sl35]\\javascript\\jQuery.js", "3.5", "Silverlight", "javascript\\jQuery.js")]
-        //[InlineData("content\\[netmf]\\CSS\\jQuery.css", "0.0", ".NETMicroFramework", "CSS\\jQuery.css")]
-        //[InlineData("content\\netmf\\CSS\\jQuery.css", null, null, "netmf\\CSS\\jQuery.css")]
-        //[InlineData("tools\\[winrt45]\\install.ps1", "4.5", ".NETCore", "install.ps1")]
-        //[InlineData("tools\\[winrt10]\\uninstall.ps1", "1.0", ".NETCore", "uninstall.ps1")]
-        //[InlineData("tools\\winrt10\\uninstall.ps1", null, null, "winrt10\\uninstall.ps1")]
-        //[InlineData("tools\\init.ps1", null, null, "init.ps1")]
-        //[InlineData("random\\foo.txt", null, null, "random\\foo.txt")]
-        //public void TestParseFrameworkFolderNameFromFilePath(
-        //    string filePath, string expectedVersion, string expectedIdentifier, string expectedEffectivePath) 
-        //{
-        //    // Act
-        //    string effectivePath;
-        //    var frameworkName = VersionUtility.ParseFrameworkNameFromFilePath(filePath, out effectivePath);
+        [Theory]
+        [InlineData("lib\\net40\\foo.dll", "4.0", ".NETFramework", "foo.dll")]
+        [InlineData("lib\\net40\\sub\\foo.dll", "4.0", ".NETFramework", "sub\\foo.dll")]
+        [InlineData("lib\\foo.dll", null, null, "foo.dll")]
+        [InlineData("content\\sl35\\javascript\\jQuery.js", "3.5", "Silverlight", "javascript\\jQuery.js")]
+        [InlineData("content\\netmf\\CSS\\jQuery.css", "0.0", ".NETMicroFramework", "CSS\\jQuery.css")]
+        [InlineData("tools\\winrt45\\install.ps1", "4.5", ".NETCore", "install.ps1")]
+        [InlineData("tools\\winrt10\\uninstall.ps1", "1.0", ".NETCore", "uninstall.ps1")]
+        [InlineData("tools\\winkt10\\uninstall.ps1", "0.0", "Unsupported", "uninstall.ps1")]
+        [InlineData("tools\\init.ps1", null, null, "init.ps1")]
+        [InlineData("random\\foo.txt", null, null, "random\\foo.txt")]
+        public void TestParseFrameworkFolderNameFromFilePath(
+            string filePath, string expectedVersion, string expectedIdentifier, string expectedEffectivePath)
+        {
+            // Act
+            string effectivePath;
+            var frameworkName = VersionUtility.ParseFrameworkNameFromFilePath(filePath, out effectivePath);
 
-        //    // Assert
-        //    if (expectedVersion == null)
-        //    {
-        //        Assert.Null(frameworkName);
-        //    }
-        //    else
-        //    {
-        //        Assert.NotNull(frameworkName);
-        //        Assert.Equal(expectedIdentifier, frameworkName.Identifier);
-        //        Assert.Equal(expectedVersion, frameworkName.Version.ToString());
-        //    }
+            // Assert
+            if (expectedVersion == null)
+            {
+                Assert.Null(frameworkName);
+            }
+            else
+            {
+                Assert.NotNull(frameworkName);
+                Assert.Equal(expectedIdentifier, frameworkName.Identifier);
+                Assert.Equal(expectedVersion, frameworkName.Version.ToString());
+            }
 
-        //    Assert.Equal(expectedEffectivePath, effectivePath);
-        //}
+            Assert.Equal(expectedEffectivePath, effectivePath);
+        }
 
-        //[Theory]
-        //[InlineData("[net40]\\foo.dll", "4.0", ".NETFramework", "foo.dll")]
-        //[InlineData("net40\\sub\\foo.dll", null, null, "net40\\sub\\foo.dll")]
-        //[InlineData("foo.dll", null, null, "foo.dll")]
-        //[InlineData("[sl35]\\javascript\\jQuery.js", "3.5", "Silverlight", "javascript\\jQuery.js")]
-        //[InlineData("[netmf]\\CSS\\jQuery.css", "0.0", ".NETMicroFramework", "CSS\\jQuery.css")]
-        //[InlineData("CSS\\jQuery.css", null, null, "CSS\\jQuery.css")]
-        //[InlineData("[winrt45]\\install.ps1", "4.5", ".NETCore", "install.ps1")]
-        //[InlineData("[winrt10]\\uninstall.ps1", "1.0", ".NETCore", "uninstall.ps1")]
-        //[InlineData("winrt10\\uninstall.ps1", null, null, "winrt10\\uninstall.ps1")]
-        //[InlineData("init.ps1", null, null, "init.ps1")]
-        //[InlineData("random\\foo.txt", null, null, "random\\foo.txt")]
-        //public void TestParseFrameworkFolderNameWithStrickParsing(
-        //    string filePath, string expectedVersion, string expectedIdentifier, string expectedEffectivePath)
-        //{
-        //    // Act
-        //    string effectivePath;
-        //    var frameworkName = VersionUtility.ParseFrameworkFolderName(filePath, strictParsing: true, effectivePath: out effectivePath);
+        [Theory]
+        [InlineData("net40\\foo.dll", "4.0", ".NETFramework", "foo.dll")]
+        [InlineData("netmu40\\sub\\foo.dll", "0.0", "Unsupported", "sub\\foo.dll")]
+        [InlineData("foo.dll", null, null, "foo.dll")]
+        [InlineData("sl35\\javascript\\jQuery.js", "3.5", "Silverlight", "javascript\\jQuery.js")]
+        [InlineData("netmf\\CSS\\jQuery.css", "0.0", ".NETMicroFramework", "CSS\\jQuery.css")]
+        [InlineData("CSS\\jQuery.css", "0.0", "Unsupported", "jQuery.css")]
+        [InlineData("winrt45\\install.ps1", "4.5", ".NETCore", "install.ps1")]
+        [InlineData("winrt10\\uninstall.ps1", "1.0", ".NETCore", "uninstall.ps1")]
+        [InlineData("winkt10\\uninstall.ps1", "0.0", "Unsupported", "uninstall.ps1")]
+        [InlineData("init.ps1", null, null, "init.ps1")]
+        [InlineData("random\\foo.txt", "0.0", "Unsupported", "foo.txt")]
+        public void TestParseFrameworkFolderNameWithStrickParsing(
+            string filePath, string expectedVersion, string expectedIdentifier, string expectedEffectivePath)
+        {
+            // Act
+            string effectivePath;
+            var frameworkName = VersionUtility.ParseFrameworkFolderName(filePath, strictParsing: true, effectivePath: out effectivePath);
 
-        //    // Assert
-        //    if (expectedVersion == null)
-        //    {
-        //        Assert.Null(frameworkName);
-        //    }
-        //    else
-        //    {
-        //        Assert.NotNull(frameworkName);
-        //        Assert.Equal(expectedIdentifier, frameworkName.Identifier);
-        //        Assert.Equal(expectedVersion, frameworkName.Version.ToString());
-        //    }
+            // Assert
+            if (expectedVersion == null)
+            {
+                Assert.Null(frameworkName);
+            }
+            else
+            {
+                Assert.NotNull(frameworkName);
+                Assert.Equal(expectedIdentifier, frameworkName.Identifier);
+                Assert.Equal(expectedVersion, frameworkName.Version.ToString());
+            }
 
-        //    Assert.Equal(expectedEffectivePath, effectivePath);
-        //}
+            Assert.Equal(expectedEffectivePath, effectivePath);
+        }
 
-        //[Theory]
-        //[InlineData("[net40]\\foo.dll", "4.0", ".NETFramework", "foo.dll")]
-        //[InlineData("net40\\sub\\foo.dll", "4.0", ".NETFramework", "sub\\foo.dll")]
-        //[InlineData("foo.dll", null, null, "foo.dll")]
-        //[InlineData("[sl35]\\javascript\\jQuery.js", "3.5", "Silverlight", "javascript\\jQuery.js")]
-        //[InlineData("[netmf]\\CSS\\jQuery.css", "0.0", ".NETMicroFramework", "CSS\\jQuery.css")]
-        //[InlineData("netmf\\CSS\\jQuery.css", "0.0", ".NETMicroFramework", "CSS\\jQuery.css")]
-        //[InlineData("[winrt45]\\install.ps1", "4.5", ".NETCore", "install.ps1")]
-        //[InlineData("[winrt10]\\uninstall.ps1", "1.0", ".NETCore", "uninstall.ps1")]
-        //[InlineData("winrt10\\uninstall.ps1", "1.0", ".NETCore", "uninstall.ps1")]
-        //[InlineData("init.ps1", null, null, "init.ps1")]
-        //[InlineData("random\\foo.txt", "0.0", "Unsupported", "foo.txt")]
-        //public void TestParseFrameworkFolderNameWithNonStrickParsing(
-        //    string filePath, string expectedVersion, string expectedIdentifier, string expectedEffectivePath)
-        //{
-        //    // Act
-        //    string effectivePath;
-        //    var frameworkName = VersionUtility.ParseFrameworkFolderName(filePath, strictParsing: false, effectivePath: out effectivePath);
+        [Theory]
+        [InlineData("net40\\foo.dll", "4.0", ".NETFramework", "foo.dll")]
+        [InlineData("net40\\sub\\foo.dll", "4.0", ".NETFramework", "sub\\foo.dll")]
+        [InlineData("foo.dll", null, null, "foo.dll")]
+        [InlineData("sl35\\javascript\\jQuery.js", "3.5", "Silverlight", "javascript\\jQuery.js")]
+        [InlineData("netmf\\CSS\\jQuery.css", "0.0", ".NETMicroFramework", "CSS\\jQuery.css")]
+        [InlineData("netmf\\CSS\\jQuery.css", "0.0", ".NETMicroFramework", "CSS\\jQuery.css")]
+        [InlineData("winrt45\\install.ps1", "4.5", ".NETCore", "install.ps1")]
+        [InlineData("winrt10\\uninstall.ps1", "1.0", ".NETCore", "uninstall.ps1")]
+        [InlineData("winrt10\\uninstall.ps1", "1.0", ".NETCore", "uninstall.ps1")]
+        [InlineData("init.ps1", null, null, "init.ps1")]
+        [InlineData("random\\foo.txt", null, null, "random\\foo.txt")]
+        public void TestParseFrameworkFolderNameWithNonStrickParsing(
+            string filePath, string expectedVersion, string expectedIdentifier, string expectedEffectivePath)
+        {
+            // Act
+            string effectivePath;
+            var frameworkName = VersionUtility.ParseFrameworkFolderName(filePath, strictParsing: false, effectivePath: out effectivePath);
 
-        //    // Assert
-        //    if (expectedVersion == null)
-        //    {
-        //        Assert.Null(frameworkName);
-        //    }
-        //    else
-        //    {
-        //        Assert.NotNull(frameworkName);
-        //        Assert.Equal(expectedIdentifier, frameworkName.Identifier);
-        //        Assert.Equal(expectedVersion, frameworkName.Version.ToString());
-        //    }
+            // Assert
+            if (expectedVersion == null)
+            {
+                Assert.Null(frameworkName);
+            }
+            else
+            {
+                Assert.NotNull(frameworkName);
+                Assert.Equal(expectedIdentifier, frameworkName.Identifier);
+                Assert.Equal(expectedVersion, frameworkName.Version.ToString());
+            }
 
-        //    Assert.Equal(expectedEffectivePath, effectivePath);
-        //}
+            Assert.Equal(expectedEffectivePath, effectivePath);
+        }
+
+        [Theory]
+        [InlineData("content\\-\\wow\\cool.txt", "-\\wow\\cool.txt")]
+        [InlineData("content\\-world\\x.dll", "-world\\x.dll")]
+        public void ParseFrameworkNameFromFilePathDoesNotThrowIfPathHasADash(string path, string expectedPath)
+        {
+            // Act
+            string effectivePath;
+            var framework = VersionUtility.ParseFrameworkNameFromFilePath(path, out effectivePath);
+            
+            // Assert
+            Assert.Null(framework);
+            Assert.Equal(expectedPath, effectivePath);
+        }
 
         [Fact]
         public void ParseFrameworkNameNormalizesSupportedNetFrameworkNames()

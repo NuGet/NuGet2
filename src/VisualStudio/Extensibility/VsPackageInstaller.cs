@@ -76,8 +76,11 @@ namespace NuGet.VisualStudio
                                                                            {
                                                                                _scriptExecutor.ExecuteScript(
                                                                                    e.InstallPath,
-                                                                                   PowerShellScripts.Install, e.Package,
-                                                                                   project, NullLogger.Instance);
+                                                                                   PowerShellScripts.Install, 
+                                                                                   e.Package,
+                                                                                   project,
+                                                                                   project.GetTargetFrameworkName(),
+                                                                                   NullLogger.Instance);
                                                                            };
 
                 bool oldBindingRedirectValue = packageManager.BindingRedirectEnabled;

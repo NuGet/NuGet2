@@ -755,57 +755,95 @@ function Test-WebSiteSimpleUninstall
     Assert-PathNotExists (Join-Path $p.FullName "bin\AwesomeLibrary.dll.refresh")
 }
 
-function Test-UninstallPackageUninstallContentFilesAccordingToTargetFramework {
-    param($context)
+function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToRemoveContentFiles
+{
+	param($context)
 
-    # Arrange
-    $project = New-ConsoleApplication
-    
-    Install-Package TestTargetFxContentFiles -Project $project.Name -Source $context.RepositoryRoot
-    
-    Assert-Package $project TestTargetFxContentFiles
-    Assert-NotNull (Get-ProjectItem $project "Sub\one.txt")
-    Assert-Null (Get-ProjectItem $project "two.txt")
+	# Arrange
+	$p = New-ClassLibrary
 
-    # Act
-    Uninstall-Package TestTargetFxContentFiles -Project $project.Name
-    Assert-Null (Get-ProjectItem $project "Sub\one.txt")
+	$p | Install-Package PackageA -Source $context.RepositoryPath
+	
+	Assert-Package $p 'packageA'
+	Assert-Package $p 'packageB'
+
+	Assert-NotNull (Get-ProjectItem $p testA4.txt)
+	Assert-NotNull (Get-ProjectItem $p testB4.txt)
+
+	# Act (change the target framework of the project to 3.5 and verifies that it still removes the content files correctly )
+
+	$projectName = $p.Name
+	$p.Properties.Item("TargetFrameworkMoniker").Value = '.NETFramework,Version=3.5'
+
+	$p = Get-Project $projectName
+
+	Uninstall-Package 'PackageA' -Project $projectName -RemoveDependencies
+	
+	# Assert
+	Assert-NoPackage $p 'PackageA'
+	Assert-NoPackage $p 'PackageB'
+	
+	Assert-Null (Get-ProjectItem $p testA4.txt)
+	Assert-Null (Get-ProjectItem $p testB4.txt)
 }
 
-function Test-UninstallPackageExecuteCorrectUninstallScriptsAccordingToTargetFramework {
-    param($context)
+function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToRemoveAssemblyReferences
+{
+	param($context)
 
-    # Arrange
-    $project = New-ConsoleApplication
-    
-    $global:UninstallVar = 0
-    Install-Package TestTargetFxPSScripts -Project $project.Name -Source $context.RepositoryRoot
+	# Arrange
+	$p = New-ClassLibrary
 
-    # Act
-    Uninstall-Package TestTargetFxPSScripts -Project $project.Name
+	$p | Install-Package PackageA -Source $context.RepositoryPath
+	
+	Assert-Package $p 'packageA'
+	Assert-Package $p 'packageB'
 
-    # Assert
-    Assert-True ($global:UninstallVar -eq 3)
+	Assert-Reference $p testA4
+	Assert-Reference $p testB4
 
-    # Clean up
-    Remove-Variable UnInstallVar -Scope Global
+	# Act (change the target framework of the project to 3.5 and verifies that it still removes the assembly references correctly )
+
+	$projectName = $p.Name
+	$p.Properties.Item("TargetFrameworkMoniker").Value = '.NETFramework,Version=3.5'
+
+	$p = Get-Project $projectName
+
+	Uninstall-Package 'PackageA' -Project $projectName -RemoveDependencies
+	
+	# Assert
+	Assert-NoPackage $p 'PackageA'
+	Assert-NoPackage $p 'PackageB'
+	
+	Assert-Null (Get-AssemblyReference $p testA4.dll)
+	Assert-Null (Get-AssemblyReference $p testB4.dll)
 }
 
-function Test-UninstallPackageExecuteCorrectUninstallScriptsAccordingToTargetFramework2 {
-    param($context)
+function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToInvokeUninstallScript
+{
+	param($context)
 
-    # Arrange
-    $project = New-SilverlightApplication
-    
-    $global:UnInstallVar = 0
-    Install-Package TestTargetFxPSScripts -Project $project.Name -Source $context.RepositoryRoot
+	# Arrange
+	$p = New-ClassLibrary
 
-    # Act
-    Uninstall-Package TestTargetFxPSScripts -Project $project.Name
-    
-    # Assert
-    Assert-True ($global:UnInstallVar -eq 300)
+	$p | Install-Package PackageA -Source $context.RepositoryPath
+	
+	Assert-Package $p 'packageA'
 
-    # Clean up
-    Remove-Variable UnInstallVar -Scope Global
+	# Act (change the target framework of the project to 3.5 and verifies that it invokes the correct uninstall.ps1 file in 'net40' folder )
+
+	$projectName = $p.Name
+	$p.Properties.Item("TargetFrameworkMoniker").Value = '.NETFramework,Version=3.5'
+
+	$global:UninstallVar = 0
+
+	$p = Get-Project $projectName
+	Uninstall-Package 'PackageA' -Project $projectName
+	
+	# Assert
+	Assert-NoPackage $p 'PackageA'
+	
+	Assert-AreEqual 1 $global:UninstallVar
+
+	Remove-Variable UninstallVar -Scope Global
 }

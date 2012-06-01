@@ -2046,6 +2046,47 @@ namespace NuGet.Test
             Assert.False(projectSystem.FileExists("b.txt"));
         }
 
+        [Fact]
+        public void AddPackageReferencePersistTargetFarmeworkToPackagesConfigFile()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework", new Version("4.0")));
+
+            var localRepository = new Mock<IPackageReferenceRepository>();
+            localRepository.Setup(p => p.AddPackage("A", 
+                                                    new SemanticVersion("1.0"),
+                                                    new FrameworkName(".NETFramework, Version=4.0"))).Verifiable();
+
+            localRepository.Setup(p => p.AddPackage("B",
+                                                    new SemanticVersion("2.0"),
+                                                    new FrameworkName(".NETFramework, Version=4.0"))).Verifiable();
+
+            var projectManager = new ProjectManager(
+                sourceRepository, 
+                new DefaultPackagePathResolver(projectSystem), 
+                projectSystem, 
+                localRepository.Object);
+
+            var dependency = new PackageDependency("B", null);
+            var dependecySets = CreateDependencySet(".NETFramework, Version=3.0", dependency);
+
+            IPackage packageA = PackageUtility.CreatePackage2("A", "1.0",
+                                                                dependencySets: new[] { dependecySets },
+                                                                content: new[] { "a.txt" });
+
+            IPackage packageB = PackageUtility.CreatePackage("B", "2.0", content: new[] { "b.txt" });
+
+            sourceRepository.AddPackage(packageB);
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            localRepository.VerifyAll();
+        }
+
         private ProjectManager CreateProjectManager()
         {
             var projectSystem = new MockProjectSystem();

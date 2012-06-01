@@ -135,7 +135,7 @@ namespace NuGet.Dialog
             }
         }
 
-        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope"), SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         private void SetupProviders(Project activeProject,
                                     DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,

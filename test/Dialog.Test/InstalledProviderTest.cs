@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
@@ -223,7 +224,7 @@ namespace NuGet.Dialog.Test
                 try
                 {
                     // Assert
-                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), "uninstall.ps1", packageA, project.Object, It.IsAny<ILogger>()));
+                    scriptExecutor.Verify(p => p.Execute(It.IsAny<string>(), "uninstall.ps1", packageA, project.Object, It.IsAny<FrameworkName>(), It.IsAny<ILogger>()), Times.Once());
                 }
                 finally
                 {
