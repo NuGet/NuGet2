@@ -43,12 +43,14 @@ function Test-PackFromProjectUsesInstalledPackagesAsDependencies {
     $packageFile = Get-ChildItem $output -Filter *.nupkg
     Assert-NotNull $packageFile
     $zipPackage = New-Object NuGet.ZipPackage($packageFile.FullName)
-    $dependencies = @($zipPackage.Dependencies)
+    $dependencySets = @($zipPackage.DependencySets)
 
-    Assert-NotNull $dependencies
-    Assert-AreEqual 1 $dependencies.Count
+    Assert-NotNull $dependencySets
+    Assert-AreEqual 1 $dependencySets.Count
+	Assert-Null $dependencySets[0].TargetFramework
+	$dependencies = $dependencySets[0].Dependencies
     Assert-AreEqual 'PackageWithContentFileAndDependency' $dependencies[0].Id
-    Assert-AreEqual '1.0' $dependencies[0].VersionSpec.ToString()
+    Assert-AreEqual "1.0" $dependencies[0].VersionSpec.ToString()
 }
 
 function Test-PackFromProjectUsesVersionSpecForDependencyIfApplicable {
@@ -64,10 +66,12 @@ function Test-PackFromProjectUsesVersionSpecForDependencyIfApplicable {
     $packageFile = Get-ChildItem $output -Filter *.nupkg
     Assert-NotNull $packageFile
     $zipPackage = New-Object NuGet.ZipPackage($packageFile.FullName)
-    $dependencies = @($zipPackage.Dependencies)
+    $dependencySets = @($zipPackage.DependencySets)
 
-    Assert-NotNull $dependencies
-    Assert-AreEqual 1 $dependencies.Count
+    Assert-NotNull $dependencySets
+    Assert-AreEqual 1 $dependencySets.Count
+	Assert-Null $dependencySets[0].TargetFramework
+	$dependencies = $dependencySets[0].Dependencies
     Assert-AreEqual 'PackageWithContentFileAndDependency' $dependencies[0].Id
     Assert-AreEqual "[1.0, 2.5)" $dependencies[0].VersionSpec.ToString()
 }
