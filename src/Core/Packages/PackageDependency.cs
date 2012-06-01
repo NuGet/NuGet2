@@ -5,11 +5,11 @@ namespace NuGet
     public class PackageDependency
     {
         public PackageDependency(string id)
-            : this(id, null)
+            : this(id, versionSpec: null)
         {
         }
 
-        public PackageDependency(string id, IVersionSpec versionSpec)
+        public PackageDependency(string id, IVersionSpec versionSpec) 
         {
             if (String.IsNullOrEmpty(id))
             {

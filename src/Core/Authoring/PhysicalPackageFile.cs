@@ -1,11 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Versioning;
 
 namespace NuGet
 {
     public sealed class PhysicalPackageFile : IPackageFile
     {
         private readonly Func<Stream> _streamFactory;
+        private string _targetPath;
+        private FrameworkName _targetFramework;
 
         public PhysicalPackageFile()
         {
@@ -30,8 +34,20 @@ namespace NuGet
         /// </summary>
         public string TargetPath
         {
-            get;
-            set;
+            get
+            {
+                return _targetPath;
+            }
+            set
+            {
+                if (String.Compare(_targetPath, value, StringComparison.OrdinalIgnoreCase) != 0)
+                {
+                    _targetPath = value;
+                    string effectivePath;
+                    _targetFramework = VersionUtility.ParseFrameworkNameFromFilePath(_targetPath, out effectivePath);
+                    EffectivePath = effectivePath;
+                }
+            }
         }
 
         string IPackageFile.Path
@@ -39,6 +55,29 @@ namespace NuGet
             get
             {
                 return TargetPath;
+            }
+        }
+
+        public string EffectivePath
+        {
+            get;
+            private set;
+        }
+
+        public FrameworkName TargetFramework
+        {
+            get { return _targetFramework; }
+        }
+
+        IEnumerable<FrameworkName> IFrameworkTargetable.SupportedFrameworks
+        {
+            get
+            {
+                if (TargetFramework != null)
+                {
+                    yield return TargetFramework;
+                }
+                yield break;
             }
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Versioning;
 using NuGet.Resources;
 
 namespace NuGet
@@ -13,14 +14,26 @@ namespace NuGet
         private readonly bool _allowPrereleaseVersions;
         private readonly OperationLookup _operations;
 
+        // this ctor is used for unit tests
+        internal InstallWalker(IPackageRepository localRepository,
+                               IPackageRepository sourceRepository,
+                               ILogger logger,
+                               bool ignoreDependencies,
+                               bool allowPrereleaseVersions) 
+            : this(localRepository, sourceRepository, null, logger, ignoreDependencies, allowPrereleaseVersions)
+        {
+        }
+
         public InstallWalker(IPackageRepository localRepository,
                              IPackageRepository sourceRepository,
+                             FrameworkName targetFramework,
                              ILogger logger,
                              bool ignoreDependencies,
                              bool allowPrereleaseVersions) :
             this(localRepository,
                  sourceRepository,
                  constraintProvider: NullConstraintProvider.Instance,
+                 targetFramework: targetFramework,
                  logger: logger,
                  ignoreDependencies: ignoreDependencies,
                  allowPrereleaseVersions: allowPrereleaseVersions)
@@ -30,9 +43,11 @@ namespace NuGet
         public InstallWalker(IPackageRepository localRepository,
                              IPackageRepository sourceRepository,
                              IPackageConstraintProvider constraintProvider,
+                             FrameworkName targetFramework,
                              ILogger logger,
                              bool ignoreDependencies,
                              bool allowPrereleaseVersions)
+            : base(targetFramework)
         {
 
             if (sourceRepository == null)
@@ -135,7 +150,7 @@ namespace NuGet
             //      C2 -> []
             // Given the above graph, if we upgrade from C1 to C2, we need to see if A and B can work with the new C
             var incompatiblePackages = from dependentPackage in GetDependents(conflictResult)
-                                       let dependency = dependentPackage.FindDependency(package.Id)
+                                       let dependency = dependentPackage.FindDependency(package.Id, TargetFramework)
                                        where dependency != null && !dependency.VersionSpec.Satisfies(package.Version)
                                        select dependentPackage;
 
@@ -170,6 +185,7 @@ namespace NuGet
             // already decided that there were no conflicts based on the above code.
             var resolver = new UninstallWalker(repository,
                                                dependentsResolver,
+                                               TargetFramework,
                                                NullLogger.Instance,
                                                removeDependencies: !IgnoreDependencies,
                                                forceRemove: false) { ThrowOnConflicts = false };
@@ -194,7 +210,7 @@ namespace NuGet
             }
 
             // Get compatible packages in one batch so we don't have to make requests for each one
-            var packages = from p in SourceRepository.FindCompatiblePackages(ConstraintProvider, dependentsLookup.Keys, package, AllowPrereleaseVersions)
+            var packages = from p in SourceRepository.FindCompatiblePackages(ConstraintProvider, dependentsLookup.Keys, package, TargetFramework, AllowPrereleaseVersions)
                            group p by p.Id into g
                            let oldPackage = dependentsLookup[g.Key]
                            select new

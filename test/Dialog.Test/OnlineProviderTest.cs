@@ -14,7 +14,6 @@ using Xunit.Extensions;
 
 namespace NuGet.Dialog.Test
 {
-
     public class OnlineProviderTest
     {
         [Fact]
@@ -342,6 +341,7 @@ namespace NuGet.Dialog.Test
             var projectManager = CreateProjectManager(localRepository, solutionRepository);
 
             var project = new Mock<Project>();
+            project.Setup(p => p.Properties.Item("TargetFrameworkMoniker").Value).Returns(".NETFramework, Version=4.0");
             var scriptExecutor = new Mock<IScriptExecutor>();
 
             var packageManager = new Mock<IVsPackageManager>();

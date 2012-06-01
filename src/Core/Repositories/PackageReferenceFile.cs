@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Xml;
 using System.Xml.Linq;
 using NuGet.Resources;
@@ -53,6 +54,7 @@ namespace NuGet
                 string id = e.GetOptionalAttributeValue("id");
                 string versionString = e.GetOptionalAttributeValue("version");
                 string versionConstraintString = e.GetOptionalAttributeValue("allowedVersions");
+                string targetFrameworkString = e.GetOptionalAttributeValue("targetFramework");
                 SemanticVersion version;
 
                 if (String.IsNullOrEmpty(id) || String.IsNullOrEmpty(versionString))
@@ -77,7 +79,17 @@ namespace NuGet
                     _constraints[id] = versionConstraintString;
                 }
 
-                yield return new PackageReference(id, version, versionConstaint);
+                FrameworkName targetFramework = null;
+                if (!String.IsNullOrEmpty(targetFrameworkString))
+                {
+                    targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkString);
+                    if (targetFramework == VersionUtility.UnsupportedFrameworkName)
+                    {
+                        targetFramework = null;
+                    }
+                } 
+
+                yield return new PackageReference(id, version, versionConstaint, targetFramework);
             }
         }
 
@@ -109,9 +121,14 @@ namespace NuGet
 
         public void AddEntry(string id, SemanticVersion version)
         {
+            AddEntry(id, version, targetFramework: null);
+        }
+
+        public void AddEntry(string id, SemanticVersion version, FrameworkName targetFramework)
+        {
             XDocument document = GetDocument(createIfNotExists: true);
 
-            AddEntry(document, id, version);
+            AddEntry(document, id, version, targetFramework);
         }
 
         public PackageName FindEntryWithLatestVersionById(string id)
@@ -136,7 +153,7 @@ namespace NuGet
                     select new PackageName(entryId, entryVersion)).FirstOrDefault();
         }
 
-        private void AddEntry(XDocument document, string id, SemanticVersion version)
+        private void AddEntry(XDocument document, string id, SemanticVersion version, FrameworkName targetFramework)
         {
             XElement element = FindEntry(document, id, version);
 
@@ -148,6 +165,10 @@ namespace NuGet
             var newElement = new XElement("package",
                                   new XAttribute("id", id),
                                   new XAttribute("version", version));
+            if (targetFramework != null)
+            {
+                newElement.Add(new XAttribute("targetFramework", VersionUtility.GetShortFrameworkName(targetFramework)));
+            }
 
             // Restore the version constraint
             string versionConstraint;

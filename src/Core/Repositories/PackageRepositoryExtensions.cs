@@ -236,11 +236,12 @@ namespace NuGet
                                                                    IPackageConstraintProvider constraintProvider,
                                                                    IEnumerable<string> packageIds,
                                                                    IPackage package,
+                                                                   FrameworkName targetFramework,
                                                                    bool allowPrereleaseVersions)
         {
             return (from p in repository.FindPackages(packageIds)
                     where allowPrereleaseVersions || p.IsReleaseVersion()
-                    let dependency = p.FindDependency(package.Id)
+                    let dependency = p.FindDependency(package.Id, targetFramework)
                     let otherConstaint = constraintProvider.GetConstraint(p.Id)
                     where dependency != null &&
                           dependency.VersionSpec.Satisfies(package.Version) &&
@@ -248,9 +249,9 @@ namespace NuGet
                     select p);
         }
 
-        public static PackageDependency FindDependency(this IPackageMetadata package, string packageId)
+        public static PackageDependency FindDependency(this IPackageMetadata package, string packageId, FrameworkName targetFramework)
         {
-            return (from dependency in package.Dependencies
+            return (from dependency in package.GetCompatiblePackageDependencies(targetFramework)
                     where dependency.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase)
                     select dependency).FirstOrDefault();
         }

@@ -157,11 +157,11 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public IEnumerable<PackageDependency> Dependencies
+        public IEnumerable<PackageDependencySet> DependencySets
         {
             get
             {
-                return _basePackage.Dependencies;
+                return _basePackage.DependencySets;
             }
         }
 

@@ -135,9 +135,9 @@ namespace NuGet.VisualStudio
             get { return Enumerable.Empty<FrameworkAssemblyReference>(); }
         }
 
-        public IEnumerable<PackageDependency> Dependencies
+        public IEnumerable<PackageDependencySet> DependencySets
         {
-            get { return _basePackage.Dependencies; }
+            get { return _basePackage.DependencySets; }
         }
 
         public Uri ReportAbuseUrl

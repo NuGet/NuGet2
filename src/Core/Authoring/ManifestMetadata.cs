@@ -80,11 +80,44 @@ namespace NuGet
         [XmlElement("tags")]
         public string Tags { get; set; }
 
+        /// <summary>
+        /// This property should be used only by the XML serializer. Do not use it in code.
+        /// </summary>
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "value", Justification="The propert setter is not supported.")]
         [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
-        [XmlArray("dependencies")]
-        [XmlArrayItem("dependency")]
-        public List<ManifestDependency> Dependencies { get; set; }
+        [XmlArray("dependencies", IsNullable = false)]
+        [XmlArrayItem("group", typeof(ManifestDependencySet))]
+        [XmlArrayItem("dependency", typeof(ManifestDependency))]
+        public List<object> DependencySetsSerialize
+        {
+            get
+            {
+                if (DependencySets == null || DependencySets.Count == 0)
+                {
+                    return null;
+                }
+
+                if (DependencySets.Any(set => set.TargetFramework != null))
+                {
+                    return DependencySets.Cast<object>().ToList();
+                }
+                else
+                {
+                    return DependencySets.SelectMany(set => set.Dependencies).Cast<object>().ToList();
+                }
+            }
+            set
+            {
+                // this property is only used for serialization.
+                throw new InvalidOperationException();
+            }
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
+        [XmlIgnore]
+        public List<ManifestDependencySet> DependencySets { get; set; }
 
         [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
@@ -171,16 +204,16 @@ namespace NuGet
             }
         }
 
-        IEnumerable<PackageDependency> IPackageMetadata.Dependencies
+        IEnumerable<PackageDependencySet> IPackageMetadata.DependencySets
         {
             get
             {
-                if (Dependencies == null)
+                if (DependencySets == null)
                 {
-                    return Enumerable.Empty<PackageDependency>();
+                    return Enumerable.Empty<PackageDependencySet>();
                 }
-                return from dependency in Dependencies
-                       select new PackageDependency(dependency.Id, String.IsNullOrEmpty(dependency.Version) ? null : VersionUtility.ParseVersionSpec(dependency.Version));
+
+                return DependencySets.Select(CreatePackageDependencySet);
             }
         }
 
@@ -245,6 +278,20 @@ namespace NuGet
 
             return frameworkNames.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                                  .Select(VersionUtility.ParseFrameworkName);
+        }
+
+        private static PackageDependencySet CreatePackageDependencySet(ManifestDependencySet manifestDependencySet) 
+        {
+            FrameworkName targetFramework = manifestDependencySet.TargetFramework == null
+                                            ? null 
+                                            : VersionUtility.ParseFrameworkName(manifestDependencySet.TargetFramework);
+
+            var dependencies = from d in manifestDependencySet.Dependencies
+                               select new PackageDependency(
+                                   d.Id,
+                                   String.IsNullOrEmpty(d.Version) ? null : VersionUtility.ParseVersionSpec(d.Version));
+
+            return new PackageDependencySet(targetFramework, dependencies);
         }
     }
 }

@@ -4,6 +4,8 @@ using System.Linq;
 using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
+using System.Xml.Linq;
+using System.Collections.Generic;
 
 namespace NuGet.Test
 {
@@ -67,7 +69,7 @@ namespace NuGet.Test
             // Assert
             Assert.Equal(@"C:\MockFileSystem\packages.config", path);
             Assert.True(fileSystem.FileExists("packages.config"));
-            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            AssertConfig(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""A"" version=""1.0"" />
 </packages>", fileSystem.ReadAllText("packages.config"));
@@ -91,7 +93,7 @@ namespace NuGet.Test
 
             // Assert
             Assert.True(fileSystem.FileExists("packages.config"));
-            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            AssertConfig(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""A"" version=""1.0"" />
 </packages>", fileSystem.ReadAllText("packages.config"));
@@ -117,7 +119,7 @@ namespace NuGet.Test
 
             // Assert
             Assert.True(fileSystem.FileExists("packages.config"));
-            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            AssertConfig(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""A"" version=""2.0"" allowedVersions=""[1.0, 5.0)"" />
 </packages>", fileSystem.ReadAllText("packages.config"));
@@ -142,7 +144,7 @@ namespace NuGet.Test
 
             // Assert
             Assert.True(fileSystem.FileExists("packages.config"));
-            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            AssertConfig(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
   <package id=""B"" version=""1.0"" />
 </packages>", fileSystem.ReadAllText("packages.config"));
@@ -318,16 +320,6 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void PackageReferenceRepositoryImplementsILatestPackageLookupInterface()
-        {
-            // Arrange
-            var repository = new PackageReferenceRepository(new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object);
-
-            // Assert
-            Assert.True(repository is ILatestPackageLookup);
-        }
-
-        [Fact]
         public void PackageReferenceRepositoryImplementsILatestPackageLookupInterfaceCorrectly()
         {
             // Arrange
@@ -433,6 +425,14 @@ namespace NuGet.Test
             // Assert
             Assert.False(result);
             Assert.Null(latestVersion);
+        }
+
+        private static void AssertConfig(string expected, string actual)
+        {
+            Assert.Equal(expected.Where(c => !Char.IsWhiteSpace(c)), actual.Where(c => !Char.IsWhiteSpace(c)));
+            
+            // Verify the actual document is parseable as an xml
+            XDocument.Load(new StringReader(actual));
         }
     }
 }

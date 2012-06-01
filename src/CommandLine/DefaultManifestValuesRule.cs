@@ -35,7 +35,7 @@ namespace NuGet
                 yield return CreateIssueFor("Description", SpecCommand.SampleDescription);
             }
 
-            var dependency = package.Dependencies.FirstOrDefault();
+            var dependency = package.GetCompatiblePackageDependencies(targetFramework: null).FirstOrDefault();
             if (dependency != null && dependency.Id.Equals(SpecCommand.SampleManifestDependency.Id, StringComparison.Ordinal)
                                    && dependency.VersionSpec.ToString().Equals("[" + SpecCommand.SampleManifestDependency.Version + "]", StringComparison.Ordinal))
             {

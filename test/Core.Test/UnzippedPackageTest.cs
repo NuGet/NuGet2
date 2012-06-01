@@ -57,12 +57,12 @@ namespace NuGet.Test
             Assert.Equal("http://www.nuget.com/license", package.LicenseUrl.ToString());
             Assert.Equal("http://www.nuget.com/", package.ProjectUrl.ToString());
             Assert.Equal("http://www.outercurve.com/", package.IconUrl.ToString());
-            Assert.Equal(1, package.Dependencies.Count());
-            Assert.Equal("bing", package.Dependencies.ElementAt(0).Id);
-            Assert.Equal(new SemanticVersion("1.0-RC"), package.Dependencies.ElementAt(0).VersionSpec.MinVersion);
-            Assert.True(package.Dependencies.ElementAt(0).VersionSpec.IsMinInclusive);
-            Assert.Equal(null, package.Dependencies.ElementAt(0).VersionSpec.MaxVersion);
-            Assert.False(package.Dependencies.ElementAt(0).VersionSpec.IsMaxInclusive);
+            Assert.Equal(1, package.DependencySets.Count());
+            Assert.Equal("bing", package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).Id);
+            Assert.Equal(new SemanticVersion("1.0-RC"), package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).VersionSpec.MinVersion);
+            Assert.True(package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).VersionSpec.IsMinInclusive);
+            Assert.Equal(null, package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).VersionSpec.MaxVersion);
+            Assert.False(package.DependencySets.ElementAt(0).Dependencies.ElementAt(0).VersionSpec.IsMaxInclusive);
             Assert.Equal("Jumpo Jet", package.Title);
             Assert.True(package.RequireLicenseAcceptance);
             Assert.Equal("My package description.", package.Description);

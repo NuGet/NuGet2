@@ -19,7 +19,7 @@ namespace NuGet.Test
             servicePackage.Dependencies = "";
 
             // Assert
-            Assert.False(((IPackage)servicePackage).Dependencies.Any());
+            Assert.False(((IPackage)servicePackage).DependencySets.Any());
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace NuGet.Test
             var servicePackage = new DataServicePackage();
 
             // Assert
-            Assert.False(((IPackage)servicePackage).Dependencies.Any());
+            Assert.False(((IPackage)servicePackage).DependencySets.Any());
         }
 
         [Fact]
@@ -40,9 +40,13 @@ namespace NuGet.Test
 
             // Act
             servicePackage.Dependencies = "      A   :   1.3 | B :  [2.4, 5.0)   ";
-            List<PackageDependency> dependencies = ((IPackage)servicePackage).Dependencies.ToList();
+
+            List<PackageDependencySet> dependencySets = ((IPackage)servicePackage).DependencySets.ToList();
 
             // Assert
+            Assert.Equal(1, dependencySets.Count);
+
+            List<PackageDependency> dependencies = dependencySets[0].Dependencies.ToList();            
             Assert.Equal(2, dependencies.Count);
             Assert.Equal("A", dependencies[0].Id);
             Assert.True(dependencies[0].VersionSpec.IsMinInclusive);

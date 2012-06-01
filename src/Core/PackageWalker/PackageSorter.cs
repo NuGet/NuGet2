@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Versioning;
 
 namespace NuGet
 {
@@ -7,6 +8,16 @@ namespace NuGet
     {
         private IPackageRepository _repository;
         private IList<IPackage> _sortedPackages;
+
+        // this ctor is used for unit tests
+        internal PackageSorter()
+        {
+        }
+
+        public PackageSorter(FrameworkName targetFramework) 
+            : base(targetFramework)
+        {
+        }
 
         protected override bool RaiseErrorOnCycle
         {

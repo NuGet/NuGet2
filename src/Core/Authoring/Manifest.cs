@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -38,10 +37,25 @@ namespace NuGet
 
         public void Save(Stream stream)
         {
-            Save(stream, validate: true);
+            Save(stream, validate: true, minimumManifestVersion: 1);
+        }
+
+        /// <summary>
+        /// Saves the current manifest to the specified stream.
+        /// </summary>
+        /// <param name="stream">The target stream.</param>
+        /// <param name="minimumManifestVersion">The minimum manifest version that this class must use when saving.</param>
+        public void Save(Stream stream, int minimumManifestVersion)
+        {
+            Save(stream, validate: true, minimumManifestVersion: minimumManifestVersion);
         }
 
         public void Save(Stream stream, bool validate)
+        {
+            Save(stream, validate, minimumManifestVersion: 1);
+        }
+
+        public void Save(Stream stream, bool validate, int minimumManifestVersion)
         {
             if (validate)
             {
@@ -49,7 +63,7 @@ namespace NuGet
                 Validate(this);
             }
 
-            int version = ManifestVersionUtility.GetManifestVersion(Metadata);
+            int version = Math.Max(minimumManifestVersion, ManifestVersionUtility.GetManifestVersion(Metadata));
             string schemaNamespace = ManifestSchemaUtility.GetSchemaNamespace(version);
 
             // Define the namespaces to use when serializing
@@ -130,7 +144,7 @@ namespace NuGet
                     Summary = metadata.Summary.SafeTrim(),
                     ReleaseNotes = metadata.ReleaseNotes.SafeTrim(),
                     Language = metadata.Language.SafeTrim(),
-                    Dependencies = CreateDependencies(metadata),
+                    DependencySets = CreateDependencySet(metadata),
                     FrameworkAssemblies = CreateFrameworkAssemblies(metadata),
                     References = CreateReferences(metadata)
                 }
@@ -149,14 +163,29 @@ namespace NuGet
                     select new ManifestReference { File = reference.SafeTrim() }).ToList();
         }
 
-        private static List<ManifestDependency> CreateDependencies(IPackageMetadata metadata)
+        private static List<ManifestDependencySet> CreateDependencySet(IPackageMetadata metadata)
         {
-            if (metadata.Dependencies.IsEmpty())
+            if (metadata.DependencySets.IsEmpty())
             {
                 return null;
             }
 
-            return (from dependency in metadata.Dependencies
+            return (from dependencySet in metadata.DependencySets
+                    select new ManifestDependencySet
+                    {
+                        TargetFramework = dependencySet.TargetFramework != null ? VersionUtility.GetFrameworkString(dependencySet.TargetFramework) : null,
+                        Dependencies = CreateDependencies(dependencySet.Dependencies)
+                    }).ToList();
+        }
+
+        private static List<ManifestDependency> CreateDependencies(ICollection<PackageDependency> dependencies)
+        {
+            if (dependencies == null)
+            {
+                return new List<ManifestDependency>(0);
+            }
+
+            return (from dependency in dependencies
                     select new ManifestDependency
                     {
                         Id = dependency.Id.SafeTrim(),
@@ -267,7 +296,10 @@ namespace NuGet
             // Run all data annotations validations
             TryValidate(manifest.Metadata, results);
             TryValidate(manifest.Files, results);
-            TryValidate(manifest.Metadata.Dependencies, results);
+            if (manifest.Metadata.DependencySets != null)
+            {
+                TryValidate(manifest.Metadata.DependencySets.SelectMany(d => d.Dependencies), results);
+            }
             TryValidate(manifest.Metadata.References, results);
 
             if (results.Any())
@@ -277,22 +309,25 @@ namespace NuGet
             }
 
             // Validate additional dependency rules dependencies
-            ValidateDependencies(manifest.Metadata);
+            ValidateDependencySets(manifest.Metadata);
         }
 
-        private static void ValidateDependencies(IPackageMetadata metadata)
+        private static void ValidateDependencySets(IPackageMetadata metadata)
         {
-            var dependencySet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var dependency in metadata.Dependencies)
+            foreach (var dependencySet in metadata.DependencySets)
             {
-                // Throw an error if this dependency has been defined more than once
-                if (!dependencySet.Add(dependency.Id))
+                var dependencyHash = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var dependency in dependencySet.Dependencies)
                 {
-                    throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.DuplicateDependenciesDefined, metadata.Id, dependency.Id));
-                }
+                    // Throw an error if this dependency has been defined more than once
+                    if (!dependencyHash.Add(dependency.Id))
+                    {
+                        throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.DuplicateDependenciesDefined, metadata.Id, dependency.Id));
+                    }
 
-                // Validate the dependency version
-                ValidateDependencyVersion(dependency);
+                    // Validate the dependency version
+                    ValidateDependencyVersion(dependency);
+                }
             }
         }
 

@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NuGet.Resources;
 
 namespace NuGet
@@ -53,7 +54,7 @@ namespace NuGet
         public PackageBuilder()
         {
             Files = new Collection<IPackageFile>();
-            Dependencies = new Collection<PackageDependency>();
+            DependencySets = new Collection<PackageDependencySet>();
             FrameworkReferences = new Collection<FrameworkAssemblyReference>();
             PackageAssemblyReferences = new Collection<string>();
             Authors = new HashSet<string>();
@@ -151,7 +152,7 @@ namespace NuGet
             set;
         }
 
-        public Collection<PackageDependency> Dependencies
+        public Collection<PackageDependencySet> DependencySets
         {
             get;
             private set;
@@ -199,11 +200,11 @@ namespace NuGet
             }
         }
 
-        IEnumerable<PackageDependency> IPackageMetadata.Dependencies
+        IEnumerable<PackageDependencySet> IPackageMetadata.DependencySets
         {
             get
             {
-                return Dependencies;
+                return DependencySets;
             }
         }
 
@@ -221,7 +222,7 @@ namespace NuGet
             PackageIdValidator.ValidatePackageId(Id);
 
             // Throw if the package doesn't contain any dependencies nor content
-            if (!Files.Any() && !Dependencies.Any() && !FrameworkReferences.Any())
+            if (!Files.Any() && !DependencySets.SelectMany(d => d.Dependencies).Any() && !FrameworkReferences.Any())
             {
                 throw new InvalidOperationException(NuGetResources.CannotCreateEmptyPackage);
             }
@@ -231,13 +232,18 @@ namespace NuGet
                 throw new InvalidOperationException(NuGetResources.SemVerSpecialVersionTooLong);
             }
 
-            ValidateDependencies(Version, Dependencies);
+            ValidateDependencySets(Version, DependencySets);
             ValidateReferenceAssemblies(Files, PackageAssemblyReferences);
+
+            bool requiresNewTargetFrameworkSchema = RequiresNewTargetFrameworkSchema(Files);
 
             using (Package package = Package.Open(stream, FileMode.Create))
             {
                 // Validate and write the manifest
-                WriteManifest(package);
+                WriteManifest(package,
+                    requiresNewTargetFrameworkSchema ?
+                        ManifestVersionUtility.TargetFrameworkSupportVersion :
+                        ManifestVersionUtility.DefaultVersion);
 
                 // Write the files to the package
                 WriteFiles(package);
@@ -249,10 +255,22 @@ namespace NuGet
                 package.PackageProperties.Version = Version.ToString();
                 package.PackageProperties.Language = Language;
                 package.PackageProperties.Keywords = ((IPackageMetadata)this).Tags;
+                package.PackageProperties.Title = Title;
             }
         }
 
-        internal static void ValidateDependencies(SemanticVersion version, IEnumerable<PackageDependency> dependencies)
+        private static bool RequiresNewTargetFrameworkSchema(ICollection<IPackageFile> files)
+        {
+            // check if any file under Content or Tools has TargetFramework defined
+            bool hasContentOrTool = files.Any(
+                f => f.TargetFramework != null &&
+                     (f.Path.StartsWith(Constants.ContentDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
+                      f.Path.StartsWith(Constants.ToolsDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)));
+
+            return hasContentOrTool;
+        }
+
+        internal static void ValidateDependencySets(SemanticVersion version, IEnumerable<PackageDependencySet> dependencies)
         {
             if (version == null)
             {
@@ -263,7 +281,7 @@ namespace NuGet
             if (String.IsNullOrEmpty(version.SpecialVersion))
             {
                 // If we are creating a production package, do not allow any of the dependencies to be a prerelease version.
-                var prereleaseDependency = dependencies.FirstOrDefault(IsPrereleaseDependency);
+                var prereleaseDependency = dependencies.SelectMany(set => set.Dependencies).FirstOrDefault(IsPrereleaseDependency);
                 if (prereleaseDependency != null)
                 {
                     throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_InvalidPrereleaseDependency, prereleaseDependency.ToString()));
@@ -330,7 +348,7 @@ namespace NuGet
                 Tags.AddRange(ParseTags(metadata.Tags));
             }
 
-            Dependencies.AddRange(metadata.Dependencies);
+            DependencySets.AddRange(metadata.DependencySets);
             FrameworkReferences.AddRange(metadata.FrameworkAssemblies);
             if (manifestMetadata.References != null)
             {
@@ -346,7 +364,7 @@ namespace NuGet
             }
         }
 
-        private void WriteManifest(Package package)
+        private void WriteManifest(Package package, int minimumManifestVersion)
         {
             Uri uri = UriUtility.CreatePartUri(Id + Constants.ManifestExtension);
 
@@ -359,7 +377,7 @@ namespace NuGet
             using (Stream stream = packagePart.GetStream())
             {
                 Manifest manifest = Manifest.Create(this);
-                manifest.Save(stream);
+                manifest.Save(stream, minimumManifestVersion);
             }
         }
 
@@ -374,7 +392,7 @@ namespace NuGet
                     {
                         CreatePart(package, file.Path, stream);
                     }
-                    catch 
+                    catch
                     {
                         Console.WriteLine(file.Path);
                         throw;

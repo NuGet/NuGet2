@@ -3,14 +3,13 @@ using Xunit;
 
 namespace NuGet.Test
 {
-
     public class ManifestVersionUtilityTest
     {
         [Fact]
         public void GetManifestVersionReturns1IfNoNewPropertiesAreSet()
         {
             // Arrange
-            var metadata = new ManifestMetadata
+            var metadata =    new ManifestMetadata
             {
                 Id = "Foo",
                 Version = "1.0",

@@ -184,7 +184,9 @@ namespace NuGet.Test.Integration.Core
                 Version = new SemanticVersion(version),
                 Description = "Test desc"
             };
-            packageBuilder.Dependencies.Add(new PackageDependency("Dummy"));
+
+            var dependencies = new PackageDependency("Dummy");
+            packageBuilder.DependencySets.Add(new PackageDependencySet(null, new [] { dependencies }));
             packageBuilder.Authors.Add("test author");
 
             Directory.CreateDirectory(Path.GetDirectoryName(packagePath));

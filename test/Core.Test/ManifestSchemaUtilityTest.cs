@@ -20,6 +20,7 @@ namespace NuGet.Test
         [InlineData(new object[] { 1, "http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd" })]
         [InlineData(new object[] { 2, "http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd" })]
         [InlineData(new object[] { 3, "http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd" })]
+        [InlineData(new object[] { 4, "http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd" })]
         public void GetSchemaNamespaceReturnsRightSchemaVersion(int version, string expectedSchemaNamespace)
         {
             // Act
