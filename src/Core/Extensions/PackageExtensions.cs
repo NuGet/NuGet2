@@ -43,7 +43,8 @@ namespace NuGet
 
         public static IEnumerable<IPackageFile> GetFiles(this IPackage package, string directory)
         {
-            return package.GetFiles().Where(file => file.Path.StartsWith(directory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase));
+            string folderPrefix = directory + Path.DirectorySeparatorChar;
+            return package.GetFiles().Where(file => file.Path.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase));
         }
 
         public static IEnumerable<IPackageFile> GetContentFiles(this IPackage package)
