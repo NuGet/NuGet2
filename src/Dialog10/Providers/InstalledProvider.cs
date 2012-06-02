@@ -212,7 +212,10 @@ namespace NuGet.Dialog.Providers
 
             var uninstallPackageNames = (from o in allOperations
                                          where o.Action == PackageAction.Uninstall && !PackageEqualityComparer.IdAndVersion.Equals(o.Package, package)
-                                         select o.Package.ToString()).ToList();
+                                         select o.Package)
+                                         .Distinct(PackageEqualityComparer.IdAndVersion)
+                                         .Select(p => p.ToString())
+                                         .ToList();
 
             bool? removeDependencies = false;
             if (uninstallPackageNames.Count > 0)
