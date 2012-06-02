@@ -212,8 +212,23 @@ namespace NuGet
                 {
                     return Enumerable.Empty<PackageDependencySet>();
                 }
+                
+                var dependencySets = DependencySets.Select(CreatePackageDependencySet);
 
-                return DependencySets.Select(CreatePackageDependencySet);
+                // group the dependency sets with the same target framework together.
+                var dependencySetGroups = dependencySets.GroupBy(set => set.TargetFramework);
+                var groupedDependencySets = dependencySetGroups.Select(group => new PackageDependencySet(group.Key, group.SelectMany(g => g.Dependencies)))
+                                                               .ToList();
+                // move the group with the null target framework (if any) to the front just for nicer display in UI
+                int nullTargetFrameworkIndex = groupedDependencySets.FindIndex(set => set.TargetFramework == null);
+                if (nullTargetFrameworkIndex > -1)
+                {
+                    var nullFxDependencySet = groupedDependencySets[nullTargetFrameworkIndex];
+                    groupedDependencySets.RemoveAt(nullTargetFrameworkIndex);
+                    groupedDependencySets.Insert(0, nullFxDependencySet);
+                }
+
+                return groupedDependencySets;
             }
         }
 

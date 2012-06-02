@@ -345,4 +345,7 @@
   <data name="Visualizer_Project" xml:space="preserve">
     <value>Project</value>
   </data>
+  <data name="NoFxDependencyGroup" xml:space="preserve">
+    <value>(not framework specific)</value>
+  </data>
 </root>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Versioning;
 using System.Windows.Media.Imaging;
@@ -17,6 +18,7 @@ namespace NuGet.Dialog.Providers
         private readonly bool _isUpdateItem, _isPrerelease;
         private bool _isSelected;
         private readonly ObservableCollection<Project> _referenceProjectNames;
+        private IEnumerable<object> _displayDependencies;
 
         public PackageItem(PackagesProviderBase provider, IPackage package, bool isUpdateItem = false) :
             this(provider, package, new Project[0], isUpdateItem)
@@ -100,6 +102,37 @@ namespace NuGet.Dialog.Providers
             get
             {
                 return _packageIdentity.GetCompatiblePackageDependencies(TargetFramework);
+            }
+        }
+
+        /// <summary>
+        /// This property is for XAML data binding.
+        /// </summary>
+        public IEnumerable<object> DisplayDependencies
+        {
+            get
+            {
+                if (_displayDependencies == null)
+                {
+                    if (TargetFramework == null)
+                    {
+                        var dependencySets = _packageIdentity.DependencySets;
+                        if (dependencySets.Any(d => d.TargetFramework != null))
+                        {
+                            // if there is at least one dependeny set with non-null target framework,
+                            // we show the dependencies grouped by target framework.
+                            _displayDependencies = _packageIdentity.DependencySets;
+                        }
+                    }
+                    
+                    if (_displayDependencies == null)
+                    {
+                        // otherwise, just show the dependencies as pre 2.0
+                        _displayDependencies = Dependencies;
+                    }
+                }
+
+                return _displayDependencies;
             }
         }
 

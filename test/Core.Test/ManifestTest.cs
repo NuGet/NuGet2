@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Xunit;
+using System.Runtime.Versioning;
 
 namespace NuGet.Test
 {
@@ -235,6 +236,100 @@ namespace NuGet.Test
 
             // Assert
             AssertManifest(expectedManifest, manifest);
+        }
+
+        [Fact]
+        public void ManifestGroupDependencySetsByTargetFrameworkAndPutNullFrameworkFirst()
+        {
+            // Arrange
+            var manifest = new Manifest
+            {
+                Metadata = new ManifestMetadata
+                {
+                    Id = "Foobar",
+                    Version = "1.0",
+                    Authors = "test-author",
+                    Description = "desc",
+                    DependencySets = new List<ManifestDependencySet> {
+                            new ManifestDependencySet {
+                                TargetFramework = ".NETFramework40",
+                                Dependencies = new List<ManifestDependency> 
+                                    {
+                                        new ManifestDependency { Id = "B" }
+                                    }
+                            },
+
+                            new ManifestDependencySet {
+                                TargetFramework = null,
+                                Dependencies = new List<ManifestDependency> 
+                                    {
+                                        new ManifestDependency { Id = "A" }
+                                    }
+                            },
+
+                            new ManifestDependencySet {
+                                TargetFramework = null,
+                                Dependencies = new List<ManifestDependency> 
+                                    {
+                                        new ManifestDependency { Id = "C" }
+                                    }
+                            },
+
+                            new ManifestDependencySet {
+                                TargetFramework = "Silverlight35",
+                                Dependencies = new List<ManifestDependency> 
+                                    {
+                                        new ManifestDependency { Id = "D" }
+                                    }
+                            },
+
+                            new ManifestDependencySet {
+                                TargetFramework = "net40",
+                                Dependencies = new List<ManifestDependency> 
+                                    {
+                                        new ManifestDependency { Id = "E" }
+                                    }
+                            },
+
+                            new ManifestDependencySet {
+                                TargetFramework = "sl35",
+                                Dependencies = new List<ManifestDependency> 
+                                    {
+                                        new ManifestDependency { Id = "F" }
+                                    }
+                            },
+
+                            new ManifestDependencySet {
+                                TargetFramework = "winrt45",
+                                Dependencies = new List<ManifestDependency>() 
+                            },
+                    }
+                }
+            };
+
+            // Act
+            var dependencySets = ((IPackageMetadata)manifest.Metadata).DependencySets.ToList();
+
+            // Assert
+            Assert.Equal(4, dependencySets.Count);
+
+            Assert.Null(dependencySets[0].TargetFramework);
+            Assert.Equal(2, dependencySets[0].Dependencies.Count);
+            Assert.Equal("A", dependencySets[0].Dependencies.First().Id);
+            Assert.Equal("C", dependencySets[0].Dependencies.Last().Id);
+
+            Assert.Equal(new FrameworkName(".NETFramework, Version=4.0"), dependencySets[1].TargetFramework);
+            Assert.Equal(2, dependencySets[1].Dependencies.Count);
+            Assert.Equal("B", dependencySets[1].Dependencies.First().Id);
+            Assert.Equal("E", dependencySets[1].Dependencies.Last().Id);
+
+            Assert.Equal(new FrameworkName("Silverlight, Version=3.5"), dependencySets[2].TargetFramework);
+            Assert.Equal(2, dependencySets[2].Dependencies.Count);
+            Assert.Equal("D", dependencySets[2].Dependencies.First().Id);
+            Assert.Equal("F", dependencySets[2].Dependencies.Last().Id);
+
+            Assert.Equal(new FrameworkName(".NETCore, Version=4.5"), dependencySets[3].TargetFramework);
+            Assert.Equal(0, dependencySets[3].Dependencies.Count);
         }
 
 
