@@ -31,7 +31,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                 return _runspace.RunspaceAvailability;
             }
         }
-        
+
         public RunspaceDispatcher(Runspace runspace)
         {
             _runspace = runspace;
@@ -129,7 +129,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                 if (!string.IsNullOrEmpty(str))
                 {
                     // Remove \r\n, which is added by the Out-String cmdlet.
-                    return str.TrimEnd(new [] { '\r', '\n' });
+                    return str.TrimEnd(new[] { '\r', '\n' });
                 }
             }
 
@@ -173,7 +173,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
         public void SetExecutionPolicy(ExecutionPolicy policy, ExecutionPolicyScope scope)
         {
             string command = string.Format(CultureInfo.InvariantCulture, "Set-ExecutionPolicy {0} -Scope {1} -Force", policy.ToString(), scope.ToString());
-            
+
             Invoke(command, inputs: null, outputResults: false);
         }
 
@@ -214,8 +214,14 @@ namespace NuGetConsole.Host.PowerShell.Implementation
         private void WithLock(Action act)
         {
             _dispatcherLock.Wait();
-            act();
-            _dispatcherLock.Release();
+            try
+            {
+                act();
+            }
+            finally
+            {
+                _dispatcherLock.Release();
+            }
         }
 
         private Collection<PSObject> InvokeCore(Pipeline pipeline, IEnumerable<object> inputs)
@@ -236,7 +242,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                 bool finished = e.PipelineStateInfo.State == PipelineState.Completed ||
                                 e.PipelineStateInfo.State == PipelineState.Failed ||
                                 e.PipelineStateInfo.State == PipelineState.Stopped;
-                if(finished)
+                if (finished)
                 {
                     // Release the dispatcher lock
                     _dispatcherLock.Release();

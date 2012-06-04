@@ -89,7 +89,6 @@
     <Compile Include="Http\RequestHelper.cs" />
     <Compile Include="Http\STSAuthHelper.cs" />
     <Compile Include="IEnvironmentVariableReader.cs" />
-    <Compile Include="Operation.cs" />
     <Compile Include="PackageRestoreConsent.cs" />
     <Compile Include="Packages\LocalPackage.cs" />
     <Compile Include="Packages\UnzippedPackage.cs" />
