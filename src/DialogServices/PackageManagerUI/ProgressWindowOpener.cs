@@ -234,23 +234,31 @@ namespace NuGet.Dialog.PackageManagerUI
 
                 // select message color based on MessageLevel value.
                 // these colors match the colors in the console, which are set in MyHostUI.cs
-                switch (level)
+                if (SystemParameters.HighContrast)
                 {
-                    case MessageLevel.Debug:
-                        messageBrush = Brushes.DarkGray;
-                        break;
+                    // Use the plain System brush
+                    messageBrush = SystemColors.ControlTextBrush;
+                }
+                else
+                {
+                    switch (level)
+                    {
+                        case MessageLevel.Debug:
+                            messageBrush = Brushes.DarkGray;
+                            break;
 
-                    case MessageLevel.Error:
-                        messageBrush = Brushes.Red;
-                        break;
+                        case MessageLevel.Error:
+                            messageBrush = Brushes.Red;
+                            break;
 
-                    case MessageLevel.Warning:
-                        messageBrush = Brushes.Magenta;
-                        break;
+                        case MessageLevel.Warning:
+                            messageBrush = Brushes.Magenta;
+                            break;
 
-                    default:
-                        messageBrush = Brushes.Black;
-                        break;
+                        default:
+                            messageBrush = Brushes.Black;
+                            break;
+                    }
                 }
 
                 _currentWindow.AddMessage(message, messageBrush);
