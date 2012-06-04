@@ -8,6 +8,9 @@ $NoResultValue = New-Object PSObject -Property @{ NoResult = $true }
 # Hashtable that stores tab expansion definitions
 $TabExpansionCommands = New-Object 'System.Collections.Hashtable' -ArgumentList @([System.StringComparer]::InvariantCultureIgnoreCase)
 
+# Hashtable to store the tab completion info for packages (ID and version) by source
+$PackagesTabCompletionInfo = New-Object 'System.Collections.Hashtable' -ArgumentList @([System.StringComparer]::InvariantCultureIgnoreCase)
+
 function Register-TabExpansion {
 <#
 .SYNOPSIS
@@ -49,7 +52,7 @@ Register-TabExpansion 'Install-Package' @{
     'Id' = {
         param($context)
 
-        GetPackageIds (GetPackages $context)
+        GetPackageIds $context
     }
     'ProjectName' = {
         GetProjectNames
@@ -145,7 +148,7 @@ Register-TabExpansion 'Update-Package' @{
 Register-TabExpansion 'Open-PackagePage' @{
     'Id' = {
         param($context)
-        GetPackageIds (GetPackages $context)
+        GetPackageIds $context
     }
     'Version' = {
         param($context)
@@ -197,8 +200,21 @@ function GetProjectNames {
     ($uniqueNames + $safeNames) | Select-Object -Unique | Sort-Object
 }
 
-function GetPackageIds($packages) {
-    $packages | Select-Object -ExpandProperty Id -Unique
+function GetPackageIds($context) {
+    $parameters = @{}
+
+    if ($context.Id) { $parameters.filter = $context.Id }
+    if ($context.Source) { $parameters.source = $context.Source }
+    if (IsPrereleaseSet $context) {
+        $parameters.includePrerelease = $true 
+    }
+
+    try {
+		return Get-PackageId @parameters
+    }
+    catch {
+		return ""
+	}
 }
 
 function GetPackageSources() {
