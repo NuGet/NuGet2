@@ -28,6 +28,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\CommandLine\Common\ConsoleCredentialProvider.cs">
@@ -39,20 +41,11 @@
     <Compile Include="..\Core\Http\CredentialStore.cs">
       <Link>CredentialStore.cs</Link>
     </Compile>
-    <Compile Include="..\Core\Http\HttpClient.cs">
-      <Link>HttpClient.cs</Link>
-    </Compile>
     <Compile Include="..\Core\Http\ICredentialCache.cs">
       <Link>ICredentialCache.cs</Link>
     </Compile>
     <Compile Include="..\Core\Http\ICredentialProvider.cs">
       <Link>ICredentialProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Http\IHttpClient.cs">
-      <Link>IHttpClient.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Http\IHttpClientEvents.cs">
-      <Link>IHttpClientEvents.cs</Link>
     </Compile>
     <Compile Include="..\Core\Http\IHttpWebResponse.cs">
       <Link>IHttpWebResponse.cs</Link>
@@ -63,41 +56,21 @@
     <Compile Include="..\Core\Http\CredentialType.cs">
       <Link>CredentialType.cs</Link>
     </Compile>
-    <Compile Include="..\Core\Http\NullCredentialProvider.cs">
-      <Link>NullCredentialProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Http\ProxyCache.cs">
-      <Link>ProxyCache.cs</Link>
-    </Compile>
     <Compile Include="..\Core\Http\RequestHelper.cs">
       <Link>RequestHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Core\Repositories\ProgressEventArgs.cs">
-      <Link>ProgressEventArgs.cs</Link>
+    <Compile Include="..\Core\Utility\EncryptionUtility.cs">
+      <Link>EncryptionUtility.cs</Link>
     </Compile>
-    <Compile Include="..\Core\Utility\IProgressProvider.cs">
-      <Link>IProgressProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Http\HttpUtility.cs">
-      <Link>HttpUtility.cs</Link>
-    </Compile>
-    <Compile Include="..\Core\Utility\WebRequestEventArgs.cs">
-      <Link>WebRequestEventArgs.cs</Link>
-    </Compile>
-    <Compile Include="NuGetResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>NuGetResources.resx</DependentUpon>
-    </Compile>
+    <Compile Include="HttpClient.cs" />
+    <Compile Include="NuGetResources.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProxyCache.cs" />
     <Compile Include="STSAuthHelper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="NuGetResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>NuGetResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+    <EmbeddedResource Include="NuGetResources.resx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

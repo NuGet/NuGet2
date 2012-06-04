@@ -7,7 +7,7 @@ namespace NuGet.Test
 {
     public class ProxyCacheTest
     {
-        private static readonly string _password = SettingsExtensions.EncryptString("password");
+        private static readonly string _password = EncryptionUtility.EncryptString("password");
 
         [Fact]
         public void GetUserConfiguredProxyReturnsNullIfValueIsNotFoundInEnvironmentOrSettings()

@@ -95,7 +95,7 @@ namespace NuGet
 
                 if (!String.IsNullOrEmpty(userName) && !String.IsNullOrEmpty(password))
                 {
-                    return new NetworkCredential(userName, SettingsExtensions.DecryptString(password));
+                    return new NetworkCredential(userName, EncryptionUtility.DecryptString(password));
                 }
             }
             return null;
@@ -149,7 +149,7 @@ namespace NuGet
             {
                 _settingsManager.SetNestedValues(CredentialsSectionName, source.Name, new[] {
                     new KeyValuePair<string, string>(UsernameToken, source.UserName),
-                    new KeyValuePair<string, string>(PasswordToken, SettingsExtensions.EncryptString(source.Password)) 
+                    new KeyValuePair<string, string>(PasswordToken, EncryptionUtility.EncryptString(source.Password)) 
                 });
             }
         }

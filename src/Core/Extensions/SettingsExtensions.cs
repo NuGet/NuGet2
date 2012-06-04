@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace NuGet
 {
     public static class SettingsExtensions
     {
         private const string ConfigSection = "config";
-        private static readonly byte[] _entropyBytes = StringToBytes("NuGet");
 
         public static string GetDecryptedValue(this ISettings settings, string section, string key)
         {
@@ -30,7 +27,7 @@ namespace NuGet
             {
                 return String.Empty;
             }
-            return DecryptString(encryptedString);
+            return EncryptionUtility.DecryptString(encryptedString);
         }
 
         public static void SetEncryptedValue(this ISettings settings, string section, string key, string value)
@@ -54,7 +51,7 @@ namespace NuGet
             }
             else
             {
-                var encryptedString = EncryptString(value);
+                var encryptedString = EncryptionUtility.EncryptString(value);
                 settings.SetValue(section, key, encryptedString);
             }
         }
@@ -99,31 +96,6 @@ namespace NuGet
         public static bool DeleteConfigValue(this ISettings settings, string key)
         {
             return settings.DeleteValue(ConfigSection, key);
-        }
-
-        internal static string EncryptString(string value)
-        {
-            var decryptedByteArray = StringToBytes(value);
-            var encryptedByteArray = ProtectedData.Protect(decryptedByteArray, _entropyBytes, DataProtectionScope.CurrentUser);
-            var encryptedString = Convert.ToBase64String(encryptedByteArray);
-            return encryptedString;
-        }
-
-        internal static string DecryptString(string encryptedString)
-        {
-            var encryptedByteArray = Convert.FromBase64String(encryptedString);
-            var decryptedByteArray = ProtectedData.Unprotect(encryptedByteArray, _entropyBytes, DataProtectionScope.CurrentUser);
-            return BytesToString(decryptedByteArray);
-        }
-
-        private static byte[] StringToBytes(string str)
-        {
-            return Encoding.UTF8.GetBytes(str);
-        }
-
-        private static string BytesToString(byte[] bytes)
-        {
-            return Encoding.UTF8.GetString(bytes);
         }
     }
 }

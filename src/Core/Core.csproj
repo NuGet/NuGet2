@@ -145,6 +145,7 @@
     <Compile Include="Utility\CredentialState.cs" />
     <Compile Include="Utility\CustomAttributeProviderExtensions.cs" />
     <Compile Include="Utility\DisposableAction.cs" />
+    <Compile Include="Utility\EncryptionUtility.cs" />
     <Compile Include="Utility\ExceptionUtility.cs" />
     <Compile Include="Http\HttpUtility.cs" />
     <Compile Include="Http\ICredentialProvider.cs" />

@@ -125,6 +125,7 @@ namespace NuGet
                             credentialCache.Add(request.RequestUri, request.Credentials);
                             credentialCache.Add(response.ResponseUri, request.Credentials);
                         }
+
                         usingSTSAuth = STSAuthHelper.TryRetrieveSTSToken(request.RequestUri, response);
                         
                         if (!IsAuthenticationResponse(response) || !continueIfFailed)

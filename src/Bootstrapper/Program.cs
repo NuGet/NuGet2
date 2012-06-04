@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Xml;
 using NuGet;
 
 namespace Bootstrapper
@@ -9,35 +10,32 @@ namespace Bootstrapper
     {
         public static int Main(string[] args)
         {
-            string _exePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"NuGet\NuGet.exe");
+            string exePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"NuGet\NuGet.exe");
             try
             {
-                var processInfo = new ProcessStartInfo(_exePath)
+                var processInfo = new ProcessStartInfo(exePath)
                 {
                     UseShellExecute = false,
                     WorkingDirectory = Environment.CurrentDirectory
                 };
 
-                if (!File.Exists(_exePath))
+                if (!File.Exists(exePath))
                 {
+                    var document = GetConfigDocument();
+                    EnsurePackageRestoreConsent(document);
+                    ProxyCache.Instance = new ProxyCache(document);
                     // Register a console based credentials provider so that the user get's prompted if a password
                     // is required for the proxy
-                    HttpClient.DefaultCredentialProvider = new ConsoleCredentialProvider();
-
                     // Setup IHttpClient for the Gallery to locate packages
-                    var httpClient = new HttpClient(new Uri("http://nuget.org/NuGet.exe"));
-                    httpClient.UserAgent = "Bootstrapper/" + typeof(Program).Assembly.GetName().Version;
-
-                    File.WriteAllBytes(_exePath, httpClient.DownloadData());
+                    new HttpClient().DownloadData(exePath);
                 }
-                else if ((DateTime.UtcNow - File.GetLastWriteTime(_exePath)).TotalDays > 10)
+                else if ((DateTime.UtcNow - File.GetLastWriteTimeUtc(exePath)).TotalDays > 10)
                 {
                     // Check for updates to the exe every 10 days
                     processInfo.Arguments = "update -self";
                     RunProcess(processInfo);
-                    File.SetLastAccessTimeUtc(_exePath, DateTime.UtcNow);
+                    File.SetLastWriteTimeUtc(exePath, DateTime.UtcNow);
                 }
-
                 processInfo.Arguments = ParseArgs();
                 RunProcess(processInfo);
                 return 0;
@@ -48,6 +46,23 @@ namespace Bootstrapper
             }
 
             return 1;
+        }
+
+        private static XmlDocument GetConfigDocument()
+        {
+            var configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NuGet", "NuGet.config");
+            if (File.Exists(configPath))
+            {
+                var document = new XmlDocument();
+                document.Load(configPath);
+                return document;
+            }
+            return null;
+        }
+
+        private static void EnsurePackageRestoreConsent(XmlDocument document)
+        {
+            // Addressing this later.
         }
 
         private static void RunProcess(ProcessStartInfo processInfo)

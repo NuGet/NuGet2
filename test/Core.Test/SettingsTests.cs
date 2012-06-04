@@ -891,7 +891,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            var value = SettingsExtensions.EncryptString("hello world");
+            var value = EncryptionUtility.EncryptString("hello world");
             settings.Setup(s => s.GetValue("config", "foo"))
                     .Returns(value)
                     .Verifiable();
@@ -934,7 +934,7 @@ namespace NuGet.Test
 
             // Assert
             settings.Verify();
-            Assert.Equal("bar", SettingsExtensions.DecryptString(value));
+            Assert.Equal("bar", EncryptionUtility.DecryptString(value));
         }
 
         [Fact]

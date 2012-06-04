@@ -301,7 +301,7 @@ namespace NuGet.Test
         public void LoadPackageSourcesReadsCredentialPairs()
         {
             // Arrange
-            string encryptedPassword = SettingsExtensions.EncryptString("topsecret");
+            string encryptedPassword = EncryptionUtility.EncryptString("topsecret");
            
             var settings = new Mock<ISettings>();
             settings.Setup(s => s.GetValues("packageSources"))

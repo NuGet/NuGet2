@@ -12,11 +12,13 @@ namespace NuGet
             {
                 throw new ArgumentNullException("uri");
             }
-            string message = credentialType == CredentialType.ProxyCredentials ? NuGetResources.Credentials_ProxyCredentials : NuGetResources.Credentials_RequestCredentials;
+            string message = credentialType == CredentialType.ProxyCredentials ?
+                    NuGetResources.ResourceManager.GetString("Credentials_ProxyCredentials") :
+                    NuGetResources.ResourceManager.GetString("Credentials_RequestCredentials");
             Console.WriteLine(message, uri.OriginalString);
-            Console.Write(NuGetResources.Credentials_UserName);
+            Console.Write(NuGetResources.ResourceManager.GetString("Credentials_UserName"));
             string username = Console.ReadLine();
-            Console.Write(NuGetResources.Credentials_Password);
+            Console.Write(NuGetResources.ResourceManager.GetString("Credentials_Password"));
             SecureString password = ReadLineAsSecureString();
             var credentials = new NetworkCredential
             {
