@@ -4,11 +4,10 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
 using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.ExtensionManager.UI;
-using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
 using Window = System.Windows.Window;
+using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 
 namespace NuGet.VisualStudio
 {
@@ -143,7 +142,9 @@ namespace NuGet.VisualStudio
             timer.Stop();
 
             // search through all open windows in the current application and look for the Extension Manager window
-            Window extensionManager = Application.Current.Windows.OfType<ExtensionManagerWindow>().FirstOrDefault();
+            Window extensionManager = Application.Current.Windows
+                                                         .OfType<Window>()
+                                                         .FirstOrDefault(w => w.GetType().Name.Equals("ExtensionManagerWindow", StringComparison.Ordinal));
             if (extensionManager != null)
             {
                 ActivateUpdatesTab(extensionManager);

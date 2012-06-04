@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.ExtensionManager;
-using Microsoft.VisualStudio.ExtensionManager.UI;
 
 namespace NuGet.VisualStudio
 {
@@ -36,7 +35,7 @@ namespace NuGet.VisualStudio
         public bool CheckForUpdate(out Version installedVersion, out Version newVersion)
         {
             // Find the vsix on the vs gallery
-            VSGalleryEntry nugetVsix = _extensionRepository.CreateQuery<VSGalleryEntry>(includeTypeInQuery: false, includeSkuInQuery: true)
+            GalleryEntry nugetVsix = _extensionRepository.CreateQuery<GalleryEntry>(includeTypeInQuery: false, includeSkuInQuery: true)
                                                       .Where(e => e.VsixID == NuGetVSIXId)
                                                       .AsEnumerable()
                                                       .FirstOrDefault();
@@ -54,6 +53,56 @@ namespace NuGet.VisualStudio
             {
                 newVersion = installedVersion;
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// This class replicates the Microsoft.VisualStudio.ExtensionManager.UI.VsGalleryEntry in Microsoft.VisualStudio.ExtensionsManager.Implementation.dll.
+        /// We do so to avoid dependency on Implementation.dll assembly, which is a private assembly of VS.
+        /// </summary>
+        private class GalleryEntry : IRepositoryEntry
+        {
+            private Version _nonNullVsixVersion;
+
+            public string VsixID 
+            { 
+                get; 
+                set; 
+            }
+
+            public string DownloadUrl
+            {
+                get;
+                set;
+            }
+
+            public string VsixReferences
+            {
+                get;
+                set;
+            }
+
+            public string VsixVersion
+            {
+                get;
+                set;
+            }
+
+            public Version NonNullVsixVersion
+            {
+                get
+                {
+                    if (_nonNullVsixVersion == null)
+                    {
+                        if (!Version.TryParse(VsixVersion, out _nonNullVsixVersion))
+                        {
+                            _nonNullVsixVersion = new Version();
+                        }
+                        
+                    }
+
+                    return _nonNullVsixVersion;
+                }
             }
         }
     }
