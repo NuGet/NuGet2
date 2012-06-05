@@ -7,13 +7,13 @@ using NuGet.VisualStudio;
 
 namespace NuGet.PowerShell.Commands
 {
-    [Cmdlet(VerbsCommon.Get, "PackageId")]
+    [Cmdlet(VerbsCommon.Get, "PackageVersion")]
 	[OutputType(typeof(string))]
-    public class GetPackageIdCommand : NuGetBaseCommand
+    public class GetPackageVersionCommand : NuGetBaseCommand
     {
     	private readonly IVsPackageSourceProvider _packageSourceProvider;
 
-    	public GetPackageIdCommand()
+    	public GetPackageVersionCommand()
             : this(
 				ServiceLocator.GetInstance<ISolutionManager>(),
 				ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
@@ -22,7 +22,7 @@ namespace NuGet.PowerShell.Commands
         {
         }
 
-		public GetPackageIdCommand(
+		public GetPackageVersionCommand(
 			ISolutionManager solutionManager,
 			IVsPackageManagerFactory packageManagerFactory,
             IHttpClientEvents httpClientEvents,
@@ -32,9 +32,9 @@ namespace NuGet.PowerShell.Commands
 			_packageSourceProvider = packageSourceProvider;
 		}
 
-    	[Parameter(Position = 0)]
+    	[Parameter(Position = 0, Mandatory = true)]
 		[ValidateNotNullOrEmpty]
-		public string Filter { get; set; }
+		public string Id { get; set; }
 
 		[Parameter(Position = 1)]
 		[ValidateNotNullOrEmpty]
@@ -48,13 +48,13 @@ namespace NuGet.PowerShell.Commands
 		{
 			var jsonSerializer = new DataContractJsonSerializer(typeof(string[]));
 			var httpClient = new HttpClient(GetUri());
-			string[] packageIds;
+			string[] packageVersions;
 			using (var stream = new MemoryStream(httpClient.DownloadData()))
 			{
-				packageIds = jsonSerializer.ReadObject(stream) as string[];
+				packageVersions = jsonSerializer.ReadObject(stream) as string[];
 			}
-			WritePackageIds(packageIds);
-		}
+			WritePackageIds(packageVersions);
+        }
 
 		private Uri GetUri()
 		{
@@ -67,12 +67,10 @@ namespace NuGet.PowerShell.Commands
                 throw new InvalidOperationException(Resources.Cmdlet_NoActivePackageSource);
 
 			var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
-			if (!string.IsNullOrWhiteSpace(Filter))
-				queryString["partialId"] = Filter;
 			if (IncludePrerelease)
 				queryString["includePrerelease"] = "true";
 
-			return new Uri(baseUri + "/api/v2/package-ids?" + queryString);
+			return new Uri(string.Format("{0}/api/v2/package-versions/{1}?{2}", baseUri, Id, queryString));
         }
 
 		private void WritePackageIds(IEnumerable<string> packageIds)

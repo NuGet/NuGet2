@@ -8,9 +8,6 @@ $NoResultValue = New-Object PSObject -Property @{ NoResult = $true }
 # Hashtable that stores tab expansion definitions
 $TabExpansionCommands = New-Object 'System.Collections.Hashtable' -ArgumentList @([System.StringComparer]::InvariantCultureIgnoreCase)
 
-# Hashtable to store the tab completion info for packages (ID and version) by source
-$PackagesTabCompletionInfo = New-Object 'System.Collections.Hashtable' -ArgumentList @([System.StringComparer]::InvariantCultureIgnoreCase)
-
 function Register-TabExpansion {
 <#
 .SYNOPSIS
@@ -60,17 +57,7 @@ Register-TabExpansion 'Install-Package' @{
     'Version' = {
         param($context)
 
-        $parameters = @{}
-
-        if ($context.Id) { $parameters.filter = $context.Id }
-        if ($context.Source) { $parameters.source = $context.Source }
-        if (IsPrereleaseSet $context) {
-            $parameters.IncludePreRelease = $true 
-        }
-
-        $parameters.Remote = $true
-        $parameters.AllVersions = $true
-        GetPackageVersions $parameters $context 
+        GetRemotePackageVersions $context
     }
     'Source' = {
         GetPackageSources
@@ -112,26 +99,23 @@ Register-TabExpansion 'Update-Package' @{
     'Version' = {
         param($context)
 
-        $parameters = @{}
-
         # Only show available versions if an id was specified
         if ($context.id) { 
-            if ($context.Source) { $parameters.source = $context.Source }
-
             # Find the installed package (this might be nothing since we could hav a partial id)
+            $versions = ""
             $packages = @(Get-Package $context.id | ?{ $_.Id -eq $context.id })
-
-            $parameters.filter = $context.id 
-            $parameters.Remote = $true
-            $parameters.AllVersions = $true
-            if (IsPrereleaseSet $context) {
-                $parameters.IncludePreRelease = $true 
-            }
-
-            $versions = GetPackageVersions $parameters $context
 
             if($packages.Count) {
                 $package = @($packages | Sort-Object Version)[0]
+
+                $parameters = @{}
+                if ($context.Source) { $parameters.source = $context.Source }
+                $parameters.id = $package.id 
+                if (IsPrereleaseSet $context) {
+	                $parameters.IncludePreRelease = $true 
+                }
+
+                $versions = GetRemotePackageVersions $parameters
 
                 # Only show versions that are higher than the lowest installed version
                 $versions = $versions | ?{ $_ -gt $package.Version }
@@ -231,6 +215,23 @@ function GetPackageVersions($parameters, $context) {
             $_ 
         }  
     } | Sort-Object -Descending
+}
+
+function GetRemotePackageVersions($context) {
+    $parameters = @{}
+
+    if ($context.Id) { $parameters.id = $context.Id }
+    if ($context.Source) { $parameters.source = $context.Source }
+    if (IsPrereleaseSet $context) {
+        $parameters.IncludePreRelease = $true 
+    }
+
+    try {
+	    return Get-PackageVersion @parameters | %{ [NuGet.SemanticVersion]::Parse($_) } | Sort-Object -Descending
+    }
+    catch {
+	    return ""
+    }
 }
 
 function NugetTabExpansion($line, $lastWord) {
