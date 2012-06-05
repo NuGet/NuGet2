@@ -144,7 +144,6 @@ namespace NuGet
             // Overwrite the <packageSourceCredentials> section
             _settingsManager.DeleteSection(CredentialsSectionName);
 
-
             var sourceWithCredentials = sources.Where(s => !String.IsNullOrEmpty(s.UserName) && !String.IsNullOrEmpty(s.Password));
             foreach (var source in sourceWithCredentials)
             {
@@ -153,6 +152,30 @@ namespace NuGet
                     new KeyValuePair<string, string>(PasswordToken, SettingsExtensions.EncryptString(source.Password)) 
                 });
             }
+        }
+
+        public void DisablePackageSource(PackageSource source)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException("source");
+            }
+
+            _settingsManager.SetValue(DisabledPackageSourcesSectionName, source.Name, "true");
+        }
+
+        public bool IsPackageSourceEnabled(PackageSource source)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException("source");
+            }
+
+            string value = _settingsManager.GetValue(DisabledPackageSourcesSectionName, source.Name);
+
+            // It doesn't matter what value it is.
+            // As long as the package source name is persisted in the <disabledPackageSources> section, the source is disabled.
+            return String.IsNullOrEmpty(value);
         }
     }
 }

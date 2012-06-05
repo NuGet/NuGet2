@@ -16,5 +16,20 @@ namespace NuGet.VisualStudio.Test
         {
             _sources = sources.ToList();
         }
+
+        public void DisablePackageSource(PackageSource source)
+        {
+            var sourceInUse = _sources.Find(p => p.Equals(source));
+            if (sourceInUse != null)
+            {
+                sourceInUse.IsEnabled = false;
+            }
+        }
+
+        public bool IsPackageSourceEnabled(PackageSource source)
+        {
+            var sourceInUse = _sources.Find(p => p.Equals(source));
+            return sourceInUse != null && sourceInUse.IsEnabled;
+        }
     }
 }

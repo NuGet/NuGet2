@@ -13,14 +13,21 @@ namespace NuGet.VisualStudio
     public class VsPackageSourceProvider : IVsPackageSourceProvider
     {
         private static readonly string OfficialFeedName = VsResources.OfficialSourceName;
-        private static readonly string VisualStudioExpressForWindows8FeedName = VsResources.VisualStudioExpressForWindows8SourceName;
-        private static readonly PackageSource _defaultSource = new PackageSource(NuGetConstants.DefaultFeedUrl, OfficialFeedName);
+        private static readonly PackageSource NuGetDefaultSource = new PackageSource(NuGetConstants.DefaultFeedUrl, OfficialFeedName);
+
+        private static readonly PackageSource Windows8Source = new PackageSource(NuGetConstants.VSExpressForWindows8FeedUrl,
+                                                                                 VsResources.VisualStudioExpressForWindows8SourceName,
+                                                                                 isEnabled: true,
+                                                                                 isOfficial: true);
+
         private static readonly Dictionary<PackageSource, PackageSource> _feedsToMigrate = new Dictionary<PackageSource, PackageSource>
         {
-            { new PackageSource(NuGetConstants.V1FeedUrl, OfficialFeedName), _defaultSource },
-            { new PackageSource(NuGetConstants.V2LegacyFeedUrl, OfficialFeedName), _defaultSource },
+            { new PackageSource(NuGetConstants.V1FeedUrl, OfficialFeedName), NuGetDefaultSource },
+            { new PackageSource(NuGetConstants.V2LegacyFeedUrl, OfficialFeedName), NuGetDefaultSource },
         };
+
         internal const string ActivePackageSourceSectionName = "activePackageSource";
+
         private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly IVsShellInfo _vsShellInfo;
         private readonly ISettings _settings;
@@ -32,7 +39,7 @@ namespace NuGet.VisualStudio
         public VsPackageSourceProvider(
             ISettings settings,
             IVsShellInfo vsShellInfo) :
-            this(settings, new PackageSourceProvider(settings, new[] { _defaultSource }, _feedsToMigrate), vsShellInfo)
+            this(settings, new PackageSourceProvider(settings, new[] { NuGetDefaultSource }, _feedsToMigrate), vsShellInfo)
         {
         }
 
@@ -89,7 +96,7 @@ namespace NuGet.VisualStudio
 
         internal static IEnumerable<PackageSource> DefaultSources
         {
-            get { return new[] { _defaultSource }; }
+            get { return new[] { NuGetDefaultSource }; }
         }
 
         internal static Dictionary<PackageSource, PackageSource> FeedsToMigrate
@@ -122,6 +129,19 @@ namespace NuGet.VisualStudio
             PersistPackageSources(_packageSourceProvider, _vsShellInfo, _packageSources);
         }
 
+        public void DisablePackageSource(PackageSource source)
+        {
+            throw new NotSupportedException();
+        }
+
+        public bool IsPackageSourceEnabled(PackageSource source)
+        {
+            EnsureInitialized();
+
+            var sourceInUse = _packageSources.FirstOrDefault(ps => ps.Equals(source));
+            return sourceInUse != null && sourceInUse.IsEnabled;
+        }
+
         private void EnsureInitialized()
         {
             if (!_initialized)
@@ -137,13 +157,19 @@ namespace NuGet.VisualStudio
                     officialPackageSource.IsOfficial = true;
                 }
 
-                // When running Visual Studio Express for Windows 8, we swap in a curated feed for the normal official feed.
+                // When running Visual Studio Express for Windows 8, we insert the curated feed at the top
                 if (_vsShellInfo.IsVisualStudioExpressForWindows8)
                 {
-                    _packageSources = _packageSources.Select(packageSource => packageSource.IsOfficial ?
-                        new PackageSource(NuGetConstants.VisualStudioExpressForWindows8FeedUrl, VisualStudioExpressForWindows8FeedName, isEnabled: packageSource.IsEnabled, isOfficial: true) :
-                        packageSource)
-                        .ToList();
+                    bool windows8SourceIsEnabled = _packageSourceProvider.IsPackageSourceEnabled(Windows8Source);
+
+                    // defensive coding: make sure we don't add duplicated win8 source
+                    _packageSources.RemoveAll(p => p.Equals(Windows8Source));
+
+                    // Windows8Source is a static object which is meant for doing comparison only. 
+                    // To add it to the list of package sources, we make a clone of it first.
+                    var windows8SourceClone = Windows8Source.Clone();
+                    windows8SourceClone.IsEnabled = windows8SourceIsEnabled;
+                    _packageSources.Insert(0, windows8SourceClone);
                 }
 
                 InitializeActivePackageSource();
@@ -160,7 +186,7 @@ namespace NuGet.VisualStudio
             {
                 // If there are no sources, pick the first source that's enabled.
                 activeSourceChanged = true;
-                _activePackageSource = _defaultSource;
+                _activePackageSource = NuGetDefaultSource;
             }
             else if (_feedsToMigrate.TryGetValue(_activePackageSource, out migratedActiveSource))
             {
@@ -180,20 +206,11 @@ namespace NuGet.VisualStudio
             IVsShellInfo vsShellInfo,
             PackageSource activePackageSource)
         {
+            settings.DeleteSection(ActivePackageSourceSectionName);
+
             if (activePackageSource != null)
             {
-                // When running Visual Studio Express For Windows 8, we will have previously swapped in a curated package source for the normal official source.
-                // But, we always want to persist the normal official source. So, we swap the normal official source back in for the curated source.
-                if (vsShellInfo.IsVisualStudioExpressForWindows8 && activePackageSource.IsOfficial)
-                {
-                    activePackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl, OfficialFeedName, isEnabled: activePackageSource.IsEnabled, isOfficial: true);
-                }
-
                 settings.SetValue(ActivePackageSourceSectionName, activePackageSource.Name, activePackageSource.Source);
-            }
-            else
-            {
-                settings.DeleteSection(ActivePackageSourceSectionName);
             }
         }
 
@@ -227,12 +244,6 @@ namespace NuGet.VisualStudio
                 if (IsOfficialPackageSource(packageSource))
                 {
                     packageSource.IsOfficial = true;
-
-                    // When running Visual Studio Express for Windows 8, we swap in a curated feed for the normal official feed.
-                    if (vsShellInfo.IsVisualStudioExpressForWindows8)
-                    {
-                        packageSource = new PackageSource(NuGetConstants.VisualStudioExpressForWindows8FeedUrl, VisualStudioExpressForWindows8FeedName, isEnabled: packageSource.IsEnabled, isOfficial: true);
-                    }
                 }
             }
 
@@ -241,20 +252,31 @@ namespace NuGet.VisualStudio
 
         private static void PersistPackageSources(IPackageSourceProvider packageSourceProvider, IVsShellInfo vsShellInfo, List<PackageSource> packageSources)
         {
-            // When running Visual Studio Express For Windows 8, we will have previously swapped in a curated package source for the normal official source.
-            // But, we always want to persist the normal official source. So, we swap the normal official source back in for the curated source.
+            bool windows8SourceIsDisabled = false;
+
+            // When running Visual Studio Express For Windows 8, we will have previously added a curated package source.
+            // But we don't want to persist it, so remove it from the list.
             if (vsShellInfo.IsVisualStudioExpressForWindows8)
             {
-                packageSources = packageSources.Select(packageSource => packageSource.IsOfficial ?
-                    new PackageSource(NuGetConstants.DefaultFeedUrl, OfficialFeedName, isEnabled: packageSource.IsEnabled, isOfficial: true) :
-                    packageSource)
-                    .ToList();
+                PackageSource windows8SourceInUse = packageSources.Find(p => p.Equals(Windows8Source));
+                Debug.Assert(windows8SourceInUse != null);
+                if (windows8SourceInUse != null)
+                {
+                    packageSources = packageSources.Where(ps => !ps.Equals(Windows8Source)).ToList();
+                    windows8SourceIsDisabled = !windows8SourceInUse.IsEnabled;
+                }
             }
 
             // Starting from version 1.3, we persist the package sources to the nuget.config file instead of VS registry.
             // assert that we are not saving aggregate source
             Debug.Assert(!packageSources.Any(p => IsAggregateSource(p.Name, p.Source)));
+            
             packageSourceProvider.SavePackageSources(packageSources);
+
+            if (windows8SourceIsDisabled)
+            {
+                packageSourceProvider.DisablePackageSource(Windows8Source);
+            }
         }
 
         private static bool IsAggregateSource(string name, string source)
@@ -276,7 +298,7 @@ namespace NuGet.VisualStudio
                 return false;
             }
 
-            return packageSource.Equals(_defaultSource);
+            return packageSource.Equals(NuGetDefaultSource);
         }
     }
 }

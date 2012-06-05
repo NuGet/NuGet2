@@ -6,5 +6,7 @@ namespace NuGet
     {
         IEnumerable<PackageSource> LoadPackageSources();
         void SavePackageSources(IEnumerable<PackageSource> sources);
+        void DisablePackageSource(PackageSource source);
+        bool IsPackageSourceEnabled(PackageSource source);
     }
 }

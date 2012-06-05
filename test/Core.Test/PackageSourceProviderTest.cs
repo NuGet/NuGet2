@@ -220,6 +220,53 @@ namespace NuGet.Test
             AssertPackageSource(values[2], "three", "threesource", true);
         }
 
+        [Fact]
+        public void DisablePackageSourceAddEntryToSettings()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            settings.Setup(s => s.SetValue("disabledPackageSources", "A", "true")).Verifiable();
+            var provider = CreatePackageSourceProvider(settings.Object);
+
+            // Act
+            provider.DisablePackageSource(new PackageSource("source", "A"));
+
+            // Assert
+            settings.Verify();
+        }
+
+        [Fact]
+        public void IsPackageSourceEnabledReturnsFalseIfTheSourceIsDisabled()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            settings.Setup(s => s.GetValue("disabledPackageSources", "A")).Returns("sdfds");
+            var provider = CreatePackageSourceProvider(settings.Object);
+
+            // Act
+            bool isEnabled = provider.IsPackageSourceEnabled(new PackageSource("source", "A"));
+
+            // Assert
+            Assert.False(isEnabled);
+        }
+
+        [Theory]
+        [InlineData((string)null)]
+        [InlineData("")]
+        public void IsPackageSourceEnabledReturnsTrueIfTheSourceIsNotDisabled(string returnValue)
+        {
+            // Arrange
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            settings.Setup(s => s.GetValue("disabledPackageSources", "A")).Returns(returnValue);
+            var provider = CreatePackageSourceProvider(settings.Object);
+
+            // Act
+            bool isEnabled = provider.IsPackageSourceEnabled(new PackageSource("source", "A"));
+
+            // Assert
+            Assert.True(isEnabled);
+        }
+
         [Theory]
         [InlineData(new object[] { null, "abcd" })]
         [InlineData(new object[] { "", "abcd" })]
@@ -330,7 +377,7 @@ namespace NuGet.Test
                     {
                         Assert.Equal(1, values.Count);
                         Assert.Equal("two", values[0].Key);
-                        Assert.Equal("true", values[0].Value);
+                        Assert.Equal("true", values[0].Value, StringComparer.OrdinalIgnoreCase);
                     })
                     .Verifiable();
 

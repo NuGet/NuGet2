@@ -6,7 +6,7 @@ namespace NuGet.TestUI
 {
     class MockPackageSourceProvider : IVsPackageSourceProvider
     {
-        private IList<PackageSource> _packageSources = new List<PackageSource>();
+        private List<PackageSource> _packageSources = new List<PackageSource>();
 
         public PackageSource ActivePackageSource
         {
@@ -32,6 +32,21 @@ namespace NuGet.TestUI
         public void SavePackageSources(IEnumerable<PackageSource> sources)
         {
             _packageSources = sources.ToList();
+        }
+
+        public void DisablePackageSource(PackageSource source)
+        {
+            var sourceInUse = _packageSources.Find(p => p.Equals(source));
+            if (sourceInUse != null)
+            {
+                sourceInUse.IsEnabled = false;
+            }
+        }
+
+        public bool IsPackageSourceEnabled(PackageSource source)
+        {
+            var sourceInUse = _packageSources.Find(p => p.Equals(source));
+            return sourceInUse != null && sourceInUse.IsEnabled;
         }
     }
 }
