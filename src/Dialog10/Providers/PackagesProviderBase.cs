@@ -642,6 +642,32 @@ namespace NuGet.Dialog.Providers
             }
         }
 
+        protected bool ShowLicenseAgreement(IVsPackageManager packageManager, IEnumerable<PackageOperation> operations)
+        {
+            var licensePackages = from o in operations
+                                  where o.Action == PackageAction.Install &&
+                                        o.Package.RequireLicenseAcceptance &&
+                                        !packageManager.LocalRepository.Exists(o.Package)
+                                  select o.Package;
+
+            // display license window if necessary
+            if (licensePackages.Any())
+            {
+                // hide the progress window if we are going to show license window
+                HideProgressWindow();
+
+                bool accepted = _providerServices.UserNotifierServices.ShowLicenseWindow(licensePackages);
+                if (!accepted)
+                {
+                    return false;
+                }
+
+                ShowProgressWindow();
+            }
+
+            return true;
+        }
+
         private void PrepareOpenReadMeFile(PackageOperationEventArgs e)
         {
             // only open the read me file for the first package that initiates this operation.

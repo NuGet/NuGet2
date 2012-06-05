@@ -35,7 +35,7 @@ namespace NuGet.Dialog.Providers
             _solutionManager = solutionManager;
             _userNotifierServices = providerServices.UserNotifierServices;
         }
-        
+
         protected override void FillRootNodes()
         {
             var allNode = new SimpleTreeNode(
@@ -98,14 +98,14 @@ namespace NuGet.Dialog.Providers
             var uninstallRepositories = new List<IPackageRepository>();
             var uninstallFrameworks = new List<FrameworkName>();
             var uninstallProjects = new List<Project>();
-            
+
             bool? removeDepedencies = false;
             if (hasUninstallWork)
             {
                 // Starting in 2.0, each project can have a different set of dependencies (because of different target frameworks).
                 // To keep the UI simple, we aggregate all the dependencies from all uninstall projects
                 // and ask if user wants to uninstall them all.
-                
+
                 foreach (Project project in allProjects)
                 {
                     // check if user wants to uninstall the package in this project
@@ -130,37 +130,17 @@ namespace NuGet.Dialog.Providers
             // now install the packages that are checked
             // Bug 1357: It's crucial that we perform all installs before uninstalls
             // to avoid the package file being deleted before an install.
-            foreach (Project project in allProjects)
+            if (hasInstallWork)
             {
-                if (selectedProjectsSet.Contains(project.UniqueName))
-                {
-                    try
-                    {
-                        IList<PackageOperation> operations;
-                        CheckInstallPSScripts(
-                            package,
-                            PackageManager.GetProjectManager(project).LocalRepository,
-                            PackageManager.SourceRepository,
-                            targetFramework: project.GetTargetFrameworkName(),
-                            includePrerelease: true,
-                            operations: out operations);
-
-                        // if the project is checked, install package into it  
-                        InstallPackageToProject(project, item, includePrerelease: true);
-                    }
-                    catch (Exception ex)
-                    {
-                        AddFailedProject(project, ex);
-                    }
-                }
+                InstallPackageIntoProjects(allProjects, selectedProjectsSet, package);
             }
 
-            // now uninstall the packages that are unchecked.            
-            for (int i=0; i < uninstallProjects.Count; ++i)
+            // now uninstall the packages that are unchecked           
+            for (int i = 0; i < uninstallProjects.Count; ++i)
             {
                 try
                 {
-                    CheckDependentPackages(package, uninstallRepositories[i], uninstallFrameworks[i]); 
+                    CheckDependentPackages(package, uninstallRepositories[i], uninstallFrameworks[i]);
                     UninstallPackageFromProject(uninstallProjects[i], item, (bool)removeDepedencies);
                 }
                 catch (Exception ex)
@@ -171,6 +151,49 @@ namespace NuGet.Dialog.Providers
 
             HideProgressWindow();
             return true;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want one failed project to affect the other projects.")]
+        private void InstallPackageIntoProjects(IList<Project> allProjects, HashSet<string> selectedProjectsSet, IPackage package)
+        {
+            var allOperations = new List<PackageOperation>();
+            foreach (Project project in allProjects)
+            {
+                if (selectedProjectsSet.Contains(project.UniqueName))
+                {
+                    IList<PackageOperation> operations;
+                    CheckInstallPSScripts(
+                        package,
+                        PackageManager.GetProjectManager(project).LocalRepository,
+                        PackageManager.SourceRepository,
+                        targetFramework: project.GetTargetFrameworkName(),
+                        includePrerelease: true,
+                        operations: out operations);
+
+                    allOperations.AddRange(operations);
+                }
+            }
+
+            ShowLicenseAgreement(PackageManager, allOperations.Reduce());
+
+            // now install the packages that are checked
+            // Bug 1357: It's crucial that we perform all installs before uninstalls
+            // to avoid the package file being deleted before an install.
+            foreach (Project project in allProjects)
+            {
+                if (selectedProjectsSet.Contains(project.UniqueName))
+                {
+                    try
+                    {
+                        // if the project is checked, install package into it  
+                        InstallPackageToProject(project, package, includePrerelease: true);
+                    }
+                    catch (Exception ex)
+                    {
+                        AddFailedProject(project, ex);
+                    }
+                }
+            }
         }
 
         private bool UninstallSolutionPackage(IPackage package)

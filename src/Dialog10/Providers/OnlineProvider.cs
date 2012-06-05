@@ -18,7 +18,6 @@ namespace NuGet.Dialog.Providers
         private readonly IPackageRepositoryFactory _packageRepositoryFactory;
         private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly IVsPackageManagerFactory _packageManagerFactory;
-        private readonly ProviderServices _providerServices;
         private readonly Project _project;
 
         public OnlineProvider(
@@ -37,7 +36,6 @@ namespace NuGet.Dialog.Providers
             _packageRepositoryFactory = packageRepositoryFactory;
             _packageSourceProvider = packageSourceProvider;
             _packageManagerFactory = packageManagerFactory;
-            _providerServices = providerServices;
             _project = project;
         }
 
@@ -167,32 +165,6 @@ namespace NuGet.Dialog.Providers
                 out operations);
 
             return ShowLicenseAgreement(packageManager, operations);
-        }
-
-        protected bool ShowLicenseAgreement(IVsPackageManager packageManager, IEnumerable<PackageOperation> operations)
-        {
-            var licensePackages = from o in operations
-                                  where o.Action == PackageAction.Install && 
-                                        o.Package.RequireLicenseAcceptance && 
-                                        !packageManager.LocalRepository.Exists(o.Package)
-                                  select o.Package;
-
-            // display license window if necessary
-            if (licensePackages.Any())
-            {
-                // hide the progress window if we are going to show license window
-                HideProgressWindow();
-
-                bool accepted = _providerServices.UserNotifierServices.ShowLicenseWindow(licensePackages);
-                if (!accepted)
-                {
-                    return false;
-                }
-
-                ShowProgressWindow();
-            }
-
-            return true;
         }
 
         protected void ExecuteCommandOnProject(Project activeProject, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations)

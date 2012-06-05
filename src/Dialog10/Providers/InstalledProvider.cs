@@ -261,17 +261,17 @@ namespace NuGet.Dialog.Providers
             return removeDependencies;
         }
 
-        protected void InstallPackageToProject(Project project, PackageItem item, bool includePrerelease)
+        protected void InstallPackageToProject(Project project, IPackage package, bool includePrerelease)
         {
             IProjectManager projectManager = null;
             try
             {
                 projectManager = PackageManager.GetProjectManager(project);
                 // make sure the package is not installed in this project before proceeding
-                if (!projectManager.IsInstalled(item.PackageIdentity))
+                if (!projectManager.IsInstalled(package))
                 {
                     RegisterPackageOperationEvents(PackageManager, projectManager);
-                    PackageManager.InstallPackage(projectManager, item.Id, item.PackageIdentity.Version, ignoreDependencies: false, allowPrereleaseVersions: includePrerelease, logger: this);
+                    PackageManager.InstallPackage(projectManager, package.Id, package.Version, ignoreDependencies: false, allowPrereleaseVersions: includePrerelease, logger: this);
                 }
             }
             finally
