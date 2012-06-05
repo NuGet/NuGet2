@@ -7,10 +7,9 @@ namespace NuGet.Dialog.PackageManagerUI
     {
         protected override AutomationPeer OnCreateAutomationPeer()
         {
-            return new TextBlockAutomationPeer(this);
+            return new TextBlockControlAutomationPeer(this);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification="This class is instantiated right above. Don't you see it?")]
         private class TextBlockControlAutomationPeer : TextBlockAutomationPeer
         {
             public TextBlockControlAutomationPeer(TextBlock owner) 

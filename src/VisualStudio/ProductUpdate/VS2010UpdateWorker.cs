@@ -35,6 +35,7 @@ namespace NuGet.VisualStudio
         public bool CheckForUpdate(out Version installedVersion, out Version newVersion)
         {
             // Find the vsix on the vs gallery
+            // IMPORTANT: The .AsEnumerble() call is REQUIRED. Don't remove it or the update service won't work.
             GalleryEntry nugetVsix = _extensionRepository.CreateQuery<GalleryEntry>(includeTypeInQuery: false, includeSkuInQuery: true)
                                                       .Where(e => e.VsixID == NuGetVSIXId)
                                                       .AsEnumerable()
