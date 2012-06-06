@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Management.Automation;
 using System.Runtime.Serialization.Json;
@@ -46,17 +45,25 @@ namespace NuGet.PowerShell.Commands
 
 		protected override void ProcessRecordCore()
 		{
-			var jsonSerializer = new DataContractJsonSerializer(typeof(string[]));
-			var httpClient = new HttpClient(GetUri());
-			string[] packageIds;
-			using (var stream = new MemoryStream(httpClient.DownloadData()))
-			{
-				packageIds = jsonSerializer.ReadObject(stream) as string[];
-			}
-			WritePackageIds(packageIds);
+            foreach (var packageId in GetPackageIds(GetUri()))
+            {
+                if (Stopping)
+                    break;
+                WriteObject(packageId);
+            }
 		}
 
-		private Uri GetUri()
+		protected virtual string[] GetPackageIds(Uri uri)
+		{
+            var jsonSerializer = new DataContractJsonSerializer(typeof(string[]));
+            var httpClient = new HttpClient(uri);
+            using (var stream = new MemoryStream(httpClient.DownloadData()))
+            {
+                return jsonSerializer.ReadObject(stream) as string[];
+            }
+		}
+        
+        protected virtual Uri GetUri()
 		{
 			string baseUri;
 			if (!String.IsNullOrEmpty(Source))
@@ -73,16 +80,6 @@ namespace NuGet.PowerShell.Commands
 				queryString["includePrerelease"] = "true";
 
 			return new Uri(baseUri + "/api/v2/package-ids?" + queryString);
-        }
-
-		private void WritePackageIds(IEnumerable<string> packageIds)
-        {
-			foreach (var packageId in packageIds)
-            {
-                if (Stopping)
-                    break;
-				WriteObject(packageId);
-            }
         }
     }
 }
