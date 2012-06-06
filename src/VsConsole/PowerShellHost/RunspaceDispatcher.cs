@@ -21,6 +21,9 @@ namespace NuGetConsole.Host.PowerShell.Implementation
     /// </remarks>
     internal class RunspaceDispatcher : IDisposable
     {
+        [ThreadStatic]
+        private static bool IHaveTheLock = false;
+
         private readonly Runspace _runspace;
         private readonly SemaphoreSlim _dispatcherLock = new SemaphoreSlim(1, 1);
 
@@ -213,14 +216,23 @@ namespace NuGetConsole.Host.PowerShell.Implementation
         // Dispatcher synchronization methods
         private void WithLock(Action act)
         {
-            _dispatcherLock.Wait();
-            try
+            if (IHaveTheLock)
             {
                 act();
             }
-            finally
+            else
             {
-                _dispatcherLock.Release();
+                IHaveTheLock = true;
+                _dispatcherLock.Wait();
+                try
+                {
+                    act();
+                }
+                finally
+                {
+                    IHaveTheLock = false;
+                    _dispatcherLock.Release();
+                }
             }
         }
 
@@ -236,13 +248,15 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
         private void InvokeCoreAsync(Pipeline pipeline, IEnumerable<object> inputs, EventHandler<PipelineStateEventArgs> pipelineStateChanged)
         {
+            bool hadTheLockAlready = IHaveTheLock;
+
             pipeline.StateChanged += (sender, e) =>
             {
                 // Release the lock ASAP
                 bool finished = e.PipelineStateInfo.State == PipelineState.Completed ||
                                 e.PipelineStateInfo.State == PipelineState.Failed ||
                                 e.PipelineStateInfo.State == PipelineState.Stopped;
-                if (finished)
+                if (finished && !hadTheLockAlready)
                 {
                     // Release the dispatcher lock
                     _dispatcherLock.Release();
@@ -267,16 +281,25 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
             // Take the dispatcher lock and invoke the pipeline
             // REVIEW: This could probably be done in a Task so that we can return to the caller before even taking the dispatcher lock
-            _dispatcherLock.Wait();
-            try
+            if (IHaveTheLock)
             {
                 pipeline.InvokeAsync();
             }
-            catch
+            else
             {
-                // Don't care about the exception, rethrow it, but first release the lock
-                _dispatcherLock.Release();
-                throw;
+                IHaveTheLock = true;
+                _dispatcherLock.Wait();
+                try
+                {
+                    pipeline.InvokeAsync();
+                }
+                catch
+                {
+                    // Don't care about the exception, rethrow it, but first release the lock
+                    IHaveTheLock = false;
+                    _dispatcherLock.Release();
+                    throw;
+                }
             }
         }
     }
