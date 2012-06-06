@@ -847,3 +847,19 @@ function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToIn
 
 	Remove-Variable UninstallVar -Scope Global
 }
+
+
+function Test-ToolsPathForUninstallScriptPointToToolsFolder
+{
+	param($context)
+
+	# Arrange
+	$p = New-SilverlightApplication
+
+	$p | Install-Package PackageA -Version 1.0.0 -Source $context.RepositoryPath
+	Assert-Package $p 'packageA'
+
+	# Act
+
+	$p | Uninstall-Package PackageA
+}

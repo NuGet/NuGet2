@@ -53,7 +53,7 @@ namespace NuGet.VisualStudio
 
             if (File.Exists(fullPath))
             {
-                string toolsPath = Path.Combine(installPath, "tools");
+                string toolsPath = Path.GetDirectoryName(fullPath);
                 string logMessage = String.Format(CultureInfo.CurrentCulture, VsResources.ExecutingScript, fullPath);
 
                 // logging to both the Output window and progress window.

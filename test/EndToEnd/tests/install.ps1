@@ -1905,3 +1905,17 @@ function Test-InstallPackagePersistTargetFrameworkToPackagesConfig
 	Assert-AreEqual 'net40' $entryA.targetFramework
 	Assert-AreEqual 'net40' $entryB.targetFramework
 }
+
+function Test-ToolsPathForInitAndInstallScriptPointToToolsFolder
+{
+	param($context)
+
+	# Arrange
+	$p = New-ClassLibrary
+
+	# Act 
+	$p | Install-Package PackageA -Version 1.0.0 -Source $context.RepositoryPath
+
+	# Assert
+	Assert-Package $p 'packageA'
+}

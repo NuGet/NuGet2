@@ -275,7 +275,7 @@ namespace NuGet.PowerShell.Commands
             if (File.Exists(fullPath))
             {
                 var psVariable = SessionState.PSVariable;
-                string toolsPath = Path.Combine(rootPath, "tools");
+                string toolsPath = Path.GetDirectoryName(fullPath);
 
                 // set temp variables to pass to the script
                 psVariable.Set("__rootPath", rootPath);
