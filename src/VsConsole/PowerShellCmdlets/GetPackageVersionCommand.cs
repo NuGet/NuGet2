@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Management.Automation;
 using System.Runtime.Serialization.Json;
@@ -46,17 +46,26 @@ namespace NuGet.PowerShell.Commands
 
 		protected override void ProcessRecordCore()
 		{
-			var jsonSerializer = new DataContractJsonSerializer(typeof(string[]));
-			var httpClient = new HttpClient(GetUri());
-			string[] packageVersions;
-			using (var stream = new MemoryStream(httpClient.DownloadData()))
-			{
-				packageVersions = jsonSerializer.ReadObject(stream) as string[];
-			}
-			WritePackageIds(packageVersions);
+            foreach (var packageVersion in GetPackageVersions(GetUri()))
+            {
+                if (Stopping)
+                    break;
+                WriteObject(packageVersion);
+            }
         }
 
-		private Uri GetUri()
+		protected virtual string[] GetPackageVersions(Uri uri)
+		{
+		    var jsonSerializer = new DataContractJsonSerializer(typeof(string[]));
+			var httpClient = new HttpClient(uri);
+			using (var stream = new MemoryStream(httpClient.DownloadData()))
+			{
+				return jsonSerializer.ReadObject(stream) as string[];
+			}
+		}
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Too much logic for getter.")]
+        protected virtual Uri GetUri()
 		{
 			string baseUri;
 			if (!String.IsNullOrEmpty(Source))
@@ -70,17 +79,7 @@ namespace NuGet.PowerShell.Commands
 			if (IncludePrerelease)
 				queryString["includePrerelease"] = "true";
 
-			return new Uri(string.Format("{0}/api/v2/package-versions/{1}?{2}", baseUri, Id, queryString));
-        }
-
-		private void WritePackageIds(IEnumerable<string> packageIds)
-        {
-			foreach (var packageId in packageIds)
-            {
-                if (Stopping)
-                    break;
-				WriteObject(packageId);
-            }
+			return new Uri(string.Format(CultureInfo.InvariantCulture, "{0}/api/v2/package-versions/{1}?{2}", baseUri, Id, queryString));
         }
     }
 }

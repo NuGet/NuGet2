@@ -62,7 +62,8 @@ namespace NuGet.PowerShell.Commands
                 return jsonSerializer.ReadObject(stream) as string[];
             }
 		}
-        
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification="Too much logic for getter.")]
         protected virtual Uri GetUri()
 		{
 			string baseUri;

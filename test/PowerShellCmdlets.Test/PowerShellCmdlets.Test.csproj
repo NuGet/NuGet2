@@ -42,6 +42,7 @@
       <Link>TestUtils.cs</Link>
     </Compile>
     <Compile Include="CmdletExtensions.cs" />
+    <Compile Include="GetPackageVersionCommandTest.cs" />
     <Compile Include="GetPackageIdCommandTest.cs" />
     <Compile Include="FindPackageCommandTest.cs" />
     <Compile Include="GetPackageCommandTest.cs" />
