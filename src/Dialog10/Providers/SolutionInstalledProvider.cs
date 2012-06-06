@@ -132,7 +132,11 @@ namespace NuGet.Dialog.Providers
             // to avoid the package file being deleted before an install.
             if (hasInstallWork)
             {
-                InstallPackageIntoProjects(allProjects, selectedProjectsSet, package);
+                bool successful = InstallPackageIntoProjects(allProjects, selectedProjectsSet, package);
+                if (!successful)
+                {
+                    return false;
+                }
             }
 
             // now uninstall the packages that are unchecked           
@@ -154,7 +158,7 @@ namespace NuGet.Dialog.Providers
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want one failed project to affect the other projects.")]
-        private void InstallPackageIntoProjects(IList<Project> allProjects, HashSet<string> selectedProjectsSet, IPackage package)
+        private bool InstallPackageIntoProjects(IList<Project> allProjects, HashSet<string> selectedProjectsSet, IPackage package)
         {
             var allOperations = new List<PackageOperation>();
             foreach (Project project in allProjects)
@@ -174,7 +178,11 @@ namespace NuGet.Dialog.Providers
                 }
             }
 
-            ShowLicenseAgreement(PackageManager, allOperations.Reduce());
+            bool accepted = ShowLicenseAgreement(PackageManager, allOperations.Reduce());
+            if (!accepted)
+            {
+                return false;
+            }
 
             // now install the packages that are checked
             // Bug 1357: It's crucial that we perform all installs before uninstalls
@@ -194,6 +202,8 @@ namespace NuGet.Dialog.Providers
                     }
                 }
             }
+
+            return true;
         }
 
         private bool UninstallSolutionPackage(IPackage package)
