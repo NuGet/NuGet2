@@ -131,7 +131,8 @@ namespace NuGet.VisualStudio
 
         public void DisablePackageSource(PackageSource source)
         {
-            throw new NotSupportedException();
+            // There's no scenario for this method to get called, so do nothing here.
+            Debug.Fail("This method shouldn't get called.");
         }
 
         public bool IsPackageSourceEnabled(PackageSource source)

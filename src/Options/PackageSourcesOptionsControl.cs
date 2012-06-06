@@ -208,8 +208,9 @@ namespace NuGet.Options
 
             // Check to see if the name is an official package source name.
             // If so, and if there is already an official package source, don't allow a second to be added.
-            var isOfficialName = name.Equals(VsResources.OfficialSourceName, StringComparison.CurrentCultureIgnoreCase)
-                || name.Equals(VsResources.VisualStudioExpressForWindows8SourceName, StringComparison.CurrentCultureIgnoreCase);
+            var isOfficialName = name.Equals(VsResources.OfficialSourceName, StringComparison.CurrentCultureIgnoreCase) || 
+                                 name.Equals(VsResources.VisualStudioExpressForWindows8SourceName, StringComparison.CurrentCultureIgnoreCase);
+
             if (isOfficialName && sourcesList.Any(packageSource => packageSource.IsOfficial))
             {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_OfficialSourceName, Resources.ShowWarning_Title);
@@ -219,8 +220,8 @@ namespace NuGet.Options
 
             // check to see if name has already been added
             // also make sure it's not the same as the aggregate source ('All')
-            bool hasName = sourcesList.Any(ps => String.Equals(name, ps.Name, StringComparison.CurrentCultureIgnoreCase)
-                || String.Equals(name, AggregatePackageSource.Instance.Name, StringComparison.CurrentCultureIgnoreCase));
+            bool hasName = sourcesList.Any(ps => String.Equals(name, ps.Name, StringComparison.CurrentCultureIgnoreCase) || 
+                           String.Equals(name, AggregatePackageSource.Instance.Name, StringComparison.CurrentCultureIgnoreCase));
             if (hasName)
             {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueName, Resources.ShowWarning_Title);
