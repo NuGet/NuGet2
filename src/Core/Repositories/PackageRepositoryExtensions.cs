@@ -373,6 +373,11 @@ namespace NuGet
             bool includeAllVersions,
             IEnumerable<FrameworkName> targetFramework = null)
         {
+            if (packages.IsEmpty())
+            {
+                return Enumerable.Empty<IPackage>();
+            }
+
             var serviceBasedRepository = repository as IServiceBasedRepository;
             return serviceBasedRepository != null ? serviceBasedRepository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFramework) :
                                                     repository.GetUpdatesCore(packages, includePrerelease, includeAllVersions, targetFramework);

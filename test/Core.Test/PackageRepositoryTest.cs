@@ -233,6 +233,21 @@ namespace NuGet.Test
             Assert.Equal(packages.First().Id, "A");
             Assert.Equal(packages.First().Version, SemanticVersion.Parse("1.2"));
         }
+        
+        [Fact]
+        public void GetUpdatesDoesNotInvokeServiceMethodIfLocalRepositoryDoesNotHaveAnyPackages()
+        {
+            // Arrange 
+            var localRepo = new MockPackageRepository();
+            var serviceRepository = new Mock<IServiceBasedRepository>(MockBehavior.Strict);
+            var remoteRepo = serviceRepository.As<IPackageRepository>().Object;
+
+            // Act
+            var packages = remoteRepo.GetUpdates(localRepo.GetPackages(), includePrerelease: false, includeAllVersions: false);
+
+            // Assert
+            serviceRepository.Verify(s => s.GetUpdates(It.IsAny<IEnumerable<IPackage>>(), false, false, It.IsAny<IEnumerable<FrameworkName>>()), Times.Never());
+        }
 
         [Fact]
         public void GetUpdatesReturnsEmptyCollectionWhenSourceRepositoryIsEmpty()

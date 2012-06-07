@@ -127,10 +127,21 @@ namespace NuGet.Server.DataServices
         [WebGet]
         public IQueryable<Package> GetUpdates(string packageIds, string versions, bool includePrerelease, bool includeAllVersions, string targetFrameworks)
         {
-            var idValues = packageIds.Split('|');
-            var versionValues = versions.Split('|');
+            if (String.IsNullOrEmpty(packageIds) || String.IsNullOrEmpty(versions))
+            {
+                return Enumerable.Empty<Package>().AsQueryable();
+            }
+
+            var idValues = packageIds.Trim().Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+            var versionValues = versions.Trim().Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
             var targetFrameworkValues = String.IsNullOrEmpty(targetFrameworks) ? null :
                                                                                  targetFrameworks.Split('|').Select(VersionUtility.ParseFrameworkName).ToList();
+
+            if ((idValues.Length == 0) || (idValues.Length != versionValues.Length))
+            {
+                // Exit early if the request looks invalid
+                return Enumerable.Empty<Package>().AsQueryable();
+            }
 
             var packagesToUpdate = new List<IPackageMetadata>();
             for (int i = 0; i < idValues.Length; i++)
