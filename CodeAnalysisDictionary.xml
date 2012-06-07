@@ -30,6 +30,7 @@
       <Word>Auth</Word>
       <Word>api</Word>
       <Word>Dir</Word>
+      <Word>Vsix</Word>
     </Recognized>
     <Deprecated>
       <Term PreferredAlternate=""></Term>
