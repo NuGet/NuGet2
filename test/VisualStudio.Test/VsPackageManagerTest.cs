@@ -539,15 +539,11 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange 
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
-
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
             var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
 
-            var packageToUpdate = PackageUtility.CreatePackage("foo", "0.9");
-            localRepository.AddPackage(packageToUpdate);
-            
             var package = PackageUtility.CreatePackage("foo", "1.0", dependencies: new PackageDependency[] { new PackageDependency("bar") });
             sourceRepository.AddPackage(package);
 
@@ -925,86 +921,6 @@ namespace NuGet.VisualStudio.Test
 
             // assert that packages.config for solution-level is created.
             localRepository.Verify(r => r.AddPackageReferenceEntry("A", new SemanticVersion("2.0")), Times.Once());
-        }
-
-        [Fact]
-        public void UpdatePackageEnsuresSatelliteReferencesAreCopiedToNewerVersion()
-        {
-            // Arrange
-            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
-            localRepository.Setup(m => m.IsReferenced("A", new SemanticVersion("1.0"))).Returns(false);
-            var projectRepository = new MockProjectPackageRepository(localRepository.Object);
-            var sourceRepository = new MockPackageRepository();
-            var fileSystem = new MockFileSystem();
-            fileSystem.AddFile(@"A.1.0\.satellite\A.fr-Fr$1.0.ref");
-
-            var pathResolver = new DefaultPackagePathResolver(fileSystem);
-            var A10 = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { @"lib\net40\A.dll" });
-            var A20 = PackageUtility.CreatePackage("A", "2.0", assemblyReferences: new[] { @"lib\net40\A.dll" });
-            var ALoc10 = PackageUtility.CreatePackage("A.fr-FR", "1.0", language: "fr-FR",
-                                            assemblyReferences: new[] { @"lib\net40\fr-FR\A.resources.dll" },
-                                            dependencies: new[] { new PackageDependency("A") });
-            sourceRepository.AddPackage(A20);
-            localRepository.Object.AddPackage(A10);
-            localRepository.Object.AddPackage(ALoc10);
-            projectRepository.Add(A10);
-
-            var projectA = Mock.Of<Project>();
-            var projectB = Mock.Of<Project>();
-            var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), sourceRepository, 
-                    Mock.Of<IFileSystemProvider>(), fileSystem, localRepository.Object, 
-                    Mock.Of<IRecentPackageRepository>(), Mock.Of<VsPackageInstallerEvents>());
-            packageManager.Setup(s => s.GetProjectManager(projectA)).Returns(new ProjectManager(localRepository.Object, pathResolver, new MockProjectSystem(), projectRepository));
-            packageManager.Setup(s => s.GetProjectManager(projectB)).Returns(new ProjectManager(localRepository.Object, pathResolver, new MockProjectSystem(), projectRepository));
-            
-            var operations = new[] { 
-                new PackageOperation(A10, PackageAction.Uninstall),
-                new PackageOperation(A20, PackageAction.Install),
-            };
-
-            // Act
-            packageManager.Object.UpdatePackage(new[] { projectA, projectB }, A20, operations, updateDependencies: false, allowPrereleaseVersions: false, 
-                    logger: NullLogger.Instance, packageOperationEventListener: null);
-
-            // Assert
-            Assert.Contains(@"A.2.0\.satellite\A.fr-FR$1.0.ref", fileSystem.Paths.Keys);
-            Assert.Contains(@"A.2.0\lib\net40\fr-FR\A.resources.dll", fileSystem.Paths.Keys);
-        }
-
-        [Fact]
-        public void UpdatePackageAcrossProjectsEnsuresSatelliteReferencesAreCopiedToNewerVersion()
-        {
-            // Arrange
-            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
-            localRepository.Setup(m => m.IsReferenced("A", new SemanticVersion("1.0"))).Returns(false);
-            var projectRepository = new MockProjectPackageRepository(localRepository.Object);
-            var sourceRepository = new MockPackageRepository();
-            var fileSystem = new MockFileSystem();
-            fileSystem.AddFile(@"A.1.0\.satellite\A.fr-Fr$1.0.ref");
-
-            var pathResolver = new DefaultPackagePathResolver(fileSystem);
-            var A10 = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { @"lib\net40\A.dll" });
-            var A20 = PackageUtility.CreatePackage("A", "2.0", assemblyReferences: new[] { @"lib\net40\A.dll" });
-            var ALoc10 = PackageUtility.CreatePackage("A.fr-FR", "1.0", language: "fr-FR",
-                                            assemblyReferences: new[] { @"lib\net40\fr-FR\A.resources.dll" },
-                                            dependencies: new[] { new PackageDependency("A") });
-            sourceRepository.AddPackage(A20);
-            localRepository.Object.AddPackage(A10);
-            localRepository.Object.AddPackage(A20);
-            localRepository.Object.AddPackage(ALoc10);
-            projectRepository.Add(A10);
-
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository,
-                    Mock.Of<IFileSystemProvider>(), fileSystem, localRepository.Object,
-                    Mock.Of<IRecentPackageRepository>(), Mock.Of<VsPackageInstallerEvents>());
-            var projectManager = new ProjectManager(localRepository.Object, pathResolver, new MockProjectSystem(), projectRepository);
-
-            // Act
-            packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance);
-
-            // Assert
-            Assert.Contains(@"A.2.0\.satellite\A.fr-FR$1.0.ref", fileSystem.Paths.Keys);
-            Assert.Contains(@"A.2.0\lib\net40\fr-FR\A.resources.dll", fileSystem.Paths.Keys);
         }
 
         // This repository better simulates what happens when we're running the package manager in vs

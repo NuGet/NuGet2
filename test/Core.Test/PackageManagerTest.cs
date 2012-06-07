@@ -158,11 +158,10 @@ namespace NuGet.Test
             packageManager.InstallPackage("foo.ja-jp");
 
             // Assert
-            Assert.Equal(6, projectSystem.Paths.Count);
+            Assert.Equal(5, projectSystem.Paths.Count);
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\foo.dll"));
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.xml"));
-            Assert.True(projectSystem.FileExists(@"foo.1.0.0\.satellite\foo.ja-jp$1.0.0.ref"));
             Assert.True(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.resources.dll"));
             Assert.True(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
         }
@@ -191,11 +190,10 @@ namespace NuGet.Test
             packageManager.InstallPackage("foo.ja-jp");
 
             // Assert
-            Assert.Equal(6, projectSystem.Paths.Count);
+            Assert.Equal(5, projectSystem.Paths.Count);
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\foo.dll"));
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.xml"));
-            Assert.True(projectSystem.FileExists(@"foo.1.0.0\.satellite\foo.ja-jp$1.0.0.ref"));
             Assert.True(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.resources.dll"));
             Assert.True(projectSystem.FileExists(@"foo.ja-jp.1.0.0\lib\ja-jp\foo.xml"));
         }
@@ -234,12 +232,11 @@ namespace NuGet.Test
             packageManager.InstallPackage("foo.ja-jp");
 
             // Assert
-            Assert.Equal(10, projectSystem.Paths.Count);
+            Assert.Equal(9, projectSystem.Paths.Count);
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\content\english.txt"));
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\foo.dll"));
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.resources.dll"));
             Assert.True(projectSystem.FileExists(@"foo.1.0.0\lib\ja-jp\foo.xml"));
-            Assert.True(projectSystem.FileExists(@"foo.1.0.0\.satellite\foo.ja-jp$1.0.0.ref"));
 
             Assert.True(projectSystem.FileExists(@"foo.ja-jp.1.0.0\content\english.txt")); 
             Assert.True(projectSystem.FileExists(@"foo.ja-jp.1.0.0\content\japanese.txt"));

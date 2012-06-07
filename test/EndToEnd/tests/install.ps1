@@ -1494,21 +1494,21 @@ function Test-InstallPackageDontMakeExcessiveNetworkRequests
     Assert-NotNull $repository
 
     $packageDownloader = $repository.PackageDownloader
-    Assert-NotNull $packageDownloader
+        Assert-NotNull $packageDownloader
 
     $global:numberOfRequests = 0
     $eventId = "__DataServiceSendingRequest"
 
     try 
     {
-        Register-ObjectEvent $packageDownloader "SendingRequest" $eventId { $global:numberOfRequests++; } | Out-Null
+        Register-ObjectEvent $packageDownloader "SendingRequest" $eventId { $global:numberOfRequests++; }
 
         # Act
         $a | Install-Package "nugetpackageexplorer.types" -version 1.0 -source $nugetsource
 
         # Assert
         Assert-Package $a 'nugetpackageexplorer.types' '1.0'
-        Assert-True $global:numberOfRequests -le 1
+        Assert-AreEqual 1 $global:numberOfRequests
     }
     finally 
     {
