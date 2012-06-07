@@ -222,10 +222,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             }
             else
             {
-                IHaveTheLock = true;
                 _dispatcherLock.Wait();
                 try
                 {
+                    IHaveTheLock = true;
                     act();
                 }
                 finally
@@ -287,10 +287,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             }
             else
             {
-                IHaveTheLock = true;
                 _dispatcherLock.Wait();
                 try
                 {
+                    IHaveTheLock = true;
                     pipeline.InvokeAsync();
                 }
                 catch
