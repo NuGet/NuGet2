@@ -344,13 +344,14 @@ namespace NuGet
 
             var dependencies = value.Split('|').Select(ParseDependency).ToList();
 
-            // grouping the dependencies by target framework
-            var groups = dependencies.GroupBy(d => d.Item2);
+            // group the dependencies by target framework
+            var groups = dependencies.GroupBy(d => d.Item3);
 
             dependencySets.AddRange(
                 groups.Select(g => new PackageDependencySet(
                                            g.Key,   // target framework 
-                                           g.Select(pair => pair.Item1))));     // dependencies by that target framework
+                                           g.Where(pair => !String.IsNullOrEmpty(pair.Item1))       // the Id is empty when a group is empty.
+                                            .Select(pair => new PackageDependency(pair.Item1, pair.Item2)))));     // dependencies by that target framework
             return dependencySets;
         }
 
@@ -358,14 +359,17 @@ namespace NuGet
         /// Parses a dependency from the feed in the format:
         /// id:versionSpec or id
         /// </summary>
-        private static Tuple<PackageDependency, FrameworkName> ParseDependency(string value)
+        private static Tuple<string, IVersionSpec, FrameworkName> ParseDependency(string value)
         {
             if (String.IsNullOrWhiteSpace(value))
             {
                 return null;
             }
 
-            string[] tokens = value.Trim().Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+            // IMPORTANT: Do not pass StringSplitOptions.RemoveEmptyEntries to this method, because it will break 
+            // if the version spec is null, for in that case, the Dependencies string sent down is "<id>::<target framework>".
+            // We do want to preserve the second empty element after the split.
+            string[] tokens = value.Trim().Split(new[] { ':' });
 
             if (tokens.Length == 0)
             {
@@ -374,17 +378,19 @@ namespace NuGet
 
             // Trim the id
             string id = tokens[0].Trim();
+            
             IVersionSpec versionSpec = null;
-
             if (tokens.Length > 1)
             {
                 // Attempt to parse the version
                 VersionUtility.TryParseVersionSpec(tokens[1], out versionSpec);
             }
 
-            var targetFramework = tokens.Length > 2 ? VersionUtility.ParseFrameworkName(tokens[2]) : null;
+            var targetFramework = (tokens.Length > 2 && !String.IsNullOrEmpty(tokens[2]))
+                                    ? VersionUtility.ParseFrameworkName(tokens[2])
+                                    : null;
 
-            return Tuple.Create(new PackageDependency(id, versionSpec), targetFramework);
+            return Tuple.Create(id, versionSpec, targetFramework);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to return null if any error occurred while trying to find the package.")]

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data.Services.Common;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -37,9 +38,7 @@ namespace NuGet.Server.DataServices
             Summary = package.Summary;
             ReleaseNotes = package.ReleaseNotes;
             Tags = package.Tags;
-            Dependencies = String.Join("|", from d in package.DependencySets
-                                                             .SelectMany(d => d.Dependencies.Select(p => Tuple.Create(p, d.TargetFramework)))
-                                            select ConvertDependency(d));
+            Dependencies = String.Join("|", package.DependencySets.SelectMany(ConvertDependencySetToStrings));
             PackageHash = derivedData.PackageHash;
             PackageHashAlgorithm = "SHA512";
             PackageSize = derivedData.PackageSize;
@@ -207,15 +206,41 @@ namespace NuGet.Server.DataServices
             set;
         }
 
-        private string ConvertDependency(Tuple<PackageDependency, FrameworkName> pair)
+        private IEnumerable<string> ConvertDependencySetToStrings(PackageDependencySet dependencySet)
         {
-            if (pair.Item2 == null)
+            if (dependencySet.Dependencies.Count == 0)
             {
-                return String.Format("{0}:{1}", pair.Item1.Id, pair.Item1.VersionSpec);
+                if (dependencySet.TargetFramework != null)
+                {
+                    // if this Dependency set is empty, we still need to send down one string of the form "::<target framework>",
+                    // so that the client can reconstruct an empty group.
+                    return new string[] { String.Format("::{0}", VersionUtility.GetShortFrameworkName(dependencySet.TargetFramework)) };
+                }
             }
             else
             {
-                return String.Format("{0}:{1}:{2}", pair.Item1.Id, pair.Item1.VersionSpec, pair.Item2.ToString());
+                return dependencySet.Dependencies.Select(dependency => ConvertDependency(dependency, dependencySet.TargetFramework));
+            }
+
+            return new string[0];
+        }
+
+        private string ConvertDependency(PackageDependency packageDependency, FrameworkName targetFramework)
+        {
+            if (targetFramework == null)
+            {
+                if (packageDependency.VersionSpec == null)
+                {
+                    return packageDependency.Id;
+                }
+                else
+                {
+                    return String.Format("{0}:{1}", packageDependency.Id, packageDependency.VersionSpec);
+                }
+            }
+            else
+            {
+                return String.Format("{0}:{1}:{2}", packageDependency.Id, packageDependency.VersionSpec, VersionUtility.GetShortFrameworkName(targetFramework));
             }
         }
     }

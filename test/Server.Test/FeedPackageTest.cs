@@ -4,6 +4,9 @@ using System.Globalization;
 using System.Linq;
 using NuGet;
 using Xunit;
+using System.Runtime.Versioning;
+using Moq;
+using NuGet.Server.Infrastructure;
 
 namespace Server.Test
 {
@@ -33,6 +36,38 @@ namespace Server.Test
                 Assert.True(feedPackageProperties.Contains(property), String.Format(CultureInfo.InvariantCulture,
                     "Property {0} could not be found in NuGet.Server package.", property));
             }
+        }
+
+        [Fact]
+        public void FeedPackageSerializeDependenciesWithTargetFrameworkCorrectly()
+        {
+            // Arrange
+            var corePackage = NuGet.Test.PackageUtility.CreatePackage2(
+                "A", 
+                "1.0",
+                dependencySets: new PackageDependencySet[] {
+                    new PackageDependencySet(new FrameworkName(".NETFramework, Version=2.0"),
+                                             new [] { new PackageDependency("B") }),
+
+                    new PackageDependencySet(new FrameworkName(".NETFramework, Version=3.0"),
+                                             new [] { new PackageDependency("B"), 
+                                                      new PackageDependency("C", VersionUtility.ParseVersionSpec("2.0")) }),
+
+                    new PackageDependencySet((FrameworkName)null,
+                                             new [] { new PackageDependency("D", VersionUtility.ParseVersionSpec("(1.0,3.0-alpha]")) }),
+
+                    new PackageDependencySet(new FrameworkName(".NETCore, Version=4.5"),
+                                             new PackageDependency[0]),
+
+                    new PackageDependencySet((FrameworkName)null,
+                                             new [] { new PackageDependency("X") })
+                });
+
+            // Act
+            var package = new NuGet.Server.DataServices.Package(corePackage, new DerivedPackageData());
+
+            // Assert
+            Assert.Equal(@"B::net20|B::net30|C:2.0:net30|D:(1.0, 3.0-alpha]|::winrt45|X", package.Dependencies);
         }
     }
 }

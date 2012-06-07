@@ -51,7 +51,8 @@ namespace NuGet
         private static readonly Dictionary<string, string> _identifierToFrameworkFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
             { NetFrameworkIdentifier, "net" },
             { ".NETMicroFramework", "netmf" },
-            { "Silverlight", "sl" }
+            { "Silverlight", "sl" },
+            { ".NETCore", "winrt"}
         };
 
         private static readonly Dictionary<string, string> _identifierToProfileFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {

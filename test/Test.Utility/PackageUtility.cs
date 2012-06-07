@@ -189,6 +189,9 @@ namespace NuGet.Test
             mockPackage.Setup(m => m.RequireLicenseAcceptance).Returns(false);
             mockPackage.Setup(m => m.Listed).Returns(listed);
             mockPackage.Setup(m => m.Language).Returns(language);
+            mockPackage.Setup(m => m.IconUrl).Returns((Uri)null);
+            mockPackage.Setup(m => m.ProjectUrl).Returns((Uri)null);
+            mockPackage.Setup(m => m.ReleaseNotes).Returns("");
             if (!listed)
             {
                 mockPackage.Setup(m => m.Published).Returns(Constants.Unpublished);
