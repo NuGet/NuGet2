@@ -33,15 +33,14 @@ namespace NuGet
 
             runtimePackage = null;
 
-            if (!String.IsNullOrEmpty(package.Language) && 
-                package.Id.EndsWith("." + package.Language, StringComparison.OrdinalIgnoreCase))
+            if (package.IsSatellitePackage())
             {
                 string runtimePackageId = package.Id.Substring(0, package.Id.Length - (package.Language.Length + 1));
                 PackageDependency dependency = package.FindDependency(runtimePackageId, targetFramework);
 
                 if (dependency != null)
                 {
-                    runtimePackage = repository.FindPackage(runtimePackageId);
+                    runtimePackage = repository.FindPackage(runtimePackageId, versionSpec: dependency.VersionSpec, allowPrereleaseVersions: true, allowUnlisted: true);
                 }
             }
 

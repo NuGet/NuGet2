@@ -64,7 +64,7 @@ namespace NuGet.VisualStudio.Test
                     new [] { new PackageDependency("C") })
             };
 
-            var package = PackageUtility.CreatePackage2(
+            var package = PackageUtility.CreatePackageWithDependencySets(
                 "foo", 
                 "1.0", 
                 new[] { "hello" },
@@ -119,7 +119,7 @@ namespace NuGet.VisualStudio.Test
                     new [] { new PackageDependency("C") })
             };
 
-            var package = PackageUtility.CreatePackage2(
+            var package = PackageUtility.CreatePackageWithDependencySets(
                 "foo",
                 "1.0",
                 new[] { "hello" },

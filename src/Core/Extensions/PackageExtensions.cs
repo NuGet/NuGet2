@@ -25,6 +25,17 @@ namespace NuGet
             return package.Listed || package.Published > Constants.Unpublished;
         }
 
+        /// <summary>
+        /// A package is deemed to be a satellite package if it has a language property set, the id of the package is of the format [.*].[Language]
+        /// and it has at least one dependency.
+        /// </summary>
+        public static bool IsSatellitePackage(this IPackageMetadata package)
+        {
+            return !String.IsNullOrEmpty(package.Language) &&
+                    package.Id.EndsWith('.' + package.Language, StringComparison.OrdinalIgnoreCase) &&
+                    package.DependencySets.Any();
+        }
+
         public static bool IsEmptyFolder(this IPackageFile packageFile)
         {
             return packageFile != null && 
@@ -166,60 +177,7 @@ namespace NuGet
             return package.Id + " " + package.Version;
         }
 
-        /// <summary>
-        /// Calculates the canonical list of operations.
-        /// </summary>
-        public static IList<PackageOperation> Reduce(this IEnumerable<PackageOperation> operations)
-        {
-            // Convert the list of operations to a dictionary from (Action, Id, Version) -> [Operations]
-            // We keep track of the index so that we preserve the ordering of the operations
-            var operationLookup = operations.Select((o, index) => new { Operation = o, Index = index })
-                                            .ToLookup(o => GetOperationKey(o.Operation))
-                                            .ToDictionary(g => g.Key,
-                                                          g => g.ToList());
-
-            // Given a list of operations we're going to eliminate the ones that have opposites (i.e. 
-            // if the list contains +A 1.0 and -A 1.0, then we eliminate them both entries).
-            foreach (var operation in operations)
-            {
-                // We get the opposing operation for the current operation:
-                // if o is +A 1.0 then the opposing key is - A 1.0
-                Tuple<PackageAction, string, SemanticVersion> opposingKey = GetOpposingOperationKey(operation);
-
-                // We can't use TryGetValue since the value of the dictionary entry
-                // is a List of an anonymous type.
-                if (operationLookup.ContainsKey(opposingKey))
-                {
-                    // If we find an opposing entry, we remove it from the list of candidates
-                    var opposingOperations = operationLookup[opposingKey];
-                    opposingOperations.RemoveAt(0);
-
-                    // Remove the list from the dictionary if nothing is in it
-                    if (!opposingOperations.Any())
-                    {
-                        operationLookup.Remove(opposingKey);
-                    }
-                }
-            }
-
-            // Create the final list of operations and order them by their original index
-            return operationLookup.SelectMany(o => o.Value)
-                                  .OrderBy(o => o.Index)
-                                  .Select(o => o.Operation)
-                                  .ToList();
-        }
-
-        private static Tuple<PackageAction, string, SemanticVersion> GetOperationKey(PackageOperation operation)
-        {
-            return Tuple.Create(operation.Action, operation.Package.Id, operation.Package.Version);
-        }
-
-        private static Tuple<PackageAction, string, SemanticVersion> GetOpposingOperationKey(PackageOperation operation)
-        {
-            return Tuple.Create(operation.Action == PackageAction.Install ?
-                                PackageAction.Uninstall :
-                                PackageAction.Install, operation.Package.Id, operation.Package.Version);
-        }
+        
 
         /// <summary>
         /// Returns a distinct set of elements using the comparer specified. This implementation will pick the last occurrence

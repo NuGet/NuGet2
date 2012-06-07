@@ -1011,7 +1011,80 @@ function Test-UpdatingSatellitePackageUpdatesReferences
 	$p | Update-Package Localized.fr-FR -Source $context.RepositoryPath
 
 	# Assert
+	Assert-Package $p Localized 2.0
 	Assert-Package $p Localized.fr-FR 2.0
+	$packageDir = (Join-Path $solutionDir packages\Localized.2.0)
 	Assert-PathNotExists (Join-Path $packageDir 'lib\net40\fr-FR\Main.1.0.resources.dll')
 	Assert-PathExists (Join-Path $packageDir 'lib\net40\fr-FR\Main.2.0.resources.dll')
+}
+
+function Test-UpdatingSatellitePackageWhenMultipleVersionsInstalled
+{
+	param($context)
+
+	# Arrange
+	$p1 = New-ClassLibrary
+	$p2 = New-ClassLibrary
+
+	# Act - 1
+	$p1 | Install-Package Localized.fr-FR -Version 1.0 -Source $context.RepositoryPath
+	$p2 | Install-Package Localized.fr-FR -Version 2.0 -Source $context.RepositoryPath
+	$p2 | Install-Package DependsOnLocalized -Version 1.0 -Source $context.RepositoryPath
+
+	# Assert - 1
+	Assert-Package $p1 Localized 1.0
+	Assert-Package $p1 Localized.fr-FR 1.0
+	Assert-Package $p2 Localized 2.0
+	Assert-Package $p2 Localized.fr-FR 2.0
+	Assert-Package $p2 DependsOnLocalized 1.0
+
+	$solutionDir = Get-SolutionDir
+	Assert-PathExists (Join-Path $solutionDir 'packages\Localized.1.0\lib\net40\fr-FR\Main.1.0.resources.dll')
+	Assert-PathExists (Join-Path $solutionDir 'packages\Localized.2.0\lib\net40\fr-FR\Main.2.0.resources.dll')
+	
+	# Act - 2
+	$p2 | Update-Package DependsOnLocalized -Source $context.RepositoryPath
+
+	# Assert - 2
+	Assert-Package $p2 Localized 3.0
+	Assert-Package $p2 Localized.fr-FR 3.0
+	Assert-Package $p2 DependsOnLocalized 2.0
+
+	Assert-PathNotExists (Join-Path $solutionDir 'packages\Localized.2.0\')
+	Assert-PathExists (Join-Path $solutionDir 'packages\Localized.3.0\lib\net40\fr-FR\Main.3.0.resources.dll')
+	
+}
+
+function Test-UpdatingPackagesWithDependenciesOnSatellitePackages
+{
+	param($context)
+
+	# Arrange
+	$p = New-ClassLibrary
+	
+	# Act - 1
+	$p | Install-Package Localized.LangPack -Version 1.0 -Source $context.RepositoryPath
+
+	# Assert - 1
+	Assert-Package $p Localized 1.0
+	Assert-Package $p Localized.fr-FR 1.0
+	Assert-Package $p Localized.ja-JP 1.0
+	Assert-Package $p Localized.LangPack 1.0
+
+	$solutionDir = Get-SolutionDir
+	Assert-PathExists (Join-Path $solutionDir 'packages\Localized.1.0\lib\net40\ja-JP\Main.1.0.resources.dll')
+	Assert-PathExists (Join-Path $solutionDir 'packages\Localized.1.0\lib\net40\fr-FR\Main.1.0.resources.dll')
+	
+	# Act - 2
+	$p | Update-Package Localized.LangPack -Source $context.RepositoryPath
+
+	# Assert - 2
+	Assert-Package $p Localized 2.0
+	Assert-Package $p Localized.fr-FR 2.0
+	Assert-Package $p Localized.ja-JP 2.0
+	Assert-Package $p Localized.LangPack 2.0
+
+	Assert-PathExists (Join-Path $solutionDir 'packages\Localized.2.0\lib\net40\ja-JP\Main.2.0.resources.dll')
+	Assert-PathExists (Join-Path $solutionDir 'packages\Localized.2.0\lib\net40\fr-FR\Main.2.0.resources.dll')
+	
 }

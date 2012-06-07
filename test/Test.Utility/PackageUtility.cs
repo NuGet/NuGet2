@@ -74,7 +74,7 @@ namespace NuGet.Test
                                  satelliteAssemblies: null);
         }
 
-        public static IPackage CreatePackage2(string id,
+        public static IPackage CreatePackageWithDependencySets(string id,
                                               string version = "1.0",
                                               IEnumerable<string> content = null,
                                               IEnumerable<string> assemblyReferences = null,

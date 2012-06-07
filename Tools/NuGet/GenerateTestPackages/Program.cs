@@ -19,11 +19,10 @@ namespace GenerateTestPackages
         {
             string path = args[0];
             var extension = Path.GetExtension(path);
-            bool signBinaries = args.Length > 1 && Boolean.Parse(args[1]);
 
             if (extension.Equals(".nuspec", StringComparison.OrdinalIgnoreCase))
             {
-                BuildPackage(path, signBinaries);
+                BuildPackage(path);
             }
             else
             {
@@ -31,7 +30,7 @@ namespace GenerateTestPackages
             }
         }
 
-        private static void BuildPackage(string nuspecPath, bool signBinaries)
+        private static void BuildPackage(string nuspecPath)
         {
             var repositoryPath = Path.GetDirectoryName(nuspecPath);
             var basePath = Path.Combine(repositoryPath, "files", Path.GetFileNameWithoutExtension(nuspecPath));
@@ -42,38 +41,41 @@ namespace GenerateTestPackages
             using (var fileStream = File.OpenRead(nuspecPath))
             {
                 var manifest = Manifest.ReadFrom(fileStream);
-                foreach (var file in manifest.Files)
-                {
-                    string outputPath = Path.Combine(basePath, file.Source);
-                    if (File.Exists(outputPath))
-                    {
-                        deleteDir = false;
-                        // A user created file exists. Continue to next file.
-                        continue;
-                    }
-                    
-                    createdFiles.Add(outputPath);
-                    string outputDir = Path.GetDirectoryName(outputPath);
-                    if (!Directory.Exists(outputDir))
-                    {
-                        Directory.CreateDirectory(outputDir);
-                    }
-
-                    if (file.Source.StartsWith(@"lib" + Path.DirectorySeparatorChar) && !file.Source.EndsWith("resources.dll"))
-                    {
-                        var name = Path.GetFileNameWithoutExtension(file.Source);
-                        CreateAssembly(new PackageInfo(manifest.Metadata.Id + ":" + manifest.Metadata.Version),
-                                       outputPath: outputPath);
-                    }
-                    else
-                    {
-                        File.WriteAllBytes(outputPath, new byte[0]);
-                    }
-                }
-
                 var packageBuilder = new PackageBuilder();
                 packageBuilder.Populate(manifest.Metadata);
-                packageBuilder.PopulateFiles(basePath, manifest.Files);
+                if (!manifest.Files.IsEmpty())
+                {
+                    foreach (var file in manifest.Files)
+                    {
+                        string outputPath = Path.Combine(basePath, file.Source);
+                        if (File.Exists(outputPath))
+                        {
+                            deleteDir = false;
+                            // A user created file exists. Continue to next file.
+                            continue;
+                        }
+                        
+                        createdFiles.Add(outputPath);
+                        string outputDir = Path.GetDirectoryName(outputPath);
+                        if (!Directory.Exists(outputDir))
+                        {
+                            Directory.CreateDirectory(outputDir);
+                        }
+
+                        if (file.Source.StartsWith(@"lib" + Path.DirectorySeparatorChar) && !file.Source.EndsWith("resources.dll"))
+                        {
+                            var name = Path.GetFileNameWithoutExtension(file.Source);
+                            CreateAssembly(new PackageInfo(manifest.Metadata.Id + ":" + manifest.Metadata.Version),
+                                           outputPath: outputPath);
+                        }
+                        else
+                        {
+                            File.WriteAllBytes(outputPath, new byte[0]);
+                        }
+                    }
+
+                    packageBuilder.PopulateFiles(basePath, manifest.Files);
+                }
                 
                 string nupkgDirectory = Path.GetFullPath("packages");
                 Directory.CreateDirectory(nupkgDirectory);
@@ -82,8 +84,6 @@ namespace GenerateTestPackages
                 {
                     packageBuilder.Save(nupkgStream);
                 }
-                
-                
             }
             try
             {

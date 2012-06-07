@@ -303,7 +303,6 @@ namespace NuGet
                 var runtimePath = PathResolver.GetPackageDirectory(runtimePackage);
                 FileSystem.DeleteFiles(satelliteFiles, runtimePath);
             }
-
         }
 
         private void OnInstalling(PackageOperationEventArgs e)

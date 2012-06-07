@@ -1747,7 +1747,7 @@ namespace NuGet.Test
             var dependency = new PackageDependency("B", null);
             var dependecySets = CreateDependencySet(".NETFramework, Version=" + dependencyVersion, dependency);
 
-            IPackage packageA = PackageUtility.CreatePackage2("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackageWithDependencySets("A", "1.0",
                                                                 dependencySets: new [] { dependecySets }, 
                                                                 content: new[] { "a.txt" });
 
@@ -1779,7 +1779,7 @@ namespace NuGet.Test
 
             var dependencyC = new PackageDependency("C", null);
             var dependencySetC = CreateDependencySet(".NETFramework, Version=2.0", dependencyC);
-            IPackage packageA = PackageUtility.CreatePackage2("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackageWithDependencySets("A", "1.0",
                                                                 dependencySets: new List<PackageDependencySet> { dependencySetB, dependencySetC },
                                                                 content: new[] { "a.txt" });
 
@@ -1817,7 +1817,7 @@ namespace NuGet.Test
 
             var dependencyC = new PackageDependency("C", null);
             var dependencySetC = CreateDependencySet(".NETFramework, Version=2.0", dependencyC);
-            IPackage packageA = PackageUtility.CreatePackage2("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackageWithDependencySets("A", "1.0",
                                                                 dependencySets: new List<PackageDependencySet> { dependencySetB, dependencySetC },
                                                                 content: new[] { "a.txt" });
 
@@ -1889,7 +1889,7 @@ namespace NuGet.Test
             var dependencySet = new PackageDependencySet(
                 new FrameworkName(".NETFramework", new Version(dependencyVersion)),
                 new PackageDependency[] { dependency });
-            IPackage packageA = PackageUtility.CreatePackage2("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackageWithDependencySets("A", "1.0",
                                                                 dependencySets: new List<PackageDependencySet> { dependencySet },
                                                                 content: new[] { "a.txt" });
 
@@ -1928,7 +1928,7 @@ namespace NuGet.Test
             var dependencyC = new PackageDependency("C", null);
             var dependencySetC = CreateDependencySet(".NETFramework, Version=2.0", dependencyC);
 
-            IPackage packageA = PackageUtility.CreatePackage2("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackageWithDependencySets("A", "1.0",
                                                                 dependencySets: new List<PackageDependencySet> { dependencySetB, dependencySetC },
                                                                 content: new[] { "a.txt" });
 
@@ -1972,13 +1972,13 @@ namespace NuGet.Test
 
             var dependency = new PackageDependency("B", null);
             var dependencySet = CreateDependencySet(".NETFramework, Version=4.5", dependency);
-            IPackage packageA = PackageUtility.CreatePackage2("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackageWithDependencySets("A", "1.0",
                                                              dependencySets: new List<PackageDependencySet> { dependencySet },
                                                              content: new[] { "a.txt" });
 
             var dependency2 = new PackageDependency("B", null);
             var dependencySet2 = CreateDependencySet(".NETFramework, Version=4.0", dependency2);
-            IPackage packageA2 = PackageUtility.CreatePackage2("A", "2.0",
+            IPackage packageA2 = PackageUtility.CreatePackageWithDependencySets("A", "2.0",
                                                                 dependencySets: new List<PackageDependencySet> { dependencySet2 },
                                                                 content: new[] { "a2.txt" });
 
@@ -2014,13 +2014,13 @@ namespace NuGet.Test
 
             var dependency = new PackageDependency("B", null);
             var dependencySet = CreateDependencySet(".NETFramework, Version=4.0", dependency);
-            IPackage packageA = PackageUtility.CreatePackage2("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackageWithDependencySets("A", "1.0",
                                                              dependencySets: new List<PackageDependencySet> { dependencySet },
                                                              content: new[] { "a.txt" });
 
             var dependency2 = new PackageDependency("B", null);
             var dependencySet2 = CreateDependencySet(".NETFramework, Version=4.5", dependency2);
-            IPackage packageA2 = PackageUtility.CreatePackage2("A", "2.0",
+            IPackage packageA2 = PackageUtility.CreatePackageWithDependencySets("A", "2.0",
                                                                 dependencySets: new List<PackageDependencySet> { dependencySet2 },
                                                                 content: new[] { "a2.txt" });
 
@@ -2071,7 +2071,7 @@ namespace NuGet.Test
             var dependency = new PackageDependency("B", null);
             var dependecySets = CreateDependencySet(".NETFramework, Version=3.0", dependency);
 
-            IPackage packageA = PackageUtility.CreatePackage2("A", "1.0",
+            IPackage packageA = PackageUtility.CreatePackageWithDependencySets("A", "1.0",
                                                                 dependencySets: new[] { dependecySets },
                                                                 content: new[] { "a.txt" });
 

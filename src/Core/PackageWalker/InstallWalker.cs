@@ -358,7 +358,6 @@ namespace NuGet
             return Operations.Reduce();
         }
 
-
         private IEnumerable<IPackage> GetDependents(ConflictResult conflict)
         {
             // Skip all dependents that are marked for uninstall
