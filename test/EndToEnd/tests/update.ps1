@@ -1047,3 +1047,31 @@ function Test-UpdatePackageInstallCorrectDependencyPackageBasedOnTargetFramework
 	Assert-NoPackage $project TestEmptyLibFolder
 	Assert-NoPackage $project TestEmptyContentFolder
 }
+
+function Test-UpdatingSatellitePackageUpdatesReferences
+{
+	param($context)
+
+	# Arrange
+	$p = New-ClassLibrary
+
+	# Act - 1
+	$p | Install-Package Localized.fr-FR -Version 1.0 -Source $context.RepositoryPath
+
+	# Assert - 1
+	Assert-Package $p Localized 1.0
+	Assert-Package $p Localized.fr-FR 1.0
+
+	$solutionDir = Get-SolutionDir
+	$packageDir = (Join-Path $solutionDir packages\Localized.1.0)
+	Assert-PathExists (Join-Path $packageDir 'lib\net40\fr-FR\Main.1.0.resources.dll')
+	
+
+	# Act
+	$p | Update-Package Localized.fr-FR -Source $context.RepositoryPath
+
+	# Assert
+	Assert-Package $p Localized.fr-FR 2.0
+	Assert-PathNotExists (Join-Path $packageDir 'lib\net40\fr-FR\Main.1.0.resources.dll')
+	Assert-PathExists (Join-Path $packageDir 'lib\net40\fr-FR\Main.2.0.resources.dll')
+}
