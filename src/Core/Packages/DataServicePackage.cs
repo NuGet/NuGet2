@@ -357,7 +357,7 @@ namespace NuGet
 
         /// <summary>
         /// Parses a dependency from the feed in the format:
-        /// id:versionSpec or id
+        /// id or id:versionSpec, or id:versionSpec:targetFramework
         /// </summary>
         private static Tuple<string, IVersionSpec, FrameworkName> ParseDependency(string value)
         {

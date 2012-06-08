@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using NuGet;
-using Xunit;
 using System.Runtime.Versioning;
-using Moq;
+using NuGet;
 using NuGet.Server.Infrastructure;
+using Xunit;
 
 namespace Server.Test
 {
@@ -42,7 +41,7 @@ namespace Server.Test
         public void FeedPackageSerializeDependenciesWithTargetFrameworkCorrectly()
         {
             // Arrange
-            var corePackage = NuGet.Test.PackageUtility.CreatePackage2(
+            var corePackage = NuGet.Test.PackageUtility.CreatePackageWithDependencySets(
                 "A", 
                 "1.0",
                 dependencySets: new PackageDependencySet[] {
