@@ -149,7 +149,7 @@
     
     <Target Name="CopyBootStrapperOutputToDropDirectory">
         <ItemGroup>
-            <BootStrapperOutputItems Exclude="$(BootStrapperBuildDirectory)\**\*.pdb" Include="$(BootStrapperBuildDirectory)\**\*.*" />
+            <BootStrapperOutputItems Exclude="$(BootStrapperBuildDirectory)\**\*.pdb" Include="$(BootStrapperBuildDirectory)\**\*.*;$(NuGetSrcRoot)\BootStrapper\Properties\*.nuspec" />
         </ItemGroup>
         <Message Text="Copying the NuGet BootStrapper output to $(BootStrapperDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(BootStrapperOutputItems)" DestinationFiles="@(BootStrapperOutputItems ->'$(BootStrapperDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
@@ -194,8 +194,9 @@
         <PropertyGroup>
             <NuGetExe>$(ExeDropDirectory)\NuGet.exe</NuGetExe>
         </PropertyGroup>
-        <Exec Command="&quot;$(NuGetExe)&quot; pack -Version $(PackageVersion)" WorkingDirectory="$(ExeDropDirectory)" />
-        <Exec Command="&quot;$(NuGetExe)&quot; pack  -Version $(PackageVersion) -o &quot;$(ServerDropDirectory)&quot; -Build -p AdditionalSettingsImport=$(AdditionalSettingsImport) -p Configuration=Release -Symbols -exclude **\NuGet.Core.*" WorkingDirectory="$(ServerBuildDirectory)" />
-        <Exec Command="&quot;$(NuGetExe)&quot; pack -Version $(PackageVersion) -o &quot;$(NuGetCoreDropDirectory)&quot; -Build -Symbols -p AdditionalSettingsImport=$(AdditionalSettingsImport)" WorkingDirectory="$(NuGetCoreBuildDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion)" WorkingDirectory="$(ExeDropDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion)" WorkingDirectory="$(BootStrapperDropDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(ServerDropDirectory)&quot; -Build -p AdditionalSettingsImport=$(AdditionalSettingsImport) -p Configuration=Release -Symbols -exclude **\NuGet.Core.*" WorkingDirectory="$(ServerBuildDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(NuGetCoreDropDirectory)&quot; -Build -Symbols -p AdditionalSettingsImport=$(AdditionalSettingsImport)" WorkingDirectory="$(NuGetCoreBuildDirectory)" />
     </Target>
 </Project>

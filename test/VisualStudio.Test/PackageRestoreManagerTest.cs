@@ -197,9 +197,9 @@ namespace NuGet.VisualStudio.Test
                 "NuGet.Build",
                 version: "1.0",
                 tools: new string[] { "NuGet.targets" },
-                dependencies: new PackageDependency[] { new PackageDependency("NuGet.CommandLine") }));
+                dependencies: new PackageDependency[] { new PackageDependency("NuGet.Bootstrapper") }));
             packageRepository.Add(PackageUtility.CreatePackage(
-                "NuGet.CommandLine",
+                "NuGet.Bootstrapper",
                 version: "1.0",
                 tools: new string[] { "NuGet.exe" }));
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
@@ -581,9 +581,9 @@ namespace NuGet.VisualStudio.Test
                 "NuGet.Build",
                 version: "1.0",
                 tools: new string[] { "NuGet.targets" },
-                dependencies: new PackageDependency[] { new PackageDependency("NuGet.CommandLine") }));
+                dependencies: new PackageDependency[] { new PackageDependency("NuGet.Bootstrapper") }));
             packageRepository.Add(PackageUtility.CreatePackage(
-                "NuGet.CommandLine",
+                "NuGet.Bootstrapper",
                 version: "2.0",
                 tools: new string[] { "NuGet.exe" }));
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
@@ -613,7 +613,7 @@ namespace NuGet.VisualStudio.Test
             Assert.Equal(2, cachePackages.Count);
             Assert.Equal("NuGet.Build", cachePackages[0].Id);
             Assert.Equal(new SemanticVersion("1.0"), cachePackages[0].Version);
-            Assert.Equal("NuGet.CommandLine", cachePackages[1].Id);
+            Assert.Equal("NuGet.Bootstrapper", cachePackages[1].Id);
             Assert.Equal(new SemanticVersion("2.0"), cachePackages[1].Version);
         }
 
@@ -660,7 +660,7 @@ namespace NuGet.VisualStudio.Test
             packageA.Setup(p => p.Listed).Returns(true);
 
             var packageB = new Mock<IPackage>(MockBehavior.Strict);
-            packageB.Setup(p => p.Id).Returns("NuGet.CommandLine");
+            packageB.Setup(p => p.Id).Returns("NuGet.Bootstrapper");
             packageB.Setup(p => p.Version).Returns(new SemanticVersion("2.0"));
             packageB.Setup(p => p.IsLatestVersion).Returns(true);
             packageB.Setup(p => p.Listed).Returns(true);
@@ -683,10 +683,10 @@ namespace NuGet.VisualStudio.Test
                "NuGet.Build",
                version: "1.0",
                tools: new string[] { "NuGet.targets" },
-               dependencies: new PackageDependency[] { new PackageDependency("NuGet.CommandLine") },
+               dependencies: new PackageDependency[] { new PackageDependency("NuGet.Bootstrapper") },
                listed: true));
             localCache.Add(PackageUtility.CreatePackage(
-                "NuGet.CommandLine",
+                "NuGet.Bootstrapper",
                 version: "2.0",
                 tools: new string[] { "NuGet.exe" },
                 listed: true));
@@ -751,7 +751,7 @@ namespace NuGet.VisualStudio.Test
                 "NuGet.Build",
                 version: "1.0",
                 tools: new string[] { "NuGet.targets" },
-                dependencies: new PackageDependency[] { new PackageDependency("NuGet.CommandLine") }));
+                dependencies: new PackageDependency[] { new PackageDependency("NuGet.Bootstrapper") }));
 
             // this package contains 'invalid.targets' in the tools folder. 
             // it shouldn't be installed because it is unlisted.
@@ -759,12 +759,12 @@ namespace NuGet.VisualStudio.Test
                 "NuGet.Build",
                 version: "2.0",
                 tools: new string[] { "invalid.targets" },
-                dependencies: new PackageDependency[] { new PackageDependency("NuGet.CommandLine") },
+                dependencies: new PackageDependency[] { new PackageDependency("NuGet.Bootstrapper") },
                 listed: false));
 
             // this verify that we accepts prerelease packages
             packageRepository.Add(PackageUtility.CreatePackage(
-                "NuGet.CommandLine",
+                "NuGet.Bootstrapper",
                 version: "1.0-alpha",
                 tools: new string[] { "NuGet.exe" }));
             var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>();
