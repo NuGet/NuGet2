@@ -357,10 +357,12 @@ namespace NuGet.VisualStudio
                     fileSystem.AddFiles(package.GetFiles(Constants.ToolsDirectory), VsConstants.NuGetSolutionSettingsFolder, preserveFilePath: false);
                 }
 
+                // IMPORTANT: do this BEFORE adding the .nuget folder to solution so that 
+                // the generated .nuget\nuget.config is included in the solution folder too. 
+                DisableSourceControlMode();
+
                 // now add the .nuget folder to the solution as a solution folder.
                 _dte.Solution.AddFolderToSolution(VsConstants.NuGetSolutionSettingsFolder, nugetFolderPath);
-
-                DisableSourceControlMode();
             }
         }
 
