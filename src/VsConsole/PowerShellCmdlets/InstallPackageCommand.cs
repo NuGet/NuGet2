@@ -85,8 +85,11 @@ namespace NuGet.PowerShell.Commands
                 {
                     using (PackageManager.SourceRepository.StartOperation(RepositoryOperationNames.Install))
                     {
-                        PackageManager.InstallPackage(ProjectManager, Id, Version, ignoreDependencies: IgnoreDependencies, allowPrereleaseVersions: IncludePrerelease.IsPresent,
-                            logger: this);
+                        using (ProjectManager.SourceRepository.StartOperation(RepositoryOperationNames.Install))
+                        {
+                            PackageManager.InstallPackage(ProjectManager, Id, Version, ignoreDependencies: IgnoreDependencies, allowPrereleaseVersions: IncludePrerelease.IsPresent,
+                                logger: this);
+                        }
                     }
                     _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source, _packageSourceProvider);
                 }
