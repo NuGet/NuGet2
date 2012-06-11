@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using Moq;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using Xunit;
-
+using Xunit.Extensions;
+    
 namespace NuGet.VisualStudio.Test
 {
-    using System.Runtime.Versioning;
-    using Xunit.Extensions;
     using PackageUtility = NuGet.Test.PackageUtility;
 
     public class VsPackageSourceRepositoryTest
@@ -126,7 +126,7 @@ namespace NuGet.VisualStudio.Test
         [Theory]
         [PropertyData("StartOperationData")]
         // name parameter is to make it easier to identify failing tests when debugging.
-        public void MethodsPassesCurrentOperationAlong(string name, Action<VsPackageSourceRepository> method)
+        public void MethodsPassCurrentOperationAlong(string name, Action<VsPackageSourceRepository> method)
         {
             // Arrange
             var mockRepositoryFactory = new Mock<IPackageRepositoryFactory>();
