@@ -12,6 +12,12 @@ namespace NuGet
             {
                 throw new ArgumentNullException("uri");
             }
+
+            if (LaunchedFromVS())
+            {
+                throw new InvalidOperationException(NuGetResources.ResourceManager.GetString("Error_CannotPromptForCedentials"));
+            }
+
             string message = credentialType == CredentialType.ProxyCredentials ?
                     NuGetResources.ResourceManager.GetString("Credentials_ProxyCredentials") :
                     NuGetResources.ResourceManager.GetString("Credentials_RequestCredentials");
@@ -74,6 +80,16 @@ namespace NuGet
 
             secureString.MakeReadOnly();
             return secureString;
+        }
+
+        /// <summary>
+        /// When running from inside VS, no input is available to our executable locking up VS.
+        /// VS sets up a couple of environment variables one of which is named VisualStudioVersion. 
+        /// Every time this is setup, we will just fail.
+        /// </summary>
+        private static bool LaunchedFromVS()
+        {
+            return !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("VisualStudioVersion"));
         }
     }
 }

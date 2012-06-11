@@ -129,4 +129,7 @@
   <data name="Credentials_UserName" xml:space="preserve">
     <value>UserName: </value>
   </data>
+  <data name="Error_CannotPromptForCedentials" xml:space="preserve">
+    <value>Unable to prompt for credentials. Consult NuGet's help documentation for ways to specify credentials.</value>
+  </data>
 </root>

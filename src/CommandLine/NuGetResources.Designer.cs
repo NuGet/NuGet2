@@ -316,6 +316,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to prompt for credentials. Consult NuGet&apos;s help documentation for ways to specify credentials..
+        /// </summary>
+        internal static string Error_CannotPromptForCedentials {
+            get {
+                return ResourceManager.GetString("Error_CannotPromptForCedentials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to build &apos;{0}&apos;..
         /// </summary>
         internal static string FailedToBuildProject {
