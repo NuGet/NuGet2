@@ -310,6 +310,13 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
+        protected IDisposable StartOperation(string operation)
+        {
+            return DisposableAction.All(
+                PackageManager.SourceRepository.StartOperation(operation),
+                ProjectManager != null ? ProjectManager.SourceRepository.StartOperation(operation) : DisposableAction.NoOp);
+        }
+
         private void SaveExpandedNodes()
         {
             // remember which nodes are currently open so that we can keep them open after the operation

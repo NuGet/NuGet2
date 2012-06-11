@@ -37,7 +37,10 @@ namespace NuGet.VisualStudio
             get
             {
                 var activeRepository = GetActiveRepository();
-                return activeRepository == null ? null : activeRepository.Source;
+                using (StartOperation(activeRepository))
+                {
+                    return activeRepository == null ? null : activeRepository.Source;
+                }
             }
         }
 
@@ -46,7 +49,10 @@ namespace NuGet.VisualStudio
             get
             {
                 var activeRepository = GetActiveRepository();
-                return activeRepository != null && activeRepository.SupportsPrereleasePackages;
+                using (StartOperation(activeRepository))
+                {
+                    return activeRepository != null && activeRepository.SupportsPrereleasePackages;
+                }
             }
         }
 
@@ -119,7 +125,10 @@ namespace NuGet.VisualStudio
         public IPackageRepository Clone()
         {
             var activeRepository = GetActiveRepository();
-            return activeRepository == null ? this : activeRepository.Clone();
+            using (StartOperation(activeRepository))
+            {
+                return activeRepository == null ? this : activeRepository.Clone();
+            }
         }
 
         public IEnumerable<IPackage> FindPackagesById(string packageId)
