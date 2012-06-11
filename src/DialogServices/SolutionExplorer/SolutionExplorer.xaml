@@ -47,7 +47,7 @@
     </Window.Resources>
     
     <DockPanel Margin="10,10,10,8">
-        <TextBlock x:Name="InstructionText" DockPanel.Dock="Top" TextWrapping="Wrap" Margin="0,0,0,3" />
+        <TextBlock x:Name="InstructionText" DockPanel.Dock="Top" TextWrapping="Wrap" Margin="0,0,0,3" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.CaptionTextKey}}" />
         
         <UniformGrid DockPanel.Dock="Bottom" HorizontalAlignment="Right" Columns="2">
             <Button AutomationProperties.AutomationId="OkButton" Content="{x:Static resources:Resources.Dialog_OK}" IsDefault="True" Click="OnOKButtonClicked" />

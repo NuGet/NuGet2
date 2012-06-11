@@ -45,14 +45,14 @@
     </Window.Resources>
     
     <DockPanel Margin="10">
-        <TextBlock DockPanel.Dock="Top" Margin="0,3,0,3" Text="{x:Static resources:Resources.License_HeaderText}" TextWrapping="Wrap" />        
+        <TextBlock DockPanel.Dock="Top" Margin="0,3,0,3" Text="{x:Static resources:Resources.License_HeaderText}" TextWrapping="Wrap" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.CaptionTextKey}}" />        
 
         <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,3" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="{x:Static resources:Resources.License_Decline}" AutomationProperties.AutomationId="DeclineButton" Click="OnDeclineButtonClick" IsCancel="True" />
             <Button Content="{x:Static resources:Resources.License_Accept}" AutomationProperties.AutomationId="AcceptButton" Click="OnAcceptButtonClick" />
         </StackPanel>
 
-        <TextBlock DockPanel.Dock="Bottom" Margin="0,0,0,3" TextWrapping="Wrap" Text="{x:Static resources:Resources.License_LicenseText}" />
+        <TextBlock DockPanel.Dock="Bottom" Margin="0,0,0,3" TextWrapping="Wrap" Text="{x:Static resources:Resources.License_LicenseText}" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.CaptionTextKey}}" />
 
         <ItemsControl
             ScrollViewer.VerticalScrollBarVisibility="Auto"

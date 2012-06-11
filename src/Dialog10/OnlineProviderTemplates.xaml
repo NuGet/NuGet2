@@ -96,7 +96,6 @@
                     FontStyle="Italic"
                     FontSize="9"
                     Margin="0,4"
-                    Foreground="DarkRed"
                     HorizontalAlignment="Center"
                     Visibility="{Binding IsPrerelease, Converter={StaticResource boolToVis}}" />
             </StackPanel>
@@ -185,7 +184,7 @@
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
                     <self:TextBlockControl AutomationProperties.AutomationId="VersionText" Text="{Binding Version, Mode=OneWay}" Style="{StaticResource DetailMetadataValueStyle}" />
-                    <self:TextBlockControl Margin="3,0,0,0" Text="{Binding Mode=OneWay, Source={x:Static resources:Resources.Dialog_PackagePrereleaseLabel}, StringFormat='({0})'}" Foreground="DarkRed" Visibility="{Binding IsPrerelease, Converter={StaticResource boolToVis}}" />
+                    <self:TextBlockControl Margin="3,0,0,0" Text="{Binding Mode=OneWay, Source={x:Static resources:Resources.Dialog_PackagePrereleaseLabel}, StringFormat='({0})'}" Visibility="{Binding IsPrerelease, Converter={StaticResource boolToVis}}" />
                 </StackPanel>
 
                 <!-- Last Updated -->
@@ -225,15 +224,12 @@
                 <self:TextBlockControl Margin="0,3,0,0" Style="{StaticResource DescriptionLabelStyle}">
                 </self:TextBlockControl>
                 
-                <TextBox
+                <self:TextBlockControl
                     Text="{Binding Description, Converter={StaticResource NormalizeTextConverter}, Mode=OneWay}"
-                    Background="{x:Null}"
-                    BorderThickness="0"
-                    IsReadOnly="True"
+                    Style="{StaticResource DetailMetadataValueStyle}"
                     TextWrapping="Wrap"
-                    Padding="0"
                     Margin="0,5">
-                </TextBox>
+                </self:TextBlockControl>
 
                 <!-- Tags -->
                 <DockPanel Margin="0,3,0,0" Visibility="{Binding PackageIdentity.Tags, Converter={StaticResource NullToVisibilityConverter}}">

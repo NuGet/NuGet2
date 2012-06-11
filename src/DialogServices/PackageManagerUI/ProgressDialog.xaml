@@ -20,7 +20,7 @@
     >
     
     <DockPanel>
-        <TextBlock DockPanel.Dock="Top" Text="{Binding Title, ElementName=Root}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" FontWeight="Bold" Margin="10" x:Name="StatusText" />
+        <TextBlock DockPanel.Dock="Top" Text="{Binding Title, ElementName=Root}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" FontWeight="Bold" Margin="10" x:Name="StatusText" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.CaptionTextKey}}" />
         <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" Margin="20,0,20,5" Height="26" Width="Auto" x:Name="ProgressBar" />
         <Button DockPanel.Dock="Bottom" HorizontalAlignment="Right" Margin="10,10,21,10" Padding="20,2,20,2" Content="{x:Static resources:Resources.Dialog_Close}" IsCancel="True" IsEnabled="False" x:Name="OkButton" Click="OkButton_Click" />
         <RichTextBox Margin="20, 5, 20, 5" AcceptsReturn="True" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" x:Name="MessagePane">

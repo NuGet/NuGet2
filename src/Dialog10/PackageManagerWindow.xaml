@@ -102,6 +102,7 @@
             BorderThickness="0,2,0,0"
             Padding="8">
             <TextBlock 
+                Foreground="{DynamicResource {x:Static vsfx:VsBrushes.CaptionTextKey}}"
                 Text="{x:Static resx:VsResources.Dialog_DisclaimerText}" 
                 TextWrapping="Wrap" />
         </Border>
