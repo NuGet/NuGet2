@@ -524,7 +524,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
         public override void WriteErrorLine(string value)
         {
-            WriteLine(value, ConsoleColor.Red);
+            WriteLine(value, ConsoleColor.Red, ConsoleColor.Gray);
         }
 
         public override void WriteProgress(long sourceId, ProgressRecord record)
@@ -543,7 +543,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
         public override void WriteWarningLine(string message)
         {
-            WriteLine(message, ConsoleColor.Magenta);
+            WriteLine(message, ConsoleColor.Magenta, ConsoleColor.Gray);
         }
     }
 }
