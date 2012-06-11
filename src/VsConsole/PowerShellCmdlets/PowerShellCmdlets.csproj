@@ -32,14 +32,15 @@
       <Link>CommonResources.cs</Link>
     </Compile>
     <Compile Include="AddBindingRedirectCommand.cs" />
-    <Compile Include="GetPackageVersionCommand.cs" />
-    <Compile Include="GetPackageIdCommand.cs" />
+    <Compile Include="GetRemotePackageVersionCommand.cs" />
+    <Compile Include="GetRemotePackageIdCommand.cs" />
     <Compile Include="FindPackageCommand.cs" />
     <Compile Include="GetPackageCommand.cs" />
     <Compile Include="GetProjectCommand.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IErrorHandler.cs" />
     <Compile Include="InstallPackageCommand.cs" />
+    <Compile Include="JsonApiCommandBase.cs" />
     <Compile Include="NuGetBaseCommand.cs" />
     <Compile Include="NuGetErrorId.cs" />
     <Compile Include="OpenPackagePageCommand.cs" />

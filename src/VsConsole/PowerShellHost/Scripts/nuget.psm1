@@ -48,15 +48,13 @@ Register-TabExpansion 'Get-Package' @{
 Register-TabExpansion 'Install-Package' @{
     'Id' = {
         param($context)
-
-        GetPackageIds $context
+        GetRemotePackageIds $context
     }
     'ProjectName' = {
         GetProjectNames
     }
     'Version' = {
         param($context)
-
         GetRemotePackageVersions $context
     }
     'Source' = {
@@ -67,31 +65,21 @@ Register-TabExpansion 'Install-Package' @{
 Register-TabExpansion 'Uninstall-Package' @{
     'Id' = {
         param($context)
-
-        $parameters = @{}
-        if ($context.id) { $parameters.filter = $context.id }
-
-        GetPackageIds (Find-Package @parameters -ErrorAction SilentlyContinue)
+        GetInstalledPackageIds $context
     }
     'ProjectName' = {
         GetProjectNames
     }
     'Version' = {
         $parameters = @{}
-        if ($context.id) { $parameters.filter = $context.id }
-
-        GetPackageVersions $parameters $context
+        GetInstalledPackageVersions $parameters $context
     }
 }
 
 Register-TabExpansion 'Update-Package' @{
     'Id' = {
         param($context)
-
-        $parameters = @{}
-        if ($context.id) { $parameters.filter = $context.id }
-
-        GetPackageIds (Find-Package @parameters -ErrorAction SilentlyContinue)
+        GetInstalledPackageIds $context
     }
     'ProjectName' = {
         GetProjectNames
@@ -102,7 +90,7 @@ Register-TabExpansion 'Update-Package' @{
         # Only show available versions if an id was specified
         if ($context.id) { 
             # Find the installed package (this might be nothing since we could hav a partial id)
-            $versions = ""
+            $versions = @()
             $packages = @(Get-Package $context.id | ?{ $_.Id -eq $context.id })
 
             if($packages.Count) {
@@ -132,19 +120,11 @@ Register-TabExpansion 'Update-Package' @{
 Register-TabExpansion 'Open-PackagePage' @{
     'Id' = {
         param($context)
-        GetPackageIds $context
+        GetRemotePackageIds $context
     }
     'Version' = {
         param($context)
-
-        $parameters = @{}
-
-        if ($context.Id) { $parameters.filter = $context.Id }
-        if ($context.Source) { $parameters.source = $context.Source }
-
-        $parameters.Remote = $true
-        $parameters.AllVersions = $true
-        GetPackageVersions $parameters $context 
+        GetRemotePackageVersions $context
     }
     'Source' = {
         GetPackageSources
@@ -184,7 +164,15 @@ function GetProjectNames {
     ($uniqueNames + $safeNames) | Select-Object -Unique | Sort-Object
 }
 
-function GetPackageIds($context) {
+function GetInstalledPackageIds($context) {
+    $parameters = @{}
+    
+    if ($context.Id) { $parameters.filter = $context.id }
+
+    Find-Package @parameters -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id -Unique
+}
+
+function GetRemotePackageIds($context) {
     $parameters = @{}
 
     if ($context.Id) { $parameters.filter = $context.Id }
@@ -194,11 +182,11 @@ function GetPackageIds($context) {
     }
 
     try {
-		return Get-PackageId @parameters
+		return Get-RemotePackageId @parameters
     }
     catch {
-		return ""
-	}
+        return @()
+    }
 }
 
 function GetPackageSources() {
@@ -206,7 +194,11 @@ function GetPackageSources() {
     $allSources | Select-Object -ExpandProperty Name
 }
 
-function GetPackageVersions($parameters, $context) {
+function GetInstalledPackageVersions($context) {
+    $parameters = @{}
+
+    if ($context.id) { $parameters.filter = $context.id }
+    
     Find-Package @parameters -ExactMatch -ErrorAction SilentlyContinue | Select -ExpandProperty Version | %{
         # Convert to version if the we're looking at the version as a string
         if($_ -is [string]) { 
@@ -227,10 +219,10 @@ function GetRemotePackageVersions($context) {
     }
 
     try {
-	    return Get-PackageVersion @parameters | %{ [NuGet.SemanticVersion]::Parse($_) } | Sort-Object -Descending
+	    return Get-RemotePackageVersion @parameters | %{ [NuGet.SemanticVersion]::Parse($_) } | Sort-Object -Descending
     }
     catch {
-	    return ""
+	    return @()
     }
 }
 

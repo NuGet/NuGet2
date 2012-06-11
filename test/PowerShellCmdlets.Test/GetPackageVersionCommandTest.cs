@@ -13,9 +13,10 @@ namespace NuGet.PowerShell.Commands.Test
         [Fact]
         public void WillWriteThePackageVersionsReturnedFromTheApiCall()
         {
-            var cmdlet = new TestableGetPackageVersionCommand
+            var cmdlet = new TestableGetRemotePackageVersionCommand
             {
-                StubPackageVersions = new string[]
+                Id = "theId",
+                StubResults = new string[]
                 {
                     "1.0",
                     "2.0"
@@ -31,68 +32,134 @@ namespace NuGet.PowerShell.Commands.Test
         [Fact]
         public void WillUseTheActivePackageSourceToBuildTheUriWhenNoSourceParameterIsSpecified()
         {
-            var cmdlet = new TestableGetPackageVersionCommand
+            var cmdlet = new TestableGetRemotePackageVersionCommand
             {
-                StubApiUri = new Uri("http://theActivePackageSourceUri")
+                Id = "theId",
+                StubPackageSource = "http://theActivePackageSourceUri"
             };
 
             cmdlet.GetResults().Cast<string>();
 
-            Assert.Equal("http://theactivepackagesourceuri", cmdlet.ActualApiUri.GetLeftPart(UriPartial.Authority));
+            Assert.Equal("http://theactivepackagesourceuri", cmdlet.ActualApiEndpointUri.GetLeftPart(UriPartial.Authority));
         }
 
         [Fact]
         public void WillUseTheSourceParameterWhenSpecified()
         {
-            var cmdlet = new TestableGetPackageVersionCommand
+            var cmdlet = new TestableGetRemotePackageVersionCommand
             {
+                Id = "theId",
                 Source = "http://theSourceParameterUri"
             };
 
             cmdlet.GetResults().Cast<string>();
 
-            Assert.Equal("http://thesourceparameteruri", cmdlet.ActualApiUri.GetLeftPart(UriPartial.Authority));
+            Assert.Equal("http://thesourceparameteruri", cmdlet.ActualApiEndpointUri.GetLeftPart(UriPartial.Authority));
         }
 
         [Fact]
         public void WillAppendTheApiPathWithIdToTheApiUri()
         {
-            var cmdlet = new TestableGetPackageVersionCommand
+            var cmdlet = new TestableGetRemotePackageVersionCommand
             {
                 Id = "theId"
             };
 
             cmdlet.GetResults().Cast<string>();
 
-            Assert.Equal("/api/v2/package-versions/theId?", cmdlet.ActualApiUri.PathAndQuery);
+            Assert.Equal("/api/v2/package-versions/theId", cmdlet.ActualApiEndpointUri.PathAndQuery);
         }
 
         [Fact]
         public void WillIncludeAPrereleaseQueryStringParameterInApiUriWhenPrereleaseParameterIsTrue()
         {
-            var cmdlet = new TestableGetPackageVersionCommand
+            var cmdlet = new TestableGetRemotePackageVersionCommand
             {
+                Id = "theId",
                 IncludePrerelease = true
             };
 
             cmdlet.GetResults().Cast<string>();
 
-            Assert.Contains("includePrerelease=true", cmdlet.ActualApiUri.ToString());
+            Assert.Contains("includePrerelease=true", cmdlet.ActualApiEndpointUri.ToString());
         }
 
         [Fact]
         public void WillNotIncludeAPrereleaseQueryStringParameterInApiUriWhenPrereleaseParameterIsFalse()
         {
-            var cmdlet = new TestableGetPackageVersionCommand
+            var cmdlet = new TestableGetRemotePackageVersionCommand
             {
+                Id = "theId",
                 IncludePrerelease = false
             };
 
             cmdlet.GetResults().Cast<string>();
 
-            Assert.DoesNotContain("includePrerelease", cmdlet.ActualApiUri.ToString());
+            Assert.DoesNotContain("includePrerelease", cmdlet.ActualApiEndpointUri.ToString());
         }
-        
+
+        [Fact]
+        public void WillUseTheRepositoryPackagesWhenTheRepositoryIsNotHttpBased()
+        {
+            var cmdlet = new TestableGetRemotePackageVersionCommand
+            {
+                Id = "theId",
+                StubPackageSource = "c:\\aPackageDir",
+                StubRepositoryPackages = new IPackage[]
+                {
+                    CreateStubPackage("theId", "1.0"),
+                    CreateStubPackage("theId", "2.0"),
+                }
+            };
+
+            var result = cmdlet.GetResults().Cast<string>();
+
+            Assert.Equal("1.0", result.First());
+            Assert.Equal("2.0", result.ElementAt(1));
+        }
+
+        [Fact]
+        public void WillIncludeRepositoryPackagesWithPrereleaseVersionsWhenFlagged()
+        {
+            var cmdlet = new TestableGetRemotePackageVersionCommand
+            {
+                Id = "theId",
+                IncludePrerelease = true,
+                StubPackageSource = "c:\\aPackageDir",
+                StubRepositoryPackages = new IPackage[]
+                {
+                    CreateStubPackage("theId", "1.0"),
+                    CreateStubPackage("theId", "2.0-pre"),
+                }
+            };
+
+            var result = cmdlet.GetResults().Cast<string>();
+
+            Assert.Equal("1.0", result.First());
+            Assert.Equal("2.0-pre", result.ElementAt(1));
+        }
+
+        [Fact]
+        public void WillNotIncludeRepositoryPackagesWithPrereleaseVersionsWhenNotFlagged()
+        {
+            var cmdlet = new TestableGetRemotePackageVersionCommand
+            {
+                Id = "theId",
+                IncludePrerelease = false,
+                StubPackageSource = "c:\\aPackageDir",
+                StubRepositoryPackages = new IPackage[]
+                {
+                    CreateStubPackage("theId", "1.0"),
+                    CreateStubPackage("theId", "2.0-pre"),
+                }
+            };
+
+            var result = cmdlet.GetResults().Cast<string>();
+
+            Assert.Equal("1.0", result.First());
+            Assert.Equal(1, result.Count());
+        }
+
         private static IPackageRepository CreateActiveRepository()
         {
             var remotePackages = new[]
@@ -115,6 +182,14 @@ namespace NuGet.PowerShell.Commands.Test
             return sourceProvider.Object;
         }
 
+        private static IPackage CreateStubPackage(string id, string version = "1.0")
+        {
+            var stubPackage = new Mock<IPackage>();
+            stubPackage.Setup(stub => stub.Id).Returns(id);
+            stubPackage.Setup(stub => stub.Version).Returns(new SemanticVersion(version));
+            return stubPackage.Object;
+        }
+
         private static IVsPackageManager CreateStubPackageManager(IEnumerable<IPackage> localPackages = null)
         {
             var fileSystem = new Mock<IFileSystem>();
@@ -127,7 +202,7 @@ namespace NuGet.PowerShell.Commands.Test
                                         localRepo.Object, new Mock<IRecentPackageRepository>().Object,
                                         new Mock<VsPackageInstallerEvents>().Object);
         }
-        
+
         private static IVsPackageManagerFactory CreateStubPackageManagerFactory()
         {
             var mockFactory = new Mock<IVsPackageManagerFactory>();
@@ -136,26 +211,30 @@ namespace NuGet.PowerShell.Commands.Test
             return mockFactory.Object;
         }
         
-        public class TestableGetPackageVersionCommand : GetPackageVersionCommand
+        public class TestableGetRemotePackageVersionCommand : GetRemotePackageVersionCommand
         {
-            public TestableGetPackageVersionCommand()
-                : base(TestUtils.GetSolutionManager(), CreateStubPackageManagerFactory(), null, CreateSourceProvider("http://aUri"))
+            public TestableGetRemotePackageVersionCommand()
+                : base(TestUtils.GetSolutionManager(), CreateStubPackageManagerFactory(), null, null, CreateSourceProvider("http://aUri"))
             {
             }
+            
+            public Uri ActualApiEndpointUri { get; private set; }
+            public string StubPackageSource { get; set; }
+            public IEnumerable<IPackage> StubRepositoryPackages { get; set; }
+            public string[] StubResults { get; set; }
 
-            public Uri ActualApiUri { get; private set; }
-            public string[] StubPackageVersions { get; set; }
-            public Uri StubApiUri { get; set; }
-
-            protected override string[] GetPackageVersions(Uri uri)
+            protected override IPackageRepository GetPackageRepository()
             {
-                ActualApiUri = uri;
-                return StubPackageVersions ?? new string[] {};
+                var stubPackageRepository = new Mock<IPackageRepository>();
+                stubPackageRepository.Setup(stub => stub.Source).Returns(Source ?? StubPackageSource ?? "http://aUri");
+                stubPackageRepository.Setup(stub => stub.GetPackages()).Returns((StubRepositoryPackages ?? new IPackage[] { }).AsQueryable());
+                return stubPackageRepository.Object;
             }
 
-            protected override Uri GetUri()
+            protected override string[] GetResults(Uri apiEndpointUri)
             {
-                return StubApiUri ?? base.GetUri();
+                ActualApiEndpointUri = apiEndpointUri;
+                return StubResults ?? new string[] { };
             }
         }
     }
