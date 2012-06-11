@@ -69,6 +69,7 @@ namespace NuGet.PowerShell.Commands
 
         protected abstract IEnumerable<T> GetResultsFromPackageRepository(IPackageRepository packageRepository);
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification="Too much logic for getter.")]
         protected virtual IPackageRepository GetPackageRepository()
         {
             if (!String.IsNullOrEmpty(Source))
@@ -94,6 +95,7 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings", Justification="Wrapping the string in a new URI doesn't improve anything.")]
         protected override void ProcessRecordCore()
         {
             var packageRepository = GetPackageRepository();
