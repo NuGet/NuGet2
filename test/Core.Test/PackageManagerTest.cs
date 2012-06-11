@@ -145,7 +145,7 @@ namespace NuGet.Test
 
             var satellitePackage = PackageUtility.CreatePackage("foo.ja-jp", "1.0.0", language: "ja-jp",
                                                     satelliteAssemblies: new[] { @"lib\ja-jp\foo.resources.dll", @"lib\ja-jp\foo.xml" },
-                                                    dependencies: new[] { new PackageDependency("foo") });
+                                                    dependencies: new[] { new PackageDependency("foo", VersionUtility.ParseVersionSpec("[1.0.0]")) });
 
             var projectSystem = new MockProjectSystem();
             var localRepository = new MockPackageRepository();
@@ -176,7 +176,7 @@ namespace NuGet.Test
 
             var satellitePackage = PackageUtility.CreatePackage("foo.ja-jp", "1.0.0", language: "ja-jp",
                                                     satelliteAssemblies: new[] { @"lib\ja-jp\foo.resources.dll", @"lib\ja-jp\foo.xml" },
-                                                    dependencies: new[] { new PackageDependency("foo") });
+                                                    dependencies: new[] { new PackageDependency("foo", VersionUtility.ParseVersionSpec("[1.0.0]")) });
 
             var projectSystem = new MockProjectSystem();
             var localRepository = new MockPackageRepository();
@@ -218,7 +218,7 @@ namespace NuGet.Test
                                                     content: new[] {
                                                         @"english.txt",
                                                         @"japanese.txt" },
-                                                    dependencies: new[] { new PackageDependency("foo") });
+                                                    dependencies: new[] { new PackageDependency("foo", VersionUtility.ParseVersionSpec("[1.0.0]")) });
 
             var projectSystem = new MockProjectSystem();
             var localRepository = new MockPackageRepository();
@@ -326,7 +326,7 @@ namespace NuGet.Test
 
             var satellitePackage = PackageUtility.CreatePackage("foo.ja-jp", "1.0.0", language: "ja-jp",
                                                     satelliteAssemblies: new[] { @"lib\ja-jp\collision.txt" },
-                                                    dependencies: new[] { new PackageDependency("foo") });
+                                                    dependencies: new[] { new PackageDependency("foo", VersionUtility.ParseVersionSpec("[1.0.0]")) });
 
             var projectSystem = new MockProjectSystem();
             var localRepository = new MockPackageRepository();

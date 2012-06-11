@@ -27,13 +27,23 @@ namespace NuGet
 
         /// <summary>
         /// A package is deemed to be a satellite package if it has a language property set, the id of the package is of the format [.*].[Language]
-        /// and it has at least one dependency.
+        /// and it has at least one dependency with an id that maps to the core package .
         /// </summary>
         public static bool IsSatellitePackage(this IPackageMetadata package)
         {
-            return !String.IsNullOrEmpty(package.Language) &&
-                    package.Id.EndsWith('.' + package.Language, StringComparison.OrdinalIgnoreCase) &&
-                    package.DependencySets.Any();
+            if (!String.IsNullOrEmpty(package.Language) &&
+                    package.Id.EndsWith('.' + package.Language, StringComparison.OrdinalIgnoreCase))
+
+            {
+                // The satellite pack's Id is of the format <Core-Package-Id>.<Language>. Extract the core package id using this.
+                // Additionally satellite packages have a strict dependency on the core package
+                string corePackageId = package.Id.Substring(0, package.Id.Length - package.Language.Length - 1);
+                return package.DependencySets.SelectMany(s => s.Dependencies).Any(
+                       d => d.Id.Equals(corePackageId, StringComparison.OrdinalIgnoreCase) &&
+                       d.VersionSpec != null &&
+                       d.VersionSpec.MaxVersion == d.VersionSpec.MinVersion && d.VersionSpec.IsMaxInclusive && d.VersionSpec.IsMinInclusive);
+            }
+            return false;
         }
 
         public static bool IsEmptyFolder(this IPackageFile packageFile)

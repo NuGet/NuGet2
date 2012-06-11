@@ -47,6 +47,82 @@ namespace NuGet.Test
             Assert.Empty(result1);
         }
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void IsSatellitePackageReturnsFalseIfThePackageDoesNotHaveLanguageSet(string language)
+        {
+            // Arrange
+            var package = PackageUtility.CreatePackage("Foo", "1.0.0", language: language);
+
+            // Act
+            bool result = package.IsSatellitePackage();
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Theory]
+        [InlineData("Foo", "ja-jp")]
+        [InlineData("Foo.ja", "ja-jp")]
+        [InlineData("Foo.ja.jp", "ja-jp")]
+        [InlineData("Foo.ja-jp.test", "ja-jp")]
+        public void IsSatellitePackageReturnsFalseIfThePackageIdDoesNotEndInLanguage(string id, string language)
+        {
+            // Arrange
+            var package = PackageUtility.CreatePackage(id, "1.0.0", language: language);
+
+            // Act
+            bool result = package.IsSatellitePackage();
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Theory]
+        [InlineData("Bar", "[1.0]")]
+        [InlineData("ja-jp", "[1.0]")]
+        [InlineData("Foo.ja-jp.test", "[1.0]")]
+        [InlineData("Foo", "(1.0]")]
+        public void IsSatellitePackageReturnsFalseIfThePackageCoreDependencyIsIncorrect(string dependencyId, string dependencyVersion)
+        {
+            // Arrange
+            var package = PackageUtility.CreatePackage("Foo.ja-jp", "1.0.0", language: "ja-jp", 
+                dependencies: new[] { new PackageDependency(dependencyId, VersionUtility.ParseVersionSpec(dependencyVersion)) });
+
+            // Act
+            bool result = package.IsSatellitePackage();
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void IsSatellitePackageReturnsFalseIfThePackageHasNoDependencies()
+        {
+            // Arrange
+            var package = PackageUtility.CreatePackage("Foo", "1.0.0", language: "ja-jp");
+
+            // Act
+            bool result = package.IsSatellitePackage();
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void IsSatellitePackageReturnsTrueIfThePackageHasStrongCoreDependency()
+        {
+            // Arrange
+            var package = PackageUtility.CreatePackage("Foo.ja-jp", "1.0.0", language: "ja-jp", 
+                dependencies: new[] { new PackageDependency("Foo", VersionUtility.ParseVersionSpec("[1.0]"))});
+
+            // Act
+            bool result = package.IsSatellitePackage();
+
+            // Assert
+            Assert.True(result);
+        }
 
         /// <summary>
         /// Create a package with teh specified language and file, and expect that the file is treated
