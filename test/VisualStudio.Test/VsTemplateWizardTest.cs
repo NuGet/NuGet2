@@ -442,6 +442,61 @@ namespace NuGet.VisualStudio.Test
             VerifyParsedPackages(document, expectedPackages);
         }
 
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void DetermineSolutionDirectory_UsesDestinationDirectoryIfSpecifiedSolutionNameNullOrEmpty(string value)
+        {
+            // Arrange
+            Dictionary<string, string> replacementsDictionary = new Dictionary<string, string>()
+            {
+                { "$specifiedsolutionname$", value },
+                { "$destinationdirectory$", "DestDir" },
+                { "$solutiondirectory$", "SlnDir" }
+            };
+
+            // Act
+            string actual = VsTemplateWizard.DetermineSolutionDirectory(replacementsDictionary);
+
+            // Assert
+            Assert.Equal("DestDir", actual);
+        }
+
+        [Fact]
+        public void DetermineSolutionDirectory_UsesSolutionDirectoryIfSpecifiedSolutionNameNonEmpty()
+        {
+            // Arrange
+            Dictionary<string, string> replacementsDictionary = new Dictionary<string, string>()
+            {
+                { "$specifiedsolutionname$", "SlnName" },
+                { "$destinationdirectory$", "DestDir" },
+                { "$solutiondirectory$", "SlnDir" }
+            };
+
+            // Act
+            string actual = VsTemplateWizard.DetermineSolutionDirectory(replacementsDictionary);
+
+            // Assert
+            Assert.Equal("SlnDir", actual);
+        }
+
+        [Fact]
+        public void DetermineSolutionDirectory_UsesDestinationDirectoryIfSolutionDirectoryNotSpecified()
+        {
+            // Arrange
+            Dictionary<string, string> replacementsDictionary = new Dictionary<string, string>()
+            {
+                { "$specifiedsolutionname$", "SlnName" },
+                { "$destinationdirectory$", "DestDir" }
+            };
+
+            // Act
+            string actual = VsTemplateWizard.DetermineSolutionDirectory(replacementsDictionary);
+
+            // Assert
+            Assert.Equal("DestDir", actual);
+        }
+
         private static void VerifyParsedPackages(XDocument document, IEnumerable<VsTemplateWizardPackageInfo> expectedPackages)
         {
             // Arrange

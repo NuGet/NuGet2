@@ -362,9 +362,8 @@ namespace NuGet.VisualStudio
                 }
                 else
                 {
-                    // the $solutiondirectory$ parameter is available in VS11 RC and later
-                    string solutionDir;
-                    if (replacementsDictionary.TryGetValue("$solutiondirectory$", out solutionDir))
+                    string solutionDir = DetermineSolutionDirectory(replacementsDictionary);
+                    if (!String.IsNullOrEmpty(solutionDir))
                     {
                         solutionRepositoryPath = Path.Combine(solutionDir, NuGet.VisualStudio.RepositorySettings.DefaultRepositoryDirectory);
                     }
@@ -423,6 +422,31 @@ namespace NuGet.VisualStudio
         {
             // always add all project items
             return true;
+        }
+
+        internal static string DetermineSolutionDirectory(Dictionary<string, string> replacementsDictionary)
+        {
+            // the $solutiondirectory$ parameter is available in VS11 RC and later
+            // No $solutiondirectory$? Ok, we're in the case where the solution is in 
+            // the same directory as the project
+            // Is $specifiedsolutionname$ null or empty? We're definitely in the solution
+            // in same directory as project case.
+
+            string solutionName;
+            string solutionDir;
+            bool ignoreSolutionDir = (replacementsDictionary.TryGetValue("$specifiedsolutionname$", out solutionName) && String.IsNullOrEmpty(solutionName));
+
+            // We check $destinationdirectory$ twice because we want the following precedence:
+            // 1. If $specifiedsolutionname$ == null, ALWAYS use $destinationdirectory$
+            // 2. Otherwise, use $solutiondirectory$ if available
+            // 3. If $solutiondirectory$ is not available, use $destinationdirectory$.
+            if ((ignoreSolutionDir && replacementsDictionary.TryGetValue("$destinationdirectory$", out solutionDir)) ||
+                replacementsDictionary.TryGetValue("$solutiondirectory$", out solutionDir) ||
+                replacementsDictionary.TryGetValue("$destinationdirectory$", out solutionDir))
+            {
+                return solutionDir;
+            }
+            return null;
         }
 
         private enum RepositoryType
