@@ -200,17 +200,8 @@ function GetPackageSources() {
 
 function GetInstalledPackageVersions($context) {
     $parameters = @{}
-
     if ($context.id) { $parameters.filter = $context.id }
-    
-    Find-Package @parameters -ExactMatch -ErrorAction SilentlyContinue | Select -ExpandProperty Version | %{
-        # Convert to version if the we're looking at the version as a string
-        if($_ -is [string]) { 
-            [NuGet.SemanticVersion]::Parse($_) 
-        } else { 
-            $_ 
-        }  
-    } | Sort-Object -Descending
+    GetAndSortVersions(Find-Package @parameters -ExactMatch -ErrorAction SilentlyContinue)
 }
 
 function GetRemotePackageVersions($context) {
@@ -228,7 +219,6 @@ function GetRemotePackageVersions($context) {
     catch [Net.WebException] {
         # If the server doesn't have the JSON API endpoints, get the remote package versions the old way.
         $parameters = @{}
-
         if ($context.Id) { $parameters.filter = $context.Id }
         if ($context.Source) { $parameters.source = $context.Source }
         if (IsPrereleaseSet $context) {
@@ -236,17 +226,21 @@ function GetRemotePackageVersions($context) {
         }
         $parameters.Remote = $true
         $parameters.AllVersions = $true
-        Find-Package @parameters -ExactMatch -ErrorAction SilentlyContinue | Select -ExpandProperty Version | %{
-            if($_ -is [string]) { 
-                [NuGet.SemanticVersion]::Parse($_) 
-            } else { 
-                $_ 
-            }  
-        } | Sort-Object -Descending
+        GetAndSortVersions(Find-Package @parameters -ExactMatch -ErrorAction SilentlyContinue)
     }
     catch {
 	    return @()
     }
+}
+
+function GetAndSortVersions($packages) {
+    $packages | Select -ExpandProperty Version | %{
+        if($_ -is [string]) { 
+            [NuGet.SemanticVersion]::Parse($_) 
+        } else { 
+            $_ 
+        }  
+    } | Sort-Object -Descending
 }
 
 function NugetTabExpansion($line, $lastWord) {
