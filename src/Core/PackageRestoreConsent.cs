@@ -35,28 +35,32 @@ namespace NuGet
         {
             get
             {
-                string value = _settings.GetValue(PackageRestoreSection, PackageRestoreConsentKey).SafeTrim();
-                if (String.IsNullOrEmpty(value))
-                {
-                    value = _environmentReader.GetEnvironmentVariable(EnvironmentVariableName).SafeTrim();
-                }
+                string settingsValue = _settings.GetValue(PackageRestoreSection, PackageRestoreConsentKey).SafeTrim();
+                string envValue =  _environmentReader.GetEnvironmentVariable(EnvironmentVariableName).SafeTrim();
 
-                if (!String.IsNullOrEmpty(value))
-                {
-                    bool boolResult;
-                    int intResult;
-
-                    return
-                       (Boolean.TryParse(value, out boolResult) && boolResult) ||
-                       (Int32.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out intResult) && (intResult == 1));
-                }
-
-                return false;
+                return IsSet(settingsValue) || IsSet(envValue);
             }
             set
             {
-                _settings.SetValue(PackageRestoreSection, PackageRestoreConsentKey, value.ToString());
+                if (value == false)
+                {
+                    _settings.DeleteSection(PackageRestoreSection);
+                }
+                else
+                {
+                    _settings.SetValue(PackageRestoreSection, PackageRestoreConsentKey, value.ToString());
+                }
             }
+        }
+
+        private static bool IsSet(string value)
+        {
+            bool boolResult;
+            int intResult;
+
+            return !String.IsNullOrEmpty(value) && 
+                   ((Boolean.TryParse(value, out boolResult) && boolResult) ||
+                   (Int32.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out intResult) && (intResult == 1)));
         }
     }
 }
