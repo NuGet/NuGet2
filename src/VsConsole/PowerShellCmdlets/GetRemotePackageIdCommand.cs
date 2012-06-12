@@ -37,9 +37,9 @@ namespace NuGet.PowerShell.Commands
 	    [ValidateNotNullOrEmpty]
 	    public string Filter { get; set; }
 
-        protected override NameValueCollection BuildApiEndpointQueryParameters()
+        protected override Dictionary<string, string> BuildApiEndpointQueryParameters()
         {
-            var queryParameters = new NameValueCollection();
+            var queryParameters = new Dictionary<string, string>();
             if (!String.IsNullOrWhiteSpace(Filter))
             {
                 queryParameters.Add("partialId", Filter);
@@ -52,7 +52,7 @@ namespace NuGet.PowerShell.Commands
         {
             IEnumerable<IPackage> packages = packageRepository.GetPackages().ToList();
             
-            if (!String.IsNullOrWhiteSpace(Filter))
+            if (!String.IsNullOrEmpty(Filter))
             {
                 packages = packages.Where(p => p.Id.StartsWith(Filter, StringComparison.OrdinalIgnoreCase));
             }

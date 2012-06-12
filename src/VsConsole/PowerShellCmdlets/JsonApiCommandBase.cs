@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Runtime.Serialization.Json;
-using System.Text;
 using System.Threading.Tasks;
 using NuGet.VisualStudio;
 
@@ -49,7 +48,7 @@ namespace NuGet.PowerShell.Commands
         [Alias("Prerelease")]
         public SwitchParameter IncludePrerelease { get; set; }
 
-        protected abstract NameValueCollection BuildApiEndpointQueryParameters();
+        protected abstract Dictionary<string, string> BuildApiEndpointQueryParameters();
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Too much logic for getter.")]
         protected virtual IPackageRepository GetPackageRepository()
@@ -107,36 +106,27 @@ namespace NuGet.PowerShell.Commands
                 .Take(30);
         }
 
-        private static string BuildQueryString(NameValueCollection queryParameters)
+        private static string BuildQueryString(Dictionary<string, string> queryParameters)
         {
             if (queryParameters.Count == 0)
             {
                 return string.Empty;
             }
 
-            var queryStringBuilder = new StringBuilder();
-            foreach (var key in queryParameters.Keys)
-            {
-                queryStringBuilder.AppendFormat("{0}={1}&", key, Uri.EscapeDataString(queryParameters[key.ToString()]));
-            }
-
-            // remove the final &
-            queryStringBuilder.Length--;
-
-            return queryStringBuilder.ToString();
+            return String.Join("&", queryParameters.Select(param => string.Format("{0}={1}", param.Key, Uri.EscapeDataString(param.Value))));
         }
 
         private IEnumerable<T> GetResults(IPackageRepository packageRepository)
         {
             Debug.Assert(!(packageRepository is AggregateRepository), "This should never be called for an aggregate package repository.");
 
-            if (!packageRepository.Source.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            if (!UriHelper.IsHttpSource(packageRepository.Source))
             {
                 return GetResultsFromPackageRepository(packageRepository);
             }
             else
             {
-                var queryParameters = BuildApiEndpointQueryParameters() ?? new NameValueCollection();
+                var queryParameters = BuildApiEndpointQueryParameters() ?? new Dictionary<string, string>();
                 if (IncludePrerelease)
                 {
                     queryParameters.Add("includePrerelease", "true");

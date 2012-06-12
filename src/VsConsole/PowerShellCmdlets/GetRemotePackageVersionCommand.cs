@@ -46,7 +46,7 @@ namespace NuGet.PowerShell.Commands
 		[ValidateNotNullOrEmpty]
 		public string Id { get; set; }
 
-        protected override NameValueCollection BuildApiEndpointQueryParameters()
+        protected override Dictionary<string, string> BuildApiEndpointQueryParameters()
         {
             return null;
         }
