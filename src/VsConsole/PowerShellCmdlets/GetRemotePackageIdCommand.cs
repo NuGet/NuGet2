@@ -50,7 +50,7 @@ namespace NuGet.PowerShell.Commands
 
         protected override IEnumerable<string> GetResultsFromPackageRepository(IPackageRepository packageRepository)
         {
-            var packages = packageRepository.GetPackages();
+            IEnumerable<IPackage> packages = packageRepository.GetPackages().ToList();
             
             if (!String.IsNullOrWhiteSpace(Filter))
             {

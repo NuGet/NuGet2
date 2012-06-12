@@ -196,6 +196,44 @@ namespace NuGet.PowerShell.Commands.Test
             Assert.Equal(1, result.Count());
         }
 
+        [Fact]
+        public void WillAggregateResultsWhenThePackageRepositoryIsAnAggregateRepository()
+        {
+            var cmdlet = new TestableGetRemotePackageIdCommand
+            {
+                StubResults = new []
+                {
+                    "theFirstPackageId",
+                    "theSecondPackageId"
+                },
+                StubPackageRepository = new AggregateRepository(
+                    new []
+                    {
+                        CreateStubPackageRepository(
+                            new []
+                            {
+                                CreateStubPackage("theFirstPackageId"),
+                                CreateStubPackage("theSecondPackageId"),
+                            },
+                            "http://theuri"),
+                        CreateStubPackageRepository(
+                            new []
+                            {
+                                CreateStubPackage("theThirdPackageId"),
+                                CreateStubPackage("theFourthPackageId"),
+                            },
+                            "c:\\packages"),
+                    }),
+            };
+
+            var result = cmdlet.GetResults().Cast<string>();
+
+            Assert.Contains("theFirstPackageId", result);
+            Assert.Contains("theSecondPackageId", result);
+            Assert.Contains("theThirdPackageId", result);
+            Assert.Contains("theFourthPackageId", result);
+        }
+
         private static IPackageRepository CreateActiveRepository()
         {
             var remotePackages = new[]
@@ -224,6 +262,14 @@ namespace NuGet.PowerShell.Commands.Test
             stubPackage.Setup(stub => stub.Id).Returns(id);
             stubPackage.Setup(stub => stub.Version).Returns(new SemanticVersion(version));
             return stubPackage.Object;
+        }
+
+        private static IPackageRepository CreateStubPackageRepository(IEnumerable<IPackage> packages, string source)
+        {
+            var stubPackageRepository = new Mock<IPackageRepository>();
+            stubPackageRepository.Setup(stub => stub.Source).Returns(source ?? "http://aUri");
+            stubPackageRepository.Setup(stub => stub.GetPackages()).Returns((packages ?? new IPackage[] { }).AsQueryable());
+            return stubPackageRepository.Object;
         }
         
         private static IVsPackageManager CreateStubPackageManager(IEnumerable<IPackage> localPackages = null)
@@ -255,19 +301,23 @@ namespace NuGet.PowerShell.Commands.Test
             }
             
             public Uri ActualApiEndpointUri { get; private set; }
+            public IPackageRepository StubPackageRepository { get; set; }
             public string StubPackageSource { get; set; }
             public IEnumerable<IPackage> StubRepositoryPackages { get; set; }
             public string[] StubResults { get; set; }
 
             protected override IPackageRepository GetPackageRepository()
             {
+                if (StubPackageRepository != null)
+                    return StubPackageRepository;
+                
                 var stubPackageRepository = new Mock<IPackageRepository>();
                 stubPackageRepository.Setup(stub => stub.Source).Returns(Source ?? StubPackageSource ?? "http://aUri");
                 stubPackageRepository.Setup(stub => stub.GetPackages()).Returns((StubRepositoryPackages ?? new IPackage[]{}).AsQueryable());
                 return stubPackageRepository.Object;
             }
 
-            protected override string[] GetResults(Uri apiEndpointUri)
+            protected override IEnumerable<string> GetResults(Uri apiEndpointUri)
             {
                 ActualApiEndpointUri = apiEndpointUri;
                 return StubResults ?? new string[] { };
