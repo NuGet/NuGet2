@@ -282,7 +282,7 @@ namespace NuGet.Commands
         {
             if (!packageRestoreConsent)
             {
-                throw new InvalidOperationException(NuGetResources.InstallCommandPackageRestoreConsentNotFound);
+                throw new InvalidOperationException(LocalizedResourceManager.GetString("InstallCommandPackageRestoreConsentNotFound"));
             }
         }
 

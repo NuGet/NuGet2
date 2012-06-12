@@ -35,6 +35,9 @@
     <Compile Include="..\CommandLine\Common\ConsoleCredentialProvider.cs">
       <Link>ConsoleCredentialProvider.cs</Link>
     </Compile>
+    <Compile Include="..\CommandLine\Common\LocalizedResourceManager.cs">
+      <Link>LocalizedResourceManager.cs</Link>
+    </Compile>
     <Compile Include="..\Core\Extensions\CredentialProviderExtensions.cs">
       <Link>CredentialProviderExtensions.cs</Link>
     </Compile>
@@ -63,7 +66,6 @@
       <Link>EncryptionUtility.cs</Link>
     </Compile>
     <Compile Include="HttpClient.cs" />
-    <Compile Include="NuGetResources.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProxyCache.cs" />

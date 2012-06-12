@@ -79,6 +79,7 @@
     <Compile Include="Common\IConsole.cs" />
     <Compile Include="Common\IMSBuildProjectSystem.cs" />
     <Compile Include="Common\MSBuildProjectSystem.cs" />
+    <Compile Include="Common\LocalizedResourceManager.cs" />
     <Compile Include="DefaultManifestValuesRule.cs" />
     <Compile Include="DefaultPackageRules.cs" />
     <Compile Include="Properties\GlobalSuppressions.cs" />

@@ -15,16 +15,16 @@ namespace NuGet
 
             if (LaunchedFromVS())
             {
-                throw new InvalidOperationException(NuGetResources.ResourceManager.GetString("Error_CannotPromptForCedentials"));
+                throw new InvalidOperationException(LocalizedResourceManager.GetString("Error_CannotPromptForCedentials"));
             }
 
             string message = credentialType == CredentialType.ProxyCredentials ?
-                    NuGetResources.ResourceManager.GetString("Credentials_ProxyCredentials") :
-                    NuGetResources.ResourceManager.GetString("Credentials_RequestCredentials");
+                    LocalizedResourceManager.GetString("Credentials_ProxyCredentials") :
+                    LocalizedResourceManager.GetString("Credentials_RequestCredentials");
             Console.WriteLine(message, uri.OriginalString);
-            Console.Write(NuGetResources.ResourceManager.GetString("Credentials_UserName"));
+            Console.Write(LocalizedResourceManager.GetString("Credentials_UserName"));
             string username = Console.ReadLine();
-            Console.Write(NuGetResources.ResourceManager.GetString("Credentials_Password"));
+            Console.Write(LocalizedResourceManager.GetString("Credentials_Password"));
             SecureString password = ReadLineAsSecureString();
             var credentials = new NetworkCredential
             {
