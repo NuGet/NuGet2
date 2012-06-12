@@ -53,7 +53,10 @@ namespace NuGet.Dialog
 
             foreach (var project in projects)
             {
-                if (project.IsSupported() && project.IsCompatible(package))
+                // If the package is a satelliate package, we assume that it's compatible with any project.
+                // It may not be accurate but we really don't want to check the corresponding runtime package here.
+                if (project.IsSupported() && 
+                    (package.IsSatellitePackage() || project.IsCompatible(package)))
                 {
                     yield return new ProjectNode(project)
                     {
