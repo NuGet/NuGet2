@@ -49,42 +49,9 @@ namespace NuGet.PowerShell.Commands
         [Alias("Prerelease")]
         public SwitchParameter IncludePrerelease { get; set; }
 
-        private IEnumerable<T> AggregateResults(AggregateRepository aggregatePackageRepository)
-        {
-            var tasks = aggregatePackageRepository.Repositories
-                .Select(r => Task.Factory.StartNew(() => GetResults(r)))
-                .ToArray();
-            Task.WaitAll(tasks);
-            return tasks
-                .SelectMany(t => t.Result)
-                .Distinct()
-                .Take(30);
-        }
-
         protected abstract NameValueCollection BuildApiEndpointQueryParameters();
 
-        private static string BuildQueryString(NameValueCollection queryParameters)
-        {
-            if (queryParameters.Count == 0)
-            {
-                return string.Empty;
-            }
-
-            var queryStringBuilder = new StringBuilder();
-            foreach(var key in queryParameters.Keys)
-            {
-                queryStringBuilder.AppendFormat("{0}={1}&", key, Uri.EscapeDataString(queryParameters[key.ToString()]));
-            }
-
-            // remove the final &
-            queryStringBuilder.Length--;
-
-            return queryStringBuilder.ToString();
-        }
-
-        protected abstract IEnumerable<T> GetResultsFromPackageRepository(IPackageRepository packageRepository);
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification="Too much logic for getter.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Too much logic for getter.")]
         protected virtual IPackageRepository GetPackageRepository()
         {
             if (!String.IsNullOrEmpty(Source))
@@ -100,6 +67,8 @@ namespace NuGet.PowerShell.Commands
             throw new InvalidOperationException(Resources.Cmdlet_NoActivePackageSource);
         }
         
+        protected abstract IEnumerable<T> GetResultsFromPackageRepository(IPackageRepository packageRepository);
+        
         protected virtual IEnumerable<T> GetResults(Uri apiEndpointUri)
         {
             var jsonSerializer = new DataContractJsonSerializer(typeof(T[]));
@@ -108,6 +77,53 @@ namespace NuGet.PowerShell.Commands
             {
                 return jsonSerializer.ReadObject(stream) as T[];
             }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings", Justification="Wrapping the string in a new URI doesn't improve anything.")]
+        protected override void ProcessRecordCore()
+        {
+            var packageRepository = GetPackageRepository();
+
+            var aggregatePackageRepository = packageRepository as AggregateRepository;
+            if (aggregatePackageRepository != null)
+            {
+                WriteResults(AggregateResults(aggregatePackageRepository));
+            }
+            else
+            {
+                WriteResults(GetResults(packageRepository));
+            }
+        }
+
+        private IEnumerable<T> AggregateResults(AggregateRepository aggregatePackageRepository)
+        {
+            var tasks = aggregatePackageRepository.Repositories
+                .Select(r => Task.Factory.StartNew(() => GetResults(r)))
+                .ToArray();
+            Task.WaitAll(tasks);
+            return tasks
+                .SelectMany(t => t.Result)
+                .Distinct()
+                .Take(30);
+        }
+
+        private static string BuildQueryString(NameValueCollection queryParameters)
+        {
+            if (queryParameters.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var queryStringBuilder = new StringBuilder();
+            foreach (var key in queryParameters.Keys)
+            {
+                queryStringBuilder.AppendFormat("{0}={1}&", key, Uri.EscapeDataString(queryParameters[key.ToString()]));
+            }
+
+            // remove the final &
+            queryStringBuilder.Length--;
+
+            return queryStringBuilder.ToString();
         }
 
         private IEnumerable<T> GetResults(IPackageRepository packageRepository)
@@ -135,23 +151,7 @@ namespace NuGet.PowerShell.Commands
                 return GetResults(uriBuilder.Uri);
             }
         }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2234:PassSystemUriObjectsInsteadOfStrings", Justification="Wrapping the string in a new URI doesn't improve anything.")]
-        protected override void ProcessRecordCore()
-        {
-            var packageRepository = GetPackageRepository();
-
-            var aggregatePackageRepository = packageRepository as AggregateRepository;
-            if (aggregatePackageRepository != null)
-            {
-                WriteResults(AggregateResults(aggregatePackageRepository));
-            }
-            else
-            {
-                WriteResults(GetResults(packageRepository));
-            }
-        } 
-
+        
         private void WriteResults(IEnumerable<T> results)
         {
             foreach (var result in results)
