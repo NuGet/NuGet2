@@ -184,6 +184,10 @@ function GetRemotePackageIds($context) {
     try {
 		return Get-RemotePackageId @parameters
     }
+    catch [Net.WebException] {
+        # If the server doesn't have the JSON API endpoints, get the remote package IDs the old way.
+        return GetPackages $context | Select-Object -ExpandProperty Id -Unique
+    }
     catch {
         return @()
     }
@@ -220,6 +224,25 @@ function GetRemotePackageVersions($context) {
 
     try {
 	    return Get-RemotePackageVersion @parameters | %{ [NuGet.SemanticVersion]::Parse($_) } | Sort-Object -Descending
+    }
+    catch [Net.WebException] {
+        # If the server doesn't have the JSON API endpoints, get the remote package versions the old way.
+        $parameters = @{}
+
+        if ($context.Id) { $parameters.filter = $context.Id }
+        if ($context.Source) { $parameters.source = $context.Source }
+        if (IsPrereleaseSet $context) {
+            $parameters.IncludePreRelease = $true 
+        }
+        $parameters.Remote = $true
+        $parameters.AllVersions = $true
+        Find-Package @parameters -ExactMatch -ErrorAction SilentlyContinue | Select -ExpandProperty Version | %{
+            if($_ -is [string]) { 
+                [NuGet.SemanticVersion]::Parse($_) 
+            } else { 
+                $_ 
+            }  
+        } | Sort-Object -Descending
     }
     catch {
 	    return @()
