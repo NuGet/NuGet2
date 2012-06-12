@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
@@ -113,7 +114,7 @@ namespace NuGet.PowerShell.Commands
                 return string.Empty;
             }
 
-            return String.Join("&", queryParameters.Select(param => string.Format("{0}={1}", param.Key, Uri.EscapeDataString(param.Value))));
+            return String.Join("&", queryParameters.Select(param => string.Format(CultureInfo.InvariantCulture, "{0}={1}", param.Key, Uri.EscapeDataString(param.Value))));
         }
 
         private IEnumerable<T> GetResults(IPackageRepository packageRepository)
