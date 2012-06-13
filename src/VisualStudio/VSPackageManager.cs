@@ -949,9 +949,14 @@ namespace NuGet.VisualStudio
 
         private void Uninstall(IEnumerable<IPackage> packages)
         {
-            foreach (var package in packages)
+            // Packages added to the sequence are added in the order in which they were visited. However for operations on satellite packages to work correctly,
+            // we need to ensure they are always uninstalled prior to the corresponding core package. To address this, we run it by Reduce which reorders it for us and ensures it 
+            // returns the minimal set of operations required.
+            var packageOperations = packages.Select(p => new PackageOperation(p, PackageAction.Uninstall))
+                                            .Reduce();
+            foreach (var operation in packageOperations)
             {
-                ExecuteUninstall(package);
+                ExecuteUninstall(operation.Package);
             }
         }
 

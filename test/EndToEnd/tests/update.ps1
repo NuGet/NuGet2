@@ -1088,3 +1088,36 @@ function Test-UpdatingPackagesWithDependenciesOnSatellitePackages
 	Assert-PathExists (Join-Path $solutionDir 'packages\Localized.2.0\lib\net40\fr-FR\Main.2.0.resources.dll')
 	
 }
+
+function Test-UpdatingMetaPackageRemovesSatelliteReferences 
+{
+	# Verification for work item 2313
+	param ($context)
+
+	# Arrange
+	$p = New-ClassLibrary
+
+	# Act - 1
+	$p | Install-Package A.Localized -Version 1.0.0 -Source $context.RepositoryPath
+	
+	# Assert - 1
+	Assert-Package $p A 1.0.0
+	Assert-Package $p A.localized 1.0.0
+	Assert-Package $p A.fr 1.0.0
+	Assert-Package $p A.es 1.0.0
+
+	# Act - 2
+	$p | Update-Package A.Localized -Source $context.RepositoryPath
+	
+	# Assert - 1
+	Assert-Package $p A 2.0.0
+	Assert-Package $p A.localized 2.0.0
+	Assert-Package $p A.fr 2.0.0
+	Assert-Package $p A.es 2.0.0
+
+	$solutionDir = Get-SolutionDir
+	Assert-PathExists (Join-Path $solutionDir 'packages\A.Localized.2.0.0\')
+	Assert-PathNotExists (Join-Path $solutionDir 'packages\A.Localized.1.0.0\')
+	Assert-PathNotExists (Join-Path $solutionDir 'packages\A.fr.1.0.0\')
+	Assert-PathNotExists (Join-Path $solutionDir 'packages\A.es.1.0.0\')
+}

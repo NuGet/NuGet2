@@ -1919,3 +1919,26 @@ function Test-ToolsPathForInitAndInstallScriptPointToToolsFolder
 	# Assert
 	Assert-Package $p 'packageA'
 }
+
+function Test-InstallFailCleansUpSatellitePackageFiles 
+{
+	# Verification for work item 2311
+	param ($context)
+
+	# Arrange
+	$p = New-ClassLibrary
+
+	# Act 
+	$p | Install-Package A -Version 1.2.0 -Source $context.RepositoryPath
+	try {
+		$p | Install-Package A.fr -Source $context.RepositoryPath
+	} catch {}
+
+	# Assert
+	Assert-Package $p A 1.2.0
+
+	$solutionDir = Get-SolutionDir
+	Assert-PathExists (Join-Path $solutionDir 'packages\A.1.2.0\')
+	Assert-PathNotExists (Join-Path $solutionDir 'packages\A.1.0.0\')
+	Assert-PathNotExists (Join-Path $solutionDir 'packages\A.fr.1.0.0\')
+}
