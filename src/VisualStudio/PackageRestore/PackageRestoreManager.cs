@@ -228,6 +228,9 @@ namespace NuGet.VisualStudio
 
         public void CheckForMissingPackages()
         {
+            // This method is called by both Solution Opened and Solution Closed event handlers.
+            // In the case of Solution Closed event, the IsCurrentSolutionEnabledForRestore is false,
+            // and so we won't do the unnecessary work of checking for package references.
             bool missing = IsCurrentSolutionEnabledForRestore && CheckForMissingPackagesCore();
             PackagesMissingStatusChanged(this, new PackagesMissingStatusEventArgs(missing));
         }
@@ -486,6 +489,8 @@ namespace NuGet.VisualStudio
 
         private void OnSolutionOpenedOrClosed(object sender, EventArgs e)
         {
+            // We need to do the check even on Solution Closed because, let's say if the yellow Update bar
+            // is showing and the user closes the solution; in that case, we want to hide the Update bar.
             CheckForMissingPackages();
         }
 
