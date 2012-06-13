@@ -513,7 +513,13 @@ namespace NuGet.Commands
                 {
                     using (Stream stream = File.OpenRead(configPath))
                     {
-                        return XDocument.Load(stream).Root.Element("repositoryPath").Value;
+                        // It's possible for the repositoryPath element to be missing in older versions of 
+                        // a NuGet.config file.
+                        var repositoryPathElement = XDocument.Load(stream).Root.Element("repositoryPath");
+                        if (repositoryPathElement != null)
+                        {
+                            return repositoryPathElement.Value;
+                        }
                     }
                 }
             }
