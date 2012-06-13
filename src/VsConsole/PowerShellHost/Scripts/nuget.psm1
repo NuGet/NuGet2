@@ -228,7 +228,7 @@ function GetRemotePackageVersions($context) {
 }
 
 function GetAndSortVersions($packages) {
-    $packages | Select -ExpandProperty Version | %{
+    $packages | Select -Unique -ExpandProperty Version | %{
         if($_ -is [string]) { 
             [NuGet.SemanticVersion]::Parse($_) 
         } else { 
