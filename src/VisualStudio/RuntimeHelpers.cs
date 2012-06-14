@@ -30,7 +30,7 @@ namespace NuGet.VisualStudio
                 IFileSystem fileSystem = VsProjectSystemFactory.CreateProjectSystem(project, fileSystemProvider);
 
                 // Run this on the UI thread since it enumerates all references
-                IEnumerable<string> assemblies = ThreadHelper.Generic.Invoke(() => project.GetAssemblyClosure(projectAssembliesCache));
+                IEnumerable<string> assemblies = ThreadHelper.Generic.Invoke(() => project.GetAssemblyClosure(fileSystemProvider, projectAssembliesCache));
 
                 redirects = BindingRedirectResolver.GetBindingRedirects(assemblies, domain);
 

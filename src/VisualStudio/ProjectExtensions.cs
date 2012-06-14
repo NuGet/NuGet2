@@ -597,7 +597,7 @@ namespace NuGet.VisualStudio
             return projects;
         }
 
-        internal static HashSet<string> GetAssemblyClosure(this Project project, IDictionary<string, HashSet<string>> visitedProjects)
+        internal static HashSet<string> GetAssemblyClosure(this Project project, IFileSystemProvider projectFileSystemProvider, IDictionary<string, HashSet<string>> visitedProjects)
         {
             HashSet<string> assemblies;
             if (visitedProjects.TryGetValue(project.UniqueName, out assemblies))
@@ -606,8 +606,8 @@ namespace NuGet.VisualStudio
             }
 
             assemblies = new HashSet<string>(PathComparer.Default);
-            assemblies.AddRange(GetLocalProjectAssemblies(project));
-            assemblies.AddRange(project.GetReferencedProjects().SelectMany(p => GetAssemblyClosure(p, visitedProjects)));
+            assemblies.AddRange(GetLocalProjectAssemblies(project, projectFileSystemProvider));
+            assemblies.AddRange(project.GetReferencedProjects().SelectMany(p => GetAssemblyClosure(p, projectFileSystemProvider, visitedProjects)));
 
             visitedProjects.Add(project.UniqueName, assemblies);
 
@@ -628,11 +628,11 @@ namespace NuGet.VisualStudio
             return projects;
         }
 
-        private static HashSet<string> GetLocalProjectAssemblies(Project project)
+        private static HashSet<string> GetLocalProjectAssemblies(Project project, IFileSystemProvider projectFileSystemProvider)
         {
             if (project.IsWebSite())
             {
-                return GetWebsiteLocalAssemblies(project);
+                return GetWebsiteLocalAssemblies(project, projectFileSystemProvider);
             }
 
             var assemblies = new HashSet<string>(PathComparer.Default);
@@ -650,7 +650,7 @@ namespace NuGet.VisualStudio
             return assemblies;
         }
 
-        private static HashSet<string> GetWebsiteLocalAssemblies(Project project)
+        private static HashSet<string> GetWebsiteLocalAssemblies(Project project, IFileSystemProvider projectFileSystemProvider)
         {
             var assemblies = new HashSet<string>(PathComparer.Default);
             AssemblyReferences references = project.Object.References;
@@ -664,6 +664,13 @@ namespace NuGet.VisualStudio
                     assemblies.Add(reference.FullPath);
                 }
             }
+
+            // For website projects, we always add .refresh files that point to the corresponding binaries in packages. In the event of bin deployed assemblies that are also GACed,
+            // the ReferenceKind is not AssemblyReferenceBin. Consequently, we work around this by looking for any additional assembly declarations specified via .refresh files.
+            string projectPath = project.GetFullPath();
+            var fileSystem = projectFileSystemProvider.GetFileSystem(projectPath);
+            assemblies.AddRange(fileSystem.ResolveRefreshPaths());
+
             return assemblies;
         }
 
