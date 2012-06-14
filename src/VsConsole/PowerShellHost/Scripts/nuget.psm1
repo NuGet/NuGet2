@@ -204,6 +204,10 @@ function GetInstalledPackageVersions($context) {
 function GetRemotePackageVersions($context) {
     $parameters = @{}
 
+    if ($context.Id -eq $null) {
+        return @()
+    }
+
     if ($context.Id) { $parameters.id = $context.Id }
     if ($context.Source) { $parameters.source = $context.Source }
     if (IsPrereleaseSet $context) {
