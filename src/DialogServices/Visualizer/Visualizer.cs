@@ -88,11 +88,11 @@ namespace NuGet.Dialog
                         select new XElement(XName.Get("Link", dgmlNS), new XAttribute("Source", item.SourceName), new XAttribute("Target", item.DestName),
                             new XAttribute("Category", item.Category))),
                     new XElement(XName.Get("Categories", dgmlNS),
-                        new XElement(XName.Get("Category", dgmlNS), new XAttribute("Id", "Project")),
-                        new XElement(XName.Get("Category", dgmlNS), new XAttribute("Id", "Package"))),
+                        new XElement(XName.Get("Category", dgmlNS), new XAttribute("Id", Resources.Visualizer_Project)),
+                        new XElement(XName.Get("Category", dgmlNS), new XAttribute("Id", Resources.Visualizer_Package))),
                     new XElement(XName.Get("Styles", dgmlNS),
-                        StyleElement("Project", "Node", "Background", "Blue"),
-                        hasDependencies ? StyleElement("Package Dependency", "Link", "Background", "Yellow") : null))
+                        StyleElement(Resources.Visualizer_Project, "Node", "Background", "Blue"),
+                        hasDependencies ? StyleElement(Resources.Visualizer_PackageDependency, "Link", "Background", "Yellow") : null))
             );
             var saveFilePath = Path.Combine(_solutionManager.SolutionDirectory, "Packages.dgml");
             document.Save(saveFilePath);
