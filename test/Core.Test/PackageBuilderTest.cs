@@ -305,6 +305,42 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void CreatePackageUsesV4SchemaNamespaceIfLibHasEmptyTargetFramework()
+        {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = "A",
+                Version = new SemanticVersion("1.0"),
+                Description = "Descriptions",
+            };
+            builder.Authors.Add("Luan");
+            builder.Files.Add(CreatePackageFile("lib\\sl4\\_._"));
+
+            using (var ms = new MemoryStream())
+            {
+                builder.Save(ms);
+
+                ms.Seek(0, SeekOrigin.Begin);
+
+                var manifestStream = GetManifestStream(ms);
+
+                // Assert
+                Assert.Equal(@"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>Luan</authors>
+    <owners>Luan</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+  </metadata>
+</package>", manifestStream.ReadToEnd());
+            }
+        }
+
+        [Fact]
         public void CreatePackageTrimsExtraWhitespace()
         {
             // Arrange

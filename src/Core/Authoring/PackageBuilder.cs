@@ -267,7 +267,18 @@ namespace NuGet
                      (f.Path.StartsWith(Constants.ContentDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
                       f.Path.StartsWith(Constants.ToolsDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)));
 
-            return hasContentOrTool;
+            if (hasContentOrTool)
+            {
+                return true;
+            }
+
+            // now check if the Lib folder has any empty framework folder
+            bool hasEmptyLibFolder = files.Any(
+                f => f.TargetFramework != null &&
+                     f.Path.StartsWith(Constants.LibDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) &&
+                     f.EffectivePath == Constants.PackageEmptyFileName);
+
+            return hasEmptyLibFolder;
         }
 
         internal static void ValidateDependencySets(SemanticVersion version, IEnumerable<PackageDependencySet> dependencies)
