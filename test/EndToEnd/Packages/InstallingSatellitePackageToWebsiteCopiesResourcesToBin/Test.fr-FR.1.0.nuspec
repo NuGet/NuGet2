@@ -7,7 +7,7 @@
     <description>Lang pack for Test</description>
     <language>fr-FR</language>
     <dependencies>
-        <dependency id="Test" version="1.0" />
+        <dependency id="Test" version="[1.0]" />
     </dependencies>
   </metadata>
   <files>
