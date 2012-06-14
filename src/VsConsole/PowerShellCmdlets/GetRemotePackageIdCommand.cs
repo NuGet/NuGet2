@@ -50,7 +50,7 @@ namespace NuGet.PowerShell.Commands
 
         protected override IEnumerable<string> GetResultsFromPackageRepository(IPackageRepository packageRepository)
         {
-            IEnumerable<IPackage> packages = packageRepository.GetPackages().ToList();
+            IEnumerable<IPackage> packages = packageRepository.GetPackages();
             
             if (!String.IsNullOrEmpty(Filter))
             {
@@ -62,7 +62,9 @@ namespace NuGet.PowerShell.Commands
                 packages = packages.Where(p => p.IsReleaseVersion());
             }
 
-            return packages.Select(p => p.Id).Distinct();
+            return packages.Select(p => p.Id)
+                .Distinct()
+                .Take(30);
         }
     }
 }
