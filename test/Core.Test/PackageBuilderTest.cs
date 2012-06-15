@@ -304,8 +304,11 @@ namespace NuGet.Test
             }
         }
 
-        [Fact]
-        public void CreatePackageUsesV4SchemaNamespaceIfLibHasEmptyTargetFramework()
+        [Theory]
+        [InlineData("lib\\sl4\\_._")]
+        [InlineData("content\\winrt\\_._")]
+        [InlineData("tools\\sl4-wp\\_._")]
+        public void CreatePackageUsesV4SchemaNamespaceIfLibHasEmptyTargetFramework(string packagePath)
         {
             // Arrange
             PackageBuilder builder = new PackageBuilder()
@@ -315,7 +318,7 @@ namespace NuGet.Test
                 Description = "Descriptions",
             };
             builder.Authors.Add("Luan");
-            builder.Files.Add(CreatePackageFile("lib\\sl4\\_._"));
+            builder.Files.Add(CreatePackageFile(packagePath));
 
             using (var ms = new MemoryStream())
             {

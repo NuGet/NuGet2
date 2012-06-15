@@ -767,4 +767,7 @@ nuget.config HTTP_PROXY</value>
   <data name="Error_CannotPromptForCedentials" xml:space="preserve">
     <value>Unable to prompt for credentials. Consult NuGet's help documentation for ways to specify credentials.</value>
   </data>
+  <data name="PackageCommandExcludeEmptyDirectories" xml:space="preserve">
+    <value>Prevent inclusion of empty directories when building the package.</value>
+  </data>
 </root>

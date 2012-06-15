@@ -5,7 +5,7 @@ using System.Runtime.Versioning;
 
 namespace NuGet
 {
-    public sealed class PhysicalPackageFile : IPackageFile
+    public class PhysicalPackageFile : IPackageFile
     {
         private readonly Func<Stream> _streamFactory;
         private string _targetPath;

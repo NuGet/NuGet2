@@ -77,6 +77,9 @@ namespace NuGet.Commands
         [Option(typeof(NuGetResources), "PackageCommandNoRunAnalysis")]
         public bool NoPackageAnalysis { get; set; }
 
+        [Option(typeof(NuGetResources), "PackageCommandExcludeEmptyDirectories")]
+        public bool ExcludeEmptyDirectories { get; set; }
+
         [Option(typeof(NuGetResources), "PackageCommandPropertiesDescription")]
         public Dictionary<string, string> Properties
         {
@@ -316,9 +319,9 @@ namespace NuGet.Commands
 
             if (String.IsNullOrEmpty(BasePath))
             {
-                return new PackageBuilder(path, propertyProvider);
+                return new PackageBuilder(path, propertyProvider, !ExcludeEmptyDirectories);
             }
-            return new PackageBuilder(path, BasePath, propertyProvider);
+            return new PackageBuilder(path, BasePath, propertyProvider, !ExcludeEmptyDirectories);
         }
 
         private IPackage BuildFromProjectFile(string path)
