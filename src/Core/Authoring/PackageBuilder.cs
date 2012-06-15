@@ -15,24 +15,15 @@ namespace NuGet
     {
         private const string DefaultContentType = "application/octet";
         internal const string ManifestRelationType = "manifest";
-
-        public PackageBuilder(string path)
-            : this(path, NullPropertyProvider.Instance)
+        private bool _includeEmptyDirectories;
+        
+        public PackageBuilder(string path, IPropertyProvider propertyProvider, bool includeEmptyDirectories)
+            : this(path, Path.GetDirectoryName(path), propertyProvider, includeEmptyDirectories)
         {
         }
 
-        public PackageBuilder(string path, IPropertyProvider propertyProvider)
-            : this(path, Path.GetDirectoryName(path), propertyProvider)
-        {
-        }
-
-        public PackageBuilder(string path, string basePath)
-            : this(path, basePath, NullPropertyProvider.Instance)
-        {
-        }
-
-        public PackageBuilder(string path, string basePath, IPropertyProvider propertyProvider)
-            : this()
+        public PackageBuilder(string path, string basePath, IPropertyProvider propertyProvider, bool includeEmptyDirectories)
+            : this(includeEmptyDirectories)
         {
             using (Stream stream = File.OpenRead(path))
             {
@@ -52,7 +43,13 @@ namespace NuGet
         }
 
         public PackageBuilder()
+            : this(includeEmptyDirectories: false)
         {
+        }
+
+        private PackageBuilder(bool includeEmptyDirectories)
+        {
+            _includeEmptyDirectories = includeEmptyDirectories;
             Files = new Collection<IPackageFile>();
             DependencySets = new Collection<PackageDependencySet>();
             FrameworkReferences = new Collection<FrameworkAssemblyReference>();
@@ -235,13 +232,13 @@ namespace NuGet
             ValidateDependencySets(Version, DependencySets);
             ValidateReferenceAssemblies(Files, PackageAssemblyReferences);
 
-            bool requiresNewTargetFrameworkSchema = RequiresNewTargetFrameworkSchema(Files);
+            bool requiresV4TargetFrameworkSchema = RequiresV4TargetFrameworkSchema(Files);
 
             using (Package package = Package.Open(stream, FileMode.Create))
             {
                 // Validate and write the manifest
                 WriteManifest(package,
-                    requiresNewTargetFrameworkSchema ?
+                    requiresV4TargetFrameworkSchema ?
                         ManifestVersionUtility.TargetFrameworkSupportVersion :
                         ManifestVersionUtility.DefaultVersion);
 
@@ -259,7 +256,7 @@ namespace NuGet
             }
         }
 
-        private static bool RequiresNewTargetFrameworkSchema(ICollection<IPackageFile> files)
+        private static bool RequiresV4TargetFrameworkSchema(ICollection<IPackageFile> files)
         {
             // check if any file under Content or Tools has TargetFramework defined
             bool hasContentOrTool = files.Any(
@@ -327,7 +324,7 @@ namespace NuGet
             {
                 if (manifest.Files == null)
                 {
-                    AddFiles(basePath, @"**\*.*", null);
+                    AddFiles(basePath, @"**\*", null);
                 }
                 else
                 {
@@ -419,14 +416,23 @@ namespace NuGet
 
         private void AddFiles(string basePath, string source, string destination, string exclude = null)
         {
-            List<PhysicalPackageFile> searchFiles = PathResolver.ResolveSearchPattern(basePath, source, destination).ToList();
+            List<PhysicalPackageFile> searchFiles = PathResolver.ResolveSearchPattern(basePath, source, destination, _includeEmptyDirectories).ToList();
+            if (_includeEmptyDirectories)
+            {
+                // we only allow empty directories which are legit framework folders.
+                searchFiles.RemoveAll(file => file.TargetFramework == null &&
+                                              Path.GetFileName(file.TargetPath) == Constants.PackageEmptyFileName);
+            }
+            
             ExcludeFiles(searchFiles, basePath, exclude);
 
             if (!PathResolver.IsWildcardSearch(source) && !searchFiles.Any())
             {
-                throw new FileNotFoundException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageAuthoring_FileNotFound,
-                    source));
+                throw new FileNotFoundException(
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageAuthoring_FileNotFound, source));
             }
+
+
             Files.AddRange(searchFiles);
         }
 

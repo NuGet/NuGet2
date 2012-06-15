@@ -51,6 +51,7 @@
     <Compile Include="Analysis\Rules\NonAssemblyInsideLibRule.cs" />
     <Compile Include="Authoring\AssemblyMetadata.cs" />
     <Compile Include="Authoring\AssemblyMetadataExtractor.cs" />
+    <Compile Include="Authoring\EmptyFrameworkFolderFile.cs" />
     <Compile Include="Authoring\IPackageBuilder.cs" />
     <Compile Include="Authoring\IPropertyProvider.cs" />
     <Compile Include="Authoring\ManifestDependencySet.cs" />

@@ -61,30 +61,42 @@ namespace NuGet
                     .Replace(@"\*", @"[^\\]*(\\)?") // For non recursive searches, limit it any character that is not a directory separator
                     .Replace(@"\?", "."); // ? translates to a single any character
             }
-            
+
             return new Regex('^' + pattern + '$', RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
         }
 
-        internal static IEnumerable<PhysicalPackageFile> ResolveSearchPattern(string basePath, string searchPath, string targetPath)
+        internal static IEnumerable<PhysicalPackageFile> ResolveSearchPattern(string basePath, string searchPath, string targetPath, bool includeEmptyDirectories)
         {
             string normalizedBasePath;
-            IEnumerable<string> files = PerformWildcardSearchInternal(basePath, searchPath, out normalizedBasePath);
-
-            return from file in files
-                   select new PhysicalPackageFile
-                   {
-                       SourcePath = file,
-                       TargetPath = ResolvePackagePath(normalizedBasePath, searchPath, file, targetPath)
-                   };
+            IEnumerable<SearchPathResult> searchResults = PerformWildcardSearchInternal(basePath, searchPath, includeEmptyDirectories, out normalizedBasePath);
+            foreach (var result in searchResults)
+            {
+                if (result.IsFile)
+                {
+                    yield return new PhysicalPackageFile
+                                     {
+                                         SourcePath = result.Path,
+                                         TargetPath = ResolvePackagePath(normalizedBasePath, searchPath, result.Path, targetPath)
+                                     };
+                }
+                else
+                {
+                    yield return new EmptyFrameworkFolderFile(ResolvePackagePath(normalizedBasePath, searchPath, result.Path, targetPath))
+                                     {
+                                         SourcePath = result.Path
+                                     };
+                }
+            }
         }
 
         public static IEnumerable<string> PerformWildcardSearch(string basePath, string searchPath)
         {
             string normalizedBasePath;
-            return PerformWildcardSearchInternal(basePath, searchPath, out normalizedBasePath);
+            var searchResults = PerformWildcardSearchInternal(basePath, searchPath, includeEmptyDirectories: false, normalizedBasePath: out normalizedBasePath);
+            return searchResults.Select(s => s.Path);
         }
 
-        private static IEnumerable<string> PerformWildcardSearchInternal(string basePath, string searchPath, out string normalizedBasePath)
+        private static IEnumerable<SearchPathResult> PerformWildcardSearchInternal(string basePath, string searchPath, bool includeEmptyDirectories, out string normalizedBasePath)
         {
             if (!searchPath.StartsWith(@"\\", StringComparison.OrdinalIgnoreCase))
             {
@@ -110,9 +122,21 @@ namespace NuGet
             }
 
             // Starting from the base path, enumerate over all files and match it using the wildcard expression provided by the user.
-            return from file in Directory.GetFiles(normalizedBasePath, "*.*", searchOption)
-                   where searchRegex.IsMatch(file)
-                   select file;
+            var matchedFiles = from file in Directory.EnumerateFiles(normalizedBasePath, "*.*", searchOption)
+                               where searchRegex.IsMatch(file)
+                               select new SearchPathResult(file, isFile: true);
+
+            if (!includeEmptyDirectories)
+            {
+                return matchedFiles;
+            }
+
+            // retrieve empty directories
+            var matchedDirectories = from directory in Directory.GetDirectories(normalizedBasePath, "*.*", searchOption)
+                                     where searchRegex.IsMatch(directory) && IsEmptyDirectory(directory)
+                                     select new SearchPathResult(directory, isFile: false);
+
+            return matchedFiles.Concat(matchedDirectories);
         }
 
         internal static string GetPathToEnumerateFrom(string basePath, string searchPath)
@@ -201,6 +225,39 @@ namespace NuGet
         internal static bool IsWildcardSearch(string filter)
         {
             return filter.IndexOf('*') != -1;
+        }
+
+        private static bool IsEmptyDirectory(string directory)
+        {
+            return !new DirectoryInfo(directory).EnumerateFileSystemInfos().Any();
+        }
+
+        private struct SearchPathResult
+        {
+            private readonly string _path;
+            private readonly bool _isFile;
+
+            public string Path
+            {
+                get
+                {
+                    return _path;
+                }
+            }
+
+            public bool IsFile
+            {
+                get
+                {
+                    return _isFile;
+                }
+            }
+
+            public SearchPathResult(string path, bool isFile)
+            {
+                _path = path;
+                _isFile = isFile;
+            }
         }
     }
 }
