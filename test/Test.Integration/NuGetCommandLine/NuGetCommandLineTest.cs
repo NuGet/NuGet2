@@ -369,12 +369,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         public void PackageCommand_NotSpecfingFilesElementPackagesEmptyFrameworkFolderInContent()
         {
             // Arrange            
-            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
+            string nuspecFile = Path.Combine("wow", "SpecWithFiles.nuspec");
             string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content"));
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content", "net40"));
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file2.txt"), "file 2");
+            Directory.CreateDirectory("wow\\content");
+            Directory.CreateDirectory("wow\\content\\net40");
+            File.WriteAllText("wow\\content\\file1.txt", "file 1");
+            File.WriteAllText("wow\\content\\file2.txt", "file 2");
             File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
@@ -385,8 +385,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     <language>en-US</language>
   </metadata>
 </package>");
-            string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory(SpecificFilesFolder);
+            string[] args = new string[] { "pack"};
+            Directory.SetCurrentDirectory("wow");
 
             // Act
             int result = Program.Main(args);
@@ -403,12 +403,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         public void PackageCommand_NotSpecfingFilesElementPackagesEmptyFrameworkFolderInLib()
         {
             // Arrange            
-            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
+            string nuspecFile = Path.Combine("mir", "SpecWithFiles.nuspec");
             string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "lib"));
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "lib", "net40"));
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "lib\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "lib\\file2.txt"), "file 2");
+            Directory.CreateDirectory(Path.Combine("mir", "lib"));
+            Directory.CreateDirectory(Path.Combine("mir", "lib", "net40"));
+            File.WriteAllText(Path.Combine("mir", "lib\\file1.txt"), "file 1");
+            File.WriteAllText(Path.Combine("mir", "lib\\file2.txt"), "file 2");
             File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
@@ -420,7 +420,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
   </metadata>
 </package>");
             string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory(SpecificFilesFolder);
+            Directory.SetCurrentDirectory("mir");
 
             // Act
             int result = Program.Main(args);
@@ -437,12 +437,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         public void PackageCommand_NotSpecfingFilesElementDoesNotPackageEmptyFrameworkFolderIfExcludeEmptyDirectoriesIsSet()
         {
             // Arrange            
-            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
+            string nuspecFile = Path.Combine("bar", "SpecWithFiles.nuspec");
             string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content"));
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content", "net40"));
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file2.txt"), "file 2");
+            Directory.CreateDirectory(Path.Combine("bar", "content"));
+            Directory.CreateDirectory(Path.Combine("bar", "content", "net40"));
+            File.WriteAllText(Path.Combine("bar", "content\\file1.txt"), "file 1");
+            File.WriteAllText(Path.Combine("bar", "content\\file2.txt"), "file 2");
             File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
@@ -454,7 +454,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
   </metadata>
 </package>");
             string[] args = new string[] { "pack", "-ExcludeEmptyDirectories" };
-            Directory.SetCurrentDirectory(SpecificFilesFolder);
+            Directory.SetCurrentDirectory("bar");
 
             // Act
             int result = Program.Main(args);
@@ -471,12 +471,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         public void PackageCommand_FilesElementSearchIncludesEmptyFrameworkFolders()
         {
             // Arrange            
-            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
+            string nuspecFile = Path.Combine("cat", "SpecWithFiles.nuspec");
             string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content"));
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content", "sl40"));
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file2.txt"), "file 2");
+            Directory.CreateDirectory(Path.Combine("cat", "content"));
+            Directory.CreateDirectory(Path.Combine("cat", "content", "sl40"));
+            File.WriteAllText(Path.Combine("cat", "content\\file1.txt"), "file 1");
+            File.WriteAllText(Path.Combine("cat", "content\\file2.txt"), "file 2");
             File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
@@ -491,7 +491,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
   </files>
 </package>");
             string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory(SpecificFilesFolder);
+            Directory.SetCurrentDirectory("cat");
 
             // Act
             int result = Program.Main(args);
@@ -508,12 +508,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         public void PackageCommand_FilesElementSearchDoesNotIncludeEmptyFrameworkFoldersIfExcludeEmptyDirectoriesIsSet()
         {
             // Arrange            
-            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
+            string nuspecFile = Path.Combine("ohm", "SpecWithFiles.nuspec");
             string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content"));
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content", "sl40"));
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file2.txt"), "file 2");
+            Directory.CreateDirectory(Path.Combine("ohm", "content"));
+            Directory.CreateDirectory(Path.Combine("ohm", "content", "sl40"));
+            File.WriteAllText(Path.Combine("ohm", "content\\file1.txt"), "file 1");
+            File.WriteAllText(Path.Combine("ohm", "content\\file2.txt"), "file 2");
             File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
@@ -528,7 +528,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
   </files>
 </package>");
             string[] args = new string[] { "pack", "-ExcludeEmptyDirectories" };
-            Directory.SetCurrentDirectory(SpecificFilesFolder);
+            Directory.SetCurrentDirectory("ohm");
 
             // Act
             int result = Program.Main(args);
@@ -545,12 +545,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         public void PackageCommand_FilesElementSearchDoesNotIncludeEmptyFrameworkFoldersIfExcluded()
         {
             // Arrange            
-            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
+            string nuspecFile = Path.Combine("pam", "SpecWithFiles.nuspec");
             string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content"));
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content", "sl40"));
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file2.txt"), "file 2");
+            Directory.CreateDirectory(Path.Combine("pam", "content"));
+            Directory.CreateDirectory(Path.Combine("pam", "content", "sl40"));
+            File.WriteAllText(Path.Combine("pam", "content\\file1.txt"), "file 1");
+            File.WriteAllText(Path.Combine("pam", "content\\file2.txt"), "file 2");
             File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
@@ -565,7 +565,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
   </files>
 </package>");
             string[] args = new string[] { "pack", "-Exclude", @"content\sl*" };
-            Directory.SetCurrentDirectory(SpecificFilesFolder);
+            Directory.SetCurrentDirectory("pam");
 
             // Act
             int result = Program.Main(args);
@@ -582,12 +582,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         public void PackageCommand_FilesElementSearchDoesNotIncludeEmptyFrameworkFoldersIfSearchPatternDoesNotMatch()
         {
             // Arrange            
-            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
+            string nuspecFile = Path.Combine("nay", "SpecWithFiles.nuspec");
             string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content"));
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content", "sl40"));
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file2.txt"), "file 2");
+            Directory.CreateDirectory(Path.Combine("nay", "content"));
+            Directory.CreateDirectory(Path.Combine("nay", "content", "sl40"));
+            File.WriteAllText(Path.Combine("nay", "content\\file1.txt"), "file 1");
+            File.WriteAllText(Path.Combine("nay", "content\\file2.txt"), "file 2");
             File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
@@ -602,7 +602,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
   </files>
 </package>");
             string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory(SpecificFilesFolder);
+            Directory.SetCurrentDirectory("nay");
 
             // Act
             int result = Program.Main(args);
@@ -619,12 +619,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         public void PackageCommand_FilesElementSearchDoesNotIncludeEmptyFrameworkFoldersIfSearchPatternDoesNotMatch2()
         {
             // Arrange            
-            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
+            string nuspecFile = Path.Combine("qaw", "SpecWithFiles.nuspec");
             string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content"));
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content", "winrt"));
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file2.txt"), "file 2");
+            Directory.CreateDirectory(Path.Combine("qaw", "content"));
+            Directory.CreateDirectory(Path.Combine("qaw", "content", "winrt"));
+            File.WriteAllText(Path.Combine("qaw", "content\\file1.txt"), "file 1");
+            File.WriteAllText(Path.Combine("qaw", "content\\file2.txt"), "file 2");
             File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
@@ -639,7 +639,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
   </files>
 </package>");
             string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory(SpecificFilesFolder);
+            Directory.SetCurrentDirectory("qaw");
 
             // Act
             int result = Program.Main(args);
@@ -656,12 +656,12 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         public void PackageCommand_NotSpecfingFilesElementDoesNotPackageEmptyNormalFolder()
         {
             // Arrange            
-            string nuspecFile = Path.Combine(SpecificFilesFolder, "SpecWithFiles.nuspec");
+            string nuspecFile = Path.Combine("lil", "SpecWithFiles.nuspec");
             string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content"));
-            Directory.CreateDirectory(Path.Combine(SpecificFilesFolder, "content", "abc"));
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine(SpecificFilesFolder, "content\\file2.txt"), "file 2");
+            Directory.CreateDirectory(Path.Combine("lil", "content"));
+            Directory.CreateDirectory(Path.Combine("lil", "content", "abc"));
+            File.WriteAllText(Path.Combine("lil", "content\\file1.txt"), "file 1");
+            File.WriteAllText(Path.Combine("lil", "content\\file2.txt"), "file 2");
             File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
@@ -673,7 +673,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
   </metadata>
 </package>");
             string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory(SpecificFilesFolder);
+            Directory.SetCurrentDirectory("lil");
 
             // Act
             int result = Program.Main(args);

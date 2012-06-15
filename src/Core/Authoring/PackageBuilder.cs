@@ -15,7 +15,7 @@ namespace NuGet
     {
         private const string DefaultContentType = "application/octet";
         internal const string ManifestRelationType = "manifest";
-        private bool _includeEmptyDirectories;
+        private readonly bool _includeEmptyDirectories;
         
         public PackageBuilder(string path, IPropertyProvider propertyProvider, bool includeEmptyDirectories)
             : this(path, Path.GetDirectoryName(path), propertyProvider, includeEmptyDirectories)

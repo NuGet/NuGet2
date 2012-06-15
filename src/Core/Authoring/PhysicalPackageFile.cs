@@ -50,7 +50,7 @@ namespace NuGet
             }
         }
 
-        string IPackageFile.Path
+        public string Path
         {
             get
             {
@@ -69,7 +69,7 @@ namespace NuGet
             get { return _targetFramework; }
         }
 
-        IEnumerable<FrameworkName> IFrameworkTargetable.SupportedFrameworks
+        public IEnumerable<FrameworkName> SupportedFrameworks
         {
             get
             {
