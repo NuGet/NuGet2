@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Xml;
 using NuGet;
 
@@ -37,8 +36,8 @@ namespace Bootstrapper
                     RunProcess(processInfo);
                     File.SetLastWriteTimeUtc(exePath, DateTime.UtcNow);
                 }
-                // Convert the args list to a command line input. If an argument has any spaces in it, we need to wrap it with single quotes.
-                processInfo.Arguments = String.Join(" ", args.Select(arg => arg.Any(Char.IsWhiteSpace) ? "'" + arg + "'" : arg));
+
+                processInfo.Arguments = ParseArgs();
                 RunProcess(processInfo);
                 return 0;
             }
@@ -48,6 +47,18 @@ namespace Bootstrapper
             }
 
             return 1;
+        }
+
+        public static string ParseArgs()
+        {
+            string args = Environment.CommandLine.TrimEnd();
+            // If the command line starts with quotes, then look for the first occurence of a quote following it. 
+            int index = args.StartsWith("\"") ? args.IndexOf("\"", 1) : args.IndexOf(" ");
+            if (index == -1 || index >= args.Length - 1)
+            {
+                return String.Empty;
+            }
+            return args.Substring(index + 1).Trim();
         }
 
         private static XmlDocument GetConfigDocument()
