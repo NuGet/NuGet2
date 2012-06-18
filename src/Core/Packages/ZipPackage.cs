@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Packaging;
 using System.Linq;
+using System.Runtime.Versioning;
 using NuGet.Resources;
 
 namespace NuGet
@@ -15,7 +16,7 @@ namespace NuGet
         private const string FilesCacheKey = "FILES";
 
         private readonly bool _enableCaching;
-          
+
         private static readonly TimeSpan CacheTimeout = TimeSpan.FromSeconds(15);
 
         // paths to exclude
@@ -63,6 +64,39 @@ namespace NuGet
             EnsureManifest();
         }
 
+        public override Stream GetStream()
+        {
+            return _streamFactory();
+        }
+
+        public override IEnumerable<FrameworkName> GetSupportedFrameworks()
+        {
+            IEnumerable<FrameworkName> fileFrameworks;
+            IEnumerable<IPackageFile> cachedFiles;
+            if (_enableCaching && MemoryCache.Instance.TryGetValue(GetFilesCacheKey(), out cachedFiles))
+            {
+                fileFrameworks = cachedFiles.Select(c => c.TargetFramework);
+            }
+            else
+            {
+                using (Stream stream = _streamFactory())
+                {
+                    var package = Package.Open(stream);
+
+                    string effectivePath;
+                    fileFrameworks = from part in package.GetParts()
+                                     where IsPackageFile(part)
+                                     select VersionUtility.ParseFrameworkNameFromFilePath(UriUtility.GetPath(part.Uri), out effectivePath);
+
+                }
+            }
+
+            return base.GetSupportedFrameworks()
+                       .Concat(fileFrameworks)
+                       .Where(f => f != null)
+                       .Distinct();
+        }
+
         protected override IEnumerable<IPackageAssemblyReference> GetAssemblyReferencesBase()
         {
             if (_enableCaching)
@@ -79,11 +113,6 @@ namespace NuGet
                 return MemoryCache.Instance.GetOrAdd(GetFilesCacheKey(), GetFilesNoCache, CacheTimeout);
             }
             return GetFilesNoCache();
-        }
-
-        public override Stream GetStream()
-        {
-            return _streamFactory();
         }
 
         private List<IPackageAssemblyReference> GetAssembliesNoCache()
@@ -142,7 +171,7 @@ namespace NuGet
             return String.Format(CultureInfo.InvariantCulture, CacheKeyFormat, AssembliesCacheKey, Id, Version);
         }
 
-        protected static bool IsPackageFile(PackagePart part)
+        private static bool IsPackageFile(PackagePart part)
         {
             string path = UriUtility.GetPath(part.Uri);
             // We exclude any opc files and the manifest file (.nuspec)

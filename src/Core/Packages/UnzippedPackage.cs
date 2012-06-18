@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using NuGet.Resources;
 
 namespace NuGet
@@ -59,6 +61,63 @@ namespace NuGet
             EnsureManifest();
         }
 
+        public override Stream GetStream()
+        {
+            return _repositoryFileSystem.OpenFile(_packageFileName);
+        }
+
+        public override IEnumerable<FrameworkName> GetSupportedFrameworks()
+        {
+            string effectivePath;
+            IEnumerable<FrameworkName> fileFrameworks = from file in GetPackageFilePaths().Select(GetPackageRelativePath)
+                                                        let targetFramework = VersionUtility.ParseFrameworkNameFromFilePath(file, out effectivePath)
+                                                        where targetFramework != null
+                                                        select targetFramework;
+            return base.GetSupportedFrameworks()
+                       .Concat(fileFrameworks)
+                       .Distinct();
+        }
+
+        protected override IEnumerable<IPackageFile> GetFilesBase()
+        {
+            return from p in GetPackageFilePaths()
+                   select new PhysicalPackageFile
+                          {
+                              SourcePath = p,
+                              TargetPath = GetPackageRelativePath(p)
+                          };
+        }
+
+        protected override IEnumerable<IPackageAssemblyReference> GetAssemblyReferencesBase()
+        {
+            string libDirectory = Path.Combine(_packageName, Constants.LibDirectory);
+
+            return from p in _repositoryFileSystem.GetFiles(libDirectory, "*.*", recursive: true)
+                   let targetPath = GetPackageRelativePath(p)
+                   where IsAssemblyReference(targetPath)
+                   let file = new PhysicalPackageFile(() => _repositoryFileSystem.OpenFile(p))
+                              {
+                                  SourcePath = _repositoryFileSystem.GetFullPath(p),
+                                  TargetPath = targetPath
+                              }
+                   select new ZipPackageAssemblyReference(file);
+        }
+
+        private IEnumerable<string> GetPackageFilePaths()
+        {
+            return from p in _repositoryFileSystem.GetFiles(_packageName, "*.*", recursive: true)
+                   where !PackageUtility.IsManifest(p)
+                   select p;
+        }
+
+        private string GetPackageRelativePath(string path)
+        {
+            // Package paths returned by the file system contain the package name. We need to yank this out of the package name because the paths we are interested in are
+            // package relative paths.
+            Debug.Assert(path.StartsWith(_packageName, StringComparison.OrdinalIgnoreCase));
+            return path.Substring(_packageName.Length + 1);
+        }
+
         private void EnsureManifest()
         {
             // we look for the .nuspec file at jQuery.1.4\jQuery.1.4.nuspec
@@ -73,37 +132,6 @@ namespace NuGet
             {
                 ReadManifest(manifestStream);
             }
-        }
-
-        public override Stream GetStream()
-        {
-            return _repositoryFileSystem.OpenFile(_packageFileName);
-        }
-
-        protected override IEnumerable<IPackageFile> GetFilesBase()
-        {
-            return from p in _repositoryFileSystem.GetFiles(_packageName, "*.*", recursive: true)
-                   where !PackageUtility.IsManifest(p)
-                   select new PhysicalPackageFile 
-                          {
-                              SourcePath = _repositoryFileSystem.GetFullPath(p),
-                              TargetPath = p.Substring(_packageName.Length + 1)     // only count from the package root
-                          };
-        }
-
-        protected override IEnumerable<IPackageAssemblyReference> GetAssemblyReferencesBase()
-        {
-            string libDirectory = Path.Combine(_packageName, Constants.LibDirectory);
-
-            return from p in _repositoryFileSystem.GetFiles(libDirectory, "*.*", recursive: true)
-                   let targetPath = p.Substring(_packageName.Length + 1)        // only count from the package root
-                   where IsAssemblyReference(targetPath)
-                   let file = new PhysicalPackageFile(()=>_repositoryFileSystem.OpenFile(p))
-                              {
-                                  SourcePath = _repositoryFileSystem.GetFullPath(p),
-                                  TargetPath = targetPath
-                              }
-                   select new ZipPackageAssemblyReference(file);
         }
     }
 }

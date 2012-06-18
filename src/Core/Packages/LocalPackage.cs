@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NuGet.Resources;
+using System.Runtime.Versioning;
 
 namespace NuGet
 {
@@ -177,17 +178,23 @@ namespace NuGet
             private set;
         }
 
+        public virtual IEnumerable<FrameworkName> GetSupportedFrameworks()
+        {
+            return FrameworkAssemblies.SelectMany(f => f.SupportedFrameworks)
+                                      .Distinct();
+        }
+
         public IEnumerable<IPackageFile> GetFiles()
         {
             return GetFilesBase();
         }
-        
+
         public abstract Stream GetStream();
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This operation can be expensive.")]
         protected abstract IEnumerable<IPackageFile> GetFilesBase();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification="This operation can be expensive.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This operation can be expensive.")]
         protected abstract IEnumerable<IPackageAssemblyReference> GetAssemblyReferencesBase();
 
         protected void ReadManifest(Stream manifestStream)
@@ -255,12 +262,12 @@ namespace NuGet
             var fileName = Path.GetFileName(filePath);
 
             return filePath.StartsWith(Constants.LibDirectory, StringComparison.OrdinalIgnoreCase) &&
-                    // empty file
-                   (fileName == Constants.PackageEmptyFileName || 
-                    // Exclude resource assemblies
+                // empty file
+                   (fileName == Constants.PackageEmptyFileName ||
+                // Exclude resource assemblies
                     !filePath.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
                     Constants.AssemblyReferencesExtensions.Contains(Path.GetExtension(filePath), StringComparer.OrdinalIgnoreCase) &&
-                    // If references are listed, ensure that the file is listed in it.
+                // If references are listed, ensure that the file is listed in it.
                     (references.IsEmpty() || references.Contains(fileName)));
         }
 

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 
 namespace NuGet.VisualStudio
 {
@@ -39,20 +41,10 @@ namespace NuGet.VisualStudio
 
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences
         {
-            get 
+            get
             {
-                return Enumerable.Empty<IPackageAssemblyReference>(); 
+                return Enumerable.Empty<IPackageAssemblyReference>();
             }
-        }
-
-        public IEnumerable<IPackageFile> GetFiles()
-        {
-            return _basePackage.GetFiles();
-        }
-
-        public System.IO.Stream GetStream()
-        {
-            return _basePackage.GetStream();
         }
 
         public string Id
@@ -148,6 +140,21 @@ namespace NuGet.VisualStudio
         public int DownloadCount
         {
             get { return _basePackage.DownloadCount; }
+        }
+
+        public IEnumerable<IPackageFile> GetFiles()
+        {
+            return _basePackage.GetFiles();
+        }
+
+        public Stream GetStream()
+        {
+            return _basePackage.GetStream();
+        }
+
+        public IEnumerable<FrameworkName> GetSupportedFrameworks()
+        {
+            return _basePackage.GetSupportedFrameworks();
         }
     }
 }

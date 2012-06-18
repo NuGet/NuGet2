@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Versioning;
 
 namespace NuGet.VisualStudio
 {
@@ -33,16 +34,6 @@ namespace NuGet.VisualStudio
             {
                 return _basePackage.AssemblyReferences;
             }
-        }
-
-        public IEnumerable<IPackageFile> GetFiles()
-        {
-            return _basePackage.GetFiles();
-        }
-
-        public Stream GetStream()
-        {
-            return _basePackage.GetStream();
         }
 
         public string Id
@@ -227,6 +218,21 @@ namespace NuGet.VisualStudio
             {
                 return _basePackage.FrameworkAssemblies;
             }
+        }
+
+        public IEnumerable<IPackageFile> GetFiles()
+        {
+            return _basePackage.GetFiles();
+        }
+
+        public Stream GetStream()
+        {
+            return _basePackage.GetStream();
+        }
+
+        public IEnumerable<FrameworkName> GetSupportedFrameworks()
+        {
+            return _basePackage.GetSupportedFrameworks();
         }
 
         public bool Equals(RecentPackage other)
