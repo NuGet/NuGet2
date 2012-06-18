@@ -35,7 +35,6 @@ namespace NuGet
             _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, _fileName);
         }
 
-
         public string ConfigFilePath
         {
             get { return Path.Combine(_fileSystem.Root, _fileName); }
