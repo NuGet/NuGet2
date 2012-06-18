@@ -42,6 +42,8 @@ namespace NuGet.Test
         [Theory]
         [InlineData("1")]
         [InlineData("true")]
+        [InlineData("1 ")]
+        [InlineData(" TRUE")]
         public void CorrectSettingsValueReturnsTrueForIsGranted(string settingsValue)
         {
             // Arrange
@@ -53,9 +55,11 @@ namespace NuGet.Test
 
             // Act
             bool isGranted = packageRestore.IsGranted;
+            bool isGrantedInSettings = packageRestore.IsGrantedInSettings;
 
             // Assert
             Assert.True(isGranted);
+            Assert.True(isGrantedInSettings);
         }
 
         [Theory]
@@ -156,9 +160,11 @@ namespace NuGet.Test
 
             // Act
             bool isGranted = packageRestore.IsGranted;
+            bool isGrantedInSettings = packageRestore.IsGrantedInSettings;
 
             // Assert
             Assert.Equal(expected, isGranted);
+            Assert.False(isGrantedInSettings);
         }
 
         [Fact]
@@ -172,7 +178,7 @@ namespace NuGet.Test
             var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
 
             // Act
-            packageRestore.IsGranted = false;
+            packageRestore.IsGrantedInSettings = false;
 
             // Assert
             settings.Verify(s => s.DeleteSection("packageRestore"), Times.Once());
@@ -189,7 +195,7 @@ namespace NuGet.Test
             var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
 
             // Act
-            packageRestore.IsGranted = true;
+            packageRestore.IsGrantedInSettings = true;
 
             // Assert
             settings.Verify(s => s.SetValue("packageRestore", "enabled", "True"), Times.Once());

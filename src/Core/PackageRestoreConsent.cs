@@ -5,7 +5,7 @@ namespace NuGet
 {
     public class PackageRestoreConsent
     {
-        internal const string EnvironmentVariableName = "EnableNuGetPackageRestore";
+        private const string EnvironmentVariableName = "EnableNuGetPackageRestore";
         private const string PackageRestoreSection = "packageRestore";
         private const string PackageRestoreConsentKey = "enabled";
         private readonly ISettings _settings;
@@ -35,14 +35,21 @@ namespace NuGet
         {
             get
             {
-                string settingsValue = _settings.GetValue(PackageRestoreSection, PackageRestoreConsentKey).SafeTrim();
-                string envValue =  _environmentReader.GetEnvironmentVariable(EnvironmentVariableName).SafeTrim();
+                string envValue = _environmentReader.GetEnvironmentVariable(EnvironmentVariableName).SafeTrim();
+                return IsGrantedInSettings || IsSet(envValue);
+            }
+        }
 
-                return IsSet(settingsValue) || IsSet(envValue);
+        public bool IsGrantedInSettings
+        {
+            get
+            {
+                string settingsValue = _settings.GetValue(PackageRestoreSection, PackageRestoreConsentKey).SafeTrim();
+                return IsSet(settingsValue);
             }
             set
             {
-                if (value == false)
+                if (!value)
                 {
                     _settings.DeleteSection(PackageRestoreSection);
                 }
@@ -58,7 +65,7 @@ namespace NuGet
             bool boolResult;
             int intResult;
 
-            return !String.IsNullOrEmpty(value) && 
+            return !String.IsNullOrEmpty(value) &&
                    ((Boolean.TryParse(value, out boolResult) && boolResult) ||
                    (Int32.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out intResult) && (intResult == 1)));
         }
