@@ -11,7 +11,7 @@ namespace NuGet.VisualStudio
         private const string SolutionConfigSection = "solution";
         public static readonly string SourceControlSupportKey = "disableSourceControlIntegration";
         private readonly ISolutionManager _solutionManager;
-        private readonly ISettings _defaultSettings;
+        private ISettings _defaultSettings;
         private readonly IFileSystemProvider _fileSystemProvider;
 
         [ImportingConstructor]
@@ -41,6 +41,15 @@ namespace NuGet.VisualStudio
             _solutionManager = solutionManager;
             _defaultSettings = defaultSettings;
             _fileSystemProvider = fileSystemProvider;
+
+            _solutionManager.SolutionOpened += OnSolutionOpenedOrClosed;
+            _solutionManager.SolutionClosed += OnSolutionOpenedOrClosed;
+        }
+
+        private void OnSolutionOpenedOrClosed(object sender, EventArgs e)
+        {
+            _defaultSettings = 
+                Settings.LoadDefaultSettings(_solutionManager.SolutionFileSystem);
         }
 
         private ISettings SolutionSettings

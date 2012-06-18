@@ -43,7 +43,7 @@ namespace NuGet
 
         public static ISettings LoadDefaultSettings(IFileSystem currentDir)
         {
-            // Walk down the tree to find a workspace config file
+            // Walk up the tree to find a workspace config file
             // if not found, attempt to load config file in user's application data
 
             while (null != currentDir)
