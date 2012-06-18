@@ -251,7 +251,7 @@ namespace NuGet.VisualStudio
             var consent = new PackageRestoreConsent(_settings);
             if (!consent.IsGranted)
             {
-                consent.IsGranted = true;
+                consent.IsGrantedInSettings = true;
             }
         }
 

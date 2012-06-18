@@ -46,7 +46,7 @@ namespace NuGet.Options
             if (!_initialized)
             {
                 var packageRestoreConsent = new PackageRestoreConsent(_settings);
-                packageRestoreConsentCheckBox.Checked = packageRestoreConsent.IsGranted;
+                packageRestoreConsentCheckBox.Checked = packageRestoreConsent.IsGrantedInSettings;
 
                 checkForUpdate.Checked = _productUpdateSettings.ShouldCheckForUpdate;
             }
@@ -59,7 +59,7 @@ namespace NuGet.Options
             _productUpdateSettings.ShouldCheckForUpdate = checkForUpdate.Checked;
 
             var packageRestoreConsent = new PackageRestoreConsent(_settings);
-            packageRestoreConsent.IsGranted = packageRestoreConsentCheckBox.Checked;
+            packageRestoreConsent.IsGrantedInSettings = packageRestoreConsentCheckBox.Checked;
         }
 
         internal void OnClosed()
