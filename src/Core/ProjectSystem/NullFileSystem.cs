@@ -25,6 +25,16 @@ namespace NuGet
             set;
         }
 
+        public IFileSystem Parent
+        {
+            get { return null; }
+        }
+
+        public IFileSystem ChildDirectory(string path)
+        {
+            return null;
+        }
+
         public string Root
         {
             get { return String.Empty; }
