@@ -193,7 +193,7 @@ namespace NuGet.Options
             this.imageList2.Images.SetKeyName(0, "uparrow.png");
             this.imageList2.Images.SetKeyName(1, "downarrow.png");
             this.imageList2.Images.SetKeyName(2, "delete.png");
-            this.imageList2.Images.SetKeyName(3, "add.png");
+            this.imageList2.Images.SetKeyName(3, "addgrayscale.png");
             // 
             // PackageSourcesOptionsControl
             // 

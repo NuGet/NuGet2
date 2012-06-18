@@ -41,8 +41,16 @@ namespace NuGet.Options
 
             if (!VsVersionHelper.IsVisualStudio2010)
             {
-                MoveUpButton.ImageList = MoveDownButton.ImageList = removeButton.ImageList = imageList2;
-                MoveUpButton.Padding = MoveDownButton.Padding = removeButton.Padding = new Padding(3);
+                // update the button icons to use grayscale versions
+                foreach (Control child in tableLayoutPanel2.Controls)
+                {
+                    var button = child as Button;
+                    if (button != null)
+                    {
+                        button.ImageList = imageList2;
+                        button.Padding = new Padding(3);
+                    }
+                }
             }
 
             _serviceProvider = serviceProvider;
