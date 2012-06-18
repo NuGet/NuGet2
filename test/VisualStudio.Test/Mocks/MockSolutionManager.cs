@@ -19,6 +19,11 @@ namespace NuGet.VisualStudio.Test.Mocks
             get;
         }
 
+        public abstract IFileSystem SolutionFileSystem
+        {
+            get;
+        }
+
         public abstract bool IsSolutionOpen { get; }
 
         public string DefaultProjectName

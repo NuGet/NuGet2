@@ -215,6 +215,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Default NuGet config file is the first file named &apos;NuGet.Workspace.config&apos; found under a &apos;.nuGet&apos; subfolder when walking up the tree. If none exist, %AppData%\NuGet\NuGet.config is used instead..
+        /// </summary>
+        internal static string DefaultConfigDescription {
+            get {
+                return ResourceManager.GetString("DefaultConfigDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to the symbol server.
         /// </summary>
         internal static string DefaultSymbolServer {
@@ -412,7 +421,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Installs a package using the specified sources. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used.  If NuGet.config specifies no sources, uses the default NuGet feed..
+        ///   Looks up a localized string similar to Installs a package using the specified sources. If no sources are specified, all sources defined in the default NuGet config file are used.  If the default NuGet config file specifies no sources, uses the default NuGet feed. .
         /// </summary>
         internal static string InstallCommandDescription {
             get {
@@ -605,7 +614,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Displays a list of packages from a given source. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used. If NuGet.config specifies no sources, uses the default NuGet feed..
+        ///   Looks up a localized string similar to Displays a list of packages from a given source. If no sources are specified, all sources defined in the default NuGet config file are used. If the default NuGet file specifies no sources, uses the default NuGet feed. .
         /// </summary>
         internal static string ListCommandDescription {
             get {
@@ -1273,7 +1282,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Provides the ability to manage list of sources located in  %AppData%\NuGet\NuGet.config.
+        ///   Looks up a localized string similar to Provides the ability to manage list of sources located in the default NuGet config file. .
         /// </summary>
         internal static string SourcesCommandDescription {
             get {

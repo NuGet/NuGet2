@@ -147,8 +147,11 @@
   <data name="InvalidOptionValueError" xml:space="preserve">
     <value>Invalid option value: '{0} {1}'</value>
   </data>
+  <data name="DefaultConfigDescription" xml:space="preserve">
+    <value>Default NuGet config file is the first file named 'NuGet.Workspace.config' found under a '.nuGet' subfolder when walking up the tree. If none exist, %AppData%\NuGet\NuGet.config is used instead.</value>
+  </data>
   <data name="ListCommandDescription" xml:space="preserve">
-    <value>Displays a list of packages from a given source. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used. If NuGet.config specifies no sources, uses the default NuGet feed.</value>
+    <value>Displays a list of packages from a given source. If no sources are specified, all sources defined in the default NuGet config file are used. If the default NuGet file specifies no sources, uses the default NuGet feed. </value>
   </data>
   <data name="ListCommandNoPackages" xml:space="preserve">
     <value>No packages found.</value>
@@ -166,7 +169,7 @@
     <value>Displays a detailed list of information for each package.</value>
   </data>
   <data name="InstallCommandDescription" xml:space="preserve">
-    <value>Installs a package using the specified sources. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used.  If NuGet.config specifies no sources, uses the default NuGet feed.</value>
+    <value>Installs a package using the specified sources. If no sources are specified, all sources defined in the default NuGet config file are used.  If the default NuGet config file specifies no sources, uses the default NuGet feed. </value>
   </data>
   <data name="InstallCommandVersionDescription" xml:space="preserve">
     <value>The version of the package to install.</value>
@@ -605,7 +608,7 @@ nuget update -Self</value>
     <value>&lt;List|Add|Remove|Enable|Disable|Update&gt; -Name [name] -Source [source]</value>
   </data>
   <data name="SourcesCommandDescription" xml:space="preserve">
-    <value>Provides the ability to manage list of sources located in  %AppData%\NuGet\NuGet.config</value>
+    <value>Provides the ability to manage list of sources located in the default NuGet config file. </value>
   </data>
   <data name="PackageCommandNoFilesForLibPackage" xml:space="preserve">
     <value>Failed to build package. Ensure '{0}' includes assembly files. For help on building symbols package, visit {1}.</value>

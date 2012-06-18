@@ -16,7 +16,9 @@ namespace NuGet.VisualStudio
 
         [ImportingConstructor]
         public VsSettings(ISolutionManager solutionManager)
-            : this(solutionManager, Settings.LoadDefaultSettings(), new PhysicalFileSystemProvider())
+            : this(solutionManager, 
+            Settings.LoadDefaultSettings(null == solutionManager ? null : solutionManager.SolutionFileSystem), 
+            new PhysicalFileSystemProvider())
         {
             // Review: Do we need to pass in the VsFileSystemProvider here instead of hardcoding PhysicalFileSystems?
         }

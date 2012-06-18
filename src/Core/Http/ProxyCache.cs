@@ -30,7 +30,7 @@ namespace NuGet
 
         }
 #else 
-        private static readonly Lazy<ProxyCache> _instance = new Lazy<ProxyCache>(() => new ProxyCache(Settings.LoadDefaultSettings(), new EnvironmentVariableWrapper()));
+        private static readonly Lazy<ProxyCache> _instance = new Lazy<ProxyCache>(() => new ProxyCache(Settings.LoadDefaultSettings(null), new EnvironmentVariableWrapper()));
 
         private readonly ISettings _settings;
         private readonly IEnvironmentVariableReader _environment;

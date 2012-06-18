@@ -125,6 +125,7 @@ namespace NuGet
                     container.ComposeExportedValue<IPackageRepositoryFactory>(new NuGet.Common.CommandLineRepositoryFactory());
                     container.ComposeExportedValue<IPackageSourceProvider>(packageSourceProvider);
                     container.ComposeExportedValue<ICredentialProvider>(credentialProvider);
+                    container.ComposeExportedValue<IFileSystem>(fileSystem);
                     container.ComposeParts(this);
                 }
             }
@@ -196,7 +197,7 @@ namespace NuGet
             {
                 return new Settings(workingDirectory);
             }
-            return Settings.LoadDefaultSettings();
+            return Settings.LoadDefaultSettings(workingDirectory);
         }
 
         private static void SetConsoleInteractivity(IConsole console, Command command)

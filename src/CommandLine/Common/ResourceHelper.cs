@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using System.Text;
 
 namespace NuGet
 {
@@ -31,27 +32,32 @@ namespace NuGet
 
             if (!_cachedResourceStrings.TryGetValue(key, out resourceValue))
             {
-                PropertyInfo property = resourceType.GetProperty(resourceName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-
-                if (property == null)
+                StringBuilder sb = new StringBuilder();
+                foreach (string name in resourceName.Split(';'))
                 {
-                    throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourceTypeDoesNotHaveProperty, resourceType, resourceName));
-                }
+                    PropertyInfo property = resourceType.GetProperty(name, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
 
-                if (property.PropertyType != typeof(string))
-                {
-                    throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourcePropertyNotStringType, resourceName, resourceType));
-                }
+                    if (property == null)
+                    {
+                        throw new InvalidOperationException(
+                            String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourceTypeDoesNotHaveProperty, resourceType, name));
+                    }
 
-                MethodInfo getMethod = property.GetGetMethod(true);
-                if ((getMethod == null) || (!getMethod.IsAssembly && !getMethod.IsPublic))
-                {
-                    throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourcePropertyDoesNotHaveAccessibleGet, resourceType, resourceName));
+                    if (property.PropertyType != typeof(string))
+                    {
+                        throw new InvalidOperationException(
+                            String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourcePropertyNotStringType, name, resourceType));
+                    }
+
+                    MethodInfo getMethod = property.GetGetMethod(true);
+                    if ((getMethod == null) || (!getMethod.IsAssembly && !getMethod.IsPublic))
+                    {
+                        throw new InvalidOperationException(
+                            String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourcePropertyDoesNotHaveAccessibleGet, resourceType, name));
+                    }
+                    sb.Append((string)property.GetValue(null, null));
                 }
-                resourceValue = (string)property.GetValue(null, null);
+                resourceValue = sb.ToString();
                 _cachedResourceStrings[key] = resourceValue;
             }
 

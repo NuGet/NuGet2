@@ -35,6 +35,19 @@ namespace NuGet.Test.Mocks
             }
         }
 
+        public virtual IFileSystem Parent
+        {
+            get 
+            {
+                return null;
+            }
+        }
+
+        public virtual IFileSystem ChildDirectory(string path)
+        {
+            return null;
+        }
+
         public virtual string Root
         {
             get; private set; 

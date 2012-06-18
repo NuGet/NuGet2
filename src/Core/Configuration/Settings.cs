@@ -13,24 +13,62 @@ namespace NuGet
     {
         private readonly XDocument _config;
         private readonly IFileSystem _fileSystem;
+        private readonly string _fileName;
 
         public Settings(IFileSystem fileSystem)
+            :this(fileSystem, Constants.SettingsFileName)
+        {
+        }
+
+        public Settings(IFileSystem fileSystem, string fileName)
         {
             if (fileSystem == null)
             {
                 throw new ArgumentNullException("fileSystem");
             }
+            if (String.IsNullOrEmpty(fileName))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "fileName");
+            }
             _fileSystem = fileSystem;
-            _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, Constants.SettingsFileName);
+            _fileName = fileName;
+            _config = XmlUtility.GetOrCreateDocument("configuration", _fileSystem, _fileName);
         }
+
 
         public string ConfigFilePath
         {
-            get { return Path.Combine(_fileSystem.Root, Constants.SettingsFileName); }
+            get { return Path.Combine(_fileSystem.Root, _fileName); }
         }
 
-        public static ISettings LoadDefaultSettings()
+        public static ISettings LoadDefaultSettings(IFileSystem currentDir)
         {
+            // Walk down the tree to find a workspace config file
+            // if not found, attempt to load config file in user's application data
+
+            while (null != currentDir)
+            {
+                var settingsDir = currentDir.ChildDirectory(Constants.NuGetWorkspaceSettingsFolder);
+                if (null != settingsDir)
+                {
+                    if (settingsDir.FileExists(Constants.WorkspaceSettingsFileName))
+                    {
+                        try
+                        {
+                            return new Settings(settingsDir, Constants.WorkspaceSettingsFileName);
+                        }
+                        catch (XmlException)
+                        {
+                            // Work Item 1531: If the config file is malformed and the constructor throws, NuGet fails to load in VS. 
+                            // Returning a null instance prevents us from silently failing and also from picking up the wrong config
+                            return NullSettings.Instance;
+                        }
+                    }
+                }
+                currentDir = currentDir.Parent;
+            }
+
+
             string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             if (!String.IsNullOrEmpty(appDataPath))
             {
@@ -252,7 +290,7 @@ namespace NuGet
 
         private void Save()
         {
-            _fileSystem.AddFile(Constants.SettingsFileName, _config.Save);
+            _fileSystem.AddFile(_fileName, _config.Save);
         }
 
         private KeyValuePair<string, string> ReadValue(XElement element)

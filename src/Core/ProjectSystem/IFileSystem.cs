@@ -8,6 +8,8 @@ namespace NuGet
     {
         ILogger Logger { get; set; }
         string Root { get; }
+        IFileSystem Parent { get; }
+        IFileSystem ChildDirectory(string path);
         void DeleteDirectory(string path, bool recursive);
         IEnumerable<string> GetFiles(string path, string filter, bool recursive);
         IEnumerable<string> GetDirectories(string path);

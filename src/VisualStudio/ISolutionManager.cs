@@ -12,6 +12,7 @@ namespace NuGet.VisualStudio
         event EventHandler<ProjectEventArgs> ProjectAdded;
 
         string SolutionDirectory { get; }
+        IFileSystem SolutionFileSystem { get; }
 
         string DefaultProjectName { get; set; }
         Project DefaultProject { get; }

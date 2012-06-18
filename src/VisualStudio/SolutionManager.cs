@@ -149,6 +149,19 @@ namespace NuGet.VisualStudio
             }
         }
 
+        public IFileSystem SolutionFileSystem
+        {
+            get
+            {
+                string path = SolutionDirectory;
+                if (string.IsNullOrEmpty(path))
+                {
+                    return null;
+                }
+                return new PhysicalFileSystem(path);
+            }
+        }
+
         private string GetSolutionFilePath()
         {
             // Use .Properties.Item("Path") instead of .FullName because .FullName might not be

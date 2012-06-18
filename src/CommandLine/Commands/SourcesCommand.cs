@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace NuGet.Commands
 {
-    [Command(typeof(NuGetResources), "sources", "SourcesCommandDescription", UsageSummaryResourceName = "SourcesCommandUsageSummary",
+    [Command(typeof(NuGetResources), "sources", "SourcesCommandDescription;DefaultConfigDescription", UsageSummaryResourceName = "SourcesCommandUsageSummary",
         MinArgs = 0, MaxArgs = 1)]
     public class SourcesCommand : Command
     {

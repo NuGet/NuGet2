@@ -13,7 +13,7 @@ using NuGet.Common;
 
 namespace NuGet.Commands
 {
-    [Command(typeof(NuGetResources), "install", "InstallCommandDescription",
+    [Command(typeof(NuGetResources), "install", "InstallCommandDescription;DefaultConfigDescription",
         MinArgs = 0, MaxArgs = 1, UsageSummaryResourceName = "InstallCommandUsageSummary",
         UsageDescriptionResourceName = "InstallCommandUsageDescription",
         UsageExampleResourceName = "InstallCommandUsageExamples")]
@@ -65,8 +65,8 @@ namespace NuGet.Commands
         }
 
         [ImportingConstructor]
-        public InstallCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider)
-            : this(packageRepositoryFactory, sourceProvider, Settings.LoadDefaultSettings(), MachineCache.Default)
+        public InstallCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider, IFileSystem startingPoint)
+            : this(packageRepositoryFactory, sourceProvider, Settings.LoadDefaultSettings(startingPoint), MachineCache.Default)
         {
         }
 
