@@ -126,7 +126,7 @@ namespace NuGetConsole.Implementation.Console
                 () => null);
         }
 
-        public IClassificationType GetTokenTypeClassification(TokenType tokenType)
+        public IClassificationType GetTokenTypeClassification()
         {
             // CodePlex 2326 (http://nuget.codeplex.com/workitem/2326) - Numbers in dark theme are hard to read
             // Just colorize all token types with the same foreground color.
