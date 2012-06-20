@@ -41,8 +41,16 @@ namespace NuGet.Options
 
             if (!VsVersionHelper.IsVisualStudio2010)
             {
-                MoveUpButton.ImageList = MoveDownButton.ImageList = removeButton.ImageList = imageList2;
-                MoveUpButton.Padding = MoveDownButton.Padding = removeButton.Padding = new Padding(3);
+                // update the button icons to use grayscale versions
+                foreach (Control child in tableLayoutPanel2.Controls)
+                {
+                    var button = child as Button;
+                    if (button != null)
+                    {
+                        button.ImageList = imageList2;
+                        button.Padding = new Padding(3);
+                    }
+                }
             }
 
             _serviceProvider = serviceProvider;
@@ -56,7 +64,6 @@ namespace NuGet.Options
             NewPackageSource.TextChanged += (o, e) => UpdateUI();
             MoveUpButton.Click += (o, e) => MoveSelectedItem(-1);
             MoveDownButton.Click += (o, e) => MoveSelectedItem(1);
-            PackageSourcesListBox.SelectedIndexChanged += (o, e) => UpdateUI();
             NewPackageName.Focus();
             UpdateUI();
         }
@@ -66,10 +73,13 @@ namespace NuGet.Options
             var selectedSource = (PackageSource)PackageSourcesListBox.SelectedItem;
 
             MoveUpButton.Enabled = selectedSource != null && PackageSourcesListBox.SelectedIndex > 0;
-            MoveDownButton.Enabled = selectedSource != null &&
-                                     PackageSourcesListBox.SelectedIndex < PackageSourcesListBox.Items.Count - 1;
+            MoveDownButton.Enabled = selectedSource != null && PackageSourcesListBox.SelectedIndex < PackageSourcesListBox.Items.Count - 1;
+            
             // do not allow deleting the official NuGet source
             removeButton.Enabled = selectedSource != null && !selectedSource.IsOfficial;
+
+            // do not allow editing the official NuGet source
+            BrowseButton.Enabled = updateButton.Enabled = selectedSource != null && !selectedSource.IsOfficial;
         }
 
         private void MoveSelectedItem(int offset)
@@ -108,6 +118,7 @@ namespace NuGet.Options
 
             // bind to the package sources, excluding Aggregate
             _allPackageSources = new BindingSource(packageSources.Select(ps => ps.Clone()).ToList(), null);
+            _allPackageSources.CurrentChanged += OnSelectedPackageSourceChanged;
             PackageSourcesListBox.DataSource = _allPackageSources;
         }
 
@@ -117,11 +128,12 @@ namespace NuGet.Options
         /// </summary>
         internal bool ApplyChangedSettings()
         {
-            // if user presses Enter after filling in Name/Source but doesn't click Add
+            // if user presses Enter after filling in Name/Source but doesn't click Update
             // the options will be closed without adding the source, try adding before closing
             // Only apply if nothing was added
-            TryAddSourceResults result = TryAddSource();
-            if (result != TryAddSourceResults.NothingAdded)
+            TryUpdateSourceResults result = TryUpdateSource();
+            if (result != TryUpdateSourceResults.NotUpdated &&
+                result != TryUpdateSourceResults.Unchanged)
             {
                 return false;
             }
@@ -163,22 +175,44 @@ namespace NuGet.Options
 
         private void OnAddButtonClick(object sender, EventArgs e)
         {
-            TryAddSourceResults result = TryAddSource();
-            if (result == TryAddSourceResults.NothingAdded)
+            _allPackageSources.Add(CreateNewPackageSource());
+
+            // auto-select the newly-added item
+            PackageSourcesListBox.SelectedIndex = PackageSourcesListBox.Items.Count - 1;    
+        }
+
+        private PackageSource CreateNewPackageSource()
+        {
+            var sourcesList = (IEnumerable<PackageSource>)_allPackageSources.List;
+            for (int i = 0; ; i++)
+            {
+                var newName = i == 0 ? "Package source" : "Package source " + i;
+                var newSource = i == 0 ? "http://packagesource" : "http://packagesource" + i;
+                var packageSource = new PackageSource(newSource, newName);
+                if (sourcesList.All(ps => !ps.Equals(packageSource))) 
+                {
+                    return packageSource;
+                }
+            }
+        }
+
+        private void OnUpdateButtonClick(object sender, EventArgs e)
+        {
+            TryUpdateSourceResults result = TryUpdateSource();
+            if (result == TryUpdateSourceResults.NotUpdated)
             {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_NameAndSourceRequired, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageName);
             }
-            UpdateUI();
         }
 
-        private TryAddSourceResults TryAddSource()
+        private TryUpdateSourceResults TryUpdateSource()
         {
             var name = NewPackageName.Text.Trim();
             var source = NewPackageSource.Text.Trim();
             if (String.IsNullOrWhiteSpace(name) && String.IsNullOrWhiteSpace(source))
             {
-                return TryAddSourceResults.NothingAdded;
+                return TryUpdateSourceResults.NotUpdated;
             }
 
             // validate name
@@ -186,7 +220,7 @@ namespace NuGet.Options
             {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_NameRequired, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageName);
-                return TryAddSourceResults.InvalidSource;
+                return TryUpdateSourceResults.InvalidSource;
             }
 
             // validate source
@@ -194,59 +228,50 @@ namespace NuGet.Options
             {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_SourceRequried, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageSource);
-                return TryAddSourceResults.InvalidSource;
+                return TryUpdateSourceResults.InvalidSource;
             }
 
             if (!(PathValidator.IsValidLocalPath(source) || PathValidator.IsValidUncPath(source) || PathValidator.IsValidUrl(source)))
             {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_InvalidSource, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageSource);
-                return TryAddSourceResults.InvalidSource;
+                return TryUpdateSourceResults.InvalidSource;
+            }
+
+            var selectedPackageSource = (PackageSource)PackageSourcesListBox.SelectedItem;
+            var newPackageSource = new PackageSource(source, name, selectedPackageSource.IsEnabled);
+            if (selectedPackageSource.Equals(newPackageSource)) 
+            {
+                return TryUpdateSourceResults.Unchanged;
             }
 
             var sourcesList = (IEnumerable<PackageSource>)_allPackageSources.List;
 
-            // Check to see if the name is an official package source name.
-            // If so, and if there is already an official package source, don't allow a second to be added.
-            var isOfficialName = name.Equals(VsResources.OfficialSourceName, StringComparison.CurrentCultureIgnoreCase) || 
-                                 name.Equals(VsResources.VisualStudioExpressForWindows8SourceName, StringComparison.CurrentCultureIgnoreCase);
-
-            if (isOfficialName && sourcesList.Any(packageSource => packageSource.IsOfficial))
-            {
-                MessageHelper.ShowWarningMessage(Resources.ShowWarning_OfficialSourceName, Resources.ShowWarning_Title);
-                SelectAndFocus(NewPackageSource);
-                return TryAddSourceResults.InvalidSource;
-            }
-
             // check to see if name has already been added
             // also make sure it's not the same as the aggregate source ('All')
-            bool hasName = sourcesList.Any(ps => String.Equals(name, ps.Name, StringComparison.CurrentCultureIgnoreCase) || 
-                           String.Equals(name, AggregatePackageSource.Instance.Name, StringComparison.CurrentCultureIgnoreCase));
+            bool hasName = sourcesList.Any(ps => ps != selectedPackageSource &&
+                                                (String.Equals(name, ps.Name, StringComparison.CurrentCultureIgnoreCase) || 
+                                                 String.Equals(name, AggregatePackageSource.Instance.Name, StringComparison.CurrentCultureIgnoreCase)));
             if (hasName)
             {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueName, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageName);
-                return TryAddSourceResults.SourceAlreadyAdded;
+                return TryUpdateSourceResults.SourceConflicted;
             }
 
             // check to see if source has already been added
-            bool hasSource = sourcesList.Any(ps => String.Equals(PathUtility.GetCanonicalPath(source), PathUtility.GetCanonicalPath(ps.Source), StringComparison.OrdinalIgnoreCase));
+            bool hasSource = sourcesList.Any(ps => ps != selectedPackageSource && 
+                                                   String.Equals(PathUtility.GetCanonicalPath(source), PathUtility.GetCanonicalPath(ps.Source), StringComparison.OrdinalIgnoreCase));
             if (hasSource)
             {
                 MessageHelper.ShowWarningMessage(Resources.ShowWarning_UniqueSource, Resources.ShowWarning_Title);
                 SelectAndFocus(NewPackageSource);
-                return TryAddSourceResults.SourceAlreadyAdded;
+                return TryUpdateSourceResults.SourceConflicted;
             }
 
-            var newPackageSource = new PackageSource(source, name);
-            _allPackageSources.Add(newPackageSource);
-            // set selection to newly added item
-            PackageSourcesListBox.SelectedIndex = PackageSourcesListBox.Items.Count - 1;
+            _allPackageSources[_allPackageSources.Position] = newPackageSource;
 
-            // now clear the text boxes
-            ClearNameSource();
-
-            return TryAddSourceResults.SourceAdded;
+            return TryUpdateSourceResults.Successful;
         }
 
         private static void SelectAndFocus(TextBox textBox)
@@ -465,6 +490,22 @@ namespace NuGet.Options
             }
         }
 
+        private void OnSelectedPackageSourceChanged(object sender, EventArgs e)
+        {
+            UpdateUI();
+
+            var selectedPackageSource = (PackageSource)_allPackageSources.Current;
+            if (selectedPackageSource != null)
+            {
+                NewPackageName.Text = selectedPackageSource.Name;
+                NewPackageSource.Text = selectedPackageSource.Source;
+            }
+            else
+            {
+                NewPackageName.Text = NewPackageSource.Text = String.Empty;
+            }
+        }
+
         private static Rectangle NewBounds(Rectangle sourceBounds, int xOffset, int yOffset)
         {
             return new Rectangle(sourceBounds.Left + xOffset, sourceBounds.Top + yOffset,
@@ -548,11 +589,12 @@ namespace NuGet.Options
         }
     }
 
-    internal enum TryAddSourceResults
+    internal enum TryUpdateSourceResults
     {
-        NothingAdded = 0,
-        SourceAdded = 1,
+        NotUpdated = 0,
+        Successful = 1,
         InvalidSource = 2,
-        SourceAlreadyAdded = 3
+        SourceConflicted = 3,
+        Unchanged = 4
     }
 }

@@ -39,7 +39,7 @@ namespace NuGet.Options
             this.MoveUpButton = new System.Windows.Forms.Button();
             this.MoveDownButton = new System.Windows.Forms.Button();
             this.packageListToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.addButton = new System.Windows.Forms.Button();
+            this.updateButton = new System.Windows.Forms.Button();
             this.BrowseButton = new System.Windows.Forms.Button();
             this.NewPackageSource = new System.Windows.Forms.TextBox();
             this.NewPackageSourceLabel = new System.Windows.Forms.Label();
@@ -48,6 +48,7 @@ namespace NuGet.Options
             this.PackageSourcesListBox = new System.Windows.Forms.ListBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            this.addButton = new System.Windows.Forms.Button();
             this.imageList2 = new System.Windows.Forms.ImageList(this.components);
             this.PackageSourcesContextMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -57,7 +58,6 @@ namespace NuGet.Options
             // HeaderLabel
             // 
             resources.ApplyResources(this.HeaderLabel, "HeaderLabel");
-            this.tableLayoutPanel1.SetColumnSpan(this.HeaderLabel, 2);
             this.HeaderLabel.Name = "HeaderLabel";
             // 
             // PackageSourcesContextMenu
@@ -88,6 +88,7 @@ namespace NuGet.Options
             this.imageList1.Images.SetKeyName(0, "uparrow.png");
             this.imageList1.Images.SetKeyName(1, "downarrow.png");
             this.imageList1.Images.SetKeyName(2, "Delete.png");
+            this.imageList1.Images.SetKeyName(3, "add.png");
             // 
             // MoveUpButton
             // 
@@ -103,12 +104,12 @@ namespace NuGet.Options
             this.MoveDownButton.Name = "MoveDownButton";
             this.MoveDownButton.UseVisualStyleBackColor = true;
             // 
-            // addButton
+            // updateButton
             // 
-            resources.ApplyResources(this.addButton, "addButton");
-            this.addButton.Name = "addButton";
-            this.addButton.UseVisualStyleBackColor = true;
-            this.addButton.Click += new System.EventHandler(this.OnAddButtonClick);
+            resources.ApplyResources(this.updateButton, "updateButton");
+            this.updateButton.Name = "updateButton";
+            this.updateButton.UseVisualStyleBackColor = true;
+            this.updateButton.Click += new System.EventHandler(this.OnUpdateButtonClick);
             // 
             // BrowseButton
             // 
@@ -155,25 +156,35 @@ namespace NuGet.Options
             // tableLayoutPanel1
             // 
             resources.ApplyResources(this.tableLayoutPanel1, "tableLayoutPanel1");
-            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 2, 0);
-            this.tableLayoutPanel1.Controls.Add(this.HeaderLabel, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.PackageSourcesListBox, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.NewPackageNameLabel, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.NewPackageName, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.NewPackageSourceLabel, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageName, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.NewPackageSource, 1, 3);
             this.tableLayoutPanel1.Controls.Add(this.BrowseButton, 2, 3);
-            this.tableLayoutPanel1.Controls.Add(this.addButton, 3, 3);
+            this.tableLayoutPanel1.Controls.Add(this.updateButton, 3, 3);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             // 
             // tableLayoutPanel2
             // 
             resources.ApplyResources(this.tableLayoutPanel2, "tableLayoutPanel2");
-            this.tableLayoutPanel1.SetColumnSpan(this.tableLayoutPanel2, 2);
-            this.tableLayoutPanel2.Controls.Add(this.removeButton, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.MoveUpButton, 1, 0);
-            this.tableLayoutPanel2.Controls.Add(this.MoveDownButton, 2, 0);
+            this.tableLayoutPanel1.SetColumnSpan(this.tableLayoutPanel2, 4);
+            this.tableLayoutPanel2.Controls.Add(this.HeaderLabel, 0, 0);
+            this.tableLayoutPanel2.Controls.Add(this.addButton, 1, 0);
+            this.tableLayoutPanel2.Controls.Add(this.removeButton, 2, 0);
+            this.tableLayoutPanel2.Controls.Add(this.MoveUpButton, 3, 0);
+            this.tableLayoutPanel2.Controls.Add(this.MoveDownButton, 4, 0);
+            this.tableLayoutPanel2.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
+            // 
+            // addButton
+            // 
+            resources.ApplyResources(this.addButton, "addButton");
+            this.addButton.ImageList = this.imageList1;
+            this.addButton.Name = "addButton";
+            this.addButton.UseVisualStyleBackColor = true;
+            this.addButton.Click += new System.EventHandler(this.OnAddButtonClick);
             // 
             // imageList2
             // 
@@ -182,6 +193,7 @@ namespace NuGet.Options
             this.imageList2.Images.SetKeyName(0, "uparrow.png");
             this.imageList2.Images.SetKeyName(1, "downarrow.png");
             this.imageList2.Images.SetKeyName(2, "delete.png");
+            this.imageList2.Images.SetKeyName(3, "addgrayscale.png");
             // 
             // PackageSourcesOptionsControl
             // 
@@ -207,7 +219,7 @@ namespace NuGet.Options
         private Button MoveUpButton;
         private Button MoveDownButton;
         private ToolTip packageListToolTip;
-        private Button addButton;
+        private Button updateButton;
         private Button BrowseButton;
         private TextBox NewPackageSource;
         private Label NewPackageSourceLabel;
@@ -218,5 +230,6 @@ namespace NuGet.Options
         private TableLayoutPanel tableLayoutPanel2;
         private ImageList imageList1;
         private ImageList imageList2;
+        private Button addButton;
     }
 }
