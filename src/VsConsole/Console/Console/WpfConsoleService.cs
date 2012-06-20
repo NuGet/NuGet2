@@ -126,39 +126,11 @@ namespace NuGetConsole.Implementation.Console
                 () => null);
         }
 
-        IClassificationType[] _tokenClassifications;
-
-        public IClassificationType GetTokenTypeClassification(TokenType tokenType)
+        public IClassificationType GetTokenTypeClassification()
         {
-            if (_tokenClassifications == null)
-            {
-                _tokenClassifications = new IClassificationType[] {
-                    StandardClassificationService.CharacterLiteral,
-                    StandardClassificationService.Comment,
-                    StandardClassificationService.ExcludedCode,
-                    StandardClassificationService.FormalLanguage,
-                    StandardClassificationService.Identifier,
-                    StandardClassificationService.Keyword,
-                    StandardClassificationService.Literal,
-                    StandardClassificationService.NaturalLanguage,
-                    StandardClassificationService.NumberLiteral,
-                    StandardClassificationService.Operator,
-                    StandardClassificationService.Other,
-                    StandardClassificationService.PreprocessorKeyword,
-                    StandardClassificationService.StringLiteral,
-                    StandardClassificationService.SymbolDefinition,
-                    StandardClassificationService.SymbolReference,
-                    StandardClassificationService.WhiteSpace,
-                };
-            }
-
-            int i = (int)tokenType;
-            if (i < 0 || i >= _tokenClassifications.Length)
-            {
-                i = (int)TokenType.Other;
-            }
-
-            return _tokenClassifications[i];
+            // CodePlex 2326 (http://nuget.codeplex.com/workitem/2326) - Numbers in dark theme are hard to read
+            // Just colorize all token types with the same foreground color.
+            return StandardClassificationService.Other;
         }
 
         private sealed class PrivateConsoleStatus : IPrivateConsoleStatus

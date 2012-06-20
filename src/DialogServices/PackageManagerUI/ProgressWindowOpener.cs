@@ -263,10 +263,6 @@ namespace NuGet.Dialog.PackageManagerUI
 
                 _currentWindow.AddMessage(message, messageBrush);
             }
-            else
-            {
-                throw new InvalidOperationException();
-            }
         }
 
         public void ClearMessages()

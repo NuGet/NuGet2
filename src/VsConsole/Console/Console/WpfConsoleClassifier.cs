@@ -209,7 +209,7 @@ namespace NuGetConsole.Implementation.Console
                 IEnumerable<Token> tokens = CommandTokenizer.Tokenize(lines);
                 foreach (Token token in tokens)
                 {
-                    IClassificationType classificationType = Factory.GetTokenTypeClassification(token.Type);
+                    IClassificationType classificationType = Factory.GetTokenTypeClassification();
                     for (int i = token.StartLine; i <= token.EndLine; i++)
                     {
                         // Tokenize() may append \r\n, resulting in more lines than spans lines
