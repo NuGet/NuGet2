@@ -58,7 +58,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var document = new XDocument(new XElement(VSTemplateNamespace + "VSTemplate"));
-            var wizard = new VsTemplateWizard(null, null, null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -80,7 +80,7 @@ namespace NuGet.VisualStudio.Test
                     .Element(VSTemplateNamespace + "packages")
                     .Add(new XAttribute("isPreunzipped", preunzippedValue));
 
-            var wizard = new VsTemplateWizard(null, null, null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"c:\some\file.vstemplate");
@@ -97,7 +97,7 @@ namespace NuGet.VisualStudio.Test
                 new XElement(VSTemplateNamespace + "VSTemplate",
                     new XElement(VSTemplateNamespace + "WizardData")
                     ));
-            var wizard = new VsTemplateWizard(null, null, null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -112,7 +112,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var document = BuildDocument(null);
-            var wizard = new VsTemplateWizard(null, null, null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -127,7 +127,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var document = BuildDocumentWithPackage("template");
-            var wizard = new VsTemplateWizard(null, null, null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -142,7 +142,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var document = BuildDocumentWithPackage("extension", new XAttribute("repositoryId", "myExtensionId"));
-            var wizard = new VsTemplateWizard(null, null, null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null, null, null);
             var extensionManagerMock = new Mock<IVsExtensionManager>();
             var extensionMock = new Mock<IInstalledExtension>();
             extensionMock.Setup(e => e.InstallPath).Returns(@"C:\Extension\Dir");
@@ -206,7 +206,7 @@ namespace NuGet.VisualStudio.Test
             var registryValue = @"C:\AspNetMvc4\Packages";
 
             var document = BuildDocumentWithPackage("registry", new XAttribute("keyName", registryKey));
-            var wizard = new VsTemplateWizard(null, null, null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             var hkcu_repository = new Mock<IRegistryKey>();
             var hkcu = new Mock<IRegistryKey>();
@@ -229,7 +229,7 @@ namespace NuGet.VisualStudio.Test
             var registryValue = @"C:\AspNetMvc4\Packages";
 
             var document = BuildDocumentWithPackage("registry", new XAttribute("keyName", registryKey));
-            var wizard = new VsTemplateWizard(null, null, null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             // HKCU key doesn't exist
             var hkcu = new Mock<IRegistryKey>();
@@ -257,7 +257,7 @@ namespace NuGet.VisualStudio.Test
             var registryValue = @"C:\AspNetMvc4\Packages";
 
             var document = BuildDocumentWithPackage("registry", new XAttribute("keyName", registryKey));
-            var wizard = new VsTemplateWizard(null, null, null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             // HKCU key exists, but the value does not
             var hkcu_repository = new Mock<IRegistryKey>();
@@ -288,7 +288,7 @@ namespace NuGet.VisualStudio.Test
             var registryValue = @"C:\AspNetMvc4\Packages";
 
             var document = BuildDocumentWithPackage("registry", new XAttribute("keyName", registryKeyName));
-            var wizard = new VsTemplateWizard(null, null, null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             // HKCU key exists, but the value does not
             var hkcu_repository = new Mock<IRegistryKey>();
@@ -500,7 +500,7 @@ namespace NuGet.VisualStudio.Test
         private static void VerifyParsedPackages(XDocument document, IEnumerable<VsTemplateWizardPackageInfo> expectedPackages)
         {
             // Arrange
-            var wizard = new VsTemplateWizard(null, null, null, null);
+            var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             // Act
             var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
@@ -1050,7 +1050,7 @@ namespace NuGet.VisualStudio.Test
         [Fact]
         public void ShouldAddProjectItem_AlwaysReturnsTrue()
         {
-            IWizard wizard = new VsTemplateWizard(null, null, null, null);
+            IWizard wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             Assert.True(wizard.ShouldAddProjectItem(null));
             Assert.True(wizard.ShouldAddProjectItem(""));
@@ -1067,7 +1067,13 @@ namespace NuGet.VisualStudio.Test
                 IVsWebsiteHandler websiteHandler = null,
                 IVsPackageInstallerServices packageServices = null,
                 IOutputConsoleProvider consoleProvider = null)
-                : base(installer, websiteHandler, packageServices ?? new Mock<IVsPackageInstallerServices>().Object, consoleProvider ?? new Mock<IOutputConsoleProvider>().Object)
+                : base(
+                    installer, 
+                    websiteHandler, 
+                    packageServices ?? new Mock<IVsPackageInstallerServices>().Object, 
+                    consoleProvider ?? new Mock<IOutputConsoleProvider>().Object,
+                    new Mock<IVsCommonOperations>().Object,
+                    new Mock<ISolutionManager>().Object)
             {
                 ErrorMessages = new List<string>();
                 _loadDocumentCallback = loadDocumentCallback ?? (path => null);

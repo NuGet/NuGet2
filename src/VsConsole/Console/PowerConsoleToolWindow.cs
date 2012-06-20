@@ -188,7 +188,6 @@ namespace NuGetConsole.Implementation
         /// </summary>
         int IOleCommandTarget.QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText)
         {
-
             // examine buttons within our toolbar
             if (pguidCmdGroup == GuidList.guidNuGetCmdSet)
             {
@@ -223,7 +222,8 @@ namespace NuGetConsole.Implementation
                 hr = cmdTarget.QueryStatus(ref pguidCmdGroup, cCmds, prgCmds, pCmdText);
             }
 
-            if (hr == OleCommandFilter.OLECMDERR_E_NOTSUPPORTED)
+            if (hr == OleCommandFilter.OLECMDERR_E_NOTSUPPORTED ||
+                hr == OleCommandFilter.OLECMDERR_E_UNKNOWNGROUP)
             {
                 IOleCommandTarget target = this.GetService(typeof(IOleCommandTarget)) as IOleCommandTarget;
                 if (target != null)
@@ -248,7 +248,8 @@ namespace NuGetConsole.Implementation
                 hr = cmdTarget.Exec(ref pguidCmdGroup, nCmdID, nCmdexecopt, pvaIn, pvaOut);
             }
 
-            if (hr == OleCommandFilter.OLECMDERR_E_NOTSUPPORTED)
+            if (hr == OleCommandFilter.OLECMDERR_E_NOTSUPPORTED ||
+                hr == OleCommandFilter.OLECMDERR_E_UNKNOWNGROUP)
             {
                 IOleCommandTarget target = this.GetService(typeof(IOleCommandTarget)) as IOleCommandTarget;
                 if (target != null)
