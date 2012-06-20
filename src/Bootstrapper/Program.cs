@@ -10,7 +10,8 @@ namespace Bootstrapper
     {
         public static int Main(string[] args)
         {
-            string exePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"NuGet\NuGet.exe");
+            string exeDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NuGet");
+            string exePath = Path.Combine(exeDir, @"NuGet.exe");
             try
             {
                 var processInfo = new ProcessStartInfo(exePath)
@@ -27,6 +28,11 @@ namespace Bootstrapper
                     // Register a console based credentials provider so that the user get's prompted if a password
                     // is required for the proxy
                     // Setup IHttpClient for the Gallery to locate packages
+                    if (!Directory.Exists(exeDir))
+                    {
+                        Directory.CreateDirectory(exeDir);
+                    }
+                    
                     new HttpClient().DownloadData(exePath);
                 }
                 else if ((DateTime.UtcNow - File.GetLastWriteTimeUtc(exePath)).TotalDays > 10)

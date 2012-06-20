@@ -66,6 +66,12 @@ namespace NuGet
 
         internal WebProxy GetUserConfiguredProxy()
         {
+            if (_document == null)
+            {
+                // If the config file does not exist or cannot be read, ignore it.
+                return null;
+            }
+            
             // Try reading from the settings. The values are stored as 3 config values http_proxy, http_proxy_user, http_proxy_password
             var host = GetConfigValue(HostKey);
             if (!String.IsNullOrEmpty(host))
