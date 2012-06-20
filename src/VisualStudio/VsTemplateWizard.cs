@@ -26,24 +26,14 @@ namespace NuGet.VisualStudio
         private DTE _dte;
         private IVsPackageInstallerServices _packageServices;
         private IOutputConsoleProvider _consoleProvider;
-        private readonly IVsCommonOperations _vsCommonOperations;
-        private readonly ISolutionManager _solutionManager;
-
+        
         [ImportingConstructor]
-        public VsTemplateWizard(
-            IVsPackageInstaller installer,
-            IVsWebsiteHandler websiteHandler,
-            IVsPackageInstallerServices packageServices,
-            IOutputConsoleProvider consoleProvider,
-            IVsCommonOperations vsCommonOperations,
-            ISolutionManager solutionManager)
+        public VsTemplateWizard(IVsPackageInstaller installer, IVsWebsiteHandler websiteHandler, IVsPackageInstallerServices packageServices, IOutputConsoleProvider consoleProvider)
         {
             _installer = installer;
             _websiteHandler = websiteHandler;
             _packageServices = packageServices;
             _consoleProvider = consoleProvider;
-            _vsCommonOperations = vsCommonOperations;
-            _solutionManager = solutionManager;
         }
 
         [Import]
@@ -316,15 +306,12 @@ namespace NuGet.VisualStudio
                 // RepositorySettings = null in unit tests
                 if (project.IsWebSite() && RepositorySettings != null)
                 {
-                    using (_vsCommonOperations.SaveSolutionExplorerNodeStates(_solutionManager))
-                    {
-                        CreateRefreshFilesInBin(
-                            project,
-                            RepositorySettings.Value.RepositoryPath,
-                            _configuration.Packages.Where(p => p.SkipAssemblyReferences));
+                    CreateRefreshFilesInBin(
+                        project,
+                        RepositorySettings.Value.RepositoryPath,
+                        _configuration.Packages.Where(p => p.SkipAssemblyReferences));
 
-                        CopyNativeBinariesToBin(project, RepositorySettings.Value.RepositoryPath, _configuration.Packages);
-                    }
+                    CopyNativeBinariesToBin(project, RepositorySettings.Value.RepositoryPath, _configuration.Packages);
                 }
             }
         }
