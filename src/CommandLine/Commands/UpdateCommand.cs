@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -62,7 +63,8 @@ namespace NuGet.Commands
             if (Self)
             {
                 Assembly assembly = typeof(UpdateCommand).Assembly;
-                SelfUpdate(assembly.Location, new SemanticVersion(assembly.GetName().Version));
+                var version = GetNuGetVersion(assembly) ?? new SemanticVersion(assembly.GetName().Version);
+                SelfUpdate(assembly.Location, version);
             }
             else
             {
@@ -359,6 +361,21 @@ namespace NuGet.Commands
 
                 Console.WriteLine(NuGetResources.UpdateCommandUpdateSuccessful);
             }
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want this method to throw.")]
+        internal static SemanticVersion GetNuGetVersion(ICustomAttributeProvider assembly)
+        {
+            try
+            {
+                var assemblyInformationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+                return new SemanticVersion(assemblyInformationalVersion.InformationalVersion);
+            }
+            catch
+            {
+                // Don't let GetCustomAttributes throw.
+            }
+            return null;
         }
 
         protected virtual void UpdateFile(string exePath, IPackageFile file)
