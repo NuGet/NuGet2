@@ -96,5 +96,25 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.True(result);
         }
+
+        [Fact]
+        public void IsCompatibleReturnsTrueIfProjectHasNullTargetFrameworkMonikerValue()
+        {
+            // Arrange
+            var package = PackageUtility.CreatePackage(
+                "A",
+                "1.0",
+                content: new string[] { "net40\\a.txt", "sl3\\b.txt" },
+                assemblyReferences: new string[] { "lib\\winrt45\\c.dll", "lib\\net35\\d.dll" });
+            var project = new Mock<Project>();
+            project.Setup(p => p.Properties.Item("TargetFrameworkMoniker").Value).Returns(null);
+
+            // Act
+            bool result = project.Object.IsCompatible(package);
+
+            // Assert
+            Assert.True(result);
+        }
+
     }
 }
