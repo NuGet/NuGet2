@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Xml;
 using NuGet;
 
@@ -25,15 +26,12 @@ namespace Bootstrapper
                     var document = GetConfigDocument();
                     EnsurePackageRestoreConsent(document);
                     ProxyCache.Instance = new ProxyCache(document);
-                    // Register a console based credentials provider so that the user get's prompted if a password
-                    // is required for the proxy
-                    // Setup IHttpClient for the Gallery to locate packages
                     if (!Directory.Exists(exeDir))
                     {
                         Directory.CreateDirectory(exeDir);
                     }
-                    
-                    new HttpClient().DownloadData(exePath);
+
+                    DownloadExe(exePath);
                 }
                 else if ((DateTime.UtcNow - File.GetLastWriteTimeUtc(exePath)).TotalDays > 10)
                 {
@@ -65,6 +63,32 @@ namespace Bootstrapper
                 return String.Empty;
             }
             return args.Substring(index + 1).Trim();
+        }
+
+        private static void DownloadExe(string exePath)
+        {
+            bool created;
+            using (var mutex = new Mutex(initiallyOwned: true, name: "NuGet.Bootstrapper", createdNew: out created))
+            {
+                try
+                {
+                    // If multiple instances of the bootstrapper and launched, and the exe does not exist, it would cause things to go messy. This code is identical to the 
+                    // way we handle concurrent installation of a package by multiple instances of NuGet.exe.
+                    if (created)
+                    {
+                        new HttpClient().DownloadData(exePath);
+                    }
+                    else
+                    {
+                        // If a different instance of Bootstrapper created the mutex, wait for a minute to download the exe.
+                        mutex.WaitOne(6000);
+                    }
+                }
+                finally
+                {
+                    mutex.ReleaseMutex();
+                }
+            }
         }
 
         private static XmlDocument GetConfigDocument()
