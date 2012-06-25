@@ -103,7 +103,7 @@ namespace NuGet.TeamFoundationServer
         {
             string fullPath = GetFullPath(path);
 
-            var pendingChanges = Workspace.GetPendingChanges(fullPath, recursionType);
+            var pendingChanges = Workspace.GetPendingChanges(fullPath);
 
             // If there are any pending deletes then do nothing
             if (pendingChanges.Any(c => c.IsDelete))

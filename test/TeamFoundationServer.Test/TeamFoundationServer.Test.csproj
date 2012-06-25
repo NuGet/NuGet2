@@ -38,9 +38,9 @@
       <Project>{F879F274-EFA0-4157-8404-33A19B4E6AEC}</Project>
       <Name>Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\TeamFoundationServer\TeamFoundationServer.csproj">
-      <Project>{5FC1C439-9263-470E-9C09-6E8B1E24C6B2}</Project>
-      <Name>TeamFoundationServer</Name>
+    <ProjectReference Include="..\..\src\TeamFoundationServer10\TeamFoundationServer10.csproj">
+      <Project>{3F786922-B4F3-4C6E-B22F-3D764BA5B3B8}</Project>
+      <Name>TeamFoundationServer10</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\VisualStudio\VisualStudio.csproj">
       <Project>{6146CA62-CC16-422C-A105-3E81F7452AA6}</Project>
