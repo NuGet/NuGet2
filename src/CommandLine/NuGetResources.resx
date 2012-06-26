@@ -517,9 +517,9 @@
     <value>Print detailed all help in markdown format.</value>
   </data>
   <data name="MirrorCommandUsageExamples" xml:space="preserve">
-    <value>NuGet mirror Microsoft.AspNet.Mvc http://myserver/myrepo/nuget http://myserver/myrepo/api/v2/package 
+    <value>NuGet mirror Microsoft.AspNet.Mvc http://server/dir/nuget http://server/dir/api/v2/package 
 
-NuGet mirror Microsoft.AspNet.Razor http://myserver/myrepo/nuget http://myserver/myrepo/api/v2/package -apikey my_key -version 1.0.20105.408</value>
+NuGet mirror Microsoft.AspNet.Razor http://server/dir/nuget http://server/dir/api/v2/package -ApiKey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -version 1.0.20105.408</value>
   </data>
   <data name="InstallCommandUsageExamples" xml:space="preserve">
     <value>nuget install elmah

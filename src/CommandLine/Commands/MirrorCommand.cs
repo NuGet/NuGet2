@@ -152,7 +152,7 @@ namespace NuGet.Commands
                 logger: Console);
         }
 
-        private PackageServer GetDestinationRepositoryPush(string repo)
+        private static PackageServer GetDestinationRepositoryPush(string repo)
         {
             return new PackageServer(repo, CommandLineConstants.UserAgent);
         }
@@ -187,7 +187,7 @@ namespace NuGet.Commands
             string packageId = Arguments[0];
             if (Path.GetFileName(packageId).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
             {
-                throw new NotImplementedException("Comming soon.");
+                throw new NotImplementedException();
             }
             
             SemanticVersion version = GetVersion();
