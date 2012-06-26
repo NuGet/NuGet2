@@ -688,6 +688,107 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The API key for pushing to the target repository. If not specified, the one specified in the default NuGet config file is used..
+        /// </summary>
+        internal static string MirrorCommandApiKey {
+            get {
+                return ResourceManager.GetString("MirrorCommandApiKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mirrors a package and its dependencies from the specified source repositories to the target repository. .
+        /// </summary>
+        internal static string MirrorCommandDescription {
+            get {
+                return ResourceManager.GetString("MirrorCommandDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to By default downloaded packages are not copied to local cache and a local cache is not used as a fallback when a package or a package dependency is not found in the specified source(s). If you want to ensure only packages from the specified sources are used, keep this default. If you want instead to maximize chances of finding packages, set this option..
+        /// </summary>
+        internal static string MirrorCommandDoCache {
+            get {
+                return ResourceManager.GetString("MirrorCommandDoCache", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Log what would be done without actually doing it..
+        /// </summary>
+        internal static string MirrorCommandNoOp {
+            get {
+                return ResourceManager.GetString("MirrorCommandNoOp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allows prerelease packages to be mirrored. This flag is not required when packages.config is used to specify packages to mirror..
+        /// </summary>
+        internal static string MirrorCommandPrerelease {
+            get {
+                return ResourceManager.GetString("MirrorCommandPrerelease", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A list of packages sources to use for the finding packages to mirror. If no sources are specified, the ones defined in the default NuGet config file are used. If the default NuGet config file specifies no sources, uses the default NuGet feed..
+        /// </summary>
+        internal static string MirrorCommandSourceDescription {
+            get {
+                return ResourceManager.GetString("MirrorCommandSourceDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specifies the timeout for pushing to the target in seconds. Defaults to 300 seconds (5 minutes)..
+        /// </summary>
+        internal static string MirrorCommandTimeoutDescription {
+            get {
+                return ResourceManager.GetString("MirrorCommandTimeoutDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Specify the id of the package to mirror, the url to query the target repository (list command) and the url to push packages to the target repository. If a path to a packages.config file is used instead of an id, all the packages it contains are mirrored. Assuming you&apos;re targeting a private repository under http://machine/repo installed using NuGet.Server, the list and push urls will be http://machine/repo/nuget and http://machine/repo/api/v2/package respectively..
+        /// </summary>
+        internal static string MirrorCommandUsageDescription {
+            get {
+                return ResourceManager.GetString("MirrorCommandUsageDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NuGet mirror Microsoft.AspNet.Mvc http://myserver/myrepo/nuget http://myserver/myrepo/api/v2/package 
+        ///
+        ///NuGet mirror Microsoft.AspNet.Razor http://myserver/myrepo/nuget http://myserver/myrepo/api/v2/package -apikey my_key -version 1.0.20105.408.
+        /// </summary>
+        internal static string MirrorCommandUsageExamples {
+            get {
+                return ResourceManager.GetString("MirrorCommandUsageExamples", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to packageId|pathToPackagesConfig listUrlTarget publishUrlTarget [options].
+        /// </summary>
+        internal static string MirrorCommandUsageSummary {
+            get {
+                return ResourceManager.GetString("MirrorCommandUsageSummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The version of the package to install. If not specified, latest version is mirrored..
+        /// </summary>
+        internal static string MirrorCommandVersionDescription {
+            get {
+                return ResourceManager.GetString("MirrorCommandVersionDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Missing option value for: &apos;{0}&apos;.
         /// </summary>
         internal static string MissingOptionValueError {

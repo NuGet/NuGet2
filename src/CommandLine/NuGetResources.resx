@@ -165,6 +165,36 @@
   <data name="ListCommandVerboseListDescription" xml:space="preserve">
     <value>Displays a detailed list of information for each package.</value>
   </data>
+  <data name="MirrorCommandDescription" xml:space="preserve">
+    <value>Mirrors a package and its dependencies from the specified source repositories to the target repository. </value>
+  </data>
+  <data name="MirrorCommandVersionDescription" xml:space="preserve">
+    <value>The version of the package to install. If not specified, latest version is mirrored.</value>
+  </data>
+  <data name="MirrorCommandSourceDescription" xml:space="preserve">
+    <value>A list of packages sources to use for the finding packages to mirror. If no sources are specified, the ones defined in the default NuGet config file are used. If the default NuGet config file specifies no sources, uses the default NuGet feed.</value>
+  </data>
+  <data name="MirrorCommandUsageDescription" xml:space="preserve">
+    <value>Specify the id of the package to mirror, the url to query the target repository (list command) and the url to push packages to the target repository. If a path to a packages.config file is used instead of an id, all the packages it contains are mirrored. Assuming you're targeting a private repository under http://machine/repo installed using NuGet.Server, the list and push urls will be http://machine/repo/nuget and http://machine/repo/api/v2/package respectively.</value>
+  </data>
+  <data name="MirrorCommandNoOp" xml:space="preserve">
+    <value>Log what would be done without actually doing it.</value>
+  </data>
+  <data name="MirrorCommandDoCache" xml:space="preserve">
+    <value>By default downloaded packages are not copied to local cache and a local cache is not used as a fallback when a package or a package dependency is not found in the specified source(s). If you want to ensure only packages from the specified sources are used, keep this default. If you want instead to maximize chances of finding packages, set this option.</value>
+  </data>
+  <data name="MirrorCommandApiKey" xml:space="preserve">
+    <value>The API key for pushing to the target repository. If not specified, the one specified in the default NuGet config file is used.</value>
+  </data>
+  <data name="MirrorCommandTimeoutDescription" xml:space="preserve">
+    <value>Specifies the timeout for pushing to the target in seconds. Defaults to 300 seconds (5 minutes).</value>
+  </data>
+  <data name="MirrorCommandPrerelease" xml:space="preserve">
+    <value>Allows prerelease packages to be mirrored. This flag is not required when packages.config is used to specify packages to mirror.</value>
+  </data>  
+  <data name="MirrorCommandUsageSummary" xml:space="preserve">
+    <value>packageId|pathToPackagesConfig listUrlTarget publishUrlTarget [options]</value>
+  </data>
   <data name="InstallCommandDescription" xml:space="preserve">
     <value>Installs a package using the specified sources. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used.  If NuGet.config specifies no sources, uses the default NuGet feed.</value>
   </data>
@@ -485,6 +515,11 @@
   </data>
   <data name="HelpCommandMarkdown" xml:space="preserve">
     <value>Print detailed all help in markdown format.</value>
+  </data>
+  <data name="MirrorCommandUsageExamples" xml:space="preserve">
+    <value>NuGet mirror Microsoft.AspNet.Mvc http://myserver/myrepo/nuget http://myserver/myrepo/api/v2/package 
+
+NuGet mirror Microsoft.AspNet.Razor http://myserver/myrepo/nuget http://myserver/myrepo/api/v2/package -apikey my_key -version 1.0.20105.408</value>
   </data>
   <data name="InstallCommandUsageExamples" xml:space="preserve">
     <value>nuget install elmah
