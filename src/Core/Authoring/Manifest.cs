@@ -135,9 +135,9 @@ namespace NuGet
                     Authors = GetCommaSeparatedString(metadata.Authors),
                     Owners = GetCommaSeparatedString(metadata.Owners) ?? GetCommaSeparatedString(metadata.Authors),
                     Tags = String.IsNullOrEmpty(metadata.Tags) ? null : metadata.Tags.SafeTrim(),
-                    LicenseUrl = metadata.LicenseUrl != null ? metadata.LicenseUrl.OriginalString.SafeTrim() : null,
-                    ProjectUrl = metadata.ProjectUrl != null ? metadata.ProjectUrl.OriginalString.SafeTrim() : null,
-                    IconUrl = metadata.IconUrl != null ? metadata.IconUrl.OriginalString.SafeTrim() : null,
+                    LicenseUrl = ConvertUrlToStringSafe(metadata.LicenseUrl),
+                    ProjectUrl = ConvertUrlToStringSafe(metadata.ProjectUrl),
+                    IconUrl = ConvertUrlToStringSafe(metadata.IconUrl),
                     RequireLicenseAcceptance = metadata.RequireLicenseAcceptance,
                     Description = metadata.Description.SafeTrim(),
                     Copyright = metadata.Copyright.SafeTrim(),
@@ -149,6 +149,20 @@ namespace NuGet
                     References = CreateReferences(metadata)
                 }
             };
+        }
+
+        private static string ConvertUrlToStringSafe(Uri url)
+        {
+            if (url != null)
+            {
+                string originalString = url.OriginalString.SafeTrim();
+                if (!String.IsNullOrEmpty(originalString))
+                {
+                    return originalString;
+                }
+            }
+
+            return null;
         }
 
         private static List<ManifestReference> CreateReferences(IPackageMetadata metadata)

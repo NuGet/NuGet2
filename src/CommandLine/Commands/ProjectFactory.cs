@@ -496,7 +496,7 @@ namespace NuGet.Commands
             string target = Path.Combine(solutionDir, GetPackagesPath(solutionDir));
             if (Directory.Exists(target))
             {
-                return new LocalPackageRepository(target);
+                return new SharedPackageRepository(target);
             }
 
             return null;
@@ -596,6 +596,7 @@ namespace NuGet.Commands
             {
                 var references = new PackageReferenceFile(packagesConfig).GetPackageReferences();
                 contentFilesInDependencies = references.Select(reference => repository.FindPackage(reference.Id, reference.Version))
+                                                       .Where(a => a != null)
                                                        .SelectMany(a => a.GetContentFiles())
                                                        .ToList();
             }

@@ -6,15 +6,125 @@ using Xunit.Extensions;
 
 namespace NuGet.Test
 {
-
     public class SharedPackageRepositoryTest
     {
+        [Theory]
+        [InlineData("A", "2.0", "A.2.0\\A.2.0.nuspec", "A.2.0\\A.2.0.nupkg")]
+        [InlineData("B", "1.0.0-alpha", "B.1.0.0-alpha\\B.1.0.0-alpha.nuspec", "B.1.0.0-alpha\\B.1.0.0-alpha.nupkg")]
+        [InlineData("C", "3.1.2.4-rtm", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nuspec", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nupkg")]
+        public void CallAddPackageWillAddNuspecFile(string id, string version, string expectedPath, string unexpectedPath)
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\root");
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            repository.AddPackage(PackageUtility.CreatePackage(id, version));
+
+            // Assert
+            Assert.True(fileSystem.FileExists(expectedPath));
+            Assert.False(fileSystem.FileExists(unexpectedPath));
+        }
+
+        [Theory]
+        [InlineData("A", "2.0", "A.2.0\\A.2.0.nuspec")]
+        [InlineData("B", "1.0.0-alpha", "B.1.0.0-alpha\\B.1.0.0-alpha.nuspec")]
+        [InlineData("C", "3.1.2.4-rtm", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nuspec")]
+        public void CallRemovePackageWillRemoveNuspecFile(string id, string version, string unexpectedPath)
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\root");
+            fileSystem.AddFile(unexpectedPath);
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            repository.RemovePackage(PackageUtility.CreatePackage(id, version));
+
+            // Assert
+            Assert.False(fileSystem.FileExists(unexpectedPath));
+        }
+
+        [Theory]
+        [InlineData("A", "2.0", "A.2.0\\A.2.0.nupkg")]
+        [InlineData("B", "1.0.0-alpha", "B.1.0.0-alpha\\B.1.0.0-alpha.nupkg")]
+        [InlineData("C", "3.1.2.4-rtm", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nupkg")]
+        public void CallRemovePackageWillRemoveNupkgFile(string id, string version, string unexpectedPath)
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\root");
+            fileSystem.AddFile(unexpectedPath);
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            repository.RemovePackage(PackageUtility.CreatePackage(id, version));
+
+            // Assert
+            Assert.False(fileSystem.FileExists(unexpectedPath));
+        }
+
+        [Theory]
+        [InlineData("A", "2.0.0.0", "A.2.0")]
+        [InlineData("B", "1.0.0.0-alpha", "B.1.0.0-alpha")]
+        [InlineData("C", "3.1.2.4-rtm", "C.3.1.2.4-rtm")]
+        [InlineData("D", "4.0", "D.4.0.0.0")]
+        [InlineData("E", "5.1.4", "E.5.1.4.0")]
+        public void ExistChecksForPresenceOfPackageDirectory(string id, string version, string path)
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\root");
+            fileSystem.CreateDirectory(path);
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            bool exists = repository.Exists(id, new SemanticVersion(version));
+
+            // Assert
+            Assert.True(exists);
+        }
+
+        [Fact]
+        public void FindPackageReturnUnzippedPackageObject()
+        {
+            // Arrange
+            string manifestContent = @"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+  <metadata>
+    <version>1.0-alpha</version>
+    <authors>dotnetjunky</authors>
+    <owners />
+    <id>One</id>
+    <title />
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>My package description.</description>
+  </metadata>
+  <files />
+</package>";
+
+            var fileSystem = new MockFileSystem("x:\root");
+            fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nuspec", manifestContent.AsStream());
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            IPackage package = repository.FindPackage("one", new SemanticVersion("1.0.0-alpha"));
+
+            // Assert
+            Assert.True(package is UnzippedPackage);
+            Assert.Equal("One", package.Id);
+            Assert.Equal(new SemanticVersion("1.0.0-alpha"), package.Version);
+            Assert.Equal(new string[] { "dotnetjunky" }, package.Authors);
+        }
+
         [Fact]
         public void CallAddPackageWillNotCreatePackageConfigEntryToPackageConfig()
         {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
-            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\");
+            fileSystem.Setup(m => m.Root).Returns(@"x:\foo\");
             var configFileSystem = new MockFileSystem();
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object, configFileSystem);
 
@@ -30,7 +140,7 @@ namespace NuGet.Test
         {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
-            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\");
+            fileSystem.Setup(m => m.Root).Returns(@"x:\foo\");
             var configFileSystem = new MockFileSystem();
             configFileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
@@ -54,7 +164,7 @@ namespace NuGet.Test
         {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
-            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\");
+            fileSystem.Setup(m => m.Root).Returns(@"x:\foo\");
             var configFileSystem = new MockFileSystem();
             configFileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
@@ -79,7 +189,7 @@ namespace NuGet.Test
         {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
-            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\");
+            fileSystem.Setup(m => m.Root).Returns(@"x:\foo\");
             var configFileSystem = new MockFileSystem();
             configFileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
@@ -158,7 +268,7 @@ namespace NuGet.Test
         {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
-            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\");
+            fileSystem.Setup(m => m.Root).Returns(@"x:\foo\");
             var configFileSystem = new MockFileSystem();
             configFileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
@@ -183,7 +293,7 @@ namespace NuGet.Test
         {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
-            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\");
+            fileSystem.Setup(m => m.Root).Returns(@"x:\foo\");
             var configFileSystem = new MockFileSystem();
             configFileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
@@ -203,11 +313,11 @@ namespace NuGet.Test
         {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
-            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\");
+            fileSystem.Setup(m => m.Root).Returns(@"x:\foo\");
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object, new MockFileSystem());
 
             // Act
-            repository.RegisterRepository(@"c:\foo\packages\packages.config");
+            repository.RegisterRepository(@"x:\foo\packages\packages.config");
 
             // Assert
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -226,11 +336,11 @@ namespace NuGet.Test
   <repository path=""A\packages.config"" />
   <repository path=""B\packages.config"" />
 </repositories>");
-            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\");
+            fileSystem.Setup(m => m.Root).Returns(@"x:\foo\");
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object, new MockFileSystem());
 
             // Act
-            repository.RegisterRepository(@"c:\foo\A\packages.config");
+            repository.RegisterRepository(@"x:\foo\A\packages.config");
 
             // Assert
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -246,18 +356,18 @@ namespace NuGet.Test
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
             fileSystem.Setup(m => m.FileExists(@"A\packages.config")).Returns(true);
-            fileSystem.Setup(m => m.FileExists(@"c:\foo\packages.config")).Returns(true);
+            fileSystem.Setup(m => m.FileExists(@"x:\foo\packages.config")).Returns(true);
             fileSystem.Setup(m => m.FileExists(@"..\..\packages.config")).Returns(true);
             fileSystem.Object.AddFile("repositories.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <repositories>
   <repository path=""A\packages.config"" />
   <repository path=""B\packages.config"" />
-  <repository path=""c:\foo\packages.config"" />
+  <repository path=""x:\foo\packages.config"" />
   <repository path=""..\..\packages.config"" />
   <repository path="""" />
   <repository />
 </repositories>");
-            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\bar\baz\");
+            fileSystem.Setup(m => m.Root).Returns(@"x:\foo\bar\baz\");
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object, new MockFileSystem());
 
             // Act
@@ -270,7 +380,7 @@ namespace NuGet.Test
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <repositories>
   <repository path=""A\packages.config"" />
-  <repository path=""c:\foo\packages.config"" />
+  <repository path=""x:\foo\packages.config"" />
 </repositories>", fileSystem.Object.ReadAllText("repositories.config"));
         }
 
@@ -279,13 +389,13 @@ namespace NuGet.Test
         {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
-            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\");
+            fileSystem.Setup(m => m.Root).Returns(@"x:\foo\");
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object, new MockFileSystem());
 
             // Act
-            repository.RegisterRepository(@"c:\foo\z\packages\packages.config");
-            repository.RegisterRepository(@"c:\foo\X\packages\packages.config");
-            repository.RegisterRepository(@"c:\foo\a\packages\packages.config");
+            repository.RegisterRepository(@"x:\foo\z\packages\packages.config");
+            repository.RegisterRepository(@"x:\foo\X\packages\packages.config");
+            repository.RegisterRepository(@"x:\foo\a\packages\packages.config");
 
             // Assert
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -310,7 +420,7 @@ namespace NuGet.Test
   <repository />
 </repositories>");
 
-            fileSystem.Setup(m => m.Root).Returns(@"c:\foo\bar\baz");
+            fileSystem.Setup(m => m.Root).Returns(@"x:\foo\bar\baz");
             var repository = new Mock<MockSharedRepository>(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object) { CallBase = true };
             var r1 = new MockPackageRepository {
                 PackageUtility.CreatePackage("A")

@@ -292,9 +292,6 @@ namespace NuGet
         {
             string packageDirectory = PathResolver.GetPackageDirectory(package);
 
-            // Remove resource files
-            FileSystem.DeleteFiles(package.GetFiles(), packageDirectory);
-
             // If this is a Satellite Package, then remove the files from the related runtime package folder too
             IPackage runtimePackage;
             if (PackageUtility.IsSatellitePackage(package, LocalRepository, targetFramework: null, runtimePackage: out runtimePackage))
@@ -303,6 +300,11 @@ namespace NuGet
                 var runtimePath = PathResolver.GetPackageDirectory(runtimePackage);
                 FileSystem.DeleteFiles(satelliteFiles, runtimePath);
             }
+
+            // Remove package files
+            // IMPORTANT: This has to be done AFTER removing satellite files from runtime package,
+            // because starting from 2.1, we read satellite files directly from package files, instead of .nupkg
+            FileSystem.DeleteFiles(package.GetFiles(), packageDirectory);
         }
 
         private void OnInstalling(PackageOperationEventArgs e)

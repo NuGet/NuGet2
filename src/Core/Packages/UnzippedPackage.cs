@@ -83,7 +83,7 @@ namespace NuGet
             return from p in GetPackageFilePaths()
                    select new PhysicalPackageFile
                           {
-                              SourcePath = p,
+                              SourcePath = _repositoryFileSystem.GetFullPath(p),
                               TargetPath = GetPackageRelativePath(p)
                           };
         }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace NuGet
 {
@@ -67,6 +69,46 @@ namespace NuGet
                 return true;
             }
             return versionSpec.ToDelegate<SemanticVersion>(v => v)(version);
+        }
+
+        public static IEnumerable<string> GetComparableVersionStrings(this SemanticVersion version)
+        {
+            Version coreVersion = version.Version;
+            string specialVersion = String.IsNullOrEmpty(version.SpecialVersion) ? String.Empty : "-" + version.SpecialVersion;
+
+            var paths = new List<string>(3);
+
+            paths.Add(String.Format(
+                   CultureInfo.InvariantCulture,
+                   "{0}.{1}.{2}.{3}{4}",
+                   coreVersion.Major,
+                   coreVersion.Minor,
+                   coreVersion.Build,
+                   coreVersion.Revision,
+                   specialVersion));
+
+            if (coreVersion.Revision == 0)
+            {
+                paths.Add(String.Format(
+                    CultureInfo.InvariantCulture,
+                    "{0}.{1}.{2}{3}",
+                    coreVersion.Major,
+                    coreVersion.Minor,
+                    coreVersion.Build,
+                    specialVersion));
+
+                if (coreVersion.Build == 0)
+                {
+                    paths.Add(String.Format(
+                        CultureInfo.InvariantCulture,
+                        "{0}.{1}{2}",
+                        coreVersion.Major,
+                        coreVersion.Minor,
+                        specialVersion));
+                }
+            }
+
+            return paths;
         }
     }
 }

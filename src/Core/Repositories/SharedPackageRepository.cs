@@ -61,14 +61,33 @@ namespace NuGet
             if (version != null)
             {
                 // optimization: if we find the sub-directory with the name "id.version", consider it exists
-                string folderPath = packageId + "." + version.ToString();
-                if (FileSystem.DirectoryExists(folderPath))
+                bool hasPackageDirectory = version.GetComparableVersionStrings()
+                                                  .Select(v => packageId + "." + v)
+                                                  .Any(FileSystem.DirectoryExists);
+
+                if (hasPackageDirectory)
                 {
                     return true;
                 }
             }
 
             return FindPackage(packageId, version) != null;
+        }
+
+        public override IPackage FindPackage(string packageId, SemanticVersion version)
+        {
+            if (version != null)
+            {
+                string packagePath = GetManifestFilePath(packageId, version);
+                if (FileSystem.FileExists(packagePath))
+                {
+                    string packageDirectory = PathResolver.GetPackageDirectory(packageId, version);
+                    return new UnzippedPackage(FileSystem, packageDirectory);
+                }
+            }
+
+            // if we didn't find the .nuspec file, search for .nupkg file
+            return base.FindPackage(packageId, version);
         }
 
         public void AddPackageReferenceEntry(string packageId, SemanticVersion version)
@@ -79,8 +98,38 @@ namespace NuGet
             }
         }
 
+        public override IQueryable<IPackage> GetPackages()
+        {
+            // combine both .nupkg file-based and .nuspec file-based packages
+            return SearchManifestPackages().Concat(base.GetPackages());
+        }
+
+        protected IQueryable<IPackage> SearchManifestPackages()
+        {
+            return (from directory in FileSystem.GetDirectories("")
+                    where FileSystem.FileExists(Path.Combine(directory, directory + Constants.ManifestExtension))
+                    select new UnzippedPackage(FileSystem, directory)).AsQueryable();
+        }
+
+        public override void AddPackage(IPackage package)
+        {
+            // Starting from 2.1, we save the nuspec file into the subdirectory with the name as <packageId>.<version>
+            // for example, for jQuery version 1.0, it will be "jQuery.1.0\\jQuery.1.0.nuspec"
+            string packageFilePath = GetManifestFilePath(package);
+            Manifest manifest = Manifest.Create(package);
+            FileSystem.AddFileWithCheck(packageFilePath, stream => manifest.Save(stream));
+        }
+
         public override void RemovePackage(IPackage package)
         {
+            string packageFilePath = GetManifestFilePath(package);
+            if (FileSystem.FileExists(packageFilePath))
+            {
+                // delete .nuspec file
+                FileSystem.DeleteFileSafe(packageFilePath);
+            }
+
+            // call the base class to delete .nupkg file if there is one
             base.RemovePackage(package);
 
             if (_packageReferenceFile != null)
@@ -89,12 +138,41 @@ namespace NuGet
             }
         }
 
+        public override IEnumerable<string> GetPackageLookupPaths(string packageId, SemanticVersion version)
+        {
+            var manifestPaths = version.GetComparableVersionStrings()
+                                       .Select(v => packageId + "." + v)
+                                       .Select(p => Path.Combine(p, p + Constants.ManifestExtension))
+                                       .Where(FileSystem.FileExists)
+                                       .ToArray();
+
+            if (manifestPaths.Length > 0)
+            {
+                return manifestPaths;
+            }
+
+            // if we didn't find any .nuspec files, fall back to searching .nupkg files
+            return base.GetPackageLookupPaths(packageId, version);
+        }
+
         protected virtual IPackageRepository CreateRepository(string path)
         {
             string root = PathUtility.EnsureTrailingSlash(FileSystem.Root);
             string absolutePath = PathUtility.GetAbsolutePath(root, path);
             string directory = Path.GetDirectoryName(absolutePath);
             return new PackageReferenceRepository(new PhysicalFileSystem(directory), this);
+        }
+
+        protected override IPackage OpenPackage(string path)
+        {
+            if (path.EndsWith(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase))
+            {
+                return new UnzippedPackage(FileSystem, Path.GetDirectoryName(path));
+            }
+
+            // if the package path doesn't end with .nuspec, it means this repository was created before 2.1.
+            // in that case, let the base class read the .nupkg file
+            return base.OpenPackage(path);
         }
 
         private IEnumerable<IPackageRepository> GetRepositories()
@@ -281,6 +359,19 @@ namespace NuGet
                 return PathUtility.GetRelativePath(root, path);
             }
             return path;
+        }
+
+        private string GetManifestFilePath(IPackage package)
+        {
+            return GetManifestFilePath(package.Id, package.Version);
+        }
+
+        private string GetManifestFilePath(string packageId, SemanticVersion version)
+        {
+            string packageDirectory = PathResolver.GetPackageDirectory(packageId, version);
+            string manifestFileName = packageDirectory + Constants.ManifestExtension;
+
+            return Path.Combine(packageDirectory, manifestFileName);
         }
     }
 }

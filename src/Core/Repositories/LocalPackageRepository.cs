@@ -101,7 +101,7 @@ namespace NuGet
             }
         }
 
-        public IPackage FindPackage(string packageId, SemanticVersion version)
+        public virtual IPackage FindPackage(string packageId, SemanticVersion version)
         {
             return FindPackage(OpenPackage, packageId, version);
         }
@@ -111,7 +111,7 @@ namespace NuGet
             return FindPackage(packageId, version) != null;
         }
 
-        public IEnumerable<string> GetPackageLookupPaths(string packageId, SemanticVersion version)
+        public virtual IEnumerable<string> GetPackageLookupPaths(string packageId, SemanticVersion version)
         {
             // Files created by the path resolver. This would take into account the non-side-by-side scenario 
             // and we do not need to match this for id and version.
@@ -182,7 +182,6 @@ namespace NuGet
 
                 // Create the package
                 IPackage package = openPackage(packagePath);
-
 
                 // create a cache entry with the last modified time
                 cacheEntry = new PackageCacheEntry(package, lastModified);

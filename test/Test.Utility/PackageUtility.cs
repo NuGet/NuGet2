@@ -192,6 +192,8 @@ namespace NuGet.Test
             mockPackage.Setup(m => m.IconUrl).Returns((Uri)null);
             mockPackage.Setup(m => m.ProjectUrl).Returns((Uri)null);
             mockPackage.Setup(m => m.ReleaseNotes).Returns("");
+            mockPackage.Setup(m => m.Owners).Returns(new string[0]);
+            mockPackage.Setup(m => m.Copyright).Returns("");
             if (!listed)
             {
                 mockPackage.Setup(m => m.Published).Returns(Constants.Unpublished);

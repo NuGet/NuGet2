@@ -148,7 +148,8 @@ namespace NuGet.Test.Mocks
         public virtual bool DirectoryExists(string path)
         {
             return Paths.Select(file => file.Key)
-                        .Any(file => Path.GetDirectoryName(file).Equals(path, StringComparison.OrdinalIgnoreCase));
+                        .Any(file => file.Equals(path, StringComparison.OrdinalIgnoreCase) ||
+                                     Path.GetDirectoryName(file).Equals(path, StringComparison.OrdinalIgnoreCase));
         }
 
         public virtual IEnumerable<string> GetDirectories(string path)

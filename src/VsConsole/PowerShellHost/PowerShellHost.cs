@@ -246,7 +246,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
                 try
                 {
-                    var localRepository = new LocalPackageRepository(repositorySettings.RepositoryPath);
+                    var localRepository = new SharedPackageRepository(repositorySettings.RepositoryPath);
 
                     // invoke init.ps1 files in the order of package dependency.
                     // if A -> B, we invoke B's init.ps1 before A's.
