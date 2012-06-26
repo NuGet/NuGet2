@@ -66,15 +66,17 @@ namespace NuGet
 
         private void RemoveExpiredEntries(object state)
         {
-            // Take a snapshot of the entries
-            var entries = _cache.ToList();
-
             // Remove all the expired ones
-            foreach (var entry in entries)
+            var keys = _cache.Keys;
+            foreach (var key in keys)
             {
-                if (entry.Value != null && entry.Value.Expired)
+                CacheItem cacheItem;
+                if (_cache.TryGetValue(key, out cacheItem) && cacheItem.Expired)
                 {
-                    Remove(entry.Key);
+                    // Note: It is entirely possible that someone reads the value between the time we read Expired on the CacheItem 
+                    // and we call TryRemove. However we are fine with cache misses at these boundary values. If in the future the nature
+                    // of this cache changes, use the method prescribed at http://blogs.msdn.com/b/pfxteam/archive/2011/04/02/10149222.aspx
+                    _cache.TryRemove(key, out cacheItem);
                 }
             }
         }
