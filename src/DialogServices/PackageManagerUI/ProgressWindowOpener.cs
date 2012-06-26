@@ -99,7 +99,7 @@ namespace NuGet.Dialog.PackageManagerUI
             if (!_uiDispatcher.CheckAccess())
             {
                 // must use BeginInvoke() here to avoid blocking the worker thread
-                _uiDispatcher.BeginInvoke(new Action<string, Window>(Show), title, owner);
+                _uiDispatcher.BeginInvoke(new Action<string, Window>(Show), DispatcherPriority.Send, title, owner);
                 return;
             }
 
@@ -138,7 +138,7 @@ namespace NuGet.Dialog.PackageManagerUI
             if (!_uiDispatcher.CheckAccess())
             {
                 // must use BeginInvoke() here to avoid blocking the worker thread
-                _uiDispatcher.BeginInvoke(new Action(Hide));
+                _uiDispatcher.BeginInvoke(new Action(Hide), DispatcherPriority.Send);
                 return;
             }
 
@@ -224,7 +224,7 @@ namespace NuGet.Dialog.PackageManagerUI
         {
             if (!_uiDispatcher.CheckAccess())
             {
-                _uiDispatcher.BeginInvoke(new Action<MessageLevel, string>(AddMessage), level, message);
+                _uiDispatcher.BeginInvoke(new Action<MessageLevel, string>(AddMessage), DispatcherPriority.Send, level, message);
                 return;
             }
 
@@ -269,7 +269,7 @@ namespace NuGet.Dialog.PackageManagerUI
         {
             if (!_uiDispatcher.CheckAccess())
             {
-                _uiDispatcher.Invoke(new Action(ClearMessages));
+                _uiDispatcher.Invoke(new Action(ClearMessages), DispatcherPriority.Send);
                 return;
             }
 
@@ -283,7 +283,7 @@ namespace NuGet.Dialog.PackageManagerUI
         {
             if (!_uiDispatcher.CheckAccess())
             {
-                _uiDispatcher.BeginInvoke(new Action<string, int>(ShowProgress), operation, percentComplete);
+                _uiDispatcher.BeginInvoke(new Action<string, int>(ShowProgress), DispatcherPriority.Send, operation, percentComplete);
                 return;
             }
 

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using Moq;
 using NuGet.Commands;
 using NuGet.Common;
@@ -7,9 +9,9 @@ using Xunit;
 
 namespace NuGet.Test.NuGetCommandLine.Commands
 {
-
     public class UpdateCommandTest
     {
+
         [Fact]
         public void SelfUpdateNoCommandLinePackageOnServerThrows()
         {
@@ -89,6 +91,52 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             Assert.Equal(@"c:\NuGet.exe.old", updateCmd.MovedFiles[@"c:\NuGet.exe"]);
             Assert.True(updateCmd.UpdatedFiles.ContainsKey(@"c:\NuGet.exe"));
             Assert.Equal(@"tools\NuGet.exe", updateCmd.UpdatedFiles[@"c:\NuGet.exe"]);
+        }
+
+        [Fact]
+        public void NuGetExeAssemblyHasAssemblyInformationalVersion()
+        {
+            // Arrange
+            var assembly = typeof(UpdateCommand).Assembly;
+
+            // Act
+            var infoVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            SemanticVersion semanticVersion;
+            var result = SemanticVersion.TryParseStrict(infoVersion.InformationalVersion, out semanticVersion);
+
+            // Assert
+            Assert.NotNull(infoVersion.InformationalVersion);
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void GetNuGetExeVersionReturnsAssemblyInformationalVersionFromProvider()
+        {
+            // Arrange
+            var assembly = new Mock<ICustomAttributeProvider>(MockBehavior.Strict);
+            assembly.Setup(s => s.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false))
+                    .Returns(new[] { new AssemblyInformationalVersionAttribute("1.2.3") });
+
+            // Act
+            var version = UpdateCommand.GetNuGetVersion(assembly.Object);
+
+            // Assert
+            Assert.Equal("1.2.3", version.ToString());
+        }
+
+        [Fact]
+        public void GetNuGetExeVersionReturnsNullIfGetCustomAttributesThrows()
+        {
+            // Arrange
+            var assembly = new Mock<ICustomAttributeProvider>(MockBehavior.Strict);
+            assembly.Setup(s => s.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), false))
+                    .Throws(new Exception());
+
+            // Act
+            var version = UpdateCommand.GetNuGetVersion(assembly.Object);
+
+            // Assert
+            Assert.Null(version);
         }
 
 

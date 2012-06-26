@@ -9,6 +9,7 @@ namespace NuGetConsole.Implementation.Console
     class OleCommandFilter : IOleCommandTarget
     {
         public const int OLECMDERR_E_NOTSUPPORTED = (int)Constants.OLECMDERR_E_NOTSUPPORTED;
+        public const int OLECMDERR_E_UNKNOWNGROUP = (int)Constants.OLECMDERR_E_UNKNOWNGROUP;
 
         protected IOleCommandTarget OldChain { get; private set; }
 
