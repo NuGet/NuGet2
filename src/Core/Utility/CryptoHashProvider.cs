@@ -18,6 +18,8 @@ namespace NuGet
         /// </summary>
         private const string SHA256HashAlgorithm = "SHA256";
 
+        private static readonly bool _isMonoRuntime = Type.GetType("Mono.Runtime") != null;
+
         private readonly string _hashAlgorithm;
 
         public CryptoHashProvider()
@@ -42,6 +44,19 @@ namespace NuGet
             _hashAlgorithm = hashAlgorithm;
         }
 
+        /// <summary>
+        /// Determines if we are to only allow Fips compliant algorithms. 
+        /// </summary>
+        /// <remarks>
+        /// CryptoConfig.AllowOnlyFipsAlgorithm does not exist in Mono. 
+        /// </remarks>
+        private static bool AllowOnlyFipsAlgorithms
+        {
+            get
+            {
+                return !_isMonoRuntime && CryptoConfig.AllowOnlyFipsAlgorithms;
+            }
+        }
 
         public byte[] CalculateHash(byte[] data)
         {
@@ -61,9 +76,9 @@ namespace NuGet
         {
             if (_hashAlgorithm.Equals(SHA256HashAlgorithm, StringComparison.OrdinalIgnoreCase))
             {
-                return CryptoConfig.AllowOnlyFipsAlgorithms ? (HashAlgorithm)new SHA256CryptoServiceProvider() : (HashAlgorithm)new SHA256Managed();
+                return AllowOnlyFipsAlgorithms ? (HashAlgorithm)new SHA256CryptoServiceProvider() : (HashAlgorithm)new SHA256Managed();
             }
-            return CryptoConfig.AllowOnlyFipsAlgorithms ? (HashAlgorithm)new SHA512CryptoServiceProvider() : (HashAlgorithm)new SHA512Managed();
+            return AllowOnlyFipsAlgorithms ? (HashAlgorithm)new SHA512CryptoServiceProvider() : (HashAlgorithm)new SHA512Managed();
         }
     }
 }

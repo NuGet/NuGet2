@@ -480,42 +480,6 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             packageManager.Verify();
         }
 
-        [Fact(Skip = "Bug in Moq when running in multi-threaded paths.")]
-        public void InstallCommandFromConfigListsAllMessagesInAggregateException()
-        {
-            // Arrange
-            var fileSystem = new MockFileSystem();
-            fileSystem.AddFile(@"X:\test\packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
-<packages>
-  <package id=""Abc"" version=""1.0.0"" />
-  <package id=""Efg"" version=""2.0.0"" />
-  <package id=""Pqr"" version=""3.0.0"" />
-</packages>");
-            fileSystem.AddFile("Foo.1.8.nupkg");
-            var pathResolver = new DefaultPackagePathResolver(fileSystem);
-            var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
-            var repository = new MockPackageRepository();
-            packageManager.Setup(p => p.InstallPackage("Efg", new SemanticVersion("2.0.0"), true, true)).Throws(new Exception("Efg exception!!"));
-            packageManager.Setup(p => p.InstallPackage("Pqr", new SemanticVersion("3.0.0"), true, true)).Throws(new Exception("No package restore consent for you!"));
-            packageManager.SetupGet(p => p.PathResolver).Returns(pathResolver);
-            packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
-            packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
-            packageManager.SetupGet(p => p.SourceRepository).Returns(repository);
-            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
-            repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
-            var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
-            var console = new MockConsole();
-
-            // Act and Assert
-            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object);
-            installCommand.Arguments.Add(@"X:\test\packages.config");
-            installCommand.Console = console;
-
-            ExceptionAssert.Throws<AggregateException>(installCommand.Execute);
-            Assert.Contains("No package restore consent for you!", console.Output);
-            Assert.Contains("Efg exception!!", console.Output);
-        }
-
         private static IPackageRepositoryFactory GetFactory()
         {
             var repositoryA = new MockPackageRepository { PackageUtility.CreatePackage("Foo"), PackageUtility.CreatePackage("Baz", "0.4"), PackageUtility.CreatePackage("Baz", "0.7") };

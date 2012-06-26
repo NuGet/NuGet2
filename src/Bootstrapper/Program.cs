@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Xml;
 using NuGet;
 
@@ -11,7 +10,8 @@ namespace Bootstrapper
     {
         public static int Main(string[] args)
         {
-            string exePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"NuGet\NuGet.exe");
+            string exeDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NuGet");
+            string exePath = Path.Combine(exeDir, @"NuGet.exe");
             try
             {
                 var processInfo = new ProcessStartInfo(exePath)
@@ -28,6 +28,11 @@ namespace Bootstrapper
                     // Register a console based credentials provider so that the user get's prompted if a password
                     // is required for the proxy
                     // Setup IHttpClient for the Gallery to locate packages
+                    if (!Directory.Exists(exeDir))
+                    {
+                        Directory.CreateDirectory(exeDir);
+                    }
+                    
                     new HttpClient().DownloadData(exePath);
                 }
                 else if ((DateTime.UtcNow - File.GetLastWriteTimeUtc(exePath)).TotalDays > 10)
@@ -37,8 +42,8 @@ namespace Bootstrapper
                     RunProcess(processInfo);
                     File.SetLastWriteTimeUtc(exePath, DateTime.UtcNow);
                 }
-                // Convert the args list to a command line input. If an argument has any spaces in it, we need to wrap it with single quotes.
-                processInfo.Arguments = String.Join(" ", args.Select(arg => arg.Any(Char.IsWhiteSpace) ? "'" + arg + "'" : arg));
+
+                processInfo.Arguments = ParseArgs();
                 RunProcess(processInfo);
                 return 0;
             }
@@ -48,6 +53,18 @@ namespace Bootstrapper
             }
 
             return 1;
+        }
+
+        public static string ParseArgs()
+        {
+            string args = Environment.CommandLine.TrimEnd();
+            // If the command line starts with quotes, then look for the first occurence of a quote following it. 
+            int index = args.StartsWith("\"") ? args.IndexOf("\"", 1) : args.IndexOf(" ");
+            if (index == -1 || index >= args.Length - 1)
+            {
+                return String.Empty;
+            }
+            return args.Substring(index + 1).Trim();
         }
 
         private static XmlDocument GetConfigDocument()

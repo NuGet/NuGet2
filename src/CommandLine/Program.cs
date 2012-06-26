@@ -69,6 +69,16 @@ namespace NuGet
                     command.Execute();
                 }
             }
+            catch (AggregateException exception)
+            {
+                if (ExceptionUtility.Unwrap(exception) == exception)
+                {
+                    // If the AggregateException contains more than one InnerException, it cannot be unwrapped. In which case, simply print out individual error messages
+                    var messages = exception.InnerExceptions.Select(ex => ex.Message)
+                                                            .Distinct(StringComparer.CurrentCulture);
+                    console.WriteError(String.Join("\n", messages));
+                }
+            }
             catch (Exception e)
             {
                 console.WriteError(ExceptionUtility.Unwrap(e).Message);

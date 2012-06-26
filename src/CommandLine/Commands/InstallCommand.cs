@@ -156,24 +156,10 @@ namespace NuGet.Commands
                 }
             }
 
-            try
+            bool installedAny = ExecuteInParallel(fileSystem, packageReferences);
+            if (!installedAny && packageReferences.Any())
             {
-                bool installedAny = ExecuteInParallel(fileSystem, packageReferences);
-                if (!installedAny && packageReferences.Any())
-                {
-                    Console.WriteLine(NuGetResources.InstallCommandNothingToInstall, Constants.PackageReferenceFile);
-                }
-            }
-            catch (AggregateException exception)
-            {
-                if (ExceptionUtility.Unwrap(exception) == exception)
-                {
-                    // If the AggregateException contains more than one InnerException, it cannot be unwrapped. In which case, simply print out individual error messages
-                    var messages = exception.InnerExceptions.Select(ex => ex.Message)
-                                                            .Distinct(StringComparer.CurrentCulture);
-                    Console.WriteError(String.Join("\n", messages));
-                }
-                throw;
+                Console.WriteLine(NuGetResources.InstallCommandNothingToInstall, Constants.PackageReferenceFile);
             }
         }
 
