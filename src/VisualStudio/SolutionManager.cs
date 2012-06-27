@@ -219,7 +219,7 @@ namespace NuGet.VisualStudio
             }
 
             // Try searching for simple names first
-            string name = project.GetName();
+            string name = project.Name;
             if (GetProject(name) == project)
             {
                 return name;
@@ -343,7 +343,7 @@ namespace NuGet.VisualStudio
                 return;
             }
             ProjectName oldProjectName;
-            _projectCache.TryGetProjectNameByShortName(project.GetName(), out oldProjectName);
+            _projectCache.TryGetProjectNameByShortName(project.Name, out oldProjectName);
 
             ProjectName newProjectName = _projectCache.AddProject(project);
 

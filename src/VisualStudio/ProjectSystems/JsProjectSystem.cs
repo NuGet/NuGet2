@@ -17,7 +17,7 @@ namespace NuGet.VisualStudio
         {
             get
             {
-                return Project.GetName();
+                return Project.Name;
             }
         }
 
