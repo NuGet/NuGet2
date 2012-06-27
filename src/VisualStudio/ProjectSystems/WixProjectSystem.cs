@@ -46,7 +46,6 @@ namespace NuGet.VisualStudio
 
         public override bool IsSupportedFile(string path)
         {
-            // TODO: Determine if any file types are not supported
             return true;
         }
 

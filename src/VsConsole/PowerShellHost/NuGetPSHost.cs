@@ -117,7 +117,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
         public override void SetShouldExit(int exitCode)
         {
-            //TODO: Exit VS?
         }
 
         #region Nested type: Commander

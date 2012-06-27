@@ -26,8 +26,6 @@ namespace NuGetConsole.Host.PowerShellProvider
             }
 
             string keyValue = (string)currentKey.GetValue("PowerShellVersion");
-
-            // TODO: Do a better check to be resilient against future version of PS
             return (keyValue == "2.0");
         }
     }

@@ -303,7 +303,6 @@ namespace NuGet.VisualStudio
         {
             if (recursive)
             {
-                // TODO: implement this when we really need it
                 throw new NotSupportedException();
             }
             else

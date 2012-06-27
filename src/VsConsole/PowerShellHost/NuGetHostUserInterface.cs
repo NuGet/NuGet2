@@ -54,7 +54,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                                                IEnumerable<int> defaultChoices)
         {
             WriteErrorLine("IHostUISupportsMultipleChoiceSelection.PromptForChoice not implemented.");
-            // TODO: 1.5
             return null;
         }
 
