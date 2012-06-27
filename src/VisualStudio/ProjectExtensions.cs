@@ -529,6 +529,14 @@ namespace NuGet.VisualStudio
             }
 
             FrameworkName frameworkName = project.GetTargetFrameworkName();
+
+            // if the target framework cannot be determined the frameworkName becomes null (for example, for WiX projects).
+            // indicate it as compatible, because we cannot determine that ourselves. Offer the capability to the end-user.
+            if (frameworkName == null)
+            {
+                return true;
+            }
+
             return VersionUtility.IsCompatible(frameworkName, package.GetSupportedFrameworks());
         }
 
