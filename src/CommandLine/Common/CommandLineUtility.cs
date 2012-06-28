@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 
 namespace NuGet
 {
@@ -47,6 +50,31 @@ namespace NuGet
             }
 
             return null;
+        }
+
+        public static List<PackageReference> GetPackageReferences(PackageReferenceFile file, string fileName, bool requireVersion)
+        {
+            if (file == null)
+            {
+                throw new ArgumentNullException("file");
+            }
+
+            var packageReferences = file.GetPackageReferences().ToList();
+            foreach (var package in packageReferences)
+            {
+                // GetPackageReferences returns all records without validating values. We'll throw if we encounter packages
+                // with malformed ids / Versions.
+                if (String.IsNullOrEmpty(package.Id))
+                {
+                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InstallCommandInvalidPackageReference, fileName));
+                }
+                if (requireVersion && (package.Version == null))
+                {
+                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InstallCommandPackageReferenceInvalidVersion, package.Id));
+                }
+            }
+
+            return packageReferences;
         }
     }
 }

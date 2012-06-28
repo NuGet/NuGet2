@@ -138,8 +138,7 @@ namespace NuGet.Commands
 
         private IPackageRepository GetDestinationRepositoryList(string repo)
         {
-            repo = SourceProvider.ResolveAndValidateSource(repo);
-            return RepositoryFactory.CreateRepository(repo);
+            return RepositoryFactory.CreateRepository(SourceProvider.ResolveAndValidateSource(repo));
         }
 
         private IPackageRepository GetTargetRepository(string pullUrl, string pushUrl)
@@ -179,25 +178,52 @@ namespace NuGet.Commands
 
         private SemanticVersion GetVersion()
         {
-            return null == Version? null : new SemanticVersion(Version);
+            return null == Version ? null : new SemanticVersion(Version);
+        }
+
+        private static PackageReferenceFile GetPackageReferenceFile(IFileSystem fileSystem, string configFilePath)
+        {
+            // By default the PackageReferenceFile does not throw if the file does not exist at the specified path.
+            // We'll try reading from the file so that the file system throws a file not found
+            using (fileSystem.OpenFile(configFilePath))
+            {
+                // Do nothing
+            }
+            return new PackageReferenceFile(Path.GetFullPath(configFilePath));
+        }
+
+        private IEnumerable<Tuple<string, SemanticVersion>> GetPackagesToMirror(string packageId)
+        {
+            if (Path.GetFileName(packageId).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
+            {
+                Prerelease = true;
+                IFileSystem fileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
+                string configFilePath = Path.GetFullPath(packageId);
+                var packageReferenceFile = GetPackageReferenceFile(fileSystem, configFilePath);
+                var packageReferences = CommandLineUtility.GetPackageReferences(packageReferenceFile, configFilePath, requireVersion: false);
+                return
+                    from pr in packageReferences
+                    select new Tuple<string, SemanticVersion>(pr.Id, pr.Version);
+            }
+            else
+            {
+                return new[] { new Tuple<string, SemanticVersion>(packageId, GetVersion()) };
+            }
         }
 
         public override void ExecuteCommand()
         {
-            string packageId = Arguments[0];
-            if (Path.GetFileName(packageId).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new NotImplementedException();
-            }
-            
-            SemanticVersion version = GetVersion();
-            IPackageRepository srcRepository = GetSourceRepository();
-            IPackageRepository dstRepository = GetTargetRepository(Arguments[1], Arguments[2]);
-            PackageMirrorer mirrorer = GetPackageMirrorer(srcRepository, dstRepository);
+            var srcRepository = GetSourceRepository();
+            var dstRepository = GetTargetRepository(Arguments[1], Arguments[2]);
+            var mirrorer = GetPackageMirrorer(srcRepository, dstRepository);
+            var toMirror = GetPackagesToMirror(Arguments[0]);
 
             using (mirrorer.SourceRepository.StartOperation(RepositoryOperationNames.Mirror))
             {
-                mirrorer.MirrorPackage(packageId, version, ignoreDependencies: false, allowPrereleaseVersions: Prerelease);
+                foreach (var package in toMirror)
+                {
+                    mirrorer.MirrorPackage(packageId: package.Item1, version: package.Item2, ignoreDependencies: false, allowPrereleaseVersions: Prerelease);
+                }
             }
         }
 
