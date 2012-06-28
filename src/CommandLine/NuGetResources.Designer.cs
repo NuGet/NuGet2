@@ -502,6 +502,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to If set, only save the .nuspec file instead of .nupkg file..
+        /// </summary>
+        internal static string InstallCommandSaveManifest {
+            get {
+                return ResourceManager.GetString("InstallCommandSaveManifest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A list of packages sources to use for the install..
         /// </summary>
         internal static string InstallCommandSourceDescription {

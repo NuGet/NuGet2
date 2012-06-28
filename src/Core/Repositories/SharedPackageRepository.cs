@@ -19,6 +19,11 @@ namespace NuGet
         {
         }
 
+        public SharedPackageRepository(IPackagePathResolver pathResolver, IFileSystem fileSystem)
+            : base(pathResolver, fileSystem)
+        {
+        }
+
         public SharedPackageRepository(IPackagePathResolver resolver, IFileSystem fileSystem, IFileSystem configSettingsFileSystem)
             : base(resolver, fileSystem)
         {

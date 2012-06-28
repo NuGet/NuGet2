@@ -770,4 +770,7 @@ nuget.config HTTP_PROXY</value>
   <data name="PackageCommandExcludeEmptyDirectories" xml:space="preserve">
     <value>Prevent inclusion of empty directories when building the package.</value>
   </data>
+  <data name="InstallCommandSaveManifest" xml:space="preserve">
+    <value>If set, only save the .nuspec file instead of .nupkg file.</value>
+  </data>
 </root>

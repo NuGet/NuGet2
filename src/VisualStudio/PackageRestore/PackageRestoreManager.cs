@@ -283,14 +283,6 @@ namespace NuGet.VisualStudio
             AddSolutionDirProperty(project, buildProject);
             AddNuGetTargets(project, buildProject);
             SetMsBuildProjectProperty(project, buildProject, "RestorePackages", "true");
-
-            if (project.IsJavaScriptProject())
-            {
-                // JavaScript project requires an extra kick
-                // in order to save changes to the project file.
-                // TODO: Check with VS team to ask them to fix 
-                buildProject.Save();
-            }
         }
 
         private void AddNuGetTargets(Project project, MsBuildProject buildProject)

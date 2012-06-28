@@ -28,6 +28,22 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         }
 
         [Fact]
+        public void InstallCommandInstallManifestFileIfSaveManifestFileOnlyIsSet()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
+            installCommand.Arguments.Add("Foo");
+            installCommand.SaveManifestFileOnly = true;
+
+            // Act
+            installCommand.ExecuteCommand();
+
+            // Assert
+            Assert.Equal(@"Foo.1.0\Foo.1.0.nuspec", fileSystem.Paths.Single().Key);
+        }
+
+        [Fact]
         public void InstallCommandUsesInstallOperationIfArgumentIsNotPackageReferenceFile()
         {
             // Arrange
@@ -193,6 +209,28 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             Assert.Equal(@"x:\test\packages.config", fileSystem.Paths.ElementAt(0).Key);
             Assert.Contains(@"Foo.1.0\Foo.1.0.nupkg", fileSystem.Paths.Keys);
             Assert.Contains(@"Baz.0.7\Baz.0.7.nupkg", fileSystem.Paths.Keys);
+        }
+
+        [Fact]
+        public void InstallCommandInstallsManifestFilesWhenInstallFromPackageReferenceFile()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"x:\test\packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""Foo"" version=""1.0"" />
+</packages>");
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem);
+            installCommand.Arguments.Add(@"x:\test\packages.config");
+            installCommand.SaveManifestFileOnly = true;
+
+            // Actt
+            installCommand.ExecuteCommand();
+
+            // Assert
+            Assert.Equal(2, fileSystem.Paths.Count);
+            Assert.Equal(@"x:\test\packages.config", fileSystem.Paths.ElementAt(0).Key);
+            Assert.Contains(@"Foo.1.0\Foo.1.0.nuspec", fileSystem.Paths.Keys);
         }
 
         [Fact]
