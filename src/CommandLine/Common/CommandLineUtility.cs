@@ -59,7 +59,7 @@ namespace NuGet
                 throw new ArgumentNullException("file");
             }
 
-            var packageReferences = file.GetPackageReferences().ToList();
+            var packageReferences = file.GetPackageReferences(requireVersion).ToList();
             foreach (var package in packageReferences)
             {
                 // GetPackageReferences returns all records without validating values. We'll throw if we encounter packages

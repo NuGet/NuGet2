@@ -31,11 +31,15 @@ namespace NuGet
 
         public override int GetHashCode()
         {
-            return Id.GetHashCode()*3137 + Version.GetHashCode();
+            return Id.GetHashCode()*3137 + (null == Version ? 0 : Version.GetHashCode());
         }
 
         public override string ToString()
         {
+            if (Version == null)
+            {
+                return Id;
+            }
             if (VersionConstraint == null)
             {
                 return Id + " " + Version;
