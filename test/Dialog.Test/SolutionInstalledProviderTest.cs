@@ -26,6 +26,21 @@ namespace NuGet.Dialog.Test
         }
 
         [Fact]
+        public void CreateExtensionsDoesNotSetCurrentVersionAttribute()
+        {
+            // Arrange
+            var provider = CreateSolutionInstalledProvider();
+            var package = PackageUtility.CreatePackage("A", "2.0");
+
+            // Act
+            var packageItem = (PackageItem)provider.CreateExtension(package);
+
+            // Assert
+            Assert.NotNull(packageItem);
+            Assert.Null(packageItem.OldVersion);
+        }
+
+        [Fact]
         public void ExecuteMethodCallsInstallPackageMethodOnPackageManager()
         {
             // Arrange

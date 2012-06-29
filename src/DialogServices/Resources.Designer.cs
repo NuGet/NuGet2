@@ -88,6 +88,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Current version:.
+        /// </summary>
+        public static string Dialog_CurrentVersionLabel {
+            get {
+                return ResourceManager.GetString("Dialog_CurrentVersionLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dependencies:.
         /// </summary>
         public static string Dialog_DependenciesLabel {

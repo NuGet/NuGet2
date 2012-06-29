@@ -26,6 +26,21 @@ namespace NuGet.Dialog.Test
             Assert.True(provider.ShowPrereleaseComboBox);
         }
 
+        [Fact]
+        public void CreateExtensionsDoesNotSetCurrentVersionAttribute()
+        {
+            // Arrange
+            var provider = CreateSolutionOnlineProvider();
+            var package = PackageUtility.CreatePackage("A", "2.0");
+
+            // Act
+            var packageItem = (PackageItem)provider.CreateExtension(package);
+
+            // Assert
+            Assert.NotNull(packageItem);
+            Assert.Null(packageItem.OldVersion);
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]

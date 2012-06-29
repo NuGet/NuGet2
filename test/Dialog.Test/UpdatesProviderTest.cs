@@ -155,6 +155,46 @@ namespace NuGet.Dialog.Test
         }
 
         [Theory]
+        [InlineData("1.0", "2.0")]
+        [InlineData("1.0", "2.0-beta")]
+        [InlineData("1.0-alpha", "2.0")]
+        [InlineData("1.0-alpha", "1.0-beta")]
+        public void CreateExtensionAddsOldVersionProperty(string oldVersion, string newVersion)
+        {
+            // Local repository contains Package A 1.0 and Package B
+            // Source repository contains Package A 2.0 and Package C
+            var packageA1 = PackageUtility.CreatePackage("A", oldVersion);
+            var packageA2 = PackageUtility.CreatePackage("A", newVersion);
+            var packageB = PackageUtility.CreatePackage("B", "2.0");
+            var packageC = PackageUtility.CreatePackage("C", "3.0");
+
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            localRepository.AddPackage(packageA1);
+            localRepository.AddPackage(packageB);
+
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(packageA2);
+            sourceRepository.AddPackage(packageC);
+
+            var projectManager = new Mock<IProjectManager>();
+            projectManager.Setup(p => p.LocalRepository).Returns(localRepository);
+
+            var packageManager = new Mock<IVsPackageManager>();
+            packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
+
+            var provider = CreateUpdatesProvider(packageManager.Object, localRepository);
+
+            // Act
+            var packageItem = (PackageItem)provider.CreateExtension(packageA2);
+
+            // Assert
+            Assert.NotNull(packageItem);
+            Assert.Equal(oldVersion, packageItem.OldVersion);
+            Assert.Equal(newVersion, packageItem.Version);
+        }
+
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public void ExecuteMethodCallsUpdatePackageMethodOnPackageManager(bool includePrerelease)

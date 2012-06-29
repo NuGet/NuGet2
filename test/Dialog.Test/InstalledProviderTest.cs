@@ -96,6 +96,7 @@ namespace NuGet.Dialog.Test
             Assert.IsType(typeof(PackageItem), extension);
             Assert.Equal("A", extension.Name);
             Assert.Equal("_Uninstall", ((PackageItem)extension).CommandName);
+            Assert.Null(((PackageItem)extension).OldVersion);
         }
 
         [Fact]

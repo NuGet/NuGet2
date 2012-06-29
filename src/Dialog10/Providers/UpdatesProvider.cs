@@ -5,6 +5,7 @@ using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.VisualStudio;
+using System.Diagnostics;
 
 namespace NuGet.Dialog.Providers
 {
@@ -107,7 +108,11 @@ namespace NuGet.Dialog.Providers
 
         public override IVsExtension CreateExtension(IPackage package)
         {
-            return new PackageItem(this, package, isUpdateItem: true)
+            var localPackage = LocalRepository.FindPackagesById(package.Id)
+                                              .OrderByDescending(p => p.Version)
+                                              .FirstOrDefault();
+
+            return new PackageItem(this, package, localPackage != null ? localPackage.Version : null)
             {
                 CommandName = Resources.Dialog_UpdateButton,
                 TargetFramework = _project.GetTargetFrameworkName()

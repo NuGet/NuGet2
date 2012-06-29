@@ -348,4 +348,7 @@
   <data name="NoFxDependencyGroup" xml:space="preserve">
     <value>(not framework specific)</value>
   </data>
+  <data name="Dialog_CurrentVersionLabel" xml:space="preserve">
+    <value>Current version:</value>
+  </data>
 </root>

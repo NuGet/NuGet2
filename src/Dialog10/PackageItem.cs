@@ -18,18 +18,20 @@ namespace NuGet.Dialog.Providers
         private readonly bool _isUpdateItem, _isPrerelease;
         private bool _isSelected;
         private readonly ObservableCollection<Project> _referenceProjectNames;
+        private readonly SemanticVersion _oldPackageVersion;
         private IEnumerable<object> _displayDependencies;
 
-        public PackageItem(PackagesProviderBase provider, IPackage package, bool isUpdateItem = false) :
-            this(provider, package, new Project[0], isUpdateItem)
+        public PackageItem(PackagesProviderBase provider, IPackage package, SemanticVersion oldPackageVersion = null) :
+            this(provider, package, new Project[0], oldPackageVersion)
         {
         }
 
-        public PackageItem(PackagesProviderBase provider, IPackage package, IEnumerable<Project> referenceProjectNames, bool isUpdateItem = false)
+        public PackageItem(PackagesProviderBase provider, IPackage package, IEnumerable<Project> referenceProjectNames, SemanticVersion oldPackageVersion = null)
         {
             _provider = provider;
             _packageIdentity = package;
-            _isUpdateItem = isUpdateItem;
+            _isUpdateItem = oldPackageVersion != null;
+            _oldPackageVersion = oldPackageVersion;
             _isPrerelease = !package.IsReleaseVersion();
             _referenceProjectNames = new ObservableCollection<Project>(referenceProjectNames);
         }
@@ -59,6 +61,14 @@ namespace NuGet.Dialog.Providers
             get
             {
                 return _packageIdentity.Version.ToString();
+            }
+        }
+
+        public string OldVersion
+        {
+            get
+            {
+                return _oldPackageVersion != null ? _oldPackageVersion.ToString() : null;
             }
         }
 
