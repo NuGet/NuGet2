@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using EnvDTE;
 using EnvDTE80;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -14,20 +15,25 @@ namespace NuGet.VisualStudio
 {
     [PartCreationPolicy(CreationPolicy.Shared)]
     [Export(typeof(ISolutionManager))]
-    public class SolutionManager : ISolutionManager
+    public class SolutionManager : ISolutionManager, IVsSelectionEvents
     {
         private readonly DTE _dte;
         private readonly SolutionEvents _solutionEvents;
+        private readonly IVsMonitorSelection _vsMonitorSelection;
+        private readonly uint _solutionLoadedUICookie;
         private IVsSolution _vsSolution;
 
         private ProjectCache _projectCache;
 
         public SolutionManager()
-            : this(ServiceLocator.GetInstance<DTE>(), ServiceLocator.GetGlobalService<SVsSolution, IVsSolution>())
+            : this(
+                ServiceLocator.GetInstance<DTE>(), 
+                ServiceLocator.GetGlobalService<SVsSolution, IVsSolution>(),
+                ServiceLocator.GetGlobalService<SVsShellMonitorSelection, IVsMonitorSelection>())
         {
         }
 
-        private SolutionManager(DTE dte, IVsSolution vsSolution)
+        private SolutionManager(DTE dte, IVsSolution vsSolution, IVsMonitorSelection vsMonitorSelection)
         {
             if (dte == null)
             {
@@ -36,10 +42,22 @@ namespace NuGet.VisualStudio
 
             _dte = dte;
             _vsSolution = vsSolution;
+            _vsMonitorSelection = vsMonitorSelection;
 
             // Keep a reference to SolutionEvents so that it doesn't get GC'ed. Otherwise, we won't receive events.
             _solutionEvents = _dte.Events.SolutionEvents;
-            _solutionEvents.Opened += OnSolutionOpened;
+
+            // can be null in unit tests
+            if (vsMonitorSelection != null)
+            {
+                Guid solutionLoadedGuid = VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_guid;
+                _vsMonitorSelection.GetCmdUIContextCookie(ref solutionLoadedGuid, out _solutionLoadedUICookie);
+
+                uint cookie;
+                int hr = _vsMonitorSelection.AdviseSelectionEvents(this, out cookie);
+                ErrorHandler.ThrowOnFailure(hr);
+            }
+            
             _solutionEvents.BeforeClosing += OnBeforeClosing;
             _solutionEvents.AfterClosing += OnAfterClosing;
             _solutionEvents.ProjectAdded += OnProjectAdded;
@@ -455,5 +473,29 @@ namespace NuGet.VisualStudio
             }
             dependents.Add(dependent);
         }
+
+        #region IVsSelectionEvents implementation
+
+        public int OnCmdUIContextChanged(uint dwCmdUICookie, int fActive)
+        {
+            if (dwCmdUICookie == _solutionLoadedUICookie && fActive == 1)
+            {
+                OnSolutionOpened();
+            }
+
+            return VSConstants.S_OK;
+        }
+
+        public int OnElementValueChanged(uint elementid, object varValueOld, object varValueNew)
+        {
+            return VSConstants.S_OK;
+        }
+
+        public int OnSelectionChanged(IVsHierarchy pHierOld, uint itemidOld, IVsMultiItemSelect pMISOld, ISelectionContainer pSCOld, IVsHierarchy pHierNew, uint itemidNew, IVsMultiItemSelect pMISNew, ISelectionContainer pSCNew)
+        {
+            return VSConstants.S_OK;
+        }
+
+        #endregion 
     }
 }
