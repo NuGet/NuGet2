@@ -953,14 +953,13 @@ public class Cl_{0} {{
             Assert.True(output.Contains("Successfully created package"));
 
             // Asserts for package issues
-            Assert.True(output.Contains("7 issue(s) found with package 'Antlr'."));
-            Assert.True(output.Contains("Incompatible files in lib folder"));
+            Assert.True(output.Contains("6 issue(s) found with package 'Antlr'."));
             Assert.True(output.Contains("Invalid framework folder"));
             Assert.True(output.Contains("Assembly not inside a framework folder"));
             Assert.True(output.Contains("Assembly outside lib folder"));
             Assert.True(output.Contains("PowerScript file outside tools folder"));
+            Assert.True(output.Contains("Transform file outside content folder."));
             Assert.True(output.Contains("Unrecognized PowerScript file"));
-            Assert.True(output.Contains("Incompatible files in lib folder"));
         }
 
         [Fact]

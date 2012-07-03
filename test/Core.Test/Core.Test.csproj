@@ -56,7 +56,6 @@
     <Compile Include="Analysis\MisplacedScriptFileRuleTest.cs" />
     <Compile Include="Analysis\MisplacedTransformFileRuleTest.cs" />
     <Compile Include="Analysis\MissingSummaryRuleTest.cs" />
-    <Compile Include="Analysis\NoneAssemblyInsideLibRuleTest.cs" />
     <Compile Include="Analysis\PackageIssueTestHelper.cs" />
     <Compile Include="DataServicePackageRepositoryTest.cs" />
     <Compile Include="DataServicePackageTest.cs" />

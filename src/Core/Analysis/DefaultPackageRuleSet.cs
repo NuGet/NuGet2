@@ -12,8 +12,7 @@ namespace NuGet
                 new MisplacedAssemblyRule(),
                 new MisplacedScriptFileRule(),
                 new MisplacedTransformFileRule(),
-                new MissingSummaryRule(),
-                new NonAssemblyInsideLibRule()
+                new MissingSummaryRule()
             }
         );
 
