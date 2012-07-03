@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -12,10 +11,8 @@ namespace NuGet
     {
         public static void AddFiles(this IProjectSystem project,
                                     IEnumerable<IPackageFile> files,
-                                    IDictionary<string, IPackageFileTransformer> fileTransformers)
+                                    IDictionary<FileTransformExtensions, IPackageFileTransformer> fileTransformers)
         {
-
-            // Convert files to a list
             List<IPackageFile> fileList = files.ToList();
 
             // See if the project system knows how to sort the files
@@ -32,7 +29,7 @@ namespace NuGet
             {
                 if (batchProcessor != null)
                 {
-                    var paths = fileList.Select(file => ResolvePath(fileTransformers, file.EffectivePath));
+                    var paths = fileList.Select(file => ResolvePath(fileTransformers, fte => fte.InstallExtension, file.EffectivePath));
                     batchProcessor.BeginProcessing(paths, PackageAction.Install);
                 }
 
@@ -43,24 +40,26 @@ namespace NuGet
                         continue;
                     }
 
-                    IPackageFileTransformer transformer;
-
-                    // Resolve the target path
-                    string path = ResolveTargetPath(project,
-                                                    fileTransformers,
-                                                    file.EffectivePath,
-                                                    out transformer);
+                    IPackageFileTransformer installTransformer;
+                    string path = ResolveTargetPath(project, fileTransformers, fte => fte.InstallExtension, file.EffectivePath, out installTransformer);
 
                     if (project.IsSupportedFile(path))
                     {
-                        // Try to get the package file modifier for the extension                
-                        if (transformer != null)
+                        if (installTransformer != null)
                         {
-                            // If the transform was done then continue
-                            transformer.TransformFile(file, path, project);
+                            installTransformer.TransformFile(file, path, project);
                         }
                         else
                         {
+                            // Ignore uninstall transform file during installation
+                            string truncatedPath;
+                            IPackageFileTransformer uninstallTransformer =
+                                FindFileTransformer(fileTransformers, fte => fte.UninstallExtension, file.EffectivePath, out truncatedPath);
+                            if (uninstallTransformer != null)
+                            {
+                                continue;
+                            }
+
                             project.AddFileWithCheck(path, file.GetStream);
                         }
                     }
@@ -75,17 +74,19 @@ namespace NuGet
             }
         }
 
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want delete to be robust, when exceptions occur we log then and move on")]
         public static void DeleteFiles(this IProjectSystem project,
                                        IEnumerable<IPackageFile> files,
                                        IEnumerable<IPackage> otherPackages,
-                                       IDictionary<string, IPackageFileTransformer> fileTransformers)
+                                       IDictionary<FileTransformExtensions, IPackageFileTransformer> fileTransformers)
         {
 
             IPackageFileTransformer transformer;
             // First get all directories that contain files
-            var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(ResolveTargetPath(project, fileTransformers, p.EffectivePath, out transformer)));
+            var directoryLookup = files.ToLookup(
+                p => Path.GetDirectoryName(ResolveTargetPath(project, fileTransformers, fte => fte.UninstallExtension, p.EffectivePath, out transformer)));
 
             // Get all directories that this package may have added
             var directories = from grouping in directoryLookup
@@ -108,7 +109,7 @@ namespace NuGet
                 {
                     if (batchProcessor != null)
                     {
-                        var paths = directoryFiles.Select(file => ResolvePath(fileTransformers, file.EffectivePath));
+                        var paths = directoryFiles.Select(file => ResolvePath(fileTransformers, fte => fte.UninstallExtension, file.EffectivePath));
                         batchProcessor.BeginProcessing(paths, PackageAction.Uninstall);
                     }
 
@@ -122,6 +123,7 @@ namespace NuGet
                         // Resolve the path
                         string path = ResolveTargetPath(project,
                                                         fileTransformers,
+                                                        fte => fte.UninstallExtension,
                                                         file.EffectivePath,
                                                         out transformer);
 
@@ -193,61 +195,69 @@ namespace NuGet
             return Enumerable.Empty<T>();
         }
 
-        private static string ResolvePath(IDictionary<string, IPackageFileTransformer> fileTransformers, string effectivePath)
+        private static string ResolvePath(
+            IDictionary<FileTransformExtensions, IPackageFileTransformer> fileTransformers,
+            Func<FileTransformExtensions, string> extensionSelector,
+            string effectivePath)
         {
-            // Try to get the package file modifier for the extension
-            string extension = Path.GetExtension(effectivePath);
+            
+            string truncatedPath;
 
-            IPackageFileTransformer transformer;
-            if (fileTransformers.TryGetValue(extension, out transformer))
+            // Remove the transformer extension (e.g. .pp, .transform)
+            IPackageFileTransformer transformer = FindFileTransformer(
+                fileTransformers, extensionSelector, effectivePath, out truncatedPath);
+            
+            if (transformer != null)
             {
-                // Remove the transformer extension (e.g. .pp, .transform)
-                string truncatedPath = RemoveExtension(effectivePath);
-
-                // Bug 1686: Don't allow transforming packages.config.transform
-                string fileName = Path.GetFileName(truncatedPath);
-                if (!Constants.PackageReferenceFile.Equals(fileName, StringComparison.OrdinalIgnoreCase))
-                {
-                    effectivePath = truncatedPath;
-                }
+                effectivePath = truncatedPath;
             }
 
             return effectivePath;
         }
 
         private static string ResolveTargetPath(IProjectSystem projectSystem,
-                                                IDictionary<string, IPackageFileTransformer> fileTransformers,
+                                                IDictionary<FileTransformExtensions, IPackageFileTransformer> fileTransformers,
+                                                Func<FileTransformExtensions, string> extensionSelector,
                                                 string effectivePath,
                                                 out IPackageFileTransformer transformer)
         {
-            // Try to get the package file modifier for the extension
-            string extension = Path.GetExtension(effectivePath);
-            if (fileTransformers.TryGetValue(extension, out transformer))
-            {
-                // Remove the transformer extension (e.g. .pp, .transform)
-                string truncatedPath = RemoveExtension(effectivePath);
+            string truncatedPath;
 
-                // Bug 1686: Don't allow transforming packages.config.transform,
-                // but we still want to copy packages.config.transform as-is into the project.
-                string fileName = Path.GetFileName(truncatedPath);
-                if (Constants.PackageReferenceFile.Equals(fileName, StringComparison.OrdinalIgnoreCase))
-                {
-                    // setting to null means no pre-processing of this file
-                    transformer = null;
-                }
-                else
-                {
-                    effectivePath = truncatedPath;
-                }
+            // Remove the transformer extension (e.g. .pp, .transform)
+            transformer = FindFileTransformer(fileTransformers, extensionSelector, effectivePath, out truncatedPath);
+            if (transformer != null)
+            {
+                effectivePath = truncatedPath;
             }
 
             return projectSystem.ResolvePath(effectivePath);
         }
 
-        private static string RemoveExtension(string path)
+        private static IPackageFileTransformer FindFileTransformer(
+            IDictionary<FileTransformExtensions, IPackageFileTransformer> fileTransformers,
+            Func<FileTransformExtensions, string> extensionSelector,
+            string effectivePath,
+            out string truncatedPath)
         {
-            // Remove the extension from the file name, preserving the directory
-            return Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path));
+            foreach (var transformExtensions in fileTransformers.Keys)
+            {
+                string extension = extensionSelector(transformExtensions);
+                if (effectivePath.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+                {
+                    truncatedPath = effectivePath.Substring(0, effectivePath.Length - extension.Length);
+
+                    // Bug 1686: Don't allow transforming packages.config.transform,
+                    // but we still want to copy packages.config.transform as-is into the project.
+                    string fileName = Path.GetFileName(truncatedPath);
+                    if (!Constants.PackageReferenceFile.Equals(fileName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return fileTransformers[transformExtensions];
+                    }
+                }
+            }
+
+            truncatedPath = effectivePath;
+            return null;
         }
     }
 }

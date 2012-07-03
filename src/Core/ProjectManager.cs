@@ -21,9 +21,12 @@ namespace NuGet
         private IPackageConstraintProvider _constraintProvider;
         private readonly IPackageReferenceRepository _packageReferenceRepository;
 
-        private static readonly IDictionary<string, IPackageFileTransformer> _fileTransformers = new Dictionary<string, IPackageFileTransformer>(StringComparer.OrdinalIgnoreCase) {
-            { ".transform", new XmlTransfomer(GetConfigMappings()) },
-            { ".pp", new Preprocessor() }
+        private readonly IDictionary<FileTransformExtensions, IPackageFileTransformer> _fileTransformers = 
+            new Dictionary<FileTransformExtensions, IPackageFileTransformer>() 
+        {
+            { new FileTransformExtensions(".transform", ".transform"), new XmlTransformer(GetConfigMappings()) },
+            { new FileTransformExtensions(".pp", ".pp"), new Preprocessor() },
+            { new FileTransformExtensions(".install.xdt", ".uninstall.xdt"), new XdtTransformer() }
         };
 
         public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IProjectSystem project, IPackageRepository localRepository)
@@ -112,7 +115,7 @@ namespace NuGet
 
         public virtual void AddPackageReference(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)
         {
-            IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, NullConstraintProvider.Instance, packageId, version, allowPrereleaseVersions);
+            IPackage package = PackageRepositoryHelper.ResolvePackage(SourceRepository, LocalRepository, NullConstraintProvider.Instance, packageId, version, allowPrereleaseVersions);
             AddPackageReference(package, ignoreDependencies, allowPrereleaseVersions);
         }
 
@@ -344,7 +347,7 @@ namespace NuGet
             // Exclude transform files since they are treated specially
             var otherContentFiles = from p in otherPackages
                                     from file in GetCompatibleItemsForPackage(p.Id, p.GetContentFiles())
-                                    where !_fileTransformers.ContainsKey(Path.GetExtension(file.Path))
+                                    where !IsTransformFile(file.Path) 
                                     select file;
 
             // Get the files and references for this package, that aren't in use by any other packages so we don't have to do reference counting
@@ -367,6 +370,13 @@ namespace NuGet
 
             Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyRemovedPackageReference, packageFullName, Project.ProjectName);
             OnPackageReferenceRemoved(args);
+        }
+
+        private bool IsTransformFile(string path)
+        {
+            return _fileTransformers.Keys.Any(
+                file => path.EndsWith(file.InstallExtension, StringComparison.OrdinalIgnoreCase) ||
+                        path.EndsWith(file.UninstallExtension, StringComparison.OrdinalIgnoreCase));
         }
 
         public void UpdatePackageReference(string packageId)

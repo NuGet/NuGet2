@@ -123,6 +123,7 @@
     <Compile Include="UriUtilityTest.cs" />
     <Compile Include="VersionSpecTest.cs" />
     <Compile Include="VersionUtilityTest.cs" />
+    <Compile Include="XdtTransformTest.cs" />
     <Compile Include="XmlExtensionsTest.cs" />
     <Compile Include="ZipPackageTest.cs" />
   </ItemGroup>

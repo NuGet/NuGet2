@@ -2079,3 +2079,20 @@ function Test-InstallPackageThrowsIfRequiredMinVersionIsNotSatisfied
     Assert-Throws { $p | Install-Package Kitty -Source $context.RepositoryPath } "The 'kitty 1.0.0' package requires NuGet client version '5.0.0.1' or above, but the current NuGet version is '$currentVersion'."
     Assert-NoPackage $p "Kitty"
 }
+
+function Test-InstallPackageWithXdtTransformTransformsTheFile
+{
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    $p | Install-Package XdtPackage -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p 'XdtPackage' '1.0.0'
+
+    $content = [xml](Get-Content (Get-ProjectItemPath $p web.config))
+
+    Assert-AreEqual "false" $content.configuration["system.web"].compilation.debug
+    Assert-NotNull $content.configuration["system.web"].customErrors
+}

@@ -99,7 +99,7 @@ namespace NuGet
 
         public virtual void InstallPackage(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)
         {
-            IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
+            IPackage package = PackageRepositoryHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
 
             InstallPackage(package, ignoreDependencies, allowPrereleaseVersions);
         }
@@ -203,7 +203,7 @@ namespace NuGet
 
                 // If this is a Satellite Package, then copy the satellite files into the related runtime package folder too
                 IPackage runtimePackage;
-                if (PackageUtility.IsSatellitePackage(package, LocalRepository, targetFramework: null, runtimePackage: out runtimePackage))
+                if (PackageHelper.IsSatellitePackage(package, LocalRepository, targetFramework: null, runtimePackage: out runtimePackage))
                 {
                     var satelliteFiles = package.GetSatelliteFiles();
                     var runtimePath = PathResolver.GetPackageDirectory(runtimePackage);
@@ -301,7 +301,7 @@ namespace NuGet
 
             // If this is a Satellite Package, then remove the files from the related runtime package folder too
             IPackage runtimePackage;
-            if (PackageUtility.IsSatellitePackage(package, LocalRepository, targetFramework: null, runtimePackage: out runtimePackage))
+            if (PackageHelper.IsSatellitePackage(package, LocalRepository, targetFramework: null, runtimePackage: out runtimePackage))
             {
                 var satelliteFiles = package.GetSatelliteFiles();
                 var runtimePath = PathResolver.GetPackageDirectory(runtimePackage);

@@ -35,6 +35,7 @@ namespace NuGet
         /// <summary>
         /// Added 'targetFramework' attribute for 'references' elements.
         /// Added 'requiredMinVersion' attribute
+        /// Allows XDT transformation
         /// </summary>
         internal const string SchemaVersionV5 = "http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd";
 

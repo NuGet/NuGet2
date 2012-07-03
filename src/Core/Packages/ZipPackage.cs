@@ -177,7 +177,7 @@ namespace NuGet
             string path = UriUtility.GetPath(part.Uri);
             // We exclude any opc files and the manifest file (.nuspec)
             return !ExcludePaths.Any(p => path.StartsWith(p, StringComparison.OrdinalIgnoreCase)) &&
-                   !PackageUtility.IsManifest(path);
+                   !PackageHelper.IsManifest(path);
         }
 
         internal static void ClearCache(IPackage package)
