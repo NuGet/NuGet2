@@ -162,15 +162,6 @@
   <data name="MissingSummaryTitle" xml:space="preserve">
     <value>Consider providing Summary text.</value>
   </data>
-  <data name="NonAssemblyInLibDescription" xml:space="preserve">
-    <value>The file '{0}' is not a valid assembly. If it is an XML documentation file or a .pdb file, there is no matching assembly specified in the same folder.</value>
-  </data>
-  <data name="NonAssemblyInLibSolution" xml:space="preserve">
-    <value>Either remove this file from 'lib' folder or add a matching .dll for it.</value>
-  </data>
-  <data name="NonAssemblyInLibTitle" xml:space="preserve">
-    <value>Incompatible files in lib folder.</value>
-  </data>
   <data name="ScriptOutsideToolsDescription" xml:space="preserve">
     <value>The script file '{0}' is outside the 'tools' folder and hence will not be executed during installation of this package.</value>
   </data>
