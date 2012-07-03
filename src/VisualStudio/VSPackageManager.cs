@@ -15,7 +15,6 @@ namespace NuGet.VisualStudio
         private readonly ISharedPackageRepository _sharedRepository;
         private readonly IDictionary<string, IProjectManager> _projects;
         private readonly ISolutionManager _solutionManager;
-        private readonly IRecentPackageRepository _recentPackagesRepository;
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly VsPackageInstallerEvents _packageEvents;
         private bool _bindingRedirectEnabled = true;
@@ -25,13 +24,11 @@ namespace NuGet.VisualStudio
                 IFileSystemProvider fileSystemProvider,
                 IFileSystem fileSystem, 
                 ISharedPackageRepository sharedRepository, 
-                IRecentPackageRepository recentPackagesRepository, 
                 VsPackageInstallerEvents packageEvents) :
             base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository)
         {
             _solutionManager = solutionManager;
             _sharedRepository = sharedRepository;
-            _recentPackagesRepository = recentPackagesRepository;
             _packageEvents = packageEvents;
             _fileSystemProvider = fileSystemProvider;
 
@@ -43,8 +40,6 @@ namespace NuGet.VisualStudio
             get { return _bindingRedirectEnabled; }
             set { _bindingRedirectEnabled = value; }
         }
-
-        internal bool AddToRecent { get; set; }
 
         internal void EnsureCached(Project project)
         {
@@ -164,9 +159,6 @@ namespace NuGet.VisualStudio
 
                 AddSolutionPackageConfigEntry(package);
             });
-
-            // Add package to recent repository
-            AddPackageToRecentRepository(package);
         }
 
         public void InstallPackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool ignoreDependencies,
@@ -296,9 +288,6 @@ namespace NuGet.VisualStudio
                         // We might be updating a solution only package
                         UpdatePackage(newPackage, updateDependencies, allowPrereleaseVersions);
                     }
-
-                    // Add package to recent repository
-                    AddPackageToRecentRepository(newPackage);
                 }
                 else
                 {
@@ -397,13 +386,6 @@ namespace NuGet.VisualStudio
             {
                 base.ExecuteUninstall(package);
             }
-        }
-
-        protected override void OnInstalled(PackageOperationEventArgs e)
-        {
-            base.OnInstalled(e);
-
-            AddPackageToRecentRepository(e.Package, updateOnly: true);
         }
 
         private IPackage FindLocalPackageForUpdate(IProjectManager projectManager, string packageId, out bool appliesToProject)
@@ -687,9 +669,6 @@ namespace NuGet.VisualStudio
 
                     AddSolutionPackageConfigEntry(package);
                 });
-
-                // Add package to recent repository
-                AddPackageToRecentRepository(package);
             }
             finally
             {
@@ -730,27 +709,6 @@ namespace NuGet.VisualStudio
             {
                 // If there was an error adding binding redirects then print a warning and continue
                 Logger.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture, VsResources.Warning_FailedToAddBindingRedirects, projectManager.Project.ProjectName, e.Message));
-            }
-        }
-
-        private void AddPackageToRecentRepository(IPackage package, bool updateOnly = false)
-        {
-            if (!AddToRecent)
-            {
-                return;
-            }
-
-            // add the installed package to the recent repository
-            if (_recentPackagesRepository != null)
-            {
-                if (updateOnly)
-                {
-                    _recentPackagesRepository.UpdatePackage(package);
-                }
-                else
-                {
-                    _recentPackagesRepository.AddPackage(package);
-                }
             }
         }
 
@@ -970,8 +928,6 @@ namespace NuGet.VisualStudio
             {
                 eventListener = eventListener ?? NullPackageOperationEventListener.Instance;
 
-                IPackage newPackage = null;
-
                 foreach (var project in _solutionManager.GetProjects())
                 {
                     IProjectManager projectManager = GetProjectManager(project);
@@ -985,12 +941,6 @@ namespace NuGet.VisualStudio
                             try
                             {
                                 RunSolutionAction(() => projectAction(projectManager));
-
-                                if (newPackage == null)
-                                {
-                                    // after the update, get the new version to add to the recent package repository
-                                    newPackage = projectManager.LocalRepository.FindPackage(packageId);
-                                }
                             }
                             catch (Exception e)
                             {
@@ -1007,11 +957,6 @@ namespace NuGet.VisualStudio
                     {
                         ClearLogger(projectManager);
                     }
-                }
-
-                if (newPackage != null)
-                {
-                    AddPackageToRecentRepository(newPackage);
                 }
             }
             else
@@ -1032,9 +977,6 @@ namespace NuGet.VisualStudio
                     {
                         ClearLogger(projectManager: null);
                     }
-
-                    // Add package to recent repository
-                    AddPackageToRecentRepository(newPackage);
                 }
                 else
                 {

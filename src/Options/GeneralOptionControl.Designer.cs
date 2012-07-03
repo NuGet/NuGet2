@@ -29,12 +29,9 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GeneralOptionControl));
-            this.ClearButton = new System.Windows.Forms.Button();
             this.checkForUpdate = new System.Windows.Forms.CheckBox();
             this.clearPackageCacheButton = new System.Windows.Forms.Button();
             this.browsePackageCacheButton = new System.Windows.Forms.Button();
-            this.RecentPackagesHeader = new System.Windows.Forms.Label();
-            this.RecentPackagesHeaderDivider = new System.Windows.Forms.GroupBox();
             this.UpdateHeaderDivider = new System.Windows.Forms.GroupBox();
             this.UpdateHeader = new System.Windows.Forms.Label();
             this.PackagesCacheHeaderDivider = new System.Windows.Forms.GroupBox();
@@ -47,13 +44,6 @@
             this.tableLayoutPanel1.SuspendLayout();
             this.updatePanel.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // ClearButton
-            // 
-            resources.ApplyResources(this.ClearButton, "ClearButton");
-            this.ClearButton.Name = "ClearButton";
-            this.ClearButton.UseVisualStyleBackColor = true;
-            this.ClearButton.Click += new System.EventHandler(this.OnClearRecentPackagesClick);
             // 
             // checkForUpdate
             // 
@@ -74,17 +64,6 @@
             this.browsePackageCacheButton.Name = "browsePackageCacheButton";
             this.browsePackageCacheButton.UseVisualStyleBackColor = true;
             this.browsePackageCacheButton.Click += new System.EventHandler(this.OnBrowsePackageCacheClick);
-            // 
-            // RecentPackagesHeader
-            // 
-            resources.ApplyResources(this.RecentPackagesHeader, "RecentPackagesHeader");
-            this.RecentPackagesHeader.Name = "RecentPackagesHeader";
-            // 
-            // RecentPackagesHeaderDivider
-            // 
-            resources.ApplyResources(this.RecentPackagesHeaderDivider, "RecentPackagesHeaderDivider");
-            this.RecentPackagesHeaderDivider.Name = "RecentPackagesHeaderDivider";
-            this.RecentPackagesHeaderDivider.TabStop = false;
             // 
             // UpdateHeaderDivider
             // 
@@ -144,9 +123,6 @@
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.RecentPackagesHeader);
-            this.Controls.Add(this.RecentPackagesHeaderDivider);
-            this.Controls.Add(this.ClearButton);
             this.Controls.Add(this.PackagesCacheHeader);
             this.Controls.Add(this.PackagesCacheHeaderDivider);
             this.Controls.Add(this.tableLayoutPanel1);
@@ -166,12 +142,9 @@
 
         #endregion
 
-        private System.Windows.Forms.Button ClearButton;
         private System.Windows.Forms.CheckBox checkForUpdate;
         private System.Windows.Forms.Button clearPackageCacheButton;
         private System.Windows.Forms.Button browsePackageCacheButton;
-        private System.Windows.Forms.Label RecentPackagesHeader;
-        private System.Windows.Forms.GroupBox RecentPackagesHeaderDivider;
         private System.Windows.Forms.GroupBox UpdateHeaderDivider;
         private System.Windows.Forms.Label UpdateHeader;
         private System.Windows.Forms.GroupBox PackagesCacheHeaderDivider;

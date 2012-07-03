@@ -237,20 +237,11 @@
   <data name="Dialog_OperationFailed" xml:space="preserve">
     <value>Operation failed.</value>
   </data>
-  <data name="Dialog_RecentProvider" xml:space="preserve">
-    <value>Recent packages</value>
-  </data>
-  <data name="Dialog_RecentProviderNoItem" xml:space="preserve">
-    <value>There are no recently installed packages.</value>
-  </data>
   <data name="License_DialogTitle" xml:space="preserve">
     <value>License Acceptance</value>
   </data>
   <data name="Dialog_IdLabel" xml:space="preserve">
     <value>Id:</value>
-  </data>
-  <data name="Dialog_RecentPackagesDefaultSort" xml:space="preserve">
-    <value>Most Recent</value>
   </data>
   <data name="License_AuthorFormatString" xml:space="preserve">
     <value>(Author: {0})</value>

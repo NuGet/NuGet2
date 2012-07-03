@@ -33,7 +33,7 @@ namespace NuGet.VisualStudio
                 throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId"));
             }
 
-            IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager(_packageRepository, useFallbackForDependencies: false, addToRecent: false);
+            IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager(_packageRepository, useFallbackForDependencies: false);
             IProjectManager projectManager = packageManager.GetProjectManager(project);
 
             EventHandler<PackageOperationEventArgs> uninstalledHandler = (sender, e) =>

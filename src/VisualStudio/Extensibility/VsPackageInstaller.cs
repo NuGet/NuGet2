@@ -60,9 +60,7 @@ namespace NuGet.VisualStudio
             using (_vsCommonOperations.SaveSolutionExplorerNodeStates(_solutionManager))
             {
                 IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager(repository,
-                                                                                               useFallbackForDependencies
-                                                                                                   : false,
-                                                                                               addToRecent: false);
+                                                                                               useFallbackForDependencies : false);
                 IProjectManager projectManager = packageManager.GetProjectManager(project);
 
                 EventHandler<PackageOperationEventArgs> installedHandler = (sender, e) =>

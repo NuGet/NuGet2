@@ -106,17 +106,11 @@
     <Compile Include="..\Dialog10\Providers\PackagesProviderBase.cs">
       <Link>Providers\PackagesProviderBase.cs</Link>
     </Compile>
-    <Compile Include="..\Dialog10\Providers\RecentProvider.cs">
-      <Link>Providers\RecentProvider.cs</Link>
-    </Compile>
     <Compile Include="..\Dialog10\Providers\SolutionInstalledProvider.cs">
       <Link>Providers\SolutionInstalledProvider.cs</Link>
     </Compile>
     <Compile Include="..\Dialog10\Providers\SolutionOnlineProvider.cs">
       <Link>Providers\SolutionOnlineProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\Dialog10\Providers\SolutionRecentProvider.cs">
-      <Link>Providers\SolutionRecentProvider.cs</Link>
     </Compile>
     <Compile Include="..\Dialog10\Providers\SolutionUpdatesProvider.cs">
       <Link>Providers\SolutionUpdatesProvider.cs</Link>

@@ -72,12 +72,10 @@
     <Compile Include="Nodes\PackagesSearchNode.cs" />
     <Compile Include="Nodes\PackagesTreeNodeBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Providers\RecentProvider.cs" />
     <Compile Include="Nodes\RootTreeNode.cs" />
     <Compile Include="Nodes\SimpleTreeNode.cs" />
     <Compile Include="Providers\SolutionInstalledProvider.cs" />
     <Compile Include="Providers\SolutionOnlineProvider.cs" />
-    <Compile Include="Providers\SolutionRecentProvider.cs" />
     <Compile Include="Providers\SolutionUpdatesProvider.cs" />
     <Compile Include="Providers\UpdatesProvider.cs" />
     <Compile Include="Nodes\UpdatesTreeNode.cs" />

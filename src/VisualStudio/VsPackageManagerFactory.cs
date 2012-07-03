@@ -12,7 +12,6 @@ namespace NuGet.VisualStudio
         private readonly ISolutionManager _solutionManager;
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly IRepositorySettings _repositorySettings;
-        private readonly IRecentPackageRepository _recentPackageRepository;
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly VsPackageInstallerEvents _packageEvents;
 
@@ -24,7 +23,6 @@ namespace NuGet.VisualStudio
                                        IVsPackageSourceProvider packageSourceProvider,
                                        IFileSystemProvider fileSystemProvider,
                                        IRepositorySettings repositorySettings,
-                                       IRecentPackageRepository recentPackagesRepository,
                                        VsPackageInstallerEvents packageEvents)
         {
             if (solutionManager == null)
@@ -56,7 +54,6 @@ namespace NuGet.VisualStudio
             _repositorySettings = repositorySettings;
             _solutionManager = solutionManager;
             _repositoryFactory = repositoryFactory;
-            _recentPackageRepository = recentPackagesRepository;
             _packageSourceProvider = packageSourceProvider;
             _packageEvents = packageEvents;
 
@@ -76,11 +73,6 @@ namespace NuGet.VisualStudio
 
         public IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies)
         {
-            return CreatePackageManager(repository, useFallbackForDependencies, addToRecent: true);
-        }
-
-        public IVsPackageManager CreatePackageManager(IPackageRepository repository, bool useFallbackForDependencies, bool addToRecent)
-        {
             if (useFallbackForDependencies)
             {
                 repository = CreateFallbackRepository(repository);
@@ -91,11 +83,7 @@ namespace NuGet.VisualStudio
                                         _fileSystemProvider,
                                         info.FileSystem,
                                         info.Repository,
-                                        _recentPackageRepository,
-                                        _packageEvents)
-                                        {
-                                            AddToRecent = addToRecent
-                                        };
+                                        _packageEvents);
         }
 
         /// <summary>

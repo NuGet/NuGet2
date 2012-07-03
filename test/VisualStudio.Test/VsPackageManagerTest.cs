@@ -23,7 +23,7 @@ namespace NuGet.VisualStudio.Test
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
             var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), new MockPackageRepository());
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<VsPackageInstallerEvents>().Object);
 
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
             sourceRepository.AddPackage(package);
@@ -51,7 +51,6 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object, 
                 projectSystem, 
                 localRepository, 
-                new Mock<IRecentPackageRepository>().Object, 
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var dependencySets = new PackageDependencySet[] {
@@ -106,7 +105,6 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
                 localRepository,
-                new Mock<IRecentPackageRepository>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var dependencySets = new PackageDependencySet[] {
@@ -158,7 +156,7 @@ namespace NuGet.VisualStudio.Test
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
             var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, new MockPackageRepository());
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository,  new Mock<VsPackageInstallerEvents>().Object);
 
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" }, new [] { "assembly.dll" });
             sourceRepository.AddPackage(package);
@@ -181,7 +179,7 @@ namespace NuGet.VisualStudio.Test
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
             var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, new MockPackageRepository());
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository,  new Mock<VsPackageInstallerEvents>().Object);
 
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" }, new[] { "assembly.dll" });
             sourceRepository.AddPackage(package);
@@ -204,7 +202,7 @@ namespace NuGet.VisualStudio.Test
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
             var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), new MockPackageRepository());
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository,  new Mock<VsPackageInstallerEvents>().Object);
 
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" }, dependencies: new PackageDependency[] { new PackageDependency("bar") });
             sourceRepository.AddPackage(package);
@@ -240,7 +238,7 @@ namespace NuGet.VisualStudio.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository,  new Mock<VsPackageInstallerEvents>().Object);
 
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
             sourceRepository.AddPackage(package);
@@ -264,7 +262,7 @@ namespace NuGet.VisualStudio.Test
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
             localRepository.Object.AddPackage(package);
             sourceRepository.AddPackage(package);
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object,  new Mock<VsPackageInstallerEvents>().Object);
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, new MockProjectSystem(), new MockPackageRepository());
 
             // Act
@@ -284,7 +282,7 @@ namespace NuGet.VisualStudio.Test
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
             localRepository.Object.AddPackage(package);
             sourceRepository.AddPackage(package);
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object,  new Mock<VsPackageInstallerEvents>().Object);
 
             // Act
             ExceptionAssert.Throws<InvalidOperationException>(() => packageManager.UninstallPackage(null, "foo", version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance), "No project was specified.");
@@ -302,7 +300,7 @@ namespace NuGet.VisualStudio.Test
             var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" });
             localRepository.Object.AddPackage(package);
             sourceRepository.AddPackage(package);
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object,  new Mock<VsPackageInstallerEvents>().Object);
 
             // Act
             packageManager.UninstallPackage(null, "foo", version: null, forceRemove: false, removeDependencies: false, logger: NullLogger.Instance);
@@ -328,7 +326,7 @@ namespace NuGet.VisualStudio.Test
             localRepository.Object.AddPackage(A10);
             localRepository.Object.AddPackage(A20);
             projectRepository.Add(A10);
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object,  new Mock<VsPackageInstallerEvents>().Object);
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, new MockProjectSystem(), projectRepository);
 
             // Act
@@ -355,7 +353,7 @@ namespace NuGet.VisualStudio.Test
             localRepository.Object.AddPackage(A10);
             localRepository.Object.AddPackage(A20);
             projectRepository.Add(A10);
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object,  new Mock<VsPackageInstallerEvents>().Object);
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, new MockProjectSystem(), projectRepository);
 
             // Act
@@ -398,7 +396,7 @@ namespace NuGet.VisualStudio.Test
             localRepository.Object.AddPackage(G10);
             projectRepository.Add(A10);
             projectRepository.Add(B10);
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object,  new Mock<VsPackageInstallerEvents>().Object);
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, new MockProjectSystem(), projectRepository);
 
             // Act
@@ -434,7 +432,7 @@ namespace NuGet.VisualStudio.Test
             localRepository.Object.AddPackage(A10);
             localRepository.Object.AddPackage(A20);
             localRepository.Object.AddPackage(B10);
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object,  new Mock<VsPackageInstallerEvents>().Object);
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
             projectManager.AddPackageReference("A", new SemanticVersion("1.0"));
 
@@ -471,7 +469,7 @@ namespace NuGet.VisualStudio.Test
             localRepository.Object.AddPackage(A10);
             localRepository.Object.AddPackage(A20);
             localRepository.Object.AddPackage(B10);
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object,  new Mock<VsPackageInstallerEvents>().Object);
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
             projectManager.AddPackageReference("A", new SemanticVersion("1.0"));
 
@@ -516,7 +514,7 @@ namespace NuGet.VisualStudio.Test
             localRepository.Object.AddPackage(A20);
             localRepository.Object.AddPackage(B10);
             localRepository.Object.AddPackage(C10);
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object,  new Mock<VsPackageInstallerEvents>().Object);
             var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
             projectManager.AddPackageReference("A", new SemanticVersion("1.0"));
 
@@ -542,7 +540,7 @@ namespace NuGet.VisualStudio.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository,  new Mock<VsPackageInstallerEvents>().Object);
 
             var package = PackageUtility.CreatePackage("foo", "1.0", dependencies: new PackageDependency[] { new PackageDependency("bar") });
             sourceRepository.AddPackage(package);
@@ -582,7 +580,7 @@ namespace NuGet.VisualStudio.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository,  new Mock<VsPackageInstallerEvents>().Object);
 
             var package = PackageUtility.CreatePackage("foo", "1.0.0", dependencies: new[] { new PackageDependency("bar") });
             sourceRepository.AddPackage(package);
@@ -611,7 +609,7 @@ namespace NuGet.VisualStudio.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository,  new Mock<VsPackageInstallerEvents>().Object);
 
             var package = PackageUtility.CreatePackage("foo", "1.0.0", dependencies: new[] { new PackageDependency("bar") });
             sourceRepository.AddPackage(package);
@@ -644,7 +642,7 @@ namespace NuGet.VisualStudio.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository,  new Mock<VsPackageInstallerEvents>().Object);
 
             var package3_1A = PackageUtility.CreatePackage("qux", "1.0-alpha");
             var package3_1B = PackageUtility.CreatePackage("qux", "1.1-alpha");
@@ -672,7 +670,7 @@ namespace NuGet.VisualStudio.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository,  new Mock<VsPackageInstallerEvents>().Object);
 
             var package3_10A = PackageUtility.CreatePackage("qux", "1.0-alpha");
             var package3_11B = PackageUtility.CreatePackage("qux", "1.1-alpha");
@@ -707,7 +705,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object, 
                 projectSystem, 
                 localRepository, 
-                new Mock<IRecentPackageRepository>().Object, 
+                 
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var orphanPackage = PackageUtility.CreatePackage("orphan", "1.0", new [] { "content" });
@@ -748,7 +746,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
                 localRepository.Object,
-                new Mock<IRecentPackageRepository>().Object,
+                
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var projectRepository = new MockProjectPackageRepository(localRepository.Object);
@@ -799,7 +797,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
                 localRepository.Object,
-                new Mock<IRecentPackageRepository>().Object,
+                
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var projectRepository = new MockProjectPackageRepository(localRepository.Object);
@@ -849,7 +847,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
                 localRepository.Object,
-                new Mock<IRecentPackageRepository>().Object,
+                
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var projectRepository = new MockProjectPackageRepository(localRepository.Object);
@@ -897,7 +895,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
                 localRepository.Object,
-                new Mock<IRecentPackageRepository>().Object,
+                
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var projectRepository = new MockProjectPackageRepository(localRepository.Object);

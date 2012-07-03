@@ -399,7 +399,7 @@ namespace NuGet.Dialog.Providers
             }
 
             // Order by the current descriptor
-            return query.SortBy<IPackage>(Provider.CurrentSort.SortProperties, Provider.CurrentSort.Direction, typeof(RecentPackage));
+            return query.SortBy<IPackage>(Provider.CurrentSort.SortProperties, Provider.CurrentSort.Direction);
         }
 
         public IList<IVsSortDescriptor> GetSortDescriptors()

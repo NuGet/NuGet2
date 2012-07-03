@@ -162,9 +162,6 @@
   <data name="Cmdlet_InvalidPSDrive" xml:space="preserve">
     <value>The PSDrive '{0}' was not found.</value>
   </data>
-  <data name="Cmdlet_NoRecentPackages" xml:space="preserve">
-    <value>There are no recently installed packages.</value>
-  </data>
   <data name="Cmdlet_InvalidProjectManagerInstance" xml:space="preserve">
     <value>The specified IProjectManager instance is not recognized.</value>
   </data>

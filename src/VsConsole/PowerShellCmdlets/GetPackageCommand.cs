@@ -17,7 +17,6 @@ namespace NuGet.PowerShell.Commands
     {
         private readonly IPackageRepositoryFactory _repositoryFactory;
         private readonly IVsPackageSourceProvider _packageSourceProvider;
-        private readonly IPackageRepository _recentPackagesRepository;
         private readonly IProductUpdateService _productUpdateService;
         private int _firstValue;
         private bool _firstValueSpecified;
@@ -28,7 +27,6 @@ namespace NuGet.PowerShell.Commands
                    ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                   ServiceLocator.GetInstance<IRecentPackageRepository>(),
                    ServiceLocator.GetInstance<IHttpClientEvents>(),
                    ServiceLocator.GetInstance<IProductUpdateService>())
         {
@@ -38,7 +36,6 @@ namespace NuGet.PowerShell.Commands
                                 IVsPackageSourceProvider packageSourceProvider,
                                 ISolutionManager solutionManager,
                                 IVsPackageManagerFactory packageManagerFactory,
-                                IPackageRepository recentPackagesRepository,
                                 IHttpClientEvents httpClientEvents,
                                 IProductUpdateService productUpdateService)
             : base(solutionManager, packageManagerFactory, httpClientEvents)
@@ -52,14 +49,9 @@ namespace NuGet.PowerShell.Commands
             {
                 throw new ArgumentNullException("packageSourceProvider");
             }
-            if (recentPackagesRepository == null)
-            {
-                throw new ArgumentNullException("recentPackagesRepository");
-            }
 
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;
-            _recentPackagesRepository = recentPackagesRepository;
             _productUpdateService = productUpdateService;
         }
 
@@ -83,11 +75,7 @@ namespace NuGet.PowerShell.Commands
         [Parameter(Mandatory = true, ParameterSetName = "Updates")]
         public SwitchParameter Updates { get; set; }
 
-        [Parameter(Mandatory = true, ParameterSetName = "Recent")]
-        public SwitchParameter Recent { get; set; }
-
         [Parameter(ParameterSetName = "Remote")]
-        [Parameter(ParameterSetName = "Recent")]
         [Parameter(ParameterSetName = "Updates")]
         public SwitchParameter AllVersions { get; set; }
 
@@ -122,7 +110,7 @@ namespace NuGet.PowerShell.Commands
         {
             get
             {
-                return ListAvailable.IsPresent || (!String.IsNullOrEmpty(Source) && !Updates.IsPresent) || Recent.IsPresent;
+                return ListAvailable.IsPresent || (!String.IsNullOrEmpty(Source) && !Updates.IsPresent);
             }
         }
 
@@ -133,7 +121,7 @@ namespace NuGet.PowerShell.Commands
         {
             get
             {
-                return ListAvailable.IsPresent || Updates.IsPresent || !String.IsNullOrEmpty(Source) || Recent.IsPresent;
+                return ListAvailable.IsPresent || Updates.IsPresent || !String.IsNullOrEmpty(Source);
             }
         }
 
@@ -141,7 +129,7 @@ namespace NuGet.PowerShell.Commands
         {
             get
             {
-                return !AllVersions.IsPresent && (ListAvailable || Recent);
+                return !AllVersions.IsPresent && ListAvailable;
             }
         }
 
@@ -195,9 +183,8 @@ namespace NuGet.PowerShell.Commands
             if (CollapseVersions)
             {
                 // In the event the client is going up against a v1 feed, do not try to fetch pre release packages since this flag does not exist.
-                if (Recent || (IncludePrerelease && sourceRepository.SupportsPrereleasePackages))
+                if (IncludePrerelease && sourceRepository.SupportsPrereleasePackages)
                 {
-                    // For Recent packages, we want to show the highest package even if it is a recent. 
                     // Review: We should change this to show both the absolute latest and the latest versions but that requires changes to our collapsing behavior.
                     packages = packages.Where(p => p.IsAbsoluteLatestVersion);
                 }
@@ -227,7 +214,7 @@ namespace NuGet.PowerShell.Commands
             if (ListAvailable && !IncludePrerelease)
             {
                 // If we aren't collapsing versions, and the pre-release flag is not set, only display release versions when displaying from a remote source.
-                // We don't need to filter packages when showing recent packages or installed packages.
+                // We don't need to filter packages when showing installed packages.
                 packagesToDisplay = packagesToDisplay.Where(p => p.IsReleaseVersion());
             }
 
@@ -251,10 +238,6 @@ namespace NuGet.PowerShell.Commands
                 _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source);
                 // If a Source parameter is explicitly specified, use it
                 return CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, Source);
-            }
-            else if (Recent.IsPresent)
-            {
-                return _recentPackagesRepository;
             }
             else if (SolutionManager.IsSolutionOpen)
             {
@@ -280,13 +263,8 @@ namespace NuGet.PowerShell.Commands
             IQueryable<IPackage> packages = String.IsNullOrEmpty(Filter)
                                                 ? sourceRepository.GetPackages()
                                                 : sourceRepository.Search(Filter, IncludePrerelease);
-
-            // for recent packages, we want to order by last installed first instead of Id
-            if (!Recent.IsPresent)
-            {
-                packages = packages.OrderBy(p => p.Id);
-            }
-
+            // by default, sort packages by Id
+            packages = packages.OrderBy(p => p.Id);
             return packages;
         }
 
@@ -333,10 +311,6 @@ namespace NuGet.PowerShell.Commands
                 else if (Updates.IsPresent)
                 {
                     LogCore(MessageLevel.Info, Resources.Cmdlet_NoPackageUpdates);
-                }
-                else if (Recent.IsPresent)
-                {
-                    LogCore(MessageLevel.Info, Resources.Cmdlet_NoRecentPackages);
                 }
             }
         }

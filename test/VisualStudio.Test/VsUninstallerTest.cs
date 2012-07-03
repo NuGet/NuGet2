@@ -27,9 +27,9 @@ namespace NuGet.VisualStudio.Test
             var scriptExecutor = new Mock<IScriptExecutor>(MockBehavior.Strict);
             scriptExecutor.Setup(s => s.Execute(@"C:\MockFileSystem\A.1.0", "uninstall.ps1", package, project, new FrameworkName(".NETCore, Version=4.5"), NullLogger.Instance)).Returns(true).Verifiable();
             var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), activeRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), localRepository.Object,
-                new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
+                new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager(activeRepository, false, false)).Returns(packageManager.Object);
+            packageManagerFactory.Setup(m => m.CreatePackageManager(activeRepository, false)).Returns(packageManager.Object);
             packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager).Verifiable();
             var packageUninstaller = new VsPackageUninstaller(packageManagerFactory.Object, activeRepository, scriptExecutor.Object);
 
@@ -58,9 +58,9 @@ namespace NuGet.VisualStudio.Test
             var scriptExecutor = new Mock<IScriptExecutor>(MockBehavior.Strict);
             scriptExecutor.Setup(s => s.Execute(@"C:\MockFileSystem\A.1.0", "uninstall.ps1", packageA, project, new FrameworkName(".NETCore, Version=4.5"), NullLogger.Instance)).Returns(true).Verifiable();
             var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), activeRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), localRepository.Object,
-                new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
+                new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager(activeRepository, false, false)).Returns(packageManager.Object);
+            packageManagerFactory.Setup(m => m.CreatePackageManager(activeRepository, false)).Returns(packageManager.Object);
             packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager).Verifiable();
             var packageUninstaller = new VsPackageUninstaller(packageManagerFactory.Object, activeRepository, scriptExecutor.Object);
 
@@ -93,9 +93,9 @@ namespace NuGet.VisualStudio.Test
             scriptExecutor.Setup(s => s.Execute(@"C:\MockFileSystem\A.1.0", "uninstall.ps1", packageA, project, It.IsAny<FrameworkName>(), NullLogger.Instance)).Returns(true).Verifiable();
             scriptExecutor.Setup(s => s.Execute(@"C:\MockFileSystem\B.1.0", "uninstall.ps1", packageB, project, It.IsAny<FrameworkName>(), NullLogger.Instance)).Returns(true).Verifiable();
             var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), activeRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), localRepository.Object,
-                new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
+                new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager(activeRepository, false, false)).Returns(packageManager.Object);
+            packageManagerFactory.Setup(m => m.CreatePackageManager(activeRepository, false)).Returns(packageManager.Object);
             packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager).Verifiable();
             var packageUninstaller = new VsPackageUninstaller(packageManagerFactory.Object, activeRepository, scriptExecutor.Object);
 
@@ -127,9 +127,9 @@ namespace NuGet.VisualStudio.Test
             var scriptExecutor = new Mock<IScriptExecutor>(MockBehavior.Strict);
             scriptExecutor.Setup(s => s.Execute(@"C:\MockFileSystem\A.1.0", "uninstall.ps1", packageA, project, It.IsAny<FrameworkName>(), NullLogger.Instance)).Returns(true).Verifiable();
             var packageManager = new Mock<VsPackageManager>(TestUtils.GetSolutionManager(), activeRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), localRepository.Object,
-                new Mock<IRecentPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
+                new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
-            packageManagerFactory.Setup(m => m.CreatePackageManager(activeRepository, false, false)).Returns(packageManager.Object);
+            packageManagerFactory.Setup(m => m.CreatePackageManager(activeRepository, false)).Returns(packageManager.Object);
             packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager).Verifiable();
             var packageUninstaller = new VsPackageUninstaller(packageManagerFactory.Object, activeRepository, scriptExecutor.Object);
 

@@ -8,7 +8,6 @@ namespace NuGet.Options
 {
     public partial class GeneralOptionControl : UserControl
     {
-        private readonly IRecentPackageRepository _recentPackageRepository;
         private readonly IProductUpdateSettings _productUpdateSettings;
         private readonly ISettings _settings;
         private bool _initialized;
@@ -20,9 +19,6 @@ namespace NuGet.Options
             _productUpdateSettings = ServiceLocator.GetInstance<IProductUpdateSettings>();
             Debug.Assert(_productUpdateSettings != null);
 
-            _recentPackageRepository = ServiceLocator.GetInstance<IRecentPackageRepository>();
-            Debug.Assert(_recentPackageRepository != null);
-
             _settings = ServiceLocator.GetInstance<ISettings>();
             Debug.Assert(_settings != null);
 
@@ -31,12 +27,6 @@ namespace NuGet.Options
                 // Starting from VS11, we don't need to check for updates anymore because VS will do it.
                 Controls.Remove(updatePanel);
             }
-        }
-
-        private void OnClearRecentPackagesClick(object sender, EventArgs e)
-        {
-            _recentPackageRepository.Clear();
-            MessageHelper.ShowInfoMessage(Resources.ShowInfo_ClearRecentPackages, Resources.ShowWarning_Title);
         }
 
         internal void OnActivated()

@@ -1374,10 +1374,10 @@ function Test-InstallPackageWithValuesFromPipe {
     $p = New-ClassLibrary
 
     # Act
-    Get-Package -ListAvailable -Source "https://go.microsoft.com/fwlink/?LinkID=206669" -Filter "Microsoft-web-helpers" | Install-Package
+    Get-Package -ListAvailable -Filter "Microsoft-web-helpers" | Install-Package
 
     # Assert
-    Assert-Package $p Microsoft-web-helpers
+    #Assert-Package $p Microsoft-web-helpers
 }
 
 function Test-ExplicitCallToAddBindingRedirectAddsBindingRedirectsToClassLibrary {
@@ -1432,19 +1432,6 @@ function Test-InstallPackageInstallsHighestPackageIfItIsReleaseWhenPreReleaseFla
 
     # Assert
     Assert-Package $a 'PreReleaseTestPackage.A' '1.0.0'
-}
-
-function Test-InstallingPrereleasePackageAddsItToRecentPackageList {
-    # Arrange
-    $a = New-ClassLibrary
-
-    # Act
-    $a | Install-Package -Source $context.RepositoryRoot PreReleaseTestPackage.A -PreRelease
-
-    # Assert
-    Assert-Package $a 'PreReleaseTestPackage.A' '1.0.0'
-    $p = @(Get-Package -Recent -Filter PreReleaseTestPackage.A)
-    Assert-AreEqual 1 $p.Count
 }
 
 function Test-InstallingPackagesWorksInTurkishLocaleWhenPackageIdContainsLetterI 

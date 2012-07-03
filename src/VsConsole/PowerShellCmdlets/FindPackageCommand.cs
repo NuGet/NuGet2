@@ -19,7 +19,6 @@ namespace NuGet.PowerShell.Commands
                    ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                    ServiceLocator.GetInstance<ISolutionManager>(),
                    ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-                   ServiceLocator.GetInstance<IRecentPackageRepository>(),
                    ServiceLocator.GetInstance<IHttpClientEvents>())
         {
         }
@@ -28,9 +27,8 @@ namespace NuGet.PowerShell.Commands
                           IVsPackageSourceProvider packageSourceProvider,
                           ISolutionManager solutionManager,
                           IVsPackageManagerFactory packageManagerFactory,
-                          IPackageRepository recentPackagesRepository,
                           IHttpClientEvents httpClientEvents)
-            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory, recentPackagesRepository, httpClientEvents, null)
+            : base(repositoryFactory, packageSourceProvider, solutionManager, packageManagerFactory, httpClientEvents, null)
         {
 
         }

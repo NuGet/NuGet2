@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Windows;
@@ -11,7 +12,6 @@ using Microsoft.VisualStudio.PlatformUI;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
-using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet.Dialog
 {
@@ -40,7 +40,6 @@ namespace NuGet.Dialog
                  ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
                  ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
                  ServiceLocator.GetInstance<IPackageSourceProvider>(),
-                 ServiceLocator.GetInstance<IRecentPackageRepository>(),
                  ServiceLocator.GetInstance<IHttpClientEvents>(),
                  ServiceLocator.GetInstance<IProductUpdateService>(),
                  ServiceLocator.GetInstance<IPackageRestoreManager>(),
@@ -54,7 +53,6 @@ namespace NuGet.Dialog
                                     IVsPackageManagerFactory packageManagerFactory,
                                     IPackageRepositoryFactory repositoryFactory,
                                     IPackageSourceProvider packageSourceProvider,
-                                    IRecentPackageRepository recentPackagesRepository,
                                     IHttpClientEvents httpClientEvents,
                                     IProductUpdateService productUpdateService,
                                     IPackageRestoreManager packageRestoreManager,
@@ -100,7 +98,6 @@ namespace NuGet.Dialog
                 repositoryFactory,
                 packageSourceProvider,
                 providerServices,
-                recentPackagesRepository,
                 httpClientEvents,
                 solutionManager,
                 packageRestoreManager);
@@ -142,7 +139,6 @@ namespace NuGet.Dialog
                                     IPackageRepositoryFactory packageRepositoryFactory,
                                     IPackageSourceProvider packageSourceProvider,
                                     ProviderServices providerServices,
-                                    IPackageRepository recentPackagesRepository,
                                     IHttpClientEvents httpClientEvents,
                                     ISolutionManager solutionManager,
                                     IPackageRestoreManager packageRestoreManager)
@@ -157,7 +153,6 @@ namespace NuGet.Dialog
             OnlineProvider onlineProvider;
             InstalledProvider installedProvider;
             UpdatesProvider updatesProvider;
-            OnlineProvider recentProvider;
 
             if (activeProject == null)
             {
@@ -193,17 +188,6 @@ namespace NuGet.Dialog
                     packageRepositoryFactory,
                     packageSourceProvider,
                     packageManagerFactory,
-                    providerServices,
-                    httpClientEvents,
-                    solutionManager);
-
-                recentProvider = new SolutionRecentProvider(
-                    localRepository,
-                    Resources,
-                    packageRepositoryFactory,
-                    packageManagerFactory,
-                    recentPackagesRepository,
-                    packageSourceProvider,
                     providerServices,
                     httpClientEvents,
                     solutionManager);
@@ -249,32 +233,19 @@ namespace NuGet.Dialog
                     providerServices,
                     httpClientEvents,
                     solutionManager);
-
-                recentProvider = new RecentProvider(
-                    activeProject,
-                    localRepository,
-                    Resources,
-                    packageRepositoryFactory,
-                    packageManagerFactory,
-                    recentPackagesRepository,
-                    packageSourceProvider,
-                    providerServices,
-                    httpClientEvents,
-                    solutionManager);
             }
 
             explorer.Providers.Add(installedProvider);
             explorer.Providers.Add(onlineProvider);
             explorer.Providers.Add(updatesProvider);
-            explorer.Providers.Add(recentProvider);
 
             installedProvider.IncludePrerelease =
                 onlineProvider.IncludePrerelease =
-                updatesProvider.IncludePrerelease =
-                recentProvider.IncludePrerelease = _providerSettings.IncludePrereleasePackages;
+                updatesProvider.IncludePrerelease = _providerSettings.IncludePrereleasePackages;
 
             // retrieve the selected provider from the settings
-            int selectedProvider = Math.Min(3, _providerSettings.SelectedProvider);
+            int selectedProvider = Math.Min(explorer.Providers.Count-1, _providerSettings.SelectedProvider);
+            selectedProvider = Math.Max(selectedProvider, 0);
             explorer.SelectedProvider = explorer.Providers[selectedProvider];
         }
 

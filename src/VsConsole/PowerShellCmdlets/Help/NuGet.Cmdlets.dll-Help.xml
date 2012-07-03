@@ -204,9 +204,6 @@ c:\temp\packages to find the package.
             <maml:name>ProjectName</maml:name>
         </command:parameter>
         <command:parameter required="false" position="named">
-          <maml:name>Recent</maml:name>
-        </command:parameter>
-        <command:parameter required="false" position="named">
           <maml:name>Filter</maml:name>
           <command:parameterValue required="true">string</command:parameterValue>
         </command:parameter>
@@ -249,12 +246,6 @@ c:\temp\packages to find the package.
          <maml:description>
            <maml:para>Specifies the project to get installed packages from. If ommitted, the command will return installed projects for the entire solution.</maml:para>
          </maml:description>
-      </command:parameter>
-      <command:parameter required="false" position="named">
-        <maml:name>Recent</maml:name>
-        <maml:description>
-          <maml:para>Gets the list of recently installed packages.</maml:para>
-        </maml:description>
       </command:parameter>
       <command:parameter required="false" position="named">
         <maml:name>Updates</maml:name>
@@ -357,18 +348,6 @@ Description
 Returns a list of packages installed in the default project that have updates available in the current package source.
           </maml:para>
           <maml:para></maml:para>
-          <maml:para></maml:para>
-        </dev:remarks>
-      </command:example>
-      <command:example>
-        <maml:title>----------  EXAMPLE 6  ----------</maml:title>
-        <dev:code>PM&gt; Get-Package -Recent</dev:code>
-        <dev:remarks>
-          <maml:para>
-Description
-------------------------------------------------------------------
-Returns a list of recently installed packages.
-          </maml:para>
           <maml:para></maml:para>
         </dev:remarks>
       </command:example>

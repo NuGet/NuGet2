@@ -28,8 +28,8 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(2, result.Count());
-            AssertPackageResultsEqual(result.First(), new {Id = "P1", Version = new SemanticVersion("0.9")});
-            AssertPackageResultsEqual(result.Last(), new {Id = "P2", Version = new SemanticVersion("1.0")});
+            AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new SemanticVersion("0.9") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "P2", Version = new SemanticVersion("1.0") });
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(1, result.Count());
-            AssertPackageResultsEqual(result.First(), new {Id = "P2", Version = new SemanticVersion("1.0")});
+            AssertPackageResultsEqual(result.First(), new { Id = "P2", Version = new SemanticVersion("1.0") });
         }
 
         [Fact]
@@ -60,7 +60,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(1, result.Count());
-            AssertPackageResultsEqual(result.First(), new {Id = "P2", Version = new SemanticVersion("1.0")});
+            AssertPackageResultsEqual(result.First(), new { Id = "P2", Version = new SemanticVersion("1.0") });
         }
 
         [Fact]
@@ -75,10 +75,10 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(4, result.Count());
-            AssertPackageResultsEqual(result.ElementAt(0), new {Id = "P0", Version = new SemanticVersion("1.1")});
-            AssertPackageResultsEqual(result.ElementAt(1), new {Id = "P1", Version = new SemanticVersion("1.1")});
-            AssertPackageResultsEqual(result.ElementAt(2), new {Id = "P2", Version = new SemanticVersion("1.2")});
-            AssertPackageResultsEqual(result.ElementAt(3), new {Id = "P3", Version = new SemanticVersion("1.0")});
+            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P0", Version = new SemanticVersion("1.1") });
+            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P1", Version = new SemanticVersion("1.1") });
+            AssertPackageResultsEqual(result.ElementAt(2), new { Id = "P2", Version = new SemanticVersion("1.2") });
+            AssertPackageResultsEqual(result.ElementAt(3), new { Id = "P3", Version = new SemanticVersion("1.0") });
         }
 
         [Fact]
@@ -95,8 +95,8 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(2, result.Count());
-            AssertPackageResultsEqual(result.ElementAt(0), new {Id = "P1", Version = new SemanticVersion("1.1")});
-            AssertPackageResultsEqual(result.ElementAt(1), new {Id = "P2", Version = new SemanticVersion("1.2")});
+            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P1", Version = new SemanticVersion("1.1") });
+            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P2", Version = new SemanticVersion("1.2") });
         }
 
         [Fact]
@@ -112,7 +112,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(1, result.Count());
-            AssertPackageResultsEqual(result.ElementAt(0), new {Id = "P1", Version = new SemanticVersion("1.1")});
+            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P1", Version = new SemanticVersion("1.1") });
         }
 
         [Fact]
@@ -128,8 +128,8 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(2, result.Count());
-            AssertPackageResultsEqual(result.First(), new {Id = "P1", Version = new SemanticVersion("1.4")});
-            AssertPackageResultsEqual(result.Last(), new {Id = "P6", Version = new SemanticVersion("1.0")});
+            AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new SemanticVersion("1.4") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "P6", Version = new SemanticVersion("1.0") });
         }
 
         [Fact]
@@ -145,8 +145,8 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(2, result.Count());
-            AssertPackageResultsEqual(result.First(), new {Id = "P1", Version = new SemanticVersion("1.4")});
-            AssertPackageResultsEqual(result.Last(), new {Id = "P6", Version = new SemanticVersion("1.0")});
+            AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new SemanticVersion("1.4") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "P6", Version = new SemanticVersion("1.0") });
         }
 
         [Fact]
@@ -174,8 +174,8 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(2, result.Count());
-            AssertPackageResultsEqual(result.First(), new {Id = "P1", Version = new SemanticVersion("1.4")});
-            AssertPackageResultsEqual(result.Last(), new {Id = "P6", Version = new SemanticVersion("1.0")});
+            AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new SemanticVersion("1.4") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "P6", Version = new SemanticVersion("1.0") });
         }
 
         [Fact]
@@ -190,8 +190,8 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(2, result.Count());
-            AssertPackageResultsEqual(result.First(), new {Id = "P1", Version = new SemanticVersion("1.4")});
-            AssertPackageResultsEqual(result.Last(), new {Id = "P6", Version = new SemanticVersion("1.0")});
+            AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new SemanticVersion("1.4") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "P6", Version = new SemanticVersion("1.0") });
         }
 
         [Fact]
@@ -208,7 +208,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(1, result.Count());
-            AssertPackageResultsEqual(result.First(), new {Id = "P6", Version = new SemanticVersion("1.0")});
+            AssertPackageResultsEqual(result.First(), new { Id = "P6", Version = new SemanticVersion("1.0") });
         }
 
         [Fact]
@@ -234,10 +234,10 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(4, result.Count());
-            AssertPackageResultsEqual(result.ElementAt(0), new {Id = "P0", Version = new SemanticVersion("1.1")});
-            AssertPackageResultsEqual(result.ElementAt(1), new {Id = "P1", Version = new SemanticVersion("1.1")});
-            AssertPackageResultsEqual(result.ElementAt(2), new {Id = "P2", Version = new SemanticVersion("1.2")});
-            AssertPackageResultsEqual(result.ElementAt(3), new {Id = "P3", Version = new SemanticVersion("1.0")});
+            AssertPackageResultsEqual(result.ElementAt(0), new { Id = "P0", Version = new SemanticVersion("1.1") });
+            AssertPackageResultsEqual(result.ElementAt(1), new { Id = "P1", Version = new SemanticVersion("1.1") });
+            AssertPackageResultsEqual(result.ElementAt(2), new { Id = "P2", Version = new SemanticVersion("1.2") });
+            AssertPackageResultsEqual(result.ElementAt(3), new { Id = "P3", Version = new SemanticVersion("1.0") });
         }
 
         [Fact]
@@ -252,8 +252,8 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(2, result.Count());
-            AssertPackageResultsEqual(result.First(), new {Id = "P1", Version = new SemanticVersion("1.4")});
-            AssertPackageResultsEqual(result.Last(), new {Id = "P6", Version = new SemanticVersion("1.0")});
+            AssertPackageResultsEqual(result.First(), new { Id = "P1", Version = new SemanticVersion("1.4") });
+            AssertPackageResultsEqual(result.Last(), new { Id = "P6", Version = new SemanticVersion("1.0") });
         }
 
         [Fact]
@@ -293,8 +293,8 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(packages.Count(), 2);
-            AssertPackageResultsEqual(packages.First(), new {Id = "P1", Version = new SemanticVersion("1.1")});
-            AssertPackageResultsEqual(packages.Last(), new {Id = "P2", Version = new SemanticVersion("1.2")});
+            AssertPackageResultsEqual(packages.First(), new { Id = "P1", Version = new SemanticVersion("1.1") });
+            AssertPackageResultsEqual(packages.Last(), new { Id = "P2", Version = new SemanticVersion("1.2") });
         }
 
         [Fact]
@@ -310,7 +310,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(packages.Count(), 1);
-            AssertPackageResultsEqual(packages.First(), new {Id = "P1", Version = new SemanticVersion("1.1")});
+            AssertPackageResultsEqual(packages.First(), new { Id = "P1", Version = new SemanticVersion("1.1") });
         }
 
         [Fact]
@@ -326,7 +326,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(packages.Count(), 1);
-            AssertPackageResultsEqual(packages.First(), new {Id = "P1", Version = new SemanticVersion("1.4")});
+            AssertPackageResultsEqual(packages.First(), new { Id = "P1", Version = new SemanticVersion("1.4") });
         }
 
         [Fact]
@@ -343,7 +343,7 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(packages.Count(), 1);
-            AssertPackageResultsEqual(packages.First(), new {Id = "P1", Version = new SemanticVersion("1.4")});
+            AssertPackageResultsEqual(packages.First(), new { Id = "P1", Version = new SemanticVersion("1.4") });
         }
 
         [Fact]
@@ -355,10 +355,13 @@ namespace NuGet.PowerShell.Commands.Test
             var repositorySettings = new Mock<IRepositorySettings>();
             repositorySettings.Setup(m => m.RepositoryPath).Returns("foo");
             var cmdlet =
-                new Mock<GetPackageCommand>(GetDefaultRepositoryFactory(), new Mock<IVsPackageSourceProvider>().Object,
-                                            TestUtils.GetSolutionManager(isSolutionOpen: false),
-                                            packageManagerFactory.Object, new Mock<IPackageRepository>().Object, null,
-                                            null) {CallBase = true}.Object;
+                new Mock<GetPackageCommand>(
+                    GetDefaultRepositoryFactory(),
+                    new Mock<IVsPackageSourceProvider>().Object,
+                    TestUtils.GetSolutionManager(isSolutionOpen: false),
+                    packageManagerFactory.Object,
+                    null,
+                    null) { CallBase = true }.Object;
             cmdlet.ListAvailable = new SwitchParameter(isPresent: true);
 
             // Act and Assert
@@ -381,10 +384,10 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(packages.Count(), 3);
-            AssertPackageResultsEqual(packages.ElementAt(0), new {Id = "jQuery", Version = new SemanticVersion("1.52")});
+            AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "jQuery", Version = new SemanticVersion("1.52") });
             AssertPackageResultsEqual(packages.ElementAt(1),
-                                      new {Id = "NHibernate", Version = new SemanticVersion("1.13")});
-            AssertPackageResultsEqual(packages.ElementAt(2), new {Id = "TestPack", Version = new SemanticVersion("0.7")});
+                                      new { Id = "NHibernate", Version = new SemanticVersion("1.13") });
+            AssertPackageResultsEqual(packages.ElementAt(2), new { Id = "TestPack", Version = new SemanticVersion("0.7") });
         }
 
         [Fact]
@@ -404,14 +407,14 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(packages.Count(), 6);
-            AssertPackageResultsEqual(packages.ElementAt(0), new {Id = "jQuery", Version = new SemanticVersion("1.44")});
-            AssertPackageResultsEqual(packages.ElementAt(1), new {Id = "jQuery", Version = new SemanticVersion("1.51")});
-            AssertPackageResultsEqual(packages.ElementAt(2), new {Id = "jQuery", Version = new SemanticVersion("1.52")});
+            AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "jQuery", Version = new SemanticVersion("1.44") });
+            AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "jQuery", Version = new SemanticVersion("1.51") });
+            AssertPackageResultsEqual(packages.ElementAt(2), new { Id = "jQuery", Version = new SemanticVersion("1.52") });
             AssertPackageResultsEqual(packages.ElementAt(3),
-                                      new {Id = "NHibernate", Version = new SemanticVersion("1.1")});
+                                      new { Id = "NHibernate", Version = new SemanticVersion("1.1") });
             AssertPackageResultsEqual(packages.ElementAt(4),
-                                      new {Id = "NHibernate", Version = new SemanticVersion("1.13")});
-            AssertPackageResultsEqual(packages.ElementAt(5), new {Id = "TestPack", Version = new SemanticVersion("0.7")});
+                                      new { Id = "NHibernate", Version = new SemanticVersion("1.13") });
+            AssertPackageResultsEqual(packages.ElementAt(5), new { Id = "TestPack", Version = new SemanticVersion("0.7") });
         }
 
         [Fact]
@@ -430,117 +433,8 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(packages.Count(), 2);
-            AssertPackageResultsEqual(packages.ElementAt(0), new {Id = "jQuery", Version = new SemanticVersion("1.52")});
-            AssertPackageResultsEqual(packages.ElementAt(1), new {Id = "TestPack", Version = new SemanticVersion("0.7")});
-        }
-
-        [Fact]
-        public void RecentPackagesCollapsesVersion()
-        {
-            // Arrange
-            var cmdlet = BuildCmdlet(repositoryFactory: GetDefaultRepositoryFactory(),
-                                     recentPackageRepository: GetRepositoryWithMultiplePackageVersions());
-            cmdlet.Recent = new SwitchParameter(isPresent: true);
-
-            // Act 
-            var packages = cmdlet.GetResults<dynamic>();
-
-            // Assert
-            Assert.Equal(packages.Count(), 3);
-            AssertPackageResultsEqual(packages.ElementAt(0), new {Id = "jQuery", Version = new SemanticVersion("1.52")});
-            AssertPackageResultsEqual(packages.ElementAt(1),
-                                      new {Id = "NHibernate", Version = new SemanticVersion("1.13")});
-            AssertPackageResultsEqual(packages.ElementAt(2), new {Id = "TestPack", Version = new SemanticVersion("0.7")});
-        }
-
-        [Fact]
-        public void RecentPackagesFiltersAndCollapsesVersion()
-        {
-            // Arrange
-            var cmdlet = BuildCmdlet(repositoryFactory: GetDefaultRepositoryFactory(),
-                                     recentPackageRepository: GetRepositoryWithMultiplePackageVersions());
-            cmdlet.Recent = true;
-            cmdlet.Filter = "NHibernate jQuery";
-
-            // Act 
-            var packages = cmdlet.GetResults<dynamic>();
-
-            // Assert
-            Assert.Equal(packages.Count(), 2);
-            AssertPackageResultsEqual(packages.ElementAt(0), new {Id = "jQuery", Version = new SemanticVersion("1.52")});
-            AssertPackageResultsEqual(packages.ElementAt(1),
-                                      new {Id = "NHibernate", Version = new SemanticVersion("1.13")});
-        }
-
-        [Fact]
-        public void RecentPackagesShowsAllPackageVersionsIfSwitchIsPresent()
-        {
-            // Arrange
-            var cmdlet = BuildCmdlet(repositoryFactory: GetDefaultRepositoryFactory(),
-                                     recentPackageRepository: GetRepositoryWithMultiplePackageVersions());
-            cmdlet.Recent = true;
-            cmdlet.AllVersions = true;
-
-            // Act 
-            var packages = cmdlet.GetResults<dynamic>();
-
-            // Assert
-            Assert.Equal(packages.Count(), 6);
-            AssertPackageResultsEqual(packages.ElementAt(0), new {Id = "jQuery", Version = new SemanticVersion("1.44")});
-            AssertPackageResultsEqual(packages.ElementAt(1), new {Id = "jQuery", Version = new SemanticVersion("1.51")});
-            AssertPackageResultsEqual(packages.ElementAt(2), new {Id = "jQuery", Version = new SemanticVersion("1.52")});
-            AssertPackageResultsEqual(packages.ElementAt(3),
-                                      new {Id = "NHibernate", Version = new SemanticVersion("1.1")});
-            AssertPackageResultsEqual(packages.ElementAt(4),
-                                      new {Id = "NHibernate", Version = new SemanticVersion("1.13")});
-            AssertPackageResultsEqual(packages.ElementAt(5), new {Id = "TestPack", Version = new SemanticVersion("0.7")});
-        }
-
-        [Fact]
-        public void RecentPackagesWithShowAllVersionsAppliesFirstAndSkipFilters()
-        {
-            // Arrange
-            var cmdlet = BuildCmdlet(repositoryFactory: GetDefaultRepositoryFactory(),
-                                     recentPackageRepository: GetRepositoryWithMultiplePackageVersions());
-            cmdlet.Recent = true;
-            cmdlet.AllVersions = true;
-            cmdlet.Skip = 2;
-            cmdlet.First = 2;
-
-            // Act 
-            var packages = cmdlet.GetResults<dynamic>();
-
-            // Assert
-            Assert.Equal(packages.Count(), 2);
-            AssertPackageResultsEqual(packages.ElementAt(0), new {Id = "jQuery", Version = new SemanticVersion("1.52")});
-            AssertPackageResultsEqual(packages.ElementAt(1),
-                                      new {Id = "NHibernate", Version = new SemanticVersion("1.1")});
-        }
-
-        [Fact]
-        public void TestRecentSwitchWorkCorrectly()
-        {
-            // Arrange
-            var packageA = PackageUtility.CreatePackage("A", "1.0");
-            var packageB = PackageUtility.CreatePackage("B", "2.0");
-            var packageC = PackageUtility.CreatePackage("C", "3.0");
-
-            var repository = new MockPackageRepository();
-            repository.Add(packageA);
-            repository.Add(packageB);
-            repository.Add(packageC);
-
-            var cmdlet = BuildCmdlet(false, repository);
-            cmdlet.Recent = true;
-
-            // Act
-            var packages = cmdlet.GetResults().OfType<PSObject>().Select(p => (IPackage) p.BaseObject).ToList();
-
-            // Assert
-            Assert.Equal(3, packages.Count);
-            Assert.Same(packageA, packages[0]);
-            Assert.Same(packageB, packages[1]);
-            Assert.Same(packageC, packages[2]);
+            AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "jQuery", Version = new SemanticVersion("1.52") });
+            AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "TestPack", Version = new SemanticVersion("0.7") });
         }
 
         [Fact]
@@ -636,21 +530,6 @@ namespace NuGet.PowerShell.Commands.Test
         }
 
         [Fact]
-        public void GetPackageDoNotInvokeProductUpdateCheckWhenGetRecentPackages()
-        {
-            // Arrange
-            var productUpdateService = new Mock<IProductUpdateService>();
-            var cmdlet = BuildCmdlet(productUpdateService: productUpdateService.Object);
-            cmdlet.Recent = true;
-
-            // Act
-            var packages = cmdlet.GetResults();
-
-            // Assert
-            productUpdateService.Verify(p => p.CheckForAvailableUpdateAsync(), Times.Never());
-        }
-
-        [Fact]
         public void GetPackageReturnsPrereleasePackageForInstalledWhenFlagIsNotSpecified()
         {
             // Arrange
@@ -663,41 +542,16 @@ namespace NuGet.PowerShell.Commands.Test
             var packageManager = GetPackageManager(installedPackages);
             packageManagerFactory.Setup(f => f.CreatePackageManager()).Returns(packageManager);
             var cmdlet = BuildCmdlet(repositoryFactory: GetDefaultRepositoryFactory(),
-                                     packageManagerFactory: packageManagerFactory.Object,
-                                     recentPackageRepository: GetRepositoryWithMultiplePackageVersions());
+                                     packageManagerFactory: packageManagerFactory.Object);
 
             // Act 
             var packages = cmdlet.GetResults<dynamic>();
 
             // Assert
             Assert.Equal(3, packages.Count());
-            AssertPackageResultsEqual(packages.ElementAt(0), new {Id = "A", Version = new SemanticVersion("1.0")});
-            AssertPackageResultsEqual(packages.ElementAt(1), new {Id = "B", Version = new SemanticVersion("1.1.0-a")});
-            AssertPackageResultsEqual(packages.ElementAt(2), new {Id = "C", Version = new SemanticVersion("1.3.7.5")});
-        }
-
-        [Fact]
-        public void GetPackageReturnsPrereleasePackageForRecentWhenFlagIsNotSpecified()
-        {
-            // Arrange
-            var recentPackages = new MockPackageRepository()
-                                     {
-                                         PackageUtility.CreatePackage("A"),
-                                         PackageUtility.CreatePackage("B", "1.1.0-a"),
-                                         PackageUtility.CreatePackage("C", "1.3.7.5")
-                                     };
-            var cmdlet = BuildCmdlet(repositoryFactory: GetDefaultRepositoryFactory(),
-                                     recentPackageRepository: recentPackages);
-            cmdlet.Recent = true;
-
-            // Act 
-            var packages = cmdlet.GetResults<dynamic>();
-
-            // Assert
-            Assert.Equal(3, packages.Count());
-            AssertPackageResultsEqual(packages.ElementAt(0), new {Id = "A", Version = new SemanticVersion("1.0")});
-            AssertPackageResultsEqual(packages.ElementAt(1), new {Id = "B", Version = new SemanticVersion("1.1.0-a")});
-            AssertPackageResultsEqual(packages.ElementAt(2), new {Id = "C", Version = new SemanticVersion("1.3.7.5")});
+            AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "A", Version = new SemanticVersion("1.0") });
+            AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "B", Version = new SemanticVersion("1.1.0-a") });
+            AssertPackageResultsEqual(packages.ElementAt(2), new { Id = "C", Version = new SemanticVersion("1.3.7.5") });
         }
 
         [Fact]
@@ -731,8 +585,8 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(2, packages.Count());
-            AssertPackageResultsEqual(packages.ElementAt(0), new {Id = "A", Version = new SemanticVersion("1.1")});
-            AssertPackageResultsEqual(packages.ElementAt(1), new {Id = "B", Version = new SemanticVersion("1.1.0")});
+            AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "A", Version = new SemanticVersion("1.1") });
+            AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "B", Version = new SemanticVersion("1.1.0") });
         }
 
         [Fact]
@@ -767,9 +621,9 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(3, packages.Count());
-            AssertPackageResultsEqual(packages.ElementAt(0), new {Id = "A", Version = new SemanticVersion("1.1")});
-            AssertPackageResultsEqual(packages.ElementAt(1), new {Id = "B", Version = new SemanticVersion("1.1.0")});
-            AssertPackageResultsEqual(packages.ElementAt(2), new {Id = "C", Version = new SemanticVersion("1.3.7.5-b")});
+            AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "A", Version = new SemanticVersion("1.1") });
+            AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "B", Version = new SemanticVersion("1.1.0") });
+            AssertPackageResultsEqual(packages.ElementAt(2), new { Id = "C", Version = new SemanticVersion("1.3.7.5-b") });
         }
 
         [Fact]
@@ -793,8 +647,8 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(2, packages.Count());
-            AssertPackageResultsEqual(packages.ElementAt(0), new {Id = "A", Version = new SemanticVersion("1.1")});
-            AssertPackageResultsEqual(packages.ElementAt(1), new {Id = "D", Version = new SemanticVersion("1.0")});
+            AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "A", Version = new SemanticVersion("1.1") });
+            AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "D", Version = new SemanticVersion("1.0") });
         }
 
         [Fact]
@@ -819,9 +673,9 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(3, packages.Count());
-            AssertPackageResultsEqual(packages.ElementAt(0), new {Id = "A", Version = new SemanticVersion("1.1")});
-            AssertPackageResultsEqual(packages.ElementAt(1), new {Id = "B", Version = new SemanticVersion("1.1.0-b")});
-            AssertPackageResultsEqual(packages.ElementAt(2), new {Id = "D", Version = new SemanticVersion("1.0")});
+            AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "A", Version = new SemanticVersion("1.1") });
+            AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "B", Version = new SemanticVersion("1.1.0-b") });
+            AssertPackageResultsEqual(packages.ElementAt(2), new { Id = "D", Version = new SemanticVersion("1.0") });
         }
 
         [Fact]
@@ -848,8 +702,8 @@ namespace NuGet.PowerShell.Commands.Test
 
             // Assert
             Assert.Equal(2, packages.Count());
-            AssertPackageResultsEqual(packages.ElementAt(0), new {Id = "A", Version = new SemanticVersion("1.1")});
-            AssertPackageResultsEqual(packages.ElementAt(1), new {Id = "B", Version = new SemanticVersion("1.1.0-b")});
+            AssertPackageResultsEqual(packages.ElementAt(0), new { Id = "A", Version = new SemanticVersion("1.1") });
+            AssertPackageResultsEqual(packages.ElementAt(1), new { Id = "B", Version = new SemanticVersion("1.1.0-b") });
         }
 
         [Fact]
@@ -863,7 +717,7 @@ namespace NuGet.PowerShell.Commands.Test
                                            PackageUtility.CreatePackage("C", "2.0.0", listed: false),
                                            PackageUtility.CreatePackage("C", "2.0.3.4-alpha", listed: false)
                                        };
-            
+
             var repositoryFactory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
             repositoryFactory.Setup(r => r.CreateRepository("NuGet Official Source")).Returns(sourceRepository);
 
@@ -882,7 +736,6 @@ namespace NuGet.PowerShell.Commands.Test
                 new Mock<IFileSystemProvider>().Object,
                 new Mock<IFileSystem>().Object,
                 localRepository.Object,
-                new Mock<IRecentPackageRepository>().Object,
                 new VsPackageInstallerEvents());
 
             var mockPackageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
@@ -893,7 +746,6 @@ namespace NuGet.PowerShell.Commands.Test
                 GetSourceProvider("NuGet Official Source"),
                 solutionManager,
                 mockPackageManagerFactory.Object,
-                new Mock<IPackageRepository>().Object,
                 new Mock<IHttpClient>().Object,
                 new Mock<IProductUpdateService>().Object);
 
@@ -941,7 +793,6 @@ namespace NuGet.PowerShell.Commands.Test
                 new Mock<IFileSystemProvider>().Object,
                 new Mock<IFileSystem>().Object,
                 localRepository.Object,
-                new Mock<IRecentPackageRepository>().Object,
                 new VsPackageInstallerEvents());
 
             var mockPackageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
@@ -952,7 +803,6 @@ namespace NuGet.PowerShell.Commands.Test
                 GetSourceProvider("NuGet Official Source"),
                 solutionManager,
                 mockPackageManagerFactory.Object,
-                new Mock<IPackageRepository>().Object,
                 new Mock<IHttpClient>().Object,
                 new Mock<IProductUpdateService>().Object);
 
@@ -989,13 +839,11 @@ namespace NuGet.PowerShell.Commands.Test
 
         private static GetPackageCommand BuildCmdlet(
             bool isSolutionOpen = true,
-            IPackageRepository recentPackageRepository = null,
             IProductUpdateService productUpdateService = null,
             IPackageRepositoryFactory repositoryFactory = null,
             IVsPackageManagerFactory packageManagerFactory = null,
             string activeSourceName = "ActiveRepo")
         {
-
             if (packageManagerFactory == null)
             {
                 var mockFactory = new Mock<IVsPackageManagerFactory>();
@@ -1004,17 +852,11 @@ namespace NuGet.PowerShell.Commands.Test
                 packageManagerFactory = mockFactory.Object;
             }
 
-            if (recentPackageRepository == null)
-            {
-                recentPackageRepository = new Mock<IPackageRepository>().Object;
-            }
-
             return new GetPackageCommand(
                 repositoryFactory ?? GetDefaultRepositoryFactory(activeSourceName),
                 GetSourceProvider(activeSourceName),
                 TestUtils.GetSolutionManager(isSolutionOpen: isSolutionOpen),
                 packageManagerFactory,
-                recentPackageRepository,
                 null,
                 productUpdateService);
         }
@@ -1023,7 +865,7 @@ namespace NuGet.PowerShell.Commands.Test
         {
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             var repository = new Mock<IPackageRepository>();
-            var packages = new[] {PackageUtility.CreatePackage("P1", "1.4"), PackageUtility.CreatePackage("P6")};
+            var packages = new[] { PackageUtility.CreatePackage("P1", "1.4"), PackageUtility.CreatePackage("P6") };
             repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
 
             repositoryFactory.Setup(c => c.CreateRepository(activeSourceName)).Returns(GetActiveRepository());
@@ -1069,12 +911,11 @@ namespace NuGet.PowerShell.Commands.Test
             var fileSystem = new Mock<IFileSystem>();
             var localRepo = new Mock<ISharedPackageRepository>();
             localPackages = localPackages ??
-                            new[] {PackageUtility.CreatePackage("P1", "0.9"), PackageUtility.CreatePackage("P2")};
+                            new[] { PackageUtility.CreatePackage("P1", "0.9"), PackageUtility.CreatePackage("P2") };
             localRepo.Setup(c => c.GetPackages()).Returns(localPackages.AsQueryable());
 
             return new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(), new Mock<IFileSystemProvider>().Object, fileSystem.Object,
-                                        localRepo.Object, new Mock<IRecentPackageRepository>().Object,
-                                        new Mock<VsPackageInstallerEvents>().Object);
+                                        localRepo.Object, new Mock<VsPackageInstallerEvents>().Object);
         }
 
         private static IVsPackageManagerFactory GetPackageManagerForMultipleVersions()
@@ -1089,9 +930,8 @@ namespace NuGet.PowerShell.Commands.Test
             localRepo.Setup(c => c.GetPackages()).Returns(localPackages.AsQueryable());
 
             var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(),
-                                                      new Mock<IFileSystemProvider>().Object, 
+                                                      new Mock<IFileSystemProvider>().Object,
                                                       fileSystem.Object, localRepo.Object,
-                                                      new Mock<IRecentPackageRepository>().Object,
                                                       new Mock<VsPackageInstallerEvents>().Object);
 
             var factory = new Mock<IVsPackageManagerFactory>();

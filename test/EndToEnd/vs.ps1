@@ -508,10 +508,6 @@ function Close-Solution {
     }
 }
 
-function Clear-RecentPackageRepository() {
-    $host.PrivateData.RecentPackageRepository.Clear() | out-null
-}
-
 function Enable-PackageRestore {
     if (!$dte.Solution -or !$dte.Solution.IsOpen) 
     {

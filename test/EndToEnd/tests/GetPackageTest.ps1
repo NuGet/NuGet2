@@ -37,42 +37,6 @@ function Test-GetPackageWithUpdatesListsUpdates {
     Assert-AreEqual 2 $packages.Count
 }
 
-function Test-GetPackageListsRecentPackages {
-    # Arrange
-    $p = New-ConsoleApplication
-
-    # Act
-    Install-Package Antlr -Project $p.Name
-    Install-Package jQuery -Project $p.Name
-
-    $packages = Get-Package -Recent
-    $haveAntlr = @($packages | Where-Object { $_.Id -eq 'Antlr' })
-    $havejQuery = @($packages | Where-Object { $_.Id -eq 'jQuery' })
-
-    # Assert
-    Assert-True ($haveAntlr.Count -gt 0)
-    Assert-True ($havejQuery.Count -gt 0)
-}
-
-
-function Test-GetPackageReturnPackagesInOrderOfLastInstalledFirst {
-    # Arrange
-    $p = New-ConsoleApplication
-
-    # Act
-    Install-Package Antlr -Project $p.Name
-    Install-Package jQuery -Project $p.Name
-    Install-Package elmah -Project $p.Name
-
-    $packages = Get-Package -Recent -First 3
-
-    # Assert
-    Assert-AreEqual 3 $packages.Count
-    Assert-AreEqual "elmah" $packages[0].Id
-    Assert-AreEqual "jQuery" $packages[1].Id
-    Assert-AreEqual "Antlr" $packages[2].Id
-}
-
 function Test-GetPackageCollapsesPackageVersionsForListAvailable {
     # Act
     $packages = Get-Package -ListAvailable jQuery 
@@ -93,26 +57,6 @@ function Test-GetPackageAllVersionReturnsMultipleVersions {
     # Ensure we have at least some packages
     Assert-True (1 -le $packages.Count) 
     Assert-True ($packageWithMoreThanOneVersion.Count -gt 0)
-}
-
-
-function Test-GetPackageCollapsesPackageVersionsForRecent {
-    # Arrange
-    $p = New-ConsoleApplication
-    
-    # Act
-    Install-Package jQuery -Project $p.Name -Version 1.4.1
-    Install-Package jQuery -Project $p.Name -Version 1.4.2
-    Install-Package jQuery -Project $p.Name -Version 1.4.4
-    Install-Package Antlr -Project $p.Name
-        
-    $recentPackages = Get-Package -Recent
-    $packagesWithMoreThanOneVersions = $recentPackages | group "Id" | Where { $_.count -gt 1 } 
- 
-    # Assert
-    # Ensure we have at least some packages
-    Assert-True (1 -le $recentPackages.Count) 
-    Assert-Null $packagesWithMoreThanOneVersions
 }
 
 function Test-GetPackageAcceptsSourceName {
@@ -186,80 +130,6 @@ function Test-GetPackageAcceptsRelativePathSource2 {
 function Test-GetPackageThrowsWhenSourceIsInvalid {
     # Act & Assert
     Assert-Throws { Get-Package -ListAvailable -source "d:package" } "Invalid URI: A Dos path must be rooted, for example, 'c:\'."
-}
-
-function Test-UpdatedPackageAppearInRecentPackageList {
-    # Arrange
-    Clear-RecentPackageRepository
-
-    $p = New-ConsoleApplication
-    Install-Package jQuery -Version 1.5
-    Update-Package jQuery -Version 1.6
-
-    # Act
-    $result = @(Get-Package -Recent)
-
-    # Assert
-    Assert-AreEqual 1 $result.Count
-    Assert-AreEqual "jQuery" $result[0].Id
-    Assert-AreEqual "1.6" $result[0].Version
-}
-
-function Test-DependentPackagesAreAddedToRecentIfOlderVersionsAlreadyInRecent {
-    # Arrange
-    Clear-RecentPackageRepository
-    $p = New-ClassLibrary
-
-    # install jQuery.Validation 1.8 will also install jQuery 1.4.4 as dependency
-    Install-Package jQuery.Validation -version 1.8 -ProjectName $p.Name
-
-    $result = @(Get-Package -Recent)
-    Assert-AreEqual 1 $result.Count
-    
-    Assert-AreEqual "jQuery.Validation" $result[0].Id
-    Assert-AreEqual "1.8" $result[0].Version
-
-    # Act
-    Update-Package jQuery -Version 1.6.2 -ProjectName $p.Name
-
-    # Assert
-    $result = @(Get-Package -Recent)
-    Assert-AreEqual 2 $result.Count
-
-    Assert-AreEqual "jQuery" $result[0].Id
-    Assert-AreEqual "1.6.2" $result[0].Version
-
-    Assert-AreEqual "jQuery.Validation" $result[1].Id
-    Assert-AreEqual "1.8.1" $result[1].Version
-}
-
-function Test-DependencyPackagesAreAddedToRecentIfOlderVersionsAlreadyInRecent {
-    # Arrange
-    Clear-RecentPackageRepository
-    $p = New-ClassLibrary
-
-    Install-Package jQuery -version 1.4.1 -ProjectName $p.Name
-
-    $result = @(Get-Package -Recent)
-    Assert-AreEqual 1 $result.Count
-    
-    Assert-AreEqual "jQuery" $result[0].Id
-    Assert-AreEqual "1.4.1" $result[0].Version
-
-    # Act
-
-    # install jQuery.UI.Combined version 1.8.14 will force updating jQuery to 1.4.4
-    Install-Package jQuery.UI.Combined -Version 1.8.14 -ProjectName $p.Name
-
-    # Assert
-    $result = @(Get-Package -Recent)
-    Assert-AreEqual 2 $result.Count
-
-    Assert-AreEqual "jQuery.UI.Combined" $result[0].Id
-    Assert-AreEqual "1.8.14" $result[0].Version
-
-    Assert-AreEqual "jQuery" $result[1].Id
-    Assert-AreEqual "1.4.4" $result[1].Version
 }
 
 function Test-GetPackageForProjectReturnsEmptyProjectIfItHasNoInstalledPackage {

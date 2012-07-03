@@ -60,13 +60,6 @@ namespace NuGetConsole.Host.PowerShell.Implementation
 
             Tuple<string, object>[] privateData = new Tuple<string, object>[] { pmfTuple };
 
-#if DEBUG
-            var recentPackageRepository = ServiceLocator.GetInstance<IRecentPackageRepository>();
-            var rprTuple = Tuple.Create<string, object>("recentPackageRepository", recentPackageRepository);
-
-            privateData = new[] { pmfTuple, rprTuple };
-#endif
-
             var host = new NuGetPSHost(hostName, privateData)
             {
                 ActiveConsole = console
