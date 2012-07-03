@@ -151,12 +151,12 @@ namespace NuGet.Commands
             return RepositoryFactory.CreateRepository(SourceProvider.ResolveAndValidateSource(repo));
         }
 
-        protected virtual IPackageRepository GetTargetRepository(string pullUrl, string pushUrl)
+        protected virtual IPackageRepository GetTargetRepository(string pull, string push)
         {
             return new PackageServerRepository(
-                pull: GetDestinationRepositoryList(pullUrl),
-                push: GetDestinationRepositoryPush(pushUrl),
-                apiKey: GetApiKey(pullUrl),
+                pull: GetDestinationRepositoryList(pull),
+                push: GetDestinationRepositoryPush(push),
+                apiKey: GetApiKey(pull),
                 timeout: GetTimeout(),
                 logger: Console);
         }
@@ -202,7 +202,7 @@ namespace NuGet.Commands
             return new PackageReferenceFile(fileSystem, Path.GetFullPath(configFilePath));
         }
 
-        private bool IsUsingPackagesConfig(string packageId)
+        private static bool IsUsingPackagesConfig(string packageId)
         {
             return Path.GetFileName(packageId).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase);
         }
