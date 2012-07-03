@@ -170,7 +170,7 @@ namespace NuGet
                 return;
             }
 
-            ExpandFiles(package);
+            OnExpandFiles(args);
 
             LocalRepository.AddPackage(package);
 
@@ -279,7 +279,7 @@ namespace NuGet
                 return;
             }
 
-            RemoveFiles(package);
+            OnRemoveFiles(args);
             // Remove package to the repository
             LocalRepository.RemovePackage(package);
 
@@ -307,12 +307,17 @@ namespace NuGet
             FileSystem.DeleteFiles(package.GetFiles(), packageDirectory);
         }
 
-        private void OnInstalling(PackageOperationEventArgs e)
+        protected virtual void OnInstalling(PackageOperationEventArgs e)
         {
             if (PackageInstalling != null)
             {
                 PackageInstalling(this, e);
             }
+        }
+
+        protected virtual void OnExpandFiles(PackageOperationEventArgs e)
+        {
+            ExpandFiles(e.Package);
         }
 
         protected virtual void OnInstalled(PackageOperationEventArgs e)
@@ -323,19 +328,24 @@ namespace NuGet
             }
         }
 
+        protected virtual void OnUninstalling(PackageOperationEventArgs e)
+        {
+            if (PackageUninstalling != null)
+            {
+                PackageUninstalling(this, e);
+            }
+        }
+
+        protected virtual void OnRemoveFiles(PackageOperationEventArgs e)
+        {
+            RemoveFiles(e.Package);
+        }
+
         protected virtual void OnUninstalled(PackageOperationEventArgs e)
         {
             if (PackageUninstalled != null)
             {
                 PackageUninstalled(this, e);
-            }
-        }
-
-        private void OnUninstalling(PackageOperationEventArgs e)
-        {
-            if (PackageUninstalling != null)
-            {
-                PackageUninstalling(this, e);
             }
         }
 
