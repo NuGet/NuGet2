@@ -108,7 +108,6 @@
     <Compile Include="ProjectManagerTest.cs" />
     <Compile Include="FileSystemExtensionsTest.cs" />
     <Compile Include="PackageManagerTest.cs" />
-    <Compile Include="SecurityTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnzippedPackageRepositoryTest.cs" />
     <Compile Include="UnzippedPackageTest.cs" />
