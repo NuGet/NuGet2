@@ -706,7 +706,16 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to By default downloaded packages are not copied to local cache and a local cache is not used as a fallback when a package or a package dependency is not found in the specified source(s). If you want to ensure only packages from the specified sources are used, keep this default. If you want instead to maximize chances of finding packages, set this option..
+        ///   Looks up a localized string similar to No packages found to check for mirroring..
+        /// </summary>
+        internal static string MirrorCommandDidNothing {
+            get {
+                return ResourceManager.GetString("MirrorCommandDidNothing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to By default a local cache is not used as a fallback when a package or a package dependency is not found in the specified source(s). If you want to ensure only packages from the specified sources are used, keep this default. If you want instead to maximize chances of finding packages, set this option..
         /// </summary>
         internal static string MirrorCommandDoCache {
             get {
@@ -715,7 +724,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Log what would be done without actually doing it..
+        ///   Looks up a localized string similar to Log what would be done without actually doing it. Assumes success for push operations. .
         /// </summary>
         internal static string MirrorCommandNoOp {
             get {
@@ -724,7 +733,16 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Allows prerelease packages to be mirrored. This flag is not required when packages.config is used to specify packages to mirror..
+        ///   Looks up a localized string similar to Version should be specified in packages.config file instead..
+        /// </summary>
+        internal static string MirrorCommandNoVersionIfPackagesConfig {
+            get {
+                return ResourceManager.GetString("MirrorCommandNoVersionIfPackagesConfig", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to When set, &quot;latest&quot; when specifying no version for a package id (as command argument or in packages.config) includes pre-release packages..
         /// </summary>
         internal static string MirrorCommandPrerelease {
             get {
@@ -751,7 +769,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specify the id of the package to mirror, the url to query the target repository (list command) and the url to push packages to the target repository. If a path to a packages.config file is used instead of an id, all the packages it contains are mirrored. Assuming you&apos;re targeting a private repository under http://machine/repo installed using NuGet.Server, the list and push urls will be http://machine/repo/nuget and http://machine/repo/api/v2/package respectively..
+        ///   Looks up a localized string similar to Specify the id of the package to mirror, the url to query the target repository (list command) and the url to push packages to the target repository. If a path to a packages.config file is used instead of a package id, all the packages it contains are mirrored to the given version (if specified) or latest otherwise. Assuming you&apos;re targeting a private repository under http://machine/repo installed using NuGet.Server, the list and push urls will be http://machine/repo/nuget and http://machine/repo/api/v2/pac [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string MirrorCommandUsageDescription {
             get {
@@ -760,9 +778,9 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to NuGet mirror Microsoft.AspNet.Mvc http://myserver/myrepo/nuget http://myserver/myrepo/api/v2/package 
+        ///   Looks up a localized string similar to NuGet mirror Microsoft.AspNet.Mvc http://server/dir/nuget http://server/dir/api/v2/package 
         ///
-        ///NuGet mirror Microsoft.AspNet.Razor http://myserver/myrepo/nuget http://myserver/myrepo/api/v2/package -apikey my_key -version 1.0.20105.408.
+        ///NuGet mirror Microsoft.AspNet.Razor http://server/dir/nuget http://server/dir/api/v2/package -ApiKey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -version 1.0.20105.408.
         /// </summary>
         internal static string MirrorCommandUsageExamples {
             get {

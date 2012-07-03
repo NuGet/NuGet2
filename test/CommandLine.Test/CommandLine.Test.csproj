@@ -57,6 +57,7 @@
     <Compile Include="FileHelperTest.cs" />
     <Compile Include="DeleteCommandTest.cs" />
     <Compile Include="InstallCommandTest.cs" />
+    <Compile Include="MirrorCommandTest.cs" />
     <Compile Include="ListCommandTests.cs" />
     <Compile Include="MockConsole.cs" />
     <Compile Include="OptionAttributeTests.cs" />

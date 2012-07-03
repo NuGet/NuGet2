@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Runtime.Versioning;
 using NuGet.Resources;
 
@@ -55,21 +54,21 @@ namespace NuGet
             set;
         }
 
-        public virtual void MirrorPackage(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)
+        public bool MirrorPackage(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)
         {
             IPackage package = PackageHelper.ResolvePackage(SourceRepository, TargetRepository, packageId, version, allowPrereleaseVersions);
 
-            MirrorPackage(package, ignoreDependencies, allowPrereleaseVersions);
+            return MirrorPackage(package, ignoreDependencies, allowPrereleaseVersions);
         }
 
-        public virtual void MirrorPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions)
+        public bool MirrorPackage(IPackage package, bool ignoreDependencies, bool allowPrereleaseVersions)
         {
-            MirrorPackage(package, targetFramework: null, ignoreDependencies: ignoreDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
+            return MirrorPackage(package, targetFramework: null, ignoreDependencies: ignoreDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
         }
 
-        protected void MirrorPackage(IPackage package, FrameworkName targetFramework, bool ignoreDependencies, bool allowPrereleaseVersions)
+        public bool MirrorPackage(IPackage package, FrameworkName targetFramework, bool ignoreDependencies, bool allowPrereleaseVersions)
         {
-            Execute(package, new InstallWalker(TargetRepository,
+            return Execute(package, new InstallWalker(TargetRepository,
                                                SourceRepository,
                                                targetFramework,
                                                Logger,
@@ -77,7 +76,7 @@ namespace NuGet
                                                allowPrereleaseVersions));
         }
 
-        private void Execute(IPackage package, IPackageOperationResolver resolver)
+        private bool Execute(IPackage package, IPackageOperationResolver resolver)
         {
             var operations = resolver.ResolveOperations(package);
             bool didOperation = false;                        
@@ -90,9 +89,10 @@ namespace NuGet
             {
                 Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageAlreadyPresent, package.GetFullName(), TargetRepository.Source);
             }
+            return didOperation;
         }
 
-        protected void Execute(PackageOperation operation)
+        private void Execute(PackageOperation operation)
         {
             bool packageExists = TargetRepository.Exists(operation.Package);
 
@@ -115,7 +115,7 @@ namespace NuGet
             }
         }
 
-        protected void ExecuteMirror(IPackage package)
+        private void ExecuteMirror(IPackage package)
         {
             if (!NoOp)
             {

@@ -123,13 +123,23 @@ namespace NuGet.Commands
             _cacheRepository = MachineCache.Default;
         }
 
+        protected virtual IPackageRepository CacheRepository
+        {
+            get { return _cacheRepository; }
+        }
+
+        protected virtual IFileSystem CreateFileSystem()
+        {
+            return new PhysicalFileSystem(Directory.GetCurrentDirectory());
+        }
+
         private IPackageRepository GetSourceRepository()
         {
             var repository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
             bool ignoreFailingRepositories = repository.IgnoreFailingRepositories;
             if (DoCache)
             {
-                repository = new AggregateRepository(new[] { _cacheRepository, repository }) 
+                repository = new AggregateRepository(new[] { CacheRepository, repository }) 
                     { IgnoreFailingRepositories = ignoreFailingRepositories, Logger = Console };
             }
             repository.Logger = Console;
@@ -141,7 +151,7 @@ namespace NuGet.Commands
             return RepositoryFactory.CreateRepository(SourceProvider.ResolveAndValidateSource(repo));
         }
 
-        private IPackageRepository GetTargetRepository(string pullUrl, string pushUrl)
+        protected virtual IPackageRepository GetTargetRepository(string pullUrl, string pushUrl)
         {
             return new PackageServerRepository(
                 pull: GetDestinationRepositoryList(pullUrl),
@@ -189,15 +199,19 @@ namespace NuGet.Commands
             {
                 // Do nothing
             }
-            return new PackageReferenceFile(Path.GetFullPath(configFilePath));
+            return new PackageReferenceFile(fileSystem, Path.GetFullPath(configFilePath));
         }
 
-        private IEnumerable<Tuple<string, SemanticVersion>> GetPackagesToMirror(string packageId)
+        private bool IsUsingPackagesConfig(string packageId)
         {
-            if (Path.GetFileName(packageId).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
+            return Path.GetFileName(packageId).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private IEnumerable<Tuple<string, SemanticVersion>> GetPackagesToMirror(string packageId, bool isPackagesConfig)
+        {
+            if (isPackagesConfig)
             {
-                Prerelease = true;
-                IFileSystem fileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
+                IFileSystem fileSystem = CreateFileSystem();
                 string configFilePath = Path.GetFullPath(packageId);
                 var packageReferenceFile = GetPackageReferenceFile(fileSystem, configFilePath);
                 var packageReferences = CommandLineUtility.GetPackageReferences(packageReferenceFile, configFilePath, requireVersion: false);
@@ -211,19 +225,46 @@ namespace NuGet.Commands
             }
         }
 
+        bool AllowPrereleaseVersion(SemanticVersion version, bool isUsingPackagesConfig)
+        {
+            if (isUsingPackagesConfig && (null != version))
+            {
+                return true;
+            }
+            return Prerelease;            
+        }
+
         public override void ExecuteCommand()
         {
             var srcRepository = GetSourceRepository();
             var dstRepository = GetTargetRepository(Arguments[1], Arguments[2]);
             var mirrorer = GetPackageMirrorer(srcRepository, dstRepository);
-            var toMirror = GetPackagesToMirror(Arguments[0]);
+            var isPackagesConfig = IsUsingPackagesConfig(Arguments[0]);
+            var toMirror = GetPackagesToMirror(Arguments[0], isPackagesConfig);            
+
+            if (isPackagesConfig && (null != Version))
+            {
+                throw new ArgumentException(NuGetResources.MirrorCommandNoVersionIfPackagesConfig);
+            }
+
+            bool didSomething = false;
 
             using (mirrorer.SourceRepository.StartOperation(RepositoryOperationNames.Mirror))
             {
                 foreach (var package in toMirror)
                 {
-                    mirrorer.MirrorPackage(packageId: package.Item1, version: package.Item2, ignoreDependencies: false, allowPrereleaseVersions: Prerelease);
+                    if (mirrorer.MirrorPackage(
+                        packageId: package.Item1,
+                        version: package.Item2,
+                        ignoreDependencies: false,
+                        allowPrereleaseVersions: AllowPrereleaseVersion(package.Item2, isPackagesConfig)))
+                        didSomething = true;
                 }
+            }
+
+            if (! didSomething)
+            {
+                Console.Log(MessageLevel.Warning, NuGetResources.MirrorCommandDidNothing);
             }
         }
 
