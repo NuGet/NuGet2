@@ -153,10 +153,14 @@ namespace NuGet.VisualStudio
                 // Unlike NuGet Core, Visual Studio has the concept of an official package source. 
                 // We find the official source, if present, and set its IsOfficial it.
                 var officialPackageSource = _packageSources.FirstOrDefault(packageSource => IsOfficialPackageSource(packageSource));
-                if (officialPackageSource != null)
+                if (officialPackageSource == null)
                 {
-                    officialPackageSource.IsOfficial = true;
+                    // if there is no official source, add one, but make it disabled
+                    officialPackageSource = NuGetDefaultSource.Clone();
+                    officialPackageSource.IsEnabled = false;
+                    _packageSources.Add(officialPackageSource);
                 }
+                officialPackageSource.IsOfficial = true;
 
                 // When running Visual Studio Express for Windows 8, we insert the curated feed at the top
                 if (_vsShellInfo.IsVisualStudioExpressForWindows8)

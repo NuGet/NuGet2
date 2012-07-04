@@ -62,6 +62,27 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
+        public void LoadPackageSourcesAddOfficialSourceIfMissing()
+        {
+            // Arrange
+            var userSettings = new Mock<ISettings>();
+            userSettings.Setup(s => s.GetValues("packageSources"))
+                        .Returns(new[] { new KeyValuePair<string, string>("my source", "http://nuget.org") });
+            var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
+            var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
+
+            // Act
+            var sources = provider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.Equal(2, sources.Count);
+            AssertPackageSource(sources[0], "my source", "http://nuget.org");
+            AssertPackageSource(sources[1], "NuGet official package source", "https://nuget.org/api/v2/");
+            Assert.False(sources[1].IsEnabled);
+            Assert.True(sources[1].IsOfficial);
+        }
+
+        [Fact]
         public void CtorMigrateV1FeedToV2FeedAndPreserveIsEnabledProperty()
         {
             // Arrange
@@ -313,7 +334,7 @@ namespace NuGet.VisualStudio.Test
             var packageSources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.Equal(3, packageSources.Count);
+            Assert.Equal(4, packageSources.Count);
             AssertPackageSource(packageSources[0], "Windows 8 Packages", NuGetConstants.VSExpressForWindows8FeedUrl);
             Assert.False(packageSources[0].IsEnabled);
         }

@@ -120,6 +120,7 @@ namespace NuGet.Options
             _allPackageSources = new BindingSource(packageSources.Select(ps => ps.Clone()).ToList(), null);
             _allPackageSources.CurrentChanged += OnSelectedPackageSourceChanged;
             PackageSourcesListBox.DataSource = _allPackageSources;
+            OnSelectedPackageSourceChanged(null, EventArgs.Empty);
         }
 
         /// <summary>
@@ -492,7 +493,7 @@ namespace NuGet.Options
 
         private void OnSelectedPackageSourceChanged(object sender, EventArgs e)
         {
-            UpdateUI();
+            UpdateUI();    
 
             var selectedPackageSource = (PackageSource)_allPackageSources.Current;
             if (selectedPackageSource != null)
