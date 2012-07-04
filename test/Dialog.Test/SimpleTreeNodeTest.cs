@@ -56,7 +56,7 @@ namespace NuGet.Dialog.Test
             SimpleTreeNode node = CreateSimpleTreeNode(repository);
 
             // Act
-            var producedPackages = node.GetPackages(allowPrereleaseVersions: true).ToList();
+            var producedPackages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(packages.Length, producedPackages.Count);
@@ -84,7 +84,7 @@ namespace NuGet.Dialog.Test
             SimpleTreeNode node = CreateSimpleTreeNode(repository);
 
             // Act
-            var producedPackages = node.GetPackages(allowPrereleaseVersions: true).ToList();
+            var producedPackages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(packages.Length, producedPackages.Count);

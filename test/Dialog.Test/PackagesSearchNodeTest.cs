@@ -58,10 +58,10 @@ namespace NuGet.Dialog.Test
 
             // Act
             node.SetSearchText("B");
-            var packages1 = node.GetPackages(allowPrereleaseVersions: true).ToList();
+            var packages1 = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
             node.SetSearchText("A1");
-            var packages2 = node.GetPackages(allowPrereleaseVersions: true).ToList();
+            var packages2 = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(0, packages1.Count);
@@ -77,10 +77,43 @@ namespace NuGet.Dialog.Test
             PackagesSearchNode node = CreatePackagesSearchNode("A", 5);
 
             // Act
-            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(5, packages.Count);
+        }
+
+        [Fact]
+        public void GetPackagesReturnsUsesSearchTermPassedInConstructorForSearching()
+        {
+            // Arrange
+            PackagesProviderBase provider = new MockPackagesProvider();
+
+            IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
+            MockTreeNode baseTreeNode = new MockTreeNode(
+                parentTreeNode,
+                provider,
+                new[] {
+                    PackageUtility.CreatePackage("TestPackage", "1.0"),
+                    PackageUtility.CreatePackage("TestPackage", "2.0"),
+                    PackageUtility.CreatePackage("Awesome", "1.0"),
+                    PackageUtility.CreatePackage("Awesome", "1.2"),
+                },
+                collapseVersions: false
+            );
+
+            var node = new PackagesSearchNode(provider, parentTreeNode, baseTreeNode, "TestPackage");
+
+            // Act
+            var packages = node.GetPackages(searchTerm: "Foobar", allowPrereleaseVersions: true).ToList();
+
+            // Assert
+            Assert.Equal(2, packages.Count);
+            Assert.Equal("TestPackage", packages[0].Id);
+            Assert.Equal(new SemanticVersion("1.0"), packages[0].Version);
+
+            Assert.Equal("TestPackage", packages[1].Id);
+            Assert.Equal(new SemanticVersion("2.0"), packages[1].Version);
         }
 
         [Fact]
@@ -106,7 +139,7 @@ namespace NuGet.Dialog.Test
             var node = new PackagesSearchNode(provider, parentTreeNode, baseTreeNode, "Azo");
 
             // Act
-            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(2, packages.Count);
@@ -124,7 +157,7 @@ namespace NuGet.Dialog.Test
             PackagesSearchNode node = CreatePackagesSearchNode("B", 5);
 
             // Act
-            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(0, packages.Count);
@@ -149,7 +182,7 @@ namespace NuGet.Dialog.Test
             var searchNode = CreatePackagesSearchNode("B", baseNode: updatesPackageNode);
 
             // Act
-            var packages = searchNode.GetPackages(allowPrereleaseVersions: true).ToList();
+            var packages = searchNode.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(1, packages.Count);
@@ -177,7 +210,7 @@ namespace NuGet.Dialog.Test
             var searchNode = new PackagesSearchNode(provider, parentTreeNode, baseNode, "Azo");
 
             // Act
-            var packages = searchNode.GetPackages(allowPrereleaseVersions: true).ToList();
+            var packages = searchNode.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(2, packages.Count);
@@ -205,7 +238,7 @@ namespace NuGet.Dialog.Test
             var searchNode = new PackagesSearchNode(provider, parentTreeNode, baseNode, "Azo");
 
             // Act
-            var packages = searchNode.GetPackages(allowPrereleaseVersions: false).ToList();
+            var packages = searchNode.GetPackages(searchTerm: null, allowPrereleaseVersions: false).ToList();
 
             // Assert
             Assert.Equal(1, packages.Count);

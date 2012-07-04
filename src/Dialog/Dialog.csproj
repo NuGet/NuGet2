@@ -106,6 +106,9 @@
     <Compile Include="..\Dialog10\Providers\PackagesProviderBase.cs">
       <Link>Providers\PackagesProviderBase.cs</Link>
     </Compile>
+    <Compile Include="..\Dialog10\Providers\OnlineSearchProvider.cs">
+      <Link>Providers\SearchProvider.cs</Link>
+    </Compile>
     <Compile Include="..\Dialog10\Providers\SolutionInstalledProvider.cs">
       <Link>Providers\SolutionInstalledProvider.cs</Link>
     </Compile>

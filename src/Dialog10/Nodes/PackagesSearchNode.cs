@@ -62,18 +62,19 @@ namespace NuGet.Dialog.Providers
             }
         }
 
-        public override IQueryable<IPackage> GetPackages(bool allowPrereleaseVersions)
+        public override IQueryable<IPackage> GetPackages(string searchTerm, bool allowPrereleaseVersions)
         {
-            if (!(_baseNode is UpdatesTreeNode))
-            {
-                var simpleNode = _baseNode as SimpleTreeNode;
-                if (simpleNode != null)
-                {
-                    return simpleNode.Repository.Search(_searchText, Provider.SupportedFrameworks, allowPrereleaseVersions);
-                }
-            }
+            return _baseNode.GetPackages(_searchText, allowPrereleaseVersions);
+        }
 
-            return _baseNode.GetPackages(allowPrereleaseVersions).Find(_searchText);
+        protected override IQueryable<IPackage> ApplyOrdering(IQueryable<IPackage> query)
+        {
+            if (Provider.CurrentSort == OnlineSearchProvider.RelevanceSortDescriptor)
+            {
+                // If we are sorting by relevance, then do nothing. 
+                return query;
+            }
+            return base.ApplyOrdering(query);
         }
     }
 }

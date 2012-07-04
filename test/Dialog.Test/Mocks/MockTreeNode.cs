@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.Providers;
@@ -28,7 +29,7 @@ namespace NuGet.Dialog.Test
             get { return _supportsPrereleasePackages; }
         }
 
-        public override IQueryable<IPackage> GetPackages(bool allowPrereleaseVersions)
+        public override IQueryable<IPackage> GetPackages(string searchTerm, bool allowPrereleaseVersions)
         {
             if (_packages == null)
             {
@@ -40,8 +41,14 @@ namespace NuGet.Dialog.Test
                 _packages = packages;
             }
 
-            return _packages.FilterByPrerelease(allowPrereleaseVersions)
-                            .AsQueryable();
+            var results = _packages.FilterByPrerelease(allowPrereleaseVersions)
+                                   .AsQueryable();
+            if (!String.IsNullOrEmpty(searchTerm))
+            {
+                results = results.Find(searchTerm);
+            }
+
+            return results;
         }
 
         public MockTreeNode(IVsExtensionsTreeNode parent, PackagesProviderBase provider, int numberOfPackages, bool collapseVersions, bool supportsPrereleasePackages = true)

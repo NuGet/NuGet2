@@ -217,6 +217,12 @@ namespace NuGet.Dialog.Providers
             };
         }
 
+        protected override PackagesProviderBase GetSearchProvider()
+        {
+            var baseProvider = base.GetSearchProvider();
+            return new OnlineSearchProvider(baseProvider);
+        }
+
         public override string NoItemsMessage
         {
             get

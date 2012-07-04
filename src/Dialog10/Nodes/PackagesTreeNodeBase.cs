@@ -237,7 +237,7 @@ namespace NuGet.Dialog.Providers
         /// Get all packages belonging to this node.
         /// </summary>
         /// <returns></returns>
-        public abstract IQueryable<IPackage> GetPackages(bool allowPrereleaseVersions);
+        public abstract IQueryable<IPackage> GetPackages(string searchTerm, bool allowPrereleaseVersions);
 
         /// <summary>
         /// Helper function to raise property changed events
@@ -332,7 +332,7 @@ namespace NuGet.Dialog.Providers
 
             if (_query == null)
             {
-                IQueryable<IPackage> query = GetPackages(Provider.IncludePrerelease);
+                IQueryable<IPackage> query = GetPackages(searchTerm: null, allowPrereleaseVersions: Provider.IncludePrerelease);
 
                 if (CollapseVersions)
                 {
@@ -350,8 +350,7 @@ namespace NuGet.Dialog.Providers
 
                 token.ThrowIfCancellationRequested();
 
-                // Apply the ordering then sort by id
-                IQueryable<IPackage> orderedQuery = ApplyOrdering(query).ThenBy(p => p.Id);
+                IQueryable<IPackage> orderedQuery = ApplyOrdering(query);
 
                 // Buffer 3 pages
                 _query = orderedQuery.AsBufferedEnumerable(PageSize * 3);
@@ -390,16 +389,20 @@ namespace NuGet.Dialog.Providers
             }
         }
 
-        private IOrderedQueryable<IPackage> ApplyOrdering(IQueryable<IPackage> query)
+        protected virtual IQueryable<IPackage> ApplyOrdering(IQueryable<IPackage> query)
         {
             // If the default sort is null then fall back to download count
+            IOrderedQueryable<IPackage> result;
             if (Provider.CurrentSort == null)
             {
-                return query.OrderByDescending(p => p.DownloadCount);
+                result = query.OrderByDescending(p => p.DownloadCount);
             }
-
-            // Order by the current descriptor
-            return query.SortBy<IPackage>(Provider.CurrentSort.SortProperties, Provider.CurrentSort.Direction);
+            else
+            {
+                // Order by the current descriptor
+                result = query.SortBy<IPackage>(Provider.CurrentSort.SortProperties, Provider.CurrentSort.Direction);
+            }
+            return result.ThenBy(p => p.Id);
         }
 
         public IList<IVsSortDescriptor> GetSortDescriptors()
@@ -417,7 +420,8 @@ namespace NuGet.Dialog.Providers
         {
             Provider.CurrentSort = selectedDescriptor as PackageSortDescriptor;
 
-            if (Provider.CurrentSort != null)
+            // The value of CurrentSort could be null if we're dealing with the SearchProvider. Use the selectedDescriptor instead since it returns the actual instance.
+            if (selectedDescriptor != null)
             {
                 // If we changed the sort order then invalidate the cache.
                 ResetQuery();

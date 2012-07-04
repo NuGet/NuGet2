@@ -28,7 +28,7 @@ namespace NuGet.Dialog.Test
         }
 
         [Fact]
-        public void GetPackagesReturnsCorrectPackages1()
+        public void GetPackagesReturnsUpdatesForPackages()
         {
             // Arrange
             MockPackageRepository localRepository = new MockPackageRepository();
@@ -41,7 +41,7 @@ namespace NuGet.Dialog.Test
             sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.5"));
 
             // Act
-            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(1, packages.Count);
@@ -49,7 +49,7 @@ namespace NuGet.Dialog.Test
         }
 
         [Fact]
-        public void GetPackagesReturnsCorrectPackages2()
+        public void GetPackagesReturnsNoResultsIfPackageDoesNotExistInSourceRepository()
         {
             // Arrange
             MockPackageRepository localRepository = new MockPackageRepository();
@@ -62,14 +62,14 @@ namespace NuGet.Dialog.Test
             sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "1.5"));
 
             // Act
-            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(0, packages.Count);
         }
 
         [Fact]
-        public void GetPackagesReturnsCorrectPackages3()
+        public void GetPackagesIngoresLowerVersions()
         {
 
             // Arrange
@@ -84,7 +84,7 @@ namespace NuGet.Dialog.Test
             sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "0.9"));
 
             // Act
-            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(1, packages.Count);
@@ -92,7 +92,7 @@ namespace NuGet.Dialog.Test
         }
 
         [Fact]
-        public void GetPackagesReturnsCorrectPackages4()
+        public void GetPackagesReturnsUpdatesForEachPackageFoundInTheSourceRepository()
         {
 
             // Arrange
@@ -109,7 +109,7 @@ namespace NuGet.Dialog.Test
             sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "2.0"));
 
             // Act
-            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(2, packages.Count);
@@ -134,7 +134,7 @@ namespace NuGet.Dialog.Test
             sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "2.0"));
 
             // Act
-            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(2, packages.Count);
@@ -161,7 +161,7 @@ namespace NuGet.Dialog.Test
             var node = new UpdatesTreeNode(provider, "Mock", parentTreeNode, localRepository, sourceRepository);
 
             // Act
-            var packages = node.GetPackages(allowPrereleaseVersions: true).ToList();
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
             // Assert
             Assert.Equal(2, packages.Count);

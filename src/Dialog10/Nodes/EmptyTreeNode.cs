@@ -10,7 +10,6 @@ namespace NuGet.Dialog.Providers
     /// </summary>
     internal class EmptyTreeNode : PackagesTreeNodeBase
     {
-
         private readonly string _category;
 
         public EmptyTreeNode(PackagesProviderBase provider, string category, IVsExtensionsTreeNode parent) :
@@ -38,7 +37,7 @@ namespace NuGet.Dialog.Providers
             get { return false; }
         }
 
-        public override IQueryable<IPackage> GetPackages(bool allowPrereleaseVersions)
+        public override IQueryable<IPackage> GetPackages(string searchTerm, bool allowPrereleaseVersions)
         {
             return Enumerable.Empty<IPackage>().AsQueryable();
         }

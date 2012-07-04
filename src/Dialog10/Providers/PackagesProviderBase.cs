@@ -69,6 +69,15 @@ namespace NuGet.Dialog.Providers
         }
 
         /// <summary>
+        /// Copy constructor for PackagesProviderBase
+        /// </summary>
+        protected PackagesProviderBase(PackagesProviderBase other) :
+            this(other._localRepository, other._resources, other._providerServices, other._progressProvider, other._solutionManager)
+        {
+
+        }
+
+        /// <summary>
         /// Returns either the solution repository or the active project repository, depending on whether we are targeting solution.
         /// </summary>
         protected IPackageRepository LocalRepository
@@ -191,7 +200,7 @@ namespace NuGet.Dialog.Providers
 
         protected virtual IList<IVsSortDescriptor> CreateSortDescriptors()
         {
-            return new List<IVsSortDescriptor> {
+            return new[] {
                 new PackageSortDescriptor(Resources.Dialog_SortOption_MostDownloads, "DownloadCount", ListSortDirection.Descending),
                 new PackageSortDescriptor(Resources.Dialog_SortOption_PublishedDate, "Published", ListSortDirection.Descending),
                 new PackageSortDescriptor(String.Format(CultureInfo.CurrentCulture, "{0}: {1}", Resources.Dialog_SortOption_Name, Resources.Dialog_SortAscending), new[] { "Title", "Id" }, ListSortDirection.Ascending),
@@ -221,7 +230,8 @@ namespace NuGet.Dialog.Providers
                 }
                 else
                 {
-                    _searchNode = new PackagesSearchNode(this, RootNode, SelectedNode, searchText);
+                    var provider = GetSearchProvider();
+                    _searchNode = new PackagesSearchNode(provider, RootNode, SelectedNode, searchText);
                     AddSearchNode();
                 }
             }
@@ -273,6 +283,12 @@ namespace NuGet.Dialog.Providers
                 RootNode.Nodes.Add(_searchNode);
                 SelectNode(_searchNode);
             }
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Need to pass it to the base type. Can't dispose here")]
+        protected virtual PackagesProviderBase GetSearchProvider()
+        {
+            return this;
         }
 
         protected void SelectNode(PackagesTreeNodeBase node)

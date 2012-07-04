@@ -47,7 +47,6 @@ namespace NuGet.Dialog.Providers
             get { return DisplayName; }
         }
 
-
         public int Compare(object x, object y)
         {
             throw new NotSupportedException();
