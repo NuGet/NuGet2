@@ -338,21 +338,24 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         }
 
         [Fact]
-        public void InstallCommandUpdatesPackageIfAlreadyPresentAndNotUsingSideBySide()
+        public void InstallCommandDoesNothingIfDifferentVersionOfPackageIsAlreadyInstalledAndNotUsingSideBySide()
         {
             // Arrange
             var fileSystem = new MockFileSystem();
-            var packages = new List<IPackage>();
-            var repository = new Mock<IPackageRepository>();
+            var packages = new List<IPackage>(); 
+            var repository = new Mock<LocalPackageRepository>(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem) { CallBase = true };
             repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Add(c)).Verifiable();
             repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Remove(c)).Verifiable();
 
             var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object);
-            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager);
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager)
+                                    {
+                                        Console = new MockConsole()
+                                    };
 
-            installCommand.Version = "0.4";
             installCommand.ExcludeVersion = true;
+            installCommand.Version = "0.4";
             installCommand.Arguments.Add("Baz");
 
             // Act - 1
@@ -363,28 +366,33 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             Assert.Equal(new SemanticVersion("0.4"), packages.Single().Version);
 
             // Act - 2
-            installCommand.Version = null;
+            fileSystem.AddFile(@"Baz\baz.nupkg");
+            installCommand.Version = "0.7";
+            installCommand.ExcludeVersion = true;
             installCommand.Execute();
 
             // Assert - 2
             Assert.Equal("Baz", packages.Single().Id);
-            Assert.Equal(new SemanticVersion("0.7"), packages.Single().Version);
-            repository.Verify();
+            Assert.Equal(new SemanticVersion("0.4"), packages.Single().Version);
         }
 
         [Fact]
-        public void InstallCommandUpdatesPackagesFromPackagesConfigIfAlreadyPresentAndNotUsingSideBySide()
+        public void InstallCommandDoesNotUpdatePackagesFromPackagesConfigIfDifferentVersionAlreadyPresentAndNotUsingSideBySide()
         {
             // Arrange
             var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"baz\baz.nupkg");
             var packages = new List<IPackage> { PackageUtility.CreatePackage("Baz", "0.4") };
-            var repository = new Mock<IPackageRepository>();
+            var repository = new Mock<LocalPackageRepository>(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem) { CallBase = true };
             repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Add(c)).Verifiable();
             repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Remove(c)).Verifiable();
 
             var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object);
-            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager);
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager)
+                                 {
+                                     Console = new MockConsole()
+                                 };
 
             installCommand.ExcludeVersion = true;
             installCommand.Arguments.Add("Baz");
@@ -394,7 +402,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 
             // Assert 
             Assert.Equal("Baz", packages.Single().Id);
-            Assert.Equal(new SemanticVersion("0.7"), packages.Single().Version);
+            Assert.Equal(new SemanticVersion("0.4"), packages.Single().Version);
         }
 
         [Fact]
@@ -403,7 +411,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var fileSystem = new MockFileSystem();
             var packages = new List<IPackage> { PackageUtility.CreatePackage("A", "0.5") };
-            var repository = new Mock<IPackageRepository>();
+            var repository = new Mock<LocalPackageRepository>(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem) { CallBase = true };
             repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Throws(new Exception("Method should not be called"));
             repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Throws(new Exception("Method should not be called"));
