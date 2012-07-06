@@ -19,6 +19,7 @@ namespace NuGet.Commands
         private readonly Project _project;
         private FrameworkName _frameworkName;
         private ILogger _logger;
+        private ISettings _settings;
 
         // Files we want to always exclude from the resulting package
         private static readonly HashSet<string> _excludeFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
@@ -52,6 +53,19 @@ namespace NuGet.Commands
             _project = project;
             Properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             AddSolutionDir();
+            _settings = null;            
+        }
+
+        private ISettings DefaultSettings
+        {
+            get
+            {
+                if (null == _settings)
+                {
+                    _settings = Settings.LoadDefaultSettings(new PhysicalFileSystem(_project.DirectoryPath));
+                }
+                return _settings;
+            }
         }
 
         private string TargetPath
@@ -488,16 +502,34 @@ namespace NuGet.Commands
         private IPackageRepository GetPackagesRepository()
         {
             string solutionDir = GetSolutionDir();
-            if (String.IsNullOrEmpty(solutionDir))
+            string defaultValue = DefaultSettings.GetRepositoryPath();
+
+            string target = null;
+            if (!String.IsNullOrEmpty(solutionDir))
             {
-                return null;
+                string configValue = GetPackagesPath(solutionDir);
+                // solution dir exists, no default packages folder specified anywhere,
+                // default to hardcoded "packages" folder under solution
+                if (string.IsNullOrEmpty(configValue) && string.IsNullOrEmpty(defaultValue))
+                {
+                    configValue = PackagesFolder;
+                }
+
+                if (!string.IsNullOrEmpty(configValue))
+                {
+                    target = Path.Combine(solutionDir, configValue);
+                }
             }
 
-            string target = Path.Combine(solutionDir, GetPackagesPath(solutionDir));
-            if (Directory.Exists(target))
+            if (string.IsNullOrEmpty(target))
+            {
+                target = defaultValue;
+            }            
+
+            if (!string.IsNullOrEmpty(target) && Directory.Exists(target))
             {
                 return new SharedPackageRepository(target);
-            }
+            }            
 
             return null;
         }
@@ -527,7 +559,7 @@ namespace NuGet.Commands
             {
             }
 
-            return PackagesFolder;
+            return null;
         }
 
         private Manifest ProcessNuspec(PackageBuilder builder, string basePath)

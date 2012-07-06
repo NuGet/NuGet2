@@ -19,6 +19,11 @@ namespace NuGet
             return String.Empty;
         }
 
+        public string GetValue(string section, string key, bool isPath)
+        {
+            return String.Empty;
+        }
+
         public IList<KeyValuePair<string, string>> GetValues(string section)
         {
             return new List<KeyValuePair<string, string>>().AsReadOnly();

@@ -45,7 +45,19 @@ namespace NuGet.Test.Mocks
 
         public virtual IFileSystem ChildDirectory(string path)
         {
-            return null;
+            path = PathUtility.EnsureTrailingSlash(path);
+            var files = Paths.Where(f => f.Key.StartsWith(path, StringComparison.OrdinalIgnoreCase));
+            if (files.IsEmpty())
+            {
+                return null;
+            }
+            var child = new MockFileSystem(Path.Combine(Root, path)) {Logger = Logger};
+            foreach (var kvp in files)
+            {
+                child.Paths.Add(kvp.Key.Substring(path.Length), kvp.Value);
+            }
+
+            return child;
         }
 
         public virtual string Root

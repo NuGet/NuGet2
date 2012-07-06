@@ -106,7 +106,7 @@ namespace NuGet.Commands
             if (Arguments.Count == 0 || Path.GetFileName(Arguments[0]).Equals(Constants.PackageReferenceFile, StringComparison.OrdinalIgnoreCase))
             {
                 Prerelease = true;
-                var configFilePath = Arguments.Count == 0 ? Constants.PackageReferenceFile : Path.GetFullPath(Arguments[0]);
+                var configFilePath = Path.GetFullPath(Arguments.Count == 0 ? Constants.PackageReferenceFile : Arguments[0]);
                 // By default the PackageReferenceFile does not throw if the file does not exist at the specified path.
                 // We'll try reading from the file so that the file system throws a file not found
                 EnsureFileExists(fileSystem, configFilePath);
@@ -219,12 +219,29 @@ namespace NuGet.Commands
             return packageManager;
         }
 
+        public string InstallPath
+        {
+            get
+            {
+                // Use the passed-in install path if any;
+                // if none specified, look in the default config file;
+                // if none specified, default to the current dir.
+                string installPath = OutputDirectory;
+                if (string.IsNullOrEmpty(installPath))
+                {
+                    installPath = _configSettings.GetRepositoryPath();
+                    if (string.IsNullOrEmpty(installPath))
+                    {
+                        installPath = Directory.GetCurrentDirectory();
+                    }
+                }
+                return installPath;
+            }
+        }
+
         protected virtual IFileSystem CreateFileSystem()
         {
-            // Use the passed in install path if any, and default to the current dir
-            string installPath = OutputDirectory ?? Directory.GetCurrentDirectory();
-
-            return new PhysicalFileSystem(installPath);
+            return new PhysicalFileSystem(InstallPath);
         }
 
         private static void EnsureFileExists(IFileSystem fileSystem, string configFilePath)
@@ -243,7 +260,7 @@ namespace NuGet.Commands
             }
         }
 
-        // Do a very quick check of whether a package in installed by checked whether the nupkg file exists
+        // Do a very quick check of whether a package in installed by checking whether the nupkg file exists
         private static bool IsPackageInstalled(LocalPackageRepository packageRepository, IFileSystem fileSystem, string packageId, SemanticVersion version)
         {
             var packagePaths = packageRepository.GetPackageLookupPaths(packageId, version);

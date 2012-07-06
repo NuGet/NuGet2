@@ -28,6 +28,85 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         }
 
         [Fact]
+        public void InstallCommandUsesCurrentDirectoryAsInstallPathIfNothingSpecified()
+        {
+            // Arrange
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider());
+
+            // Assert
+            Assert.Equal(Directory.GetCurrentDirectory(), installCommand.InstallPath);
+        }
+
+        [Fact]
+        public void InstallCommandUsesOutputDirectoryAsInstallPathIfSpecified()
+        {
+            // Arrange
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider())
+                                     {OutputDirectory = @"Bar\Baz"};
+
+            // Assert
+            Assert.Equal(@"Bar\Baz", installCommand.InstallPath);
+        }
+
+        private static IFileSystem GetFileSystemWithDefaultConfig(string repositoryPath = @"C:\This\Is\My\Install\Path")
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@".nuget\nuget.workspace.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration><config><add key=""repositorypath"" value="""+repositoryPath+@""" /></config></configuration>");
+            return fileSystem;
+        }
+
+        [Fact]
+        public void InstallCommandUsesRepositoryPathFromConfigIfSpecified()
+        {
+            // Arrange
+            var fileSystem = GetFileSystemWithDefaultConfig();
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
+                settings: Settings.LoadDefaultSettings(fileSystem));
+
+            // Assert
+            Assert.Equal(@"C:\This\Is\My\Install\Path", installCommand.InstallPath);
+        }
+
+        [Fact]
+        public void InstallCommandOutPathTakesPrecedenceOverRepositoryPath()
+        {
+            // Arrange
+            var fileSystem = GetFileSystemWithDefaultConfig();
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
+                                                        settings: Settings.LoadDefaultSettings(fileSystem))
+                                     {OutputDirectory = @"Bar\Baz"};
+
+
+            // Assert
+            Assert.Equal(@"Bar\Baz", installCommand.InstallPath);
+        }
+
+        [Fact]
+        public void InstallCommandCanUsePathsRelativeToConfigFile()
+        {
+            // Arrange
+            var fileSystem = GetFileSystemWithDefaultConfig(@"$\under_dot_nuget\other_dir");
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
+                settings: Settings.LoadDefaultSettings(fileSystem));
+
+            // Assert
+            Assert.Equal(@"C:\MockFileSystem\.nuget\under_dot_nuget\other_dir", installCommand.InstallPath);
+        }
+
+        [Fact]
+        public void InstallCommandCanUsePathsRelativeToConfigFile2()
+        {
+            // Arrange
+            var fileSystem = GetFileSystemWithDefaultConfig(@"$\..\..\packages");
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
+                settings: Settings.LoadDefaultSettings(fileSystem));
+
+            // Assert
+            Assert.Equal(@"C:\packages", installCommand.InstallPath);
+        }
+
+        [Fact]
         public void InstallCommandInstallManifestFileIfSaveManifestFileOnlyIsSet()
         {
             // Arrange
@@ -560,13 +639,14 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 
             public TestInstallCommand(IPackageRepositoryFactory factory,
                                       IPackageSourceProvider sourceProvider,
-                                      IFileSystem fileSystem,
+                                      IFileSystem fileSystem = null,
                                       IPackageManager packageManager = null,
                                       IPackageRepository machineCacheRepository = null,
-                                      bool allowPackageRestore = true)
-                : base(factory, sourceProvider, CreateSettings(allowPackageRestore), machineCacheRepository ?? new MockPackageRepository())
+                                      bool allowPackageRestore = true,
+                                      ISettings settings = null)
+                : base(factory, sourceProvider, settings??CreateSettings(allowPackageRestore), machineCacheRepository ?? new MockPackageRepository())
             {
-                _fileSystem = fileSystem;
+                _fileSystem = fileSystem??new MockFileSystem();
                 _packageManager = packageManager;
             }
 

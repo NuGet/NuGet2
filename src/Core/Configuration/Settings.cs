@@ -91,6 +91,11 @@ namespace NuGet
 
         public string GetValue(string section, string key)
         {
+            return GetValue(section, key, false);
+        }
+
+        public string GetValue(string section, string key, bool isPath)
+        {
             if (String.IsNullOrEmpty(section))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
@@ -116,7 +121,16 @@ namespace NuGet
             }
 
             // Return the optional value which if not there will be null;
-            return element.GetOptionalAttributeValue("value");
+            string ret = element.GetOptionalAttributeValue("value");
+            if (!isPath || string.IsNullOrEmpty(ret))
+            {
+                return ret;
+            }
+            // if value represents a path and relative to this file path was specified, 
+            // append location of file
+            return (ret.StartsWith("$\\", StringComparison.OrdinalIgnoreCase) || ret.StartsWith("$/", StringComparison.OrdinalIgnoreCase))
+                       ? Path.GetFullPath(Path.Combine(_fileSystem.Root, ret.Substring(2)))
+                       : ret;
         }
 
         public IList<KeyValuePair<string, string>> GetValues(string section)

@@ -18,9 +18,10 @@ namespace NuGet.VisualStudio
 
         private string _configurationPath;
         private IFileSystem _fileSystem;
+        private ISettings _settings;
         private readonly ISolutionManager _solutionManager;
         private readonly IFileSystemProvider _fileSystemProvider;
-
+        
         [ImportingConstructor]
         public RepositorySettings(ISolutionManager solutionManager, IFileSystemProvider fileSystemProvider, IVsSourceControlTracker sourceControlTracker)
         {
@@ -41,12 +42,14 @@ namespace NuGet.VisualStudio
 
             _solutionManager = solutionManager;
             _fileSystemProvider = fileSystemProvider;
+            _settings = null;
 
             EventHandler resetConfiguration = (sender, e) =>
             {
                 // Kill our configuration cache when someone closes the solution
                 _configurationPath = null;
                 _fileSystem = null;
+                _settings = null;
             };
 
             _solutionManager.SolutionClosing += resetConfiguration;
@@ -91,6 +94,18 @@ namespace NuGet.VisualStudio
             }
         }
 
+        private ISettings DefaultSettings
+        {
+            get
+            {
+                if (_settings == null)
+                {
+                    _settings = Settings.LoadDefaultSettings(FileSystem);
+                }
+                return _settings;
+            }
+        }
+
         private string GetRepositoryPath()
         {
             // If the solution directory is unavailable then throw an exception
@@ -100,27 +115,37 @@ namespace NuGet.VisualStudio
             }
 
             // Get the configuration path (if any)
-            string configurtionPath = GetConfigurationPath();
+            string configurationPath = GetConfigurationPath();
 
             string path = null;
             string directoryPath = _solutionManager.SolutionDirectory;
 
             // If we found a config file, try to read it
-            if (!String.IsNullOrEmpty(configurtionPath))
+            if (!String.IsNullOrEmpty(configurationPath))
             {
                 // Read the path from the file
-                path = GetRepositoryPathFromConfig(configurtionPath);
+                path = GetRepositoryPathFromConfig(configurationPath);
             }
 
             if (String.IsNullOrEmpty(path))
             {
-                // If the path is null then default to the directory
-                path = DefaultRepositoryDirectory;
+                // If the path is null, look in default settings                 
+                path = DefaultSettings.GetRepositoryPath();
+
+                if (String.IsNullOrEmpty(path))
+                {
+                    // if default settings file does not provide a path either, then default to the directory
+                    path = DefaultRepositoryDirectory;
+                }
+                else
+                {
+                    return path;
+                }
             }
             else
             {
                 // Resolve the path relative to the configuration path
-                directoryPath = Path.GetDirectoryName(configurtionPath);
+                directoryPath = Path.GetDirectoryName(configurationPath);
             }
 
             return Path.Combine(directoryPath, path);
@@ -146,7 +171,7 @@ namespace NuGet.VisualStudio
         private bool CheckConfiguration()
         {
             // If there's no saved configuration path then look for a configuration file.
-            // This is to accomate the workflow where someone changes the solution repository
+            // This is to accommodate the workflow where someone changes the solution repository
             // after installing packages using the default "packages" folder.
 
             // REVIEW: Do we always look even in the default scenario where the user has no nuget.config file?

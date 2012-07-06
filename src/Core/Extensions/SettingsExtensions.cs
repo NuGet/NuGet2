@@ -6,6 +6,11 @@ namespace NuGet
     {
         private const string ConfigSection = "config";
 
+        public static string GetRepositoryPath(this ISettings settings)
+        {
+            return settings.GetValue(ConfigSection, "repositoryPath", true);
+        }
+
         public static string GetDecryptedValue(this ISettings settings, string section, string key)
         {
             if (String.IsNullOrEmpty(section))

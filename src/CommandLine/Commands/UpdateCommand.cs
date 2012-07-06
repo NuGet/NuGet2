@@ -19,12 +19,19 @@ namespace NuGet.Commands
 
         private readonly List<string> _sources = new List<string>();
         private readonly List<string> _ids = new List<string>();
+        private readonly IFileSystem _fileSystem;
+
+        public UpdateCommand(IPackageRepositoryFactory repositoryFactory, IPackageSourceProvider sourceProvider)
+            :this(repositoryFactory, sourceProvider, new PhysicalFileSystem(Directory.GetCurrentDirectory()))
+        {            
+        }
 
         [ImportingConstructor]
-        public UpdateCommand(IPackageRepositoryFactory repositoryFactory, IPackageSourceProvider sourceProvider)
+        public UpdateCommand(IPackageRepositoryFactory repositoryFactory, IPackageSourceProvider sourceProvider, IFileSystem fileSystem)
         {
             RepositoryFactory = repositoryFactory;
             SourceProvider = sourceProvider;
+            _fileSystem = fileSystem;
         }
 
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }
@@ -80,7 +87,7 @@ namespace NuGet.Commands
                 }
                 else
                 {
-                    if (!File.Exists(inputFile))
+                    if (!_fileSystem.FileExists(inputFile))
                     {
                         throw new CommandLineException(NuGetResources.UnableToFindSolution, inputFile);
                     }
@@ -91,6 +98,11 @@ namespace NuGet.Commands
                     }
                 }
             }
+        }
+
+        private ISettings DefaultSettings
+        {
+            get { return Settings.LoadDefaultSettings(_fileSystem); }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -194,7 +206,7 @@ namespace NuGet.Commands
             project = project ?? GetMSBuildProject(packagesConfigPath);
 
             // Resolve the repository path
-            repositoryPath = repositoryPath ?? GetReposioryPath(project.Root);
+            repositoryPath = repositoryPath ?? GetRepositoryPath(project.Root);
 
             var pathResolver = new DefaultPackagePathResolver(repositoryPath);
 
@@ -208,17 +220,21 @@ namespace NuGet.Commands
             project.Save();
         }
 
-        private string GetReposioryPath(string projectRoot)
+        private string GetRepositoryPath(string projectRoot)
         {
             string packagesDir = RepositoryPath;
 
             if (String.IsNullOrEmpty(packagesDir))
             {
-                // Try to resolve the packages directory from the project
-                string projectDir = Path.GetDirectoryName(projectRoot);
-                string solutionDir = ProjectHelper.GetSolutionDir(projectDir);
+                packagesDir = DefaultSettings.GetRepositoryPath();
+                if (String.IsNullOrEmpty(packagesDir))
+                {
+                    // Try to resolve the packages directory from the project
+                    string projectDir = Path.GetDirectoryName(projectRoot);
+                    string solutionDir = ProjectHelper.GetSolutionDir(projectDir);
 
-                return GetRepositoryPathFromSolution(solutionDir);
+                    return GetRepositoryPathFromSolution(solutionDir);
+                }
             }
 
             return GetPackagesDir(packagesDir);
