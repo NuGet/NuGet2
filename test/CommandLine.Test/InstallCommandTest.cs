@@ -188,7 +188,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             Assert.Equal(@"Bar.0.5\Bar.0.5.nupkg", fileSystem.Paths.Last().Key);
         }
 
-        [Fact(Skip="Bug in Moq makes this flaky")]
+        [Fact(Skip = "Bug in Moq makes this flaky")]
         public void InstallCommandInstallsAllPackagesFromConfigFileIfSpecifiedAsArgument()
         {
             // Arrange

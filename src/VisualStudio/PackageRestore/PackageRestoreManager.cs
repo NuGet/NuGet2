@@ -16,9 +16,10 @@ namespace NuGet.VisualStudio
     [Export(typeof(IPackageRestoreManager))]
     internal class PackageRestoreManager : IPackageRestoreManager
     {
+        private static readonly string NuGetExeFile = Path.Combine(VsConstants.NuGetSolutionSettingsFolder, "nuget.exe");
         private static readonly string NuGetTargetsFile = Path.Combine(VsConstants.NuGetSolutionSettingsFolder, "nuget.targets");
         private const string NuGetBuildPackageName = "NuGet.Build";
-        private const string NuGetBootstrapperPackageName = "NuGet.Bootstrapper";
+        private const string NuGetCommandLinePackageName = "NuGet.CommandLine";
 
         private readonly IFileSystemProvider _fileSystemProvider;
         private readonly IPackageSourceProvider _packageSourceProvider;
@@ -97,7 +98,8 @@ namespace NuGet.VisualStudio
                 }
 
                 IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(solutionDirectory);
-                return fileSystem.FileExists(NuGetTargetsFile);
+                return fileSystem.FileExists(NuGetExeFile) &&
+                       fileSystem.FileExists(NuGetTargetsFile);
             }
         }
 
@@ -339,16 +341,25 @@ namespace NuGet.VisualStudio
             IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(solutionDirectory);
 
             if (!fileSystem.DirectoryExists(VsConstants.NuGetSolutionSettingsFolder) ||
+                !fileSystem.FileExists(NuGetExeFile) ||
                 !fileSystem.FileExists(NuGetTargetsFile))
             {
-                // download NuGet.Build and NuGet.Bootstrapper packages into the .nuget folder
+                // download NuGet.Build and NuGet.CommandLine packages into the .nuget folder
                 IPackageRepository repository = _packageSourceProvider.GetAggregate(_packageRepositoryFactory, ignoreFailingRepositories: true);
 
-                // Ensure we have packages before we attempt to add them.
-                var installPackages = new [] { GetPackage(repository, NuGetBuildPackageName, fromActivation), 
-                                               GetPackage(repository, NuGetBootstrapperPackageName, fromActivation) };
-                foreach (var package in installPackages)
+                var installPackages = new string[] { NuGetBuildPackageName, NuGetCommandLinePackageName };
+                foreach (var packageId in installPackages)
                 {
+                    IPackage package = GetPackage(repository, packageId, fromActivation);
+                    if (package == null)
+                    {
+                        throw new InvalidOperationException(
+                            String.Format(
+                                CultureInfo.CurrentCulture,
+                                VsResources.PackageRestoreDownloadPackageFailed,
+                                packageId));
+                    }
+
                     fileSystem.AddFiles(package.GetFiles(Constants.ToolsDirectory), VsConstants.NuGetSolutionSettingsFolder, preserveFilePath: false);
                 }
 
@@ -419,11 +430,7 @@ namespace NuGet.VisualStudio
 
             if (package == null)
             {
-                throw new InvalidOperationException(
-                            String.Format(
-                                CultureInfo.CurrentCulture,
-                                VsResources.PackageRestoreDownloadPackageFailed,
-                                packageId));
+                return null;
             }
 
             if (!fromCache)
