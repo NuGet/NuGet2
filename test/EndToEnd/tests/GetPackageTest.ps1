@@ -454,3 +454,25 @@ function Test-GetPackageUpdatesReturnAllVersionsAndPrereleaseVersionsIfTwoFlagsA
     Assert-AreEqual 'PrereleaseTestPackage' $updates[1].Id
     Assert-AreEqual '1.0.1-a' $updates[1].Version
 }
+
+function Test-GetInstalledPackageWithFilterReturnsCorrectPackage
+{
+	param
+	(
+		$context
+	)
+
+	# Arrange
+    $p = New-ClassLibrary
+    
+	$p | Install-Package PrereleaseTestPackage -Version '1.0.0-b' -Source $context.RepositoryRoot
+    Assert-Package $p 'PrereleaseTestPackage' '1.0.0-b'
+    
+	# Act
+	$packages = @(Get-Package 'Prerelease')
+
+	# Assert
+	Assert-AreEqual 1 $packages.Count
+	Assert-AreEqual 'PrereleaseTestPackage' $packages[0].Id
+	Assert-AreEqual '1.0.0-b' $packages[0].Version
+}

@@ -260,9 +260,11 @@ namespace NuGet.PowerShell.Commands
 
         protected virtual IQueryable<IPackage> GetPackages(IPackageRepository sourceRepository)
         {
+            bool effectiveIncludePrerelease = IncludePrerelease || !UseRemoteSource;
+
             IQueryable<IPackage> packages = String.IsNullOrEmpty(Filter)
                                                 ? sourceRepository.GetPackages()
-                                                : sourceRepository.Search(Filter, IncludePrerelease);
+                                                : sourceRepository.Search(Filter, effectiveIncludePrerelease);
             // by default, sort packages by Id
             packages = packages.OrderBy(p => p.Id);
             return packages;

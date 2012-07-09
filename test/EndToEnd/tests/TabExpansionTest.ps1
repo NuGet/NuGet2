@@ -399,12 +399,10 @@ function Test-UpdatePackageCommandShowTabExpansionForPreReleasePackagesVersions 
     $suggestions = @(TabExpansion "Update-Package PreReleaseTestPackage -Source '$($context.RepositoryRoot)' -ProjectName '$($p.Name)' -IncludePreRelease -Version ")
 
     # Assert
-    Assert-AreEqual 4 $suggestions.Count
+    Assert-AreEqual 2 $suggestions.Count
 
     Assert-AreEqual '1.0.1-a' $suggestions[0]
     Assert-AreEqual '1.0.0' $suggestions[1]
-    Assert-AreEqual '1.0.0-b' $suggestions[2]
-    Assert-AreEqual '1.0.0-a' $suggestions[3]
 }
 
 function Test-InstallPackageCommandShowTabExpansionForPreReleasePackagesIfPreReleaseFlagIsSet {

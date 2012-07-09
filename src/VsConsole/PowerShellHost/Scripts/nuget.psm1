@@ -71,8 +71,7 @@ Register-TabExpansion 'Uninstall-Package' @{
         GetProjectNames
     }
     'Version' = {
-        $parameters = @{}
-        GetInstalledPackageVersions $parameters $context
+        GetInstalledPackageVersions $context
     }
 }
 
@@ -89,21 +88,14 @@ Register-TabExpansion 'Update-Package' @{
 
         # Only show available versions if an id was specified
         if ($context.id) { 
-            # Find the installed package (this might be nothing since we could hav a partial id)
+            # Find the installed package (this might be nothing since we could have a partial id)
             $versions = @()
-            $packages = @(Get-Package $context.id | ?{ $_.Id -eq $context.id })
+            $packages = @(Get-Package $context.id | ? { $_.Id -eq $context.id })
 
             if($packages.Count) {
                 $package = @($packages | Sort-Object Version)[0]
 
-                $parameters = @{}
-                if ($context.Source) { $parameters.source = $context.Source }
-                $parameters.id = $package.id 
-                if (IsPrereleaseSet $context) {
-	                $parameters.IncludePreRelease = $true 
-                }
-
-                $versions = GetRemotePackageVersions $parameters
+                $versions = GetRemotePackageVersions $context
 
                 # Only show versions that are higher than the lowest installed version
                 $versions = $versions | ?{ $_ -gt $package.Version }
@@ -143,7 +135,7 @@ function IsPrereleaseSet($context) {
 	return (HasProperty $context 'IncludePreRelease') -or (HasProperty $context 'PreRelease') -or (HasProperty $context 'Pre')
 }
 
-function GetPackages($context) {  
+function GetPackages($context) {
     $parameters = @{}
 
     if ($context.Id) { $parameters.filter = $context.Id }
@@ -198,7 +190,7 @@ function GetPackageSources() {
 function GetInstalledPackageVersions($context) {
     $parameters = @{}
     if ($context.id) { $parameters.filter = $context.id }
-    GetAndSortVersions(Find-Package @parameters -ExactMatch -ErrorAction SilentlyContinue)
+    GetAndSortVersions (Find-Package @parameters -ExactMatch -ErrorAction SilentlyContinue)
 }
 
 function GetRemotePackageVersions($context) {
