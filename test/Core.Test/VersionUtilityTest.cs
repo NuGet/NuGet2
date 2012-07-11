@@ -177,6 +177,24 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void ParseFrameworkNameNormalizesSupportedWindowsPhoneNames()
+        {
+            // Arrange
+            var knownNameFormats = new[] { "windowsphone", "phone" };
+            Version defaultVersion = new Version("0.0");
+
+            // Act
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+
+            // Assert
+            foreach (var frameworkName in frameworkNames)
+            {
+                Assert.Equal("WindowsPhone", frameworkName.Identifier);
+                Assert.Equal(defaultVersion, frameworkName.Version);
+            }
+        }
+
+        [Fact]
         public void ParseFrameworkNameNormalizesSupportedWinRTFrameworkNames()
         {
             // Arrange
@@ -802,14 +820,27 @@ namespace NuGet.Test
             // Arrange
             FrameworkName wp7 = VersionUtility.ParseFrameworkName("sl3-wp");
             FrameworkName wp7Mango = VersionUtility.ParseFrameworkName("sl4-wp71");
+            FrameworkName wp8 = new FrameworkName("WindowsPhone, Version=v8.0");
 
             // Act
             bool wp7MangoCompatibleWithwp7 = VersionUtility.IsCompatible(wp7, wp7Mango);
             bool wp7CompatibleWithwp7Mango = VersionUtility.IsCompatible(wp7Mango, wp7);
 
+            bool wp7CompatibleWithwp8 = VersionUtility.IsCompatible(wp8, wp7);
+            bool wp7MangoCompatibleWithwp8 = VersionUtility.IsCompatible(wp8, wp7Mango);
+
+            bool wp8CompatibleWithwp7 = VersionUtility.IsCompatible(wp7, wp8);
+            bool wp8CompatbielWithwp7Mango = VersionUtility.IsCompatible(wp7Mango, wp8);
+
             // Assert
             Assert.False(wp7MangoCompatibleWithwp7);
             Assert.True(wp7CompatibleWithwp7Mango);
+
+            Assert.True(wp7CompatibleWithwp8);
+            Assert.True(wp7MangoCompatibleWithwp8);
+
+            Assert.False(wp8CompatibleWithwp7);
+            Assert.False(wp8CompatbielWithwp7Mango);
         }
 
         [Fact]

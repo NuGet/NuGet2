@@ -41,6 +41,8 @@ namespace NuGet
             { ".NETPortable", ".NETPortable" },
             { "NETPortable", ".NETPortable" },
             { "portable", ".NETPortable" }
+            { "wp", "WindowsPhone" },
+            { "WindowsPhone", "WindowsPhone" },
         };
 
         private static readonly Dictionary<string, string> _knownProfiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
@@ -55,7 +57,8 @@ namespace NuGet
             { NetFrameworkIdentifier, "net" },
             { ".NETMicroFramework", "netmf" },
             { "Silverlight", "sl" },
-            { ".NETCore", "winrt"}
+            { ".NETCore", "winrt"},
+            { "WindowsPhone", "phone"}
         };
 
         private static readonly Dictionary<string, string> _identifierToProfileFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
@@ -65,7 +68,7 @@ namespace NuGet
         };
 
         private static readonly Dictionary<string, CompatibilityMapping> _compatibiltyMapping = new Dictionary<string, CompatibilityMapping>(StringComparer.OrdinalIgnoreCase) {
-            { 
+            {
                 // Client profile is compatible with the full framework (empty string is full)
                 NetFrameworkIdentifier, new CompatibilityMapping(StringComparer.OrdinalIgnoreCase) {
                     { "", new [] { "Client" } },
@@ -74,10 +77,18 @@ namespace NuGet
             },
             {
                 "Silverlight", new CompatibilityMapping(StringComparer.OrdinalIgnoreCase) {
-                    { "WindowsPhone", new[] { "WindowsPhone71" } }
+                    { "WindowsPhone", new[] { "WindowsPhone71" } },
+                    { "WindowsPhone71", new[] { "WindowsPhone" } }
                 }
             }
         };
+
+        // we treat framework name 'WindowsPhone8.0' as if 'Silverlight8.0-WindowsPhone'
+        private static readonly Dictionary<string, Tuple<string, string>> _identifierAlias = new Dictionary<string, Tuple<string, string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                // origininal id                  new id        new profile
+                { "WindowsPhone", Tuple.Create("Silverlight", "WindowsPhone") }
+            };
 
         public static Version DefaultTargetFrameworkVersion
         {
@@ -614,9 +625,28 @@ namespace NuGet
             return true;
         }
 
+        /// <summary>
+        /// Determines whether the specified framework name is compatible with the target framework.
+        /// </summary>
+        /// <param name="frameworkName">Project framework.</param>
+        /// <param name="targetFrameworkName">Package framework.</param>
         internal static bool IsCompatible(FrameworkName frameworkName, FrameworkName targetFrameworkName)
         {
-            if (!frameworkName.Identifier.Equals(targetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase))
+            string identifier = frameworkName.Identifier;
+            string profile = frameworkName.Profile;
+            
+            if (!identifier.Equals(targetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase))
+            {
+                // if Ids do not match, check to see if Id alias does
+                Tuple<string, string> alias;
+                if (_identifierAlias.TryGetValue(identifier, out alias))
+                {
+                    identifier = alias.Item1;
+                    profile = alias.Item2;
+                }
+            }
+
+            if (!identifier.Equals(targetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
@@ -628,21 +658,21 @@ namespace NuGet
             }
 
             // If the profile names are equal then they're compatible
-            if (String.Equals(frameworkName.Profile, targetFrameworkName.Profile, StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(profile, targetFrameworkName.Profile, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
 
             // Get the compatibility mapping for this framework identifier
             CompatibilityMapping mapping;
-            if (_compatibiltyMapping.TryGetValue(frameworkName.Identifier, out mapping))
+            if (_compatibiltyMapping.TryGetValue(identifier, out mapping))
             {
                 // Get all compatible profiles for the target profile
                 string[] compatibleProfiles;
                 if (mapping.TryGetValue(targetFrameworkName.Profile, out compatibleProfiles))
                 {
                     // See if this profile is in the list of compatible profiles
-                    return compatibleProfiles.Contains(frameworkName.Profile, StringComparer.OrdinalIgnoreCase);
+                    return compatibleProfiles.Contains(profile, StringComparer.OrdinalIgnoreCase);
                 }
             }
 
