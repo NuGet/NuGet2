@@ -715,11 +715,11 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to By default a local cache is not used as a fallback when a package or a package dependency is not found in the specified source(s). If you want to ensure only packages from the specified sources are used, keep this default. If you want instead to maximize chances of finding packages, set this option..
+        ///   Looks up a localized string similar to By default a local cache is used as a fallback when a package or a package dependency is not found in the specified source(s). If you want to ensure only packages from the specified sources are used, set the NoCache option. If you want instead to maximize chances of finding packages, do not set this option..
         /// </summary>
-        internal static string MirrorCommandDoCache {
+        internal static string MirrorCommandNoCache {
             get {
-                return ResourceManager.GetString("MirrorCommandDoCache", resourceCulture);
+                return ResourceManager.GetString("MirrorCommandNoCache", resourceCulture);
             }
         }
         

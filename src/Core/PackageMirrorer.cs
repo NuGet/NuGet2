@@ -111,7 +111,7 @@ namespace NuGet
             }
             else
             {
-                throw new NotSupportedException("How did I get here?");
+                throw new NotSupportedException();
             }
         }
 

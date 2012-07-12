@@ -180,8 +180,8 @@
   <data name="MirrorCommandNoOp" xml:space="preserve">
     <value>Log what would be done without actually doing it. Assumes success for push operations. </value>
   </data>
-  <data name="MirrorCommandDoCache" xml:space="preserve">
-    <value>By default a local cache is not used as a fallback when a package or a package dependency is not found in the specified source(s). If you want to ensure only packages from the specified sources are used, keep this default. If you want instead to maximize chances of finding packages, set this option.</value>
+  <data name="MirrorCommandNoCache" xml:space="preserve">
+    <value>By default a local cache is used as a fallback when a package or a package dependency is not found in the specified source(s). If you want to ensure only packages from the specified sources are used, set the NoCache option. If you want instead to maximize chances of finding packages, do not set this option.</value>
   </data>
   <data name="MirrorCommandApiKey" xml:space="preserve">
     <value>The API key for pushing to the target repository. If not specified, the one specified in the default NuGet config file is used.</value>

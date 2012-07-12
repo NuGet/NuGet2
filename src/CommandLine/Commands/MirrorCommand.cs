@@ -1,85 +1,86 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Collections.Generic;
 using System.IO;
 using NuGet.Common;
 
 namespace NuGet.Commands
 {
-
-    // Thin wrapper that allows exposing a PackageServer as an IPackageRepository
-    public class PackageServerRepository : IPackageRepository
-    {
-        private readonly IPackageRepository _pull;
-        private readonly PackageServer _push;
-        private readonly string _apiKey;
-        private readonly TimeSpan _timeout;
-        private readonly ILogger _logger;
-
-        public PackageServerRepository(IPackageRepository pull, PackageServer push, string apiKey, TimeSpan timeout, ILogger logger)
-        {
-            if (pull == null)
-            {
-                throw new ArgumentNullException("pull");
-            }
-            if (push == null)
-            {
-                throw new ArgumentNullException("push");
-            }
-            if (apiKey == null)
-            {
-                throw new ArgumentNullException("apiKey");
-            }
-            if (logger == null)
-            {
-                throw new ArgumentNullException("logger");
-            }
-            _pull = pull;
-            _push = push;
-            _apiKey = apiKey;
-            _timeout = timeout;
-            _logger = logger;
-        }
-
-        public string Source
-        {
-            get { return _pull.Source; }
-        }
-
-        public bool SupportsPrereleasePackages
-        {
-            get { return _pull.SupportsPrereleasePackages; }
-        }
-
-        public IQueryable<IPackage> GetPackages()
-        {
-            return _pull.GetPackages();
-        }
-
-        public void AddPackage(IPackage package)
-        {
-            _logger.Log(MessageLevel.Info, NuGetResources.PushCommandPushingPackage, package.GetFullName(), CommandLineUtility.GetSourceDisplayName(_push.Source));
-
-            using (Stream stream = package.GetStream())
-            {
-                _push.PushPackage(_apiKey, stream, Convert.ToInt32(_timeout.TotalMilliseconds));
-            }
-
-            _logger.Log(MessageLevel.Info, NuGetResources.PushCommandPackagePushed);
-        }
-
-        public void RemovePackage(IPackage package)
-        {
-            throw new NotSupportedException();
-        }
-    }
-
     [Command(typeof(NuGetResources), "mirror", "MirrorCommandDescription",
         MinArgs = 3, MaxArgs = 3, UsageDescriptionResourceName = "MirrorCommandUsageDescription",
         UsageSummaryResourceName = "MirrorCommandUsageSummary", UsageExampleResourceName = "MirrorCommandUsageExamples")]
     public class MirrorCommand : Command
     {
+
+        // Thin wrapper that allows exposing a PackageServer as an IPackageRepository
+        private class PackageServerRepository : IPackageRepository
+        {
+            private readonly IPackageRepository _pull;
+            private readonly PackageServer _push;
+            private readonly string _apiKey;
+            private readonly TimeSpan _timeout;
+            private readonly ILogger _logger;
+
+            public PackageServerRepository(IPackageRepository pull, PackageServer push, string apiKey, TimeSpan timeout, ILogger logger)
+            {
+                if (pull == null)
+                {
+                    throw new ArgumentNullException("pull");
+                }
+                if (push == null)
+                {
+                    throw new ArgumentNullException("push");
+                }
+                if (apiKey == null)
+                {
+                    throw new ArgumentNullException("apiKey");
+                }
+                if (logger == null)
+                {
+                    throw new ArgumentNullException("logger");
+                }
+                _pull = pull;
+                _push = push;
+                _apiKey = apiKey;
+                _timeout = timeout;
+                _logger = logger;
+            }
+
+            public string Source
+            {
+                get { return _pull.Source; }
+            }
+
+            public bool SupportsPrereleasePackages
+            {
+                get { return _pull.SupportsPrereleasePackages; }
+            }
+
+            public IQueryable<IPackage> GetPackages()
+            {
+                return _pull.GetPackages();
+            }
+
+            public void AddPackage(IPackage package)
+            {
+                _logger.Log(MessageLevel.Info, NuGetResources.PushCommandPushingPackage, package.GetFullName(), CommandLineUtility.GetSourceDisplayName(_push.Source));
+
+                using (Stream stream = package.GetStream())
+                {
+                    _push.PushPackage(_apiKey, stream, Convert.ToInt32(_timeout.TotalMilliseconds));
+                }
+
+                _logger.Log(MessageLevel.Info, NuGetResources.PushCommandPackagePushed);
+            }
+
+            public void RemovePackage(IPackage package)
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+
         private readonly List<string> _sources = new List<string>();
 
         [Option(typeof(NuGetResources), "MirrorCommandSourceDescription", AltName="src")]
@@ -100,8 +101,8 @@ namespace NuGet.Commands
         [Option(typeof(NuGetResources), "PushCommandTimeoutDescription")]
         public int Timeout { get; set; }
 
-        [Option(typeof(NuGetResources), "MirrorCommandDoCache", AltName = "c")]
-        public bool DoCache { get; set; }
+        [Option(typeof(NuGetResources), "MirrorCommandNoCache", AltName = "c")]
+        public bool NoCache { get; set; }
 
         [Option(typeof(NuGetResources), "MirrorCommandNoOp", AltName = "n" )]
         public bool NoOp { get; set; }
@@ -137,7 +138,7 @@ namespace NuGet.Commands
         {
             var repository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
             bool ignoreFailingRepositories = repository.IgnoreFailingRepositories;
-            if (DoCache)
+            if (! NoCache)
             {
                 repository = new AggregateRepository(new[] { CacheRepository, repository }) 
                     { IgnoreFailingRepositories = ignoreFailingRepositories, Logger = Console };

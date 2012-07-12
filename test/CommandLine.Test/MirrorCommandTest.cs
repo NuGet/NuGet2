@@ -201,14 +201,14 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         }
 
         [Fact]
-        public void MirrorCommandUsesLocalCacheIfDoCacheIsTrue()
+        public void MirrorCommandUsesLocalCacheIfNoCacheIsFalse()
         {
             // Arrange
             var localCache = new Mock<IPackageRepository>(MockBehavior.Strict);
             localCache.Setup(c => c.GetPackages()).Returns(new[] { PackageUtility.CreatePackage("Gamma") }.AsQueryable()).Verifiable();
             var mirrorCommand = new TestMirrorCommand("Gamma", machineCacheRepository: localCache.Object)
             {
-                DoCache = true
+                NoCache = false
             };
             
             mirrorCommand.Source.Add("Some Source name");
@@ -223,13 +223,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         }
 
         [Fact]
-        public void MirrorCommandDoesNotUseLocalCacheIfDoCacheIsFalse()
+        public void MirrorCommandDoesNotUseLocalCacheIfNoCacheIsTrue()
         {
             // Arrange
             var localCache = new Mock<IPackageRepository>(MockBehavior.Strict);
             var mirrorCommand = new TestMirrorCommand("Baz", machineCacheRepository: localCache.Object)
             {
-                DoCache = false
+                NoCache = true
             };
             
             mirrorCommand.Source.Add("Some Source name");
