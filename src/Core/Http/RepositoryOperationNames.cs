@@ -10,5 +10,6 @@
         public static readonly string Update = "Update";
         public static readonly string Install = "Install";
         public static readonly string Restore = "Restore";
+        public static readonly string Reinstall = "Reinstall";
     }
 }

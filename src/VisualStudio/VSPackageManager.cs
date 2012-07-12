@@ -379,6 +379,184 @@ namespace NuGet.VisualStudio
             UpdatePackages(updateDependencies, safeUpdate: true, allowPrereleaseVersions: allowPrereleaseVersions, logger: logger, eventListener: eventListener);
         }
 
+        // Reinstall all packages in all projects
+        public void ReinstallPackages(
+            bool updateDependencies, 
+            bool allowPrereleaseVersions, 
+            ILogger logger, 
+            IPackageOperationEventListener eventListener)
+        {
+            UpdatePackages(
+                LocalRepository,
+                package => ReinstallPackageToAllProjects(package, null, updateDependencies, allowPrereleaseVersions, logger, eventListener),
+                logger);
+        }
+
+        // Reinstall all packages in the specified project
+        public void ReinstallPackages(
+            IProjectManager projectManager, 
+            bool updateDependencies, 
+            bool allowPrereleaseVersions, 
+            ILogger logger)
+        {
+            UpdatePackages(
+                projectManager.LocalRepository,
+                package => ReinstallPackageInProject(projectManager, package, updateDependencies, allowPrereleaseVersions, logger),
+                logger);
+        }
+
+        /// <summary>
+        /// Reinstall the specified package in all projects.
+        /// </summary>
+        public void ReinstallPackage(
+            string packageId, 
+            bool updateDependencies, 
+            bool allowPrereleaseVersions, 
+            ILogger logger, 
+            IPackageOperationEventListener eventListener)
+        {
+            bool appliesToProject;
+            IPackage package = FindLocalPackage(packageId, out appliesToProject);
+            ReinstallPackageToAllProjects(package, appliesToProject, updateDependencies, allowPrereleaseVersions, logger, eventListener);
+        }
+
+        /// <summary>
+        /// Reinstall the specified package in the specified project.
+        /// </summary>
+        public void ReinstallPackage(
+            IProjectManager projectManager, 
+            string packageId, 
+            bool updateDependencies, 
+            bool allowPrereleaseVersions, 
+            ILogger logger)
+        {
+            bool appliesToProject;
+            IPackage package = FindLocalPackageForUpdate(projectManager, packageId, out appliesToProject);
+
+            if (appliesToProject)
+            {
+                ReinstallPackageInProject(projectManager, package, updateDependencies, allowPrereleaseVersions, logger);
+            }
+            else
+            {
+                ReinstallSolutionPackage(package, updateDependencies, allowPrereleaseVersions, logger);
+            }
+        }
+
+        /// <summary>
+        /// Reinstall the specified package in the specified project, taking care of logging too.
+        /// </summary>
+        private void ReinstallPackageInProject(
+            IProjectManager projectManager, 
+            IPackage package, 
+            bool updateDependencies, 
+            bool allowPrereleaseVersions, 
+            ILogger logger)
+        {
+            logger = logger ?? NullLogger.Instance;
+
+            try
+            {
+                InitializeLogger(logger, projectManager);
+
+                logger.Log(MessageLevel.Info, VsResources.ReinstallProjectPackage, package, projectManager.Project.ProjectName);
+
+                RunSolutionAction(
+                    () =>
+                    {
+                        UninstallPackage(
+                            projectManager,
+                            package.Id,
+                            version: null,
+                            forceRemove: true,
+                            removeDependencies: updateDependencies,
+                            logger: logger);
+
+                        InstallPackage(
+                            projectManager,
+                            package.Id,
+                            package.Version,
+                            ignoreDependencies: !updateDependencies,
+                            allowPrereleaseVersions: allowPrereleaseVersions,
+                            logger: logger);
+                    });
+            }
+            finally
+            {
+                ClearLogger(projectManager);
+            }
+        }
+
+        private void ReinstallPackageToAllProjects(
+            IPackage package, 
+            bool? appliesToProject,
+            bool updateDependencies, 
+            bool allowPrereleaseVersions, 
+            ILogger logger, 
+            IPackageOperationEventListener eventListener)
+        {
+            appliesToProject = appliesToProject ?? IsProjectLevel(package);
+
+            if ((bool)appliesToProject)
+            {
+                logger = logger ?? NullLogger.Instance;
+                eventListener = eventListener ?? NullPackageOperationEventListener.Instance;
+                foreach (var project in _solutionManager.GetProjects())
+                {
+                    try
+                    {
+                        eventListener.OnBeforeAddPackageReference(project);
+                        var projectManager = GetProjectManager(project);
+
+                        if (projectManager.LocalRepository.Exists(package))
+                        {
+                            ReinstallPackageInProject(projectManager, package, updateDependencies, allowPrereleaseVersions, logger);
+                        }
+                    }
+                    catch (Exception exception)
+                    {
+                        logger.Log(MessageLevel.Error, ExceptionUtility.Unwrap(exception).Message);
+                        eventListener.OnAddPackageReferenceError(project, exception);
+                    }
+                    finally
+                    {
+                        eventListener.OnAfterAddPackageReference(project);
+                    }
+                }
+            }
+            else
+            {
+                ReinstallSolutionPackage(package, updateDependencies, allowPrereleaseVersions, logger);
+            }
+        }
+
+        private void ReinstallSolutionPackage(
+            IPackage package, 
+            bool updateDependencies, 
+            bool allowPrereleaseVersions, 
+            ILogger logger)
+        {
+            logger = logger ?? NullLogger.Instance;
+
+            try
+            {
+                InitializeLogger(logger);
+
+                logger.Log(MessageLevel.Info, VsResources.ReinstallSolutionPackage, package);
+
+                RunSolutionAction(
+                    () =>
+                    {
+                        UninstallPackage(package, forceRemove: true, removeDependencies: !updateDependencies);
+                        InstallPackage(package, ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
+                    });
+            }
+            finally 
+            {
+                ClearLogger();
+            }
+        }
+
         protected override void ExecuteUninstall(IPackage package)
         {
             // Check if the package is in use before removing it
@@ -712,7 +890,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        private void InitializeLogger(ILogger logger, IProjectManager projectManager)
+        private void InitializeLogger(ILogger logger, IProjectManager projectManager = null)
         {
             // Setup logging on all of our objects
             Logger = logger;
@@ -725,7 +903,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        private void ClearLogger(IProjectManager projectManager)
+        private void ClearLogger(IProjectManager projectManager = null)
         {
             // clear logging on all of our objects
             Logger = null;
@@ -737,6 +915,7 @@ namespace NuGet.VisualStudio
                 projectManager.Project.Logger = null;
             }
         }
+
         /// <summary>
         /// Runs the specified action and rolls back any installed packages if on failure.
         /// </summary>

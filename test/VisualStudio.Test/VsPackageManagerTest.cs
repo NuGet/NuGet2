@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.Versioning;
 using EnvDTE;
 using Moq;
 using NuGet.Test;
@@ -10,9 +11,8 @@ using Xunit.Extensions;
 namespace NuGet.VisualStudio.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
-    using System.Runtime.Versioning;
 
-    public class VsPackageManagerTest
+    public partial class VsPackageManagerTest
     {
         [Fact]
         public void InstallPackageInstallsIntoProjectAndPackageManager()

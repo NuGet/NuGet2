@@ -102,6 +102,41 @@ namespace NuGet.PowerShell.Commands.Test
         }
 
         [Fact]
+        public void UpdatePackageCmdletSpecifiesReinstallOperationDuringReinstall()
+        {
+            // Arrange
+            var mockPackageRepository = new MockPackageRepository();
+            var projectManager = new Mock<IProjectManager>();
+            projectManager.Setup(p => p.LocalRepository).Returns(new MockPackageRepository());
+            var vsPackageManager = new Mock<IVsPackageManager>();
+            vsPackageManager.Setup(v => v.SourceRepository).Returns(mockPackageRepository);
+            vsPackageManager.Setup(v => v.GetProjectManager(It.IsAny<Project>())).Returns(projectManager.Object);
+
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager.Object);
+            var sourceProvider = GetPackageSourceProvider(new PackageSource("somesource"));
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(c => c.CreateRepository(It.Is<string>(s => s == "somesource"))).Returns(mockPackageRepository);
+            var cmdlet = new UpdatePackageCommand(
+                TestUtils.GetSolutionManagerWithProjects("foo"), 
+                packageManagerFactory.Object, 
+                repositoryFactory.Object, 
+                sourceProvider, 
+                null, 
+                null, 
+                new Mock<IVsCommonOperations>().Object);
+            cmdlet.Id = "my-id";
+            cmdlet.Reinstall = true;
+            cmdlet.ProjectName = "foo";
+
+            // Act
+            cmdlet.Execute();
+
+            // Assert
+            Assert.Equal(RepositoryOperationNames.Reinstall, mockPackageRepository.LastOperation);
+        }
+
+        [Fact]
         public void UpdatePackageCmdletPassesIgnoreDependencySwitchCorrectly()
         {
             // Arrange

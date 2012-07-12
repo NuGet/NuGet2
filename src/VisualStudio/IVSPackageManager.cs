@@ -41,5 +41,12 @@ namespace NuGet.VisualStudio
 
         void SafeUpdatePackage(string packageId, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger, IPackageOperationEventListener eventListener);
         void SafeUpdatePackage(IProjectManager projectManager, string packageId, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger);
+
+        // Reinstall
+        void ReinstallPackages(bool updateDependencies, bool allowPrereleaseVersions, ILogger logger, IPackageOperationEventListener eventListener);
+        void ReinstallPackages(IProjectManager projectManager, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger);
+
+        void ReinstallPackage(string packageId, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger, IPackageOperationEventListener eventListener);
+        void ReinstallPackage(IProjectManager projectManager, string packageId, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger);
     }
 }

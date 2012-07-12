@@ -320,4 +320,10 @@ Packages installed into Website projects will not be restored during build. Cons
   <data name="TemplateWizard_VersionConflict" xml:space="preserve">
     <value>Attempting to install version '{1}' of '{0}' but the project already includes a different version. Skipping...</value>
   </data>
+  <data name="ReinstallProjectPackage" xml:space="preserve">
+    <value>Reinstalling '{0}' in project '{1}'.</value>
+  </data>
+  <data name="ReinstallSolutionPackage" xml:space="preserve">
+    <value>Reinstalling '{0}'.</value>
+  </data>
 </root>
