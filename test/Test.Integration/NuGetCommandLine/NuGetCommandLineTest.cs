@@ -1395,7 +1395,7 @@ public class Cl_{0} {{
             {
                 // clean up 
                 Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", oldEnvironmentVariable,
-                                                   EnvironmentVariableTarget.User);
+                                                   EnvironmentVariableTarget.Process);
             }
         }
 
