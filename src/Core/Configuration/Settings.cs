@@ -45,27 +45,28 @@ namespace NuGet
         {
             // Walk up the tree to find a workspace config file
             // if not found, attempt to load config file in user's application data
+            var currentRoot = currentDir == null ? null : currentDir.Root;
 
-            while (null != currentDir)
+            while (null != currentRoot)
             {
-                var settingsDir = currentDir.ChildDirectory(Constants.NuGetWorkspaceSettingsFolder);
-                if (null != settingsDir)
+                var workspaceSettingsDir = Path.Combine(currentRoot, Constants.NuGetWorkspaceSettingsFolder);
+                var workspaceSettingsFile = Path.Combine(workspaceSettingsDir, Constants.WorkspaceSettingsFileName);
+
+                if (currentDir.FileExists(workspaceSettingsFile))
                 {
-                    if (settingsDir.FileExists(Constants.WorkspaceSettingsFileName))
+                    try
                     {
-                        try
-                        {
-                            return new Settings(settingsDir, Constants.WorkspaceSettingsFileName);
-                        }
-                        catch (XmlException)
-                        {
-                            // Work Item 1531: If the config file is malformed and the constructor throws, NuGet fails to load in VS. 
-                            // Returning a null instance prevents us from silently failing and also from picking up the wrong config
-                            return NullSettings.Instance;
-                        }
+                        return new Settings(new PhysicalFileSystem(workspaceSettingsDir), Constants.WorkspaceSettingsFileName);
+                    }
+                    catch (XmlException)
+                    {
+                        // Work Item 1531: If the config file is malformed and the constructor throws, NuGet fails to load in VS. 
+                        // Returning a null instance prevents us from silently failing and also from picking up the wrong config
+                        return NullSettings.Instance;
                     }
                 }
-                currentDir = currentDir.Parent;
+
+                currentRoot = Path.GetDirectoryName(currentRoot);
             }
 
 
