@@ -40,37 +40,6 @@ namespace NuGet
             }
         }
 
-        public IFileSystem Parent
-        {
-            get
-            {
-                if (!Directory.Exists(Root))
-                {
-                    return null;
-                }
-                DirectoryInfo dir = new DirectoryInfo(Root);
-                if (!dir.Exists || null == dir.Parent)
-                {
-                    return null;
-                }
-                IFileSystem ret = new PhysicalFileSystem(dir.Parent.FullName);
-                ret.Logger = _logger;
-                return ret;
-            }
-        }
-
-        public virtual IFileSystem ChildDirectory(string path)
-        {
-            path = GetFullPath(path);
-            if (Directory.Exists(path))
-            {
-                IFileSystem ret = new PhysicalFileSystem(path);
-                ret.Logger = _logger;
-                return ret;
-            }
-            return null;
-        }
-
         public virtual string GetFullPath(string path)
         {
             if (String.IsNullOrEmpty(path))
