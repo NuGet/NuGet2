@@ -40,53 +40,15 @@ namespace NuGet
             get { return Path.Combine(_fileSystem.Root, _fileName); }
         }
 
-        public static ISettings LoadDefaultSettings(IFileSystem currentDir)
+        public static ISettings LoadDefaultSettings(IFileSystem fileSystem)
         {
             // Walk up the tree to find a workspace config file
             // if not found, attempt to load config file in user's application data
-            var currentRoot = currentDir == null ? null : currentDir.Root;
-
-            while (null != currentRoot)
-            {
-                var workspaceSettingsDir = Path.Combine(currentRoot, Constants.NuGetWorkspaceSettingsFolder);
-                var workspaceSettingsFile = Path.Combine(workspaceSettingsDir, Constants.WorkspaceSettingsFileName);
-
-                if (currentDir.FileExists(workspaceSettingsFile))
-                {
-                    try
-                    {
-                        return new Settings(new PhysicalFileSystem(workspaceSettingsDir), Constants.WorkspaceSettingsFileName);
-                    }
-                    catch (XmlException)
-                    {
-                        // Work Item 1531: If the config file is malformed and the constructor throws, NuGet fails to load in VS. 
-                        // Returning a null instance prevents us from silently failing and also from picking up the wrong config
-                        return NullSettings.Instance;
-                    }
-                }
-
-                currentRoot = Path.GetDirectoryName(currentRoot);
-            }
-
-
-            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            if (!String.IsNullOrEmpty(appDataPath))
-            {
-                var defaultSettingsPath = Path.Combine(appDataPath, "NuGet");
-                var fileSystem = new PhysicalFileSystem(defaultSettingsPath);
-                try
-                {
-                    return new Settings(fileSystem);
-                }
-                catch (XmlException)
-                {
-                    // Work Item 1531: If the config file is malformed and the constructor throws, NuGet fails to load in VS. 
-                    // Returning a null instance prevents us from silently failing.
-                }
-            }
+            var settingsFile = GetSettingsFilePaths(fileSystem).Select(f => ReadSettings(fileSystem, f))
+                                                               .First(f => f != null);
 
             // If there is no AppData folder, use a null file system to make the Settings object do nothing
-            return NullSettings.Instance;
+            return settingsFile ?? NullSettings.Instance;
         }
 
         public string GetValue(string section, string key)
@@ -372,6 +334,36 @@ namespace NuGet
         private static IList<KeyValuePair<string, string>> EmptyList()
         {
             return new KeyValuePair<string, string>[0];
+        }
+
+        private static IEnumerable<string> GetSettingsFilePaths(IFileSystem fileSystem)
+        {
+            string root = fileSystem.Root;
+            while (root != null)
+            {
+                var settingsFile = Path.Combine(root, Constants.SettingsFileName);
+                yield return settingsFile;
+                root = Path.GetDirectoryName(root);
+            }
+            yield return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        }
+
+        private static ISettings ReadSettings(IFileSystem fileSystem, string settingsPath)
+        {
+            try
+            {
+                if (fileSystem.FileExists(settingsPath))
+                {
+                    return new Settings(fileSystem, settingsPath);
+                }
+            }
+            catch (XmlException)
+            {
+                // Work Item 1531: If the config file is malformed and the constructor throws, NuGet fails to load in VS. 
+                // Returning a null instance prevents us from silently failing and also from picking up the wrong config
+                return NullSettings.Instance;
+            }
+            return null;
         }
     }
 }
