@@ -92,6 +92,78 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void MergingElementsMergeComments()
+        {
+            // Act
+            XElement a = XElement.Parse(@"<tests>
+    <test name=""one"" value=""foo"" />
+    <special>
+    </special>
+    <!-- old comment -->
+</tests>");
+
+            XElement b = XElement.Parse(@"<tests>
+    <!-- this is a comment -->
+    <test name=""one"" value=""foo"">
+        <!-- this is a comment inside element -->
+        <child>
+            <!-- this is a nested comment -->
+        </child>
+        <!-- comment before new element -->
+        <!-- second comment before new element -->
+        <rock />
+    </test>
+    <!-- comment at the end -->
+</tests>");
+
+            // Act
+            var result = a.MergeWith(b).ToString();
+
+            // Assert            
+            Assert.Equal(@"<tests>
+  <!-- this is a comment -->
+  <test name=""one"" value=""foo"">
+    <!-- this is a comment inside element -->
+    <child>
+      <!-- this is a nested comment -->
+    </child>
+    <!-- comment before new element -->
+    <!-- second comment before new element -->
+    <rock />
+  </test>
+  <special></special>
+  <!-- old comment -->
+  <!-- comment at the end -->
+</tests>", result);
+        }
+
+        [Fact]
+        public void MergingElementsMergeCommentsWhenThereIsNoChildElement()
+        {
+            // Act
+            XElement a = XElement.Parse(@"<tests>
+    <test name=""one"" value=""foo"" />
+</tests>");
+
+            XElement b = XElement.Parse(@"<tests>
+    <!-- this file contains only comment
+         hahaha, you like that? -->
+    <!-- dark knight rises -->
+</tests>");
+
+            // Act
+            var result = a.MergeWith(b).ToString();
+
+            // Assert            
+            Assert.Equal(@"<tests>
+  <test name=""one"" value=""foo"" />
+  <!-- this file contains only comment
+         hahaha, you like that? -->
+  <!-- dark knight rises -->
+</tests>", result);
+        }
+
+        [Fact]
         public void MergingElementsWithMultipleEntiresAddsEntryIfNotExists()
         {
             // Act
@@ -170,6 +242,55 @@ namespace NuGet.Test
             Assert.Equal(2, barElement.Attributes().Count());
             AssertAttributeValue(barElement, "a", "g");
             AssertAttributeValue(barElement, "b", "2");
+        }
+
+        [Fact]
+        public void ExceptRemoveComments()
+        {
+            // Act
+            XElement a = XElement.Parse(@"<tests>
+    <test name=""One"" value=""foo"" />
+    <test name=""two"" value=""bar"" />
+    <!-- comment -->
+</tests>");
+
+            XElement b = XElement.Parse(@"<tests>
+    <!-- comment -->
+    <test name=""two"" value=""bar"" />
+</tests>");
+
+            // Act
+            var result = a.Except(b);
+
+            // Assert
+            Assert.Equal(@"<tests>
+  <test name=""One"" value=""foo"" />
+</tests>", result.ToString());
+        }
+
+        [Fact]
+        public void ExceptDoNotRemoveCommentIfCommentsDoNotMatch()
+        {
+            // Act
+            XElement a = XElement.Parse(@"<tests>
+    <test name=""One"" value=""foo"" />
+    <test name=""two"" value=""bar"" />
+    <!-- this is a comment -->
+</tests>");
+
+            XElement b = XElement.Parse(@"<tests>
+    <!-- comment -->
+    <test name=""two"" value=""bar"" />
+</tests>");
+
+            // Act
+            var result = a.Except(b);
+
+            // Assert
+            Assert.Equal(@"<tests>
+  <test name=""One"" value=""foo"" />
+  <!-- this is a comment -->
+</tests>", result.ToString());
         }
 
         [Fact]

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace NuGet
@@ -64,18 +65,33 @@ namespace NuGet
                 a.Remove();
             }
 
-            foreach (var sourceChild in source.Elements().ToList())
+            foreach (var sourceChildNode in source.Nodes().ToList())
             {
-                var targetChild = FindElement(target, sourceChild);
-                if (targetChild != null && !HasConflict(sourceChild, targetChild))
+                var sourceChildComment = sourceChildNode as XComment;
+                if (sourceChildComment != null)
                 {
-                    Except(sourceChild, targetChild);
-                    bool hasContent = sourceChild.HasAttributes || sourceChild.HasElements;
-                    if (!hasContent)
+                    bool hasMatchingComment = HasComment(target, sourceChildComment);
+                    if (hasMatchingComment)
                     {
-                        // Remove the element if there is no content
-                        sourceChild.Remove();
-                        targetChild.Remove();
+                        sourceChildComment.Remove();
+                    }
+                    continue;
+                }
+
+                var sourceChild = sourceChildNode as XElement;
+                if (sourceChild != null)
+                {
+                    var targetChild = FindElement(target, sourceChild);
+                    if (targetChild != null && !HasConflict(sourceChild, targetChild))
+                    {
+                        Except(sourceChild, targetChild);
+                        bool hasContent = sourceChild.HasAttributes || sourceChild.HasElements;
+                        if (!hasContent)
+                        {
+                            // Remove the element if there is no content
+                            sourceChild.Remove();
+                            targetChild.Remove();
+                        }
                     }
                 }
             }
@@ -105,29 +121,58 @@ namespace NuGet
                 }
             }
 
+            var pendingComments = new Queue<XComment>();
+
             // Go through the elements to be merged
-            foreach (var targetChild in target.Elements())
+            foreach (var targetChildNode in target.Nodes())
             {
-                var sourceChild = FindElement(source, targetChild);
-                if (sourceChild != null && !HasConflict(sourceChild, targetChild))
+                var targetChildComment = targetChildNode as XComment;
+                if (targetChildComment != null)
                 {
-                    // Other wise merge recursively
-                    sourceChild.MergeWith(targetChild, nodeActions);
+                    // always add comment to source
+                    pendingComments.Enqueue(targetChildComment);
+                    continue;
                 }
-                else
+
+                var targetChild = targetChildNode as XElement;
+                if (targetChild != null)
                 {
-                    Action<XElement, XElement> nodeAction;
-                    if (nodeActions != null && nodeActions.TryGetValue(targetChild.Name, out nodeAction))
+                    var sourceChild = FindElement(source, targetChild);
+                    if (sourceChild != null)
                     {
-                        nodeAction(source, targetChild);
+                        // when we see an element, add all the previous comments before the child element
+                        AddContents(pendingComments, sourceChild.AddBeforeSelf);
+                    }
+
+                    if (sourceChild != null && !HasConflict(sourceChild, targetChild))
+                    {
+                        // Other wise merge recursively
+                        sourceChild.MergeWith(targetChild, nodeActions);
                     }
                     else
                     {
-                        // If that element is null then add that node
-                        source.Add(targetChild);
+                        Action<XElement, XElement> nodeAction;
+                        if (nodeActions != null && nodeActions.TryGetValue(targetChild.Name, out nodeAction))
+                        {
+                            nodeAction(source, targetChild);
+                        }
+                        else
+                        {
+                            // If that element is null then add that node
+                            source.Add(targetChild);
+
+                            var newlyAddedElement = source.Elements().Last();
+                            Debug.Assert(newlyAddedElement.Name == targetChild.Name);
+
+                            // when we see an element, add all the previous comments before the child element
+                            AddContents(pendingComments, newlyAddedElement.AddBeforeSelf);
+                        }
                     }
                 }
             }
+
+            // now add all remaining comments at the end
+            AddContents(pendingComments, source.Add);
             return source;
         }
 
@@ -140,6 +185,12 @@ namespace NuGet
             sourceElements.Sort((a, b) => Compare(targetChild, a, b));
 
             return sourceElements.FirstOrDefault();
+        }
+
+        private static bool HasComment(XElement element, XComment comment)
+        {
+            return element.Nodes().Any(node => node.NodeType == XmlNodeType.Comment &&
+                                               ((XComment)node).Value.Equals(comment.Value, StringComparison.Ordinal));                                                
         }
 
         private static int Compare(XElement target, XElement left, XElement right)
@@ -211,6 +262,14 @@ namespace NuGet
                 return false;
             }
             return source.Name == target.Name && source.Value == target.Value;
+        }
+
+        private static void AddContents<T>(Queue<T> pendingComments, Action<T> action)
+        {
+            while (pendingComments.Count > 0)
+            {
+                action(pendingComments.Dequeue());
+            }
         }
     }
 }
