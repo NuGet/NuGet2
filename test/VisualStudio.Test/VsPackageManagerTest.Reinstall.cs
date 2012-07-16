@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Runtime.Versioning;
 using EnvDTE;
 using Moq;
 using NuGet.Test;
 using NuGet.Test.Mocks;
 using Xunit;
-using Xunit.Extensions;
 
 namespace NuGet.VisualStudio.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
-    using System.Collections.Generic;
 
     public partial class VsPackageManagerTest
     {

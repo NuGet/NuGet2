@@ -19,11 +19,11 @@ namespace NuGet.VisualStudio
         private readonly VsPackageInstallerEvents _packageEvents;
         private bool _bindingRedirectEnabled = true;
 
-        public VsPackageManager(ISolutionManager solutionManager, 
-                IPackageRepository sourceRepository, 
+        public VsPackageManager(ISolutionManager solutionManager,
+                IPackageRepository sourceRepository,
                 IFileSystemProvider fileSystemProvider,
-                IFileSystem fileSystem, 
-                ISharedPackageRepository sharedRepository, 
+                IFileSystem fileSystem,
+                ISharedPackageRepository sharedRepository,
                 VsPackageInstallerEvents packageEvents) :
             base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository)
         {
@@ -119,11 +119,11 @@ namespace NuGet.VisualStudio
         }
 
         public virtual void InstallPackage(
-            IProjectManager projectManager, 
-            string packageId, 
-            SemanticVersion version, 
-            bool ignoreDependencies, 
-            bool allowPrereleaseVersions, 
+            IProjectManager projectManager,
+            string packageId,
+            SemanticVersion version,
+            bool ignoreDependencies,
+            bool allowPrereleaseVersions,
             ILogger logger)
         {
             InstallPackage(projectManager, packageId, version, ignoreDependencies, allowPrereleaseVersions,
@@ -131,12 +131,12 @@ namespace NuGet.VisualStudio
         }
 
         public void InstallPackage(
-            IProjectManager projectManager, 
-            string packageId, 
-            SemanticVersion version, 
-            bool ignoreDependencies, 
-            bool allowPrereleaseVersions, 
-            bool skipAssemblyReferences, 
+            IProjectManager projectManager,
+            string packageId,
+            SemanticVersion version,
+            bool ignoreDependencies,
+            bool allowPrereleaseVersions,
+            bool skipAssemblyReferences,
             ILogger logger)
         {
             InitializeLogger(logger, projectManager);
@@ -150,9 +150,9 @@ namespace NuGet.VisualStudio
             RunSolutionAction(() =>
             {
                 InstallPackage(
-                    package, 
-                    projectManager != null ? projectManager.Project.TargetFramework : null, 
-                    ignoreDependencies, 
+                    package,
+                    projectManager != null ? projectManager.Project.TargetFramework : null,
+                    ignoreDependencies,
                     allowPrereleaseVersions);
 
                 AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
@@ -192,7 +192,7 @@ namespace NuGet.VisualStudio
             EventHandler<PackageOperationEventArgs> uninstallingHandler =
                 (sender, e) => _packageEvents.NotifyUninstalling(e);
 
-            EventHandler<PackageOperationEventArgs> uninstalledHandler = 
+            EventHandler<PackageOperationEventArgs> uninstalledHandler =
                 (sender, e) => _packageEvents.NotifyUninstalled(e);
 
             try
@@ -381,22 +381,28 @@ namespace NuGet.VisualStudio
 
         // Reinstall all packages in all projects
         public void ReinstallPackages(
-            bool updateDependencies, 
-            bool allowPrereleaseVersions, 
-            ILogger logger, 
+            bool updateDependencies,
+            bool allowPrereleaseVersions,
+            ILogger logger,
             IPackageOperationEventListener eventListener)
         {
             UpdatePackages(
                 LocalRepository,
-                package => ReinstallPackageToAllProjects(package, null, updateDependencies, allowPrereleaseVersions, logger, eventListener),
+                package => ReinstallPackageToAllProjects(
+                                package,
+                                appliesToProject: null,
+                                updateDependencies: updateDependencies,
+                                allowPrereleaseVersions: allowPrereleaseVersions,
+                                logger: logger,
+                                eventListener: eventListener),
                 logger);
         }
 
         // Reinstall all packages in the specified project
         public void ReinstallPackages(
-            IProjectManager projectManager, 
-            bool updateDependencies, 
-            bool allowPrereleaseVersions, 
+            IProjectManager projectManager,
+            bool updateDependencies,
+            bool allowPrereleaseVersions,
             ILogger logger)
         {
             UpdatePackages(
@@ -409,10 +415,10 @@ namespace NuGet.VisualStudio
         /// Reinstall the specified package in all projects.
         /// </summary>
         public void ReinstallPackage(
-            string packageId, 
-            bool updateDependencies, 
-            bool allowPrereleaseVersions, 
-            ILogger logger, 
+            string packageId,
+            bool updateDependencies,
+            bool allowPrereleaseVersions,
+            ILogger logger,
             IPackageOperationEventListener eventListener)
         {
             bool appliesToProject;
@@ -424,10 +430,10 @@ namespace NuGet.VisualStudio
         /// Reinstall the specified package in the specified project.
         /// </summary>
         public void ReinstallPackage(
-            IProjectManager projectManager, 
-            string packageId, 
-            bool updateDependencies, 
-            bool allowPrereleaseVersions, 
+            IProjectManager projectManager,
+            string packageId,
+            bool updateDependencies,
+            bool allowPrereleaseVersions,
             ILogger logger)
         {
             bool appliesToProject;
@@ -447,10 +453,10 @@ namespace NuGet.VisualStudio
         /// Reinstall the specified package in the specified project, taking care of logging too.
         /// </summary>
         private void ReinstallPackageInProject(
-            IProjectManager projectManager, 
-            IPackage package, 
-            bool updateDependencies, 
-            bool allowPrereleaseVersions, 
+            IProjectManager projectManager,
+            IPackage package,
+            bool updateDependencies,
+            bool allowPrereleaseVersions,
             ILogger logger)
         {
             logger = logger ?? NullLogger.Instance;
@@ -467,7 +473,7 @@ namespace NuGet.VisualStudio
                         UninstallPackage(
                             projectManager,
                             package.Id,
-                            version: null,
+                            package.Version,
                             forceRemove: true,
                             removeDependencies: updateDependencies,
                             logger: logger);
@@ -488,11 +494,11 @@ namespace NuGet.VisualStudio
         }
 
         private void ReinstallPackageToAllProjects(
-            IPackage package, 
+            IPackage package,
             bool? appliesToProject,
-            bool updateDependencies, 
-            bool allowPrereleaseVersions, 
-            ILogger logger, 
+            bool updateDependencies,
+            bool allowPrereleaseVersions,
+            ILogger logger,
             IPackageOperationEventListener eventListener)
         {
             appliesToProject = appliesToProject ?? IsProjectLevel(package);
@@ -531,9 +537,9 @@ namespace NuGet.VisualStudio
         }
 
         private void ReinstallSolutionPackage(
-            IPackage package, 
-            bool updateDependencies, 
-            bool allowPrereleaseVersions, 
+            IPackage package,
+            bool updateDependencies,
+            bool allowPrereleaseVersions,
             ILogger logger)
         {
             logger = logger ?? NullLogger.Instance;
@@ -551,7 +557,7 @@ namespace NuGet.VisualStudio
                         InstallPackage(package, ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
                     });
             }
-            finally 
+            finally
             {
                 ClearLogger();
             }

@@ -68,7 +68,7 @@
     <Compile Include="VsFileSystemProviderTest.cs" />
     <Compile Include="VsInstallerTest.cs" />
     <Compile Include="VsPackageManagerTest.cs" />
-    <Compile Include="VsPackageManagerTest2.cs" />
+    <Compile Include="VsPackageManagerTest.Reinstall.cs" />
     <Compile Include="VsPackageSourceProviderTest.cs" />
     <Compile Include="VsPackageSourceRepositoryTest.cs" />
     <Compile Include="TestUtils.cs" />

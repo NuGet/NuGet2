@@ -143,7 +143,7 @@ namespace NuGet.PowerShell.Commands
                     // If a package id was specified, but no project was specified, then update this package in all projects
                     if (String.IsNullOrEmpty(ProjectName))
                     {
-                        PackageManager.ReinstallPackage(Id, !IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
+                        PackageManager.ReinstallPackage(Id, !IgnoreDependencies, IncludePrerelease, this, this);
                     }
                     else if (projectManager != null)
                     {
@@ -154,11 +154,11 @@ namespace NuGet.PowerShell.Commands
                 {
                     if (String.IsNullOrEmpty(ProjectName))
                     {
-                        PackageManager.ReinstallPackages(!IgnoreDependencies.IsPresent, IncludePrerelease, this, this);
+                        PackageManager.ReinstallPackages(!IgnoreDependencies, IncludePrerelease, this, this);
                     }
                     else if (projectManager != null)
                     {
-                        PackageManager.ReinstallPackages(projectManager, !IgnoreDependencies.IsPresent, IncludePrerelease, this);
+                        PackageManager.ReinstallPackages(projectManager, !IgnoreDependencies, IncludePrerelease, this);
                     }
                 }
             }

@@ -1121,3 +1121,120 @@ function Test-UpdatingMetaPackageRemovesSatelliteReferences
 	Assert-PathNotExists (Join-Path $solutionDir 'packages\A.fr.1.0.0\')
 	Assert-PathNotExists (Join-Path $solutionDir 'packages\A.es.1.0.0\')
 }
+
+function Test-ReinstallPackageInvokeUninstallAndInstallScripts 
+{
+	param($context) 
+	
+	# Arrange
+	$p = New-ClassLibrary
+
+	$p | Install-Package TestReinstallPackageScripts -Source $context.RepositoryPath
+
+	$global:InstallScriptCount = 0
+	$global:UninstallScriptCount = 4
+
+	# Act
+	Update-Package TestReinstallPackageScripts -Reinstall -ProjectName $p.Name -Source $context.RepositoryPath
+
+	# Assert
+	Assert-AreEqual 1 $global:InstallScriptCount
+	Assert-AreEqual 5 $global:UninstallScriptCount
+
+	# clean up
+	Remove-Variable InstallScriptCount -Scope Global 
+	Remove-Variable UninstallScriptCount -Scope Global 
+}
+
+function Test-ReinstallAllPackagesInAProjectInvokeUninstallAndInstallScripts 
+{
+	param($context) 
+	
+	# Arrange
+	$p = New-ClassLibrary
+
+	$p | Install-Package TestReinstallPackageScripts -Source $context.RepositoryPath
+	$p | Install-Package MagicPackage -Source $context.RepositoryPath
+
+	$global:InstallScriptCount = 7
+	$global:UninstallScriptCount = 3
+
+	$global:InstallMagicScript = 4
+	$global:UninstallMagicScript = 6
+
+	# Act
+	Update-Package -Reinstall -ProjectName $p.Name -Source $context.RepositoryPath
+
+	# Assert
+	Assert-AreEqual 8 $global:InstallScriptCount
+	Assert-AreEqual 4 $global:UninstallScriptCount
+
+	Assert-AreEqual 5 $global:InstallMagicScript
+	Assert-AreEqual 7 $global:UninstallMagicScript
+
+	# clean up
+	Remove-Variable InstallScriptCount -Scope Global 
+	Remove-Variable UninstallScriptCount -Scope Global 
+	Remove-Variable InstallMagicScript -Scope Global 
+	Remove-Variable UninstallMagicScript -Scope Global 
+}
+
+function Test-ReinstallPackageInAllProjectsInvokeUninstallAndInstallScripts 
+{
+	param($context) 
+	
+	# Arrange
+	$p = New-ClassLibrary
+	$q = New-ConsoleApplication
+
+	$p | Install-Package TestReinstallPackageScripts -Source $context.RepositoryPath
+	$q | Install-Package TestReinstallPackageScripts -Source $context.RepositoryPath
+
+	$global:InstallScriptCount = 2
+	$global:UninstallScriptCount = 9
+
+	# Act
+	Update-Package TestReinstallPackageScripts -Reinstall -Source $context.RepositoryPath
+
+	# Assert
+	Assert-AreEqual 4 $global:InstallScriptCount
+	Assert-AreEqual 11 $global:UninstallScriptCount
+
+	# clean up
+	Remove-Variable InstallScriptCount -Scope Global 
+	Remove-Variable UninstallScriptCount -Scope Global 
+}
+
+function Test-ReinstallAllPackagesInAllProjectsInvokeUninstallAndInstallScripts 
+{
+	param($context) 
+	
+	# Arrange
+	$p = New-ClassLibrary
+	$q = New-ConsoleApplication
+
+	($p, $q) | Install-Package TestReinstallPackageScripts -Source $context.RepositoryPath
+	($p, $q) | Install-Package MagicPackage -Source $context.RepositoryPath
+
+	$global:InstallScriptCount = 7
+	$global:UninstallScriptCount = 3
+
+	$global:InstallMagicScript = 4
+	$global:UninstallMagicScript = 6
+
+	# Act
+	Update-Package -Reinstall -Source $context.RepositoryPath
+
+	# Assert
+	Assert-AreEqual 9 $global:InstallScriptCount
+	Assert-AreEqual 5 $global:UninstallScriptCount
+
+	Assert-AreEqual 6 $global:InstallMagicScript
+	Assert-AreEqual 8 $global:UninstallMagicScript
+
+	# clean up
+	Remove-Variable InstallScriptCount -Scope Global 
+	Remove-Variable UninstallScriptCount -Scope Global 
+	Remove-Variable InstallMagicScript -Scope Global 
+	Remove-Variable UninstallMagicScript -Scope Global 
+}
