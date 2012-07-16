@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using NuGet.Resources;
 
@@ -54,7 +55,7 @@ namespace NuGet
         {
             get
             {
-                return !_isMonoRuntime && CryptoConfig.AllowOnlyFipsAlgorithms;
+                return !_isMonoRuntime && ReadFipsConfigValue();
             }
         }
 
@@ -79,6 +80,13 @@ namespace NuGet
                 return AllowOnlyFipsAlgorithms ? (HashAlgorithm)new SHA256CryptoServiceProvider() : (HashAlgorithm)new SHA256Managed();
             }
             return AllowOnlyFipsAlgorithms ? (HashAlgorithm)new SHA512CryptoServiceProvider() : (HashAlgorithm)new SHA512Managed();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+        private static bool ReadFipsConfigValue()
+        {
+            // Mono does not currently support this method. Have this in a separate method to avoid JITing exceptions.
+            return CryptoConfig.AllowOnlyFipsAlgorithms;
         }
     }
 }
