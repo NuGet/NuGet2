@@ -37,7 +37,10 @@ namespace NuGet
             { ".NETMicroFramework", ".NETMicroFramework" },
             { "netmf", ".NETMicroFramework" },
             { "SL", "Silverlight" },
-            { "Silverlight", "Silverlight" }
+            { "Silverlight", "Silverlight" },
+            { ".NETPortable", ".NETPortable" },
+            { "NETPortable", ".NETPortable" },
+            { "portable", ".NETPortable" }
         };
 
         private static readonly Dictionary<string, string> _knownProfiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {

@@ -159,6 +159,24 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void ParseFrameworkNameNormalizesSupportedPortableNetFrameworkNames()
+        {
+            // Arrange
+            var knownNameFormats = new[] { ".netportable", "netportable", "portable" };
+            Version defaultVersion = new Version("0.0");
+
+            // Act
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+
+            // Assert
+            foreach (var frameworkName in frameworkNames)
+            {
+                Assert.Equal(".NETPortable", frameworkName.Identifier);
+                Assert.Equal(defaultVersion, frameworkName.Version);
+            }
+        }
+
+        [Fact]
         public void ParseFrameworkNameNormalizesSupportedWinRTFrameworkNames()
         {
             // Arrange
