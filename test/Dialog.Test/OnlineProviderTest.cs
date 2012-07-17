@@ -89,6 +89,22 @@ namespace NuGet.Dialog.Test
         }
 
         [Fact]
+        public void RootNodeIsPopulatedWithoutTheAggregateNodeIfThereIsOnlyOneSource()
+        {
+            // Arrange
+            var provider = CreateOnlineProvider(onlyOneSource: true);
+
+            // Act
+            var extentionsTree = provider.ExtensionsTree;
+
+            // Assert
+            Assert.Equal(1, extentionsTree.Nodes.Count);
+
+            Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[0]);
+            Assert.Equal("One", extentionsTree.Nodes[0].Name);
+        }
+
+        [Fact]
         public void RootNodeIsPopulatedWithCorrectNumberOfNodes()
         {
             // Arrange
@@ -419,7 +435,8 @@ namespace NuGet.Dialog.Test
             IPackageSourceProvider packageSourceProvider = null,
             Project project = null,
             IScriptExecutor scriptExecutor = null,
-            ISolutionManager solutionManager = null)
+            ISolutionManager solutionManager = null,
+            bool onlyOneSource = false)
         {
 
             if (packageManager == null)
@@ -441,12 +458,17 @@ namespace NuGet.Dialog.Test
             if (packageSourceProvider == null)
             {
                 var packageSourceProviderMock = new Mock<IPackageSourceProvider>();
-                packageSourceProviderMock.Setup(p => p.LoadPackageSources()).Returns(
-                        new PackageSource[2] {
-                            new PackageSource("Test1", "One"),
-                            new PackageSource("Test2", "Two")
-                        }
-                    );
+
+                var packageSources = onlyOneSource
+                    ? new PackageSource[] {
+                                              new PackageSource("Test1", "One"),
+                                          }
+                    : new PackageSource[] {
+                                              new PackageSource("Test1", "One"),
+                                              new PackageSource("Test2", "Two")
+                                           };
+                
+                packageSourceProviderMock.Setup(p => p.LoadPackageSources()).Returns(packageSources);
                 packageSourceProvider = packageSourceProviderMock.Object;
             }
 
