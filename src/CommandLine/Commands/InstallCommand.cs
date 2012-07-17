@@ -193,32 +193,9 @@ namespace NuGet.Commands
             var packageManager = CreatePackageManager(fileSystem);
             using (packageManager.SourceRepository.StartOperation(operation))
             {
-                if (!AllowMultipleVersions)
+                if (ExcludeVersion || (version != null))
                 {
-                    var installedPackage = packageManager.LocalRepository.FindPackage(packageId);
-                    if (installedPackage != null)
-                    {
-                        if (version != null && installedPackage.Version >= version)
-                        {
-                            // If the package is already installed (or the version being installed is lower), then we do not need to do anything. 
-                            return false;
-                        }
-                        else if (packageManager.SourceRepository.Exists(packageId, version))
-                        {
-                            EnsurePackageRestoreConsent(packageRestoreConsent);
-
-                            // If the package is already installed, but
-                            // (a) the version we require is different from the one that is installed, 
-                            // (b) side-by-side is disabled
-                            // we need to uninstall it.
-                            // However, before uninstalling, make sure the package exists in the source repository. 
-                            packageManager.UninstallPackage(installedPackage, forceRemove: false, removeDependencies: true);
-                        }
-                    }
-                }
-                else if (version != null)
-                {
-                    // If we know exactly what package to lookup, check if it's already installed locally. 
+                    // If we know exactly what package to lookup or we are not installing packages side by side, check if it's already installed locally. 
                     // We'll do this by checking if the package directory exists on disk.
                     var localRepository = packageManager.LocalRepository as LocalPackageRepository;
                     Debug.Assert(localRepository != null, "The PackageManager's local repository instance is necessarily a LocalPackageRepository instance.");

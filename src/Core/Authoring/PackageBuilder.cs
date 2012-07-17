@@ -261,6 +261,7 @@ namespace NuGet
             // check if any file under Content or Tools has TargetFramework defined
             bool hasContentOrTool = files.Any(
                 f => f.TargetFramework != null &&
+                     f.TargetFramework != VersionUtility.UnsupportedFrameworkName &&
                      (f.Path.StartsWith(Constants.ContentDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
                       f.Path.StartsWith(Constants.ToolsDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)));
 

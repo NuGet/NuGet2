@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.IO;
 using System.Net;
 using System.ServiceModel;
 using System.ServiceModel.Security;
@@ -28,8 +27,6 @@ namespace NuGet
         /// Request header that contains the SAML token.
         /// </summary>
         private const string STSTokenHeader = "X-NuGet-STS-Token";
-
-        private const string WIFAssemblyName = "Microsoft.IdentityModel, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35";
 
         /// <summary>
         /// Adds the SAML token as a header to the request if it is already cached for this host.
@@ -67,54 +64,53 @@ namespace NuGet
             }
 
             string cacheKey = GetCacheKey(requestUri);
-            try
-            {
-                // TODO: We need to figure out a way to cache the token for the duration of the token's validity (which is available as part of it's result).
-                MemoryCache.Instance.GetOrAdd(cacheKey,
-                                        () => GetSTSToken(endPoint, realm),
-                                        TimeSpan.FromMinutes(30),
-                                        absoluteExpiration: true);
-            }
-            catch (FileNotFoundException ex)
-            {
-                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UnableToLocateWIF, requestUri), ex);
-            }
+            
+            // TODO: We need to figure out a way to cache the token for the duration of the token's validity (which is available as part of it's result).
+            MemoryCache.Instance.GetOrAdd(cacheKey,
+                                    () => GetSTSToken(requestUri, endPoint, realm),
+                                    TimeSpan.FromMinutes(30),
+                                    absoluteExpiration: true);
             return true;
         }
 
-        private static string GetSTSToken(string endPoint, string appliesTo)
+        private static string GetSTSToken(Uri requestUri, string endPoint, string appliesTo)
         {
-            var binding = CreateInstance("Microsoft.IdentityModel.Protocols.WSTrust.Bindings.WindowsWSTrustBinding", SecurityMode.Transport);
-            dynamic factory = CreateInstance("Microsoft.IdentityModel.Protocols.WSTrust.WSTrustChannelFactory", binding, endPoint);
+            var typeProvider = WIFTypeProvider.GetWIFTypes();
+            if (typeProvider == null)
+            {
+                throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UnableToLocateWIF, requestUri));
+            }
+
+            var binding = new WS2007HttpBinding(SecurityMode.Transport);
+            dynamic factory = Activator.CreateInstance(typeProvider.ChannelFactory, binding, endPoint);
             factory.TrustVersion = TrustVersion.WSTrust13;
 
-            dynamic rst = CreateInstance("Microsoft.IdentityModel.Protocols.WSTrust.RequestSecurityToken");
-            rst.RequestType = GetFieldValue<string>("Microsoft.IdentityModel.SecurityTokenService.RequestTypes", "Issue");
-            rst.AppliesTo = new EndpointAddress(appliesTo);
-            rst.KeyType = GetFieldValue<string>("Microsoft.IdentityModel.SecurityTokenService.KeyTypes", "Bearer");
+            // Check if we can create 4.5 types. 
+            dynamic rst = Activator.CreateInstance(typeProvider.RequestSecurityToken);
+            rst.RequestType = GetFieldValue<string>(typeProvider.RequestTypes, "Issue");
+            rst.KeyType = GetFieldValue<string>(typeProvider.KeyTypes, "Bearer");
+
+            // Dynamic verifies the type of the instance so we cannot use it to assign a value for this property. 
+            var endPointAddress = Activator.CreateInstance(typeProvider.EndPoint, appliesTo);
+            SetProperty(rst, "AppliesTo", endPointAddress);
 
             dynamic channel = factory.CreateChannel();
             dynamic securityToken = channel.Issue(rst);
             return securityToken.TokenXml.OuterXml;
         }
 
-        private static object CreateInstance(string typeName, params object[] args)
+        private static void SetProperty(object instance, string propertyName, object value)
         {
-            typeName = QualifyTypeName(typeName);
-            return Activator.CreateInstance(Type.GetType(typeName, throwOnError: true), args);
+            var type = instance.GetType();
+            var property = type.GetProperty(propertyName);
+
+            var propertySetter = property.GetSetMethod();
+            propertySetter.Invoke(instance, new[] { value });
         }
 
-        private static TVal GetFieldValue<TVal>(string typeName, string fieldName)
+        private static TVal GetFieldValue<TVal>(Type type, string fieldName)
         {
-            typeName = QualifyTypeName(typeName);
-            var type = Type.GetType(typeName);
             return (TVal)type.GetField(fieldName).GetValue(obj: null);
-        }
-
-        private static string QualifyTypeName(string typeName)
-        {
-            typeName = typeName + ',' + WIFAssemblyName;
-            return typeName;
         }
 
         private static string GetSTSEndPoint(IHttpWebResponse response)

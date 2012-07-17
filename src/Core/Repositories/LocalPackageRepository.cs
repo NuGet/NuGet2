@@ -118,7 +118,7 @@ namespace NuGet
             var packageFileName = PathResolver.GetPackageFileName(packageId, version);
             var filesMatchingFullName = GetPackageFiles(packageFileName);
 
-            if (version.Version.Revision < 1)
+            if (version != null && version.Version.Revision < 1)
             {
                 // If the build or revision number is not set, we need to look for combinations of the format
                 // * Foo.1.2.nupkg

@@ -78,6 +78,7 @@ namespace NuGet
                                                             .Distinct(StringComparer.CurrentCulture);
                     console.WriteError(String.Join("\n", messages));
                 }
+                return 1;
             }
             catch (Exception e)
             {
