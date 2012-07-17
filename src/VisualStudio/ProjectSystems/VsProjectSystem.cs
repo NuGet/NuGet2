@@ -258,7 +258,7 @@ namespace NuGet.VisualStudio
 
         private bool FileExistsInProject(string path)
         {
-            return Project.GetProjectItem(path) != null;
+            return Project.ContainsFile(path);
         }
 
         protected virtual bool ExcludeFile(string path)

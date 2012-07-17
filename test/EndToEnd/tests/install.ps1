@@ -1929,3 +1929,23 @@ function Test-InstallFailCleansUpSatellitePackageFiles
 	Assert-PathNotExists (Join-Path $solutionDir 'packages\A.1.0.0\')
 	Assert-PathNotExists (Join-Path $solutionDir 'packages\A.fr.1.0.0\')
 }
+
+function Test-FileTransformWorksOnDependentFile
+{
+	param($context)
+
+	# Arrange 
+	$p = New-WebApplication
+	Install-Package TTFile -Source $context.RepositoryPath
+
+	# Act
+	Install-Package test -Source $context.RepositoryPath
+
+	# Assert
+
+	$projectDir = Split-Path -parent -path $p.FullName
+	$configFilePath = Join-Path -path $projectDir -childpath "one.config"
+	$content = get-content $configFilePath
+	$matches = @($content | ? { ($_.IndexOf('foo="bar"') -gt -1) })
+	Assert-True ($matches.Count -gt 0)
+}

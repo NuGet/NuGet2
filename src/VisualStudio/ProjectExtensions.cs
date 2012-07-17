@@ -173,6 +173,19 @@ namespace NuGet.VisualStudio
             return projectItem != null;
         }
 
+        public static bool ContainsFile(this Project project, string name)
+        {
+            IVsProject vsProject = (IVsProject)project.ToVsHierarchy();
+            if (vsProject == null) 
+            {
+                return false;
+            }
+            int pFound;
+            uint itemId;
+            int hr = vsProject.IsDocumentInProject( name, out pFound, new VSDOCUMENTPRIORITY[0], out itemId);
+            return ErrorHandler.Succeeded(hr) && pFound == 1;
+        }
+
         /// <summary>
         /// // If we didn't find the project item at the top level, then we look one more level down.
         /// In VS files can have other nested files like foo.aspx and foo.aspx.cs or web.config and web.debug.config. 
