@@ -5,6 +5,7 @@ using System.Reflection;
 using Moq;
 using NuGet.Commands;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test.NuGetCommandLine
 {
@@ -54,13 +55,15 @@ namespace NuGet.Test.NuGetCommandLine
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
-            var ExpectedCommand = new MockCommand();
+            var command = new MockCommand();
             var argsEnumerator = new List<string>().GetEnumerator();
+            
             // Act
-            ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
+            parser.ExtractOptions(command, argsEnumerator);
+            
             // Assert
-            Assert.Equal(0, actualCommand.Arguments.Count);
-            Assert.Null(((MockCommand)actualCommand).Message);
+            Assert.Equal(0, command.Arguments.Count);
+            Assert.Null(command.Message);
         }
 
         [Fact]
@@ -74,15 +77,17 @@ namespace NuGet.Test.NuGetCommandLine
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
-            var ExpectedCommand = new MockCommand();
+            var command = new MockCommand();
             var argsEnumerator = new List<string>() { "optionOne", "optionTwo" }.GetEnumerator();
+            
             // Act
-            ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
+            parser.ExtractOptions(command, argsEnumerator);
+
             // Assert
-            Assert.Equal(2, actualCommand.Arguments.Count);
-            Assert.Equal("optionOne", actualCommand.Arguments[0]);
-            Assert.Equal("optionTwo", actualCommand.Arguments[1]);
-            Assert.Null(((MockCommand)actualCommand).Message);
+            Assert.Equal(2, command.Arguments.Count);
+            Assert.Equal("optionOne", command.Arguments[0]);
+            Assert.Equal("optionTwo", command.Arguments[1]);
+            Assert.Null(command.Message);
         }
 
         [Fact]
@@ -96,11 +101,12 @@ namespace NuGet.Test.NuGetCommandLine
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
-            var ExpectedCommand = new MockCommand();
+            var command = new MockCommand();
             string expectedErrorMessage = "Unknown option: '/NotAnOption'";
             var argsEnumerator = new List<string>() { "/NotAnOption" }.GetEnumerator();
+            
             // Act & Assert
-            ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
+            ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(command, argsEnumerator), expectedErrorMessage);
         }
 
         [Fact]
@@ -114,12 +120,14 @@ namespace NuGet.Test.NuGetCommandLine
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
-            var ExpectedCommand = new MockCommand();
+            var cmd = new MockCommand();
             var argsEnumerator = new List<string>() { "/Message", "foo bar" }.GetEnumerator();
+            
             // Act
-            ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
+            parser.ExtractOptions(cmd, argsEnumerator);
+            
             // Assert
-            Assert.Equal("foo bar", ((MockCommand)actualCommand).Message);
+            Assert.Equal("foo bar", cmd.Message);
         }
 
         [Fact]
@@ -133,12 +141,14 @@ namespace NuGet.Test.NuGetCommandLine
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
-            var ExpectedCommand = new MockCommand();
+            var command = new MockCommand();
             var argsEnumerator = new List<string>() { "/Mess", "foo bar" }.GetEnumerator();
+            
             // Act
-            ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
+            parser.ExtractOptions(command, argsEnumerator);
+            
             // Assert
-            Assert.Equal("foo bar", ((MockCommand)actualCommand).Message);
+            Assert.Equal("foo bar", command.Message);
         }
 
         [Fact]
@@ -152,12 +162,14 @@ namespace NuGet.Test.NuGetCommandLine
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
-            var ExpectedCommand = new MockCommand();
+            var command = new MockCommand();
             var argsEnumerator = new List<string>() { "-Message", "foo bar" }.GetEnumerator();
+            
             // Act
-            ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
+            parser.ExtractOptions(command, argsEnumerator);
+            
             // Assert
-            Assert.Equal("foo bar", ((MockCommand)actualCommand).Message);
+            Assert.Equal("foo bar", command.Message);
         }
 
         [Fact]
@@ -171,12 +183,12 @@ namespace NuGet.Test.NuGetCommandLine
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
-            var ExpectedCommand = new MockCommand();
+            var command = new MockCommand();
             string expectedErrorMessage = "Missing option value for: '/Message'";
             var argsEnumerator = new List<string>() { "/Message" }.GetEnumerator();
 
             // Act & Assert
-            ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
+            ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(command, argsEnumerator), expectedErrorMessage);
         }
 
         [Fact]
@@ -190,12 +202,14 @@ namespace NuGet.Test.NuGetCommandLine
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
-            var ExpectedCommand = new MockCommand();
+            var command = new MockCommand();
             var argsEnumerator = new List<string>() { "-IsWorking" }.GetEnumerator();
+            
             // Act
-            ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
+            parser.ExtractOptions(command, argsEnumerator);
+            
             // Assert
-            Assert.True(((MockCommand)actualCommand).IsWorking);
+            Assert.True(command.IsWorking);
         }
 
         [Fact]
@@ -209,12 +223,14 @@ namespace NuGet.Test.NuGetCommandLine
             MockCommandOptions.Add(mockOptionAttribute, mockPropertyInfo);
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
-            var ExpectedCommand = new MockCommand();
+            var command = new MockCommand();
             var argsEnumerator = new List<string>() { "-IsWorking-" }.GetEnumerator();
+            
             // Act
-            ICommand actualCommand = parser.ExtractOptions(ExpectedCommand, argsEnumerator);
+            parser.ExtractOptions(command, argsEnumerator);
+            
             // Assert
-            Assert.False(((MockCommand)actualCommand).IsWorking);
+            Assert.False(command.IsWorking);
         }
 
         [Fact]
@@ -230,11 +246,12 @@ namespace NuGet.Test.NuGetCommandLine
 
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
-            var ExpectedCommand = new MockCommand();
+            var command = new MockCommand();
             string expectedErrorMessage = "Invalid option value: '/Count null'";
             var argsEnumerator = new List<string>() { "/Count", "null" }.GetEnumerator();
+            
             // Act & Assert
-            ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
+            ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(command, argsEnumerator), expectedErrorMessage);
         }
 
         [Fact]
@@ -246,12 +263,12 @@ namespace NuGet.Test.NuGetCommandLine
             var MockCommandOptions = new Dictionary<OptionAttribute, PropertyInfo>();
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
-            var ExpectedCommand = new MockCommand();
+            var command = new MockCommand();
             string expectedErrorMessage = "Unknown option: '/Count'";
             var argsEnumerator = new List<string>() { "/Count", "null" }.GetEnumerator();
 
             // Act & Assert
-            ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
+            ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(command, argsEnumerator), expectedErrorMessage);
         }
 
         [Fact]
@@ -270,13 +287,12 @@ namespace NuGet.Test.NuGetCommandLine
 
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
-            var ExpectedCommand = new MockCommand();
+            var command = new MockCommand();
             string expectedErrorMessage = "Ambiguous option 'Co'. Possible values: Count Counter.";
             var argsEnumerator = new List<string>() { "/Co", "null" }.GetEnumerator();
 
             // Act & Assert
-
-            ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
+            ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(command, argsEnumerator), expectedErrorMessage);
         }
 
         [Fact]
@@ -295,13 +311,12 @@ namespace NuGet.Test.NuGetCommandLine
 
             cmdMgr.Setup(cm => cm.GetCommandOptions(It.IsAny<ICommand>())).Returns(MockCommandOptions);
             CommandLineParser parser = new CommandLineParser(cmdMgr.Object);
-            var ExpectedCommand = new MockCommand();
+            var command = new MockCommand();
             string expectedErrorMessage = "Unknown option: '/37264752DOESNOTEXIST!!'";
             var argsEnumerator = new List<string>() { "/37264752DOESNOTEXIST!!", "false" }.GetEnumerator();
 
             // Act & Assert
-
-            ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(ExpectedCommand, argsEnumerator), expectedErrorMessage);
+            ExceptionAssert.Throws<CommandLineException>(() => parser.ExtractOptions(command, argsEnumerator), expectedErrorMessage);
         }
 
         [Fact]
@@ -346,6 +361,64 @@ namespace NuGet.Test.NuGetCommandLine
             Assert.Equal(command.ListProperty[4], "Val5");
         }
 
+        [Fact]
+        public void AssignValueAssignsPrimitiveValues()
+        {
+            // Arrange
+            var cmd = new AssignValueType();
+            var property = cmd.GetType().GetProperty("PrimitiveProperty");
+            var value = "Qux";
+
+            // Act
+            CommandLineParser.AssignValue(cmd, property, "PrimitiveProperty", value);
+
+            // Assert
+            Assert.Equal("Qux", cmd.PrimitiveProperty);
+        }
+
+        [Fact]
+        public void AssignValueAddsToCollection()
+        {
+            // Arrange
+            var cmd = new AssignValueType();
+            var property = cmd.GetType().GetProperty("DictionaryProperty");
+            var value = "MyKey=MyTestValue";
+
+            // Act
+            CommandLineParser.AssignValue(cmd, property, "DictionaryProperty", value);
+
+            // Assert
+            Assert.Equal("MyTestValue", cmd.DictionaryProperty["MyKey"]);
+        }
+
+        [Theory]
+        [InlineData("Quiet", TestEnum.Quiet)]
+        [InlineData("di", TestEnum.Diagnostic)]
+        [InlineData("Norm", TestEnum.Normal)]
+        public void AssignValueSetsEnumProperty(string value, TestEnum expectedValue)
+        {
+            // Arrange
+            var cmd = new AssignValueType();
+            var property = cmd.GetType().GetProperty("TestEnum");
+
+            // Act
+            CommandLineParser.AssignValue(cmd, property, "TestEnum", value);
+
+            // Assert
+            Assert.Equal(expectedValue, cmd.TestEnum);
+        }
+
+        [Fact]
+        public void AssignValueThrowsIfPartialEnumValueIsAmbigious()
+        {
+            // Arrange
+            var cmd = new AssignValueType();
+            var property = cmd.GetType().GetProperty("TestEnum");
+
+            // Act and Assert
+            ExceptionAssert.Throws<CommandLineException>(() => CommandLineParser.AssignValue(cmd, property, "TestEnum", "d"),
+                "Ambiguous option 'd'. Possible values: Diagnostic Detailed.");
+        }
 
         private class MockCommand : ICommand
         {
@@ -401,6 +474,28 @@ namespace NuGet.Test.NuGetCommandLine
             {
                 throw new NotImplementedException();
             }
+        }
+
+        public class AssignValueType
+        {
+            private readonly Dictionary<string, string> _dict = new Dictionary<string, string>();
+
+            public string PrimitiveProperty { get; set; }
+
+            public Dictionary<string, string> DictionaryProperty
+            {
+                get { return _dict; }
+            }
+
+            public TestEnum TestEnum { get; set; }
+        }
+
+        public enum TestEnum 
+        {
+            Normal,
+            Diagnostic,
+            Detailed,
+            Quiet
         }
     }
 }

@@ -316,11 +316,11 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unable to prompt for credentials. Consult NuGet&apos;s help documentation for ways to specify credentials..
+        ///   Looks up a localized string similar to Cannot prompt for input in non-interactive mode..
         /// </summary>
-        internal static string Error_CannotPromptForCedentials {
+        internal static string Error_CannotPromptForInput {
             get {
-                return ResourceManager.GetString("Error_CannotPromptForCedentials", resourceCulture);
+                return ResourceManager.GetString("Error_CannotPromptForInput", resourceCulture);
             }
         }
         
@@ -720,6 +720,33 @@ namespace NuGet {
         internal static string OfficialPackageSourceName {
             get {
                 return ResourceManager.GetString("OfficialPackageSourceName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do not prompt for user input or confirmations..
+        /// </summary>
+        internal static string Option_NonInteractive {
+            get {
+                return ResourceManager.GetString("Option_NonInteractive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Option &apos;Verbose&apos; has been deprecated. Use &apos;Verbosity&apos; instead..
+        /// </summary>
+        internal static string Option_VerboseDeprecated {
+            get {
+                return ResourceManager.GetString("Option_VerboseDeprecated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display this amount of details in the output: normal, quiet, detailed..
+        /// </summary>
+        internal static string Option_Verbosity {
+            get {
+                return ResourceManager.GetString("Option_Verbosity", resourceCulture);
             }
         }
         

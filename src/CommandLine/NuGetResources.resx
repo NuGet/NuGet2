@@ -731,10 +731,19 @@ nuget.config HTTP_PROXY</value>
   <data name="ConfigCommandSummary" xml:space="preserve">
     <value>-Set name=value</value>
   </data>
-  <data name="Error_CannotPromptForCedentials" xml:space="preserve">
-    <value>Unable to prompt for credentials. Consult NuGet's help documentation for ways to specify credentials.</value>
+  <data name="Error_CannotPromptForInput" xml:space="preserve">
+    <value>Cannot prompt for input in non-interactive mode.</value>
   </data>
   <data name="PackageCommandExcludeEmptyDirectories" xml:space="preserve">
     <value>Prevent inclusion of empty directories when building the package.</value>
+  </data>
+  <data name="Option_Verbosity" xml:space="preserve">
+    <value>Display this amount of details in the output: normal, quiet, detailed.</value>
+  </data>
+  <data name="Option_NonInteractive" xml:space="preserve">
+    <value>Do not prompt for user input or confirmations.</value>
+  </data>
+  <data name="Option_VerboseDeprecated" xml:space="preserve">
+    <value>Option 'Verbose' has been deprecated. Use 'Verbosity' instead.</value>
   </data>
 </root>

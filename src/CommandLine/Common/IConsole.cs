@@ -1,12 +1,14 @@
-﻿using System.IO;
+﻿using System;
+using System.Security;
 
 namespace NuGet.Common
 {
     public interface IConsole : ILogger
     {
         int CursorLeft { get; set; }
-        TextWriter ErrorWriter { get; }
         int WindowWidth { get; set; }
+        Verbosity Verbosity { get; set; }
+        bool IsNonInteractive { get; set; }
 
         void Write(object value);
         void Write(string value);
@@ -27,6 +29,9 @@ namespace NuGet.Common
         void WriteWarning(bool prependWarningText, string value, params object[] args);
 
         bool Confirm(string description);
+        ConsoleKeyInfo ReadKey();
+        string ReadLine();
+        void ReadSecureString(SecureString secureString);
 
         void PrintJustified(int startIndex, string text);
         void PrintJustified(int startIndex, string text, int maxWidth);

@@ -31,6 +31,12 @@ namespace NuGet.Commands
         [Option("help", AltName = "?")]
         public bool Help { get; set; }
 
+        [Option(typeof(NuGetResources), "Option_Verbosity")]
+        public Verbosity Verbosity { get; set; }
+
+        [Option(typeof(NuGetResources), "Option_NonInteractive")]
+        public bool NonInteractive { get; set; }
+
         public CommandAttribute CommandAttribute
         {
             get

@@ -88,5 +88,10 @@ namespace NuGet
         {
             return GetGenericCollectionType(property.PropertyType) != null || IsKeyValueProperty(property);
         }
+
+        public static bool IsEnumProperty(PropertyInfo property)
+        {
+            return property.PropertyType.IsEnum;
+        }
     }
 }

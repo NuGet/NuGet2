@@ -66,6 +66,7 @@ namespace NuGet
                 }
                 else
                 {
+                    SetConsoleInteractivity(console, command as Command);
                     command.Execute();
                 }
             }
@@ -116,7 +117,7 @@ namespace NuGet
 
                     // Register an additional provider for the console specific application so that the user
                     // will be prompted if a proxy is set and credentials are required
-                    var credentialProvider = new SettingsCredentialProvider(new ConsoleCredentialProvider(), packageSourceProvider, console);
+                    var credentialProvider = new SettingsCredentialProvider(new ConsoleCredentialProvider(console), packageSourceProvider, console);
                     HttpClient.DefaultCredentialProvider = credentialProvider;
 
                     container.ComposeExportedValue<IConsole>(console);
@@ -196,6 +197,27 @@ namespace NuGet
                 return new Settings(workingDirectory);
             }
             return Settings.LoadDefaultSettings();
+        }
+
+        private static void SetConsoleInteractivity(IConsole console, Command command)
+        {
+            // Global environment variable to prevent the exe for prompting for credentials
+            string globalSwitch = Environment.GetEnvironmentVariable("NUGET_EXE_NO_PROMPT");
+            
+            // When running from inside VS, no input is available to our executable locking up VS.
+            // VS sets up a couple of environment variables one of which is named VisualStudioVersion. 
+            // Every time this is setup, we will just fail.
+            // TODO: Remove this in next iteration. This is meant for short-term backwards compat.
+            string vsSwitch = Environment.GetEnvironmentVariable("VisualStudioVersion");
+
+            console.IsNonInteractive = !String.IsNullOrEmpty(globalSwitch) || 
+                                       !String.IsNullOrEmpty(vsSwitch) ||
+                                       (command != null && command.NonInteractive);
+
+            if (command != null)
+            {
+                console.Verbosity = command.Verbosity;
+            }
         }
     }
 }

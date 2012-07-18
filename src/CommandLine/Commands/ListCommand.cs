@@ -90,13 +90,19 @@ namespace NuGet.Commands
 
         public override void ExecuteCommand()
         {
+            if (Verbose)
+            {
+                Console.WriteWarning(NuGetResources.Option_VerboseDeprecated);
+                Verbosity = Verbosity.Detailed;
+            }
+
             IEnumerable<IPackage> packages = GetPackages();
 
             bool hasPackages = false;
 
             if (packages != null)
             {
-                if (Verbose)
+                if (Verbosity == Verbosity.Detailed)
                 {
                     /***********************************************
                      * Package-Name
