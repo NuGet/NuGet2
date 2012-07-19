@@ -493,6 +493,9 @@ namespace NuGet.VisualStudio
             }
         }
 
+        // Reinstall one package in all projects.
+        // We need to uninstall the package from all projects BEFORE
+        // reinstalling it back, so that the package will be refreshed from source repository.
         private void ReinstallPackageToAllProjects(
             IPackage package,
             bool? appliesToProject,
@@ -507,28 +510,50 @@ namespace NuGet.VisualStudio
             {
                 logger = logger ?? NullLogger.Instance;
                 eventListener = eventListener ?? NullPackageOperationEventListener.Instance;
-                foreach (var project in _solutionManager.GetProjects())
-                {
-                    try
-                    {
-                        eventListener.OnBeforeAddPackageReference(project);
-                        var projectManager = GetProjectManager(project);
 
+                var projectsHasPackage = new List<Project>();
+
+                // first uninstall from all projects that has the package installed
+                RunActionOnProjects(
+                    _solutionManager.GetProjects(),
+                    project =>
+                    {
+                        var projectManager = GetProjectManager(project);
                         if (projectManager.LocalRepository.Exists(package))
                         {
-                            ReinstallPackageInProject(projectManager, package, updateDependencies, allowPrereleaseVersions, logger);
+                            projectsHasPackage.Add(project);
+
+                            UninstallPackage(
+                                projectManager,
+                                package.Id,
+                                package.Version,
+                                forceRemove: true,
+                                removeDependencies: updateDependencies,
+                                logger: logger);
                         }
-                    }
-                    catch (Exception exception)
-                    {
-                        logger.Log(MessageLevel.Error, ExceptionUtility.Unwrap(exception).Message);
-                        eventListener.OnAddPackageReferenceError(project, exception);
-                    }
-                    finally
-                    {
-                        eventListener.OnAfterAddPackageReference(project);
-                    }
-                }
+                    },
+                    logger,
+                    eventListener);
+
+                // now reinstall back to all the affected projects
+                RunActionOnProjects(
+                   projectsHasPackage,
+                   project =>
+                   {
+                       var projectManager = GetProjectManager(project);
+                       if (!projectManager.LocalRepository.Exists(package))
+                       {
+                           InstallPackage(
+                               projectManager,
+                               package.Id,
+                               package.Version,
+                               ignoreDependencies: !updateDependencies,
+                               allowPrereleaseVersions: allowPrereleaseVersions,
+                               logger: logger);
+                       }
+                   },
+                   logger,
+                   eventListener);
             }
             else
             {
@@ -969,6 +994,34 @@ namespace NuGet.VisualStudio
                 // Remove the event handler
                 PackageInstalling -= installHandler;
                 PackageInstalled -= installedHandler;
+            }
+        }
+
+        /// <summary>
+        /// Runs the action on projects and log any error that may occur.
+        /// </summary>
+        private void RunActionOnProjects(
+            IEnumerable<Project> projects,
+            Action<Project> action,
+            ILogger logger,
+            IPackageOperationEventListener eventListener)
+        {
+            foreach (var project in projects)
+            {
+                try
+                {
+                    eventListener.OnBeforeAddPackageReference(project);
+                    action(project);
+                }
+                catch (Exception exception)
+                {
+                    logger.Log(MessageLevel.Error, ExceptionUtility.Unwrap(exception).Message);
+                    eventListener.OnAddPackageReferenceError(project, exception);
+                }
+                finally
+                {
+                    eventListener.OnAfterAddPackageReference(project);
+                }
             }
         }
 
