@@ -104,6 +104,8 @@
             <RestorePackageProjects Include="$(NuGetRoot)\test\Test.Utility\Test.Utility.csproj" />
             <RestorePackageProjects Include="$(NuGetRoot)\src\Server\Server.csproj" />
           </ItemGroup>
+          
+          <Message Text="Restoring NuGet packages" Importance="High" />
           <MsBuild Projects="@(RestorePackageProjects)" 
                      Targets="RestorePackages"
                      Properties="NuGetExePath=$(ExeBuildDirectory)\NuGet.exe;NuGetRoot=$(NuGetRoot)" 
@@ -113,11 +115,16 @@
     <Target Name="Build">
         <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true" />
     </Target>
-
+    
     <Target Name="RunTests">
+        <PropertyGroup>
+            <!-- Team City under-reports tests when they're run in parallel. We'll specifically disable it in there -->
+            <BuildTestsInParallel Condition=" '$(TEAMCITY_VERSION)' == '' ">true</BuildTestsInParallel>
+            <BuildTestsInParallel Condition=" '$(TEAMCITY_VERSION)' != '' ">false</BuildTestsInParallel>
+        </PropertyGroup>
         <MsBuild Projects="@(TestProjects)" 
                   Targets="RunTests" 
-                  BuildInParallel="false" />
+                  BuildInParallel="$(BuildTestsInParallel)" />
     </Target>
     
     <Target Name="ReportFxCopResults">

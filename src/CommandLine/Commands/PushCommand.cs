@@ -13,9 +13,6 @@ namespace NuGet.Commands
         UsageSummaryResourceName = "PushCommandUsageSummary", UsageExampleResourceName = "PushCommandUsageExamples")]
     public class PushCommand : Command
     {
-        [Option(typeof(NuGetResources), "PushCommandCreateOnlyDescription", AltName = "co")]
-        public bool CreateOnly { get; set; }
-
         [Option(typeof(NuGetResources), "PushCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
@@ -148,11 +145,6 @@ namespace NuGet.Commands
             using (Stream stream = package.GetStream())
             {
                 packageServer.PushPackage(apiKey, stream, Convert.ToInt32(timeout.TotalMilliseconds));
-            }
-
-            if (CreateOnly)
-            {
-                Console.WriteWarning(NuGetResources.Warning_PublishPackageDeprecated);
             }
             Console.WriteLine(NuGetResources.PushCommandPackagePushed);
         }

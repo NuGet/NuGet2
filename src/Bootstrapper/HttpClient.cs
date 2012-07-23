@@ -13,7 +13,7 @@ namespace NuGet
                                              (_) => { },
                                              ProxyCache.Instance,
                                              CredentialStore.Instance,
-                                             new ConsoleCredentialProvider()))
+                                             new ConsoleCredentialProvider(new NuGet.Common.Console())))
             {
                 using (Stream stream = response.GetResponseStream(),
                               fileStream = File.OpenWrite(filePath))

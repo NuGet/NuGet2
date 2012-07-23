@@ -94,6 +94,12 @@ namespace NuGet.Commands
 
         public override void ExecuteCommand()
         {
+            if (Verbose)
+            {
+                Console.WriteWarning(NuGetResources.Option_VerboseDeprecated);
+                Verbosity = Verbosity.Detailed;
+            }
+
             // Get the input file
             string path = GetInputFile();
 
@@ -136,7 +142,7 @@ namespace NuGet.Commands
                 throw;
             }
 
-            if (Verbose)
+            if (Verbosity == Verbosity.Detailed)
             {
                 PrintVerbose(outputPath);
             }

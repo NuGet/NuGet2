@@ -32,11 +32,26 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\CommandLine\Common\IConsole.cs">
+      <Link>ConsoleCredentialProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\CommandLine\Common\Console.cs">
+      <Link>Console.cs</Link>
+    </Compile>
+    <Compile Include="..\CommandLine\Common\Verbosity.cs">
+      <Link>Verbosity.cs</Link>
+    </Compile>
     <Compile Include="..\CommandLine\Common\ConsoleCredentialProvider.cs">
       <Link>ConsoleCredentialProvider.cs</Link>
     </Compile>
     <Compile Include="..\CommandLine\Common\LocalizedResourceManager.cs">
       <Link>LocalizedResourceManager.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Logging\ILogger.cs">
+      <Link>ILogger.cs</Link>
+    </Compile>
+    <Compile Include="..\Core\Logging\MessageLevel.cs">
+      <Link>MessageLevel.cs</Link>
     </Compile>
     <Compile Include="..\Core\Extensions\CredentialProviderExtensions.cs">
       <Link>CredentialProviderExtensions.cs</Link>

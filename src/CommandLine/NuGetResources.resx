@@ -207,24 +207,6 @@
   <data name="PackageCommandUsageSummary" xml:space="preserve">
     <value>&lt;nuspec | project&gt; [options]</value>
   </data>
-  <data name="PublishCommandDescription" xml:space="preserve">
-    <value>Publishes a package that was uploaded to the server but not added to the feed.</value>
-  </data>
-  <data name="PublishCommandPackagePublished" xml:space="preserve">
-    <value>Your package was published.</value>
-  </data>
-  <data name="PublishCommandPublishingPackage" xml:space="preserve">
-    <value>Publishing {0} {1} to {2}...</value>
-  </data>
-  <data name="PublishCommandSourceDescription" xml:space="preserve">
-    <value>Specifies the server URL.</value>
-  </data>
-  <data name="PublishCommandUsageDescription" xml:space="preserve">
-    <value>Specify the id and version of the package that will be published to the feed.</value>
-  </data>
-  <data name="PublishCommandUsageSummary" xml:space="preserve">
-    <value>&lt;package id&gt; &lt;package version&gt; &lt;API Key&gt; [options]</value>
-  </data>
   <data name="PushCommandPushingPackage" xml:space="preserve">
     <value>Pushing {0} to {1}...</value>
   </data>
@@ -233,9 +215,6 @@
   </data>
   <data name="PushCommandNoSourceError" xml:space="preserve">
     <value>There is no default source, please specify a source.</value>
-  </data>
-  <data name="PushCommandCreateOnlyDescription" xml:space="preserve">
-    <value>Specifies if the package should be created and uploaded to the server but not published to the server. False by default.</value>
   </data>
   <data name="PushCommandSourceDescription" xml:space="preserve">
     <value>Specifies the server URL.</value>
@@ -567,15 +546,6 @@ nuget ?
 
 nuget push -?</value>
   </data>
-  <data name="PublishCommandUsageExamples" xml:space="preserve">
-    <value>nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
-
-nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -s http://example.com/nuget-publish-endpoint
-
-nuget push foo.nupkg
-
-nuget push foo.nupkg.symbols</value>
-  </data>
   <data name="UpdateCommandUsageExamples" xml:space="preserve">
     <value>nuget update
     
@@ -712,9 +682,6 @@ nuget update -Self</value>
   <data name="CommandApiKey" xml:space="preserve">
     <value>The API key for the server.</value>
   </data>
-  <data name="Warning_PublishPackageDeprecated" xml:space="preserve">
-    <value>Unpublished packages are no longer supported. Associated commands and properties would be removed in future versions.</value>
-  </data>
   <data name="PackageCommandFileFromDependencyIsChanged" xml:space="preserve">
     <value>File from dependency is changed. Adding file '{0}'.</value>
   </data>
@@ -764,13 +731,22 @@ nuget.config HTTP_PROXY</value>
   <data name="ConfigCommandSummary" xml:space="preserve">
     <value>-Set name=value</value>
   </data>
-  <data name="Error_CannotPromptForCedentials" xml:space="preserve">
-    <value>Unable to prompt for credentials. Consult NuGet's help documentation for ways to specify credentials.</value>
+  <data name="Error_CannotPromptForInput" xml:space="preserve">
+    <value>Cannot prompt for input in non-interactive mode.</value>
   </data>
   <data name="PackageCommandExcludeEmptyDirectories" xml:space="preserve">
     <value>Prevent inclusion of empty directories when building the package.</value>
   </data>
   <data name="InstallCommandSaveManifest" xml:space="preserve">
     <value>If set, only save the .nuspec file instead of .nupkg file.</value>
+  </data>
+  <data name="Option_Verbosity" xml:space="preserve">
+    <value>Display this amount of details in the output: normal, quiet, detailed.</value>
+  </data>
+  <data name="Option_NonInteractive" xml:space="preserve">
+    <value>Do not prompt for user input or confirmations.</value>
+  </data>
+  <data name="Option_VerboseDeprecated" xml:space="preserve">
+    <value>Option 'Verbose' has been deprecated. Use 'Verbosity' instead.</value>
   </data>
 </root>

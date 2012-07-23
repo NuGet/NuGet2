@@ -57,7 +57,7 @@ namespace NuGet
 
             foreach (PropertyInfo propInfo in command.GetType().GetProperties())
             {
-                foreach (OptionAttribute attr in propInfo.GetCustomAttributes(typeof(OptionAttribute), true))
+                foreach (OptionAttribute attr in propInfo.GetCustomAttributes(typeof(OptionAttribute), inherit: true))
                 {
                     if (!propInfo.CanWrite && !TypeHelper.IsMultiValuedProperty(propInfo))
                     {

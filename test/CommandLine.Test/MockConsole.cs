@@ -20,9 +20,16 @@ namespace NuGet.Test
             get { return builder.ToString(); }
         }
 
-        public TextWriter ErrorWriter
+        public Verbosity Verbosity
         {
-            get { return null; }
+            get;
+            set;
+        }
+
+        public bool IsNonInteractive
+        {
+            get;
+            set;
         }
 
         public int WindowWidth
@@ -120,6 +127,21 @@ namespace NuGet.Test
         public void Log(MessageLevel level, string message, params object[] args)
         {
             Write(message, args);
+        }
+
+        public ConsoleKeyInfo ReadKey()
+        {
+            throw new NotSupportedException();
+        }
+
+        public string ReadLine()
+        {
+            throw new NotSupportedException();
+        }
+
+        public void ReadSecureString(System.Security.SecureString secureString)
+        {
+            throw new NotSupportedException();
         }
     }
 }

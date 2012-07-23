@@ -6,6 +6,6 @@
         <Error Condition=" '$(NuGetExePath)' == '' " Text="Property 'NuGetExePath' not specified." />
         <Error Condition=" '$(NuGetRoot)' == '' " Text="Property 'NuGetRoot' not specified." />
 
-        <Exec Command="$(NuGetExePath) install $(MsBuildProjectDirectory)\packages.config -Source $(PackageSources) -out $(NuGetRoot)\packages " />
+        <Exec Command="$(NuGetExePath) install $(MsBuildProjectDirectory)\packages.config -Source $(PackageSources) -out $(NuGetRoot)\packages -verbosity quiet" />
     </Target>
 </Project> 

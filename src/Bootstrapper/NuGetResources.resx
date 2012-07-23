@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CommandLine_Warning" xml:space="preserve">
+    <value>WARNING: {0}</value>
+  </data>
+  <data name="ConsoleConfirmMessage" xml:space="preserve">
+    <value>{0} (y/N) </value>
+  </data>
+  <data name="ConsoleConfirmMessageAccept" xml:space="preserve">
+    <value>y</value>
+  </data>
   <data name="Credentials_Password" xml:space="preserve">
     <value>Password: </value>
   </data>
@@ -131,6 +140,9 @@
   </data>
   <data name="Error_CannotPromptForCedentials" xml:space="preserve">
     <value>Unable to prompt for credentials. Consult NuGet's help documentation for ways to specify credentials.</value>
+  </data>
+  <data name="Error_CannotPromptForInput" xml:space="preserve">
+    <value>Cannot prompt for input in non-interactive mode.</value>
   </data>
   <data name="RestoreConsent" xml:space="preserve">
     <value>Package restore is disabled by default. To give consent, open the Visual Studio Options dialog, click on Package Manager node and check 'Allow NuGet to download missing packages during build.' You can also give consent by setting the environment variable 'EnableNuGetPackageRestore' to 'true'.</value>

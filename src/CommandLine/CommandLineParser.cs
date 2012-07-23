@@ -21,7 +21,7 @@ namespace NuGet
             _commandManager = manager;
         }
 
-        public ICommand ExtractOptions(ICommand command, IEnumerator<string> argsEnumerator)
+        public void ExtractOptions(ICommand command, IEnumerator<string> argsEnumerator)
         {
             List<string> arguments = new List<string>();
             IDictionary<OptionAttribute, PropertyInfo> properties = _commandManager.GetCommandOptions(command);
@@ -51,31 +51,8 @@ namespace NuGet
                     value = "false";
                 }
 
-                var results = from prop in properties
-                              where prop.Value.Name.StartsWith(optionText, StringComparison.OrdinalIgnoreCase) ||
-                              (prop.Key.AltName ?? String.Empty).StartsWith(optionText, StringComparison.OrdinalIgnoreCase)
-                              select prop;
-
-                if (!results.Any())
-                {
-                    throw new CommandLineException(NuGetResources.UnknownOptionError, option);
-                }
-
-                PropertyInfo propInfo = results.First().Value;
-                if (results.Skip(1).Any())
-                {
-                    try
-                    {
-                        // When multiple results are found, if there's an exact match, return it.
-                        propInfo = results.First(c => c.Value.Name.Equals(optionText, StringComparison.OrdinalIgnoreCase)
-                                || optionText.Equals(c.Key.AltName, StringComparison.OrdinalIgnoreCase)).Value;
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.AmbiguousOption, optionText,
-                            String.Join(" ", from c in results select c.Value.Name)));
-                    }
-                }
+                var result = GetPartialOptionMatch(properties, prop => prop.Value.Name, prop => prop.Key.AltName, option, optionText);
+                PropertyInfo propInfo = result.Value;
 
                 if (propInfo.PropertyType == typeof(bool))
                 {
@@ -91,19 +68,15 @@ namespace NuGet
                     throw new CommandLineException(NuGetResources.MissingOptionValueError, option);
                 }
 
-                AssignValue(propInfo, command, option, value);
+                AssignValue(command, propInfo, option, value);
             }
-
             command.Arguments.AddRange(arguments);
-
-            return command;
         }
 
-        private static void AssignValue(PropertyInfo property, ICommand command, string option, object value)
+        internal static void AssignValue(object command, PropertyInfo property, string option, object value)
         {
             try
             {
-
                 if (TypeHelper.IsMultiValuedProperty(property))
                 {
                     // If we were able to look up a parent of type ICollection<>, perform a Add operation on it.
@@ -133,10 +106,20 @@ namespace NuGet
                         }
                     }
                 }
+                else if (TypeHelper.IsEnumProperty(property))
+                {
+                    var enumValue = Enum.GetValues(property.PropertyType).Cast<object>();
+                    value = GetPartialOptionMatch(enumValue, e => e.ToString(), e => e.ToString(), option, value.ToString());
+                    property.SetValue(command, value, index: null);
+                }
                 else
                 {
-                    property.SetValue(command, TypeHelper.ChangeType(value, property.PropertyType), null);
+                    property.SetValue(command, TypeHelper.ChangeType(value, property.PropertyType), index: null);
                 }
+            }
+            catch (CommandLineException)
+            {
+                throw;
             }
             catch
             {
@@ -162,7 +145,8 @@ namespace NuGet
                 throw new CommandLineException(NuGetResources.UnknowCommandError, cmdName);
             }
 
-            return ExtractOptions(cmd, argsEnumerator);
+            ExtractOptions(cmd, argsEnumerator);
+            return cmd;
         }
 
         public static string GetNextCommandLineItem(IEnumerator<string> argsEnumerator)
@@ -172,6 +156,34 @@ namespace NuGet
                 return null;
             }
             return argsEnumerator.Current;
+        }
+
+        private static TVal GetPartialOptionMatch<TVal>(IEnumerable<TVal> source, Func<TVal, string> getDisplayName, Func<TVal, string> getAltName, string option, string value)
+        {
+            var results = from item in source
+                          where getDisplayName(item).StartsWith(value, StringComparison.OrdinalIgnoreCase) ||
+                                (getAltName(item) ?? String.Empty).StartsWith(value, StringComparison.OrdinalIgnoreCase)
+                          select item;
+            var result = results.FirstOrDefault();
+            if (!results.Any())
+            {
+                throw new CommandLineException(NuGetResources.UnknownOptionError, option);
+            }
+            else if (results.Skip(1).Any())
+            {
+                try
+                {
+                    // When multiple results are found, if there's an exact match, return it.
+                    result = results.First(c => value.Equals(getDisplayName(c), StringComparison.OrdinalIgnoreCase) ||
+                                                value.Equals(getAltName(c), StringComparison.OrdinalIgnoreCase));
+                }
+                catch (InvalidOperationException)
+                {
+                    throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.AmbiguousOption, value,
+                        String.Join(" ", from c in results select getDisplayName(c))));
+                }
+            }
+            return result;
         }
     }
 }
