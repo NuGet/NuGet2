@@ -114,11 +114,16 @@
     <Target Name="Build">
         <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true" />
     </Target>
-
+    
     <Target Name="RunTests">
+        <PropertyGroup>
+            <!-- Team City under-reports tests when they're run in parallel. We'll specifically disable it in there -->
+            <BuildTestsInParallel Condition=" '$(TEAMCITY_VERSION)' == '' ">true</BuildTestsInParallel>
+            <BuildTestsInParallel Condition=" '$(TEAMCITY_VERSION)' != '' ">false</BuildTestsInParallel>
+        </PropertyGroup>
         <MsBuild Projects="@(TestProjects)" 
                   Targets="RunTests" 
-                  BuildInParallel="false" />
+                  BuildInParallel="$(BuildTestsInParallel)" />
     </Target>
     
     <Target Name="ReportFxCopResults">
