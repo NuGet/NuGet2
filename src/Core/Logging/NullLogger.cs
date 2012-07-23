@@ -1,6 +1,8 @@
+using System;
+
 namespace NuGet
 {
-    public class NullLogger : ILogger
+    public class NullLogger : MarshalByRefObject, ILogger
     {
         private static readonly ILogger _instance = new NullLogger();
 

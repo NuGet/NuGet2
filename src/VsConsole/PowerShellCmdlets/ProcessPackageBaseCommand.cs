@@ -1,3 +1,6 @@
+using EnvDTE;
+using NuGet.VisualStudio;
+using NuGet.VisualStudio.Resources;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,9 +10,6 @@ using System.IO;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Runtime.Versioning;
-using EnvDTE;
-using NuGet.VisualStudio;
-using NuGet.VisualStudio.Resources;
 
 namespace NuGet.PowerShell.Commands
 {
@@ -226,28 +226,21 @@ namespace NuGet.PowerShell.Commands
                 throw new ArgumentException(Resources.Cmdlet_InvalidProjectManagerInstance, "sender");
             }
 
-            ExecuteScript(e.InstallPath, PowerShellScripts.Install, e.Package, project.GetTargetFrameworkName(), project);
+            ExecuteScript(e.InstallPath, PowerShellScripts.Install, e.Package, project.GetTargetFrameworkName(), projectManager.Project);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private void OnPackageReferenceRemoving(object sender, PackageOperationEventArgs e)
         {
-            var projectManager = (ProjectManager)sender;
-
-            Project project;
-            if (!_projectManagerToProject.TryGetValue(projectManager, out project))
-            {
-                throw new ArgumentException(Resources.Cmdlet_InvalidProjectManagerInstance, "sender");
-            }
-
             try
             {
+                var projectManager = (ProjectManager)sender;
                 ExecuteScript(
                     e.InstallPath, 
                     PowerShellScripts.Uninstall, 
                     e.Package, 
                     projectManager.GetTargetFrameworkForPackage(e.Package.Id), 
-                    project);
+                    projectManager.Project);
             }
             catch (Exception ex)
             {
@@ -260,19 +253,16 @@ namespace NuGet.PowerShell.Commands
             string scriptFileName, 
             IPackage package, 
             FrameworkName targetFramework,
-            Project project)
+            IProjectSystem project)
         {
-            string scriptPath, fullPath;
-            if (package.FindCompatibleToolFiles(scriptFileName, targetFramework, out scriptPath))
+            string scriptPath;
+            string fullPath = null;
+            if (package.FindCompatibleToolFiles(scriptFileName + ".ps1", targetFramework, out scriptPath))
             {
                 fullPath = Path.Combine(rootPath, scriptPath);
             }
-            else
-            {
-                return;
-            }
-            
-            if (File.Exists(fullPath))
+
+            if (fullPath != null && File.Exists(fullPath))
             {
                 var psVariable = SessionState.PSVariable;
                 string toolsPath = Path.GetDirectoryName(fullPath);
@@ -292,6 +282,33 @@ namespace NuGet.PowerShell.Commands
                 psVariable.Remove("__toolsPath");
                 psVariable.Remove("__package");
                 psVariable.Remove("__project");
+            }
+            else
+            {
+                if (scriptFileName == "init")
+                {
+                    fullPath = Path.Combine(rootPath, "tools", "package.dll");
+                }
+                else if (package.FindCompatibleToolFiles("package.dll", targetFramework, out scriptPath))
+                {
+                    fullPath = Path.Combine(rootPath, scriptPath);
+                }
+
+                if (File.Exists(fullPath))
+                {
+                    if (scriptFileName == "init")
+                    {
+                        CodeInvoker.InvokeInit(fullPath, rootPath, package);
+                    }
+                    else if (scriptFileName == "install")
+                    {
+                        CodeInvoker.InvokeInstall(fullPath, rootPath, package, project);
+                    }
+                    else if (scriptFileName == "uninstall")
+                    {
+                        CodeInvoker.InvokeUninstall(fullPath, rootPath, package, project);
+                    }
+                }
             }
         }
 

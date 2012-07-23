@@ -69,6 +69,8 @@
     <Compile Include="Configuration\NullSettings.cs" />
     <Compile Include="Configuration\Settings.cs" />
     <Compile Include="EnvironmentVariableWrapper.cs" />
+    <Compile Include="ExecutionModel\UninstallContext.cs" />
+    <Compile Include="ExecutionModel\IProject.cs" />
     <Compile Include="Extensions\CredentialProviderExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
@@ -90,6 +92,8 @@
     <Compile Include="Http\STSAuthHelper.cs" />
     <Compile Include="Http\WIFTypeProvider.cs" />
     <Compile Include="IEnvironmentVariableReader.cs" />
+    <Compile Include="ExecutionModel\AppDomainWorker.cs" />
+    <Compile Include="ExecutionModel\InstallContext.cs" />
     <Compile Include="PackageRestoreConsent.cs" />
     <Compile Include="Packages\LocalPackage.cs" />
     <Compile Include="Packages\UnzippedPackage.cs" />

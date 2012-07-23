@@ -14,7 +14,7 @@ namespace NuGet
     [EntityPropertyMapping("Authors", SyndicationItemProperty.AuthorName, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [EntityPropertyMapping("Summary", SyndicationItemProperty.Summary, SyndicationTextContentKind.Plaintext, keepInContent: false)]
     [CLSCompliant(false)]
-    public class DataServicePackage : IPackage
+    public class DataServicePackage : MarshalByRefObject, IPackage
     {
         private IHashProvider _hashProvider;
         private bool _usingMachineCache;

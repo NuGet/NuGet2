@@ -7,7 +7,7 @@ using System.Runtime.Versioning;
 
 namespace NuGet
 {
-    public abstract class LocalPackage : IPackage
+    public abstract class LocalPackage : MarshalByRefObject, IPackage
     {
         private const string ResourceAssemblyExtension = ".resources.dll";
         private HashSet<string> _references;

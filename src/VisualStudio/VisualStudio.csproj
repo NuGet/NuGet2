@@ -14,7 +14,9 @@
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ExecutionModel\CodeInvoker.cs" />
     <Compile Include="ExceptionHelper.cs" />
+    <Compile Include="ExecutionModel\VsProjectProxy.cs" />
     <Compile Include="Extensibility\VsPackageUninstaller.cs" />
     <Compile Include="Extensibility\IVsPackageUninstaller.cs" />
     <Compile Include="Extensibility\IVsPackageMetadata.cs" />
@@ -62,6 +64,7 @@
     <Compile Include="ProductUpdate\VS2010UpdateWorker.cs" />
     <Compile Include="ProductUpdate\VsProductUpdateSettings.cs" />
     <Compile Include="ProjectCache.cs" />
+    <Compile Include="ProjectDynamicObject.cs" />
     <Compile Include="ProjectEventArgs.cs" />
     <Compile Include="ProjectName.cs" />
     <Compile Include="ProjectSystems\IVsProjectSystem.cs" />
