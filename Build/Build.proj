@@ -103,6 +103,8 @@
             <RestorePackageProjects Include="$(NuGetRoot)\test\Test.Utility\Test.Utility.csproj" />
             <RestorePackageProjects Include="$(NuGetRoot)\src\Server\Server.csproj" />
           </ItemGroup>
+          
+          <Message Text="Restoring NuGet packages" Importance="High" />
           <MsBuild Projects="@(RestorePackageProjects)" 
                      Targets="RestorePackages"
                      Properties="NuGetExePath=$(ExeBuildDirectory)\NuGet.exe;NuGetRoot=$(NuGetRoot)" 
