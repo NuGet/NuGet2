@@ -953,5 +953,62 @@ namespace NuGet.Test
             Assert.True(result);
             settings.Verify();
         }
+
+        [Fact]
+        public void GetValueIgnoresClearedValues()
+        {
+            // Arrange
+            var mockFileSystem = new MockFileSystem();
+            var nugetConfigPath = "NuGet.Config";
+            string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key1"" value=""foo"" />
+    <clear />
+    <add key=""key2"" value=""bar"" />
+  </SectionName>
+</configuration>";
+            mockFileSystem.AddFile(nugetConfigPath, config);
+            Settings settings = new Settings(mockFileSystem);
+
+            // Act
+            var result1 = settings.GetValue("SectionName", "Key1");
+            var result2 = settings.GetValue("SectionName", "Key2");
+
+            // Assert
+            Assert.Null(result1);
+            Assert.Equal("bar", result2);
+        }
+
+        [Fact]
+        public void GetValuesIgnoresClearedValues()
+        {
+            // Arrange
+            var mockFileSystem = new MockFileSystem();
+            var nugetConfigPath = "NuGet.Config";
+            string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key1"" value=""value1"" />
+    <add key=""key2"" value=""value2"" />
+    <clear />
+    <add key=""key3"" value=""value3"" />
+    <add key=""key4"" value=""value4"" />
+  </SectionName>
+</configuration>";
+            mockFileSystem.AddFile(nugetConfigPath, config);
+            Settings settings = new Settings(mockFileSystem);
+
+            // Act
+            var result = settings.GetValues("SectionName");
+            
+
+            // Assert
+            Assert.Equal(2, result.Count);
+            Assert.Equal("key3", result[0].Key);
+            Assert.Equal("value3", result[0].Value);
+            Assert.Equal("key4", result[1].Key);
+            Assert.Equal("value4", result[1].Value);
+        }
     }
 }

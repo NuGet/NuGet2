@@ -147,10 +147,7 @@ namespace NuGet
                 return EmptyList();
             }
 
-            return sectionElement.Elements("add")
-                                 .Select(ReadValue)
-                                 .ToList()
-                                 .AsReadOnly();
+            return ReadSection(sectionElement);
         }
 
         public IList<KeyValuePair<string, string>> GetNestedValues(string section, string key)
@@ -175,11 +172,7 @@ namespace NuGet
             {
                 return EmptyList();
             }
-
-            return subSection.Elements("add")
-                             .Select(ReadValue)
-                             .ToList()
-                             .AsReadOnly();
+            return ReadSection(subSection);
         }
 
         public void SetValue(string section, string key, string value)
@@ -302,6 +295,25 @@ namespace NuGet
             Save();
             return true;
         }
+        
+        protected IList<KeyValuePair<string, string>> ReadSection(XElement sectionElement)
+        {
+            var elements = sectionElement.Elements();
+            var values = new List<KeyValuePair<string, string>>();
+            foreach (var element in elements)
+            {
+                string elementName = element.Name.LocalName;
+                if (elementName.Equals("add", StringComparison.OrdinalIgnoreCase))
+                {
+                    values.Add(ReadValue(element));
+                }
+                else if (elementName.Equals("clear", StringComparison.OrdinalIgnoreCase))
+                {
+                    values.Clear();
+                }
+            }
+            return values.AsReadOnly();
+        }
 
         private void Save()
         {
@@ -341,8 +353,21 @@ namespace NuGet
 
         private static XElement FindElementByKey(XElement sectionElement, string key)
         {
-            return sectionElement.Elements("add")
-                                        .FirstOrDefault(s => key.Equals(s.GetOptionalAttributeValue("key"), StringComparison.OrdinalIgnoreCase));
+            XElement result = null;
+            foreach (var element in sectionElement.Elements())
+            {
+                string elementName = element.Name.LocalName;
+                if (elementName.Equals("clear", StringComparison.OrdinalIgnoreCase))
+                {
+                    result = null;
+                }
+                else if (elementName.Equals("add", StringComparison.OrdinalIgnoreCase) && 
+                         element.GetOptionalAttributeValue("key").Equals(key, StringComparison.OrdinalIgnoreCase))
+                {
+                    result = element;
+                }
+            }
+            return result;
         }
 
         private static IList<KeyValuePair<string, string>> EmptyList()
