@@ -50,7 +50,6 @@
       <DependentUpon>HelpCommandMarkdownTemplate.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Commands\InstallCommand.cs" />
-    <Compile Include="Commands\MirrorCommand.cs" />
     <Compile Include="Commands\ProjectFactory.cs" />
     <Compile Include="Commands\SetApiKeyCommand.cs" />
     <Compile Include="Commands\SourcesCommand.cs" />

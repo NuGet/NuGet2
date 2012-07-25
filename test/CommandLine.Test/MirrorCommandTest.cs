@@ -3,42 +3,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Moq;
-using NuGet.Commands;
 using NuGet.Common;
+using NuGet.ServerExtensions;
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.Test.NuGetCommandLine.Commands
+namespace NuGet.Test.ServerExtensions
 {
     public class MirrorCommandTest
     {
-
-        private static void AssertSinglePackage(TestMirrorCommand mirrorCommand, string id, string version)
-        {
-            var pack = mirrorCommand.DestinationRepository.GetPackages().Single();
-            Assert.Equal(id, pack.Id);
-            Assert.Equal(version, pack.Version.ToString());
-        }
-
-        private static void AssertTwoPackages(TestMirrorCommand mirrorCommand, string id, string version,
-            string id2, string version2)
-        {
-            var pack = mirrorCommand.DestinationRepository.GetPackages();
-            Assert.Equal(2, pack.Count());
-            var first = pack.First();
-            var last = pack.Last();
-            Assert.Equal(id, first.Id);
-            Assert.Equal(version, first.Version.ToString());
-            Assert.Equal(id2, last.Id);
-            Assert.Equal(version2, last.Version.ToString());
-        }
-
         [Fact]
         public void MirrorCommandMirrorsPackageIfArgumentIsNotPackageReferenceFile()
         {
             // Arrange
             var mirrorCommand = new TestMirrorCommand("Foo");
-            
+
             // Act
             mirrorCommand.ExecuteCommand();
 
@@ -83,8 +62,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                 }
             });
 
-            var mirrorCommand = new TestMirrorCommand(@"x:\test\packages.config", fileSystem: fileSystem)
-                                    {Console = console.Object};
+            var mirrorCommand = new TestMirrorCommand(@"x:\test\packages.config", fileSystem: fileSystem) { Console = console.Object };
 
             // Act
             mirrorCommand.ExecuteCommand();
@@ -104,7 +82,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             mirrorCommand.ExecuteCommand();
 
             // Assert
-            AssertSinglePackage(mirrorCommand, "Foo", "1.0");            
+            AssertSinglePackage(mirrorCommand, "Foo", "1.0");
         }
 
         [Fact]
@@ -119,7 +97,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             mirrorCommand.ExecuteCommand();
 
             // Assert
-            AssertSinglePackage(mirrorCommand, "Foo","1.0");
+            AssertSinglePackage(mirrorCommand, "Foo", "1.0");
         }
 
         [Fact]
@@ -157,7 +135,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Assert
             Assert.Equal("Boom", message);
             Assert.Equal(MessageLevel.Warning, level.Value);
-        }  
+        }
 
         [Fact]
         public void MirrorCommandThrowsIfConfigFileDoesNotExist()
@@ -177,11 +155,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             fileSystem.AddFile(@"x:\test\packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <packages>
 </packages>".AsStream());
-            var mirrorCommand = new TestMirrorCommand(@"x:\test\packages.config", fileSystem: fileSystem)
-                                    {Version = "1.0"};
+            var mirrorCommand = new TestMirrorCommand(@"x:\test\packages.config", fileSystem: fileSystem) { Version = "1.0" };
 
             // Act and Assert
-            ExceptionAssert.Throws<ArgumentException>(() => mirrorCommand.ExecuteCommand(), "Version should be specified in packages.config file instead.");            
+            ExceptionAssert.Throws<ArgumentException>(() => mirrorCommand.ExecuteCommand(), "Version should be specified in packages.config file instead.");
         }
 
         [Fact]
@@ -189,7 +166,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             var mirrorCommand = new TestMirrorCommand("Baz");
-            
+
             mirrorCommand.Source.Add("Some Source name");
             mirrorCommand.Source.Add("Some other Source");
 
@@ -197,7 +174,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             mirrorCommand.ExecuteCommand();
 
             // Assert
-            AssertSinglePackage(mirrorCommand,"Baz","0.7");
+            AssertSinglePackage(mirrorCommand, "Baz", "0.7");
         }
 
         [Fact]
@@ -210,7 +187,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             {
                 NoCache = false
             };
-            
+
             mirrorCommand.Source.Add("Some Source name");
             mirrorCommand.Source.Add("Some other Source");
 
@@ -218,7 +195,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             mirrorCommand.ExecuteCommand();
 
             // Assert            
-            AssertSinglePackage(mirrorCommand,"Gamma","1.0");
+            AssertSinglePackage(mirrorCommand, "Gamma", "1.0");
             localCache.Verify();
         }
 
@@ -231,7 +208,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             {
                 NoCache = true
             };
-            
+
             mirrorCommand.Source.Add("Some Source name");
             mirrorCommand.Source.Add("Some other Source");
 
@@ -239,7 +216,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             mirrorCommand.ExecuteCommand();
 
             // Assert            
-            AssertSinglePackage(mirrorCommand,"Baz","0.7");
+            AssertSinglePackage(mirrorCommand, "Baz", "0.7");
             localCache.Verify(c => c.GetPackages(), Times.Never());
         }
 
@@ -248,7 +225,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             var mirrorCommand = new TestMirrorCommand("Baz") { Prerelease = true };
-            
+
             mirrorCommand.Source.Add("Some Source name");
             mirrorCommand.Source.Add("Some other Source");
 
@@ -311,8 +288,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 <package id=""Foo"" />
 <package id=""Baz"" />
 </packages>".AsStream());
-            var mirrorCommand = new TestMirrorCommand(@"x:\test\packages.config", fileSystem: fileSystem)
-                                    {Prerelease = true};
+            var mirrorCommand = new TestMirrorCommand(@"x:\test\packages.config", fileSystem: fileSystem) { Prerelease = true };
 
             mirrorCommand.Source.Add("Some Source name");
             mirrorCommand.Source.Add("Some other Source");
@@ -355,19 +331,19 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             private readonly IFileSystem _fileSystem;
             private readonly IPackageRepository _destinationRepository;
-            private readonly IPackageRepository _machineCacheRepository ;
+            private readonly IPackageRepository _machineCacheRepository;
 
             public TestMirrorCommand(
                 string packageId,
                 IPackageRepositoryFactory factory = null,
                 IPackageSourceProvider sourceProvider = null,
-                IFileSystem fileSystem = null,                                     
+                IFileSystem fileSystem = null,
                 IPackageRepository machineCacheRepository = null
                 )
                 : base(
-                    sourceProvider??GetSourceProvider(), 
-                    CreateSettings(), 
-                    factory??GetFactory()
+                    sourceProvider ?? GetSourceProvider(),
+                    CreateSettings(),
+                    factory ?? GetFactory()
                 )
             {
                 Arguments.Add(packageId);
@@ -385,7 +361,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 
             private static ISettings CreateSettings()
             {
-                var settings = new Mock<ISettings>();                
+                var settings = new Mock<ISettings>();
                 return settings.Object;
             }
 
@@ -394,16 +370,35 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                 return _fileSystem;
             }
 
-           protected override IPackageRepository GetTargetRepository(string pullUrl, string pushUrl)
-           {
-               return _destinationRepository;
-           }
+            protected override IPackageRepository GetTargetRepository(string pullUrl, string pushUrl)
+            {
+                return _destinationRepository;
+            }
 
             public IPackageRepository DestinationRepository
             {
                 get { return _destinationRepository; }
             }
+        }
 
+        private static void AssertSinglePackage(TestMirrorCommand mirrorCommand, string id, string version)
+        {
+            var pack = mirrorCommand.DestinationRepository.GetPackages().Single();
+            Assert.Equal(id, pack.Id);
+            Assert.Equal(version, pack.Version.ToString());
+        }
+
+        private static void AssertTwoPackages(TestMirrorCommand mirrorCommand, string id, string version,
+            string id2, string version2)
+        {
+            var pack = mirrorCommand.DestinationRepository.GetPackages();
+            Assert.Equal(2, pack.Count());
+            var first = pack.First();
+            var last = pack.Last();
+            Assert.Equal(id, first.Id);
+            Assert.Equal(version, first.Version.ToString());
+            Assert.Equal(id2, last.Id);
+            Assert.Equal(version2, last.Version.ToString());
         }
     }
 }

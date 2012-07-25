@@ -331,29 +331,11 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; already present on &apos;{1}&apos;..
-        /// </summary>
-        internal static string Log_PackageAlreadyPresent {
-            get {
-                return ResourceManager.GetString("Log_PackageAlreadyPresent", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Successfully installed &apos;{0}&apos;..
         /// </summary>
         internal static string Log_PackageInstalledSuccessfully {
             get {
                 return ResourceManager.GetString("Log_PackageInstalledSuccessfully", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Successfully mirrored &apos;{0}&apos; to &apos;{1}&apos;..
-        /// </summary>
-        internal static string Log_PackageMirroredSuccessfully {
-            get {
-                return ResourceManager.GetString("Log_PackageMirroredSuccessfully", resourceCulture);
             }
         }
         

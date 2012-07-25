@@ -156,12 +156,6 @@
   <data name="Log_NoUpdatesAvailable" xml:space="preserve">
     <value>No updates available for '{0}'.</value>
   </data>
-  <data name="Log_PackageAlreadyPresent" xml:space="preserve">
-    <value>'{0}' already present on '{1}'.</value>
-  </data>
-  <data name="Log_PackageMirroredSuccessfully" xml:space="preserve">
-    <value>Successfully mirrored '{0}' to '{1}'.</value>
-  </data>
   <data name="Log_PackageAlreadyInstalled" xml:space="preserve">
     <value>'{0}' already installed.</value>
   </data>

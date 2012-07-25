@@ -2,17 +2,19 @@
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using NuGet.Test.Mocks;
 using Xunit;
 using Xunit.Extensions;
-using System.Runtime.Versioning;
 
 namespace NuGet.Test
 {
     public class PackageReferenceFileTest
     {
-        [Fact]
-        public void GetPackageReferencesIgnoresEntryIfIdIsNotPresent()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void GetPackageReferencesIgnoresEntryIfIdIsNotPresent(bool requireVersion)
         {
             // Arrange
             var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -24,7 +26,7 @@ namespace NuGet.Test
             var packageReferenceFile = new PackageReferenceFile(fileSystem, "packages.config");
 
             // Act
-            var values = packageReferenceFile.GetPackageReferences();
+            var values = packageReferenceFile.GetPackageReferences(requireVersion);
 
             // Assert
             Assert.Empty(values);
@@ -47,6 +49,27 @@ namespace NuGet.Test
 
             // Assert
             Assert.Empty(values);
+        }
+
+        [Fact]
+        public void GetPackageReturnsReferencesWithEmptyVersionsWhenRequiredVersionIsFalse()
+        {
+            // Arrange
+            var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version="""" />
+</packages>";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", config);
+            var packageReferenceFile = new PackageReferenceFile(fileSystem, "packages.config");
+
+            // Act
+            var values = packageReferenceFile.GetPackageReferences(requireVersion: false);
+
+            // Assert
+            Assert.Equal(1, values.Count());
+            Assert.Equal("A", values.First().Id);
+            Assert.Null(values.First().Version);
         }
 
         [Fact]

@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Log_PackageAlreadyPresent" xml:space="preserve">
+    <value>'{0}' already present on '{1}'.</value>
+  </data>
+  <data name="Log_PackageMirroredSuccessfully" xml:space="preserve">
+    <value>Successfully mirrored '{0}' to '{1}'.</value>
+  </data>
+  <data name="MirrorCommandApiKey" xml:space="preserve">
+    <value>The API key for pushing to the target repository. If not specified, the one specified in the default NuGet config file is used.</value>
+  </data>
+  <data name="MirrorCommandDescription" xml:space="preserve">
+    <value>Mirrors a package and its dependencies from the specified source repositories to the target repository. </value>
+  </data>
+  <data name="MirrorCommandDidNothing" xml:space="preserve">
+    <value>No packages found to check for mirroring.</value>
+  </data>
+  <data name="MirrorCommandNoCache" xml:space="preserve">
+    <value>By default a local cache is used as a fallback when a package or a package dependency is not found in the specified source(s). If you want to ensure only packages from the specified sources are used, set the NoCache option. If you want instead to maximize chances of finding packages, do not set this option.</value>
+  </data>
+  <data name="MirrorCommandNoOp" xml:space="preserve">
+    <value>Log what would be done without actually doing it. Assumes success for push operations. </value>
+  </data>
+  <data name="MirrorCommandNoVersionIfPackagesConfig" xml:space="preserve">
+    <value>Version should be specified in packages.config file instead.</value>
+  </data>
+  <data name="MirrorCommandPackagePushed" xml:space="preserve">
+    <value>Your package was pushed.</value>
+  </data>
+  <data name="MirrorCommandPrerelease" xml:space="preserve">
+    <value>When set, "latest" when specifying no version for a package id (as command argument or in packages.config) includes pre-release packages.</value>
+  </data>
+  <data name="MirrorCommandPushingPackage" xml:space="preserve">
+    <value>Pushing {0} to {1}...</value>
+  </data>
+  <data name="MirrorCommandSourceDescription" xml:space="preserve">
+    <value>A list of packages sources to use for the finding packages to mirror. If no sources are specified, the ones defined in the default NuGet config file are used. If the default NuGet config file specifies no sources, uses the default NuGet feed.</value>
+  </data>
+  <data name="MirrorCommandTimeoutDescription" xml:space="preserve">
+    <value>Specifies the timeout for pushing to the target in seconds. Defaults to 300 seconds (5 minutes).</value>
+  </data>
+  <data name="MirrorCommandUsageDescription" xml:space="preserve">
+    <value>Specify the id of the package to mirror, the url to query the target repository (list command) and the url to push packages to the target repository. If a path to a packages.config file is used instead of a package id, all the packages it contains are mirrored to the given version (if specified) or latest otherwise. Assuming you're targeting a private repository under http://machine/repo installed using NuGet.Server, the list and push urls will be http://machine/repo/nuget and http://machine/repo/api/v2/package respectively.</value>
+  </data>
+  <data name="MirrorCommandUsageExamples" xml:space="preserve">
+    <value>NuGet mirror Microsoft.AspNet.Mvc http://server/dir/nuget http://server/dir/api/v2/package 
+
+NuGet mirror Microsoft.AspNet.Razor http://server/dir/nuget http://server/dir/api/v2/package -ApiKey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -version 1.0.20105.408</value>
+  </data>
+  <data name="MirrorCommandUsageSummary" xml:space="preserve">
+    <value>packageId|pathToPackagesConfig listUrlTarget publishUrlTarget [options]</value>
+  </data>
+  <data name="MirrorCommandVersionDescription" xml:space="preserve">
+    <value>The version of the package to install. If not specified, latest version is mirrored.</value>
+  </data>
+</root>

@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace NuGet
 {
-    internal static class CommandLineUtility
+    public static class CommandLineUtility
     {
         public readonly static string ApiKeysSectionName = "apikeys";
 
@@ -41,18 +41,7 @@ namespace NuGet
             return "'" + source + "'";
         }
 
-        public static string GetUnambiguousFile(string searchPattern)
-        {
-            var files = Directory.GetFiles(Directory.GetCurrentDirectory(), searchPattern);
-            if (files.Length == 1)
-            {
-                return files[0];
-            }
-
-            return null;
-        }
-
-        public static List<PackageReference> GetPackageReferences(PackageReferenceFile file, string fileName, bool requireVersion)
+        public static ICollection<PackageReference> GetPackageReferences(PackageReferenceFile file, string fileName, bool requireVersion)
         {
             if (file == null)
             {

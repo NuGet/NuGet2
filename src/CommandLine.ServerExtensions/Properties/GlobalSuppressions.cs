@@ -1,0 +1,4 @@
+﻿[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1701:ResourceStringCompoundWordsShouldBeCasedCorrectly", MessageId = "nuget", Scope = "resource", Target = "NuGet.ServerExtensions.NuGetResources.resources")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId = "ef", Scope = "resource", Target = "NuGet.NuGetResources.resources")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId = "ef", Scope = "resource", Target = "NuGet.ServerExtensions.NuGetResources.resources")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId = "Mvc", Scope = "resource", Target = "NuGet.ServerExtensions.NuGetResources.resources")]
