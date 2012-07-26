@@ -7,6 +7,7 @@
       <Word>NuGet</Word>
       <Word>nuget</Word>
       <Word>Tokenizer</Word>
+      <Word>Mirrorer</Word>
       <Word>Info</Word>
       <Word>dte</Word>
       <Word>param</Word>
@@ -30,6 +31,7 @@
       <Word>Auth</Word>
       <Word>api</Word>
       <Word>Dir</Word>
+      <Word>Mvc</Word>
       <Word>Vsix</Word>
     </Recognized>
     <Deprecated>

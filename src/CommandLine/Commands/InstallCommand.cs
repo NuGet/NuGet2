@@ -110,7 +110,7 @@ namespace NuGet.Commands
                 // By default the PackageReferenceFile does not throw if the file does not exist at the specified path.
                 // We'll try reading from the file so that the file system throws a file not found
                 EnsureFileExists(fileSystem, configFilePath);
-                InstallPackagesFromConfigFile(fileSystem, GetPackageReferenceFile(configFilePath));
+                InstallPackagesFromConfigFile(fileSystem, GetPackageReferenceFile(configFilePath), configFilePath);
             }
             else
             {
@@ -142,22 +142,9 @@ namespace NuGet.Commands
             return repository;
         }
 
-        private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile file)
+        private void InstallPackagesFromConfigFile(IFileSystem fileSystem, PackageReferenceFile file, string fileName)
         {
-            var packageReferences = file.GetPackageReferences().ToList();
-            foreach (var package in packageReferences)
-            {
-                if (String.IsNullOrEmpty(package.Id))
-                {
-                    // GetPackageReferences returns all records without validating values. We'll throw if we encounter packages
-                    // with malformed ids / Versions.
-                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InstallCommandInvalidPackageReference, Arguments[0]));
-                }
-                else if (package.Version == null)
-                {
-                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.InstallCommandPackageReferenceInvalidVersion, package.Id));
-                }
-            }
+            var packageReferences = CommandLineUtility.GetPackageReferences(file, fileName, requireVersion: true);
 
             bool installedAny = ExecuteInParallel(fileSystem, packageReferences);
             if (!installedAny && packageReferences.Any())
@@ -166,7 +153,7 @@ namespace NuGet.Commands
             }
         }
 
-        private bool ExecuteInParallel(IFileSystem fileSystem, List<PackageReference> packageReferences)
+        private bool ExecuteInParallel(IFileSystem fileSystem, ICollection<PackageReference> packageReferences)
         {
             bool packageRestore = new PackageRestoreConsent(_configSettings).IsGranted;
             int defaultConnectionLimit = ServicePointManager.DefaultConnectionLimit;

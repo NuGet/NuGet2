@@ -57,6 +57,7 @@
     <Compile Include="FileHelperTest.cs" />
     <Compile Include="DeleteCommandTest.cs" />
     <Compile Include="InstallCommandTest.cs" />
+    <Compile Include="MirrorCommandTest.cs" />
     <Compile Include="ListCommandTests.cs" />
     <Compile Include="MockConsole.cs" />
     <Compile Include="OptionAttributeTests.cs" />
@@ -70,6 +71,10 @@
     <Compile Include="UpdateCommandTest.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\CommandLine.ServerExtensions\CommandLine.ServerExtensions.csproj">
+      <Project>{52EA04DC-1DA5-4E45-B13C-0A10F4B71662}</Project>
+      <Name>CommandLine.ServerExtensions</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\CommandLine\CommandLine.csproj">
       <Project>{B34A6632-E627-4B66-8E0A-D2DA3BC96893}</Project>
       <Name>CommandLine</Name>

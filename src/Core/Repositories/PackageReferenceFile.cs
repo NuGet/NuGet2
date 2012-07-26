@@ -42,6 +42,11 @@ namespace NuGet
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This might be expensive")]
         public IEnumerable<PackageReference> GetPackageReferences()
         {
+            return GetPackageReferences(requireVersion: true);
+        }
+
+        public IEnumerable<PackageReference> GetPackageReferences(bool requireVersion)
+        {
             XDocument document = GetDocument();
 
             if (document == null)
@@ -55,15 +60,23 @@ namespace NuGet
                 string versionString = e.GetOptionalAttributeValue("version");
                 string versionConstraintString = e.GetOptionalAttributeValue("allowedVersions");
                 string targetFrameworkString = e.GetOptionalAttributeValue("targetFramework");
-                SemanticVersion version;
+                SemanticVersion version = null;
 
-                if (String.IsNullOrEmpty(id) || String.IsNullOrEmpty(versionString))
+                if (String.IsNullOrEmpty(id))
                 {
-                    // If the id or version is empty, ignore the record.
+                    // If the id is empty, ignore the record unless unspecified versions are allowed
                     continue;
                 }
-
-                if (!SemanticVersion.TryParse(versionString, out version))
+                
+                if (String.IsNullOrEmpty(versionString))
+                {
+                    // If the version is empty, ignore the record unless unspecified versions are allowed
+                    if (requireVersion)
+                    {
+                        continue;
+                    }
+                }
+                else if (!SemanticVersion.TryParse(versionString, out version))
                 {
                     throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ReferenceFile_InvalidVersion, versionString, _path));
                 }

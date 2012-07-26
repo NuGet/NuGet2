@@ -12,6 +12,8 @@
         <NuGetDropDirectory>$(DropDirectory)\NuGet</NuGetDropDirectory>
         <ExeBuildDirectory>$(NuGetSrcRoot)\CommandLine\bin\$(Configuration)</ExeBuildDirectory>
         <ExeDropDirectory>$(NuGetDropDirectory)\Console</ExeDropDirectory>
+        <ServerExtensionsBuildDirectory>$(NuGetSrcRoot)\src\CommandLine.ServerExtensions</ServerExtensionsBuildDirectory>
+        <ServerExtensionsDropsDirectory>$(NuGetDropDirectory)\CommandLine.ServerExtensions</ServerExtensionsDropsDirectory>
         <BootStrapperBuildDirectory>$(NuGetSrcRoot)\Bootstrapper\bin\$(Configuration)</BootStrapperBuildDirectory>
         <BootStrapperDropDirectory>$(NuGetDropDirectory)\Bootstrapper</BootStrapperDropDirectory>
         <VisualStudioAddInBuildDirectory>$(NuGetSrcRoot)\VsExtension\bin\$(Configuration)</VisualStudioAddInBuildDirectory>
@@ -24,6 +26,7 @@
         <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
         <ILMergeArtifactDirectory>$(ArtifactDropDirectory)\ILMerge</ILMergeArtifactDirectory>
         <ILMergeInternalizeIgnoreFile>$(NuGetRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
+    
     </PropertyGroup>
     
     <PropertyGroup>
@@ -81,7 +84,9 @@
     
     <Target Name="Go" 
         DependsOnTargets="CheckFxCop; UpdateVsixVersion; RestorePackages; Build; 
-                                    ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; CopyBootStrapperOutputToDropDirectory; CopyVisualStudioAddInOutputToDropDirectory; 
+                                    ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; 
+                                    CopyBootStrapperOutputToDropDirectory; CopyServerExtensionsOutputToDropDirectory;
+                                    CopyVisualStudioAddInOutputToDropDirectory; 
                                     CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; BuildPackages">
     </Target>
     
@@ -145,6 +150,7 @@
         <MakeDir Directories="$(VisualStudioAddInDropDirectory)" Condition="!Exists('$(VisualStudioAddInDropDirectory)')" />
         <MakeDir Directories="$(ServerDropDirectory)" Condition="!Exists('$(ServerDropDirectory)')" />
         <MakeDir Directories="$(NuGetCoreDropDirectory)" Condition="!Exists('$(NuGetCoreDropDirectory)')" />
+        <MakeDir Directories="$(ExtensionsDropDirectory)" Condition="!Exists('$(ExtensionsDropDirectory)')" />
     </Target>
 
     <Target Name="CopyExecutableOutputToDropDirectory">
@@ -161,8 +167,19 @@
         </ItemGroup>
         <Message Text="Copying the NuGet BootStrapper output to $(BootStrapperDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(BootStrapperOutputItems)" DestinationFiles="@(BootStrapperOutputItems ->'$(BootStrapperDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
-    </Target>    
-    <Target Name="CopyVisualStudioAddInOutputToDropDirectory">
+    </Target>
+
+   <Target Name="CopyServerExtensionsOutputToDropDirectory">
+     <ItemGroup>
+       <ServerExtensionsOutputItems Exclude="$(ServerExtensionsBuildDirectory)\**\*.pdb" Include="$(ServerExtensionsBuildDirectory)\**\*.*" />
+     </ItemGroup>
+     <Message Text="Copying Server extensions output to $(ServerExtensionsDropDirectory)" />
+     <Copy ContinueOnError="false" 
+           SourceFiles="@(ServerExtensionsOutputItems)" 
+           DestinationFiles="@(ServerExtensionsOutputItems ->'$(ServerExtensionsDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+   </Target>
+
+  <Target Name="CopyVisualStudioAddInOutputToDropDirectory">
         <ItemGroup>
             <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\*.vsix" />
             <VisualStudioAddInOutputItems Include="$(VisualStudioAddInBuildDirectory)\**\NuGet.VisualStudio.dll" />
