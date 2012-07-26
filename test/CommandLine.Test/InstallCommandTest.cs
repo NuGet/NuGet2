@@ -51,7 +51,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         private static IFileSystem GetFileSystemWithDefaultConfig(string repositoryPath = @"C:\This\Is\My\Install\Path")
         {
             var fileSystem = new MockFileSystem();
-            fileSystem.AddFile(@".nuget\nuget.workspace.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+            fileSystem.AddFile(@".nuget\nuget.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration><config><add key=""repositorypath"" value="""+repositoryPath+@""" /></config></configuration>");
             return fileSystem;
         }

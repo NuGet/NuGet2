@@ -215,7 +215,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Default NuGet config file is the first file named &apos;NuGet.Workspace.config&apos; found under a &apos;.nuGet&apos; subfolder when walking up the tree. If none exist, %AppData%\NuGet\NuGet.config is used instead..
+        ///   Looks up a localized string similar to NuGet&apos;s default configuration is obtained by loading %AppData%\NuGet\NuGet.config, then loading any nuget.config or .nuget\nuget.config starting from root of drive and ending in current directory..
         /// </summary>
         internal static string DefaultConfigDescription {
             get {

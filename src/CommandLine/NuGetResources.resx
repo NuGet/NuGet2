@@ -148,7 +148,7 @@
     <value>Invalid option value: '{0} {1}'</value>
   </data>
   <data name="DefaultConfigDescription" xml:space="preserve">
-    <value>Default NuGet config file is the first file named 'NuGet.Workspace.config' found under a '.nuGet' subfolder when walking up the tree. If none exist, %AppData%\NuGet\NuGet.config is used instead.</value>
+    <value>NuGet's default configuration is obtained by loading %AppData%\NuGet\NuGet.config, then loading any nuget.config or .nuget\nuget.config starting from root of drive and ending in current directory.</value>
   </data>
   <data name="ListCommandDescription" xml:space="preserve">
     <value>Displays a list of packages from a given source. If no sources are specified, all sources defined in the default NuGet config file are used. If the default NuGet file specifies no sources, uses the default NuGet feed. </value>
