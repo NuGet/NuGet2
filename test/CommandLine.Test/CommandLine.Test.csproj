@@ -8,6 +8,22 @@
     <AssemblyName>NuGet.Test</AssemblyName>
     <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug11|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\Debug11\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Coverage|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\Coverage\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\Release\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Moq, Version=4.0.10827.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
@@ -76,7 +92,7 @@
       <Name>CommandLine.ServerExtensions</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\CommandLine\CommandLine.csproj">
-      <Project>{B34A6632-E627-4B66-8E0A-D2DA3BC96893}</Project>
+      <Project>{b34a6632-e627-4b66-8e0a-d2da3bc96893}</Project>
       <Name>CommandLine</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\Core\Core.csproj">

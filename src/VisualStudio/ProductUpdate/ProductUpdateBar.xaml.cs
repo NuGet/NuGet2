@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using Microsoft.VisualStudio.Shell;
 
 namespace NuGet.VisualStudio
 {
@@ -22,6 +23,14 @@ namespace NuGet.VisualStudio
 
             _productUpdateService = productUpdateService;
             _productUpdateService.UpdateAvailable += OnUpdateAvailable;
+
+            // Set DynamicResource binding in code 
+            // The reason we can't set it in XAML is that the VsBrushes class come from either 
+            // Microsoft.VisualStudio.Shell.10 or Microsoft.VisualStudio.Shell.11 assembly, 
+            // depending on whether NuGet runs inside VS10 or VS11.
+            UpdateBar.SetResourceReference(Border.BackgroundProperty, VsBrushes.InfoBackgroundKey);
+            UpdateBar.SetResourceReference(Border.BorderBrushProperty, VsBrushes.ActiveBorderKey);
+            StatusMessage.SetResourceReference(TextBlock.ForegroundProperty, VsBrushes.InfoTextKey);
         }
 
         private void OnUpdateAvailable(object sender, ProductUpdateAvailableEventArgs e)

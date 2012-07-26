@@ -26,7 +26,6 @@
         <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
         <ILMergeArtifactDirectory>$(ArtifactDropDirectory)\ILMerge</ILMergeArtifactDirectory>
         <ILMergeInternalizeIgnoreFile>$(NuGetRoot)\Build\ilmerge.internalize.ignore.txt</ILMergeInternalizeIgnoreFile>
-    
     </PropertyGroup>
     
     <PropertyGroup>
@@ -77,10 +76,9 @@
         <TestProjects Include="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" />
         <TestProjects Include="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" />
         <TestProjects Include="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" />
-        <TestProjects Include="$(NuGetTestRoot)\TeamFoundationServer.Test\TeamFoundationServer.Test.csproj" />
+        <!--<TestProjects Include="$(NuGetTestRoot)\TeamFoundationServer.Test\TeamFoundationServer.Test.csproj" />-->
         <TestProjects Include="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" />
     </ItemGroup>
-    
     
     <Target Name="Go" 
         DependsOnTargets="CheckFxCop; UpdateVsixVersion; RestorePackages; Build; 
@@ -92,7 +90,7 @@
     
     <Target Name="CheckFxCop">
         <Error 
-            Condition="!Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll') "
+            Condition="!Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll') And !Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\CodeAnalysis\fxcoptask.dll')"
             Text="FxCop not found at $(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll. Cannot proceed" />
     </Target>
     
@@ -114,7 +112,7 @@
           <MsBuild Projects="@(RestorePackageProjects)" 
                      Targets="RestorePackages"
                      Properties="NuGetExePath=$(ExeBuildDirectory)\NuGet.exe;NuGetRoot=$(NuGetRoot)" 
-                     BuildInParallel="true" />
+                     BuildInParallel="false" />
     </Target>
 
     <Target Name="Build">
@@ -129,7 +127,7 @@
         </PropertyGroup>
         <MsBuild Projects="@(TestProjects)" 
                   Targets="RunTests" 
-                  BuildInParallel="$(BuildTestsInParallel)" />
+                  BuildInParallel="false" />
     </Target>
     
     <Target Name="ReportFxCopResults">
@@ -219,6 +217,7 @@
         <PropertyGroup>
             <NuGetExe>$(ExeDropDirectory)\NuGet.exe</NuGetExe>
         </PropertyGroup>
+
         <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion)" WorkingDirectory="$(ExeDropDirectory)" />
         <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(ServerDropDirectory)&quot; -Build -p AdditionalSettingsImport=$(AdditionalSettingsImport) -p Configuration=Release -Symbols -exclude **\NuGet.Core.*" WorkingDirectory="$(ServerBuildDirectory)" />
         <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(NuGetCoreDropDirectory)&quot; -Build -Symbols -p AdditionalSettingsImport=$(AdditionalSettingsImport)" WorkingDirectory="$(NuGetCoreBuildDirectory)" />

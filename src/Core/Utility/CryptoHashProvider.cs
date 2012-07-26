@@ -73,6 +73,7 @@ namespace NuGet
             return Enumerable.SequenceEqual(dataHash, hash);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification="We want to return the object.")]
         private HashAlgorithm GetHashAlgorithm()
         {
             if (_hashAlgorithm.Equals(SHA256HashAlgorithm, StringComparison.OrdinalIgnoreCase))

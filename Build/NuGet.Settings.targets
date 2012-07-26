@@ -17,8 +17,29 @@
         <AdditionalSettingsImport Condition=" $(AdditionalSettingsImport) == '' ">$(NuGetRoot)\Extended.Settings.targets</AdditionalSettingsImport>
     </PropertyGroup>
 
+  <Choose>
+    <When Condition="'$(Configuration)' == 'Debug11'">      
+      <PropertyGroup>
+        <ComponentHostAssembly>Microsoft.VisualStudio.ComponentModelHost, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</ComponentHostAssembly>
+
+        <ExtensionManagerAssembly>Microsoft.VisualStudio.ExtensionManager, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionManagerAssembly>
+        <ExtensionsExplorerAssembly>Microsoft.VisualStudio.ExtensionsExplorer, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerAssembly>
+        <ExtensionsExplorerUIAssembly>Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerUIAssembly>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <ComponentHostAssembly>Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</ComponentHostAssembly>
+        
+        <ExtensionManagerAssembly>Microsoft.VisualStudio.ExtensionManager, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionManagerAssembly>
+        <ExtensionsExplorerAssembly>Microsoft.VisualStudio.ExtensionsExplorer, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerAssembly>
+        <ExtensionsExplorerUIAssembly>Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerUIAssembly>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
+
     <!-- Common settings for Debug and Coverage builds -->
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Coverage'">
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Coverage' ">
         <DebugSymbols>true</DebugSymbols>
         <DebugType>full</DebugType>
         <Optimize>false</Optimize>
@@ -31,6 +52,15 @@
         <DebugType>pdbonly</DebugType>
         <Optimize>true</Optimize>
         <OutputPath>bin\Release\</OutputPath>
+    </PropertyGroup>
+
+    <!-- Settings only for Debug builds for VS11 -->
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug11' ">
+      <DebugSymbols>true</DebugSymbols>
+      <DebugType>full</DebugType>
+      <Optimize>false</Optimize>
+      <OutputPath>bin\Debug11\</OutputPath>
+      <DefineConstants>$(DefineConstants);DEBUG;CODE_ANALYSIS</DefineConstants>
     </PropertyGroup>
 
     <!-- Settings only for Coverage builds -->

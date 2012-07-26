@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using Microsoft.VisualStudio.Shell;
 using NuGet.VisualStudio;
 
 namespace NuGetConsole
@@ -15,6 +16,12 @@ namespace NuGetConsole
 
             RootLayout.Children.Add(new ProductUpdateBar(productUpdateService));
             RootLayout.Children.Add(new PackageRestoreBar(packageRestoreManager));
+
+            // Set DynamicResource binding in code 
+            // The reason we can't set it in XAML is that the VsBrushes class come from either 
+            // Microsoft.VisualStudio.Shell.10 or Microsoft.VisualStudio.Shell.11 assembly, 
+            // depending on whether NuGet runs inside VS10 or VS11.
+            InitializeText.SetResourceReference(TextBlock.ForegroundProperty, VsBrushes.WindowTextKey);
         }
 
         public void AddConsoleEditor(UIElement content)
