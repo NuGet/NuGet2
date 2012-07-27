@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -18,6 +19,22 @@ namespace NuGet.Test
 
             // Act
             byte[] actualHash = hashProvider.CalculateHash(testBytes);
+
+            // Assert
+            Assert.Equal(actualHash, Convert.FromBase64String(expectedHash));
+        }
+
+        [Fact]
+        public void DefaultCryptoHashProviderUsesSHA512Stream()
+        {
+            // Arrange
+            byte[] testBytes = Encoding.UTF8.GetBytes("There is no butter knife");
+            string expectedHash = "xy/brd+/mxheBbyBL7i8Oyy62P2ZRteaIkfc4yA8ncH1MYkbDo+XwBcZsOBY2YeaOucrdLJj5odPvozD430w2g==";
+            IHashProvider hashProvider = new CryptoHashProvider();
+            MemoryStream stream = new MemoryStream(testBytes);
+
+            // Act
+            byte[] actualHash = hashProvider.CalculateHash(stream);
 
             // Assert
             Assert.Equal(actualHash, Convert.FromBase64String(expectedHash));
@@ -47,6 +64,25 @@ namespace NuGet.Test
 
             // Act
             string result = Convert.ToBase64String(hashProvider.CalculateHash(testBytes));
+
+            // Assert
+            Assert.Equal(expectedHash, result);
+        }
+
+
+        [Theory]
+        [InlineData("sha512", "xy/brd+/mxheBbyBL7i8Oyy62P2ZRteaIkfc4yA8ncH1MYkbDo+XwBcZsOBY2YeaOucrdLJj5odPvozD430w2g==")]
+        [InlineData("SHA512", "xy/brd+/mxheBbyBL7i8Oyy62P2ZRteaIkfc4yA8ncH1MYkbDo+XwBcZsOBY2YeaOucrdLJj5odPvozD430w2g==")]
+        [InlineData("sha256", "F7qs6AZmrGdFSsAc/EpRjjIgkhlW8M92djz8ySt48EM=")]
+        public void CryptoHashProviderAllowsSHA512orSHA256Stream(string hashAlgorithm, string expectedHash)
+        {
+            // Arrange
+            byte[] testBytes = Encoding.UTF8.GetBytes("There is no butter knife");
+            var hashProvider = new CryptoHashProvider(hashAlgorithm);
+            MemoryStream stream = new MemoryStream(testBytes);
+
+            // Act
+            string result = Convert.ToBase64String(hashProvider.CalculateHash(stream));
 
             // Assert
             Assert.Equal(expectedHash, result);

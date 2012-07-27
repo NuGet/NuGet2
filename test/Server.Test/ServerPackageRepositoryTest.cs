@@ -45,6 +45,7 @@ namespace NuGet.Test.Server.Infrastructure
         {
             var hashProvider = new Mock<IHashProvider>();
             hashProvider.Setup(c => c.CalculateHash(It.IsAny<byte[]>())).Returns((byte[] value) => value.Select(Invert).ToArray());
+            hashProvider.Setup(c => c.CalculateHash(It.IsAny<Stream>())).Returns((Stream value) => value.ReadAllBytes().Select(Invert).ToArray());
 
             return hashProvider.Object;
         }

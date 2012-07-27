@@ -127,8 +127,7 @@ namespace NuGet
         {
             using (Stream stream = package.GetStream())
             {
-                byte[] packageBytes = stream.ReadAllBytes();
-                return Convert.ToBase64String(hashProvider.CalculateHash(packageBytes));
+                return Convert.ToBase64String(hashProvider.CalculateHash(stream));
             }
         }
 

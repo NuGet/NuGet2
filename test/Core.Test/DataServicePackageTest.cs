@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Moq;
@@ -175,7 +176,7 @@ namespace NuGet.Test
             var zipPackage = PackageUtility.CreatePackage("A", "1.2");
 
             var hashProvider = new Mock<IHashProvider>(MockBehavior.Strict);
-            hashProvider.Setup(h => h.CalculateHash(It.IsAny<byte[]>())).Returns(hashBytes);
+            hashProvider.Setup(h => h.CalculateHash(It.IsAny<Stream>())).Returns(hashBytes);
 
             var mockRepository = new MockPackageRepository();
             mockRepository.Add(zipPackage);
@@ -205,7 +206,7 @@ namespace NuGet.Test
             var zipPackage2 = PackageUtility.CreatePackage("A", "1.2");
 
             var hashProvider = new Mock<IHashProvider>(MockBehavior.Strict);
-            hashProvider.Setup(h => h.CalculateHash(It.IsAny<byte[]>())).Returns(hashBytes1);
+            hashProvider.Setup(h => h.CalculateHash(It.IsAny<Stream>())).Returns(hashBytes1);
 
             var mockRepository = new Mock<IPackageRepository>(MockBehavior.Strict);
             var lookup = mockRepository.As<IPackageLookup>();
