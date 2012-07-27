@@ -64,7 +64,7 @@ namespace NuGet.Tools
             ServiceLocator.InitializePackageServiceProvider(this);
         }
 
-        private IVsMonitorSelection VsMonitorSelection 
+        private IVsMonitorSelection VsMonitorSelection
         {
             get
             {
@@ -146,7 +146,7 @@ namespace NuGet.Tools
             var webProxy = (IVsWebProxy)GetService(typeof(SVsWebProxy));
             Debug.Assert(webProxy != null);
 
-            var settings = Settings.LoadDefaultSettings(null==_solutionManager ? null : _solutionManager.SolutionFileSystem);
+            var settings = Settings.LoadDefaultSettings(_solutionManager == null ? null : _solutionManager.SolutionFileSystem);
             var packageSourceProvider = new PackageSourceProvider(settings);
             HttpClient.DefaultCredentialProvider = new SettingsCredentialProvider(new VSRequestCredentialProvider(webProxy), packageSourceProvider);
 

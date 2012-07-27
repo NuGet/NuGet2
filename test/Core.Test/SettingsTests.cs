@@ -1125,7 +1125,7 @@ namespace NuGet.Test
     <add key=""key2"" value=""LastOneWins2"" />
   </SectionName>
 </configuration>";
-            mockFileSystem.AddFile(@".nuget\NuGet.Config", config);
+            mockFileSystem.AddFile(@"NuGet.Config", config);
             config = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <SectionName>
@@ -1161,7 +1161,7 @@ namespace NuGet.Test
     <add key=""key1"" value=""value1"" />    
   </SectionName>
 </configuration>";
-            mockFileSystem.AddFile(@"C:\mockfilesystem\dir1\.nuget\NuGet.Config", config);
+            mockFileSystem.AddFile(@"C:\mockfilesystem\dir1\NuGet.Config", config);
 
             var settings = Settings.LoadDefaultSettings(mockFileSystem);
 

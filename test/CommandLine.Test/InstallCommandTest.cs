@@ -51,7 +51,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         private static IFileSystem GetFileSystemWithDefaultConfig(string repositoryPath = @"C:\This\Is\My\Install\Path")
         {
             var fileSystem = new MockFileSystem();
-            fileSystem.AddFile(@".nuget\nuget.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+            fileSystem.AddFile(@"nuget.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration><config><add key=""repositorypath"" value="""+repositoryPath+@""" /></config></configuration>");
             return fileSystem;
         }
@@ -75,7 +75,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var fileSystem = GetFileSystemWithDefaultConfig();
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
                                                         settings: Settings.LoadDefaultSettings(fileSystem))
-                                     {OutputDirectory = @"Bar\Baz"};
+                                     {
+                                         OutputDirectory = @"Bar\Baz"
+                                     };
 
 
             // Assert
@@ -91,7 +93,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                 settings: Settings.LoadDefaultSettings(fileSystem));
 
             // Assert
-            Assert.Equal(@"C:\MockFileSystem\.nuget\under_dot_nuget\other_dir", installCommand.InstallPath);
+            Assert.Equal(@"C:\MockFileSystem\under_dot_nuget\other_dir", installCommand.InstallPath);
         }
 
         [Fact]
@@ -646,7 +648,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                                       ISettings settings = null)
                 : base(factory, sourceProvider, settings??CreateSettings(allowPackageRestore), machineCacheRepository ?? new MockPackageRepository())
             {
-                _fileSystem = fileSystem??new MockFileSystem();
+                _fileSystem = fileSystem ?? new MockFileSystem();
                 _packageManager = packageManager;
             }
 

@@ -41,8 +41,8 @@ namespace NuGet
         {
             get
             {
-                return Path.IsPathRooted(_fileName)
-                            ? _fileName : Path.GetFullPath(Path.Combine(_fileSystem.Root, _fileName));
+                return Path.IsPathRooted(_fileName) ?
+                            _fileName : Path.GetFullPath(Path.Combine(_fileSystem.Root, _fileName));
             }
         }
 
@@ -50,10 +50,28 @@ namespace NuGet
         {
             // Walk up the tree to find a config file; also look in .nuget subdirectories
             // Finally look in %APPDATA%\NuGet
-            var validSettingFiles = GetSettingsFileNames(fileSystem)
-                .Select(f => ReadSettings(fileSystem, f))
-                .Where(f => f != null)
-                .ToArray();
+            var validSettingFiles = new List<Settings>();
+            if (fileSystem != null)
+            {
+                validSettingFiles.AddRange(
+                    GetSettingsFileNames(fileSystem)
+                        .Select(f => ReadSettings(fileSystem, f))
+                        .Where(f => f != null));
+            }
+
+            // for the default location, allow case where file does not exist, in which case it'll end
+            // up being created if needed
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            if (!String.IsNullOrEmpty(appDataPath))
+            {
+                var defaultSettingsPath = Path.Combine(appDataPath, "NuGet");
+                var appDataSettings = ReadSettings(new PhysicalFileSystem(defaultSettingsPath),
+                                                   Constants.SettingsFileName);
+                if (appDataSettings!= null)
+                {
+                    validSettingFiles.Add(appDataSettings);
+                }
+            }
 
             if (validSettingFiles.IsEmpty())
             {
@@ -64,7 +82,7 @@ namespace NuGet
             }
 
             // if multiple setting files were loaded, chain them in a linked list
-            for (int i = 1; i < validSettingFiles.Length; ++i )
+            for (int i = 1; i < validSettingFiles.Count; ++i )
             {
                 validSettingFiles[i]._next = validSettingFiles[i - 1];
             }
@@ -77,7 +95,7 @@ namespace NuGet
 
         public string GetValue(string section, string key)
         {
-            return GetValue(section, key, false);
+            return GetValue(section, key, isPath: false);
         }
 
         public string GetValue(string section, string key, bool isPath)
@@ -188,14 +206,14 @@ namespace NuGet
             var curr = this;
             while (curr != null)
             {
-                curr.PopulateValuesNested(section, key, values);
+                curr.PopulateNestedValues(section, key, values);
                 curr = curr._next;
             }
 
             return values.AsReadOnly();
         }
 
-        private void PopulateValuesNested(string section, string key, List<KeyValuePair<string, string>> current)
+        private void PopulateNestedValues(string section, string key, List<KeyValuePair<string, string>> current)
         {
             var sectionElement = GetSection(_config.Root, section);
             if (sectionElement == null)
@@ -408,10 +426,7 @@ namespace NuGet
         // Order is most significant (e.g. applied last) to least significant (applied first)
         // ex:
         // c:\foo\nuget.config
-        // c:\foo\.nuget\nuget.config
         // c:\nuget.config
-        // c:\.nuget\nuget.config
-        // %APPDATA%\nuget\nuget.config
         // 
         private static IEnumerable<string> GetSettingsFileNames(IFileSystem fileSystem)
         {
@@ -426,50 +441,35 @@ namespace NuGet
                 // of failures should this code could go away
                 if (fileName.StartsWith(fileSystem.Root, StringComparison.OrdinalIgnoreCase))
                 {
-                    int cnt = fileSystem.Root.Length;
+                    int count = fileSystem.Root.Length;
+                    // if fileSystem.Root ends with \ (ex: c:\foo\) then we've removed all we needed
+                    // otherwise, remove one more char
                     if (!(fileSystem.Root.EndsWith("\\") || fileSystem.Root.EndsWith("/")))
-                        cnt++;
-                    fileName = fileName.Substring(cnt);
+                    {
+                        count++;
+                    }
+                    fileName = fileName.Substring(count);
                 }
 
                 if (fileSystem.FileExists(fileName))
                     yield return fileName;
             }
-            // for the default location, allow case where file does not exist, in which case it'll end
-            // up being created if needed
-            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            if (!String.IsNullOrEmpty(appDataPath))
-            {
-                yield return Path.Combine(Path.Combine(appDataPath, "NuGet"), Constants.SettingsFileName);
-            }
         }
 
         private static IEnumerable<string> GetSettingsFilePaths(IFileSystem fileSystem)
         {
-            if (null == fileSystem)
-            {
-                yield break;
-            }
-
             string root = fileSystem.Root;
             while (root != null)
             {
                 yield return root;
-                yield return Path.Combine(root, Constants.NuGetSettingsFolder);
                 root = Path.GetDirectoryName(root);
             }
         }
-
-
 
         private static Settings ReadSettings(IFileSystem fileSystem, string settingsPath)
         {
             try
             {
-                if (null == fileSystem)
-                {
-                    fileSystem = new PhysicalFileSystem(Path.GetDirectoryName(settingsPath));
-                }
                 return new Settings(fileSystem, settingsPath);
             }
             catch (XmlException)
