@@ -1,5 +1,6 @@
 extern alias dialog;
 extern alias dialog10;
+
 using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
@@ -18,6 +19,7 @@ using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
 using NuGetConsole;
 using NuGetConsole.Implementation;
+
 using ManagePackageDialog = dialog::NuGet.Dialog.PackageManagerWindow;
 using VS10ManagePackageDialog = dialog10::NuGet.Dialog.PackageManagerWindow;
 

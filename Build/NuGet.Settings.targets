@@ -17,26 +17,21 @@
         <AdditionalSettingsImport Condition=" $(AdditionalSettingsImport) == '' ">$(NuGetRoot)\Extended.Settings.targets</AdditionalSettingsImport>
     </PropertyGroup>
 
-  <Choose>
-    <When Condition="'$(Configuration)' == 'Debug11'">      
-      <PropertyGroup>
-        <ComponentHostAssembly>Microsoft.VisualStudio.ComponentModelHost, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</ComponentHostAssembly>
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug11'">
+      <ComponentHostAssembly>Microsoft.VisualStudio.ComponentModelHost, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</ComponentHostAssembly>
 
-        <ExtensionManagerAssembly>Microsoft.VisualStudio.ExtensionManager, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionManagerAssembly>
-        <ExtensionsExplorerAssembly>Microsoft.VisualStudio.ExtensionsExplorer, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerAssembly>
-        <ExtensionsExplorerUIAssembly>Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerUIAssembly>
-      </PropertyGroup>
-    </When>
-    <Otherwise>
-      <PropertyGroup>
-        <ComponentHostAssembly>Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</ComponentHostAssembly>
+      <ExtensionManagerAssembly>Microsoft.VisualStudio.ExtensionManager, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionManagerAssembly>
+      <ExtensionsExplorerAssembly>Microsoft.VisualStudio.ExtensionsExplorer, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerAssembly>
+      <ExtensionsExplorerUIAssembly>Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerUIAssembly>
+    </PropertyGroup>
+  
+    <PropertyGroup Condition="'$(Configuration)' != 'Debug11'">
+      <ComponentHostAssembly>Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</ComponentHostAssembly>
         
-        <ExtensionManagerAssembly>Microsoft.VisualStudio.ExtensionManager, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionManagerAssembly>
-        <ExtensionsExplorerAssembly>Microsoft.VisualStudio.ExtensionsExplorer, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerAssembly>
-        <ExtensionsExplorerUIAssembly>Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerUIAssembly>
-      </PropertyGroup>
-    </Otherwise>
-  </Choose>
+      <ExtensionManagerAssembly>Microsoft.VisualStudio.ExtensionManager, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionManagerAssembly>
+      <ExtensionsExplorerAssembly>Microsoft.VisualStudio.ExtensionsExplorer, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerAssembly>
+      <ExtensionsExplorerUIAssembly>Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerUIAssembly>
+    </PropertyGroup>
 
     <!-- Common settings for Debug and Coverage builds -->
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Coverage' ">

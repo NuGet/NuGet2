@@ -24,6 +24,8 @@ namespace NuGet.VisualStudio
             // Microsoft.VisualStudio.Shell.10 or Microsoft.VisualStudio.Shell.11 assembly, 
             // depending on whether NuGet runs inside VS10 or VS11.
             StatusMessage.SetResourceReference(TextBlock.ForegroundProperty, VsBrushes.InfoTextKey);
+            RestoreBar.SetResourceReference(Border.BackgroundProperty, VsBrushes.InfoBackgroundKey);
+            RestoreBar.SetResourceReference(Border.BorderBrushProperty, VsBrushes.ActiveBorderKey);
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
