@@ -343,6 +343,6 @@
     <value>Relevance</value>
   </data>
   <data name="Dialog_CurrentVersionLabel" xml:space="preserve">
-    <value>Current version:</value>
+    <value>Installed version:</value>
   </data>
 </root>
