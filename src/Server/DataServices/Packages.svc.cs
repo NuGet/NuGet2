@@ -63,7 +63,10 @@ namespace NuGet.Server.DataServices
             var package = (Package)entity;
 
             var context = HttpContext.Current;
-            var rootUrl = context.Request.Url.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
+            
+            var rootUrl = string.IsNullOrWhiteSpace(System.Configuration.ConfigurationManager.AppSettings["rootUrl"])
+                ? context.Request.Url.GetComponents(UriComponents.Scheme, UriFormat.Unescaped)
+                : System.Configuration.ConfigurationManager.AppSettings["rootUrl"];
 
             // the URI need to ends with a '/' to be correctly merged so we add it to the application if it 
             string downloadUrl = PackageUtility.GetPackageDownloadUrl(package);
