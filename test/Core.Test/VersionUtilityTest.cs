@@ -180,7 +180,7 @@ namespace NuGet.Test
         public void ParseFrameworkNameNormalizesSupportedWindowsPhoneNames()
         {
             // Arrange
-            var knownNameFormats = new[] { "windowsphone", "phone" };
+            var knownNameFormats = new[] { "windowsphone", "wp" };
             Version defaultVersion = new Version("0.0");
 
             // Act
@@ -841,6 +841,68 @@ namespace NuGet.Test
 
             Assert.False(wp8CompatibleWithwp7);
             Assert.False(wp8CompatbielWithwp7Mango);
+        }
+
+        [Theory]
+        [InlineData("wp")]
+        [InlineData("wp7")]
+        [InlineData("wp70")]
+        [InlineData("windowsphone")]
+        [InlineData("windowsphone7")]
+        [InlineData("windowsphone70")]
+        [InlineData("sl3-wp")]
+        public void WindowsPhone7IdentifierCompatibleWithAllWPProjects(string wp7Identifier)
+        {
+            // Arrange
+            var wp7Package = VersionUtility.ParseFrameworkName(wp7Identifier);
+
+            var wp7Project = new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone");
+            var mangoProject = new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71");
+            var apolloProject = new FrameworkName("WindowsPhone, Version=v8.0");
+
+            // Act & Assert
+            Assert.True(VersionUtility.IsCompatible(wp7Project, wp7Package));
+            Assert.True(VersionUtility.IsCompatible(mangoProject, wp7Package));
+            Assert.True(VersionUtility.IsCompatible(apolloProject, wp7Package));
+        }
+
+        [Theory]
+        [InlineData("wp71")]
+        [InlineData("windowsphone71")]
+        [InlineData("sl4-wp71")]
+        public void WindowsPhoneMangoIdentifierCompatibleWithAllWPProjects(string mangoIdentifier)
+        {
+            // Arrange
+            var mangoPackage = VersionUtility.ParseFrameworkName(mangoIdentifier);
+
+            var wp7Project = new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone");
+            var mangoProject = new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71");
+            var apolloProject = new FrameworkName("WindowsPhone, Version=v8.0");
+
+            // Act & Assert
+            Assert.False(VersionUtility.IsCompatible(wp7Project, mangoPackage));
+            Assert.True(VersionUtility.IsCompatible(mangoProject, mangoPackage));
+            Assert.True(VersionUtility.IsCompatible(apolloProject, mangoPackage));
+        }
+
+        [Theory]
+        [InlineData("wp8")]
+        [InlineData("wp80")]
+        [InlineData("windowsphone8")]
+        [InlineData("windowsphone80")]
+        public void WindowsPhoneApolloIdentifierCompatibleWithAllWPProjects(string apolloIdentifier)
+        {
+            // Arrange
+            var apolloPackage = VersionUtility.ParseFrameworkName(apolloIdentifier);
+
+            var wp7Project = new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone");
+            var mangoProject = new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71");
+            var apolloProject = new FrameworkName("WindowsPhone, Version=v8.0");
+
+            // Act & Assert
+            Assert.False(VersionUtility.IsCompatible(wp7Project, apolloPackage));
+            Assert.False(VersionUtility.IsCompatible(mangoProject, apolloPackage));
+            Assert.True(VersionUtility.IsCompatible(apolloProject, apolloPackage));
         }
 
         [Fact]

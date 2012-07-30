@@ -40,7 +40,7 @@ namespace NuGet
             { "Silverlight", "Silverlight" },
             { ".NETPortable", ".NETPortable" },
             { "NETPortable", ".NETPortable" },
-            { "portable", ".NETPortable" }
+            { "portable", ".NETPortable" },
             { "wp", "WindowsPhone" },
             { "WindowsPhone", "WindowsPhone" },
         };
@@ -83,7 +83,16 @@ namespace NuGet
             }
         };
 
+        // These aliases allow us to accept 'wp', 'wp70' and 'wp71' as valid target farmework folders.
+        private static readonly Dictionary<FrameworkName, FrameworkName> _packageFrameworkNameAlias = new Dictionary<FrameworkName, FrameworkName>(FrameworkNameEqualityComparer.Default)
+        {
+            { new FrameworkName("WindowsPhone, Version=v0.0"), new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone") },
+            { new FrameworkName("WindowsPhone, Version=v7.0"), new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone") },
+            { new FrameworkName("WindowsPhone, Version=v7.1"), new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71") }
+        };
+
         // we treat framework name 'WindowsPhone8.0' as if 'Silverlight8.0-WindowsPhone'
+        // this alias applies to the Project's target framework
         private static readonly Dictionary<string, Tuple<string, string>> _identifierAlias = new Dictionary<string, Tuple<string, string>>(StringComparer.OrdinalIgnoreCase)
             {
                 // origininal id                  new id        new profile
@@ -632,6 +641,12 @@ namespace NuGet
         /// <param name="targetFrameworkName">Package framework.</param>
         internal static bool IsCompatible(FrameworkName frameworkName, FrameworkName targetFrameworkName)
         {
+            FrameworkName aliasTargetFrameworkName;
+            if (_packageFrameworkNameAlias.TryGetValue(targetFrameworkName, out aliasTargetFrameworkName)) 
+            {
+                targetFrameworkName = aliasTargetFrameworkName;
+            }
+
             string identifier = frameworkName.Identifier;
             string profile = frameworkName.Profile;
             

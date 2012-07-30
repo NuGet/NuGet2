@@ -175,6 +175,7 @@
     <Compile Include="FileModifiers\Preprocessor.cs" />
     <Compile Include="FileModifiers\XmlTransfomer.cs" />
     <Compile Include="Http\IHttpClient.cs" />
+    <Compile Include="Utility\FrameworkNameEqualityComparer.cs" />
     <Compile Include="Utility\IProgressProvider.cs" />
     <Compile Include="Utility\IVersionSpec.cs" />
     <Compile Include="Utility\MemoryCache.cs" />
