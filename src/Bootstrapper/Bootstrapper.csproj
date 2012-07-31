@@ -23,7 +23,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuGet</RootNamespace>
     <AssemblyName>NuGet</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
   </PropertyGroup>
   <ItemGroup>

@@ -20,7 +20,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuGet.Tools</RootNamespace>
     <AssemblyName>NuGet.Tools</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <VsSdkTargets>$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\VSSDK\Microsoft.VsSDK.targets</VsSdkTargets>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Debug11'">
