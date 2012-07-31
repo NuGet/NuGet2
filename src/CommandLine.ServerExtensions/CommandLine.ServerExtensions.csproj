@@ -35,7 +35,13 @@
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition=" '$(CIBuild)' == 'true' ">
+    <Reference Include="NuGet">
+      <Private>False</Private>
+      <HintPath>..\CommandLine\bin\$(Configuration)\Merged\NuGet.exe</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(CIBuild)' != 'true' ">
     <ProjectReference Include="..\CommandLine\CommandLine.csproj">
       <Project>{B34A6632-E627-4B66-8E0A-D2DA3BC96893}</Project>
       <Name>CommandLine</Name>

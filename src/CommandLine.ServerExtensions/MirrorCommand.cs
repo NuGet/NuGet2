@@ -30,7 +30,7 @@ namespace NuGet.ServerExtensions
         [Option(typeof(NuGetResources), "MirrorCommandPrerelease")]
         public bool Prerelease { get; set; }
 
-        [Option(typeof(NuGetResources), "PushCommandTimeoutDescription")]
+        [Option(typeof(NuGetResources), "MirrorCommandTimeoutDescription")]
         public int Timeout { get; set; }
 
         [Option(typeof(NuGetResources), "MirrorCommandNoCache", AltName = "c")]
