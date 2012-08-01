@@ -194,21 +194,22 @@ namespace NuGet.Commands
             project = project ?? GetMSBuildProject(packagesConfigPath);
 
             // Resolve the repository path
-            repositoryPath = repositoryPath ?? GetReposioryPath(project.Root);
+            repositoryPath = repositoryPath ?? GetRepositoryPath(project.Root);
 
             var pathResolver = new DefaultPackagePathResolver(repositoryPath);
 
             // Create the local and source repositories
-            var localRepository = new PackageReferenceRepository(project, new SharedPackageRepository(repositoryPath));
+            var sharedPackageRepository = new SharedPackageRepository(repositoryPath);
+            var localRepository = new PackageReferenceRepository(project, sharedPackageRepository);
             sourceRepository = sourceRepository ?? AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
             IPackageConstraintProvider constraintProvider = localRepository;
 
             Console.WriteLine(NuGetResources.UpdatingProject, project.ProjectName);
-            UpdatePackages(localRepository, sourceRepository, constraintProvider, pathResolver, project);
+            UpdatePackages(localRepository, sharedPackageRepository, sourceRepository, constraintProvider, pathResolver, project);
             project.Save();
         }
 
-        private string GetReposioryPath(string projectRoot)
+        private string GetRepositoryPath(string projectRoot)
         {
             string packagesDir = RepositoryPath;
 
@@ -271,6 +272,7 @@ namespace NuGet.Commands
         }
 
         internal void UpdatePackages(IPackageRepository localRepository,
+                                     ISharedPackageRepository sharedPackageRepository,
                                      IPackageRepository sourceRepository,
                                      IPackageConstraintProvider constraintProvider,
                                      IPackagePathResolver pathResolver,
@@ -281,6 +283,14 @@ namespace NuGet.Commands
                                      ConstraintProvider = constraintProvider
                                  };
 
+            // Fix for work item 2411: When updating packages, we did not add packages to the shared package repository. 
+            // Consequently, when querying the package reference repository, we would have package references with no backing package files in
+            // the shared repository. This would cause the reference repository to skip the package assuming that the entry is invalid.
+            projectManager.PackageReferenceAdded += (sender, eventArgs) =>
+            {
+                sharedPackageRepository.AddPackage(eventArgs.Package);
+            };
+            
             if (Verbose)
             {
                 projectManager.Logger = Console;
