@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using EnvDTE;
+using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
 
@@ -123,6 +124,14 @@ namespace NuGet.Dialog.Providers
 
                 return true;
             }
+        }
+
+        public override IVsExtension CreateExtension(IPackage package)
+        {
+            return new PackageItem(this, package)
+            {
+                CommandName = Resources.Dialog_UpdateButton
+            };
         }
 
         protected bool CheckPSScriptAndShowLicenseAgreement(
