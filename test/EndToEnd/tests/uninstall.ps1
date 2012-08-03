@@ -752,7 +752,7 @@ function Test-WebSiteSimpleUninstall
     $p | Uninstall-Package MyAwesomeLibrary
 
     # Assert
-    Assert-PathNotExists (Join-Path $p.FullName "bin\AwesomeLibrary.dll.refresh")
+    Assert-PathNotExists (Join-Path (Get-ProjectDir $p) "bin\AwesomeLibrary.dll.refresh")
 }
 
 function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToRemoveContentFiles

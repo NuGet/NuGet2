@@ -28,7 +28,7 @@ function Test-WebsiteSimpleInstall {
     Assert-Package $p MyAwesomeLibrary
     Assert-SolutionPackage MyAwesomeLibrary
     
-    $refreshFilePath = Join-Path $p.FullName "bin\MyAwesomeLibrary.dll.refresh"
+    $refreshFilePath = Join-Path (Get-ProjectDir $p) "bin\MyAwesomeLibrary.dll.refresh"
     $content = Get-Content $refreshFilePath
     
     Assert-AreEqual "..\packages\MyAwesomeLibrary.1.0\lib\net40\MyAwesomeLibrary.dll" $content
@@ -849,7 +849,7 @@ function Test-InstallingPackageDoesNotOverwriteFileIfExistsOnDiskButNotInProject
 
     # Arrange
     $p = New-WebApplication
-    $projectPath = $p.Properties.Item("FullPath").Value
+    $projectPath = Get-ProjectDir $p
     $fooPath = Join-Path $projectPath foo
     "file content" > $fooPath
 
@@ -1320,7 +1320,7 @@ function Test-InstallPackageWithReferences {
 
     # Assert - 1
     Assert-Reference $p1 ClassLibrary1
-    
+
     New-Solution "Test"
     # Arrange - 2
     $p2 = New-ClassLibrary
@@ -1863,7 +1863,7 @@ function Test-InstallingSatellitePackageToWebsiteCopiesResourcesToBin
 	Assert-Package $p Test.fr-FR
 	Assert-Package $p Test
 	
-	$projectPath = $p.FullName
+	$projectPath = Get-ProjectDir $p
 	Assert-PathExists (Join-Path $projectPath "bin\Test.dll.refresh")
 	Assert-PathExists (Join-Path $projectPath "bin\Test.dll")
 	Assert-PathExists (Join-Path $projectPath "bin\fr-FR\Test.resources.dll")
