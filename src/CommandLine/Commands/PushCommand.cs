@@ -8,7 +8,7 @@ using NuGet.Common;
 
 namespace NuGet.Commands
 {
-    [Command(typeof(NuGetCommand), "push", "PushCommandDescription",
+    [Command(typeof(NuGetCommand), "push", "PushCommandDescription;DefaultConfigDescription",
         MinArgs = 1, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
         UsageSummaryResourceName = "PushCommandUsageSummary", UsageExampleResourceName = "PushCommandUsageExamples")]
     public class PushCommand : Command
@@ -61,13 +61,18 @@ namespace NuGet.Commands
             }
         }
 
-        private string ResolveSource(string packagePath)
+        public string ResolveSource(string packagePath)
         {
-            string source;
+            string source = Source;
 
-            if (!String.IsNullOrEmpty(Source))
+            if (String.IsNullOrEmpty(source))
             {
-                source = SourceProvider.ResolveAndValidateSource(Source);
+                source = Settings.GetConfigValue("DefaultPushSource");
+            }
+
+            if (!String.IsNullOrEmpty(source))
+            {
+                source = SourceProvider.ResolveAndValidateSource(source);
             }
             else
             {

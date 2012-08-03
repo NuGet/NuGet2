@@ -300,7 +300,7 @@ nuget pack foo.nuspec -Version 2.1.0</value>
     <value>Pushes a package to the server and optionally publishes it.</value>
   </data>
   <data name="PushCommandSourceDescription" xml:space="preserve">
-    <value>Specifies the server URL.</value>
+    <value>Specifies the server URL. If not specified, nuget.org is used unless DefaultPushSource config value is set in the NuGet config file.</value>
   </data>
   <data name="PushCommandTimeoutDescription" xml:space="preserve">
     <value>Specifies the timeout for pushing to a server in seconds. Defaults to 300 seconds (5 minutes).</value>
