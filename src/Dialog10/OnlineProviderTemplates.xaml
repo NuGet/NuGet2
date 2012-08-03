@@ -231,6 +231,7 @@
                 </self:TextBlockControl>
                 
                 <self:TextBlockControl
+                    AutomationProperties.AutomationId="PackageDescription"
                     Text="{Binding Description, Converter={StaticResource NormalizeTextConverter}, Mode=OneWay}"
                     Style="{StaticResource DetailMetadataValueStyle}"
                     TextWrapping="Wrap"
