@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using Microsoft.VisualStudio.Text;
 using NuGet;
+using System.Globalization;
 
 namespace NuGetConsole.Implementation.Console
 {
@@ -165,9 +166,21 @@ namespace NuGetConsole.Implementation.Console
                         _dispatcher = new SyncHostConsoleDispatcher(this);
                     }
 
+                    // capture the cultures to assign to the worker thread below
+                    CultureInfo currentCulture = CultureInfo.CurrentCulture;
+                    CultureInfo currentUICulture = CultureInfo.CurrentUICulture;
+
                     Task.Factory.StartNew(
                         // gives the host a chance to do initialization works before the console starts accepting user inputs
-                        () => host.Initialize(WpfConsole)
+                        () => 
+                            {
+                                // apply the culture of the main thread to this thread so that the PowerShell engine
+                                // will have the same culture as Visual Studio.
+                                System.Threading.Thread.CurrentThread.CurrentCulture = currentCulture;
+                                System.Threading.Thread.CurrentThread.CurrentUICulture = currentUICulture;
+
+                                host.Initialize(WpfConsole);
+                            }
                     ).ContinueWith(
                         task =>
                         {
