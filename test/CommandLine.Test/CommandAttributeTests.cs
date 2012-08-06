@@ -85,14 +85,5 @@ namespace NuGet.Test.NuGetCommandLine
             // Assert
             Assert.Equal("Not a Resource", actual);
         }
-
-
-        public class MockResourceType
-        {
-            public static string ResourceName
-            {
-                get { return "This is a Resource String."; }
-            }
-        }
     }
 }

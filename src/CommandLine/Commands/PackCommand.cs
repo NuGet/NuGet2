@@ -8,7 +8,7 @@ using NuGet.Common;
 
 namespace NuGet.Commands
 {
-    [Command(typeof(NuGetResources), "pack", "PackageCommandDescription", MaxArgs = 1, UsageSummaryResourceName = "PackageCommandUsageSummary",
+    [Command(typeof(NuGetCommand), "pack", "PackageCommandDescription", MaxArgs = 1, UsageSummaryResourceName = "PackageCommandUsageSummary",
             UsageDescriptionResourceName = "PackageCommandUsageDescription", UsageExampleResourceName = "PackCommandUsageExamples")]
     public class PackCommand : Command
     {
@@ -44,43 +44,43 @@ namespace NuGet.Commands
             ".nproj"
         };
 
-        [Option(typeof(NuGetResources), "PackageCommandOutputDirDescription")]
+        [Option(typeof(NuGetCommand), "PackageCommandOutputDirDescription")]
         public string OutputDirectory { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandBasePathDescription")]
+        [Option(typeof(NuGetCommand), "PackageCommandBasePathDescription")]
         public string BasePath { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandVerboseDescription")]
+        [Option(typeof(NuGetCommand), "PackageCommandVerboseDescription")]
         public bool Verbose { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandVersionDescription")]
+        [Option(typeof(NuGetCommand), "PackageCommandVersionDescription")]
         public string Version { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandExcludeDescription")]
+        [Option(typeof(NuGetCommand), "PackageCommandExcludeDescription")]
         public ICollection<string> Exclude
         {
             get { return _excludes; }
         }
 
-        [Option(typeof(NuGetResources), "PackageCommandSymbolsDescription")]
+        [Option(typeof(NuGetCommand), "PackageCommandSymbolsDescription")]
         public bool Symbols { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandToolDescription")]
+        [Option(typeof(NuGetCommand), "PackageCommandToolDescription")]
         public bool Tool { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandBuildDescription")]
+        [Option(typeof(NuGetCommand), "PackageCommandBuildDescription")]
         public bool Build { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandNoDefaultExcludes")]
+        [Option(typeof(NuGetCommand), "PackageCommandNoDefaultExcludes")]
         public bool NoDefaultExcludes { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandNoRunAnalysis")]
+        [Option(typeof(NuGetCommand), "PackageCommandNoRunAnalysis")]
         public bool NoPackageAnalysis { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandExcludeEmptyDirectories")]
+        [Option(typeof(NuGetCommand), "PackageCommandExcludeEmptyDirectories")]
         public bool ExcludeEmptyDirectories { get; set; }
 
-        [Option(typeof(NuGetResources), "PackageCommandPropertiesDescription")]
+        [Option(typeof(NuGetCommand), "PackageCommandPropertiesDescription")]
         public Dictionary<string, string> Properties
         {
             get

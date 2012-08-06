@@ -5,22 +5,22 @@ using System.Linq;
 
 namespace NuGet.Commands
 {
-    [Command(typeof(NuGetResources), "sources", "SourcesCommandDescription", UsageSummaryResourceName = "SourcesCommandUsageSummary",
+    [Command(typeof(NuGetCommand), "sources", "SourcesCommandDescription", UsageSummaryResourceName = "SourcesCommandUsageSummary",
         MinArgs = 0, MaxArgs = 1)]
     public class SourcesCommand : Command
     {
         private readonly IPackageSourceProvider _sourceProvider;
 
-        [Option(typeof(NuGetResources), "SourcesCommandNameDescription")]
+        [Option(typeof(NuGetCommand), "SourcesCommandNameDescription")]
         public string Name { get; set; }
 
-        [Option(typeof(NuGetResources), "SourcesCommandSourceDescription", AltName = "src")]
+        [Option(typeof(NuGetCommand), "SourcesCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
-        [Option(typeof(NuGetResources), "SourcesCommandUserNameDescription")]
+        [Option(typeof(NuGetCommand), "SourcesCommandUserNameDescription")]
         public string UserName { get; set; }
 
-        [Option(typeof(NuGetResources), "SourcesCommandPasswordDescription")]
+        [Option(typeof(NuGetCommand), "SourcesCommandPasswordDescription")]
         public string Password { get; set; }
 
         [ImportingConstructor]

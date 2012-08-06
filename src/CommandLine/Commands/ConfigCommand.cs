@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace NuGet.Commands
 {
-    [Command(typeof(NuGetResources), "config", "ConfigCommandDesc", MaxArgs = 1,
+    [Command(typeof(NuGetCommand), "config", "ConfigCommandDesc", MaxArgs = 1,
             UsageSummaryResourceName = "ConfigCommandSummary", UsageExampleResourceName = "ConfigCommandExamples")]
     public class ConfigCommand : Command
     {
@@ -23,7 +23,7 @@ namespace NuGet.Commands
             _settings = settings;
         }
 
-        [Option(typeof(NuGetResources), "ConfigCommandSetDesc")]
+        [Option(typeof(NuGetCommand), "ConfigCommandSetDesc")]
         public Dictionary<string, string> Set
         {
             get { return _setValues; }

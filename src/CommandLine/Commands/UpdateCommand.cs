@@ -9,7 +9,7 @@ using NuGet.Common;
 
 namespace NuGet.Commands
 {
-    [Command(typeof(NuGetResources), "update", "UpdateCommandDescription", UsageSummary = "<packages.config|solution>",
+    [Command(typeof(NuGetCommand), "update", "UpdateCommandDescription", UsageSummary = "<packages.config|solution>",
         UsageExampleResourceName = "UpdateCommandUsageExamples")]
     public class UpdateCommand : Command
     {
@@ -31,31 +31,31 @@ namespace NuGet.Commands
 
         public IPackageSourceProvider SourceProvider { get; private set; }
 
-        [Option(typeof(NuGetResources), "UpdateCommandSourceDescription")]
+        [Option(typeof(NuGetCommand), "UpdateCommandSourceDescription")]
         public ICollection<string> Source
         {
             get { return _sources; }
         }
 
-        [Option(typeof(NuGetResources), "UpdateCommandIdDescription")]
+        [Option(typeof(NuGetCommand), "UpdateCommandIdDescription")]
         public ICollection<string> Id
         {
             get { return _ids; }
         }
 
-        [Option(typeof(NuGetResources), "UpdateCommandRepositoryPathDescription")]
+        [Option(typeof(NuGetCommand), "UpdateCommandRepositoryPathDescription")]
         public string RepositoryPath { get; set; }
 
-        [Option(typeof(NuGetResources), "UpdateCommandSafeDescription")]
+        [Option(typeof(NuGetCommand), "UpdateCommandSafeDescription")]
         public bool Safe { get; set; }
 
-        [Option(typeof(NuGetResources), "UpdateCommandSelfDescription")]
+        [Option(typeof(NuGetCommand), "UpdateCommandSelfDescription")]
         public bool Self { get; set; }
 
-        [Option(typeof(NuGetResources), "UpdateCommandVerboseDescription")]
+        [Option(typeof(NuGetCommand), "UpdateCommandVerboseDescription")]
         public bool Verbose { get; set; }
 
-        [Option(typeof(NuGetResources), "UpdateCommandPrerelease")]
+        [Option(typeof(NuGetCommand), "UpdateCommandPrerelease")]
         public bool Prerelease { get; set; }
 
         public override void ExecuteCommand()

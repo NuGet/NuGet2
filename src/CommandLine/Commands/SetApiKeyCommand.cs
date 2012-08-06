@@ -4,12 +4,12 @@ using NuGet.Common;
 
 namespace NuGet.Commands
 {
-    [Command(typeof(NuGetResources), "setApiKey", "SetApiKeyCommandDescription",
+    [Command(typeof(NuGetCommand), "setApiKey", "SetApiKeyCommandDescription",
         MinArgs = 1, MaxArgs = 1, UsageDescriptionResourceName = "SetApiKeyCommandUsageDescription",
         UsageSummaryResourceName = "SetApiKeyCommandUsageSummary", UsageExampleResourceName = "SetApiKeyCommandUsageExamples")]
     public class SetApiKeyCommand : Command
     {
-        [Option(typeof(NuGetResources), "SetApiKeyCommandSourceDescription", AltName = "src")]
+        [Option(typeof(NuGetCommand), "SetApiKeyCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
         public IPackageSourceProvider SourceProvider { get; private set; }

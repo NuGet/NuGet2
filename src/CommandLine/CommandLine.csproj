@@ -81,6 +81,9 @@
     <Compile Include="Common\LocalizedResourceManager.cs" />
     <Compile Include="DefaultManifestValuesRule.cs" />
     <Compile Include="DefaultPackageRules.cs" />
+    <Compile Include="NuGetCommand.cs">
+      <DependentUpon>NuGetCommand.resx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\GlobalSuppressions.cs" />
     <Compile Include="NuGetResources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -117,6 +120,7 @@
       <Link>Common\CommonResources.resx</Link>
       <DependentUpon>CommonResources.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="NuGetCommand.resx" />
     <EmbeddedResource Include="NuGetResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>NuGetResources.Designer.cs</LastGenOutput>

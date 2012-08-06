@@ -7,26 +7,26 @@ using NuGet.Common;
 
 namespace NuGet.Commands
 {
-    [Command(typeof(NuGetResources), "list", "ListCommandDescription",
+    [Command(typeof(NuGetCommand), "list", "ListCommandDescription",
         UsageSummaryResourceName = "ListCommandUsageSummary", UsageDescriptionResourceName = "ListCommandUsageDescription",
         UsageExampleResourceName = "ListCommandUsageExamples")]
     public class ListCommand : Command
     {
         private readonly List<string> _sources = new List<string>();
 
-        [Option(typeof(NuGetResources), "ListCommandSourceDescription")]
+        [Option(typeof(NuGetCommand), "ListCommandSourceDescription")]
         public ICollection<string> Source
         {
             get { return _sources; }
         }
 
-        [Option(typeof(NuGetResources), "ListCommandVerboseListDescription")]
+        [Option(typeof(NuGetCommand), "ListCommandVerboseListDescription")]
         public bool Verbose { get; set; }
 
-        [Option(typeof(NuGetResources), "ListCommandAllVersionsDescription")]
+        [Option(typeof(NuGetCommand), "ListCommandAllVersionsDescription")]
         public bool AllVersions { get; set; }
 
-        [Option(typeof(NuGetResources), "ListCommandPrerelease")]
+        [Option(typeof(NuGetCommand), "ListCommandPrerelease")]
         public bool Prerelease { get; set; }
 
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }

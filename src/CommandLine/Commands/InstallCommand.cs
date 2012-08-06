@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -13,7 +12,7 @@ using NuGet.Common;
 
 namespace NuGet.Commands
 {
-    [Command(typeof(NuGetResources), "install", "InstallCommandDescription",
+    [Command(typeof(NuGetCommand), "install", "InstallCommandDescription",
         MinArgs = 0, MaxArgs = 1, UsageSummaryResourceName = "InstallCommandUsageSummary",
         UsageDescriptionResourceName = "InstallCommandUsageDescription",
         UsageExampleResourceName = "InstallCommandUsageExamples")]
@@ -23,25 +22,25 @@ namespace NuGet.Commands
         private readonly List<string> _sources = new List<string>();
         private readonly ISettings _configSettings;
 
-        [Option(typeof(NuGetResources), "InstallCommandSourceDescription")]
+        [Option(typeof(NuGetCommand), "InstallCommandSourceDescription")]
         public ICollection<string> Source
         {
             get { return _sources; }
         }
 
-        [Option(typeof(NuGetResources), "InstallCommandOutputDirDescription")]
+        [Option(typeof(NuGetCommand), "InstallCommandOutputDirDescription")]
         public string OutputDirectory { get; set; }
 
-        [Option(typeof(NuGetResources), "InstallCommandVersionDescription")]
+        [Option(typeof(NuGetCommand), "InstallCommandVersionDescription")]
         public string Version { get; set; }
 
-        [Option(typeof(NuGetResources), "InstallCommandExcludeVersionDescription", AltName = "x")]
+        [Option(typeof(NuGetCommand), "InstallCommandExcludeVersionDescription", AltName = "x")]
         public bool ExcludeVersion { get; set; }
 
-        [Option(typeof(NuGetResources), "InstallCommandPrerelease")]
+        [Option(typeof(NuGetCommand), "InstallCommandPrerelease")]
         public bool Prerelease { get; set; }
 
-        [Option(typeof(NuGetResources), "InstallCommandNoCache")]
+        [Option(typeof(NuGetCommand), "InstallCommandNoCache")]
         public bool NoCache { get; set; }
 
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }
