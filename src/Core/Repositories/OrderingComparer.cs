@@ -19,6 +19,15 @@ namespace NuGet
             _expression = expression;
         }
 
+        public bool CanCompare
+        {
+            get
+            {
+                EnsureOrderings();
+                return _orderings.Count > 0;
+            }
+        }
+
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
             if (QueryableUtility.IsOrderingMethod(node))
@@ -69,13 +78,7 @@ namespace NuGet
 
         public int Compare(TElement x, TElement y)
         {
-            if (_orderings == null)
-            {
-                _orderings = new Stack<Ordering<TElement>>();
-                Visit(_expression);
-            }
-
-            if (!_orderings.Any())
+            if (!CanCompare)
             {
                 throw new InvalidOperationException(NuGetResources.AggregateQueriesRequireOrder);
             }
@@ -104,6 +107,16 @@ namespace NuGet
             }
 
             return value;
+        }
+
+
+        private void EnsureOrderings()
+        {
+            if (_orderings == null)
+            {
+                _orderings = new Stack<Ordering<TElement>>();
+                Visit(_expression);
+            }
         }
 
         private class Ordering<T>

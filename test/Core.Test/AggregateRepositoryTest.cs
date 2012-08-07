@@ -12,20 +12,22 @@ namespace NuGet.Test
     public class AggregateRepositoryTest
     {
         [Fact]
-        public void GetPackagesNoOrderByExpressionThrows()
+        public void GetPackagesNoOrderByReadsDistinctPackages()
         {
             // Arrange
+            IPackage a = PackageUtility.CreatePackage("A"),
+                     b = PackageUtility.CreatePackage("B"),
+                     c = PackageUtility.CreatePackage("C");
             var repository = new AggregateRepository(new[] { 
-                new MockPackageRepository { 
-                    PackageUtility.CreatePackage("A"), 
-                }, 
-                new MockPackageRepository { 
-                    PackageUtility.CreatePackage("B"), 
-                } 
+                new MockPackageRepository { c, a },
+                new MockPackageRepository { b, a }
             });
 
             // Act
-            ExceptionAssert.Throws<InvalidOperationException>(() => repository.GetPackages().ToList(), "Aggregate queries require at least one OrderBy.");
+            var packages = repository.GetPackages().ToList();
+
+            // Assert
+            Assert.Equal(new[] { c, a, b }, packages);
         }
 
         [Fact]

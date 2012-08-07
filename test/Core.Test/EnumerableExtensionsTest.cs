@@ -77,7 +77,6 @@ namespace NuGet.Test
             Assert.Equal(20, result[2].Age);
         }
 
-
         [Fact]
         public void SafeIterateWithFailingElementAtTheBeginningOfSequence()
         {
@@ -95,7 +94,7 @@ namespace NuGet.Test
             var result = EnumerableExtensions.SafeIterate(enumerable);
 
             // Assert
-            Assert.Equal(new[] { 1, 4, 9 }, result.ToArray());
+            Assert.Equal(new int[0], result.ToArray());
         }
 
         [Fact]
@@ -115,7 +114,7 @@ namespace NuGet.Test
             var result = EnumerableExtensions.SafeIterate(enumerable);
 
             // Assert
-            Assert.Equal(new[] { 0, 4 }, result.ToArray());
+            Assert.Equal(new[] { 0 }, result.ToArray());
         }
 
         [Fact]

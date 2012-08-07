@@ -29,6 +29,62 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void AggregateQueryConcatenatesIndividualQueriesIfNoOrderingButSequenceIsInvalid()
+        {
+            // Arrange
+            IEnumerable<IQueryable<string>> sources = new[] {
+                Enumerable.Range(0, 3).Select(i => i + "C").AsQueryable(),
+                GetInvalidSequence("B"),
+                Enumerable.Range(0, 3).Select(i => i + "A").AsQueryable(),
+            };
+
+            // Act
+            var aggregateQuery = new AggregateQuery<string>(sources, StringComparer.Ordinal, NullLogger.Instance, ignoreFailures: false);
+
+            // Assert
+            ExceptionAssert.Throws<Exception>(() => aggregateQuery.ToArray(), "Bad sequence");
+        }
+
+        [Fact]
+        public void AggregateQueryConcatenatesIndividualQueriesIfNoOrderingIsAvailable()
+        {
+            // Arrange
+            IEnumerable<IQueryable<string>> sources = new[] {
+                Enumerable.Range(0, 3).Select(i => i + "C").AsQueryable(),
+                Enumerable.Range(0, 3).Select(i => i + "A").AsQueryable(),
+            };
+
+            // Act
+            var aggregateQuery = new AggregateQuery<string>(sources, StringComparer.Ordinal, NullLogger.Instance, ignoreFailures: false);
+
+            // Assert
+            Assert.Equal(
+                new[] { "0C", "1C", "2C", "0A", "1A", "2A" },
+                aggregateQuery.ToArray()
+            );
+        }
+
+        [Fact]
+        public void AggregateQueryConcatenatesIndividualQueriesIfNoOrderingIsAvailableWhileSkippingInvalidSequences()
+        {
+            // Arrange
+            IEnumerable<IQueryable<string>> sources = new[] {
+                Enumerable.Range(0, 3).Select(i => i + "A").AsQueryable(),
+                GetInvalidSequence("B"),
+                Enumerable.Range(0, 3).Select(i => i + "C").AsQueryable(),
+            };
+
+            // Act
+            var aggregateQuery = new AggregateQuery<string>(sources, StringComparer.Ordinal, NullLogger.Instance, ignoreFailures: true);
+
+            // Assert
+            Assert.Equal(
+                new[] { "0A", "1A", "2A", "0C", "1C", "2C" },
+                aggregateQuery.ToArray()
+            );
+        }
+
+        [Fact]
         public void AggregateQueryThrowsForInvalidRepositoriesIfFlagIsSet()
         {
             // Arrange
@@ -42,7 +98,6 @@ namespace NuGet.Test
             ExceptionAssert.Throws<AggregateException>(
                 () => new AggregateQuery<string>(sources, StringComparer.Ordinal, NullLogger.Instance, ignoreFailures: false).OrderBy(c => c).ToArray());
         }
-
 
         [Fact]
         public void CountDoesNotThrowIfForInvalidRepositoriesIfFlagIsSet()
@@ -67,7 +122,7 @@ namespace NuGet.Test
             {
                 if (value > 1)
                 {
-                    throw new Exception();
+                    throw new Exception("Bad sequence");
                 }
                 return value + suffix;
             };

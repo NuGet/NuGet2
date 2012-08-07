@@ -53,7 +53,7 @@ namespace NuGet
         /// </summary>
         /// <returns>An IEnumerable containing elements from the original sequence that did not throw.</returns>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "By defintion we want to ignore all exceptions")]
-        internal static IEnumerable<TElement> SafeIterate<TElement>(IEnumerable<TElement> source)
+        internal static IEnumerable<TElement> SafeIterate<TElement>(this IEnumerable<TElement> source)
         {
             var result = new List<TElement>();
             using (var enumerator = source.GetEnumerator())
@@ -72,6 +72,7 @@ namespace NuGet
                     }
                     catch
                     {
+                        break;
                     }
                 }
             }

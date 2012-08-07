@@ -131,13 +131,28 @@ namespace NuGet
         {
             // Used to pick the right element from each sub query in the right order
             var comparer = new OrderingComparer<TVal>(Expression);
+            
+            if (!comparer.CanCompare)
+            {
+                // If the original queries do not have sort expressions, we'll use the order of the subqueries to read results out.
+                return _subQueries.SelectMany(query => _ignoreFailures ? query.SafeIterate() : query)
+                                  .Distinct(_equalityComparer);
+            }
+            return ReadOrderedQueues(comparer);
+        }
 
+        /// <summary>
+        /// Reads the minimal set of queries 
+        /// </summary>
+        /// <param name="comparer"></param>
+        /// <returns></returns>
+        private IEnumerable<TVal> ReadOrderedQueues(IComparer<TVal> comparer)
+        {
             // Create lazy queues over each sub query so we can lazily pull items from it
             var lazyQueues = _subQueries.Select(query => new LazyQueue<TVal>(query.GetEnumerator())).ToList();
 
             // Used to keep track of everything we've seen so far (we never show duplicates)
             var seen = new HashSet<TVal>(_equalityComparer);
-
             do
             {
                 TVal minElement = default(TVal);
@@ -180,7 +195,7 @@ namespace NuGet
                     minQueue.Dequeue();
                 }
 
-            } while (lazyQueues.Any());
+            } while (lazyQueues.Count > 0);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "By definition we want to suppress all exceptions if the flag is set")]

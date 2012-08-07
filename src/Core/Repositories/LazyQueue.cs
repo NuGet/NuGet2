@@ -1,20 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace NuGet
 {
-    internal class LazyQueue<T>
+    internal class LazyQueue<TVal> : IEnumerable<TVal>
     {
-        private readonly IEnumerator<T> _enumerator;
-        private T _peeked;
+        private readonly IEnumerator<TVal> _enumerator;
+        private TVal _peeked;
 
-        public LazyQueue(IEnumerator<T> enumerator)
+        public LazyQueue(IEnumerator<TVal> enumerator)
         {
             _enumerator = enumerator;
         }
 
-        public bool TryPeek(out T element)
+        public bool TryPeek(out TVal element)
         {
-            element = default(T);
+            element = default(TVal);
 
             if (_peeked != null)
             {
@@ -36,7 +37,17 @@ namespace NuGet
         public void Dequeue()
         {
             // Reset the peeked element
-            _peeked = default(T);
+            _peeked = default(TVal);
+        }
+
+        public IEnumerator<TVal> GetEnumerator()
+        {
+            return _enumerator;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }
