@@ -71,11 +71,36 @@ namespace NuGet.Test
         [InlineData("C", "3.1.2.4-rtm", "C.3.1.2.4-rtm")]
         [InlineData("D", "4.0", "D.4.0.0.0")]
         [InlineData("E", "5.1.4", "E.5.1.4.0")]
-        public void ExistChecksForPresenceOfPackageDirectory(string id, string version, string path)
+        public void ExistChecksForPresenceOfPackageFileUnderDirectory(string id, string version, string path)
         {
             // Arrange
             var fileSystem = new MockFileSystem("x:\root");
             fileSystem.CreateDirectory(path);
+            fileSystem.AddFile(path + "\\" + path + ".nupkg");
+
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            bool exists = repository.Exists(id, new SemanticVersion(version));
+
+            // Assert
+            Assert.True(exists);
+        }
+
+        [Theory]
+        [InlineData("A", "2.0.0.0", "A.2.0")]
+        [InlineData("B", "1.0.0.0-alpha", "B.1.0.0-alpha")]
+        [InlineData("C", "3.1.2.4-rtm", "C.3.1.2.4-rtm")]
+        [InlineData("D", "4.0", "D.4.0.0.0")]
+        [InlineData("E", "5.1.4", "E.5.1.4.0")]
+        public void ExistChecksForPresenceOfManifestFileUnderDirectory(string id, string version, string path)
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\root");
+            fileSystem.CreateDirectory(path);
+            fileSystem.AddFile(path + "\\" + path + ".nuspec");
+
             var configFileSystem = new MockFileSystem();
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
 
@@ -441,12 +466,27 @@ namespace NuGet.Test
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void ExistsMethodChecksForFolderNameExistsAsOptimization(bool exists)
+        public void ExistsMethodChecksForPackageFileExistsAsOptimization(bool exists)
         {
             // Arrange
             var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
-            fileSystem.Setup(m => m.DirectoryExists("A.1.0.0")).Returns(exists);
+            fileSystem.Setup(m => m.FileExists("A.1.0.0\\A.1.0.0.nupkg")).Returns(exists);
             
+            var repository = new Mock<MockSharedRepository>(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object) { CallBase = true };
+
+            // Act && Assert
+            Assert.Equal(exists, repository.Object.Exists("A", new SemanticVersion("1.0.0")));
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ExistsMethodChecksForManifestFileExistsAsOptimization(bool exists)
+        {
+            // Arrange
+            var fileSystem = new Mock<MockFileSystem>() { CallBase = true };
+            fileSystem.Setup(m => m.FileExists("A.1.0.0\\A.1.0.0.nupkg")).Returns(exists);
+
             var repository = new Mock<MockSharedRepository>(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object) { CallBase = true };
 
             // Act && Assert

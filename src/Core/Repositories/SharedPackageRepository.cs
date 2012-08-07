@@ -65,10 +65,12 @@ namespace NuGet
         {
             if (version != null)
             {
-                // optimization: if we find the sub-directory with the name "id.version", consider it exists
+                // optimization: if we find the .nuspec file at "id.version"\"id.version".nuspec or 
+                // the .nupkg file at "id.version"\"id.version".nupkg, consider it exists
                 bool hasPackageDirectory = version.GetComparableVersionStrings()
                                                   .Select(v => packageId + "." + v)
-                                                  .Any(FileSystem.DirectoryExists);
+                                                  .Any(path => FileSystem.FileExists(Path.Combine(path, path + Constants.PackageExtension)) ||
+                                                               FileSystem.FileExists(Path.Combine(path, path + Constants.ManifestExtension)));
 
                 if (hasPackageDirectory)
                 {
