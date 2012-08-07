@@ -42,10 +42,6 @@ namespace NuGet.Commands
 
         [Option(typeof(NuGetCommand), "InstallCommandNoCache")]
         public bool NoCache { get; set; }
-
-        [Option(typeof(NuGetCommand), "InstallCommandSaveManifest")]
-        public bool SaveManifestFileOnly { get; set; }
-
         internal string InstallPath
         {
             get
@@ -226,10 +222,7 @@ namespace NuGet.Commands
             var repository = GetRepository();
             var pathResolver = new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions);
 
-            IPackageRepository localRepository = 
-                SaveManifestFileOnly ? new SharedPackageRepository(pathResolver, fileSystem)
-                                     : new LocalPackageRepository(pathResolver, fileSystem);
-
+            IPackageRepository localRepository = new LocalPackageRepository(pathResolver, fileSystem);
             var packageManager = new PackageManager(repository, pathResolver, fileSystem, localRepository)
                                  {
                                      Logger = Console

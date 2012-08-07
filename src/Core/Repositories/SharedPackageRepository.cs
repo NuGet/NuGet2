@@ -125,6 +125,11 @@ namespace NuGet
             string packageFilePath = GetManifestFilePath(package);
             Manifest manifest = Manifest.Create(package);
             FileSystem.AddFileWithCheck(packageFilePath, stream => manifest.Save(stream));
+
+            // But in order to maintain backwards compatibility with older versions of NuGet, 
+            // we will save the .nupkg file too. This way, 2.1 will read the .nuspec file, and 
+            // pre 2.1 will read the .nupkg
+            base.AddPackage(package);
         }
 
         public override void RemovePackage(IPackage package)

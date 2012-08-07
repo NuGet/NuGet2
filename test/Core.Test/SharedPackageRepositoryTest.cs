@@ -12,7 +12,7 @@ namespace NuGet.Test
         [InlineData("A", "2.0", "A.2.0\\A.2.0.nuspec", "A.2.0\\A.2.0.nupkg")]
         [InlineData("B", "1.0.0-alpha", "B.1.0.0-alpha\\B.1.0.0-alpha.nuspec", "B.1.0.0-alpha\\B.1.0.0-alpha.nupkg")]
         [InlineData("C", "3.1.2.4-rtm", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nuspec", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nupkg")]
-        public void CallAddPackageWillAddNuspecFile(string id, string version, string expectedPath, string unexpectedPath)
+        public void CallAddPackageWillAddBothNuspecFileAndNupkgFile(string id, string version, string expectedPath, string unexpectedPath)
         {
             // Arrange
             var fileSystem = new MockFileSystem("x:\root");
@@ -24,7 +24,7 @@ namespace NuGet.Test
 
             // Assert
             Assert.True(fileSystem.FileExists(expectedPath));
-            Assert.False(fileSystem.FileExists(unexpectedPath));
+            Assert.True(fileSystem.FileExists(unexpectedPath));
         }
 
         [Theory]
@@ -63,6 +63,27 @@ namespace NuGet.Test
 
             // Assert
             Assert.False(fileSystem.FileExists(unexpectedPath));
+        }
+
+        [Theory]
+        [InlineData("A", "2.0", "A.2.0\\A.2.0.nuspec", "A.2.0\\A.2.0.nupkg")]
+        [InlineData("B", "1.0.0-alpha", "B.1.0.0-alpha\\B.1.0.0-alpha.nuspec", "B.1.0.0-alpha\\B.1.0.0-alpha.nupkg")]
+        [InlineData("C", "3.1.2.4-rtm", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nuspec", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nupkg")]
+        public void CallRemovePackageWillRemoveBothNupkgFileAndNuSpecFile(string id, string version, string nuspecPath, string nupkgPath)
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\root");
+            fileSystem.AddFile(nuspecPath);
+            fileSystem.AddFile(nupkgPath);
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            repository.RemovePackage(PackageUtility.CreatePackage(id, version));
+
+            // Assert
+            Assert.False(fileSystem.FileExists(nuspecPath));
+            Assert.False(fileSystem.FileExists(nupkgPath));
         }
 
         [Theory]
