@@ -149,6 +149,7 @@
         <MakeDir Directories="$(ServerDropDirectory)" Condition="!Exists('$(ServerDropDirectory)')" />
         <MakeDir Directories="$(NuGetCoreDropDirectory)" Condition="!Exists('$(NuGetCoreDropDirectory)')" />
         <MakeDir Directories="$(ExtensionsDropDirectory)" Condition="!Exists('$(ExtensionsDropDirectory)')" />
+        <MakeDir Directories="$(ServerExtensionsBuildDirectory)" Condition="!Exists('$(ServerExtensionsBuildDirectory)')" />
     </Target>
 
     <Target Name="CopyExecutableOutputToDropDirectory">
@@ -168,16 +169,17 @@
     </Target>
 
    <Target Name="CopyServerExtensionsOutputToDropDirectory">
-     <!-- Since this is an extension, it needs to be compiled against the IL Merged nuget.exe. So we rebuild it with the magic flag that tells it to be compiled -->
-     <ItemGroup>
-       <ServerExtensionsOutputItems Include="$(ServerExtensionsBuildDirectory)\**\NuGet.ServerExtensions.dll" />
-     </ItemGroup>
      <Message Text="Rebuilding server extensions" />
      <MSBuild Projects="$(NuGetSrcRoot)\CommandLine.ServerExtensions\CommandLine.ServerExtensions.csproj" Properties="CIBuild=true;SignAssembly=false;" Targets="Clean;Build" />
-     <Message Text="Copying Server extensions output from $(ServerExtensionsBuildDirectory) to $(ServerExtensionsDropDirectory)" />
+      <!-- Since this is an extension, it needs to be compiled against the IL Merged nuget.exe. So we rebuild it with the magic flag that tells it to be compiled -->
+     <ItemGroup>
+       <ServerExtensionsOutputItems Include="$(ServerExtensionsBuildDirectory)\NuGet.ServerExtensions.dll" />
+     </ItemGroup>
+     
+     <Message Text="Copying Server extensions output from $(ServerExtensionsBuildDirectory) to $(ServerExtensionsDropDirectory): @(ServerExtensionsOutputItems) " />
      <Copy ContinueOnError="false" 
            SourceFiles="@(ServerExtensionsOutputItems)" 
-           DestinationFiles="@(ServerExtensionsOutputItems ->'$(ServerExtensionsDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+           DestinationFolder="$(ServerExtensionsDropDirectory)" />
            
     <!-- Delete the source file for good measure -->
     <Delete Files="@(ServerExtensionsOutputItems)" />
