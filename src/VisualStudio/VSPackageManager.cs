@@ -388,9 +388,8 @@ namespace NuGet.VisualStudio
         {
             UpdatePackages(
                 LocalRepository,
-                package => ReinstallPackageToAllProjects(
-                                package,
-                                appliesToProject: null,
+                package => ReinstallPackage(
+                                package.Id,
                                 updateDependencies: updateDependencies,
                                 allowPrereleaseVersions: allowPrereleaseVersions,
                                 logger: logger,
@@ -423,7 +422,15 @@ namespace NuGet.VisualStudio
         {
             bool appliesToProject;
             IPackage package = FindLocalPackage(packageId, out appliesToProject);
-            ReinstallPackageToAllProjects(package, appliesToProject, updateDependencies, allowPrereleaseVersions, logger, eventListener);
+
+            if (appliesToProject)
+            {
+                ReinstallPackageToAllProjects(packageId, updateDependencies, allowPrereleaseVersions, logger, eventListener);
+            }
+            else
+            {
+                ReinstallSolutionPackage(package, updateDependencies, allowPrereleaseVersions, logger);
+            }
         }
 
         /// <summary>
@@ -497,68 +504,62 @@ namespace NuGet.VisualStudio
         // We need to uninstall the package from all projects BEFORE
         // reinstalling it back, so that the package will be refreshed from source repository.
         private void ReinstallPackageToAllProjects(
-            IPackage package,
-            bool? appliesToProject,
+            string packageId,
             bool updateDependencies,
             bool allowPrereleaseVersions,
             ILogger logger,
             IPackageOperationEventListener eventListener)
         {
-            appliesToProject = appliesToProject ?? IsProjectLevel(package);
+            logger = logger ?? NullLogger.Instance;
+            eventListener = eventListener ?? NullPackageOperationEventListener.Instance;
 
-            if ((bool)appliesToProject)
-            {
-                logger = logger ?? NullLogger.Instance;
-                eventListener = eventListener ?? NullPackageOperationEventListener.Instance;
+            var projectsHasPackage = new Dictionary<Project, SemanticVersion>();
 
-                var projectsHasPackage = new List<Project>();
+            // first uninstall from all projects that has the package installed
+            RunActionOnProjects(
+                _solutionManager.GetProjects(),
+                project =>
+                {
+                    var projectManager = GetProjectManager(project);
 
-                // first uninstall from all projects that has the package installed
-                RunActionOnProjects(
-                    _solutionManager.GetProjects(),
-                    project =>
+                    // find the package version installed in this project
+                    var projectPackage = projectManager.LocalRepository.FindPackage(packageId);
+                    if (projectPackage != null)
                     {
-                        var projectManager = GetProjectManager(project);
-                        if (projectManager.LocalRepository.Exists(package))
-                        {
-                            projectsHasPackage.Add(project);
+                        // save the version installed in this project so that we can restore the correct version later
+                        projectsHasPackage.Add(project, projectPackage.Version);
 
-                            UninstallPackage(
-                                projectManager,
-                                package.Id,
-                                package.Version,
-                                forceRemove: true,
-                                removeDependencies: updateDependencies,
-                                logger: logger);
-                        }
-                    },
-                    logger,
-                    eventListener);
+                        UninstallPackage(
+                            projectManager,
+                            packageId,
+                            version: null,
+                            forceRemove: true,
+                            removeDependencies: updateDependencies,
+                            logger: logger);
+                    }
+                },
+                logger,
+                eventListener);
 
-                // now reinstall back to all the affected projects
-                RunActionOnProjects(
-                   projectsHasPackage,
-                   project =>
+            // now reinstall back to all the affected projects
+            RunActionOnProjects(
+               projectsHasPackage.Keys,
+               project =>
+               {
+                   var projectManager = GetProjectManager(project);
+                   if (!projectManager.LocalRepository.Exists(packageId))
                    {
-                       var projectManager = GetProjectManager(project);
-                       if (!projectManager.LocalRepository.Exists(package))
-                       {
-                           InstallPackage(
-                               projectManager,
-                               package.Id,
-                               package.Version,
-                               ignoreDependencies: !updateDependencies,
-                               allowPrereleaseVersions: allowPrereleaseVersions,
-                               logger: logger);
-                       }
-                   },
-                   logger,
-                   eventListener);
-            }
-            else
-            {
-                ReinstallSolutionPackage(package, updateDependencies, allowPrereleaseVersions, logger);
-            }
+                       InstallPackage(
+                           projectManager,
+                           packageId,
+                           version: projectsHasPackage[project],
+                           ignoreDependencies: !updateDependencies,
+                           allowPrereleaseVersions: allowPrereleaseVersions,
+                           logger: logger);
+                   }
+               },
+               logger,
+               eventListener);
         }
 
         private void ReinstallSolutionPackage(

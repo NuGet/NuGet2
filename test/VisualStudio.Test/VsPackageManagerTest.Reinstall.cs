@@ -459,7 +459,8 @@ namespace NuGet.VisualStudio.Test
         public void ReinstallPackagesRestoresPackageInAllProjectsWithNewContentIfProjectFrameworkChanges()
         {
             // Arrange
-            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var localRepositoryMock = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var localRepository = localRepositoryMock.Object;
             var sourceRepository = new MockPackageRepository();
 
             var projectSystem1 = new MockProjectSystem(new FrameworkName(".NETFramework, Version=v3.0"));
@@ -524,8 +525,11 @@ namespace NuGet.VisualStudio.Test
             projectSystem1.ChangeTargetFramework(new FrameworkName("Silverlight, Version=v4.0"));
             projectSystem2.ChangeTargetFramework(new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71"));
 
+            localRepositoryMock.Setup(p => p.IsReferenced("A", new SemanticVersion("1.2-alpha"))).Returns((string id, SemanticVersion version) => projectManager1.LocalRepository.Exists(id, version));
+            localRepositoryMock.Setup(p => p.IsReferenced("B", new SemanticVersion("2.0"))).Returns((string id, SemanticVersion version) => projectManager2.LocalRepository.Exists(id, version));
+
             // Act
-            packageManager.ReinstallPackages(updateDependencies: true, allowPrereleaseVersions: false, logger: null, eventListener: NullPackageOperationEventListener.Instance);
+            packageManager.ReinstallPackages(updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance, eventListener: NullPackageOperationEventListener.Instance);
 
             // Assert
             Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
@@ -549,9 +553,10 @@ namespace NuGet.VisualStudio.Test
         public void ReinstallPackagesRestoresPackageInAllProjectsWithNewContentIfSourcePackageChanges()
         {
             // Arrange
-            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
-            var sourceRepository = new MockPackageRepository();
+            var localRepositoryMock = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var localRepository = localRepositoryMock.Object;
 
+            var sourceRepository = new MockPackageRepository();
             var projectSystem1 = new MockProjectSystem();
             var pathResolver1 = new DefaultPackagePathResolver(projectSystem1);
             var packageReferenceRepository1 = new PackageReferenceRepository(projectSystem1, localRepository);
@@ -624,8 +629,11 @@ namespace NuGet.VisualStudio.Test
             sourceRepository.AddPackage(packageA2);
             sourceRepository.AddPackage(packageB2);
 
+            localRepositoryMock.Setup(p => p.IsReferenced("A", new SemanticVersion("1.2-alpha"))).Returns((string id, SemanticVersion version) => projectManager1.LocalRepository.Exists(id, version));
+            localRepositoryMock.Setup(p => p.IsReferenced("B", new SemanticVersion("2.0"))).Returns((string id, SemanticVersion version) => projectManager2.LocalRepository.Exists(id, version));
+
             // Act
-            packageManager.ReinstallPackages(updateDependencies: true, allowPrereleaseVersions: false, logger: null, eventListener: NullPackageOperationEventListener.Instance);
+            packageManager.ReinstallPackages(updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance, eventListener: NullPackageOperationEventListener.Instance);
 
             // Assert
             Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
@@ -638,6 +646,222 @@ namespace NuGet.VisualStudio.Test
 
             Assert.True(packageManager.LocalRepository.Exists("B", new SemanticVersion("2.0")));
             Assert.True(projectManager2.LocalRepository.Exists("B", new SemanticVersion("2.0")));
+
+            Assert.False(projectSystem2.FileExists("hello.txt"));
+            Assert.True(projectSystem2.FileExists("world.txt"));
+            Assert.False(projectSystem2.ReferenceExists("comma.dll"));
+            Assert.True(projectSystem2.ReferenceExists("dude.dll"));
+        }
+
+        [Fact]
+        public void ReinstallPackagesRestoresPackagesWithSameIdAndDifferentVersionsInAllProjects()
+        {
+            // Arrange
+            var localRepositoryMock = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var localRepository = localRepositoryMock.Object;
+
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem1 = new MockProjectSystem();
+            var pathResolver1 = new DefaultPackagePathResolver(projectSystem1);
+            var packageReferenceRepository1 = new PackageReferenceRepository(projectSystem1, localRepository);
+            var projectManager1 = new ProjectManager(localRepository, pathResolver1, projectSystem1, packageReferenceRepository1);
+
+            var projectSystem2 = new MockProjectSystem();
+            var pathResolver2 = new DefaultPackagePathResolver(projectSystem2);
+            var packageReferenceRepository2 = new PackageReferenceRepository(projectSystem2, localRepository);
+            var projectManager2 = new ProjectManager(localRepository, pathResolver2, projectSystem2, packageReferenceRepository2);
+
+            var project1 = TestUtils.GetProject("Project1");
+            var project2 = TestUtils.GetProject("Project2");
+
+            var packageManager = new MockVsPackageManager(
+                TestUtils.GetSolutionManager(projects: new[] { project1, project2 }),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                projectSystem2,
+                localRepository,
+                new Mock<VsPackageInstallerEvents>().Object);
+
+            packageManager.RegisterProjectManager(project1, projectManager1);
+            packageManager.RegisterProjectManager(project2, projectManager2);
+
+            // A and A3 are two packages with the same id, but different version.
+            // A is installed into project1, A3 into project2
+            // Then A is changed to A2 and A3 is changed to A4. 
+            // We verified that A2 and A4 are reinstalled
+            var packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.2-alpha",
+                new[] { "content.txt" },
+                new[] { "lib\\ref.dll" });
+
+            var packageA2 = PackageUtility.CreatePackage(
+                "A",
+                "1.2-alpha",
+                new[] { "foo.txt" },
+                new[] { "lib\\bar.dll" });
+
+            var A3 = PackageUtility.CreatePackage(
+                "A",
+                "2.0",
+                new[] { "hello.txt" },
+                new[] { "lib\\comma.dll" });
+
+            var A4 = PackageUtility.CreatePackage(
+                "A",
+                "2.0",
+                new[] { "world.txt" },
+                new[] { "lib\\dude.dll" });
+
+            sourceRepository.Add(packageA);
+            sourceRepository.Add(A3);
+
+            // install package A -> project 1
+            // and package B -> project 2
+            packageManager.InstallPackage(projectManager1, "A", new SemanticVersion("1.2-alpha"), ignoreDependencies: false, allowPrereleaseVersions: true, logger: null);
+            packageManager.InstallPackage(projectManager2, "A", new SemanticVersion("2.0"), ignoreDependencies: false, allowPrereleaseVersions: true, logger: null);
+
+            Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+            Assert.True(projectManager1.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+            Assert.True(projectSystem1.FileExists("content.txt"));
+            Assert.True(projectSystem1.ReferenceExists("ref.dll"));
+
+            Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("2.0")));
+            Assert.True(projectManager2.LocalRepository.Exists("A", new SemanticVersion("2.0")));
+            Assert.True(projectSystem2.FileExists("hello.txt"));
+            Assert.True(projectSystem2.ReferenceExists("comma.dll"));
+
+            // now change the package A and B to different packages
+            sourceRepository.RemovePackage(packageA);
+            sourceRepository.RemovePackage(A3);
+            sourceRepository.AddPackage(packageA2);
+            sourceRepository.AddPackage(A4);
+
+            localRepositoryMock.Setup(p => p.IsReferenced("A", new SemanticVersion("1.2-alpha"))).Returns((string id, SemanticVersion version) => projectManager1.LocalRepository.Exists(id, version));
+            localRepositoryMock.Setup(p => p.IsReferenced("A", new SemanticVersion("2.0"))).Returns((string id, SemanticVersion version) => projectManager2.LocalRepository.Exists(id, version));
+
+            // Act
+            packageManager.ReinstallPackages(updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance, eventListener: NullPackageOperationEventListener.Instance);
+
+            // Assert
+            Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+            Assert.True(projectManager1.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+
+            Assert.False(projectSystem1.FileExists("content.txt"));
+            Assert.True(projectSystem1.FileExists("foo.txt"));
+            Assert.False(projectSystem1.ReferenceExists("ref.dll"));
+            Assert.True(projectSystem1.ReferenceExists("bar.dll"));
+
+            Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("2.0")));
+            Assert.True(projectManager2.LocalRepository.Exists("A", new SemanticVersion("2.0")));
+
+            Assert.False(projectSystem2.FileExists("hello.txt"));
+            Assert.True(projectSystem2.FileExists("world.txt"));
+            Assert.False(projectSystem2.ReferenceExists("comma.dll"));
+            Assert.True(projectSystem2.ReferenceExists("dude.dll"));
+        }
+
+        [Fact]
+        public void ReinstallPackagesRestoresPackagesWithSameIdAndDifferentVersionsInAllProjectsCallingAnotherOverload()
+        {
+            // Arrange
+            var localRepositoryMock = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var localRepository = localRepositoryMock.Object;
+
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem1 = new MockProjectSystem();
+            var pathResolver1 = new DefaultPackagePathResolver(projectSystem1);
+            var packageReferenceRepository1 = new PackageReferenceRepository(projectSystem1, localRepository);
+            var projectManager1 = new ProjectManager(localRepository, pathResolver1, projectSystem1, packageReferenceRepository1);
+
+            var projectSystem2 = new MockProjectSystem();
+            var pathResolver2 = new DefaultPackagePathResolver(projectSystem2);
+            var packageReferenceRepository2 = new PackageReferenceRepository(projectSystem2, localRepository);
+            var projectManager2 = new ProjectManager(localRepository, pathResolver2, projectSystem2, packageReferenceRepository2);
+
+            var project1 = TestUtils.GetProject("Project1");
+            var project2 = TestUtils.GetProject("Project2");
+
+            var packageManager = new MockVsPackageManager(
+                TestUtils.GetSolutionManager(projects: new[] { project1, project2 }),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                projectSystem2,
+                localRepository,
+                new Mock<VsPackageInstallerEvents>().Object);
+
+            packageManager.RegisterProjectManager(project1, projectManager1);
+            packageManager.RegisterProjectManager(project2, projectManager2);
+
+            // A and A3 are two packages with the same id, but different version.
+            // A is installed into project1, A3 into project2
+            // Then A is changed to A2 and A3 is changed to A4. 
+            // We verified that A2 and A4 are reinstalled
+            var packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.2-alpha",
+                new[] { "content.txt" },
+                new[] { "lib\\ref.dll" });
+
+            var packageA2 = PackageUtility.CreatePackage(
+                "A",
+                "1.2-alpha",
+                new[] { "foo.txt" },
+                new[] { "lib\\bar.dll" });
+
+            var A3 = PackageUtility.CreatePackage(
+                "A",
+                "2.0",
+                new[] { "hello.txt" },
+                new[] { "lib\\comma.dll" });
+
+            var A4 = PackageUtility.CreatePackage(
+                "A",
+                "2.0",
+                new[] { "world.txt" },
+                new[] { "lib\\dude.dll" });
+
+            sourceRepository.Add(packageA);
+            sourceRepository.Add(A3);
+
+            // install package A -> project 1
+            // and package B -> project 2
+            packageManager.InstallPackage(projectManager1, "A", new SemanticVersion("1.2-alpha"), ignoreDependencies: false, allowPrereleaseVersions: true, logger: null);
+            packageManager.InstallPackage(projectManager2, "A", new SemanticVersion("2.0"), ignoreDependencies: false, allowPrereleaseVersions: true, logger: null);
+
+            Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+            Assert.True(projectManager1.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+            Assert.True(projectSystem1.FileExists("content.txt"));
+            Assert.True(projectSystem1.ReferenceExists("ref.dll"));
+
+            Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("2.0")));
+            Assert.True(projectManager2.LocalRepository.Exists("A", new SemanticVersion("2.0")));
+            Assert.True(projectSystem2.FileExists("hello.txt"));
+            Assert.True(projectSystem2.ReferenceExists("comma.dll"));
+
+            // now change the package A and B to different packages
+            sourceRepository.RemovePackage(packageA);
+            sourceRepository.RemovePackage(A3);
+            sourceRepository.AddPackage(packageA2);
+            sourceRepository.AddPackage(A4);
+
+            localRepositoryMock.Setup(p => p.IsReferenced("A", new SemanticVersion("1.2-alpha"))).Returns((string id, SemanticVersion version) => projectManager1.LocalRepository.Exists(id, version));
+            localRepositoryMock.Setup(p => p.IsReferenced("A", new SemanticVersion("2.0"))).Returns((string id, SemanticVersion version) => projectManager2.LocalRepository.Exists(id, version));
+
+            // Act
+            packageManager.ReinstallPackage("A", updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance, eventListener: NullPackageOperationEventListener.Instance);
+
+            // Assert
+            Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+            Assert.True(projectManager1.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+
+            Assert.False(projectSystem1.FileExists("content.txt"));
+            Assert.True(projectSystem1.FileExists("foo.txt"));
+            Assert.False(projectSystem1.ReferenceExists("ref.dll"));
+            Assert.True(projectSystem1.ReferenceExists("bar.dll"));
+
+            Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("2.0")));
+            Assert.True(projectManager2.LocalRepository.Exists("A", new SemanticVersion("2.0")));
 
             Assert.False(projectSystem2.FileExists("hello.txt"));
             Assert.True(projectSystem2.FileExists("world.txt"));
