@@ -104,7 +104,7 @@ namespace NuGet
                 }
                 using (var container = new CompositionContainer(catalog))
                 {
-                    var settings = GetCommandLineSettings(fileSystem);
+                    var settings = Settings.LoadDefaultSettings(fileSystem);
                     var defaultPackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl);
 
                     var officialPackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl, NuGetResources.OfficialPackageSourceName);
@@ -201,15 +201,6 @@ namespace NuGet
                     // Ignore if the dll wasn't a valid assembly
                 }
             }
-        }
-
-        internal static ISettings GetCommandLineSettings(IFileSystem workingDirectory)
-        {
-            if (workingDirectory.FileExists(Constants.SettingsFileName))
-            {
-                return new Settings(workingDirectory);
-            }
-            return Settings.LoadDefaultSettings(workingDirectory);
         }
 
         private static void SetConsoleInteractivity(IConsole console, Command command)

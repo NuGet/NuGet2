@@ -56,22 +56,6 @@ namespace NuGet.Test
             Assert.True(true);
         }
 
-        [Fact]
-        public void GetCommandLineSettingsReturnsSettingsFromLocalFileIfExists()
-        {
-            // Arrange
-            var fileContent = @"<?xml version=""1.0""?><configuration><fooSection><add key=""barValue"" value=""qux"" /></fooSection></configuration>";
-            var fileSystem = new MockFileSystem();
-            fileSystem.AddFile("NuGet.config", fileContent.AsStream());
-
-            // Act
-            var settings = Program.GetCommandLineSettings(fileSystem);
-            var value = settings.GetValue("fooSection", "barValue");
-
-            // Assert
-            Assert.Equal("qux", value);
-        }
-
         private static string GetOldExePath()
         {
             var path = typeof(NuGet.Program).Assembly.Location;
