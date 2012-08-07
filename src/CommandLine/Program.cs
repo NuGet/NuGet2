@@ -72,13 +72,18 @@ namespace NuGet
             }
             catch (AggregateException exception)
             {
-                if (ExceptionUtility.Unwrap(exception) == exception)
+                string message;
+                Exception unwrappedEx = ExceptionUtility.Unwrap(exception);
+                if (unwrappedEx == exception)
                 {
                     // If the AggregateException contains more than one InnerException, it cannot be unwrapped. In which case, simply print out individual error messages
-                    var messages = exception.InnerExceptions.Select(ex => ex.Message)
-                                                            .Distinct(StringComparer.CurrentCulture);
-                    console.WriteError(String.Join("\n", messages));
+                    message = String.Join(Environment.NewLine, exception.InnerExceptions.Select(ex => ex.Message).Distinct(StringComparer.CurrentCulture));
                 }
+                else
+                {
+                    message = ExceptionUtility.Unwrap(exception).Message;
+                }
+                console.WriteError(message);
                 return 1;
             }
             catch (Exception e)
@@ -166,14 +171,21 @@ namespace NuGet
                 directories = directories.Concat(customExtensions.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries));
             }
 
+            IEnumerable<string> files;
             foreach (var directory in directories)
             {
                 if (Directory.Exists(directory))
                 {
-                    var files = Directory.EnumerateFiles(directory, "*.dll", SearchOption.AllDirectories);
+                    files = Directory.EnumerateFiles(directory, "*.dll", SearchOption.AllDirectories);
                     RegisterExtensions(catalog, files);
                 }
             }
+
+            // Ideally we want to look for all files. However, using MEF to identify imports results in assemblies being loaded and locked by our App Domain
+            // which could be slow, might affect people's build systems and among other things breaks our build. 
+            // Consequently, we'll use a convention - only binaries ending in the name Extensions would be loaded. 
+            files = Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*Extensions.dll");
+            RegisterExtensions(catalog, files);
         }
 
         private static void RegisterExtensions(AggregateCatalog catalog, IEnumerable<string> enumerateFiles)
@@ -204,14 +216,14 @@ namespace NuGet
         {
             // Global environment variable to prevent the exe for prompting for credentials
             string globalSwitch = Environment.GetEnvironmentVariable("NUGET_EXE_NO_PROMPT");
-            
+
             // When running from inside VS, no input is available to our executable locking up VS.
             // VS sets up a couple of environment variables one of which is named VisualStudioVersion. 
             // Every time this is setup, we will just fail.
             // TODO: Remove this in next iteration. This is meant for short-term backwards compat.
             string vsSwitch = Environment.GetEnvironmentVariable("VisualStudioVersion");
 
-            console.IsNonInteractive = !String.IsNullOrEmpty(globalSwitch) || 
+            console.IsNonInteractive = !String.IsNullOrEmpty(globalSwitch) ||
                                        !String.IsNullOrEmpty(vsSwitch) ||
                                        (command != null && command.NonInteractive);
 

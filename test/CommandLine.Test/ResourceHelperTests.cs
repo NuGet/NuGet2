@@ -1,5 +1,6 @@
 using System;
 using Xunit;
+using System.Resources;
 
 namespace NuGet.Test.NuGetCommandLine
 {
@@ -35,27 +36,28 @@ namespace NuGet.Test.NuGetCommandLine
             Type resourceType = typeof(MockResourceType);
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => ResourceHelper.GetLocalizedString(resourceType, "DoesntExist"),
-                "The resource type 'NuGet.Test.NuGetCommandLine.ResourceHelperTests+MockResourceType' does not have an accessible static property named 'DoesntExist'.");
+                "The resource type 'NuGet.Test.MockResourceType' does not have an accessible static property named 'DoesntExist'.");
         }
 
         [Fact]
-        public void GetLocalizedString_ThrowsIfPropertyIsNotOfStringType()
+        public void GetLocalizedString_ThrowsIfResourceManagerIsNotAProperty()
         {
             // Arrange 
-            Type resourceType = typeof(MockResourceType);
+            Type resourceType = typeof(BadResourceType);
+
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => ResourceHelper.GetLocalizedString(resourceType, "NotValid"),
-                "The property 'NotValid' on resource type 'NuGet.Test.NuGetCommandLine.ResourceHelperTests+MockResourceType' is not a string type.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => ResourceHelper.GetLocalizedString(resourceType, "NoGet"),
+                "The resource type 'NuGet.Test.NuGetCommandLine.ResourceHelperTests+BadResourceType' does not have an accessible static property named 'ResourceManager'.");
         }
 
         [Fact]
         public void GetLocalizedString_ThrowsIfGetPropertyIsNotAvalible()
         {
             // Arrange 
-            Type resourceType = typeof(MockResourceType);
+            Type resourceType = typeof(ResourceTypeWithNoGetter);
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => ResourceHelper.GetLocalizedString(resourceType, "NoGet"),
-                "The resource type 'NuGet.Test.NuGetCommandLine.ResourceHelperTests+MockResourceType' does not have an accessible get for the 'NoGet' property.");
+                "The resource type 'NuGet.Test.NuGetCommandLine.ResourceHelperTests+ResourceTypeWithNoGetter' does not have an accessible static property named 'ResourceManager'.");
         }
 
         [Fact]
@@ -69,12 +71,16 @@ namespace NuGet.Test.NuGetCommandLine
             Assert.Equal("This is a Message.", actual);
         }
 
-        private class MockResourceType
+        private class BadResourceType
         {
-            public static string Message { get { return "This is a Message."; } }
-            public static string MessageTwo { get { return "This is Message Two."; } }
-            public static int NotValid { get { return 0; } }
-            public static string NoGet { private get { return "No Public Get."; } set { } }
+
         }
+
+        private class ResourceTypeWithNoGetter
+        {
+            public static ResourceManager ResourceManager { set { } } 
+        }
+
+
     }
 }

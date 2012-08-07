@@ -30,10 +30,5 @@ namespace NuGet.Test.NuGetCommandLine
             // Assert
             Assert.Equal("ResourceName", actual);
         }
-
-        private class MockResourceType
-        {
-            public static string ResourceName { get { return "This is a Resource String."; } }
-        }
     }
 }

@@ -70,12 +70,16 @@
     <Compile Include="CommandTest.cs" />
     <Compile Include="ConfigCommandTest.cs" />
     <Compile Include="DefaultSpecValuesRuleTest.cs" />
-    <Compile Include="FileHelperTest.cs" />
     <Compile Include="DeleteCommandTest.cs" />
     <Compile Include="InstallCommandTest.cs" />
-    <Compile Include="MirrorCommandTest.cs" />
     <Compile Include="ListCommandTests.cs" />
+    <Compile Include="MirrorCommandTest.cs" />
     <Compile Include="MockConsole.cs" />
+    <Compile Include="MockResourceType.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MockResourceType.resx</DependentUpon>
+    </Compile>
     <Compile Include="OptionAttributeTests.cs" />
     <Compile Include="PackCommandTest.cs" />
     <Compile Include="ProgramTest.cs" />
@@ -107,7 +111,12 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="MockResourceType.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MockResourceType.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\..\Build\NuGet.Test.targets" />
 </Project>

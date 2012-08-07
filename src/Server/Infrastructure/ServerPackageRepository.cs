@@ -107,16 +107,18 @@ namespace NuGet.Server.Infrastructure
 
         private DerivedPackageData CalculateDerivedData(IPackage package, string path)
         {
-            byte[] fileBytes;
+            byte[] hashBytes;
+            long fileLength;
             using (Stream stream = FileSystem.OpenFile(path))
             {
-                fileBytes = stream.ReadAllBytes();
+                fileLength = stream.Length;
+                hashBytes = HashProvider.CalculateHash(stream);
             }
 
             return new DerivedPackageData
             {
-                PackageSize = fileBytes.Length,
-                PackageHash = Convert.ToBase64String(HashProvider.CalculateHash(fileBytes)),
+                PackageSize = fileLength,
+                PackageHash = Convert.ToBase64String(hashBytes),
                 LastUpdated = FileSystem.GetLastModified(path),
                 Created = FileSystem.GetCreated(path),
                 // TODO: Add support when we can make this faster

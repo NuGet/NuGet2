@@ -12,8 +12,8 @@
         <NuGetDropDirectory>$(DropDirectory)\NuGet</NuGetDropDirectory>
         <ExeBuildDirectory>$(NuGetSrcRoot)\CommandLine\bin\$(Configuration)</ExeBuildDirectory>
         <ExeDropDirectory>$(NuGetDropDirectory)\Console</ExeDropDirectory>
-        <ServerExtensionsBuildDirectory>$(NuGetSrcRoot)\src\CommandLine.ServerExtensions</ServerExtensionsBuildDirectory>
-        <ServerExtensionsDropsDirectory>$(NuGetDropDirectory)\CommandLine.ServerExtensions</ServerExtensionsDropsDirectory>
+        <ServerExtensionsBuildDirectory>$(NuGetSrcRoot)\CommandLine.ServerExtensions\bin\$(Configuration)</ServerExtensionsBuildDirectory>
+        <ServerExtensionsDropDirectory>$(NuGetDropDirectory)\CommandLine.ServerExtensions</ServerExtensionsDropDirectory>
         <BootStrapperBuildDirectory>$(NuGetSrcRoot)\Bootstrapper\bin\$(Configuration)</BootStrapperBuildDirectory>
         <BootStrapperDropDirectory>$(NuGetDropDirectory)\Bootstrapper</BootStrapperDropDirectory>
         <VisualStudioAddInBuildDirectory>$(NuGetSrcRoot)\VsExtension\bin\$(Configuration)</VisualStudioAddInBuildDirectory>
@@ -168,13 +168,19 @@
     </Target>
 
    <Target Name="CopyServerExtensionsOutputToDropDirectory">
+     <!-- Since this is an extension, it needs to be compiled against the IL Merged nuget.exe. So we rebuild it with the magic flag that tells it to be compiled -->
      <ItemGroup>
-       <ServerExtensionsOutputItems Exclude="$(ServerExtensionsBuildDirectory)\**\*.pdb" Include="$(ServerExtensionsBuildDirectory)\**\*.*" />
+       <ServerExtensionsOutputItems Include="$(ServerExtensionsBuildDirectory)\**\NuGet.ServerExtensions.dll" />
      </ItemGroup>
-     <Message Text="Copying Server extensions output to $(ServerExtensionsDropDirectory)" />
+     <Message Text="Rebuilding server extensions" />
+     <MSBuild Projects="$(NuGetSrcRoot)\CommandLine.ServerExtensions\CommandLine.ServerExtensions.csproj" Properties="CIBuild=true;SignAssembly=false;" Targets="Clean;Build" />
+     <Message Text="Copying Server extensions output from $(ServerExtensionsBuildDirectory) to $(ServerExtensionsDropDirectory)" />
      <Copy ContinueOnError="false" 
            SourceFiles="@(ServerExtensionsOutputItems)" 
            DestinationFiles="@(ServerExtensionsOutputItems ->'$(ServerExtensionsDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
+           
+    <!-- Delete the source file for good measure -->
+    <Delete Files="@(ServerExtensionsOutputItems)" />
    </Target>
 
   <Target Name="CopyVisualStudioAddInOutputToDropDirectory">

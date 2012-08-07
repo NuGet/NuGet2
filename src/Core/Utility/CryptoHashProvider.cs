@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -56,6 +57,14 @@ namespace NuGet
             get
             {
                 return !_isMonoRuntime && ReadFipsConfigValue();
+            }
+        }
+
+        public byte[] CalculateHash(Stream stream)
+        {
+            using (var hashAlgorithm = GetHashAlgorithm())
+            {
+                return hashAlgorithm.ComputeHash(stream);
             }
         }
 

@@ -7,7 +7,7 @@ using NuGet.Common;
 
 namespace NuGet.Commands
 {
-    [Command(typeof(NuGetResources), "spec", "SpecCommandDescription", MaxArgs = 1,
+    [Command(typeof(NuGetCommand), "spec", "SpecCommandDescription", MaxArgs = 1,
             UsageSummaryResourceName = "SpecCommandUsageSummary", UsageExampleResourceName = "SpecCommandUsageExamples")]
     public class SpecCommand : Command
     {
@@ -19,14 +19,14 @@ namespace NuGet.Commands
         internal static readonly string SampleDescription = "Package description";
         internal static readonly ManifestDependency SampleManifestDependency = new ManifestDependency { Id = "SampleDependency", Version = "1.0" };
 
-        [Option(typeof(NuGetResources), "SpecCommandAssemblyPathDescription")]
+        [Option(typeof(NuGetCommand), "SpecCommandAssemblyPathDescription")]
         public string AssemblyPath
         {
             get;
             set;
         }
 
-        [Option(typeof(NuGetResources), "SpecCommandForceDescription")]
+        [Option(typeof(NuGetCommand), "SpecCommandForceDescription")]
         public bool Force
         {
             get;

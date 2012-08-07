@@ -88,15 +88,6 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The API key for the server..
-        /// </summary>
-        internal static string CommandApiKey {
-            get {
-                return ResourceManager.GetString("CommandApiKey", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to WARNING: {0}.
         /// </summary>
         internal static string CommandLine_Warning {
@@ -106,48 +97,11 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Gets or sets NuGet config values..
-        /// </summary>
-        internal static string ConfigCommandDesc {
-            get {
-                return ResourceManager.GetString("ConfigCommandDesc", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to nuget config -Set HTTP_PROXY=http://127.0.0.1 -Set HTTP_PROXY.USER=domain\user
-        ///nuget.config HTTP_PROXY.
-        /// </summary>
-        internal static string ConfigCommandExamples {
-            get {
-                return ResourceManager.GetString("ConfigCommandExamples", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Key &apos;{0}&apos; not found..
         /// </summary>
         internal static string ConfigCommandKeyNotFound {
             get {
                 return ResourceManager.GetString("ConfigCommandKeyNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to One on more key-value pairs to be set in config..
-        /// </summary>
-        internal static string ConfigCommandSetDesc {
-            get {
-                return ResourceManager.GetString("ConfigCommandSetDesc", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to -Set name=value.
-        /// </summary>
-        internal static string ConfigCommandSummary {
-            get {
-                return ResourceManager.GetString("ConfigCommandSummary", resourceCulture);
             }
         }
         
@@ -215,15 +169,6 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to NuGet&apos;s default configuration is obtained by loading %AppData%\NuGet\NuGet.config, then loading any nuget.config or .nuget\nuget.config starting from root of drive and ending in current directory..
-        /// </summary>
-        internal static string DefaultConfigDescription {
-            get {
-                return ResourceManager.GetString("DefaultConfigDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to the symbol server.
         /// </summary>
         internal static string DefaultSymbolServer {
@@ -269,62 +214,6 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Deletes a package from the server..
-        /// </summary>
-        internal static string DeleteCommandDescription {
-            get {
-                return ResourceManager.GetString("DeleteCommandDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Do not prompt when deleting..
-        /// </summary>
-        internal static string DeleteCommandNoPromptDescription {
-            get {
-                return ResourceManager.GetString("DeleteCommandNoPromptDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specifies the server URL..
-        /// </summary>
-        internal static string DeleteCommandSourceDescription {
-            get {
-                return ResourceManager.GetString("DeleteCommandSourceDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specify the Id and version of the package to delete from the server..
-        /// </summary>
-        internal static string DeleteCommandUsageDescription {
-            get {
-                return ResourceManager.GetString("DeleteCommandUsageDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to nuget delete MyPackage 1.0
-        ///    
-        ///nuget delete MyPackage 1.0 -NoPrompt.
-        /// </summary>
-        internal static string DeleteCommandUsageExamples {
-            get {
-                return ResourceManager.GetString("DeleteCommandUsageExamples", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;package Id&gt; &lt;package version&gt; [API Key] [options].
-        /// </summary>
-        internal static string DeleteCommandUsageSummary {
-            get {
-                return ResourceManager.GetString("DeleteCommandUsageSummary", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Cannot prompt for input in non-interactive mode..
         /// </summary>
         internal static string Error_CannotPromptForInput {
@@ -361,84 +250,6 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Print detailed help for all available commands..
-        /// </summary>
-        internal static string HelpCommandAll {
-            get {
-                return ResourceManager.GetString("HelpCommandAll", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Displays general help information and help information about other commands..
-        /// </summary>
-        internal static string HelpCommandDescription {
-            get {
-                return ResourceManager.GetString("HelpCommandDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Print detailed all help in markdown format..
-        /// </summary>
-        internal static string HelpCommandMarkdown {
-            get {
-                return ResourceManager.GetString("HelpCommandMarkdown", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Pass a command name to display help information for that command..
-        /// </summary>
-        internal static string HelpCommandUsageDescription {
-            get {
-                return ResourceManager.GetString("HelpCommandUsageDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to nuget help
-        ///
-        ///nuget help push
-        ///
-        ///nuget ?
-        ///
-        ///nuget push -?.
-        /// </summary>
-        internal static string HelpCommandUsageExamples {
-            get {
-                return ResourceManager.GetString("HelpCommandUsageExamples", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to [command].
-        /// </summary>
-        internal static string HelpCommandUsageSummary {
-            get {
-                return ResourceManager.GetString("HelpCommandUsageSummary", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Installs a package using the specified sources. If no sources are specified, all sources defined in the default NuGet config file are used.  If the default NuGet config file specifies no sources, uses the default NuGet feed. .
-        /// </summary>
-        internal static string InstallCommandDescription {
-            get {
-                return ResourceManager.GetString("InstallCommandDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to If set, the destination folder will contain only the package name, not the version number.
-        /// </summary>
-        internal static string InstallCommandExcludeVersionDescription {
-            get {
-                return ResourceManager.GetString("InstallCommandExcludeVersionDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; contains invalid package references. .
         /// </summary>
         internal static string InstallCommandInvalidPackageReference {
@@ -448,29 +259,11 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Disable looking up packages from local machine cache..
-        /// </summary>
-        internal static string InstallCommandNoCache {
-            get {
-                return ResourceManager.GetString("InstallCommandNoCache", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to All packages listed in {0} are already installed..
         /// </summary>
         internal static string InstallCommandNothingToInstall {
             get {
                 return ResourceManager.GetString("InstallCommandNothingToInstall", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specifies the directory in which packages will be installed. If none specified, uses the current directory..
-        /// </summary>
-        internal static string InstallCommandOutputDirDescription {
-            get {
-                return ResourceManager.GetString("InstallCommandOutputDirDescription", resourceCulture);
             }
         }
         
@@ -498,73 +291,6 @@ namespace NuGet {
         internal static string InstallCommandPackageRestoreConsentNotFound {
             get {
                 return ResourceManager.GetString("InstallCommandPackageRestoreConsentNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Allows prerelease packages to be installed. This flag is not required when restoring packages by installing from packages.config..
-        /// </summary>
-        internal static string InstallCommandPrerelease {
-            get {
-                return ResourceManager.GetString("InstallCommandPrerelease", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to If set, only save the .nuspec file instead of .nupkg file..
-        /// </summary>
-        internal static string InstallCommandSaveManifest {
-            get {
-                return ResourceManager.GetString("InstallCommandSaveManifest", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to A list of packages sources to use for the install..
-        /// </summary>
-        internal static string InstallCommandSourceDescription {
-            get {
-                return ResourceManager.GetString("InstallCommandSourceDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specify the id and optionally the version of the package to install. If a path to a packages.config file is used instead of an id, all the packages it contains are installed..
-        /// </summary>
-        internal static string InstallCommandUsageDescription {
-            get {
-                return ResourceManager.GetString("InstallCommandUsageDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to nuget install elmah
-        ///
-        ///nuget install packages.config
-        ///
-        ///nuget install ninject -o c:\foo.
-        /// </summary>
-        internal static string InstallCommandUsageExamples {
-            get {
-                return ResourceManager.GetString("InstallCommandUsageExamples", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to packageId|pathToPackagesConfig [options].
-        /// </summary>
-        internal static string InstallCommandUsageSummary {
-            get {
-                return ResourceManager.GetString("InstallCommandUsageSummary", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The version of the package to install..
-        /// </summary>
-        internal static string InstallCommandVersionDescription {
-            get {
-                return ResourceManager.GetString("InstallCommandVersionDescription", resourceCulture);
             }
         }
         
@@ -605,85 +331,11 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to List all versions of a package. By default, only the latest package version is displayed..
-        /// </summary>
-        internal static string ListCommandAllVersionsDescription {
-            get {
-                return ResourceManager.GetString("ListCommandAllVersionsDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Displays a list of packages from a given source. If no sources are specified, all sources defined in the default NuGet config file are used. If the default NuGet file specifies no sources, uses the default NuGet feed. .
-        /// </summary>
-        internal static string ListCommandDescription {
-            get {
-                return ResourceManager.GetString("ListCommandDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to No packages found..
         /// </summary>
         internal static string ListCommandNoPackages {
             get {
                 return ResourceManager.GetString("ListCommandNoPackages", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Allow prerelease packages to be shown..
-        /// </summary>
-        internal static string ListCommandPrerelease {
-            get {
-                return ResourceManager.GetString("ListCommandPrerelease", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to A list of packages sources to search..
-        /// </summary>
-        internal static string ListCommandSourceDescription {
-            get {
-                return ResourceManager.GetString("ListCommandSourceDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specify optional search terms..
-        /// </summary>
-        internal static string ListCommandUsageDescription {
-            get {
-                return ResourceManager.GetString("ListCommandUsageDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to nuget list
-        ///
-        ///nuget list -verbose -allversions.
-        /// </summary>
-        internal static string ListCommandUsageExamples {
-            get {
-                return ResourceManager.GetString("ListCommandUsageExamples", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to [search terms] [options].
-        /// </summary>
-        internal static string ListCommandUsageSummary {
-            get {
-                return ResourceManager.GetString("ListCommandUsageSummary", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Displays a detailed list of information for each package..
-        /// </summary>
-        internal static string ListCommandVerboseListDescription {
-            get {
-                return ResourceManager.GetString("ListCommandVerboseListDescription", resourceCulture);
             }
         }
         
@@ -742,29 +394,11 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Do not prompt for user input or confirmations..
-        /// </summary>
-        internal static string Option_NonInteractive {
-            get {
-                return ResourceManager.GetString("Option_NonInteractive", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Option &apos;Verbose&apos; has been deprecated. Use &apos;Verbosity&apos; instead..
         /// </summary>
         internal static string Option_VerboseDeprecated {
             get {
                 return ResourceManager.GetString("Option_VerboseDeprecated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Display this amount of details in the output: normal, quiet, detailed..
-        /// </summary>
-        internal static string Option_Verbosity {
-            get {
-                return ResourceManager.GetString("Option_Verbosity", resourceCulture);
             }
         }
         
@@ -801,51 +435,6 @@ namespace NuGet {
         internal static string PackageCommandAttemptingToBuildSymbolsPackage {
             get {
                 return ResourceManager.GetString("PackageCommandAttemptingToBuildSymbolsPackage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The base path of the files defined in the nuspec file..
-        /// </summary>
-        internal static string PackageCommandBasePathDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandBasePathDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Determines if the project should be built before building the package..
-        /// </summary>
-        internal static string PackageCommandBuildDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandBuildDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Creates a NuGet package based on the specified nuspec or project file..
-        /// </summary>
-        internal static string PackageCommandDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specifies one or more wildcard patterns to exclude when creating a package..
-        /// </summary>
-        internal static string PackageCommandExcludeDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandExcludeDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Prevent inclusion of empty directories when building the package..
-        /// </summary>
-        internal static string PackageCommandExcludeEmptyDirectories {
-            get {
-                return ResourceManager.GetString("PackageCommandExcludeEmptyDirectories", resourceCulture);
             }
         }
         
@@ -895,15 +484,6 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Prevent default exclusion of NuGet package files and files and folders starting with a dot e.g. .svn..
-        /// </summary>
-        internal static string PackageCommandNoDefaultExcludes {
-            get {
-                return ResourceManager.GetString("PackageCommandNoDefaultExcludes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Failed to build package. Ensure &apos;{0}&apos; includes assembly files. For help on building symbols package, visit {1}..
         /// </summary>
         internal static string PackageCommandNoFilesForLibPackage {
@@ -922,38 +502,11 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specify if the command should not run package analysis after building the package..
-        /// </summary>
-        internal static string PackageCommandNoRunAnalysis {
-            get {
-                return ResourceManager.GetString("PackageCommandNoRunAnalysis", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specifies the directory for the created NuGet package file. If not specified, uses the current directory..
-        /// </summary>
-        internal static string PackageCommandOutputDirDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandOutputDirDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0} issue(s) found with package &apos;{1}&apos;..
         /// </summary>
         internal static string PackageCommandPackageIssueSummary {
             get {
                 return ResourceManager.GetString("PackageCommandPackageIssueSummary", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Provides the ability to specify a semicolon &quot;;&quot; delimited list of properties when creating a package..
-        /// </summary>
-        internal static string PackageCommandPropertiesDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandPropertiesDescription", resourceCulture);
             }
         }
         
@@ -976,60 +529,6 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Determines if a package containing sources and symbols should be created. When specified with a nuspec, creates a regular NuGet package file and the corresponding symbols package..
-        /// </summary>
-        internal static string PackageCommandSymbolsDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandSymbolsDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Determines if the output files of the project should be in the tool folder. .
-        /// </summary>
-        internal static string PackageCommandToolDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandToolDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specify the location of the nuspec or project file to create a package..
-        /// </summary>
-        internal static string PackageCommandUsageDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandUsageDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;nuspec | project&gt; [options].
-        /// </summary>
-        internal static string PackageCommandUsageSummary {
-            get {
-                return ResourceManager.GetString("PackageCommandUsageSummary", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Shows verbose output for package building..
-        /// </summary>
-        internal static string PackageCommandVerboseDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandVerboseDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Overrides the version number from the nuspec file..
-        /// </summary>
-        internal static string PackageCommandVersionDescription {
-            get {
-                return ResourceManager.GetString("PackageCommandVersionDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Unable to locate &apos;{0} {1}&apos;. Make sure all packages exist in the packages folder before running update..
         /// </summary>
         internal static string PackageDoesNotExist {
@@ -1044,32 +543,6 @@ namespace NuGet {
         internal static string PackagingFilesFromOutputPath {
             get {
                 return ResourceManager.GetString("PackagingFilesFromOutputPath", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to nuget pack
-        ///
-        ///nuget pack foo.nuspec
-        ///
-        ///nuget pack foo.csproj
-        ///
-        ///nuget pack foo.csproj -Build -Symbols -Properties Configuration=Release
-        ///
-        ///nuget pack foo.nuspec -Version 2.1.0.
-        /// </summary>
-        internal static string PackCommandUsageExamples {
-            get {
-                return ResourceManager.GetString("PackCommandUsageExamples", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Pushes a package to the server and optionally publishes it..
-        /// </summary>
-        internal static string PushCommandDescription {
-            get {
-                return ResourceManager.GetString("PushCommandDescription", resourceCulture);
             }
         }
         
@@ -1101,59 +574,6 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Specifies the server URL..
-        /// </summary>
-        internal static string PushCommandSourceDescription {
-            get {
-                return ResourceManager.GetString("PushCommandSourceDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specifies the timeout for pushing to a server in seconds. Defaults to 300 seconds (5 minutes)..
-        /// </summary>
-        internal static string PushCommandTimeoutDescription {
-            get {
-                return ResourceManager.GetString("PushCommandTimeoutDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specify the path to the package and your API key to push the package to the server..
-        /// </summary>
-        internal static string PushCommandUsageDescription {
-            get {
-                return ResourceManager.GetString("PushCommandUsageDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
-        ///
-        ///nuget push foo.nupkg 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -s http://customsource/
-        ///
-        ///nuget push foo.nupkg
-        ///
-        ///nuget push foo.nupkg.symbols
-        ///
-        ///nuget push foo.nupkg -Timeout 360.
-        /// </summary>
-        internal static string PushCommandUsageExamples {
-            get {
-                return ResourceManager.GetString("PushCommandUsageExamples", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;package path&gt; [API key] [options].
-        /// </summary>
-        internal static string PushCommandUsageSummary {
-            get {
-                return ResourceManager.GetString("PushCommandUsageSummary", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to All.
         /// </summary>
         internal static string ReservedPackageNameAll {
@@ -1163,20 +583,11 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The resource type &apos;{0}&apos; does not have an accessible get for the &apos;{1}&apos; property..
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; on resource type &apos;{1}&apos; is not a type of ResourceManager..
         /// </summary>
-        internal static string ResourcePropertyDoesNotHaveAccessibleGet {
+        internal static string ResourcePropertyIncorrectType {
             get {
-                return ResourceManager.GetString("ResourcePropertyDoesNotHaveAccessibleGet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The property &apos;{0}&apos; on resource type &apos;{1}&apos; is not a string type..
-        /// </summary>
-        internal static string ResourcePropertyNotStringType {
-            get {
-                return ResourceManager.GetString("ResourcePropertyNotStringType", resourceCulture);
+                return ResourceManager.GetString("ResourcePropertyIncorrectType", resourceCulture);
             }
         }
         
@@ -1217,53 +628,6 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Saves an API key for a given server URL. When no URL is provided API key is saved for the NuGet gallery..
-        /// </summary>
-        internal static string SetApiKeyCommandDescription {
-            get {
-                return ResourceManager.GetString("SetApiKeyCommandDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Server URL where the API key is valid..
-        /// </summary>
-        internal static string SetApiKeyCommandSourceDescription {
-            get {
-                return ResourceManager.GetString("SetApiKeyCommandSourceDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Specify the API key to save and an optional URL to the server that provided the API key..
-        /// </summary>
-        internal static string SetApiKeyCommandUsageDescription {
-            get {
-                return ResourceManager.GetString("SetApiKeyCommandUsageDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a
-        ///
-        ///nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -Source http://example.com/nugetfeed.
-        /// </summary>
-        internal static string SetApiKeyCommandUsageExamples {
-            get {
-                return ResourceManager.GetString("SetApiKeyCommandUsageExamples", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;API key&gt; [options].
-        /// </summary>
-        internal static string SetApiKeyCommandUsageSummary {
-            get {
-                return ResourceManager.GetString("SetApiKeyCommandUsageSummary", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Package source name &apos;All&apos; is a reserved name..
         /// </summary>
         internal static string SourcesCommandAllNameIsReserved {
@@ -1278,15 +642,6 @@ namespace NuGet {
         internal static string SourcesCommandCredentialsRequired {
             get {
                 return ResourceManager.GetString("SourcesCommandCredentialsRequired", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Provides the ability to manage list of sources located in the default NuGet config file. .
-        /// </summary>
-        internal static string SourcesCommandDescription {
-            get {
-                return ResourceManager.GetString("SourcesCommandDescription", resourceCulture);
             }
         }
         
@@ -1318,15 +673,6 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Name of the source..
-        /// </summary>
-        internal static string SourcesCommandNameDescription {
-            get {
-                return ResourceManager.GetString("SourcesCommandNameDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The name specified cannot be empty. Please provide a valid name..
         /// </summary>
         internal static string SourcesCommandNameRequired {
@@ -1354,15 +700,6 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Password to be used when connecting to an authenticated source..
-        /// </summary>
-        internal static string SourcesCommandPasswordDescription {
-            get {
-                return ResourceManager.GetString("SourcesCommandPasswordDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Registered Sources:.
         /// </summary>
         internal static string SourcesCommandRegisteredSources {
@@ -1377,15 +714,6 @@ namespace NuGet {
         internal static string SourcesCommandSourceAddedSuccessfully {
             get {
                 return ResourceManager.GetString("SourcesCommandSourceAddedSuccessfully", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Path to the package(s) source..
-        /// </summary>
-        internal static string SourcesCommandSourceDescription {
-            get {
-                return ResourceManager.GetString("SourcesCommandSourceDescription", resourceCulture);
             }
         }
         
@@ -1453,33 +781,6 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;List|Add|Remove|Enable|Disable|Update&gt; -Name [name] -Source [source].
-        /// </summary>
-        internal static string SourcesCommandUsageSummary {
-            get {
-                return ResourceManager.GetString("SourcesCommandUsageSummary", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to UserName to be used when connecting to an authenticated source..
-        /// </summary>
-        internal static string SourcesCommandUserNameDescription {
-            get {
-                return ResourceManager.GetString("SourcesCommandUserNameDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Assembly to use for metadata..
-        /// </summary>
-        internal static string SpecCommandAssemblyPathDescription {
-            get {
-                return ResourceManager.GetString("SpecCommandAssemblyPathDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Created &apos;{0}&apos; successfully..
         /// </summary>
         internal static string SpecCommandCreatedNuSpec {
@@ -1489,51 +790,11 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Generates a nuspec for a new package. If this command is run in the same folder as a project file (.csproj, .vbproj, .fsproj), it will create a tokenized nuspec file..
-        /// </summary>
-        internal static string SpecCommandDescription {
-            get {
-                return ResourceManager.GetString("SpecCommandDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; already exists, use -f to overwrite it..
         /// </summary>
         internal static string SpecCommandFileExists {
             get {
                 return ResourceManager.GetString("SpecCommandFileExists", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Overwrite nuspec file if it exists..
-        /// </summary>
-        internal static string SpecCommandForceDescription {
-            get {
-                return ResourceManager.GetString("SpecCommandForceDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to nuget spec
-        ///
-        ///nuget spec MyPackage
-        ///
-        ///nuget spec -a MyAssembly.dll.
-        /// </summary>
-        internal static string SpecCommandUsageExamples {
-            get {
-                return ResourceManager.GetString("SpecCommandUsageExamples", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to [package id].
-        /// </summary>
-        internal static string SpecCommandUsageSummary {
-            get {
-                return ResourceManager.GetString("SpecCommandUsageSummary", resourceCulture);
             }
         }
         
@@ -1646,74 +907,11 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Update packages to latest available versions. This command also updates NuGet.exe itself..
-        /// </summary>
-        internal static string UpdateCommandDescription {
-            get {
-                return ResourceManager.GetString("UpdateCommandDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Package ids to update..
-        /// </summary>
-        internal static string UpdateCommandIdDescription {
-            get {
-                return ResourceManager.GetString("UpdateCommandIdDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to NuGet.exe is up to date..
         /// </summary>
         internal static string UpdateCommandNuGetUpToDate {
             get {
                 return ResourceManager.GetString("UpdateCommandNuGetUpToDate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Allows updating to prerelease versions. This flag is not required when updating prerelease packages that are already installed..
-        /// </summary>
-        internal static string UpdateCommandPrerelease {
-            get {
-                return ResourceManager.GetString("UpdateCommandPrerelease", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Path to the local packages folder (location where packages are installed)..
-        /// </summary>
-        internal static string UpdateCommandRepositoryPathDescription {
-            get {
-                return ResourceManager.GetString("UpdateCommandRepositoryPathDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Looks for updates with the highest version available within the same major and minor version as the installed package..
-        /// </summary>
-        internal static string UpdateCommandSafeDescription {
-            get {
-                return ResourceManager.GetString("UpdateCommandSafeDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Update the running NuGet.exe to the newest version available from the server..
-        /// </summary>
-        internal static string UpdateCommandSelfDescription {
-            get {
-                return ResourceManager.GetString("UpdateCommandSelfDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to A list of package sources to search for updates..
-        /// </summary>
-        internal static string UpdateCommandSourceDescription {
-            get {
-                return ResourceManager.GetString("UpdateCommandSourceDescription", resourceCulture);
             }
         }
         
@@ -1750,28 +948,6 @@ namespace NuGet {
         internal static string UpdateCommandUpdatingNuGet {
             get {
                 return ResourceManager.GetString("UpdateCommandUpdatingNuGet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to nuget update
-        ///    
-        ///nuget update -Safe
-        ///
-        ///nuget update -Self.
-        /// </summary>
-        internal static string UpdateCommandUsageExamples {
-            get {
-                return ResourceManager.GetString("UpdateCommandUsageExamples", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Show verbose output while updating..
-        /// </summary>
-        internal static string UpdateCommandVerboseDescription {
-            get {
-                return ResourceManager.GetString("UpdateCommandVerboseDescription", resourceCulture);
             }
         }
         

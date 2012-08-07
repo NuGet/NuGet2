@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
-using System.Text;
+using System.Resources;
 
 namespace NuGet
 {
     public static class ResourceHelper
     {
-        private static Dictionary<Tuple<Type, string>, string> _cachedResourceStrings;
+        private static Dictionary<Type, ResourceManager> _cachedManagers;
 
         public static string GetLocalizedString(Type resourceType, string resourceName)
         {
@@ -22,46 +22,39 @@ namespace NuGet
                 throw new ArgumentNullException("resourceType");
             }
 
-            if (_cachedResourceStrings == null)
+            if (_cachedManagers == null)
             {
-                _cachedResourceStrings = new Dictionary<Tuple<Type, string>, string>();
+                _cachedManagers = new Dictionary<Type, ResourceManager>();
             }
 
-            var key = Tuple.Create(resourceType, resourceName);
-            string resourceValue;
-
-            if (!_cachedResourceStrings.TryGetValue(key, out resourceValue))
+            ResourceManager resourceManager;
+            if (!_cachedManagers.TryGetValue(resourceType, out resourceManager))
             {
-                StringBuilder sb = new StringBuilder();
-                foreach (string name in resourceName.Split(';'))
+                PropertyInfo property = resourceType.GetProperty("ResourceManager", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+
+                if (property == null || property.GetGetMethod(nonPublic: true) == null)
                 {
-                    PropertyInfo property = resourceType.GetProperty(name, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-
-                    if (property == null)
-                    {
-                        throw new InvalidOperationException(
-                            String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourceTypeDoesNotHaveProperty, resourceType, name));
-                    }
-
-                    if (property.PropertyType != typeof(string))
-                    {
-                        throw new InvalidOperationException(
-                            String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourcePropertyNotStringType, name, resourceType));
-                    }
-
-                    MethodInfo getMethod = property.GetGetMethod(true);
-                    if ((getMethod == null) || (!getMethod.IsAssembly && !getMethod.IsPublic))
-                    {
-                        throw new InvalidOperationException(
-                            String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourcePropertyDoesNotHaveAccessibleGet, resourceType, name));
-                    }
-                    sb.Append((string)property.GetValue(null, null));
+                    throw new InvalidOperationException(
+                        String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourceTypeDoesNotHaveProperty, resourceType, "ResourceManager"));
                 }
-                resourceValue = sb.ToString();
-                _cachedResourceStrings[key] = resourceValue;
+
+                if (property.PropertyType != typeof(ResourceManager))
+                {
+                    throw new InvalidOperationException(
+                        String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourcePropertyIncorrectType, resourceName, resourceType));
+                }
+
+                resourceManager = (ResourceManager)property.GetGetMethod(nonPublic: true)
+                                                           .Invoke(obj: null, parameters: null);
+            }
+            string value = (string)resourceManager.GetString(resourceName);
+            if (String.IsNullOrEmpty(value))
+            {
+                throw new InvalidOperationException(
+                        String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourceTypeDoesNotHaveProperty, resourceType, resourceName));
             }
 
-            return resourceValue;
+            return value;
         }
     }
 }

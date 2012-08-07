@@ -8,18 +8,18 @@ using NuGet.Common;
 
 namespace NuGet.Commands
 {
-    [Command(typeof(NuGetResources), "push", "PushCommandDescription",
+    [Command(typeof(NuGetCommand), "push", "PushCommandDescription",
         MinArgs = 1, MaxArgs = 2, UsageDescriptionResourceName = "PushCommandUsageDescription",
         UsageSummaryResourceName = "PushCommandUsageSummary", UsageExampleResourceName = "PushCommandUsageExamples")]
     public class PushCommand : Command
     {
-        [Option(typeof(NuGetResources), "PushCommandSourceDescription", AltName = "src")]
+        [Option(typeof(NuGetCommand), "PushCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
-        [Option(typeof(NuGetResources), "CommandApiKey")]
+        [Option(typeof(NuGetCommand), "CommandApiKey")]
         public string ApiKey { get; set; }
 
-        [Option(typeof(NuGetResources), "PushCommandTimeoutDescription")]
+        [Option(typeof(NuGetCommand), "PushCommandTimeoutDescription")]
         public int Timeout { get; set; }
 
         public IPackageSourceProvider SourceProvider { get; private set; }

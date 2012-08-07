@@ -5,18 +5,18 @@ using NuGet.Common;
 
 namespace NuGet.Commands
 {
-    [Command(typeof(NuGetResources), "delete", "DeleteCommandDescription",
+    [Command(typeof(NuGetCommand), "delete", "DeleteCommandDescription",
         MinArgs = 2, MaxArgs = 3, UsageDescriptionResourceName = "DeleteCommandUsageDescription",
         UsageSummaryResourceName = "DeleteCommandUsageSummary", UsageExampleResourceName = "DeleteCommandUsageExamples")]
     public class DeleteCommand : Command
     {
-        [Option(typeof(NuGetResources), "DeleteCommandSourceDescription", AltName = "src")]
+        [Option(typeof(NuGetCommand), "DeleteCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
 
-        [Option(typeof(NuGetResources), "DeleteCommandNoPromptDescription", AltName = "np")]
+        [Option(typeof(NuGetCommand), "DeleteCommandNoPromptDescription", AltName = "np")]
         public bool NoPrompt { get; set; }
 
-        [Option(typeof(NuGetResources), "CommandApiKey")]
+        [Option(typeof(NuGetCommand), "CommandApiKey")]
         public string ApiKey { get; set; }
 
         public IPackageSourceProvider SourceProvider { get; private set; }
