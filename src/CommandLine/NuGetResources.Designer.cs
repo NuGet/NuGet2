@@ -1015,6 +1015,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Option &apos;NoPrompt&apos; has been deprecated. Use &apos;NonInteractive&apos; instead..
+        /// </summary>
+        internal static string Warning_NoPromptDeprecated {
+            get {
+                return ResourceManager.GetString("Warning_NoPromptDeprecated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Version &quot;{0}&quot; does not follow semantic versioning guidelines..
         /// </summary>
         internal static string Warning_SemanticVersion {

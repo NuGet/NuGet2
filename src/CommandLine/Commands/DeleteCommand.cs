@@ -32,6 +32,12 @@ namespace NuGet.Commands
 
         public override void ExecuteCommand()
         {
+            if (NoPrompt)
+            {
+                Console.WriteWarning(NuGetResources.Warning_NoPromptDeprecated);
+                NonInteractive = true;
+            }
+
             //First argument should be the package ID
             string packageId = Arguments[0];
             //Second argument should be the package Version
@@ -43,10 +49,13 @@ namespace NuGet.Commands
 
             //If the user did not pass an API Key look in the config file
             string apiKey = GetApiKey(source);
-
             string sourceDisplayName = CommandLineUtility.GetSourceDisplayName(source);
+            if (String.IsNullOrEmpty(apiKey))
+            {
+                Console.WriteWarning(NuGetResources.NoApiKeyFound, sourceDisplayName);
+            }
 
-            if (NoPrompt || Console.Confirm(String.Format(CultureInfo.CurrentCulture, NuGetResources.DeleteCommandConfirm, packageId, packageVersion, sourceDisplayName)))
+            if (NonInteractive || Console.Confirm(String.Format(CultureInfo.CurrentCulture, NuGetResources.DeleteCommandConfirm, packageId, packageVersion, sourceDisplayName)))
             {
                 Console.WriteLine(NuGetResources.DeleteCommandDeletingPackage, packageId, packageVersion, sourceDisplayName);
                 gallery.DeletePackage(apiKey, packageId, packageVersion);
@@ -56,7 +65,6 @@ namespace NuGet.Commands
             {
                 Console.WriteLine(NuGetResources.DeleteCommandCanceled);
             }
-
         }
 
         internal string GetApiKey(string source)

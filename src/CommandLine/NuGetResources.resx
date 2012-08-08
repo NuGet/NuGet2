@@ -450,4 +450,7 @@
   <data name="SpecCommandFileExists" xml:space="preserve">
     <value>'{0}' already exists, use -f to overwrite it.</value>
   </data>
+  <data name="Warning_NoPromptDeprecated" xml:space="preserve">
+    <value>Option 'NoPrompt' has been deprecated. Use 'NonInteractive' instead.</value>
+  </data>
 </root>
