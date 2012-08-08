@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Resources;
+using System.Text;
 
 namespace NuGet
 {
@@ -10,11 +11,11 @@ namespace NuGet
     {
         private static Dictionary<Type, ResourceManager> _cachedManagers;
 
-        public static string GetLocalizedString(Type resourceType, string resourceName)
+        public static string GetLocalizedString(Type resourceType, string resourceNames)
         {
-            if (String.IsNullOrEmpty(resourceName))
+            if (String.IsNullOrEmpty(resourceNames))
             {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "resourceName");
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "resourceNames");
             }
 
             if (resourceType == null)
@@ -41,20 +42,30 @@ namespace NuGet
                 if (property.PropertyType != typeof(ResourceManager))
                 {
                     throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourcePropertyIncorrectType, resourceName, resourceType));
+                        String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourcePropertyIncorrectType, resourceNames, resourceType));
                 }
 
                 resourceManager = (ResourceManager)property.GetGetMethod(nonPublic: true)
                                                            .Invoke(obj: null, parameters: null);
             }
-            string value = (string)resourceManager.GetString(resourceName);
-            if (String.IsNullOrEmpty(value))
+
+            var builder = new StringBuilder();
+            foreach (var resource in resourceNames.Split(';'))
             {
-                throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourceTypeDoesNotHaveProperty, resourceType, resourceName));
+                string value = (string)resourceManager.GetString(resource);
+                if (String.IsNullOrEmpty(value))
+                {
+                    throw new InvalidOperationException(
+                            String.Format(CultureInfo.CurrentCulture, NuGetResources.ResourceTypeDoesNotHaveProperty, resourceType, resource));
+                }
+                if (builder.Length > 0)
+                {
+                    builder.AppendLine();
+                }
+                builder.Append(value);
             }
 
-            return value;
+            return builder.ToString();
         }
     }
 }

@@ -19,14 +19,14 @@ namespace NuGet.Test.NuGetCommandLine
         public void GetLocalizedString_ThrowsArgumentExceptionForNullName()
         {
             // Act & Assert
-            ExceptionAssert.ThrowsArgNullOrEmpty(() => ResourceHelper.GetLocalizedString(typeof(string), null), "resourceName");
+            ExceptionAssert.ThrowsArgNullOrEmpty(() => ResourceHelper.GetLocalizedString(typeof(string), null), "resourceNames");
         }
 
         [Fact]
         public void GetLocalizedString_ThrowsArgumentExceptionForEmptyName()
         {
             // Act & Assert
-            ExceptionAssert.ThrowsArgNullOrEmpty(() => ResourceHelper.GetLocalizedString(typeof(string), ""), "resourceName");
+            ExceptionAssert.ThrowsArgNullOrEmpty(() => ResourceHelper.GetLocalizedString(typeof(string), ""), "resourceNames");
         }
 
         [Fact]
