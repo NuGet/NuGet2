@@ -107,15 +107,32 @@ namespace NuGet
 
         public override IQueryable<IPackage> GetPackages()
         {
-            // combine both .nupkg file-based and .nuspec file-based packages
-            return SearchManifestPackages().Concat(base.GetPackages());
+            return SearchPackages().AsQueryable();
         }
 
-        protected IQueryable<IPackage> SearchManifestPackages()
+        /// <summary>
+        /// Search for either .nupkg-based or .nuspec-based packages
+        /// </summary>
+        /// <returns></returns>
+        protected IEnumerable<IPackage> SearchPackages()
         {
-            return (from directory in FileSystem.GetDirectories("")
-                    where FileSystem.FileExists(Path.Combine(directory, directory + Constants.ManifestExtension))
-                    select new UnzippedPackage(FileSystem, directory)).AsQueryable();
+            foreach (string directory in FileSystem.GetDirectories(""))
+            {
+                string partialPath = Path.Combine(directory, directory);
+
+                // always search for .nuspec-based packages first
+                if (FileSystem.FileExists(partialPath + Constants.ManifestExtension))
+                {
+                    yield return new UnzippedPackage(FileSystem, directory);
+                    continue;
+                }
+
+                string nupkgPath = partialPath + Constants.PackageExtension;
+                if (FileSystem.FileExists(nupkgPath))
+                {
+                    yield return new ZipPackage(FileSystem.OpenFile(nupkgPath));
+                }
+            }
         }
 
         public override void AddPackage(IPackage package)
@@ -148,23 +165,6 @@ namespace NuGet
             {
                 _packageReferenceFile.DeleteEntry(package.Id, package.Version);
             }
-        }
-
-        public override IEnumerable<string> GetPackageLookupPaths(string packageId, SemanticVersion version)
-        {
-            var manifestPaths = version.GetComparableVersionStrings()
-                                       .Select(v => packageId + "." + v)
-                                       .Select(p => Path.Combine(p, p + Constants.ManifestExtension))
-                                       .Where(FileSystem.FileExists)
-                                       .ToArray();
-
-            if (manifestPaths.Length > 0)
-            {
-                return manifestPaths;
-            }
-
-            // if we didn't find any .nuspec files, fall back to searching .nupkg files
-            return base.GetPackageLookupPaths(packageId, version);
         }
 
         protected virtual IPackageRepository CreateRepository(string path)

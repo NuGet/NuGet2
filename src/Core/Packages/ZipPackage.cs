@@ -26,8 +26,8 @@ namespace NuGet
         // so we don't have to hold on to that resource
         private readonly Func<Stream> _streamFactory;
 
-        public ZipPackage(string fileName)
-            : this(fileName, enableCaching: false)
+        public ZipPackage(string filePath)
+            : this(filePath, enableCaching: false)
         {
         }
 
@@ -42,14 +42,14 @@ namespace NuGet
             EnsureManifest();
         }
 
-        internal ZipPackage(string fileName, bool enableCaching)
+        internal ZipPackage(string filePath, bool enableCaching)
         {
-            if (String.IsNullOrEmpty(fileName))
+            if (String.IsNullOrEmpty(filePath))
             {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "fileName");
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "filePath");
             }
             _enableCaching = enableCaching;
-            _streamFactory = () => File.OpenRead(fileName);
+            _streamFactory = () => File.OpenRead(filePath);
             EnsureManifest();
         }
 

@@ -12,7 +12,7 @@ namespace NuGet.Test
         [InlineData("A", "2.0", "A.2.0\\A.2.0.nuspec", "A.2.0\\A.2.0.nupkg")]
         [InlineData("B", "1.0.0-alpha", "B.1.0.0-alpha\\B.1.0.0-alpha.nuspec", "B.1.0.0-alpha\\B.1.0.0-alpha.nupkg")]
         [InlineData("C", "3.1.2.4-rtm", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nuspec", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nupkg")]
-        public void CallAddPackageWillAddBothNuspecFileAndNupkgFile(string id, string version, string expectedPath, string unexpectedPath)
+        public void CallAddPackageWillAddBothNuspecFileAndNupkgFile(string id, string version, string nuspecPath, string nupkgPath)
         {
             // Arrange
             var fileSystem = new MockFileSystem("x:\root");
@@ -23,8 +23,8 @@ namespace NuGet.Test
             repository.AddPackage(PackageUtility.CreatePackage(id, version));
 
             // Assert
-            Assert.True(fileSystem.FileExists(expectedPath));
-            Assert.True(fileSystem.FileExists(unexpectedPath));
+            Assert.True(fileSystem.FileExists(nuspecPath));
+            Assert.True(fileSystem.FileExists(nupkgPath));
         }
 
         [Theory]

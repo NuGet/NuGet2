@@ -21,8 +21,8 @@ namespace NuGet.Test
         [Fact]
         public void CtorWithFileNameThrowsIfNullOrEmpty()
         {
-            ExceptionAssert.ThrowsArgNullOrEmpty(() => new ZipPackage((string)null), "fileName");
-            ExceptionAssert.ThrowsArgNullOrEmpty(() => new ZipPackage(String.Empty), "fileName");
+            ExceptionAssert.ThrowsArgNullOrEmpty(() => new ZipPackage((string)null), "filePath");
+            ExceptionAssert.ThrowsArgNullOrEmpty(() => new ZipPackage(String.Empty), "filePath");
         }
 
         [Fact]
