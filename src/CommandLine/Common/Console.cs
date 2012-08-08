@@ -219,24 +219,19 @@ namespace NuGet.Common
 
         public ConsoleKeyInfo ReadKey()
         {
-            if (IsNonInteractive)
-            {
-                throw new InvalidOperationException(LocalizedResourceManager.GetString("Error_CannotPromptForInput"));
-            }
+            EnsureInteractive();
             return System.Console.ReadKey(intercept: true);
         }
 
         public string ReadLine()
         {
-            if (IsNonInteractive)
-            {
-                throw new InvalidOperationException(LocalizedResourceManager.GetString("Error_CannotPromptForInput"));
-            }
+            EnsureInteractive();
             return System.Console.ReadLine();
         }
 
         public void ReadSecureString(SecureString secureString)
         {
+            EnsureInteractive();
             try
             {
                 ReadSecureStringFromConsole(secureString);
@@ -257,7 +252,7 @@ namespace NuGet.Common
         private static void ReadSecureStringFromConsole(SecureString secureString)
         {
             ConsoleKeyInfo keyInfo;
-            while ((keyInfo = System.Console.ReadKey()).Key != ConsoleKey.Enter)
+            while ((keyInfo = System.Console.ReadKey(intercept: true)).Key != ConsoleKey.Enter)
             {
                 if (keyInfo.Key == ConsoleKey.Backspace)
                 {
@@ -277,6 +272,14 @@ namespace NuGet.Common
                 }
             }
             System.Console.WriteLine();
+        }
+
+        private void EnsureInteractive()
+        {
+            if (IsNonInteractive)
+            {
+                throw new InvalidOperationException(LocalizedResourceManager.GetString("Error_CannotPromptForInput"));
+            }
         }
 
         public void Log(MessageLevel level, string message, params object[] args)
