@@ -58,6 +58,7 @@
     <Compile Include="DeleteCommandTest.cs" />
     <Compile Include="InstallCommandTest.cs" />
     <Compile Include="ListCommandTests.cs" />
+    <Compile Include="LocalizedResourceManagerTest.cs" />
     <Compile Include="MockConsole.cs" />
     <Compile Include="OptionAttributeTests.cs" />
     <Compile Include="PackCommandTest.cs" />
