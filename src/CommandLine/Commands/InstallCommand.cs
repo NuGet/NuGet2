@@ -44,6 +44,9 @@ namespace NuGet.Commands
         [Option(typeof(NuGetResources), "InstallCommandNoCache")]
         public bool NoCache { get; set; }
 
+        [Option(typeof(NuGetResources), "InstallCommandRequireConsent")]
+        public bool RequireConsent { get; set; }
+
         public IPackageRepositoryFactory RepositoryFactory { get; private set; }
 
         public IPackageSourceProvider SourceProvider { get; private set; }
@@ -278,9 +281,9 @@ namespace NuGet.Commands
             }
         }
 
-        private static void EnsurePackageRestoreConsent(bool packageRestoreConsent)
+        private void EnsurePackageRestoreConsent(bool packageRestoreConsent)
         {
-            if (!packageRestoreConsent)
+            if (RequireConsent && !packageRestoreConsent)
             {
                 throw new InvalidOperationException(LocalizedResourceManager.GetString("InstallCommandPackageRestoreConsentNotFound"));
             }
