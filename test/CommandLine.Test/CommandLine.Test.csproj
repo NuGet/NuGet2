@@ -25,6 +25,7 @@
     <OutputPath>bin\Release\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Moq, Version=4.0.10827.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -83,6 +84,7 @@
     <Compile Include="OptionAttributeTests.cs" />
     <Compile Include="PackCommandTest.cs" />
     <Compile Include="ProgramTest.cs" />
+    <Compile Include="ProjectFactoryTest.cs" />
     <Compile Include="PushCommandTest.cs" />
     <Compile Include="ResourceHelperTests.cs" />
     <Compile Include="SetApiKeyCommandTest.cs" />
