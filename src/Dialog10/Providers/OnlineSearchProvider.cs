@@ -21,6 +21,18 @@ namespace NuGet.Dialog.Providers
             get { return _baseProvider.Name; }
         }
 
+        internal override bool IncludePrerelease
+        {
+            get
+            {
+                return _baseProvider.IncludePrerelease;
+            }
+            set
+            {
+                _baseProvider.IncludePrerelease = value;
+            }
+        }
+
         internal static PackageSortDescriptor RelevanceSortDescriptor
         {
             get { return _defaultSortDescriptor; }

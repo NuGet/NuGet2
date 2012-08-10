@@ -12,6 +12,7 @@ using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using Xunit;
 using Xunit.Extensions;
+using System;
 
 namespace NuGet.Dialog.Test
 {
@@ -265,6 +266,88 @@ namespace NuGet.Dialog.Test
 
             // do not allow the method to return
             manualEvent.WaitOne();
+        }
+
+        [Theory]
+        [InlineData(false, "1.0")]
+        [InlineData(true, "2.0-alpha")]
+        public void SearchTreeNodeHonorsTheIncludePrereleaseAttribute(bool includePrerelease, string expectedVersion)
+        {
+            // Arrange
+            var packageA1 = PackageUtility.CreatePackage("packageA", "1.0");
+            var packageA2 = PackageUtility.CreatePackage("packageA", "2.0-alpha");
+            var packageC = PackageUtility.CreatePackage("packageB", "3.0.0.0-rtm");
+
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(packageA2);
+            sourceRepository.AddPackage(packageC);
+            sourceRepository.AddPackage(packageA1);
+
+            var localRepository = new MockPackageRepository();
+            localRepository.AddPackage(packageA2);
+
+            var projectManager = new Mock<IProjectManager>();
+            projectManager.Setup(p => p.LocalRepository).Returns(localRepository);
+
+            var project = new Mock<Project>();
+
+            var packageManager = new Mock<IVsPackageManager>();
+            packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project.Object))).Returns(projectManager.Object);
+
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(s => s.GetProject(It.IsAny<string>())).Returns(project.Object);
+
+            var provider = CreateOnlineProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, project: project.Object);
+            provider.IncludePrerelease = includePrerelease;
+            var extensionTree = provider.ExtensionsTree;
+
+            var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
+            firstTreeNode.Repository.AddPackage(packageA2);
+            firstTreeNode.Repository.AddPackage(packageA1);
+            firstTreeNode.Repository.AddPackage(packageC);
+
+            provider.SelectedNode = firstTreeNode;
+            IVsPackageManager activePackageManager = provider.GetActivePackageManager();
+            Mock<IVsPackageManager> mockPackageManager = Mock.Get<IVsPackageManager>(activePackageManager);
+            mockPackageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project.Object))).Returns(projectManager.Object);
+
+            var manualEvent = new ManualResetEventSlim(false);
+
+            // Act 1
+            var treeNode = (PackagesTreeNodeBase)provider.Search("packageA");
+            Assert.NotNull(treeNode);
+
+            Exception exception = null;
+
+            treeNode.PackageLoadCompleted += (o, e) =>
+            {
+                try
+                {
+                    var packages = treeNode.Extensions.OfType<PackageItem>().ToList();
+                    Assert.Equal(1, packages.Count);
+                    AssertPackage(packages[0].PackageIdentity, "packageA", expectedVersion);
+                }
+                catch (Exception ex)
+                {
+                    exception = ex;
+                }
+                finally
+                {
+                    manualEvent.Set();
+                }
+            };
+
+            // trigger loading packages
+            var extensions = treeNode.Extensions;
+
+            // do not allow the method to return
+            manualEvent.Wait();
+
+            if (exception != null)
+            {
+                throw exception;
+            }
         }
 
         [Fact]
@@ -523,6 +606,13 @@ namespace NuGet.Dialog.Test
         {
             var projectSystem = new MockVsProjectSystem();
             return new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+        }
+
+        private void AssertPackage(IPackage package, string Id, string version)
+        {
+            Assert.NotNull(package);
+            Assert.Equal(Id, package.Id);
+            Assert.Equal(version, package.Version.ToString());
         }
     }
 }
