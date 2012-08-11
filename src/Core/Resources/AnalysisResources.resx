@@ -144,6 +144,15 @@
   <data name="InvalidFrameworkTitle" xml:space="preserve">
     <value>Invalid framework folder.</value>
   </data>
+  <data name="MisplacedInitScriptDescription" xml:space="preserve">
+    <value>The file '{0}' will be ignored by Microsoft because it is not directly under 'tools' folder.</value>
+  </data>
+  <data name="MisplacedInitScriptSolution" xml:space="preserve">
+    <value>Place the file directly under 'tools' folder.</value>
+  </data>
+  <data name="MisplacedInitScriptTitle" xml:space="preserve">
+    <value>Init.ps1 script will be ignored.</value>
+  </data>
   <data name="MisplacedTransformFileDescription" xml:space="preserve">
     <value>The transform file '{0}' is outside the 'content' folder and hence will not be transformed during installation of this package.</value>
   </data>

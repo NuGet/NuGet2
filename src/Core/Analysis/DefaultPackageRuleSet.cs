@@ -12,7 +12,8 @@ namespace NuGet
                 new MisplacedAssemblyRule(),
                 new MisplacedScriptFileRule(),
                 new MisplacedTransformFileRule(),
-                new MissingSummaryRule()
+                new MissingSummaryRule(),
+                new InitScriptNotUnderTools()
             }
         );
 
