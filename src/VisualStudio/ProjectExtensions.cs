@@ -66,7 +66,7 @@ namespace NuGet.VisualStudio
 
             // 'cursor' can contain a reference to either a Project instance or ProjectItem instance. 
             // Both types have the ProjectItems property that we want to access.
-            dynamic cursor = project;
+            object cursor = project;
 
             string fullPath = project.GetFullPath();
             string folderRelativePath = String.Empty;
@@ -83,7 +83,7 @@ namespace NuGet.VisualStudio
                 }
             }
 
-            return cursor.ProjectItems;
+            return GetProjectItems(cursor);
         }
 
         public static ProjectItem GetProjectItem(this Project project, string path)
@@ -361,7 +361,7 @@ namespace NuGet.VisualStudio
         // 'parentItem' can be either a Project or ProjectItem
         private static ProjectItem GetOrCreateFolder(
             Project project,
-            dynamic parentItem,
+            object parentItem,
             string fullPath,
             string folderRelativePath,
             string folderName,
@@ -374,7 +374,7 @@ namespace NuGet.VisualStudio
 
             ProjectItem subFolder;
 
-            ProjectItems projectItems = parentItem.ProjectItems;
+            ProjectItems projectItems = GetProjectItems(parentItem);
             if (projectItems.TryGetFolder(folderName, out subFolder))
             {
                 // Get the sub folder
@@ -391,9 +391,9 @@ namespace NuGet.VisualStudio
                     if (succeeded)
                     {
                         // IMPORTANT: after including the folder into project, we need to get 
-                        // a new ProjectItems snapshot from the parent item. Otheriwse, reusing 
+                        // a new ProjectItems snapshot from the parent item. Otherwise, reusing 
                         // the old snapshot from above won't have access to the added folder.
-                        projectItems = parentItem.ProjectItems;
+                        projectItems = GetProjectItems(parentItem);
                         if (projectItems.TryGetFolder(folderName, out subFolder))
                         {
                             // Get the sub folder
@@ -413,6 +413,23 @@ namespace NuGet.VisualStudio
                     // to this impl
                     return projectItems.AddFolder(folderName);
                 }
+            }
+
+            return null;
+        }
+
+        private static ProjectItems GetProjectItems(object parent)
+        {
+            var project = parent as Project;
+            if (project != null)
+            {
+                return project.ProjectItems;
+            }
+
+            var projectItem = parent as ProjectItem;
+            if (projectItem != null)
+            {
+                return projectItem.ProjectItems;
             }
 
             return null;
