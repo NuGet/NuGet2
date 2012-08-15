@@ -184,7 +184,7 @@
                 <StackPanel Style="{StaticResource DetailMetadataStyle}">
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_VersionLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
                     <self:TextBlockControl AutomationProperties.AutomationId="VersionText" Text="{Binding Version, Mode=OneWay}" Style="{StaticResource DetailMetadataValueStyle}" />
-                    <self:TextBlockControl Margin="3,0,0,0" Text="{Binding Mode=OneWay, Source={x:Static resources:Resources.Dialog_PackagePrereleaseLabel}, StringFormat='({0})'}" Visibility="{Binding IsPrerelease, Converter={StaticResource boolToVis}}" />
+                    <self:TextBlockControl AutomationProperties.AutomationId="PrereleaseText" Margin="3,0,0,0" Text="{Binding Mode=OneWay, Source={x:Static resources:Resources.Dialog_PackagePrereleaseLabel}, StringFormat='({0})'}" Visibility="{Binding IsPrerelease, Converter={StaticResource boolToVis}}" />
                 </StackPanel>
 
                 <!-- Current Version -->

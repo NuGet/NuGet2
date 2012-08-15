@@ -17,6 +17,7 @@
     WindowStartupLocation="CenterOwner"
     Title="{x:Static resources:Resources.Dialog_ProjectSelectorTitle}"
     local:WindowSizePersistenceHelper.WindowToken="SolutionExplorer"
+    AutomationProperties.AutomationId="ManagePackages_SelectProjectsDialog"
     Background="{DynamicResource {x:Static local:UIResources.WindowBackgroundBrushKey}}">
     
     <Window.Resources>        
