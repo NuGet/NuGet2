@@ -406,7 +406,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         }
 
         [Fact]
-        public void InstallCommandWorksIfExcludedVersionsAndPackageIsNotFoundInRemoteRepository()
+        public void InstallCommandNoOpsIfExcludedVersionsAndAVersionOfThePackageIsAlreadyInstalled()
         {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -417,15 +417,21 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Throws(new Exception("Method should not be called"));
 
             var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object);
-            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager);
-
-            installCommand.ExcludeVersion = true;
+            var console = new MockConsole();
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager)
+            {
+                Console = console,
+                ExcludeVersion = true
+            };
             installCommand.Arguments.Add("A");
 
-            // Act and Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => installCommand.ExecuteCommand(), "Unable to find package 'A'.");
+            // Act
+            installCommand.ExecuteCommand();
+            
+            // Assert
             // Ensure packages were not removed.
             Assert.Equal(1, packages.Count);
+            Assert.Equal("Package \"A\" is already installed." + Environment.NewLine, console.Output);
         }
 
         [Fact]
@@ -440,9 +446,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 </packages>");
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
             var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
-            var repository = new MockPackageRepository();
-            packageManager.Setup(p => p.InstallPackage("Foo", new SemanticVersion("1.0.0"), true, true)).Verifiable();
-            packageManager.Setup(p => p.InstallPackage("Qux", new SemanticVersion("2.3.56-beta"), true, true)).Verifiable();
+            var package1 = PackageUtility.CreatePackage("Foo", "1.0.0");
+            var package2 = PackageUtility.CreatePackage("Qux", "2.3.56-beta");
+            var repository = new MockPackageRepository { package1, package2 };
+            packageManager.Setup(p => p.InstallPackage(package1, true, true)).Verifiable();
+            packageManager.Setup(p => p.InstallPackage(package2, true, true)).Verifiable();
             packageManager.SetupGet(p => p.PathResolver).Returns(pathResolver);
             packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
             packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
@@ -471,10 +479,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
   <package id=""Qux"" version=""2.3.56-beta"" />
 </packages>");
             fileSystem.AddFile("Foo.1.8.nupkg");
+            var package = PackageUtility.CreatePackage("Qux", "2.3.56-beta");
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
             var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
-            var repository = new MockPackageRepository();
-            packageManager.Setup(p => p.InstallPackage("Qux", new SemanticVersion("2.3.56-beta"), true, true)).Verifiable();
+            var repository = new MockPackageRepository { package };
+            packageManager.Setup(p => p.InstallPackage(package, true, true)).Verifiable();
             packageManager.SetupGet(p => p.PathResolver).Returns(pathResolver);
             packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
             packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
@@ -542,12 +551,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 </packages>");
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
             var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
-            var repository = new MockPackageRepository { PackageUtility.CreatePackage("Abc") };
+            var package = PackageUtility.CreatePackage("Abc");
+            var repository = new MockPackageRepository { package };
             packageManager.SetupGet(p => p.PathResolver).Returns(pathResolver);
             packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
             packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
             packageManager.SetupGet(p => p.SourceRepository).Returns(repository);
-            packageManager.Setup(p => p.InstallPackage("Abc", new SemanticVersion("1.0.0"), true, true)).Verifiable();
+            packageManager.Setup(p => p.InstallPackage(package, true, true)).Verifiable();
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
@@ -596,6 +606,50 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Assert
             Assert.Equal("Package restore is disabled by default. To give consent, open the Visual Studio Options dialog, click on Package Manager node and check 'Allow NuGet to download missing packages during build.' You can also give consent by setting the environment variable 'EnableNuGetPackageRestore' to 'true'.",
                          exception.InnerException.Message);
+        }
+
+        [Fact]
+        public void InstallCommandInstallsSatellitePackagesAfterCorePackages()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"X:\test\packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+    <package id=""Foo.Fr"" version=""1.0.0"" />  
+    <package id=""Foo"" version=""1.0.0"" />
+</packages>");
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
+            var package1 = PackageUtility.CreatePackage("Foo", "1.0.0");
+            var package2 = PackageUtility.CreatePackage("Foo.Fr", "1.0.0", language: "fr", 
+                dependencies: new[] { new PackageDependency("Foo", VersionUtility.ParseVersionSpec("[1.0.0]")) });
+            var repository = new MockPackageRepository { package1, package2 };
+            // We *shouldn't* be testing if a sequence of operations worked rather that the outcome that satellite package was installed correctly, 
+            // but doing so requires work with  nice to have a unit test that tests it. 
+            bool langPackInstalled = false;
+            packageManager.Setup(p => p.InstallPackage(package1, true, true)).Callback(() =>
+                {
+                    if (langPackInstalled)
+                    {
+                        throw new Exception("Lang package installed first");
+                    }
+                }).Verifiable();
+            packageManager.Setup(p => p.InstallPackage(package2, true, true)).Callback(() => langPackInstalled = true).Verifiable();
+            packageManager.SetupGet(p => p.PathResolver).Returns(pathResolver);
+            packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
+            packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
+            packageManager.SetupGet(p => p.SourceRepository).Returns(repository);
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
+            var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+
+            // Act
+            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object);
+            installCommand.Arguments.Add(@"X:\test\packages.config");
+            installCommand.Execute();
+
+            // Assert
+            packageManager.Verify();
         }
 
         private static IPackageRepositoryFactory GetFactory()
