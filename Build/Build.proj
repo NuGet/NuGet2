@@ -205,7 +205,7 @@
         <Copy ContinueOnError="false" SourceFiles="@(VisualStudioAddInOutputItems)" DestinationFiles="@(VisualStudioAddInOutputItems ->'$(VisualStudioAddInDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
 
-    <Target Name="CopyEndToEndTestsToDropDirectory" DependsOnTargets="">
+    <Target Name="CopyEndToEndTestsToDropDirectory" Condition=" '$(ProduceEndToEndTest)' == 'true' ">
         <ItemGroup>
             <EndToEndTestItems Include="$(EndToEndTestsDirectory)\**\*.*" />
             <EndToEndTestItems Remove="$(EndToEndTestsDirectory)\bin\**\*.*" />
