@@ -10,8 +10,15 @@ using Xunit;
 
 namespace NuGet.Test.NuGetCommandLine.Commands
 {
-    public class InstallCommandTest
+    public class InstallCommandTest : IDisposable
     {
+        private static readonly string _environmentVariableValue = Environment.GetEnvironmentVariable("EnableNuGetPackageRestore");
+
+        public InstallCommandTest()
+        {
+            Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", "", EnvironmentVariableTarget.Process);
+        }
+
         [Fact]
         public void InstallCommandInstallsPackageIfArgumentIsNotPackageReferenceFile()
         {
@@ -488,6 +495,73 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             packageManager.Verify();
         }
 
+        [Fact]
+        public void InstallCommandDoesNotPromptForConsentIfRequireConsentIsNotSet()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"X:\test\packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""Abc"" version=""1.0.0"" />
+</packages>");
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
+            var repository = new MockPackageRepository { PackageUtility.CreatePackage("Abc") };
+            packageManager.SetupGet(p => p.PathResolver).Returns(pathResolver);
+            packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
+            packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
+            packageManager.SetupGet(p => p.SourceRepository).Returns(repository);
+            packageManager.Setup(p => p.InstallPackage("Abc", new SemanticVersion("1.0.0"), true, true)).Verifiable();
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
+            var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+            var console = new MockConsole();
+
+            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object, allowPackageRestore: false);
+            installCommand.Arguments.Add(@"X:\test\packages.config");
+            installCommand.Console = console;
+
+            // Act
+            installCommand.Execute();
+
+            // Assert
+            packageManager.Verify();
+        }
+
+        [Fact]
+        public void InstallCommandPromptsForConsentIfRequireConsentIsSet()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"X:\test\packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""Abc"" version=""1.0.0"" />
+</packages>");
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
+            var repository = new MockPackageRepository { PackageUtility.CreatePackage("Abc") };
+            packageManager.SetupGet(p => p.PathResolver).Returns(pathResolver);
+            packageManager.SetupGet(p => p.LocalRepository).Returns(new LocalPackageRepository(pathResolver, fileSystem));
+            packageManager.SetupGet(p => p.FileSystem).Returns(fileSystem);
+            packageManager.SetupGet(p => p.SourceRepository).Returns(repository);
+            var repositoryFactory = new Mock<IPackageRepositoryFactory>();
+            repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
+            var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+            var console = new MockConsole();
+
+            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object, allowPackageRestore: false);
+            installCommand.Arguments.Add(@"X:\test\packages.config");
+            installCommand.Console = console;
+            installCommand.RequireConsent = true;
+
+            // Act 
+            var exception = Assert.Throws<AggregateException>(() => installCommand.Execute());
+
+            // Assert
+            Assert.Equal("Package restore is disabled by default. To give consent, open the Visual Studio Options dialog, click on Package Manager node and check 'Allow NuGet to download missing packages during build.' You can also give consent by setting the environment variable 'EnableNuGetPackageRestore' to 'true'.",
+                         exception.InnerException.Message);
+        }
+
         private static IPackageRepositoryFactory GetFactory()
         {
             var repositoryA = new MockPackageRepository { PackageUtility.CreatePackage("Foo"), PackageUtility.CreatePackage("Baz", "0.4"), PackageUtility.CreatePackage("Baz", "0.7") };
@@ -513,6 +587,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             yield return PackageUtility.CreatePackage("Baz");
             throw new InvalidOperationException("Boom");
+        }
+
+        public void Dispose()
+        {
+            Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", _environmentVariableValue, EnvironmentVariableTarget.Process);
         }
 
         private sealed class TestInstallCommand : InstallCommand

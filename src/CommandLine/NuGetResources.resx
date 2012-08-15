@@ -453,4 +453,43 @@
   <data name="Warning_NoPromptDeprecated" xml:space="preserve">
     <value>Option 'NoPrompt' has been deprecated. Use 'NonInteractive' instead.</value>
   </data>
+  <data name="InstallCommandPackageRestoreConsentNotFound_chs" xml:space="preserve">
+    <value>默认情况下已禁用程序包还原。若要允许还原程序包，请打开 Visual Studio 的“选项”对话框，单击“程序包管理器”节点，然后选中“允许 NuGet 在生成期间下载缺少的程序包”。还可以通过将环境变量“EnableNuGetPackageRestore”设置为“true”来允许还原程序包。</value>
+  </data>
+  <data name="InstallCommandPackageRestoreConsentNotFound_cht" xml:space="preserve">
+    <value>還原封裝預設為停用。 若同意，請開啟 Visual Studio 選項對話框，按一下 [封裝管理員] 節點並勾選 [建置時允許 NuGet 下載缺少的封裝]。 您也可以透過設定環境變數「EnableNuGetPackageRestore」設定為「true」來表示同意。</value>
+  </data>
+  <data name="InstallCommandPackageRestoreConsentNotFound_csy" xml:space="preserve">
+    <value>Obnovení balíèku je ve výchozím nastavení zakázáno. Chcete-li udìlit souhlas, otevøete dialogové okno Možnosti produktu Visual Studio, kliknìte na uzel Správce balíèkù a zaškrtnìte možnost 'Povolit rozhraní NuGet stáhnout chybìjící balíèky bìhem sestavení'. Souhlas mùžete udìlit také nastavením promìnné prostøedí EnableNuGetPackageRestore na hodnotu true.</value>
+  </data>
+  <data name="InstallCommandPackageRestoreConsentNotFound_deu" xml:space="preserve">
+    <value>Die Paketwiederherstellung ist standardmäßig deaktiviert. Wenn Sie Ihre Zustimmung erteilen möchten, öffnen Sie das Dialogfeld "Optionen" von Visual Studio, klicken Sie auf den Knoten "Paket-Manager", und aktivieren Sie dann "NuGet das Herunterladen fehlender Pakete während des Builds erlauben". Sie können Ihre Zustimmung erteilen, indem Sie die Umgebungsvariable "EnableNuGetPackageRestore" auf "true" festlegen.</value>
+  </data>
+  <data name="InstallCommandPackageRestoreConsentNotFound_esn" xml:space="preserve">
+    <value>De manera predeterminada, restauración de paquetes está deshabilitada. Para dar su consentimiento, abra el cuadro de diálogo Opciones de Visual Studio, haga clic en el nodo Administrador de paquetes y active la opción para permitir que NuGet descargue los paquetes faltantes durante la compilación. También puede dar su consentimiento al establecer la variable de entorno 'EnableNuGetPackageRestore' en 'true'.</value>
+  </data>
+  <data name="InstallCommandPackageRestoreConsentNotFound_fra" xml:space="preserve">
+    <value>La fonctionnalité de restauration des packages est désactivée par défaut. Pour donner votre accord, ouvrez la boîte de dialogue Options de Visual Studio, cliquez sur le nœud Gestionnaire de package et activez l’option « Autoriser NuGet à télécharger les packages manquants lors de la génération ». Vous pouvez également donner votre accord en définissant la variable d’environnement « EnableNuGetPackageRestore » sur « true ».</value>
+  </data>
+  <data name="InstallCommandPackageRestoreConsentNotFound_ita" xml:space="preserve">
+    <value>Il ripristino dei pacchetti è disabilitato per impostazione predefinita. Per abilitarlo, aprire la finestra di dialogo Opzioni di Visual Studio, fare clic sul nodo Gestione pacchetti e selezionare l'opzione che consente a NuGet di scaricare pacchetti mancanti durante la compilazione. È anche possibile abilitare il ripristino dei pacchetti impostando la variabile di ambiente 'EnableNuGetPackageRestore' su 'true'.</value>
+  </data>
+  <data name="InstallCommandPackageRestoreConsentNotFound_jpn" xml:space="preserve">
+    <value>パッケージの復元は既定で無効になっています。確認のため、Visual Studio の [オプション] ダイアログ ボックスを開き、Package Manager ノードをクリックして、[NuGet がビルド中に存在しないパッケージをダウンロードするのを許可する] チェック ボックスをオンにします。また、環境変数 'EnableNuGetPackageRestore' を true に設定して確認することもできます。</value>
+  </data>
+  <data name="InstallCommandPackageRestoreConsentNotFound_kor" xml:space="preserve">
+    <value>패키지 복원은 기본적으로 사용하지 않도록 설정됩니다. 동의하려면 Visual Studio 옵션 대화 상자를 열어 패키지 관리자 노드를 클릭하고 '빌드하는 동안 누락된 패키지를 다운로드하도록 NuGet 허용'을 선택합니다. 환경 변수 'EnableNuGetPackageRestore'를 'true'로 설정해 동의할 수도 있습니다.</value>
+  </data>
+  <data name="InstallCommandPackageRestoreConsentNotFound_plk" xml:space="preserve">
+    <value>Przywracanie pakietów jest domyślnie wyłączone. Aby wyrazić zgodę, otwórz okno dialogowe Opcje programu Visual Studio, kliknij węzeł Menedżer pakietów i zaznacz pozycję „Zezwalaj programowi NuGet na pobieranie brakujących pakietów podczas kompilowania”. Zgodę możesz także wyrazić, ustawiając zmienną środowiskową „EnableNuGetPackageRestore” na wartość „true”.</value>
+  </data>
+  <data name="InstallCommandPackageRestoreConsentNotFound_ptb" xml:space="preserve">
+    <value>A restauração de pacotes está desabilitada por padrão. Para dar permissão, abra o diálogo Opções do Visual Studio, clique no nó do Gerenciador de Pacotes e marque 'Permitir que o NuGet baixe os pacotes ausentes durante a compilação'. Também é possível dar permissão configurando a variável de ambiente 'EnableNuGetPackageRestore' para 'true'.</value>
+  </data>
+  <data name="InstallCommandPackageRestoreConsentNotFound_rus" xml:space="preserve">
+    <value>По умолчанию восстановление пакетов выключено. Чтобы разрешить его, откройте диалоговое окно "Параметры" в Visual Studio, щелкните узел диспетчера пакетов и установите флажок "Разрешить NuGet загружать недостающие пакеты при построении". Это также можно сделать, задав для переменной среды "EnableNuGetPackageRestore" значение "true".</value>
+  </data>
+  <data name="InstallCommandPackageRestoreConsentNotFound_trk" xml:space="preserve">
+    <value>Paketi geri yükleme varsayýlan olarak devre dýþý. Ýzin vermek için Visual Studio Seçenekleri iletiþim kutusunu açýn, Package Manager  (Paket Yöneticisi) düðümünü týklatýn ve 'Allow NuGet to download missing packages during build' (NuGet'in derleme sýrasýnda eksik paketleri indirmesine izin ver) öðesini iþaretleyin. Ayrýca 'EnableNuGetPackageRestore' ortam deðiþkenini 'true' olarak ayarlayarak da izin verebilirsiniz.</value>
+  </data>
 </root>

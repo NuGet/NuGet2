@@ -410,4 +410,7 @@ nuget update -Self</value>
   <data name="CommandApiKey" xml:space="preserve">
     <value>The API key for the server.</value>
   </data>
+  <data name="InstallCommandRequireConsent" xml:space="preserve">
+    <value>Checks if package restore consent is granted before installing a package.</value>
+  </data>
 </root>
