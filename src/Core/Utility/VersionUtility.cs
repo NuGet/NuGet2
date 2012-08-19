@@ -547,7 +547,8 @@ namespace NuGet
 
             // Default framework for assembly references with an unspecified framework name
             // always match the project framework's identifier by is the lowest possible version
-            var defaultFramework = new FrameworkName(projectFramework.Identifier, new Version(), projectFramework.Profile);
+            // Not all projects have a framework, we need to consider those projects.
+            var defaultFramework = projectFramework != null ? new FrameworkName(projectFramework.Identifier, new Version(), projectFramework.Profile) : null;
 
             // Turn something that looks like this:
             // item -> [Framework1, Framework2, Framework3] into
@@ -565,10 +566,11 @@ namespace NuGet
             var frameworkGroups = normalizedItems.GroupBy(g => g.TargetFramework ?? defaultFramework, g => g.Item);
 
             // Try to find the best match
+            // Not all projects have a framework, we need to consider those projects.
             compatibleItems = (from g in frameworkGroups
-                               where IsCompatible(projectFramework, g.Key)
+                               where projectFramework != null ? IsCompatible(projectFramework, g.Key) : g.Key == null
                                orderby GetProfileCompatibility(projectFramework, g.Key) descending,
-                                       g.Key.Version descending
+                                       g.Key == null ? new Version(0, 0) : g.Key.Version descending
                                select g).FirstOrDefault();
 
             return compatibleItems != null && compatibleItems.Any();
@@ -656,6 +658,12 @@ namespace NuGet
         private static int GetProfileCompatibility(FrameworkName frameworkName, FrameworkName targetFrameworkName)
         {
             int compatibility = 0;
+
+            // Not all projects have a framework, we need to consider those projects.
+            if (frameworkName == null || targetFrameworkName == null)
+            {
+                return compatibility;
+            }
 
             if (NormalizeVersion(frameworkName.Version) == NormalizeVersion(targetFrameworkName.Version))
             {
