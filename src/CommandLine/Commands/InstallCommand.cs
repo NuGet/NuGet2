@@ -147,11 +147,15 @@ namespace NuGet.Commands
 
         private IPackageRepository GetRepository()
         {
-            var repository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
+            var repository = AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source, useBlobStorageSourceForDefault: true);
+            
             bool ignoreFailingRepositories = repository.IgnoreFailingRepositories;
             if (!NoCache)
             {
-                repository = new AggregateRepository(new[] { CacheRepository, repository }) { IgnoreFailingRepositories = ignoreFailingRepositories };
+                repository = new AggregateRepository(new[] { CacheRepository, repository }) 
+                { 
+                    IgnoreFailingRepositories = ignoreFailingRepositories 
+                };
             }
             repository.Logger = Console;
             return repository;

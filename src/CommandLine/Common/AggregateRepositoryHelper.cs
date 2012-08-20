@@ -1,26 +1,30 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NuGet.Common
 {
     public static class AggregateRepositoryHelper
     {
-        public static AggregateRepository CreateAggregateRepositoryFromSources(IPackageRepositoryFactory factory, IPackageSourceProvider sourceProvider, IEnumerable<string> sources)
+        public static AggregateRepository CreateAggregateRepositoryFromSources(IPackageRepositoryFactory factory, IPackageSourceProvider sourceProvider, IEnumerable<string> sources, 
+            bool useBlobStorageSourceForDefault = false)
         {
-            AggregateRepository repository;
-            if (sources != null && sources.Any())
-            {
-                var repositories = sources.Select(s => sourceProvider.ResolveSource(s))
-                                             .Select(factory.CreateRepository)
-                                             .ToList();
-                repository = new AggregateRepository(repositories);
-            }
-            else
-            {
-                repository = sourceProvider.GetAggregate(factory, ignoreFailingRepositories: true);
-            }
+            bool ignoreFailingRepositories = sources.IsEmpty();
+            sources = sources.IsEmpty() ? sourceProvider.GetEnabledPackageSources().Select(s => s.Source) : 
+                                          sources.Select(s => sourceProvider.ResolveSource(s));
+            
+            var repositories = sources.Select(s => CreateRepository(factory, s, useBlobStorageSourceForDefault))
+                                      .ToList();
+            return new AggregateRepository(repositories) { IgnoreFailingRepositories = ignoreFailingRepositories };
+        }
 
-            return repository;
+        private static IPackageRepository CreateRepository(IPackageRepositoryFactory factory, string source, bool useBlobStorageSourceForDefault)
+        {
+            if (useBlobStorageSourceForDefault && source.Equals(NuGetConstants.DefaultFeedUrl, StringComparison.OrdinalIgnoreCase))
+            {
+                return new BlobStoragePackageRepository();
+            }
+            return factory.CreateRepository(source);
         }
     }
 }
