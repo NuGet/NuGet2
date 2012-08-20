@@ -16,23 +16,28 @@
         <DefineConstants>$(DefineConstants);TRACE</DefineConstants>
         <AdditionalSettingsImport Condition=" $(AdditionalSettingsImport) == '' ">$(NuGetRoot)\Extended.Settings.targets</AdditionalSettingsImport>
     </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)' == 'Debug11'">
-      <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-
-      <ComponentHostAssembly>Microsoft.VisualStudio.ComponentModelHost, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</ComponentHostAssembly>
-      <ExtensionManagerAssembly>Microsoft.VisualStudio.ExtensionManager, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionManagerAssembly>
-      <ExtensionsExplorerAssembly>Microsoft.VisualStudio.ExtensionsExplorer, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerAssembly>
-      <ExtensionsExplorerUIAssembly>Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerUIAssembly>
+    
+    <PropertyGroup>
+        <Dev10Directory>$(MSBuildExtensionsPath)\..\Microsoft Visual Studio 10.0\Common7\IDE</Dev10Directory>
+        <Dev11Directory>$(MSBuildExtensionsPath)\..\Microsoft Visual Studio 11.0\Common7\IDE</Dev11Directory>
+        <Dev11Available Condition=" '$(VisualStudioVersion)' == '11.0' OR Exists($(Dev11Directory)) ">true</Dev11Available>
     </PropertyGroup>
-  
-    <PropertyGroup Condition="'$(Configuration)' != 'Debug11'">
-      <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-      
-      <ComponentHostAssembly>Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</ComponentHostAssembly>
-      <ExtensionManagerAssembly>Microsoft.VisualStudio.ExtensionManager, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionManagerAssembly>
-      <ExtensionsExplorerAssembly>Microsoft.VisualStudio.ExtensionsExplorer, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerAssembly>
-      <ExtensionsExplorerUIAssembly>Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerUIAssembly>
+    
+    <!-- If Dev11 is installed, we will no longer be able to open the solution from Dev10 on that box. This is a consequence of us linking against 4.5 components from the GAC -->
+    <PropertyGroup Condition=" $(Dev11Available) == true ">
+        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+        <ComponentHostAssembly>Microsoft.VisualStudio.ComponentModelHost, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</ComponentHostAssembly>
+        <ExtensionManagerAssembly>Microsoft.VisualStudio.ExtensionManager, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionManagerAssembly>
+        <ExtensionsExplorerAssembly>Microsoft.VisualStudio.ExtensionsExplorer, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerAssembly>
+        <ExtensionsExplorerUIAssembly>Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerUIAssembly>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" $(Dev11Available) != true ">
+        <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+        <ComponentHostAssembly>Microsoft.VisualStudio.ComponentModelHost, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</ComponentHostAssembly>
+        <ExtensionManagerAssembly>Microsoft.VisualStudio.ExtensionManager, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionManagerAssembly>
+        <ExtensionsExplorerAssembly>Microsoft.VisualStudio.ExtensionsExplorer, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerAssembly>
+        <ExtensionsExplorerUIAssembly>Microsoft.VisualStudio.ExtensionsExplorer.UI, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL</ExtensionsExplorerUIAssembly>
     </PropertyGroup>
 
     <!-- Common settings for Debug and Coverage builds -->
@@ -49,15 +54,6 @@
         <DebugType>pdbonly</DebugType>
         <Optimize>true</Optimize>
         <OutputPath>bin\Release\</OutputPath>
-    </PropertyGroup>
-
-    <!-- Settings only for Debug builds for VS11 -->
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug11' ">
-      <DebugSymbols>true</DebugSymbols>
-      <DebugType>full</DebugType>
-      <Optimize>false</Optimize>
-      <OutputPath>bin\Debug11\</OutputPath>
-      <DefineConstants>$(DefineConstants);DEBUG;CODE_ANALYSIS</DefineConstants>
     </PropertyGroup>
 
     <!-- Settings only for Coverage builds -->
