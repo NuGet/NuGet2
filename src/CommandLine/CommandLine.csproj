@@ -17,13 +17,6 @@
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug11|x86'">
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug11\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-  </PropertyGroup>
   <Import Project="..\..\Build\NuGet.Settings.targets" />
   <PropertyGroup>
     <ProjectGuid>{B34A6632-E627-4B66-8E0A-D2DA3BC96893}</ProjectGuid>

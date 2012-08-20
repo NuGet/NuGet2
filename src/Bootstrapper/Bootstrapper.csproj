@@ -3,19 +3,6 @@
   <PropertyGroup>
     <DefineConstants>BOOTSTRAPPER</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>$(DefineConstants);TRACE;DEBUG</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <PlatformTarget>x86</PlatformTarget>
-    <DebugType>none</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-  </PropertyGroup>
   <Import Project="..\..\Build\NuGet.Settings.targets" />
   <PropertyGroup>
     <ProjectGuid>{087B1726-2ECE-43E9-8280-9FFEAABA0DAE}</ProjectGuid>
@@ -23,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuGet</RootNamespace>
     <AssemblyName>NuGet</AssemblyName>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">Client</TargetFrameworkProfile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
