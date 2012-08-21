@@ -355,4 +355,22 @@
   <data name="Manifest_DependenciesHasMixedElements" xml:space="preserve">
     <value>&lt;dependencies&gt; element must not contain both &lt;group&gt; and &lt;dependency&gt; child elements.</value>
   </data>
+  <data name="SupportedFrameworkIsNull" xml:space="preserve">
+    <value>One of the supported framework is null.</value>
+  </data>
+  <data name="PortableFrameworkProfileComponentIsEmpty" xml:space="preserve">
+    <value>The profile part of a portable target framework must not contain empty component.</value>
+  </data>
+  <data name="PortableFrameworkProfileComponentIsPortable" xml:space="preserve">
+    <value>The profile part of a portable target framework must not contain a portable framework component.</value>
+  </data>
+  <data name="PortableFrameworkProfileEmpty" xml:space="preserve">
+    <value>Portable target framework must not have an empty profile part.</value>
+  </data>
+  <data name="PortableFrameworkProfileHasDash" xml:space="preserve">
+    <value>The profile part of a portable target framework must not contain the '-' character.</value>
+  </data>
+  <data name="PortableFrameworkProfileHasSpace" xml:space="preserve">
+    <value>The profile part of a portable target framework must not contain empty space.</value>
+  </data>
 </root>

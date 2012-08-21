@@ -18,6 +18,7 @@ namespace NuGet
         private const string WinRTFrameworkIdentifier = ".NETCore";
         private const string LessThanOrEqualTo = "\u2264";
         private const string GreaterThanOrEqualTo = "\u2265";
+        private const string PortableFrameworkIdentifier = ".NETPortable";
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security",
@@ -38,9 +39,9 @@ namespace NuGet
             { "netmf", ".NETMicroFramework" },
             { "SL", "Silverlight" },
             { "Silverlight", "Silverlight" },
-            { ".NETPortable", ".NETPortable" },
-            { "NETPortable", ".NETPortable" },
-            { "portable", ".NETPortable" },
+            { ".NETPortable", PortableFrameworkIdentifier },
+            { "NETPortable", PortableFrameworkIdentifier },
+            { "portable", PortableFrameworkIdentifier },
             { "wp", "WindowsPhone" },
             { "WindowsPhone", "WindowsPhone" },
         };
@@ -57,8 +58,9 @@ namespace NuGet
             { NetFrameworkIdentifier, "net" },
             { ".NETMicroFramework", "netmf" },
             { "Silverlight", "sl" },
-            { ".NETCore", "winrt"},
-            { "WindowsPhone", "phone"}
+            { ".NETCore", "netcore"},
+            { ".NETPortable", "portable" },
+            { "WindowsPhone", "wp"}
         };
 
         private static readonly Dictionary<string, string> _identifierToProfileFolder = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
@@ -217,7 +219,45 @@ namespace NuGet
                 identifierPart = NetFrameworkIdentifier;
             }
 
+            // if this is a .NET Portable framework name, validate the profile part to ensure it is valid
+            if (identifierPart.Equals(PortableFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
+            {
+                ValidatePortableFrameworkProfilePart(profilePart);
+            }
+
             return new FrameworkName(identifierPart, version, profilePart);
+        }
+
+        internal static void ValidatePortableFrameworkProfilePart(string profilePart)
+        {
+            if (String.IsNullOrEmpty(profilePart))
+            {
+                throw new ArgumentException(NuGetResources.PortableFrameworkProfileEmpty, "profilePart");
+            }
+
+            if (profilePart.Contains('-'))
+            {
+                throw new ArgumentException(NuGetResources.PortableFrameworkProfileHasDash, "profilePart");
+            }
+
+            if (profilePart.Contains(' '))
+            {
+                throw new ArgumentException(NuGetResources.PortableFrameworkProfileHasSpace, "profilePart");
+            }
+
+            string[] parts = profilePart.Split('+');
+            if (parts.Any(p => String.IsNullOrEmpty(p)))
+            {
+                throw new ArgumentException(NuGetResources.PortableFrameworkProfileComponentIsEmpty, "profilePart");
+            }
+
+            // Prevent portable framework inside a portable framework - Inception
+            if (parts.Any(p => p.StartsWith("portable", StringComparison.OrdinalIgnoreCase)) ||
+                parts.Any(p => p.StartsWith("NETPortable", StringComparison.OrdinalIgnoreCase)) ||
+                parts.Any(p => p.StartsWith(".NETPortable", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new ArgumentException(NuGetResources.PortableFrameworkProfileComponentIsPortable, "profilePart");
+            }
         }
 
         /// <summary>
@@ -456,19 +496,35 @@ namespace NuGet
             {
                 name = frameworkName.Identifier;
             }
-
-            // Remove the . from versions
-            name += frameworkName.Version.ToString().Replace(".", String.Empty);
-
-            if (String.IsNullOrEmpty(frameworkName.Profile))
-            {
-                return name;
-            }
-
+            
+            // for Portable framework name, the short name has the form "portable-sl4+wp7+net45"
             string profile;
-            if (!_identifierToProfileFolder.TryGetValue(frameworkName.Profile, out profile))
+            if (name.Equals("portable", StringComparison.OrdinalIgnoreCase))
             {
-                profile = frameworkName.Profile;
+                NetPortableProfile portableProfile = NetPortableProfile.Parse(frameworkName.Profile);
+                if (portableProfile != null)
+                {
+                    profile = portableProfile.CustomProfileString;
+                }
+                else
+                {
+                    profile = frameworkName.Profile;
+                }
+            }
+            else
+            {
+                // Remove the . from versions
+                name += frameworkName.Version.ToString().Replace(".", String.Empty);
+
+                if (String.IsNullOrEmpty(frameworkName.Profile))
+                {
+                    return name;
+                }
+
+                if (!_identifierToProfileFolder.TryGetValue(frameworkName.Profile, out profile))
+                {
+                    profile = frameworkName.Profile;
+                }
             }
 
             return name + "-" + profile;
@@ -635,16 +691,25 @@ namespace NuGet
         }
 
         /// <summary>
-        /// Determines whether the specified framework name is compatible with the target framework.
+        /// Determines if a package's target framework can be installed into a project's framework.
         /// </summary>
-        /// <param name="frameworkName">Project framework.</param>
-        /// <param name="targetFrameworkName">Package framework.</param>
+        /// <param name="frameworkName">The project's framework</param>
+        /// <param name="targetFrameworkName">The package's target framework</param>
         internal static bool IsCompatible(FrameworkName frameworkName, FrameworkName targetFrameworkName)
         {
-            FrameworkName aliasTargetFrameworkName;
-            if (_packageFrameworkNameAlias.TryGetValue(targetFrameworkName, out aliasTargetFrameworkName)) 
+            // Treat portable library specially
+            if (targetFrameworkName.Identifier.Equals(PortableFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
             {
-                targetFrameworkName = aliasTargetFrameworkName;
+                return IsPortableLibraryCompatible(frameworkName, targetFrameworkName);
+            }
+
+            if (!frameworkName.Identifier.Equals(targetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase))
+            {
+                FrameworkName aliasTargetFrameworkName;
+                if (_packageFrameworkNameAlias.TryGetValue(targetFrameworkName, out aliasTargetFrameworkName))
+                {
+                    targetFrameworkName = aliasTargetFrameworkName;
+                }
             }
 
             string identifier = frameworkName.Identifier;
@@ -666,7 +731,7 @@ namespace NuGet
                 return false;
             }
 
-            if (NormalizeVersion(frameworkName.Version) <
+            if (NormalizeVersion(frameworkName.Version) < 
                 NormalizeVersion(targetFrameworkName.Version))
             {
                 return false;
@@ -692,6 +757,42 @@ namespace NuGet
             }
 
             return false;
+        }
+
+        private static bool IsPortableLibraryCompatible(FrameworkName frameworkName, FrameworkName targetFrameworkName)
+        {
+            if (String.IsNullOrEmpty(targetFrameworkName.Profile)) 
+            {
+                return false;
+            }
+
+            NetPortableProfile targetFrameworkPortableProfile = NetPortableProfile.Parse(targetFrameworkName.Profile);
+            if (targetFrameworkPortableProfile == null)
+            {
+                return false;
+            }
+
+            if (frameworkName.Identifier.Equals(PortableFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
+            {
+                // this is the case with Portable Library vs. Portable Library
+                if (String.Equals(frameworkName.Profile, targetFrameworkName.Profile, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                NetPortableProfile frameworkPortableProfile = NetPortableProfile.Parse(frameworkName.Profile);
+                if (frameworkPortableProfile == null)
+                {
+                    return false;
+                }
+
+                return targetFrameworkPortableProfile.IsCompatibleWith(frameworkPortableProfile);
+            }
+            else
+            {
+                // this is the case with Portable Library installed into a normal project
+                return targetFrameworkPortableProfile.IsCompatibleWith(frameworkName);
+            }
         }
 
         /// <summary>

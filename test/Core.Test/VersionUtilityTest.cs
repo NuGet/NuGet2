@@ -162,7 +162,7 @@ namespace NuGet.Test
         public void ParseFrameworkNameNormalizesSupportedPortableNetFrameworkNames()
         {
             // Arrange
-            var knownNameFormats = new[] { ".netportable", "netportable", "portable" };
+            var knownNameFormats = new[] { ".netportable-sl3", "netportable-net4", "portable-netcore45" };
             Version defaultVersion = new Version("0.0");
 
             // Act
@@ -1043,6 +1043,198 @@ namespace NuGet.Test
                 yield return new object[] { "(1.6)", new VersionSpec { MinVersion = new SemanticVersion("1.6"), MaxVersion = new SemanticVersion("1.6"), IsMinInclusive = false, IsMaxInclusive = false } };
                 yield return new object[] { "[2.7]", new VersionSpec { MinVersion = new SemanticVersion("2.7"), MaxVersion = new SemanticVersion("2.7"), IsMinInclusive = true, IsMaxInclusive = true } };
             }
+        }
+
+        [Fact]
+        public void ParsePortableFrameworkNameThrowsIfProfileIsEmpty()
+        {
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => VersionUtility.ParseFrameworkName("portable45"),
+                "profilePart",
+                "Portable target framework must not have an empty profile part.");
+        }
+
+        [Fact]
+        public void ParsePortableFrameworkNameThrowsIfProfileContainsASpace()
+        {
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => VersionUtility.ParseFrameworkName("portable45-sl4 net45"),
+                "profilePart",
+                "The profile part of a portable target framework must not contain empty space.");
+        }
+
+        [Fact]
+        public void ParsePortableFrameworkNameThrowsIfProfileContainsEmptyComponent()
+        {
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => VersionUtility.ParseFrameworkName("portable45-sl4++net45"),
+                "profilePart",
+                "The profile part of a portable target framework must not contain empty component.");
+        }
+
+        [Fact]
+        public void ParsePortableFrameworkNameThrowsIfProfileContainsPortableFramework()
+        {
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => VersionUtility.ParseFrameworkName("portable-net45+portable"),
+                "profilePart",
+                "The profile part of a portable target framework must not contain a portable framework component.");
+        }
+
+        [Fact]
+        public void TestGetShortNameForPortableFramework()
+        {
+            // Arrange
+            NetPortableProfileTable.Profiles = BuildProfileCollection();
+
+            var framework = new FrameworkName(".NETPortable, Version=4.0, Profile=Profile1");
+
+            // Act-1
+            string shortName = VersionUtility.GetShortFrameworkName(framework);
+
+            // Assert-2
+            Assert.Equal("portable-net45+sl40+wp71", shortName);
+
+            // Arrange
+            var framework2 = new FrameworkName(".NETPortable, Version=4.0, Profile=Profile2");
+
+            // Act-2
+            string shortName2 = VersionUtility.GetShortFrameworkName(framework2);
+
+            // Assert-2
+            Assert.Equal("portable-netcore45+sl30+wp71", shortName2);
+        }
+
+        [Fact]
+        public void IsCompatibleReturnsTrueForPortableFrameworkAndNormalFramework()
+        {
+            // Arrange
+            var portableFramework = VersionUtility.ParseFrameworkName("portable-netcore45+sl4");
+            var normalFramework = VersionUtility.ParseFrameworkName("silverlight45");
+
+            // Act
+            bool isCompatible = VersionUtility.IsCompatible(normalFramework, portableFramework);
+
+            // Assert
+            Assert.True(isCompatible);
+        }
+
+        [Fact]
+        public void IsCompatibleReturnsFalseForPortableFrameworkAndNormalFramework()
+        {
+            // Arrange
+            var portableFramework = VersionUtility.ParseFrameworkName("portable-netcore45+sl4");
+            var normalFramework = VersionUtility.ParseFrameworkName("silverlight3");
+
+            // Act
+            bool isCompatible = VersionUtility.IsCompatible(normalFramework, portableFramework);
+
+            // Assert
+            Assert.False(isCompatible);
+        }
+
+        [Fact]
+        public void IsCompatibleReturnsFalseForPortableFrameworkAndNormalFramework2()
+        {
+            // Arrange
+            var portableFramework = VersionUtility.ParseFrameworkName("portable-netcore45+sl4");
+            var normalFramework = VersionUtility.ParseFrameworkName("wp7");
+
+            // Act
+            bool isCompatible = VersionUtility.IsCompatible(normalFramework, portableFramework);
+
+            // Assert
+            Assert.False(isCompatible);
+        }
+
+        [Theory]
+        [InlineData("silverlight4")]
+        [InlineData("silverlight3")]
+        [InlineData("silverlight5")]
+        [InlineData("netcore45")]
+        [InlineData("netcore5")]
+        public void IsCompatibleReturnsFalseForNormalFrameworkAndPortableFramework(string frameworkValue)
+        {
+            // Arrange
+            var portableFramework = VersionUtility.ParseFrameworkName("portable-netcore45+sl4");
+            var normalFramework = VersionUtility.ParseFrameworkName(frameworkValue);
+
+            // Act
+            bool isCompatible = VersionUtility.IsCompatible(portableFramework, normalFramework);
+
+            // Assert
+            Assert.False(isCompatible);
+        }
+
+        [Theory]
+        [InlineData("portable-netcore45+sl4+wp", "portable-netcore45+sl4")]
+        [InlineData("portable-netcore45+sl4+wp", "portable-netcore5+wp7")]
+        [InlineData("portable-netcore45+sl4+wp+net", "portable-wp7")]
+        public void IsCompatibleReturnsTrueForPortableFrameworkAndPortableFramework(string packageFramework, string projectFramework)
+        {
+            // Arrange
+            var packagePortableFramework = VersionUtility.ParseFrameworkName(packageFramework);
+            var projectPortableFramework = VersionUtility.ParseFrameworkName(projectFramework);
+
+            // Act
+            bool isCompatible = VersionUtility.IsCompatible(projectPortableFramework, packagePortableFramework);
+
+            // Assert
+            Assert.True(isCompatible);
+        }
+
+        [Theory]
+        [InlineData("portable-netcore45+sl4+wp", "portable-netcore4+sl4")]
+        [InlineData("portable-netcore45+sl4+wp", "portable-netcore5+wp7+net")]
+        [InlineData("portable-netcore45+sl4+wp+net", "portable-wp7+netcore4")]
+        [InlineData("portable-netcore45+sl4", "portable-net4+wp7")]
+        public void IsCompatibleReturnsFalseForPortableFrameworkAndPortableFramework(string packageFramework, string projectFramework)
+        {
+            // Arrange
+            var packagePortableFramework = VersionUtility.ParseFrameworkName(packageFramework);
+            var projectPortableFramework = VersionUtility.ParseFrameworkName(projectFramework);
+
+            // Act
+            bool isCompatible = VersionUtility.IsCompatible(projectPortableFramework, packagePortableFramework);
+
+            // Assert
+            Assert.False(isCompatible);
+        }
+
+        private NetPortableProfileCollection BuildProfileCollection()
+        {
+            var profileCollection = new NetPortableProfileCollection();
+            var profile1 = new NetPortableProfile(
+               "Profile1",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=4.0"), 
+                           new FrameworkName("WindowsPhone, Version=7.1"), 
+                      });
+
+            var profile2 = new NetPortableProfile(
+               "Profile2",
+               new[] { 
+                           new FrameworkName(".NetCore, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=3.0"), 
+                           new FrameworkName("WindowsPhone, Version=7.1"), 
+                      });
+
+            var profile3 = new NetPortableProfile(
+               "Profile3",
+               new[] { 
+                           new FrameworkName(".NetCore, Version=4.5"), 
+                           new FrameworkName(".NETFramework, Version=2.0"), 
+                      });
+            profileCollection.Add(profile1);
+            profileCollection.Add(profile2);
+            profileCollection.Add(profile3);
+
+            return profileCollection;
         }
     }
 }
