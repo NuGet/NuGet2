@@ -213,6 +213,24 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void ParseFrameworkNameNormalizesSupportedWindowsFrameworkNames()
+        {
+            // Arrange
+            var knownNameFormats = new[] { "Windows", "win" };
+            Version defaultVersion = new Version("0.0");
+
+            // Act
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+
+            // Assert
+            foreach (var frameworkName in frameworkNames)
+            {
+                Assert.Equal("Windows", frameworkName.Identifier);
+                Assert.Equal(defaultVersion, frameworkName.Version);
+            }
+        }
+
+        [Fact]
         public void ParseFrameworkNameNormalizesSupportedNetMicroFrameworkNames()
         {
             // Arrange
@@ -903,6 +921,40 @@ namespace NuGet.Test
             Assert.False(VersionUtility.IsCompatible(wp7Project, apolloPackage));
             Assert.False(VersionUtility.IsCompatible(mangoProject, apolloPackage));
             Assert.True(VersionUtility.IsCompatible(apolloProject, apolloPackage));
+        }
+
+        [Theory]
+        [InlineData("windows")]
+        [InlineData("windows8")]
+        [InlineData("win")]
+        [InlineData("win8")]
+        public void WindowsIdentifierCompatibleWithWindowsStoreAppProjects(string identifier)
+        {
+            // Arrange
+            var packageFramework = VersionUtility.ParseFrameworkName(identifier);
+
+            var projectFramework = new FrameworkName(".NETCore, Version=4.5");
+
+            // Act && Assert
+            Assert.True(VersionUtility.IsCompatible(projectFramework, packageFramework));
+        }
+
+        [Theory]
+        [InlineData("windows9")]
+        [InlineData("win9")]
+        [InlineData("win10")]
+        [InlineData("windows81")]
+        [InlineData("windows45")]
+        [InlineData("windows1")]
+        public void WindowsIdentifierWithUnsupportedVersionNotCompatibleWithWindowsStoreAppProjects(string identifier)
+        {
+            // Arrange
+            var packageFramework = VersionUtility.ParseFrameworkName(identifier);
+
+            var projectFramework = new FrameworkName(".NETCore, Version=4.5");
+
+            // Act && Assert
+            Assert.False(VersionUtility.IsCompatible(projectFramework, packageFramework));
         }
 
         [Fact]

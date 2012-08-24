@@ -15,10 +15,10 @@ namespace NuGet
     public static class VersionUtility
     {
         private const string NetFrameworkIdentifier = ".NETFramework";
-        private const string WinRTFrameworkIdentifier = ".NETCore";
+        private const string NetCoreFrameworkIdentifier = ".NETCore";
+        private const string PortableFrameworkIdentifier = ".NETPortable";
         private const string LessThanOrEqualTo = "\u2264";
         private const string GreaterThanOrEqualTo = "\u2265";
-        private const string PortableFrameworkIdentifier = ".NETPortable";
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security",
@@ -32,9 +32,9 @@ namespace NuGet
             { ".NET", NetFrameworkIdentifier },
             { "NETFramework", NetFrameworkIdentifier },
             { ".NETFramework", NetFrameworkIdentifier },
-            { "NETCore", WinRTFrameworkIdentifier},
-            { ".NETCore", WinRTFrameworkIdentifier},
-            { "WinRT", WinRTFrameworkIdentifier},
+            { "NETCore", NetCoreFrameworkIdentifier},
+            { ".NETCore", NetCoreFrameworkIdentifier},
+            { "WinRT", NetCoreFrameworkIdentifier},     // 'WinRT' is now deprecated. Use 'Windows' or 'win' instead.
             { ".NETMicroFramework", ".NETMicroFramework" },
             { "netmf", ".NETMicroFramework" },
             { "SL", "Silverlight" },
@@ -44,6 +44,8 @@ namespace NuGet
             { "portable", PortableFrameworkIdentifier },
             { "wp", "WindowsPhone" },
             { "WindowsPhone", "WindowsPhone" },
+            { "Windows", "Windows" },
+            { "win", "Windows" },
         };
 
         private static readonly Dictionary<string, string> _knownProfiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
@@ -85,12 +87,15 @@ namespace NuGet
             }
         };
 
-        // These aliases allow us to accept 'wp', 'wp70' and 'wp71' as valid target farmework folders.
+        // These aliases allow us to accept 'wp', 'wp70', 'wp71', 'windows', 'windows8' as valid target farmework folders.
         private static readonly Dictionary<FrameworkName, FrameworkName> _packageFrameworkNameAlias = new Dictionary<FrameworkName, FrameworkName>(FrameworkNameEqualityComparer.Default)
         {
             { new FrameworkName("WindowsPhone, Version=v0.0"), new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone") },
             { new FrameworkName("WindowsPhone, Version=v7.0"), new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone") },
-            { new FrameworkName("WindowsPhone, Version=v7.1"), new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71") }
+            { new FrameworkName("WindowsPhone, Version=v7.1"), new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71") },
+
+            { new FrameworkName("Windows, Version=v0.0"), new FrameworkName(".NETCore, Version=v4.5") },
+            { new FrameworkName("Windows, Version=v8.0"), new FrameworkName(".NETCore, Version=v4.5") }
         };
 
         // we treat framework name 'WindowsPhone8.0' as if 'Silverlight8.0-WindowsPhone'
