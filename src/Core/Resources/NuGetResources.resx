@@ -205,7 +205,7 @@
     <value>The replacement token '{0}' has no value.</value>
   </data>
   <data name="UnableToFindCompatibleItems" xml:space="preserve">
-    <value>Could not install package '{0}'. You are trying to install this package into a project that targets '{1}', but the package does not contain any {2} that are compatible with that framework. For more information, contact the package author.</value>
+    <value>Could not install package '{0}'. You are trying to install this package into a project that targets '{1}', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author.</value>
   </data>
   <data name="UnableToLocateDependency" xml:space="preserve">
     <value>Unable to locate dependency '{0}'. It may have been uninstalled.</value>
@@ -266,9 +266,6 @@
   </data>
   <data name="Manifest_AssemblyNameRequired" xml:space="preserve">
     <value>Assembly name is required.</value>
-  </data>
-  <data name="AssemblyReferences" xml:space="preserve">
-    <value>assembly references</value>
   </data>
   <data name="DownloadProgressStatus" xml:space="preserve">
     <value>Downloading {0} {1}...</value>

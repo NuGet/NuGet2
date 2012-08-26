@@ -192,9 +192,19 @@ namespace NuGet
         {
             // BUG 491: Installing a package with incompatible binaries still does a partial install.
             // Resolve assembly references and content files first so that if this fails we never do anything to the project
-            IEnumerable<IPackageAssemblyReference> assemblyReferences = GetCompatibleItems(Project, package.AssemblyReferences, package.GetFullName());
-            IEnumerable<FrameworkAssemblyReference> frameworkReferences = Project.GetCompatibleItemsCore(package.FrameworkAssemblies);
-            IEnumerable<IPackageFile> contentFiles = Project.GetCompatibleItemsCore(package.GetContentFiles());
+            IList<IPackageAssemblyReference> assemblyReferences = Project.GetCompatibleItemsCore(package.AssemblyReferences).ToList();
+            IList<FrameworkAssemblyReference> frameworkReferences = Project.GetCompatibleItemsCore(package.FrameworkAssemblies).ToList();
+            IList<IPackageFile> contentFiles = Project.GetCompatibleItemsCore(package.GetContentFiles()).ToList();
+
+            // If the package doesn't have any compatible assembly references or content files,
+            // throw, unless it's a meta package.
+            if (assemblyReferences.Count == 0 && frameworkReferences.Count == 0 && contentFiles.Count == 0 &&
+                (package.FrameworkAssemblies.Any() || package.AssemblyReferences.Any() || package.GetContentFiles().Any()))
+            {
+                throw new InvalidOperationException(
+                           String.Format(CultureInfo.CurrentCulture,
+                           NuGetResources.UnableToFindCompatibleItems, package.GetFullName(), Project.TargetFramework));
+            }
 
             try
             {
@@ -485,7 +495,7 @@ namespace NuGet
             }
             return Enumerable.Empty<T>();
         }
-
+       
         private PackageOperationEventArgs CreateOperation(IPackage package)
         {
             return new PackageOperationEventArgs(package, Project, PathResolver.GetInstallPath(package));
@@ -499,22 +509,6 @@ namespace NuGet
             return new Dictionary<XName, Action<XElement, XElement>>() {
                 { "configSections" , (parent, element) => parent.AddFirst(element) }
             };
-        }
-
-        private static IEnumerable<T> GetCompatibleItems<T>(IProjectSystem project, IEnumerable<T> items, string package) where T : IFrameworkTargetable
-        {
-            // A package might have references that target a specific version of the framework (.net/silverlight etc)
-            // so we try to get the highest version that satisfies the target framework i.e.
-            // if a package has 1.0, 2.0, 4.0 and the target framework is 3.5 we'd pick the 2.0 references.
-            IEnumerable<T> compatibleItems;
-            if (!project.TryGetCompatibleItems(items, out compatibleItems))
-            {
-                throw new InvalidOperationException(
-                           String.Format(CultureInfo.CurrentCulture,
-                           NuGetResources.UnableToFindCompatibleItems, package, project.TargetFramework, NuGetResources.AssemblyReferences));
-            }
-
-            return compatibleItems;
         }
 
         private class PackageFileComparer : IEqualityComparer<IPackageFile>
