@@ -230,6 +230,40 @@ namespace NuGet.VisualStudio.Test
             Assert.True(projectManager.LocalRepository.Exists(package2));
         }
 
+
+        [Fact]
+        public void InstallPackageWithOperationsInstallsMetaPackageSuccessfully()
+        {
+            // Arrange 
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), new MockPackageRepository());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<VsPackageInstallerEvents>().Object);
+
+            var package = PackageUtility.CreatePackage("foo", "1.0", dependencies: new [] { new PackageDependency("bar") });
+            sourceRepository.AddPackage(package);
+
+            var package2 = PackageUtility.CreatePackage("bar", "2.0", content: new[] { "world" });
+            sourceRepository.AddPackage(package2);
+
+            var operations = new PackageOperation[] {  
+                 new PackageOperation(package, PackageAction.Install), 
+                 new PackageOperation(package2, PackageAction.Install), 
+             };
+
+            // Act 
+            packageManager.InstallPackage(projectManager, package, operations, ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance);
+
+            // Assert 
+            Assert.True(packageManager.LocalRepository.Exists(package));
+            Assert.True(packageManager.LocalRepository.Exists(package2));
+
+            Assert.True(projectManager.LocalRepository.Exists(package));
+            Assert.True(projectManager.LocalRepository.Exists(package2));
+        }
+
         [Fact]
         public void InstallPackgeWithNullProjectManagerOnlyInstallsIntoPackageManager()
         {

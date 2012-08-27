@@ -127,6 +127,46 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void GetFilesDoesNotIncludePackageFile()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            AddPackage(fileSystem, "X", "2.0.0-alpha");
+
+            fileSystem.AddFile(@"X.2.0.0-alpha\readme.txt");
+            fileSystem.AddFile(@"X.2.0.0-alpha\x.nupkg");
+
+            var package = new UnzippedPackage(fileSystem, "X.2.0.0-alpha");
+
+            // Act
+            IList<IPackageFile> files = package.GetFiles().OrderBy(p => p.Path).ToList();
+
+            // Assert
+            Assert.Equal(1, files.Count);
+            Assert.Equal(@"readme.txt", files[0].Path);
+        }
+
+        [Fact]
+        public void GetFilesDoesNotIncludeManifestFile()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            AddPackage(fileSystem, "X", "2.0.0-alpha");
+
+            fileSystem.AddFile(@"X.2.0.0-alpha\readme.txt");
+            fileSystem.AddFile(@"X.2.0.0-alpha\y.nuspec");
+
+            var package = new UnzippedPackage(fileSystem, "X.2.0.0-alpha");
+
+            // Act
+            IList<IPackageFile> files = package.GetFiles().OrderBy(p => p.Path).ToList();
+
+            // Assert
+            Assert.Equal(1, files.Count);
+            Assert.Equal(@"readme.txt", files[0].Path);
+        }
+
+        [Fact]
         public void GetAssemblyReferencesReturnsCorrectFiles()
         {
             // Arrange
