@@ -8,8 +8,6 @@
     <description>With the Bing Map App SDK, you can now create your own map apps built on top of Bing Maps and hosted on bing.com. This package contains the required assemblies for developing map apps. It is best installed into Silverlight 4 application projects (rather than library projects).</description>
   </metadata>
   <files>
-    <file src="content\appicon.png" target="content\appicon.png" />
-    <file src="content\metadata.xml.pp" target="content\metadata.xml.pp" />
     <file src="lib\SL4\Microsoft.Maps.Core.dll" target="lib\SL4\Microsoft.Maps.Core.dll" />
     <file src="lib\SL4\Microsoft.Maps.Extended.dll" target="lib\SL4\Microsoft.Maps.Extended.dll" />
     <file src="lib\SL4\Microsoft.Maps.MapControl.Types.dll" target="lib\SL4\Microsoft.Maps.MapControl.Types.dll" />

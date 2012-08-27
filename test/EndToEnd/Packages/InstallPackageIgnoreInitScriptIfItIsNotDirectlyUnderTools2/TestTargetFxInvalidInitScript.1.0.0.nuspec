@@ -10,7 +10,7 @@
     <description>My package description.</description>
   </metadata>
   <files>
-    <file src="content\net45\test.txt" target="content\net45\test.txt" />
+    <file src="content\test.txt" target="content\test.txt" />
     <file src="tools\net30\init.ps1" target="tools\net30\init.ps1" />
     <file src="tools\net30\install.ps1" target="tools\net30\install.ps1" />
     <file src="tools\net30\uninstall.ps1" target="tools\net30\uninstall.ps1" />

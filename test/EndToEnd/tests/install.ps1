@@ -124,7 +124,7 @@ function Test-PackageWithIncompatibleAssembliesRollsInstallBack {
     $p = New-WebApplication
 
     # Act & Assert
-    Assert-Throws { Install-Package BingMapAppSDK -Project $p.Name -Source $context.RepositoryPath } "Could not install package 'BingMapAppSDK 1.0.1011.1716'. You are trying to install this package into a project that targets '.NETFramework,Version=v4.0', but the package does not contain any assembly references that are compatible with that framework. For more information, contact the package author."
+    Assert-Throws { Install-Package BingMapAppSDK -Project $p.Name -Source $context.RepositoryPath } "Could not install package 'BingMapAppSDK 1.0.1011.1716'. You are trying to install this package into a project that targets '.NETFramework,Version=v4.0', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
     Assert-Null (Get-ProjectPackage $p BingMapAppSDK 1.0.1011.1716)
     Assert-Null (Get-SolutionPackage BingMapAppSDK 1.0.1011.1716)
 }
@@ -395,7 +395,7 @@ function Test-InstallPackageWithUnsupportedReference {
     $p = New-ClassLibrary
     
     # Act
-    Assert-Throws { $p | Install-Package PackageWithUnsupportedReferences -Source $context.RepositoryRoot } "Could not install package 'PackageWithUnsupportedReferences 1.0'. You are trying to install this package into a project that targets '.NETFramework,Version=v4.0', but the package does not contain any assembly references that are compatible with that framework. For more information, contact the package author."
+    Assert-Throws { $p | Install-Package PackageWithUnsupportedReferences -Source $context.RepositoryRoot } "Could not install package 'PackageWithUnsupportedReferences 1.0'. You are trying to install this package into a project that targets '.NETFramework,Version=v4.0', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
 
     # Assert    
     Assert-Null (Get-ProjectPackage $p PackageWithUnsupportedReferences)
@@ -490,13 +490,13 @@ function Test-InstallPackageThatTargetsWindowsPhone {
     $p = New-WindowsPhoneClassLibrary
 
     # Arrange
-    $p | Install-Package MyAwesomeLibrary -Source $context.RepositoryRoot
+    $p | Install-Package WpPackage -Source $context.RepositoryPath
 
     # Assert
-    Assert-Package $p MyAwesomeLibrary
-    Assert-SolutionPackage MyAwesomeLibrary
-    $reference = Get-AssemblyReference $p MyAwesomeLibrary
-    Assert-True ($reference.Path.Contains("sl4-wp"))
+    Assert-Package $p WpPackage
+    Assert-SolutionPackage WpPackage
+    $reference = Get-AssemblyReference $p luan
+    Assert-True ($reference.Path.Contains("wp7"))
 }
 
 function Test-InstallPackageWithNonExistentFrameworkReferences {
@@ -926,7 +926,7 @@ function Test-InstallPackageIntoSecondProjectWithIncompatibleAssembliesDoesNotRo
 
     # Act
     $p1 | Install-Package NuGet.Core    
-    Assert-Throws { $p2 | Install-Package NuGet.Core -Version 1.4.20615.9012 } "Could not install package 'NuGet.Core 1.4.20615.9012'. You are trying to install this package into a project that targets 'Silverlight,Version=v4.0,Profile=WindowsPhone', but the package does not contain any assembly references that are compatible with that framework. For more information, contact the package author."
+    Assert-Throws { $p2 | Install-Package NuGet.Core -Version 1.4.20615.9012 } "Could not install package 'NuGet.Core 1.4.20615.9012'. You are trying to install this package into a project that targets 'Silverlight,Version=v4.0,Profile=WindowsPhone71', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
 
     # Assert    
     Assert-Package $p1 NuGet.Core
@@ -1693,15 +1693,28 @@ function Test-InstallPackageInstallContentFilesAccordingToTargetFramework2 {
     param($context)
 
     # Arrange
-    $project = New-SilverlightClassLibrary
+    $project = New-ClassLibrary
     
     # Act
     Install-Package TestTargetFxContentFiles -Project $project.Name -Source $context.RepositoryPath
     
     # Assert
     Assert-Package $project TestTargetFxContentFiles
-    Assert-Null (Get-ProjectItem $project "Sub\one.txt")
+    Assert-NotNull (Get-ProjectItem $project "Sub\one.txt")
     Assert-Null (Get-ProjectItem $project "two.txt")
+}
+
+function Test-InstallPackageThrowsIfThereIsNoCompatibleContentFiles
+{
+    param($context)
+
+    # Arrange
+    $project = New-SilverlightClassLibrary
+    
+    # Act & Assert
+
+	Assert-Throws { Install-Package TestTargetFxContentFiles -Project $project.Name -Source $context.RepositoryPath } "Could not install package 'TestTargetFxContentFiles 1.0.0'. You are trying to install this package into a project that targets 'Silverlight,Version=v4.0', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
+    Assert-NoPackage $project TestTargetFxContentFiles
 }
 
 function Test-InstallPackageExecuteCorrectInstallScriptsAccordingToTargetFramework {

@@ -45,31 +45,31 @@ function Test-VsPackageInstallerEvents {
         $cm = Get-VsComponentModel
         $installerEvents = $cm.GetService([NuGet.VisualStudio.IVsPackageInstallerEvents])
     
-        $installing = 0
-        $installed = 0
-        $uninstalling = 0
-        $uninstalled = 0
+        $global:installing = 0
+        $global:installed = 0
+        $global:uninstalling = 0
+        $global:uninstalled = 0
 
         $installingHandler = {
-            $installing++
+            $global:installing++
         }
 
         $installerEvents.add_PackageInstalling($installingHandler)
 
         $installedHandler = {
-            $installed++
+            $global:installed++
         }
 
         $installerEvents.add_PackageInstalled($installedHandler)
 
         $uninstallingHandler = {
-            $uninstalling++
+            $global:uninstalling++
         }
 
         $installerEvents.add_PackageUninstalling($uninstallingHandler)
 
         $uninstalledHandler = {
-            $uninstalled++
+            $global:uninstalled++
         }
 
         $installerEvents.add_PackageUninstalled($uninstalledHandler)
@@ -77,18 +77,23 @@ function Test-VsPackageInstallerEvents {
         # Act
         $p | Install-Package jquery -Version 1.5 -Source $context.RepositoryPath
         $p | Uninstall-Package jquery
-        
+
         # Assert
-        Assert-AreEqual 1 $installing
-        Assert-AreEqual 1 $installed
-        Assert-AreEqual 1 $uninstalling
-        Assert-AreEqual 1 $uninstalled
+        Assert-AreEqual 1 $global:installing
+        Assert-AreEqual 1 $global:installed
+        Assert-AreEqual 1 $global:uninstalling
+        Assert-AreEqual 1 $global:uninstalled
     }
     finally {
         $installerEvents.remove_PackageInstalling($installingHandler)
         $installerEvents.remove_PackageInstalled($installedHandler)
         $installerEvents.remove_PackageUninstalling($uninstallingHandler)
         $installerEvents.remove_PackageUninstalled($uninstalledHandler)
+
+		Remove-Variable "installing"   -scope global
+		Remove-Variable "installed"    -scope global
+		Remove-Variable "uninstalling" -scope global
+		Remove-Variable "uninstalled"  -scope global
     }
 }
 
