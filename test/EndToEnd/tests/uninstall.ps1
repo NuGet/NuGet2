@@ -677,25 +677,25 @@ function Test-UninstallingSatellitePackageRemovesFilesFromRuntimePackageFolder
     Assert-PathNotExists (Join-Path $solutionDir packages\PackageWithStrongNamedLib.1.1\lib\ja-jp\Core.xml)
 }
 
-function Test-UninstallingSatellitePackageDoesNotRemoveCollidingRuntimeFilesWhenContentsDiffer
-{
-    param(
-        $context
-    )
-
-    # Arrange
-    $p = New-ClassLibrary
-    $solutionDir = Get-SolutionDir
-
-    # Act
-    $p | Install-Package PackageWithStrongNamedLib -Source $context.RepositoryPath
-    $p | Install-Package PackageWithStrongNamedLib.ja-jp -Source $context.RepositoryPath
-
-    $p | Uninstall-Package PackageWithStrongNamedLib.ja-jp 
-
-    # Assert (the resources from the satellite package are copied into the runtime package's folder)
-    Assert-PathExists (Join-Path $solutionDir packages\PackageWithStrongNamedLib.1.1\lib\ja-jp\collision-differences.txt)
-}
+#function Test-UninstallingSatellitePackageDoesNotRemoveCollidingRuntimeFilesWhenContentsDiffer
+#{
+#    param(
+#        $context
+#    )
+#
+#    # Arrange
+#    $p = New-ClassLibrary
+#    $solutionDir = Get-SolutionDir
+#
+#    # Act
+#    $p | Install-Package PackageWithStrongNamedLib -Source $context.RepositoryPath
+#    $p | Install-Package PackageWithStrongNamedLib.ja-jp -Source $context.RepositoryPath
+#
+#    $p | Uninstall-Package PackageWithStrongNamedLib.ja-jp 
+#
+#    # Assert (the resources from the satellite package are copied into the runtime package's folder)
+#    Assert-PathExists (Join-Path $solutionDir packages\PackageWithStrongNamedLib.1.1\lib\ja-jp\collision-differences.txt)
+#}
 
 function Test-UninstallingSatellitePackageDoesRemoveCollidingRuntimeFilesWhenContentsMatch
 {

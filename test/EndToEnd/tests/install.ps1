@@ -549,9 +549,9 @@ function Test-SimpleBindingRedirects {
     # Arrange
     $a = New-WebApplication
     $b = New-WebSite
-    $c = New-FSharpConsoleApplication
+    
 
-    $projects = @($a, $b, $c)
+    $projects = @($a, $b)
 
     # Act
     $projects | Install-Package B -Version 2.0 -Source $context.RepositoryPath
@@ -569,8 +569,6 @@ function Test-SimpleBindingRedirects {
     Assert-BindingRedirect $a web.config D '0.0.0.0-2.0.0.0' '2.0.0.0'
     Assert-BindingRedirect $b web.config B '0.0.0.0-2.0.0.0' '2.0.0.0'
     Assert-BindingRedirect $b web.config D '0.0.0.0-2.0.0.0' '2.0.0.0'
-    Assert-BindingRedirect $c app.config B '0.0.0.0-2.0.0.0' '2.0.0.0'
-    Assert-BindingRedirect $c app.config D '0.0.0.0-2.0.0.0' '2.0.0.0'
 }
 
 function Test-BindingRedirectDoesNotAddToSilverlightProject {
