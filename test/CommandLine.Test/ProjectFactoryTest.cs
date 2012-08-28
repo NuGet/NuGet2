@@ -63,18 +63,5 @@ namespace NuGet.Test
 </package>";
             Assert.Equal(expected, actual);
         }
-        
-        [Fact]
-        public void ProjectFactoryCreatesBuilderForPreprocessor()
-        {
-            var solutionDir = ProjectHelper.GetSolutionDir(Environment.CurrentDirectory);
-            var pathToProjectFile = Path.Combine(solutionDir, "src", "Core", "Core.csproj");
-            var projectFactory = new ProjectFactory(pathToProjectFile);
-
-            var builder = projectFactory.CreateBuilder(null);
-
-            Assert.Equal("\x00a9 Outercurve Foundation. All rights reserved.", builder.Copyright);
-        }
-
     }
 }
