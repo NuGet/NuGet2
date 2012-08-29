@@ -275,5 +275,32 @@ namespace NuGet.Resources {
                 return ResourceManager.GetString("UnrecognizedScriptTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The file at &apos;{0}&apos; uses the obsolete &apos;WinRT&apos; as the framework folder..
+        /// </summary>
+        internal static string WinRTObsoleteDescription {
+            get {
+                return ResourceManager.GetString("WinRTObsoleteDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Replace &apos;WinRT&apos; or &apos;WinRT45&apos; with &apos;Windows8&apos;..
+        /// </summary>
+        internal static string WinRTObsoleteSolution {
+            get {
+                return ResourceManager.GetString("WinRTObsoleteSolution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The framework name &apos;WinRT&apos; is obsolete..
+        /// </summary>
+        internal static string WinRTObsoleteTitle {
+            get {
+                return ResourceManager.GetString("WinRTObsoleteTitle", resourceCulture);
+            }
+        }
     }
 }

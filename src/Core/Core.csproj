@@ -48,6 +48,7 @@
     <Compile Include="Analysis\Rules\MisplacedScriptFileRule.cs" />
     <Compile Include="Analysis\Rules\MisplacedTransformFileRule.cs" />
     <Compile Include="Analysis\Rules\MissingSummaryRule.cs" />
+    <Compile Include="Analysis\Rules\WinRTNameIsObsoleteRule.cs" />
     <Compile Include="Authoring\AssemblyMetadata.cs" />
     <Compile Include="Authoring\AssemblyMetadataExtractor.cs" />
     <Compile Include="Authoring\EmptyFrameworkFolderFile.cs" />
