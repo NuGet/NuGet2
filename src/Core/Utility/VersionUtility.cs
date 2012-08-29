@@ -94,23 +94,16 @@ namespace NuGet
         };
 
         // These aliases allow us to accept 'wp', 'wp70', 'wp71', 'windows', 'windows8' as valid target farmework folders.
-        private static readonly Dictionary<FrameworkName, FrameworkName> _packageFrameworkNameAlias = new Dictionary<FrameworkName, FrameworkName>(FrameworkNameEqualityComparer.Default)
+        private static readonly Dictionary<FrameworkName, FrameworkName> _frameworkNameAlias = new Dictionary<FrameworkName, FrameworkName>(FrameworkNameEqualityComparer.Default)
         {
             { new FrameworkName("WindowsPhone, Version=v0.0"), new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone") },
             { new FrameworkName("WindowsPhone, Version=v7.0"), new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone") },
             { new FrameworkName("WindowsPhone, Version=v7.1"), new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71") },
+            { new FrameworkName("WindowsPhone, Version=v8.0"), new FrameworkName("Silverlight, Version=v8.0, Profile=WindowsPhone") },
 
             { new FrameworkName("Windows, Version=v0.0"), new FrameworkName(".NETCore, Version=v4.5") },
             { new FrameworkName("Windows, Version=v8.0"), new FrameworkName(".NETCore, Version=v4.5") }
         };
-
-        // we treat framework name 'WindowsPhone8.0' as if 'Silverlight8.0-WindowsPhone'
-        // this alias applies to the Project's target framework
-        private static readonly Dictionary<string, Tuple<string, string>> _identifierAlias = new Dictionary<string, Tuple<string, string>>(StringComparer.OrdinalIgnoreCase)
-            {
-                // origininal id                  new id        new profile
-                { "WindowsPhone", Tuple.Create("Silverlight", "WindowsPhone") }
-            };
 
         public static Version DefaultTargetFrameworkVersion
         {
@@ -659,7 +652,7 @@ namespace NuGet
             compatibleItems = (from g in frameworkGroups
                                where IsCompatible(internalProjectFramework, g.Key)
                                orderby GetProfileCompatibility(internalProjectFramework, g.Key) descending,
-                                       g.Key.Version descending
+                                       GetEffectiveFrameworkVersion(projectFramework, g.Key) descending
                                select g).FirstOrDefault();
 
             return compatibleItems != null && compatibleItems.Any();
@@ -671,6 +664,17 @@ namespace NuGet
                                verison.Minor,
                                Math.Max(verison.Build, 0),
                                Math.Max(verison.Revision, 0));
+        }
+
+        internal static FrameworkName NormalizeFrameworkName(FrameworkName framework)
+        {
+            FrameworkName aliasFramework;
+            if (_frameworkNameAlias.TryGetValue(framework, out aliasFramework))
+            {
+                return aliasFramework;
+            }
+
+            return framework;
         }
 
         /// <summary>
@@ -713,35 +717,15 @@ namespace NuGet
         internal static bool IsCompatible(FrameworkName frameworkName, FrameworkName targetFrameworkName)
         {
             // Treat portable library specially
-            if (targetFrameworkName.Identifier.Equals(PortableFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
+            if (targetFrameworkName.IsPortableFramework())
             {
                 return IsPortableLibraryCompatible(frameworkName, targetFrameworkName);
             }
 
+            targetFrameworkName = NormalizeFrameworkName(targetFrameworkName);
+            frameworkName = NormalizeFrameworkName(frameworkName);
+
             if (!frameworkName.Identifier.Equals(targetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase))
-            {
-                FrameworkName aliasTargetFrameworkName;
-                if (_packageFrameworkNameAlias.TryGetValue(targetFrameworkName, out aliasTargetFrameworkName))
-                {
-                    targetFrameworkName = aliasTargetFrameworkName;
-                }
-            }
-
-            string identifier = frameworkName.Identifier;
-            string profile = frameworkName.Profile;
-
-            if (!identifier.Equals(targetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase))
-            {
-                // if Ids do not match, check to see if Id alias does
-                Tuple<string, string> alias;
-                if (_identifierAlias.TryGetValue(identifier, out alias))
-                {
-                    identifier = alias.Item1;
-                    profile = alias.Item2;
-                }
-            }
-
-            if (!identifier.Equals(targetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
@@ -753,21 +737,21 @@ namespace NuGet
             }
 
             // If the profile names are equal then they're compatible
-            if (String.Equals(profile, targetFrameworkName.Profile, StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(frameworkName.Profile, targetFrameworkName.Profile, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
 
             // Get the compatibility mapping for this framework identifier
             CompatibilityMapping mapping;
-            if (_compatibiltyMapping.TryGetValue(identifier, out mapping))
+            if (_compatibiltyMapping.TryGetValue(frameworkName.Identifier, out mapping))
             {
                 // Get all compatible profiles for the target profile
                 string[] compatibleProfiles;
                 if (mapping.TryGetValue(targetFrameworkName.Profile, out compatibleProfiles))
                 {
                     // See if this profile is in the list of compatible profiles
-                    return compatibleProfiles.Contains(profile, StringComparer.OrdinalIgnoreCase);
+                    return compatibleProfiles.Contains(frameworkName.Profile, StringComparer.OrdinalIgnoreCase);
                 }
             }
 
@@ -787,7 +771,7 @@ namespace NuGet
                 return false;
             }
 
-            if (frameworkName.Identifier.Equals(PortableFrameworkIdentifier, StringComparison.OrdinalIgnoreCase))
+            if (frameworkName.IsPortableFramework())
             {
                 // this is the case with Portable Library vs. Portable Library
                 if (String.Equals(frameworkName.Profile, targetFrameworkName.Profile, StringComparison.OrdinalIgnoreCase))
@@ -816,6 +800,15 @@ namespace NuGet
         /// </summary>
         private static int GetProfileCompatibility(FrameworkName frameworkName, FrameworkName targetFrameworkName)
         {
+            frameworkName = NormalizeFrameworkName(frameworkName);
+            targetFrameworkName = NormalizeFrameworkName(targetFrameworkName);
+
+            if (targetFrameworkName.IsPortableFramework() && !frameworkName.IsPortableFramework())
+            {
+                // we divide by 2 to ensure Portable framework has less compatibility value than specific framework.
+                return GetProfileCompatibilityForPortableLibrary(frameworkName, targetFrameworkName) / 2;
+            }
+
             int compatibility = 0;
 
             if (NormalizeVersion(frameworkName.Version) == NormalizeVersion(targetFrameworkName.Version))
@@ -832,7 +825,46 @@ namespace NuGet
                 compatibility++;
             }
 
+            // this is to give specific profile higher compatibility than portable profile
+            if (targetFrameworkName.Identifier.Equals(frameworkName.Identifier, StringComparison.OrdinalIgnoreCase))
+            {
+                compatibility += 10;
+            }
+
             return compatibility;
+        }
+
+        private static Version GetEffectiveFrameworkVersion(FrameworkName projectFramework, FrameworkName targetFrameworkVersion)
+        {
+            if (targetFrameworkVersion.IsPortableFramework())
+            {
+                NetPortableProfile profile = NetPortableProfile.Parse(targetFrameworkVersion.Profile);
+                if (profile != null)
+                {
+                    // if it's a portable library, return the version of the matching framework
+                    var compatibleFramework = profile.SupportedFrameworks.FirstOrDefault(f => VersionUtility.IsCompatible(projectFramework, f));
+                    if (compatibleFramework != null)
+                    {
+                        return compatibleFramework.Version;
+                    }
+                }
+            }
+            
+            return targetFrameworkVersion.Version;
+        }
+
+        private static int GetProfileCompatibilityForPortableLibrary(FrameworkName frameworkName, FrameworkName portableFramework)
+        {
+            NetPortableProfile profile = NetPortableProfile.Parse(portableFramework.Profile);
+            if (profile == null)
+            {
+                // defensive coding, this should never happen
+                return 0;
+            }
+
+            // among the supported frameworks by the Portable library, pick the one that is compatible with 'frameworkName'
+            var compatibleFramework = profile.SupportedFrameworks.FirstOrDefault(f => VersionUtility.IsCompatible(frameworkName, f));
+            return compatibleFramework == null ? 0 : GetProfileCompatibility(frameworkName, compatibleFramework);
         }
 
         private static bool TryParseVersion(string versionString, out SemanticVersion version)
@@ -848,6 +880,11 @@ namespace NuGet
                 }
             }
             return version != null;
+        }
+
+        public static bool IsPortableFramework(this FrameworkName framework)
+        {
+            return framework != null && PortableFrameworkIdentifier.Equals(framework.Identifier, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

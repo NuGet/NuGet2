@@ -211,13 +211,13 @@ namespace NuGet.Test
             var profile = new NetPortableProfile(
                 "ProfileXXX",
                 new[] { 
-                           new FrameworkName("WindowsPhone, Version=8.0"), 
+                           new FrameworkName("WindowsPhone, Version=7.0"), 
                       });
 
             var targetProfile = new NetPortableProfile(
                 "MyProfile",
                 new[] {
-                           new FrameworkName("WindowsPhone, Version=8.1"), 
+                           new FrameworkName("WindowsPhone, Version=7.1"), 
                       });
 
             // Act & Assert

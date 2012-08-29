@@ -69,6 +69,49 @@ namespace NuGet.Test
             Assert.True(projectSystem.FileExists(@"foo\bar\file"));
         }
 
+        [Theory]
+        [InlineData("net20\\one.txt", ".NETFramework, Version=4.0")]
+        [InlineData("silverlight3\\one.txt", "Silverlight, Version=4.0")]
+        [InlineData("wp7\\one.txt", "WindowsPhone, Version=8.0")]
+        [InlineData("wp7\\one.txt", "Silverlight, Version=4.0, Profile=WindowsPhone71")]
+        [InlineData("windows8\\one.txt", ".NETCore, Version=4.5")]
+        public void AddPackageReferencePicksSpecificLibraryOverPortableOne(string pickedContentFile, string projectFramework)
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(projectFramework));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "portable40-net40+wp7+silverlight4+windows\\two.txt", pickedContentFile});
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.False(projectSystem.FileExists("two.txt"));
+            Assert.True(projectSystem.FileExists("one.txt"));
+        }
+
+        [Theory]
+        [InlineData("portable-wp7+sl3+net40\\two.txt", "portable-net45+sl4\\one.txt")]
+        [InlineData("portable-net40+sl3+wp71\\one.txt", "portable-windows8+sl2\\two.txt")]
+        public void AddPackageReferenceThePortableLibraryWithHigherVersionOfTheMatchingFrameworks(string contentFile, string otherContentFile)
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName("Silverlight, Version=4.0"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { contentFile, otherContentFile });
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(projectSystem.FileExists("one.txt"));
+            Assert.False(projectSystem.FileExists("two.txt"));
+        }
+
         [Fact]
         public void AddPackageReferenceWhenNewVersionOfPackageAlreadyReferencedThrows()
         {
