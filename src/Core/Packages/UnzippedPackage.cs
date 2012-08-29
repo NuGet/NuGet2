@@ -106,7 +106,7 @@ namespace NuGet
         private IEnumerable<string> GetPackageFilePaths()
         {
             return from p in _repositoryFileSystem.GetFiles(_packageName, "*.*", recursive: true)
-                   where !PackageUtility.IsManifest(p)
+                   where !PackageUtility.IsManifest(p) && !PackageUtility.IsPackageFile(p)
                    select p;
         }
 

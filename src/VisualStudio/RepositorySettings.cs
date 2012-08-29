@@ -220,6 +220,9 @@ namespace NuGet.VisualStudio
         /// </summary>
         private IEnumerable<string> GetConfigurationDirectories(string path)
         {
+            // look for nuget.config under '<solution root>\.nuget' folder first
+            yield return Path.Combine(path, VsConstants.NuGetSolutionSettingsFolder);
+
             while (!String.IsNullOrEmpty(path))
             {
                 yield return path;

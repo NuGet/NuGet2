@@ -162,7 +162,7 @@ namespace NuGet.Test
         public void ParseFrameworkNameNormalizesSupportedPortableNetFrameworkNames()
         {
             // Arrange
-            var knownNameFormats = new[] { ".netportable", "netportable", "portable" };
+            var knownNameFormats = new[] { ".netportable-sl3", "netportable-net4", "portable-netcore45" };
             Version defaultVersion = new Version("0.0");
 
             // Act
@@ -172,6 +172,24 @@ namespace NuGet.Test
             foreach (var frameworkName in frameworkNames)
             {
                 Assert.Equal(".NETPortable", frameworkName.Identifier);
+                Assert.Equal(defaultVersion, frameworkName.Version);
+            }
+        }
+
+        [Fact]
+        public void ParseFrameworkNameNormalizesSupportedWindowsPhoneNames()
+        {
+            // Arrange
+            var knownNameFormats = new[] { "windowsphone", "wp" };
+            Version defaultVersion = new Version("0.0");
+
+            // Act
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+
+            // Assert
+            foreach (var frameworkName in frameworkNames)
+            {
+                Assert.Equal("WindowsPhone", frameworkName.Identifier);
                 Assert.Equal(defaultVersion, frameworkName.Version);
             }
         }
@@ -190,6 +208,24 @@ namespace NuGet.Test
             foreach (var frameworkName in frameworkNames)
             {
                 Assert.Equal(".NETCore", frameworkName.Identifier);
+                Assert.Equal(defaultVersion, frameworkName.Version);
+            }
+        }
+
+        [Fact]
+        public void ParseFrameworkNameNormalizesSupportedWindowsFrameworkNames()
+        {
+            // Arrange
+            var knownNameFormats = new[] { "Windows", "win" };
+            Version defaultVersion = new Version("0.0");
+
+            // Act
+            var frameworkNames = knownNameFormats.Select(fmt => VersionUtility.ParseFrameworkName(fmt));
+
+            // Assert
+            foreach (var frameworkName in frameworkNames)
+            {
+                Assert.Equal("Windows", frameworkName.Identifier);
                 Assert.Equal(defaultVersion, frameworkName.Version);
             }
         }
@@ -802,14 +838,123 @@ namespace NuGet.Test
             // Arrange
             FrameworkName wp7 = VersionUtility.ParseFrameworkName("sl3-wp");
             FrameworkName wp7Mango = VersionUtility.ParseFrameworkName("sl4-wp71");
+            FrameworkName wp8 = new FrameworkName("WindowsPhone, Version=v8.0");
 
             // Act
             bool wp7MangoCompatibleWithwp7 = VersionUtility.IsCompatible(wp7, wp7Mango);
             bool wp7CompatibleWithwp7Mango = VersionUtility.IsCompatible(wp7Mango, wp7);
 
+            bool wp7CompatibleWithwp8 = VersionUtility.IsCompatible(wp8, wp7);
+            bool wp7MangoCompatibleWithwp8 = VersionUtility.IsCompatible(wp8, wp7Mango);
+
+            bool wp8CompatibleWithwp7 = VersionUtility.IsCompatible(wp7, wp8);
+            bool wp8CompatbielWithwp7Mango = VersionUtility.IsCompatible(wp7Mango, wp8);
+
             // Assert
             Assert.False(wp7MangoCompatibleWithwp7);
             Assert.True(wp7CompatibleWithwp7Mango);
+
+            Assert.True(wp7CompatibleWithwp8);
+            Assert.True(wp7MangoCompatibleWithwp8);
+
+            Assert.False(wp8CompatibleWithwp7);
+            Assert.False(wp8CompatbielWithwp7Mango);
+        }
+
+        [Theory]
+        [InlineData("wp")]
+        [InlineData("wp7")]
+        [InlineData("wp70")]
+        [InlineData("windowsphone")]
+        [InlineData("windowsphone7")]
+        [InlineData("windowsphone70")]
+        [InlineData("sl3-wp")]
+        public void WindowsPhone7IdentifierCompatibleWithAllWPProjects(string wp7Identifier)
+        {
+            // Arrange
+            var wp7Package = VersionUtility.ParseFrameworkName(wp7Identifier);
+
+            var wp7Project = new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone");
+            var mangoProject = new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71");
+            var apolloProject = new FrameworkName("WindowsPhone, Version=v8.0");
+
+            // Act & Assert
+            Assert.True(VersionUtility.IsCompatible(wp7Project, wp7Package));
+            Assert.True(VersionUtility.IsCompatible(mangoProject, wp7Package));
+            Assert.True(VersionUtility.IsCompatible(apolloProject, wp7Package));
+        }
+
+        [Theory]
+        [InlineData("wp71")]
+        [InlineData("windowsphone71")]
+        [InlineData("sl4-wp71")]
+        public void WindowsPhoneMangoIdentifierCompatibleWithAllWPProjects(string mangoIdentifier)
+        {
+            // Arrange
+            var mangoPackage = VersionUtility.ParseFrameworkName(mangoIdentifier);
+
+            var wp7Project = new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone");
+            var mangoProject = new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71");
+            var apolloProject = new FrameworkName("WindowsPhone, Version=v8.0");
+
+            // Act & Assert
+            Assert.False(VersionUtility.IsCompatible(wp7Project, mangoPackage));
+            Assert.True(VersionUtility.IsCompatible(mangoProject, mangoPackage));
+            Assert.True(VersionUtility.IsCompatible(apolloProject, mangoPackage));
+        }
+
+        [Theory]
+        [InlineData("wp8")]
+        [InlineData("wp80")]
+        [InlineData("windowsphone8")]
+        [InlineData("windowsphone80")]
+        public void WindowsPhoneApolloIdentifierCompatibleWithAllWPProjects(string apolloIdentifier)
+        {
+            // Arrange
+            var apolloPackage = VersionUtility.ParseFrameworkName(apolloIdentifier);
+
+            var wp7Project = new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone");
+            var mangoProject = new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71");
+            var apolloProject = new FrameworkName("WindowsPhone, Version=v8.0");
+
+            // Act & Assert
+            Assert.False(VersionUtility.IsCompatible(wp7Project, apolloPackage));
+            Assert.False(VersionUtility.IsCompatible(mangoProject, apolloPackage));
+            Assert.True(VersionUtility.IsCompatible(apolloProject, apolloPackage));
+        }
+
+        [Theory]
+        [InlineData("windows")]
+        [InlineData("windows8")]
+        [InlineData("win")]
+        [InlineData("win8")]
+        public void WindowsIdentifierCompatibleWithWindowsStoreAppProjects(string identifier)
+        {
+            // Arrange
+            var packageFramework = VersionUtility.ParseFrameworkName(identifier);
+
+            var projectFramework = new FrameworkName(".NETCore, Version=4.5");
+
+            // Act && Assert
+            Assert.True(VersionUtility.IsCompatible(projectFramework, packageFramework));
+        }
+
+        [Theory]
+        [InlineData("windows9")]
+        [InlineData("win9")]
+        [InlineData("win10")]
+        [InlineData("windows81")]
+        [InlineData("windows45")]
+        [InlineData("windows1")]
+        public void WindowsIdentifierWithUnsupportedVersionNotCompatibleWithWindowsStoreAppProjects(string identifier)
+        {
+            // Arrange
+            var packageFramework = VersionUtility.ParseFrameworkName(identifier);
+
+            var projectFramework = new FrameworkName(".NETCore, Version=4.5");
+
+            // Act && Assert
+            Assert.False(VersionUtility.IsCompatible(projectFramework, packageFramework));
         }
 
         [Fact]
@@ -950,6 +1095,198 @@ namespace NuGet.Test
                 yield return new object[] { "(1.6)", new VersionSpec { MinVersion = new SemanticVersion("1.6"), MaxVersion = new SemanticVersion("1.6"), IsMinInclusive = false, IsMaxInclusive = false } };
                 yield return new object[] { "[2.7]", new VersionSpec { MinVersion = new SemanticVersion("2.7"), MaxVersion = new SemanticVersion("2.7"), IsMinInclusive = true, IsMaxInclusive = true } };
             }
+        }
+
+        [Fact]
+        public void ParsePortableFrameworkNameThrowsIfProfileIsEmpty()
+        {
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => VersionUtility.ParseFrameworkName("portable45"),
+                "profilePart",
+                "Portable target framework must not have an empty profile part.");
+        }
+
+        [Fact]
+        public void ParsePortableFrameworkNameThrowsIfProfileContainsASpace()
+        {
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => VersionUtility.ParseFrameworkName("portable45-sl4 net45"),
+                "profilePart",
+                "The profile part of a portable target framework must not contain empty space.");
+        }
+
+        [Fact]
+        public void ParsePortableFrameworkNameThrowsIfProfileContainsEmptyComponent()
+        {
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => VersionUtility.ParseFrameworkName("portable45-sl4++net45"),
+                "profilePart",
+                "The profile part of a portable target framework must not contain empty component.");
+        }
+
+        [Fact]
+        public void ParsePortableFrameworkNameThrowsIfProfileContainsPortableFramework()
+        {
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => VersionUtility.ParseFrameworkName("portable-net45+portable"),
+                "profilePart",
+                "The profile part of a portable target framework must not contain a portable framework component.");
+        }
+
+        [Fact]
+        public void TestGetShortNameForPortableFramework()
+        {
+            // Arrange
+            NetPortableProfileTable.Profiles = BuildProfileCollection();
+
+            var framework = new FrameworkName(".NETPortable, Version=4.0, Profile=Profile1");
+
+            // Act-1
+            string shortName = VersionUtility.GetShortFrameworkName(framework);
+
+            // Assert-2
+            Assert.Equal("portable-net45+sl40+wp71", shortName);
+
+            // Arrange
+            var framework2 = new FrameworkName(".NETPortable, Version=4.0, Profile=Profile2");
+
+            // Act-2
+            string shortName2 = VersionUtility.GetShortFrameworkName(framework2);
+
+            // Assert-2
+            Assert.Equal("portable-netcore45+sl30+wp71", shortName2);
+        }
+
+        [Fact]
+        public void IsCompatibleReturnsTrueForPortableFrameworkAndNormalFramework()
+        {
+            // Arrange
+            var portableFramework = VersionUtility.ParseFrameworkName("portable-netcore45+sl4");
+            var normalFramework = VersionUtility.ParseFrameworkName("silverlight45");
+
+            // Act
+            bool isCompatible = VersionUtility.IsCompatible(normalFramework, portableFramework);
+
+            // Assert
+            Assert.True(isCompatible);
+        }
+
+        [Fact]
+        public void IsCompatibleReturnsFalseForPortableFrameworkAndNormalFramework()
+        {
+            // Arrange
+            var portableFramework = VersionUtility.ParseFrameworkName("portable-netcore45+sl4");
+            var normalFramework = VersionUtility.ParseFrameworkName("silverlight3");
+
+            // Act
+            bool isCompatible = VersionUtility.IsCompatible(normalFramework, portableFramework);
+
+            // Assert
+            Assert.False(isCompatible);
+        }
+
+        [Fact]
+        public void IsCompatibleReturnsFalseForPortableFrameworkAndNormalFramework2()
+        {
+            // Arrange
+            var portableFramework = VersionUtility.ParseFrameworkName("portable-netcore45+sl4");
+            var normalFramework = VersionUtility.ParseFrameworkName("wp7");
+
+            // Act
+            bool isCompatible = VersionUtility.IsCompatible(normalFramework, portableFramework);
+
+            // Assert
+            Assert.False(isCompatible);
+        }
+
+        [Theory]
+        [InlineData("silverlight4")]
+        [InlineData("silverlight3")]
+        [InlineData("silverlight5")]
+        [InlineData("netcore45")]
+        [InlineData("netcore5")]
+        public void IsCompatibleReturnsFalseForNormalFrameworkAndPortableFramework(string frameworkValue)
+        {
+            // Arrange
+            var portableFramework = VersionUtility.ParseFrameworkName("portable-netcore45+sl4");
+            var normalFramework = VersionUtility.ParseFrameworkName(frameworkValue);
+
+            // Act
+            bool isCompatible = VersionUtility.IsCompatible(portableFramework, normalFramework);
+
+            // Assert
+            Assert.False(isCompatible);
+        }
+
+        [Theory]
+        [InlineData("portable-netcore45+sl4+wp", "portable-netcore45+sl4")]
+        [InlineData("portable-netcore45+sl4+wp", "portable-netcore5+wp7")]
+        [InlineData("portable-netcore45+sl4+wp+net", "portable-wp7")]
+        public void IsCompatibleReturnsTrueForPortableFrameworkAndPortableFramework(string packageFramework, string projectFramework)
+        {
+            // Arrange
+            var packagePortableFramework = VersionUtility.ParseFrameworkName(packageFramework);
+            var projectPortableFramework = VersionUtility.ParseFrameworkName(projectFramework);
+
+            // Act
+            bool isCompatible = VersionUtility.IsCompatible(projectPortableFramework, packagePortableFramework);
+
+            // Assert
+            Assert.True(isCompatible);
+        }
+
+        [Theory]
+        [InlineData("portable-netcore45+sl4+wp", "portable-netcore4+sl4")]
+        [InlineData("portable-netcore45+sl4+wp", "portable-netcore5+wp7+net")]
+        [InlineData("portable-netcore45+sl4+wp+net", "portable-wp7+netcore4")]
+        [InlineData("portable-netcore45+sl4", "portable-net4+wp7")]
+        public void IsCompatibleReturnsFalseForPortableFrameworkAndPortableFramework(string packageFramework, string projectFramework)
+        {
+            // Arrange
+            var packagePortableFramework = VersionUtility.ParseFrameworkName(packageFramework);
+            var projectPortableFramework = VersionUtility.ParseFrameworkName(projectFramework);
+
+            // Act
+            bool isCompatible = VersionUtility.IsCompatible(projectPortableFramework, packagePortableFramework);
+
+            // Assert
+            Assert.False(isCompatible);
+        }
+
+        private NetPortableProfileCollection BuildProfileCollection()
+        {
+            var profileCollection = new NetPortableProfileCollection();
+            var profile1 = new NetPortableProfile(
+               "Profile1",
+               new[] { 
+                           new FrameworkName(".NETFramework, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=4.0"), 
+                           new FrameworkName("WindowsPhone, Version=7.1"), 
+                      });
+
+            var profile2 = new NetPortableProfile(
+               "Profile2",
+               new[] { 
+                           new FrameworkName(".NetCore, Version=4.5"), 
+                           new FrameworkName("Silverlight, Version=3.0"), 
+                           new FrameworkName("WindowsPhone, Version=7.1"), 
+                      });
+
+            var profile3 = new NetPortableProfile(
+               "Profile3",
+               new[] { 
+                           new FrameworkName(".NetCore, Version=4.5"), 
+                           new FrameworkName(".NETFramework, Version=2.0"), 
+                      });
+            profileCollection.Add(profile1);
+            profileCollection.Add(profile2);
+            profileCollection.Add(profile3);
+
+            return profileCollection;
         }
     }
 }

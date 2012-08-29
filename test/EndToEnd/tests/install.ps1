@@ -1949,3 +1949,17 @@ function Test-FileTransformWorksOnDependentFile
 	$matches = @($content | ? { ($_.IndexOf('foo="bar"') -gt -1) })
 	Assert-True ($matches.Count -gt 0)
 }
+
+function Test-InstallMetaPackageWorksAsExpected
+{
+	param($context)
+
+	# Arrange
+	$p = New-ClassLibrary
+
+	$p | Install-Package MetaPackage -Source $context.RepositoryPath
+
+	# Assert
+	Assert-Package $p MetaPackage
+	Assert-Package $p Dependency
+}

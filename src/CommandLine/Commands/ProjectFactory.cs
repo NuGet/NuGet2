@@ -133,27 +133,7 @@ namespace NuGet.Commands
                 ExtractMetadataFromProject(builder);
             }
 
-            // Set the properties that were resolved from the assembly/project so they can be 
-            // resolved by name if the nuspec contains tokens
-            _properties.Clear();
-            _properties.Add("Id", builder.Id);
-            _properties.Add("Version", builder.Version.ToString());
-
-            if (!String.IsNullOrEmpty(builder.Title))
-            {
-                _properties.Add("Title", builder.Title);
-            }
-
-            if (!String.IsNullOrEmpty(builder.Description))
-            {
-                _properties.Add("Description", builder.Description);
-            }
-
-            string projectAuthor = builder.Authors.FirstOrDefault();
-            if (!String.IsNullOrEmpty(projectAuthor))
-            {
-                _properties.Add("Author", projectAuthor);
-            }
+            var projectAuthor = InitializeProperties(builder);
 
             // If the package contains a nuspec file then use it for metadata
             Manifest manifest = ProcessNuspec(builder, basePath);
@@ -196,6 +176,37 @@ namespace NuGet.Commands
             }
 
             return builder;
+        }
+
+        internal string InitializeProperties(IPackageMetadata metadata)
+        {
+            // Set the properties that were resolved from the assembly/project so they can be
+            // resolved by name if the nuspec contains tokens
+            _properties.Clear();
+            _properties.Add("Id", metadata.Id);
+            _properties.Add("Version", metadata.Version.ToString());
+
+            if (!String.IsNullOrEmpty(metadata.Title))
+            {
+                _properties.Add("Title", metadata.Title);
+            }
+
+            if (!String.IsNullOrEmpty(metadata.Description))
+            {
+                _properties.Add("Description", metadata.Description);
+            }
+
+            if (!String.IsNullOrEmpty(metadata.Copyright))
+            {
+                _properties.Add("Copyright", metadata.Copyright);
+            }
+
+            string projectAuthor = metadata.Authors.FirstOrDefault();
+            if (!String.IsNullOrEmpty(projectAuthor))
+            {
+                _properties.Add("Author", projectAuthor);
+            }
+            return projectAuthor;
         }
 
         dynamic IPropertyProvider.GetPropertyValue(string propertyName)

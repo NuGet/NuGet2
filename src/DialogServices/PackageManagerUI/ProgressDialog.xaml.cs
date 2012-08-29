@@ -4,6 +4,7 @@ using System.Windows.Documents;
 using System.Windows.Interop;
 using System.Windows.Media;
 using Microsoft.VisualStudio.PlatformUI;
+using System.Windows;
 
 namespace NuGet.Dialog.PackageManagerUI
 {
@@ -32,6 +33,7 @@ namespace NuGet.Dialog.PackageManagerUI
             OkButton.IsEnabled = true;
             ProgressBar.IsIndeterminate = false;
             ProgressBar.Value = ProgressBar.Maximum;
+            ProgressBar.Foreground = Brushes.Red;
             StatusText.Text = NuGet.Dialog.Resources.Dialog_OperationFailed;
         }
 
