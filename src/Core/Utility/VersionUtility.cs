@@ -20,6 +20,10 @@ namespace NuGet
         private const string LessThanOrEqualTo = "\u2264";
         private const string GreaterThanOrEqualTo = "\u2265";
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Security",
+            "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes",
+            Justification = "The type FrameworkName is immutable.")]
         public static readonly FrameworkName EmptyFramework = new FrameworkName("NoFramework", new Version());
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -503,7 +507,7 @@ namespace NuGet
             {
                 name = frameworkName.Identifier;
             }
-            
+
             // for Portable framework name, the short name has the form "portable-sl4+wp7+net45"
             string profile;
             if (name.Equals("portable", StringComparison.OrdinalIgnoreCase))
@@ -725,7 +729,7 @@ namespace NuGet
 
             string identifier = frameworkName.Identifier;
             string profile = frameworkName.Profile;
-            
+
             if (!identifier.Equals(targetFrameworkName.Identifier, StringComparison.OrdinalIgnoreCase))
             {
                 // if Ids do not match, check to see if Id alias does
@@ -742,7 +746,7 @@ namespace NuGet
                 return false;
             }
 
-            if (NormalizeVersion(frameworkName.Version) < 
+            if (NormalizeVersion(frameworkName.Version) <
                 NormalizeVersion(targetFrameworkName.Version))
             {
                 return false;
@@ -772,7 +776,7 @@ namespace NuGet
 
         private static bool IsPortableLibraryCompatible(FrameworkName frameworkName, FrameworkName targetFrameworkName)
         {
-            if (String.IsNullOrEmpty(targetFrameworkName.Profile)) 
+            if (String.IsNullOrEmpty(targetFrameworkName.Profile))
             {
                 return false;
             }
