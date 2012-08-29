@@ -767,7 +767,7 @@ namespace NuGet.VisualStudio.Test
             
             var sourceRepository = new MockPackageRepository();
             var packageB = PackageUtility.CreatePackage("B", "1.0", new string[] {"hello.txt"});
-            var packageA = PackageUtility.CreatePackage("A", "2.0", dependencies: new [] { new PackageDependency("B")});
+            var packageA = PackageUtility.CreatePackage("A", "2.0", new string[] {"world.txt"}, dependencies: new [] { new PackageDependency("B")});
             sourceRepository.Add(packageA);
             sourceRepository.Add(packageB);
 
@@ -818,7 +818,7 @@ namespace NuGet.VisualStudio.Test
 
             var sourceRepository = new MockPackageRepository();
             var packageB = PackageUtility.CreatePackage("B", "1.0", new string[] { "hello.txt" });
-            var packageA = PackageUtility.CreatePackage("A", "2.0", dependencies: new[] { new PackageDependency("B") });
+            var packageA = PackageUtility.CreatePackage("A", "2.0", new string[] { "world" }, dependencies: new[] { new PackageDependency("B") });
             sourceRepository.Add(packageA);
             sourceRepository.Add(packageB);
 
