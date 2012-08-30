@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -7,7 +8,6 @@ using System.Runtime.Versioning;
 using System.Text;
 using System.Text.RegularExpressions;
 using NuGet.Resources;
-
 using CompatibilityMapping = System.Collections.Generic.Dictionary<string, string[]>;
 
 namespace NuGet
@@ -828,6 +828,13 @@ namespace NuGet
             // this is to give specific profile higher compatibility than portable profile
             if (targetFrameworkName.Identifier.Equals(frameworkName.Identifier, StringComparison.OrdinalIgnoreCase))
             {
+                // Let's say a package has two framework folders: 'net40' and 'portable-net45+wp8'.
+                // The package is installed into a net45 project. We want to pick the 'net40' folder, even though
+                // the 'net45' in portable folder has a matching version with the project's framework.
+                //
+                // So, in order to achieve that, here we give the folder that has matching identifer with the project's 
+                // framework identifier a compatibility score of 10, to make sure it weighs more than the compatibility of matching version.
+
                 compatibility += 10;
             }
 
@@ -859,6 +866,7 @@ namespace NuGet
             if (profile == null)
             {
                 // defensive coding, this should never happen
+                Debug.Fail("'portableFramework' is not a valid portable framework.");
                 return 0;
             }
 
@@ -882,8 +890,11 @@ namespace NuGet
             return version != null;
         }
 
-        public static bool IsPortableFramework(this FrameworkName framework)
+        private static bool IsPortableFramework(this FrameworkName framework)
         {
+            // The profile part has been verified in the ParseFrameworkName() method. 
+            // By the time it is called here, it's guaranteed to be valid.
+            // Thus we can ignore the profile part here
             return framework != null && PortableFrameworkIdentifier.Equals(framework.Identifier, StringComparison.OrdinalIgnoreCase);
         }
     }
