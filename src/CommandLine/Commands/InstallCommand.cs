@@ -154,7 +154,7 @@ namespace NuGet.Commands
         }
 
         /// <returns>True if one or more packages are installed.</returns>
-        private bool ExecuteInParallel(IFileSystem fileSystem, List<PackageReference> packageReferences)
+        private bool ExecuteInParallel(IFileSystem fileSystem, ICollection<PackageReference> packageReferences)
         {
             bool packageRestoreConsent = new PackageRestoreConsent(_configSettings).IsGranted;
             int defaultConnectionLimit = ServicePointManager.DefaultConnectionLimit;
