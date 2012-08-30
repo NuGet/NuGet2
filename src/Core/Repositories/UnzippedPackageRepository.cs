@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace NuGet
@@ -54,6 +56,11 @@ namespace NuGet
                 return new UnzippedPackage(FileSystem, packageName);
             }
             return null;
+        }
+
+        public IEnumerable<IPackage> FindPackagesById(string packageId)
+        {
+            return GetPackages().Where(p => p.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase));
         }
 
         public bool Exists(string packageId, SemanticVersion version)

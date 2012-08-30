@@ -11,7 +11,7 @@ namespace NuGet
     /// it also has a reference to the repository that actually contains the packages. It keeps track
     /// of packages in an xml file at the project root (packages.xml).
     /// </summary>
-    public class PackageReferenceRepository : PackageRepositoryBase, IPackageReferenceRepository, IPackageLookup, IPackageConstraintProvider, ILatestPackageLookup
+    public class PackageReferenceRepository : IPackageReferenceRepository, IPackageLookup, IPackageConstraintProvider, ILatestPackageLookup
     {
         private readonly PackageReferenceFile _packageReferenceFile;
         private readonly string _fullPath;
@@ -31,7 +31,7 @@ namespace NuGet
             SourceRepository = sourceRepository;
         }
 
-        public override string Source
+        public string Source
         {
             get
             {
@@ -39,7 +39,7 @@ namespace NuGet
             }
         }
 
-        public override bool SupportsPrereleasePackages
+        public bool SupportsPrereleasePackages
         {
             get { return true; }
         }
@@ -66,38 +66,24 @@ namespace NuGet
             }
         }
 
-        public override IQueryable<IPackage> GetPackages()
+        public IQueryable<IPackage> GetPackages()
         {
             return GetPackagesCore().AsQueryable();
         }
 
         private IEnumerable<IPackage> GetPackagesCore()
         {
-            foreach (var reference in _packageReferenceFile.GetPackageReferences())
-            {
-                IPackage package;
-
-                if (String.IsNullOrEmpty(reference.Id) ||
-                    reference.Version == null ||
-                    !SourceRepository.TryFindPackage(reference.Id, reference.Version, out package))
-                {
-
-                    // Skip bad entries
-                    continue;
-                }
-                else
-                {
-                    yield return package;
-                }
-            }
+            return _packageReferenceFile.GetPackageReferences()
+                                        .Select(GetPackage)
+                                        .Where(p => p != null);
         }
 
-        public override void AddPackage(IPackage package)
+        public void AddPackage(IPackage package)
         {
             AddPackage(package.Id, package.Version, targetFramework: null);
         }
 
-        public override void RemovePackage(IPackage package)
+        public void RemovePackage(IPackage package)
         {
             if (_packageReferenceFile.DeleteEntry(package.Id, package.Version))
             {
@@ -114,6 +100,12 @@ namespace NuGet
             }
 
             return SourceRepository.FindPackage(packageId, version);
+        }
+
+        public IEnumerable<IPackage> FindPackagesById(string packageId)
+        {
+            return GetPackageReferences(packageId).Select(GetPackage)
+                                                  .Where(p => p != null);
         }
 
         public bool Exists(string packageId, SemanticVersion version)
@@ -140,25 +132,18 @@ namespace NuGet
             return null;
         }
 
-        private PackageReference GetPackageReference(string packageId)
-        {
-            PackageReference reference =
-                _packageReferenceFile.GetPackageReferences().FirstOrDefault(
-                    p => p.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase));
-            return reference;
-        }
-
         public bool TryFindLatestPackageById(string id, out SemanticVersion latestVersion)
         {
-            PackageName packageName = _packageReferenceFile.FindEntryWithLatestVersionById(id);
-            if (packageName == null)
+            PackageReference reference = GetPackageReferences(id).OrderByDescending(r => r.Version)
+                                                                 .FirstOrDefault();
+            if (reference == null)
             {
                 latestVersion = null;
                 return false;
             }
             else
             {
-                latestVersion = packageName.Version;
+                latestVersion = reference.Version;
                 Debug.Assert(latestVersion != null);
                 return true;
             }
@@ -183,6 +168,37 @@ namespace NuGet
                 return reference.TargetFramework;
             }
             return null;
+        }
+
+        private PackageReference GetPackageReference(string packageId)
+        {
+            return GetPackageReferences(packageId).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets all references to a specific package id that are valid.
+        /// </summary>
+        /// <param name="packageId"></param>
+        /// <returns></returns>
+        private IEnumerable<PackageReference> GetPackageReferences(string packageId)
+        {
+            return _packageReferenceFile.GetPackageReferences()
+                                        .Where(reference => IsValidReference(reference) && 
+                                                            reference.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private IPackage GetPackage(PackageReference reference)
+        {
+            if (IsValidReference(reference))
+            {
+                return SourceRepository.FindPackage(reference.Id, reference.Version);
+            }
+            return null;
+        }
+
+        private static bool IsValidReference(PackageReference reference)
+        {
+            return !String.IsNullOrEmpty(reference.Id) && reference.Version != null;
         }
     }
 }

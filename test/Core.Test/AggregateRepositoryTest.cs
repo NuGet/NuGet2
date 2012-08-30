@@ -231,7 +231,7 @@ namespace NuGet.Test
             var mockRepository = new Mock<IPackageRepository>();
             mockRepository.Setup(c => c.GetPackages()).Throws(new InvalidOperationException()).Verifiable();
 
-            var packageLookup = new Mock<PackageLookupBase>();
+            var packageLookup = new Mock<IPackageLookup>(MockBehavior.Strict);
             packageLookup.Setup(c => c.FindPackage(It.IsAny<string>(), It.IsAny<SemanticVersion>())).Throws(new Exception());
             var mockRepositoryWithLookup = packageLookup.As<IPackageRepository>();
             mockRepositoryWithLookup.Setup(c => c.GetPackages()).Throws(new InvalidOperationException());
@@ -420,19 +420,6 @@ namespace NuGet.Test
         {
             yield return PackageUtility.CreatePackage("A");
             throw new InvalidOperationException();
-        }
-
-        public abstract class PackageLookupBase : IPackageLookup
-        {
-            public virtual IPackage FindPackage(string packageId, SemanticVersion version)
-            {
-                throw new NotImplementedException();
-            }
-
-            public virtual bool Exists(string packageId, SemanticVersion version)
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }

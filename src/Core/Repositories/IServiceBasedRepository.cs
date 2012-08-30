@@ -4,10 +4,9 @@ using System.Runtime.Versioning;
 
 namespace NuGet
 {
-    public interface IServiceBasedRepository
+    public interface IServiceBasedRepository : IPackageRepository
     {
         IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions);
-        IEnumerable<IPackage> FindPackagesById(string packageId);
         IEnumerable<IPackage> GetUpdates(IEnumerable<IPackage> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFramework);
     }
 }

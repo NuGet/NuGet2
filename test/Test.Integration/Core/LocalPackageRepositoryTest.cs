@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
 using Xunit.Extensions;
@@ -144,6 +145,70 @@ namespace NuGet.Test.Integration.Core
             // Assert
             Assert.Null(findPackage);
         }
+
+        [Fact]
+        public void FindPackagesByIdFindPackagesMatchingExactId()
+        {
+            // Arrange
+            string id = "Test";
+            var repositoryRoot = CreatePackage(id, version: "1.2", packageFileName: "Test.1.2.nupkg");
+            CreatePackage(id, version: "1.3", packageFileName: "Test.1.3.nupkg", rootDir: repositoryRoot);
+            CreatePackage(id, version: "2.0.0.9200-alpha", packageFileName: "Test.2.0.0.9200.nupkg", rootDir: repositoryRoot);
+
+            IPackageRepository repository = new LocalPackageRepository(repositoryRoot);
+
+            // Act
+            var packages = repository.FindPackagesById(id).ToList();
+
+            // Assert
+            Assert.Equal(3, packages.Count);
+            Assert.Equal("1.2", packages[0].Version.ToString());
+            Assert.Equal("1.3", packages[1].Version.ToString());
+            Assert.Equal("2.0.0.9200-alpha", packages[2].Version.ToString());
+        }
+
+        [Fact]
+        public void FindPackagesByIdIgnoresPackagesThatDoNotMatchId()
+        {
+            // Arrange
+            string id = "Test";
+            var repositoryRoot = CreatePackage(id, version: "1.2", packageFileName: "Test.1.2.nupkg");
+            CreatePackage(id, version: "1.3", packageFileName: "TeST.1.3.nupkg", rootDir: repositoryRoot);
+            CreatePackage(id, version: "2.0.0.9200-alpha", packageFileName: "TEst.2.0.0.9200.nupkg", rootDir: repositoryRoot);
+            CreatePackage("Test2", version: "2.0", packageFileName: "Test2.2.0.nupkg", rootDir: repositoryRoot);
+            File.WriteAllBytes(Path.Combine(repositoryRoot, "NotTest.1.0.nupkg"), new byte[0]);
+
+            IPackageRepository repository = new LocalPackageRepository(repositoryRoot);
+
+            // Act
+            var packages = repository.FindPackagesById(id).ToList();
+
+            // Assert
+            Assert.Equal(3, packages.Count);
+            Assert.Equal("1.2", packages[0].Version.ToString());
+            Assert.Equal("1.3", packages[1].Version.ToString());
+            Assert.Equal("2.0.0.9200-alpha", packages[2].Version.ToString());
+        }
+
+        [Fact]
+        public void FindPackagesByUsesIdFromManifestToValidateIdMatches()
+        {
+            // Arrange
+            string id = "Test";
+            var repositoryRoot = CreatePackage(id, version: "1.2", packageFileName: "Test.1.2.nupkg");
+            CreatePackage(id, version: "1.3", packageFileName: "TeST.1.3.nupkg", rootDir: repositoryRoot);
+            CreatePackage("Blah", version: "2.0.0", packageFileName: "Test.2.0.0.nupkg", rootDir: repositoryRoot);
+
+            IPackageRepository repository = new LocalPackageRepository(repositoryRoot);
+
+            // Act
+            var packages = repository.FindPackagesById(id).ToList();
+
+            // Assert
+            Assert.Equal(2, packages.Count);
+            Assert.Equal("1.2", packages[0].Version.ToString());
+            Assert.Equal("1.3", packages[1].Version.ToString());
+        }
         
         [Fact]
         public void GetPackageReturnsPackagesFromNestedDirectories()
@@ -166,6 +231,18 @@ namespace NuGet.Test.Integration.Core
             AssertPackage("Test", "1.3.1.0", packages[0]);
             AssertPackage("Foo", "1.4", packages[1]); 
             AssertPackage("Test", "1.3.4", packages[2]);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void FindPackagesByIdThrowsIfIdIsNullOrEmpty(string id)
+        {
+            // Arrange
+            var repository = new LocalPackageRepository(Mock.Of<IPackagePathResolver>(), Mock.Of<IFileSystem>());
+
+            // Act and Assert
+            ExceptionAssert.ThrowsArgNullOrEmpty(() => repository.FindPackagesById(id), "packageId");
         }
 
         [Fact]

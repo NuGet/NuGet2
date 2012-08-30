@@ -84,15 +84,6 @@ namespace NuGet.Server.Infrastructure
             return packages;
         }
 
-        public IEnumerable<IPackage> FindPackagesById(string packageId)
-        {
-            // TODO : Fix this when we can update Core.
-            return (from p in GetPackages()
-                    where p.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase)
-                    orderby p.Id
-                    select p);
-        }
-
         public IEnumerable<IPackage> GetUpdates(IEnumerable<IPackage> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFramework)
         {
             return this.GetUpdatesCore(packages, includePrerelease, includeAllVersions, targetFramework);

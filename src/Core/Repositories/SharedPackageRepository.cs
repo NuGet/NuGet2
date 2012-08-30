@@ -177,7 +177,11 @@ namespace NuGet
 
         protected override IPackage OpenPackage(string path)
         {
-            if (path.EndsWith(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase))
+            // We could either be passed in manifest path or the path to the nupkg. The manifest path ensures that the calling code has already verified the existence of the 
+            // manifest and we can return an UnzippedPackageRepository. If the caller passed in a nupkg, we'll quickly verify if a manifest exists alongside.
+            string extension = Path.GetExtension(path);
+            if (extension.Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase) ||
+                FileSystem.FileExists(Path.ChangeExtension(path, Constants.ManifestExtension)))
             {
                 return new UnzippedPackage(FileSystem, Path.GetDirectoryName(path));
             }

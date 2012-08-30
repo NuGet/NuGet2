@@ -425,7 +425,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var fileSystem = new MockFileSystem();
             var packages = new List<IPackage>(); 
             var repository = new Mock<LocalPackageRepository>(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem) { CallBase = true };
-            repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
+            repository.Setup(c => c.FindPackagesById("Baz")).Returns(packages);
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Add(c)).Verifiable();
             repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Remove(c)).Verifiable();
 
@@ -465,7 +465,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             fileSystem.AddFile(@"baz\baz.nupkg");
             var packages = new List<IPackage> { PackageUtility.CreatePackage("Baz", "0.4") };
             var repository = new Mock<LocalPackageRepository>(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem) { CallBase = true };
-            repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
+            repository.Setup(c => c.FindPackagesById("Baz")).Returns(packages);
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Add(c)).Verifiable();
             repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Remove(c)).Verifiable();
 
@@ -491,9 +491,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             var fileSystem = new MockFileSystem();
-            var packages = new List<IPackage> { PackageUtility.CreatePackage("A", "0.5") };
+            var packages = new [] { PackageUtility.CreatePackage("A", "0.5") };
             var repository = new Mock<LocalPackageRepository>(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem) { CallBase = true };
-            repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
+            repository.Setup(c => c.FindPackagesById("A")).Returns(packages);
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Throws(new Exception("Method should not be called"));
             repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Throws(new Exception("Method should not be called"));
 
@@ -511,7 +511,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             
             // Assert
             // Ensure packages were not removed.
-            Assert.Equal(1, packages.Count);
+            Assert.Equal(1, packages.Length);
             Assert.Equal("Package \"A\" is already installed." + Environment.NewLine, console.Output);
         }
 

@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
+using System.Runtime.Versioning;
 using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
@@ -159,10 +161,51 @@ namespace NuGet.Test
             IPackage package = repository.FindPackage("one", new SemanticVersion("1.0.0-alpha"));
 
             // Assert
-            Assert.True(package is UnzippedPackage);
+            Assert.IsType<UnzippedPackage>(package);
             Assert.Equal("One", package.Id);
             Assert.Equal(new SemanticVersion("1.0.0-alpha"), package.Version);
             Assert.Equal(new string[] { "dotnetjunky" }, package.Authors);
+        }
+
+        [Fact]
+        public void FindPackagesByIdReturnsAnUnzippedInstanceIfANuspecIsAvailableAndAZipPackageOtherwise()
+        {
+            // Arrange
+            string manifestContent = @"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+  <metadata>
+    <id>One</id>
+    <version>1.0-alpha</version>
+    <authors>test</authors>
+    <description>My package description.</description>
+  </metadata>
+  <files />
+</package>";
+
+            var fileSystem = new MockFileSystem("x:\root");
+            fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nuspec", manifestContent.AsStream());
+            fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nupkg", Stream.Null);
+
+            var packageStream = GetPackageStream("One", "1.0.0");
+            fileSystem.AddFile("one.1.0\\one.1.0.nupkg", packageStream);
+
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            var packages = repository.FindPackagesById("one").ToList();
+
+            // Assert
+            Assert.Equal(2, packages.Count);
+            var package = packages[0]; 
+            Assert.IsType<UnzippedPackage>(package);
+            Assert.Equal("One", package.Id);
+            Assert.Equal(new SemanticVersion("1.0.0-alpha"), package.Version);
+
+            package = packages[1];
+            Assert.IsType<ZipPackage>(package);
+            Assert.Equal("One", package.Id);
+            Assert.Equal(new SemanticVersion("1.0.0"), package.Version);
         }
 
         [Fact]
@@ -530,6 +573,29 @@ namespace NuGet.Test
             {
                 return null;
             }
+        }
+
+        private static Stream GetPackageStream(string id, string version = "1.0")
+        {
+            var packageBuilder = new PackageBuilder
+            {
+                Id = id,
+                Version = SemanticVersion.Parse(version),
+                Description = "Test description",
+            };
+
+            var dependencySet = new PackageDependencySet(VersionUtility.DefaultTargetFramework,
+                new PackageDependency[] {
+                    new PackageDependency("Foo")
+                });
+            packageBuilder.DependencySets.Add(dependencySet);
+            packageBuilder.Authors.Add("foo");
+
+            var memoryStream = new MemoryStream();
+            packageBuilder.Save(memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+
+            return memoryStream;
         }
     }
 }

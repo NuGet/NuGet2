@@ -515,6 +515,107 @@ namespace NuGet.Test
             Assert.Null(latestVersion);
         }
 
+
+        [Fact]
+        public void GetPackageReferencesFindLatestEntryCorrectly()
+        {
+            // Arrange
+            var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+        <packages>
+          <package id=""A"" version=""1.3.4"" />
+          <package id=""A"" version=""2.5"" />
+          <package id=""B"" version=""1.0"" />
+          <package id=""C"" version=""2.1.4"" />
+        </packages>";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", config);
+            var sharedRepository = new Mock<MockPackageRepository>().As<ISharedPackageRepository>();
+            var packageReferenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+
+            // Act
+            SemanticVersion version;
+            bool result = packageReferenceRepository.TryFindLatestPackageById("A", out version);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal(new SemanticVersion("2.5"), version);
+        }
+
+        [Fact]
+        public void GetPackageReferencesFindLatestPrereleaseEntryCorrectly()
+        {
+            // Arrange
+            var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+        <packages>
+          <package id=""A"" version=""1.3.4"" />
+          <package id=""A"" version=""2.5-beta"" />
+          <package id=""B"" version=""1.0"" />
+          <package id=""C"" version=""2.1.4"" />
+        </packages>";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", config);
+            var sharedRepository = new Mock<MockPackageRepository>().As<ISharedPackageRepository>();
+            var packageReferenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+
+            // Act
+            SemanticVersion version;
+            bool result = packageReferenceRepository.TryFindLatestPackageById("A", out version);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal(new SemanticVersion("2.5-beta"), version);
+        }
+
+        [Fact]
+        public void GetPackageReferencesFindTheOnlyVersionAsLatestVersion()
+        {
+            // Arrange
+            var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+        <packages>
+          <package id=""A"" version=""1.3.4"" />
+          <package id=""A"" version=""2.5-beta"" />
+          <package id=""B"" version=""1.0"" />
+          <package id=""C"" version=""2.1.4"" />
+        </packages>";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", config);
+            var sharedRepository = new Mock<MockPackageRepository>().As<ISharedPackageRepository>();
+            var packageReferenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+
+            // Act
+            SemanticVersion version;
+            bool result = packageReferenceRepository.TryFindLatestPackageById("B", out version);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal(new SemanticVersion("1.0"), version);
+        }
+
+        [Fact]
+        public void GetPackageReferencesReturnsFalseForNonExistentId()
+        {
+            // Arrange
+            var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+        <packages>
+          <package id=""A"" version=""1.3.4"" />
+          <package id=""A"" version=""2.5-beta"" />
+          <package id=""B"" version=""1.0"" />
+          <package id=""C"" version=""2.1.4"" />
+        </packages>";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", config);
+            var sharedRepository = new Mock<MockPackageRepository>().As<ISharedPackageRepository>();
+            var packageReferenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+
+            // Act
+            SemanticVersion version;
+            bool result = packageReferenceRepository.TryFindLatestPackageById("does-not-exist", out version);
+
+            // Assert
+            Assert.False(result);
+            Assert.Null(version);
+        }
+
         private static void AssertConfig(string expected, string actual)
         {
             Assert.Equal(expected.Where(c => !Char.IsWhiteSpace(c)), actual.Where(c => !Char.IsWhiteSpace(c)));

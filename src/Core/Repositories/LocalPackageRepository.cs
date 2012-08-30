@@ -57,6 +57,12 @@ namespace NuGet
             }
         }
 
+        public IPackagePathResolver PathResolver
+        {
+            get;
+            set;
+        }
+
         public override bool SupportsPrereleasePackages
         {
             get { return true; }
@@ -66,12 +72,6 @@ namespace NuGet
         {
             get;
             private set;
-        }
-
-        public IPackagePathResolver PathResolver
-        {
-            get;
-            set;
         }
 
         public override IQueryable<IPackage> GetPackages()
@@ -105,7 +105,25 @@ namespace NuGet
 
         public virtual IPackage FindPackage(string packageId, SemanticVersion version)
         {
+            if (String.IsNullOrEmpty(packageId))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
+            }
+            if (version == null)
+            {
+                throw new ArgumentNullException("version");
+            }
             return FindPackage(OpenPackage, packageId, version);
+        }
+
+        public virtual IEnumerable<IPackage> FindPackagesById(string packageId)
+        {
+            if (String.IsNullOrEmpty(packageId))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
+            }
+
+            return FindPackagesById(OpenPackage, packageId);
         }
 
         public virtual bool Exists(string packageId, SemanticVersion version)
@@ -162,6 +180,17 @@ namespace NuGet
                     let package = GetPackage(openPackage, path)
                     where lookupPackageName.Equals(new PackageName(package.Id, package.Version))
                     select package).FirstOrDefault();
+        }
+
+        internal IEnumerable<IPackage> FindPackagesById(Func<string, IPackage> openPackage, string packageId)
+        {
+            Debug.Assert(!String.IsNullOrEmpty(packageId), "The caller has to ensure packageId is never null.");
+
+            var packagePaths = GetPackageFiles(packageId + "*" + Constants.PackageExtension);
+            return from path in packagePaths
+                   let package = GetPackage(openPackage, path)
+                   where package.Id.Equals(packageId, StringComparison.OrdinalIgnoreCase)
+                   select package;
         }
 
         internal IEnumerable<IPackage> GetPackages(Func<string, IPackage> openPackage)
@@ -224,6 +253,12 @@ namespace NuGet
 
         protected virtual IPackage OpenPackage(string path)
         {
+            var nuspecPath = Path.ChangeExtension(path, Constants.ManifestExtension);
+            if (FileSystem.FileExists(nuspecPath))
+            {
+                return new UnzippedPackage(FileSystem, Path.GetFileNameWithoutExtension(nuspecPath));
+            }
+
             ZipPackage package;
             try
             {

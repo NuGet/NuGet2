@@ -11,10 +11,10 @@ namespace NuGet.Test
     public class PackageRepositoryExtensionsTest
     {
         [Fact]
-        public void FindPackagesByIdUsesSearchableRepositoryIfAvailable()
+        public void FindPackagesByIdUsesPackageLookupIfAvailable()
         {
             // Arrange
-            var repository = new Mock<IServiceBasedRepository>();
+            var repository = new Mock<IPackageLookup>();
             repository.Setup(p => p.FindPackagesById("A")).Returns(new IPackage[0]).Verifiable();
 
             // Act

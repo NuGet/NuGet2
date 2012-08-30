@@ -6,11 +6,31 @@ namespace NuGet
 {
     public static class Constants
     {
+        /// <summary>
+        /// Represents the ".nupkg" extension.
+        /// </summary>
         public static readonly string PackageExtension = ".nupkg";
+        
+        /// <summary>
+        /// Represents the ".nuspec" extension.
+        /// </summary>
         public static readonly string ManifestExtension = ".nuspec";
+
+        /// <summary>
+        /// Represents the content directory in the package.
+        /// </summary>
         public static readonly string ContentDirectory = "content";
+
+        /// <summary>
+        /// Represents the lib directory in the package.
+        /// </summary>
         public static readonly string LibDirectory = "lib";
+
+        /// <summary>
+        /// Represents the tools directory in the package.
+        /// </summary>
         public static readonly string ToolsDirectory = "tools";
+        
         public static readonly string BinDirectory = "bin";
         public static readonly string SettingsFileName = "NuGet.Config";
         public static readonly string PackageReferenceFile = "packages.config";

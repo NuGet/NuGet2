@@ -5,7 +5,6 @@ namespace NuGet
 
     public abstract class PackageRepositoryBase : IPackageRepository
     {
-
         public abstract string Source { get; }
 
         public abstract IQueryable<IPackage> GetPackages();

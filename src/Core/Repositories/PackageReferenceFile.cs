@@ -144,28 +144,6 @@ namespace NuGet
             AddEntry(document, id, version, targetFramework);
         }
 
-        public PackageName FindEntryWithLatestVersionById(string id)
-        {
-            if (String.IsNullOrEmpty(id))
-            {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "id");
-            }
-
-            XDocument document = GetDocument();
-            if (document == null)
-            {
-                return null;
-            }
-
-            return (from e in document.Root.Elements("package")
-                    let entryId = e.GetOptionalAttributeValue("id")
-                    let entryVersion = SemanticVersion.ParseOptionalVersion(e.GetOptionalAttributeValue("version"))
-                    where entryId != null && entryVersion != null
-                    where id.Equals(entryId, StringComparison.OrdinalIgnoreCase)
-                    orderby entryVersion descending
-                    select new PackageName(entryId, entryVersion)).FirstOrDefault();
-        }
-
         private void AddEntry(XDocument document, string id, SemanticVersion version, FrameworkName targetFramework)
         {
             XElement element = FindEntry(document, id, version);

@@ -241,9 +241,97 @@ namespace NuGet.Test
             Assert.True(mockFileSystem.Deleted.Contains(@"A.1.0\A.1.0.nupkg"));
         }
 
+        [Fact]
+        public void FindPackagesByIdReturnsEmptySequenceIfNoPackagesWithSpecifiedIdAreFound()
+        {
+            // Arramge
+            var fileSystem = new MockFileSystem();
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            var localPackageRepository = new LocalPackageRepository(pathResolver, fileSystem);
+            
+            // Act
+            var packages = localPackageRepository.FindPackagesById("Foo");
+
+            // Assert
+            Assert.Empty(packages);
+        }
+
+        [Fact]
+        public void FindPackagesByIdFindsPackagesWithSpecifiedId()
+        {
+            // Arramge
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"Foo.1.0\Foo.1.0.nupkg");
+            fileSystem.AddFile(@"Foo.2.0.0\Foo.2.0.0.nupkg");
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            var foo_10 = PackageUtility.CreatePackage("Foo", "1.0");
+            var foo_20 = PackageUtility.CreatePackage("Foo", "2.0.0");
+            var localPackageRepository = new MockLocalRepository(fileSystem, path => 
+                {
+                    switch (path)
+                    {
+                        case @"Foo.1.0\Foo.1.0.nupkg": return foo_10;
+                        case @"Foo.2.0.0\Foo.2.0.0.nupkg": return foo_20;
+                        default: return null;
+                    }
+                });
+
+            // Act
+            var packages = localPackageRepository.FindPackagesById("Foo").ToList();
+
+            // Assert
+            Assert.Equal(new[] { foo_10, foo_20 }, packages);
+        }
+
+        [Fact]
+        public void FindPackagesByIdIgnoresPartialIdMatches()
+        {
+            // Arramge
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"Foo.1.0\Foo.1.0.nupkg");
+            fileSystem.AddFile(@"Foo.2.0.0\Foo.2.0.0.nupkg");
+            fileSystem.AddFile(@"Foo.Baz.2.0.0\Foo.Baz.2.0.0.nupkg");
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            var foo_10 = PackageUtility.CreatePackage("Foo", "1.0");
+            var foo_20 = PackageUtility.CreatePackage("Foo", "2.0.0");
+            var fooBaz_20 = PackageUtility.CreatePackage("Foo.Baz", "2.0.0");
+            var localPackageRepository = new MockLocalRepository(fileSystem, path =>
+            {
+                switch (path)
+                {
+                    case @"Foo.1.0\Foo.1.0.nupkg": return foo_10;
+                    case @"Foo.2.0.0\Foo.2.0.0.nupkg": return foo_20;
+                    case @"Foo.Baz.2.0.0\Foo.Baz.2.0.0.nupkg": return fooBaz_20;
+                    default: return null;
+                }
+            });
+
+            // Act
+            var packages = localPackageRepository.FindPackagesById("Foo").ToList();
+
+            // Assert
+            Assert.Equal(new[] { foo_10, foo_20 }, packages);
+        }
+
         private static DateTimeOffset GetDateTimeOffset(int seconds)
         {
             return new DateTimeOffset(1000, 10, 1, 0, 0, seconds, TimeSpan.Zero);
+        }
+
+        private class MockLocalRepository : LocalPackageRepository
+        {
+            private readonly Func<string, IPackage> _openPackage;
+
+            public MockLocalRepository(IFileSystem fileSystem, Func<string, IPackage> openPackage = null)
+                : base(new DefaultPackagePathResolver(fileSystem), fileSystem)
+            {
+                _openPackage = openPackage;
+            }
+
+            protected override IPackage OpenPackage(string path)
+            {
+                return _openPackage(path);
+            }
         }
     }
 }

@@ -144,7 +144,7 @@ namespace NuGet
 
         public static IEnumerable<IPackage> FindPackagesById(this IPackageRepository repository, string packageId)
         {
-            var serviceBasedRepository = repository as IServiceBasedRepository;
+            var serviceBasedRepository = repository as IPackageLookup;
             if (serviceBasedRepository != null)
             {
                 return serviceBasedRepository.FindPackagesById(packageId).ToList();
