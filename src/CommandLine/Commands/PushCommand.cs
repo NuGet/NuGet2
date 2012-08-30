@@ -144,10 +144,7 @@ namespace NuGet.Commands
             string sourceName = CommandLineUtility.GetSourceDisplayName(source);
             Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), sourceName);
 
-            using (Stream stream = package.GetStream())
-            {
-                packageServer.PushPackage(apiKey, stream, Convert.ToInt32(timeout.TotalMilliseconds));
-            }
+            packageServer.PushPackage(apiKey, package.GetStream, Convert.ToInt32(timeout.TotalMilliseconds));
             Console.WriteLine(NuGetResources.PushCommandPackagePushed);
         }
 

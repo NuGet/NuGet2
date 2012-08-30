@@ -50,12 +50,7 @@ namespace NuGet.ServerExtensions
         public void AddPackage(IPackage package)
         {
             _logger.Log(MessageLevel.Info, NuGetResources.MirrorCommandPushingPackage, package.GetFullName(), CommandLineUtility.GetSourceDisplayName(_destination.Source));
-
-            using (var stream = package.GetStream())
-            {
-                _destination.PushPackage(_apiKey, stream, (int)_timeout.TotalMilliseconds);
-            }
-
+            _destination.PushPackage(_apiKey, package.GetStream, (int)_timeout.TotalMilliseconds);
             _logger.Log(MessageLevel.Info, NuGetResources.MirrorCommandPackagePushed);
         }
 
