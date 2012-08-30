@@ -174,15 +174,15 @@ namespace NuGet.Test
         {
             // Arrange
             var assemblyReference = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("5.0")));
-            var toolReference = PackageUtility.CreateAssemblyReference("init1.ps1", null);
-            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReference, toolReference };
+            var assemblyReferenceNullFrameworkName = PackageUtility.CreateAssemblyReference("foo2.dll", null);
+            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReference, assemblyReferenceNullFrameworkName };
 
             // Act
             var compatibleAssemblyReferences = GetCompatibleItems(null, assemblyReferences).ToList();
 
             // Assert
             Assert.Equal(1, compatibleAssemblyReferences.Count);
-            Assert.Equal(toolReference, compatibleAssemblyReferences[0]);
+            Assert.Equal(assemblyReferenceNullFrameworkName, compatibleAssemblyReferences[0]);
         }
 
         private IEnumerable<T> GetCompatibleItems<T>(FrameworkName frameworkName, IEnumerable<T> items) where T : IFrameworkTargetable

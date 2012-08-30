@@ -20,6 +20,8 @@ namespace NuGet
         private const string LessThanOrEqualTo = "\u2264";
         private const string GreaterThanOrEqualTo = "\u2265";
 
+        public static readonly FrameworkName EmptyFramework = new FrameworkName("NoFramework", new Version());
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security",
             "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes",
@@ -626,10 +628,12 @@ namespace NuGet
                 return true;
             }
 
+            // Not all projects have a framework, we need to consider those projects.
+            var internalProjectFramework = projectFramework ?? EmptyFramework;
+
             // Default framework for assembly references with an unspecified framework name
             // always match the project framework's identifier by is the lowest possible version
-            // Not all projects have a framework, we need to consider those projects.
-            var defaultFramework = projectFramework != null ? new FrameworkName(projectFramework.Identifier, new Version(), projectFramework.Profile) : null;
+            var defaultFramework = new FrameworkName(internalProjectFramework.Identifier, new Version(), internalProjectFramework.Profile);
 
             // Turn something that looks like this:
             // item -> [Framework1, Framework2, Framework3] into
@@ -649,9 +653,9 @@ namespace NuGet
             // Try to find the best match
             // Not all projects have a framework, we need to consider those projects.
             compatibleItems = (from g in frameworkGroups
-                               where projectFramework != null ? IsCompatible(projectFramework, g.Key) : g.Key == null
-                               orderby GetProfileCompatibility(projectFramework, g.Key) descending,
-                                       g.Key == null ? new Version(0, 0) : g.Key.Version descending
+                               where IsCompatible(internalProjectFramework, g.Key)
+                               orderby GetProfileCompatibility(internalProjectFramework, g.Key) descending,
+                                       g.Key.Version descending
                                select g).FirstOrDefault();
 
             return compatibleItems != null && compatibleItems.Any();
@@ -809,12 +813,6 @@ namespace NuGet
         private static int GetProfileCompatibility(FrameworkName frameworkName, FrameworkName targetFrameworkName)
         {
             int compatibility = 0;
-
-            // Not all projects have a framework, we need to consider those projects.
-            if (frameworkName == null || targetFrameworkName == null)
-            {
-                return compatibility;
-            }
 
             if (NormalizeVersion(frameworkName.Version) == NormalizeVersion(targetFrameworkName.Version))
             {
