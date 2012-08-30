@@ -53,7 +53,10 @@ namespace NuGet
 
                 request.Timeout = timeout;
                 request.ReadWriteTimeout = timeout;
-                request.Headers.Add(ApiKeyHeader, apiKey);
+                if (!String.IsNullOrEmpty(apiKey))
+                {
+                    request.Headers.Add(ApiKeyHeader, apiKey);
+                }
 
                 var multiPartRequest = new MultipartWebRequest();
                 multiPartRequest.AddFile(() => packageStream, "package");

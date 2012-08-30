@@ -10,13 +10,9 @@ namespace NuGet
     {
         public readonly static string ApiKeysSectionName = "apikeys";
 
-        public static string GetApiKey(ISettings settings, string source, bool throwIfNotFound = true)
+        public static string GetApiKey(ISettings settings, string source)
         {
             var value = settings.GetDecryptedValue(CommandLineUtility.ApiKeysSectionName, source);
-            if (String.IsNullOrEmpty(value) && throwIfNotFound)
-            {
-                throw new CommandLineException(NuGetResources.NoApiKeyFound, GetSourceDisplayName(source));
-            }
             return value;
         }
 

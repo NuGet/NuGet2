@@ -75,6 +75,7 @@
     <Compile Include="InstallCommandTest.cs" />
     <Compile Include="ListCommandTests.cs" />
     <Compile Include="MirrorCommandTest.cs" />
+    <Compile Include="LocalizedResourceManagerTest.cs" />
     <Compile Include="MockConsole.cs" />
     <Compile Include="MockResourceType.Designer.cs">
       <AutoGen>True</AutoGen>

@@ -35,10 +35,11 @@ namespace NuGet.Server
             var package = new ZipPackage(stream);
 
             // Make sure they can access this package
-            Authenticate(context, apiKey, package.Id,
-                         () => _serverRepository.AddPackage(package));
-
-            WriteStatus(context, HttpStatusCode.Created, "");
+            if (Authenticate(context, apiKey, package.Id))
+            {
+                _serverRepository.AddPackage(package);
+                WriteStatus(context, HttpStatusCode.Created, "");
+            }
         }
 
         public void PublishPackage(HttpContextBase context)
@@ -58,16 +59,14 @@ namespace NuGet.Server
 
             IPackage requestedPackage = _serverRepository.FindPackage(packageId, version);
 
-            if (requestedPackage != null)
-            {
-                // Make sure they can access this package
-                Authenticate(context, apiKey, packageId,
-                             () => _serverRepository.RemovePackage(packageId, version));
-            }
-            else
+            if (requestedPackage == null)
             {
                 // Package not found
                 WritePackageNotFound(context, packageId, version);
+            }
+            else if (Authenticate(context, apiKey, packageId)) 
+            {
+                _serverRepository.RemovePackage(packageId, version);
             }
         }
 
@@ -99,15 +98,16 @@ namespace NuGet.Server
             WriteStatus(context, HttpStatusCode.NotFound, String.Format("'Package {0} {1}' Not found.", packageId, version));
         }
 
-        private void Authenticate(HttpContextBase context, string apiKey, string packageId, Action action)
+        private bool Authenticate(HttpContextBase context, string apiKey, string packageId)
         {
             if (_authenticationService.IsAuthenticated(context.User, apiKey, packageId))
             {
-                action();
+                return true;
             }
             else
             {
                 WriteForbidden(context, packageId);
+                return false;
             }
         }
 

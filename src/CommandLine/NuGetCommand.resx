@@ -413,7 +413,7 @@ nuget update -Self</value>
   <data name="DefaultConfigDescription" xml:space="preserve">
     <value>NuGet's default configuration is obtained by loading %AppData%\NuGet\NuGet.config, then loading any nuget.config or .nuget\nuget.config starting from root of drive and ending in current directory.</value>
   </data>
-  <data name="InstallCommandSaveManifest" xml:space="preserve">
-    <value>If set, only save the .nuspec file instead of .nupkg file.</value>
+  <data name="InstallCommandRequireConsent" xml:space="preserve">
+    <value>Checks if package restore consent is granted before installing a package.</value>
   </data>
 </root>

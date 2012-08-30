@@ -44,7 +44,7 @@ namespace NuGet.Commands
             var apiKey = GetApiKey(source);
             if (String.IsNullOrEmpty(apiKey))
             {
-                throw new CommandLineException(NuGetResources.NoApiKeyFound, CommandLineUtility.GetSourceDisplayName(source));
+                Console.WriteWarning(NuGetResources.NoApiKeyFound, CommandLineUtility.GetSourceDisplayName(source));
             }
 
             var timeout = TimeSpan.FromSeconds(Math.Abs(Timeout));
@@ -99,16 +99,13 @@ namespace NuGet.Commands
                 string source = NuGetConstants.DefaultSymbolServerUrl;
 
                 // See if the api key exists
-                string apiKey = GetApiKey(source, throwIfNotFound: false);
+                string apiKey = GetApiKey(source);
 
                 if (String.IsNullOrEmpty(apiKey))
                 {
                     Console.WriteWarning(NuGetResources.Warning_SymbolServerNotConfigured, Path.GetFileName(symbolPackagePath), NuGetResources.DefaultSymbolServer);
                 }
-                else
-                {
-                    PushPackage(symbolPackagePath, source, apiKey, timeout);
-                }
+                PushPackage(symbolPackagePath, source, apiKey, timeout);
             }
         }
 
@@ -184,7 +181,7 @@ namespace NuGet.Commands
             return packagePath;
         }
 
-        private string GetApiKey(string source, bool throwIfNotFound = true)
+        private string GetApiKey(string source)
         {
             if (!String.IsNullOrEmpty(ApiKey))
             {
@@ -202,7 +199,7 @@ namespace NuGet.Commands
             // If the user did not pass an API Key look in the config file
             if (String.IsNullOrEmpty(apiKey))
             {
-                apiKey = CommandLineUtility.GetApiKey(Settings, source, throwIfNotFound);
+                apiKey = CommandLineUtility.GetApiKey(Settings, source);
             }
 
             return apiKey;
