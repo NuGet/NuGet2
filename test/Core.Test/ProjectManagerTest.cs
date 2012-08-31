@@ -95,7 +95,7 @@ namespace NuGet.Test
         [Theory]
         [InlineData("portable-wp7+sl3+net40\\two.txt", "portable-net45+sl4\\one.txt")]
         [InlineData("portable-net40+sl3+wp71\\one.txt", "portable-windows8+sl2\\two.txt")]
-        public void AddPackageReferenceThePortableLibraryWithHigherVersionOfTheMatchingFrameworks(string contentFile, string otherContentFile)
+        public void AddPackageReferencePicksThePortableLibraryWithHigherVersionOfTheMatchingFrameworks(string contentFile, string otherContentFile)
         {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
@@ -110,6 +110,73 @@ namespace NuGet.Test
             // Assert
             Assert.True(projectSystem.FileExists("one.txt"));
             Assert.False(projectSystem.FileExists("two.txt"));
+        }
+
+        [Fact]
+        public void AddPackageReferencePicksThePortableLibraryWithMoreMatchingVersionsWhenInstalledIntoPortableProject()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-net45+sl5+wp71"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A", 
+                "1.0", 
+                new[] { "portable-net45+sl5+wp8\\one.txt",
+                        "portable-net45+sl5+wp71\\two.txt",
+                        "portable-net45+sl5+wp71+win8\\three.txt",
+                        "portable-net45+sl4+wp71+win8\\four.txt",
+                        "portable-net40+sl4+wp71+win8\\five.txt",
+                        "portable-net40+sl4+wp7+win8\\six.txt",
+                        "portable-wp8+win8\\seven.txt" });
+            
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.False(projectSystem.FileExists("one.txt"));
+            Assert.True(projectSystem.FileExists("two.txt"));
+            Assert.False(projectSystem.FileExists("three.txt"));
+            Assert.False(projectSystem.FileExists("three.txt"));
+            Assert.False(projectSystem.FileExists("four.txt"));
+            Assert.False(projectSystem.FileExists("five.txt"));
+            Assert.False(projectSystem.FileExists("six.txt"));
+            Assert.False(projectSystem.FileExists("seven.txt"));
+        }
+
+        [Fact]
+        public void AddPackageReferencePicksThePortableLibraryWithMoreMatchingVersionsWhenInstalledIntoPortableProject2()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-net45+sl5+wp71"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.0",
+                new[] { "portable-net45+sl5+wp8\\one.txt",
+                        "portable-net45+sl5+wp8\\two.txt",
+                        "portable-net45+sl5+wp71+win8\\three.txt",
+                        "portable-net45+sl4+wp71+win8\\four.txt",
+                        "portable-net40+sl4+wp71+win8\\five.txt",
+                        "portable-net40+sl4+wp7+win8\\six.txt",
+                        "portable-wp8+win8\\seven.txt" });
+
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.False(projectSystem.FileExists("one.txt"));
+            Assert.False(projectSystem.FileExists("two.txt"));
+            Assert.True(projectSystem.FileExists("three.txt"));
+            Assert.False(projectSystem.FileExists("four.txt"));
+            Assert.False(projectSystem.FileExists("five.txt"));
+            Assert.False(projectSystem.FileExists("six.txt"));
+            Assert.False(projectSystem.FileExists("seven.txt"));
         }
 
         [Fact]

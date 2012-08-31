@@ -1158,7 +1158,56 @@ namespace NuGet.Test
             string shortName2 = VersionUtility.GetShortFrameworkName(framework2);
 
             // Assert-2
-            Assert.Equal("portable-netcore45+sl30+wp71", shortName2);
+            Assert.Equal("portable-win+sl30+wp71", shortName2);
+
+            // Arrange
+            var framework3 = new FrameworkName(".NETPortable, Version=4.0, Profile=Profile4");
+
+            // Act-3
+            string shortName3 = VersionUtility.GetShortFrameworkName(framework3);
+
+            // Assert-4
+            Assert.Equal("portable-sl20+wp", shortName3);
+        }
+
+        [Fact]
+        public void GetShortNameDoesNotIncludeVersionIfVersionIs00()
+        {
+            // Act
+            string shortName = VersionUtility.GetShortFrameworkName(new FrameworkName("Silverlight, Version=v0.0"));
+
+            // Assert
+            Assert.Equal("sl", shortName);
+        }
+
+        [Fact]
+        public void GetShortNameForNetCore45ReturnsWindows()
+        {
+            // Act
+            string shortName = VersionUtility.GetShortFrameworkName(new FrameworkName(".NETCore, Version=v4.5"));
+
+            // Assert
+            Assert.Equal("win", shortName);
+        }
+
+        [Fact]
+        public void GetShortNameForWindowsPhoneReturnsWP()
+        {
+            // Act
+            string shortName = VersionUtility.GetShortFrameworkName(new FrameworkName("Silverlight, Version=v3.0, Profile=WindowsPhone"));
+
+            // Assert
+            Assert.Equal("wp", shortName);
+        }
+
+        [Fact]
+        public void GetShortNameForMangoReturnsWP71()
+        {
+            // Act
+            string shortName = VersionUtility.GetShortFrameworkName(new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71"));
+
+            // Assert
+            Assert.Equal("wp71", shortName);
         }
 
         [Fact]
@@ -1282,9 +1331,18 @@ namespace NuGet.Test
                            new FrameworkName(".NetCore, Version=4.5"), 
                            new FrameworkName(".NETFramework, Version=2.0"), 
                       });
+
+            var profile4 = new NetPortableProfile(
+               "Profile4",
+               new[] { 
+                           new FrameworkName("Silverlight, Version=2.0"), 
+                           new FrameworkName("Silverlight, Version=3.0, Profile=WindowsPhone"), 
+                      });
+
             profileCollection.Add(profile1);
             profileCollection.Add(profile2);
             profileCollection.Add(profile3);
+            profileCollection.Add(profile4);
 
             return profileCollection;
         }

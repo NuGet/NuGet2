@@ -103,7 +103,7 @@ namespace NuGet.Test
                        Assert.Equal("Search", entitySet);
                        Assert.Equal(2, parameters.Count);
                        Assert.Equal("'dante''s inferno'", parameters["searchTerm"]);
-                       Assert.Equal("'net40|sl40|sl30-wp|netmf11'", parameters["targetFramework"]);
+                       Assert.Equal("'net40|sl40|wp|netmf11'", parameters["targetFramework"]);
                    })
                    .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object);
 
@@ -133,7 +133,7 @@ namespace NuGet.Test
                        Assert.Equal("Search", entitySet);
                        Assert.Equal(3, parameters.Count);
                        Assert.Equal("'dante''s inferno'", parameters["searchTerm"]);
-                       Assert.Equal("'net40|sl40|sl30-wp|netmf11'", parameters["targetFramework"]);
+                       Assert.Equal("'net40|sl40|wp|netmf11'", parameters["targetFramework"]);
                        Assert.Equal("true", parameters["includePrerelease"]);
                    })
                    .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object)
