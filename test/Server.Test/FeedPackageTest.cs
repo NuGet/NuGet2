@@ -66,7 +66,7 @@ namespace Server.Test
             var package = new NuGet.Server.DataServices.Package(corePackage, new DerivedPackageData());
 
             // Assert
-            Assert.Equal(@"B::net20|B::net30|C:2.0:net30|D:(1.0, 3.0-alpha]|::netcore45|X", package.Dependencies);
+            Assert.Equal(@"B::net20|B::net30|C:2.0:net30|D:(1.0, 3.0-alpha]|::win|X", package.Dependencies);
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿using NuGet.Resources;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
+using NuGet.Resources;
 
 namespace NuGet
 {

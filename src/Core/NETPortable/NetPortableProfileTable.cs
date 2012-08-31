@@ -124,6 +124,12 @@ namespace NuGet
                         if (profile.EndsWith("*", StringComparison.Ordinal))
                         {
                             profile = profile.Substring(0, profile.Length - 1);
+
+                            // special case, if it was 'WindowsPhone7*', we want it to be WindowsPhone71
+                            if (profile.Equals("WindowsPhone7", StringComparison.OrdinalIgnoreCase))
+                            {
+                                profile = "WindowsPhone71";
+                            }
                         }
 
                         string versionString = root.GetOptionalAttributeValue("MinimumVersion");
