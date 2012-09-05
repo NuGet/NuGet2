@@ -538,10 +538,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             packageManager.SetupGet(p => p.SourceRepository).Returns(repository);
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
-            var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+            var packageSourceProvider = Mock.Of<IPackageSourceProvider>();
 
             // Act
-            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object);
+            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider, fileSystem, packageManager.Object);
             installCommand.Arguments.Add(@"X:\test\packages.config");
             installCommand.Execute();
 
@@ -571,10 +571,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             packageManager.SetupGet(p => p.SourceRepository).Returns(repository);
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
-            var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+            var packageSourceProvider = Mock.Of<IPackageSourceProvider>();
 
             // Act
-            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object)
+            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider, fileSystem, packageManager.Object)
             {
                 Console = new MockConsole()
             };
@@ -605,10 +605,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             packageManager.Setup(p => p.InstallPackage(package, true, true)).Verifiable();
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
-            var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+            var packageSourceProvider = Mock.Of<IPackageSourceProvider>();
             var console = new MockConsole();
 
-            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object, allowPackageRestore: false);
+            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider, fileSystem, packageManager.Object, allowPackageRestore: false);
             installCommand.Arguments.Add(@"X:\test\packages.config");
             installCommand.Console = console;
 
@@ -637,10 +637,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             packageManager.SetupGet(p => p.SourceRepository).Returns(repository);
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
-            var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+            var packageSourceProvider = Mock.Of<IPackageSourceProvider>();
             var console = new MockConsole();
 
-            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object, allowPackageRestore: false);
+            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider, fileSystem, packageManager.Object, allowPackageRestore: false);
             installCommand.Arguments.Add(@"X:\test\packages.config");
             installCommand.Console = console;
             installCommand.RequireConsent = true;
@@ -686,10 +686,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             packageManager.SetupGet(p => p.SourceRepository).Returns(repository);
             var repositoryFactory = new Mock<IPackageRepositoryFactory>();
             repositoryFactory.Setup(r => r.CreateRepository("My Source")).Returns(repository);
-            var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+            var packageSourceProvider = Mock.Of<IPackageSourceProvider>();
 
             // Act
-            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider.Object, fileSystem, packageManager.Object);
+            var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider, fileSystem, packageManager.Object);
             installCommand.Arguments.Add(@"X:\test\packages.config");
             installCommand.Execute();
 

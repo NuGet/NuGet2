@@ -183,6 +183,11 @@ namespace NuGet.Commands
                 ServicePointManager.DefaultConnectionLimit = Math.Min(10, packageReferences.Count);
             }
 
+            // The PackageSourceProvider reads from the underlying ISettings multiple times. One of the fields it reads is the password which is consequently decrypted
+            // once for each package being installed. Per work item 2345, a couple of users are running into an issue where this results in an exception in native 
+            // code. Instead, we'll use a cached set of sources. This should solve the issue and also give us some perf boost.
+            SourceProvider = new CachedPackageSourceProvider(SourceProvider);
+
             var satellitePackages = new List<IPackage>();
             var tasks = packageReferences.Select(package =>
                             Task.Factory.StartNew(() => RestorePackage(fileSystem, package.Id, package.Version, packageRestoreConsent, satellitePackages))).ToArray();

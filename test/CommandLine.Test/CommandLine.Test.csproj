@@ -65,6 +65,7 @@
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="CachedPackageSourceProviderTest.cs" />
     <Compile Include="CommandAttributeTests.cs" />
     <Compile Include="CommandLinePaserTests.cs" />
     <Compile Include="CommandManagerTests.cs" />
