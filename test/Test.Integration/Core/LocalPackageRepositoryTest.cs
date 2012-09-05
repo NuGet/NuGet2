@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using NuGet.Test.Mocks;
 using Xunit;
 using Xunit.Extensions;
 
@@ -165,6 +166,19 @@ namespace NuGet.Test.Integration.Core
             AssertPackage("Test", "1.3.1.0", packages[0]);
             AssertPackage("Foo", "1.4", packages[1]); 
             AssertPackage("Test", "1.3.4", packages[2]);
+        }
+
+        [Fact]
+        public void OpenPackagePrintsPathToPackageIfItCannotBeRead()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"Foo.nupkg");
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            var repository = new LocalPackageRepository(pathResolver, fileSystem);
+
+            // Act and Assert
+            ExceptionAssert.Throws<InvalidDataException>(() => repository.GetPackages().ToList(), "Unable to read package from path 'Foo.nupkg'.");
         }
 
         private static void AssertPackage(string id, string version, IPackage findPackage)

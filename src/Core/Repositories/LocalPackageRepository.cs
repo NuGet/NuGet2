@@ -2,8 +2,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using NuGet.Resources;
 
 namespace NuGet
 {
@@ -145,7 +147,7 @@ namespace NuGet
             var lookupPackageName = new PackageName(packageId, version);
             string packagePath;
             // If caching is enabled, check if we have a cached path. Additionally, verify that the file actually exists on disk since it might have moved.
-            if (_enableCaching && 
+            if (_enableCaching &&
                 _packagePathLookup.TryGetValue(lookupPackageName, out packagePath) &&
                 FileSystem.FileExists(packagePath))
             {
@@ -222,8 +224,15 @@ namespace NuGet
 
         protected virtual IPackage OpenPackage(string path)
         {
-            var package = new ZipPackage(() => FileSystem.OpenFile(path), _enableCaching);
-
+            ZipPackage package;
+            try
+            {
+                package = new ZipPackage(() => FileSystem.OpenFile(path), _enableCaching);
+            }
+            catch (FileFormatException ex)
+            {
+                throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ErrorReadingPackage, path), ex);
+            }
             // Set the last modified date on the package
             package.Published = FileSystem.GetLastModified(path);
 

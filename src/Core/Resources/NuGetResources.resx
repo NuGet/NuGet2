@@ -370,4 +370,7 @@
   <data name="PortableFrameworkProfileHasSpace" xml:space="preserve">
     <value>The profile part of a portable target framework must not contain empty space.</value>
   </data>
+  <data name="ErrorReadingPackage" xml:space="preserve">
+    <value>Unable to read package from path '{0}'.</value>
+  </data>
 </root>
