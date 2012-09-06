@@ -29,13 +29,17 @@ namespace NuGet.Dialog.Providers
             // We need to call ToList() here so that we don't evaluate the enumerable twice
             // when trying to count it.
             IList<FrameworkName> solutionFrameworks = Provider.SupportedFrameworks.Select(s => new FrameworkName(s)).ToList();
-            var packages = Repository.GetUpdates(_localRepository.GetPackages(), allowPrereleaseVersions, includeAllVersions: false, targetFramework: solutionFrameworks)
-                                     .AsQueryable();
+
+            // The allow prerelease flag passed to this method indiciates if we are allowed to show prerelease packages as part of the updates and does not
+            // reflect the filtering of packages we are looking for updates to.
+            var packages = _localRepository.GetPackages();
             if (!String.IsNullOrEmpty(searchTerm))
             {
                 packages = packages.Find(searchTerm);
             }
-            return packages;
+
+            return Repository.GetUpdates(packages, allowPrereleaseVersions, includeAllVersions: false, targetFramework: solutionFrameworks)
+                             .AsQueryable();
         }
 
         protected override IQueryable<IPackage> CollapsePackageVersions(IQueryable<IPackage> packages)
