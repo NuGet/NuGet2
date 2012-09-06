@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Versioning;
 using System.Threading;
 using EnvDTE;
@@ -39,6 +40,36 @@ namespace NuGet.Dialog.Test
             // Assert
             Assert.NotNull(packageItem);
             Assert.Null(packageItem.OldVersion);
+        }
+
+        [Fact]
+        public void SupportedTargetFrameworksDoNotReturnNullValue()
+        {
+            // Arrange
+            var project1 = new Mock<Project>();
+            project1.Setup(p => p.Kind).Returns("yyy");
+            project1.Setup(p => p.Properties.Item("TargetFrameworkMoniker").Value).Returns(".NETFramework, Version=4.0");
+
+            var project2 = new Mock<Project>();
+            project2.Setup(p => p.Kind).Returns("zzz");
+            project2.Setup(p => p.Properties.Item("TargetFrameworkMoniker").Value).Returns(null);
+
+            var project3 = new Mock<Project>();
+            project3.Setup(p => p.Kind).Returns("aaa");
+            project3.Setup(p => p.Properties.Item("TargetFrameworkMoniker").Value).Returns("Silverlight, Version=2.0");
+
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(s => s.GetProjects()).Returns(new[] { project1.Object, project2.Object, project3.Object });
+
+            var provider = CreateSolutionOnlineProvider(solutionManager: solutionManager.Object);
+
+            // Act
+            var frameworks = provider.SupportedFrameworks.ToList();
+
+            // Assert
+            Assert.Equal(2, frameworks.Count);
+            Assert.Equal(".NETFramework, Version=4.0", frameworks[0]);
+            Assert.Equal("Silverlight, Version=2.0", frameworks[1]);
         }
 
         [Theory]

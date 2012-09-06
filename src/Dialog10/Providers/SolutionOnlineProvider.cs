@@ -43,7 +43,9 @@ namespace NuGet.Dialog.Providers
             get
             {
                 return from p in _solutionManager.GetProjects()
-                       select p.GetTargetFramework();
+                       let fx = p.GetTargetFramework()
+                       where fx != null
+                       select fx;
             }
         }
 

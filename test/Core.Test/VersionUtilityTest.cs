@@ -1306,6 +1306,27 @@ namespace NuGet.Test
             Assert.False(isCompatible);
         }
 
+        [Theory]
+        [InlineData("portable-net45+sl5+wp71", "portable-net45+sl5+wp71", -3)]
+        [InlineData("portable-net45+sl5+wp71", "portable-net45+sl5+wp71+win8", -4)]
+        [InlineData("portable-net45+sl5+wp71", "portable-net45+sl4+wp71+win8", -54)]
+        [InlineData("portable-net45+sl5+wp71", "portable-net4+sl4+wp71+win8", -104)]
+        [InlineData("portable-net45+sl5+wp71", "portable-net4+sl4+wp7+win8", -154)]
+        [InlineData("portable-win8+wp8", "portable-win8+wp7", -52)]
+        [InlineData("portable-win8+wp8", "portable-win8+wp7+silverlight4", -53)]
+        public void TestGetCompatibilityBetweenPortableLibraryAndPortableLibrary(string frameworkName, string targetFrameworkName, int expectedScore)
+        {
+            // Arrange
+            var framework = VersionUtility.ParseFrameworkName(frameworkName);
+            var targetFramework = VersionUtility.ParseFrameworkName(targetFrameworkName);
+
+            // Act
+            int score = VersionUtility.GetCompatibilityBetweenPortableLibraryAndPortableLibrary(framework, targetFramework);
+
+            // Assert
+            Assert.Equal(expectedScore, score);
+        }
+
         private NetPortableProfileCollection BuildProfileCollection()
         {
             var profileCollection = new NetPortableProfileCollection();

@@ -263,7 +263,8 @@ namespace NuGet.VisualStudio
         private void EnablePackageRestore(Project project, IVsPackageManager packageManager)
         {
             var projectManager = packageManager.GetProjectManager(project);
-            if (projectManager.LocalRepository.GetPackages().IsEmpty())
+            var projectPackageReferences = GetPackageReferences(projectManager);
+            if (projectPackageReferences.IsEmpty())
             {
                 // don't enable package restore for the project if it doesn't have at least one 
                 // nuget package installed
@@ -556,9 +557,7 @@ namespace NuGet.VisualStudio
         private IEnumerable<PackageReference> GetAllPackageReferences(IVsPackageManager packageManager)
         {
             IEnumerable<PackageReference> projectReferences = from project in _solutionManager.GetProjects()
-                                                              from reference in
-                                                                  GetPackageReferences(
-                                                                      packageManager.GetProjectManager(project))
+                                                              from reference in GetPackageReferences(packageManager.GetProjectManager(project))
                                                               select reference;
 
             var localRepository = packageManager.LocalRepository as SharedPackageRepository;
