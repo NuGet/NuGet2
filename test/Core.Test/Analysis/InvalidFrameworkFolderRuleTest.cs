@@ -45,6 +45,10 @@ namespace NuGet.Test.Analysis
         [InlineData("en-USA")]
         [InlineData("es-Spain")]
         [InlineData("ent")]
+        [InlineData("portable-net 4")]
+        [InlineData("portable-net4+portable")]
+        [InlineData("portable-net4+sl-wp")]
+        [InlineData("portable")]
         public void PackageWithInvalidFrameworkNamesHasOneIssue(string folder)
         {
             // Arrange

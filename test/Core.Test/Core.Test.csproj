@@ -69,6 +69,7 @@
     <Compile Include="ManifestSchemaUtilityTest.cs" />
     <Compile Include="ManifestTest.cs" />
     <Compile Include="ManifestVersionUtilityTest.cs" />
+    <Compile Include="NetPortableProfileTableTest.cs" />
     <Compile Include="NetPortableProfileTest.cs" />
     <Compile Include="NullFileSystemTest.cs" />
     <Compile Include="PackageDependencyTest.cs" />

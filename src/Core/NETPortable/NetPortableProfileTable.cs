@@ -27,7 +27,7 @@ namespace NuGet
 
             return null;
         }
-        
+
         internal static NetPortableProfileCollection Profiles
         {
             get
@@ -84,7 +84,7 @@ namespace NuGet
         private static NetPortableProfile LoadPortableProfile(string profileDirectory)
         {
             string profileName = Path.GetFileName(profileDirectory);
-            
+
             string supportedFrameworkDirectory = Path.Combine(profileDirectory, "SupportedFrameworks");
             if (!Directory.Exists(supportedFrameworkDirectory))
             {
@@ -98,54 +98,77 @@ namespace NuGet
             return new NetPortableProfile(profileName, supportedFrameworks);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification="We don't care if this fails.")]
         private static FrameworkName LoadSupportedFramework(string frameworkFile)
+        {
+            using (Stream stream = File.OpenRead(frameworkFile))
+            {
+                return LoadSupportedFramework(stream);
+            }
+        }
+
+        internal static FrameworkName LoadSupportedFramework(Stream stream)
         {
             try
             {
-                using (Stream stream = File.OpenRead(frameworkFile))
+                var document = XDocument.Load(stream);
+                var root = document.Root;
+                if (root.Name.LocalName.Equals("Framework", StringComparison.Ordinal))
                 {
-                    var document = XDocument.Load(stream);
-                    var root = document.Root;
-                    if (root.Name.LocalName.Equals("Framework", StringComparison.Ordinal))
+                    string identifer = root.GetOptionalAttributeValue("Identifier");
+                    if (identifer == null)
                     {
-                        string identifer = root.GetOptionalAttributeValue("Identifier");
-                        if (identifer == null)
-                        {
-                            return null;
-                        }
-
-                        string profile = root.GetOptionalAttributeValue("Profile");
-                        if (profile == null)
-                        {
-                            profile = "";
-                        }
-
-                        if (profile.EndsWith("*", StringComparison.Ordinal))
-                        {
-                            profile = profile.Substring(0, profile.Length - 1);
-
-                            // special case, if it was 'WindowsPhone7*', we want it to be WindowsPhone71
-                            if (profile.Equals("WindowsPhone7", StringComparison.OrdinalIgnoreCase))
-                            {
-                                profile = "WindowsPhone71";
-                            }
-                        }
-
-                        string versionString = root.GetOptionalAttributeValue("MinimumVersion");
-                        if (versionString == null)
-                        {
-                            return null;
-                        }
-
-                        Version version;
-                        if (!Version.TryParse(versionString, out version))
-                        {
-                            return null;
-                        }
-
-                        return new FrameworkName(identifer, version, profile);
+                        return null;
                     }
+
+                    string versionString = root.GetOptionalAttributeValue("MinimumVersion");
+                    if (versionString == null)
+                    {
+                        return null;
+                    }
+
+                    Version version;
+                    if (!Version.TryParse(versionString, out version))
+                    {
+                        return null;
+                    }
+
+                    string profile = root.GetOptionalAttributeValue("Profile");
+                    if (profile == null)
+                    {
+                        profile = "";
+                    }
+
+                    if (profile.EndsWith("*", StringComparison.Ordinal))
+                    {
+                        profile = profile.Substring(0, profile.Length - 1);
+
+                        // special case, if it was 'WindowsPhone7*', we want it to be WindowsPhone71
+                        if (profile.Equals("WindowsPhone7", StringComparison.OrdinalIgnoreCase))
+                        {
+                            profile = "WindowsPhone71";
+                        }
+                        else if (identifer.Equals("Silverlight", StringComparison.OrdinalIgnoreCase) &&
+                                 profile.Equals("WindowsPhone", StringComparison.OrdinalIgnoreCase) &&
+                                 version == new Version(4, 0))
+                        {
+                            // Since the beginning of NuGet, we have been using "SL3-WP" as the moniker to target WP7 project. 
+                            // However, it's been discovered recently that the real TFM for WP7 project is "Silverlight, Version=4.0, Profile=WindowsPhone".
+                            // This is how the Portable Library xml describes a WP7 platform, as shown here:
+                            // 
+                            // <Framework
+                            //     Identifier="Silverlight"
+                            //     Profile="WindowsPhone*"
+                            //     MinimumVersion="4.0"
+                            //     DisplayName="Windows Phone"
+                            //     MinimumVersionDisplayName="7" />
+                            //
+                            // To maintain consistent behavior with previous versions of NuGet, we want to change it back to "SL3-WP" nonetheless.
+
+                            version = new Version(3, 0);
+                        }
+                    }
+
+                    return new FrameworkName(identifer, version, profile);
                 }
             }
             catch (XmlException)

@@ -216,7 +216,17 @@ namespace NuGet.Test
 
 
                 string effectivePath;
-                FrameworkName fn = ParseFrameworkName(fileName, out effectivePath);
+                FrameworkName fn;
+                try
+                {
+                    fn = ParseFrameworkName(fileName, out effectivePath);
+                }
+                catch (ArgumentException)
+                {
+                    effectivePath = fileName;
+                    fn = VersionUtility.UnsupportedFrameworkName;
+                }
+
                 if (fn != null)
                 {
                     mockAssemblyReference.Setup(m => m.EffectivePath).Returns(effectivePath);
