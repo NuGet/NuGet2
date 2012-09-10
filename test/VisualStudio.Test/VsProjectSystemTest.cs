@@ -45,6 +45,26 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Theory]
+        [InlineData("web.config")]
+        [InlineData("web.DEBUG.CONFIG")]
+        [InlineData("Web.release.Config")]
+        [InlineData("Web.aaaa.config")]
+        public void IsSupportedFileMethodRejectsAllVariationsOfWebConfigFile(string filePath)
+        {
+            // Arrange
+            var mockFileSystemProvider = new Mock<IFileSystemProvider>();
+            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
+            Project project = TestUtils.GetProject("TestProject");
+            VsProjectSystem projectSystem = new VsProjectSystem(project, mockFileSystemProvider.Object);
+
+            // Act
+            bool supported = projectSystem.IsSupportedFile(filePath);
+
+            // Assert
+            Assert.False(supported);
+        }
+
+        [Theory]
         [InlineData(".NetFramework, Version=1.0")]
         [InlineData(".NetCompact, Version=2.0, Profile=Client")]
         public void NonSilverlightProjectSupportsBindingRedirect(string targetFramework)
@@ -52,7 +72,7 @@ namespace NuGet.VisualStudio.Test
             // Arrange
             var silverlightProject = TestUtils.GetProject(
                 "Silverlight", 
-                propertyGetter: name => GetSilverlightTargetFrameworkProperty("TargetFrameworkMoniker", targetFramework));
+                propertyGetter: name => GetTargetFrameworkProperty("TargetFrameworkMoniker", targetFramework));
             var mockFileSystemProvider = new Mock<IFileSystemProvider>();
             mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
             var projectSystem = new VsProjectSystem(silverlightProject, mockFileSystemProvider.Object);
@@ -72,7 +92,7 @@ namespace NuGet.VisualStudio.Test
             // Arrange
             var silverlightProject = TestUtils.GetProject(
                 "Silverlight",
-                propertyGetter: name => GetSilverlightTargetFrameworkProperty("TargetFrameworkMoniker", targetFramework));
+                propertyGetter: name => GetTargetFrameworkProperty("TargetFrameworkMoniker", targetFramework));
             var mockFileSystemProvider = new Mock<IFileSystemProvider>();
             mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
             var projectSystem = new VsProjectSystem(silverlightProject, mockFileSystemProvider.Object);
@@ -84,7 +104,7 @@ namespace NuGet.VisualStudio.Test
             Assert.False(bindingRedirectSupported);
         }
 
-        private Property GetSilverlightTargetFrameworkProperty(string name, string targetFramework)
+        private Property GetTargetFrameworkProperty(string name, string targetFramework)
         {
             if (name == "TargetFrameworkMoniker")
             {

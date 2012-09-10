@@ -13,11 +13,9 @@ namespace NuGet.VisualStudio
 
         public override bool IsSupportedFile(string path)
         {
-            if ("app.config".Equals(Path.GetFileName(path), StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-            return true;
+            string fileName = Path.GetFileName(path);
+            return !(fileName.StartsWith("app.", StringComparison.OrdinalIgnoreCase) &&
+                     fileName.EndsWith(".config", StringComparison.OrdinalIgnoreCase));
         }
     }
 }

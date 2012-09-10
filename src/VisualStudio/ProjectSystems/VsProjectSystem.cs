@@ -360,7 +360,12 @@ namespace NuGet.VisualStudio
 
         public virtual bool IsSupportedFile(string path)
         {
-            return !(Path.GetFileName(path).Equals("web.config", StringComparison.OrdinalIgnoreCase));
+            string fileName = Path.GetFileName(path);
+
+            // exclude all file names with the pattern as "web.*.config", 
+            // e.g. web.config, web.release.config, web.debug.config
+            return !(fileName.StartsWith("web.", StringComparison.OrdinalIgnoreCase) &&
+                     fileName.EndsWith(".config", StringComparison.OrdinalIgnoreCase));
         }
 
         private void EnsureCheckedOutIfExists(string path)

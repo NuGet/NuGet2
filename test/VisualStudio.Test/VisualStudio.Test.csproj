@@ -81,6 +81,7 @@
     <Compile Include="VsSourceControlTrackerTest.cs" />
     <Compile Include="VsTemplateWizardTest.cs" />
     <Compile Include="VsUninstallerTest.cs" />
+    <Compile Include="WebProjectSystemTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Core\Core.csproj">
