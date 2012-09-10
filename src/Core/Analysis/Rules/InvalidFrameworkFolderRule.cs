@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using NuGet.Resources;
 
 namespace NuGet.Analysis.Rules
@@ -28,7 +29,17 @@ namespace NuGet.Analysis.Rules
 
         private static bool IsValidFrameworkName(string name)
         {
-            return VersionUtility.ParseFrameworkName(name) != VersionUtility.UnsupportedFrameworkName;
+            FrameworkName fx;
+            try
+            {
+                fx = VersionUtility.ParseFrameworkName(name);
+            }
+            catch (ArgumentException) 
+            {
+                fx = VersionUtility.UnsupportedFrameworkName;
+            }
+
+            return fx != VersionUtility.UnsupportedFrameworkName;
         }
 
         private static bool IsValidCultureName(IPackage package, string name)
