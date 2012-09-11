@@ -2310,6 +2310,43 @@ namespace NuGet.Test
             localRepository.VerifyAll();
         }
 
+        [Fact]
+        public void SafeUpdatingADependencyDoesNotUninstallPackage()
+        {
+            // Arrange
+            
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework", new Version("4.0")));
+
+            var packageA = PackageUtility.CreatePackage("A", "1.0", dependencies: new [] { new PackageDependency("C"), new PackageDependency("B") });
+            var packageB10 = PackageUtility.CreatePackage("B", "1.0", dependencies: new[] { new PackageDependency("C") });
+            var packageB101 = PackageUtility.CreatePackage("B", "1.0.1", dependencies: new[] { new PackageDependency("C") });
+            var packageC = PackageUtility.CreatePackage("C", "1.0", content: new[] { "1.txt" });
+            
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockPackageRepository { packageA, packageB10, packageB101, packageC };
+
+            var projectManager = new ProjectManager(
+                sourceRepository,
+                new DefaultPackagePathResolver(projectSystem),
+                projectSystem,
+                localRepository);
+
+            // Act 1 
+            projectManager.AddPackageReference(packageB10, ignoreDependencies: false, allowPrereleaseVersions: false);
+
+            // Assert 1
+            Assert.Contains(packageB10, localRepository);
+            Assert.Contains(packageC, localRepository);
+
+            // Act 2
+            projectManager.AddPackageReference("A");
+
+            // Assert 2
+            Assert.Contains(packageA, localRepository);
+            Assert.Contains(packageB101, localRepository);
+            Assert.Contains(packageC, localRepository);
+        }
+
         private ProjectManager CreateProjectManager()
         {
             var projectSystem = new MockProjectSystem();
