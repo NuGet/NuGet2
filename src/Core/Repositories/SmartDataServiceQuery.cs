@@ -14,8 +14,7 @@ namespace NuGet
     /// </summary>
     /// <remarks>
     /// Batch queries are multiple queries tunneled via a single post. Post requests are never cached, therefore it is imperative that batch queries are used sparingly. 
-    /// A formalized max-length is not specified, so we use 4k as per the analysis in http://www.boutell.com/newfaq/misc/urllength.html and only switch to batch queries when the url 
-    /// exceeds this limit.
+    /// IIS7 defaults to a value of 2048, so we'll use this as our max value.
     /// </remarks>
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Type is an IQueryable and by convention should end with the term Query")]
     public class SmartDataServiceQuery<T> : IQueryable<T>, IQueryProvider, IOrderedQueryable<T>
@@ -124,11 +123,23 @@ namespace NuGet
 
         public TResult Execute<TResult>(Expression expression)
         {
+            DataServiceRequest request = _query.GetRequest(expression);
+            if (_query.RequiresBatch(expression))
+            {
+                return _context.ExecuteBatch<TResult>(request).FirstOrDefault();
+            }
+
             return _query.Execute<TResult>(expression);
         }
 
         public object Execute(Expression expression)
         {
+            DataServiceRequest request = _query.GetRequest(expression);
+            if (_query.RequiresBatch(expression))
+            {
+                return _context.ExecuteBatch<object>(request).FirstOrDefault();
+            }
+
             return _query.Execute(expression);
         }
 

@@ -61,6 +61,7 @@
     <Compile Include="Analysis\WinRTNameObsoleteRuleTest.cs" />
     <Compile Include="DataServicePackageRepositoryTest.cs" />
     <Compile Include="DataServicePackageTest.cs" />
+    <Compile Include="DataServiceQueryWrapperTest.cs" />
     <Compile Include="DefaultPackagePathResolverTest.cs" />
     <Compile Include="EnumerableExtensionsTest.cs" />
     <Compile Include="Extensions\VersionExtensionsTest.cs" />
