@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using EnvDTE;
 using NuGet.VisualStudio.Resources;
+using VsWebSite;
 
 namespace NuGet.VisualStudio
 {
@@ -57,7 +58,7 @@ namespace NuGet.VisualStudio
         public override void RemoveReference(string name)
         {
             // Remove the reference via DTE.
-            base.RemoveReference(name);
+            RemoveDTEReference(name);
             
             // For GACed binaries, VS would not clear the refresh files for us since it assumes the reference exists in web.config. 
             // We'll clean up any remaining .refresh files.
@@ -150,6 +151,41 @@ namespace NuGet.VisualStudio
         private bool RequiresAppCodeRemapping(string path)
         {
             return !_excludedCodeFiles.Contains(path) && !IsUnderAppCode(path) && IsSourceFile(path);
+        }
+
+        /// <summary>
+        /// Removes a reference via the DTE. 
+        /// </summary>
+        /// <remarks>This is identical to VsProjectSystem.RemoveReference except in the way we process exceptions.</remarks>
+        private void RemoveDTEReference(string name)
+        {
+            // Get the reference name without extension
+            string referenceName = Path.GetFileNameWithoutExtension(name);
+
+            // Remove the reference from the project
+            AssemblyReference reference = null;
+            try
+            {
+                reference = Project.Object.References.Item(referenceName);
+                if (reference != null)
+                {
+                    reference.Remove();
+                    Logger.Log(MessageLevel.Debug, VsResources.Debug_RemoveReference, name, ProjectName);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageLevel messageLevel = MessageLevel.Warning;
+                if (reference != null && reference.ReferenceKind == AssemblyReferenceType.AssemblyReferenceConfig)
+                {
+                    // Bug 2319: Strong named assembly references are specified via config and may be specified in the root web.config. Attempting to remove these 
+                    // references always throws and there isn't an easy way to identify this. Instead, we'll attempt to lower the level of the message so it doesn't
+                    // appear as readily.
+
+                    messageLevel = MessageLevel.Debug;
+                }
+                Logger.Log(messageLevel, ex.Message);
+            }
         }
 
         private static bool IsUnderAppCode(string path)
