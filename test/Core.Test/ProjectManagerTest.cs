@@ -1748,7 +1748,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackageReferenceDoesNotThrowIfThereIfThereIsCompatibleAssemblyInLibButNotInContent()
+        public void AddPackageReferenceDoesNotThrowIfThereIsCompatibleAssemblyInLibButNotInContent()
         {
             // Arrange
             var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework", new Version("4.0")));
@@ -1771,7 +1771,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackageReferenceDoesNotThrowIfThereIfThereIsCompatibleAssemblyInContentButNotInLib()
+        public void AddPackageReferenceDoesNotThrowIfThereIsCompatibleAssemblyInContentButNotInLib()
         {
             // Arrange
             var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework", new Version("4.0")));
@@ -1836,6 +1836,73 @@ namespace NuGet.Test
             Assert.True(projectSystem.References.ContainsKey(@"reference.dll"));
             Assert.False(projectSystem.References.ContainsKey(@"bar.dll"));
             Assert.True(localRepository.Exists("A"));
+        }
+
+        [Fact]
+        public void AddPackageReferencePicksAssemblyFromHigherVersionFolderOverFullNetProfile()
+        {
+            // Arrange
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework", new Version("4.5")));
+            var localRepository = new MockPackageRepository();
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            var packageA = PackageUtility.CreatePackage("A", "1.0",
+                                                        new[] { "contentFile.txt" },
+                                                        new[] { "lib\\net40-client\\a4.dll", "lib\\net35-client\\a35.dll", "lib\\net20\\a20.dll" });
+
+            mockRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(projectSystem.ReferenceExists("a4.dll"));
+            Assert.False(projectSystem.ReferenceExists("a35.dll"));
+            Assert.False(projectSystem.ReferenceExists("a20.dll"));
+        }
+
+        [Fact]
+        public void AddPackageReferencePicksAssemblyFromFullProfileOverClientProfile()
+        {
+            // Arrange
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework", new Version("4.5")));
+            var localRepository = new MockPackageRepository();
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            var packageA = PackageUtility.CreatePackage("A", "1.0",
+                                                        new[] { "contentFile.txt" },
+                                                        new[] { "lib\\net45-client\\a.dll", "lib\\net45\\b.dll" });
+
+            mockRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.False(projectSystem.ReferenceExists("a.dll"));
+            Assert.True(projectSystem.ReferenceExists("b.dll"));
+        }
+
+        [Fact]
+        public void AddPackageReferencePicksAssemblyFromClientProfileOverFullProfile()
+        {
+            // Arrange
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework", new Version("4.5"), "Client"));
+            var localRepository = new MockPackageRepository();
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            var packageA = PackageUtility.CreatePackage("A", "1.0",
+                                                        new[] { "contentFile.txt" },
+                                                        new[] { "lib\\net45-client\\a.dll", "lib\\net45\\b.dll" });
+
+            mockRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(projectSystem.ReferenceExists("a.dll"));
+            Assert.False(projectSystem.ReferenceExists("b.dll"));
         }
 
         [Fact]

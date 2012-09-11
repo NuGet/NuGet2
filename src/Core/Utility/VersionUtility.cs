@@ -837,16 +837,14 @@ namespace NuGet
 
             if (NormalizeVersion(frameworkName.Version) == NormalizeVersion(targetFrameworkName.Version))
             {
-                compatibility++;
-            }
-
-            // Things with matching profiles are more compatible than things without.
-            // This means that if we have net40 and net40-client assemblies and the target framework is
-            // net40, both sets of assemblies are compatible but we prefer net40 since it matches
-            // the profile exactly.
-            if (targetFrameworkName.Profile.Equals(frameworkName.Profile, StringComparison.OrdinalIgnoreCase))
-            {
-                compatibility++;
+                // Things with matching profiles are more compatible than things without.
+                // This means that if we have net40 and net40-client assemblies and the target framework is
+                // net40, both sets of assemblies are compatible but we prefer net40 since it matches
+                // the profile exactly.
+                if (targetFrameworkName.Profile.Equals(frameworkName.Profile, StringComparison.OrdinalIgnoreCase))
+                {
+                    compatibility++;
+                }
             }
 
             // this is to give specific profile higher compatibility than portable profile
