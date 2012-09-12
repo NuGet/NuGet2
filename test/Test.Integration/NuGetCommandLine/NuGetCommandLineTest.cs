@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test.Integration.NuGetCommandLine
 {
@@ -366,7 +367,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         }
 
         [Fact]
-        public void PackageCommand_NotSpecfingFilesElementPackagesEmptyFrameworkFolderInContent()
+        public void PackageCommand_NotSpecifyingFilesElementPackagesEmptyFrameworkFolderInContent()
         {
             // Arrange            
             string nuspecFile = Path.Combine("wow", "SpecWithFiles.nuspec");
@@ -400,15 +401,15 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         }
 
         [Fact]
-        public void PackageCommand_NotSpecfingFilesElementPackagesEmptyFrameworkFolderInLib()
+        public void PackageCommand_NotSpecifyingFilesElementPackagesEmptyFrameworkFolderInLib()
         {
             // Arrange            
-            string nuspecFile = Path.Combine("mir", "SpecWithFiles.nuspec");
+            string nuspecFile = Path.Combine("pta", "SpecWithFiles.nuspec");
             string expectedPackage = "test.1.1.1.nupkg";
-            Directory.CreateDirectory(Path.Combine("mir", "lib"));
-            Directory.CreateDirectory(Path.Combine("mir", "lib", "net40"));
-            File.WriteAllText(Path.Combine("mir", "lib\\file1.txt"), "file 1");
-            File.WriteAllText(Path.Combine("mir", "lib\\file2.txt"), "file 2");
+            Directory.CreateDirectory(Path.Combine("pta", "lib"));
+            Directory.CreateDirectory(Path.Combine("pta", "lib", "net40"));
+            File.WriteAllText(Path.Combine("pta", "lib\\file1.txt"), "file 1");
+            File.WriteAllText(Path.Combine("pta", "lib\\file2.txt"), "file 2");
             File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>
   <metadata>
@@ -420,7 +421,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
   </metadata>
 </package>");
             string[] args = new string[] { "pack" };
-            Directory.SetCurrentDirectory("mir");
+            Directory.SetCurrentDirectory("pta");
 
             // Act
             int result = Program.Main(args);
@@ -431,6 +432,88 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             Assert.True(File.Exists(expectedPackage));
 
             VerifyPackageContents(expectedPackage, new[] { @"lib\file1.txt", @"lib\file2.txt", @"lib\net40\_._" });
+        }
+
+        [Fact]
+        public void PackageCommand_FileSourceEndsWithDirectoryCharPackageTheWholeDirectory()
+        {
+            // Arrange            
+            string nuspecFile = Path.Combine("hir", "SpecWithFiles.nuspec");
+            string expectedPackage = "test.1.1.1.nupkg";
+            if (Directory.Exists("hir"))
+            {
+                Directory.Delete("hir", recursive: true);
+            }
+            Directory.CreateDirectory(Path.Combine("hir", "lib"));
+            Directory.CreateDirectory(Path.Combine("hir", "lib", "net40"));
+            Directory.CreateDirectory(Path.Combine("hir", "lib", "net45"));
+            Directory.CreateDirectory(Path.Combine("hir", "lib", "net45", "css"));
+            Directory.CreateDirectory(Path.Combine("hir", "lib", "win8"));
+            Directory.CreateDirectory(Path.Combine("hir", "lib", "win8", "js"));
+            File.WriteAllText(Path.Combine("hir", "lib\\net45\\file1.txt"), "file 1");
+            File.WriteAllText(Path.Combine("hir", "lib\\win8\\js\\file2.txt"), "file 2");
+            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>test</id>
+    <version>1.1.1</version>
+    <authors>Luan</authors>
+    <description>Very cool.</description>
+    <language>en-US</language>
+  </metadata>
+  <files>
+    <file src=""lib\"" target=""content"" />
+  </files>
+</package>");
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory("hir");
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
+
+            VerifyPackageContents(expectedPackage, new[] { @"content\net45\file1.txt", @"content\net45\css\_._", @"content\win8\js\file2.txt", @"content\net40\_._" });
+        }
+
+        [Theory]
+        [InlineData("lib\\net40\\")]
+        [InlineData("lib\\net40")]
+        public void PackageCommand_FileSourceEndsWithDirectoryCharPackageEmptyDirectory(string sourcePath)
+        {
+            // Arrange            
+            string nuspecFile = Path.Combine("tir", "SpecWithFiles.nuspec");
+            string expectedPackage = "test.1.1.1.nupkg";
+            Directory.CreateDirectory(Path.Combine("tir", "lib"));
+            Directory.CreateDirectory(Path.Combine("tir", "lib", "net40"));
+            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>test</id>
+    <version>1.1.1</version>
+    <authors>Luan</authors>
+    <description>Very cool.</description>
+    <language>en-US</language>
+  </metadata>
+  <files>
+    <file src=""" + sourcePath + @""" target=""lib\net40"" />
+  </files>
+</package>");
+            string[] args = new string[] { "pack" };
+            Directory.SetCurrentDirectory("tir");
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
+
+            VerifyPackageContents(expectedPackage, new[] { @"lib\net40\_._" });
         }
 
         [Fact]

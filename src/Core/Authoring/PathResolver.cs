@@ -98,6 +98,17 @@ namespace NuGet
                 // If we aren't dealing with network paths, trim the leading slash. 
                 searchPath = searchPath.TrimStart(Path.DirectorySeparatorChar);
             }
+
+            bool searchDirectory = false;
+            
+            // If the searchPath ends with \ or /, we treat searchPath as a directory,
+            // and will include everything under it, recursively
+            if (IsDirectoryPath(searchPath))
+            {
+                searchPath = searchPath + "**" + Path.DirectorySeparatorChar + "*";
+                searchDirectory = true;
+            }
+
             basePath = NormalizeBasePath(basePath, ref searchPath);
             normalizedBasePath = GetPathToEnumerateFrom(basePath, searchPath);
 
@@ -132,6 +143,11 @@ namespace NuGet
             var matchedDirectories = from directory in Directory.GetDirectories(normalizedBasePath, "*.*", searchOption)
                                      where searchRegex.IsMatch(directory) && IsEmptyDirectory(directory)
                                      select new SearchPathResult(directory, isFile: false);
+
+            if (searchDirectory && IsEmptyDirectory(normalizedBasePath))
+            {
+                matchedDirectories = matchedDirectories.Concat(new [] { new SearchPathResult(normalizedBasePath, isFile: false) });
+            }
 
             return matchedFiles.Concat(matchedDirectories);
         }
@@ -175,10 +191,11 @@ namespace NuGet
         internal static string ResolvePackagePath(string searchDirectory, string searchPattern, string fullPath, string targetPath)
         {
             string packagePath;
+            bool isDirectorySearch = IsDirectoryPath(searchPattern);
             bool isWildcardSearch = IsWildcardSearch(searchPattern);
             bool isRecursiveWildcardSearch = isWildcardSearch && searchPattern.IndexOf("**", StringComparison.OrdinalIgnoreCase) != -1;
 
-            if (isRecursiveWildcardSearch && fullPath.StartsWith(searchDirectory, StringComparison.OrdinalIgnoreCase))
+            if ((isRecursiveWildcardSearch || isDirectorySearch) && fullPath.StartsWith(searchDirectory, StringComparison.OrdinalIgnoreCase))
             {
                 // The search pattern is recursive. Preserve the non-wildcard portion of the path.
                 // e.g. Search: X:\foo\**\*.cs results in SearchDirectory: X:\foo and a file path of X:\foo\bar\biz\boz.cs
@@ -222,6 +239,11 @@ namespace NuGet
         internal static bool IsWildcardSearch(string filter)
         {
             return filter.IndexOf('*') != -1;
+        }
+
+        internal static bool IsDirectoryPath(string path)
+        {
+            return path != null && path.Length > 1 && path[path.Length - 1] == Path.DirectorySeparatorChar;
         }
 
         private static bool IsEmptyDirectory(string directory)

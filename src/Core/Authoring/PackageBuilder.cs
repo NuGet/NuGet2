@@ -427,7 +427,7 @@ namespace NuGet
             
             ExcludeFiles(searchFiles, basePath, exclude);
 
-            if (!PathResolver.IsWildcardSearch(source) && !searchFiles.Any())
+            if (!PathResolver.IsWildcardSearch(source) && !PathResolver.IsDirectoryPath(source) && !searchFiles.Any())
             {
                 throw new FileNotFoundException(
                     String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageAuthoring_FileNotFound, source));
