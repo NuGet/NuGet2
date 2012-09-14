@@ -147,8 +147,8 @@ namespace NuGet.Commands
             // Add output files
             AddOutputFiles(builder);
 
-            // if there is a .nuspec file, only add content files if the <files /> element is not empty.
-            if (manifest == null || manifest.Files == null || manifest.Files.Count > 0)
+            // if there is a .nuspec file, only add content files if the <files /> element is missing.
+            if (manifest == null || manifest.Files == null)
             {
                 // Add content files
                 AddFiles(builder, ContentItemType, ContentFolder);
@@ -322,6 +322,7 @@ namespace NuGet.Commands
 
             // List of extensions to allow in the output path
             var allowedOutputExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+                ".winmd",
                 ".dll",
                 ".exe",
                 ".xml"
@@ -340,39 +341,37 @@ namespace NuGet.Commands
             // By default we add all files in the project's output directory
             foreach (var file in GetFiles(projectOutputDirectory, targetFileName, allowedOutputExtensions))
             {
+                string extension = Path.GetExtension(file);
+
+                // Only look at files we care about
+                if (!allowedOutputExtensions.Contains(extension))
                 {
-                    string extension = Path.GetExtension(file);
+                    continue;
+                }
 
-                    // Only look at files we care about
-                    if (!allowedOutputExtensions.Contains(extension))
+                string targetFolder;
+
+                if (IsTool)
+                {
+                    targetFolder = ToolsFolder;
+                }
+                else
+                {
+                    if (targetFramework == null)
                     {
-                        continue;
-                    }
-
-                    string targetFolder;
-
-                    if (IsTool)
-                    {
-                        targetFolder = ToolsFolder;
+                        targetFolder = ReferenceFolder;
                     }
                     else
                     {
-                        if (targetFramework == null)
-                        {
-                            targetFolder = ReferenceFolder;
-                        }
-                        else
-                        {
-                            targetFolder = Path.Combine(ReferenceFolder, VersionUtility.GetShortFrameworkName(targetFramework));
-                        }
+                        targetFolder = Path.Combine(ReferenceFolder, VersionUtility.GetShortFrameworkName(targetFramework));
                     }
-
-                    builder.Files.Add(new PhysicalPackageFile
-                    {
-                        SourcePath = file,
-                        TargetPath = Path.Combine(targetFolder, Path.GetFileName(file))
-                    });
                 }
+
+                builder.Files.Add(new PhysicalPackageFile
+                {
+                    SourcePath = file,
+                    TargetPath = Path.Combine(targetFolder, Path.GetFileName(file))
+                });
             }
         }
 
