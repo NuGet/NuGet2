@@ -43,15 +43,15 @@ namespace NuGet.Commands
         private const string PackagesFolder = "packages";
         private const string TransformFileExtension = ".transform";
 
-        public ProjectFactory(string path)
-            : this(new Project(path))
+        public ProjectFactory(string path, IDictionary<string, string> projectProperties)
+            : this(new Project(path, projectProperties, null))
         {
         }
 
         public ProjectFactory(Project project)
         {
             _project = project;
-            Properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            ProjectProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             AddSolutionDir();
             _settings = null;            
         }
@@ -97,7 +97,7 @@ namespace NuGet.Commands
 
         public bool Build { get; set; }
 
-        public Dictionary<string, string> Properties { get; private set; }
+        public Dictionary<string, string> ProjectProperties { get; private set; }
 
         public bool IsTool { get; set; }
 
@@ -235,7 +235,7 @@ namespace NuGet.Commands
 
                 using (var projectCollection = new ProjectCollection(ToolsetDefinitionLocations.Registry | ToolsetDefinitionLocations.ConfigurationFile))
                 {
-                    BuildRequestData requestData = new BuildRequestData(_project.FullPath, Properties, _project.ToolsVersion, new string[0], null);
+                    BuildRequestData requestData = new BuildRequestData(_project.FullPath, ProjectProperties, _project.ToolsVersion, new string[0], null);
                     var parameters = new BuildParameters(projectCollection)
                                      {
                                          Loggers = new[] { new ConsoleLogger { Verbosity = LoggerVerbosity.Quiet }},
@@ -268,9 +268,13 @@ namespace NuGet.Commands
         private string ResolveTargetPath()
         {
             // Set the project properties
-            foreach (var property in Properties)
+            foreach (var property in ProjectProperties)
             {
-                _project.SetProperty(property.Key, property.Value);
+                var existingProperty = _project.GetProperty(property.Key);
+                if (existingProperty == null || !existingProperty.IsGlobalProperty)
+                {
+                    _project.SetProperty(property.Key, property.Value);
+                }
             }
 
             // Re-evaluate the project so that the new property values are applied
@@ -501,7 +505,7 @@ namespace NuGet.Commands
 
             if (!String.IsNullOrEmpty(solutionDir))
             {
-                Properties.Add("SolutionDir", solutionDir);
+                ProjectProperties.Add("SolutionDir", solutionDir);
             }
         }
 

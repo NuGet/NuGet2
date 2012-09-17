@@ -333,18 +333,12 @@ namespace NuGet.Commands
 
         private IPackage BuildFromProjectFile(string path)
         {
-            var factory = new ProjectFactory(path)
+            var factory = new ProjectFactory(path, Properties)
             {
                 IsTool = Tool,
                 Logger = Console,
                 Build = Build,
             };
-
-            // Add the additional Properties to the properties of the Project Factory
-            foreach (var property in Properties)
-            {
-                factory.Properties.Add(property.Key, property.Value);
-            }
 
             // Create a builder for the main package as well as the sources/symbols package
             PackageBuilder mainPackageBuilder = factory.CreateBuilder(BasePath);
