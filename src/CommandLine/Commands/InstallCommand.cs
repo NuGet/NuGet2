@@ -256,10 +256,28 @@ namespace NuGet.Commands
         {
             var packageManager = CreatePackageManager(fileSystem);
 
-            if (IsPackageInstalled(packageManager.LocalRepository, fileSystem, packageId, version))
+            if (!AllowMultipleVersions)
             {
-                return false;
+                var installedPackage = packageManager.LocalRepository.FindPackage(packageId);
+                if (installedPackage != null)
+                {
+                    if (version != null && installedPackage.Version >= version)
+                    {
+                        // If the package is already installed (or the version being installed is lower), then we do not need to do anything. 
+                        return false;
+                    }
+                    else if (packageManager.SourceRepository.Exists(packageId, version))
+                    {
+                        // If the package is already installed, but
+                        // (a) the version we require is different from the one that is installed, 
+                        // (b) side-by-side is disabled
+                        // we need to uninstall it.
+                        // However, before uninstalling, make sure the package exists in the source repository. 
+                        packageManager.UninstallPackage(installedPackage, forceRemove: false, removeDependencies: true);
+                    }
+                }
             }
+
             using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Install))
             {
                 packageManager.InstallPackage(packageId, version, ignoreDependencies: false, allowPrereleaseVersions: Prerelease);
