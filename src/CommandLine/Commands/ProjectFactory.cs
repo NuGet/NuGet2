@@ -273,6 +273,9 @@ namespace NuGet.Commands
                 var existingProperty = _project.GetProperty(property.Key);
                 if (existingProperty == null || !existingProperty.IsGlobalProperty)
                 {
+                    // Only set the property if it's not already defined as a global property
+                    // (which those passed in via the ctor are) as trying to set global properties
+                    // with this method throws.
                     _project.SetProperty(property.Key, property.Value);
                 }
             }
