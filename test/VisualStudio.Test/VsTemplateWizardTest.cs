@@ -497,6 +497,31 @@ namespace NuGet.VisualStudio.Test
             Assert.Equal("DestDir", actual);
         }
 
+        [Theory]
+        [InlineData("http://localhost", "http://localhost", @"packages\")]
+        [InlineData("http://localhost/website", "http://localhost", @"..\packages\")]
+        [InlineData("http://localhost:2302/", @"x:\\dir\me\", @"x:\\dir\me\packages\")]
+        [InlineData("http://localhost:2302/website/", @"x:\\dir\me\", @"x:\\dir\me\packages\")]
+        public void AddNuGetPackageFolderTemplateParameterIsCorrectWhenProjectWebsiteIsHttpBased(string directoryPath, string solutionPath, string expectedPath)
+        {
+            // Arrange
+            var template = new TestableVsTemplateWizard();
+            var parameters = new Dictionary<string, string>();
+
+            parameters["$destinationdirectory$"] = directoryPath;
+            parameters["$solutiondirectory$"] = solutionPath;
+
+            // Act
+            ((IVsTemplateWizard)template).RunStarted(new Mock<DTE>().Object, parameters, WizardRunKind.AsNewProject, new object[0]);
+
+            string nugetFolder;
+            bool result = parameters.TryGetValue("$nugetpackagesfolder$", out nugetFolder);
+
+            // Assert
+            Assert.True(result);
+            Assert.Equal(expectedPath, nugetFolder);
+        }
+
         private static void VerifyParsedPackages(XDocument document, IEnumerable<VsTemplateWizardPackageInfo> expectedPackages)
         {
             // Arrange

@@ -11,7 +11,10 @@ namespace NuGet
 {
     public class DataServiceQueryWrapper<T> : IDataServiceQuery<T>
     {
-        private const int MaxUrlLength = 4000;
+        /// <remarks>
+        /// Corresponds to the default value of "maxQueryString" in system.webserver.
+        /// </remarks>
+        private const int MaxUrlLength = 2048;
 
         private readonly DataServiceQuery _query;
         private readonly IDataServiceContext _context;
@@ -41,12 +44,20 @@ namespace NuGet
 
         public bool RequiresBatch(Expression expression)
         {
-            return GetRequest(expression).RequestUri.OriginalString.Length >= MaxUrlLength;
+            // Absolute uri returns the escaped url that would be sent to the server. Escaping exapnds the value and IIS uses this escaped query to determine if the 
+            // query is of acceptable length. 
+            string requestUri = GetRequestUri(expression).AbsoluteUri;
+            return requestUri.Length >= MaxUrlLength;
         }
 
         public DataServiceRequest GetRequest(Expression expression)
         {
             return (DataServiceRequest)_query.Provider.CreateQuery(GetInnerExpression(expression));
+        }
+
+        public virtual Uri GetRequestUri(Expression expression)
+        {
+            return GetRequest(expression).RequestUri;
         }
 
         public TResult Execute<TResult>(Expression expression)
