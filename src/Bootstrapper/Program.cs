@@ -40,8 +40,7 @@ namespace Bootstrapper
                     File.SetLastWriteTimeUtc(exePath, DateTime.UtcNow);
                 }
                 processInfo.Arguments = ParseArgs();
-                RunProcess(processInfo);
-                return 0;
+                return RunProcess(processInfo);
             }
             catch (Exception e)
             {
@@ -104,11 +103,12 @@ namespace Bootstrapper
             }
         }
 
-        private static void RunProcess(ProcessStartInfo processInfo)
+        private static int RunProcess(ProcessStartInfo processInfo)
         {
             using (var process = Process.Start(processInfo))
             {
                 process.WaitForExit();
+                return process.ExitCode;
             }
         }
 
