@@ -736,6 +736,7 @@ namespace NuGet.PowerShell.Commands.Test
                 new Mock<IFileSystemProvider>().Object,
                 new Mock<IFileSystem>().Object,
                 localRepository.Object,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new VsPackageInstallerEvents());
 
             var mockPackageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
@@ -793,6 +794,7 @@ namespace NuGet.PowerShell.Commands.Test
                 new Mock<IFileSystemProvider>().Object,
                 new Mock<IFileSystem>().Object,
                 localRepository.Object,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new VsPackageInstallerEvents());
 
             var mockPackageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
@@ -915,7 +917,7 @@ namespace NuGet.PowerShell.Commands.Test
             localRepo.Setup(c => c.GetPackages()).Returns(localPackages.AsQueryable());
 
             return new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(), new Mock<IFileSystemProvider>().Object, fileSystem.Object,
-                                        localRepo.Object, new Mock<VsPackageInstallerEvents>().Object);
+                                        localRepo.Object, new Mock<IDeleteOnRestartManager>().Object, new Mock<VsPackageInstallerEvents>().Object);
         }
 
         private static IVsPackageManagerFactory GetPackageManagerForMultipleVersions()
@@ -932,6 +934,7 @@ namespace NuGet.PowerShell.Commands.Test
             var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), GetActiveRepository(),
                                                       new Mock<IFileSystemProvider>().Object,
                                                       fileSystem.Object, localRepo.Object,
+                                                      new Mock<IDeleteOnRestartManager>().Object,
                                                       new Mock<VsPackageInstallerEvents>().Object);
 
             var factory = new Mock<IVsPackageManagerFactory>();

@@ -23,7 +23,8 @@ namespace NuGet.PowerShell.Commands
                    ServiceLocator.GetInstance<IVsPackageSourceProvider>(),
                    ServiceLocator.GetInstance<IHttpClientEvents>(),
                    ServiceLocator.GetInstance<IProductUpdateService>(),
-                   ServiceLocator.GetInstance<IVsCommonOperations>())
+                   ServiceLocator.GetInstance<IVsCommonOperations>(),
+                   ServiceLocator.GetInstance<IDeleteOnRestartManager>())
         {
         }
 
@@ -33,8 +34,9 @@ namespace NuGet.PowerShell.Commands
                                     IVsPackageSourceProvider packageSourceProvider,
                                     IHttpClientEvents httpClientEvents,
                                     IProductUpdateService productUpdateService,
-                                    IVsCommonOperations vsCommonOperations)
-            : base(solutionManager, packageManagerFactory, httpClientEvents, vsCommonOperations)
+                                    IVsCommonOperations vsCommonOperations,
+                                    IDeleteOnRestartManager deleteOnRestartManager)
+            : base(solutionManager, packageManagerFactory, httpClientEvents, vsCommonOperations, deleteOnRestartManager)
         {
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;

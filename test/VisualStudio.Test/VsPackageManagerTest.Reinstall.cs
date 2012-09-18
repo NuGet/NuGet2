@@ -29,6 +29,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
                 localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var packageA = PackageUtility.CreatePackage("A", "1.2", new[] { "content.txt" });
@@ -60,6 +61,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
                 localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var packageA = PackageUtility.CreatePackage("A", "1.2-alpha", new[] { "content.txt" });
@@ -91,6 +93,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
                 localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var packageA = PackageUtility.CreatePackage("A", "1.2-alpha", new[] { "content.txt" }, dependencies: new[] { new PackageDependency("B") });
@@ -131,6 +134,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
                 localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var packageA = PackageUtility.CreatePackage("A", "1.2-alpha", new[] { "content.txt" }, dependencies: new[] { new PackageDependency("B") });
@@ -173,6 +177,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
                 localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var packageA = PackageUtility.CreatePackage(
@@ -224,6 +229,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
                 localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var packageA = PackageUtility.CreatePackageWithDependencySets(
@@ -298,6 +304,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
                 localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var packageA = PackageUtility.CreatePackageWithDependencySets(
@@ -372,6 +379,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
                 localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var packageA = PackageUtility.CreatePackageWithDependencySets(
@@ -439,6 +447,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
                 localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var packageA = PackageUtility.CreatePackageWithDependencySets(
@@ -510,6 +519,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
                 localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
             var packageA = PackageUtility.CreatePackage(
@@ -593,6 +603,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem2,
                 localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
             packageManager.RegisterProjectManager(project1, projectManager1);
@@ -687,6 +698,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem2,
                 localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
             packageManager.RegisterProjectManager(project1, projectManager1);
@@ -791,6 +803,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem2,
                 localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
             packageManager.RegisterProjectManager(project1, projectManager1);
@@ -899,6 +912,7 @@ namespace NuGet.VisualStudio.Test
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem2,
                 localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
             packageManager.RegisterProjectManager(project1, projectManager1);
@@ -991,6 +1005,7 @@ namespace NuGet.VisualStudio.Test
                 IFileSystemProvider fileSystemProvider,
                 IFileSystem fileSystem,
                 ISharedPackageRepository sharedRepository,
+                IDeleteOnRestartManager deleteOnRestartManager,
                 VsPackageInstallerEvents packageEvents) :
                 base(
                     solutionManager,
@@ -998,6 +1013,7 @@ namespace NuGet.VisualStudio.Test
                     fileSystemProvider,
                     fileSystem,
                     sharedRepository,
+                    deleteOnRestartManager,
                     packageEvents)
             {
             }

@@ -14,6 +14,10 @@
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DeleteOnRestart\DeleteOnRestartManager.cs" />
+    <Compile Include="DeleteOnRestart\RestartRequestBar.xaml.cs">
+      <DependentUpon>RestartRequestBar.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ExceptionHelper.cs" />
     <Compile Include="Extensibility\VsPackageUninstaller.cs" />
     <Compile Include="Extensibility\IVsPackageUninstaller.cs" />
@@ -22,6 +26,7 @@
     <Compile Include="Extensibility\VsPackageMetadata.cs" />
     <Compile Include="Extensions\ProjectSystemExtensions.cs" />
     <Compile Include="FallbackRepository.cs" />
+    <Compile Include="DeleteOnRestart\IDeleteOnRestartManager.cs" />
     <Compile Include="IRegistryKey.cs" />
     <Compile Include="ISourceControlFileSystem.cs" />
     <Compile Include="IVsCommonOperations.cs" />
@@ -165,6 +170,9 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
@@ -250,6 +258,10 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="DeleteOnRestart\RestartRequestBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="PackageRestore\PackageRestoreBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

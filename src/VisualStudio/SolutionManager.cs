@@ -33,7 +33,7 @@ namespace NuGet.VisualStudio
         {
         }
 
-        private SolutionManager(DTE dte, IVsSolution vsSolution, IVsMonitorSelection vsMonitorSelection)
+        internal SolutionManager(DTE dte, IVsSolution vsSolution, IVsMonitorSelection vsMonitorSelection)
         {
             if (dte == null)
             {
@@ -89,6 +89,9 @@ namespace NuGet.VisualStudio
                 return project;
             }
         }
+
+        [Import]
+        internal Lazy<IDeleteOnRestartManager> DeleteOnRestartManager { get; set; }
 
         public event EventHandler SolutionOpened;
 
@@ -494,6 +497,10 @@ namespace NuGet.VisualStudio
             if (dwCmdUICookie == _solutionLoadedUICookie && fActive == 1)
             {
                 OnSolutionOpened();
+                // We must call DeleteMarkedPackageDirectories outside of OnSolutionOpened, because OnSolutionOpened might be called in the constructor
+                // and DeleteOnRestartManager requires VsFileSystemProvider and RepositorySetings which both have dependencies on SolutionManager.
+                // In practice, this code gets executed even when a solution is opened directly during Visual Studio startup.
+                DeleteOnRestartManager.Value.DeleteMarkedPackageDirectories();
             }
 
             return VSConstants.S_OK;

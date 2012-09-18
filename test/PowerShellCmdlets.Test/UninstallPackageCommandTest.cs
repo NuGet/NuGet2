@@ -17,7 +17,7 @@ namespace NuGet.PowerShell.Commands.Test
             // Arrange
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns((IVsPackageManager)null);
-            var uninstallCmdlet = new UninstallPackageCommand(TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, null, new Mock<IVsCommonOperations>().Object);
+            var uninstallCmdlet = new UninstallPackageCommand(TestUtils.GetSolutionManager(isSolutionOpen: false), packageManagerFactory.Object, null, new Mock<IVsCommonOperations>().Object, new Mock<IDeleteOnRestartManager>().Object);
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => uninstallCmdlet.GetResults(),
@@ -33,7 +33,7 @@ namespace NuGet.PowerShell.Commands.Test
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            var uninstallCmdlet = new Mock<UninstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsCommonOperations>().Object) { CallBase = true };
+            var uninstallCmdlet = new Mock<UninstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsCommonOperations>().Object, new Mock<IDeleteOnRestartManager>().Object) { CallBase = true };
             uninstallCmdlet.Object.Id = id;
             uninstallCmdlet.Object.Version = version;
 
@@ -55,7 +55,7 @@ namespace NuGet.PowerShell.Commands.Test
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            var uninstallCmdlet = new Mock<UninstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsCommonOperations>().Object) { CallBase = true };
+            var uninstallCmdlet = new Mock<UninstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsCommonOperations>().Object, new Mock<IDeleteOnRestartManager>().Object) { CallBase = true };
             uninstallCmdlet.Object.Id = id;
             uninstallCmdlet.Object.Version = version;
             uninstallCmdlet.Object.Force = new SwitchParameter(forceSwitch);
@@ -76,7 +76,7 @@ namespace NuGet.PowerShell.Commands.Test
             var vsPackageManager = new MockVsPackageManager();
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(vsPackageManager);
-            var uninstallCmdlet = new Mock<UninstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsCommonOperations>().Object) { CallBase = true };
+            var uninstallCmdlet = new Mock<UninstallPackageCommand>(TestUtils.GetSolutionManager(), packageManagerFactory.Object, null, new Mock<IVsCommonOperations>().Object, new Mock<IDeleteOnRestartManager>().Object) { CallBase = true };
             uninstallCmdlet.Object.Id = "my-id";
             uninstallCmdlet.Object.Version = new SemanticVersion("2.8");
             uninstallCmdlet.Object.RemoveDependencies = new SwitchParameter(true);
@@ -93,7 +93,7 @@ namespace NuGet.PowerShell.Commands.Test
         private class MockVsPackageManager : VsPackageManager
         {
             public MockVsPackageManager()
-                : base(new Mock<ISolutionManager>().Object, new Mock<IPackageRepository>().Object, new Mock<IFileSystemProvider>().Object, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<VsPackageInstallerEvents>().Object)
+                : base(new Mock<ISolutionManager>().Object, new Mock<IPackageRepository>().Object, new Mock<IFileSystemProvider>().Object, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IDeleteOnRestartManager>().Object, new Mock<VsPackageInstallerEvents>().Object)
             {
             }
 

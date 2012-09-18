@@ -9,6 +9,7 @@ using System.Windows.Input;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
+using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.Dialog.Providers;
 using NuGet.VisualStudio;
@@ -48,6 +49,8 @@ namespace NuGet.Dialog
                  ServiceLocator.GetInstance<IPackageRestoreManager>(),
                  ServiceLocator.GetInstance<ISolutionManager>(),
                  ServiceLocator.GetInstance<IOptionsPageActivator>(),
+                 ServiceLocator.GetInstance<IDeleteOnRestartManager>(),
+                 ServiceLocator.GetGlobalService<SVsShell, IVsShell4>(),
                  dialogParameters)
         {            
         }
@@ -62,6 +65,8 @@ namespace NuGet.Dialog
                                     IPackageRestoreManager packageRestoreManager,
                                     ISolutionManager solutionManager,
                                     IOptionsPageActivator optionPageActivator,
+                                    IDeleteOnRestartManager deleteOnRestartManager,
+                                    IVsShell4 vsRestarter,
                                     string dialogParameters)
             : base(F1Keyword)
         {
@@ -92,6 +97,7 @@ namespace NuGet.Dialog
 
             AddUpdateBar(productUpdateService);
             AddRestoreBar(packageRestoreManager);
+            var restartRequestBar = AddRestartRequestBar(deleteOnRestartManager, vsRestarter);
             InsertDisclaimerElement();
             AdjustSortComboBoxWidth();
             PreparePrereleaseComboBox();
@@ -105,7 +111,8 @@ namespace NuGet.Dialog
                 providerServices,
                 httpClientEvents,
                 solutionManager,
-                packageRestoreManager);
+                packageRestoreManager,
+                restartRequestBar);
 
             ProcessDialogParameters(dialogParameters);
         }
@@ -160,6 +167,15 @@ namespace NuGet.Dialog
             restoreBar.SizeChanged += OnHeaderBarSizeChanged;
         }
 
+        private RestartRequestBar AddRestartRequestBar(IDeleteOnRestartManager deleteOnRestartManager, IVsShell4 vsRestarter)
+        {
+            var restartRequestBar = new RestartRequestBar(deleteOnRestartManager, vsRestarter);
+            Grid.SetColumn(restartRequestBar, 1);
+            BottomBar.Children.Insert(1, restartRequestBar);
+            Loaded += restartRequestBar.NotifyOnUnsuccessfulUninstall;
+            return restartRequestBar;
+        }
+
         private void OnHeaderBarSizeChanged(object sender, SizeChangedEventArgs e)
         {
             // when the update bar appears, we adjust the window position 
@@ -183,7 +199,8 @@ namespace NuGet.Dialog
                                     ProviderServices providerServices,
                                     IHttpClientEvents httpClientEvents,
                                     ISolutionManager solutionManager,
-                                    IPackageRestoreManager packageRestoreManager)
+                                    IPackageRestoreManager packageRestoreManager,
+                                    RestartRequestBar restartRequestBar)
         {
 
             // This package manager is not used for installing from a remote source, and therefore does not need a fallback repository for resolving dependencies
@@ -284,6 +301,8 @@ namespace NuGet.Dialog
             installedProvider.IncludePrerelease =
                 onlineProvider.IncludePrerelease =
                 updatesProvider.IncludePrerelease = _providerSettings.IncludePrereleasePackages;
+            
+            installedProvider.ExecuteCompleted += restartRequestBar.NotifyOnUnsuccessfulUninstall;
         }
 
         private void UpdateSelectedProvider(int selectedProvider)

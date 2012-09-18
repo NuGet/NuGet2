@@ -1,10 +1,12 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using EnvDTE;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio.Resources;
 
@@ -16,6 +18,7 @@ namespace NuGet.VisualStudio
         private readonly IDictionary<string, IProjectManager> _projects;
         private readonly ISolutionManager _solutionManager;
         private readonly IFileSystemProvider _fileSystemProvider;
+        private readonly IDeleteOnRestartManager _deleteOnRestartManager;
         private readonly VsPackageInstallerEvents _packageEvents;
         private bool _bindingRedirectEnabled = true;
 
@@ -24,13 +27,15 @@ namespace NuGet.VisualStudio
                 IFileSystemProvider fileSystemProvider,
                 IFileSystem fileSystem,
                 ISharedPackageRepository sharedRepository,
-                VsPackageInstallerEvents packageEvents) :
-            base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository)
+                IDeleteOnRestartManager deleteOnRestartManager,
+                VsPackageInstallerEvents packageEvents)
+            : base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository)
         {
             _solutionManager = solutionManager;
             _sharedRepository = sharedRepository;
             _packageEvents = packageEvents;
             _fileSystemProvider = fileSystemProvider;
+            _deleteOnRestartManager = deleteOnRestartManager;
 
             _projects = new Dictionary<string, IProjectManager>(StringComparer.OrdinalIgnoreCase);
         }
@@ -1318,6 +1323,13 @@ namespace NuGet.VisualStudio
             bool appliesToProject;
             IPackage package = FindLocalPackageForUpdate(projectManager, packageId, out appliesToProject);
             return VersionUtility.GetSafeRange(package.Version);
+        }
+
+        protected override void OnUninstalled(PackageOperationEventArgs e)
+        {
+            base.OnUninstalled(e);
+
+            _deleteOnRestartManager.MarkPackageDirectoryForDeletion(e.Package, createZipPackageFromPath: path => new ZipPackage(path));
         }
     }
 }

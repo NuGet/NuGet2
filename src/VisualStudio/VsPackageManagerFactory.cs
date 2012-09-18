@@ -82,7 +82,9 @@ namespace NuGet.VisualStudio
                                         repository,
                                         _fileSystemProvider,
                                         info.FileSystem,
-                                        info.Repository,
+                                        info.Repository,                                        // We ensure DeleteOnRestartManager is initialized with a PhysicalFileSystem so the
+                                        // .deleteme marker files that get created don't get checked into version control
+                                        new DeleteOnRestartManager(() => new PhysicalFileSystem(info.FileSystem.Root)),
                                         _packageEvents);
         }
 

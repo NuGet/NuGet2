@@ -107,10 +107,11 @@
                 TextWrapping="Wrap" />
         </Border>
 
-        <Grid Grid.Row="2" MinHeight="50">
+        <Grid x:Name="BottomBar" Grid.Row="2" MinHeight="50">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <Button
@@ -127,7 +128,7 @@
 
             <Button 
                 AutomationProperties.AutomationId="CloseButton"
-                Grid.Column="1"
+                Grid.Column="2"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
                 Margin="12"

@@ -1267,3 +1267,45 @@ function Test-ReinstallPackageReinstallPrereleaseDependencyPackages
     Assert-Package $p2 "A" "1.0.0-alpha"
     Assert-Package $p2 "B" "2.0.0-beta"
 }
+
+function Test-FinishFailedUpdateOnSolutionOpen
+{
+    param($context)
+
+    # Arrange
+    $p = New-ConsoleApplication
+
+    $packageManager = $host.PrivateData.packageManagerFactory.CreatePackageManager()
+    $localRepositoryPath = $packageManager.LocalRepository.Source
+    $physicalFileSystem = New-Object NuGet.PhysicalFileSystem($localRepositoryPath)
+
+    $p | Install-Package SolutionOnlyPackage -Version 1.0 -Source $context.RepositoryRoot
+
+    # We will open a file handle preventing the deletion packages\SolutionOnlyPackage.1.0\file1.txt
+    # causing the uninstall to fail to complete thereby forcing it to finish the next time the solution is opened
+    $filePath = Join-Path $localRepositoryPath "SolutionOnlyPackage.1.0\file1.txt"
+    $fileStream = [System.IO.File]::Open($filePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read)
+
+	try {
+		# Act
+		$p | Update-Package SolutionOnlyPackage -Source $context.RepositoryRoot
+
+		# Assert
+		Assert-True $physicalFileSystem.DirectoryExists("SolutionOnlyPackage.1.0")
+		Assert-True $physicalFileSystem.FileExists("SolutionOnlyPackage.1.0.deleteme")
+		Assert-True $physicalFileSystem.DirectoryExists("SolutionOnlyPackage.2.0")
+	} finally {
+		$fileStream.Close()
+	}
+
+    # Act
+    # After closing the file handle, we close the solution and reopen it
+    $solutionDir = $dte.Solution.FullName
+    Close-Solution
+    Open-Solution $solutionDir
+
+    # Assert
+    Assert-False $physicalFileSystem.DirectoryExists("SolutionOnlyPackage.1.0")
+    Assert-False $physicalFileSystem.FileExists("SolutionOnlyPackage.1.0.deleteme")
+    Assert-True $physicalFileSystem.DirectoryExists("SolutionOnlyPackage.2.0")
+}

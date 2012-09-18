@@ -863,3 +863,86 @@ function Test-ToolsPathForUninstallScriptPointToToolsFolder
 
 	$p | Uninstall-Package PackageA
 }
+
+function Test-FinishFailedUninstallOnSolutionOpen
+{
+    param($context)
+
+    # Arrange
+    $p = New-ConsoleApplication
+
+    $packageManager = $host.PrivateData.packageManagerFactory.CreatePackageManager()
+    $localRepositoryPath = $packageManager.LocalRepository.Source
+    $physicalFileSystem = New-Object NuGet.PhysicalFileSystem($localRepositoryPath)
+
+    $p | Install-Package SolutionLevelPkg -Version 1.0.0 -Source $context.RepositoryRoot
+
+    # We will open a file handle preventing the deletion packages\SolutionLevelPkg.1.0.0\tools\Sample.targets
+    # causing the uninstall to fail to complete thereby forcing it to finish the next time the solution is opened
+    $filePath = Join-Path $localRepositoryPath "SolutionLevelPkg.1.0.0\tools\Sample.targets"
+    $fileStream = [System.IO.File]::Open($filePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read)
+
+	try {
+		# Act
+		$p | Uninstall-Package SolutionLevelPkg
+
+		# Assert
+		Assert-True $physicalFileSystem.DirectoryExists("SolutionLevelPkg.1.0.0")
+		Assert-True $physicalFileSystem.FileExists("SolutionLevelPkg.1.0.0.deleteme")
+
+	} finally {
+		$fileStream.Close()
+	}
+
+	# Act
+	# After closing the file handle, we close the solution and reopen it
+    $solutionDir = $dte.Solution.FullName
+    Close-Solution
+    Open-Solution $solutionDir
+
+    # Assert
+    Assert-False $physicalFileSystem.DirectoryExists("SolutionLevelPkg.1.0.0")
+    Assert-False $physicalFileSystem.FileExists("SolutionLevelPkg.1.0.0.deleteme")
+}
+
+function Test-FinishFailedUninstallOnSolutionOpenOfProjectLevelPackage
+{
+    param($context)
+
+    # Arrange
+    $p = New-ConsoleApplication
+
+    $packageManager = $host.PrivateData.packageManagerFactory.CreatePackageManager()
+    $localRepositoryPath = $packageManager.LocalRepository.Source
+    $physicalFileSystem = New-Object NuGet.PhysicalFileSystem($localRepositoryPath)
+
+    $p | Install-Package PackageWithTextFile -Version 1.0 -Source $context.RepositoryRoot
+
+    # We will open a file handle preventing the deletion packages\PackageWithTextFile.1.0\content\text
+    # causing the uninstall to fail to complete thereby forcing it to finish the next time the solution is opened
+    $filePath = Join-Path $localRepositoryPath "PackageWithTextFile.1.0\content\text"
+    $fileStream = [System.IO.File]::Open($filePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read)
+
+	try {
+		# Act
+		$p | Uninstall-Package PackageWithTextFile
+
+		# Assert
+		Assert-True $physicalFileSystem.DirectoryExists("PackageWithTextFile.1.0")
+		Assert-True $physicalFileSystem.FileExists("PackageWithTextFile.1.0.deleteme")
+
+	} finally {
+		$fileStream.Close()
+	}
+
+	# Act
+	# After closing the file handle, we close the solution and reopen it
+    $solutionDir = $dte.Solution.FullName
+    Close-Solution
+    Open-Solution $solutionDir
+
+    # Assert
+    Assert-False $physicalFileSystem.DirectoryExists("PackageWithTextFile.1.0")
+    Assert-False $physicalFileSystem.FileExists("PackageWithTextFile.1.0.deleteme")
+}
+

@@ -246,7 +246,7 @@ namespace NuGet.PowerShell.Commands.Test
             localRepo.Setup(c => c.GetPackages()).Returns(localPackages.AsQueryable());
 
             return new VsPackageManager(TestUtils.GetSolutionManager(), CreateActiveRepository(), new Mock<IFileSystemProvider>().Object, fileSystem.Object,
-                                        localRepo.Object, new Mock<VsPackageInstallerEvents>().Object);
+                                        localRepo.Object, new Mock<IDeleteOnRestartManager>().Object, new Mock<VsPackageInstallerEvents>().Object);
         }
 
         private static IVsPackageManagerFactory CreateStubPackageManagerFactory()

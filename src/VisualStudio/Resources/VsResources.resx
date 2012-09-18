@@ -326,4 +326,19 @@ Packages installed into Website projects will not be restored during build. Cons
   <data name="ReinstallSolutionPackage" xml:space="preserve">
     <value>Reinstalling '{0}'.</value>
   </data>
+  <data name="Warning_FailedToDeleteMarkedPackageDirectory" xml:space="preserve">
+    <value>Failed to remove package directory '{0}' that was marked for deletion on Visual Studio restart.</value>
+  </data>
+  <data name="Warning_FailedToMarkPackageDirectoryForDeletion" xml:space="preserve">
+    <value>Failed to mark package directory '{0}' for deletion on Visual Studio restart: {1}</value>
+  </data>
+  <data name="Warning_FailedToDeleteMarkedPackageDirectories" xml:space="preserve">
+    <value>Failed to remove package directories that were marked for deletion on Visual Studio restart: {0}</value>
+  </data>
+  <data name="RequestRestartToCompleteUninstall" xml:space="preserve">
+    <value>Some packages could not be completely removed. Restart Visual Studio to finish uninstall.</value>
+  </data>
+  <data name="RestartNow" xml:space="preserve">
+    <value>Restart Now</value>
+  </data>
 </root>
