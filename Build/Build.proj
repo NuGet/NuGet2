@@ -24,6 +24,7 @@
         <ServerDropDirectory>$(NuGetDropDirectory)\Server</ServerDropDirectory>
         <NuGetCoreBuildDirectory>$(NuGetSrcRoot)\Core</NuGetCoreBuildDirectory>
         <NuGetCoreDropDirectory>$(NuGetDropDirectory)\Core</NuGetCoreDropDirectory>
+        <NuGetBuildDropDirectory>$(NuGetDropDirectory)\Build</NuGetBuildDropDirectory>
         <NuGetVisualStudioBuildDirectory>$(NuGetSrcRoot)\VisualStudio</NuGetVisualStudioBuildDirectory>
         <NuGetVisualStudioDropDirectory>$(NuGetDropDirectory)\VisualStudio</NuGetVisualStudioDropDirectory>
         <GenerateTestPackageProjectDirectory>$(NuGetRoot)\Tools\NuGet\GenerateTestPackages</GenerateTestPackageProjectDirectory>
@@ -161,6 +162,7 @@
         <MakeDir Directories="$(NuGetVisualStudioDropDirectory)" Condition="!Exists('$(NuGetVisualStudioDropDirectory)')" />
         <MakeDir Directories="$(ExtensionsDropDirectory)" Condition="!Exists('$(ExtensionsDropDirectory)')" />
         <MakeDir Directories="$(ServerExtensionsBuildDirectory)" Condition="!Exists('$(ServerExtensionsBuildDirectory)')" />
+        <MakeDir Directories="$(NuGetBuildDropDirectory)" Condition="!Exists('$(NuGetBuildDropDirectory)')" />
     </Target>
 
     <Target Name="CopyExecutableOutputToDropDirectory">
@@ -260,6 +262,6 @@
         <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion)" WorkingDirectory="$(ExeDropDirectory)" />
         <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(ServerDropDirectory)&quot; -Build -p AdditionalSettingsImport=$(AdditionalSettingsImport) -p Configuration=Release -Symbols -exclude **\NuGet.Core.*" WorkingDirectory="$(ServerBuildDirectory)" />
         <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(NuGetCoreDropDirectory)&quot; -Build -Symbols -p AdditionalSettingsImport=$(AdditionalSettingsImport)" WorkingDirectory="$(NuGetCoreBuildDirectory)" />
-        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(NuGetVisualStudioDropDirectory)&quot; -Build -p AdditionalSettingsImport=$(AdditionalSettingsImport)" WorkingDirectory="$(NuGetVisualStudioBuildDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(NuGetVisualStudioDropDirectory)&quot; -Build -p AdditionalSettingsImport=$(AdditionalSettingsImport)" WorkingDirectory="$(NuGetVisualStudioBuildDirectory)" />        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(NuGetBuildDropDirectory)&quot;" WorkingDirectory="$(NuGetSrcRoot)\Build" />
     </Target>
 </Project>
