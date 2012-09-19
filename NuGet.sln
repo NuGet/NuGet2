@@ -109,6 +109,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandLine.Test", "test\Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeamFoundationServer.Test", "test\TeamFoundationServer.Test\TeamFoundationServer.Test.csproj", "{F1A63FD0-E1DE-43C6-940A-754D3B6C0A77}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget.build", "nuget.build", "{9D2D9A2A-71C8-481A-A2A3-EF0CE65E3B32}"
+	ProjectSection(SolutionItems) = preProject
+		src\Build\NuGet.Build.nuspec = src\Build\NuGet.Build.nuspec
+		src\Build\NuGet.targets = src\Build\NuGet.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Coverage|Any CPU = Coverage|Any CPU
