@@ -51,11 +51,11 @@
         <RestoreCommand>$(NuGetCommand) install "$(PackagesConfig)" -source "$(PackageSources)"  $(RequireConsentSwitch) -solutionDir "$(SolutionDir) "</RestoreCommand>
         <BuildCommand>$(NuGetCommand) pack "$(ProjectPath)" -p Configuration=$(Configuration) -o "$(PackageOutputDir)" -symbols</BuildCommand>
 
-        <!-- Make the build depend on restore packages -->
-        <BuildDependsOn Condition="$(RestorePackages) == 'true'">
+        <!-- We need to ensure packages are restored prior to assembly resolve -->
+        <ResolveReferencesDependsOn Condition="$(RestorePackages) == 'true'">
             RestorePackages;
-            $(BuildDependsOn);
-        </BuildDependsOn>
+            $(ResolveReferencesDependsOn);
+        </ResolveReferencesDependsOn>
 
         <!-- Make the build depend on restore packages -->
         <BuildDependsOn Condition="$(BuildPackage) == 'true'">
