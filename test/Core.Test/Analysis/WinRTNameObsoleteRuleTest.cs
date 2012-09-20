@@ -23,7 +23,7 @@ namespace NuGet.Test.Analysis
                 results[0],
                 "The framework name 'WinRT' is obsolete.",
                 "The file at 'content\\winRT\\one.txt' uses the obsolete 'WinRT' as the framework folder.",
-                "Replace 'WinRT' or 'WinRT45' with 'Windows8'.");
+                "Replace 'WinRT' or 'WinRT45' with 'NetCore45'.");
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace NuGet.Test.Analysis
                 results[0],
                 "The framework name 'WinRT' is obsolete.",
                 "The file at 'lib\\winRT45\\one.dll' uses the obsolete 'WinRT' as the framework folder.",
-                "Replace 'WinRT' or 'WinRT45' with 'Windows8'.");
+                "Replace 'WinRT' or 'WinRT45' with 'NetCore45'.");
         }
 
         [Fact]
@@ -63,7 +63,7 @@ namespace NuGet.Test.Analysis
                 results[0],
                 "The framework name 'WinRT' is obsolete.",
                 "The file at 'tools\\winRT45\\install.ps1' uses the obsolete 'WinRT' as the framework folder.",
-                "Replace 'WinRT' or 'WinRT45' with 'Windows8'.");
+                "Replace 'WinRT' or 'WinRT45' with 'NetCore45'.");
         }
 
         [Fact]
