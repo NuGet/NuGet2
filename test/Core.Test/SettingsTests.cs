@@ -4,6 +4,7 @@ using System.IO;
 using Moq;
 using Xunit;
 using NuGet.Test.Mocks;
+using Xunit.Extensions;
 
 namespace NuGet.Test
 {
@@ -1168,6 +1169,73 @@ namespace NuGet.Test
             // Assert
             Assert.Equal("value2", settings.GetValue("SectionName", "key2"));
             Assert.Equal(null, settings.GetValue("SectionName", "key1"));
+        }
+
+        [Fact]
+        public void GetValueReturnsPathRelativeToConfigWhenPathIsNotRooted()
+        {
+            // Arrange
+            var mockFileSystem = new MockFileSystem(@"x:\mock-directory\");
+            string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""path-key"" value=""foo\bar"" />
+  </SectionName>
+</configuration>";
+            mockFileSystem.AddFile("nuget.config", config);
+            var settings = new Settings(mockFileSystem, "nuget.config");
+
+            // Act
+            string result = settings.GetValue("SectionName", "path-key", isPath: true);
+
+            // Assert
+            Assert.Equal(@"x:\mock-directory\foo\bar", result);
+        }
+
+        [Theory]
+        [InlineData(@"z:\foo")]
+        [InlineData(@"x:\foo\bar\qux")]
+        public void GetValueReturnsPathWhenPathIsRooted(string value)
+        {
+            // Arrange
+            var mockFileSystem = new MockFileSystem(@"x:\mock-directory\");
+            string config = String.Format(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""path-key"" value=""{0}"" />
+  </SectionName>
+</configuration>", value);
+            mockFileSystem.AddFile("nuget.config", config);
+            var settings = new Settings(mockFileSystem, "nuget.config");
+
+            // Act
+            string result = settings.GetValue("SectionName", "path-key", isPath: true);
+
+            // Assert
+            Assert.Equal(value, result);
+        }
+
+        [Fact]
+        public void GetValueResolvesRelativePaths()
+        {
+            // Arrange
+            var mockFileSystem = new Mock<MockFileSystem>(@"x:\mock-directory\") { CallBase = true };
+            mockFileSystem.Setup(f => f.GetFullPath(@"x:\mock-directory\..\Blah")).Returns(@"x:\mock-directory\Qux\Blah").Verifiable();
+            string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""path-key"" value=""..\Blah"" />
+  </SectionName>
+</configuration>";
+            mockFileSystem.Object.AddFile("nuget.config", config);
+            var settings = new Settings(mockFileSystem.Object, "nuget.config");
+
+            // Act
+            string result = settings.GetValue("SectionName", "path-key", isPath: true);
+
+            // Assert
+            mockFileSystem.Verify();
+            Assert.Equal(@"x:\mock-directory\Qux\Blah", result);
         }
     }
 }

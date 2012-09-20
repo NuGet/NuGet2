@@ -7,6 +7,7 @@ using NuGet.Commands;
 using NuGet.Common;
 using NuGet.Test.Mocks;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test.NuGetCommandLine.Commands
 {
@@ -91,28 +92,18 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             Assert.Equal(@"Bar\Baz", installCommand.InstallPath);
         }
 
-        [Fact]
-        public void InstallCommandCanUsePathsRelativeToConfigFile()
+        [Theory]
+        [InlineData(@"under_dot_nuget\other_dir", @"C:\MockFileSystem\under_dot_nuget\other_dir")]
+        [InlineData(@"..\..\packages", @"C:\MockFileSystem\..\..\packages")]
+        public void InstallCommandCanUsePathsRelativeToConfigFile(string input, string expected)
         {
             // Arrange
-            var fileSystem = GetFileSystemWithDefaultConfig(@"$\under_dot_nuget\other_dir");
+            var fileSystem = GetFileSystemWithDefaultConfig(input);
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
                 settings: Settings.LoadDefaultSettings(fileSystem));
 
             // Assert
-            Assert.Equal(@"C:\MockFileSystem\under_dot_nuget\other_dir", installCommand.InstallPath);
-        }
-
-        [Fact]
-        public void InstallCommandCanUsePathsRelativeToConfigFile2()
-        {
-            // Arrange
-            var fileSystem = GetFileSystemWithDefaultConfig(@"$\..\..\packages");
-            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
-                settings: Settings.LoadDefaultSettings(fileSystem));
-
-            // Assert
-            Assert.Equal(@"C:\packages", installCommand.InstallPath);
+            Assert.Equal(expected, installCommand.InstallPath);
         }
 
         [Fact]
