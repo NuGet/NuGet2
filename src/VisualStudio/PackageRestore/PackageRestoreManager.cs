@@ -13,6 +13,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet.VisualStudio
 {
@@ -536,6 +537,7 @@ namespace NuGet.VisualStudio
             CheckForMissingPackages();
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't care about exception handling here.")]
         private bool CheckForMissingPackagesCore()
         {
             // this can happen during unit tests
@@ -544,10 +546,19 @@ namespace NuGet.VisualStudio
                 return false;
             }
 
-            IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager();
-            IPackageRepository localRepository = packageManager.LocalRepository;
-            var projectReferences = GetAllPackageReferences(packageManager);
-            return projectReferences.Any(reference => !localRepository.Exists(reference.Id, reference.Version));
+            try
+            {
+                IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager();
+                IPackageRepository localRepository = packageManager.LocalRepository;
+                var projectReferences = GetAllPackageReferences(packageManager);
+                return projectReferences.Any(reference => !localRepository.Exists(reference.Id, reference.Version));
+            }
+            catch (Exception exception)
+            {
+                // if an exception happens during the check, assume no missing packages and move on.
+                ExceptionHelper.WriteToActivityLog(exception);
+                return false;
+            }
         }
 
         /// <summary>
