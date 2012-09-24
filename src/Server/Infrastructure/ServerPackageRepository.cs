@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Threading;
 using Ninject;
 using NuGet.Server.DataServices;
 
@@ -10,7 +11,10 @@ namespace NuGet.Server.Infrastructure
 {
     public class ServerPackageRepository : LocalPackageRepository, IServerPackageRepository
     {
-        private readonly IDictionary<IPackage, DerivedPackageData> _derivedDataLookup = new Dictionary<IPackage, DerivedPackageData>();
+        private readonly IDictionary<IPackage, DerivedPackageData> _derivedDataLookup = new Dictionary<IPackage, DerivedPackageData>(PackageEqualityComparer.IdAndVersion);
+        private readonly ManualResetEvent _derivedDataComputed = new ManualResetEvent(false);
+        private readonly ReaderWriterLockSlim _cacheLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+        private const int MaxWaitMs = 1000*60*2;
 
         public ServerPackageRepository(string path)
             : base(path)
@@ -53,18 +57,113 @@ namespace NuGet.Server.Infrastructure
         {
             string fileName = PathResolver.GetPackageFileName(package);
             FileSystem.DeleteFile(fileName);
+            DeleteData(package);
         }
 
         protected override IPackage OpenPackage(string path)
         {
             IPackage package = base.OpenPackage(path);
-            _derivedDataLookup[package] = CalculateDerivedData(package, path);
+
+            _cacheLock.EnterWriteLock();            
+            try
+            {                
+                DateTime start = DateTime.Now;
+                while (true)
+                {
+                    DerivedPackageData packageData;
+                    if (!_derivedDataLookup.TryGetValue(package, out packageData))
+                    {
+                        // take ownership
+                        _derivedDataLookup[package] = null;
+                        break;
+                    }
+                    if (packageData != null)
+                    {
+                        // derived data has been computed and cached
+                        return package;
+                    }
+                    if ((DateTime.Now - start).TotalSeconds > MaxWaitMs)
+                    {
+                        // we're giving up on waiting; potentially other thread is blocked, died, ... take ownership
+                        _derivedDataLookup[package] = null;
+                        break;
+                    }
+                    // about to wait; release locks
+                    _cacheLock.ExitWriteLock();
+                    _derivedDataComputed.WaitOne(MaxWaitMs);
+
+                    _cacheLock.EnterWriteLock();
+                }                                
+            }
+            finally
+            {
+                _cacheLock.ExitWriteLock();
+            }
+
+            try
+            {
+                // compute
+                DerivedPackageData packageData = CalculateDerivedData(package, path);
+                // write value
+                SetData(package, packageData);
+            }
+            catch
+            {
+                // on failure, clean cache
+                DeleteData(package);
+                throw;
+            }
+            finally
+            {
+                // We've either failed or succeeded => wake up waiting threads, if any.
+                _derivedDataComputed.Set();
+            }
+            
             return package;
+        }
+
+        private DerivedPackageData GetData(IPackage package)
+        {
+            _cacheLock.EnterReadLock();
+            try
+            {
+                return _derivedDataLookup[package];
+            }
+            finally
+            {
+                _cacheLock.ExitReadLock();
+            }
+        }
+
+        private void SetData(IPackage package, DerivedPackageData packageData)
+        {
+            _cacheLock.EnterWriteLock();
+            try
+            {
+                _derivedDataLookup[package] = packageData;
+            }
+            finally
+            {
+                _cacheLock.ExitWriteLock();
+            }
+        }
+
+        private void DeleteData(IPackage package)
+        {
+            _cacheLock.EnterWriteLock();
+            try
+            {   // note: doesn't throw if not found in dict
+                _derivedDataLookup.Remove(package);
+            }
+            finally
+            {
+                _cacheLock.ExitWriteLock();
+            }
         }
 
         public Package GetMetadataPackage(IPackage package)
         {
-            return new Package(package, _derivedDataLookup[package]);
+            return new Package(package, GetData(package));
         }
 
         public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
@@ -100,7 +199,7 @@ namespace NuGet.Server.Infrastructure
 
         private bool IsCompatible(FrameworkName frameworkName, IPackage package)
         {
-            var packageData = _derivedDataLookup[package];
+            DerivedPackageData packageData = GetData(package);
 
             return VersionUtility.IsCompatible(frameworkName, packageData.SupportedFrameworks);
         }
