@@ -18,7 +18,7 @@ namespace NuGet
         private Settings _next;
 
         public Settings(IFileSystem fileSystem)
-            :this(fileSystem, Constants.SettingsFileName)
+            : this(fileSystem, Constants.SettingsFileName)
         {
         }
 
@@ -67,7 +67,7 @@ namespace NuGet
                 var defaultSettingsPath = Path.Combine(appDataPath, "NuGet");
                 var appDataSettings = ReadSettings(new PhysicalFileSystem(defaultSettingsPath),
                                                    Constants.SettingsFileName);
-                if (appDataSettings!= null)
+                if (appDataSettings != null)
                 {
                     validSettingFiles.Add(appDataSettings);
                 }
@@ -82,7 +82,7 @@ namespace NuGet
             }
 
             // if multiple setting files were loaded, chain them in a linked list
-            for (int i = 1; i < validSettingFiles.Count; ++i )
+            for (int i = 1; i < validSettingFiles.Count; ++i)
             {
                 validSettingFiles[i]._next = validSettingFiles[i - 1];
             }
@@ -117,7 +117,7 @@ namespace NuGet
             while (curr != null)
             {
                 XElement newElement = curr.GetValueInternal(section, key, element);
-                if ( ! object.ReferenceEquals(element, newElement))
+                if (!object.ReferenceEquals(element, newElement))
                 {
                     element = newElement;
 
@@ -132,22 +132,21 @@ namespace NuGet
 
         private string ElementToValue(XElement element, bool isPath)
         {
-            if (null == element)
+            if (element == null)
             {
                 return null;
-            }           
+            }
 
             // Return the optional value which if not there will be null;
-            string ret = element.GetOptionalAttributeValue("value");
-            if (!isPath || string.IsNullOrEmpty(ret))
+            string value = element.GetOptionalAttributeValue("value");
+            if (!isPath || String.IsNullOrEmpty(value))
             {
-                return ret;
+                return value;
             }
             // if value represents a path and relative to this file path was specified, 
             // append location of file
-            return (ret.StartsWith("$\\", StringComparison.OrdinalIgnoreCase) || ret.StartsWith("$/", StringComparison.OrdinalIgnoreCase))
-                       ? Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ConfigFilePath), ret.Substring(2)))
-                       : ret;
+            string configDirectory = Path.GetDirectoryName(ConfigFilePath);
+            return _fileSystem.GetFullPath(Path.Combine(configDirectory, value));
         }
 
         private XElement GetValueInternal(string section, string key, XElement curr)
@@ -298,8 +297,8 @@ namespace NuGet
             }
             else
             {
-                sectionElement.Add(new XElement("add", 
-                                                    new XAttribute("key", key), 
+                sectionElement.Add(new XElement("add",
+                                                    new XAttribute("key", key),
                                                     new XAttribute("value", value)));
             }
         }
@@ -348,7 +347,7 @@ namespace NuGet
             Save();
             return true;
         }
-        
+
         private void ReadSection(XContainer sectionElement, ICollection<KeyValuePair<string, string>> values)
         {
             var elements = sectionElement.Elements();
@@ -413,21 +412,21 @@ namespace NuGet
                 {
                     result = null;
                 }
-                else if (elementName.Equals("add", StringComparison.OrdinalIgnoreCase) && 
+                else if (elementName.Equals("add", StringComparison.OrdinalIgnoreCase) &&
                          element.GetOptionalAttributeValue("key").Equals(key, StringComparison.OrdinalIgnoreCase))
                 {
                     result = element;
                 }
             }
             return result;
-        }        
-
-        //
-        // Order is most significant (e.g. applied last) to least significant (applied first)
-        // ex:
-        // c:\foo\nuget.config
-        // c:\nuget.config
-        // 
+        }
+        
+        /// <remarks>
+        /// Order is most significant (e.g. applied last) to least significant (applied first)
+        /// ex:
+        /// c:\foo\nuget.config
+        /// c:\nuget.config
+        /// </remarksy>
         private static IEnumerable<string> GetSettingsFileNames(IFileSystem fileSystem)
         {
             // for dirs obtained by walking up the tree, only consider setting files that already exist.
@@ -452,7 +451,9 @@ namespace NuGet
                 }
 
                 if (fileSystem.FileExists(fileName))
+                {
                     yield return fileName;
+                }
             }
         }
 

@@ -37,7 +37,19 @@ namespace NuGet
         /// <param name="apiKey">API key to be used to push the package.</param>
         /// <param name="packageStream">Stream representing the package.</param>
         /// <param name="timeout">Time in milliseconds to timeout the server request.</param>
+        [Obsolete("This overload is obsolete, please use the overload which takes a Func<Stream>")]
         public void PushPackage(string apiKey, Stream packageStream, int timeout)
+        {
+            PushPackage(apiKey, () => packageStream, timeout);
+        }
+
+        /// <summary>
+        /// Pushes a package to the server that is represented by the stream.
+        /// </summary>
+        /// <param name="apiKey">API key to be used to push the package.</param>
+        /// <param name="packageStreamFactory">A delegate which can be used to open a stream for the package file.</param>
+        /// <param name="timeout">Time in milliseconds to timeout the server request.</param>
+        public void PushPackage(string apiKey, Func<Stream> packageStreamFactory, int timeout) 
         {
             HttpClient client = GetClient("", "PUT", "application/octet-stream");
 
@@ -59,7 +71,7 @@ namespace NuGet
                 }
 
                 var multiPartRequest = new MultipartWebRequest();
-                multiPartRequest.AddFile(() => packageStream, "package");
+                multiPartRequest.AddFile(packageStreamFactory, "package");
 
                 multiPartRequest.CreateMultipartRequest(request);
             };
