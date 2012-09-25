@@ -2,14 +2,14 @@
 <Project ToolsVersion="4.0" DefaultTargets="Go" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <UsingTask TaskName="RegexTransform" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
         <ParameterGroup>
-          <Items ParameterType="Microsoft.Build.Framework.ITaskItem[]" />
+            <Items ParameterType="Microsoft.Build.Framework.ITaskItem[]" />
         </ParameterGroup>
         <Task>
-          <Using Namespace="System.IO" />
-          <Using Namespace="System.Text.RegularExpressions" />
-          <Using Namespace="Microsoft.Build.Framework" />
-          <Code Type="Fragment" Language="cs">
-          <![CDATA[
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Text.RegularExpressions" />
+            <Using Namespace="Microsoft.Build.Framework" />
+            <Code Type="Fragment" Language="cs">
+                <![CDATA[
             foreach(ITaskItem item in Items) {
               string fileName = item.GetMetadata("FullPath");
               string find = item.GetMetadata("Find");
@@ -28,7 +28,32 @@
                 )
               );
             }
-          ]]></Code>
+          ]]>
+            </Code>
         </Task>
-      </UsingTask>
-  </Project>
+    </UsingTask>
+
+    <UsingTask TaskName="CheckUnexpectedAssemblies" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+            <Items ParameterType="Microsoft.Build.Framework.ITaskItem[]" />
+        </ParameterGroup>
+        <Task>
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Text.RegularExpressions" />
+            <Using Namespace="Microsoft.Build.Framework" />
+            <Code Type="Fragment" Language="cs">
+                <![CDATA[
+            foreach(ITaskItem item in Items) 
+            {
+                string fileName = item.GetMetadata("Filename");
+              
+                if(!fileName.StartsWith("NuGet")) 
+                {
+                    Log.LogError("The assembly '{0}' is not expected to be in the VSIX.", fileName);
+                }
+            }
+          ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+</Project>

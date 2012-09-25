@@ -90,8 +90,8 @@
     </ItemGroup>
 
     <Target Name="Go"
-        DependsOnTargets="CheckFxCop; UpdateVsixVersion; RestorePackages; Build; 
-                                    ReportFxCopResults; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; 
+        DependsOnTargets="CheckFxCop; UpdateVsixVersion; RestorePackages; Build; ReportFxCopResults;
+                                    VerifyAssembliesInVsix; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; 
                                     CopyBootStrapperOutputToDropDirectory; CopyServerExtensionsOutputToDropDirectory;
                                     CopyVisualStudioAddInOutputToDropDirectory; CopyEndToEndTestsToDropDirectory;
                                     CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; BuildPackages">
@@ -126,6 +126,25 @@
 
     <Target Name="Build">
         <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true" />
+    </Target>
+
+    <Target Name="VerifyAssembliesInVSIX">
+        <PropertyGroup>
+            <VsixFileLocation>$(VisualStudioAddInBuildDirectory)\NuGet.Tools.vsix</VsixFileLocation>
+            <TempVsixDirectory>$(DropDirectory)\Temp</TempVsixDirectory>
+        </PropertyGroup>
+
+        <RemoveDir Directories="$(TempVsixDirectory)" Condition="Exists($(TempVsixDirectory))" />
+
+        <Exec Command="&quot;$(ZipExe)&quot; x -o&quot;$(TempVsixDirectory)&quot; &quot;$(VsixFileLocation)&quot;" />
+
+        <ItemGroup>
+            <VsixAssemblies Include="$(TempVsixDirectory)\*.dll" />
+        </ItemGroup>
+
+        <CheckUnexpectedAssemblies Items="@(VsixAssemblies)" />
+
+        <RemoveDir Directories="$(TempVsixDirectory)" ContinueOnError="true" />
     </Target>
 
     <Target Name="RunTests">
