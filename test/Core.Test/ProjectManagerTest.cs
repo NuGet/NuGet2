@@ -69,6 +69,44 @@ namespace NuGet.Test
             Assert.True(projectSystem.FileExists(@"foo\bar\file"));
         }
 
+        [Fact]
+        public void AddPackageReferenceThrowsWhenNoTargetFrameworkIsCompatibleWithPortableProject()
+        {
+            // Arrange
+            var portableCollection = new NetPortableProfileCollection();
+            portableCollection.Add(new NetPortableProfile("Profile104", new [] { VersionUtility.ParseFrameworkName("net45"), VersionUtility.ParseFrameworkName("sl5")}));
+
+            NetPortableProfileTable.Profiles = portableCollection;
+
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETPortable, Version=1.0, Profile=Profile104"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "silverlight4\\a.txt"});
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => projectManager.AddPackageReference("A"),
+                "Could not install package 'A 1.0'. You are trying to install this package into a project that targets 'portable-net45+sl50', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author.");
+        }
+
+        [Fact]
+        public void AddPackageReferenceThrowsWhenNoTargetFrameworkIsCompatibleWithNonPortableProject()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "silverlight4\\a.txt" });
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => projectManager.AddPackageReference("A"),
+                "Could not install package 'A 1.0'. You are trying to install this package into a project that targets '.NETFramework,Version=v4.5', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author.");
+        }
+
+
         [Theory]
         [InlineData("net20\\one.txt", ".NETFramework, Version=4.0")]
         [InlineData("silverlight3\\one.txt", "Silverlight, Version=4.0")]

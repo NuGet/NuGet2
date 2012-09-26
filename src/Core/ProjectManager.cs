@@ -201,9 +201,14 @@ namespace NuGet
             if (assemblyReferences.Count == 0 && frameworkReferences.Count == 0 && contentFiles.Count == 0 &&
                 (package.FrameworkAssemblies.Any() || package.AssemblyReferences.Any() || package.GetContentFiles().Any()))
             {
+                // for portable framework, we want to show the friendly short form (e.g. portable-win8+net45+wp8) instead of ".NETPortable, Profile=Profile104".
+                string targetFrameworkString = VersionUtility.IsPortableFramework(Project.TargetFramework) 
+                                                    ? VersionUtility.GetShortFrameworkName(Project.TargetFramework) 
+                                                    : Project.TargetFramework.ToString();
+
                 throw new InvalidOperationException(
                            String.Format(CultureInfo.CurrentCulture,
-                           NuGetResources.UnableToFindCompatibleItems, package.GetFullName(), Project.TargetFramework));
+                           NuGetResources.UnableToFindCompatibleItems, package.GetFullName(), targetFrameworkString));
             }
 
             try

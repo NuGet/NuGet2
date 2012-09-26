@@ -968,7 +968,7 @@ namespace NuGet
             return version != null;
         }
 
-        private static bool IsPortableFramework(this FrameworkName framework)
+        internal static bool IsPortableFramework(this FrameworkName framework)
         {
             // The profile part has been verified in the ParseFrameworkName() method. 
             // By the time it is called here, it's guaranteed to be valid.
