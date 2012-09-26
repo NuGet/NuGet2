@@ -54,5 +54,10 @@ namespace NuGet.Dialog.Providers
             sortDescriptors.Insert(0, _defaultSortDescriptor);
             return sortDescriptors;
         }
+
+        protected internal override void RemoveSearchNode()
+        {
+            _baseProvider.RemoveSearchNode();
+        }
     }
 }

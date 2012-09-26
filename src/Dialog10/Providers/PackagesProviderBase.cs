@@ -243,7 +243,7 @@ namespace NuGet.Dialog.Providers
             return _searchNode;
         }
 
-        private void RemoveSearchNode()
+        protected internal virtual void RemoveSearchNode()
         {
             if (_searchNode != null)
             {

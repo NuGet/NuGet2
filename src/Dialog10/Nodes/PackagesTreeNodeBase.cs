@@ -316,6 +316,7 @@ namespace NuGet.Dialog.Providers
             {
                 _currentCancellationSource.Cancel();
                 _loadingInProgress = false;
+                Provider.RemoveSearchNode();
             }
         }
 
@@ -329,7 +330,7 @@ namespace NuGet.Dialog.Providers
         private LoadPageResult ExecuteAsync(int pageNumber, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-
+            
             if (_query == null)
             {
                 IQueryable<IPackage> query = GetPackages(searchTerm: null, allowPrereleaseVersions: Provider.IncludePrerelease);
