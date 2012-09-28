@@ -41,27 +41,64 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider());
 
+            // Act
+            string installPath = installCommand.ResolveInstallPath();
+
             // Assert
-            Assert.Equal(Directory.GetCurrentDirectory(), installCommand.InstallPath);
+            Assert.Equal(Directory.GetCurrentDirectory(), installPath);
         }
 
         [Fact]
         public void InstallCommandUsesOutputDirectoryAsInstallPathIfSpecified()
         {
             // Arrange
-            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider())
-                                     {OutputDirectory = @"Bar\Baz"};
+            var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider()) { OutputDirectory = @"Bar\Baz" };
+
+            // Act
+            string installPath = installCommand.ResolveInstallPath();
 
             // Assert
-            Assert.Equal(@"Bar\Baz", installCommand.InstallPath);
+            Assert.Equal(@"Bar\Baz", installPath);
         }
 
-        private static IFileSystem GetFileSystemWithDefaultConfig(string repositoryPath = @"C:\This\Is\My\Install\Path")
+        [Theory]
+        [InlineData(@"x:\solution-dir")]
+        [InlineData(@"x:\solution-dir\")]
+        public void InstallCommandUsesPathFromSolutionRepositorySettings(string solutionDirectory)
         {
-            var fileSystem = new MockFileSystem();
-            fileSystem.AddFile(@"nuget.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
-<configuration><config><add key=""repositorypath"" value="""+repositoryPath+@""" /></config></configuration>");
-            return fileSystem;
+            // Arrange
+            string expectedPath = @"x:\working-dir\packages\";
+            var installCommand = new Mock<TestInstallCommand>(GetFactory(), GetSourceProvider(), null, null, null, true, Mock.Of<ISettings>()) { CallBase = true };
+            installCommand.Setup(s => s.CreateFileSystem(@"x:\solution-dir\.nuget"))
+                          .Returns<string>(_ => GetFileSystemWithDefaultConfig(expectedPath, repositoryRoot: @"x:\solution-dir\.nuget"))
+                          .Verifiable();
+            installCommand.Object.SolutionDirectory = solutionDirectory;
+
+            // Act
+            string installPath = installCommand.Object.ResolveInstallPath();
+
+            // Assert
+            Assert.Equal(expectedPath, installPath);
+            installCommand.Verify();
+        }
+
+        [Fact]
+        public void InstallCommandUsesPathFromConfigInSolutionRoot()
+        {
+            // Arrange
+            string expectedPath = @"x:\working-dir\packages\";
+            var installCommand = new Mock<TestInstallCommand>(GetFactory(), GetSourceProvider(), null, null, null, true, Mock.Of<ISettings>()) { CallBase = true };
+            installCommand.Setup(s => s.CreateFileSystem(@"x:\solution-dir\.nuget"))
+                .Returns<string>(_ => GetFileSystemWithDefaultConfig(expectedPath, settingsFilePath: @"x:\solution-dir\nuget.config", repositoryRoot: @"x:\solution-dir\.nuget"))
+                          .Verifiable();
+            installCommand.Object.SolutionDirectory = @"x:\solution-dir";
+
+            // Act
+            string installPath = installCommand.Object.ResolveInstallPath();
+
+            // Assert
+            Assert.Equal(expectedPath, installPath);
+            installCommand.Verify();
         }
 
         [Fact]
@@ -72,8 +109,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
                 settings: Settings.LoadDefaultSettings(fileSystem));
 
+            // Act
+            string installPath = installCommand.ResolveInstallPath();
+
             // Assert
-            Assert.Equal(@"C:\This\Is\My\Install\Path", installCommand.InstallPath);
+            Assert.Equal(@"C:\This\Is\My\Install\Path", installPath);
         }
 
         [Fact]
@@ -87,9 +127,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                                          OutputDirectory = @"Bar\Baz"
                                      };
 
+            // Act
+            string installPath = installCommand.ResolveInstallPath();
 
             // Assert
-            Assert.Equal(@"Bar\Baz", installCommand.InstallPath);
+            Assert.Equal(@"Bar\Baz", installPath);
         }
 
         [Theory]
@@ -102,8 +144,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
                 settings: Settings.LoadDefaultSettings(fileSystem));
 
+            // Act
+            string installPath = installCommand.ResolveInstallPath();
+
             // Assert
-            Assert.Equal(expected, installCommand.InstallPath);
+            Assert.Equal(expected, installPath);
         }
 
         [Fact]
@@ -414,7 +459,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             var fileSystem = new MockFileSystem();
-            var packages = new List<IPackage>(); 
+            var packages = new List<IPackage>();
             var repository = new Mock<LocalPackageRepository>(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem) { CallBase = true };
             repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Add(c)).Verifiable();
@@ -499,7 +544,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 
             // Act
             installCommand.ExecuteCommand();
-            
+
             // Assert
             // Ensure packages were not removed.
             Assert.Equal(1, packages.Count);
@@ -657,7 +702,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
             var packageManager = new Mock<IPackageManager>(MockBehavior.Strict);
             var package1 = PackageUtility.CreatePackage("Foo", "1.0.0");
-            var package2 = PackageUtility.CreatePackage("Foo.Fr", "1.0.0", language: "fr", 
+            var package2 = PackageUtility.CreatePackage("Foo.Fr", "1.0.0", language: "fr",
                 dependencies: new[] { new PackageDependency("Foo", VersionUtility.ParseVersionSpec("[1.0.0]")) });
             var repository = new MockPackageRepository { package1, package2 };
             // We *shouldn't* be testing if a sequence of operations worked rather that the outcome that satellite package was installed correctly, 
@@ -720,7 +765,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", _environmentVariableValue, EnvironmentVariableTarget.Process);
         }
 
-        private sealed class TestInstallCommand : InstallCommand
+        public class TestInstallCommand : InstallCommand
         {
             private readonly IFileSystem _fileSystem;
             private readonly IPackageManager _packageManager;
@@ -732,7 +777,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                                       IPackageRepository machineCacheRepository = null,
                                       bool allowPackageRestore = true,
                                       ISettings settings = null)
-                : base(factory, sourceProvider, settings??CreateSettings(allowPackageRestore), machineCacheRepository ?? new MockPackageRepository())
+                : base(factory, sourceProvider, settings ?? CreateSettings(allowPackageRestore), machineCacheRepository ?? new MockPackageRepository())
             {
                 _fileSystem = fileSystem ?? new MockFileSystem();
                 _packageManager = packageManager;
@@ -746,7 +791,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                 return settings.Object;
             }
 
-            protected override IFileSystem CreateFileSystem()
+            protected internal override IFileSystem CreateFileSystem(string path)
             {
                 return _fileSystem;
             }
@@ -761,5 +806,21 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                 return new PackageReferenceFile(_fileSystem, path);
             }
         }
+
+        private static IFileSystem GetFileSystemWithDefaultConfig(string repositoryPath = @"C:\This\Is\My\Install\Path",
+                string settingsFilePath = "nuget.config",
+                string repositoryRoot = @"C:\MockFileSystem\")
+        {
+            var fileSystem = new MockFileSystem(repositoryRoot);
+            fileSystem.AddFile(settingsFilePath, String.Format(
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+    <config>
+        <add key=""repositorypath"" value=""{0}"" />
+    </config>
+</configuration>", repositoryPath));
+            return fileSystem;
+        }
+
     }
 }

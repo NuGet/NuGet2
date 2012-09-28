@@ -15,7 +15,6 @@ namespace NuGet.Commands
     {
         private const string NuGetCommandLinePackageId = "NuGet.CommandLine";
         private const string NuGetExe = "NuGet.exe";
-        private const string PackagesFolder = "packages";
 
         private readonly List<string> _sources = new List<string>();
         private readonly List<string> _ids = new List<string>();
@@ -248,7 +247,7 @@ namespace NuGet.Commands
             if (String.IsNullOrEmpty(packagesDir) &&
                 !String.IsNullOrEmpty(solutionDir))
             {
-                packagesDir = Path.Combine(solutionDir, PackagesFolder);
+                packagesDir = Path.Combine(solutionDir, CommandLineConstants.PackagesDirectoryName);
             }
 
             return GetPackagesDir(packagesDir);

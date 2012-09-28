@@ -416,4 +416,7 @@ nuget update -Self</value>
   <data name="InstallCommandRequireConsent" xml:space="preserve">
     <value>Checks if package restore consent is granted before installing a package.</value>
   </data>
+  <data name="InstallCommandSolutionDirectory" xml:space="preserve">
+    <value>Solution root for package restore.</value>
+  </data>
 </root>
