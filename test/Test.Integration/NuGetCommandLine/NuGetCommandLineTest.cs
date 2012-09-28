@@ -1152,54 +1152,6 @@ public class Cl_{0} {{
         }
 
         [Fact]
-        public void PackageCommand_SpecifyingProjectFileWithNuSpecWithFilesElementDoNotIncludeContentFiles()
-        {
-            // Arrange
-            string expectedPackage = "ProjectWithNuSpecNonEmptyFiles.1.0.0.0.nupkg";
-            WriteAssemblyInfo("ProjectWithNuSpecNonEmptyFiles",
-                               "1.0.0.0",
-                               "Luan",
-                               "Project with content",
-                               "Title of Package");
-
-            WriteProjectFile("foo.cs", "public class Foo { }");
-            WriteProjectFile("package.nuspec", @"<?xml version=""1.0"" encoding=""utf-8""?>
-<package>
-  <metadata>
-    <id>$id$</id>
-    <title>$title$</title>
-    <version>$version$</version>
-    <authors>$author$</authors>
-    <description>Description from nuspec</description>
-    <tags>t1 t2</tags>
-    <dependencies>
-        <dependency id=""elmah"" version=""1.5"" />
-    </dependencies>
-  </metadata>
-  <files>
-      <file src=""readme.txt"" target=""content\\readme.txt"" />
-  </files>
-</package>");
-            WriteProjectFile("readme.txt", "This is so fun.");
-            WriteProjectFile("donotinclude.txt", "Hello world.");
-            CreateProject("ProjectWithNuSpecNonEmptyFiles", content: new[] { "package.nuspec", "readme.txt", "donotinclude.txt" },
-                                               compile: new[] { "foo.cs" });
-
-            string[] args = new string[] { "pack", "ProjectWithNuSpecNonEmptyFiles.csproj", "-Build" };
-            Directory.SetCurrentDirectory(ProjectFilesFolder);
-
-            // Act
-            int result = Program.Main(args);
-
-            // Assert
-            Assert.Equal(0, result);
-            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
-            Assert.True(File.Exists(expectedPackage));
-
-            var package = VerifyPackageContents(expectedPackage, new[] { @"content\\readme.txt", @"lib\net40\ProjectWithNuSpecNonEmptyFiles.dll" });
-        }
-
-        [Fact]
         public void PackageCommand_SpecifyingProjectFileWithNuSpecNamedAfterProjectUsesNuSpecForMetadata()
         {
             // Arrange                        
