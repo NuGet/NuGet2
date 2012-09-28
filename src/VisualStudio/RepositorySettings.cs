@@ -88,7 +88,8 @@ namespace NuGet.VisualStudio
             {
                 if (_fileSystem == null)
                 {
-                    _fileSystem = _fileSystemProvider.GetFileSystem(_solutionManager.SolutionDirectory);
+                    string configFolderPath = GetConfigFolderPath();
+                    _fileSystem = _fileSystemProvider.GetFileSystem(configFolderPath);
                 }
                 return _fileSystem;
             }
