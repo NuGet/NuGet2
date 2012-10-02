@@ -1238,3 +1238,32 @@ function Test-ReinstallAllPackagesInAllProjectsInvokeUninstallAndInstallScripts
 	Remove-Variable InstallMagicScript -Scope Global 
 	Remove-Variable UninstallMagicScript -Scope Global 
 }
+
+function Test-ReinstallPackageReinstallPrereleaseDependencyPackages
+{
+	param($context) 
+	
+	# Arrange
+	$sol = New-Solution
+
+    $p1 = $sol | New-ClassLibrary
+    $p2 = $sol | New-ConsoleApplication
+
+    ($p1, $p2) | Install-Package A -Source $context.RepositoryPath -Pre
+
+    Assert-Package $p1 "A" "1.0.0-alpha"
+    Assert-Package $p1 "B" "2.0.0-beta"
+
+    Assert-Package $p2 "A" "1.0.0-alpha"
+    Assert-Package $p2 "B" "2.0.0-beta"
+    
+    # Act
+    Update-Package A -Reinstall -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p1 "A" "1.0.0-alpha"
+    Assert-Package $p1 "B" "2.0.0-beta"
+
+    Assert-Package $p2 "A" "1.0.0-alpha"
+    Assert-Package $p2 "B" "2.0.0-beta"
+}

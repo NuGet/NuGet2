@@ -116,6 +116,46 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
+        public void ReinstallPackagesRestoresPackagesWithPrereleaseDependencies()
+        {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, new MockPackageRepository());
+
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                projectSystem,
+                localRepository,
+                new Mock<VsPackageInstallerEvents>().Object);
+
+            var packageA = PackageUtility.CreatePackage("A", "1.2-alpha", new[] { "content.txt" }, dependencies: new[] { new PackageDependency("B") });
+            var packageB = PackageUtility.CreatePackage("B", "2.0.0-beta", new[] { "hello.txt" });
+
+            sourceRepository.Add(packageA);
+            localRepository.AddPackage(packageA);
+            projectManager.LocalRepository.AddPackage(packageA);
+
+            sourceRepository.Add(packageB);
+            localRepository.AddPackage(packageB);
+            projectManager.LocalRepository.AddPackage(packageB);
+
+            // Act
+            packageManager.ReinstallPackage(projectManager, "A", updateDependencies: true, allowPrereleaseVersions: false, logger: null);
+
+            // Assert
+            Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+            Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+
+            Assert.True(packageManager.LocalRepository.Exists("B", new SemanticVersion("2.0.0-beta")));
+            Assert.True(projectManager.LocalRepository.Exists("B", new SemanticVersion("2.0.0-beta")));
+        }
+
+        [Fact]
         public void ReinstallPackagesRestoresPackagesWithNewContentIfProjectFrameworkChanges()
         {
             // Arrange
@@ -315,7 +355,74 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
-        public void ReinstallPackagesThrowsWithNewDependencyWhenProjectFrameworkChangesIfAllowPrereleaseParameterIsFalse()
+        public void ReinstallPackagesThrowsWithNewDependencyWhenProjectFrameworkChangesIfAllowPrereleaseParameterIsFalseAndPackageVersionIsStable()
+        {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=v4.0"));
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+
+            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, localRepository);
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, packageReferenceRepository);
+
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                projectSystem,
+                localRepository,
+                new Mock<VsPackageInstallerEvents>().Object);
+
+            var packageA = PackageUtility.CreatePackageWithDependencySets(
+                "A",
+                "1.2",
+                new[] { "contentA.txt" },
+                dependencySets: new PackageDependencySet[] {
+                    new PackageDependencySet(new FrameworkName(".NETFramework, Version=v4.0"),
+                                             new [] { new PackageDependency("B")}),
+                    new PackageDependencySet(new FrameworkName("Silverlight, Version=v5.0"),
+                                             new [] { new PackageDependency("C")})
+                });
+
+            var packageB = PackageUtility.CreatePackage(
+                "B",
+                "1.0",
+                new[] { "contentB.txt" });
+
+            var packageC = PackageUtility.CreatePackage(
+                "C",
+                "2.0-beta",
+                new[] { "contentC.txt" });
+
+            sourceRepository.Add(packageA);
+            sourceRepository.Add(packageB);
+            sourceRepository.Add(packageC);
+
+            packageManager.InstallPackage(projectManager, "A", new SemanticVersion("1.2"), ignoreDependencies: false, allowPrereleaseVersions: true, logger: null);
+            Assert.True(packageManager.LocalRepository.Exists("A"));
+            Assert.True(projectManager.LocalRepository.Exists("A"));
+            Assert.True(packageManager.LocalRepository.Exists("B"));
+            Assert.True(projectManager.LocalRepository.Exists("B"));
+            Assert.False(packageManager.LocalRepository.Exists("C"));
+            Assert.False(projectManager.LocalRepository.Exists("C"));
+            Assert.True(projectSystem.FileExists("contentA.txt"));
+            Assert.True(projectSystem.FileExists("contentB.txt"));
+            Assert.False(projectSystem.FileExists("contentC.txt"));
+
+            // now change project's target framework to silverilght
+            projectSystem.ChangeTargetFramework(new FrameworkName("Silverlight, Version=v5.0"));
+
+            // Act && Assert
+
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => packageManager.ReinstallPackage(projectManager, "A", updateDependencies: true, allowPrereleaseVersions: false, logger: null),
+                "Unable to resolve dependency 'C'."
+            );
+        }
+
+        [Fact]
+        public void ReinstallPackagesDoesNotThrowWithNewDependencyWhenProjectFrameworkChangesIfAllowPrereleaseParameterIsFalseAndPackageVersionIsPrerelease()
         {
             // Arrange
             var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
@@ -373,12 +480,16 @@ namespace NuGet.VisualStudio.Test
             // now change project's target framework to silverilght
             projectSystem.ChangeTargetFramework(new FrameworkName("Silverlight, Version=v5.0"));
 
-            // Act && Assert
-
-            ExceptionAssert.Throws<InvalidOperationException>(
-                () => packageManager.ReinstallPackage(projectManager, "A", updateDependencies: true, allowPrereleaseVersions: false, logger: null),
-                "Unable to resolve dependency 'C'."
-            );
+            // Act
+            packageManager.ReinstallPackage(projectManager, "A", updateDependencies: true, allowPrereleaseVersions: false, logger: null);
+            
+            // Assert
+            Assert.True(packageManager.LocalRepository.Exists("A"));
+            Assert.True(projectManager.LocalRepository.Exists("A"));
+            Assert.False(packageManager.LocalRepository.Exists("B"));
+            Assert.False(projectManager.LocalRepository.Exists("B"));
+            Assert.True(packageManager.LocalRepository.Exists("C"));
+            Assert.True(projectManager.LocalRepository.Exists("C"));
         }
 
         [Fact]

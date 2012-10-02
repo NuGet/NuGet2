@@ -490,7 +490,7 @@ namespace NuGet.VisualStudio
                             package.Id,
                             package.Version,
                             ignoreDependencies: !updateDependencies,
-                            allowPrereleaseVersions: allowPrereleaseVersions,
+                            allowPrereleaseVersions: allowPrereleaseVersions || !package.IsReleaseVersion(),
                             logger: logger);
                     });
             }
@@ -549,12 +549,13 @@ namespace NuGet.VisualStudio
                    var projectManager = GetProjectManager(project);
                    if (!projectManager.LocalRepository.Exists(packageId))
                    {
+                       SemanticVersion oldVersion = projectsHasPackage[project];
                        InstallPackage(
                            projectManager,
                            packageId,
-                           version: projectsHasPackage[project],
+                           version: oldVersion,
                            ignoreDependencies: !updateDependencies,
-                           allowPrereleaseVersions: allowPrereleaseVersions,
+                           allowPrereleaseVersions: allowPrereleaseVersions || !String.IsNullOrEmpty(oldVersion.SpecialVersion),
                            logger: logger);
                    }
                },
@@ -580,7 +581,7 @@ namespace NuGet.VisualStudio
                     () =>
                     {
                         UninstallPackage(package, forceRemove: true, removeDependencies: !updateDependencies);
-                        InstallPackage(package, ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions);
+                        InstallPackage(package, ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions || !package.IsReleaseVersion());
                     });
             }
             finally
