@@ -160,9 +160,9 @@ namespace NuGet.VisualStudio
             return _defaultSettings.DeleteSection(section);
         }
 
-        private static IFileSystem GetSolutionSettingsFileSystem(ISolutionManager solutionManager)
+        internal static IFileSystem GetSolutionSettingsFileSystem(ISolutionManager solutionManager)
         {
-            if (solutionManager == null)
+            if (solutionManager == null || !solutionManager.IsSolutionOpen)
             {
                 return null;
             }
