@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("NuGet.VisualStudio")]
-[assembly: AssemblyDescription("API for automating Visual Studio via NuGet")]
+[assembly: AssemblyDescription("APIs for invoking NuGet services in Visual Studio.")]
 
 [assembly: InternalsVisibleTo("NuGet.VisualStudio.Test")]
 [assembly: InternalsVisibleTo("NuGet.Cmdlets.Test")]

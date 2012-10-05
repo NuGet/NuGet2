@@ -47,25 +47,8 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "InstallCommandRequireConsent")]
         public bool RequireConsent { get; set; }
 
-        internal string InstallPath
-        {
-            get
-            {
-                // Use the passed-in install path if any;
-                // if none specified, look in the default config file;
-                // if none specified, default to the current dir.
-                string installPath = OutputDirectory;
-                if (String.IsNullOrEmpty(installPath))
-                {
-                    installPath = _configSettings.GetRepositoryPath();
-                    if (String.IsNullOrEmpty(installPath))
-                    {
-                        installPath = Directory.GetCurrentDirectory();
-                    }
-                }
-                return installPath;
-            }
-        }
+        [Option(typeof(NuGetCommand), "InstallCommandSolutionDirectory")]
+        public string SolutionDirectory { get; set; }
 
         private IPackageRepositoryFactory RepositoryFactory { get; set; }
 
@@ -119,7 +102,8 @@ namespace NuGet.Commands
 
         public override void ExecuteCommand()
         {
-            IFileSystem fileSystem = CreateFileSystem();
+            string installPath = ResolveInstallPath();
+            IFileSystem fileSystem = CreateFileSystem(installPath);
 
             // If the first argument is a packages.config file, install everything it lists
             // Otherwise, treat the first argument as a package Id
@@ -148,6 +132,41 @@ namespace NuGet.Commands
         protected virtual PackageReferenceFile GetPackageReferenceFile(string path)
         {
             return new PackageReferenceFile(Path.GetFullPath(path));
+        }
+
+        internal string ResolveInstallPath()
+        {
+            if (!String.IsNullOrEmpty(OutputDirectory))
+            {
+                // Use the OutputDirectory if specified.
+                return OutputDirectory;
+            }
+
+            // If the SolutionDir is specified, use the .nuget directory under it to determine the solution-level settings
+            ISettings currentSettings = _configSettings;
+            if (!String.IsNullOrEmpty(SolutionDirectory))
+            {
+                var solutionSettingsFile = Path.Combine(SolutionDirectory.TrimEnd(Path.DirectorySeparatorChar), NuGetConstants.NuGetSolutionSettingsFolder);
+                var fileSystem = CreateFileSystem(solutionSettingsFile);
+
+                currentSettings = Settings.LoadDefaultSettings(fileSystem);
+            }
+
+            string installPath = currentSettings.GetRepositoryPath();
+            if (!String.IsNullOrEmpty(installPath))
+            {
+                // If a value is specified in config, use that. 
+                return installPath;
+            }
+
+            if (!String.IsNullOrEmpty(SolutionDirectory))
+            {
+                // For package restore scenarios, deduce the path of the packages directory from the solution directory.
+                return Path.Combine(SolutionDirectory, CommandLineConstants.PackagesDirectoryName);
+            }
+
+            // Use the current directory as output.
+            return Directory.GetCurrentDirectory();
         }
 
         private IPackageRepository GetRepository()
@@ -299,9 +318,9 @@ namespace NuGet.Commands
             return packageManager;
         }
 
-        protected virtual IFileSystem CreateFileSystem()
+        protected internal virtual IFileSystem CreateFileSystem(string path)
         {
-            return new PhysicalFileSystem(InstallPath);
+            return new PhysicalFileSystem(path);
         }
 
         private static void EnsureFileExists(IFileSystem fileSystem, string configFilePath)
@@ -340,6 +359,7 @@ namespace NuGet.Commands
             }
             return false;
         }
+
 
         /// <summary>
         /// We want to base the lock name off of the full path of the package, however, the Mutex looks for files on disk if a path is given.

@@ -196,5 +196,33 @@ namespace NuGet.VisualStudio.Test
             Assert.Equal("bar", valueA);
             Assert.Equal("qux", valueB);
         }
+
+        [Fact]
+        public void GetSolutionSettingsFileSystemReturnsNullIfSolutionManagerIsNull()
+        {
+            // Arrange
+            ISolutionManager solutionManager = null;
+
+            // Act 
+            var fileSystem = VsSettings.GetSolutionSettingsFileSystem(solutionManager);
+
+            // Assert
+            Assert.Null(fileSystem);
+        }
+
+        [Fact]
+        public void GetSolutionSettingsFileSystemReturnsNullIfSolutionIsNotOpen()
+        {
+            // Arrange
+            var solutionManager = new Mock<ISolutionManager>(MockBehavior.Strict);
+            solutionManager.Setup(s => s.IsSolutionOpen).Returns(false);
+
+            // Act 
+            var fileSystem = VsSettings.GetSolutionSettingsFileSystem(solutionManager.Object);
+
+            // Assert
+            Assert.Null(fileSystem);
+
+        }
     }
 }

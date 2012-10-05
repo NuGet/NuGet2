@@ -11,5 +11,7 @@
 
         public static readonly string DefaultSymbolServerUrl = "http://nuget.gw.symbolsource.org/Public/NuGet";
         public static readonly string ReadmeFileName = "readme.txt";
+
+        public static readonly string NuGetSolutionSettingsFolder = ".nuget";
     }
 }

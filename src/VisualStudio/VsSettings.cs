@@ -5,11 +5,11 @@ using System.IO;
 
 namespace NuGet.VisualStudio
 {
+    // TODO: Get rid of this type since the hierarchy should take care of it.
     [Export(typeof(ISettings))]
     public class VsSettings : ISettings
     {
         private const string SolutionConfigSection = "solution";
-        public static readonly string SourceControlSupportKey = "disableSourceControlIntegration";
         private readonly ISolutionManager _solutionManager;
         private ISettings _defaultSettings;
         private readonly IFileSystemProvider _fileSystemProvider;
@@ -17,7 +17,7 @@ namespace NuGet.VisualStudio
         [ImportingConstructor]
         public VsSettings(ISolutionManager solutionManager)
             : this(solutionManager, 
-            Settings.LoadDefaultSettings(null == solutionManager ? null : solutionManager.SolutionFileSystem), 
+            Settings.LoadDefaultSettings(GetSolutionSettingsFileSystem(solutionManager)), 
             new PhysicalFileSystemProvider())
         {
             // Review: Do we need to pass in the VsFileSystemProvider here instead of hardcoding PhysicalFileSystems?
@@ -158,6 +158,16 @@ namespace NuGet.VisualStudio
                 return SolutionSettings.DeleteSection(section);
             }
             return _defaultSettings.DeleteSection(section);
+        }
+
+        internal static IFileSystem GetSolutionSettingsFileSystem(ISolutionManager solutionManager)
+        {
+            if (solutionManager == null || !solutionManager.IsSolutionOpen)
+            {
+                return null;
+            }
+            string settingsPath = Path.Combine(solutionManager.SolutionFileSystem.Root, VsConstants.NuGetSolutionSettingsFolder);
+            return new PhysicalFileSystem(settingsPath);
         }
 
         private sealed class PhysicalFileSystemProvider : IFileSystemProvider
