@@ -73,6 +73,7 @@
       <Button guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0x0100" type="Button">
           <Parent guid="guidReferenceContext" id="cmdAddReferenceGroup" />
           <Icon guid="guidToolbarImages" id="bmpAddNuGetPackage" />
+          <CommandFlag>AllowParams</CommandFlag>
           <CommandFlag>DefaultInvisible</CommandFlag>
           <CommandFlag>DynamicVisibility</CommandFlag>
           <CommandFlag>TextChanges</CommandFlag>

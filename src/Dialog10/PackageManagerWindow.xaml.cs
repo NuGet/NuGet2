@@ -33,8 +33,11 @@ namespace NuGet.Dialog
         private readonly IProductUpdateService _productUpdateService;
         private readonly IOptionsPageActivator _optionsPageActivator;
         private readonly Project _activeProject;
+        
+        private static readonly string[] Providers = new string[] { "Installed", "Online", "Updates" };
+        private string _searchText = null;
 
-        public PackageManagerWindow(Project project) :
+        public PackageManagerWindow(Project project, string dialogParameters = null) :
             this(project,
                  ServiceLocator.GetInstance<DTE>(),
                  ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
@@ -44,8 +47,9 @@ namespace NuGet.Dialog
                  ServiceLocator.GetInstance<IProductUpdateService>(),
                  ServiceLocator.GetInstance<IPackageRestoreManager>(),
                  ServiceLocator.GetInstance<ISolutionManager>(),
-                 ServiceLocator.GetInstance<IOptionsPageActivator>())
-        {
+                 ServiceLocator.GetInstance<IOptionsPageActivator>(),
+                 dialogParameters)
+        {            
         }
 
         private PackageManagerWindow(Project project,
@@ -57,7 +61,8 @@ namespace NuGet.Dialog
                                     IProductUpdateService productUpdateService,
                                     IPackageRestoreManager packageRestoreManager,
                                     ISolutionManager solutionManager,
-                                    IOptionsPageActivator optionPageActivator)
+                                    IOptionsPageActivator optionPageActivator,
+                                    string dialogParameters)
             : base(F1Keyword)
         {
 
@@ -101,6 +106,43 @@ namespace NuGet.Dialog
                 httpClientEvents,
                 solutionManager,
                 packageRestoreManager);
+
+            ProcessDialogParameters(dialogParameters);
+        }
+
+        private void ProcessDialogParameters(string dialogParameters)
+        {
+            bool providerSet = false;
+            if (dialogParameters != null)
+            {
+                string[] parameters = dialogParameters.Split(';');
+
+                // Only act when the number of parameters is 1 or 2
+                if (parameters.Length > 0 && parameters.Length <= 2)
+                {
+                    _searchText = parameters[0];
+                }
+
+                if (parameters.Length == 2)
+                {
+                    for (int i = 0; i < Providers.Length; i++)
+                    {
+                        // Case insensitive comparisons with the strings
+                        if (String.Equals(Providers[i], parameters[1], StringComparison.OrdinalIgnoreCase))
+                        {
+                            UpdateSelectedProvider(i);
+                            providerSet = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!providerSet)
+            {
+                // retrieve the selected provider from the settings
+                UpdateSelectedProvider(_providerSettings.SelectedProvider);
+            }
         }
 
         private void AddUpdateBar(IProductUpdateService productUpdateService)
@@ -242,9 +284,12 @@ namespace NuGet.Dialog
             installedProvider.IncludePrerelease =
                 onlineProvider.IncludePrerelease =
                 updatesProvider.IncludePrerelease = _providerSettings.IncludePrereleasePackages;
+        }
 
-            // retrieve the selected provider from the settings
-            int selectedProvider = Math.Min(explorer.Providers.Count-1, _providerSettings.SelectedProvider);
+        private void UpdateSelectedProvider(int selectedProvider)
+        {
+            // update the selected provider
+            selectedProvider = Math.Min(explorer.Providers.Count - 1, selectedProvider);
             selectedProvider = Math.Max(selectedProvider, 0);
             explorer.SelectedProvider = explorer.Providers[selectedProvider];
         }
@@ -556,6 +601,21 @@ namespace NuGet.Dialog
         {
             // HACK: Keep track of the currently open instance of this class.
             CurrentInstance = this;
+        }
+
+        protected override void OnContentRendered(EventArgs e)
+        {
+ 	         base.OnContentRendered(e);
+#if !VS10
+             var searchControlParent = explorer.SearchControlParent as DependencyObject;
+#else
+             var searchControlParent = explorer;
+#endif
+             var element = (TextBox)searchControlParent.FindDescendant<TextBox>();
+             if (element != null)
+             {
+                 element.Text = _searchText;
+             }
         }
     }
 }

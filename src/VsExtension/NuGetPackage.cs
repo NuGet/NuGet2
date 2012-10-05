@@ -173,6 +173,7 @@ namespace NuGet.Tools
                 // menu command for opening Manage NuGet packages dialog
                 CommandID managePackageDialogCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, PkgCmdIDList.cmdidAddPackageDialog);
                 OleMenuCommand managePackageDialogCommand = new OleMenuCommand(ShowManageLibraryPackageDialog, null, BeforeQueryStatusForAddPackageDialog, managePackageDialogCommandID);
+                managePackageDialogCommand.ParametersDescription = "p";
                 mcs.AddCommand(managePackageDialogCommand);
 
                 // menu command for opening "Manage NuGet packages for solution" dialog
@@ -230,6 +231,12 @@ namespace NuGet.Tools
 
         private void ShowManageLibraryPackageDialog(object sender, EventArgs e)
         {
+            string parameterString = null;
+            OleMenuCmdEventArgs args = e as OleMenuCmdEventArgs;
+            if (null != args)
+            {
+                parameterString = args.InValue as string;
+            }
             if (VsMonitorSelection.GetIsSolutionNodeSelected())
             {
                 ShowManageLibraryPackageDialog(null);
@@ -239,7 +246,7 @@ namespace NuGet.Tools
                 Project project = VsMonitorSelection.GetActiveProject();
                 if (project != null && !project.IsUnloaded() && project.IsSupported())
                 {
-                    ShowManageLibraryPackageDialog(project);
+                    ShowManageLibraryPackageDialog(project, parameterString);
                 }
                 else
                 {
@@ -266,11 +273,11 @@ namespace NuGet.Tools
             ShowManageLibraryPackageDialog(null);
         }
 
-        private static void ShowManageLibraryPackageDialog(Project project)
+        private static void ShowManageLibraryPackageDialog(Project project, string parameterString = null)
         {
             DialogWindow window = VsVersionHelper.IsVisualStudio2010 ?
                 GetVS10PackageManagerWindow(project) :
-                GetPackageManagerWindow(project);
+                GetPackageManagerWindow(project, parameterString);
             try
             {
                 window.ShowModal();
@@ -289,9 +296,9 @@ namespace NuGet.Tools
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static DialogWindow GetPackageManagerWindow(Project project)
+        private static DialogWindow GetPackageManagerWindow(Project project, string parameterString)
         {
-            return new ManagePackageDialog(project);
+            return new ManagePackageDialog(project, parameterString);
         }
 
         private void EnablePackagesRestore(object sender, EventArgs args)
