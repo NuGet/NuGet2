@@ -2007,3 +2007,19 @@ function Test-InstallPackageDoesNotUninstallDependencyGraphWhenSafeUpdatingADepe
 	Assert-Package $p Microsoft.AspNet.WebPages 2.0.20710.0
 	Assert-Package $p Microsoft.AspNet.Razor 2.0.20710.0
 }
+
+function Test-InstallPackgeRespectAssemblyReferenceFilterOnDependencyPackages
+{
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package A -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p 'A' '1.0.0'
+    Assert-Package $p 'B' '1.0.0'
+
+    Assert-Reference $p 'GrayscaleEffect'
+    Assert-Null (Get-AssemblyReference $p 'Ookii.Dialogs.Wpf')
+}

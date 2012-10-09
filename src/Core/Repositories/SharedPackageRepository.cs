@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -141,6 +142,13 @@ namespace NuGet
             // for example, for jQuery version 1.0, it will be "jQuery.1.0\\jQuery.1.0.nuspec"
             string packageFilePath = GetManifestFilePath(package);
             Manifest manifest = Manifest.Create(package);
+            
+            // The IPackage object doesn't carry the References information. 
+            // Thus we set the References for the manifest to the set of all valid assembly references
+            manifest.Metadata.References = package.AssemblyReferences
+                                                  .Select(p => new ManifestReference() { File = p.Name })
+                                                  .Distinct()
+                                                  .ToList();
             FileSystem.AddFileWithCheck(packageFilePath, stream => manifest.Save(stream));
 
             // But in order to maintain backwards compatibility with older versions of NuGet, 
