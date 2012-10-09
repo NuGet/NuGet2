@@ -1973,4 +1973,56 @@ function Test-InstallMetaPackageWorksAsExpected
 	# Assert
 	Assert-Package $p MetaPackage
 	Assert-Package $p Dependency
+<<<<<<< HEAD
+=======
+}
+
+function Test-InstallPackageDoesNotUninstallDependencyGraphWhenSafeUpdatingADependency 
+{
+	# The InstallWalker used to compensate for packages that were already installed by attempting to remove
+	# an uninstall operation. Consequently any uninstall operation that occurred later in the graph would cause 
+	# the package to be uninstalled. This test verifies that this behavior does not occur.
+
+	param ($context)
+
+	# Arrange
+	$p = New-ClassLibrary
+
+	# Act - 1
+	$p | Install-Package Microsoft.AspNet.WebPages.Administration -Version 2.0.20710.0 -Source $context.RepositoryPath
+
+	# Assert - 1
+	Assert-Package $p Microsoft.AspNet.WebPages.Administration 2.0.20710.0
+	Assert-Package $p Microsoft.Web.Infrastructure 1.0
+	Assert-Package $p NuGet.Core 1.6.2
+	Assert-Package $p Microsoft.AspNet.WebPages 2.0.20710.0
+	Assert-Package $p Microsoft.AspNet.Razor 2.0.20710.0
+	
+	# Act - 2
+	$p | Install-Package microsoft-web-helpers -Source $context.RepositoryPath -Verbose
+	
+	# Assert - 2
+	Assert-Package $p microsoft-web-helpers 2.0.20710.0
+	Assert-Package $p Microsoft.AspNet.WebPages.Administration 2.0.20713.0
+	Assert-Package $p Microsoft.Web.Infrastructure 1.0
+	Assert-Package $p NuGet.Core 1.6.2
+	Assert-Package $p Microsoft.AspNet.WebPages 2.0.20710.0
+	Assert-Package $p Microsoft.AspNet.Razor 2.0.20710.0
+}
+
+function Test-InstallPackgeRespectAssemblyReferenceFilterOnDependencyPackages
+{
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package A -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p 'A' '1.0.0'
+    Assert-Package $p 'B' '1.0.0'
+
+    Assert-Reference $p 'GrayscaleEffect'
+    Assert-Null (Get-AssemblyReference $p 'Ookii.Dialogs.Wpf')
+>>>>>>> 15d649e... Respect explicit references in dependency packages. Work items: 2663
 }
