@@ -33,5 +33,10 @@ namespace NuGet
         {
             return other != null && String.Equals(File, other.File, StringComparison.OrdinalIgnoreCase);
         }
+
+        public override int GetHashCode()
+        {
+            return File == null ? 0 : File.GetHashCode();
+        }
     }
 }

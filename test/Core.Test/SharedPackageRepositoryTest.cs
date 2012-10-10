@@ -29,6 +29,31 @@ namespace NuGet.Test
             Assert.True(fileSystem.FileExists(nupkgPath));
         }
 
+        [Fact]
+        public void CallAddPackageWillAddNuspecWhichHasReferencesData()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\root");
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            repository.AddPackage(PackageUtility.CreatePackage("A", 
+                                                               "1.0", 
+                                                               assemblyReferences: new [] { "net40\\A.dll", "sl45\\B.dll", "A.dll", "win8\\C.dll" }));
+
+            // Assert
+            Assert.True(fileSystem.FileExists("A.1.0\\A.1.0.nuspec"));
+
+            Stream manifestContentStream = fileSystem.OpenFile("A.1.0\\A.1.0.nuspec");
+            Manifest manifest = Manifest.ReadFrom(manifestContentStream);
+
+            Assert.Equal(3, manifest.Metadata.References.Count);
+            Assert.Equal("A.dll", manifest.Metadata.References[0].File);
+            Assert.Equal("B.dll", manifest.Metadata.References[1].File);
+            Assert.Equal("C.dll", manifest.Metadata.References[2].File);
+        }
+
         [Theory]
         [InlineData("A", "2.0", "A.2.0\\A.2.0.nuspec")]
         [InlineData("B", "1.0.0-alpha", "B.1.0.0-alpha\\B.1.0.0-alpha.nuspec")]

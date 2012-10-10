@@ -145,10 +145,12 @@ namespace NuGet
             
             // The IPackage object doesn't carry the References information. 
             // Thus we set the References for the manifest to the set of all valid assembly references
+            
             manifest.Metadata.References = package.AssemblyReferences
                                                   .Select(p => new ManifestReference() { File = p.Name })
                                                   .Distinct()
                                                   .ToList();
+
             FileSystem.AddFileWithCheck(packageFilePath, stream => manifest.Save(stream));
 
             // But in order to maintain backwards compatibility with older versions of NuGet, 
