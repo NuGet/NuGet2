@@ -129,6 +129,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Properties\NuGet.Bootstrapper.nuspec" />
     <None Include="Properties\NuGet.CommandLine.nuspec" />
   </ItemGroup>
   <ItemGroup>
