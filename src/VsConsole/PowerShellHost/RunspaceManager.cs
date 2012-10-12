@@ -105,13 +105,14 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             string modulePath = Path.Combine(extensionRoot, "Modules", "NuGet", "NuGet.psd1");
             runspace.ImportModule(modulePath);
 
-#if DEBUG
+
             // provide backdoor to enable function test
-            string functionalTestPath = Environment.GetEnvironmentVariable("FunctionalTestPath");
+            string functionalTestPath = Environment.GetEnvironmentVariable("NuGetFunctionalTestPath");
             if (functionalTestPath != null && File.Exists(functionalTestPath))
             {
                 runspace.ImportModule(functionalTestPath);
             }
+#if DEBUG
             else
             {
                 if (File.Exists(DebugConstants.TestModulePath))
