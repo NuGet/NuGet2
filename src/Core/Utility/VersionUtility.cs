@@ -14,9 +14,9 @@ namespace NuGet
 {
     public static class VersionUtility
     {
-        private const string NetFrameworkIdentifier = ".NETFramework";
-        private const string NetCoreFrameworkIdentifier = ".NETCore";
-        private const string PortableFrameworkIdentifier = ".NETPortable";
+        public const string NetFrameworkIdentifier = ".NETFramework";
+        public const string NetCoreFrameworkIdentifier = ".NETCore";
+        public const string PortableFrameworkIdentifier = ".NETPortable";
         private const string LessThanOrEqualTo = "\u2264";
         private const string GreaterThanOrEqualTo = "\u2265";
 
@@ -87,6 +87,11 @@ namespace NuGet
                 }
             },
             {
+                NetCoreFrameworkIdentifier, new CompatibilityMapping(StringComparer.OrdinalIgnoreCase) {
+                    { "", new [] { "javascript", "managed", "native" } },
+                }
+            },
+            {
                 "Silverlight", new CompatibilityMapping(StringComparer.OrdinalIgnoreCase) {
                     { "WindowsPhone", new[] { "WindowsPhone71" } },
                     { "WindowsPhone71", new[] { "WindowsPhone" } }
@@ -103,7 +108,13 @@ namespace NuGet
             { new FrameworkName("WindowsPhone, Version=v8.0"), new FrameworkName("Silverlight, Version=v8.0, Profile=WindowsPhone") },
 
             { new FrameworkName("Windows, Version=v0.0"), new FrameworkName(".NETCore, Version=v4.5") },
-            { new FrameworkName("Windows, Version=v8.0"), new FrameworkName(".NETCore, Version=v4.5") }
+            { new FrameworkName("Windows, Version=v8.0"), new FrameworkName(".NETCore, Version=v4.5") },
+
+            { new FrameworkName("Windows, Version=v0.0, Profile=javascript"), new FrameworkName(".NETCore, Version=v4.5, Profile=javascript") },
+            { new FrameworkName("Windows, Version=v8.0, Profile=javascript"), new FrameworkName(".NETCore, Version=v4.5, Profile=javascript") },
+
+            { new FrameworkName("Windows, Version=v0.0, Profile=managed"), new FrameworkName(".NETCore, Version=v4.5, Profile=managed") },
+            { new FrameworkName("Windows, Version=v8.0, Profile=managed"), new FrameworkName(".NETCore, Version=v4.5, Profile=managed") }
         };
 
         public static Version DefaultTargetFrameworkVersion

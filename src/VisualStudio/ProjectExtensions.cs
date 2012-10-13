@@ -303,14 +303,26 @@ namespace NuGet.VisualStudio
             if (project.IsJavaScriptProject())
             {
                 // HACK: The JS Metro project does not have a TargetFrameworkMoniker property set. 
-                // We hard-code the return value so that it behaves as if it had a WinRT target 
-                // framework, i.e. .NETCore, Version=4.5
-
-                // Review: What about future versions? Let's not worry about that for now.
-                return ".NETCore, Version=4.5";
+                // We hard-code the return value so that it behaves as if it had a .NETCore target 
+                // framework, i.e. .NETCore, Version=4.5, Profile=Javascript
+                return ".NETCore,Version=4.5,Profile=javascript";
             }
 
-            return project.GetPropertyValue<string>("TargetFrameworkMoniker");
+            string framework = project.GetPropertyValue<string>("TargetFrameworkMoniker");
+            if (!String.IsNullOrEmpty(framework))
+            {
+                // Change ".NETCore, Version=XXX" to ".NETCore, Version=XXX, Profile=managed"
+                // so that we can distinguish Managed projects from Javascript projects (and 
+                // native ones when we support them)
+                string[] components = framework.Split(new [] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (components.Length == 2 &&
+                    VersionUtility.NetCoreFrameworkIdentifier.Equals(components[0], StringComparison.OrdinalIgnoreCase))
+                {
+                    framework = String.Join(",", components[0], components[1], "Profile=managed");
+                }
+            }
+
+            return framework;
         }
 
         public static FrameworkName GetTargetFrameworkName(this Project project)

@@ -130,6 +130,56 @@ namespace NuGet.Test
             Assert.True(projectSystem.FileExists("one.txt"));
         }
 
+        [Fact]
+        public void AddPackageReferencePicksManagedWindowsLibraryOverGenericWindowsOne()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETCore, Version=4.5, Profile=managed"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A", 
+                "1.0", 
+                content: new [] { "win8\\a.txt", "win8-managed\\b.txt" }, 
+                assemblyReferences: new[] { "lib\\win8\\a.dll", "lib\\win8-managed\\b.dll" });
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.False(projectSystem.ReferenceExists("a.dll"));
+            Assert.False(projectSystem.FileExists("a.txt"));
+
+            Assert.True(projectSystem.ReferenceExists("b.dll"));
+            Assert.True(projectSystem.FileExists("b.txt"));
+        }
+
+        [Fact]
+        public void AddPackageReferencePicksJavascriptWindowsLibraryOverGenericWindowsOne()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETCore, Version=4.5, Profile=javascript"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.0",
+                content: new[] { "win8\\a.txt", "win8-javascript\\b.txt" },
+                assemblyReferences: new[] { "lib\\win8\\a.dll", "lib\\win8-javascript\\b.dll" });
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.False(projectSystem.ReferenceExists("a.dll"));
+            Assert.False(projectSystem.FileExists("a.txt"));
+
+            Assert.True(projectSystem.ReferenceExists("b.dll"));
+            Assert.True(projectSystem.FileExists("b.txt"));
+        }
+
         [Theory]
         [InlineData("portable-wp7+sl3+net40\\two.txt", "portable-net45+sl4\\one.txt")]
         [InlineData("portable-net40+sl3+wp71\\one.txt", "portable-windows8+sl2\\two.txt")]

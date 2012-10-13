@@ -1,10 +1,10 @@
 ﻿using EnvDTE;
+using Moq;
 using Xunit;
 
 namespace NuGet.VisualStudio.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
-    using Moq;
 
     public class ProjectExtensionsTest
     {
@@ -115,6 +115,34 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.True(result);
         }
+        
+        [Fact]
+        public void GetTargetFrameworkForWindowsStoreProjectReturnsManagedProfile()
+        {
+            // Arrange
+            var project = new Mock<Project>();
+            project.Setup(p => p.Properties.Item("TargetFrameworkMoniker").Value).Returns(".NETCore, Version=4.5");
 
+            // Act
+            string framework = project.Object.GetTargetFramework();
+
+            // Assert
+            Assert.Equal(".NETCore,Version=4.5,Profile=managed", framework);
+        }
+
+        [Fact]
+        public void GetTargetFrameworkForWindowsStoreJavascriptProjectReturnsJavascriptProfile()
+        {
+            // Arrange
+            var project = new Mock<Project>();
+            project.Setup(p => p.Kind).Returns("{262852C6-CD72-467D-83FE-5EEB1973A190}");
+            project.Setup(p => p.Properties.Item("TargetFrameworkMoniker").Value).Returns("");
+
+            // Act
+            string framework = project.Object.GetTargetFramework();
+
+            // Assert
+            Assert.Equal(".NETCore,Version=4.5,Profile=javascript", framework);
+        }
     }
 }
