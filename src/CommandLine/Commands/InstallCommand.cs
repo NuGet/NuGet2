@@ -297,6 +297,7 @@ namespace NuGet.Commands
 
         protected internal virtual IFileSystem CreateFileSystem(string path)
         {
+            path = Path.GetFullPath(path);
             return new PhysicalFileSystem(path);
         }
 
