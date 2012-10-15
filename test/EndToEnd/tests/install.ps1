@@ -2008,7 +2008,7 @@ function Test-InstallPackageDoesNotUninstallDependencyGraphWhenSafeUpdatingADepe
 	Assert-Package $p Microsoft.AspNet.Razor 2.0.20710.0
 }
 
-function Test-InstallPackgeRespectAssemblyReferenceFilterOnDependencyPackages
+function Test-InstallPackageRespectAssemblyReferenceFilterOnDependencyPackages
 {
     # Arrange
     $p = New-ClassLibrary
@@ -2022,4 +2022,26 @@ function Test-InstallPackgeRespectAssemblyReferenceFilterOnDependencyPackages
 
     Assert-Reference $p 'GrayscaleEffect'
     Assert-Null (Get-AssemblyReference $p 'Ookii.Dialogs.Wpf')
+}
+
+function Test-InstallPackageRespectAssemblyReferenceFilterOnSecondProject
+{
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Act
+    $p | Install-Package B -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p 'B' '1.0.0'
+    Assert-Reference $p 'GrayscaleEffect'
+    Assert-Null (Get-AssemblyReference $p 'Ookii.Dialogs.Wpf')
+
+    $q = New-ConsoleApplication
+    
+    # Act
+    $q | Install-Package B -Source $context.RepositoryPath
+    Assert-Package $q 'B' '1.0.0'
+    Assert-Reference $q 'GrayscaleEffect'
+    Assert-Null (Get-AssemblyReference $q 'Ookii.Dialogs.Wpf')
 }
