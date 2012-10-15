@@ -16,6 +16,7 @@ namespace NuGet
                                                 ICredentialCache credentialCache,
                                                 ICredentialProvider credentialProvider)
         {
+            HttpWebRequest previousRequest = null;
             IHttpWebResponse previousResponse = null;
             HttpStatusCode? previousStatusCode = null;
             bool usingSTSAuth = false;
@@ -33,7 +34,7 @@ namespace NuGet
                     request.Proxy.Credentials = CredentialCache.DefaultCredentials;
                 }
 
-                if (previousResponse == null)
+                if (previousResponse == null || IsKeepAliveShoudBeUsedInPreviousRequest(previousRequest, previousResponse))
                 {
                     // Try to use the cached credentials (if any, for the first request)
                     request.Credentials = credentialCache.GetCredentials(request.RequestUri);
@@ -130,12 +131,13 @@ namespace NuGet
                         }
 
                         usingSTSAuth = STSAuthHelper.TryRetrieveSTSToken(request.RequestUri, response);
-                        
+
                         if (!IsAuthenticationResponse(response) || !continueIfFailed)
                         {
                             throw;
                         }
 
+                        previousRequest = request;
                         previousResponse = response;
                         previousStatusCode = previousResponse.StatusCode;
                     }
@@ -171,14 +173,34 @@ namespace NuGet
             // should not require KeepAlive.
             // REVIEW: The WWW-Authenticate header is tricky to parse so a Equals might not be correct. 
             if (previousResponse == null ||
-                (!String.Equals(previousResponse.AuthType, "NTLM", StringComparison.OrdinalIgnoreCase) &&
-                !String.Equals(previousResponse.AuthType, "Kerberos", StringComparison.OrdinalIgnoreCase)))
+                !IsNtlmOrKerberos(previousResponse.AuthType))
             {
                 // This is to work around the "The underlying connection was closed: An unexpected error occurred on a receive."
                 // exception.
                 request.KeepAlive = false;
                 request.ProtocolVersion = HttpVersion.Version10;
             }
+        }
+
+        private static bool IsKeepAliveShoudBeUsedInPreviousRequest(HttpWebRequest previousRequest, IHttpWebResponse previousResponse)
+        {
+            return
+                previousRequest != null
+                && !previousRequest.KeepAlive
+                && previousResponse != null
+                && IsNtlmOrKerberos(previousResponse.AuthType);
+        }
+
+        private static bool IsNtlmOrKerberos(string authType)
+        {
+            if (String.IsNullOrEmpty(authType))
+            {
+                return false;
+            }
+
+            return
+                authType.IndexOf("NTLM", StringComparison.OrdinalIgnoreCase) != -1
+                || authType.IndexOf("Kerberos", StringComparison.OrdinalIgnoreCase) != -1;
         }
 
         private class HttpWebResponseWrapper : IHttpWebResponse
