@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+  <Symbols>
+    <!-- This is the package guid. -->
+    <GuidSymbol name="guidNuget_ExtensionsPkg" value="{45375e1b-0506-4b59-b026-d35674a0906f}" />
+  </Symbols>
+
+</CommandTable>
