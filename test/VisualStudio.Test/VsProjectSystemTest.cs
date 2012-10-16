@@ -7,7 +7,6 @@ using Xunit.Extensions;
 
 namespace NuGet.VisualStudio.Test
 {
-
     public class VsProjectSystemTest
     {
         [Fact]
@@ -15,7 +14,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var mockFileSystemProvider = new Mock<IFileSystemProvider>();
-            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
+            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(new MockFileSystem());
             VsProjectSystem projectSystem = new VsProjectSystem(TestUtils.GetProject("Name"), mockFileSystemProvider.Object);
 
             // Assert
@@ -32,7 +31,7 @@ namespace NuGet.VisualStudio.Test
 
             // Arrange
             var mockFileSystemProvider = new Mock<IFileSystemProvider>();
-            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
+            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(new MockFileSystem());
             Project project = TestUtils.GetProject("Name",
                                                    propertyGetter: name => { throw new ArgumentException(); });
             VsProjectSystem projectSystem = new VsProjectSystem(project, mockFileSystemProvider.Object);
@@ -53,7 +52,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var mockFileSystemProvider = new Mock<IFileSystemProvider>();
-            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
+            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(new MockFileSystem());
             Project project = TestUtils.GetProject("TestProject");
             VsProjectSystem projectSystem = new VsProjectSystem(project, mockFileSystemProvider.Object);
 
@@ -74,7 +73,7 @@ namespace NuGet.VisualStudio.Test
                 "Silverlight", 
                 propertyGetter: name => GetTargetFrameworkProperty("TargetFrameworkMoniker", targetFramework));
             var mockFileSystemProvider = new Mock<IFileSystemProvider>();
-            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
+            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(new MockFileSystem());
             var projectSystem = new VsProjectSystem(silverlightProject, mockFileSystemProvider.Object);
 
             // Act
@@ -94,7 +93,7 @@ namespace NuGet.VisualStudio.Test
                 "Silverlight",
                 propertyGetter: name => GetTargetFrameworkProperty("TargetFrameworkMoniker", targetFramework));
             var mockFileSystemProvider = new Mock<IFileSystemProvider>();
-            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
+            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(new MockFileSystem());
             var projectSystem = new VsProjectSystem(silverlightProject, mockFileSystemProvider.Object);
 
             // Act

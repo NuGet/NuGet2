@@ -22,7 +22,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var mockFileSystemProvider = new Mock<IFileSystemProvider>();
-            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
+            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(new MockFileSystem());
             Project project = TestUtils.GetProject("TestProject");
             var projectSystem = new WebProjectSystem(project, mockFileSystemProvider.Object);
 

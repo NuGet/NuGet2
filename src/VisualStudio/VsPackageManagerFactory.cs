@@ -82,7 +82,8 @@ namespace NuGet.VisualStudio
                                         repository,
                                         _fileSystemProvider,
                                         info.FileSystem,
-                                        info.Repository,                                        // We ensure DeleteOnRestartManager is initialized with a PhysicalFileSystem so the
+                                        info.Repository,
+                                        // We ensure DeleteOnRestartManager is initialized with a PhysicalFileSystem so the
                                         // .deleteme marker files that get created don't get checked into version control
                                         new DeleteOnRestartManager(() => new PhysicalFileSystem(info.FileSystem.Root)),
                                         _packageEvents);
@@ -133,8 +134,15 @@ namespace NuGet.VisualStudio
             {
                 IFileSystem fileSystem = _fileSystemProvider.GetFileSystem(path);
                 IFileSystem configSettingsFileSystem = GetConfigSettingsFileSystem(configFolderPath);
+                // this file system is used to access the repositories.config file. We want to use Source Control-bound 
+                // file system to access it even if the 'disableSourceControlIntegration' setting is set.
+                IFileSystem storeFileSystem = _fileSystemProvider.GetFileSystem(path, ignoreSourceControlSetting: true);
+                
                 ISharedPackageRepository repository = new SharedPackageRepository(
-                    new DefaultPackagePathResolver(fileSystem), fileSystem, configSettingsFileSystem);
+                    new DefaultPackagePathResolver(fileSystem), 
+                    fileSystem, 
+                    storeFileSystem, 
+                    configSettingsFileSystem);
 
                 _repositoryInfo = new RepositoryInfo(path, configFolderPath, fileSystem, repository);
             }

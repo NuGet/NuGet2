@@ -187,7 +187,7 @@ namespace NuGet.VisualStudio.Test
         {
             private IFileSystem _mockFileSystem = new MockFileSystemShallowCopy();
 
-            public IFileSystem GetFileSystem(string path)
+            public IFileSystem GetFileSystem(string path, bool ignoreSourceControlSetting)
             {
                 return _mockFileSystem;
             }

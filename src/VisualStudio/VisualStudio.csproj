@@ -24,6 +24,7 @@
     <Compile Include="Extensibility\IVsPackageMetadata.cs" />
     <Compile Include="Extensibility\VsPackageEventHandler.cs" />
     <Compile Include="Extensibility\VsPackageMetadata.cs" />
+    <Compile Include="Extensions\FileSystemProviderExtensions.cs" />
     <Compile Include="Extensions\ProjectSystemExtensions.cs" />
     <Compile Include="FallbackRepository.cs" />
     <Compile Include="DeleteOnRestart\IDeleteOnRestartManager.cs" />

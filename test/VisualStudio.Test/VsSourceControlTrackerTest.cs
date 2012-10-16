@@ -43,7 +43,7 @@ namespace NuGet.VisualStudio.Test
             solutionManager.Setup(s => s.SolutionDirectory).Returns("baz:\\foo");
 
             var fileSystem = new Mock<IFileSystem>();
-            fileSystemProvider.Setup(f => f.GetFileSystem("baz:\\foo\\.nuget")).Returns(fileSystem.Object);
+            fileSystemProvider.Setup(f => f.GetFileSystem("baz:\\foo\\.nuget", It.IsAny<bool>())).Returns(fileSystem.Object);
 
             // Act
             var scTracker = new VsSourceControlTracker(
@@ -121,7 +121,7 @@ namespace NuGet.VisualStudio.Test
             solutionManager.Setup(s => s.SolutionDirectory).Returns("baz:\\foo");
 
             var fileSystem = new MockFileSystem();
-            fileSystemProvider.Setup(f => f.GetFileSystem("baz:\\foo\\.nuget")).Returns(fileSystem);
+            fileSystemProvider.Setup(f => f.GetFileSystem("baz:\\foo\\.nuget", It.IsAny<bool>())).Returns(fileSystem);
 
             var scTracker = new VsSourceControlTracker(
                 solutionManager.Object, fileSystemProvider.Object, projectDocumentsEvents.Object, new Mock<ISettings>().Object);

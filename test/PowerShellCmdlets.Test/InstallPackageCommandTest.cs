@@ -270,7 +270,7 @@ namespace NuGet.PowerShell.Commands.Test
             repositoryFactory.Setup(c => c.CreateRepository("B")).Returns(repoB);
             var sourceProvider = GetPackageSourceProvider(new PackageSource("A"), new PackageSource("B"));
             var fileSystemProvider = new Mock<IFileSystemProvider>();
-            fileSystemProvider.Setup(c => c.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
+            fileSystemProvider.Setup(c => c.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(new MockFileSystem());
             var repositorySettings = new Mock<IRepositorySettings>();
             repositorySettings.Setup(c => c.RepositoryPath).Returns(String.Empty);
 

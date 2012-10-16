@@ -29,7 +29,7 @@ namespace NuGet.VisualStudio.Test
             mockRepository2.AddPackage(PackageUtility.CreatePackage("A", "1.2"));
 
             mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source2 });
-            mockFileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
+            mockFileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(new MockFileSystem());
             mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s =>
             {
                 switch (s)
@@ -68,7 +68,7 @@ namespace NuGet.VisualStudio.Test
             mockRepository2.AddPackage(PackageUtility.CreatePackage("A", "1.2"));
 
             mockSourceProvider.Setup(m => m.LoadPackageSources()).Returns(new[] { source1, source2 });
-            mockFileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
+            mockFileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(new MockFileSystem());
             mockRepositoryFactory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns<string>(s =>
             {
                 switch (s)

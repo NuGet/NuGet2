@@ -44,13 +44,11 @@ namespace NuGet.VisualStudio
             _settings = settings;
         }
 
-        public IFileSystem GetFileSystem(string path)
+        public IFileSystem GetFileSystem(string path, bool ignoreSourceControlSetting)
         {
-            // Get the source control providers
-            var physicalFileSystem = new PhysicalFileSystem(path);
-            if (_settings.IsSourceControlDisabled())
+            if (!ignoreSourceControlSetting && _settings.IsSourceControlDisabled())
             {
-                return physicalFileSystem;
+                return new PhysicalFileSystem(path);
             }
 
             var providers = _componentModel.GetExtensions<ISourceControlFileSystemProvider>();
@@ -80,7 +78,7 @@ namespace NuGet.VisualStudio
                 }
             }
 
-            return fileSystem ?? physicalFileSystem;
+            return fileSystem ?? new PhysicalFileSystem(path);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We should never fail")]

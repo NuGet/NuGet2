@@ -71,7 +71,7 @@ namespace NuGet.VisualStudio.Test
             fileSystem.Setup(p => p.FileExists(It.IsAny<string>())).Returns(false);
 
             var fileSystemProvider = new Mock<IFileSystemProvider>();
-            fileSystemProvider.Setup(p => p.GetFileSystem(path)).Returns(fileSystem.Object);
+            fileSystemProvider.Setup(p => p.GetFileSystem(path, It.IsAny<bool>())).Returns(fileSystem.Object);
 
             var packageRestore = CreateInstance(solutionManager: solutionManager.Object, fileSystemProvider: fileSystemProvider.Object);
 
@@ -98,7 +98,7 @@ namespace NuGet.VisualStudio.Test
             fileSystem.Setup(p => p.FileExists(".nuget\\nuget.exe")).Returns(true);
 
             var fileSystemProvider = new Mock<IFileSystemProvider>();
-            fileSystemProvider.Setup(p => p.GetFileSystem(path)).Returns(fileSystem.Object);
+            fileSystemProvider.Setup(p => p.GetFileSystem(path, It.IsAny<bool>())).Returns(fileSystem.Object);
 
             var packageRestore = CreateInstance(solutionManager: solutionManager.Object, fileSystemProvider: fileSystemProvider.Object);
 
@@ -128,7 +128,7 @@ namespace NuGet.VisualStudio.Test
             fileSystem.Setup(p => p.FileExists(".nuget\\nuget.targets")).Returns(true);
 
             var fileSystemProvider = new Mock<IFileSystemProvider>();
-            fileSystemProvider.Setup(p => p.GetFileSystem(path)).Returns(fileSystem.Object);
+            fileSystemProvider.Setup(p => p.GetFileSystem(path, It.IsAny<bool>())).Returns(fileSystem.Object);
 
             var packageRestore = CreateInstance(solutionManager: solutionManager.Object, fileSystemProvider: fileSystemProvider.Object);
 
@@ -167,10 +167,10 @@ namespace NuGet.VisualStudio.Test
             // setup file system
             var fileSystem = new PhysicalFileSystem(tempSolutionPath);
             var fileSystemProvider = new Mock<IFileSystemProvider>();
-            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem);
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath, It.IsAny<bool>())).Returns(fileSystem);
 
             var nugetFolderFileSystem = new PhysicalFileSystem(tempSolutionPath + "\\.nuget");
-            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath + "\\.nuget")).Returns(nugetFolderFileSystem);
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath + "\\.nuget", It.IsAny<bool>())).Returns(nugetFolderFileSystem);
 
             // default app settings
             var defaultAppSettings = new Mock<ISettings>();
@@ -269,7 +269,7 @@ namespace NuGet.VisualStudio.Test
             fileSystem.Setup(p => p.FileExists(".nuget\\nuget.targets")).Returns(true);
 
             var fileSystemProvider = new Mock<IFileSystemProvider>();
-            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem.Object);
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath, It.IsAny<bool>())).Returns(fileSystem.Object);
 
             // setup VsPackageManager
             var projectFileSystem = new MockFileSystem();
@@ -337,7 +337,7 @@ namespace NuGet.VisualStudio.Test
             fileSystem.Setup(p => p.FileExists(".nuget\\nuget.targets")).Returns(true);
 
             var fileSystemProvider = new Mock<IFileSystemProvider>();
-            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem.Object);
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath, It.IsAny<bool>())).Returns(fileSystem.Object);
 
             // setup VsPackageManager
             var projectFileSystem = new MockFileSystem();
@@ -403,7 +403,7 @@ namespace NuGet.VisualStudio.Test
             fileSystem.Setup(p => p.FileExists(".nuget\\nuget.targets")).Returns(true);
 
             var fileSystemProvider = new Mock<IFileSystemProvider>();
-            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem.Object);
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath, It.IsAny<bool>())).Returns(fileSystem.Object);
 
             // setup VsPackageManager
             var projectFileSystem = new MockFileSystem();
@@ -473,7 +473,7 @@ namespace NuGet.VisualStudio.Test
             fileSystem.Setup(p => p.FileExists(".nuget\\nuget.targets")).Returns(true);
 
             var fileSystemProvider = new Mock<IFileSystemProvider>();
-            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem.Object);
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath, It.IsAny<bool>())).Returns(fileSystem.Object);
 
             // setup VsPackageManager
             string tempFile = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -555,10 +555,10 @@ namespace NuGet.VisualStudio.Test
             // setup file system
             var fileSystem = new PhysicalFileSystem(tempSolutionPath);
             var fileSystemProvider = new Mock<IFileSystemProvider>();
-            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem);
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath, It.IsAny<bool>())).Returns(fileSystem);
 
             var nugetFolderFileSystem = new PhysicalFileSystem(tempSolutionPath + "\\.nuget");
-            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath + "\\.nuget")).Returns(nugetFolderFileSystem);
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath + "\\.nuget", It.IsAny<bool>())).Returns(nugetFolderFileSystem);
 
             // setup DTE
             var dte = new Mock<DTE>();
@@ -631,10 +631,10 @@ namespace NuGet.VisualStudio.Test
             // setup file system
             var fileSystem = new PhysicalFileSystem(tempSolutionPath);
             var fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
-            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem);
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath, It.IsAny<bool>())).Returns(fileSystem);
 
             var nugetFolderFileSystem = new PhysicalFileSystem(tempSolutionPath + "\\.nuget");
-            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath + "\\.nuget")).Returns(nugetFolderFileSystem);
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath + "\\.nuget", It.IsAny<bool>())).Returns(nugetFolderFileSystem);
 
             // setup DTE
             var dte = new Mock<DTE>();
@@ -721,10 +721,10 @@ namespace NuGet.VisualStudio.Test
             // setup file system
             var fileSystem = new PhysicalFileSystem(tempSolutionPath);
             var fileSystemProvider = new Mock<IFileSystemProvider>();
-            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem);
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath, It.IsAny<bool>())).Returns(fileSystem);
 
             var nugetFolderFileSystem = new PhysicalFileSystem(tempSolutionPath + "\\.nuget");
-            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath + "\\.nuget")).Returns(nugetFolderFileSystem);
+            fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath + "\\.nuget", It.IsAny<bool>())).Returns(nugetFolderFileSystem);
 
             // default app settings
             var defaultAppSettings = new Mock<ISettings>();

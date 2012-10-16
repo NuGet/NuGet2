@@ -172,7 +172,7 @@ namespace NuGet.VisualStudio
 
         private sealed class PhysicalFileSystemProvider : IFileSystemProvider
         {
-            public IFileSystem GetFileSystem(string path)
+            public IFileSystem GetFileSystem(string path, bool ignoreSourceControlSetting)
             {
                 return new PhysicalFileSystem(path);
             }

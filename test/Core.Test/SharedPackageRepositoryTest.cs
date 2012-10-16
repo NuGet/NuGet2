@@ -582,6 +582,81 @@ namespace NuGet.Test
             Assert.Equal(exists, repository.Object.Exists("A", new SemanticVersion("1.0.0")));
         }
 
+        [Fact]
+        public void RegisterRepositoryUseTheStoreFileSystem()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\\");
+            var storeFileSystem = new MockFileSystem("y:\\");
+            var configFileSystem = new MockFileSystem("z:\\");
+            var resolver = new DefaultPackagePathResolver(fileSystem);
+
+            var repository = new SharedPackageRepository(resolver, fileSystem, storeFileSystem, configFileSystem);
+
+            // Act
+            repository.RegisterRepository("x:\\project1\\path");
+
+            // Assert
+            Assert.True(storeFileSystem.FileExists("repositories.config"));
+            string content = storeFileSystem.ReadAllText("repositories.config");
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<repositories>
+  <repository path=""project1\path"" />
+</repositories>", content);
+        }
+
+        [Fact]
+        public void UnregisterRepositoryUseTheStoreFileSystem()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\\");
+            var storeFileSystem = new MockFileSystem("y:\\");
+            storeFileSystem.AddFile("repositories.config",
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<repositories>
+  <repository path=""project1\path"" />
+  <repository path=""..\one\two"" />
+</repositories>");
+            var configFileSystem = new MockFileSystem("z:\\");
+            var resolver = new DefaultPackagePathResolver(fileSystem);
+
+            var repository = new SharedPackageRepository(resolver, fileSystem, storeFileSystem, configFileSystem);
+
+            // Act
+            repository.UnregisterRepository("x:\\project1\\path");
+
+            // Assert
+            Assert.True(storeFileSystem.FileExists("repositories.config"));
+            string content = storeFileSystem.ReadAllText("repositories.config");
+            Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<repositories>
+  <repository path=""..\one\two"" />
+</repositories>", content);
+        }
+
+        [Fact]
+        public void UnregisterRepositoryUseTheStoreFileSystemAndDeleteRepositoryConfig()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\\");
+            var storeFileSystem = new MockFileSystem("y:\\");
+            storeFileSystem.AddFile("repositories.config",
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<repositories>
+  <repository path=""project1\path"" />
+</repositories>");
+            var configFileSystem = new MockFileSystem("z:\\");
+            var resolver = new DefaultPackagePathResolver(fileSystem);
+
+            var repository = new SharedPackageRepository(resolver, fileSystem, storeFileSystem, configFileSystem);
+
+            // Act
+            repository.UnregisterRepository("x:\\project1\\path");
+
+            // Assert
+            Assert.False(storeFileSystem.FileExists("repositories.config"));
+        }
+
         public class MockSharedRepository : SharedPackageRepository
         {
             public MockSharedRepository(IPackagePathResolver resolver, IFileSystem fileSystem)
