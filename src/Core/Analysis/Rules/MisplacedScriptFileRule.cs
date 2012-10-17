@@ -26,10 +26,8 @@ namespace NuGet.Analysis.Rules
                 }
                 else
                 {
-                    string directory = Path.GetDirectoryName(path);
                     string name = Path.GetFileNameWithoutExtension(path);
-                    if (!directory.Equals(Constants.ToolsDirectory, StringComparison.OrdinalIgnoreCase) ||
-                        !name.Equals("install", StringComparison.OrdinalIgnoreCase) &&
+                    if (!name.Equals("install", StringComparison.OrdinalIgnoreCase) &&
                         !name.Equals("uninstall", StringComparison.OrdinalIgnoreCase) &&
                         !name.Equals("init", StringComparison.OrdinalIgnoreCase))
                     {

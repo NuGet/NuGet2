@@ -5,10 +5,8 @@ using Xunit;
 
 namespace NuGet.Test.Analysis
 {
-
     public class MisplacedScriptFileRuleTest
     {
-
         [Fact]
         public void NoScriptHasNoIssue()
         {
@@ -22,7 +20,6 @@ namespace NuGet.Test.Analysis
             // Assert
             Assert.False(issues.Any());
         }
-
 
         [Fact]
         public void ScriptsOutsideToolsFolder()
@@ -54,6 +51,7 @@ namespace NuGet.Test.Analysis
                 "Move it into the 'tools' folder.");
         }
 
+        [Fact]
         public void UnrecognizedScriptsInsideToolsFolder()
         {
             // Arrange
@@ -80,6 +78,23 @@ namespace NuGet.Test.Analysis
                 "Unrecognized PowerScript file.",
                 "The script file 'tools\\abc.ps1' is not recognized by NuGet and hence will not be executed during installation of this package.",
                 "Rename it to install.ps1, uninstall.ps1 or init.ps1 and place it directly under 'tools'.");
+        }
+
+        [Fact]
+        public void InstallScriptUnderFrameworkFolderDoesNotIssueWarning()
+        {
+            // Arrange
+            var package = PackageUtility.CreatePackage(
+                "A",
+                tools: new[] { "init.ps1", "portable-wp8+sl4\\install.ps1", "silverlight5\\uninstall.ps1" }
+            );
+            var rule = new MisplacedScriptFileRule();
+
+            // Act
+            IList<PackageIssue> issues = rule.Validate(package).ToList();
+
+            // Assert
+            Assert.Equal(0, issues.Count);
         }
     }
 }
