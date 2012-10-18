@@ -28,7 +28,7 @@
         <NuGetVisualStudioBuildDirectory>$(NuGetSrcRoot)\VisualStudio</NuGetVisualStudioBuildDirectory>
         <NuGetVisualStudioDropDirectory>$(NuGetDropDirectory)\VisualStudio</NuGetVisualStudioDropDirectory>
         <GenerateTestPackageProjectDirectory>$(NuGetRoot)\Tools\NuGet\GenerateTestPackages</GenerateTestPackageProjectDirectory>
-        <GenerateTestPackageExe>$(GenerateTestPackageProjectDirectory)\bin\Release\GenerateTestPackages.exe</GenerateTestPackageExe>
+        <GenerateTestPackageExe>$(GenerateTestPackageProjectDirectory)\bin\$(Configuration)\GenerateTestPackages.exe</GenerateTestPackageExe>
         <ZipExe>$(NuGetRoot)\Tools\7za920\7za.exe</ZipExe>
         <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
         <ILMergeArtifactDirectory>$(ArtifactDropDirectory)\ILMerge</ILMergeArtifactDirectory>
@@ -219,16 +219,8 @@
             <EndToEndTestItems Include="$(EndToEndTestsDirectory)\**\*.*" />
             <EndToEndTestItems Remove="$(EndToEndTestsDirectory)\bin\**\*.*" />
         </ItemGroup>
-
-        <Message Text="Compiling the GenerateTestPackages project..." Importance="high" />
-
-        <MSBuild 
-            Projects="$(GenerateTestPackageProjectDirectory)\GenerateTestPackages.sln" 
-            Properties="Configuration=Release;Platform=x86" />
         
         <Copy ContinueOnError="false" SourceFiles="@(EndToEndTestItems)" DestinationFiles="@(EndToEndTestItems ->'$(EndToEndTestsDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
-        <Copy ContinueOnError="false" SourceFiles="$(ExeDropDirectory)\NuGet.exe" DestinationFolder="$(EndToEndTestsDropDirectory)" />
-        <Copy ContinueOnError="false" SourceFiles="$(GenerateTestPackageExe)" DestinationFolder="$(EndToEndTestsDropDirectory)" />
 
         <Message Text="Zipping the EndToEnd directory..." Importance="high" />
         <Exec Command="&quot;$(ZipExe)&quot; a ..\EndToEnd.zip" WorkingDirectory="$(EndToEndTestsDropDirectory)" />

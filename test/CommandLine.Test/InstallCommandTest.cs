@@ -455,53 +455,47 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         }
 
         [Fact]
-        public void InstallCommandDoesNothingIfDifferentVersionOfPackageIsAlreadyInstalledAndNotUsingSideBySide()
+        public void InstallCommandUpdatesPackageIfAlreadyPresentAndNotUsingSideBySide()
         {
             // Arrange
             var fileSystem = new MockFileSystem();
-            var packages = new List<IPackage>();
-            var repository = new Mock<LocalPackageRepository>(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem) { CallBase = true };
-            repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
-            repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Add(c)).Verifiable();
-            repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Remove(c)).Verifiable();
+            var repository = new MockPackageRepository();
 
-            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository.Object);
+            var packageManager = new PackageManager(GetFactory().CreateRepository("Some source"), new DefaultPackagePathResolver(fileSystem), fileSystem, repository);
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager)
                                     {
-                                        Console = new MockConsole()
+                                        Console = new MockConsole(),
+                                        ExcludeVersion = true,
+                                        Version = "0.4",
                                     };
-
-            installCommand.ExcludeVersion = true;
-            installCommand.Version = "0.4";
             installCommand.Arguments.Add("Baz");
 
             // Act - 1
             installCommand.ExecuteCommand();
 
             // Assert - 1
-            Assert.Equal("Baz", packages.Single().Id);
-            Assert.Equal(new SemanticVersion("0.4"), packages.Single().Version);
+            Assert.True(repository.Exists("Baz", new SemanticVersion("0.4")));
 
             // Act - 2
-            fileSystem.AddFile(@"Baz\baz.nupkg");
-            installCommand.Version = "0.7";
-            installCommand.ExcludeVersion = true;
+            installCommand.Version = null;
             installCommand.Execute();
 
             // Assert - 2
-            Assert.Equal("Baz", packages.Single().Id);
-            Assert.Equal(new SemanticVersion("0.4"), packages.Single().Version);
+            Assert.False(repository.Exists("Baz", new SemanticVersion("0.4")));
+            Assert.True(repository.Exists("Baz", new SemanticVersion("0.7")));
         }
 
         [Fact]
-        public void InstallCommandDoesNotUpdatePackagesFromPackagesConfigIfDifferentVersionAlreadyPresentAndNotUsingSideBySide()
+        public void InstallCommandUpdatesPackageFromPackagesConfigIfDifferentVersionAlreadyPresentAndNotUsingSideBySide()
         {
             // Arrange
             var fileSystem = new MockFileSystem();
-            fileSystem.AddFile(@"baz\baz.nupkg");
-            var packages = new List<IPackage> { PackageUtility.CreatePackage("Baz", "0.4") };
+            fileSystem.AddFile(@"baz\baz.0.4.nupkg");
+            var baz40 = PackageUtility.CreatePackage("Baz", "0.4");
+            var packages = new List<IPackage> { baz40 };
             var repository = new Mock<LocalPackageRepository>(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem) { CallBase = true };
             repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
+            repository.Setup(c => c.Exists("Baz", new SemanticVersion("0.4"))).Returns(true);
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Add(c)).Verifiable();
             repository.Setup(c => c.RemovePackage(It.IsAny<IPackage>())).Callback<IPackage>(c => packages.Remove(c)).Verifiable();
 
@@ -518,16 +512,17 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             installCommand.ExecuteCommand();
 
             // Assert 
+            repository.Verify();
             Assert.Equal("Baz", packages.Single().Id);
-            Assert.Equal(new SemanticVersion("0.4"), packages.Single().Version);
+            Assert.Equal(new SemanticVersion("0.7"), packages.Single().Version);
         }
 
         [Fact]
-        public void InstallCommandNoOpsIfExcludedVersionsAndAVersionOfThePackageIsAlreadyInstalled()
+        public void InstallCommandNoOpsIfExcludingVersionAndALowerVersionOfThePackageIsAlreadyInstalled()
         {
             // Arrange
             var fileSystem = new MockFileSystem();
-            var packages = new List<IPackage> { PackageUtility.CreatePackage("A", "0.5") };
+            var packages = new[] { PackageUtility.CreatePackage("A", "0.5") };
             var repository = new Mock<LocalPackageRepository>(new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: false), fileSystem) { CallBase = true };
             repository.Setup(c => c.GetPackages()).Returns(packages.AsQueryable());
             repository.Setup(c => c.AddPackage(It.IsAny<IPackage>())).Throws(new Exception("Method should not be called"));
@@ -538,7 +533,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem, packageManager)
             {
                 Console = console,
-                ExcludeVersion = true
+                ExcludeVersion = true,
+                Version = "0.4"
             };
             installCommand.Arguments.Add("A");
 
@@ -547,7 +543,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 
             // Assert
             // Ensure packages were not removed.
-            Assert.Equal(1, packages.Count);
+            Assert.Equal(1, packages.Length);
             Assert.Equal("Package \"A\" is already installed." + Environment.NewLine, console.Output);
         }
 
