@@ -9,9 +9,9 @@ using System.Xml;
 
 namespace Nuget.Tools
 {
-    internal sealed class NugetSearchTask : VsSearchTask
+    public sealed class NugetSearchTask : VsSearchTask
     {
-        private DTE _dte;
+        private readonly DTE _dte;
         private readonly NugetSearchProvider _provider;
 
         public NugetSearchTask(DTE dte, NugetSearchProvider provider, uint dwCookie, IVsSearchQuery pSearchQuery, IVsSearchProviderCallback pSearchCallback)

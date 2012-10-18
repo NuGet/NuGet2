@@ -12,8 +12,8 @@ namespace Nuget.Tools
     /// <summary>
     ///  Search Provider for Nuget Packages
     /// </summary>
-    [Guid("042C2B4B-C7F7-49DB-B7A2-402EB8DC7891")]
-    internal class NugetSearchProvider : IVsSearchProvider
+    [Guid("042C2B4B-C7F7-49DB-B7A2-402EB8DC7892")]
+    public class NugetSearchProvider : IVsSearchProvider
     {
         private DTE _dte;
         private DTE DTE

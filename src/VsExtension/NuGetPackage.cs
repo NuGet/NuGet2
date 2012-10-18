@@ -1,6 +1,5 @@
 extern alias dialog;
 extern alias dialog10;
-
 using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
@@ -16,10 +15,10 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Options;
 using NuGet.VisualStudio;
+using NuGet.VisualStudio11;
 using NuGet.VisualStudio.Resources;
 using NuGetConsole;
 using NuGetConsole.Implementation;
-
 using ManagePackageDialog = dialog::NuGet.Dialog.PackageManagerWindow;
 using VS10ManagePackageDialog = dialog10::NuGet.Dialog.PackageManagerWindow;
 
@@ -37,6 +36,7 @@ namespace NuGet.Tools
         Orientation = ToolWindowOrientation.Right)]
     [ProvideOptionPage(typeof(PackageSourceOptionsPage), "Package Manager", "Package Sources", 113, 114, true)]
     [ProvideOptionPage(typeof(GeneralOptionPage), "Package Manager", "General", 113, 115, true)]
+    [ProvideSearchProvider(typeof(NuGetSearchProvider), "NuGet Search")]
     [ProvideBindingPath] // Definition dll needs to be on VS binding path
     [ProvideAutoLoad(GuidList.guidAutoLoadNuGetString)]
     [FontAndColorsRegistration(
@@ -44,7 +44,7 @@ namespace NuGet.Tools
         NuGetConsole.Implementation.GuidList.GuidPackageManagerConsoleFontAndColorCategoryString,
         "{" + GuidList.guidNuGetPkgString + "}")]
     [Guid(GuidList.guidNuGetPkgString)]
-    public sealed class NuGetPackage : Package
+    public sealed class NuGetPackage : Package, IVsPackageExtensionProvider
     {
         // This product version will be updated by the build script to match the daily build version.
         // It is displayed in the Help - About box of Visual Studio
@@ -405,6 +405,16 @@ namespace NuGet.Tools
                 }
                 return _isVisualizerSupported.Value;
             }
+        }
+
+        public dynamic CreateExtensionInstance(ref Guid extensionPoint, ref Guid instance)
+        {
+            if (instance == typeof(NuGetSearchProvider).GUID)
+            {
+                return new NuGetSearchProvider(_dte);
+            }
+
+            return null;
         }
     }
 }

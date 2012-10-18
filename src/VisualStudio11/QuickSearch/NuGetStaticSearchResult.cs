@@ -1,35 +1,29 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Windows.Media.Imaging;
-using Microsoft.Internal.VisualStudio.PlatformUI;
-using EnvDTE;
-using EnvDTE80;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using System.Globalization;
+using EnvDTE;
+using Microsoft.VisualStudio.Shell.Interop;
 
-namespace Nuget.Tools
+namespace NuGet.VisualStudio11
 {
-    public class NugetStaticSearchResult : IVsSearchItemResult
+    public class NuGetStaticSearchResult : IVsSearchItemResult
     {
         private const string TabProvider = ";Online";
         private readonly string _searchText;
+        private readonly DTE _dte;
 
-        private DTE _dte;
-        public NugetStaticSearchResult(DTE dte, string searchText, NugetSearchProvider provider)
+        public NuGetStaticSearchResult(DTE dte, string searchText, NuGetSearchProvider provider)
         {
+            _dte = dte;
             _searchText = searchText;
+
             DisplayText = String.Format(CultureInfo.CurrentCulture, Resources.NuGetStaticResult_DisplayText, searchText);
             PersistenceData = searchText;
             SearchProvider = provider;
-            Icon = provider.Icon;
-            _dte = dte;
         }
 
         public string Description
         {
-            get;
-            private set;
+            get { return null; }
         }
 
         public string DisplayText
@@ -40,13 +34,16 @@ namespace Nuget.Tools
 
         public IVsUIObject Icon
         {
-            get;
-            private set;
+            get 
+            { 
+                // TODO: Supply nuget icon here
+                return null; 
+            }
         }
 
         public void InvokeAction()
         {
-            _dte.ExecuteCommand("Project.ManageNuGetPackages", String.Format("{0}{1}", _searchText, TabProvider));
+            _dte.ExecuteCommand("Project.ManageNuGetPackages", _searchText + TabProvider);
         }
 
         public string PersistenceData
@@ -63,8 +60,7 @@ namespace Nuget.Tools
 
         public string Tooltip
         {
-            get;
-            private set;
+            get { return null; } 
         }
     }
 }
