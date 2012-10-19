@@ -481,9 +481,11 @@ Global
 		{5376E601-D111-4198-8BC2-F1118433CC83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5376E601-D111-4198-8BC2-F1118433CC83}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5376E601-D111-4198-8BC2-F1118433CC83}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{5376E601-D111-4198-8BC2-F1118433CC83}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{5376E601-D111-4198-8BC2-F1118433CC83}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5376E601-D111-4198-8BC2-F1118433CC83}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5376E601-D111-4198-8BC2-F1118433CC83}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{5376E601-D111-4198-8BC2-F1118433CC83}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{F1A63FD0-E1DE-43C6-940A-754D3B6C0A77}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
 		{F1A63FD0-E1DE-43C6-940A-754D3B6C0A77}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
 		{F1A63FD0-E1DE-43C6-940A-754D3B6C0A77}.Coverage|Mixed Platforms.ActiveCfg = Coverage|Any CPU
