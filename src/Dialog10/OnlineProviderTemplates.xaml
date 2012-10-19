@@ -194,9 +194,9 @@
                 </StackPanel>
 
                 <!-- Last Updated -->
-                <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding PackageIdentity.LastUpdated, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
+                <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding PackageIdentity.Published, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_LastUpdatedLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl Text="{Binding PackageIdentity.LastUpdated, StringFormat='{}{0:d}'}" Style="{StaticResource DetailMetadataValueStyle}"  />
+                    <self:TextBlockControl Text="{Binding PackageIdentity.Published, StringFormat='{}{0:d}'}" Style="{StaticResource DetailMetadataValueStyle}"  />
                 </StackPanel>
 
                 <!-- Download count -->
