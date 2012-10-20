@@ -38,6 +38,15 @@ if (!(Test-Path $nugetExePath))
 
 $msbuildPath = Join-Path $env:windir Microsoft.NET\Framework\v4.0.30319\msbuild
 
+if ($dte.Version.SubString(0, 2) -eq "10")
+{
+    $targetFrameworkVersion = "v4.0"
+}
+else
+{
+    $targetFrameworkVersion = "v4.5"
+}
+
 # TODO: Add the ability to rerun failed tests from the previous run
 
 # Add intellisense for the test parameter
@@ -69,7 +78,7 @@ function global:Run-Test {
     )
     
     if (!(Test-Path $generatePackagesExePath)) {
-        & $msbuildPath $generatePackagesProject /v:quiet
+        & $msbuildPath $generatePackagesProject /v:quiet /p:TargetFrameworkVersion=$targetFrameworkVersion
     }
     
     # Close the solution after every test run
