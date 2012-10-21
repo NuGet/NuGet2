@@ -72,6 +72,7 @@
     <Compile Include="ProjectFactoryTest.cs" />
     <Compile Include="PushCommandTest.cs" />
     <Compile Include="ResourceHelperTests.cs" />
+    <Compile Include="SelfUpdaterTests.cs" />
     <Compile Include="SetApiKeyCommandTest.cs" />
     <Compile Include="SourcesCommandTest.cs" />
     <Compile Include="TypeHelperTest.cs" />

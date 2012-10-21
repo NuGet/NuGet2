@@ -61,6 +61,8 @@
     <Compile Include="Commands\PackCommand.cs" />
     <Compile Include="Commands\PushCommand.cs" />
     <Compile Include="Commands\UpdateCommand.cs" />
+    <Compile Include="Common\SelfUpdater.cs" />
+    <Compile Include="Common\PackageExtractor.cs" />
     <Compile Include="Common\Verbosity.cs" />
     <Compile Include="Common\AggregateRepositoryHelper.cs" />
     <Compile Include="..\..\Common\NuGetConstants.cs">
