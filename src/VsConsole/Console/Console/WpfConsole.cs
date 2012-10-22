@@ -705,7 +705,7 @@ namespace NuGetConsole.Implementation.Console
 
         #region Nested type: PrivateMarshaler
 
-        private class PrivateMarshaler : Marshaler<WpfConsole>, IWpfConsole, IPrivateWpfConsole
+        private class PrivateMarshaler : Marshaler<WpfConsole>, IPrivateWpfConsole
         {
             public PrivateMarshaler(WpfConsole impl)
                 : base(impl)

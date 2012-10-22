@@ -36,7 +36,7 @@ namespace NuGet.Dialog
         private readonly Project _activeProject;
         
         private static readonly string[] Providers = new string[] { "Installed", "Online", "Updates" };
-        private string _searchText = null;
+        private string _searchText;
 
         public PackageManagerWindow(Project project, string dialogParameters = null) :
             this(project,

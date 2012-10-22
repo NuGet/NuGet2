@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuGet.VisualStudio
@@ -11,7 +10,6 @@ namespace NuGet.VisualStudio
     /// </summary>
     public partial class RestartRequestBar : UserControl
     {
-        private readonly RoutedCommand RestartVisualStudio = new RoutedCommand();
         private readonly IDeleteOnRestartManager _deleteOnRestartManager;
         private readonly IVsShell4 _vsRestarter;
 

@@ -71,7 +71,7 @@ namespace NuGet.VisualStudio
                     foreach (var assemblyReference in compatibleAssemblyReferences)
                     {
                         // Get the absolute path to the assembly being added. 
-                        string assemblyPath = Path.Combine(packageDirectory, assemblyReference.Path); ;
+                        string assemblyPath = Path.Combine(packageDirectory, assemblyReference.Path);
 
                         // create one refresh file for each assembly reference, as per required by Website projects
                         projectSystem.CreateRefreshFile(assemblyPath);

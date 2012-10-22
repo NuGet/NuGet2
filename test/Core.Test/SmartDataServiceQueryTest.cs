@@ -7,7 +7,6 @@ using Xunit;
 
 namespace NuGet.Test
 {
-
     public class SmartDataServiceQueryTest
     {
         [Fact]

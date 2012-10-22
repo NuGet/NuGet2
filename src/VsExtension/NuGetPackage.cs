@@ -253,15 +253,9 @@ namespace NuGet.Tools
                     // show error message when no supported project is selected.
                     string projectName = project != null ? project.Name : String.Empty;
 
-                    string errorMessage;
-                    if (String.IsNullOrEmpty(projectName))
-                    {
-                        errorMessage = Resources.NoProjectSelected;
-                    }
-                    else
-                    {
-                        errorMessage = String.Format(CultureInfo.CurrentCulture, VsResources.DTE_ProjectUnsupported, projectName);
-                    }
+                    string errorMessage = String.IsNullOrEmpty(projectName) 
+                        ? Resources.NoProjectSelected 
+                        : String.Format(CultureInfo.CurrentCulture, VsResources.DTE_ProjectUnsupported, projectName);
 
                     MessageHelper.ShowWarningMessage(errorMessage, Resources.ErrorDialogBoxTitle);
                 }

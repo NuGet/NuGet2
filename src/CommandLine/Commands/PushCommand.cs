@@ -76,14 +76,9 @@ namespace NuGet.Commands
             }
             else
             {
-                if (packagePath.EndsWith(PackCommand.SymbolsExtension, StringComparison.OrdinalIgnoreCase))
-                {
-                    source = NuGetConstants.DefaultSymbolServerUrl;
-                }
-                else
-                {
-                    source = NuGetConstants.DefaultGalleryServerUrl;
-                }
+                source = packagePath.EndsWith(PackCommand.SymbolsExtension, StringComparison.OrdinalIgnoreCase) 
+                    ? NuGetConstants.DefaultSymbolServerUrl 
+                    : NuGetConstants.DefaultGalleryServerUrl;
             }
             return source;
         }

@@ -297,11 +297,6 @@ namespace NuGet.Dialog
             public IVsHierarchy Hierarchy { get; private set; }
             public uint ItemID { get; private set; }
 
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
-
             public static bool MaybeMapToNested(HierarchyItemPair outerInfo, out HierarchyItemPair nestedInfo)
             {
                 Guid IID_IVsHierarchy = typeof(IVsHierarchy).GUID;

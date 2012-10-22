@@ -21,7 +21,7 @@ namespace NuGet.VisualStudio
         private readonly SolutionEvents _solutionEvents;
         private readonly IVsMonitorSelection _vsMonitorSelection;
         private readonly uint _solutionLoadedUICookie;
-        private IVsSolution _vsSolution;
+        private readonly IVsSolution _vsSolution;
 
         private ProjectCache _projectCache;
 

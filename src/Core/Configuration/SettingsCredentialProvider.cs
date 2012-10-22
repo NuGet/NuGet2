@@ -7,9 +7,6 @@ namespace NuGet
 {
     public class SettingsCredentialProvider : ICredentialProvider
     {
-        private const string CredentialsSection = "PackageSourceCredentials";
-        private const string UserToken = "Username-";
-        private const string PasswordToken = "Password-"; 
         private readonly ICredentialProvider _credentialProvider;
         private readonly IPackageSourceProvider _packageSourceProvider;
         private readonly ILogger _logger;

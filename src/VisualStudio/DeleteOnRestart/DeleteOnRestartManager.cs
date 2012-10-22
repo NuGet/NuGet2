@@ -14,11 +14,11 @@ namespace NuGet.VisualStudio
     {
         // The file extension to add to the empty files which will be placed adjacent to partially uninstalled package
         // directories marking them for removal the next time the solution is opened.
-        private const string _deletionMarkerSuffix = ".deleteme";
-        private const string _deletionMarkerFilter = "*" + _deletionMarkerSuffix;
+        private const string DeletionMarkerSuffix = ".deleteme";
+        private const string DeletionMarkerFilter = "*" + DeletionMarkerSuffix;
 
-        private Func<IFileSystem> _repositoryFileSystemFactory;
-        private Func<IPackagePathResolver> _packagePathResolverFactory;
+        private readonly Func<IFileSystem> _repositoryFileSystemFactory;
+        private readonly Func<IPackagePathResolver> _packagePathResolverFactory;
 
         [ImportingConstructor]
         public DeleteOnRestartManager(IFileSystemProvider fileSystemProvider, IRepositorySettings repositorySettings)
@@ -43,7 +43,7 @@ namespace NuGet.VisualStudio
         /// </summary>
         public bool PackageDirectoriesAreMarkedForDeletion
         {
-            get { return _repositoryFileSystemFactory().GetFiles(path: "", filter: _deletionMarkerFilter, recursive: false).Any(); }
+            get { return _repositoryFileSystemFactory().GetFiles(path: "", filter: DeletionMarkerFilter, recursive: false).Any(); }
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace NuGet.VisualStudio
 
                     // NOTE: The repository should always be a PhysicalFileSystem, except during testing, so the
                     // .deleteme marker file doesn't get checked into version control
-                    repositoryFileSystem.AddFile(packageDirectoryName + _deletionMarkerSuffix, Stream.Null);
+                    repositoryFileSystem.AddFile(packageDirectoryName + DeletionMarkerSuffix, Stream.Null);
                 }
             }
             catch (Exception e)
@@ -115,7 +115,7 @@ namespace NuGet.VisualStudio
             IFileSystem repositoryFileSystem = _repositoryFileSystemFactory();
             try
             {
-                foreach (string deletemePath in repositoryFileSystem.GetFiles(path: "", filter: _deletionMarkerFilter, recursive: false))
+                foreach (string deletemePath in repositoryFileSystem.GetFiles(path: "", filter: DeletionMarkerFilter, recursive: false))
                 {
                     string deletedPackageDirectoryPath = Path.GetFileNameWithoutExtension(deletemePath);
                     try

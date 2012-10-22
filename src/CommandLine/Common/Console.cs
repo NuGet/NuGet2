@@ -202,11 +202,11 @@ namespace NuGet.Common
                 return true;
             }
 
-            var currentColor = System.ConsoleColor.Gray;
+            var currentColor = ConsoleColor.Gray;
             try
             {
                 currentColor = System.Console.ForegroundColor;
-                System.Console.ForegroundColor = System.ConsoleColor.Yellow;
+                System.Console.ForegroundColor = ConsoleColor.Yellow;
                 System.Console.Write(String.Format(CultureInfo.CurrentCulture, LocalizedResourceManager.GetString("ConsoleConfirmMessage"), description));
                 var result = System.Console.ReadLine();
                 return result.StartsWith(LocalizedResourceManager.GetString("ConsoleConfirmMessageAccept"), StringComparison.OrdinalIgnoreCase);

@@ -137,7 +137,7 @@ namespace NuGet
         /// <remarks>
         /// We use this method instead of the "safe" methods in FileSystem because it attempts to retry multiple times with delays.
         /// In our case, if we are unable to perform IO over the machine cache, we want to quit trying immediately.
-        /// </summary>
+        /// </remarks>
         private static void TryAct(Action action)
         {
             try

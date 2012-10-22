@@ -39,7 +39,7 @@ namespace NuGet.VisualStudio
             {
                 return (bool)o;
             }
-            return (o is int) ? (int)o != 0 : false;
+            return (o is int) && (int)o != 0;
         }
 
         public IVsUIHierarchy UIHierarchy()
@@ -128,15 +128,7 @@ namespace NuGet.VisualStudio
 
         internal uint GetNextSiblingId(bool fVisible)
         {
-            object o;
-            if (fVisible)
-            {
-                o = GetProperty(__VSHPROPID.VSHPROPID_NextVisibleSibling);
-            }
-            else
-            {
-                o = GetProperty(__VSHPROPID.VSHPROPID_NextSibling);
-            }
+            object o = GetProperty(fVisible ? __VSHPROPID.VSHPROPID_NextVisibleSibling : __VSHPROPID.VSHPROPID_NextSibling);
 
             if (o is int)
             {
@@ -164,15 +156,7 @@ namespace NuGet.VisualStudio
 
         internal uint GetFirstChildId(bool fVisible)
         {
-            object o;
-            if (fVisible)
-            {
-                o = GetProperty(__VSHPROPID.VSHPROPID_FirstVisibleChild);
-            }
-            else
-            {
-                o = GetProperty(__VSHPROPID.VSHPROPID_FirstChild);
-            }
+            object o = GetProperty(fVisible ? __VSHPROPID.VSHPROPID_FirstVisibleChild : __VSHPROPID.VSHPROPID_FirstChild);
 
             if (o is int)
             {

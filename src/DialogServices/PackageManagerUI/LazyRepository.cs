@@ -5,7 +5,7 @@ using System.Runtime.Versioning;
 
 namespace NuGet.Dialog.Providers
 {
-    public class LazyRepository : IPackageRepository, IServiceBasedRepository, IOperationAwareRepository
+    public class LazyRepository : IServiceBasedRepository, IOperationAwareRepository
     {
         private readonly Lazy<IPackageRepository> _repository;
 

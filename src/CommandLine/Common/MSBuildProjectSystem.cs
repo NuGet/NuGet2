@@ -8,7 +8,7 @@ using Microsoft.Build.Evaluation;
 
 namespace NuGet.Common
 {
-    public class MSBuildProjectSystem : PhysicalFileSystem, IProjectSystem, IMSBuildProjectSystem
+    public class MSBuildProjectSystem : PhysicalFileSystem, IMSBuildProjectSystem
     {
         public MSBuildProjectSystem(string projectFile)
             : base(Path.GetDirectoryName(projectFile))
@@ -79,11 +79,6 @@ namespace NuGet.Common
             {
                 Project.RemoveItem(assemblyReference);
             }
-        }
-
-        private ProjectItem GetItem(string itemType, string name)
-        {
-            return GetItems(itemType, name).FirstOrDefault();
         }
 
         private IEnumerable<ProjectItem> GetItems(string itemType, string name)

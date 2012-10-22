@@ -8,7 +8,7 @@ using NuGet.VisualStudio.Resources;
 namespace NuGet.VisualStudio
 {
     [Export(typeof(IPackageRepository))]
-    public class VsPackageSourceRepository : IPackageRepository, IServiceBasedRepository, ICloneableRepository, IPackageLookup, IOperationAwareRepository
+    public class VsPackageSourceRepository : IServiceBasedRepository, ICloneableRepository, IPackageLookup, IOperationAwareRepository
     {
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepositoryFactory _repositoryFactory;

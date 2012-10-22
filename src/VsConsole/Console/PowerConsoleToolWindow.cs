@@ -51,17 +51,6 @@ namespace NuGetConsole.Implementation
             }
         }
 
-        /// <summary>
-        /// Get IWpfConsoleService through MEF.
-        /// </summary>
-        private IWpfConsoleService WpfConsoleService
-        {
-            get
-            {
-                return ComponentModel.GetService<IWpfConsoleService>();
-            }
-        }
-
         private PowerConsoleWindow PowerConsoleWindow
         {
             get

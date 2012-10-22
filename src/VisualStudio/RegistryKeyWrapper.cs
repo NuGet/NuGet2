@@ -6,7 +6,7 @@ namespace NuGet.VisualStudio
 {
     internal class RegistryKeyWrapper : IRegistryKey
     {
-        private RegistryKey _registryKey;
+        private readonly RegistryKey _registryKey;
 
         public RegistryKeyWrapper(RegistryKey registryKey)
         {

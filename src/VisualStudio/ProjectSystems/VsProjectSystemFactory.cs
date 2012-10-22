@@ -17,7 +17,6 @@ namespace NuGet.VisualStudio
             { VsConstants.JsProjectTypeGuid , (project, fileSystemProvider) => new JsProjectSystem(project, fileSystemProvider) },
         };
 
-
         public static IProjectSystem CreateProjectSystem(Project project, IFileSystemProvider fileSystemProvider)
         {
             if (project == null)

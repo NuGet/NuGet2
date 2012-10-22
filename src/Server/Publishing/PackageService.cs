@@ -23,7 +23,6 @@ namespace NuGet.Server
 
         public void CreatePackage(HttpContextBase context)
         {
-            RouteData routeData = GetRouteData(context);
             var request = context.Request;
 
             // Get the api key from the header

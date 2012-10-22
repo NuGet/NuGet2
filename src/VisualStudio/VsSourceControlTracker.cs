@@ -144,11 +144,6 @@ namespace NuGet.VisualStudio
             }
         }
 
-        private static string MakeRelativePath(string fullPath, string root)
-        {
-            return fullPath.Substring(root.Length).TrimStart(Path.DirectorySeparatorChar);
-        }
-
         private class TrackProjectDocumentEventListener : IVsTrackProjectDocumentsEvents2
         {
             private readonly VsSourceControlTracker _parent;

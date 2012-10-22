@@ -120,7 +120,7 @@ namespace NuGet.VisualStudio
 
                 _activePackageSource = value;
 
-                PersistActivePackageSource(_settings, _vsShellInfo, _activePackageSource);
+                PersistActivePackageSource(_settings, _activePackageSource);
             }
         }
 
@@ -182,7 +182,7 @@ namespace NuGet.VisualStudio
 
                 // Unlike NuGet Core, Visual Studio has the concept of an official package source. 
                 // We find the official source, if present, and set its IsOfficial it.
-                var officialPackageSource = _packageSources.FirstOrDefault(packageSource => IsOfficialPackageSource(packageSource));
+                var officialPackageSource = _packageSources.FirstOrDefault(IsOfficialPackageSource);
                 if (officialPackageSource == null)
                 {
                     // if there is no official source, add one, but make it disabled
@@ -232,14 +232,11 @@ namespace NuGet.VisualStudio
 
             if (activeSourceChanged)
             {
-                PersistActivePackageSource(_settings, _vsShellInfo, _activePackageSource);
+                PersistActivePackageSource(_settings, _activePackageSource);
             }
         }
 
-        private static void PersistActivePackageSource(
-            ISettings settings,
-            IVsShellInfo vsShellInfo,
-            PackageSource activePackageSource)
+        private static void PersistActivePackageSource(ISettings settings, PackageSource activePackageSource)
         {
             settings.DeleteSection(ActivePackageSourceSectionName);
 

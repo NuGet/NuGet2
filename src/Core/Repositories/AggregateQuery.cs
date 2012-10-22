@@ -30,6 +30,9 @@ namespace NuGet
             _subQueries = GetSubQueries(_expression);
         }
 
+        /// <summary>
+        /// This constructor is used by unit tests.
+        /// </summary>
         private AggregateQuery(IEnumerable<IQueryable<TVal>> queryables,
                                IEqualityComparer<TVal> equalityComparer,
                                IList<IEnumerable<TVal>> subQueries,
@@ -131,7 +134,7 @@ namespace NuGet
         {
             // Used to pick the right element from each sub query in the right order
             var comparer = new OrderingComparer<TVal>(Expression);
-            
+
             if (!comparer.CanCompare)
             {
                 // If the original queries do not have sort expressions, we'll use the order of the subqueries to read results out.
@@ -266,13 +269,6 @@ namespace NuGet
             return queryable.Provider
                             .Execute<TResult>(Rewrite(queryable, expression));
         }
-
-        private static object Execute(IQueryable queryable, Expression expression)
-        {
-            return queryable.Provider
-                            .Execute(Rewrite(queryable, expression));
-        }
-
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "By definition we want to suppress all exceptions if the flag is set")]
         private TResult TryExecute<TResult>(IQueryable queryable, Expression expression)

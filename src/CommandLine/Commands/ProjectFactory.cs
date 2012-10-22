@@ -678,7 +678,7 @@ namespace NuGet.Commands
                     using (var dependencyFileStream = targetFile.GetStream())
                     using (var fileContentsStream = File.Open(fullPath, FileMode.Open))
                     {
-                        var isEqual = StreamExtensions.ContentEquals(dependencyFileStream, fileContentsStream);
+                        var isEqual = dependencyFileStream.ContentEquals(fileContentsStream);
                         if (isEqual)
                         {
                             Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsNotChanged, targetFilePath);

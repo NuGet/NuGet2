@@ -413,16 +413,7 @@ namespace NuGet.Commands
 
         private string GetInputFile()
         {
-            IEnumerable<string> files;
-
-            if (Arguments.Any())
-            {
-                files = Arguments;
-            }
-            else
-            {
-                files = Directory.GetFiles(Directory.GetCurrentDirectory());
-            }
+            IEnumerable<string> files = Arguments.Any() ? Arguments : Directory.GetFiles(Directory.GetCurrentDirectory());
 
             return GetInputFile(files);
         }

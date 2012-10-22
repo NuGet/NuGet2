@@ -89,13 +89,6 @@ namespace NuGet.Server.Infrastructure
             return this.GetUpdatesCore(packages, includePrerelease, includeAllVersions, targetFramework);
         }
 
-        private bool IsCompatible(FrameworkName frameworkName, IPackage package)
-        {
-            var packageData = _derivedDataLookup[package];
-
-            return VersionUtility.IsCompatible(frameworkName, packageData.SupportedFrameworks);
-        }
-
         private DerivedPackageData CalculateDerivedData(IPackage package, string path)
         {
             byte[] hashBytes;

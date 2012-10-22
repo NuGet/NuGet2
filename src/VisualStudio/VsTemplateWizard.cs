@@ -24,8 +24,8 @@ namespace NuGet.VisualStudio
         private readonly IVsWebsiteHandler _websiteHandler;
         private VsTemplateWizardInstallerConfiguration _configuration;
         private DTE _dte;
-        private IVsPackageInstallerServices _packageServices;
-        private IOutputConsoleProvider _consoleProvider;
+        private readonly IVsPackageInstallerServices _packageServices;
+        private readonly IOutputConsoleProvider _consoleProvider;
         private readonly IVsCommonOperations _vsCommonOperations;
         private readonly ISolutionManager _solutionManager;
 

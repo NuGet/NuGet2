@@ -5,7 +5,6 @@ using Xunit;
 
 namespace NuGet.Test
 {
-
     public class AggregateQueryTest
     {
         [Fact]

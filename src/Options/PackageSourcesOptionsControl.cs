@@ -507,12 +507,6 @@ namespace NuGet.Options
             }
         }
 
-        private static Rectangle NewBounds(Rectangle sourceBounds, int xOffset, int yOffset)
-        {
-            return new Rectangle(sourceBounds.Left + xOffset, sourceBounds.Top + yOffset,
-                sourceBounds.Width - xOffset, sourceBounds.Height - yOffset);
-        }
-
         private void OnBrowseButtonClicked(object sender, EventArgs e)
         {
             const int MaxDirectoryLength = 1000;

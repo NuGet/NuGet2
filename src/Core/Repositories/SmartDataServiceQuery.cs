@@ -52,6 +52,9 @@ namespace NuGet
             Expression = Expression.Constant(this);
         }
 
+        /// <summary>
+        /// This seemingly-unused constructor is required for the unit test to pass.
+        /// </summary>
         private SmartDataServiceQuery(IDataServiceContext context, IDataServiceQuery query, Expression expression)
         {
             _context = context;

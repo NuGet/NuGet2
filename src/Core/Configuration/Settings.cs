@@ -426,7 +426,7 @@ namespace NuGet
         /// ex:
         /// c:\foo\nuget.config
         /// c:\nuget.config
-        /// </remarksy>
+        /// </remarks>
         private static IEnumerable<string> GetSettingsFileNames(IFileSystem fileSystem)
         {
             // for dirs obtained by walking up the tree, only consider setting files that already exist.

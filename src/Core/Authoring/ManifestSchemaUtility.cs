@@ -9,7 +9,6 @@ namespace NuGet
 {
     internal static class ManifestSchemaUtility
     {
-        private const string SchemaNamespaceToken = "!!Schema version!!";
         /// <summary>
         /// Baseline schema 
         /// </summary>
