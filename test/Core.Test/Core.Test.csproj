@@ -51,7 +51,7 @@
     </Compile>
     <Compile Include="AggregateQueryTest.cs" />
     <Compile Include="AggregateRepositoryTest.cs" />
-    <Compile Include="Analysis\InitScriptNotUnderToolsTest.cs" />
+    <Compile Include="Analysis\InitScriptNotUnderToolsRuleTest.cs" />
     <Compile Include="Analysis\InvalidFrameworkFolderRuleTest.cs" />
     <Compile Include="Analysis\MisplacedAssemblyRuleTest.cs" />
     <Compile Include="Analysis\MisplacedScriptFileRuleTest.cs" />

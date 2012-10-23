@@ -6,7 +6,7 @@ using System.IO;
 
 namespace NuGet.Analysis.Rules
 {
-    internal class InitScriptNotUnderTools : IPackageRule
+    internal class InitScriptNotUnderToolsRule : IPackageRule
     {
         public IEnumerable<PackageIssue> Validate(IPackage package)
         {
