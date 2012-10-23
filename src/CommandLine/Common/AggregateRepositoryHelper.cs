@@ -10,7 +10,7 @@ namespace NuGet.Common
             AggregateRepository repository;
             if (sources != null && sources.Any())
             {
-                var repositories = sources.Select(sourceProvider.ResolveSource)
+                var repositories = sources.Select(s => sourceProvider.ResolveSource(s))
                                              .Select(factory.CreateRepository)
                                              .ToList();
                 repository = new AggregateRepository(repositories);
