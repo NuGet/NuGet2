@@ -43,7 +43,7 @@ namespace NuGet.Test.Analysis
         {
             Assert.Equal("Init.ps1 script will be ignored.", packageIssue.Title);
             Assert.Equal("Place the file directly under 'tools' folder.", packageIssue.Solution);
-            Assert.Equal("The file '" + file + "' will be ignored by Microsoft because it is not directly under 'tools' folder.", packageIssue.Description);
+            Assert.Equal("The file '" + file + "' will be ignored by NuGet because it is not directly under 'tools' folder.", packageIssue.Description);
         }
 
     }

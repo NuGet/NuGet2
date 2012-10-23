@@ -145,7 +145,7 @@
     <value>Invalid framework folder.</value>
   </data>
   <data name="MisplacedInitScriptDescription" xml:space="preserve">
-    <value>The file '{0}' will be ignored by Microsoft because it is not directly under 'tools' folder.</value>
+    <value>The file '{0}' will be ignored by NuGet because it is not directly under 'tools' folder.</value>
   </data>
   <data name="MisplacedInitScriptSolution" xml:space="preserve">
     <value>Place the file directly under 'tools' folder.</value>
