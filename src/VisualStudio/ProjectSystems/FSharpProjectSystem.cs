@@ -34,5 +34,11 @@ namespace NuGet.VisualStudio
             // The F# project system expects assemblies that start with * to be framework assemblies.
             base.AddGacReference("*" + name);
         }
+
+        protected override bool FileExistsInProject(string path)
+        {
+            ProjectItem projectItem = Project.GetProjectItem(path);
+            return (projectItem != null);
+        }
     }
 }

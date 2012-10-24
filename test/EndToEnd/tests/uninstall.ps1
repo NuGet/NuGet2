@@ -121,6 +121,15 @@ function Test-SimpleFSharpUninstall {
     Assert-Null (Get-SolutionPackage Ninject)
 }
 
+function Test-FSharpDependentPackageUninstall {
+    # Arrange
+	$p = New-FSharpLibrary
+	$p | Install-Package -Source $context.RepositoryRoot PackageWithDependencyOnPrereleaseTestPackage
+
+	# Act & Assert
+	Assert-Throws { $p | Uninstall-Package PreReleaseTestPackage } "Unable to uninstall 'PreReleaseTestPackage 1.0.0' because 'PackageWithDependencyOnPrereleaseTestPackage 1.0' depends on it."
+}
+
 function Test-UninstallPackageThatIsNotInstalledThrows {
     # Arrange
     $p = New-ClassLibrary

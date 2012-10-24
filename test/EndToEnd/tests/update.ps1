@@ -483,6 +483,24 @@ function Test-UpdateAllPackagesInSolution {
     Assert-Package $p2 E 3.0
 }
 
+function Test-UpdatePackageOnAnF#ProjectWithMultiplePackages {
+    param(
+        $context
+    )
+
+    # Arrange
+    $p = New-FSharpLibrary
+
+    # Act
+    $p | Install-Package SkypePackage -version 1.0 -source $context.RepositoryRoot
+    $p | Install-Package netfx-Guard -Source $context.RepositoryRoot
+
+    $p | Update-Package -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-Package $p SkypePackage 3.0
+}
+
 function Test-UpdateScenariosWithConstraints {
     param(
         $context

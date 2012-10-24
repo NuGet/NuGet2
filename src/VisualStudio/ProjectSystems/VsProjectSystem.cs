@@ -256,7 +256,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        private bool FileExistsInProject(string path)
+        protected virtual bool FileExistsInProject(string path)
         {
             return Project.ContainsFile(path);
         }
