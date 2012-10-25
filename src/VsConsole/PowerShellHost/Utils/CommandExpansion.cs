@@ -89,14 +89,14 @@ namespace NuGetConsole.Host
         /// <param name="leftWord">The text in the last word left to caret.</param>
         /// <param name="expansions">TabExpansion results.</param>
         /// <returns>The common start word shared by leftWord and expansions that could be hide.</returns>
-        private static string AdjustExpansions(string leftWord, ref string[] expansions)
+        internal static string AdjustExpansions(string leftWord, ref string[] expansions)
         {
             string commonWord = null;
 
             if (!string.IsNullOrEmpty(leftWord) && expansions != null)
             {
                 int lastSepIndex = leftWord.Length - 1;
-                while (true)
+                while (lastSepIndex >= 0)
                 {
                     // Check the longest possible common starting word
                     lastSepIndex = leftWord.LastIndexOfAny(EXPANSION_SEPARATORS, lastSepIndex);
@@ -111,6 +111,7 @@ namespace NuGetConsole.Host
                     {
                         break; // Found
                     }
+                    lastSepIndex--;
                 }
             }
 
