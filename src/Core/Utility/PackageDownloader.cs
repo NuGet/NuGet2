@@ -8,7 +8,7 @@ namespace NuGet
 {
     public class PackageDownloader : IHttpClientEvents
     {
-        private const string DefaultUserAgentClient = "NuGet Visual Studio Extension";
+        private const string DefaultUserAgentClient = "NuGet Core";
 
         public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
         public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
