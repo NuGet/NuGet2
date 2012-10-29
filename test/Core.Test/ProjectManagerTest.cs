@@ -156,6 +156,54 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void AddPackageReferencePrefersFullProfileOverClientProfileWhenInstallIntoFullProfileProject()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.0",
+                content: new[] { "net40-client\\b.txt", "net40\\a.txt" },
+                assemblyReferences: new[] { "lib\\net40\\a.dll", "lib\\net40-client\\b.dll" });
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.False(projectSystem.ReferenceExists("b.dll"));
+            Assert.False(projectSystem.FileExists("b.txt"));
+
+            Assert.True(projectSystem.ReferenceExists("a.dll"));
+            Assert.True(projectSystem.FileExists("a.txt"));
+        }
+
+        [Fact]
+        public void AddPackageReferencePrefersVersionClosenessOverClientProfileCompatibility()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5, Profile=Client"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.0",
+                content: new[] { "net35\\a.txt", "net4.0.0.1\\b.txt", "net40-client\\c.txt", "net4.5.0.1-client\\d.txt" });
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.False(projectSystem.FileExists("a.txt"));
+            Assert.True(projectSystem.FileExists("b.txt"));
+            Assert.False(projectSystem.FileExists("c.txt"));
+            Assert.False(projectSystem.FileExists("d.txt"));
+        }
+
+        [Fact]
         public void AddPackageReferencePicksJavascriptWindowsLibraryOverGenericWindowsOne()
         {
             // Arrange            
