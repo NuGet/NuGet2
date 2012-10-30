@@ -71,6 +71,7 @@
     <Compile Include="ProjectName.cs" />
     <Compile Include="ProjectSystems\IVsProjectSystem.cs" />
     <Compile Include="ProjectSystems\JsProjectSystem.cs" />
+    <Compile Include="ProjectSystems\WindowsStoreProjectSystem.cs" />
     <Compile Include="ProjectSystems\WixProjectSystem.cs" />
     <Compile Include="RegistryKeyWrapper.cs" />
     <Compile Include="SkipAssemblyReferencesPackage.cs" />
