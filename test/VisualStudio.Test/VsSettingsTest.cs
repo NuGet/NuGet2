@@ -39,7 +39,7 @@ namespace NuGet.VisualStudio.Test
             solutionManager.Setup(s => s.IsSolutionOpen).Returns(false).Verifiable();
             var defaultSettings = new Mock<ISettings>(MockBehavior.Strict);
             var fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
-            fileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Throws(new Exception("This method should not be called"));
+            fileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>())).Throws(new Exception("This method should not be called"));
 
             // Act
             var vsSettings = new VsSettings(solutionManager.Object, defaultSettings.Object, fileSystemProvider.Object);
@@ -59,7 +59,7 @@ namespace NuGet.VisualStudio.Test
             solutionManager.Setup(s => s.SolutionDirectory).Returns((string)null).Verifiable();
             var defaultSettings = new Mock<ISettings>(MockBehavior.Strict);
             var fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
-            fileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Throws(new Exception("This method should not be called"));
+            fileSystemProvider.Setup(f => f.GetFileSystem(It.IsAny<string>())).Throws(new Exception("This method should not be called"));
 
             // Act
             var vsSettings = new VsSettings(solutionManager.Object, defaultSettings.Object, fileSystemProvider.Object);
@@ -79,7 +79,7 @@ namespace NuGet.VisualStudio.Test
             solutionManager.Setup(s => s.SolutionDirectory).Returns(@"x:\").Verifiable();
             var defaultSettings = new Mock<ISettings>(MockBehavior.Strict);
             var fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
-            fileSystemProvider.Setup(f => f.GetFileSystem(@"x:\.nuget", It.IsAny<bool>())).Returns(new MockFileSystem());
+            fileSystemProvider.Setup(f => f.GetFileSystem(@"x:\.nuget")).Returns(new MockFileSystem());
 
             // Act
             var vsSettings = new VsSettings(solutionManager.Object, defaultSettings.Object, fileSystemProvider.Object);
@@ -102,7 +102,7 @@ namespace NuGet.VisualStudio.Test
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile("nuget.config", @"<?xml version=""1.0"" ?><configuration><solution><add key=""foo"" value=""bar"" /></solution></configuration>");
             var fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
-            fileSystemProvider.Setup(f => f.GetFileSystem(@"x:\solution\.nuget", It.IsAny<bool>())).Returns(fileSystem).Verifiable();
+            fileSystemProvider.Setup(f => f.GetFileSystem(@"x:\solution\.nuget")).Returns(fileSystem).Verifiable();
 
             // Act
             var vsSettings = new VsSettings(solutionManager.Object, defaultSettings.Object, fileSystemProvider.Object);
@@ -127,7 +127,7 @@ namespace NuGet.VisualStudio.Test
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile("nuget.config", @"<?xml version=""1.0"" ?><configuration><solution><add key=""foo"" value=""bar"" /></solution></configuration>");
             var fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
-            fileSystemProvider.Setup(f => f.GetFileSystem(@"x:\solution\.nuget", It.IsAny<bool>())).Returns(fileSystem).Verifiable();
+            fileSystemProvider.Setup(f => f.GetFileSystem(@"x:\solution\.nuget")).Returns(fileSystem).Verifiable();
 
             // Act
             var vsSettings = new VsSettings(solutionManager.Object, defaultSettings.Object, fileSystemProvider.Object);
@@ -154,8 +154,8 @@ namespace NuGet.VisualStudio.Test
             fileSystemB.AddFile("nuget.config", @"<?xml version=""1.0"" ?><configuration><solution><add key=""foo"" value=""barB"" /></solution></configuration>");
 
             var fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
-            fileSystemProvider.Setup(f => f.GetFileSystem(@"x:\solution\.nuget", It.IsAny<bool>())).Returns(fileSystemA).Verifiable();
-            fileSystemProvider.Setup(f => f.GetFileSystem(@"y:\solution\.nuget", It.IsAny<bool>())).Returns(fileSystemB).Verifiable();
+            fileSystemProvider.Setup(f => f.GetFileSystem(@"x:\solution\.nuget")).Returns(fileSystemA).Verifiable();
+            fileSystemProvider.Setup(f => f.GetFileSystem(@"y:\solution\.nuget")).Returns(fileSystemB).Verifiable();
 
             // Act
             var vsSettings = new VsSettings(solutionManager.Object, defaultSettings.Object, fileSystemProvider.Object);
@@ -184,7 +184,7 @@ namespace NuGet.VisualStudio.Test
             fileSystem.AddFile("nuget.config", @"<?xml version=""1.0"" ?><configuration><solution><add key=""foo"" value=""bar"" /></solution></configuration>");
 
             var fileSystemProvider = new Mock<IFileSystemProvider>(MockBehavior.Strict);
-            fileSystemProvider.Setup(f => f.GetFileSystem(@"x:\solution\.nuget", It.IsAny<bool>())).Returns(fileSystem).Verifiable();
+            fileSystemProvider.Setup(f => f.GetFileSystem(@"x:\solution\.nuget")).Returns(fileSystem).Verifiable();
 
             // Act
             var vsSettings = new VsSettings(solutionManager.Object, defaultSettings.Object, fileSystemProvider.Object);

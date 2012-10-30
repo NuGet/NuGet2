@@ -67,7 +67,7 @@ namespace NuGet.VisualStudio.Test
         public void MarkPackageDirectoryForDeletionDoesNotAddDeletemeFileWhenFileModified()
         {
             // Arrange
-            IPackage package = NuGet.Test.PackageUtility.CreatePackage(id: "foo", version: "1.0.0", content: new string[] {}, assemblyReferences: new string[] {}, tools: new[] { "modifiedFile.txt" });
+            IPackage package = NuGet.Test.PackageUtility.CreatePackage(id: "foo", version: "1.0.0", content: new string[] { }, assemblyReferences: new string[] { }, tools: new[] { "modifiedFile.txt" });
             var fileSystem = new MockFileSystem();
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
             string packageDirectoryPath = pathResolver.GetPackageDirectory(package);
@@ -115,7 +115,7 @@ namespace NuGet.VisualStudio.Test
         public void MarkPackageDirectoryForDeletionAddsDeletemeFileWhenDirectoryRemovalUnsuccessful()
         {
             // Arrange
-            IPackage package = NuGet.Test.PackageUtility.CreatePackage(id: "foo", version: "1.0.0", content: new string[] {}, assemblyReferences: new string[] {}, tools: new[] { "lockedFile.txt" });
+            IPackage package = NuGet.Test.PackageUtility.CreatePackage(id: "foo", version: "1.0.0", content: new string[] { }, assemblyReferences: new string[] { }, tools: new[] { "lockedFile.txt" });
             var fileSystem = new MockFileSystem();
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
             string packageDirectoryPath = pathResolver.GetPackageDirectory(package);
@@ -186,6 +186,11 @@ namespace NuGet.VisualStudio.Test
         private class MockFileSystemProvider : IFileSystemProvider
         {
             private IFileSystem _mockFileSystem = new MockFileSystemShallowCopy();
+
+            public IFileSystem GetFileSystem(string path)
+            {
+                return GetFileSystem(path, ignoreSourceControlSetting: false);
+            }
 
             public IFileSystem GetFileSystem(string path, bool ignoreSourceControlSetting)
             {

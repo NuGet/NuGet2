@@ -44,6 +44,11 @@ namespace NuGet.VisualStudio
             _settings = settings;
         }
 
+        public IFileSystem GetFileSystem(string path)
+        {
+            return GetFileSystem(path, ignoreSourceControlSetting: false);
+        }
+
         public IFileSystem GetFileSystem(string path, bool ignoreSourceControlSetting)
         {
             if (!ignoreSourceControlSetting && _settings.IsSourceControlDisabled())
