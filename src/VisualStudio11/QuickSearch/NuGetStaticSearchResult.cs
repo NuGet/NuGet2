@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Globalization;
-using EnvDTE;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuGet.VisualStudio11
@@ -9,16 +9,29 @@ namespace NuGet.VisualStudio11
     {
         private const string TabProvider = ";Online";
         private readonly string _searchText;
-        private readonly DTE _dte;
+        private readonly OleMenuCommand _supportedManagePackageCommand;
+        private readonly NuGetSearchProvider _searchProvider;
 
-        public NuGetStaticSearchResult(DTE dte, string searchText, NuGetSearchProvider provider)
+        public NuGetStaticSearchResult(string searchText, NuGetSearchProvider provider, OleMenuCommand supportedManagePackageCommand)
         {
-            _dte = dte;
+            if (searchText == null)
+            {
+                throw new ArgumentNullException("searchText");
+            }
+            if (provider == null)
+            {
+                throw new ArgumentNullException("provider");
+            }
+            if (supportedManagePackageCommand == null)
+            {
+                throw new ArgumentNullException("supportedManagePackageCommand");
+            }
+
             _searchText = searchText;
+            _supportedManagePackageCommand = supportedManagePackageCommand;
 
             DisplayText = String.Format(CultureInfo.CurrentCulture, Resources.NuGetStaticResult_DisplayText, searchText);
-            PersistenceData = searchText;
-            SearchProvider = provider;
+            _searchProvider = provider;
         }
 
         public string Description
@@ -35,27 +48,30 @@ namespace NuGet.VisualStudio11
         public IVsUIObject Icon
         {
             get 
-            { 
-                // TODO: Supply nuget icon here
-                return null; 
+            {
+                return _searchProvider.SearchResultsIcon;
             }
         }
 
         public void InvokeAction()
         {
-            _dte.ExecuteCommand("Project.ManageNuGetPackages", _searchText + TabProvider);
+            _supportedManagePackageCommand.Invoke(_searchText + TabProvider);
         }
 
         public string PersistenceData
         {
-            get;
-            private set;
+            get
+            {
+                return null;
+            }
         }
 
         public IVsSearchProvider SearchProvider
         {
-            get;
-            private set;
+            get
+            {
+                return _searchProvider;
+            }
         }
 
         public string Tooltip

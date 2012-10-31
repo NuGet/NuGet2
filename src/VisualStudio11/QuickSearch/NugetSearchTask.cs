@@ -1,20 +1,43 @@
 ﻿using System;
 using EnvDTE;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuGet.VisualStudio11
 {
     public sealed class NuGetSearchTask : IVsSearchTask
     {
-        private readonly DTE _dte;
         private readonly NuGetSearchProvider _provider;
         private readonly IVsSearchProviderCallback _searchCallback;
+        private readonly OleMenuCommand _managePackageDialogCommand;
+        private readonly OleMenuCommand _managePackageForSolutionDialogCommand;
 
-        public NuGetSearchTask(DTE dte, NuGetSearchProvider provider, uint cookie, IVsSearchQuery searchQuery, IVsSearchProviderCallback searchCallback)
+        public NuGetSearchTask(NuGetSearchProvider provider, uint cookie, IVsSearchQuery searchQuery, IVsSearchProviderCallback searchCallback, OleMenuCommand managePackageDialogCommand, OleMenuCommand managePackageForSolutionDialogCommand)
         {
+            if (provider == null)
+            {
+                throw new ArgumentNullException("provider");
+            }
+            if (searchQuery == null)
+            {
+                throw new ArgumentNullException("searchQuery");
+            }
+            if (searchCallback == null)
+            {
+                throw new ArgumentNullException("searchCallback");
+            }
+            if (managePackageDialogCommand == null)
+            {
+                throw new ArgumentNullException("managePackageDialogCommand");
+            }
+            if (managePackageForSolutionDialogCommand == null)
+            {
+                throw new ArgumentNullException("managePackageForSolutionDialogCommand");
+            }
             _provider = provider;
-            _dte = dte;
             _searchCallback = searchCallback;
+            _managePackageDialogCommand = managePackageDialogCommand;
+            _managePackageForSolutionDialogCommand = managePackageForSolutionDialogCommand;
 
             SearchQuery = searchQuery;
             Id = cookie;
@@ -52,9 +75,11 @@ namespace NuGet.VisualStudio11
             SetStatus(VsSearchTaskStatus.Started);
 
             SetStatus(VsSearchTaskStatus.Completed);
-            if (!String.IsNullOrEmpty(SearchQuery.SearchString))
+            OleMenuCommand supportedManagePackageCommand = GetSupportedManagePackageCommand();
+
+            if (!String.IsNullOrEmpty(SearchQuery.SearchString) && null != supportedManagePackageCommand)
             {
-                var result = new NuGetStaticSearchResult(_dte, SearchQuery.SearchString, _provider);
+                var result = new NuGetStaticSearchResult(SearchQuery.SearchString, _provider, supportedManagePackageCommand);
                 _searchCallback.ReportResult(this, result);
                 _searchCallback.ReportComplete(this, 1);
             }
@@ -81,6 +106,21 @@ namespace NuGet.VisualStudio11
             Error = 4,
             Started = 1,
             Stopped = 3
+        }
+
+        private OleMenuCommand GetSupportedManagePackageCommand()
+        {
+            if (_managePackageDialogCommand.Enabled && _managePackageDialogCommand.Visible && _managePackageDialogCommand.Supported)
+            {
+                return _managePackageDialogCommand;
+            }
+
+            if (_managePackageForSolutionDialogCommand.Enabled && _managePackageForSolutionDialogCommand.Visible && _managePackageForSolutionDialogCommand.Supported)
+            {
+                return _managePackageForSolutionDialogCommand;
+            }
+
+            return null;
         }
     }
 }

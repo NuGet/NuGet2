@@ -97,7 +97,7 @@ namespace NuGet.VisualStudio11 {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Click here to search Online for &quot;{0}&quot;.
+        ///   Looks up a localized string similar to Search Online for NuGet Packages matching &apos;{0}&apos;.
         /// </summary>
         internal static string NuGetStaticResult_DisplayText {
             get {

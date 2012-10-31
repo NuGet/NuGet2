@@ -130,6 +130,6 @@
     <value>NuGet Search</value>
   </data>
   <data name="NuGetStaticResult_DisplayText" xml:space="preserve">
-    <value>Click here to search Online for "{0}"</value>
+    <value>Search Online for NuGet Packages matching '{0}'</value>
   </data>
 </root>
