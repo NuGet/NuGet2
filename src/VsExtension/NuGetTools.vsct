@@ -87,7 +87,6 @@
             <Parent guid="guidReferenceContext" id="cmdAddReferenceGroup" />
             <Icon guid="guidToolbarImages" id="bmpAddNuGetPackage" />
             <CommandFlag>DefaultInvisible</CommandFlag>
-            <CommandFlag>DynamicVisibility</CommandFlag>
             <Strings>
                 <CommandName>cmdidAddPackagesForSolution</CommandName>
                 <ButtonText>Manage &amp;NuGet Packages for Solution...</ButtonText>
@@ -169,7 +168,7 @@
     <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackagesForSolution" priority="0xF100">
       <Parent guid="guidToolsGroup" id="idToolsGroup"/>
     </CommandPlacement>
-      <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">
+      <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackagesForSolution" priority="0xF100">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_SOLUTION_BUILD" />
       </CommandPlacement>
       <CommandPlacement guid="guidDialogCmdSet" id="cmdidAddPackages" priority="0xF100">

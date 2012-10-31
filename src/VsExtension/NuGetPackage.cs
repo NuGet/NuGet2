@@ -15,8 +15,8 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Options;
 using NuGet.VisualStudio;
-using NuGet.VisualStudio11;
 using NuGet.VisualStudio.Resources;
+using NuGet.VisualStudio11;
 using NuGetConsole;
 using NuGetConsole.Implementation;
 using ManagePackageDialog = dialog::NuGet.Dialog.PackageManagerWindow;
@@ -51,7 +51,7 @@ namespace NuGet.Tools
         public const string ProductVersion = "2.2.0.0";
         private static readonly string[] _visualizerSupportedSKUs = new[] { "Premium", "Ultimate" };
 
-        private uint _debuggingContextCookie, _solutionBuildingContextCookie;
+        private uint _solutionNotBuildingAndNotDebuggingContextCookie;
         private DTE _dte;
         private IConsoleStatus _consoleStatus;
         private IVsMonitorSelection _vsMonitorSelection;
@@ -73,13 +73,9 @@ namespace NuGet.Tools
                     // get the UI context cookie for the debugging mode
                     _vsMonitorSelection = (IVsMonitorSelection)GetService(typeof(IVsMonitorSelection));
 
-                    // get debugging context cookie
-                    Guid debuggingContextGuid = VSConstants.UICONTEXT_Debugging;
-                    _vsMonitorSelection.GetCmdUIContextCookie(ref debuggingContextGuid, out _debuggingContextCookie);
-
-                    // get the solution building cookie
-                    Guid solutionBuildingContextGuid = VSConstants.UICONTEXT_SolutionBuilding;
-                    _vsMonitorSelection.GetCmdUIContextCookie(ref solutionBuildingContextGuid, out _solutionBuildingContextCookie);
+                    // get the solution not building and not debugging cookie
+                    Guid guid = VSConstants.UICONTEXT.SolutionExistsAndNotBuildingAndNotDebugging_guid;
+                    _vsMonitorSelection.GetCmdUIContextCookie(ref guid, out _solutionNotBuildingAndNotDebuggingContextCookie);
                 }
                 return _vsMonitorSelection;
             }
@@ -237,6 +233,7 @@ namespace NuGet.Tools
             {
                 parameterString = args.InValue as string;
             }
+
             if (VsMonitorSelection.GetIsSolutionNodeSelected())
             {
                 ShowManageLibraryPackageDialog(null);
@@ -309,22 +306,15 @@ namespace NuGet.Tools
 
         private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args)
         {
-            bool isSolutionSelected = VsMonitorSelection.GetIsSolutionNodeSelected();
-
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = SolutionManager.IsSolutionOpen && !IsIDEInDebuggingOrBuildingContext() && (isSolutionSelected || HasActiveLoadedSupportedProject);
+            command.Visible = !IsIDENotInDebuggingOrBuildingContext() && HasActiveLoadedSupportedProject;
             // disable the dialog menu if the console is busy executing a command;
             command.Enabled = !ConsoleStatus.IsBusy;
-            if (command.Visible)
-            {
-                command.Text = isSolutionSelected ? Resources.ManagePackageForSolutionLabel : Resources.ManagePackageLabel;
-            }
         }
 
         private void BeforeQueryStatusForAddPackageForSolutionDialog(object sender, EventArgs args)
         {
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = SolutionManager.IsSolutionOpen && !IsIDEInDebuggingOrBuildingContext();
             // disable the dialog menu if the console is busy executing a command;
             command.Enabled = !ConsoleStatus.IsBusy;
         }
@@ -335,22 +325,11 @@ namespace NuGet.Tools
             command.Visible = SolutionManager.IsSolutionOpen && IsVisualizerSupported;
         }
 
-        private bool IsIDEInDebuggingOrBuildingContext()
+        private bool IsIDENotInDebuggingOrBuildingContext()
         {
             int pfActive;
-            int result = VsMonitorSelection.IsCmdUIContextActive(_debuggingContextCookie, out pfActive);
-            if (result == VSConstants.S_OK && pfActive > 0)
-            {
-                return true;
-            }
-
-            result = VsMonitorSelection.IsCmdUIContextActive(_solutionBuildingContextCookie, out pfActive);
-            if (result == VSConstants.S_OK && pfActive > 0)
-            {
-                return true;
-            }
-
-            return false;
+            int result = VsMonitorSelection.IsCmdUIContextActive(_solutionNotBuildingAndNotDebuggingContextCookie, out pfActive);
+            return !(result == VSConstants.S_OK && pfActive > 0);
         }
 
         private void ShowPackageSourcesOptionPage(object sender, EventArgs args)
