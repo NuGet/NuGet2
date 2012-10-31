@@ -316,8 +316,7 @@ namespace NuGet.Tools
         private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args)
         {
             OleMenuCommand command = (OleMenuCommand)sender;
-            command.Visible = !IsIDENotInDebuggingOrBuildingContext() && HasActiveLoadedSupportedProject;
-            // disable the dialog menu if the console is busy executing a command;
+            command.Visible = IsSolutionExistsAndNotDebuggingAndNotBuilding() && HasActiveLoadedSupportedProject;
             command.Enabled = !ConsoleStatus.IsBusy;
         }
 
@@ -334,11 +333,11 @@ namespace NuGet.Tools
             command.Visible = SolutionManager.IsSolutionOpen && IsVisualizerSupported;
         }
 
-        private bool IsIDENotInDebuggingOrBuildingContext()
+        private bool IsSolutionExistsAndNotDebuggingAndNotBuilding()
         {
             int pfActive;
             int result = VsMonitorSelection.IsCmdUIContextActive(_solutionNotBuildingAndNotDebuggingContextCookie, out pfActive);
-            return !(result == VSConstants.S_OK && pfActive > 0);
+            return (result == VSConstants.S_OK && pfActive > 0);
         }
 
         private void ShowPackageSourcesOptionPage(object sender, EventArgs args)

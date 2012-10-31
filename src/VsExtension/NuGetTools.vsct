@@ -76,7 +76,6 @@
           <CommandFlag>AllowParams</CommandFlag>
           <CommandFlag>DefaultInvisible</CommandFlag>
           <CommandFlag>DynamicVisibility</CommandFlag>
-          <CommandFlag>TextChanges</CommandFlag>
           <Strings>
               <CommandName>cmdidAddPackages</CommandName>
               <ButtonText>Manage &amp;NuGet Packages...</ButtonText>
