@@ -15,7 +15,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var mockFileSystemProvider = new Mock<IFileSystemProvider>();
-            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(new MockFileSystem());
+            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
 
             var project = TestUtils.GetProject("WindowsStore");
 
@@ -36,7 +36,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var mockFileSystemProvider = new Mock<IFileSystemProvider>();
-            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(new MockFileSystem());
+            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
 
             var project = TestUtils.GetProject("WindowsStore");
 
@@ -57,7 +57,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var mockFileSystemProvider = new Mock<IFileSystemProvider>();
-            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(new MockFileSystem());
+            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
 
             var project = TestUtils.GetProject("WindowsStore");
 
@@ -78,7 +78,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var mockFileSystemProvider = new Mock<IFileSystemProvider>();
-            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(new MockFileSystem());
+            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
 
             var project = TestUtils.GetProject("WindowsStore");
 
@@ -98,7 +98,7 @@ namespace NuGet.VisualStudio.Test
             var sourceRepository = new MockPackageRepository();
 
             var mockFileSystemProvider = new Mock<IFileSystemProvider>();
-            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>(), It.IsAny<bool>())).Returns(new MockFileSystem());
+            mockFileSystemProvider.Setup(fs => fs.GetFileSystem(It.IsAny<string>())).Returns(new MockFileSystem());
             var project = TestUtils.GetProject("WindowsStore");
 
             var projectSystem = new TestableWindowsStoreProjectSystem(project, mockFileSystemProvider.Object);
