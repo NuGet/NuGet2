@@ -258,18 +258,23 @@ namespace NuGet.PowerShell.Commands
                 // No active source has been specified. 
                 throw new InvalidOperationException(Resources.Cmdlet_NoActivePackageSource);
             }
-
-            // Bug #2761: The Search() service method on nuget.org doesn't handle $skiptoken, resulting in incorrect results.
-            // As a work around, we wrap the repository in a AggregateRepository, which use $top and $skip options in the query.
-            if (!Updates.IsPresent && 
-                !String.IsNullOrEmpty(Filter) &&
-                repository is IServiceBasedRepository &&
-                !(repository is AggregateRepository) )
+            
+            if (IsRepositoryUsedForSearch(repository))
             {
                 repository = new AggregateRepository(new [] { repository });
             }
 
             return repository;
+        }
+
+        private bool IsRepositoryUsedForSearch(IPackageRepository repository)
+        {
+            // Bug #2761: The Search() service method on nuget.org doesn't handle $skiptoken, resulting in incorrect results.
+            // As a work around, we wrap the repository in a AggregateRepository, which use $top and $skip options in the query.
+            return !Updates.IsPresent &&
+                            !String.IsNullOrEmpty(Filter) &&
+                            repository is IServiceBasedRepository &&
+                            !(repository is AggregateRepository);
         }
 
         protected virtual IQueryable<IPackage> GetPackages(IPackageRepository sourceRepository)
