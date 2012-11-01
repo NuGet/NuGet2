@@ -233,29 +233,43 @@ namespace NuGet.PowerShell.Commands
         /// </summary>
         private IPackageRepository GetRemoteRepository()
         {
+            IPackageRepository repository;
+
             if (!String.IsNullOrEmpty(Source))
             {
                 _hasConnectedToHttpSource |= UriHelper.IsHttpSource(Source);
                 // If a Source parameter is explicitly specified, use it
-                return CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, Source);
+                repository = CreateRepositoryFromSource(_repositoryFactory, _packageSourceProvider, Source);
             }
             else if (SolutionManager.IsSolutionOpen)
             {
                 _hasConnectedToHttpSource |= UriHelper.IsHttpSource(_packageSourceProvider);
                 // If the solution is open, retrieve the cached repository instance
-                return PackageManager.SourceRepository;
+                repository = PackageManager.SourceRepository;
             }
             else if (_packageSourceProvider.ActivePackageSource != null)
             {
                 _hasConnectedToHttpSource |= UriHelper.IsHttpSource(_packageSourceProvider);
                 // No solution available. Use the repository Url to create a new repository
-                return _repositoryFactory.CreateRepository(_packageSourceProvider.ActivePackageSource.Source);
+                repository = _repositoryFactory.CreateRepository(_packageSourceProvider.ActivePackageSource.Source);
             }
             else
             {
                 // No active source has been specified. 
                 throw new InvalidOperationException(Resources.Cmdlet_NoActivePackageSource);
             }
+
+            // Bug #2761: The Search() service method on nuget.org doesn't handle $skiptoken, resulting in incorrect results.
+            // As a work around, we wrap the repository in a AggregateRepository, which use $top and $skip options in the query.
+            if (!Updates.IsPresent && 
+                !String.IsNullOrEmpty(Filter) &&
+                repository is IServiceBasedRepository &&
+                !(repository is AggregateRepository) )
+            {
+                repository = new AggregateRepository(new [] { repository });
+            }
+
+            return repository;
         }
 
         protected virtual IQueryable<IPackage> GetPackages(IPackageRepository sourceRepository)
