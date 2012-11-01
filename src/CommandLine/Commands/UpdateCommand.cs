@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using NuGet.Common;
 
 namespace NuGet.Commands
@@ -13,16 +11,13 @@ namespace NuGet.Commands
         UsageExampleResourceName = "UpdateCommandUsageExamples")]
     public class UpdateCommand : Command
     {
-        private const string NuGetCommandLinePackageId = "NuGet.CommandLine";
-        private const string NuGetExe = "NuGet.exe";
-
         private readonly List<string> _sources = new List<string>();
         private readonly List<string> _ids = new List<string>();
         private readonly IFileSystem _fileSystem;
 
         public UpdateCommand(IPackageRepositoryFactory repositoryFactory, IPackageSourceProvider sourceProvider)
-            :this(repositoryFactory, sourceProvider, new PhysicalFileSystem(Directory.GetCurrentDirectory()))
-        {            
+            : this(repositoryFactory, sourceProvider, new PhysicalFileSystem(Directory.GetCurrentDirectory()))
+        {
         }
 
         [ImportingConstructor]
@@ -68,9 +63,8 @@ namespace NuGet.Commands
         {
             if (Self)
             {
-                Assembly assembly = typeof(UpdateCommand).Assembly;
-                var version = GetNuGetVersion(assembly) ?? new SemanticVersion(assembly.GetName().Version);
-                SelfUpdate(assembly.Location, version);
+                var selfUpdater = new SelfUpdater(RepositoryFactory) { Console = Console };
+                selfUpdater.UpdateSelf();
             }
             else
             {
@@ -207,16 +201,17 @@ namespace NuGet.Commands
             // Resolve the repository path
             repositoryPath = repositoryPath ?? GetRepositoryPath(project.Root);
 
-            var pathResolver = new DefaultPackagePathResolver(repositoryPath);
+            var sharedRepositoryFileSystem = new PhysicalFileSystem(repositoryPath);
+            var pathResolver = new DefaultPackagePathResolver(sharedRepositoryFileSystem);
 
             // Create the local and source repositories
-            var sharedPackageRepository = new SharedPackageRepository(repositoryPath);
+            var sharedPackageRepository = new SharedPackageRepository(pathResolver, sharedRepositoryFileSystem, sharedRepositoryFileSystem);
             var localRepository = new PackageReferenceRepository(project, sharedPackageRepository);
             sourceRepository = sourceRepository ?? AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
             IPackageConstraintProvider constraintProvider = localRepository;
 
             Console.WriteLine(NuGetResources.UpdatingProject, project.ProjectName);
-            UpdatePackages(localRepository, sharedPackageRepository, sourceRepository, constraintProvider, pathResolver, project);
+            UpdatePackages(localRepository, sharedRepositoryFileSystem, sharedPackageRepository, sourceRepository, constraintProvider, pathResolver, project);
             project.Save();
         }
 
@@ -287,12 +282,15 @@ namespace NuGet.Commands
         }
 
         internal void UpdatePackages(IPackageRepository localRepository,
+                                     IFileSystem sharedRepositoryFileSystem,
                                      ISharedPackageRepository sharedPackageRepository,
                                      IPackageRepository sourceRepository,
                                      IPackageConstraintProvider constraintProvider,
                                      IPackagePathResolver pathResolver,
                                      IProjectSystem project)
         {
+            var packageManager = new PackageManager(sourceRepository, pathResolver, sharedRepositoryFileSystem, sharedPackageRepository);
+
             var projectManager = new ProjectManager(sourceRepository, pathResolver, project, localRepository)
                                  {
                                      ConstraintProvider = constraintProvider
@@ -303,9 +301,9 @@ namespace NuGet.Commands
             // the shared repository. This would cause the reference repository to skip the package assuming that the entry is invalid.
             projectManager.PackageReferenceAdded += (sender, eventArgs) =>
             {
-                sharedPackageRepository.AddPackage(eventArgs.Package);
+                PackageExtractor.InstallPackage(packageManager, eventArgs.Package);
             };
-            
+
             if (Verbose)
             {
                 projectManager.Logger = Console;
@@ -339,93 +337,6 @@ namespace NuGet.Commands
                     }
                 }
             }
-        }
-
-        internal void SelfUpdate(string exePath, SemanticVersion version)
-        {
-            Console.WriteLine(NuGetResources.UpdateCommandCheckingForUpdates, NuGetConstants.DefaultFeedUrl);
-
-            // Get the nuget command line package from the specified repository
-            IPackageRepository packageRepository = RepositoryFactory.CreateRepository(NuGetConstants.DefaultFeedUrl);
-
-            IPackage package = packageRepository.FindPackage(NuGetCommandLinePackageId);
-
-            // We didn't find it so complain
-            if (package == null)
-            {
-                throw new CommandLineException(NuGetResources.UpdateCommandUnableToFindPackage, NuGetCommandLinePackageId);
-            }
-
-            Console.WriteLine(NuGetResources.UpdateCommandCurrentlyRunningNuGetExe, version);
-
-            // Check to see if an update is needed
-            if (version >= package.Version)
-            {
-                Console.WriteLine(NuGetResources.UpdateCommandNuGetUpToDate);
-            }
-            else
-            {
-                Console.WriteLine(NuGetResources.UpdateCommandUpdatingNuGet, package.Version);
-
-                // Get NuGet.exe file from the package
-                IPackageFile file = package.GetFiles().FirstOrDefault(f => Path.GetFileName(f.Path).Equals(NuGetExe, StringComparison.OrdinalIgnoreCase));
-
-                // If for some reason this package doesn't have NuGet.exe then we don't want to use it
-                if (file == null)
-                {
-                    throw new CommandLineException(NuGetResources.UpdateCommandUnableToLocateNuGetExe);
-                }
-
-                // Get the exe path and move it to a temp file (NuGet.exe.old) so we can replace the running exe with the bits we got 
-                // from the package repository
-                string renamedPath = exePath + ".old";
-                Move(exePath, renamedPath);
-
-                // Update the file
-                UpdateFile(exePath, file);
-
-                Console.WriteLine(NuGetResources.UpdateCommandUpdateSuccessful);
-            }
-        }
-
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want this method to throw.")]
-        internal static SemanticVersion GetNuGetVersion(ICustomAttributeProvider assembly)
-        {
-            try
-            {
-                var assemblyInformationalVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-                return new SemanticVersion(assemblyInformationalVersion.InformationalVersion);
-            }
-            catch
-            {
-                // Don't let GetCustomAttributes throw.
-            }
-            return null;
-        }
-
-        protected virtual void UpdateFile(string exePath, IPackageFile file)
-        {
-            using (Stream fromStream = file.GetStream(), toStream = File.Create(exePath))
-            {
-                fromStream.CopyTo(toStream);
-            }
-        }
-
-        protected virtual void Move(string oldPath, string newPath)
-        {
-            try
-            {
-                if (File.Exists(newPath))
-                {
-                    File.Delete(newPath);
-                }
-            }
-            catch (FileNotFoundException)
-            {
-
-            }
-
-            File.Move(oldPath, newPath);
         }
 
         private IEnumerable<IPackage> GetPackages(IPackageRepository repository)
