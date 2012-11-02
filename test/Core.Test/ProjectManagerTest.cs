@@ -316,7 +316,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackageReferencePicksThePortableLibraryWithMoreMatchingVersionsWhenInstalledIntoNonPortableProject()
+        public void AddPackageReferencePicksThePortableLibraryWithLeastPlatformsWhenInstalledIntoNonPortableProject()
         {
             // Arrange            
             var sourceRepository = new MockPackageRepository();
