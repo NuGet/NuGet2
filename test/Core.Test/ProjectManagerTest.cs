@@ -316,6 +316,31 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void AddPackageReferencePicksThePortableLibraryWithMoreMatchingVersionsWhenInstalledIntoNonPortableProject()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("netcore45"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.0",
+                new[] { "portable-net45+sl4+win8+wp8\\zero.txt",
+                        "portable-net45+win8+wp8\\one.txt",
+                        "portable-net40+sl4+win8+wp71\\two.txt"});
+
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.False(projectSystem.FileExists("zero.txt"));
+            Assert.True(projectSystem.FileExists("one.txt"));
+            Assert.False(projectSystem.FileExists("two.txt"));
+        }
+
+        [Fact]
         public void AddPackageReferenceWhenNewVersionOfPackageAlreadyReferencedThrows()
         {
             // Arrange            

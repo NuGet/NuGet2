@@ -884,7 +884,7 @@ namespace NuGet
             // calculate the "distance" between 2 versions
             var distance = (projectVersion.Major - targetFrameworkVersion.Major) * 255L * 255 * 255 +
                            (projectVersion.Minor - targetFrameworkVersion.Minor) * 255L * 255 +
-                           (projectVersion.Build - targetFrameworkVersion.Build) * 255L + 
+                           (projectVersion.Build - targetFrameworkVersion.Build) * 255L +
                            (projectVersion.Revision - targetFrameworkVersion.Revision);
 
             Debug.Assert(MaxValue >= distance);
@@ -979,8 +979,21 @@ namespace NuGet
             }
 
             // among the supported frameworks by the Portable library, pick the one that is compatible with 'frameworkName'
-            var compatibleFramework = profile.SupportedFrameworks.FirstOrDefault(f => VersionUtility.IsCompatible(frameworkName, f));
-            return compatibleFramework == null ? 0 : GetProfileCompatibility(frameworkName, compatibleFramework);
+            var compatibleFramework = profile.SupportedFrameworks.FirstOrDefault(f => IsCompatible(frameworkName, f));
+
+            if (compatibleFramework != null)
+            {
+                var score = GetProfileCompatibility(frameworkName, compatibleFramework);
+
+                // This is to ensure that if two portable frameworks have the same score,
+                // we pick the one that has less number of supported platforms.
+                // The *2 is to make up for the /2 to which the result of this method is subject.
+                score -= (profile.SupportedFrameworks.Count * 2);
+
+                return score;
+            }
+
+            return 0;
         }
 
         private static bool TryParseVersion(string versionString, out SemanticVersion version)
