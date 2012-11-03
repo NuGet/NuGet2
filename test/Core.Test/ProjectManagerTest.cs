@@ -2538,7 +2538,7 @@ namespace NuGet.Test
             localRepository.VerifyAll();
         }
 
-        [Fact]
+        [Fact(Skip = "The fix for this is temporarily reverted.")]
         public void SafeUpdatingADependencyDoesNotUninstallPackage()
         {
             // Arrange
