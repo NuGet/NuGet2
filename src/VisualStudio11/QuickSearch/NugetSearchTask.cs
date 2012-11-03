@@ -1,5 +1,7 @@
 ﻿using System;
 using EnvDTE;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -110,12 +112,26 @@ namespace NuGet.VisualStudio11
 
         private OleMenuCommand GetSupportedManagePackageCommand()
         {
-            if (_managePackageDialogCommand.Enabled && _managePackageDialogCommand.Visible && _managePackageDialogCommand.Supported)
+            // Call QueryStatus for _managePackageDialogCommand and _managePackageForSolutionDialogCommand below
+            // to refresh the visibility of the command which is used to determine whether search results should be displayed or not.
+            // The following API QueryStatusCommand returns S_OK if successful
+            // int QueryStatus(ref Guid pguidCmdGroup, uint cCmds, OLECMD[] prgCmds, IntPtr pCmdText);
+            // Note that both the commands belong to the commandGroup. That is, the first parameter GUID representing the cmdGroup
+            // is the same for both the commands. Hence, it is possible to query for their status in a single call
+
+            OLECMD[] cmd = new OLECMD[2];
+            cmd[0].cmdID = (uint)_managePackageDialogCommand.CommandID.ID;
+            cmd[1].cmdID = (uint)_managePackageForSolutionDialogCommand.CommandID.ID;
+            Guid guid = _managePackageDialogCommand.CommandID.Guid;
+            int result = ((IOleCommandTarget)_provider.MenuCommandService).QueryStatus(pguidCmdGroup: ref guid, cCmds: 2u, prgCmds: cmd, pCmdText: (IntPtr)null);
+
+            // At this point, if result == S_OK, the visibility of the commands are up to date and can be used confidently
+            if (result == VSConstants.S_OK && _managePackageDialogCommand.Visible && _managePackageDialogCommand.Enabled)
             {
                 return _managePackageDialogCommand;
             }
 
-            if (_managePackageForSolutionDialogCommand.Enabled && _managePackageForSolutionDialogCommand.Visible && _managePackageForSolutionDialogCommand.Supported)
+            if (result == VSConstants.S_OK && _managePackageForSolutionDialogCommand.Visible && _managePackageForSolutionDialogCommand.Enabled)
             {
                 return _managePackageForSolutionDialogCommand;
             }

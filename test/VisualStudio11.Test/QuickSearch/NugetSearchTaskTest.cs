@@ -25,7 +25,8 @@ namespace NuGet.VisualStudio11.Test
             Mock<IVsSearchQuery> searchQuery = new Mock<IVsSearchQuery>();
             Mock<IVsSearchProviderCallback> searchCallback = new Mock<IVsSearchProviderCallback>();
             Mock<OleMenuCommand> managePackageCommand = new Mock<OleMenuCommand>(null, null);
-            NuGetSearchProvider provider = new NuGetSearchProvider(managePackageCommand.Object, managePackageCommand.Object);
+            Mock<OleMenuCommandService> menuCommandService = new Mock<OleMenuCommandService>(new Mock<IServiceProvider>().Object);
+            NuGetSearchProvider provider = new NuGetSearchProvider(menuCommandService.Object, managePackageCommand.Object, managePackageCommand.Object);
 
             // Act & Assert
             ExceptionAssert.ThrowsArgNull(() => new NuGetSearchTask(null, 1, searchQuery.Object, searchCallback.Object, managePackageCommand.Object, managePackageCommand.Object), "provider");
@@ -42,9 +43,10 @@ namespace NuGet.VisualStudio11.Test
             Mock<IVsSearchQuery> searchQuery = new Mock<IVsSearchQuery>();
             Mock<IVsSearchProviderCallback> searchCallback = new Mock<IVsSearchProviderCallback>();
             searchCallback.Setup(s => s.ReportComplete(It.IsAny<IVsSearchTask>(), It.IsAny<uint>()));
-            Mock<OleMenuCommand> managePackageCommand = new Mock<OleMenuCommand>(null, null);
-            NuGetSearchProvider provider = new NuGetSearchProvider(managePackageCommand.Object, managePackageCommand.Object);
-            NuGetSearchTask searchTask = new NuGetSearchTask(provider, 1, searchQuery.Object, searchCallback.Object, managePackageCommand.Object, managePackageCommand.Object);
+            OleMenuCommand managePackageCommand = new OleMenuCommand(null, new System.ComponentModel.Design.CommandID(Guid.Empty, 0));
+            Mock<OleMenuCommandService> menuCommandService = new Mock<OleMenuCommandService>(new Mock<IServiceProvider>().Object);
+            NuGetSearchProvider provider = new NuGetSearchProvider(menuCommandService.Object, managePackageCommand, managePackageCommand);
+            NuGetSearchTask searchTask = new NuGetSearchTask(provider, 1, searchQuery.Object, searchCallback.Object, managePackageCommand, managePackageCommand);
 
             // Act
             searchTask.Start();
@@ -60,7 +62,8 @@ namespace NuGet.VisualStudio11.Test
             Mock<IVsSearchQuery> searchQuery = new Mock<IVsSearchQuery>();
             Mock<IVsSearchProviderCallback> searchCallback = new Mock<IVsSearchProviderCallback>();
             Mock<OleMenuCommand> managePackageCommand = new Mock<OleMenuCommand>(null, null);
-            NuGetSearchProvider provider = new NuGetSearchProvider(managePackageCommand.Object, managePackageCommand.Object);
+            Mock<OleMenuCommandService> menuCommandService = new Mock<OleMenuCommandService>(new Mock<IServiceProvider>().Object);
+            NuGetSearchProvider provider = new NuGetSearchProvider(menuCommandService.Object, managePackageCommand.Object, managePackageCommand.Object);
             NuGetSearchTask searchTask = new NuGetSearchTask(provider, 1, searchQuery.Object, searchCallback.Object, managePackageCommand.Object, managePackageCommand.Object);
 
             // Act
@@ -79,7 +82,8 @@ namespace NuGet.VisualStudio11.Test
             searchQuery.Setup(s => s.ParseError).Returns(0);
             Mock<IVsSearchProviderCallback> searchCallback = new Mock<IVsSearchProviderCallback>();
             Mock<OleMenuCommand> managePackageCommand = new Mock<OleMenuCommand>(null, null);
-            NuGetSearchProvider provider = new NuGetSearchProvider(managePackageCommand.Object, managePackageCommand.Object);
+            Mock<OleMenuCommandService> menuCommandService = new Mock<OleMenuCommandService>(new Mock<IServiceProvider>().Object);
+            NuGetSearchProvider provider = new NuGetSearchProvider(menuCommandService.Object, managePackageCommand.Object, managePackageCommand.Object);
             uint cookie = 1;
 
             // Act

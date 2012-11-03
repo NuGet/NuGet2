@@ -21,7 +21,8 @@ namespace NuGet.VisualStudio11.Test
         {
             // Arrange
             Mock<OleMenuCommand> managePackageCommand = new Mock<OleMenuCommand>(null, null);
-            NuGetSearchProvider searchProvider = new NuGetSearchProvider(managePackageCommand.Object, managePackageCommand.Object);
+            Mock<OleMenuCommandService> menuCommandService = new Mock<OleMenuCommandService>(new Mock<IServiceProvider>().Object);
+            NuGetSearchProvider searchProvider = new NuGetSearchProvider(menuCommandService.Object, managePackageCommand.Object, managePackageCommand.Object);
 
             // Act & Assert
             ExceptionAssert.ThrowsArgNull(() => new NuGetStaticSearchResult(null, searchProvider, managePackageCommand.Object), "searchText");
@@ -34,7 +35,8 @@ namespace NuGet.VisualStudio11.Test
         {
             // Arrange
             Mock<OleMenuCommand> managePackageCommand = new Mock<OleMenuCommand>(null, null);
-            NuGetSearchProvider searchProvider = new NuGetSearchProvider(managePackageCommand.Object, managePackageCommand.Object);
+            Mock<OleMenuCommandService> menuCommandService = new Mock<OleMenuCommandService>(new Mock<IServiceProvider>().Object);
+            NuGetSearchProvider searchProvider = new NuGetSearchProvider(menuCommandService.Object, managePackageCommand.Object, managePackageCommand.Object);
             NuGetStaticSearchResult result = new NuGetStaticSearchResult(DummyText, searchProvider, managePackageCommand.Object);
 
             // Assert
@@ -46,7 +48,8 @@ namespace NuGet.VisualStudio11.Test
         {
             // Arrange & Act
             Mock<OleMenuCommand> managePackageCommand = new Mock<OleMenuCommand>(null, null);
-            NuGetSearchProvider searchProvider = new NuGetSearchProvider(managePackageCommand.Object, managePackageCommand.Object);
+            Mock<OleMenuCommandService> menuCommandService = new Mock<OleMenuCommandService>(new Mock<IServiceProvider>().Object);
+            NuGetSearchProvider searchProvider = new NuGetSearchProvider(menuCommandService.Object, managePackageCommand.Object, managePackageCommand.Object);
             NuGetStaticSearchResult result = new NuGetStaticSearchResult(DummyText, searchProvider, managePackageCommand.Object);
 
             // Assert
@@ -66,7 +69,8 @@ namespace NuGet.VisualStudio11.Test
         {
             // Arrange
             Mock<OleMenuCommand> managePackageCommand = new Mock<OleMenuCommand>(null, null);
-            NuGetSearchProvider searchProvider = new NuGetSearchProvider(managePackageCommand.Object, managePackageCommand.Object);
+            Mock<OleMenuCommandService> menuCommandService = new Mock<OleMenuCommandService>(new Mock<IServiceProvider>().Object);
+            NuGetSearchProvider searchProvider = new NuGetSearchProvider(menuCommandService.Object, managePackageCommand.Object, managePackageCommand.Object);
             NuGetStaticSearchResult result = new NuGetStaticSearchResult(DummyText, searchProvider, managePackageCommand.Object);
 
             // Act

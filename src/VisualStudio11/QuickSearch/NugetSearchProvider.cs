@@ -15,9 +15,14 @@ namespace NuGet.VisualStudio11
         private IVsUIObject _searchResultsIcon;
         private readonly OleMenuCommand _managePackageDialogCommand;
         private readonly OleMenuCommand _managePackageForSolutionDialogCommand;
+        private readonly OleMenuCommandService _menuCommandService;
 
-        public NuGetSearchProvider(OleMenuCommand managePackageDialogCommand, OleMenuCommand managePackageForSolutionDialogCommand)
+        public NuGetSearchProvider(OleMenuCommandService menuCommandService, OleMenuCommand managePackageDialogCommand, OleMenuCommand managePackageForSolutionDialogCommand)
         {
+            if (menuCommandService == null)
+            {
+                throw new ArgumentNullException("menuCommandService");
+            }
             if (managePackageDialogCommand == null)
             {
                 throw new ArgumentNullException("managePackageDialogCommand");
@@ -27,8 +32,17 @@ namespace NuGet.VisualStudio11
                 throw new ArgumentNullException("managePackageForSolutionDialogCommand");
             }
 
+            _menuCommandService = menuCommandService;
             _managePackageDialogCommand = managePackageDialogCommand;
             _managePackageForSolutionDialogCommand = managePackageForSolutionDialogCommand;
+        }
+
+        internal OleMenuCommandService MenuCommandService
+        {
+            get
+            {
+                return _menuCommandService;
+            }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -42,7 +56,7 @@ namespace NuGet.VisualStudio11
                     {
                         const string packUriFormat = "pack://application:,,,/{0};component/{1}";
                         string assemblyName = GetType().Assembly.GetName().Name;
-                        var image = new BitmapImage(new Uri(String.Format(CultureInfo.InvariantCulture, packUriFormat, assemblyName, "Resources/nugetAbout.bmp")));
+                        var image = new BitmapImage(new Uri(String.Format(CultureInfo.InvariantCulture, packUriFormat, assemblyName, "Resources/nugetIcon.bmp")));
                         _searchResultsIcon = WpfPropertyValue.CreateIconObject(image);
                     }
                     catch (Exception)

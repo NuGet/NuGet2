@@ -60,6 +60,7 @@ namespace NuGet.Tools
         private ISolutionManager _solutionManager;
         private OleMenuCommand _managePackageDialogCommand;
         private OleMenuCommand _managePackageForSolutionDialogCommand;
+        private OleMenuCommandService _mcs;
 
         public NuGetPackage()
         {
@@ -160,45 +161,45 @@ namespace NuGet.Tools
 
         private void AddMenuCommandHandlers()
         {
-            OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (null != mcs)
+            _mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+            if (null != _mcs)
             {
                 // menu command for opening Package Manager Console
                 CommandID toolwndCommandID = new CommandID(GuidList.guidNuGetConsoleCmdSet, PkgCmdIDList.cmdidPowerConsole);
                 MenuCommand menuToolWin = new MenuCommand(ShowToolWindow, toolwndCommandID);
-                mcs.AddCommand(menuToolWin);
+                _mcs.AddCommand(menuToolWin);
 
                 // menu command for opening Manage NuGet packages dialog
                 CommandID managePackageDialogCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, PkgCmdIDList.cmdidAddPackageDialog);
                 _managePackageDialogCommand = new OleMenuCommand(ShowManageLibraryPackageDialog, null, BeforeQueryStatusForAddPackageDialog, managePackageDialogCommandID);
                 _managePackageDialogCommand.ParametersDescription = "p";
-                mcs.AddCommand(_managePackageDialogCommand);
+                _mcs.AddCommand(_managePackageDialogCommand);
 
                 // menu command for opening "Manage NuGet packages for solution" dialog
                 CommandID managePackageForSolutionDialogCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, PkgCmdIDList.cmdidAddPackageDialogForSolution);
                 _managePackageForSolutionDialogCommand = new OleMenuCommand(ShowManageLibraryPackageForSolutionDialog, null, BeforeQueryStatusForAddPackageForSolutionDialog, managePackageForSolutionDialogCommandID);
                 _managePackageForSolutionDialogCommand.ParametersDescription = "p";
-                mcs.AddCommand(_managePackageForSolutionDialogCommand);
+                _mcs.AddCommand(_managePackageForSolutionDialogCommand);
 
                 // menu command for opening Package Source settings options page
                 CommandID settingsCommandID = new CommandID(GuidList.guidNuGetConsoleCmdSet, PkgCmdIDList.cmdidSourceSettings);
                 OleMenuCommand settingsMenuCommand = new OleMenuCommand(ShowPackageSourcesOptionPage, settingsCommandID);
-                mcs.AddCommand(settingsMenuCommand);
+                _mcs.AddCommand(settingsMenuCommand);
 
                 // menu command for opening General options page
                 CommandID generalSettingsCommandID = new CommandID(GuidList.guidNuGetToolsGroupCmdSet, PkgCmdIDList.cmdIdGeneralSettings);
                 OleMenuCommand generalSettingsCommand = new OleMenuCommand(ShowGeneralSettingsOptionPage, generalSettingsCommandID);
-                mcs.AddCommand(generalSettingsCommand);
+                _mcs.AddCommand(generalSettingsCommand);
 
                 // menu command for Package Visualizer
                 CommandID visualizerCommandID = new CommandID(GuidList.guidNuGetToolsGroupCmdSet, PkgCmdIDList.cmdIdVisualizer);
                 OleMenuCommand visualizerCommand = new OleMenuCommand(ExecuteVisualizer, null, QueryStatusForVisualizer, visualizerCommandID);
-                mcs.AddCommand(visualizerCommand);
+                _mcs.AddCommand(visualizerCommand);
 
                 // menu command for Package Restore command
                 CommandID restorePackagesCommandID = new CommandID(GuidList.guidNuGetPackagesRestoreCmdSet, PkgCmdIDList.cmdidRestorePackages);
                 var restorePackagesCommand = new OleMenuCommand(EnablePackagesRestore, null, QueryStatusEnablePackagesRestore, restorePackagesCommandID);
-                mcs.AddCommand(restorePackagesCommand);
+                _mcs.AddCommand(restorePackagesCommand);
             }
         }
 
@@ -323,6 +324,7 @@ namespace NuGet.Tools
         private void BeforeQueryStatusForAddPackageForSolutionDialog(object sender, EventArgs args)
         {
             OleMenuCommand command = (OleMenuCommand)sender;
+            command.Visible = IsSolutionExistsAndNotDebuggingAndNotBuilding();
             // disable the dialog menu if the console is busy executing a command;
             command.Enabled = !ConsoleStatus.IsBusy;
         }
@@ -392,7 +394,7 @@ namespace NuGet.Tools
         {
             if (instance == typeof(NuGetSearchProvider).GUID)
             {
-                return new NuGetSearchProvider(_managePackageDialogCommand, _managePackageForSolutionDialogCommand);
+                return new NuGetSearchProvider(_mcs, _managePackageDialogCommand, _managePackageForSolutionDialogCommand);
             }
 
             return null;
