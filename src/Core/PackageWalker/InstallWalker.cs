@@ -19,7 +19,7 @@ namespace NuGet
                                IPackageRepository sourceRepository,
                                ILogger logger,
                                bool ignoreDependencies,
-                               bool allowPrereleaseVersions)
+                               bool allowPrereleaseVersions) 
             : this(localRepository, sourceRepository, null, logger, ignoreDependencies, allowPrereleaseVersions)
         {
         }
@@ -295,9 +295,17 @@ namespace NuGet
 
         protected override void OnAfterPackageWalk(IPackage package)
         {
-            // Add an install operation. This might result in the package operation no-oping if the package is already installed 
-            // but we overcompensate for future uninstall operations by doing this.
-            _operations.AddOperation(new PackageOperation(package, PackageAction.Install));
+            if (!Repository.Exists(package))
+            {
+                // Don't add the package for installation if it already exists in the repository
+                _operations.AddOperation(new PackageOperation(package, PackageAction.Install));
+            }
+            else
+            {
+                // If we already added an entry for removing this package then remove it 
+                // (it's equivalent for doing +P since we're removing a -P from the list)
+                _operations.RemoveOperation(package, PackageAction.Uninstall);
+            }
         }
 
         protected override IPackage ResolveDependency(PackageDependency dependency)
@@ -409,6 +417,17 @@ namespace NuGet
                 {
                     dictionary.Add(operation.Package, operation);
                     _operations.Add(operation);
+                }
+            }
+
+            internal void RemoveOperation(IPackage package, PackageAction action)
+            {
+                Dictionary<IPackage, PackageOperation> dictionary = GetPackageLookup(action);
+                PackageOperation operation;
+                if (dictionary != null && dictionary.TryGetValue(package, out operation))
+                {
+                    dictionary.Remove(package);
+                    _operations.Remove(operation);
                 }
             }
 
