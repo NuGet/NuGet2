@@ -562,10 +562,7 @@ namespace NuGet.VisualStudio
             // if there is any file under content/lib which has no target framework, we consider the package
             // compatible with any project, because that file will be the fallback if no supported frameworks matches the project's. 
             // REVIEW: what about install.ps1 and uninstall.ps1?
-            bool hasFileWithNullTargetFramework = package.GetContentFiles()
-                                                         .Concat(package.GetLibFiles())
-                                                         .Any(file => file.TargetFramework == null);
-            if (hasFileWithNullTargetFramework)
+            if (package.HasFileWithNullTargetFramework())
             {
                 return true;
             }

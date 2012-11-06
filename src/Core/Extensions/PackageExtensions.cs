@@ -33,7 +33,6 @@ namespace NuGet
         {
             if (!String.IsNullOrEmpty(package.Language) &&
                     package.Id.EndsWith('.' + package.Language, StringComparison.OrdinalIgnoreCase))
-
             {
                 // The satellite pack's Id is of the format <Core-Package-Id>.<Language>. Extract the core package id using this.
                 // Additionally satellite packages have a strict dependency on the core package
@@ -48,7 +47,7 @@ namespace NuGet
 
         public static bool IsEmptyFolder(this IPackageFile packageFile)
         {
-            return packageFile != null && 
+            return packageFile != null &&
                    Constants.PackageEmptyFileName.Equals(Path.GetFileName(packageFile.Path), StringComparison.OrdinalIgnoreCase);
         }
 
@@ -81,6 +80,13 @@ namespace NuGet
         public static IEnumerable<IPackageFile> GetLibFiles(this IPackage package)
         {
             return package.GetFiles(Constants.LibDirectory);
+        }
+
+        public static bool HasFileWithNullTargetFramework(this IPackage package)
+        {
+            return package.GetContentFiles()
+                .Concat(package.GetLibFiles())
+                .Any(file => file.TargetFramework == null);
         }
 
         /// <summary>
@@ -167,7 +173,7 @@ namespace NuGet
         /// </summary>
         public static bool IsDependencyOnly(this IPackage package)
         {
-            return !package.GetFiles().Any() && 
+            return !package.GetFiles().Any() &&
                    package.DependencySets.SelectMany(d => d.Dependencies).Any();
         }
 

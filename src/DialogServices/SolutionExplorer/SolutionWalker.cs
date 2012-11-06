@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Versioning;
 using EnvDTE;
 using NuGet.VisualStudio;
 
@@ -35,7 +36,17 @@ namespace NuGet.Dialog
                 enabledStateSelector = p => true;
             }
 
-            var children = CreateProjectNode(solution.Projects.OfType<Project>(), package, checkedStateSelector, enabledStateSelector).ToArray();
+            // precalculate here so that we don't calculate it over and over again for each project during the walk.
+            ICollection<FrameworkName> supportedFrameworks = 
+                package.HasFileWithNullTargetFramework() ? null : package.GetSupportedFrameworks().ToList();
+
+            var children = CreateProjectNode(
+                solution.Projects.OfType<Project>(), 
+                supportedFrameworks, 
+                package.IsSatellitePackage(), 
+                checkedStateSelector, 
+                enabledStateSelector).ToArray();
+
             Array.Sort(children, ProjectNodeComparer.Default);
 
             return new FolderNode(
@@ -46,17 +57,17 @@ namespace NuGet.Dialog
 
         private static IEnumerable<ProjectNodeBase> CreateProjectNode(
             IEnumerable<Project> projects,
-            IPackage package,
+            ICollection<FrameworkName> supportedFrameworks,
+            bool isSatellitePackage,
             Predicate<Project> checkedStateSelector,
             Predicate<Project> enabledStateSelector)
         {
-
             foreach (var project in projects)
             {
                 // If the package is a satelliate package, we assume that it's compatible with any project.
                 // It may not be accurate but we really don't want to check the corresponding runtime package here.
-                if (project.IsSupported() && 
-                    (package.IsSatellitePackage() || project.IsCompatible(package)))
+                if (project.IsSupported() &&
+                    (isSatellitePackage || supportedFrameworks == null || VersionUtility.IsCompatible(project.GetTargetFrameworkName(), supportedFrameworks)))
                 {
                     yield return new ProjectNode(project)
                     {
@@ -74,7 +85,8 @@ namespace NuGet.Dialog
                                 OfType<ProjectItem>().
                                 Where(p => p.SubProject != null).
                                 Select(p => p.SubProject),
-                            package,
+                            supportedFrameworks,
+                            isSatellitePackage,
                             checkedStateSelector,
                             enabledStateSelector
                         ).ToArray();
