@@ -727,20 +727,20 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not access or create config file at %AppData%\NuGet\NuGet.config..
-        /// </summary>
-        internal static string SetApiCommandNullSettings {
-            get {
-                return ResourceManager.GetString("SetApiCommandNullSettings", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The API Key &apos;{0}&apos; was saved for {1}..
         /// </summary>
         internal static string SetApiKeyCommandApiKeySaved {
             get {
                 return ResourceManager.GetString("SetApiKeyCommandApiKeySaved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not access or create config file at %AppData%\NuGet\NuGet.config..
+        /// </summary>
+        internal static string SetApiKeyCommandCannotAccessConfigFile {
+            get {
+                return ResourceManager.GetString("SetApiKeyCommandCannotAccessConfigFile", resourceCulture);
             }
         }
         
