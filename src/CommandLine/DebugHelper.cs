@@ -18,8 +18,7 @@ namespace NuGet
                 args = args.Skip(1).ToArray();
                 if (!Debugger.IsAttached)
                 {
-                    Console.WriteLine("Waiting for Debugger to attach...");
-                    SpinWait.SpinUntil(() => Debugger.IsAttached);
+                    Debugger.Launch();
                 }
             }
         }
