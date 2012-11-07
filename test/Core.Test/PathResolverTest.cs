@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Xunit;
 
@@ -239,7 +241,6 @@ namespace NuGet.Test
             Assert.Equal(@"content\css\site.css", result);
         }
 
-
         [Fact]
         public void GetMatchesFiltersByWildCards()
         {
@@ -272,6 +273,27 @@ namespace NuGet.Test
 
             // Act
             var matches = PathResolver.GetMatches(files, f => f.SourcePath, new[] { @"content\**\.txt", "**.pdb" });
+
+            // Assert
+            Assert.Equal(3, matches.Count());
+            Assert.Equal(@"content\1.txt", matches.ElementAt(0).SourcePath);
+            Assert.Equal(@"content\foo\bar.txt", matches.ElementAt(1).SourcePath);
+            Assert.Equal(@"lib\baz.pdb", matches.ElementAt(2).SourcePath);
+        }
+
+        [Fact]
+        public void GetMatchesAgainstUnixStylePaths()
+        {
+            // Arrange
+            var files = new[] { 
+                new PhysicalPackageFile { SourcePath = @"content\1.txt" }, 
+                new PhysicalPackageFile { SourcePath = @"content\foo\bar.txt" },
+                new PhysicalPackageFile { SourcePath = @"lib\baz.pdb" },
+                new PhysicalPackageFile { SourcePath = @"baz.dll" },
+            };
+
+            // Act
+            var matches = PathResolver.GetMatches(files, f => f.SourcePath, new[] { @"content/**/.txt", "**.pdb" });
 
             // Assert
             Assert.Equal(3, matches.Count());

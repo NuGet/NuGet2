@@ -56,6 +56,7 @@ namespace NuGet
             {
                 // regex wildcard adjustments for Windows-style file systems
                 pattern = pattern
+                    .Replace("/", @"\\") // On Windows, / is treated the same as \.
                     .Replace(@"\*\*\\", ".*") //For recursive wildcards \**\, include the current directory.
                     .Replace(@"\*\*", ".*") // For recursive wildcards that don't end in a slash e.g. **.txt would be treated as a .txt file at any depth
                     .Replace(@"\*", @"[^\\]*(\\)?") // For non recursive searches, limit it any character that is not a directory separator
@@ -243,7 +244,9 @@ namespace NuGet
 
         internal static bool IsDirectoryPath(string path)
         {
-            return path != null && path.Length > 1 && path[path.Length - 1] == Path.DirectorySeparatorChar;
+            return path != null && path.Length > 1 &&
+                (path[path.Length - 1] == Path.DirectorySeparatorChar ||
+                path[path.Length - 1] == Path.AltDirectorySeparatorChar);
         }
 
         private static bool IsEmptyDirectory(string directory)

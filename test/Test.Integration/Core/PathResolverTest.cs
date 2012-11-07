@@ -1008,6 +1008,58 @@ namespace NuGet.Test.Integration.PathResolver
         }
 
         [Fact]
+        public void PerformWildcardSearchWithUnixStyleDirectory()
+        {
+            // Arrange
+            var testDirectory = Path.Combine(Environment.CurrentDirectory, "testdir");
+            var testFile = Path.Combine(testDirectory, "test.nupkg");
+            Directory.CreateDirectory(testDirectory);
+            using (StreamWriter writer = System.IO.File.CreateText(testFile))
+            {
+                writer.Write("test");
+            }
+
+            try
+            {
+                // Act. Test that a unix style directory, "testdir/" can be searched correctly.
+                var result = NuGet.PathResolver.PerformWildcardSearch(Environment.CurrentDirectory, @"testdir/");
+                Assert.Equal(testFile, result.First());
+            }
+            finally
+            {
+                // Cleanup
+                Directory.Delete(testDirectory, true);
+            }
+        }
+
+        [Fact]
+        public void PerformWildcardSearchWithUnixStylePath()
+        {
+            // Arrange
+            var testDirectory = Path.Combine(Environment.CurrentDirectory, "testdir");
+            var testFile = Path.Combine(testDirectory, "test.nupkg");
+            Directory.CreateDirectory(testDirectory);
+            using (StreamWriter writer = System.IO.File.CreateText(testFile))
+            {
+                writer.Write("test");
+            }
+
+            try
+            {
+                // Act. Test that a unix style path, "testdir/test.nupkg" can be searched correctly.
+                var result = NuGet.PathResolver.PerformWildcardSearch(
+                    Environment.CurrentDirectory, @"testdir/test.nupkg");
+                Assert.Equal(testFile, result.First());
+            }
+            finally
+            {
+                // Cleanup
+                Directory.Delete(testDirectory, true);
+            }
+        }
+        
+
+        [Fact]
         public void ExclusionWithSimpleExtensions()
         {
             // Arrange
