@@ -193,9 +193,9 @@
                     <self:TextBlockControl AutomationProperties.AutomationId="CurrentVersionText" Text="{Binding OldVersion, Mode=OneWay}" Style="{StaticResource DetailMetadataValueStyle}" />
                 </StackPanel>
 
-                <!-- Last Updated -->
+                <!-- Last Published -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding PackageIdentity.Published, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
-                    <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_LastUpdatedLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_LastPublishedLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
                     <self:TextBlockControl Text="{Binding PackageIdentity.Published, StringFormat='{}{0:d}'}" Style="{StaticResource DetailMetadataValueStyle}"  />
                 </StackPanel>
 

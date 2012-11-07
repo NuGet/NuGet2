@@ -249,8 +249,8 @@
   <data name="Dialog_TagLabel" xml:space="preserve">
     <value>Tags:</value>
   </data>
-  <data name="Dialog_LastUpdatedLabel" xml:space="preserve">
-    <value>Last Updated:</value>
+  <data name="Dialog_LastPublishedLabel" xml:space="preserve">
+    <value>Last Published:</value>
   </data>
   <data name="Dialog_OnlineSolutionInstruction" xml:space="preserve">
     <value>Install the package in the following projects:</value>
