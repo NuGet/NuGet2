@@ -13,7 +13,7 @@ namespace NuGet
         [Conditional("DEBUG")]
         internal static void WaitForAttach(ref string[] args)
         {
-            if (String.Equals(args[0], "dbg", StringComparison.OrdinalIgnoreCase) || String.Equals(args[0], "debug", StringComparison.OrdinalIgnoreCase))
+            if (args.Length > 0 && (String.Equals(args[0], "dbg", StringComparison.OrdinalIgnoreCase) || String.Equals(args[0], "debug", StringComparison.OrdinalIgnoreCase)))
             {
                 args = args.Skip(1).ToArray();
                 if (!Debugger.IsAttached)
