@@ -31,6 +31,8 @@ namespace NuGet
 
         public static int Main(string[] args)
         {
+            DebugHelper.WaitForAttach(ref args);
+
             var console = new Common.Console();
             var fileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
             try
@@ -105,20 +107,7 @@ namespace NuGet
                 using (var container = new CompositionContainer(catalog))
                 {
                     var settings = Settings.LoadDefaultSettings(fileSystem);
-                    var defaultPackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl);
-
-                    var officialPackageSource = new PackageSource(NuGetConstants.DefaultFeedUrl, NuGetResources.OfficialPackageSourceName);
-                    var v1PackageSource = new PackageSource(NuGetConstants.V1FeedUrl, NuGetResources.OfficialPackageSourceName);
-                    var legacyV2PackageSource = new PackageSource(NuGetConstants.V2LegacyFeedUrl, NuGetResources.OfficialPackageSourceName);
-
-                    var packageSourceProvider = new PackageSourceProvider(
-                        settings,
-                        new[] { defaultPackageSource },
-                        new Dictionary<PackageSource, PackageSource> { 
-                            { v1PackageSource, officialPackageSource },
-                            { legacyV2PackageSource, officialPackageSource }
-                        }
-                    );
+                    var packageSourceProvider = PackageSourceBuilder.CreateSourceProvider(settings);
 
                     // Register an additional provider for the console specific application so that the user
                     // will be prompted if a proxy is set and credentials are required
