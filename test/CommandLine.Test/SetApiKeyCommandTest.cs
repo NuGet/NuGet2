@@ -25,6 +25,19 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void SetApiKeyThrowsIfSettingsFileIsNullSettings()
+        {
+            // Arrange
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+
+            // Act and Assert
+            ExceptionAssert.ThrowsArgumentException(
+                () => new SetApiKeyCommand(packageSourceProvider.Object, settings: NullSettings.Instance), 
+                "settings", 
+                @"Could not access or create config file at %AppData%\NuGet\NuGet.config.");
+        }
+
+        [Fact]
         public void SetApiKeyCommandUsesSettingsFile()
         {
             // Arrange

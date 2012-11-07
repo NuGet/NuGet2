@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Windows;
 using EnvDTE;
 using NuGet.VisualStudio.Resources;
 using VsWebSite;

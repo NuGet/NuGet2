@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using Moq;
 using NuGet.Commands;
 using NuGet.Common;
@@ -114,6 +115,42 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 
             // Assert
             Assert.Equal(@"C:\This\Is\My\Install\Path", installPath);
+        }
+
+        [Fact]
+        public void InstallCommandUsesCredentialsFromSolutionDotNuGetConfigFileIfSpecified()
+        {
+            // Arrange
+            var fileSystem = GetFileSystemWithConfigWithCredential();
+            var installCommand = new Mock<TestInstallCommand>(
+                GetFactory(), GetSourceProvider(), fileSystem, null, null, null, Settings.LoadDefaultSettings(fileSystem))
+                {
+                    CallBase = true
+                };
+            installCommand.Object.Console = new MockConsole();
+            installCommand.Object.SolutionDirectory = @"C:\My\Solution";
+            installCommand.Setup(c => c.CreateFileSystem(@"C:\My\Solution")).Returns(fileSystem);
+
+            // Act
+            string installPath = installCommand.Object.ResolveInstallPath();
+
+            // Assert
+            var enabledPackageSource = installCommand
+                .Object
+                .SourceProvider
+                .GetEnabledPackageSources()
+                .SingleOrDefault(src => src.Name.Equals("__ATESTREPO__"));
+            Assert.NotNull(enabledPackageSource);
+            Assert.Equal("user", enabledPackageSource.UserName);
+            Assert.Equal("123abc", enabledPackageSource.Password);
+            var creds = HttpClient.DefaultCredentialProvider.GetCredentials(
+                uri: new Uri("http://www.myprivatefeed.example/"),
+                proxy: null,
+                credentialType: CredentialType.RequestCredentials, 
+                retrying: false).GetCredential(null, null);
+            Assert.NotNull(creds);
+            Assert.Equal("user", creds.UserName);
+            Assert.Equal("123abc", creds.Password);
         }
 
         [Fact]
@@ -816,6 +853,28 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         <add key=""repositorypath"" value=""{0}"" />
     </config>
 </configuration>", repositoryPath));
+            return fileSystem;
+        }
+
+        private static IFileSystem GetFileSystemWithConfigWithCredential()
+        {
+            var fileSystem = new MockFileSystem(@"C:\This\Is\My\Install\Path\.nuget");
+            fileSystem.AddFile("nuget.config",
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <solution>
+    <add key=""disableSourceControlIntegration"" value=""true"" />
+  </solution>
+  <packageSources>
+    <add key=""__ATESTREPO__"" value=""http://www.myprivatefeed.example/"" />
+  </packageSources>
+  <packageSourceCredentials>
+      <__ATESTREPO__>
+          <add key=""Username"" value=""user"" />
+          <add key=""Password"" value=""" + EncryptionUtility.EncryptString("123abc") + @""" />
+      </__ATESTREPO__>
+  </packageSourceCredentials>
+</configuration>");
             return fileSystem;
         }
 
