@@ -77,7 +77,10 @@ namespace NuGet.VisualStudio
                 return;
             }
 
-            AddBindingRedirects(project, fileSystemProvider, domain, projectAssembliesCache);
+            if (project.SupportsBindingRedirects())
+            {
+                AddBindingRedirects(project, fileSystemProvider, domain, projectAssembliesCache);
+            }
 
             // Add binding redirects to all projects that are referencing this one
             foreach (Project dependentProject in solutionManager.GetDependentProjects(project))

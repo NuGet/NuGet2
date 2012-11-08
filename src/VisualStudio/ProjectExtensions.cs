@@ -230,7 +230,7 @@ namespace NuGet.VisualStudio
 
             // Consider class libraries projects that have one project type guid and an output type of project library.
             var outputType = project.GetPropertyValue<prjOutputType>("OutputType");
-            return project.GetProjectTypeGuids().Count() == 1 &&
+            return project.GetProjectTypeGuids().Length == 1 &&
                    outputType == prjOutputType.prjOutputTypeLibrary;
         }
 
@@ -473,8 +473,15 @@ namespace NuGet.VisualStudio
 
         public static bool IsWebProject(this Project project)
         {
-            var types = new HashSet<string>(project.GetProjectTypeGuids(), StringComparer.OrdinalIgnoreCase);
-            return types.Contains(VsConstants.WebSiteProjectTypeGuid) || types.Contains(VsConstants.WebApplicationProjectTypeGuid);
+            string[] types = project.GetProjectTypeGuids();
+            return types.Contains(VsConstants.WebSiteProjectTypeGuid, StringComparer.OrdinalIgnoreCase) || 
+                   types.Contains(VsConstants.WebApplicationProjectTypeGuid, StringComparer.OrdinalIgnoreCase);
+        }
+
+        public static bool IsWindowsStoreApp(this Project project)
+        {
+            string[] types = project.GetProjectTypeGuids();
+            return types.Contains(VsConstants.WindowsStoreProjectTypeGuid, StringComparer.OrdinalIgnoreCase);
         }
 
         public static bool IsWebSite(this Project project)
@@ -510,8 +517,8 @@ namespace NuGet.VisualStudio
 
         public static bool SupportsBindingRedirects(this Project project)
         {
-            return project.Kind != null &
-                !_unsupportedProjectTypesForBindingRedirects.Contains(project.Kind, StringComparer.OrdinalIgnoreCase);
+            return (project.Kind != null & !_unsupportedProjectTypesForBindingRedirects.Contains(project.Kind, StringComparer.OrdinalIgnoreCase)) &&
+                    !project.IsWindowsStoreApp();
         }
 
         public static bool IsUnloaded(this Project project)
@@ -579,7 +586,7 @@ namespace NuGet.VisualStudio
             return VersionUtility.IsCompatible(frameworkName, package.GetSupportedFrameworks());
         }
 
-        public static IEnumerable<string> GetProjectTypeGuids(this Project project)
+        public static string[] GetProjectTypeGuids(this Project project)
         {
             // Get the vs hierarchy as an IVsAggregatableProject to get the project type guids
 
@@ -607,7 +614,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        internal static IEnumerable<Project> GetReferencedProjects(this Project project)
+        internal static IList<Project> GetReferencedProjects(this Project project)
         {
             if (project.IsWebSite())
             {
@@ -644,7 +651,7 @@ namespace NuGet.VisualStudio
             return assemblies;
         }
 
-        private static IEnumerable<Project> GetWebsiteReferencedProjects(Project project)
+        private static IList<Project> GetWebsiteReferencedProjects(Project project)
         {
             var projects = new List<Project>();
             AssemblyReferences references = project.Object.References;
