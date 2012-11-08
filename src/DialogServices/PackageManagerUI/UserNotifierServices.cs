@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.Versioning;
 using System.Windows.Threading;
 using EnvDTE;
 using NuGet.VisualStudio;
+using System.Runtime.Versioning;
 
 namespace NuGet.Dialog.PackageManagerUI
 {
@@ -70,13 +70,8 @@ namespace NuGet.Dialog.PackageManagerUI
                 checkedStateSelector,
                 enabledStateSelector);
 
-            bool hasProjects = ProgressDialogHelper.DoWorkWhileShowingProgress(
-                () => viewModel.HasProjects,
-                title: Resources.Dialog_ProjectSelectorTitle,
-                message: Resources.Dialog_LoadingProjects);
-
             // only show the solution explorer window if there is at least one compatible project
-            if (hasProjects)
+            if (viewModel.HasProjects)
             {
                 var window = new SolutionExplorer()
                 {

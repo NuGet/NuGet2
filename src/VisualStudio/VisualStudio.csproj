@@ -78,7 +78,6 @@
     <Compile Include="SolutionFolderFileSystem.cs" />
     <Compile Include="TfsSourceControlFileSystemProviderPicker.cs" />
     <Compile Include="Utility\PathHelper.cs" />
-    <Compile Include="Utility\ProgressDialogHelper.cs" />
     <Compile Include="Utility\SourceControlHelper.cs" />
     <Compile Include="Utility\UriHelper.cs" />
     <Compile Include="Utility\VsHierarchyHelper.cs">

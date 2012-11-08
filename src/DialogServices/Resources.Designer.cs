@@ -196,15 +196,6 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Loading the projects in the current solution....
-        /// </summary>
-        public static string Dialog_LoadingProjects {
-            get {
-                return ResourceManager.GetString("Dialog_LoadingProjects", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Operation failed.
         /// </summary>
         public static string Dialog_MessageBoxTitle {
