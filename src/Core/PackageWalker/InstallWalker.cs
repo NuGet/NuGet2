@@ -14,6 +14,10 @@ namespace NuGet
         private readonly bool _allowPrereleaseVersions;
         private readonly OperationLookup _operations;
 
+        // This acts as a "retainment" queue. It contains packages that are already installed but need to be kept during 
+        // a package walk. This is to prevent those from being uninstalled in subsequent encounters.
+        private readonly HashSet<IPackage> _packagesToKeep = new HashSet<IPackage>(PackageEqualityComparer.IdAndVersion);
+
         // this ctor is used for unit tests
         internal InstallWalker(IPackageRepository localRepository,
                                IPackageRepository sourceRepository,
@@ -174,6 +178,9 @@ namespace NuGet
 
         private void Uninstall(IPackage package, IDependentsResolver dependentsResolver, IPackageRepository repository)
         {
+            // If we explicitly want to uninstall this package, then remove it from the retainment queue.
+            _packagesToKeep.Remove(package);
+
             // If this package isn't part of the current graph (i.e. hasn't been visited yet) and
             // is marked for removal, then do nothing. This is so we don't get unnecessary duplicates.
             if (!Marker.Contains(package) && _operations.Contains(package, PackageAction.Uninstall))
@@ -192,7 +199,11 @@ namespace NuGet
 
             foreach (var operation in resolver.ResolveOperations(package))
             {
-                _operations.AddOperation(operation);
+                // If the operation is Uninstall, we don't want to uninstall the package if it is in the "retainment" queue.
+                if (operation.Action == PackageAction.Install || !_packagesToKeep.Contains(operation.Package))
+                {
+                    _operations.AddOperation(operation);
+                }
             }
         }
 
@@ -305,6 +316,9 @@ namespace NuGet
                 // If we already added an entry for removing this package then remove it 
                 // (it's equivalent for doing +P since we're removing a -P from the list)
                 _operations.RemoveOperation(package, PackageAction.Uninstall);
+
+                // and mark the package as being "retained".
+                _packagesToKeep.Add(package);
             }
         }
 
@@ -353,6 +367,7 @@ namespace NuGet
         {
             _operations.Clear();
             Marker.Clear();
+            _packagesToKeep.Clear();
 
             Walk(package);
             return Operations.Reduce();
