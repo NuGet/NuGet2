@@ -18,7 +18,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
             packageSourceProvider.Setup(c => c.LoadPackageSources()).Returns(new[] { new PackageSource("FirstSource", "FirstName") });
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object);
+            var sourceCommand = new SourcesCommand()
+            {
+                SourceProvider = packageSourceProvider.Object,
+            };
             string expectedText =
 @"Registered Sources:
   1.  FirstName [Enabled]
@@ -27,11 +30,14 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var stringBuilder = new StringBuilder();
             var console = new MockConsole();
 
-            var sourcesCommand = new SourcesCommand(packageSourceProvider.Object);
+            var sourcesCommand = new SourcesCommand()
+            {
+                SourceProvider = packageSourceProvider.Object
+            };
             sourceCommand.Console = console;
 
             // Act
-            sourceCommand.Execute();
+            sourceCommand.ExecuteCommand();
 
             // Assert
             Assert.Equal(expectedText, console.Output);
@@ -43,7 +49,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
             packageSourceProvider.Setup(c => c.LoadPackageSources()).Returns(new[] { new PackageSource("FirstSource", "FirstName", isEnabled: false) });
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object);
+            var sourceCommand = new SourcesCommand()
+            {
+                SourceProvider = packageSourceProvider.Object
+            };
             sourceCommand.Arguments.Add("list");
             string expectedText =
 @"Registered Sources:
@@ -53,11 +62,14 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var stringBuilder = new StringBuilder();
             var console = new MockConsole();
 
-            var sourcesCommand = new SourcesCommand(packageSourceProvider.Object);
+            var sourcesCommand = new SourcesCommand()
+            {
+                SourceProvider = packageSourceProvider.Object
+            };
             sourceCommand.Console = console;
 
             // Act
-            sourceCommand.Execute();
+            sourceCommand.ExecuteCommand();
 
             // Assert
             Assert.Equal(expectedText, console.Output);
@@ -70,13 +82,15 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object) {
+            var sourceCommand = new SourcesCommand()
+            {
+                SourceProvider = packageSourceProvider.Object,
                 Name = name
             };
             sourceCommand.Arguments.Add("ADD");
             
             // Act and Assert
-            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "The name specified cannot be empty. Please provide a valid name.");
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, "The name specified cannot be empty. Please provide a valid name.");
         }
 
         [Fact]
@@ -84,14 +98,15 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = "All"
             };
             sourceCommand.Arguments.Add("ADD");
             
             // Act and Assert
-            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "Package source name 'All' is a reserved name.");
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, "Package source name 'All' is a reserved name.");
         }
 
         [Theory]
@@ -101,15 +116,16 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = "Test",
                 Source = source
             };
             sourceCommand.Arguments.Add("ADD");
 
             // Act and Assert
-            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "The source specified cannot be empty. Please provide a valid source.");
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, "The source specified cannot be empty. Please provide a valid source.");
         }
 
         [Theory]
@@ -119,15 +135,16 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = "Test",
                 Source = source
             };
             sourceCommand.Arguments.Add("ADD");
 
             // Act and Assert
-            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "The source specified is invalid. Please provide a valid source.");
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, "The source specified is invalid. Please provide a valid source.");
         }
 
         [Fact]
@@ -137,15 +154,16 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
             packageSourceProvider.Setup(s => s.LoadPackageSources())
                                  .Returns(new[] { new PackageSource("http://TestSource", "TestName") });
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = "TestName",
                 Source = "http://nuget.org"
             };
             sourceCommand.Arguments.Add("ADD");
 
             // Act and Assert
-            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "The name specified has already been added to the list of available package sources. Please provide a unique name.");
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, "The name specified has already been added to the list of available package sources. Please provide a unique name.");
         }
 
         [Fact]
@@ -155,15 +173,16 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
             packageSourceProvider.Setup(s => s.LoadPackageSources())
                                  .Returns(new[] { new PackageSource("http://TestSource", "TestName") });
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = "TestName1",
                 Source = "http://TestSource"
             };
             sourceCommand.Arguments.Add("ADD");
 
             // Act and Assert
-            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "The source specified has already been added to the list of available package sources. Please provide a unique source.");
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, "The source specified has already been added to the list of available package sources. Please provide a unique source.");
         }
 
         [Theory]
@@ -175,8 +194,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = "TestName",
                 Source = "http://TestSource",
                 UserName = userName,
@@ -185,7 +205,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             sourceCommand.Arguments.Add("ADD");
 
             // Act and Assert
-            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "Both UserName and Password must be specified.");
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, "Both UserName and Password must be specified.");
         }
 
         [Fact]
@@ -198,8 +218,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                                  .Returns(new[] { new PackageSource("http://TestSource", "TestName") });
             packageSourceProvider.Setup(s => s.SavePackageSources(It.IsAny<IEnumerable<PackageSource>>()))
                 .Callback((IEnumerable<PackageSource> source) => Assert.Equal(expectedSources, source));
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = "new-source-name",
                 Source = "http://new-source"
             };
@@ -207,7 +228,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             sourceCommand.Console = new MockConsole();
 
             // Act 
-            sourceCommand.Execute();
+            sourceCommand.ExecuteCommand();
 
             // Assert
             packageSourceProvider.Verify();
@@ -220,15 +241,16 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = source,
                 Source = "Source"
             };
             sourceCommand.Arguments.Add("remove");
 
             // Act and Assert
-            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "The name specified cannot be empty. Please provide a valid name.");
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, "The name specified cannot be empty. Please provide a valid name.");
         }
 
         [Fact]
@@ -238,14 +260,15 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var sources = new[] { new PackageSource("Abcd") };
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
             packageSourceProvider.Setup(c => c.LoadPackageSources()).Returns(sources);
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = "efgh",
             };
             sourceCommand.Arguments.Add("remove");
 
             // Act and Assert
-            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "Unable to find any package source(s) matching name: efgh.");
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, "Unable to find any package source(s) matching name: efgh.");
         }
 
         [Fact]
@@ -259,15 +282,16 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             packageSourceProvider.Setup(c => c.SavePackageSources(It.IsAny<IEnumerable<PackageSource>>()))
                                  .Callback((IEnumerable<PackageSource> src) => Assert.Equal(expectedSource, src))
                                  .Verifiable();
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = "efgh",
             };
             sourceCommand.Arguments.Add("remove");
             sourceCommand.Console = new MockConsole();
 
             // Act 
-            sourceCommand.Execute();
+            sourceCommand.ExecuteCommand();
 
             // Assert
             packageSourceProvider.Verify();
@@ -280,15 +304,16 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         {
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = source,
                 Source = "Source"
             };
             sourceCommand.Arguments.Add("update");
 
             // Act and Assert
-            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "The name specified cannot be empty. Please provide a valid name.");
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, "The name specified cannot be empty. Please provide a valid name.");
         }
 
         [Fact]
@@ -298,14 +323,15 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var sources = new[] { new PackageSource("Abcd") };
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
             packageSourceProvider.Setup(c => c.LoadPackageSources()).Returns(sources);
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = "efgh",
             };
             sourceCommand.Arguments.Add("update");
 
             // Act and Assert
-            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "Unable to find any package source(s) matching name: efgh.");
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, "Unable to find any package source(s) matching name: efgh.");
         }
 
         [Fact]
@@ -315,15 +341,16 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var sources = new[] { new PackageSource("Abcd"), new PackageSource("pqrs") };
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
             packageSourceProvider.Setup(c => c.LoadPackageSources()).Returns(sources);
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = "Abcd",
                 Source = "http:\\bad-url"
             };
             sourceCommand.Arguments.Add("update");
 
             // Act and Assert
-            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "The source specified is invalid. Please provide a valid source.");
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, "The source specified is invalid. Please provide a valid source.");
         }
 
         [Fact]
@@ -333,15 +360,16 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var sources = new[] { new PackageSource("Abcd"), new PackageSource("http://test-source", "source") };
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
             packageSourceProvider.Setup(c => c.LoadPackageSources()).Returns(sources);
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = "Abcd",
                 Source = "http://test-source"
             };
             sourceCommand.Arguments.Add("update");
 
             // Act and Assert
-            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, 
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, 
                 "The source specified has already been added to the list of available package sources. Please provide a unique source.");
         }
 
@@ -355,8 +383,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
             packageSourceProvider.Setup(s => s.LoadPackageSources()).Returns(new[] { new PackageSource("http://testsource") });
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = "http://TestSource",
                 UserName = userName,
                 Password = password
@@ -364,7 +393,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             sourceCommand.Arguments.Add("UPDATE");
 
             // Act and Assert
-            ExceptionAssert.Throws<CommandLineException>(sourceCommand.Execute, "Both UserName and Password must be specified.");
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, "Both UserName and Password must be specified.");
         }
 
         [Fact]
@@ -380,8 +409,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                                  .Callback((IEnumerable<PackageSource> actualSources) => Assert.Equal(expectedSources, actualSources))
                                  .Verifiable();
 
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = "Abcd",
                 Source = "http://abcd-source"
             };
@@ -389,7 +419,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             sourceCommand.Console = new MockConsole();
 
             // Act 
-            sourceCommand.Execute();
+            sourceCommand.ExecuteCommand();
 
             // Assert
             packageSourceProvider.Verify();
@@ -415,8 +445,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                                  })
                                  .Verifiable();
 
-            var sourceCommand = new SourcesCommand(packageSourceProvider.Object)
+            var sourceCommand = new SourcesCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
                 Name = "Abcd",
                 Source = "http://abcd-source",
                 UserName = userName,
@@ -426,7 +457,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             sourceCommand.Console = new MockConsole();
 
             // Act 
-            sourceCommand.Execute();
+            sourceCommand.ExecuteCommand();
 
             // Assert
             packageSourceProvider.Verify();
@@ -496,7 +527,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                                  .Callback((IEnumerable<PackageSource> sources) => Assert.Equal(new[] { new PackageSource("Two") { IsEnabled = true } }, sources))
                                  .Verifiable();
 
-            var command = new SourcesCommand(packageSourceProvider.Object);
+            var command = new SourcesCommand()
+            {
+                SourceProvider = packageSourceProvider.Object
+            };
             command.Arguments.Add("Enable");
             command.Name = "two";
             command.Console = new Mock<IConsole>().Object;
@@ -532,7 +566,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                                  .Callback((IEnumerable<PackageSource> sources) => Assert.Equal(expectedSources, sources))
                                  .Verifiable();
 
-            var command = new SourcesCommand(packageSourceProvider.Object);
+            var command = new SourcesCommand()
+            {
+                SourceProvider = packageSourceProvider.Object
+            };
             command.Arguments.Add("Enable");
             command.Name = "one";
             command.Console = new Mock<IConsole>().Object;
@@ -568,7 +605,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                                  .Callback((IEnumerable<PackageSource> sources) => Assert.Equal(expectedSources, sources))
                                  .Verifiable();
 
-            var command = new SourcesCommand(packageSourceProvider.Object);
+            var command = new SourcesCommand()
+            {
+                SourceProvider = packageSourceProvider.Object
+            };
             command.Arguments.Add("Disable");
             command.Name = "three";
             command.Console = new Mock<IConsole>().Object;
@@ -604,7 +644,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                                  .Callback((IEnumerable<PackageSource> sources) => Assert.Equal(expectedSources, sources))
                                  .Verifiable();
 
-            var command = new SourcesCommand(packageSourceProvider.Object);
+            var command = new SourcesCommand()
+            {
+                SourceProvider = packageSourceProvider.Object
+            };
             command.Arguments.Add("Disable");
             command.Name = "two";
             command.Console = new Mock<IConsole>().Object;
@@ -619,7 +662,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         private SourcesCommand CreateCommand()
         {
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
-            return new SourcesCommand(packageSourceProvider.Object);
+            return new SourcesCommand()
+            {
+                SourceProvider = packageSourceProvider.Object
+            };
         }
 
     }

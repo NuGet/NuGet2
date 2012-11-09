@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using NuGet.Common;
 
@@ -16,6 +17,9 @@ namespace NuGet.Commands
         {
             Arguments = new List<string>();
         }
+
+        [Import]
+        public IFileSystem FileSystem { get; set; }
 
         public IList<string> Arguments { get; private set; }
 
@@ -37,6 +41,15 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "Option_NonInteractive")]
         public bool NonInteractive { get; set; }
 
+        [Option(typeof(NuGetCommand), "Option_ConfigFile")]
+        public string ConfigFile { get; set; }
+
+        protected internal ISettings Settings { get; set; }
+
+        protected internal IPackageSourceProvider SourceProvider { get; set; }
+
+        protected internal IPackageRepositoryFactory RepositoryFactory { get; set; }
+
         public CommandAttribute CommandAttribute
         {
             get
@@ -57,6 +70,31 @@ namespace NuGet.Commands
             }
             else
             {
+                if (String.IsNullOrEmpty(ConfigFile))
+                {
+                    Settings = NuGet.Settings.LoadDefaultSettings(FileSystem);
+                }
+                else
+                {
+                    var directory = Path.GetDirectoryName(Path.GetFullPath(ConfigFile));
+                    var configFileName = Path.GetFileName(ConfigFile);
+                    var configFileSystem = new PhysicalFileSystem(directory);
+                    Settings = NuGet.Settings.LoadDefaultSettings(
+                        configFileSystem,
+                        configFileName);
+                }
+
+                SourceProvider = PackageSourceBuilder.CreateSourceProvider(Settings);
+
+                // Register an additional provider for the console specific application so that the user
+                // will be prompted if a proxy is set and credentials are required
+                var credentialProvider = new SettingsCredentialProvider(
+                    new ConsoleCredentialProvider(Console),
+                    SourceProvider, 
+                    Console);
+                HttpClient.DefaultCredentialProvider = credentialProvider;
+                RepositoryFactory = new NuGet.Common.CommandLineRepositoryFactory();
+
                 ExecuteCommand();
             }
         }

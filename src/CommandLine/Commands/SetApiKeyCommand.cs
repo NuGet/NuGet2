@@ -11,29 +11,18 @@ namespace NuGet.Commands
     {
         [Option(typeof(NuGetCommand), "SetApiKeyCommandSourceDescription", AltName = "src")]
         public string Source { get; set; }
-
-        public IPackageSourceProvider SourceProvider { get; private set; }
-
-        public ISettings Settings { get; private set; }
-
-        [ImportingConstructor]
-        public SetApiKeyCommand(IPackageSourceProvider packageSourceProvider, ISettings settings)
-        {
-            if (packageSourceProvider == null)
-            {
-                throw new ArgumentNullException("packageSourceProvider");
-            }
-            if (settings == null)
-            {
-                throw new ArgumentNullException("settings");
-            }
-
-            SourceProvider = packageSourceProvider;
-            Settings = settings;
-        }
-
+        
         public override void ExecuteCommand()
         {
+            if (SourceProvider == null)
+            {
+                throw new InvalidOperationException(NuGetResources.Error_SourceProviderIsNull);
+            }
+            if (Settings == null)
+            {
+                throw new InvalidOperationException(NuGetResources.Error_SettingsIsNull);
+            }
+
             //Frist argument should be the ApiKey
             string apiKey = Arguments[0];
 

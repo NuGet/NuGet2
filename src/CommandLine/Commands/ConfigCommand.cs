@@ -11,18 +11,7 @@ namespace NuGet.Commands
     {
         private const string HttpPasswordKey = "http_proxy.password";
         private readonly Dictionary<string, string> _setValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        private readonly ISettings _settings;
-
-        [ImportingConstructor]
-        public ConfigCommand(ISettings settings)
-        {
-            if (settings == null)
-            {
-                throw new ArgumentNullException("settings");
-            }
-            _settings = settings;
-        }
-
+        
         [Option(typeof(NuGetCommand), "ConfigCommandSetDesc")]
         public Dictionary<string, string> Set
         {
@@ -31,6 +20,11 @@ namespace NuGet.Commands
 
         public override void ExecuteCommand()
         {
+            if (Settings == null)
+            {
+                throw new InvalidOperationException(NuGetResources.Error_SettingsIsNull);
+            }
+
             string getKey = Arguments.FirstOrDefault();
             if (Set.Any())
             {
@@ -38,19 +32,19 @@ namespace NuGet.Commands
                 {
                     if (String.IsNullOrEmpty(property.Value))
                     {
-                        _settings.DeleteConfigValue(property.Key);
+                        Settings.DeleteConfigValue(property.Key);
                     }
                     else
                     {
                         // Hack: Need a nicer way for the user to say encrypt this.
                         bool encrypt = HttpPasswordKey.Equals(property.Key, StringComparison.OrdinalIgnoreCase);
-                        _settings.SetConfigValue(property.Key, property.Value, encrypt);
+                        Settings.SetConfigValue(property.Key, property.Value, encrypt);
                     }
                 }
             }
             else if (!String.IsNullOrEmpty(getKey))
             {
-                string value = _settings.GetConfigValue(getKey);
+                string value = Settings.GetConfigValue(getKey);
                 if (String.IsNullOrEmpty(value))
                 {
                     Console.WriteWarning(NuGetResources.ConfigCommandKeyNotFound, getKey);

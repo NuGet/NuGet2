@@ -39,22 +39,7 @@ namespace NuGet.ServerExtensions
         [Option(typeof(NuGetResources), "MirrorCommandNoOp", AltName = "n")]
         public bool NoOp { get; set; }
 
-        private IPackageSourceProvider SourceProvider { get; set; }
-
-        private IPackageRepositoryFactory RepositoryFactory { get; set; }
-
-        private ISettings Settings { get; set; }
-
-        private readonly IPackageRepository _cacheRepository;
-
-        [ImportingConstructor]
-        public MirrorCommand(IPackageSourceProvider packageSourceProvider, ISettings settings, IPackageRepositoryFactory packageRepositoryFactory)
-        {
-            SourceProvider = packageSourceProvider;
-            Settings = settings;
-            RepositoryFactory = packageRepositoryFactory;
-            _cacheRepository = MachineCache.Default;
-        }
+        private readonly IPackageRepository _cacheRepository = MachineCache.Default;
 
         public override void ExecuteCommand()
         {

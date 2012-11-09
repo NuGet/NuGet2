@@ -175,7 +175,7 @@ nuget push -?</value>
     <value>[command]</value>
   </data>
   <data name="InstallCommandDescription" xml:space="preserve">
-    <value>Installs a package using the specified sources. If no sources are specified, all sources defined in %AppData%\NuGet\NuGet.config are used.  If NuGet.config specifies no sources, uses the default NuGet feed.</value>
+    <value>Installs a package using the specified sources. If no sources are specified, all sources defined in the NuGet configuration file are used.  If the configuration file specifies no sources, uses the default NuGet feed.</value>
   </data>
   <data name="InstallCommandExcludeVersionDescription" xml:space="preserve">
     <value>If set, the destination folder will contain only the package name, not the version number</value>
@@ -418,5 +418,8 @@ nuget update -Self</value>
   </data>
   <data name="InstallCommandSolutionDirectory" xml:space="preserve">
     <value>Solution root for package restore.</value>
+  </data>  
+  <data name="Option_ConfigFile" xml:space="preserve">
+    <value>The NuGet configuration file. If not specified, file %AppData%\NuGet\NuGet.config is used as configuration file.</value>
   </data>
 </root>

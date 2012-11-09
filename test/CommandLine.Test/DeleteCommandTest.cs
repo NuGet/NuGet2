@@ -11,7 +11,11 @@ namespace NuGet.Test
         {
             // Arrange
             var guid = "1234-5678-9801-2345";
-            var deleteCommand = new DeleteCommand(new Mock<IPackageSourceProvider>(MockBehavior.Strict).Object, new Mock<ISettings>(MockBehavior.Strict).Object);
+            var deleteCommand = new DeleteCommand()
+            {
+                SourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict).Object,
+                Settings = new Mock<ISettings>(MockBehavior.Strict).Object
+            };
             deleteCommand.Arguments.AddRange(new[] { "NuGet.CommandLine", "1.0", guid });
 
             // Act
@@ -27,10 +31,13 @@ namespace NuGet.Test
             // Arrange
             var namedGuid = "2345-9801-5678-1234";
             var unnamedGuid = "1234-5678-9801-2345";
-            var deleteCommand = new DeleteCommand(new Mock<IPackageSourceProvider>(MockBehavior.Strict).Object, new Mock<ISettings>(MockBehavior.Strict).Object)
+            var deleteCommand = new DeleteCommand() 
             {
-                ApiKey = namedGuid
+                SourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict).Object,
+                Settings = new Mock<ISettings>(MockBehavior.Strict).Object,
+                ApiKey = namedGuid        
             };
+
             deleteCommand.Arguments.AddRange(new[] { "NuGet.CommandLine", "1.0", unnamedGuid });
 
             // Act

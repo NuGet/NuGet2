@@ -340,12 +340,11 @@ namespace NuGet.Test.ServerExtensions
                 IFileSystem fileSystem = null,
                 IPackageRepository machineCacheRepository = null
                 )
-                : base(
-                    sourceProvider ?? GetSourceProvider(),
-                    CreateSettings(),
-                    factory ?? GetFactory()
-                )
             {
+                SourceProvider = sourceProvider ?? GetSourceProvider();
+                Settings = CreateSettings();
+                RepositoryFactory = factory ?? GetFactory();
+
                 Arguments.Add(packageId);
                 Arguments.Add("destinationurlpull");
                 Arguments.Add("destinationurlpush");

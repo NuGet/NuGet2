@@ -29,27 +29,6 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "ListCommandPrerelease")]
         public bool Prerelease { get; set; }
 
-        public IPackageRepositoryFactory RepositoryFactory { get; private set; }
-
-        public IPackageSourceProvider SourceProvider { get; private set; }
-
-        [ImportingConstructor]
-        public ListCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider)
-        {
-            if (packageRepositoryFactory == null)
-            {
-                throw new ArgumentNullException("packageRepositoryFactory");
-            }
-
-            if (sourceProvider == null)
-            {
-                throw new ArgumentNullException("sourceProvider");
-            }
-
-            RepositoryFactory = packageRepositoryFactory;
-            SourceProvider = sourceProvider;
-        }
-
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This call is expensive")]
         public IEnumerable<IPackage> GetPackages()
         {

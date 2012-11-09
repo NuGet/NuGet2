@@ -35,7 +35,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
             packageSourceProvider.Setup(s => s.LoadPackageSources()).Returns(new[] { new PackageSource("foo-source") });
 
-            var updateCommand = new UpdateCommand(repositoryFactory.Object, packageSourceProvider.Object);
+            var updateCommand = new UpdateCommand()
+            {
+                RepositoryFactory = repositoryFactory.Object,
+                SourceProvider = packageSourceProvider.Object
+            };
 
             // Act
             updateCommand.UpdatePackages(localRepository, fileSystem, sharedRepository.Object, sourceRepository, constraintProvider, pathResolver, projectSystem);
@@ -73,7 +77,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
             packageSourceProvider.Setup(s => s.LoadPackageSources()).Returns(new[] { new PackageSource("foo-source") });
 
-            var updateCommand = new UpdateCommand(repositoryFactory.Object, packageSourceProvider.Object);
+            var updateCommand = new UpdateCommand()
+            {
+                RepositoryFactory = repositoryFactory.Object,
+                SourceProvider = packageSourceProvider.Object
+            };
 
             // Act
             updateCommand.UpdatePackages(localRepository, fileSystem, sharedRepository.Object, sourceRepository, constraintProvider, pathResolver, projectSystem);

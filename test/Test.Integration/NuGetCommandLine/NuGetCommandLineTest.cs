@@ -118,6 +118,30 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         }
 
         [Fact]
+        public void SetapikeyCommand_WithConfigOption()
+        {
+            var testDirectory = Path.Combine(_testRootDirectory, "testdir");
+            string[] args = new string[] 
+            { 
+                "setapikey", 
+                "A", 
+                "-ConfigFile", 
+                Path.Combine(testDirectory, "test_nuget.config") 
+            };
+            int result = Program.Main(args);
+
+            // Assert
+            var settings = Settings.LoadDefaultSettings(
+                new PhysicalFileSystem(testDirectory),
+                "test_nuget.config");
+            var apiKey = CommandLineUtility.GetApiKey(settings, NuGetConstants.DefaultGalleryServerUrl);
+            Assert.Equal("A", apiKey);
+
+            apiKey = CommandLineUtility.GetApiKey(settings, NuGetConstants.DefaultSymbolServerUrl);
+            Assert.Equal("A", apiKey);
+        }
+
+        [Fact]
         public void PackageCommand_CreatesPackageWhenPassingBasePath()
         {
             //Arrange

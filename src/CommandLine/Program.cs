@@ -41,7 +41,7 @@ namespace NuGet
                 RemoveOldFile(fileSystem);
 
                 // Import Dependencies  
-                var p = new Program();
+                var p = new Program();                
                 p.Initialize(fileSystem, console);
 
                 // Add commands to the manager
@@ -106,19 +106,8 @@ namespace NuGet
                 }
                 using (var container = new CompositionContainer(catalog))
                 {
-                    var settings = Settings.LoadDefaultSettings(fileSystem);
-                    var packageSourceProvider = PackageSourceBuilder.CreateSourceProvider(settings);
-
-                    // Register an additional provider for the console specific application so that the user
-                    // will be prompted if a proxy is set and credentials are required
-                    var credentialProvider = new SettingsCredentialProvider(new ConsoleCredentialProvider(console), packageSourceProvider, console);
-                    HttpClient.DefaultCredentialProvider = credentialProvider;
-
                     container.ComposeExportedValue<IConsole>(console);
-                    container.ComposeExportedValue<ISettings>(settings);
                     container.ComposeExportedValue<IPackageRepositoryFactory>(new NuGet.Common.CommandLineRepositoryFactory());
-                    container.ComposeExportedValue<IPackageSourceProvider>(packageSourceProvider);
-                    container.ComposeExportedValue<ICredentialProvider>(credentialProvider);
                     container.ComposeExportedValue<IFileSystem>(fileSystem);
                     container.ComposeParts(this);
                 }

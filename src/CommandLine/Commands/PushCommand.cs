@@ -21,18 +21,7 @@ namespace NuGet.Commands
 
         [Option(typeof(NuGetCommand), "PushCommandTimeoutDescription")]
         public int Timeout { get; set; }
-
-        public IPackageSourceProvider SourceProvider { get; private set; }
-
-        public ISettings Settings { get; private set; }
-
-        [ImportingConstructor]
-        public PushCommand(IPackageSourceProvider packageSourceProvider, ISettings settings)
-        {
-            SourceProvider = packageSourceProvider;
-            Settings = settings;
-        }
-
+        
         public override void ExecuteCommand()
         {
             // First argument should be the package

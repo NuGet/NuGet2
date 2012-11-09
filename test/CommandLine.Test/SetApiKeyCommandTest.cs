@@ -12,7 +12,9 @@ namespace NuGet.Test
         public void SetApiKeyThrowsIfPackageSourceProviderIsNull()
         {
             // Act and Assert
-            ExceptionAssert.ThrowsArgNull(() => new SetApiKeyCommand(packageSourceProvider: null, settings: null), "packageSourceProvider");
+            var setApiKeyCommand = new SetApiKeyCommand();
+            setApiKeyCommand.SourceProvider = null;            
+            ExceptionAssert.Throws<InvalidOperationException>(() => setApiKeyCommand.ExecuteCommand(), "Property SourceProvider is null.");
         }
 
         [Fact]
@@ -20,9 +22,12 @@ namespace NuGet.Test
         {
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            var setApiKeyCommand = new SetApiKeyCommand();
+            setApiKeyCommand.SourceProvider = packageSourceProvider.Object;
+            setApiKeyCommand.Settings = null;
 
             // Act and Assert
-            ExceptionAssert.ThrowsArgNull(() => new SetApiKeyCommand(packageSourceProvider.Object, settings: null), "settings");
+            ExceptionAssert.Throws<InvalidOperationException>(() => setApiKeyCommand.ExecuteCommand(), "Property Settings is null.");
         }
 
         [Fact]
@@ -30,12 +35,14 @@ namespace NuGet.Test
         {
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
-            var command = new SetApiKeyCommand(packageSourceProvider.Object, settings: NullSettings.Instance);
-            command.Arguments.Add("foo");
+            var setApiKeyCommand = new SetApiKeyCommand();
+            setApiKeyCommand.SourceProvider = packageSourceProvider.Object;
+            setApiKeyCommand.Settings = NullSettings.Instance;
+            setApiKeyCommand.Arguments.Add("foo");
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(
-                () => command.Execute(), 
+                () => setApiKeyCommand.ExecuteCommand(),
                 "\"SetValue\" cannot be called on a NullSettings. This may be caused on account of insufficient permissions to read or write to \"%AppData%\\NuGet\\NuGet.config\".");
         }
 
@@ -49,12 +56,14 @@ namespace NuGet.Test
             settingsFile.Setup(c => c.SetValue("apikeys", NuGetConstants.DefaultSymbolServerUrl, It.IsAny<string>())).Verifiable();
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
 
-            // Act
-            var setApiKey = new SetApiKeyCommand(packageSourceProvider.Object, settingsFile.Object)
+            var setApiKey = new SetApiKeyCommand()
             {
+                SourceProvider = packageSourceProvider.Object,
+                Settings = settingsFile.Object,
                 Console = new Mock<IConsole>().Object
             };
 
+            // Act
             setApiKey.Arguments.Add(apiKey);
             setApiKey.ExecuteCommand();
 

@@ -9,8 +9,6 @@ namespace NuGet.Commands
         MinArgs = 0, MaxArgs = 1)]
     public class SourcesCommand : Command
     {
-        private readonly IPackageSourceProvider _sourceProvider;
-
         [Option(typeof(NuGetCommand), "SourcesCommandNameDescription")]
         public string Name { get; set; }
 
@@ -23,18 +21,13 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "SourcesCommandPasswordDescription")]
         public string Password { get; set; }
 
-        [ImportingConstructor]
-        public SourcesCommand(IPackageSourceProvider sourceProvider)
-        {
-            if (sourceProvider == null)
-            {
-                throw new ArgumentNullException("sourceProvider");
-            }
-            _sourceProvider = sourceProvider;
-        }
-
         public override void ExecuteCommand()
         {
+            if (SourceProvider == null)
+            {
+                throw new InvalidOperationException(NuGetResources.Error_SourceProviderIsNull);
+            }
+
             // Convert to update
             var action = Arguments.FirstOrDefault();
 
@@ -72,7 +65,7 @@ namespace NuGet.Commands
                 throw new CommandLineException(NuGetResources.SourcesCommandNameRequired);
             }
 
-            List<PackageSource> sourceList = _sourceProvider.LoadPackageSources().ToList();
+            List<PackageSource> sourceList = SourceProvider.LoadPackageSources().ToList();
             var existingSource = sourceList.Where(ps => String.Equals(Name, ps.Name, StringComparison.OrdinalIgnoreCase));
             if (!existingSource.Any())
             {
@@ -84,7 +77,7 @@ namespace NuGet.Commands
                 source.IsEnabled = enabled;
             }
 
-            _sourceProvider.SavePackageSources(sourceList);
+            SourceProvider.SavePackageSources(sourceList);
             Console.WriteLine(
                 enabled ? NuGetResources.SourcesCommandSourceEnabledSuccessfully : NuGetResources.SourcesCommandSourceDisabledSuccessfully,
                 Name);
@@ -97,7 +90,7 @@ namespace NuGet.Commands
                 throw new CommandLineException(NuGetResources.SourcesCommandNameRequired);
             }
             // Check to see if we already have a registered source with the same name or source
-            var sourceList = _sourceProvider.LoadPackageSources().ToList();
+            var sourceList = SourceProvider.LoadPackageSources().ToList();
             var matchingSources = sourceList.Where(ps => String.Equals(Name, ps.Name, StringComparison.OrdinalIgnoreCase)).ToList();
             if (!matchingSources.Any())
             {
@@ -105,7 +98,7 @@ namespace NuGet.Commands
             }
 
             sourceList.RemoveAll(matchingSources.Contains);
-            _sourceProvider.SavePackageSources(sourceList);
+            SourceProvider.SavePackageSources(sourceList);
             Console.WriteLine(NuGetResources.SourcesCommandSourceRemovedSuccessfully, Name);
         }
 
@@ -132,7 +125,7 @@ namespace NuGet.Commands
             ValidateCredentials();
 
             // Check to see if we already have a registered source with the same name or source
-            var sourceList = _sourceProvider.LoadPackageSources().ToList();
+            var sourceList = SourceProvider.LoadPackageSources().ToList();
             bool hasName = sourceList.Any(ps => String.Equals(Name, ps.Name, StringComparison.OrdinalIgnoreCase));
             if (hasName)
             {
@@ -146,7 +139,7 @@ namespace NuGet.Commands
 
             var newPackageSource = new PackageSource(Source, Name) { UserName = UserName, Password = Password };
             sourceList.Add(newPackageSource);
-            _sourceProvider.SavePackageSources(sourceList);
+            SourceProvider.SavePackageSources(sourceList);
             Console.WriteLine(NuGetResources.SourcesCommandSourceAddedSuccessfully, Name);
         }
 
@@ -157,7 +150,7 @@ namespace NuGet.Commands
                 throw new CommandLineException(NuGetResources.SourcesCommandNameRequired);
             }
 
-            List<PackageSource> sourceList = _sourceProvider.LoadPackageSources().ToList();
+            List<PackageSource> sourceList = SourceProvider.LoadPackageSources().ToList();
             int existingSourceIndex = sourceList.FindIndex(ps => Name.Equals(ps.Name, StringComparison.OrdinalIgnoreCase));
             if (existingSourceIndex == -1)
             {
@@ -188,7 +181,7 @@ namespace NuGet.Commands
             existingSource.Password = Password;
             
             sourceList.Insert(existingSourceIndex, existingSource);
-            _sourceProvider.SavePackageSources(sourceList);
+            SourceProvider.SavePackageSources(sourceList);
             Console.WriteLine(NuGetResources.SourcesCommandUpdateSuccessful, Name);
         }
 
@@ -206,7 +199,7 @@ namespace NuGet.Commands
 
         private void PrintRegisteredSources()
         {
-            var sourcesList = _sourceProvider.LoadPackageSources().ToList();
+            var sourcesList = SourceProvider.LoadPackageSources().ToList();
             if (!sourcesList.Any())
             {
                 Console.WriteLine(NuGetResources.SourcesCommandNoSources);

@@ -46,10 +46,43 @@ namespace NuGet
             }
         }
 
+        /// <summary>
+        /// Loads user settings from the NuGet configuration files. The method walks the directory
+        /// tree in <paramref name="fileSystem"/> up to its root, and reads each NuGet.config file
+        /// it finds in the directories. It then loads the configuration file %AppData%\NuGet\NuGet.config.
+        /// </summary>
+        /// <param name="fileSystem">The file system to walk to find configuration files.</param>
+        /// <returns>The settings object loaded.</returns>
         public static ISettings LoadDefaultSettings(IFileSystem fileSystem)
         {
+            return LoadDefaultSettings(
+                fileSystem,
+                null);
+        }
+
+        /// <summary>
+        /// Loads user settings from the NuGet configuration files. The method walks the directory
+        /// tree in <paramref name="fileSystem"/> up to its root, and reads each NuGet.config file
+        /// it finds in the directories. It then reads the user specified <paramref name="configFileName"/>
+        /// in <paramref name="fileSystem"/> if <paramref name="configFileName"/> is not null. 
+        /// If <paramref name="configFileName"/> is null, file %AppData%\NuGet\NuGet.config is loaded.
+        /// </summary>
+        /// <remarks>
+        /// For example, if <paramref name="fileSystem"/> is c:\dir1\dir2, <paramref name="configFileName"/> 
+        /// is "userConfig.file", the files loaded are (in the order that they are loaded):
+        ///     c:\dir1\dir2\nuget.config
+        ///     c:\dir1\nuget.config
+        ///     c:\nuget.config
+        ///     c:\dir1\dir2\userConfig.file
+        /// </remarks>
+        /// <param name="fileSystem">The file system to walk to find configuration files.</param>
+        /// <param name="configFileName">The user specified configuration file.</param>
+        /// <returns>The settings object loaded.</returns>
+        public static ISettings LoadDefaultSettings(
+            IFileSystem fileSystem,
+            string configFileName)
+        {
             // Walk up the tree to find a config file; also look in .nuget subdirectories
-            // Finally look in %APPDATA%\NuGet
             var validSettingFiles = new List<Settings>();
             if (fileSystem != null)
             {
@@ -61,16 +94,25 @@ namespace NuGet
 
             // for the default location, allow case where file does not exist, in which case it'll end
             // up being created if needed
-            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            if (!String.IsNullOrEmpty(appDataPath))
+            Settings appDataSettings = null;
+            if (configFileName == null)
             {
-                var defaultSettingsPath = Path.Combine(appDataPath, "NuGet");
-                var appDataSettings = ReadSettings(new PhysicalFileSystem(defaultSettingsPath),
-                                                   Constants.SettingsFileName);
-                if (appDataSettings != null)
+                // load %AppData%\NuGet\NuGet.config
+                string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                if (!String.IsNullOrEmpty(appDataPath))
                 {
-                    validSettingFiles.Add(appDataSettings);
+                    var defaultSettingsPath = Path.Combine(appDataPath, "NuGet");
+                    appDataSettings = ReadSettings(new PhysicalFileSystem(defaultSettingsPath),
+                        Constants.SettingsFileName);
                 }
+            }
+            else
+            {
+                appDataSettings = ReadSettings(fileSystem, configFileName);
+            }
+            if (appDataSettings != null)
+            {
+                validSettingFiles.Add(appDataSettings);
             }
 
             if (validSettingFiles.IsEmpty())

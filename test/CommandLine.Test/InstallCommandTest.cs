@@ -515,7 +515,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 
             // Act - 2
             installCommand.Version = null;
-            installCommand.Execute();
+            installCommand.ExecuteCommand();
 
             // Assert - 2
             Assert.False(repository.Exists("Baz", new SemanticVersion("0.4")));
@@ -613,7 +613,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Act
             var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider, fileSystem, packageManager.Object);
             installCommand.Arguments.Add(@"X:\test\packages.config");
-            installCommand.Execute();
+            installCommand.ExecuteCommand();
 
             // Assert
             packageManager.Verify();
@@ -649,7 +649,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                 Console = new MockConsole()
             };
             installCommand.Arguments.Add(@"X:\test\packages.config");
-            installCommand.Execute();
+            installCommand.ExecuteCommand();
 
             // Assert
             packageManager.Verify();
@@ -683,7 +683,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             installCommand.Console = console;
 
             // Act
-            installCommand.Execute();
+            installCommand.ExecuteCommand();
 
             // Assert
             packageManager.Verify();
@@ -716,7 +716,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             installCommand.RequireConsent = true;
 
             // Act 
-            var exception = Assert.Throws<AggregateException>(() => installCommand.Execute());
+            var exception = Assert.Throws<AggregateException>(() => installCommand.ExecuteCommand());
 
             // Assert
             Assert.Equal("Package restore is disabled by default. To give consent, open the Visual Studio Options dialog, click on Package Manager node and check 'Allow NuGet to download missing packages during build.' You can also give consent by setting the environment variable 'EnableNuGetPackageRestore' to 'true'.",
@@ -761,7 +761,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Act
             var installCommand = new TestInstallCommand(repositoryFactory.Object, packageSourceProvider, fileSystem, packageManager.Object);
             installCommand.Arguments.Add(@"X:\test\packages.config");
-            installCommand.Execute();
+            installCommand.ExecuteCommand();
 
             // Assert
             packageManager.Verify();
@@ -811,8 +811,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                                       IPackageRepository machineCacheRepository = null,
                                       bool allowPackageRestore = true,
                                       ISettings settings = null)
-                : base(factory, sourceProvider, settings ?? CreateSettings(allowPackageRestore), machineCacheRepository ?? new MockPackageRepository())
+                : base(machineCacheRepository ?? new MockPackageRepository())
             {
+                RepositoryFactory = factory;
+                SourceProvider = sourceProvider;
+                Settings = settings ?? CreateSettings(allowPackageRestore);
                 _fileSystem = fileSystem ?? new MockFileSystem();
                 _packageManager = packageManager;
             }

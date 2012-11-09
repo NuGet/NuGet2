@@ -13,25 +13,7 @@ namespace NuGet.Commands
     {
         private readonly List<string> _sources = new List<string>();
         private readonly List<string> _ids = new List<string>();
-        private readonly IFileSystem _fileSystem;
-
-        public UpdateCommand(IPackageRepositoryFactory repositoryFactory, IPackageSourceProvider sourceProvider)
-            : this(repositoryFactory, sourceProvider, new PhysicalFileSystem(Directory.GetCurrentDirectory()))
-        {
-        }
-
-        [ImportingConstructor]
-        public UpdateCommand(IPackageRepositoryFactory repositoryFactory, IPackageSourceProvider sourceProvider, IFileSystem fileSystem)
-        {
-            RepositoryFactory = repositoryFactory;
-            SourceProvider = sourceProvider;
-            _fileSystem = fileSystem;
-        }
-
-        public IPackageRepositoryFactory RepositoryFactory { get; private set; }
-
-        public IPackageSourceProvider SourceProvider { get; private set; }
-
+        
         [Option(typeof(NuGetCommand), "UpdateCommandSourceDescription")]
         public ICollection<string> Source
         {
@@ -80,7 +62,7 @@ namespace NuGet.Commands
                 }
                 else
                 {
-                    if (!_fileSystem.FileExists(inputFile))
+                    if (!FileSystem.FileExists(inputFile))
                     {
                         throw new CommandLineException(NuGetResources.UnableToFindSolution, inputFile);
                     }
@@ -91,11 +73,6 @@ namespace NuGet.Commands
                     }
                 }
             }
-        }
-
-        private ISettings DefaultSettings
-        {
-            get { return Settings.LoadDefaultSettings(_fileSystem); }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
@@ -221,7 +198,7 @@ namespace NuGet.Commands
 
             if (String.IsNullOrEmpty(packagesDir))
             {
-                packagesDir = DefaultSettings.GetRepositoryPath();
+                packagesDir = Settings.GetRepositoryPath();
                 if (String.IsNullOrEmpty(packagesDir))
                 {
                     // Try to resolve the packages directory from the project

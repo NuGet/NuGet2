@@ -21,8 +21,7 @@ namespace NuGet.Commands
         private static readonly object _satelliteLock = new object();
         private readonly IPackageRepository _cacheRepository;
         private readonly List<string> _sources = new List<string>();
-        private readonly ISettings _configSettings;
-
+        
         [Option(typeof(NuGetCommand), "InstallCommandSourceDescription")]
         public ICollection<string> Source
         {
@@ -50,10 +49,6 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "InstallCommandSolutionDirectory")]
         public string SolutionDirectory { get; set; }
 
-        private IPackageRepositoryFactory RepositoryFactory { get; set; }
-
-        internal IPackageSourceProvider SourceProvider { get; private set; }
-
         /// <remarks>
         /// Meant for unit testing.
         /// </remarks>
@@ -68,36 +63,15 @@ namespace NuGet.Commands
         }
 
         [ImportingConstructor]
-        public InstallCommand(IPackageRepositoryFactory packageRepositoryFactory, IPackageSourceProvider sourceProvider, IFileSystem startingPoint)
-            : this(packageRepositoryFactory, sourceProvider, Settings.LoadDefaultSettings(startingPoint), MachineCache.Default)
+        public InstallCommand()
+            : this(MachineCache.Default)
         {
         }
 
         protected internal InstallCommand(
-            IPackageRepositoryFactory packageRepositoryFactory,
-            IPackageSourceProvider sourceProvider,
-            ISettings configSettings,
             IPackageRepository cacheRepository)
         {
-            if (packageRepositoryFactory == null)
-            {
-                throw new ArgumentNullException("packageRepositoryFactory");
-            }
-
-            if (sourceProvider == null)
-            {
-                throw new ArgumentNullException("sourceProvider");
-            }
-
-            if (configSettings == null)
-            {
-                throw new ArgumentNullException("configSettings");
-            }
-
-            RepositoryFactory = packageRepositoryFactory;
-            SourceProvider = sourceProvider;
             _cacheRepository = cacheRepository;
-            _configSettings = configSettings;
         }
 
         public override void ExecuteCommand()
@@ -143,13 +117,13 @@ namespace NuGet.Commands
             }
 
             // If the SolutionDir is specified, use the .nuget directory under it to determine the solution-level settings
-            ISettings currentSettings = _configSettings;
+            ISettings currentSettings = Settings;
             if (!String.IsNullOrEmpty(SolutionDirectory))
             {
                 var solutionSettingsFile = Path.Combine(SolutionDirectory.TrimEnd(Path.DirectorySeparatorChar), NuGetConstants.NuGetSolutionSettingsFolder);
                 var fileSystem = CreateFileSystem(solutionSettingsFile);
 
-                currentSettings = Settings.LoadDefaultSettings(fileSystem);
+                currentSettings = NuGet.Settings.LoadDefaultSettings(fileSystem);
 
                 // Recreate the source provider and credential provider
                 SourceProvider = PackageSourceBuilder.CreateSourceProvider(currentSettings);
@@ -199,7 +173,7 @@ namespace NuGet.Commands
         /// <returns>True if one or more packages are installed.</returns>
         private bool ExecuteInParallel(IFileSystem fileSystem, ICollection<PackageReference> packageReferences)
         {
-            bool packageRestoreConsent = new PackageRestoreConsent(_configSettings).IsGranted;
+            bool packageRestoreConsent = new PackageRestoreConsent(Settings).IsGranted;
             int defaultConnectionLimit = ServicePointManager.DefaultConnectionLimit;
             if (packageReferences.Count > defaultConnectionLimit)
             {

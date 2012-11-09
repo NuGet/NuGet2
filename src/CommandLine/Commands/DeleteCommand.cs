@@ -19,17 +19,6 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "CommandApiKey")]
         public string ApiKey { get; set; }
 
-        public IPackageSourceProvider SourceProvider { get; private set; }
-
-        public ISettings Settings { get; private set; }
-
-        [ImportingConstructor]
-        public DeleteCommand(IPackageSourceProvider packageSourceProvider, ISettings settings)
-        {
-            SourceProvider = packageSourceProvider;
-            Settings = settings;
-        }
-
         public override void ExecuteCommand()
         {
             if (NoPrompt)

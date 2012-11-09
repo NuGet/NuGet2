@@ -21,7 +21,9 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
             IConsole console = new Mock<IConsole>().Object;
-            ListCommand cmd = new ListCommand(factory, GetSourceProvider());
+            ListCommand cmd = new ListCommand();
+            cmd.RepositoryFactory = factory;
+            cmd.SourceProvider = GetSourceProvider();
             cmd.Console = console;
             cmd.Source.Add(NonDefaultRepoUrl1);
 
@@ -38,8 +40,12 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
             IConsole console = new Mock<IConsole>().Object;
-            ListCommand cmd = new ListCommand(factory, GetSourceProvider());
-            cmd.Console = console;
+            ListCommand cmd = new ListCommand()
+            {
+                RepositoryFactory = factory,
+                SourceProvider = GetSourceProvider(),
+                Console = console
+            };
 
             // Act
             var packages = cmd.GetPackages();
@@ -60,7 +66,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
             IConsole console = new Mock<IConsole>().Object;
-            ListCommand cmd = new ListCommand(factory, GetSourceProvider());
+            ListCommand cmd = new ListCommand()
+            {
+                RepositoryFactory = factory,
+                SourceProvider = GetSourceProvider()
+            };
             cmd.Source.Add(DefaultRepoUrl);
             cmd.Console = console;
             cmd.Arguments.Add("SearchPackage");
@@ -80,7 +90,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var factory = CreatePackageRepositoryFactory();
             var console = new Mock<IConsole>().Object;
-            var cmd = new ListCommand(factory, GetSourceProvider());
+            var cmd = new ListCommand()
+            {
+                RepositoryFactory = factory,
+                SourceProvider = GetSourceProvider()
+            };
             cmd.Source.Add(NonDefaultRepoUrl2);
             cmd.Console = console;
 
@@ -99,7 +113,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var factory = CreatePackageRepositoryFactory();
             var console = new Mock<IConsole>().Object;
-            var cmd = new ListCommand(factory, GetSourceProvider());
+            var cmd = new ListCommand()
+            {
+                RepositoryFactory = factory,
+                SourceProvider = GetSourceProvider()
+            };
             cmd.Source.Add(NonDefaultRepoUrl2);
             cmd.Console = console;
             cmd.Arguments.Add("NHibernate");
@@ -118,7 +136,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var factory = CreatePackageRepositoryFactory();
             var console = new Mock<IConsole>().Object;
-            var cmd = new ListCommand(factory, GetSourceProvider());
+            var cmd = new ListCommand()
+            {
+                RepositoryFactory = factory,
+                SourceProvider = GetSourceProvider()
+            };
             cmd.Source.Add(NonDefaultRepoUrl2);
             cmd.Console = console;
             cmd.AllVersions = true;
@@ -152,8 +174,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var factory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
             factory.Setup(f => f.CreateRepository(DefaultRepoUrl)).Returns(repository.Object);
 
-            var cmd = new ListCommand(factory.Object, GetSourceProvider())
+            var cmd = new ListCommand()
             {
+                RepositoryFactory = factory.Object,
+                SourceProvider = GetSourceProvider(),
                 Console = new Mock<IConsole>().Object,
                 Prerelease = true
             };
@@ -198,8 +222,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var factory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
             factory.Setup(f => f.CreateRepository(DefaultRepoUrl)).Returns(repository);
 
-            var cmd = new ListCommand(factory.Object, GetSourceProvider())
+            var cmd = new ListCommand()
             {
+                RepositoryFactory = factory.Object, 
+                SourceProvider = GetSourceProvider(),
                 Console = new Mock<IConsole>().Object,
             };
             cmd.Source.Add(DefaultRepoUrl);
@@ -241,8 +267,10 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var factory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
             factory.Setup(f => f.CreateRepository(DefaultRepoUrl)).Returns(repository);
 
-            var cmd = new ListCommand(factory.Object, GetSourceProvider())
+            var cmd = new ListCommand()
             {
+                RepositoryFactory = factory.Object,
+                SourceProvider = GetSourceProvider(),
                 Console = new Mock<IConsole>().Object,
                 Prerelease = true
             };
@@ -265,7 +293,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var console = new Mock<IConsole>().Object;
             var provider = new Mock<IPackageSourceProvider>();
             provider.Setup(c => c.LoadPackageSources()).Returns(new[] { new PackageSource(NonDefaultRepoUrl1, "Foo") });
-            var cmd = new ListCommand(factory, provider.Object);
+            var cmd = new ListCommand()
+            {
+                RepositoryFactory = factory,
+                SourceProvider = provider.Object
+            };
             cmd.Source.Add("Foo");
             cmd.Console = console;
 

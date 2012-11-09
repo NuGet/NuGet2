@@ -44,7 +44,9 @@ namespace NuGet.Test
         [InlineData(new object[] { @"test.dll", @"https://www.nuget.org" })]
         public void PushCommandUsesNuGetOrgWhenNoSourceSpecified(string input, string expected)
         {
-            var push = new PushCommand(CreateSourceProvider(), CreateSettings());
+            var push = new PushCommand();
+            push.SourceProvider = CreateSourceProvider();
+            push.Settings = CreateSettings();
             Assert.Equal(expected, push.ResolveSource(input));
         }
 
@@ -52,7 +54,10 @@ namespace NuGet.Test
         public void PushCommandUsesSourceWhenSpecified()
         {
             const string src = "http://foo/bar";
-            var push = new PushCommand(CreateSourceProvider(), CreateSettings()) {Source = src};
+            var push = new PushCommand();
+            push.SourceProvider = CreateSourceProvider();
+            push.Settings = CreateSettings();
+            push.Source = src;
             Assert.Equal(src, push.ResolveSource(@"X:\test\foobar.symbols.nupkg"));
         }
 
@@ -60,7 +65,9 @@ namespace NuGet.Test
         public void PushCommandUsesConfFileWhenDefaultPushSourceSpecified()
         {
             const string src = "http://foo/bar/baz";
-            var push = new PushCommand(CreateSourceProvider(), CreateSettings(src));
+            var push = new PushCommand();
+            push.SourceProvider = CreateSourceProvider();
+            push.Settings = CreateSettings(src);
             Assert.Equal(src, push.ResolveSource(@"X:\test\foobar.symbols.nupkg"));
         }
 
@@ -69,7 +76,10 @@ namespace NuGet.Test
         {
             const string srcCmdLine = "http://foo/bar/baz1";
             const string srcConfFile = "http://foo/bar/baz2";
-            var push = new PushCommand(CreateSourceProvider(), CreateSettings(srcConfFile)) {Source = srcCmdLine};
+            var push = new PushCommand();
+            push.SourceProvider = CreateSourceProvider();
+            push.Settings = CreateSettings(srcConfFile);
+            push.Source = srcCmdLine;
             Assert.Equal(srcCmdLine, push.ResolveSource(@"X:\test\foobar.symbols.nupkg"));
         }
 

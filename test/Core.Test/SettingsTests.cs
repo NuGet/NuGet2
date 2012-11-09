@@ -1192,6 +1192,40 @@ namespace NuGet.Test
             Assert.Equal(@"x:\mock-directory\foo\bar", result);
         }
 
+        [Fact]
+        public void GetValuesWithUserSpecifiedDefaultConfigFile()
+        {
+            // Arrange
+            var mockFileSystem = new MockFileSystem(@"C:\mockfilesystem\dir1\dir2");
+            string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key3"" value=""value3"" />
+    <add key=""key4"" value=""value4"" />
+  </SectionName>
+</configuration>";
+            mockFileSystem.AddFile(@"C:\mockfilesystem\dir1\NuGet.Config", config);
+
+            config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <add key=""key1"" value=""value1"" />
+    <add key=""key2"" value=""value2"" />
+  </SectionName>
+</configuration>";
+            mockFileSystem.AddFile("UserDefinedConfigFile.confg", config);
+
+            var settings = Settings.LoadDefaultSettings(
+                mockFileSystem, 
+                "UserDefinedConfigFile.confg");
+
+            // Act
+            var result = settings.GetValues("SectionName");
+
+            // Assert
+            AssertEqualCollections(result, new[] { "key1", "value1", "key2", "value2", "key3", "value3", "key4", "value4" });
+        }
+
         [Theory]
         [InlineData(@"z:\foo")]
         [InlineData(@"x:\foo\bar\qux")]

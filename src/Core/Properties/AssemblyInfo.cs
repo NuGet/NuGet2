@@ -8,5 +8,6 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("NuGet.Test")]
 [assembly: InternalsVisibleTo("NuGet.Test.Utility")]
+[assembly: InternalsVisibleTo("NuGet.Test.Integration")]
 [assembly: InternalsVisibleTo("NuGet.VisualStudio.Test")]
 [assembly: InternalsVisibleTo("NuGet.Cmdlets.Test")]

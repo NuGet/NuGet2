@@ -12,7 +12,10 @@ namespace NuGet.Test
         public void ConstructorThrowsIfSettingsIsNull()
         {
             // Act and Assert
-            ExceptionAssert.ThrowsArgNull(() => new ConfigCommand(settings: null), "settings");
+            var configCommand = new ConfigCommand();
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => configCommand.ExecuteCommand(),
+                "Property Settings is null.");
         }
 
         [Fact]
@@ -21,10 +24,11 @@ namespace NuGet.Test
             // Arrange
             var settings = Mock.Of<ISettings>();
             var console = new MockConsole();
-            var command = new ConfigCommand(settings)
-                                {
-                                    Console = console
-                                };
+            var command = new ConfigCommand()
+            {
+                Settings = settings,
+                Console = console
+            };
 
             // Act
             command.ExecuteCommand();
@@ -41,8 +45,9 @@ namespace NuGet.Test
             settings.Setup(s => s.GetValue("config", "test")).Returns("value").Verifiable();
 
             var console = new MockConsole();
-            var command = new ConfigCommand(settings.Object)
+            var command = new ConfigCommand()
             {
+                Settings = settings.Object,
                 Console = console,
             };
             command.Arguments.Add("test");
@@ -64,8 +69,9 @@ namespace NuGet.Test
             settings.Setup(s => s.SetValue("config", "test2", "value1")).Verifiable();
 
             var console = new MockConsole();
-            var command = new ConfigCommand(settings.Object)
+            var command = new ConfigCommand()
             {
+                Settings = settings.Object,
                 Console = console,
             };
             command.Set.Add("test", "value2");
@@ -86,8 +92,9 @@ namespace NuGet.Test
             settings.Setup(s => s.DeleteValue("config", "test")).Returns(true).Verifiable();
 
             var console = new MockConsole();
-            var command = new ConfigCommand(settings.Object)
+            var command = new ConfigCommand()
             {
+                Settings = settings.Object,
                 Console = console,
             };
             command.Set.Add("test", "");
@@ -100,16 +107,19 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void ExecuteThrowsIfSettingAnd()
+        public void ExecuteThrowsIfSettingsIsNullSettings()
         {
             // Arrange
             var packageSourceProvider = new Mock<IPackageSourceProvider>();
-            var command = new ConfigCommand(NullSettings.Instance);
+            var command = new ConfigCommand()
+            {
+                Settings = NullSettings.Instance
+            };
             command.Set.Add("foo", "bar");
 
             // Act and Assert
             ExceptionAssert.Throws<InvalidOperationException>(
-                () => command.Execute(),
+                () => command.ExecuteCommand(),
                 "\"SetValue\" cannot be called on a NullSettings. This may be caused on account of insufficient permissions to read or write to \"%AppData%\\NuGet\\NuGet.config\".");
         }
     }
