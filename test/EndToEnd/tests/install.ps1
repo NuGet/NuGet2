@@ -1936,9 +1936,9 @@ function Test-InstallFailCleansUpSatellitePackageFiles
     Assert-Package $p A 1.2.0
 
     $solutionDir = Get-SolutionDir
-    Assert-PathExists (Join-Path $solutionDir 'packages\A.1.2.0\')
-    Assert-PathNotExists (Join-Path $solutionDir 'packages\A.1.0.0\')
-    Assert-PathNotExists (Join-Path $solutionDir 'packages\A.fr.1.0.0\')
+    Assert-SolutionPackage A -Version 1.2.0
+    Assert-NoSolutionPackage A -Version 1.0.0
+    Assert-NoSolutionPackage A.fr -Version 1.0.0
 }
 
 function Test-FileTransformWorksOnDependentFile

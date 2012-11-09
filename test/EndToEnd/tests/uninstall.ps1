@@ -177,7 +177,7 @@ function Test-UninstallPackageProjectLevelPackageThatsOnlyInstalledAtSolutionLev
     $p | Uninstall-Package elmah
 
     # Assert
-    Assert-Null (Get-SolutionPackage elmah)
+    Assert-NoSolutionPackage elmah -Version 1.1
 }
 
 function Test-UninstallSpecificPackageThrowsIfNotInstalledInProject {
