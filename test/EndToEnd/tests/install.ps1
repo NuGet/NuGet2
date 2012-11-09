@@ -1473,13 +1473,13 @@ function Test-InstallPackageDontMakeExcessiveNetworkRequests
     # Arrange
     $a = New-ClassLibrary
 
-    $nugetsource = "https://go.microsoft.com/FWLink/?LinkID=206669"
+    $nugetsource = "https://nuget.org/api/v2/"
     
     $repository = Get-PackageRepository $nugetsource
     Assert-NotNull $repository
 
     $packageDownloader = $repository.PackageDownloader
-        Assert-NotNull $packageDownloader
+    Assert-NotNull $packageDownloader
 
     $global:numberOfRequests = 0
     $eventId = "__DataServiceSendingRequest"
@@ -1646,30 +1646,30 @@ function Test-InstallWithConflictDoesNotUpdateToPrerelease {
 
 
 function Test-ReinstallingAnUninstallPackageIsNotExcessivelyCached {
-	param(
+    param(
         $context
     )
 
-		# Arrange
-	$a = New-ClassLibrary
+    # Arrange
+    $a = New-ClassLibrary
 
-	# Act 1
-	$a | Install-Package netfx-Guard -Version 1.2 -Source $context.RepositoryRoot
+    # Act 1
+    $a | Install-Package netfx-Guard -Version 1.2 -Source $context.RepositoryRoot
 
-	# Assert 1
-	Assert-Package $a netfx-Guard 1.2
+    # Assert 1
+    Assert-Package $a netfx-Guard 1.2
 
-	# Act 2
-	$a | Uninstall-Package netfx-Guard
+    # Act 2
+    $a | Uninstall-Package netfx-Guard
 
-	# Assert 2
-	Assert-Null (Get-Package netfx-Guard)
+    # Assert 2
+    Assert-Null (Get-Package netfx-Guard)
 
-	# Act 3
-	$a | Install-Package netfx-Guard -Version 1.2.0 -Source $context.RepositoryRoot
+    # Act 3
+    $a | Install-Package netfx-Guard -Version 1.2.0 -Source $context.RepositoryRoot
 
-	# Assert 3
-	Assert-Package $a netfx-Guard 1.2 
+    # Assert 3
+    Assert-Package $a netfx-Guard 1.2 
 }
 
 function Test-InstallPackageInstallContentFilesAccordingToTargetFramework {
@@ -1711,7 +1711,7 @@ function Test-InstallPackageThrowsIfThereIsNoCompatibleContentFiles
     
     # Act & Assert
 
-	Assert-Throws { Install-Package TestTargetFxContentFiles -Project $project.Name -Source $context.RepositoryPath } "Could not install package 'TestTargetFxContentFiles 1.0.0'. You are trying to install this package into a project that targets 'Silverlight,Version=v4.0', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
+    Assert-Throws { Install-Package TestTargetFxContentFiles -Project $project.Name -Source $context.RepositoryPath } "Could not install package 'TestTargetFxContentFiles 1.0.0'. You are trying to install this package into a project that targets 'Silverlight,Version=v4.0', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
     Assert-NoPackage $project TestTargetFxContentFiles
 }
 
@@ -1793,219 +1793,219 @@ function Test-InstallPackageIgnoreInitScriptIfItIsNotDirectlyUnderTools2 {
 
 function Test-InstallPackageWithEmptyContentFrameworkFolder 
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$project = New-ClassLibrary
+    # Arrange
+    $project = New-ClassLibrary
 
-	# Act
-	Install-Package TestEmptyContentFolder -Project $project.Name -Source $context.RepositoryPath
+    # Act
+    Install-Package TestEmptyContentFolder -Project $project.Name -Source $context.RepositoryPath
 
-	# Assert
-	Assert-Package $project TestEmptyContentFolder
-	Assert-Null (Get-ProjectItem $project NewFile.txt)
+    # Assert
+    Assert-Package $project TestEmptyContentFolder
+    Assert-Null (Get-ProjectItem $project NewFile.txt)
 }
 
 function Test-InstallPackageWithEmptyLibFrameworkFolder 
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$project = New-ClassLibrary
+    # Arrange
+    $project = New-ClassLibrary
 
-	# Act
-	Install-Package TestEmptyLibFolder -Project $project.Name -Source $context.RepositoryPath
+    # Act
+    Install-Package TestEmptyLibFolder -Project $project.Name -Source $context.RepositoryPath
 
-	# Assert
-	Assert-Package $project TestEmptyLibFolder
-	Assert-Null (Get-AssemblyReference $project one.dll)
+    # Assert
+    Assert-Package $project TestEmptyLibFolder
+    Assert-Null (Get-AssemblyReference $project one.dll)
 }
 
 function Test-InstallPackageWithEmptyToolsFrameworkFolder
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$project = New-ClassLibrary
+    # Arrange
+    $project = New-ClassLibrary
 
-	$global:InstallVar = 0
+    $global:InstallVar = 0
 
-	# Act
-	Install-Package TestEmptyToolsFolder -Project $project.Name -Source $context.RepositoryPath
+    # Act
+    Install-Package TestEmptyToolsFolder -Project $project.Name -Source $context.RepositoryPath
 
-	# Assert
-	Assert-Package $project TestEmptyToolsFolder
-	 
-	Assert-AreEqual 0 $global:InstallVar
+    # Assert
+    Assert-Package $project TestEmptyToolsFolder
+     
+    Assert-AreEqual 0 $global:InstallVar
 
-	Remove-Variable InstallVar -Scope Global
+    Remove-Variable InstallVar -Scope Global
 }
 
 function Test-InstallPackageInstallCorrectDependencyPackageBasedOnTargetFramework
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$project = New-ClassLibrary
+    # Arrange
+    $project = New-ClassLibrary
 
-	$global:InstallVar = 0
+    $global:InstallVar = 0
 
-	# Act
-	Install-Package TestDependencyTargetFramework -Project $project.Name -Source $context.RepositoryPath
+    # Act
+    Install-Package TestDependencyTargetFramework -Project $project.Name -Source $context.RepositoryPath
 
-	# Assert
-	Assert-Package $project TestDependencyTargetFramework
-	Assert-Package $project TestEmptyLibFolder
-	Assert-NoPackage $project TestEmptyContentFolder
-	Assert-NoPackage $project TestEmptyToolsFolder
+    # Assert
+    Assert-Package $project TestDependencyTargetFramework
+    Assert-Package $project TestEmptyLibFolder
+    Assert-NoPackage $project TestEmptyContentFolder
+    Assert-NoPackage $project TestEmptyToolsFolder
 }
 
 function Test-InstallingSatellitePackageToWebsiteCopiesResourcesToBin
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$p = New-Website
+    # Arrange
+    $p = New-Website
 
-	# Act
-	$p | Install-Package Test.fr-FR -Source $context.RepositoryPath
+    # Act
+    $p | Install-Package Test.fr-FR -Source $context.RepositoryPath
 
-	# Assert
-	Assert-Package $p Test.fr-FR
-	Assert-Package $p Test
-	
-	$projectPath = Get-ProjectDir $p
-	Assert-PathExists (Join-Path $projectPath "bin\Test.dll.refresh")
-	Assert-PathExists (Join-Path $projectPath "bin\Test.dll")
-	Assert-PathExists (Join-Path $projectPath "bin\fr-FR\Test.resources.dll")
+    # Assert
+    Assert-Package $p Test.fr-FR
+    Assert-Package $p Test
+    
+    $projectPath = Get-ProjectDir $p
+    Assert-PathExists (Join-Path $projectPath "bin\Test.dll.refresh")
+    Assert-PathExists (Join-Path $projectPath "bin\Test.dll")
+    Assert-PathExists (Join-Path $projectPath "bin\fr-FR\Test.resources.dll")
 
 }
 
 function Test-InstallPackagePersistTargetFrameworkToPackagesConfig
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$p = New-ClassLibrary
+    # Arrange
+    $p = New-ClassLibrary
 
-	# Act
-	$p | Install-Package PackageA -Source $context.RepositoryPath
-	
-	# Assert
-	Assert-Package $p 'packageA'
-	Assert-Package $p 'packageB'
+    # Act
+    $p | Install-Package PackageA -Source $context.RepositoryPath
+    
+    # Assert
+    Assert-Package $p 'packageA'
+    Assert-Package $p 'packageB'
 
-	$content = [xml](Get-Content (Get-ProjectItemPath $p 'packages.config'))
+    $content = [xml](Get-Content (Get-ProjectItemPath $p 'packages.config'))
 
-	$entryA = $content.packages.package[0]
-	$entryB = $content.packages.package[1]
+    $entryA = $content.packages.package[0]
+    $entryB = $content.packages.package[1]
 
-	Assert-AreEqual 'net40' $entryA.targetFramework
-	Assert-AreEqual 'net40' $entryB.targetFramework
+    Assert-AreEqual 'net40' $entryA.targetFramework
+    Assert-AreEqual 'net40' $entryB.targetFramework
 }
 
 function Test-ToolsPathForInitAndInstallScriptPointToToolsFolder
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$p = New-ClassLibrary
+    # Arrange
+    $p = New-ClassLibrary
 
-	# Act 
-	$p | Install-Package PackageA -Version 1.0.0 -Source $context.RepositoryPath
+    # Act 
+    $p | Install-Package PackageA -Version 1.0.0 -Source $context.RepositoryPath
 
-	# Assert
-	Assert-Package $p 'packageA'
+    # Assert
+    Assert-Package $p 'packageA'
 }
 
 function Test-InstallFailCleansUpSatellitePackageFiles 
 {
-	# Verification for work item 2311
-	param ($context)
+    # Verification for work item 2311
+    param ($context)
 
-	# Arrange
-	$p = New-ClassLibrary
+    # Arrange
+    $p = New-ClassLibrary
 
-	# Act 
-	$p | Install-Package A -Version 1.2.0 -Source $context.RepositoryPath
-	try {
-		$p | Install-Package A.fr -Source $context.RepositoryPath
-	} catch {}
+    # Act 
+    $p | Install-Package A -Version 1.2.0 -Source $context.RepositoryPath
+    try {
+        $p | Install-Package A.fr -Source $context.RepositoryPath
+    } catch {}
 
-	# Assert
-	Assert-Package $p A 1.2.0
+    # Assert
+    Assert-Package $p A 1.2.0
 
-	$solutionDir = Get-SolutionDir
-	Assert-PathExists (Join-Path $solutionDir 'packages\A.1.2.0\')
-	Assert-PathNotExists (Join-Path $solutionDir 'packages\A.1.0.0\')
-	Assert-PathNotExists (Join-Path $solutionDir 'packages\A.fr.1.0.0\')
+    $solutionDir = Get-SolutionDir
+    Assert-PathExists (Join-Path $solutionDir 'packages\A.1.2.0\')
+    Assert-PathNotExists (Join-Path $solutionDir 'packages\A.1.0.0\')
+    Assert-PathNotExists (Join-Path $solutionDir 'packages\A.fr.1.0.0\')
 }
 
 function Test-FileTransformWorksOnDependentFile
 {
-	param($context)
+    param($context)
 
-	# Arrange 
-	$p = New-WebApplication
-	Install-Package TTFile -Source $context.RepositoryPath
+    # Arrange 
+    $p = New-WebApplication
+    Install-Package TTFile -Source $context.RepositoryPath
 
-	# Act
-	Install-Package test -Source $context.RepositoryPath
+    # Act
+    Install-Package test -Source $context.RepositoryPath
 
-	# Assert
+    # Assert
 
-	$projectDir = Split-Path -parent -path $p.FullName
-	$configFilePath = Join-Path -path $projectDir -childpath "one.config"
-	$content = get-content $configFilePath
-	$matches = @($content | ? { ($_.IndexOf('foo="bar"') -gt -1) })
-	Assert-True ($matches.Count -gt 0)
+    $projectDir = Split-Path -parent -path $p.FullName
+    $configFilePath = Join-Path -path $projectDir -childpath "one.config"
+    $content = get-content $configFilePath
+    $matches = @($content | ? { ($_.IndexOf('foo="bar"') -gt -1) })
+    Assert-True ($matches.Count -gt 0)
 }
 
 function Test-InstallMetaPackageWorksAsExpected
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$p = New-ClassLibrary
+    # Arrange
+    $p = New-ClassLibrary
 
-	$p | Install-Package MetaPackage -Source $context.RepositoryPath
+    $p | Install-Package MetaPackage -Source $context.RepositoryPath
 
-	# Assert
-	Assert-Package $p MetaPackage
-	Assert-Package $p Dependency
+    # Assert
+    Assert-Package $p MetaPackage
+    Assert-Package $p Dependency
 }
 
 function Test-InstallPackageDoesNotUninstallDependencyGraphWhenSafeUpdatingADependency 
 {
-	# The InstallWalker used to compensate for packages that were already installed by attempting to remove
-	# an uninstall operation. Consequently any uninstall operation that occurred later in the graph would cause 
-	# the package to be uninstalled. This test verifies that this behavior does not occur.
+    # The InstallWalker used to compensate for packages that were already installed by attempting to remove
+    # an uninstall operation. Consequently any uninstall operation that occurred later in the graph would cause 
+    # the package to be uninstalled. This test verifies that this behavior does not occur.
 
-	param ($context)
+    param ($context)
 
-	# Arrange
-	$p = New-ClassLibrary
+    # Arrange
+    $p = New-ClassLibrary
 
-	# Act - 1
-	$p | Install-Package Microsoft.AspNet.WebPages.Administration -Version 2.0.20710.0 -Source $context.RepositoryPath
+    # Act - 1
+    $p | Install-Package Microsoft.AspNet.WebPages.Administration -Version 2.0.20710.0 -Source $context.RepositoryPath
 
-	# Assert - 1
-	Assert-Package $p Microsoft.AspNet.WebPages.Administration 2.0.20710.0
-	Assert-Package $p Microsoft.Web.Infrastructure 1.0
-	Assert-Package $p NuGet.Core 1.6.2
-	Assert-Package $p Microsoft.AspNet.WebPages 2.0.20710.0
-	Assert-Package $p Microsoft.AspNet.Razor 2.0.20710.0
-	
-	# Act - 2
-	$p | Install-Package microsoft-web-helpers -Source $context.RepositoryPath -Verbose
-	
-	# Assert - 2
-	Assert-Package $p microsoft-web-helpers 2.0.20710.0
-	Assert-Package $p Microsoft.AspNet.WebPages.Administration 2.0.20713.0
-	Assert-Package $p Microsoft.Web.Infrastructure 1.0
-	Assert-Package $p NuGet.Core 1.6.2
-	Assert-Package $p Microsoft.AspNet.WebPages 2.0.20710.0
-	Assert-Package $p Microsoft.AspNet.Razor 2.0.20710.0
+    # Assert - 1
+    Assert-Package $p Microsoft.AspNet.WebPages.Administration 2.0.20710.0
+    Assert-Package $p Microsoft.Web.Infrastructure 1.0
+    Assert-Package $p NuGet.Core 1.6.2
+    Assert-Package $p Microsoft.AspNet.WebPages 2.0.20710.0
+    Assert-Package $p Microsoft.AspNet.Razor 2.0.20710.0
+    
+    # Act - 2
+    $p | Install-Package microsoft-web-helpers -Source $context.RepositoryPath -Verbose
+    
+    # Assert - 2
+    Assert-Package $p microsoft-web-helpers 2.0.20710.0
+    Assert-Package $p Microsoft.AspNet.WebPages.Administration 2.0.20713.0
+    Assert-Package $p Microsoft.Web.Infrastructure 1.0
+    Assert-Package $p NuGet.Core 1.6.2
+    Assert-Package $p Microsoft.AspNet.WebPages 2.0.20710.0
+    Assert-Package $p Microsoft.AspNet.Razor 2.0.20710.0
 }
 
 function Test-InstallPackageRespectAssemblyReferenceFilterOnDependencyPackages
