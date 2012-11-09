@@ -8,7 +8,6 @@
     <Locale>1033</Locale>
     <MoreInfoUrl>http://docs.nuget.org/</MoreInfoUrl>
     <License>LICENSE.txt</License>
-    <GettingStartedGuide>http://docs.nuget.org/docs/start-here/overview</GettingStartedGuide>
     <SupportedProducts>
       <VisualStudio Version="10.0">
         <Edition>Pro</Edition>

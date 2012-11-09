@@ -177,7 +177,7 @@ function Test-UninstallPackageProjectLevelPackageThatsOnlyInstalledAtSolutionLev
     $p | Uninstall-Package elmah
 
     # Assert
-    Assert-Null (Get-SolutionPackage elmah)
+    Assert-NoSolutionPackage elmah -Version 1.1
 }
 
 function Test-UninstallSpecificPackageThrowsIfNotInstalledInProject {
@@ -211,21 +211,23 @@ function Test-UninstallSpecificVersionOfProjectLevelPackageFromSolutionLevel {
     # Arrange
     $p1 = New-ClassLibrary
     $p2 = New-FSharpLibrary
-    $p1 | Install-Package Antlr -Version 3.1.1
-    $p2 | Install-Package Antlr -Version 3.1.3.42154
+    $p1 | Install-Package jQuery -Version 1.8.0
+    $p2 | Install-Package jQuery -Version 1.8.2
     Remove-ProjectItem $p1 packages.config
     Remove-ProjectItem $p2 packages.config
 
-    Assert-SolutionPackage Antlr 3.1.1
-    Assert-SolutionPackage Antlr 3.1.3.42154
+    Assert-SolutionPackage jQuery 1.8.0
+    Assert-SolutionPackage jQuery 1.8.2
     @($p1, $p2) | %{ Assert-Null (Get-ProjectPackage $_ Antlr) }
 
+    Write-Host "Now uninstall package"
+
     # Act
-    $p1 | Uninstall-Package Antlr -Version 3.1.1
+    $p1 | Uninstall-Package jQuery -Version 1.8.0
 
     # Assert
-    Assert-Null (Get-SolutionPackage Antlr 3.1.1)
-    Assert-NotNull (Get-SolutionPackage Antlr 3.1.3.42154)
+    Assert-Null (Get-SolutionPackage jQuery 1.8.0)
+    Assert-NotNull (Get-SolutionPackage jQuery 1.8.2)
 }
 
 function Test-UninstallAmbiguousProjectLevelPackageFromSolutionLevel {    

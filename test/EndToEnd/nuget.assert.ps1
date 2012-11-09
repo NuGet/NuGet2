@@ -142,6 +142,37 @@ function Assert-SolutionPackage {
     }
 }
 
+function Assert-NoSolutionPackage {
+    param(
+        [parameter(Mandatory = $true)]
+        [string]$Id,
+        [parameter(Mandatory = $true)]
+        [string]$Version
+    )
+    
+    # Make sure the packages directory exists
+    $packagesDir = Get-PackagesDir
+    if (-not (Test-Path $packagesDir))
+    {
+        return
+    }
+
+    $thisPackageDir = Join-Path $packagesDir ($Id + "." + $Version)
+    if (-not (Test-Path $thisPackageDir))
+    {
+        return
+    }
+
+    # if there is a .deleteme file next to the folder, consider the installation succeeds
+    $deleteMeFile = $thisPackageDir + ".deleteme"
+    if (Test-Path $deleteMeFile)
+    {
+        return
+    } 
+    
+    Assert-Fail "Package $Id $Version does EXIST at solution level"
+}
+
 function Get-PackagesDir {
     # TODO: Handle when the package location changes
     Join-Path (Get-SolutionDir) packages
