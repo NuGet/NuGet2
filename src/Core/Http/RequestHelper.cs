@@ -34,7 +34,7 @@ namespace NuGet
                     request.Proxy.Credentials = CredentialCache.DefaultCredentials;
                 }
 
-                if (previousResponse == null || IsKeepAliveShoudBeUsedInPreviousRequest(previousRequest, previousResponse))
+                if (previousResponse == null || ShouldKeepAliveBeUsedInRequest(previousRequest, previousResponse))
                 {
                     // Try to use the cached credentials (if any, for the first request)
                     request.Credentials = credentialCache.GetCredentials(request.RequestUri);
@@ -182,13 +182,19 @@ namespace NuGet
             }
         }
 
-        private static bool IsKeepAliveShoudBeUsedInPreviousRequest(HttpWebRequest previousRequest, IHttpWebResponse previousResponse)
+        private static bool ShouldKeepAliveBeUsedInRequest(HttpWebRequest request, IHttpWebResponse response)
         {
-            return
-                previousRequest != null
-                && !previousRequest.KeepAlive
-                && previousResponse != null
-                && IsNtlmOrKerberos(previousResponse.AuthType);
+            if (request == null)
+            {
+                throw new ArgumentNullException("request");
+            }
+
+            if (response == null)
+            {
+                throw new ArgumentNullException("response");
+            }
+
+            return !request.KeepAlive && IsNtlmOrKerberos(response.AuthType);
         }
 
         private static bool IsNtlmOrKerberos(string authType)
@@ -198,8 +204,7 @@ namespace NuGet
                 return false;
             }
 
-            return
-                authType.IndexOf("NTLM", StringComparison.OrdinalIgnoreCase) != -1
+            return authType.IndexOf("NTLM", StringComparison.OrdinalIgnoreCase) != -1
                 || authType.IndexOf("Kerberos", StringComparison.OrdinalIgnoreCase) != -1;
         }
 
