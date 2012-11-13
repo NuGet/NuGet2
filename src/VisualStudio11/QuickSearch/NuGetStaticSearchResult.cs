@@ -2,6 +2,7 @@
 using System.Globalization;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet.VisualStudio11
 {
@@ -53,6 +54,7 @@ namespace NuGet.VisualStudio11
             }
         }
 
+        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Just to make TeamCity build happy. We don't see any FxCop issue when built locally.")]
         public void InvokeAction()
         {
             _supportedManagePackageCommand.Invoke(_searchText + TabProvider);
