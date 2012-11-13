@@ -277,7 +277,7 @@ namespace NuGet.Tools
         private static void ShowManageLibraryPackageDialog(Project project, string parameterString = null)
         {
             DialogWindow window = VsVersionHelper.IsVisualStudio2010 ?
-                GetVS10PackageManagerWindow(project) :
+                GetVS10PackageManagerWindow(project, parameterString) :
                 GetPackageManagerWindow(project, parameterString);
             try
             {
@@ -291,9 +291,9 @@ namespace NuGet.Tools
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static DialogWindow GetVS10PackageManagerWindow(Project project)
+        private static DialogWindow GetVS10PackageManagerWindow(Project project, string parameterString)
         {
-            return new VS10ManagePackageDialog(project);
+            return new VS10ManagePackageDialog(project, parameterString);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

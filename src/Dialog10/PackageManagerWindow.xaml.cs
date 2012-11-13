@@ -631,7 +631,7 @@ namespace NuGet.Dialog
              var searchControlParent = explorer;
 #endif
              var element = (TextBox)searchControlParent.FindDescendant<TextBox>();
-             if (element != null)
+             if (element != null && !String.IsNullOrEmpty(_searchText))
              {
                  element.Text = _searchText;
              }
