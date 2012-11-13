@@ -1,9 +1,10 @@
 ﻿using System;
-using EnvDTE;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+
 
 namespace NuGet.VisualStudio11
 {
@@ -101,15 +102,7 @@ namespace NuGet.VisualStudio11
             Status = (uint)taskStatus;
         }
 
-        private enum VsSearchTaskStatus : uint
-        {
-            Completed = 2,
-            Created = 0,
-            Error = 4,
-            Started = 1,
-            Stopped = 3
-        }
-
+        [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Just to make TeamCity build happy. We don't see any FxCop issue when built locally.")]
         private OleMenuCommand GetSupportedManagePackageCommand()
         {
             // Call QueryStatus for _managePackageDialogCommand and _managePackageForSolutionDialogCommand below
@@ -137,6 +130,15 @@ namespace NuGet.VisualStudio11
             }
 
             return null;
+        }
+
+        private enum VsSearchTaskStatus : uint
+        {
+            Completed = 2,
+            Created = 0,
+            Error = 4,
+            Started = 1,
+            Stopped = 3
         }
     }
 }
