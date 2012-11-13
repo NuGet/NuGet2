@@ -233,10 +233,9 @@ namespace NuGet
                         Project.RemoveReference(assemblyReference.Name);
                     }
 
-                    using (Stream stream = assemblyReference.GetStream())
-                    {
-                        Project.AddReference(relativeReferencePath, stream);
-                    }
+                    // The current implementation of all ProjectSystem does not use the Stream parameter at all.
+                    // We can't change the API now, so just pass in a null stream.
+                    Project.AddReference(relativeReferencePath, Stream.Null);
                 }
 
                 // Add GAC/Framework references
