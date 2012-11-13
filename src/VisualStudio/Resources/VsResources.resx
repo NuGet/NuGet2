@@ -341,4 +341,10 @@ Packages installed into Website projects will not be restored during build. Cons
   <data name="RestartNow" xml:space="preserve">
     <value>Restart Now</value>
   </data>
+  <data name="PackageRestoreSkipForProject" xml:space="preserve">
+    <value>Skipped reinstalling package '{0}' in project '{1}' because the package does not exist in the package source.</value>
+  </data>
+  <data name="PackageRestoreSkipForSolution" xml:space="preserve">
+    <value>Skipped reinstalling package '{0}' because the package does not exist in the package source.</value>
+  </data>
 </root>

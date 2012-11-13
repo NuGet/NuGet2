@@ -479,25 +479,38 @@ namespace NuGet.VisualStudio
 
                 logger.Log(MessageLevel.Info, VsResources.ReinstallProjectPackage, package, projectManager.Project.ProjectName);
 
-                RunSolutionAction(
-                    () =>
-                    {
-                        UninstallPackage(
-                            projectManager,
-                            package.Id,
-                            package.Version,
-                            forceRemove: true,
-                            removeDependencies: updateDependencies,
-                            logger: logger);
+                // Before we start reinstalling, need to make sure the package exists in the source repository. 
+                // Otherwise, the package will be uninstalled and can't be reinstalled.
+                if (SourceRepository.Exists(package))
+                {
+                    RunSolutionAction(
+                        () =>
+                        {
+                            UninstallPackage(
+                                projectManager,
+                                package.Id,
+                                package.Version,
+                                forceRemove: true,
+                                removeDependencies: updateDependencies,
+                                logger: logger);
 
-                        InstallPackage(
-                            projectManager,
-                            package.Id,
-                            package.Version,
-                            ignoreDependencies: !updateDependencies,
-                            allowPrereleaseVersions: allowPrereleaseVersions || !package.IsReleaseVersion(),
-                            logger: logger);
-                    });
+                            InstallPackage(
+                                projectManager,
+                                package.Id,
+                                package.Version,
+                                ignoreDependencies: !updateDependencies,
+                                allowPrereleaseVersions: allowPrereleaseVersions || !package.IsReleaseVersion(),
+                                logger: logger);
+                        });
+                }
+                else
+                {
+                    logger.Log(
+                        MessageLevel.Warning,
+                        VsResources.PackageRestoreSkipForProject,
+                        package.GetFullName(),
+                        projectManager.Project.ProjectName);
+                }
             }
             finally
             {
@@ -516,31 +529,55 @@ namespace NuGet.VisualStudio
             IPackageOperationEventListener eventListener)
         {
             logger = logger ?? NullLogger.Instance;
+
             eventListener = eventListener ?? NullPackageOperationEventListener.Instance;
 
             var projectsHasPackage = new Dictionary<Project, SemanticVersion>();
+            var versionsChecked = new Dictionary<SemanticVersion, bool>();
 
             // first uninstall from all projects that has the package installed
             RunActionOnProjects(
                 _solutionManager.GetProjects(),
                 project =>
                 {
-                    var projectManager = GetProjectManager(project);
+                    IProjectManager projectManager = GetProjectManager(project);
 
                     // find the package version installed in this project
-                    var projectPackage = projectManager.LocalRepository.FindPackage(packageId);
+                    IPackage projectPackage = projectManager.LocalRepository.FindPackage(packageId);
                     if (projectPackage != null)
                     {
-                        // save the version installed in this project so that we can restore the correct version later
-                        projectsHasPackage.Add(project, projectPackage.Version);
+                        bool packageExistInSource;
+                        if (!versionsChecked.TryGetValue(projectPackage.Version, out packageExistInSource))
+                        {
+                            // version has not been checked, so check it here
+                            packageExistInSource = SourceRepository.Exists(packageId, projectPackage.Version);
 
-                        UninstallPackage(
-                            projectManager,
-                            packageId,
-                            version: null,
-                            forceRemove: true,
-                            removeDependencies: updateDependencies,
-                            logger: logger);
+                            // mark the version as checked so that we don't have to check again if we
+                            // encounter another project with the same version.
+                            versionsChecked[projectPackage.Version] = packageExistInSource;
+                        }
+
+                        if (packageExistInSource)
+                        {
+                            // save the version installed in this project so that we can restore the correct version later
+                            projectsHasPackage.Add(project, projectPackage.Version);
+
+                            UninstallPackage(
+                                projectManager,
+                                packageId,
+                                version: null,
+                                forceRemove: true,
+                                removeDependencies: updateDependencies,
+                                logger: logger);
+                        }
+                        else
+                        {
+                            logger.Log(
+                                MessageLevel.Warning,
+                                VsResources.PackageRestoreSkipForProject,
+                                projectPackage.GetFullName(),
+                                project.Name);
+                        }
                     }
                 },
                 logger,
@@ -582,12 +619,22 @@ namespace NuGet.VisualStudio
 
                 logger.Log(MessageLevel.Info, VsResources.ReinstallSolutionPackage, package);
 
-                RunSolutionAction(
-                    () =>
-                    {
-                        UninstallPackage(package, forceRemove: true, removeDependencies: !updateDependencies);
-                        InstallPackage(package, ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions || !package.IsReleaseVersion());
-                    });
+                if (SourceRepository.Exists(package))
+                {
+                    RunSolutionAction(
+                        () =>
+                        {
+                            UninstallPackage(package, forceRemove: true, removeDependencies: !updateDependencies);
+                            InstallPackage(package, ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions || !package.IsReleaseVersion());
+                        });
+                }
+                else
+                {
+                    logger.Log(
+                        MessageLevel.Warning,
+                        VsResources.PackageRestoreSkipForSolution,
+                        package.GetFullName());
+                }
             }
             finally
             {
