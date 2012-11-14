@@ -29,6 +29,7 @@ namespace NuGet
 
         [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
+        [XmlArray("files")]
         public List<ManifestFile> Files
         {
             get;

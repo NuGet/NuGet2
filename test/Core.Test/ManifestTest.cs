@@ -332,6 +332,39 @@ namespace NuGet.Test
             Assert.Equal(0, dependencySets[3].Dependencies.Count);
         }
 
+        // Test that manifest is serialized correctly.
+        [Fact]
+        public void ManifestSerialization()
+        {
+            var manifest = new Manifest();
+            manifest.Metadata.Id = "id";
+            manifest.Metadata.Authors = "author";
+            manifest.Metadata.Version = "1.0.0";
+            manifest.Metadata.Description = "description";
+            
+            manifest.Files = new List<ManifestFile>();            
+            var file = new ManifestFile();
+            file.Source = "file_source";
+            file.Target = "file_target";
+            manifest.Files.Add(file);
+
+            var memoryStream = new MemoryStream();
+            manifest.Save(memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+
+            // read the serialized manifest.
+            var newManifest = Manifest.ReadFrom(memoryStream);
+            Assert.Equal(newManifest.Metadata.Id, manifest.Metadata.Id);
+            Assert.Equal(newManifest.Metadata.Authors, manifest.Metadata.Authors);
+            Assert.Equal(newManifest.Metadata.Description, manifest.Metadata.Description);
+            Assert.Equal(newManifest.Files.Count, manifest.Files.Count);
+            for (int i = 0; i < newManifest.Files.Count; ++i)
+            {
+                Assert.Equal(newManifest.Files[i].Source, manifest.Files[i].Source);
+                Assert.Equal(newManifest.Files[i].Target, manifest.Files[i].Target);
+            }
+        }
+
 
         private void AssertManifest(Manifest expected, Manifest actual)
         {
