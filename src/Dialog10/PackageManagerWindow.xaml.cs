@@ -150,6 +150,12 @@ namespace NuGet.Dialog
                 // retrieve the selected provider from the settings
                 UpdateSelectedProvider(_providerSettings.SelectedProvider);
             }
+
+            if (!String.IsNullOrEmpty(_searchText))
+            {
+                var selectedProvider = explorer.SelectedProvider as PackagesProviderBase;
+                selectedProvider.SuppressLoad = true;
+            }
         }
 
         private void AddUpdateBar(IProductUpdateService productUpdateService)
@@ -633,6 +639,8 @@ namespace NuGet.Dialog
              var element = (TextBox)searchControlParent.FindDescendant<TextBox>();
              if (element != null && !String.IsNullOrEmpty(_searchText))
              {
+                 var selectedProvider = explorer.SelectedProvider as PackagesProviderBase;
+                 selectedProvider.SuppressLoad = false;
                  element.Text = _searchText;
              }
         }

@@ -104,6 +104,8 @@ namespace NuGet.Dialog.Providers
 
         public bool SuppressNextRefresh { get; private set; }
 
+        internal bool SuppressLoad { get; set; }
+
         /// <summary>
         /// Gets the root node of the tree
         /// </summary>
