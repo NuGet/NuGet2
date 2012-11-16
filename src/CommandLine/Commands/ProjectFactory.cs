@@ -675,12 +675,7 @@ namespace NuGet.Commands
                 if (targetFile != null)
                 {
                     // Compare contents as well
-                    bool isEqual;
-                    using (var dependencyFileStream = targetFile.GetStream())
-                    using (var fileContentsStream = File.Open(fullPath, FileMode.Open))
-                    {
-                        isEqual = dependencyFileStream.ContentEquals(fileContentsStream);
-                    }
+                    var isEqual = ContentEquals(targetFile, fullPath);
                     if (isEqual)
                     {
                         Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsNotChanged, targetFilePath);
@@ -696,6 +691,17 @@ namespace NuGet.Commands
                     TargetPath = targetPath
                 });
             }
+        }
+
+        internal static bool ContentEquals(IPackageFile targetFile, string fullPath)
+        {
+            bool isEqual;
+            using (var dependencyFileStream = targetFile.GetStream())
+            using (var fileContentsStream = File.Open(fullPath, FileMode.Open))
+            {
+                isEqual = dependencyFileStream.ContentEquals(fileContentsStream);
+            }
+            return isEqual;
         }
 
         private string GetTargetPath(ProjectItem item)
