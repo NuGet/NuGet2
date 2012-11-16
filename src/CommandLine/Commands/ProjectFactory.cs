@@ -675,18 +675,19 @@ namespace NuGet.Commands
                 if (targetFile != null)
                 {
                     // Compare contents as well
+                    bool isEqual;
                     using (var dependencyFileStream = targetFile.GetStream())
                     using (var fileContentsStream = File.Open(fullPath, FileMode.Open))
                     {
-                        var isEqual = dependencyFileStream.ContentEquals(fileContentsStream);
-                        if (isEqual)
-                        {
-                            Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsNotChanged, targetFilePath);
-                            continue;
-                        }
-
-                        Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsChanged, targetFilePath);
+                        isEqual = dependencyFileStream.ContentEquals(fileContentsStream);
                     }
+                    if (isEqual)
+                    {
+                        Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsNotChanged, targetFilePath);
+                        continue;
+                    }
+
+                    Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsChanged, targetFilePath);
                 }
 
                 builder.Files.Add(new PhysicalPackageFile
