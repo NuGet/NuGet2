@@ -27,10 +27,6 @@ namespace NuGet.Commands
             {
                 throw new ArgumentNullException("settings");
             }
-            if (settings == NullSettings.Instance)
-            {
-                throw new ArgumentException(NuGetResources.SetApiKeyCommandCannotAccessConfigFile, "settings");
-            }
 
             SourceProvider = packageSourceProvider;
             Settings = settings;
