@@ -28,10 +28,5 @@ namespace NuGet.Test
             ExceptionAssert.Throws<InvalidOperationException>(throwsDelegate,
                 String.Format("\"{0}\" cannot be called on a NullSettings. This may be caused on account of insufficient permissions to read or write to \"%AppData%\\NuGet\\NuGet.config\".", methodName));
         }
-
-        private static void AssertThrows(Assert.ThrowsDelegate action, string methodName)
-        {
-            
-        }
     }
 }
