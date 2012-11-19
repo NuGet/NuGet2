@@ -37,6 +37,8 @@ namespace NuGet.Dialog
         
         private static readonly string[] Providers = new string[] { "Installed", "Online", "Updates" };
         private string _searchText;
+        private const string SearchInSwitch = "/searchin:";
+        private static readonly char[] dialogParametersSplitChars = new char[] { ' ' };
 
         public PackageManagerWindow(Project project, string dialogParameters = null) :
             this(project,
@@ -117,29 +119,45 @@ namespace NuGet.Dialog
             ProcessDialogParameters(dialogParameters);
         }
 
+        /// <summary>
+        /// Project.ManageNuGetPackages supports a maximum of 2 parameters separated by space(s)
+        /// Only process the parameters, when the number of parameters is 1 or 2. Otherwise, Ignore all the parameters altogether and simply launch dialog
+        /// When there is only one parameter, it should be the search text, if not, ignore the parameters
+        /// When there are 2 parameters, the first parameter should be the search text and the second one should start with /searchin: (case-insensitive). Otherwise, ignore the parameters
+        /// </summary>
+        /// <param name="dialogParameters"></param>
         private void ProcessDialogParameters(string dialogParameters)
         {
             bool providerSet = false;
             if (dialogParameters != null)
             {
-                string[] parameters = dialogParameters.Split(';');
+                string[] parameters = dialogParameters.Split(dialogParametersSplitChars, StringSplitOptions.RemoveEmptyEntries);
 
-                // Only act when the number of parameters is 1 or 2
-                if (parameters.Length > 0 && parameters.Length <= 2)
+                if (parameters.Length == 1)
                 {
-                    _searchText = parameters[0];
-                }
-
-                if (parameters.Length == 2)
-                {
-                    for (int i = 0; i < Providers.Length; i++)
+                    // When there is only one parameter, it should be the search text
+                    // Check if it is the case
+                    if (!parameters[0].StartsWith("/"))
                     {
-                        // Case insensitive comparisons with the strings
-                        if (String.Equals(Providers[i], parameters[1], StringComparison.OrdinalIgnoreCase))
+                        _searchText = parameters[0];
+                    }
+                }
+                else
+                {
+                    if (parameters.Length == 2 && !parameters[0].StartsWith("/") && parameters[1].StartsWith(SearchInSwitch, StringComparison.OrdinalIgnoreCase))
+                    {
+                        _searchText = parameters[0];
+
+                        string secondParameter = parameters[1].Substring(SearchInSwitch.Length);
+                        for (int i = 0; i < Providers.Length; i++)
                         {
-                            UpdateSelectedProvider(i);
-                            providerSet = true;
-                            break;
+                            // Case insensitive comparisons with the strings
+                            if (String.Equals(Providers[i], secondParameter, StringComparison.OrdinalIgnoreCase))
+                            {
+                                UpdateSelectedProvider(i);
+                                providerSet = true;
+                                break;
+                            }
                         }
                     }
                 }
