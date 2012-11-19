@@ -310,7 +310,7 @@
     <value>Invalid schema namespace '{0}'.</value>
   </data>
   <data name="InvalidNullSettingsOperation" xml:space="preserve">
-    <value>"{0}" cannot be called on a NullSettings.</value>
+    <value>"{0}" cannot be called on a NullSettings. This may be caused on account of insufficient permissions to read or write to "%AppData%\NuGet\NuGet.config".</value>
   </data>
   <data name="TypeMustBeASemanticVersion" xml:space="preserve">
     <value>Type to compare must be an instance of SemanticVersion.</value>

@@ -1,4 +1,6 @@
-﻿using Moq;
+﻿using System;
+using System.Collections.Generic;
+using Moq;
 using NuGet.Commands;
 using Xunit;
 
@@ -95,6 +97,20 @@ namespace NuGet.Test
 
             // Assert
             settings.Verify();
+        }
+
+        [Fact]
+        public void ExecuteThrowsIfSettingAnd()
+        {
+            // Arrange
+            var packageSourceProvider = new Mock<IPackageSourceProvider>();
+            var command = new ConfigCommand(NullSettings.Instance);
+            command.Set.Add("foo", "bar");
+
+            // Act and Assert
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => command.Execute(),
+                "\"SetValue\" cannot be called on a NullSettings. This may be caused on account of insufficient permissions to read or write to \"%AppData%\\NuGet\\NuGet.config\".");
         }
     }
 }
