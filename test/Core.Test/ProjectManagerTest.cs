@@ -131,31 +131,6 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackageReferencePicksManagedWindowsLibraryOverGenericWindowsOne()
-        {
-            // Arrange            
-            var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(new FrameworkName(".NETCore, Version=4.5, Profile=managed"));
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
-            IPackage packageA = PackageUtility.CreatePackage(
-                "A", 
-                "1.0", 
-                content: new [] { "win8\\a.txt", "win8-managed\\b.txt" }, 
-                assemblyReferences: new[] { "lib\\win8\\a.dll", "lib\\win8-managed\\b.dll" });
-            sourceRepository.AddPackage(packageA);
-
-            // Act
-            projectManager.AddPackageReference("A");
-
-            // Assert
-            Assert.False(projectSystem.ReferenceExists("a.dll"));
-            Assert.False(projectSystem.FileExists("a.txt"));
-
-            Assert.True(projectSystem.ReferenceExists("b.dll"));
-            Assert.True(projectSystem.FileExists("b.txt"));
-        }
-
-        [Fact]
         public void AddPackageReferencePrefersFullProfileOverClientProfileWhenInstallIntoFullProfileProject()
         {
             // Arrange            
@@ -201,31 +176,6 @@ namespace NuGet.Test
             Assert.True(projectSystem.FileExists("b.txt"));
             Assert.False(projectSystem.FileExists("c.txt"));
             Assert.False(projectSystem.FileExists("d.txt"));
-        }
-
-        [Fact]
-        public void AddPackageReferencePicksJavascriptWindowsLibraryOverGenericWindowsOne()
-        {
-            // Arrange            
-            var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(new FrameworkName(".NETCore, Version=4.5, Profile=javascript"));
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
-            IPackage packageA = PackageUtility.CreatePackage(
-                "A",
-                "1.0",
-                content: new[] { "win8\\a.txt", "win8-javascript\\b.txt" },
-                assemblyReferences: new[] { "lib\\win8\\a.dll", "lib\\win8-javascript\\b.dll" });
-            sourceRepository.AddPackage(packageA);
-
-            // Act
-            projectManager.AddPackageReference("A");
-
-            // Assert
-            Assert.False(projectSystem.ReferenceExists("a.dll"));
-            Assert.False(projectSystem.FileExists("a.txt"));
-
-            Assert.True(projectSystem.ReferenceExists("b.dll"));
-            Assert.True(projectSystem.FileExists("b.txt"));
         }
 
         [Theory]
