@@ -76,7 +76,7 @@ namespace NuGet
                 multiPartRequest.CreateMultipartRequest(request);
             };
 
-            EnsureSuccessfulResponse(client, HttpStatusCode.Created);
+            EnsureSuccessfulResponse(client);
         }
 
         public void DeletePackage(string apiKey, string packageId, string packageVersion)
@@ -127,13 +127,18 @@ namespace NuGet
             return requestUri;
         }
 
-        private static void EnsureSuccessfulResponse(HttpClient client, HttpStatusCode expectedStatusCode = HttpStatusCode.OK)
+        private static void EnsureSuccessfulResponse(HttpClient client, HttpStatusCode? expectedStatusCode = null)
         {
             HttpWebResponse response = null;
             try
             {
                 response = (HttpWebResponse)client.GetResponse();
-                if (response != null && expectedStatusCode != response.StatusCode)
+                if (response != null && 
+                    ((expectedStatusCode.HasValue && expectedStatusCode.Value != response.StatusCode) || 
+
+                    // If expected status code isn't provided, just look for anything 400 (Client Errors) or higher (incl. 500-series, Server Errors)
+                    // 100-series is protocol changes, 200-series is success, 300-series is redirect.
+                    (!expectedStatusCode.HasValue && (int)response.StatusCode >= 400)))
                 {
                     throw new InvalidOperationException(String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageServerError, response.StatusDescription, String.Empty));
                 }
