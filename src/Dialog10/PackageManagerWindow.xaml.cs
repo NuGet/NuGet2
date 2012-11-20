@@ -119,10 +119,8 @@ namespace NuGet.Dialog
         }
 
         /// <summary>
-        /// Project.ManageNuGetPackages supports a maximum of 2 parameters separated by space(s)
-        /// Only process the parameters, when the number of parameters is 1 or 2. Otherwise, Ignore all the parameters altogether and simply launch dialog
-        /// When there is only one parameter, it should be the search text, if not, ignore the parameters
-        /// When there are 2 parameters, the first parameter should be the search text and the second one should start with /searchin: (case-insensitive). Otherwise, ignore the parameters
+        /// Project.ManageNuGetPackages supports 1 optional argument and 1 optional switch /searchin. /searchin Switch has to be provided at the end
+        /// If the provider specified in the optional switch is not valid, then the provider entered is ignored
         /// </summary>
         /// <param name="dialogParameters"></param>
         private void ProcessDialogParameters(string dialogParameters)
@@ -130,28 +128,29 @@ namespace NuGet.Dialog
             bool providerSet = false;
             if (dialogParameters != null)
             {
-                string[] parameters = dialogParameters.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                dialogParameters = dialogParameters.Trim();
+                int lastIndexOfSearchInSwitch = dialogParameters.LastIndexOf(SearchInSwitch, StringComparison.OrdinalIgnoreCase);
 
-                if (parameters.Length == 1)
+                if (lastIndexOfSearchInSwitch == -1)
                 {
-                    // When there is only one parameter, it should be the search text
-                    // Check if it is the case
-                    if (!parameters[0].StartsWith("/", StringComparison.OrdinalIgnoreCase))
-                    {
-                        _searchText = parameters[0];
-                    }
+                    _searchText = dialogParameters;
                 }
                 else
                 {
-                    if (parameters.Length == 2 && !parameters[0].StartsWith("/", StringComparison.OrdinalIgnoreCase) && parameters[1].StartsWith(SearchInSwitch, StringComparison.OrdinalIgnoreCase))
-                    {
-                        _searchText = parameters[0];
+                    _searchText = dialogParameters.Substring(0, lastIndexOfSearchInSwitch);
 
-                        string secondParameter = parameters[1].Substring(SearchInSwitch.Length);
+                    // At this point, we know that /searchin: exists in the string.
+                    // Check if there is content following the switch
+                    if (dialogParameters.Length > (lastIndexOfSearchInSwitch + SearchInSwitch.Length))
+                    {
+                        // At this point, we know that there is some content following the /searchin: switch
+                        // Check if it represents a valid provider. Otherwise, don't set the provider here
+                        // Note that at the end of the method the provider from the settings will be used if no valid provider was determined
+                        string provider = dialogParameters.Substring(lastIndexOfSearchInSwitch + SearchInSwitch.Length);
                         for (int i = 0; i < Providers.Length; i++)
                         {
                             // Case insensitive comparisons with the strings
-                            if (String.Equals(Providers[i], secondParameter, StringComparison.OrdinalIgnoreCase))
+                            if (String.Equals(Providers[i], provider, StringComparison.OrdinalIgnoreCase))
                             {
                                 UpdateSelectedProvider(i);
                                 providerSet = true;
