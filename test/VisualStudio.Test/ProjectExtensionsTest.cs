@@ -1,10 +1,10 @@
 ﻿using EnvDTE;
 using Xunit;
+using Moq;
 
 namespace NuGet.VisualStudio.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
-    using Moq;
 
     public class ProjectExtensionsTest
     {

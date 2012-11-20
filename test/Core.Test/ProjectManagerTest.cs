@@ -106,6 +106,42 @@ namespace NuGet.Test
                 "Could not install package 'A 1.0'. You are trying to install this package into a project that targets '.NETFramework,Version=v4.5', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author.");
         }
 
+        [Fact]
+        public void AddPackageReferencePicksPortableLibraryFilesOverFallbackFiles()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-sl4+net4+wp8+windows8"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "portable-windows8+sl4+wp8+net4\\portable.txt", "me.txt" });
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.False(projectSystem.FileExists("me.txt"));
+            Assert.True(projectSystem.FileExists("portable.txt"));
+        }
+
+        [Fact]
+        public void AddPackageReferencePicksPortableLibraryAssemblyOverFallbackAssembly()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-sl4+net45"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "netcf\\you.dll", "lib\\portable-sl4+net45+wp8+windows8\\portable.dll", "lib\\me.dll" });
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.False(projectSystem.ReferenceExists("me.dll"));
+            Assert.False(projectSystem.ReferenceExists("you.dll"));
+            Assert.True(projectSystem.ReferenceExists("portable.dll"));
+        }
 
         [Theory]
         [InlineData("net20\\one.txt", ".NETFramework, Version=4.0")]
