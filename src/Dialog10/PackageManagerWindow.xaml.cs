@@ -23,6 +23,9 @@ namespace NuGet.Dialog
         private const string DialogUserAgentClient = "NuGet Add Package Dialog";
         private readonly Lazy<string> _dialogUserAgent = new Lazy<string>(() => HttpUtility.CreateUserAgentString(DialogUserAgentClient));
 
+        private static readonly string[] Providers = new string[] { "Installed", "Online", "Updates" };
+        private const string SearchInSwitch = "/searchin:";
+
         private const string F1Keyword = "vs.ExtensionManager";
 
         private readonly IHttpClientEvents _httpClientEvents;
@@ -34,11 +37,7 @@ namespace NuGet.Dialog
         private readonly IProductUpdateService _productUpdateService;
         private readonly IOptionsPageActivator _optionsPageActivator;
         private readonly Project _activeProject;
-        
-        private static readonly string[] Providers = new string[] { "Installed", "Online", "Updates" };
         private string _searchText;
-        private const string SearchInSwitch = "/searchin:";
-        private static readonly char[] dialogParametersSplitChars = new char[] { ' ' };
 
         public PackageManagerWindow(Project project, string dialogParameters = null) :
             this(project,
@@ -131,7 +130,7 @@ namespace NuGet.Dialog
             bool providerSet = false;
             if (dialogParameters != null)
             {
-                string[] parameters = dialogParameters.Split(dialogParametersSplitChars, StringSplitOptions.RemoveEmptyEntries);
+                string[] parameters = dialogParameters.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
                 if (parameters.Length == 1)
                 {
