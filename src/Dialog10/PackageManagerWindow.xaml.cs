@@ -136,14 +136,14 @@ namespace NuGet.Dialog
                 {
                     // When there is only one parameter, it should be the search text
                     // Check if it is the case
-                    if (!parameters[0].StartsWith("/"))
+                    if (!parameters[0].StartsWith("/", StringComparison.OrdinalIgnoreCase))
                     {
                         _searchText = parameters[0];
                     }
                 }
                 else
                 {
-                    if (parameters.Length == 2 && !parameters[0].StartsWith("/") && parameters[1].StartsWith(SearchInSwitch, StringComparison.OrdinalIgnoreCase))
+                    if (parameters.Length == 2 && !parameters[0].StartsWith("/", StringComparison.OrdinalIgnoreCase) && parameters[1].StartsWith(SearchInSwitch, StringComparison.OrdinalIgnoreCase))
                     {
                         _searchText = parameters[0];
 
