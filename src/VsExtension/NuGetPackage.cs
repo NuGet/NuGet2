@@ -172,13 +172,17 @@ namespace NuGet.Tools
                 // menu command for opening Manage NuGet packages dialog
                 CommandID managePackageDialogCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, PkgCmdIDList.cmdidAddPackageDialog);
                 _managePackageDialogCommand = new OleMenuCommand(ShowManageLibraryPackageDialog, null, BeforeQueryStatusForAddPackageDialog, managePackageDialogCommandID);
-                _managePackageDialogCommand.ParametersDescription = "p";
+                // ‘$’ - This indicates that the input line other than the argument forms a single argument string with no autocompletion
+                //       Autocompletion for filename(s) is supported for option 'p' or 'd' which is not applicable for this command
+                _managePackageDialogCommand.ParametersDescription = "$";
                 _mcs.AddCommand(_managePackageDialogCommand);
 
                 // menu command for opening "Manage NuGet packages for solution" dialog
                 CommandID managePackageForSolutionDialogCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, PkgCmdIDList.cmdidAddPackageDialogForSolution);
                 _managePackageForSolutionDialogCommand = new OleMenuCommand(ShowManageLibraryPackageForSolutionDialog, null, BeforeQueryStatusForAddPackageForSolutionDialog, managePackageForSolutionDialogCommandID);
-                _managePackageForSolutionDialogCommand.ParametersDescription = "p";
+                // ‘$’ - This indicates that the input line other than the argument forms a single argument string with no autocompletion
+                //       Autocompletion for filename(s) is supported for option 'p' or 'd' which is not applicable for this command
+                _managePackageForSolutionDialogCommand.ParametersDescription = "$";
                 _mcs.AddCommand(_managePackageForSolutionDialogCommand);
 
                 // menu command for opening Package Source settings options page
@@ -277,7 +281,7 @@ namespace NuGet.Tools
         private static void ShowManageLibraryPackageDialog(Project project, string parameterString = null)
         {
             DialogWindow window = VsVersionHelper.IsVisualStudio2010 ?
-                GetVS10PackageManagerWindow(project) :
+                GetVS10PackageManagerWindow(project, parameterString) :
                 GetPackageManagerWindow(project, parameterString);
             try
             {
@@ -291,9 +295,9 @@ namespace NuGet.Tools
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private static DialogWindow GetVS10PackageManagerWindow(Project project)
+        private static DialogWindow GetVS10PackageManagerWindow(Project project, string parameterString)
         {
-            return new VS10ManagePackageDialog(project);
+            return new VS10ManagePackageDialog(project, parameterString);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

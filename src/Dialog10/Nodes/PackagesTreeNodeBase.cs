@@ -263,7 +263,7 @@ namespace NuGet.Dialog.Providers
                     String.Format(CultureInfo.CurrentCulture, CommonResources.Argument_Must_Be_GreaterThanOrEqualTo, 1));
             }
 
-            if (_loadingInProgress)
+            if (_loadingInProgress || Provider.SuppressLoad)
             {
                 return;
             }

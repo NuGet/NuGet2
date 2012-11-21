@@ -940,78 +940,6 @@ namespace NuGet.Test
         }
 
         [Theory]
-        [InlineData("windows")]
-        [InlineData("windows8")]
-        [InlineData("win")]
-        [InlineData("win8")]
-        [InlineData("windows-javascript")]
-        [InlineData("windows8-javascript")]
-        [InlineData("win-javascript")]
-        [InlineData("win8-javascript")]
-        public void WindowsIdentifierCompatibleWithWindowsStoreJavascriptProjects(string identifier)
-        {
-            // Arrange
-            var packageFramework = VersionUtility.ParseFrameworkName(identifier);
-
-            var projectFramework = new FrameworkName(".NETCore, Version=4.5, Profile=javascript");
-
-            // Act && Assert
-            Assert.True(VersionUtility.IsCompatible(projectFramework, packageFramework));
-        }
-
-        [Theory]
-        [InlineData("windows-javascript")]
-        [InlineData("windows8-javascript")]
-        [InlineData("win-javascript")]
-        [InlineData("win8-javascript")]
-        public void WindowsJavascriptIdentifierNotCompatibleWithWindowsStoreManagedProject(string identifier)
-        {
-            // Arrange
-            var packageFramework = VersionUtility.ParseFrameworkName(identifier);
-
-            var projectFramework = new FrameworkName(".NETCore, Version=4.5, Profile=managed");
-
-            // Act && Assert
-            Assert.False(VersionUtility.IsCompatible(projectFramework, packageFramework));
-        }
-
-        [Theory]
-        [InlineData("windows")]
-        [InlineData("windows8")]
-        [InlineData("win")]
-        [InlineData("win8")]
-        [InlineData("windows-managed")]
-        [InlineData("windows8-managed")]
-        [InlineData("win-managed")]
-        [InlineData("win8-managed")]
-        public void WindowsIdentifierCompatibleWithWindowsStoreManagedProjects(string identifier)
-        {
-            // Arrange
-            var packageFramework = VersionUtility.ParseFrameworkName(identifier);
-
-            var projectFramework = new FrameworkName(".NETCore, Version=4.5, Profile=managed");
-
-            // Act && Assert
-            Assert.True(VersionUtility.IsCompatible(projectFramework, packageFramework));
-        }
-
-        [Theory]
-        [InlineData("windows-managed")]
-        [InlineData("windows8-managed")]
-        [InlineData("win-managed")]
-        [InlineData("win8-managed")]
-        public void WindowsManagedIdentifierNotCompatibleWithWindowsStoreJavascriptProject(string identifier)
-        {
-            // Arrange
-            var packageFramework = VersionUtility.ParseFrameworkName(identifier);
-
-            var projectFramework = new FrameworkName(".NETCore, Version=4.5, Profile=javascript");
-
-            // Act && Assert
-            Assert.False(VersionUtility.IsCompatible(projectFramework, packageFramework));
-        }
-
-        [Theory]
         [InlineData("windows9")]
         [InlineData("win9")]
         [InlineData("win10")]
@@ -1260,26 +1188,6 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal("win", shortName);
-        }
-
-        [Fact]
-        public void GetShortNameForJavascriptIdentifierReturnsWindowsJavascript()
-        {
-            // Act
-            string shortName = VersionUtility.GetShortFrameworkName(new FrameworkName(".NETCore, Version=v4.5, Profile=javascript"));
-
-            // Assert
-            Assert.Equal("win-javascript", shortName);
-        }
-
-        [Fact]
-        public void GetShortNameForWindowsManagedIdentifierReturnsWindowsManaged()
-        {
-            // Act
-            string shortName = VersionUtility.GetShortFrameworkName(new FrameworkName(".NETCore, Version=v4.5, Profile=managed"));
-
-            // Assert
-            Assert.Equal("win-managed", shortName);
         }
 
         [Fact]

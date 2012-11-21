@@ -23,6 +23,9 @@ namespace NuGet.Dialog
         private const string DialogUserAgentClient = "NuGet Add Package Dialog";
         private readonly Lazy<string> _dialogUserAgent = new Lazy<string>(() => HttpUtility.CreateUserAgentString(DialogUserAgentClient));
 
+        private static readonly string[] Providers = new string[] { "Installed", "Online", "Updates" };
+        private const string SearchInSwitch = "/searchin:";
+
         private const string F1Keyword = "vs.ExtensionManager";
 
         private readonly IHttpClientEvents _httpClientEvents;
@@ -34,8 +37,6 @@ namespace NuGet.Dialog
         private readonly IProductUpdateService _productUpdateService;
         private readonly IOptionsPageActivator _optionsPageActivator;
         private readonly Project _activeProject;
-        
-        private static readonly string[] Providers = new string[] { "Installed", "Online", "Updates" };
         private string _searchText;
 
         public PackageManagerWindow(Project project, string dialogParameters = null) :
@@ -117,29 +118,45 @@ namespace NuGet.Dialog
             ProcessDialogParameters(dialogParameters);
         }
 
+        /// <summary>
+        /// Project.ManageNuGetPackages supports a maximum of 2 parameters separated by space(s)
+        /// Only process the parameters, when the number of parameters is 1 or 2. Otherwise, Ignore all the parameters altogether and simply launch dialog
+        /// When there is only one parameter, it should be the search text, if not, ignore the parameters
+        /// When there are 2 parameters, the first parameter should be the search text and the second one should start with /searchin: (case-insensitive). Otherwise, ignore the parameters
+        /// </summary>
+        /// <param name="dialogParameters"></param>
         private void ProcessDialogParameters(string dialogParameters)
         {
             bool providerSet = false;
             if (dialogParameters != null)
             {
-                string[] parameters = dialogParameters.Split(';');
+                string[] parameters = dialogParameters.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-                // Only act when the number of parameters is 1 or 2
-                if (parameters.Length > 0 && parameters.Length <= 2)
+                if (parameters.Length == 1)
                 {
-                    _searchText = parameters[0];
-                }
-
-                if (parameters.Length == 2)
-                {
-                    for (int i = 0; i < Providers.Length; i++)
+                    // When there is only one parameter, it should be the search text
+                    // Check if it is the case
+                    if (!parameters[0].StartsWith("/", StringComparison.OrdinalIgnoreCase))
                     {
-                        // Case insensitive comparisons with the strings
-                        if (String.Equals(Providers[i], parameters[1], StringComparison.OrdinalIgnoreCase))
+                        _searchText = parameters[0];
+                    }
+                }
+                else
+                {
+                    if (parameters.Length == 2 && !parameters[0].StartsWith("/", StringComparison.OrdinalIgnoreCase) && parameters[1].StartsWith(SearchInSwitch, StringComparison.OrdinalIgnoreCase))
+                    {
+                        _searchText = parameters[0];
+
+                        string secondParameter = parameters[1].Substring(SearchInSwitch.Length);
+                        for (int i = 0; i < Providers.Length; i++)
                         {
-                            UpdateSelectedProvider(i);
-                            providerSet = true;
-                            break;
+                            // Case insensitive comparisons with the strings
+                            if (String.Equals(Providers[i], secondParameter, StringComparison.OrdinalIgnoreCase))
+                            {
+                                UpdateSelectedProvider(i);
+                                providerSet = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -149,6 +166,12 @@ namespace NuGet.Dialog
             {
                 // retrieve the selected provider from the settings
                 UpdateSelectedProvider(_providerSettings.SelectedProvider);
+            }
+
+            if (!String.IsNullOrEmpty(_searchText))
+            {
+                var selectedProvider = explorer.SelectedProvider as PackagesProviderBase;
+                selectedProvider.SuppressLoad = true;
             }
         }
 
@@ -631,8 +654,10 @@ namespace NuGet.Dialog
              var searchControlParent = explorer;
 #endif
              var element = (TextBox)searchControlParent.FindDescendant<TextBox>();
-             if (element != null)
+             if (element != null && !String.IsNullOrEmpty(_searchText))
              {
+                 var selectedProvider = explorer.SelectedProvider as PackagesProviderBase;
+                 selectedProvider.SuppressLoad = false;
                  element.Text = _searchText;
              }
         }

@@ -106,6 +106,42 @@ namespace NuGet.Test
                 "Could not install package 'A 1.0'. You are trying to install this package into a project that targets '.NETFramework,Version=v4.5', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author.");
         }
 
+        [Fact]
+        public void AddPackageReferencePicksPortableLibraryFilesOverFallbackFiles()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-sl4+net4+wp8+windows8"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "portable-windows8+sl4+wp8+net4\\portable.txt", "me.txt" });
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.False(projectSystem.FileExists("me.txt"));
+            Assert.True(projectSystem.FileExists("portable.txt"));
+        }
+
+        [Fact]
+        public void AddPackageReferencePicksPortableLibraryAssemblyOverFallbackAssembly()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-sl4+net45"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "netcf\\you.dll", "lib\\portable-sl4+net45+wp8+windows8\\portable.dll", "lib\\me.dll" });
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.False(projectSystem.ReferenceExists("me.dll"));
+            Assert.False(projectSystem.ReferenceExists("you.dll"));
+            Assert.True(projectSystem.ReferenceExists("portable.dll"));
+        }
 
         [Theory]
         [InlineData("net20\\one.txt", ".NETFramework, Version=4.0")]
@@ -128,31 +164,6 @@ namespace NuGet.Test
             // Assert
             Assert.False(projectSystem.FileExists("two.txt"));
             Assert.True(projectSystem.FileExists("one.txt"));
-        }
-
-        [Fact]
-        public void AddPackageReferencePicksManagedWindowsLibraryOverGenericWindowsOne()
-        {
-            // Arrange            
-            var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(new FrameworkName(".NETCore, Version=4.5, Profile=managed"));
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
-            IPackage packageA = PackageUtility.CreatePackage(
-                "A", 
-                "1.0", 
-                content: new [] { "win8\\a.txt", "win8-managed\\b.txt" }, 
-                assemblyReferences: new[] { "lib\\win8\\a.dll", "lib\\win8-managed\\b.dll" });
-            sourceRepository.AddPackage(packageA);
-
-            // Act
-            projectManager.AddPackageReference("A");
-
-            // Assert
-            Assert.False(projectSystem.ReferenceExists("a.dll"));
-            Assert.False(projectSystem.FileExists("a.txt"));
-
-            Assert.True(projectSystem.ReferenceExists("b.dll"));
-            Assert.True(projectSystem.FileExists("b.txt"));
         }
 
         [Fact]
@@ -201,31 +212,6 @@ namespace NuGet.Test
             Assert.True(projectSystem.FileExists("b.txt"));
             Assert.False(projectSystem.FileExists("c.txt"));
             Assert.False(projectSystem.FileExists("d.txt"));
-        }
-
-        [Fact]
-        public void AddPackageReferencePicksJavascriptWindowsLibraryOverGenericWindowsOne()
-        {
-            // Arrange            
-            var sourceRepository = new MockPackageRepository();
-            var projectSystem = new MockProjectSystem(new FrameworkName(".NETCore, Version=4.5, Profile=javascript"));
-            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
-            IPackage packageA = PackageUtility.CreatePackage(
-                "A",
-                "1.0",
-                content: new[] { "win8\\a.txt", "win8-javascript\\b.txt" },
-                assemblyReferences: new[] { "lib\\win8\\a.dll", "lib\\win8-javascript\\b.dll" });
-            sourceRepository.AddPackage(packageA);
-
-            // Act
-            projectManager.AddPackageReference("A");
-
-            // Assert
-            Assert.False(projectSystem.ReferenceExists("a.dll"));
-            Assert.False(projectSystem.FileExists("a.txt"));
-
-            Assert.True(projectSystem.ReferenceExists("b.dll"));
-            Assert.True(projectSystem.FileExists("b.txt"));
         }
 
         [Theory]

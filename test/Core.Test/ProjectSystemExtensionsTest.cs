@@ -100,6 +100,27 @@ namespace NuGet.Test
             Assert.Same(assemblyReferenceNoVersion, targetAssemblyReferences[0]);
         }
 
+
+        [Fact]
+        public void GetCompatibleReferencesReferenceWithUnspecifiedFrameworkNameWinsIfNoMatchingSpecificFrameworkNamesWithDifferentProfiles()
+        {
+            // Arrange
+            var assemblyReference20 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETFramework", new Version("2.0")));
+            var assemblyReference30 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName("Silverlight", new Version("3.0")));
+            var assemblyReference40 = PackageUtility.CreateAssemblyReference("foo.dll", new FrameworkName(".NETCore", new Version("4.5")));
+            var assemblyReferenceNoVersion = PackageUtility.CreateAssemblyReference("foo.dll", null);
+            var assemblyReferenceNoVersion2 = PackageUtility.CreateAssemblyReference("bar.dll", null);
+            var assemblyReferences = new IPackageAssemblyReference[] { assemblyReferenceNoVersion2, assemblyReference20, assemblyReference30, assemblyReference40, assemblyReferenceNoVersion };
+
+            // Act
+            var targetAssemblyReferences = GetCompatibleItems(new FrameworkName("WindowsPhone", new Version("8.0")), assemblyReferences).ToList();
+
+            // Assert
+            Assert.Equal(2, targetAssemblyReferences.Count);
+            Assert.Same(assemblyReferenceNoVersion, targetAssemblyReferences[1]);
+            Assert.Same(assemblyReferenceNoVersion2, targetAssemblyReferences[0]);
+        }
+
         [Fact]
         public void GetCompatibleReferencesReferenceMostSpecificVersionWins()
         {

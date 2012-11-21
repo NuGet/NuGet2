@@ -77,7 +77,7 @@ namespace NuGet.VisualStudio11.Test
             result.InvokeAction();
 
             // Assert
-            managePackageCommand.Verify(m => m.Invoke(DummyText + ";Online"), Times.Once());
+            managePackageCommand.Verify(m => m.Invoke(DummyText + " /searchin:online"), Times.Once());
         }
     }
 }

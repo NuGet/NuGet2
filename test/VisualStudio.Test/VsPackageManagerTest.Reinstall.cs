@@ -46,6 +46,56 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
+        public void ReinstallPackagesSkipsReinstallingIfPackageDoesNotExistAndLogWarning()
+        {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, new MockPackageRepository());
+
+            var installerEvents = new Mock<VsPackageInstallerEvents>(MockBehavior.Strict);
+            int eventCount = 0;
+            RegisterInstallerEvents(installerEvents, _ => eventCount++);
+
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                projectSystem,
+                localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
+                installerEvents.Object);
+
+            var packageA = PackageUtility.CreatePackage("A", "1.2", new[] { "content.txt" });
+            sourceRepository.Add(packageA);
+            localRepository.AddPackage(packageA);
+            projectManager.LocalRepository.AddPackage(packageA);
+
+            // remove package from source repository to simulate missing package condition
+            sourceRepository.Remove(packageA);
+
+            var logger = new Mock<ILogger>();
+            logger.Setup(s => s.Log(
+                MessageLevel.Warning, 
+                "Skipped reinstalling package '{0}' in project '{1}' because the package does not exist in the package source.", 
+                "A 1.2",
+                "x:\\MockFileSystem")
+            ).Verifiable();
+
+            // Act
+            packageManager.ReinstallPackage(projectManager, "A", updateDependencies: true, allowPrereleaseVersions: true, logger: logger.Object);
+
+            // Assert
+            logger.Verify();
+            Assert.Equal(0, eventCount);
+
+            Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("1.2")));
+            Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("1.2")));
+        }
+
+        [Fact]
         public void ReinstallPackagesRestoresPackageWithTheSamePrereleaseVersion()
         {
             // Arrange
@@ -111,6 +161,56 @@ namespace NuGet.VisualStudio.Test
             packageManager.ReinstallPackage(projectManager, "A", updateDependencies: true, allowPrereleaseVersions: false, logger: null);
 
             // Assert
+            Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+            Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+
+            Assert.True(packageManager.LocalRepository.Exists("B", new SemanticVersion("2.0.0")));
+            Assert.True(projectManager.LocalRepository.Exists("B", new SemanticVersion("2.0.0")));
+        }
+
+        [Fact]
+        public void ReinstallPackagesWithDependenciesSkipIfDependencyPackageIsMissingFromSource()
+        {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, new MockPackageRepository());
+
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                projectSystem,
+                localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
+                new Mock<VsPackageInstallerEvents>().Object);
+
+            var packageA = PackageUtility.CreatePackage("A", "1.2-alpha", new[] { "content.txt" }, dependencies: new[] { new PackageDependency("B") });
+            var packageB = PackageUtility.CreatePackage("B", "2.0.0", new[] { "hello.txt" });
+
+            sourceRepository.Add(packageA);
+            localRepository.AddPackage(packageA);
+            projectManager.LocalRepository.AddPackage(packageA);
+
+            //sourceRepository.Add(packageB);
+            localRepository.AddPackage(packageB);
+            projectManager.LocalRepository.AddPackage(packageB);
+
+            var logger = new Mock<ILogger>();
+            logger.Setup(s => s.Log(
+                MessageLevel.Warning,
+                "Skipped reinstalling package '{0}' in project '{1}' because the package does not exist in the package source.",
+                "B 2.0.0",
+                "x:\\MockFileSystem")
+            ).Verifiable();
+
+            // Act
+            packageManager.ReinstallPackages(projectManager, updateDependencies: false, allowPrereleaseVersions: false, logger: logger.Object);
+
+            // Assert
+            logger.Verify();
             Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
             Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
 
@@ -577,6 +677,80 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
+        public void ReinstallPackagesSkipReinstallingForPackagesThatDoNotExistInSource()
+        {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=v3.0"));
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+
+            var packageReferenceRepository = new PackageReferenceRepository(projectSystem, localRepository);
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, packageReferenceRepository);
+
+            var installerEvents = new Mock<VsPackageInstallerEvents>(MockBehavior.Strict);
+            int eventCount = 0;
+            RegisterInstallerEvents(installerEvents, _ => eventCount++);
+
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                projectSystem,
+                localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
+                installerEvents.Object);
+
+            var packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.2-alpha",
+                new[] { "net30\\content.txt", "silverlight40\\content4.txt" },
+                new[] { "lib\\net30\\ref.dll", "lib\\silverlight40\\refsl.dll" });
+
+            var packageB = PackageUtility.CreatePackage(
+                "B",
+                "2.0",
+                new[] { "net30\\contentB.txt", "silverlight40\\content4B.txt" },
+                new[] { "lib\\net30\\refB.dll", "lib\\silverlight40\\refslB.dll" });
+
+            localRepository.AddPackage(packageA);
+            localRepository.AddPackage(packageB);
+            projectManager.LocalRepository.AddPackage(packageA);
+            projectManager.LocalRepository.AddPackage(packageB);
+
+            // now change project's target framework to silverlight
+            projectSystem.ChangeTargetFramework(new FrameworkName("Silverlight, Version=v4.0"));
+
+            var logger = new Mock<ILogger>();
+            logger.Setup(s => s.Log(
+                MessageLevel.Warning,
+                "Skipped reinstalling package '{0}' in project '{1}' because the package does not exist in the package source.",
+                "B 2.0",
+                "x:\\MockFileSystem")
+            ).Verifiable();
+
+            logger.Setup(s => s.Log(
+                MessageLevel.Warning,
+                "Skipped reinstalling package '{0}' in project '{1}' because the package does not exist in the package source.",
+                "A 1.2-alpha",
+                "x:\\MockFileSystem")
+            ).Verifiable();
+
+            // Act
+            packageManager.ReinstallPackages(projectManager, updateDependencies: false, allowPrereleaseVersions: true, logger: logger.Object);
+
+            // Assert
+            logger.Verify();
+            Assert.Equal(0, eventCount);
+
+            Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+            Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+
+            Assert.True(packageManager.LocalRepository.Exists("B"));
+            Assert.True(projectManager.LocalRepository.Exists("B"));
+        }
+
+        [Fact]
         public void ReinstallPackagesRestoresPackageInAllProjectsWithNewContentIfProjectFrameworkChanges()
         {
             // Arrange
@@ -669,6 +843,98 @@ namespace NuGet.VisualStudio.Test
             Assert.True(projectSystem2.FileExists("world.txt"));
             Assert.False(projectSystem2.ReferenceExists("comma.dll"));
             Assert.True(projectSystem2.ReferenceExists("dude.dll"));
+        }
+
+        [Fact]
+        public void ReinstallPackagesSkipRestallingForOneProjectButProceedWithTheOther()
+        {
+            // Arrange
+            var localRepositoryMock = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var localRepository = localRepositoryMock.Object;
+            var sourceRepository = new MockPackageRepository();
+
+            var projectSystem1 = new MockProjectSystem(new FrameworkName(".NETFramework, Version=v3.0"));
+            var pathResolver1 = new DefaultPackagePathResolver(projectSystem1);
+            var packageReferenceRepository1 = new PackageReferenceRepository(projectSystem1, localRepository);
+            var projectManager1 = new ProjectManager(localRepository, pathResolver1, projectSystem1, packageReferenceRepository1);
+
+            var projectSystem2 = new MockProjectSystem(new FrameworkName(".NETCore, Version=v4.5"));
+            var pathResolver2 = new DefaultPackagePathResolver(projectSystem2);
+            var packageReferenceRepository2 = new PackageReferenceRepository(projectSystem2, localRepository);
+            var projectManager2 = new ProjectManager(localRepository, pathResolver2, projectSystem2, packageReferenceRepository2);
+
+            var project1 = TestUtils.GetProject("Project1");
+            var project2 = TestUtils.GetProject("Project2");
+
+            var packageManager = new MockVsPackageManager(
+                TestUtils.GetSolutionManager(projects: new[] { project1, project2 }),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                projectSystem2,
+                localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
+                new Mock<VsPackageInstallerEvents>().Object);
+
+            packageManager.RegisterProjectManager(project1, projectManager1);
+            packageManager.RegisterProjectManager(project2, projectManager2);
+
+            var packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.2-alpha",
+                new[] { "net30\\content.txt", "silverlight40\\content4.txt" },
+                new[] { "lib\\net30\\ref.dll", "lib\\silverlight40\\refsl.dll" });
+
+            var packageB = PackageUtility.CreatePackage(
+                "B",
+                "2.0",
+                new[] { "winrt45\\hello.txt", "sl4-wp71\\world.txt" },
+                new[] { "lib\\winrt45\\comma.dll", "lib\\sl4-wp71\\dude.dll" });
+
+            sourceRepository.Add(packageA);
+            localRepository.AddPackage(packageA);
+            localRepository.AddPackage(packageB);
+
+            // install package A -> project 1
+            // and package B -> project 2
+            packageManager.InstallPackage(projectManager1, "A", new SemanticVersion("1.2-alpha"), ignoreDependencies: false, allowPrereleaseVersions: true, logger: null);
+            packageManager.InstallPackage(projectManager2, "B", new SemanticVersion("2.0"), ignoreDependencies: false, allowPrereleaseVersions: true, logger: null);
+
+            // now change project's target framework to silverlight
+            projectSystem1.ChangeTargetFramework(new FrameworkName("Silverlight, Version=v4.0"));
+            projectSystem2.ChangeTargetFramework(new FrameworkName("Silverlight, Version=v4.0, Profile=WindowsPhone71"));
+
+            localRepositoryMock.Setup(p => p.IsReferenced("A", new SemanticVersion("1.2-alpha"))).Returns((string id, SemanticVersion version) => projectManager1.LocalRepository.Exists(id, version));
+            localRepositoryMock.Setup(p => p.IsReferenced("B", new SemanticVersion("2.0"))).Returns((string id, SemanticVersion version) => projectManager2.LocalRepository.Exists(id, version));
+
+            var logger = new Mock<ILogger>();
+            logger.Setup(s => s.Log(
+                MessageLevel.Warning,
+                "Skipped reinstalling package '{0}' in project '{1}' because the package does not exist in the package source.",
+                "B 2.0",
+                "Project2")
+            ).Verifiable();
+
+            // Act
+            packageManager.ReinstallPackages(updateDependencies: true, allowPrereleaseVersions: false, logger: logger.Object, eventListener: NullPackageOperationEventListener.Instance);
+
+            // Assert
+            logger.Verify();
+
+            Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+            Assert.True(projectManager1.LocalRepository.Exists("A", new SemanticVersion("1.2-alpha")));
+
+            Assert.False(projectSystem1.FileExists("content.txt"));
+            Assert.True(projectSystem1.FileExists("content4.txt"));
+            Assert.False(projectSystem1.ReferenceExists("ref.dll"));
+            Assert.True(projectSystem1.ReferenceExists("refsl.dll"));
+
+            Assert.True(packageManager.LocalRepository.Exists("B", new SemanticVersion("2.0")));
+            Assert.True(projectManager2.LocalRepository.Exists("B", new SemanticVersion("2.0")));
+
+            Assert.True(projectSystem2.FileExists("hello.txt"));
+            Assert.False(projectSystem2.FileExists("world.txt"));
+            Assert.True(projectSystem2.ReferenceExists("comma.dll"));
+            Assert.False(projectSystem2.ReferenceExists("dude.dll"));
         }
 
         [Fact]
@@ -992,6 +1258,61 @@ namespace NuGet.VisualStudio.Test
             Assert.True(projectSystem2.FileExists("world.txt"));
             Assert.False(projectSystem2.ReferenceExists("comma.dll"));
             Assert.True(projectSystem2.ReferenceExists("dude.dll"));
+        }
+
+        [Fact]
+        public void ReinstallPackagesSkipsReinstallingSolutionPackageIfItDoesNotExistAndLogWarning()
+        {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, new MockPackageRepository());
+
+            var installerEvents = new Mock<VsPackageInstallerEvents>(MockBehavior.Strict);
+            int eventCount = 0;
+            RegisterInstallerEvents(installerEvents, _ => eventCount++);
+
+            var packageManager = new VsPackageManager(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                projectSystem,
+                localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
+                installerEvents.Object);
+
+
+            // this is a solution package
+            var packageA = PackageUtility.CreatePackage("A", "1.2", tools: new[] { "one.proj" });
+            localRepository.AddPackage(packageA);
+
+            var logger = new Mock<ILogger>();
+            logger.Setup(s => s.Log(
+                MessageLevel.Warning,
+                "Skipped reinstalling package '{0}' because the package does not exist in the package source.",
+                "A 1.2")
+            ).Verifiable();
+
+            // Act
+            packageManager.ReinstallPackage("A", updateDependencies: true, allowPrereleaseVersions: true, logger: logger.Object, eventListener: NullPackageOperationEventListener.Instance);
+
+            // Assert
+            logger.Verify();
+            Assert.Equal(0, eventCount);
+
+            Assert.True(packageManager.LocalRepository.Exists("A", new SemanticVersion("1.2")));
+        }
+
+        private void RegisterInstallerEvents(Mock<VsPackageInstallerEvents> installerEvents, VsPackageEventHandler handler)
+        {
+            installerEvents.Object.PackageInstalled += handler;
+            installerEvents.Object.PackageInstalling += handler;
+            installerEvents.Object.PackageReferenceAdded += handler;
+            installerEvents.Object.PackageReferenceRemoved += handler;
+            installerEvents.Object.PackageUninstalled += handler;
+            installerEvents.Object.PackageUninstalling += handler;
         }
 
         private class MockVsPackageManager : VsPackageManager

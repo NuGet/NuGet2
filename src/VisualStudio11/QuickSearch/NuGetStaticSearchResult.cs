@@ -8,7 +8,7 @@ namespace NuGet.VisualStudio11
 {
     public class NuGetStaticSearchResult : IVsSearchItemResult
     {
-        private const string TabProvider = ";Online";
+        private const string TabProvider = " /searchin:online";
         private readonly string _searchText;
         private readonly OleMenuCommand _supportedManagePackageCommand;
         private readonly NuGetSearchProvider _searchProvider;

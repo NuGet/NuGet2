@@ -14,9 +14,9 @@ namespace NuGet
 {
     public static class VersionUtility
     {
-        public const string NetFrameworkIdentifier = ".NETFramework";
-        public const string NetCoreFrameworkIdentifier = ".NETCore";
-        public const string PortableFrameworkIdentifier = ".NETPortable";
+        private const string NetFrameworkIdentifier = ".NETFramework";
+        private const string NetCoreFrameworkIdentifier = ".NETCore";
+        private const string PortableFrameworkIdentifier = ".NETPortable";
         private const string LessThanOrEqualTo = "\u2264";
         private const string GreaterThanOrEqualTo = "\u2265";
 
@@ -87,11 +87,6 @@ namespace NuGet
                 }
             },
             {
-                NetCoreFrameworkIdentifier, new CompatibilityMapping(StringComparer.OrdinalIgnoreCase) {
-                    { "", new [] { "javascript", "managed", "native" } },
-                }
-            },
-            {
                 "Silverlight", new CompatibilityMapping(StringComparer.OrdinalIgnoreCase) {
                     { "WindowsPhone", new[] { "WindowsPhone71" } },
                     { "WindowsPhone71", new[] { "WindowsPhone" } }
@@ -108,13 +103,7 @@ namespace NuGet
             { new FrameworkName("WindowsPhone, Version=v8.0"), new FrameworkName("Silverlight, Version=v8.0, Profile=WindowsPhone") },
 
             { new FrameworkName("Windows, Version=v0.0"), new FrameworkName(".NETCore, Version=v4.5") },
-            { new FrameworkName("Windows, Version=v8.0"), new FrameworkName(".NETCore, Version=v4.5") },
-
-            { new FrameworkName("Windows, Version=v0.0, Profile=javascript"), new FrameworkName(".NETCore, Version=v4.5, Profile=javascript") },
-            { new FrameworkName("Windows, Version=v8.0, Profile=javascript"), new FrameworkName(".NETCore, Version=v4.5, Profile=javascript") },
-
-            { new FrameworkName("Windows, Version=v0.0, Profile=managed"), new FrameworkName(".NETCore, Version=v4.5, Profile=managed") },
-            { new FrameworkName("Windows, Version=v8.0, Profile=managed"), new FrameworkName(".NETCore, Version=v4.5, Profile=managed") }
+            { new FrameworkName("Windows, Version=v8.0"), new FrameworkName(".NETCore, Version=v4.5") }
         };
 
         public static Version DefaultTargetFrameworkVersion
@@ -656,10 +645,6 @@ namespace NuGet
             // Not all projects have a framework, we need to consider those projects.
             var internalProjectFramework = projectFramework ?? EmptyFramework;
 
-            // Default framework for assembly references with an unspecified framework name
-            // always match the project framework's identifier by is the lowest possible version
-            var defaultFramework = new FrameworkName(internalProjectFramework.Identifier, new Version(), internalProjectFramework.Profile);
-
             // Turn something that looks like this:
             // item -> [Framework1, Framework2, Framework3] into
             // [{item, Framework1}, {item, Framework2}, {item, Framework3}]
@@ -673,16 +658,30 @@ namespace NuGet
                                   };
 
             // Group references by target framework (if there is no target framework we assume it is the default)
-            var frameworkGroups = normalizedItems.GroupBy(g => g.TargetFramework ?? defaultFramework, g => g.Item);
+            var frameworkGroups = normalizedItems.GroupBy(g => g.TargetFramework, g => g.Item).ToList();
 
             // Try to find the best match
             // Not all projects have a framework, we need to consider those projects.
             compatibleItems = (from g in frameworkGroups
-                               where IsCompatible(internalProjectFramework, g.Key)
+                               where g.Key != null && IsCompatible(internalProjectFramework, g.Key)
                                orderby GetProfileCompatibility(internalProjectFramework, g.Key) descending
                                select g).FirstOrDefault();
 
-            return compatibleItems != null && compatibleItems.Any();
+            bool hasItems = compatibleItems != null && compatibleItems.Any();
+            if (!hasItems)
+            {
+                // if there's no matching profile, fall back to the items without target framework
+                // because those are considered to be compatible with any target framework
+                compatibleItems = frameworkGroups.Where(g => g.Key == null).SelectMany(g => g);
+                hasItems = compatibleItems != null && compatibleItems.Any();
+            }
+
+            if (!hasItems)
+            {
+                compatibleItems = null;
+            }
+
+            return hasItems;
         }
 
         internal static Version NormalizeVersion(Version verison)

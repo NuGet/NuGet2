@@ -105,10 +105,14 @@ namespace NuGet.VisualStudio
                 VsHierarchyItem child = GetFirstChild(fVisible);
                 while (child != null)
                 {
-                    int returnVal = child.WalkDepthFirst(fVisible, processCallback, newCallerObject);
-                    if (returnVal == -1)
+                    bool isMemberOfProject = (bool)child.GetProperty(__VSHPROPID.VSHPROPID_IsNonMemberItem) == false;
+                    if (isMemberOfProject)
                     {
-                        return returnVal;
+                        int returnVal = child.WalkDepthFirst(fVisible, processCallback, newCallerObject);
+                        if (returnVal == -1)
+                        {
+                            return returnVal;
+                        }
                     }
                     child = child.GetNextSibling(fVisible);
                 }

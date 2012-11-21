@@ -262,11 +262,13 @@ namespace NuGet
 
         public override int GetHashCode()
         {
-            var hashCodeCombiner = new HashCodeCombiner();
-            hashCodeCombiner.AddObject(Version);
-            hashCodeCombiner.AddObject(SpecialVersion);
+            int hashCode = Version.GetHashCode();
+            if (SpecialVersion != null)
+            {
+                hashCode = hashCode * 4567 + SpecialVersion.GetHashCode();
+            }
 
-            return hashCodeCombiner.CombinedHash;
+            return hashCode;
         }
     }
 }
