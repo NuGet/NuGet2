@@ -214,6 +214,24 @@ namespace NuGet.Test
             Assert.False(projectSystem.FileExists("d.txt"));
         }
 
+        [Fact]
+        public void AddPackageReferencePicksMatchingProfileEvenIfItIsEmpty()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("sl4"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "sl3\\_._", "me.txt" });
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.False(projectSystem.FileExists("me.txt"));
+            Assert.False(projectSystem.FileExists("_._"));
+        }
+
         [Theory]
         [InlineData("portable-wp7+sl3+net40\\two.txt", "portable-net45+sl4\\one.txt")]
         [InlineData("portable-net40+sl3+wp71\\one.txt", "portable-windows8+sl2\\two.txt")]
@@ -1454,8 +1472,7 @@ namespace NuGet.Test
             Assert.True(projectManager.LocalRepository.Exists(packageB20));
             Assert.True(projectManager.LocalRepository.Exists(packageC20));
         }
-
-
+        
         [Fact]
         public void UpdatePackageReferenceFromRepositoryChainedIncompatibleDependents()
         {
