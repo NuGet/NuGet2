@@ -125,6 +125,41 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void AddPackageReferencePickPortableDependencySetOverFallbackDependencySet()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("portable-net45+wp8+windows8"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+
+            var dependencySets = new PackageDependencySet[] 
+            {
+                new PackageDependencySet(targetFramework: null, dependencies: new [] { PackageDependency.CreateDependency("B", "1.0.0")}),
+                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("net45"), dependencies: new PackageDependency[0] { }),
+                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("win8"), dependencies: new PackageDependency[0] { }),
+                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("wp8"), dependencies: new PackageDependency[0] { }),
+                new PackageDependencySet(targetFramework: VersionUtility.ParseFrameworkName("portable-net45+win8+wp8"), dependencies: new PackageDependency[0] { }),
+            };
+
+            IPackage packageA = PackageUtility.CreatePackageWithDependencySets("A", "1.0", new[] { "me.txt" }, dependencySets: dependencySets);
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0", new[] { "you.txt" });
+
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageB);
+
+            // Act
+            projectManager.AddPackageReference("A", null, ignoreDependencies: false, allowPrereleaseVersions: true);
+
+            // Assert
+            Assert.True(projectManager.LocalRepository.Exists("A"));
+            Assert.False(projectManager.LocalRepository.Exists("B"));
+
+            Assert.True(projectSystem.FileExists("me.txt"));
+            Assert.False(projectSystem.FileExists("you.txt"));
+
+        }
+
+        [Fact]
         public void AddPackageReferencePicksPortableLibraryAssemblyOverFallbackAssembly()
         {
             // Arrange            
