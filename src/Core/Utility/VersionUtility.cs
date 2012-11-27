@@ -52,6 +52,9 @@ namespace NuGet
             { "WindowsPhone", "WindowsPhone" },
             { "Windows", "Windows" },
             { "win", "Windows" },
+            { "MonoAndroid", "MonoAndroid" },
+            { "MonoTouch", "MonoTouch" },
+            { "MonoMac", "MonoMac" },
         };
 
         private static readonly Dictionary<string, string> _knownProfiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {

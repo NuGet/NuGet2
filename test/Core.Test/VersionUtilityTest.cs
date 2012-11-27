@@ -267,6 +267,60 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void ParseFrameworkNameNormalizesSupportedMonoAndroidNames()
+        {
+            // Arrange
+            var knownNameFormats = new[] { "MonoAndroid", "monoandroid", "MONOANDROID " };
+            Version defaultVersion = new Version("0.0");
+
+            // Act
+            var frameworkNames = knownNameFormats.Select(VersionUtility.ParseFrameworkName);
+
+            // Assert
+            foreach (var frameworkName in frameworkNames)
+            {
+                Assert.Equal("MonoAndroid", frameworkName.Identifier);
+                Assert.Equal(defaultVersion, frameworkName.Version);
+            }
+        }
+
+        [Fact]
+        public void ParseFrameworkNameNormalizesSupportedMonoTouchNames()
+        {
+            // Arrange
+            var knownNameFormats = new[] { "MonoTouch", "monotouch", "monoTOUCH  " };
+            Version defaultVersion = new Version("0.0");
+
+            // Act
+            var frameworkNames = knownNameFormats.Select(VersionUtility.ParseFrameworkName);
+
+            // Assert
+            foreach (var frameworkName in frameworkNames)
+            {
+                Assert.Equal("MonoTouch", frameworkName.Identifier);
+                Assert.Equal(defaultVersion, frameworkName.Version);
+            }
+        }
+
+        [Fact]
+        public void ParseFrameworkNameNormalizesSupportedMonoMacNames()
+        {
+            // Arrange
+            var knownNameFormats = new[] { "MonoMac", "monomac", "mONOmAC " };
+            Version defaultVersion = new Version("0.0");
+
+            // Act
+            var frameworkNames = knownNameFormats.Select(VersionUtility.ParseFrameworkName);
+
+            // Assert
+            foreach (var frameworkName in frameworkNames)
+            {
+                Assert.Equal("MonoMac", frameworkName.Identifier);
+                Assert.Equal(defaultVersion, frameworkName.Version);
+            }
+        }
+
+        [Fact]
         public void ParseFrameworkNameReturnsUnsupportedFrameworkNameIfUnrecognized()
         {
             // Arrange

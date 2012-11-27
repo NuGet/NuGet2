@@ -249,6 +249,22 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void TestParseWithCustomProfileString3()
+        {
+            // Arrange & Act
+            var profile = NetPortableProfile.Parse("wp71+win8+monoandroid1.6+monotouch1.0+sl4+net45");
+
+            // Assert
+            Assert.Equal(6, profile.SupportedFrameworks.Count);
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("WindowsPhone, Version=7.1")));
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("Windows, Version=8.0")));
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("MonoAndroid, Version=1.6")));
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("MonoTouch, Version=1.0")));
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName("Silverlight, Version=4.0")));
+            Assert.True(profile.SupportedFrameworks.Contains(new FrameworkName(".NETFramework, Version=4.5")));
+        }
+
+        [Fact]
         public void TestParseWithStandardProfileString()
         {
             // Arrange & Act
