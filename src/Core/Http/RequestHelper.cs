@@ -10,6 +10,7 @@ namespace NuGet
         /// Keeps sending requests until a response code that doesn't require authentication happens or if
         /// the request requires authentication and the user has stopped trying to enter them (i.e. they hit cancel when they are prompted).
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         internal static WebResponse GetResponse(Func<WebRequest> createRequest,
                                                 Action<WebRequest> prepareRequest,
                                                 IProxyCache proxyCache,
