@@ -675,18 +675,14 @@ namespace NuGet.Commands
                 if (targetFile != null)
                 {
                     // Compare contents as well
-                    using (var dependencyFileStream = targetFile.GetStream())
-                    using (var fileContentsStream = File.Open(fullPath, FileMode.Open))
+                    var isEqual = ContentEquals(targetFile, fullPath);
+                    if (isEqual)
                     {
-                        var isEqual = dependencyFileStream.ContentEquals(fileContentsStream);
-                        if (isEqual)
-                        {
-                            Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsNotChanged, targetFilePath);
-                            continue;
-                        }
-
-                        Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsChanged, targetFilePath);
+                        Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsNotChanged, targetFilePath);
+                        continue;
                     }
+
+                    Logger.Log(MessageLevel.Info, NuGetResources.PackageCommandFileFromDependencyIsChanged, targetFilePath);
                 }
 
                 builder.Files.Add(new PhysicalPackageFile
@@ -695,6 +691,17 @@ namespace NuGet.Commands
                     TargetPath = targetPath
                 });
             }
+        }
+
+        internal static bool ContentEquals(IPackageFile targetFile, string fullPath)
+        {
+            bool isEqual;
+            using (var dependencyFileStream = targetFile.GetStream())
+            using (var fileContentsStream = File.OpenRead(fullPath))
+            {
+                isEqual = dependencyFileStream.ContentEquals(fileContentsStream);
+            }
+            return isEqual;
         }
 
         private string GetTargetPath(ProjectItem item)
