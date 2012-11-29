@@ -123,11 +123,11 @@ function Test-SimpleFSharpUninstall {
 
 function Test-FSharpDependentPackageUninstall {
     # Arrange
-	$p = New-FSharpLibrary
-	$p | Install-Package -Source $context.RepositoryRoot PackageWithDependencyOnPrereleaseTestPackage
+    $p = New-FSharpLibrary
+    $p | Install-Package -Source $context.RepositoryRoot PackageWithDependencyOnPrereleaseTestPackage
 
-	# Act & Assert
-	Assert-Throws { $p | Uninstall-Package PreReleaseTestPackage } "Unable to uninstall 'PreReleaseTestPackage 1.0.0' because 'PackageWithDependencyOnPrereleaseTestPackage 1.0' depends on it."
+    # Act & Assert
+    Assert-Throws { $p | Uninstall-Package PreReleaseTestPackage } "Unable to uninstall 'PreReleaseTestPackage 1.0.0' because 'PackageWithDependencyOnPrereleaseTestPackage 1.0' depends on it."
 }
 
 function Test-UninstallPackageThatIsNotInstalledThrows {
@@ -218,7 +218,7 @@ function Test-UninstallSpecificVersionOfProjectLevelPackageFromSolutionLevel {
 
     Assert-SolutionPackage jQuery 1.8.0
     Assert-SolutionPackage jQuery 1.8.2
-    @($p1, $p2) | %{ Assert-Null (Get-ProjectPackage $_ Antlr) }
+    @($p1, $p2) | %{ Assert-Null (Get-ProjectPackage $_ jQuery) }
 
     Write-Host "Now uninstall package"
 
@@ -226,8 +226,8 @@ function Test-UninstallSpecificVersionOfProjectLevelPackageFromSolutionLevel {
     $p1 | Uninstall-Package jQuery -Version 1.8.0
 
     # Assert
-    Assert-Null (Get-SolutionPackage jQuery 1.8.0)
-    Assert-NotNull (Get-SolutionPackage jQuery 1.8.2)
+    Assert-NoSolutionPackage jQuery 1.8.0
+    Assert-SolutionPackage jQuery 1.8.2
 }
 
 function Test-UninstallAmbiguousProjectLevelPackageFromSolutionLevel {    
@@ -768,111 +768,111 @@ function Test-WebSiteSimpleUninstall
 
 function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToRemoveContentFiles
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$p = New-ClassLibrary
+    # Arrange
+    $p = New-ClassLibrary
 
-	$p | Install-Package PackageA -Source $context.RepositoryPath
-	
-	Assert-Package $p 'packageA'
-	Assert-Package $p 'packageB'
+    $p | Install-Package PackageA -Source $context.RepositoryPath
+    
+    Assert-Package $p 'packageA'
+    Assert-Package $p 'packageB'
 
-	Assert-NotNull (Get-ProjectItem $p testA4.txt)
-	Assert-NotNull (Get-ProjectItem $p testB4.txt)
+    Assert-NotNull (Get-ProjectItem $p testA4.txt)
+    Assert-NotNull (Get-ProjectItem $p testB4.txt)
 
-	# Act (change the target framework of the project to 3.5 and verifies that it still removes the content files correctly )
+    # Act (change the target framework of the project to 3.5 and verifies that it still removes the content files correctly )
 
-	$projectName = $p.Name
-	$p.Properties.Item("TargetFrameworkMoniker").Value = '.NETFramework,Version=3.5'
+    $projectName = $p.Name
+    $p.Properties.Item("TargetFrameworkMoniker").Value = '.NETFramework,Version=3.5'
 
-	$p = Get-Project $projectName
+    $p = Get-Project $projectName
 
-	Uninstall-Package 'PackageA' -Project $projectName -RemoveDependencies
-	
-	# Assert
-	Assert-NoPackage $p 'PackageA'
-	Assert-NoPackage $p 'PackageB'
-	
-	Assert-Null (Get-ProjectItem $p testA4.txt)
-	Assert-Null (Get-ProjectItem $p testB4.txt)
+    Uninstall-Package 'PackageA' -Project $projectName -RemoveDependencies
+    
+    # Assert
+    Assert-NoPackage $p 'PackageA'
+    Assert-NoPackage $p 'PackageB'
+    
+    Assert-Null (Get-ProjectItem $p testA4.txt)
+    Assert-Null (Get-ProjectItem $p testB4.txt)
 }
 
 function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToRemoveAssemblyReferences
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$p = New-ClassLibrary
+    # Arrange
+    $p = New-ClassLibrary
 
-	$p | Install-Package PackageA -Source $context.RepositoryPath
-	
-	Assert-Package $p 'packageA'
-	Assert-Package $p 'packageB'
+    $p | Install-Package PackageA -Source $context.RepositoryPath
+    
+    Assert-Package $p 'packageA'
+    Assert-Package $p 'packageB'
 
-	Assert-Reference $p testA4
-	Assert-Reference $p testB4
+    Assert-Reference $p testA4
+    Assert-Reference $p testB4
 
-	# Act (change the target framework of the project to 3.5 and verifies that it still removes the assembly references correctly )
+    # Act (change the target framework of the project to 3.5 and verifies that it still removes the assembly references correctly )
 
-	$projectName = $p.Name
-	$p.Properties.Item("TargetFrameworkMoniker").Value = '.NETFramework,Version=3.5'
+    $projectName = $p.Name
+    $p.Properties.Item("TargetFrameworkMoniker").Value = '.NETFramework,Version=3.5'
 
-	$p = Get-Project $projectName
+    $p = Get-Project $projectName
 
-	Uninstall-Package 'PackageA' -Project $projectName -RemoveDependencies
-	
-	# Assert
-	Assert-NoPackage $p 'PackageA'
-	Assert-NoPackage $p 'PackageB'
-	
-	Assert-Null (Get-AssemblyReference $p testA4.dll)
-	Assert-Null (Get-AssemblyReference $p testB4.dll)
+    Uninstall-Package 'PackageA' -Project $projectName -RemoveDependencies
+    
+    # Assert
+    Assert-NoPackage $p 'PackageA'
+    Assert-NoPackage $p 'PackageB'
+    
+    Assert-Null (Get-AssemblyReference $p testA4.dll)
+    Assert-Null (Get-AssemblyReference $p testB4.dll)
 }
 
 function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToInvokeUninstallScript
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$p = New-ClassLibrary
+    # Arrange
+    $p = New-ClassLibrary
 
-	$p | Install-Package PackageA -Source $context.RepositoryPath
-	
-	Assert-Package $p 'packageA'
+    $p | Install-Package PackageA -Source $context.RepositoryPath
+    
+    Assert-Package $p 'packageA'
 
-	# Act (change the target framework of the project to 3.5 and verifies that it invokes the correct uninstall.ps1 file in 'net40' folder )
+    # Act (change the target framework of the project to 3.5 and verifies that it invokes the correct uninstall.ps1 file in 'net40' folder )
 
-	$projectName = $p.Name
-	$p.Properties.Item("TargetFrameworkMoniker").Value = '.NETFramework,Version=3.5'
+    $projectName = $p.Name
+    $p.Properties.Item("TargetFrameworkMoniker").Value = '.NETFramework,Version=3.5'
 
-	$global:UninstallVar = 0
+    $global:UninstallVar = 0
 
-	$p = Get-Project $projectName
-	Uninstall-Package 'PackageA' -Project $projectName
-	
-	# Assert
-	Assert-NoPackage $p 'PackageA'
-	
-	Assert-AreEqual 1 $global:UninstallVar
+    $p = Get-Project $projectName
+    Uninstall-Package 'PackageA' -Project $projectName
+    
+    # Assert
+    Assert-NoPackage $p 'PackageA'
+    
+    Assert-AreEqual 1 $global:UninstallVar
 
-	Remove-Variable UninstallVar -Scope Global
+    Remove-Variable UninstallVar -Scope Global
 }
 
 
 function Test-ToolsPathForUninstallScriptPointToToolsFolder
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$p = New-SilverlightApplication
+    # Arrange
+    $p = New-SilverlightApplication
 
-	$p | Install-Package PackageA -Version 1.0.0 -Source $context.RepositoryPath
-	Assert-Package $p 'packageA'
+    $p | Install-Package PackageA -Version 1.0.0 -Source $context.RepositoryPath
+    Assert-Package $p 'packageA'
 
-	# Act
+    # Act
 
-	$p | Uninstall-Package PackageA
+    $p | Uninstall-Package PackageA
 }
 
 function Test-FinishFailedUninstallOnSolutionOpen
@@ -893,20 +893,20 @@ function Test-FinishFailedUninstallOnSolutionOpen
     $filePath = Join-Path $localRepositoryPath "SolutionLevelPkg.1.0.0\tools\Sample.targets"
     $fileStream = [System.IO.File]::Open($filePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read)
 
-	try {
-		# Act
-		$p | Uninstall-Package SolutionLevelPkg
+    try {
+        # Act
+        $p | Uninstall-Package SolutionLevelPkg
 
-		# Assert
-		Assert-True $physicalFileSystem.DirectoryExists("SolutionLevelPkg.1.0.0")
-		Assert-True $physicalFileSystem.FileExists("SolutionLevelPkg.1.0.0.deleteme")
+        # Assert
+        Assert-True $physicalFileSystem.DirectoryExists("SolutionLevelPkg.1.0.0")
+        Assert-True $physicalFileSystem.FileExists("SolutionLevelPkg.1.0.0.deleteme")
 
-	} finally {
-		$fileStream.Close()
-	}
+    } finally {
+        $fileStream.Close()
+    }
 
-	# Act
-	# After closing the file handle, we close the solution and reopen it
+    # Act
+    # After closing the file handle, we close the solution and reopen it
     $solutionDir = $dte.Solution.FullName
     Close-Solution
     Open-Solution $solutionDir
@@ -934,20 +934,20 @@ function Test-FinishFailedUninstallOnSolutionOpenOfProjectLevelPackage
     $filePath = Join-Path $localRepositoryPath "PackageWithTextFile.1.0\content\text"
     $fileStream = [System.IO.File]::Open($filePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read)
 
-	try {
-		# Act
-		$p | Uninstall-Package PackageWithTextFile
+    try {
+        # Act
+        $p | Uninstall-Package PackageWithTextFile
 
-		# Assert
-		Assert-True $physicalFileSystem.DirectoryExists("PackageWithTextFile.1.0")
-		Assert-True $physicalFileSystem.FileExists("PackageWithTextFile.1.0.deleteme")
+        # Assert
+        Assert-True $physicalFileSystem.DirectoryExists("PackageWithTextFile.1.0")
+        Assert-True $physicalFileSystem.FileExists("PackageWithTextFile.1.0.deleteme")
 
-	} finally {
-		$fileStream.Close()
-	}
+    } finally {
+        $fileStream.Close()
+    }
 
-	# Act
-	# After closing the file handle, we close the solution and reopen it
+    # Act
+    # After closing the file handle, we close the solution and reopen it
     $solutionDir = $dte.Solution.FullName
     Close-Solution
     Open-Solution $solutionDir
