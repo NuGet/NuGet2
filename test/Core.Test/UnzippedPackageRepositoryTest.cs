@@ -105,6 +105,23 @@ namespace NuGet.Test
             Assert.Null(packageB);
         }
 
+        [Fact]
+        public void GetPackagePublishedTime()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("c:\\");
+            AddPackage(fileSystem, "A", "1.0");
+
+            // Act
+            var pathResolver = new DefaultPackagePathResolver("c:\\");
+            var repository = new UnzippedPackageRepository(pathResolver, fileSystem);
+            var packages = repository.GetPackages().ToList();
+
+            // Assert            
+            var time = fileSystem.GetLastModified(@"A.1.0\A.1.0.nuspec");
+            Assert.Equal(time, packages[0].Published);
+        }
+
         private void AssertPackage(IPackage package, string id, SemanticVersion version)
         {
             Assert.NotNull(package);
