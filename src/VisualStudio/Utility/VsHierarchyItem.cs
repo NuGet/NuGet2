@@ -105,7 +105,10 @@ namespace NuGet.VisualStudio
                 VsHierarchyItem child = GetFirstChild(fVisible);
                 while (child != null)
                 {
-                    bool isMemberOfProject = (bool)child.GetProperty(__VSHPROPID.VSHPROPID_IsNonMemberItem) == false;
+                    object isNonMemberItemValue = child.GetProperty(__VSHPROPID.VSHPROPID_IsNonMemberItem);
+                    // Some project systems (e.g. F#) don't support querying for the VSHPROPID_IsNonMemberItem property. 
+                    // In that case, we treat this child as belonging to the project
+                    bool isMemberOfProject = isNonMemberItemValue == null || (bool)isNonMemberItemValue == false;
                     if (isMemberOfProject)
                     {
                         int returnVal = child.WalkDepthFirst(fVisible, processCallback, newCallerObject);
