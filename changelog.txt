@@ -1,0 +1,16 @@
+Release notes
+
+*** v2.3 ***
+
+- Add support for MonoAndroid, MonoTouch and MonoMac framework identifiers.
+
+
+*** v2.2 ***
+
+- When a package uninstallation fails to delete all files, we show a message asking users to restart VS.
+- The Quick Launch feature.
+- In .nuspec, allow specifying an entire directory in the <file> element using this syntax:
+
+     <file src=”scripts\” target=”contents\scripts” />
+
+  This will also allow package authors to create empty directory easily. 
