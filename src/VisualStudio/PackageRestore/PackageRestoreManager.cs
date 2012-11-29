@@ -20,7 +20,7 @@ namespace NuGet.VisualStudio
     [Export(typeof(IPackageRestoreManager))]
     internal class PackageRestoreManager : IPackageRestoreManager
     {
-        private static readonly string NuGetExeFile = Path.Combine(VsConstants.NuGetSolutionSettingsFolder, "nuget.exe");
+        private static readonly string NuGetExeFile = Path.Combine(VsConstants.NuGetSolutionSettingsFolder, "NuGet.exe");
         private static readonly string NuGetTargetsFile = Path.Combine(VsConstants.NuGetSolutionSettingsFolder, "NuGet.targets");
         private const string NuGetBuildPackageName = "NuGet.Build";
         private const string NuGetCommandLinePackageName = "NuGet.CommandLine";
