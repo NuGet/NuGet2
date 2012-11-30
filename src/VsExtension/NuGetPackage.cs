@@ -58,6 +58,7 @@ namespace NuGet.Tools
         private bool? _isVisualizerSupported;
         private IPackageRestoreManager _packageRestoreManager;
         private ISolutionManager _solutionManager;
+        private IDeleteOnRestartManager _deleteOnRestart;
         private OleMenuCommand _managePackageDialogCommand;
         private OleMenuCommand _managePackageForSolutionDialogCommand;
         private OleMenuCommandService _mcs;
@@ -124,6 +125,20 @@ namespace NuGet.Tools
             }
         }
 
+        private IDeleteOnRestartManager DeleteOnRestart
+        {
+            get
+            {
+                if (_deleteOnRestart == null)
+                {
+                    _deleteOnRestart = ServiceLocator.GetInstance<IDeleteOnRestartManager>();
+                    Debug.Assert(_deleteOnRestart != null);
+                }
+
+                return _deleteOnRestart;
+            }
+        }
+
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -155,7 +170,15 @@ namespace NuGet.Tools
             // the <Import> element added.
             if (PackageRestoreManager.IsCurrentSolutionEnabledForRestore)
             {
-                _packageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: false);
+                PackageRestoreManager.EnableCurrentSolutionForRestore(fromActivation: false);
+            }
+
+            // when NuGet loads, if the current solution has some package 
+            // folders marked for deletion (because a previous uninstalltion didn't succeed),
+            // delete them now.
+            if (SolutionManager.IsSolutionOpen)
+            {
+                DeleteOnRestart.DeleteMarkedPackageDirectories();
             }
         }
 
