@@ -390,6 +390,45 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             VerifyPackageContents(expectedPackage, new[] { @"content\file1.txt" });
         }
 
+
+        [Fact]
+        public void PackageCommand_IncludeFileWithoutFileNameIfNoDefaultExcludeIsSet()
+        {
+            // Arrange
+            string nuspecFile = Path.Combine(SpecificFilesFolder, "FileWithoutFileName.nuspec");
+            string expectedPackage = "exon.1.0.0.nupkg";
+            File.WriteAllText(Path.Combine(SpecificFilesFolder, ".htaccess"), "file 1");
+            File.WriteAllText(Path.Combine(SpecificFilesFolder, ".clax"), "file 2");
+            File.WriteAllText(Path.Combine(SpecificFilesFolder, "two.txt"), "file 3");
+            File.WriteAllText(nuspecFile, @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package>
+  <metadata>
+    <id>exon</id>
+    <version>1.0.0</version>
+    <authors>dotnetjunky</authors>
+    <description>Why do you care.</description>
+    <language>en-US</language>
+  </metadata>
+  <files>
+    <file src="".htaccess"" target=""content"" />
+    <file src=""*.clax"" target=""content"" />
+    <file src=""two.txt"" target=""content"" />
+  </files>
+</package>");
+            string[] args = new string[] { "pack", "-NoDefaultExcludes" };
+            Directory.SetCurrentDirectory(SpecificFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists(expectedPackage));
+
+            VerifyPackageContents(expectedPackage, new[] { @"content\.clax", @"content\.htaccess", @"content\two.txt" });
+        }
+
         [Fact]
         public void PackageCommand_NotSpecifyingFilesElementPackagesEmptyFrameworkFolderInContent()
         {
