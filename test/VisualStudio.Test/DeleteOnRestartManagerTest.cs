@@ -26,7 +26,7 @@ namespace NuGet.VisualStudio.Test
             var deleteOnRestartManager = new DeleteOnRestartManager(() => fileSystem);
 
             // Assert
-            Assert.True(deleteOnRestartManager.PackageDirectoriesAreMarkedForDeletion);
+            Assert.True(deleteOnRestartManager.PackageDirectoriesMarkedForDeletion.Any());
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace NuGet.VisualStudio.Test
 
             // Act
             // Assert
-            Assert.False(deleteOnRestartManager.PackageDirectoriesAreMarkedForDeletion);
+            Assert.False(deleteOnRestartManager.PackageDirectoriesMarkedForDeletion.Any());
         }
 
         [Fact]

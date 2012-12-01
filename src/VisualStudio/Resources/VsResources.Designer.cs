@@ -477,7 +477,7 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Some packages could not be completely removed. Restart Visual Studio to finish uninstall..
+        ///   Looks up a localized string similar to One or more packages could not be completely removed: {0}. Restart Visual Studio to finish uninstall..
         /// </summary>
         public static string RequestRestartToCompleteUninstall {
             get {

@@ -9,7 +9,7 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Border Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" MinHeight="23" Background="{DynamicResource {x:Static vsfx:VsBrushes.InfoBackgroundKey}}">
-            <TextBlock Text="{x:Static resx:VsResources.RequestRestartToCompleteUninstall}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="WrapWithOverflow" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.InfoTextKey}}" />
+            <TextBlock Name="RequestRestartMessage" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="WrapWithOverflow" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.InfoTextKey}}" />
         </Border>
         <Button
             x:Name="RestartButton"

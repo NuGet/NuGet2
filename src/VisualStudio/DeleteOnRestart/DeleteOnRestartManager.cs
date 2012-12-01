@@ -37,13 +37,15 @@ namespace NuGet.VisualStudio
             _packagePathResolverFactory = packagePathResolverFactory;
         }
 
-        /// <summary>
-        /// Indicates whether any packages still need to be deleted as indicated by the existence of .deleteme files
-        /// in the local package repository.
-        /// </summary>
-        public bool PackageDirectoriesAreMarkedForDeletion
+        public IList<string> PackageDirectoriesMarkedForDeletion
         {
-            get { return _repositoryFileSystemFactory().GetFiles(path: "", filter: DeletionMarkerFilter, recursive: false).Any(); }
+            get {
+                return _repositoryFileSystemFactory()
+                    .GetFiles(path: "", filter: DeletionMarkerFilter, recursive: false)
+                    .Select(
+                        // strip the DeletionMarkerFilter at the end of the path to get the package name.
+                        path => Path.ChangeExtension(path, null)).ToList();
+            }
         }
 
         /// <summary>
