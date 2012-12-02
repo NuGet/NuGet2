@@ -929,8 +929,11 @@ namespace NuGet.VisualStudio
                     }
 
                     action();
-
-                    AddSolutionPackageConfigEntry(package);
+                    
+                    foreach (var operation in operations)
+                    {
+                        AddSolutionPackageConfigEntry(operation.Package);
+                    }
                 });
             }
             finally
