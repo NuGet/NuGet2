@@ -75,6 +75,11 @@ namespace NuGet
             return Stream.Null;
         }
 
+        public Stream CreateFile(string path)
+        {
+            return Stream.Null;
+        }
+
         public DateTimeOffset GetLastModified(string path)
         {
             return DateTimeOffset.MinValue;

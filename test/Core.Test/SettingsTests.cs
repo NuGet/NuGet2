@@ -268,8 +268,8 @@ namespace NuGet.Test
         public void CallingSetValueWithEmptySectionNameThrowsException()
         {
             // Arrange 
-            var mockFileSystem = new Mock<IFileSystem>();
-            var settings = new Settings(mockFileSystem.Object);
+            var mockFileSystem = new MockFileSystem();
+            var settings = new Settings(mockFileSystem);
 
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.SetValue("", "SomeKey", "SomeValue"));
@@ -279,8 +279,8 @@ namespace NuGet.Test
         public void CallingSetValueWithEmptyKeyThrowsException()
         {
             // Arrange 
-            var mockFileSystem = new Mock<IFileSystem>();
-            var settings = new Settings(mockFileSystem.Object);
+            var mockFileSystem = new MockFileSystem();
+            var settings = new Settings(mockFileSystem);
 
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(() => settings.SetValue("SomeKey", "", "SomeValue"));

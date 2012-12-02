@@ -173,22 +173,21 @@ namespace NuGet
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "The caller is responsible for closing the stream")]
         internal static void AddFileWithCheck(this IFileSystem fileSystem, string path, Action<Stream> write)
         {
-            fileSystem.AddFileWithCheck(path, () =>
+            if (fileSystem.FileExists(path))
             {
-                var stream = new MemoryStream();
-                write(stream);
-                stream.Seek(0, SeekOrigin.Begin);
-                return stream;
-            });
+                fileSystem.Logger.Log(MessageLevel.Warning, NuGetResources.Warning_FileAlreadyExists, path);
+            }
+            else
+            {
+                AddFile(fileSystem, path, write);
+            }
         }
 
         internal static void AddFile(this IFileSystem fileSystem, string path, Action<Stream> write)
         {
-            using (var stream = new MemoryStream())
+            using (var stream = fileSystem.CreateFile(path))
             {
                 write(stream);
-                stream.Seek(0, SeekOrigin.Begin);
-                fileSystem.AddFile(path, stream);
             }
         }
 

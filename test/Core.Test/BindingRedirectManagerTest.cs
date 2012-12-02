@@ -2,6 +2,7 @@
 using System.IO;
 using Moq;
 using NuGet.Runtime;
+using NuGet.Test.Mocks;
 using Xunit;
 
 namespace NuGet.Test
@@ -13,23 +14,17 @@ namespace NuGet.Test
         public void AddingBindingRedirectToEmptyConfig()
         {
             // Arrange            
-            var mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(m => m.FileExists("config")).Returns(true);
-            mockFileSystem.Setup(m => m.OpenFile("config")).Returns(@"<configuration></configuration>".AsStream());
-            var ms = new MemoryStream();
-            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) =>
-            {
-                stream.CopyTo(ms);
-                ms.Seek(0, SeekOrigin.Begin);
-            });
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddFile("config", @"<configuration></configuration>");
 
-            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem.Object, "config");
+            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem, "config");
             AssemblyBinding assemblyBinding = GetAssemblyBinding("AssemblyName", "token", "3.0.0.0");
 
             // Act
             bindingRedirectManager.AddBindingRedirects(new[] { assemblyBinding });
 
             // Assert
+            string outputContent = mockFileSystem.OpenFile("config").ReadToEnd();
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
@@ -40,16 +35,15 @@ namespace NuGet.Test
       </dependentAssembly>
     </assemblyBinding>
   </runtime>
-</configuration>", ms.ReadToEnd());
+</configuration>", outputContent);
         }
 
         [Fact]
         public void AddingBindingRedirectWithMultipleAssemblyBindingSectionsAddsToFirstOne()
         {
             // Arrange            
-            var mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(m => m.FileExists("config")).Returns(true);
-            mockFileSystem.Setup(m => m.OpenFile("config")).Returns(@"
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddFile("config", @"
 <configuration>
     <runtime>
         <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
@@ -65,21 +59,16 @@ namespace NuGet.Test
             </dependentAssembly>
         </assemblyBinding>
     </runtime>
-</configuration>".AsStream());
-            var ms = new MemoryStream();
-            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) =>
-            {
-                stream.CopyTo(ms);
-                ms.Seek(0, SeekOrigin.Begin);
-            });
+</configuration>");
 
-            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem.Object, "config");
+            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem, "config");
             AssemblyBinding assemblyBinding = GetAssemblyBinding("AssemblyName", "token", "3.0.0.0");
 
             // Act
             bindingRedirectManager.AddBindingRedirects(new[] { assemblyBinding });
 
             // Assert
+            string outputContent = mockFileSystem.OpenFile("config").ReadToEnd();
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
@@ -100,16 +89,15 @@ namespace NuGet.Test
       </dependentAssembly>
     </assemblyBinding>
   </runtime>
-</configuration>", ms.ReadToEnd());
+</configuration>", outputContent);
         }
 
         [Fact]
         public void AddingBindingRedirectsDoesNotAddDuplicates()
         {
             // Arrange            
-            var mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(m => m.FileExists("config")).Returns(true);
-            mockFileSystem.Setup(m => m.OpenFile("config")).Returns(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddFile("config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
@@ -119,21 +107,16 @@ namespace NuGet.Test
       </dependentAssembly>
     </assemblyBinding>
   </runtime>
-</configuration>".AsStream());
-            var ms = new MemoryStream();
-            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) =>
-            {
-                stream.CopyTo(ms);
-                ms.Seek(0, SeekOrigin.Begin);
-            });
+</configuration>");
 
-            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem.Object, "config");
+            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem, "config");
             AssemblyBinding assemblyBinding = GetAssemblyBinding("AssemblyName", "token", "3.0.0.0");
 
             // Act
             bindingRedirectManager.AddBindingRedirects(new[] { assemblyBinding });
 
             // Assert
+            string outputContent = mockFileSystem.OpenFile("config").ReadToEnd();
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
@@ -144,16 +127,15 @@ namespace NuGet.Test
       </dependentAssembly>
     </assemblyBinding>
   </runtime>
-</configuration>", ms.ReadToEnd());
+</configuration>", outputContent);
         }
 
         [Fact]
         public void AddingBindingRedirectsOverwritesAssemblyBindingIfBindingForAssemblyExists()
         {
             // Arrange            
-            var mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(m => m.FileExists("config")).Returns(true);
-            mockFileSystem.Setup(m => m.OpenFile("config")).Returns(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddFile("config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
@@ -163,21 +145,15 @@ namespace NuGet.Test
       </dependentAssembly>
     </assemblyBinding>
   </runtime>
-</configuration>".AsStream());
-            var ms = new MemoryStream();
-            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) =>
-            {
-                stream.CopyTo(ms);
-                ms.Seek(0, SeekOrigin.Begin);
-            });
-
-            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem.Object, "config");
+</configuration>");
+            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem, "config");
             AssemblyBinding assemblyBinding = GetAssemblyBinding("AssemblyName", "token", "5.0.0.0");
 
             // Act
             bindingRedirectManager.AddBindingRedirects(new[] { assemblyBinding });
 
             // Assert
+            string outputContent = mockFileSystem.OpenFile("config").ReadToEnd();
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
@@ -188,16 +164,15 @@ namespace NuGet.Test
       </dependentAssembly>
     </assemblyBinding>
   </runtime>
-</configuration>", ms.ReadToEnd());
+</configuration>", outputContent);
         }
 
         [Fact]
         public void AddingBindingRedirectsFileWithDuplicateAssemblyIdentitiesOverwritesAssemblyBindingIfBindingForAssemblyExists()
         {
             // Arrange            
-            var mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(m => m.FileExists("config")).Returns(true);
-            mockFileSystem.Setup(m => m.OpenFile("config")).Returns(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddFile("config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
@@ -211,21 +186,16 @@ namespace NuGet.Test
     </dependentAssembly>
     </assemblyBinding>
   </runtime>
-</configuration>".AsStream());
-            var ms = new MemoryStream();
-            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) =>
-            {
-                stream.CopyTo(ms);
-                ms.Seek(0, SeekOrigin.Begin);
-            });
+</configuration>");
 
-            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem.Object, "config");
+            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem, "config");
             AssemblyBinding assemblyBinding = GetAssemblyBinding("AssemblyName", "token", "5.0.0.0");
 
             // Act
             bindingRedirectManager.AddBindingRedirects(new[] { assemblyBinding });
 
             // Assert
+            string outputContent = mockFileSystem.OpenFile("config").ReadToEnd();
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
@@ -236,16 +206,15 @@ namespace NuGet.Test
       </dependentAssembly>
     </assemblyBinding>
   </runtime>
-</configuration>", ms.ReadToEnd());
+</configuration>", outputContent);
         }
 
         [Fact]
         public void RemoveBindingRedirectsRemovesParentNodeIfLastElement()
         {
             // Arrange            
-            var mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(m => m.FileExists("config")).Returns(true);
-            mockFileSystem.Setup(m => m.OpenFile("config")).Returns(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddFile("config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
@@ -257,36 +226,30 @@ namespace NuGet.Test
       </dependentAssembly>
     </assemblyBinding>
   </runtime>
-</configuration>".AsStream());
-            var ms = new MemoryStream();
-            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) =>
-            {
-                stream.CopyTo(ms);
-                ms.Seek(0, SeekOrigin.Begin);
-            });
+</configuration>");
 
-            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem.Object, "config");
+            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem, "config");
             AssemblyBinding assemblyBinding = GetAssemblyBinding("AssemblyName", "token", "3.0.0.0");
 
             // Act
             bindingRedirectManager.RemoveBindingRedirects(new[] { assemblyBinding });
 
             // Assert
+            string outputContent = mockFileSystem.OpenFile("config").ReadToEnd();
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1""></assemblyBinding>
   </runtime>
-</configuration>", ms.ReadToEnd());
+</configuration>", outputContent);
         }
 
         [Fact]
         public void RemoveBindingRedirectsDoesNotRemoveParentNodeIfNotLastElement()
         {
             // Arrange            
-            var mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(m => m.FileExists("config")).Returns(true);
-            mockFileSystem.Setup(m => m.OpenFile("config")).Returns(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddFile("config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
@@ -300,21 +263,16 @@ namespace NuGet.Test
       </dependentAssembly>
     </assemblyBinding>
   </runtime>
-</configuration>".AsStream());
-            var ms = new MemoryStream();
-            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) =>
-            {
-                stream.CopyTo(ms);
-                ms.Seek(0, SeekOrigin.Begin);
-            });
+</configuration>");
 
-            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem.Object, "config");
+            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem, "config");
             AssemblyBinding assemblyBinding = GetAssemblyBinding("AssemblyName", "token", "3.0.0.0");
 
             // Act
             bindingRedirectManager.RemoveBindingRedirects(new[] { assemblyBinding });
 
             // Assert
+            string outputContent = mockFileSystem.OpenFile("config").ReadToEnd();
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
@@ -325,16 +283,15 @@ namespace NuGet.Test
       </dependentAssembly>
     </assemblyBinding>
   </runtime>
-</configuration>", ms.ReadToEnd());
+</configuration>", outputContent);
         }
 
         [Fact]
         public void AddBindingRedirectUpdatesElementsPreservingComments()
         {
-            // Arrange            
-            var mockFileSystem = new Mock<IFileSystem>();
-            mockFileSystem.Setup(m => m.FileExists("config")).Returns(true);
-            mockFileSystem.Setup(m => m.OpenFile("config")).Returns(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            // Arrange
+            var mockFileSystem = new MockFileSystem();
+            mockFileSystem.AddFile("config", @"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
@@ -345,21 +302,17 @@ namespace NuGet.Test
       </dependentAssembly>
     </assemblyBinding>
   </runtime>
-</configuration>".AsStream());
-            var ms = new MemoryStream();
-            mockFileSystem.Setup(m => m.AddFile("config", It.IsAny<Stream>())).Callback<string, Stream>((path, stream) =>
-            {
-                stream.CopyTo(ms);
-                ms.Seek(0, SeekOrigin.Begin);
-            });
+</configuration>");
 
-            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem.Object, "config");
+            var bindingRedirectManager = new BindingRedirectManager(mockFileSystem, "config");
             AssemblyBinding assemblyBinding = GetAssemblyBinding("AssemblyName", "token", "4.0.0.0");
 
             // Act
             bindingRedirectManager.AddBindingRedirects(new[] { assemblyBinding });
 
             // Assert
+            string outputContent = mockFileSystem.OpenFile("config").ReadToEnd();
+
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
@@ -371,7 +324,7 @@ namespace NuGet.Test
       </dependentAssembly>
     </assemblyBinding>
   </runtime>
-</configuration>", ms.ReadToEnd());
+</configuration>", outputContent);
         }
 
         private static AssemblyBinding GetAssemblyBinding(string name, string publicKey, string version, string culture = "neutral")

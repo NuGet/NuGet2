@@ -143,6 +143,18 @@ namespace NuGet.Test.Mocks
             return factory();
         }
 
+        public virtual Stream CreateFile(string path)
+        {
+            Paths[path] = () => Stream.Null;
+            
+            Action<Stream> streamClose = (stream) => {
+                stream.Seek(0, SeekOrigin.Begin);
+                AddFile(path, stream);
+            };
+            var memoryStream = new EventMemoryStream(streamClose);
+            return memoryStream;
+        }
+
         public string ReadAllText(string path)
         {
             return OpenFile(path).ReadToEnd();
