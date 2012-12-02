@@ -8,7 +8,7 @@ namespace NuGet.Test.Mocks
     public class MockPackageRepository : PackageRepositoryBase, ICollection<IPackage>, ILatestPackageLookup, IOperationAwareRepository
     {
         private readonly string _source;
-
+        
         public string LastOperation { get; private set; }
 
         public MockPackageRepository()
@@ -48,7 +48,7 @@ namespace NuGet.Test.Mocks
         {
             AddPackage(package.Id, package);
         }
-
+        
         public override IQueryable<IPackage> GetPackages()
         {
             return Packages.Values.SelectMany(p => p).AsQueryable();
