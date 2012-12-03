@@ -9,6 +9,7 @@ namespace NuGet.Test.Mocks
     public class MockFileSystem : IFileSystem
     {
         private ILogger _logger;
+        private Dictionary<string, DateTime> _createdTime;
 
         public MockFileSystem()
             : this(@"C:\MockFileSystem\")
@@ -21,6 +22,7 @@ namespace NuGet.Test.Mocks
             Root = root;
             Paths = new Dictionary<string, Func<Stream>>(StringComparer.OrdinalIgnoreCase);
             Deleted = new HashSet<string>();
+            _createdTime = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
         }
 
         public virtual ILogger Logger
@@ -178,6 +180,7 @@ namespace NuGet.Test.Mocks
             stream.CopyTo(ms);
             byte[] buffer = ms.ToArray();
             Paths[path] = () => new MemoryStream(buffer);
+            _createdTime[path] = DateTime.UtcNow;
         }
 
         public virtual void AddFile(string path, Stream stream)
@@ -192,17 +195,41 @@ namespace NuGet.Test.Mocks
 
         public virtual DateTimeOffset GetLastModified(string path)
         {
-            return DateTime.UtcNow;
+            DateTime time;
+            if (_createdTime.TryGetValue(path, out time))
+            {
+                return time;
+            }
+            else
+            {
+                return DateTime.UtcNow;
+            }
         }
 
         public virtual DateTimeOffset GetCreated(string path)
         {
-            return DateTime.UtcNow;
+            DateTime time;
+            if (_createdTime.TryGetValue(path, out time))
+            {
+                return time;
+            }
+            else
+            {
+                return DateTime.UtcNow;
+            }
         }
 
         public virtual DateTimeOffset GetLastAccessed(string path)
         {
-            return DateTime.UtcNow;
+            DateTime time;
+            if (_createdTime.TryGetValue(path, out time))
+            {
+                return time;
+            }
+            else
+            {
+                return DateTime.UtcNow;
+            }
         }
     }
 }

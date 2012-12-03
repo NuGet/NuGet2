@@ -514,7 +514,7 @@ function Test-UpdateAllPackagesInSolution {
     Assert-Package $p2 E 3.0
 }
 
-function Test-UpdatePackageOnAnF#ProjectWithMultiplePackages {
+function Test-UpdatePackageOnAnFSharpProjectWithMultiplePackages {
     param(
         $context
     )
@@ -526,7 +526,7 @@ function Test-UpdatePackageOnAnF#ProjectWithMultiplePackages {
     $p | Install-Package SkypePackage -version 1.0 -source $context.RepositoryRoot
     $p | Install-Package netfx-Guard -Source $context.RepositoryRoot
 
-    $p | Update-Package -Source $context.RepositoryRoot
+    Update-Package -Source $context.RepositoryRoot -ProjectName $p.Name
 
     # Assert
     Assert-Package $p SkypePackage 3.0
@@ -681,7 +681,7 @@ function Test-UpdateAllPackagesInASingleProjectWithMultipleProjects {
     $p1, $p2 | Install-Package jQuery.UI.Combined  -Version 1.8.11 -Source $context.RepositoryPath
 
     # Act
-    $p1 | Update-Package -Source $context.RepositoryPath
+    Update-Package -Source $context.RepositoryPath -ProjectName $p1.Name
 
     # Assert
     Assert-Package $p1 jQuery 1.6.1
@@ -702,7 +702,7 @@ function Test-UpdateAllPackagesInASingleProjectWithSafeFlagAndMultipleProjects {
     $p1, $p2 | Install-Package jQuery.UI.Combined  -Version 1.8.11 -Source $context.RepositoryPath
 
     # Act
-    $p1 | Update-Package -Safe -Source $context.RepositoryPath
+    Update-Package -Safe -Source $context.RepositoryPath -ProjectName $p1.Name
 
     # Assert
     Assert-Package $p1 jQuery 1.5.2
@@ -745,7 +745,7 @@ function Test-UpdatePackageInOneProjectDoesNotCheckAllPackagesInSolution {
     $p1 | Install-Package jQuery -Version 1.5.1 -Source $context.RepositoryPath
 
     # Act
-    $p2 | Update-Package -Source $context.RepositoryRoot
+    Update-Package -Source $context.RepositoryRoot -ProjectName $p2.Name
 
     # Assert
     Assert-Package $p1 jQuery 1.5.1
@@ -1013,287 +1013,287 @@ function Test-UpdatePackageDontMakeExcessiveNetworkRequests
 
 function Test-UpdatePackageInstallCorrectDependencyPackageBasedOnTargetFramework
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$project = New-ClassLibrary
+    # Arrange
+    $project = New-ClassLibrary
 
-	$global:InstallVar = 0
+    $global:InstallVar = 0
 
-	Install-Package TestDependencyTargetFramework -Version 1.0 -Project $project.Name -Source $context.RepositoryPath
+    Install-Package TestDependencyTargetFramework -Version 1.0 -Project $project.Name -Source $context.RepositoryPath
 
-	Assert-Package $project TestDependencyTargetFramework -Version 1.0
-	Assert-Package $project TestEmptyLibFolder
-	Assert-NoPackage $project TestEmptyContentFolder
-	Assert-NoPackage $project TestEmptyToolsFolder
+    Assert-Package $project TestDependencyTargetFramework -Version 1.0
+    Assert-Package $project TestEmptyLibFolder
+    Assert-NoPackage $project TestEmptyContentFolder
+    Assert-NoPackage $project TestEmptyToolsFolder
 
-	# Act
-	Update-Package TestDependencyTargetFramework -Version 2.0 -Project $project.Name -Source $context.RepositoryPath
+    # Act
+    Update-Package TestDependencyTargetFramework -Version 2.0 -Project $project.Name -Source $context.RepositoryPath
 
-	# Assert
-	Assert-Package $project TestDependencyTargetFramework -Version 2.0
-	Assert-Package $project TestEmptyToolsFolder
-	Assert-NoPackage $project TestEmptyLibFolder
-	Assert-NoPackage $project TestEmptyContentFolder
+    # Assert
+    Assert-Package $project TestDependencyTargetFramework -Version 2.0
+    Assert-Package $project TestEmptyToolsFolder
+    Assert-NoPackage $project TestEmptyLibFolder
+    Assert-NoPackage $project TestEmptyContentFolder
 }
 
 function Test-UpdatingSatellitePackageUpdatesReferences
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$p = New-ClassLibrary
+    # Arrange
+    $p = New-ClassLibrary
 
-	# Act - 1
-	$p | Install-Package Localized.fr-FR -Version 1.0 -Source $context.RepositoryPath
+    # Act - 1
+    $p | Install-Package Localized.fr-FR -Version 1.0 -Source $context.RepositoryPath
 
-	# Assert - 1
-	Assert-Package $p Localized 1.0
-	Assert-Package $p Localized.fr-FR 1.0
+    # Assert - 1
+    Assert-Package $p Localized 1.0
+    Assert-Package $p Localized.fr-FR 1.0
 
-	$solutionDir = Get-SolutionDir
-	$packageDir = (Join-Path $solutionDir packages\Localized.1.0)
-	Assert-PathExists (Join-Path $packageDir 'lib\net40\fr-FR\Main.1.0.resources.dll')
-	
+    $solutionDir = Get-SolutionDir
+    $packageDir = (Join-Path $solutionDir packages\Localized.1.0)
+    Assert-PathExists (Join-Path $packageDir 'lib\net40\fr-FR\Main.1.0.resources.dll')
+    
 
-	# Act
-	$p | Update-Package Localized.fr-FR -Source $context.RepositoryPath
+    # Act
+    $p | Update-Package Localized.fr-FR -Source $context.RepositoryPath
 
-	# Assert
-	Assert-Package $p Localized 2.0
-	Assert-Package $p Localized.fr-FR 2.0
-	$packageDir = (Join-Path $solutionDir packages\Localized.2.0)
-	Assert-PathNotExists (Join-Path $packageDir 'lib\net40\fr-FR\Main.1.0.resources.dll')
-	Assert-PathExists (Join-Path $packageDir 'lib\net40\fr-FR\Main.2.0.resources.dll')
+    # Assert
+    Assert-Package $p Localized 2.0
+    Assert-Package $p Localized.fr-FR 2.0
+    $packageDir = (Join-Path $solutionDir packages\Localized.2.0)
+    Assert-PathNotExists (Join-Path $packageDir 'lib\net40\fr-FR\Main.1.0.resources.dll')
+    Assert-PathExists (Join-Path $packageDir 'lib\net40\fr-FR\Main.2.0.resources.dll')
 }
 
 function Test-UpdatingSatellitePackageWhenMultipleVersionsInstalled
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$p1 = New-ClassLibrary
-	$p2 = New-ClassLibrary
+    # Arrange
+    $p1 = New-ClassLibrary
+    $p2 = New-ClassLibrary
 
-	# Act - 1
-	$p1 | Install-Package Localized.fr-FR -Version 1.0 -Source $context.RepositoryPath
-	$p2 | Install-Package Localized.fr-FR -Version 2.0 -Source $context.RepositoryPath
-	$p2 | Install-Package DependsOnLocalized -Version 1.0 -Source $context.RepositoryPath
+    # Act - 1
+    $p1 | Install-Package Localized.fr-FR -Version 1.0 -Source $context.RepositoryPath
+    $p2 | Install-Package Localized.fr-FR -Version 2.0 -Source $context.RepositoryPath
+    $p2 | Install-Package DependsOnLocalized -Version 1.0 -Source $context.RepositoryPath
 
-	# Assert - 1
-	Assert-Package $p1 Localized 1.0
-	Assert-Package $p1 Localized.fr-FR 1.0
-	Assert-Package $p2 Localized 2.0
-	Assert-Package $p2 Localized.fr-FR 2.0
-	Assert-Package $p2 DependsOnLocalized 1.0
+    # Assert - 1
+    Assert-Package $p1 Localized 1.0
+    Assert-Package $p1 Localized.fr-FR 1.0
+    Assert-Package $p2 Localized 2.0
+    Assert-Package $p2 Localized.fr-FR 2.0
+    Assert-Package $p2 DependsOnLocalized 1.0
 
-	$solutionDir = Get-SolutionDir
-	Assert-PathExists (Join-Path $solutionDir 'packages\Localized.1.0\lib\net40\fr-FR\Main.1.0.resources.dll')
-	Assert-PathExists (Join-Path $solutionDir 'packages\Localized.2.0\lib\net40\fr-FR\Main.2.0.resources.dll')
-	
-	# Act - 2
-	$p2 | Update-Package DependsOnLocalized -Source $context.RepositoryPath
+    $solutionDir = Get-SolutionDir
+    Assert-PathExists (Join-Path $solutionDir 'packages\Localized.1.0\lib\net40\fr-FR\Main.1.0.resources.dll')
+    Assert-PathExists (Join-Path $solutionDir 'packages\Localized.2.0\lib\net40\fr-FR\Main.2.0.resources.dll')
+    
+    # Act - 2
+    $p2 | Update-Package DependsOnLocalized -Source $context.RepositoryPath
 
-	# Assert - 2
-	Assert-Package $p2 Localized 3.0
-	Assert-Package $p2 Localized.fr-FR 3.0
-	Assert-Package $p2 DependsOnLocalized 2.0
+    # Assert - 2
+    Assert-Package $p2 Localized 3.0
+    Assert-Package $p2 Localized.fr-FR 3.0
+    Assert-Package $p2 DependsOnLocalized 2.0
 
-	Assert-PathNotExists (Join-Path $solutionDir 'packages\Localized.2.0\')
-	Assert-PathExists (Join-Path $solutionDir 'packages\Localized.3.0\lib\net40\fr-FR\Main.3.0.resources.dll')
-	
+    Assert-PathNotExists (Join-Path $solutionDir 'packages\Localized.2.0\')
+    Assert-PathExists (Join-Path $solutionDir 'packages\Localized.3.0\lib\net40\fr-FR\Main.3.0.resources.dll')
+    
 }
 
 function Test-UpdatingPackagesWithDependenciesOnSatellitePackages
 {
-	param($context)
+    param($context)
 
-	# Arrange
-	$p = New-ClassLibrary
-	
-	# Act - 1
-	$p | Install-Package Localized.LangPack -Version 1.0 -Source $context.RepositoryPath
+    # Arrange
+    $p = New-ClassLibrary
+    
+    # Act - 1
+    $p | Install-Package Localized.LangPack -Version 1.0 -Source $context.RepositoryPath
 
-	# Assert - 1
-	Assert-Package $p Localized 1.0
-	Assert-Package $p Localized.fr-FR 1.0
-	Assert-Package $p Localized.ja-JP 1.0
-	Assert-Package $p Localized.LangPack 1.0
+    # Assert - 1
+    Assert-Package $p Localized 1.0
+    Assert-Package $p Localized.fr-FR 1.0
+    Assert-Package $p Localized.ja-JP 1.0
+    Assert-Package $p Localized.LangPack 1.0
 
-	$solutionDir = Get-SolutionDir
-	Assert-PathExists (Join-Path $solutionDir 'packages\Localized.1.0\lib\net40\ja-JP\Main.1.0.resources.dll')
-	Assert-PathExists (Join-Path $solutionDir 'packages\Localized.1.0\lib\net40\fr-FR\Main.1.0.resources.dll')
-	
-	# Act - 2
-	$p | Update-Package Localized.LangPack -Source $context.RepositoryPath
+    $solutionDir = Get-SolutionDir
+    Assert-PathExists (Join-Path $solutionDir 'packages\Localized.1.0\lib\net40\ja-JP\Main.1.0.resources.dll')
+    Assert-PathExists (Join-Path $solutionDir 'packages\Localized.1.0\lib\net40\fr-FR\Main.1.0.resources.dll')
+    
+    # Act - 2
+    $p | Update-Package Localized.LangPack -Source $context.RepositoryPath
 
-	# Assert - 2
-	Assert-Package $p Localized 2.0
-	Assert-Package $p Localized.fr-FR 2.0
-	Assert-Package $p Localized.ja-JP 2.0
-	Assert-Package $p Localized.LangPack 2.0
+    # Assert - 2
+    Assert-Package $p Localized 2.0
+    Assert-Package $p Localized.fr-FR 2.0
+    Assert-Package $p Localized.ja-JP 2.0
+    Assert-Package $p Localized.LangPack 2.0
 
-	Assert-PathExists (Join-Path $solutionDir 'packages\Localized.2.0\lib\net40\ja-JP\Main.2.0.resources.dll')
-	Assert-PathExists (Join-Path $solutionDir 'packages\Localized.2.0\lib\net40\fr-FR\Main.2.0.resources.dll')
-	
+    Assert-PathExists (Join-Path $solutionDir 'packages\Localized.2.0\lib\net40\ja-JP\Main.2.0.resources.dll')
+    Assert-PathExists (Join-Path $solutionDir 'packages\Localized.2.0\lib\net40\fr-FR\Main.2.0.resources.dll')
+    
 }
 
 function Test-UpdatingMetaPackageRemovesSatelliteReferences 
 {
-	# Verification for work item 2313
-	param ($context)
+    # Verification for work item 2313
+    param ($context)
 
-	# Arrange
-	$p = New-ClassLibrary
+    # Arrange
+    $p = New-ClassLibrary
 
-	# Act - 1
-	$p | Install-Package A.Localized -Version 1.0.0 -Source $context.RepositoryPath
-	
-	# Assert - 1
-	Assert-Package $p A 1.0.0
-	Assert-Package $p A.localized 1.0.0
-	Assert-Package $p A.fr 1.0.0
-	Assert-Package $p A.es 1.0.0
+    # Act - 1
+    $p | Install-Package A.Localized -Version 1.0.0 -Source $context.RepositoryPath
+    
+    # Assert - 1
+    Assert-Package $p A 1.0.0
+    Assert-Package $p A.localized 1.0.0
+    Assert-Package $p A.fr 1.0.0
+    Assert-Package $p A.es 1.0.0
 
-	# Act - 2
-	$p | Update-Package A.Localized -Source $context.RepositoryPath
-	
-	# Assert - 1
-	Assert-Package $p A 2.0.0
-	Assert-Package $p A.localized 2.0.0
-	Assert-Package $p A.fr 2.0.0
-	Assert-Package $p A.es 2.0.0
+    # Act - 2
+    $p | Update-Package A.Localized -Source $context.RepositoryPath
+    
+    # Assert - 1
+    Assert-Package $p A 2.0.0
+    Assert-Package $p A.localized 2.0.0
+    Assert-Package $p A.fr 2.0.0
+    Assert-Package $p A.es 2.0.0
 
-	$solutionDir = Get-SolutionDir
-	Assert-PathExists (Join-Path $solutionDir 'packages\A.Localized.2.0.0\')
-	Assert-PathNotExists (Join-Path $solutionDir 'packages\A.Localized.1.0.0\')
-	Assert-PathNotExists (Join-Path $solutionDir 'packages\A.fr.1.0.0\')
-	Assert-PathNotExists (Join-Path $solutionDir 'packages\A.es.1.0.0\')
+    $solutionDir = Get-SolutionDir
+    Assert-PathExists (Join-Path $solutionDir 'packages\A.Localized.2.0.0\')
+    Assert-PathNotExists (Join-Path $solutionDir 'packages\A.Localized.1.0.0\')
+    Assert-PathNotExists (Join-Path $solutionDir 'packages\A.fr.1.0.0\')
+    Assert-PathNotExists (Join-Path $solutionDir 'packages\A.es.1.0.0\')
 }
 
 function Test-ReinstallPackageInvokeUninstallAndInstallScripts 
 {
-	param($context) 
-	
-	# Arrange
-	$p = New-ClassLibrary
+    param($context) 
+    
+    # Arrange
+    $p = New-ClassLibrary
 
-	$p | Install-Package TestReinstallPackageScripts -Source $context.RepositoryPath
+    $p | Install-Package TestReinstallPackageScripts -Source $context.RepositoryPath
 
-	$global:InstallScriptCount = 0
-	$global:UninstallScriptCount = 4
+    $global:InstallScriptCount = 0
+    $global:UninstallScriptCount = 4
 
-	# Act
-	Update-Package TestReinstallPackageScripts -Reinstall -ProjectName $p.Name -Source $context.RepositoryPath
+    # Act
+    Update-Package TestReinstallPackageScripts -Reinstall -ProjectName $p.Name -Source $context.RepositoryPath
 
-	# Assert
-	Assert-AreEqual 1 $global:InstallScriptCount
-	Assert-AreEqual 5 $global:UninstallScriptCount
+    # Assert
+    Assert-AreEqual 1 $global:InstallScriptCount
+    Assert-AreEqual 5 $global:UninstallScriptCount
 
-	# clean up
-	Remove-Variable InstallScriptCount -Scope Global 
-	Remove-Variable UninstallScriptCount -Scope Global 
+    # clean up
+    Remove-Variable InstallScriptCount -Scope Global 
+    Remove-Variable UninstallScriptCount -Scope Global 
 }
 
 function Test-ReinstallAllPackagesInAProjectInvokeUninstallAndInstallScripts 
 {
-	param($context) 
-	
-	# Arrange
-	$p = New-ClassLibrary
+    param($context) 
+    
+    # Arrange
+    $p = New-ClassLibrary
 
-	$p | Install-Package TestReinstallPackageScripts -Source $context.RepositoryPath
-	$p | Install-Package MagicPackage -Source $context.RepositoryPath
+    $p | Install-Package TestReinstallPackageScripts -Source $context.RepositoryPath
+    $p | Install-Package MagicPackage -Source $context.RepositoryPath
 
-	$global:InstallScriptCount = 7
-	$global:UninstallScriptCount = 3
+    $global:InstallScriptCount = 7
+    $global:UninstallScriptCount = 3
 
-	$global:InstallMagicScript = 4
-	$global:UninstallMagicScript = 6
+    $global:InstallMagicScript = 4
+    $global:UninstallMagicScript = 6
 
-	# Act
-	Update-Package -Reinstall -ProjectName $p.Name -Source $context.RepositoryPath
+    # Act
+    Update-Package -Reinstall -ProjectName $p.Name -Source $context.RepositoryPath
 
-	# Assert
-	Assert-AreEqual 8 $global:InstallScriptCount
-	Assert-AreEqual 4 $global:UninstallScriptCount
+    # Assert
+    Assert-AreEqual 8 $global:InstallScriptCount
+    Assert-AreEqual 4 $global:UninstallScriptCount
 
-	Assert-AreEqual 5 $global:InstallMagicScript
-	Assert-AreEqual 7 $global:UninstallMagicScript
+    Assert-AreEqual 5 $global:InstallMagicScript
+    Assert-AreEqual 7 $global:UninstallMagicScript
 
-	# clean up
-	Remove-Variable InstallScriptCount -Scope Global 
-	Remove-Variable UninstallScriptCount -Scope Global 
-	Remove-Variable InstallMagicScript -Scope Global 
-	Remove-Variable UninstallMagicScript -Scope Global 
+    # clean up
+    Remove-Variable InstallScriptCount -Scope Global 
+    Remove-Variable UninstallScriptCount -Scope Global 
+    Remove-Variable InstallMagicScript -Scope Global 
+    Remove-Variable UninstallMagicScript -Scope Global 
 }
 
 function Test-ReinstallPackageInAllProjectsInvokeUninstallAndInstallScripts 
 {
-	param($context) 
-	
-	# Arrange
-	$p = New-ClassLibrary
-	$q = New-ConsoleApplication
+    param($context) 
+    
+    # Arrange
+    $p = New-ClassLibrary
+    $q = New-ConsoleApplication
 
-	$p | Install-Package TestReinstallPackageScripts -Source $context.RepositoryPath
-	$q | Install-Package TestReinstallPackageScripts -Source $context.RepositoryPath
+    $p | Install-Package TestReinstallPackageScripts -Source $context.RepositoryPath
+    $q | Install-Package TestReinstallPackageScripts -Source $context.RepositoryPath
 
-	$global:InstallScriptCount = 2
-	$global:UninstallScriptCount = 9
+    $global:InstallScriptCount = 2
+    $global:UninstallScriptCount = 9
 
-	# Act
-	Update-Package TestReinstallPackageScripts -Reinstall -Source $context.RepositoryPath
+    # Act
+    Update-Package TestReinstallPackageScripts -Reinstall -Source $context.RepositoryPath
 
-	# Assert
-	Assert-AreEqual 4 $global:InstallScriptCount
-	Assert-AreEqual 11 $global:UninstallScriptCount
+    # Assert
+    Assert-AreEqual 4 $global:InstallScriptCount
+    Assert-AreEqual 11 $global:UninstallScriptCount
 
-	# clean up
-	Remove-Variable InstallScriptCount -Scope Global 
-	Remove-Variable UninstallScriptCount -Scope Global 
+    # clean up
+    Remove-Variable InstallScriptCount -Scope Global 
+    Remove-Variable UninstallScriptCount -Scope Global 
 }
 
 function Test-ReinstallAllPackagesInAllProjectsInvokeUninstallAndInstallScripts 
 {
-	param($context) 
-	
-	# Arrange
-	$p = New-ClassLibrary
-	$q = New-ConsoleApplication
+    param($context) 
+    
+    # Arrange
+    $p = New-ClassLibrary
+    $q = New-ConsoleApplication
 
-	($p, $q) | Install-Package TestReinstallPackageScripts -Source $context.RepositoryPath
-	($p, $q) | Install-Package MagicPackage -Source $context.RepositoryPath
+    ($p, $q) | Install-Package TestReinstallPackageScripts -Source $context.RepositoryPath
+    ($p, $q) | Install-Package MagicPackage -Source $context.RepositoryPath
 
-	$global:InstallScriptCount = 7
-	$global:UninstallScriptCount = 3
+    $global:InstallScriptCount = 7
+    $global:UninstallScriptCount = 3
 
-	$global:InstallMagicScript = 4
-	$global:UninstallMagicScript = 6
+    $global:InstallMagicScript = 4
+    $global:UninstallMagicScript = 6
 
-	# Act
-	Update-Package -Reinstall -Source $context.RepositoryPath
+    # Act
+    Update-Package -Reinstall -Source $context.RepositoryPath
 
-	# Assert
-	Assert-AreEqual 9 $global:InstallScriptCount
-	Assert-AreEqual 5 $global:UninstallScriptCount
+    # Assert
+    Assert-AreEqual 9 $global:InstallScriptCount
+    Assert-AreEqual 5 $global:UninstallScriptCount
 
-	Assert-AreEqual 6 $global:InstallMagicScript
-	Assert-AreEqual 8 $global:UninstallMagicScript
+    Assert-AreEqual 6 $global:InstallMagicScript
+    Assert-AreEqual 8 $global:UninstallMagicScript
 
-	# clean up
-	Remove-Variable InstallScriptCount -Scope Global 
-	Remove-Variable UninstallScriptCount -Scope Global 
-	Remove-Variable InstallMagicScript -Scope Global 
-	Remove-Variable UninstallMagicScript -Scope Global 
+    # clean up
+    Remove-Variable InstallScriptCount -Scope Global 
+    Remove-Variable UninstallScriptCount -Scope Global 
+    Remove-Variable InstallMagicScript -Scope Global 
+    Remove-Variable UninstallMagicScript -Scope Global 
 }
 
 function Test-ReinstallPackageReinstallPrereleaseDependencyPackages
 {
-	param($context) 
-	
-	# Arrange
-	$sol = New-Solution
+    param($context) 
+    
+    # Arrange
+    $sol = New-Solution
 
     $p1 = $sol | New-ClassLibrary
     $p2 = $sol | New-ConsoleApplication
@@ -1335,17 +1335,17 @@ function Test-FinishFailedUpdateOnSolutionOpen
     $filePath = Join-Path $localRepositoryPath "SolutionOnlyPackage.1.0\file1.txt"
     $fileStream = [System.IO.File]::Open($filePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read)
 
-	try {
-		# Act
-		$p | Update-Package SolutionOnlyPackage -Source $context.RepositoryRoot
+    try {
+        # Act
+        $p | Update-Package SolutionOnlyPackage -Source $context.RepositoryRoot
 
-		# Assert
-		Assert-True $physicalFileSystem.DirectoryExists("SolutionOnlyPackage.1.0")
-		Assert-True $physicalFileSystem.FileExists("SolutionOnlyPackage.1.0.deleteme")
-		Assert-True $physicalFileSystem.DirectoryExists("SolutionOnlyPackage.2.0")
-	} finally {
-		$fileStream.Close()
-	}
+        # Assert
+        Assert-True $physicalFileSystem.DirectoryExists("SolutionOnlyPackage.1.0")
+        Assert-True $physicalFileSystem.FileExists("SolutionOnlyPackage.1.0.deleteme")
+        Assert-True $physicalFileSystem.DirectoryExists("SolutionOnlyPackage.2.0")
+    } finally {
+        $fileStream.Close()
+    }
 
     # Act
     # After closing the file handle, we close the solution and reopen it

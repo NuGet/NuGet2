@@ -132,6 +132,8 @@ namespace NuGet
             {
                 ReadManifest(manifestStream);
             }
+
+            Published = _repositoryFileSystem.GetLastModified(manifestFile);
         }
     }
 }

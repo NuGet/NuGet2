@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace NuGet.VisualStudio
 {
     public interface IDeleteOnRestartManager
     {
         /// <summary>
-        /// Indicates whether any packages still need to be deleted in the local package repository.
+        /// Gets the list of package directories that are still need to be deleted in the
+        /// local package repository.
         /// </summary>
-        bool PackageDirectoriesAreMarkedForDeletion { get; }
+        IList<string> PackageDirectoriesMarkedForDeletion { get; }
 
         /// <summary>
         /// Marks package directory for future removal if it was not fully deleted during the normal uninstall process

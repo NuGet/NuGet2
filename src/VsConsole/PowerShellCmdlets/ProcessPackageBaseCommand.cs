@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Runtime.Versioning;
@@ -106,9 +107,16 @@ namespace NuGet.PowerShell.Commands
                 projectManager.PackageReferenceRemoving -= OnPackageReferenceRemoving;
             }
 
-            if (_deleteOnRestartManager.PackageDirectoriesAreMarkedForDeletion)
+            IList<string> packageDirectoriesMarkedForDeletion =
+                _deleteOnRestartManager.PackageDirectoriesMarkedForDeletion;
+            if (packageDirectoriesMarkedForDeletion != null &&
+                packageDirectoriesMarkedForDeletion.Count != 0)
             {
-                WriteWarning(VsResources.RequestRestartToCompleteUninstall);
+                var message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    VsResources.RequestRestartToCompleteUninstall,
+                    string.Join(", ", packageDirectoriesMarkedForDeletion));
+                WriteWarning(message);
             }
 
             WriteLine();

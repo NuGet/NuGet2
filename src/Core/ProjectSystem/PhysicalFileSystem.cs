@@ -125,6 +125,14 @@ namespace NuGet
             {
                 path = GetFullPath(path);
                 Directory.Delete(path, recursive);
+                
+                // The directory is not guranteed to be gone since there could be
+                // other open handles. Wait, up to half a second, until the directory is gone.
+                for (int i = 0; Directory.Exists(path) && i < 10; ++i)
+                {
+                    System.Threading.Thread.Sleep(50);
+                }
+
                 Logger.Log(MessageLevel.Debug, NuGetResources.Debug_RemovedFolder, path);
             }
             catch (DirectoryNotFoundException)

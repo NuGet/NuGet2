@@ -336,7 +336,7 @@ Packages installed into Website projects will not be restored during build. Cons
     <value>Failed to remove package directories that were marked for deletion on Visual Studio restart: {0}</value>
   </data>
   <data name="RequestRestartToCompleteUninstall" xml:space="preserve">
-    <value>Some packages could not be completely removed. Restart Visual Studio to finish uninstall.</value>
+    <value>One or more packages could not be completely removed: {0}. Restart Visual Studio to finish uninstall.</value>
   </data>
   <data name="RestartNow" xml:space="preserve">
     <value>Restart Now</value>
