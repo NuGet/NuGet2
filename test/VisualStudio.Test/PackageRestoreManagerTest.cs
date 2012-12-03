@@ -95,7 +95,7 @@ namespace NuGet.VisualStudio.Test
 
             var fileSystem = new Mock<IFileSystem>();
             fileSystem.Setup(p => p.DirectoryExists(".nuget")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\nuget.exe")).Returns(true);
+            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.exe")).Returns(true);
 
             var fileSystemProvider = new Mock<IFileSystemProvider>();
             fileSystemProvider.Setup(p => p.GetFileSystem(path)).Returns(fileSystem.Object);
@@ -115,8 +115,8 @@ namespace NuGet.VisualStudio.Test
             // Arrange
             string path = CreateTempFolder();
             Directory.CreateDirectory(Path.Combine(path, ".nuget"));
-            CreateEmptyFile(Path.Combine(path, ".nuget", "nuget.exe"));
-            CreateEmptyFile(Path.Combine(path, ".nuget", "nuget.targets"));
+            CreateEmptyFile(Path.Combine(path, ".nuget", "NuGet.exe"));
+            CreateEmptyFile(Path.Combine(path, ".nuget", "NuGet.targets"));
 
             var solutionManager = new Mock<ISolutionManager>();
             solutionManager.Setup(p => p.IsSolutionOpen).Returns(true);
@@ -124,8 +124,8 @@ namespace NuGet.VisualStudio.Test
 
             var fileSystem = new Mock<IFileSystem>();
             fileSystem.Setup(p => p.DirectoryExists(".nuget")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\nuget.exe")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\nuget.targets")).Returns(true);
+            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.exe")).Returns(true);
+            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.targets")).Returns(true);
 
             var fileSystemProvider = new Mock<IFileSystemProvider>();
             fileSystemProvider.Setup(p => p.GetFileSystem(path)).Returns(fileSystem.Object);
@@ -265,8 +265,8 @@ namespace NuGet.VisualStudio.Test
             // setup file system
             var fileSystem = new Mock<IFileSystem>();
             fileSystem.Setup(p => p.DirectoryExists(".nuget")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\nuget.exe")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\nuget.targets")).Returns(true);
+            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.exe")).Returns(true);
+            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.targets")).Returns(true);
 
             var fileSystemProvider = new Mock<IFileSystemProvider>();
             fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem.Object);
@@ -333,8 +333,8 @@ namespace NuGet.VisualStudio.Test
             // setup file system
             var fileSystem = new Mock<IFileSystem>();
             fileSystem.Setup(p => p.DirectoryExists(".nuget")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\nuget.exe")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\nuget.targets")).Returns(true);
+            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.exe")).Returns(true);
+            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.targets")).Returns(true);
 
             var fileSystemProvider = new Mock<IFileSystemProvider>();
             fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem.Object);
@@ -399,8 +399,8 @@ namespace NuGet.VisualStudio.Test
             // setup file system
             var fileSystem = new Mock<IFileSystem>();
             fileSystem.Setup(p => p.DirectoryExists(".nuget")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\nuget.exe")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\nuget.targets")).Returns(true);
+            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.exe")).Returns(true);
+            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.targets")).Returns(true);
 
             var fileSystemProvider = new Mock<IFileSystemProvider>();
             fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem.Object);
@@ -469,8 +469,8 @@ namespace NuGet.VisualStudio.Test
             // setup file system
             var fileSystem = new Mock<IFileSystem>();
             fileSystem.Setup(p => p.DirectoryExists(".nuget")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\nuget.exe")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\nuget.targets")).Returns(true);
+            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.exe")).Returns(true);
+            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.targets")).Returns(true);
 
             var fileSystemProvider = new Mock<IFileSystemProvider>();
             fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem.Object);
