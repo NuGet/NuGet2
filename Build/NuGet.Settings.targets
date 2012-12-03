@@ -41,7 +41,7 @@
     </PropertyGroup>
 
     <!-- Common settings for Debug and Coverage builds -->
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Coverage' ">
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Coverage' Or '$(Configuration)' == 'Mono Debug'">
         <DebugSymbols>true</DebugSymbols>
         <DebugType>full</DebugType>
         <Optimize>false</Optimize>
@@ -50,7 +50,7 @@
     </PropertyGroup>
 
     <!-- Settings only for Release builds -->
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' Or '$(Configuration)' == 'Mono Release'">
         <DebugType>pdbonly</DebugType>
         <Optimize>true</Optimize>
         <OutputPath>bin\Release\</OutputPath>
