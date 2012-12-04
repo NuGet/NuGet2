@@ -147,7 +147,7 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="MergeExecutable" Inputs="$(OutputPath)\NuGet.Core.dll;$(OutputPath)\NuGet.exe" Outputs="$(OutputPath)Merged\NuGet.exe">
+  <Target Name="MergeExecutable" Inputs="$(OutputPath)\NuGet.Core.dll;$(OutputPath)\NuGet.exe" Outputs="$(OutputPath)Merged\NuGet.exe" Condition=" '$(OS)' == 'Windows_NT'">
     <PropertyGroup>
       <NuGetRoot>$(MsBuildProjectDirectory)\..\..</NuGetRoot>
       <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
