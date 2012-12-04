@@ -95,10 +95,10 @@
         <TestProjects Include="$(NuGetTestRoot)\Dialog.Test\Dialog.Test.csproj" />
         <TestProjects Include="$(NuGetTestRoot)\CommandLine.Test\CommandLine.Test.csproj" />
         <TestProjects Include="$(NuGetTestRoot)\Core.Test\Core.Test.csproj" />
+        <TestProjects Include="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" />
         <TestProjects Include="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" Condition="'$(MonoBuild)' == ''" />
-        <TestProjects Include="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" />
         <TestProjects Include="$(NuGetTestRoot)\TeamFoundationServer.Test\TeamFoundationServer.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" Condition="'$(MonoBuild)' == ''" />
     </ItemGroup>
