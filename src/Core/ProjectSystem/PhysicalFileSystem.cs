@@ -259,9 +259,10 @@ namespace NuGet
 
         private static string EnsureTrailingSlash(string path)
         {
-            if (!path.EndsWith("\\", StringComparison.Ordinal))
+            string pathChar = Path.DirectorySeparatorChar.ToString();
+            if (!path.EndsWith(pathChar, StringComparison.Ordinal))
             {
-                path += "\\";
+                path += pathChar;
             }
             return path;
         }
