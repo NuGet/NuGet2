@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using NuGet.Resources;
@@ -19,8 +20,6 @@ namespace NuGet
         /// Server token used to represent that the hash being used is SHA 256
         /// </summary>
         private const string SHA256HashAlgorithm = "SHA256";
-
-        private static readonly bool _isMonoRuntime = Type.GetType("Mono.Runtime") != null;
 
         private readonly string _hashAlgorithm;
 
@@ -56,7 +55,7 @@ namespace NuGet
         {
             get
             {
-                return !_isMonoRuntime && ReadFipsConfigValue();
+                return ReadFipsConfigValue();
             }
         }
 
@@ -92,11 +91,22 @@ namespace NuGet
             return AllowOnlyFipsAlgorithms ? (HashAlgorithm)new SHA512CryptoServiceProvider() : (HashAlgorithm)new SHA512Managed();
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
         private static bool ReadFipsConfigValue()
         {
             // Mono does not currently support this method. Have this in a separate method to avoid JITing exceptions.
-            return CryptoConfig.AllowOnlyFipsAlgorithms;
+            var cryptoConfig = typeof(System.Security.Cryptography.CryptoConfig);
+
+            if(cryptoConfig != null) 
+            {
+                var allowOnlyFipsAlgorithmsProperty = cryptoConfig.GetProperty("AllowOnlyFipsAlgorithms", BindingFlags.NonPublic | BindingFlags.Static);
+
+                if(allowOnlyFipsAlgorithmsProperty != null)
+                {
+                    return (bool)allowOnlyFipsAlgorithmsProperty.GetValue(null, null);
+                }
+            }
+
+            return false;
         }
     }
 }
