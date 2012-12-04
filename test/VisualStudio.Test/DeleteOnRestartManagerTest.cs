@@ -26,7 +26,7 @@ namespace NuGet.VisualStudio.Test
             var deleteOnRestartManager = new DeleteOnRestartManager(() => fileSystem);
 
             // Assert
-            Assert.True(deleteOnRestartManager.PackageDirectoriesMarkedForDeletion.Any());
+            Assert.True(deleteOnRestartManager.GetPackageDirectoriesMarkedForDeletion().Any());
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace NuGet.VisualStudio.Test
 
             // Act
             // Assert
-            Assert.False(deleteOnRestartManager.PackageDirectoriesMarkedForDeletion.Any());
+            Assert.False(deleteOnRestartManager.GetPackageDirectoriesMarkedForDeletion().Any());
         }
 
         [Fact]
@@ -56,58 +56,10 @@ namespace NuGet.VisualStudio.Test
             var deleteOnRestartManager = new DeleteOnRestartManager(() => fileSystem, () => pathResolver);
 
             // Act
-            deleteOnRestartManager.MarkPackageDirectoryForDeletion(package, _ => package);
+            deleteOnRestartManager.MarkPackageDirectoryForDeletion(package);
 
             // Assert
             Assert.False(fileSystem.DirectoryExists(packageDirectoryPath));
-            Assert.False(fileSystem.FileExists(packageDirectoryPath + _deletionMarkerSuffix));
-        }
-
-        [Fact]
-        public void MarkPackageDirectoryForDeletionDoesNotAddDeletemeFileWhenFileModified()
-        {
-            // Arrange
-            IPackage package = NuGet.Test.PackageUtility.CreatePackage(id: "foo", version: "1.0.0", content: new string[] { }, assemblyReferences: new string[] { }, tools: new[] { "modifiedFile.txt" });
-            var fileSystem = new MockFileSystem();
-            var pathResolver = new DefaultPackagePathResolver(fileSystem);
-            string packageDirectoryPath = pathResolver.GetPackageDirectory(package);
-            string modifiedFilePath = Path.Combine("tools", "modifiedFile.txt");
-
-            fileSystem.AddFile(Path.Combine(packageDirectoryPath, pathResolver.GetPackageFileName(package)), Stream.Null);
-            fileSystem.AddFile(Path.Combine(packageDirectoryPath, modifiedFilePath), "Modified Content".AsStream());
-
-            var deleteOnRestartManager = new DeleteOnRestartManager(() => fileSystem, () => pathResolver);
-
-            // Act
-            deleteOnRestartManager.MarkPackageDirectoryForDeletion(package, _ => package);
-
-            // Assert
-            Assert.True(fileSystem.DirectoryExists(packageDirectoryPath));
-            Assert.True(fileSystem.FileExists(Path.Combine(packageDirectoryPath, modifiedFilePath)));
-            Assert.False(fileSystem.FileExists(packageDirectoryPath + _deletionMarkerSuffix));
-        }
-
-        [Fact]
-        public void MarkPackageDirectoryForDeletionDoesNotAddDeletemeFileWhenFileAdded()
-        {
-            // Arrange
-            IPackage package = NuGet.Test.PackageUtility.CreatePackage(id: "foo", version: "1.0.0");
-            var fileSystem = new MockFileSystem();
-            var pathResolver = new DefaultPackagePathResolver(fileSystem);
-            string packageDirectoryPath = pathResolver.GetPackageDirectory(package);
-            string addedFilePath = Path.Combine("tools", "addedFile.txt");
-
-            fileSystem.AddFile(Path.Combine(packageDirectoryPath, pathResolver.GetPackageFileName(package)), Stream.Null);
-            fileSystem.AddFile(Path.Combine(packageDirectoryPath, addedFilePath), "Added Content".AsStream());
-
-            var deleteOnRestartManager = new DeleteOnRestartManager(() => fileSystem, () => pathResolver);
-
-            // Act
-            deleteOnRestartManager.MarkPackageDirectoryForDeletion(package, _ => package);
-
-            // Assert
-            Assert.True(fileSystem.DirectoryExists(packageDirectoryPath));
-            Assert.True(fileSystem.FileExists(Path.Combine(packageDirectoryPath, addedFilePath)));
             Assert.False(fileSystem.FileExists(packageDirectoryPath + _deletionMarkerSuffix));
         }
 
@@ -128,7 +80,7 @@ namespace NuGet.VisualStudio.Test
             var deleteOnRestartManager = new DeleteOnRestartManager(() => fileSystem, () => pathResolver);
 
             // Act
-            deleteOnRestartManager.MarkPackageDirectoryForDeletion(package, _ => package);
+            deleteOnRestartManager.MarkPackageDirectoryForDeletion(package);
 
             // Assert
             Assert.True(fileSystem.DirectoryExists(packageDirectoryPath));

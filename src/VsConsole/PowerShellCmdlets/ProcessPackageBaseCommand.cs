@@ -107,10 +107,8 @@ namespace NuGet.PowerShell.Commands
                 projectManager.PackageReferenceRemoving -= OnPackageReferenceRemoving;
             }
 
-            IList<string> packageDirectoriesMarkedForDeletion =
-                _deleteOnRestartManager.PackageDirectoriesMarkedForDeletion;
-            if (packageDirectoriesMarkedForDeletion != null &&
-                packageDirectoriesMarkedForDeletion.Count != 0)
+            IList<string> packageDirectoriesMarkedForDeletion = _deleteOnRestartManager.GetPackageDirectoriesMarkedForDeletion();
+            if (packageDirectoriesMarkedForDeletion.Count != 0)
             {
                 var message = string.Format(
                     CultureInfo.CurrentCulture,

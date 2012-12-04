@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -37,15 +36,14 @@ namespace NuGet.VisualStudio
             _packagePathResolverFactory = packagePathResolverFactory;
         }
 
-        public IList<string> PackageDirectoriesMarkedForDeletion
+        public IList<string> GetPackageDirectoriesMarkedForDeletion()
         {
-            get {
-                return _repositoryFileSystemFactory()
-                    .GetFiles(path: "", filter: DeletionMarkerFilter, recursive: false)
-                    .Select(
-                        // strip the DeletionMarkerFilter at the end of the path to get the package name.
-                        path => Path.ChangeExtension(path, null)).ToList();
-            }
+            var fileSystem = _repositoryFileSystemFactory();
+            return fileSystem.GetFiles(path: "", filter: DeletionMarkerFilter, recursive: false)
+                // strip the DeletionMarkerFilter at the end of the path to get the package name.
+                .Select(path => Path.ChangeExtension(path, null))
+                .Where(path => fileSystem.DirectoryExists(path))
+                .ToList();
         }
 
         /// <summary>
@@ -54,47 +52,16 @@ namespace NuGet.VisualStudio
         /// The package directory will be marked by an adjacent *directory name*.deleteme file.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning and move on")]
-        public void MarkPackageDirectoryForDeletion(IPackage package, Func<string, IPackage> createZipPackageFromPath)
+        public void MarkPackageDirectoryForDeletion(IPackage package)
         {
             IFileSystem repositoryFileSystem = _repositoryFileSystemFactory();
             IPackagePathResolver pathResolver = _packagePathResolverFactory();
             string packageDirectoryName = pathResolver.GetPackageDirectory(package);
-            
+
             try
             {
                 if (repositoryFileSystem.DirectoryExists(packageDirectoryName))
                 {
-                    string packageFilePath = Path.Combine(packageDirectoryName, pathResolver.GetPackageFileName(package));
-                    IPackage zipPackage = createZipPackageFromPath(repositoryFileSystem.GetFullPath(packageFilePath));
-
-                    IEnumerable<IPackageFile> origPackageFiles = zipPackage.GetFiles();
-                    IDictionary<string, IPackageFile> origPackageFileLookup = origPackageFiles.ToDictionary(f => Path.Combine(packageDirectoryName, f.Path), StringComparer.OrdinalIgnoreCase);
-
-                    foreach (var filePath in repositoryFileSystem.GetFiles(path: packageDirectoryName, filter: "*.*", recursive: true))
-                    {
-                        // Assume the package file and the package manifest are unmodified.
-                        if (!filePath.Equals(packageFilePath, StringComparison.OrdinalIgnoreCase) &&
-                            !Path.GetExtension(filePath).Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase))
-                        {
-                            // Don't mark directory for deletion if file has been added.
-                            IPackageFile origFile;
-                            if (!origPackageFileLookup.TryGetValue(filePath, out origFile))
-                            {
-                                return;
-                            }
-
-                            // Don't mark directory for deletion if file has been modified.
-                            using (Stream origStream = origFile.GetStream(),
-                                          fileStream = repositoryFileSystem.OpenFile(filePath))
-                            {
-                                if (!origStream.ContentEquals(fileStream))
-                                {
-                                    return;
-                                }
-                            }
-                        }
-                    }
-
                     // NOTE: The repository should always be a PhysicalFileSystem, except during testing, so the
                     // .deleteme marker file doesn't get checked into version control
                     repositoryFileSystem.AddFile(packageDirectoryName + DeletionMarkerSuffix, Stream.Null);

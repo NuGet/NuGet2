@@ -372,7 +372,7 @@ namespace NuGet.VisualStudio.Test
             var sourceRepository = new MockPackageRepository();
             var packageA = PackageUtility.CreatePackage("A");
             var deleteOnRestartManager = new Mock<IDeleteOnRestartManager>(MockBehavior.Strict);
-            deleteOnRestartManager.Setup(d => d.MarkPackageDirectoryForDeletion(packageA, It.IsAny<Func<string, IPackage>>())).Verifiable();
+            deleteOnRestartManager.Setup(d => d.MarkPackageDirectoryForDeletion(packageA)).Verifiable();
             localRepository.Object.AddPackage(packageA);
             sourceRepository.AddPackage(packageA);
             var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), localRepository.Object,
@@ -812,7 +812,7 @@ namespace NuGet.VisualStudio.Test
             sourceRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageAv2);
 
-            deleteOnRestartManager.Setup(d => d.MarkPackageDirectoryForDeletion(packageA, It.IsAny<Func<string, IPackage>>())).Verifiable();
+            deleteOnRestartManager.Setup(d => d.MarkPackageDirectoryForDeletion(packageA)).Verifiable();
 
             var packageManager = new VsPackageManager(
                 TestUtils.GetSolutionManager(),

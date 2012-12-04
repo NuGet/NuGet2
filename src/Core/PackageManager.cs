@@ -272,7 +272,6 @@ namespace NuGet
 
         protected virtual void ExecuteUninstall(IPackage package)
         {
-            string packageDirectory = PathResolver.GetPackageDirectory(package);
             PackageOperationEventArgs args = CreateOperation(package);
             OnUninstalling(args);
 
@@ -282,15 +281,8 @@ namespace NuGet
             }
 
             OnRemoveFiles(args);
-
-            // Only remove nupkg and nuspec if the package directory is otherwise empty.
-            // The DeleteOnRestartManager will use the nupkg to determine whether files are left in the package directory
-            // directory because files were added or modified as opposed to locked.
-            if (!FileSystem.GetDirectoriesSafe(packageDirectory).Any() &&
-                FileSystem.GetFilesSafe(packageDirectory).All(f => PackageUtility.IsPackageFile(f) || PackageUtility.IsManifest(f)))
-            {
-                LocalRepository.RemovePackage(package);
-            }
+            
+            LocalRepository.RemovePackage(package);
 
             Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyUninstalledPackage, package.GetFullName());
 
