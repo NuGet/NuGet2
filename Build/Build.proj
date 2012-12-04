@@ -10,13 +10,16 @@
         <DropDirectory>$(NuGetRoot)\bin</DropDirectory>
         <ArtifactDropDirectory>$(DropDirectory)\artifacts</ArtifactDropDirectory>
         <NuGetDropDirectory>$(DropDirectory)\NuGet</NuGetDropDirectory>
-        <ExeBuildDirectory>$(NuGetSrcRoot)\CommandLine\bin\$(Configuration)</ExeBuildDirectory>
+        <ConfigFolderPath>$(Configuration)</ConfigFolderPath>
+        <ConfigFolderPath Condition="'$(Configuration)' == 'Mono Debug'">Debug</ConfigFolderPath>
+        <ConfigFolderPath Condition="'$(Configuration)' == 'Mono Release'">Release</ConfigFolderPath>
+        <ExeBuildDirectory>$(NuGetSrcRoot)\CommandLine\bin\$(ConfigFolderPath)</ExeBuildDirectory>
         <ExeDropDirectory>$(NuGetDropDirectory)\Console</ExeDropDirectory>
-        <ServerExtensionsBuildDirectory>$(NuGetSrcRoot)\CommandLine.ServerExtensions\bin\$(Configuration)</ServerExtensionsBuildDirectory>
+        <ServerExtensionsBuildDirectory>$(NuGetSrcRoot)\CommandLine.ServerExtensions\bin\$(ConfigFolderPath)</ServerExtensionsBuildDirectory>
         <ServerExtensionsDropDirectory>$(NuGetDropDirectory)\CommandLine.ServerExtensions</ServerExtensionsDropDirectory>
-        <BootStrapperBuildDirectory>$(NuGetSrcRoot)\Bootstrapper\bin\$(Configuration)</BootStrapperBuildDirectory>
+        <BootStrapperBuildDirectory>$(NuGetSrcRoot)\Bootstrapper\bin\$(ConfigFolderPath)</BootStrapperBuildDirectory>
         <BootStrapperDropDirectory>$(NuGetDropDirectory)\Bootstrapper</BootStrapperDropDirectory>
-        <VisualStudioAddInBuildDirectory>$(NuGetSrcRoot)\VsExtension\bin\$(Configuration)</VisualStudioAddInBuildDirectory>
+        <VisualStudioAddInBuildDirectory>$(NuGetSrcRoot)\VsExtension\bin\$(ConfigFolderPath)</VisualStudioAddInBuildDirectory>
         <VisualStudioAddInDropDirectory>$(NuGetDropDirectory)\VisualStudioAddIn</VisualStudioAddInDropDirectory>
         <EndToEndTestsDirectory>$(NuGetTestRoot)\EndToEnd</EndToEndTestsDirectory>
         <EndToEndTestsDropDirectory>$(NuGetDropDirectory)\EndToEnd\Artifacts</EndToEndTestsDropDirectory>
@@ -28,7 +31,7 @@
         <NuGetVisualStudioBuildDirectory>$(NuGetSrcRoot)\VisualStudio</NuGetVisualStudioBuildDirectory>
         <NuGetVisualStudioDropDirectory>$(NuGetDropDirectory)\VisualStudio</NuGetVisualStudioDropDirectory>
         <GenerateTestPackageProjectDirectory>$(NuGetRoot)\Tools\NuGet\GenerateTestPackages</GenerateTestPackageProjectDirectory>
-        <GenerateTestPackageExe>$(GenerateTestPackageProjectDirectory)\bin\$(Configuration)\GenerateTestPackages.exe</GenerateTestPackageExe>
+        <GenerateTestPackageExe>$(GenerateTestPackageProjectDirectory)\bin\$(ConfigFolderPath)\GenerateTestPackages.exe</GenerateTestPackageExe>
         <ZipExe>$(NuGetRoot)\Tools\7za920\7za.exe</ZipExe>
         <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
         <ILMergeArtifactDirectory>$(ArtifactDropDirectory)\ILMerge</ILMergeArtifactDirectory>
@@ -91,13 +94,21 @@
         <TestProjects Include="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <RestorePackageProjects Include="@(TestProjects)" />
+        <RestorePackageProjects Include="$(NuGetRoot)\test\Test.Utility\Test.Utility.csproj" />
+        <RestorePackageProjects Include="$(NuGetRoot)\src\Server\Server.csproj" />
+    </ItemGroup>
+
     <Target Name="Go"
-        DependsOnTargets="CheckFxCop; UpdateVsixVersion; RestorePackages; Build; ReportFxCopResults;
+        DependsOnTargets="CheckFxCop; UpdateVsixVersion; RestorePackages; RestorePackages; ReportFxCopResults;
                                     VerifyAssembliesInVsix; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; 
                                     CopyBootStrapperOutputToDropDirectory; CopyServerExtensionsOutputToDropDirectory;
                                     CopyVisualStudioAddInOutputToDropDirectory; CopyEndToEndTestsToDropDirectory;
                                     CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; BuildPackages">
     </Target>
+
+    <Target Name="GoMono" DependsOnTargets="RestorePackages; RunTests" />
 
     <Target Name="CheckFxCop">
         <Error
@@ -112,12 +123,7 @@
     <Target Name="RestorePackages">
         <MsBuild Projects="$(NuGetRoot)\src\CommandLine\CommandLine.csproj"
                    Targets="Build"
-                   Properties="DefineConstants=CODE_ANALYSIS" />
-        <ItemGroup>
-            <RestorePackageProjects Include="@(TestProjects)" />
-            <RestorePackageProjects Include="$(NuGetRoot)\test\Test.Utility\Test.Utility.csproj" />
-            <RestorePackageProjects Include="$(NuGetRoot)\src\Server\Server.csproj" />
-        </ItemGroup>
+                   Properties="DefineConstants=CODE_ANALYSIS" />        
 
         <Message Text="Restoring NuGet packages" Importance="High" />
         <MsBuild Projects="@(RestorePackageProjects)"
