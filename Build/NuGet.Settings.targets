@@ -20,7 +20,7 @@
     <PropertyGroup>
         <Dev10Directory>$(MSBuildExtensionsPath)\..\Microsoft Visual Studio 10.0\Common7\IDE</Dev10Directory>
         <Dev11Directory>$(MSBuildExtensionsPath)\..\Microsoft Visual Studio 11.0\Common7\IDE</Dev11Directory>
-        <Dev11Available Condition=" '$(VisualStudioVersion)' == '11.0' OR Exists($(Dev11Directory)) ">true</Dev11Available>
+        <Dev11Available Condition=" '$(VisualStudioVersion)' == '11.0' Or Exists('$(Dev11Directory)') ">true</Dev11Available>
     </PropertyGroup>
     
     <!-- If Dev11 is installed, we will no longer be able to open the solution from Dev10 on that box. This is a consequence of us linking against 4.5 components from the GAC -->
