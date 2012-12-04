@@ -9,6 +9,7 @@ using NuGet.Resources;
 
 namespace NuGet
 {
+    [CLSCompliant(false)]
     public class DataServiceQueryWrapper<T> : IDataServiceQuery<T>
     {
         /// <remarks>
