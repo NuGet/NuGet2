@@ -2,17 +2,26 @@
 <Project ToolsVersion="4.0" DefaultTargets="Go" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <Import Project="$(MSBuildProjectDirectory)\Build.tasks" />
 
+    <!-- Setup configuration variables -->
     <PropertyGroup>
         <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+        <ConfigFolderPath>$(Configuration)</ConfigFolderPath>
+        <ConfigFolderPath Condition="'$(Configuration)' == 'Mono Debug'">Debug</ConfigFolderPath>
+        <ConfigFolderPath Condition="'$(Configuration)' == 'Mono Release'">Release</ConfigFolderPath>
+    </PropertyGroup>
+
+    <!-- Set MonoBuild to true so we can distingiush building for mono -->
+    <PropertyGroup Condition="'$(Configuration)' == 'Mono Debug' Or '$(Configuration)' == 'Mono Release'">
+        <MonoBuild>true</MonoBuild>
+    </PropertyGroup>
+
+    <PropertyGroup>        
         <NuGetRoot>$(MSBuildProjectDirectory)\..</NuGetRoot>
         <NuGetTestRoot>$(NuGetRoot)\test</NuGetTestRoot>
         <NuGetSrcRoot>$(NuGetRoot)\src</NuGetSrcRoot>
         <DropDirectory>$(NuGetRoot)\bin</DropDirectory>
         <ArtifactDropDirectory>$(DropDirectory)\artifacts</ArtifactDropDirectory>
         <NuGetDropDirectory>$(DropDirectory)\NuGet</NuGetDropDirectory>
-        <ConfigFolderPath>$(Configuration)</ConfigFolderPath>
-        <ConfigFolderPath Condition="'$(Configuration)' == 'Mono Debug'">Debug</ConfigFolderPath>
-        <ConfigFolderPath Condition="'$(Configuration)' == 'Mono Release'">Release</ConfigFolderPath>
         <ExeBuildDirectory>$(NuGetSrcRoot)\CommandLine\bin\$(ConfigFolderPath)</ExeBuildDirectory>
         <ExeDropDirectory>$(NuGetDropDirectory)\Console</ExeDropDirectory>
         <ServerExtensionsBuildDirectory>$(NuGetSrcRoot)\CommandLine.ServerExtensions\bin\$(ConfigFolderPath)</ServerExtensionsBuildDirectory>
@@ -86,12 +95,12 @@
         <TestProjects Include="$(NuGetTestRoot)\Dialog.Test\Dialog.Test.csproj" />
         <TestProjects Include="$(NuGetTestRoot)\CommandLine.Test\CommandLine.Test.csproj" />
         <TestProjects Include="$(NuGetTestRoot)\Core.Test\Core.Test.csproj" />
-        <TestProjects Include="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" />
-        <TestProjects Include="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" />
-        <TestProjects Include="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" />
+        <TestProjects Include="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Condition="'$(MonoBuild)' == ''" />
+        <TestProjects Include="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" Condition="'$(MonoBuild)' == ''" />
+        <TestProjects Include="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" />
-        <TestProjects Include="$(NuGetTestRoot)\TeamFoundationServer.Test\TeamFoundationServer.Test.csproj" />
-        <TestProjects Include="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" />
+        <TestProjects Include="$(NuGetTestRoot)\TeamFoundationServer.Test\TeamFoundationServer.Test.csproj" Condition="'$(MonoBuild)' == ''" />
+        <TestProjects Include="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" Condition="'$(MonoBuild)' == ''" />
     </ItemGroup>
 
     <ItemGroup>
