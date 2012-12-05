@@ -4,7 +4,8 @@
 
     <!-- Setup configuration variables -->
     <PropertyGroup>
-        <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+        <Configuration Condition="'$(OS)' == 'Windows_NT' And '$(Configuration)' == ''">Debug</Configuration>
+        <Configuration Condition="'$(OS)' != 'Windows_NT' And '$(Configuration)' == ''">Mono Debug</Configuration>
         <ConfigFolderPath>$(Configuration)</ConfigFolderPath>
         <ConfigFolderPath Condition="'$(Configuration)' == 'Mono Debug'">Debug</ConfigFolderPath>
         <ConfigFolderPath Condition="'$(Configuration)' == 'Mono Release'">Release</ConfigFolderPath>
@@ -60,6 +61,12 @@
         <PackageVersion>$(MajorVersion).$(MinorVersion).0</PackageVersion>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <!-- Team City under-reports tests when they're run in parallel. We'll specifically disable it in there -->
+        <BuildTestsInParallel Condition=" '$(TEAMCITY_VERSION)' == '' ">true</BuildTestsInParallel>
+        <BuildTestsInParallel Condition=" '$(TEAMCITY_VERSION)' != '' ">false</BuildTestsInParallel>
+    </PropertyGroup>
+
     <ItemGroup>
         <RegexTransform Include="$(NuGetSrcRoot)\VsExtension\source.extension.vsixmanifest">
             <Find><![CDATA[<Version>\d+\.\d+\.\d+\.\d+</Version>]]></Find>
@@ -94,7 +101,7 @@
     <ItemGroup>
         <TestProjects Include="$(NuGetTestRoot)\CommandLine.Test\CommandLine.Test.csproj" />
         <TestProjects Include="$(NuGetTestRoot)\Core.Test\Core.Test.csproj" />
-        <TestProjects Include="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" />
+        <TestProjects Include="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\Dialog.Test\Dialog.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Condition="'$(MonoBuild)' == ''" />
         <TestProjects Include="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" Condition="'$(MonoBuild)' == ''" />
@@ -117,8 +124,7 @@
                                     CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; BuildPackages">
     </Target>
 
-    <!-- Mono Target. TODO: Figure out why xbuild doesn't like our tests projects -->
-    <Target Name="GoMono" DependsOnTargets="RestorePackages;" />
+    <Target Name="GoMono" DependsOnTargets="RestorePackages; Build; RunTests" />
 
     <Target Name="CheckFxCop">
         <Error
@@ -165,12 +171,7 @@
         <RemoveDir Directories="$(TempVsixDirectory)" ContinueOnError="true" />
     </Target>
 
-    <Target Name="RunTests">
-        <PropertyGroup>
-            <!-- Team City under-reports tests when they're run in parallel. We'll specifically disable it in there -->
-            <BuildTestsInParallel Condition=" '$(TEAMCITY_VERSION)' == '' ">true</BuildTestsInParallel>
-            <BuildTestsInParallel Condition=" '$(TEAMCITY_VERSION)' != '' ">false</BuildTestsInParallel>
-        </PropertyGroup>
+    <Target Name="RunTests">        
         <MsBuild Projects="@(TestProjects)"
                   Targets="RunTests"
                   BuildInParallel="$(BuildTestsInParallel)" />
