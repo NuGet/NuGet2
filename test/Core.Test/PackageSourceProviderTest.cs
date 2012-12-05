@@ -515,8 +515,6 @@ namespace NuGet.Test
         public void GetAggregateSetsIgnoreInvalidRepositoryProperty()
         {
             // Arrange
-            var repositoryA = new Mock<IPackageRepository>();
-            var repositoryC = new Mock<IPackageRepository>();
             var factory = new Mock<IPackageRepositoryFactory>();
             bool ignoreRepository = true;
 

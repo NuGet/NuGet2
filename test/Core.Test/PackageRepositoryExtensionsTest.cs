@@ -47,7 +47,6 @@ namespace NuGet.Test
         public void FindPackagesByIdRecognizeICultureAwareRepositoryInterface()
         {
             var turkeyCulture = new CultureInfo("tr-TR");
-            string smallPackageName = "YUI".ToLower(turkeyCulture);
 
             // Arrange
             var packages = new IPackage[] 
@@ -58,8 +57,6 @@ namespace NuGet.Test
 
             var repository = new Mock<IPackageRepository>();
             repository.Setup(p => p.GetPackages()).Returns(packages.AsQueryable());
-
-            var cultureRepository = repository.As<ICultureAwareRepository>().Setup(p => p.Culture).Returns(turkeyCulture);
 
             var savedCulture = Thread.CurrentThread.CurrentCulture;
             try

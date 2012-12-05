@@ -88,7 +88,6 @@ namespace NuGet.Test
         {
             // Arrange
             var repo = GetLocalRepository();
-            var versionSpec = VersionUtility.ParseVersionSpec("[0.9, 1.1]");
 
             // Act
             var package1 = repo.FindPackage("X", VersionUtility.ParseVersionSpec("[0.9, 1.1]"), allowPrereleaseVersions: false, allowUnlisted: true);
@@ -243,7 +242,7 @@ namespace NuGet.Test
             var remoteRepo = serviceRepository.As<IPackageRepository>().Object;
 
             // Act
-            var packages = remoteRepo.GetUpdates(localRepo.GetPackages(), includePrerelease: false, includeAllVersions: false);
+            remoteRepo.GetUpdates(localRepo.GetPackages(), includePrerelease: false, includeAllVersions: false);
 
             // Assert
             serviceRepository.Verify(s => s.GetUpdates(It.IsAny<IEnumerable<IPackage>>(), false, false, It.IsAny<IEnumerable<FrameworkName>>()), Times.Never());

@@ -110,7 +110,6 @@ namespace NuGet.Test
             var packageDependency = new PackageDependency("B", new VersionSpec { MinVersion = new SemanticVersion("1.1") });
             IPackage packageA = PackageUtility.CreatePackage("A", "1.0",
                                                             dependencies: new List<PackageDependency> { packageDependency });
-            IPackage packageB10 = PackageUtility.CreatePackage("B", "1.0");
             IPackage packageB12 = PackageUtility.CreatePackage("B", "1.2");
             var repository = new Mock<PackageRepositoryBase>(MockBehavior.Strict);
             repository.Setup(c => c.GetPackages()).Returns(new[] { packageA }.AsQueryable());
@@ -274,13 +273,6 @@ namespace NuGet.Test
             sourceRepository.AddPackage(packageE20);
             sourceRepository.AddPackage(packageE10);
 
-            IPackageOperationResolver projectResolver = new UpdateWalker(localRepository,
-                                                                         sourceRepository,
-                                                                         new DependentsWalker(localRepository),
-                                                                         NullConstraintProvider.Instance,
-                                                                         NullLogger.Instance,
-                                                                         updateDependencies: true,
-                                                                         allowPrereleaseVersions: false);
 
             IPackageOperationResolver resolver = new InstallWalker(localRepository,
                                                                    sourceRepository,
