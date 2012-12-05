@@ -40,7 +40,28 @@ namespace NuGet
         [Obsolete("This overload is obsolete, please use the overload which takes a Func<Stream>")]
         public void PushPackage(string apiKey, Stream packageStream, int timeout)
         {
-            PushPackage(apiKey, () => packageStream, timeout);
+            PushPackageToServer(apiKey, () => packageStream, timeout);
+        }
+
+        /// <summary>
+        /// Pushes a package to the Source.
+        /// </summary>
+        /// <param name="apiKey">API key to be used to push the package.</param>
+        /// <param name="package">The package to be pushed.</param>
+        /// <param name="timeout">Time in milliseconds to timeout the server request.</param>
+        public void PushPackage(string apiKey, IPackage package, int timeout) 
+        {
+            var sourceUri = new Uri(Source);
+            if (sourceUri.IsFile)
+            {
+                PushPackageToFileSystem(
+                    new PhysicalFileSystem(sourceUri.LocalPath),
+                    package);
+            }
+            else
+            {
+                PushPackageToServer(apiKey, package.GetStream, timeout);
+            }
         }
 
         /// <summary>
@@ -49,7 +70,7 @@ namespace NuGet
         /// <param name="apiKey">API key to be used to push the package.</param>
         /// <param name="packageStreamFactory">A delegate which can be used to open a stream for the package file.</param>
         /// <param name="timeout">Time in milliseconds to timeout the server request.</param>
-        public void PushPackage(string apiKey, Func<Stream> packageStreamFactory, int timeout) 
+        private void PushPackageToServer(string apiKey, Func<Stream> packageStreamFactory, int timeout) 
         {
             HttpClient client = GetClient("", "PUT", "application/octet-stream");
 
@@ -79,7 +100,50 @@ namespace NuGet
             EnsureSuccessfulResponse(client);
         }
 
+        /// <summary>
+        /// Pushes a package to a FileSystem.
+        /// </summary>
+        /// <param name="fileSystem">The FileSystem that the package is pushed to.</param>
+        /// <param name="package">The package to be pushed.</param>
+        private static void PushPackageToFileSystem(IFileSystem fileSystem, IPackage package)
+        {
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            var packageFileName = pathResolver.GetPackageFileName(package);
+            using (var stream = package.GetStream())
+            {
+                fileSystem.AddFile(packageFileName, stream);
+            }
+        }
+
+        /// <summary>
+        /// Deletes a package from the Source.
+        /// </summary>
+        /// <param name="apiKey">API key to be used to delete the package.</param>
+        /// <param name="packageId">The package Id.</param>
+        /// <param name="packageVersion">The package version.</param>
         public void DeletePackage(string apiKey, string packageId, string packageVersion)
+        {
+            var sourceUri = new Uri(Source);
+            if (sourceUri.IsFile)
+            {
+                DeletePackageFromFileSystem(
+                    new PhysicalFileSystem(sourceUri.LocalPath),
+                    packageId,
+                    packageVersion);
+            }
+            else
+            {
+                DeletePackageFromServer(apiKey, packageId, packageVersion);
+            }
+        }
+
+        /// <summary>
+        /// Deletes a package from the server represented by the Source.
+        /// </summary>
+        /// <param name="apiKey">API key to be used to delete the package.</param>
+        /// <param name="packageId">The package Id.</param>
+        /// <param name="packageVersion">The package Id.</param>
+        private void DeletePackageFromServer(string apiKey, string packageId, string packageVersion)
         {
             // Review: Do these values need to be encoded in any way?
             var url = String.Join("/", packageId, packageVersion);
@@ -93,6 +157,19 @@ namespace NuGet
             EnsureSuccessfulResponse(client);
         }
 
+        /// <summary>
+        /// Deletes a package from a FileSystem.
+        /// </summary>
+        /// <param name="fileSystem">The FileSystem where the specified package is deleted.</param>
+        /// <param name="packageId">The package Id.</param>
+        /// <param name="packageVersion">The package Id.</param>
+        private static void DeletePackageFromFileSystem(IFileSystem fileSystem, string packageId, string packageVersion)
+        {
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            var packageFileName = pathResolver.GetPackageFileName(packageId, new SemanticVersion(packageVersion));
+            fileSystem.DeleteFile(packageFileName);
+        }
+        
         private HttpClient GetClient(string path, string method, string contentType)
         {
             var baseUrl = _baseUri.Value;

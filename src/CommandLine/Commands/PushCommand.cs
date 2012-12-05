@@ -128,7 +128,7 @@ namespace NuGet.Commands
             string sourceName = CommandLineUtility.GetSourceDisplayName(source);
             Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), sourceName);
 
-            packageServer.PushPackage(apiKey, package.GetStream, Convert.ToInt32(timeout.TotalMilliseconds));
+            packageServer.PushPackage(apiKey, package, Convert.ToInt32(timeout.TotalMilliseconds));
             Console.WriteLine(NuGetResources.PushCommandPackagePushed);
         }
 

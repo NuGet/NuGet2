@@ -313,11 +313,7 @@ namespace NuGet.VisualStudio.Test
         public void InstallPackageSolutionLevelPackagesAreAddedToSolutionPackageConfig()
         {
             // Arrange 
-<<<<<<< HEAD
             var localRepository = new MockSharedPackageRepository();
-=======
-            var localRepository = new Mock<MockSharedPackageRepository>() { CallBase = true }.Object;
->>>>>>> Fix of issue 2830
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);
@@ -364,11 +360,7 @@ namespace NuGet.VisualStudio.Test
         public void InstallPackageUninstalledSolutionLevelPackagesAreNotAddedToSolutionPackageConfig()
         {
             // Arrange 
-<<<<<<< HEAD
             var localRepository = new MockSharedPackageRepository();
-=======
-            var localRepository = new Mock<MockSharedPackageRepository>() { CallBase = true }.Object;
->>>>>>> Fix of issue 2830
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem();
             var pathResolver = new DefaultPackagePathResolver(projectSystem);

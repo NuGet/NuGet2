@@ -16,9 +16,9 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             // Arrange
             var tempPath = Path.GetTempPath();
             var repositoryPath = Path.Combine(tempPath, Guid.NewGuid().ToString());
-            CreateDirectory(repositoryPath);
-            CreateTestPackage("testPackage1", "1.1.0", repositoryPath);
-            CreateTestPackage("testPackage2", "2.0.0", repositoryPath);
+            Util.CreateDirectory(repositoryPath);
+            Util.CreateTestPackage("testPackage1", "1.1.0", repositoryPath);
+            Util.CreateTestPackage("testPackage2", "2.0.0", repositoryPath);
 
             string[] args = new string[] { "list", "-Source", repositoryPath };
             MemoryStream memoryStream = new MemoryStream();
@@ -41,9 +41,9 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             // Arrange
             var tempPath = Path.GetTempPath();
             var repositoryPath = Path.Combine(tempPath, Guid.NewGuid().ToString());
-            CreateDirectory(repositoryPath);
-            CreateTestPackage("testPackage1", "1.1.0", repositoryPath);
-            CreateTestPackage("testPackage2", "2.0.0", repositoryPath);
+            Util.CreateDirectory(repositoryPath);
+            Util.CreateTestPackage("testPackage1", "1.1.0", repositoryPath);
+            Util.CreateTestPackage("testPackage2", "2.0.0", repositoryPath);
 
             // create the config file
             var configFile = Path.GetTempFileName();
@@ -75,37 +75,6 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             Assert.Equal(0, r);
             var output = Encoding.Default.GetString(memoryStream.ToArray());
             Assert.Equal("testPackage1 1.1.0\r\ntestPackage2 2.0.0\r\n", output);
-        }
-
-        private void CreateTestPackage(string packageId, string version, string repositoryPath)
-        {
-            var tempPath = Path.GetTempPath();
-            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
-            CreateDirectory(packageDirectory);
-
-            Directory.SetCurrentDirectory(packageDirectory);
-            string[] args = new string[] { "spec", packageId };
-            int r = Program.Main(args);
-            Assert.Equal(0, r);
-
-            args = new string[] { "pack", "-Version", version  };
-            r = Program.Main(args);
-            Assert.Equal(0, r);
-
-            var packageFileName = string.Format("{0}.{1}.nupkg", packageId, version);
-            File.Move(packageFileName, Path.Combine(repositoryPath, packageFileName));
-
-            Directory.SetCurrentDirectory(repositoryPath);
-            Directory.Delete(packageDirectory, true);
-        }
-
-        private void CreateDirectory(string directory)
-        {
-            if (Directory.Exists(directory))
-            {
-                Directory.Delete(directory, true);
-            }
-            Directory.CreateDirectory(directory);
         }
     }
 }

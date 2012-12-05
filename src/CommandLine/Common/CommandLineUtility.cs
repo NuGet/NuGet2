@@ -18,7 +18,8 @@ namespace NuGet
 
         public static void ValidateSource(string source)
         {
-            if (!PathValidator.IsValidUrl(source))
+            Uri result;
+            if (!Uri.TryCreate(source, UriKind.Absolute, out result))
             {
                 throw new CommandLineException(NuGetResources.InvalidSource, source);
             }

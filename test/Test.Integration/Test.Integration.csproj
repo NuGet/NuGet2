@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\Build\NuGet.Settings.targets" />
   <PropertyGroup>
@@ -46,13 +46,16 @@
     <Compile Include="CommandRunner.cs" />
     <Compile Include="Core\LocalPackageRepositoryTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetConfigCommandTest.cs" />
+    <Compile Include="NuGetCommandLine\NuGetDeleteCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetListCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetCommandLineTest.cs" />
+    <Compile Include="NuGetCommandLine\NuGetPushCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuSpecFileContext.cs" />
     <Compile Include="Core\PathResolverTest.cs" />
     <Compile Include="NuGetCommandLine\NugetProgramStatic.cs" />
     <Compile Include="NuGetCommandLine\ProjectFactoryTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetSourcesCommandTest.cs" />
+    <Compile Include="NuGetCommandLine\Util.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
