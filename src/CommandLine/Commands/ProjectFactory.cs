@@ -288,7 +288,7 @@ namespace NuGet.Commands
             return _project.GetPropertyValue("TargetPath");
         }
 
-        private bool IsGlobalProperty(ProjectProperty projectProperty)
+        private static bool IsGlobalProperty(ProjectProperty projectProperty)
         {
             // This property isn't available on xbuild (mono)
             var property = typeof(ProjectProperty).GetProperty("IsGlobalProperty", BindingFlags.Public | BindingFlags.Instance);
