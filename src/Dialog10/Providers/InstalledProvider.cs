@@ -52,8 +52,6 @@ namespace NuGet.Dialog.Providers
             _packageRestoreManager.PackagesMissingStatusChanged += OnMissPackagesChanged;
         }
 
-        public event EventHandler ExecuteCompleted;
-
         protected IVsPackageManager PackageManager
         {
             get
@@ -318,15 +316,6 @@ namespace NuGet.Dialog.Providers
             else
             {
                 base.OnExecuteCompleted(item);
-            }
-            OneExecuteCompletedEvent();            
-        }
-
-        protected void OneExecuteCompletedEvent()
-        {
-            if (ExecuteCompleted != null)
-            {
-                ExecuteCompleted(this, EventArgs.Empty);
             }
         }
 

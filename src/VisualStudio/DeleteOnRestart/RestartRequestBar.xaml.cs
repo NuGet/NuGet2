@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -23,12 +22,12 @@ namespace NuGet.VisualStudio
             _vsRestarter = vsRestarter;
         }
 
-        public void NotifyOnUnsuccessfulUninstall(object sender, EventArgs e)
+        public void CheckForUnsuccessfulUninstall()
         {
             IList<string> packageDirectoriesMarkedForDeletion = _deleteOnRestartManager.GetPackageDirectoriesMarkedForDeletion();
             if (packageDirectoriesMarkedForDeletion != null && packageDirectoriesMarkedForDeletion.Count != 0)
             {
-                var message = string.Format(
+                var message = String.Format(
                     CultureInfo.CurrentCulture,
                     NuGet.VisualStudio.Resources.VsResources.RequestRestartToCompleteUninstall,
                     string.Join(", ", packageDirectoriesMarkedForDeletion));
