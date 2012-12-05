@@ -247,6 +247,22 @@ function Write-TestResults {
     $TextResultPath = Join-Path $ResultsDirectory "TestResults.txt"
     Write-TextResults $TestRunId $Results $TextResultPath
 
+    $pass = 0
+    $fail = 0
+    $skipped = 0
+
+    $rows = $Results | % { 
+        if($_.Skipped) {
+            $skipped++
+        }
+        elseif($_.Error) {
+            $fail++
+        }
+        else {
+            $pass++
+        }
+    }
+
     Write-Host "Ran $($Results.Count) Tests, $pass Passed, $fail Failed, $skipped Skipped. See '$HtmlResultPath' or '$TextResultPath' for more details."
 
     if (($fail -gt 0) -and $LaunchResultsOnFailure -and ($Results.Count -gt 1)) 
