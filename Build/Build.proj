@@ -17,7 +17,7 @@
     </PropertyGroup>
 
     <PropertyGroup>        
-        <NuGetRoot>$(MSBuildProjectDirectory)..</NuGetRoot>
+        <NuGetRoot>$(MSBuildProjectDirectory)\..</NuGetRoot>
         <NuGetTestRoot>$(NuGetRoot)\test</NuGetTestRoot>
         <NuGetSrcRoot>$(NuGetRoot)\src</NuGetSrcRoot>
         <DropDirectory>$(NuGetRoot)\bin</DropDirectory>
