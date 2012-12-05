@@ -124,7 +124,7 @@
     </ItemGroup>
 
     <Target Name="Go"
-        DependsOnTargets="CheckFxCop; UpdateVsixVersion; RestorePackages; RestorePackages; ReportFxCopResults;
+        DependsOnTargets="CheckFxCop; UpdateVsixVersion; RestorePackages; ReportFxCopResults;
                                     VerifyAssembliesInVsix; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; 
                                     CopyBootStrapperOutputToDropDirectory; CopyServerExtensionsOutputToDropDirectory;
                                     CopyVisualStudioAddInOutputToDropDirectory; CopyEndToEndTestsToDropDirectory;
