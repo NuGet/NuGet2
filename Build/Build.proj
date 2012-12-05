@@ -11,7 +11,7 @@
     </PropertyGroup>
 
     <!-- Set MonoBuild to true so we can distingiush building for mono -->
-    <PropertyGroup Condition="'$(Configuration)' == 'Mono Debug' Or '$(Configuration)' == 'Mono Release'">
+    <PropertyGroup Condition=" '$(Configuration)' == 'Mono Debug' Or '$(Configuration)' == 'Mono Release' Or '$(OS)' != 'Windows_NT'">
         <MonoBuild>true</MonoBuild>
     </PropertyGroup>
 

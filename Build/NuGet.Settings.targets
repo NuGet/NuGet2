@@ -62,6 +62,11 @@
         <Coverage>true</Coverage>
         <DefineConstants>$(DefineConstants);CODE_COVERAGE</DefineConstants> 
     </PropertyGroup>
+
+    <!-- There's no client profile on Mono -->
+    <PropertyGroup Condition=" '$(Configuration)' == 'Mono Debug' Or '$(Configuration)' == 'Mono Release' Or '$(OS)' != 'Windows_NT'">
+        <MonoBuild>true</MonoBuild>
+    </PropertyGroup>    
     
     <Import Project="$(MsBuildThisFileDirectory)\NuGet.Restore.targets"/>
     <Import Project="$(AdditionalSettingsImport)" Condition="Exists('$(AdditionalSettingsImport)')" />
