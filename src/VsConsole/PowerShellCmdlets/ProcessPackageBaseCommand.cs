@@ -108,7 +108,7 @@ namespace NuGet.PowerShell.Commands
             }
 
             IList<string> packageDirectoriesMarkedForDeletion = _deleteOnRestartManager.GetPackageDirectoriesMarkedForDeletion();
-            if (packageDirectoriesMarkedForDeletion.Count != 0)
+            if (packageDirectoriesMarkedForDeletion != null && packageDirectoriesMarkedForDeletion.Count != 0)
             {
                 var message = string.Format(
                     CultureInfo.CurrentCulture,

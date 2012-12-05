@@ -26,7 +26,7 @@ namespace NuGet.VisualStudio
         public void NotifyOnUnsuccessfulUninstall(object sender, EventArgs e)
         {
             IList<string> packageDirectoriesMarkedForDeletion = _deleteOnRestartManager.GetPackageDirectoriesMarkedForDeletion();
-            if (packageDirectoriesMarkedForDeletion.Count != 0)
+            if (packageDirectoriesMarkedForDeletion != null && packageDirectoriesMarkedForDeletion.Count != 0)
             {
                 var message = string.Format(
                     CultureInfo.CurrentCulture,
