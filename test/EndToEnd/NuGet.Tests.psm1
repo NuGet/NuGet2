@@ -20,20 +20,20 @@ $generatePackagesExePath = Join-Path $currentPath "GenerateTestPackages.exe"
 if (-not (Test-Path $generatePackagesExePath)) 
 {
     $toolsPath = "$nugetRoot\Tools"
-	$generatePackagesProject = Join-Path $toolsPath NuGet\GenerateTestPackages\GenerateTestPackages.csproj
-	$generatePackagesExePath = Join-Path $toolsPath NuGet\GenerateTestPackages\bin\Debug\GenerateTestPackages.exe
+    $generatePackagesProject = Join-Path $toolsPath NuGet\GenerateTestPackages\GenerateTestPackages.csproj
+    $generatePackagesExePath = Join-Path $toolsPath NuGet\GenerateTestPackages\bin\Debug\GenerateTestPackages.exe
 }
 
 $nugetExePath = Join-Path $currentPath "NuGet.exe"
 
 if (!(Test-Path $nugetExePath)) 
 {
-	$nugetExePath = "$nugetRoot\src\CommandLine\bin\Debug\NuGet.exe"
+    $nugetExePath = "$nugetRoot\src\CommandLine\bin\Debug\NuGet.exe"
 }
 
 if (!(Test-Path $nugetExePath)) 
 {
-	$nugetExePath = "$nugetRoot\src\CommandLine\bin\Debug11\NuGet.exe"
+    $nugetExePath = "$nugetRoot\src\CommandLine\bin\Debug11\NuGet.exe"
 }
 
 $msbuildPath = Join-Path $env:windir Microsoft.NET\Framework\v4.0.30319\msbuild
@@ -92,7 +92,6 @@ function global:Run-Test {
     
     $testRunId = New-Guid
     $testRunOutputPath = Join-Path $testOutputPath $testRunId
-    $testRunResultsFile = Join-Path $testRunOutputPath Results.html
     $testLogFile = Join-Path $testRunOutputPath log.txt
     
     # Create the output folder
@@ -161,7 +160,7 @@ function global:Run-Test {
                 pushd 
                 Set-Location $repositoryPath
                 # Generate any packages that might be in the repository dir
-				Get-ChildItem $repositoryPath\* -Include *.dgml,*.nuspec | %{
+                Get-ChildItem $repositoryPath\* -Include *.dgml,*.nuspec | %{
                     & $generatePackagesExePath $_.FullName | Out-Null
                 } 
                 popd
@@ -224,7 +223,7 @@ function global:Run-Test {
         # Set focus back to powershell
         $window.SetFocus()              
                
-        Write-TestResults $testRunId $results $testRunResultsFile $LaunchResultsOnFailure
+        Write-TestResults $testRunId $results $testRunOutputPath $LaunchResultsOnFailure
 
         # Clear out the setting when the tests are done running
         [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "")
@@ -235,13 +234,59 @@ function Write-TestResults {
     param(
         $TestRunId,
         $Results,
-        $Path,
+        $ResultsDirectory,
         $LaunchResultsOnFailure
     )
 
     # Show failed tests first
     $Results = $Results | Sort-Object -Property Error -Descending
-    
+
+    $HtmlResultPath = Join-Path $ResultsDirectory "Results.html"
+    Write-HtmlResults $TestRunId $Results $HtmlResultPath
+
+    $TextResultPath = Join-Path $ResultsDirectory "TestResults.txt"
+    Write-TextResults $TestRunId $Results $TextResultPath
+
+    Write-Host "Ran $($Results.Count) Tests, $pass Passed, $fail Failed, $skipped Skipped. See '$HtmlResultPath' or '$TextResultPath' for more details."
+
+    if (($fail -gt 0) -and $LaunchResultsOnFailure -and ($Results.Count -gt 1)) 
+    {
+        [System.Diagnostics.Process]::Start($HtmlResultPath)
+    }
+}
+
+function Write-TextResults
+{
+    param(
+        $TestRunId,
+        $Results,
+        $Path
+    )
+
+    $rows = $Results | % { 
+        $status = 'Passed'
+        
+        if($_.Skipped) {
+            $status = 'Skipped'
+        }
+        elseif($_.Error) {
+            $status = 'Failed'
+        }
+
+        "$status $($_.Test) $($_.Error)"
+    }
+
+    $rows | Out-File $Path | Out-Null
+}
+
+function Write-HtmlResults
+{
+    param(
+        $TestRunId,
+        $Results,
+        $Path
+    )
+
     $resultsTemplate = "<html>
     <head>
         <title>
@@ -366,12 +411,6 @@ function Write-TestResults {
     }
 
     [String]::Format($resultsTemplate, $TestRunId, (Split-Path $Path), $Results.Count, $pass, $fail, $skipped, [String]::Join("", $rows)) | Out-File $Path | Out-Null
-    Write-Host "Ran $($Results.Count) Tests, $pass Passed, $fail Failed, $skipped Skipped. See $Path for more details"
-
-    if (($fail -gt 0) -and $LaunchResultsOnFailure -and ($Results.Count -gt 1)) 
-    {
-        [System.Diagnostics.Process]::Start($Path)
-    }
 }
 
 function Get-PackageRepository
