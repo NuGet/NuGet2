@@ -111,6 +111,13 @@
     </ItemGroup>
 
     <ItemGroup>
+        <MonoProjects Include="$(NuGetSrcRoot)\Core\Core.csproj"/>
+        <MonoProjects Include="$(NuGetSrcRoot)\Bootstrapper\Bootstrapper.csproj"/>
+        <MonoProjects Include="$(NuGetSrcRoot)\CommandLine\CommandLine.csproj"/>
+        <MonoProjects Include="@(TestProjects)" />
+    </ItemGroup>
+
+    <ItemGroup>
         <RestorePackageProjects Include="@(TestProjects)" />
         <RestorePackageProjects Include="$(NuGetRoot)\test\Test.Utility\Test.Utility.csproj" />
         <RestorePackageProjects Include="$(NuGetRoot)\src\Server\Server.csproj" />
@@ -124,7 +131,7 @@
                                     CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; BuildPackages">
     </Target>
 
-    <Target Name="GoMono" DependsOnTargets="RestorePackages; Build; RunTests" />
+    <Target Name="GoMono" DependsOnTargets="RestorePackages; BuildMono; RunTests" />
 
     <Target Name="CheckFxCop">
         <Error
@@ -150,6 +157,11 @@
 
     <Target Name="Build">
         <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true" />
+    </Target>
+
+    <Target Name="BuildMono">
+        <MSBuild Projects="@(MonoProjects)" 
+                 Targets="Build" />
     </Target>
 
     <Target Name="VerifyAssembliesInVSIX">
