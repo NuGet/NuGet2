@@ -110,7 +110,6 @@ namespace NuGet.Test
         public void ExecuteThrowsIfSettingsIsNullSettings()
         {
             // Arrange
-            var packageSourceProvider = new Mock<IPackageSourceProvider>();
             var command = new ConfigCommand()
             {
                 Settings = NullSettings.Instance

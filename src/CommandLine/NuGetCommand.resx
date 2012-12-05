@@ -418,8 +418,11 @@ nuget update -Self</value>
   </data>
   <data name="InstallCommandSolutionDirectory" xml:space="preserve">
     <value>Solution root for package restore.</value>
-  </data>  
+  </data>
   <data name="Option_ConfigFile" xml:space="preserve">
     <value>The NuGet configuration file. If not specified, file %AppData%\NuGet\NuGet.config is used as configuration file.</value>
+  </data>
+  <data name="InstallCommandDisableParallel" xml:space="preserve">
+    <value>Disable parallel nuget package installs.</value>
   </data>
 </root>

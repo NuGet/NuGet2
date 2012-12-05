@@ -4,6 +4,7 @@ using System.Data.Services.Client;
 
 namespace NuGet
 {
+    [CLSCompliant(false)]
     public interface IDataServiceContext
     {
         Uri BaseUri { get; }

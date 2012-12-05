@@ -67,7 +67,7 @@ namespace NuGet.Test
 </package>";
             Assert.Equal(expected, actual);
         }
-
+#if !MONO
         [Fact]
         public void ProjectFactoryAppliesGlobalProperties()
         {
@@ -114,5 +114,6 @@ namespace NuGet.Test
             Assert.Equal("true", project.GetProperty("MyGlobalProperty").UnevaluatedValue, StringComparer.OrdinalIgnoreCase);
             Assert.Equal("true", project.GetProperty("TestProperty").UnevaluatedValue, StringComparer.OrdinalIgnoreCase);
         }
+#endif
     }
 }

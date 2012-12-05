@@ -35,13 +35,23 @@ namespace NuGet
 
             var console = new Common.Console();
             var fileSystem = new PhysicalFileSystem(Directory.GetCurrentDirectory());
+
+            Func<Exception, string> getErrorMessage = e => e.Message;
+
+            // When we're detailed, get the whole exception including the stack
+            // This is useful for debugging errors.
+            if (console.Verbosity == Verbosity.Detailed)
+            {
+                getErrorMessage = e => e.ToString();
+            }
+
             try
             {
                 // Remove NuGet.exe.old
                 RemoveOldFile(fileSystem);
 
                 // Import Dependencies  
-                var p = new Program();                
+                var p = new Program();
                 p.Initialize(fileSystem, console);
 
                 // Add commands to the manager
@@ -73,24 +83,25 @@ namespace NuGet
                 }
             }
             catch (AggregateException exception)
-            {
+            { 
                 string message;
                 Exception unwrappedEx = ExceptionUtility.Unwrap(exception);
                 if (unwrappedEx == exception)
                 {
                     // If the AggregateException contains more than one InnerException, it cannot be unwrapped. In which case, simply print out individual error messages
-                    message = String.Join(Environment.NewLine, exception.InnerExceptions.Select(ex => ex.Message).Distinct(StringComparer.CurrentCulture));
+                    message = String.Join(Environment.NewLine, exception.InnerExceptions.Select(getErrorMessage).Distinct(StringComparer.CurrentCulture));
                 }
                 else
                 {
-                    message = ExceptionUtility.Unwrap(exception).Message;
+
+                    message = getErrorMessage(ExceptionUtility.Unwrap(exception));
                 }
                 console.WriteError(message);
                 return 1;
             }
             catch (Exception e)
             {
-                console.WriteError(ExceptionUtility.Unwrap(e).Message);
+                console.WriteError(getErrorMessage(ExceptionUtility.Unwrap(e)));
                 return 1;
             }
             return 0;

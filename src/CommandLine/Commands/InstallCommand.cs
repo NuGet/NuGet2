@@ -21,6 +21,8 @@ namespace NuGet.Commands
         private static readonly object _satelliteLock = new object();
         private readonly IPackageRepository _cacheRepository;
         private readonly List<string> _sources = new List<string>();
+
+        private static readonly bool _isMonoRuntime = Type.GetType("Mono.Runtime") != null;
         
         [Option(typeof(NuGetCommand), "InstallCommandSourceDescription")]
         public ICollection<string> Source
@@ -49,6 +51,9 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "InstallCommandSolutionDirectory")]
         public string SolutionDirectory { get; set; }
 
+        [Option(typeof(NuGetCommand), "InstallCommandDisableParallel")]
+        public bool DisableParallel { get; set; }
+
         /// <remarks>
         /// Meant for unit testing.
         /// </remarks>
@@ -72,6 +77,10 @@ namespace NuGet.Commands
             IPackageRepository cacheRepository)
         {
             _cacheRepository = cacheRepository;
+
+            // On mono, parallel builds are broken for some reason. See https://gist.github.com/4201936 for the errors
+            // That are thrown.
+            DisableParallel = _isMonoRuntime;
         }
 
         public override void ExecuteCommand()
@@ -186,6 +195,17 @@ namespace NuGet.Commands
             SourceProvider = new CachedPackageSourceProvider(SourceProvider);
 
             var satellitePackages = new List<IPackage>();
+
+            if(DisableParallel)
+            {
+                foreach(var package in packageReferences)
+                {
+                    RestorePackage(fileSystem, package.Id, package.Version, packageRestoreConsent, satellitePackages);
+                }
+
+                return true;
+            }
+
             var tasks = packageReferences.Select(package =>
                             Task.Factory.StartNew(() => RestorePackage(fileSystem, package.Id, package.Version, packageRestoreConsent, satellitePackages))).ToArray();
 

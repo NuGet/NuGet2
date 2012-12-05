@@ -1,7 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <!-- Common Build Settings and Configurations -->
     <PropertyGroup>
-        <NuGetRoot Condition=" '$(NuGetRoot)' == '' ">$(MsBuildThisFileDirectory)\..</NuGetRoot>
+        <NuGetRoot Condition=" '$(NuGetRoot)' == '' ">$(MsBuildThisFileDirectory)..</NuGetRoot>
         <Configuration Condition=" '$(Configuration)' == '' Or '$(Configuration)' == 'CI' ">Debug</Configuration>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
         <ProductVersion>8.0.30703</ProductVersion>
@@ -20,7 +20,7 @@
     <PropertyGroup>
         <Dev10Directory>$(MSBuildExtensionsPath)\..\Microsoft Visual Studio 10.0\Common7\IDE</Dev10Directory>
         <Dev11Directory>$(MSBuildExtensionsPath)\..\Microsoft Visual Studio 11.0\Common7\IDE</Dev11Directory>
-        <Dev11Available Condition=" '$(VisualStudioVersion)' == '11.0' OR Exists($(Dev11Directory)) ">true</Dev11Available>
+        <Dev11Available Condition=" '$(VisualStudioVersion)' == '11.0' Or Exists('$(Dev11Directory)') ">true</Dev11Available>
     </PropertyGroup>
     
     <!-- If Dev11 is installed, we will no longer be able to open the solution from Dev10 on that box. This is a consequence of us linking against 4.5 components from the GAC -->
@@ -41,7 +41,7 @@
     </PropertyGroup>
 
     <!-- Common settings for Debug and Coverage builds -->
-    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Coverage' ">
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Coverage' Or '$(Configuration)' == 'Mono Debug'">
         <DebugSymbols>true</DebugSymbols>
         <DebugType>full</DebugType>
         <Optimize>false</Optimize>
@@ -50,7 +50,7 @@
     </PropertyGroup>
 
     <!-- Settings only for Release builds -->
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' Or '$(Configuration)' == 'Mono Release'">
         <DebugType>pdbonly</DebugType>
         <Optimize>true</Optimize>
         <OutputPath>bin\Release\</OutputPath>
@@ -62,6 +62,12 @@
         <Coverage>true</Coverage>
         <DefineConstants>$(DefineConstants);CODE_COVERAGE</DefineConstants> 
     </PropertyGroup>
+
+    <!-- There's no client profile on Mono -->
+    <PropertyGroup Condition=" '$(Configuration)' == 'Mono Debug' Or '$(Configuration)' == 'Mono Release' Or '$(OS)' != 'Windows_NT'">
+        <MonoBuild>true</MonoBuild>
+        <DefineConstants>$(DefineConstants);MONO;</DefineConstants>
+    </PropertyGroup>    
     
     <Import Project="$(MsBuildThisFileDirectory)\NuGet.Restore.targets"/>
     <Import Project="$(AdditionalSettingsImport)" Condition="Exists('$(AdditionalSettingsImport)')" />

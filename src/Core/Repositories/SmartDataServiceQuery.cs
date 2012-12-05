@@ -16,6 +16,7 @@ namespace NuGet
     /// Batch queries are multiple queries tunneled via a single post. Post requests are never cached, therefore it is imperative that batch queries are used sparingly. 
     /// IIS7 defaults to a value of 2048, so we'll use this as our max value.
     /// </remarks>
+    [CLSCompliant(false)]
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Type is an IQueryable and by convention should end with the term Query")]
     public class SmartDataServiceQuery<T> : IQueryable<T>, IQueryProvider, IOrderedQueryable<T>
     {

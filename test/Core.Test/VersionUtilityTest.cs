@@ -323,9 +323,6 @@ namespace NuGet.Test
         [Fact]
         public void ParseFrameworkNameReturnsUnsupportedFrameworkNameIfUnrecognized()
         {
-            // Arrange
-            Version version20 = new Version("2.0");
-
             // Act
             var frameworkName1 = VersionUtility.ParseFrameworkName("NETCF20");
             var frameworkName2 = VersionUtility.ParseFrameworkName("NET40ClientProfile");

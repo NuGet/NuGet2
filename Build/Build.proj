@@ -2,21 +2,34 @@
 <Project ToolsVersion="4.0" DefaultTargets="Go" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <Import Project="$(MSBuildProjectDirectory)\Build.tasks" />
 
+    <!-- Setup configuration variables -->
     <PropertyGroup>
-        <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+        <Configuration Condition="'$(OS)' == 'Windows_NT' And '$(Configuration)' == ''">Debug</Configuration>
+        <Configuration Condition="'$(OS)' != 'Windows_NT' And '$(Configuration)' == ''">Mono Debug</Configuration>
+        <ConfigFolderPath>$(Configuration)</ConfigFolderPath>
+        <ConfigFolderPath Condition="'$(Configuration)' == 'Mono Debug'">Debug</ConfigFolderPath>
+        <ConfigFolderPath Condition="'$(Configuration)' == 'Mono Release'">Release</ConfigFolderPath>
+    </PropertyGroup>
+
+    <!-- Set MonoBuild to true so we can distingiush building for mono -->
+    <PropertyGroup Condition=" '$(Configuration)' == 'Mono Debug' Or '$(Configuration)' == 'Mono Release' Or '$(OS)' != 'Windows_NT'">
+        <MonoBuild>true</MonoBuild>
+    </PropertyGroup>
+
+    <PropertyGroup>        
         <NuGetRoot>$(MSBuildProjectDirectory)\..</NuGetRoot>
         <NuGetTestRoot>$(NuGetRoot)\test</NuGetTestRoot>
         <NuGetSrcRoot>$(NuGetRoot)\src</NuGetSrcRoot>
         <DropDirectory>$(NuGetRoot)\bin</DropDirectory>
         <ArtifactDropDirectory>$(DropDirectory)\artifacts</ArtifactDropDirectory>
         <NuGetDropDirectory>$(DropDirectory)\NuGet</NuGetDropDirectory>
-        <ExeBuildDirectory>$(NuGetSrcRoot)\CommandLine\bin\$(Configuration)</ExeBuildDirectory>
+        <ExeBuildDirectory>$(NuGetSrcRoot)\CommandLine\bin\$(ConfigFolderPath)</ExeBuildDirectory>
         <ExeDropDirectory>$(NuGetDropDirectory)\Console</ExeDropDirectory>
-        <ServerExtensionsBuildDirectory>$(NuGetSrcRoot)\CommandLine.ServerExtensions\bin\$(Configuration)</ServerExtensionsBuildDirectory>
+        <ServerExtensionsBuildDirectory>$(NuGetSrcRoot)\CommandLine.ServerExtensions\bin\$(ConfigFolderPath)</ServerExtensionsBuildDirectory>
         <ServerExtensionsDropDirectory>$(NuGetDropDirectory)\CommandLine.ServerExtensions</ServerExtensionsDropDirectory>
-        <BootStrapperBuildDirectory>$(NuGetSrcRoot)\Bootstrapper\bin\$(Configuration)</BootStrapperBuildDirectory>
+        <BootStrapperBuildDirectory>$(NuGetSrcRoot)\Bootstrapper\bin\$(ConfigFolderPath)</BootStrapperBuildDirectory>
         <BootStrapperDropDirectory>$(NuGetDropDirectory)\Bootstrapper</BootStrapperDropDirectory>
-        <VisualStudioAddInBuildDirectory>$(NuGetSrcRoot)\VsExtension\bin\$(Configuration)</VisualStudioAddInBuildDirectory>
+        <VisualStudioAddInBuildDirectory>$(NuGetSrcRoot)\VsExtension\bin\$(ConfigFolderPath)</VisualStudioAddInBuildDirectory>
         <VisualStudioAddInDropDirectory>$(NuGetDropDirectory)\VisualStudioAddIn</VisualStudioAddInDropDirectory>
         <EndToEndTestsDirectory>$(NuGetTestRoot)\EndToEnd</EndToEndTestsDirectory>
         <EndToEndTestsDropDirectory>$(NuGetDropDirectory)\EndToEnd\Artifacts</EndToEndTestsDropDirectory>
@@ -28,7 +41,7 @@
         <NuGetVisualStudioBuildDirectory>$(NuGetSrcRoot)\VisualStudio</NuGetVisualStudioBuildDirectory>
         <NuGetVisualStudioDropDirectory>$(NuGetDropDirectory)\VisualStudio</NuGetVisualStudioDropDirectory>
         <GenerateTestPackageProjectDirectory>$(NuGetRoot)\Tools\NuGet\GenerateTestPackages</GenerateTestPackageProjectDirectory>
-        <GenerateTestPackageExe>$(GenerateTestPackageProjectDirectory)\bin\$(Configuration)\GenerateTestPackages.exe</GenerateTestPackageExe>
+        <GenerateTestPackageExe>$(GenerateTestPackageProjectDirectory)\bin\$(ConfigFolderPath)\GenerateTestPackages.exe</GenerateTestPackageExe>
         <ZipExe>$(NuGetRoot)\Tools\7za920\7za.exe</ZipExe>
         <ILMergeExe>$(NuGetRoot)\Tools\ILMerge\ILMerge.exe</ILMergeExe>
         <ILMergeArtifactDirectory>$(ArtifactDropDirectory)\ILMerge</ILMergeArtifactDirectory>
@@ -46,6 +59,12 @@
         <Revision>$(BUILD_NUMBER)</Revision>
         <Version>$(MajorVersion).$(MinorVersion).$(Build).$(Revision)</Version>
         <PackageVersion>$(MajorVersion).$(MinorVersion).0</PackageVersion>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <!-- Team City under-reports tests when they're run in parallel. We'll specifically disable it in there -->
+        <BuildTestsInParallel Condition=" '$(TEAMCITY_VERSION)' == '' ">true</BuildTestsInParallel>
+        <BuildTestsInParallel Condition=" '$(TEAMCITY_VERSION)' != '' ">false</BuildTestsInParallel>
     </PropertyGroup>
 
     <ItemGroup>
@@ -80,15 +99,28 @@
     </ItemGroup>
 
     <ItemGroup>
-        <TestProjects Include="$(NuGetTestRoot)\Dialog.Test\Dialog.Test.csproj" />
         <TestProjects Include="$(NuGetTestRoot)\CommandLine.Test\CommandLine.Test.csproj" />
         <TestProjects Include="$(NuGetTestRoot)\Core.Test\Core.Test.csproj" />
-        <TestProjects Include="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" />
-        <TestProjects Include="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" />
-        <TestProjects Include="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" />
-        <TestProjects Include="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" />
-        <TestProjects Include="$(NuGetTestRoot)\TeamFoundationServer.Test\TeamFoundationServer.Test.csproj" />
-        <TestProjects Include="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" />
+        <TestProjects Include="$(NuGetTestRoot)\Server.Test\Server.Test.csproj" Condition="'$(MonoBuild)' == ''" />
+        <TestProjects Include="$(NuGetTestRoot)\Dialog.Test\Dialog.Test.csproj" Condition="'$(MonoBuild)' == ''" />
+        <TestProjects Include="$(NuGetTestRoot)\VisualStudio.Test\VisualStudio.Test.csproj" Condition="'$(MonoBuild)' == ''" />
+        <TestProjects Include="$(NuGetTestRoot)\PowerShellCmdlets.Test\PowerShellCmdlets.Test.csproj" Condition="'$(MonoBuild)' == ''" />
+        <TestProjects Include="$(NuGetTestRoot)\PowerShellHost.Test\PowerShellHost.Test.csproj" Condition="'$(MonoBuild)' == ''" />
+        <TestProjects Include="$(NuGetTestRoot)\TeamFoundationServer.Test\TeamFoundationServer.Test.csproj" Condition="'$(MonoBuild)' == ''" />
+        <TestProjects Include="$(NuGetTestRoot)\Test.Integration\Test.Integration.csproj" Condition="'$(MonoBuild)' == ''" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <MonoProjects Include="$(NuGetSrcRoot)\Core\Core.csproj"/>
+        <MonoProjects Include="$(NuGetSrcRoot)\Bootstrapper\Bootstrapper.csproj"/>
+        <MonoProjects Include="$(NuGetSrcRoot)\CommandLine\CommandLine.csproj"/>
+        <MonoProjects Include="@(TestProjects)" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <RestorePackageProjects Include="@(TestProjects)" />
+        <RestorePackageProjects Include="$(NuGetRoot)\test\Test.Utility\Test.Utility.csproj" />
+        <RestorePackageProjects Include="$(NuGetRoot)\src\Server\Server.csproj" />
     </ItemGroup>
 
     <Target Name="Go"
@@ -98,6 +130,8 @@
                                     CopyVisualStudioAddInOutputToDropDirectory; CopyEndToEndTestsToDropDirectory;
                                     CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; BuildPackages">
     </Target>
+
+    <Target Name="GoMono" DependsOnTargets="RestorePackages; BuildMono; RunTests" />
 
     <Target Name="CheckFxCop">
         <Error
@@ -112,12 +146,7 @@
     <Target Name="RestorePackages">
         <MsBuild Projects="$(NuGetRoot)\src\CommandLine\CommandLine.csproj"
                    Targets="Build"
-                   Properties="DefineConstants=CODE_ANALYSIS" />
-        <ItemGroup>
-            <RestorePackageProjects Include="@(TestProjects)" />
-            <RestorePackageProjects Include="$(NuGetRoot)\test\Test.Utility\Test.Utility.csproj" />
-            <RestorePackageProjects Include="$(NuGetRoot)\src\Server\Server.csproj" />
-        </ItemGroup>
+                   Properties="DefineConstants=CODE_ANALYSIS" />        
 
         <Message Text="Restoring NuGet packages" Importance="High" />
         <MsBuild Projects="@(RestorePackageProjects)"
@@ -128,6 +157,11 @@
 
     <Target Name="Build">
         <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true" />
+    </Target>
+
+    <Target Name="BuildMono">
+        <MSBuild Projects="@(MonoProjects)" 
+                 Targets="Build" />
     </Target>
 
     <Target Name="VerifyAssembliesInVSIX">
@@ -149,12 +183,7 @@
         <RemoveDir Directories="$(TempVsixDirectory)" ContinueOnError="true" />
     </Target>
 
-    <Target Name="RunTests">
-        <PropertyGroup>
-            <!-- Team City under-reports tests when they're run in parallel. We'll specifically disable it in there -->
-            <BuildTestsInParallel Condition=" '$(TEAMCITY_VERSION)' == '' ">true</BuildTestsInParallel>
-            <BuildTestsInParallel Condition=" '$(TEAMCITY_VERSION)' != '' ">false</BuildTestsInParallel>
-        </PropertyGroup>
+    <Target Name="RunTests">        
         <MsBuild Projects="@(TestProjects)"
                   Targets="RunTests"
                   BuildInParallel="$(BuildTestsInParallel)" />

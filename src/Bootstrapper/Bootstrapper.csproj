@@ -10,12 +10,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuGet</RootNamespace>
     <AssemblyName>NuGet</AssemblyName>
-    <TargetFrameworkProfile Condition=" '$(TargetFrameworkVersion)' == 'v4.0' ">Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile Condition=" '$(MonoBuild)' == '' And '$(TargetFrameworkVersion)' == 'v4.0' ">Client</TargetFrameworkProfile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Security" />
-    <Reference Include="System.XML" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\CommandLine\Common\IConsole.cs">

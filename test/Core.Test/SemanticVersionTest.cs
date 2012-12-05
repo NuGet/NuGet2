@@ -170,11 +170,15 @@ namespace NuGet.Test
             SemanticVersion itemA = null;
             SemanticVersion itemB = new SemanticVersion("1.0");
 
+            // Disable this warning since it complains on mono
+#pragma warning disable 0219
             // Act and Assert
             ExceptionAssert.ThrowsArgNull(() => { bool val = itemA < itemB; }, "version1");
             ExceptionAssert.ThrowsArgNull(() => { bool val = itemA <= itemB; }, "version1");
             ExceptionAssert.ThrowsArgNull(() => { bool val = itemA > itemB; }, "version1");
             ExceptionAssert.ThrowsArgNull(() => { bool val = itemA >= itemB; }, "version1");
+#pragma warning restore 0219
+
         }
 
         [Theory]

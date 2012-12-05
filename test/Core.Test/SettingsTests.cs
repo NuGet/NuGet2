@@ -34,7 +34,7 @@ namespace NuGet.Test
             mockFileSystem.Setup(m => m.FileExists(configFile)).Returns(true);
 
             // Act
-            Settings settings = new Settings(mockFileSystem.Object);
+            new Settings(mockFileSystem.Object);
 
             // Assert 
             mockFileSystem.Verify(x => x.OpenFile(configFile), Times.Once(), "File was not read");

@@ -9,6 +9,7 @@ using System.Xml.Linq;
 
 namespace NuGet
 {
+    [CLSCompliant(false)]
     public class DataServiceContextWrapper : IDataServiceContext
     {
         private const string MetadataKey = "DataServiceMetadata|";

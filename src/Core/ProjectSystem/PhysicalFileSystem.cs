@@ -148,7 +148,7 @@ namespace NuGet
 
         public virtual IEnumerable<string> GetFiles(string path, string filter, bool recursive)
         {
-            path = EnsureTrailingSlash(GetFullPath(path));
+            path = PathUtility.EnsureTrailingSlash(GetFullPath(path));
             if (String.IsNullOrEmpty(filter))
             {
                 filter = "*.*";
@@ -178,7 +178,7 @@ namespace NuGet
         {
             try
             {
-                path = EnsureTrailingSlash(GetFullPath(path));
+                path = PathUtility.EnsureTrailingSlash(GetFullPath(path));
                 if (!Directory.Exists(path))
                 {
                     return Enumerable.Empty<string>();
@@ -269,15 +269,6 @@ namespace NuGet
         {
             path = GetFullPath(path);
             Directory.CreateDirectory(path);
-        }
-
-        private static string EnsureTrailingSlash(string path)
-        {
-            if (!path.EndsWith("\\", StringComparison.Ordinal))
-            {
-                path += "\\";
-            }
-            return path;
         }
     }
 }

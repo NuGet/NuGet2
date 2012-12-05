@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Versioning;
 using System.Xml.Linq;
 using Microsoft.Build.Evaluation;
@@ -271,7 +272,7 @@ namespace NuGet.Commands
             foreach (var property in ProjectProperties)
             {
                 var existingProperty = _project.GetProperty(property.Key);
-                if (existingProperty == null || !existingProperty.IsGlobalProperty)
+                if (existingProperty == null || !IsGlobalProperty(existingProperty))
                 {
                     // Only set the property if it's not already defined as a global property
                     // (which those passed in via the ctor are) as trying to set global properties
@@ -285,6 +286,20 @@ namespace NuGet.Commands
 
             // Return the new target path
             return _project.GetPropertyValue("TargetPath");
+        }
+
+        private static bool IsGlobalProperty(ProjectProperty projectProperty)
+        {
+            // This property isn't available on xbuild (mono)
+            var property = typeof(ProjectProperty).GetProperty("IsGlobalProperty", BindingFlags.Public | BindingFlags.Instance);
+            if(property != null) 
+            {
+                return (bool)property.GetValue(projectProperty, null);
+            }
+
+            // REVIEW: Maybe there's something better we can do on mono
+            // Just return false if the property isn't there
+            return false;
         }
 
         private string ResolveTargetPath(BuildResult result)

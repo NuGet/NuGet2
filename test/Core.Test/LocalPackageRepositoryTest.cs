@@ -104,7 +104,6 @@ namespace NuGet.Test
             Func<string, IPackage> openPackage = p =>
             {
                 searchedPaths.Add(p);
-                string id = Path.GetFileNameWithoutExtension(p);
                 return PackageUtility.CreatePackage("A", "1.1");
             };
 
@@ -263,7 +262,6 @@ namespace NuGet.Test
             var fileSystem = new MockFileSystem();
             fileSystem.AddFile(@"Foo.1.0\Foo.1.0.nupkg");
             fileSystem.AddFile(@"Foo.2.0.0\Foo.2.0.0.nupkg");
-            var pathResolver = new DefaultPackagePathResolver(fileSystem);
             var foo_10 = PackageUtility.CreatePackage("Foo", "1.0");
             var foo_20 = PackageUtility.CreatePackage("Foo", "2.0.0");
             var localPackageRepository = new MockLocalRepository(fileSystem, path => 
@@ -291,7 +289,6 @@ namespace NuGet.Test
             fileSystem.AddFile(@"Foo.1.0\Foo.1.0.nupkg");
             fileSystem.AddFile(@"Foo.2.0.0\Foo.2.0.0.nupkg");
             fileSystem.AddFile(@"Foo.Baz.2.0.0\Foo.Baz.2.0.0.nupkg");
-            var pathResolver = new DefaultPackagePathResolver(fileSystem);
             var foo_10 = PackageUtility.CreatePackage("Foo", "1.0");
             var foo_20 = PackageUtility.CreatePackage("Foo", "2.0.0");
             var fooBaz_20 = PackageUtility.CreatePackage("Foo.Baz", "2.0.0");

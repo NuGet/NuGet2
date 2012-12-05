@@ -1,9 +1,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-<UsingTask AssemblyFile="$(NuGetRoot)\tools\xunit\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
-<PropertyGroup>
-    <TestAssembly>$(TargetDir)$(AssemblyName).dll</TestAssembly>
-</PropertyGroup>
+<UsingTask AssemblyFile="$(NuGetRoot)\Tools\XUnit\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit" />
 <Target Name="RunTests">
-    <xunit Assembly="$(TestAssembly)" />
+    <xunit Assembly="$(TargetDir)$(AssemblyName).dll" />
 </Target>
 </Project>
