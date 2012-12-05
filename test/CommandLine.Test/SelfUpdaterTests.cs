@@ -15,7 +15,6 @@ namespace NuGet.Test
         {
             // Arrange
             var factory = new Mock<IPackageRepositoryFactory>();
-            var sourceProvider = new Mock<IPackageSourceProvider>();
             factory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns(new MockPackageRepository());
 
             ConsoleInfo consoleInfo = GetConsoleInfo();
@@ -34,7 +33,6 @@ namespace NuGet.Test
         {
             // Arrange
             var factory = new Mock<IPackageRepositoryFactory>();
-            var sourceProvider = new Mock<IPackageSourceProvider>();
             var repository = new MockPackageRepository();
             repository.Add(PackageUtility.CreatePackage("NuGet.CommandLine", "1.0"));
             factory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns(repository);
@@ -57,7 +55,6 @@ namespace NuGet.Test
         {
             // Arrange
             var factory = new Mock<IPackageRepositoryFactory>();
-            var sourceProvider = new Mock<IPackageSourceProvider>();
             var repository = new MockPackageRepository();
             repository.Add(PackageUtility.CreatePackage("NuGet.CommandLine", "3.0"));
             factory.Setup(m => m.CreateRepository(It.IsAny<string>())).Returns(repository);
@@ -78,7 +75,6 @@ namespace NuGet.Test
         {
             // Arrange
             var factory = new Mock<IPackageRepositoryFactory>();
-            var sourceProvider = new Mock<IPackageSourceProvider>();
             var repository = new MockPackageRepository();
             IPackage package = PackageUtility.CreatePackage("NuGet.CommandLine", "3.0", tools: new[] { "NuGet.exe" });
             repository.Add(package);

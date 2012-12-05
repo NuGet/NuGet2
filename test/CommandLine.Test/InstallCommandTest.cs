@@ -132,7 +132,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             installCommand.Setup(c => c.CreateFileSystem(@"C:\My\Solution")).Returns(fileSystem);
 
             // Act
-            string installPath = installCommand.Object.ResolveInstallPath();
+            installCommand.Object.ResolveInstallPath();
 
             // Assert
             var enabledPackageSource = installCommand

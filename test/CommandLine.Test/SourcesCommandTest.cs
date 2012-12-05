@@ -27,13 +27,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands
   1.  FirstName [Enabled]
       FirstSource
 ";
-            var stringBuilder = new StringBuilder();
             var console = new MockConsole();
 
-            var sourcesCommand = new SourcesCommand()
-            {
-                SourceProvider = packageSourceProvider.Object
-            };
             sourceCommand.Console = console;
 
             // Act
@@ -59,13 +54,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands
   1.  FirstName [Disabled]
       FirstSource
 ";
-            var stringBuilder = new StringBuilder();
             var console = new MockConsole();
 
-            var sourcesCommand = new SourcesCommand()
-            {
-                SourceProvider = packageSourceProvider.Object
-            };
             sourceCommand.Console = console;
 
             // Act
