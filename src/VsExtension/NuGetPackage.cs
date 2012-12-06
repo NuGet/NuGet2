@@ -19,6 +19,7 @@ using NuGet.VisualStudio.Resources;
 using NuGet.VisualStudio11;
 using NuGetConsole;
 using NuGetConsole.Implementation;
+using NuGetConsole.Implementation.Console;
 using ManagePackageDialog = dialog::NuGet.Dialog.PackageManagerWindow;
 using VS10ManagePackageDialog = dialog10::NuGet.Dialog.PackageManagerWindow;
 
@@ -62,6 +63,7 @@ namespace NuGet.Tools
         private OleMenuCommand _managePackageDialogCommand;
         private OleMenuCommand _managePackageForSolutionDialogCommand;
         private OleMenuCommandService _mcs;
+        private bool _powerConsoleCommandExecuting;
 
         public NuGetPackage()
         {
@@ -189,8 +191,11 @@ namespace NuGet.Tools
             {
                 // menu command for opening Package Manager Console
                 CommandID toolwndCommandID = new CommandID(GuidList.guidNuGetConsoleCmdSet, PkgCmdIDList.cmdidPowerConsole);
-                MenuCommand menuToolWin = new MenuCommand(ShowToolWindow, toolwndCommandID);
-                _mcs.AddCommand(menuToolWin);
+                OleMenuCommand powerConsoleExecuteCommand = new OleMenuCommand(ExecutePowerConsoleCommand, null, BeforeQueryStatusForPowerConsole, toolwndCommandID);
+                // ‘$’ - This indicates that the input line other than the argument forms a single argument string with no autocompletion
+                //       Autocompletion for filename(s) is supported for option 'p' or 'd' which is not applicable for this command
+                powerConsoleExecuteCommand.ParametersDescription = "$";
+                _mcs.AddCommand(powerConsoleExecuteCommand);
 
                 // menu command for opening Manage NuGet packages dialog
                 CommandID managePackageDialogCommandID = new CommandID(GuidList.guidNuGetDialogCmdSet, PkgCmdIDList.cmdidAddPackageDialog);
@@ -230,7 +235,7 @@ namespace NuGet.Tools
             }
         }
 
-        private void ShowToolWindow(object sender, EventArgs e)
+        private void ExecutePowerConsoleCommand(object sender, EventArgs e)
         {
             // Get the instance number 0 of this tool window. This window is single instance so this instance
             // is actually the only one.
@@ -242,6 +247,32 @@ namespace NuGet.Tools
             }
             IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
             ErrorHandler.ThrowOnFailure(windowFrame.Show());
+
+            // Parse the arguments to determine the command and arguments to be passed to IHost
+            // passed which is of type OleMenuCmdEventArgs
+            string command = null;
+            OleMenuCmdEventArgs eventArgs = e as OleMenuCmdEventArgs;
+            if (eventArgs != null && eventArgs.InValue != null && eventArgs.InValue is string)
+            {
+                command = eventArgs.InValue as string;
+            }
+
+            // If the command string is null or empty, simply launch the console and return
+            if (!String.IsNullOrEmpty(command))
+            {
+                IPowerConsoleService powerConsoleService = (IPowerConsoleService)window;
+
+                if (powerConsoleService.Execute(command, null))
+                {
+                    _powerConsoleCommandExecuting = true;
+                    powerConsoleService.ExecuteEnd += PowerConsoleService_ExecuteEnd;
+                }
+            }
+        }
+
+        private void PowerConsoleService_ExecuteEnd(object sender, EventArgs e)
+        {
+            _powerConsoleCommandExecuting = false;
         }
 
         /// <summary>
@@ -339,6 +370,12 @@ namespace NuGet.Tools
             OleMenuCommand command = (OleMenuCommand)sender;
             command.Visible = SolutionManager.IsSolutionOpen && !PackageRestoreManager.IsCurrentSolutionEnabledForRestore;
             command.Enabled = !ConsoleStatus.IsBusy;
+        }
+
+        private void BeforeQueryStatusForPowerConsole(object sender, EventArgs args)
+        {
+            OleMenuCommand command = (OleMenuCommand)sender;
+            command.Enabled = !ConsoleStatus.IsBusy && !_powerConsoleCommandExecuting;
         }
 
         private void BeforeQueryStatusForAddPackageDialog(object sender, EventArgs args)

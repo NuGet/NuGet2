@@ -41,6 +41,7 @@
     <Buttons>
       <Button guid="guidPowerConsoleCmdSet" id="cmdidPowerConsole" priority="0x0100" type="Button">
         <Icon guid="guidToolbarImages" id="bmpPowerConsole" />
+        <CommandFlag>AllowParams</CommandFlag>
         <Strings>
           <ButtonText>Package Manager C&amp;onsole</ButtonText>
         </Strings>
