@@ -39,11 +39,17 @@ namespace NuGet.VisualStudio
         public IList<string> GetPackageDirectoriesMarkedForDeletion()
         {
             var fileSystem = _repositoryFileSystemFactory();
-            return fileSystem.GetFiles(path: "", filter: DeletionMarkerFilter, recursive: false)
+            var candidates = fileSystem.GetFiles(path: "", filter: DeletionMarkerFilter, recursive: false)
                 // strip the DeletionMarkerFilter at the end of the path to get the package name.
-                .Select(path => Path.ChangeExtension(path, null))
-                .Where(path => fileSystem.DirectoryExists(path))
-                .ToList();
+                .Select(path => Path.ChangeExtension(path, null)).ToList();
+
+            var filesWithoutFolders = candidates.Where(path => !fileSystem.DirectoryExists(path));
+            foreach (var directory in filesWithoutFolders)
+            {
+                fileSystem.DeleteFile(directory + DeletionMarkerSuffix);
+            }
+
+            return candidates.Where(path => fileSystem.DirectoryExists(path)).ToList();
         }
 
         /// <summary>
