@@ -802,7 +802,8 @@ namespace NuGet.Commands
                 var ms = new MemoryStream();
                 element.Save(ms);
                 ms.Seek(0, SeekOrigin.Begin);
-                return ms.ToStreamFactory();
+                byte[] buffer = ms.ToArray();
+                return () => new MemoryStream(buffer);
             }
 
             private static XElement GetElement(IPackageFile file)
