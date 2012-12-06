@@ -371,7 +371,7 @@ namespace NuGet
             IEnumerable<IPackage> packages,
             bool includePrerelease,
             bool includeAllVersions,
-            IEnumerable<FrameworkName> targetFramework = null)
+            IEnumerable<FrameworkName> targetFrameworks = null)
         {
             if (packages.IsEmpty())
             {
@@ -379,8 +379,8 @@ namespace NuGet
             }
 
             var serviceBasedRepository = repository as IServiceBasedRepository;
-            return serviceBasedRepository != null ? serviceBasedRepository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFramework) :
-                                                    repository.GetUpdatesCore(packages, includePrerelease, includeAllVersions, targetFramework);
+            return serviceBasedRepository != null ? serviceBasedRepository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFrameworks) :
+                                                    repository.GetUpdatesCore(packages, includePrerelease, includeAllVersions, targetFrameworks);
         }
 
         public static IEnumerable<IPackage> GetUpdatesCore(this IPackageRepository repository, IEnumerable<IPackageMetadata> packages, bool includePrerelease, bool includeAllVersions, 

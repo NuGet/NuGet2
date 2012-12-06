@@ -144,7 +144,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public IEnumerable<IPackage> GetUpdates(IEnumerable<IPackage> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFramework)
+        public IEnumerable<IPackage> GetUpdates(IEnumerable<IPackage> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFrameworks)
         {
             var activeRepository = GetActiveRepository();
             if (activeRepository == null)
@@ -153,7 +153,7 @@ namespace NuGet.VisualStudio
             }
             using (StartOperation(activeRepository))
             {
-                return activeRepository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFramework);
+                return activeRepository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFrameworks);
             }
         }
 

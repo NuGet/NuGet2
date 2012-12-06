@@ -38,7 +38,7 @@ namespace NuGet.Dialog.Providers
                 packages = packages.Find(searchTerm);
             }
 
-            return Repository.GetUpdates(packages, allowPrereleaseVersions, includeAllVersions: false, targetFramework: solutionFrameworks)
+            return Repository.GetUpdates(packages, allowPrereleaseVersions, includeAllVersions: false, targetFrameworks: solutionFrameworks)
                              .AsQueryable();
         }
 

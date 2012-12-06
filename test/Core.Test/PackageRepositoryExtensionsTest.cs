@@ -98,7 +98,7 @@ namespace NuGet.Test
             };
 
             // Act
-            var foundPackages = PackageRepositoryExtensions.GetUpdates(sourceRepository, packages, includePrerelease: true, targetFramework: Enumerable.Empty<FrameworkName>(),
+            var foundPackages = PackageRepositoryExtensions.GetUpdates(sourceRepository, packages, includePrerelease: true, targetFrameworks: Enumerable.Empty<FrameworkName>(),
                                                                        includeAllVersions: true).ToList();
 
             // Assert
