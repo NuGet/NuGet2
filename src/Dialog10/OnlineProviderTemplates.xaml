@@ -196,13 +196,13 @@
                 <!-- Last Published -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding PackageIdentity.Published, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_LastPublishedLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl Text="{Binding PackageIdentity.Published, StringFormat='{}{0:d}'}" Style="{StaticResource DetailMetadataValueStyle}"  />
+                    <self:TextBlockControl AutomationProperties.AutomationId="LastPublishedDate" Text="{Binding PackageIdentity.Published, StringFormat='{}{0:d}'}" Style="{StaticResource DetailMetadataValueStyle}"  />
                 </StackPanel>
 
                 <!-- Download count -->
                 <StackPanel Style="{StaticResource DetailMetadataStyle}" Visibility="{Binding PackageIdentity.DownloadCount, Converter={StaticResource countConverter}, ConverterParameter=-1}">
                     <self:TextBlockControl Text="{x:Static resources:Resources.Dialog_DownloadsLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
-                    <self:TextBlockControl Text="{Binding PackageIdentity.DownloadCount}" Style="{StaticResource DetailMetadataValueStyle}"  />
+                    <self:TextBlockControl  AutomationProperties.AutomationId="DownloadCount" Text="{Binding PackageIdentity.DownloadCount}" Style="{StaticResource DetailMetadataValueStyle}"  />
                 </StackPanel>
 
                 <!-- View License Url -->

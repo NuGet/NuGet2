@@ -272,8 +272,6 @@ namespace NuGet.Dialog.Providers
                 packageItem.ReferenceProjects.Clear();
                 packageItem.ReferenceProjects.AddRange(GetReferenceProjects(packageItem.PackageIdentity));
             }
-
-            OneExecuteCompletedEvent();
         }
 
         private void SelectedNode_PackageLoadCompleted(object sender, EventArgs e)

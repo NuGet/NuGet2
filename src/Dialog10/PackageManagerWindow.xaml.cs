@@ -53,7 +53,7 @@ namespace NuGet.Dialog
                  ServiceLocator.GetInstance<IDeleteOnRestartManager>(),
                  ServiceLocator.GetGlobalService<SVsShell, IVsShell4>(),
                  dialogParameters)
-        {            
+        {
         }
 
         private PackageManagerWindow(Project project,
@@ -194,7 +194,6 @@ namespace NuGet.Dialog
             var restartRequestBar = new RestartRequestBar(deleteOnRestartManager, vsRestarter);
             Grid.SetColumn(restartRequestBar, 1);
             BottomBar.Children.Insert(1, restartRequestBar);
-            Loaded += restartRequestBar.NotifyOnUnsuccessfulUninstall;
             return restartRequestBar;
         }
 
@@ -323,8 +322,12 @@ namespace NuGet.Dialog
             installedProvider.IncludePrerelease =
                 onlineProvider.IncludePrerelease =
                 updatesProvider.IncludePrerelease = _providerSettings.IncludePrereleasePackages;
-            
-            installedProvider.ExecuteCompleted += restartRequestBar.NotifyOnUnsuccessfulUninstall;
+
+            installedProvider.ExecuteCompletedCallback =
+                onlineProvider.ExecuteCompletedCallback =
+                updatesProvider.ExecuteCompletedCallback = restartRequestBar.CheckForUnsuccessfulUninstall;
+
+            Loaded += (o, e) => restartRequestBar.CheckForUnsuccessfulUninstall();
         }
 
         private void UpdateSelectedProvider(int selectedProvider)
@@ -551,7 +554,8 @@ namespace NuGet.Dialog
         private void OnFxComboBoxSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var combo = (ComboBox)sender;
-            if (combo.SelectedIndex == -1) {
+            if (combo.SelectedIndex == -1)
+            {
                 return;
             }
 
@@ -559,7 +563,7 @@ namespace NuGet.Dialog
 
             // persist the option to VS settings store
             _providerSettings.IncludePrereleasePackages = includePrerelease;
-            
+
             // set the flags on all providers
             foreach (PackagesProviderBase provider in explorer.Providers)
             {
@@ -646,19 +650,19 @@ namespace NuGet.Dialog
 
         protected override void OnContentRendered(EventArgs e)
         {
- 	         base.OnContentRendered(e);
+            base.OnContentRendered(e);
 #if !VS10
-             var searchControlParent = explorer.SearchControlParent as DependencyObject;
+            var searchControlParent = explorer.SearchControlParent as DependencyObject;
 #else
-             var searchControlParent = explorer;
+            var searchControlParent = explorer;
 #endif
-             var element = (TextBox)searchControlParent.FindDescendant<TextBox>();
-             if (element != null && !String.IsNullOrEmpty(_searchText))
-             {
-                 var selectedProvider = explorer.SelectedProvider as PackagesProviderBase;
-                 selectedProvider.SuppressLoad = false;
-                 element.Text = _searchText;
-             }
+            var element = (TextBox)searchControlParent.FindDescendant<TextBox>();
+            if (element != null && !String.IsNullOrEmpty(_searchText))
+            {
+                var selectedProvider = explorer.SelectedProvider as PackagesProviderBase;
+                selectedProvider.SuppressLoad = false;
+                element.Text = _searchText;
+            }
         }
     }
 }

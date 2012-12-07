@@ -231,10 +231,10 @@ namespace NuGet
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to suppress any exception that we may encounter.")]
-        public IEnumerable<IPackage> GetUpdates(IEnumerable<IPackage> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFramework)
+        public IEnumerable<IPackage> GetUpdates(IEnumerable<IPackage> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFrameworks)
         {
             // GetUpdatesCore returns all updates. We'll allow the extension method to determine if we need to collapse based on allVersion.
-            var tasks = _repositories.Select(p => Task.Factory.StartNew(state => p.GetUpdates(packages, includePrerelease, includeAllVersions, targetFramework), p)).ToArray();
+            var tasks = _repositories.Select(p => Task.Factory.StartNew(state => p.GetUpdates(packages, includePrerelease, includeAllVersions, targetFrameworks), p)).ToArray();
 
             try
             {

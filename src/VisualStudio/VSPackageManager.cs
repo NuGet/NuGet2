@@ -1382,7 +1382,7 @@ namespace NuGet.VisualStudio
         {
             base.OnUninstalled(e);
 
-            _deleteOnRestartManager.MarkPackageDirectoryForDeletion(e.Package, createZipPackageFromPath: path => new ZipPackage(path));
+            _deleteOnRestartManager.MarkPackageDirectoryForDeletion(e.Package);
         }
     }
 }

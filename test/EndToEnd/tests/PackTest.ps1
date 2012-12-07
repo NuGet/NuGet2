@@ -1,4 +1,4 @@
-function Test-PackFromProject {
+function NoTest-PackFromProject {
     param(
         $context
     )
@@ -27,7 +27,7 @@ function Test-PackFromProject {
     Assert-AreEqual "$($p.Name).dll" $assemblies[0].Name
 }
 
-function Test-PackFromProjectUsesInstalledPackagesAsDependencies {
+function NoTest-PackFromProjectUsesInstalledPackagesAsDependencies {
     param(
         $context
     )
@@ -47,13 +47,13 @@ function Test-PackFromProjectUsesInstalledPackagesAsDependencies {
 
     Assert-NotNull $dependencySets
     Assert-AreEqual 1 $dependencySets.Count
-	Assert-Null $dependencySets[0].TargetFramework
-	$dependencies = $dependencySets[0].Dependencies
+    Assert-Null $dependencySets[0].TargetFramework
+    $dependencies = $dependencySets[0].Dependencies
     Assert-AreEqual 'PackageWithContentFileAndDependency' $dependencies[0].Id
     Assert-AreEqual "1.0" $dependencies[0].VersionSpec.ToString()
 }
 
-function Test-PackFromProjectUsesVersionSpecForDependencyIfApplicable {
+function NoTest-PackFromProjectUsesVersionSpecForDependencyIfApplicable {
     $p = New-ClassLibrary
     
     $p | Install-Package PackageWithContentFileAndDependency -Source $context.RepositoryRoot
@@ -70,8 +70,8 @@ function Test-PackFromProjectUsesVersionSpecForDependencyIfApplicable {
 
     Assert-NotNull $dependencySets
     Assert-AreEqual 1 $dependencySets.Count
-	Assert-Null $dependencySets[0].TargetFramework
-	$dependencies = $dependencySets[0].Dependencies
+    Assert-Null $dependencySets[0].TargetFramework
+    $dependencies = $dependencySets[0].Dependencies
     Assert-AreEqual 'PackageWithContentFileAndDependency' $dependencies[0].Id
     Assert-AreEqual "[1.0, 2.5)" $dependencies[0].VersionSpec.ToString()
 }

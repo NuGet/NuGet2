@@ -181,8 +181,8 @@ namespace NuGet
             string targetFrameworkString = String.Join("|", shortFrameworkNames);
 
             var searchParameters = new Dictionary<string, object> {
-                { "searchTerm", "'" + Escape(searchTerm) + "'" },
-                { "targetFramework", "'" + Escape(targetFrameworkString) + "'" },
+                { "searchTerm", "'" + UrlEncodeOdataParameter(searchTerm) + "'" },
+                { "targetFramework", "'" + UrlEncodeOdataParameter(targetFrameworkString) + "'" },
             };
 
             if (SupportsPrereleasePackages)
@@ -204,7 +204,7 @@ namespace NuGet
             }
 
             var serviceParameters = new Dictionary<string, object> {
-                { "id", "'" + Escape(packageId) + "'" }
+                { "id", "'" + UrlEncodeOdataParameter(packageId) + "'" }
             };
 
             // Create a query for the search service method
@@ -212,25 +212,25 @@ namespace NuGet
             return new SmartDataServiceQuery<DataServicePackage>(Context, query);
         }
 
-        public IEnumerable<IPackage> GetUpdates(IEnumerable<IPackage> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFramework)
+        public IEnumerable<IPackage> GetUpdates(IEnumerable<IPackage> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFrameworks)
         {
             if (!Context.SupportsServiceMethod(GetUpdatesSvcMethod))
             {
                 // If there's no search method then we can't filter by target framework
-                return PackageRepositoryExtensions.GetUpdatesCore(this, packages, includePrerelease, includeAllVersions, targetFramework);
+                return PackageRepositoryExtensions.GetUpdatesCore(this, packages, includePrerelease, includeAllVersions, targetFrameworks);
             }
 
             // Pipe all the things!
             string ids = String.Join("|", packages.Select(p => p.Id));
             string versions = String.Join("|", packages.Select(p => p.Version.ToString()));
-            string targetFrameworkValue = targetFramework.IsEmpty() ? "" : String.Join("|", targetFramework.Select(VersionUtility.GetShortFrameworkName));
+            string targetFrameworksValue = targetFrameworks.IsEmpty() ? "" : String.Join("|", targetFrameworks.Select(VersionUtility.GetShortFrameworkName));
 
             var serviceParameters = new Dictionary<string, object> {
                 { "packageIds", "'" + ids + "'" },
                 { "versions", "'" + versions + "'" },
                 { "includePrerelease", ToString(includePrerelease) },
                 { "includeAllVersions", ToString(includeAllVersions) },
-                { "targetFrameworks", "'" + Escape(targetFrameworkValue) + "'" },
+                { "targetFrameworks", "'" + UrlEncodeOdataParameter(targetFrameworksValue) + "'" },
                
             };
 
@@ -253,15 +253,14 @@ namespace NuGet
             });
         }
 
-        /// <summary>
-        /// Escapes single quotes in the value by replacing them with two single quotes.
-        /// </summary>
-        private static string Escape(string value)
+        private static string UrlEncodeOdataParameter(string value)
         {
-            // REVIEW: Couldn't find another way to do this with odata
             if (!String.IsNullOrEmpty(value))
             {
-                return value.Replace("'", "''");
+                // OData requires that a single quote MUST be escaped as 2 single quotes.
+                // In .NET 4.5, Uri.EscapeDataString() escapes single quote as %27. Thus we must replace %27 with 2 single quotes.
+                // In .NET 4.0, Uri.EscapeDataString() doesn't escape single quote. Thus we must replace it with 2 single quotes.
+                return Uri.EscapeDataString(value).Replace("'", "''").Replace("%27", "''");
             }
 
             return value;

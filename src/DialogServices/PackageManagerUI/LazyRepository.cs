@@ -63,9 +63,9 @@ namespace NuGet.Dialog.Providers
             return Repository.FindPackagesById(packageId);
         }
 
-        public IEnumerable<IPackage> GetUpdates(IEnumerable<IPackage> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFramework)
+        public IEnumerable<IPackage> GetUpdates(IEnumerable<IPackage> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFrameworks)
         {
-            return Repository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFramework);
+            return Repository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFrameworks);
         }
 
         public IDisposable StartOperation(string operation)

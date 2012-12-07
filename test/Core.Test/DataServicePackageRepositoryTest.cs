@@ -78,7 +78,7 @@ namespace NuGet.Test
                        // Assert
                        Assert.Equal("Search", entitySet);
                        Assert.Equal(2, parameters.Count);
-                       Assert.Equal("'dante''s inferno'", parameters["searchTerm"]);
+                       Assert.Equal("'dante''s%20inferno'", parameters["searchTerm"]);
                        Assert.Equal("''", parameters["targetFramework"]);
                    })
                    .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object);
@@ -102,8 +102,8 @@ namespace NuGet.Test
                        // Assert
                        Assert.Equal("Search", entitySet);
                        Assert.Equal(2, parameters.Count);
-                       Assert.Equal("'dante''s inferno'", parameters["searchTerm"]);
-                       Assert.Equal("'net40|sl40|wp|netmf11'", parameters["targetFramework"]);
+                       Assert.Equal("'dante''s%20inferno'", parameters["searchTerm"]);
+                       Assert.Equal("'net40%7Csl40%7Cwp%7Cnetmf11'", parameters["targetFramework"]);
                    })
                    .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object);
 
@@ -132,8 +132,8 @@ namespace NuGet.Test
                        // Assert
                        Assert.Equal("Search", entitySet);
                        Assert.Equal(3, parameters.Count);
-                       Assert.Equal("'dante''s inferno'", parameters["searchTerm"]);
-                       Assert.Equal("'net40|sl40|wp|netmf11'", parameters["targetFramework"]);
+                       Assert.Equal("'dante''s%20inferno'", parameters["searchTerm"]);
+                       Assert.Equal("'net40%7Csl40%7Cwp%7Cnetmf11'", parameters["targetFramework"]);
                        Assert.Equal("true", parameters["includePrerelease"]);
                    })
                    .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object)
@@ -146,6 +146,48 @@ namespace NuGet.Test
                 VersionUtility.ParseFrameworkName("sl3-wp").FullName,
                 VersionUtility.ParseFrameworkName("netmf11").FullName,
             }, allowPrereleaseVersions: true);
+
+            context.Verify();
+        }
+
+        [Fact]
+        public void UpdatesMethodWithPortableFrameworkEncodesTheValueCorrectly()
+        {
+            // Arrange
+            var client = new Mock<IHttpClient>();
+            var context = new Mock<IDataServiceContext>();
+            var repository = new Mock<DataServicePackageRepository>(client.Object) { CallBase = true };
+            repository.Object.Context = context.Object;
+            context.Setup(m => m.SupportsServiceMethod("GetUpdates")).Returns(true);
+            context.Setup(m => m.SupportsProperty("IsAbsoluteLatestVersion")).Returns(true);
+            context.Setup(m => m.CreateQuery<DataServicePackage>(It.IsAny<string>(), It.IsAny<IDictionary<string, object>>()))
+                   .Callback<string, IDictionary<string, object>>((entitySet, parameters) =>
+                   {
+                       // Assert
+                       Assert.Equal("GetUpdates", entitySet);
+                       Assert.Equal(5, parameters.Count);
+                       Assert.Equal("'TaylorSwift'", parameters["packageIds"]);
+                       Assert.Equal("'1.0-alpha'", parameters["versions"]);
+                       Assert.Equal("true", parameters["includePrerelease"]);
+                       Assert.Equal("false", parameters["includeAllVersions"]);
+                       Assert.Equal("'wp%7Cportable-net45%2Bwin80'", parameters["targetFrameworks"]);
+                   })
+                   .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object)
+                   .Verifiable();
+
+            var package = PackageUtility.CreatePackage("TaylorSwift", "1.0-alpha");
+
+            // Act
+            repository.Object.GetUpdates(
+                new [] { package },
+                includePrerelease: true,
+                includeAllVersions: false,
+                targetFrameworks: new [] 
+                    {
+                        VersionUtility.ParseFrameworkName("sl3-wp"),
+                        VersionUtility.ParseFrameworkName("portable-net45+win8")
+                    }
+            );
 
             context.Verify();
         }

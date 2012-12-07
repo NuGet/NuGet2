@@ -20,20 +20,20 @@ $generatePackagesExePath = Join-Path $currentPath "GenerateTestPackages.exe"
 if (-not (Test-Path $generatePackagesExePath)) 
 {
     $toolsPath = "$nugetRoot\Tools"
-	$generatePackagesProject = Join-Path $toolsPath NuGet\GenerateTestPackages\GenerateTestPackages.csproj
-	$generatePackagesExePath = Join-Path $toolsPath NuGet\GenerateTestPackages\bin\Debug\GenerateTestPackages.exe
+    $generatePackagesProject = Join-Path $toolsPath NuGet\GenerateTestPackages\GenerateTestPackages.csproj
+    $generatePackagesExePath = Join-Path $toolsPath NuGet\GenerateTestPackages\bin\Debug\GenerateTestPackages.exe
 }
 
 $nugetExePath = Join-Path $currentPath "NuGet.exe"
 
 if (!(Test-Path $nugetExePath)) 
 {
-	$nugetExePath = "$nugetRoot\src\CommandLine\bin\Debug\NuGet.exe"
+    $nugetExePath = "$nugetRoot\src\CommandLine\bin\Debug\NuGet.exe"
 }
 
 if (!(Test-Path $nugetExePath)) 
 {
-	$nugetExePath = "$nugetRoot\src\CommandLine\bin\Debug11\NuGet.exe"
+    $nugetExePath = "$nugetRoot\src\CommandLine\bin\Debug11\NuGet.exe"
 }
 
 $msbuildPath = Join-Path $env:windir Microsoft.NET\Framework\v4.0.30319\msbuild
@@ -92,7 +92,6 @@ function global:Run-Test {
     
     $testRunId = New-Guid
     $testRunOutputPath = Join-Path $testOutputPath $testRunId
-    $testRunResultsFile = Join-Path $testRunOutputPath Results.html
     $testLogFile = Join-Path $testRunOutputPath log.txt
     
     # Create the output folder
@@ -113,13 +112,11 @@ function global:Run-Test {
     Get-ChildItem $testPath -Filter $File | %{ 
         . $_.FullName
     } 
-    
-    # Get all of the the tests functions
-    $allTests = Get-ChildItem function:\Test*
-    
+        
     # If no tests were specified just run all
     if(!$test) {
-        $tests = $allTests
+        # Get all of the the tests functions
+        $tests = Get-ChildItem function:\Test*
     }
     else {
         $tests = @(Get-ChildItem "function:\Test-$Test")
@@ -129,7 +126,7 @@ function global:Run-Test {
         } 
     }
     
-    $results = @()
+    $results = @{}
     
     # Add a reference to the msbuild assembly in case it isn't there
     Add-Type -AssemblyName "Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
@@ -138,82 +135,100 @@ function global:Run-Test {
     [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "false")
     
     try {
-        # Run all tests
-        $tests | %{ 
-            # Trim the Test- prefix
-            $name = $_.Name.Substring(5)
+        for ($counter = 0; $counter -le 1; $counter++) {
+            # Run all tests
+            $tests | %{ 
+                # Trim the Test- prefix
+                $name = $_.Name.Substring(5)
             
-            "Running Test $name..."
+                "Running Test $name..."
 
-            # Write to log file as we run tests
-            "Running Test $name..." >> $testLogFile
+                # Write to log file as we run tests
+                "Running Test $name..." >> $testLogFile
             
-            $repositoryPath = Join-Path $testRepositoryPath $name
+                $repositoryPath = Join-Path $testRepositoryPath $name
 
-            $values = @{
-                RepositoryRoot = $testRepositoryPath
-                TestRoot = $repositoryPath
-                RepositoryPath = Join-Path $repositoryPath Packages
-                NuGetExe = $nugetExePath
-            }
-            
-            if(Test-Path $repositoryPath) {            
-                pushd 
-                Set-Location $repositoryPath
-                # Generate any packages that might be in the repository dir
-				Get-ChildItem $repositoryPath\* -Include *.dgml,*.nuspec | %{
-                    & $generatePackagesExePath $_.FullName | Out-Null
-                } 
-                popd
-            }
-            
-            $context = New-Object PSObject -Property $values
-
-            try {
-                & $_ $context
-                
-                Write-Host -ForegroundColor DarkGreen "Test $name Passed"
-                
-                $results += New-Object PSObject -Property @{ 
-                    Test = $name
-                    Error = $null
+                $values = @{
+                    RepositoryRoot = $testRepositoryPath
+                    TestRoot = $repositoryPath
+                    RepositoryPath = Join-Path $repositoryPath Packages
+                    NuGetExe = $nugetExePath
                 }
-            }
-            catch {                     
-                if($_.Exception.Message.StartsWith("SKIP")) {
-                    $message = $_.Exception.Message.Substring(5).Trim()
-                    $results += New-Object PSObject -Property @{ 
+            
+                if(Test-Path $repositoryPath) {            
+                    pushd 
+                    Set-Location $repositoryPath
+                    # Generate any packages that might be in the repository dir
+                    Get-ChildItem $repositoryPath\* -Include *.dgml,*.nuspec | %{
+                        & $generatePackagesExePath $_.FullName | Out-Null
+                    } 
+                    popd
+                }
+            
+                $context = New-Object PSObject -Property $values
+
+                try {
+                    & $_ $context
+                
+                    Write-Host -ForegroundColor DarkGreen "Test $name Passed"
+                
+                    $results[$name] = New-Object PSObject -Property @{ 
                         Test = $name
-                        Error = $message
-                        Skipped = $true
+                        Error = $null
+                    }
+                }
+                catch {                     
+                    if($_.Exception.Message.StartsWith("SKIP")) {
+                        $message = $_.Exception.Message.Substring(5).Trim()
+                        $results[$name] = New-Object PSObject -Property @{ 
+                            Test = $name
+                            Error = $message
+                            Skipped = $true
+                        }
+
+                        Write-Warning "$name was Skipped: $message"
+                    }
+                    else {                    
+                        $results[$name] = New-Object PSObject -Property @{ 
+                            Test = $name
+                            Error = $_
+                        }
+                        Write-Host -ForegroundColor Red "$($_.InvocationInfo.InvocationName) Failed: $_"
+                    }
+                }
+                finally {
+                    try {           
+                        # Clear the cache after running each test
+                        [NuGet.MachineCache]::Default.Clear()
+                    }
+                    catch {
+                        # The type might not be loaded so don't fail if it isn't
                     }
 
-                    Write-Warning "$name was Skipped: $message"
-                }
-                else {                    
-                    $results += New-Object PSObject -Property @{ 
-                        Test = $name
-                        Error = $_
+                    if($tests.Count -gt 1) {
+                        $dte.Solution.Close()
                     }
-                    Write-Host -ForegroundColor Red "$($_.InvocationInfo.InvocationName) Failed: $_"
-                }
-            }
-            finally {
-                try {           
-                    # Clear the cache after running each test
-                    [NuGet.MachineCache]::Default.Clear()
-                }
-                catch {
-                    # The type might not be loaded so don't fail if it isn't
-                }
-
-                if($tests.Count -gt 1) {
-                    $dte.Solution.Close()
-                }
          
-                # Cleanup the output from running the generate packages tool
-                Remove-Item (Join-Path $repositoryPath Packages) -Force -Recurse -ErrorAction SilentlyContinue
-                Remove-Item (Join-Path $repositoryPath Assemblies) -Force -Recurse -ErrorAction SilentlyContinue
+                    # Cleanup the output from running the generate packages tool
+                    Remove-Item (Join-Path $repositoryPath Packages) -Force -Recurse -ErrorAction SilentlyContinue
+                    Remove-Item (Join-Path $repositoryPath Assemblies) -Force -Recurse -ErrorAction SilentlyContinue
+                }
+            }
+
+            # After the first run, rerun the failed tests if any
+
+            if ($counter -eq 0)
+            {
+                $failedTests = @($results.GetEnumerator() | ? { $_.Value.Error -and !$_.Value.Skipped } | % { $_.Name })
+                if ($failedTests -gt 0)
+                {
+                    Write-Warning "There are $($failedTests.Count) failed tests. Re-running them one more time..."
+                    $tests = @($failedTests | % { Get-ChildItem "function:\Test-$_" })
+                }
+                else 
+                {
+                    break;
+                }
             }
         }
     }
@@ -222,9 +237,9 @@ function global:Run-Test {
         rm function:\Test*
         
         # Set focus back to powershell
-        $window.SetFocus()              
+        $window.SetFocus()
                
-        Write-TestResults $testRunId $results $testRunResultsFile $LaunchResultsOnFailure
+        Write-TestResults $testRunId $results.Values $testRunOutputPath $LaunchResultsOnFailure
 
         # Clear out the setting when the tests are done running
         [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "")
@@ -235,13 +250,75 @@ function Write-TestResults {
     param(
         $TestRunId,
         $Results,
-        $Path,
+        $ResultsDirectory,
         $LaunchResultsOnFailure
     )
 
     # Show failed tests first
     $Results = $Results | Sort-Object -Property Error -Descending
-    
+
+    $HtmlResultPath = Join-Path $ResultsDirectory "Results.html"
+    Write-HtmlResults $TestRunId $Results $HtmlResultPath
+
+    $TextResultPath = Join-Path $ResultsDirectory "TestResults.txt"
+    Write-TextResults $TestRunId $Results $TextResultPath
+
+    $pass = 0
+    $fail = 0
+    $skipped = 0
+
+    $rows = $Results | % { 
+        if($_.Skipped) {
+            $skipped++
+        }
+        elseif($_.Error) {
+            $fail++
+        }
+        else {
+            $pass++
+        }
+    }
+
+    Write-Host "Ran $($Results.Count) Tests, $pass Passed, $fail Failed, $skipped Skipped. See '$HtmlResultPath' or '$TextResultPath' for more details."
+
+    if (($fail -gt 0) -and $LaunchResultsOnFailure -and ($Results.Count -gt 1)) 
+    {
+        [System.Diagnostics.Process]::Start($HtmlResultPath)
+    }
+}
+
+function Write-TextResults
+{
+    param(
+        $TestRunId,
+        $Results,
+        $Path
+    )
+
+    $rows = $Results | % { 
+        $status = 'Passed'
+        
+        if($_.Skipped) {
+            $status = 'Skipped'
+        }
+        elseif($_.Error) {
+            $status = 'Failed'
+        }
+
+        "$status $($_.Test) $($_.Error)"
+    }
+
+    $rows | Out-File $Path | Out-Null
+}
+
+function Write-HtmlResults
+{
+    param(
+        $TestRunId,
+        $Results,
+        $Path
+    )
+
     $resultsTemplate = "<html>
     <head>
         <title>
@@ -366,12 +443,6 @@ function Write-TestResults {
     }
 
     [String]::Format($resultsTemplate, $TestRunId, (Split-Path $Path), $Results.Count, $pass, $fail, $skipped, [String]::Join("", $rows)) | Out-File $Path | Out-Null
-    Write-Host "Ran $($Results.Count) Tests, $pass Passed, $fail Failed, $skipped Skipped. See $Path for more details"
-
-    if (($fail -gt 0) -and $LaunchResultsOnFailure -and ($Results.Count -gt 1)) 
-    {
-        [System.Diagnostics.Process]::Start($Path)
-    }
 }
 
 function Get-PackageRepository
