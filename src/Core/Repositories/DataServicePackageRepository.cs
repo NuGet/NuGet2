@@ -181,8 +181,8 @@ namespace NuGet
             string targetFrameworkString = String.Join("|", shortFrameworkNames);
 
             var searchParameters = new Dictionary<string, object> {
-                { "searchTerm", "'" + UrlEncodeSafe(searchTerm) + "'" },
-                { "targetFramework", "'" + UrlEncodeSafe(targetFrameworkString) + "'" },
+                { "searchTerm", "'" + UrlEncodeOdataParameter(searchTerm) + "'" },
+                { "targetFramework", "'" + UrlEncodeOdataParameter(targetFrameworkString) + "'" },
             };
 
             if (SupportsPrereleasePackages)
@@ -204,7 +204,7 @@ namespace NuGet
             }
 
             var serviceParameters = new Dictionary<string, object> {
-                { "id", "'" + UrlEncodeSafe(packageId) + "'" }
+                { "id", "'" + UrlEncodeOdataParameter(packageId) + "'" }
             };
 
             // Create a query for the search service method
@@ -230,7 +230,7 @@ namespace NuGet
                 { "versions", "'" + versions + "'" },
                 { "includePrerelease", ToString(includePrerelease) },
                 { "includeAllVersions", ToString(includeAllVersions) },
-                { "targetFrameworks", "'" + UrlEncodeSafe(targetFrameworksValue) + "'" },
+                { "targetFrameworks", "'" + UrlEncodeOdataParameter(targetFrameworksValue) + "'" },
                
             };
 
@@ -253,7 +253,7 @@ namespace NuGet
             });
         }
 
-        private static string UrlEncodeSafe(string value)
+        private static string UrlEncodeOdataParameter(string value)
         {
             if (!String.IsNullOrEmpty(value))
             {
