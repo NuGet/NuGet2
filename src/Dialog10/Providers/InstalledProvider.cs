@@ -49,7 +49,7 @@ namespace NuGet.Dialog.Providers
             _targetFramework = _project.GetTargetFrameworkName();
             _userNotifierServices = providerServices.UserNotifierServices;
             _packageRestoreManager = packageRestoreManager;
-            _packageRestoreManager.PackagesMissingStatusChanged += OnMissPackagesChanged;
+            _packageRestoreManager.PackagesMissingStatusChanged += OnMissingPackagesChanged;
         }
 
         protected IVsPackageManager PackageManager
@@ -154,7 +154,7 @@ namespace NuGet.Dialog.Providers
                 return false;
             }
 
-            ShowProgressWindow();
+            ShowProgressWindow(cancelable: false);
             UninstallPackageFromProject(_project, item, (bool)removeDependencies);
             HideProgressWindow();
             return true;
@@ -171,7 +171,7 @@ namespace NuGet.Dialog.Providers
             IList<IPackage> dependents = dependentsWalker.GetDependents(package).ToList();
             if (dependents.Count > 0)
             {
-                ShowProgressWindow();
+                ShowProgressWindow(cancelable: false);
                 throw new InvalidOperationException(
                     String.Format(
                         CultureInfo.CurrentCulture,
@@ -305,7 +305,7 @@ namespace NuGet.Dialog.Providers
             }
         }
 
-        protected override void OnExecuteCompleted(PackageItem item)
+        protected override void OnExecuteSuccessfullyCompleted(PackageItem item)
         {
             if (SelectedNode != null)
             {
@@ -315,7 +315,7 @@ namespace NuGet.Dialog.Providers
             }
             else
             {
-                base.OnExecuteCompleted(item);
+                base.OnExecuteSuccessfullyCompleted(item);
             }
         }
 
@@ -349,7 +349,7 @@ namespace NuGet.Dialog.Providers
             return Resources.Dialog_UninstallProgress + package.ToString();
         }
 
-        private void OnMissPackagesChanged(object sender, PackagesMissingStatusEventArgs e)
+        private void OnMissingPackagesChanged(object sender, PackagesMissingStatusEventArgs e)
         {
             // after packages are restored, refresh the installed tab to show those packages.
             if (!e.PackagesMissing)
@@ -366,7 +366,7 @@ namespace NuGet.Dialog.Providers
             base.Dispose();
 
             // to avoid memory leak, we need to unsubscribe from the event
-            _packageRestoreManager.PackagesMissingStatusChanged -= OnMissPackagesChanged;
+            _packageRestoreManager.PackagesMissingStatusChanged -= OnMissingPackagesChanged;
         }
     }
 }

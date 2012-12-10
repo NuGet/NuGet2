@@ -311,12 +311,8 @@ namespace NuGet.Dialog.Providers
             AddSearchNode();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Globalization",
-            "CA1303:Do not pass literals as localized parameters",
-            MessageId = "NuGet.Dialog.Providers.PackagesProviderBase.WriteLineToOutputWindow(System.String)",
-            Justification = "No need to localize the --- strings"),
-        System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "NuGet.Dialog.Providers.PackagesProviderBase.WriteLineToOutputWindow(System.String)", Justification = "No need to localize the --- strings")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public virtual void Execute(PackageItem item)
         {
             if (OperationCoordinator.IsBusy)
@@ -329,14 +325,11 @@ namespace NuGet.Dialog.Providers
 
             _readmeFile = null;
             _originalPackageId = item.Id;
-            _progressProvider.ProgressAvailable += OnProgressAvailable;
 
             _uiCulture = System.Threading.Thread.CurrentThread.CurrentUICulture;
             _culture = System.Threading.Thread.CurrentThread.CurrentCulture;
 
             _failedProjects = new Dictionary<Project, Exception>();
-
-            ClearProgressMessages();
 
             SaveExpandedNodes();
 
@@ -348,11 +341,6 @@ namespace NuGet.Dialog.Providers
             // write an introductory sentence before every operation starts to make the console easier to read
             string progressMessage = GetProgressMessage(item.PackageIdentity);
             WriteLineToOutputWindow("------- " + progressMessage + " -------");
-        }
-
-        private void OnProgressAvailable(object sender, ProgressEventArgs e)
-        {
-            _providerServices.ProgressWindow.ShowProgress(e.Operation, e.PercentComplete);
         }
 
         private void OnRunWorkerDoWork(object sender, DoWorkEventArgs e)
@@ -371,36 +359,33 @@ namespace NuGet.Dialog.Providers
         {
             OperationCoordinator.IsBusy = false;
 
-            _progressProvider.ProgressAvailable -= OnProgressAvailable;
+            CloseProgressWindow();
 
             if (e.Error == null)
             {
-                if (e.Cancelled)
+                if (!e.Cancelled)
                 {
-                    CloseProgressWindow();
-                }
-                else
-                {
-                    OnExecuteCompleted((PackageItem)e.Result);
-                    _providerServices.ProgressWindow.SetCompleted(successful: true);
+                    OnExecuteSuccessfullyCompleted((PackageItem)e.Result);
                     OpenReadMeFile();
-
                     CollapseNodes();
                 }
             }
             else
             {
-                // show error message in the progress window in case of error
-                Log(MessageLevel.Error, ExceptionUtility.Unwrap(e.Error).Message);
-                _providerServices.ProgressWindow.SetCompleted(successful: false);
+                if (e.Error is OperationCanceledException)
+                {
+                    Log(MessageLevel.Info, "Operation canceled by users.");
+                }
+                else
+                {
+                    string message = ExceptionUtility.Unwrap(e.Error).Message;
+                    Log(MessageLevel.Error, message);
+                    MessageHelper.ShowErrorMessage(message, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
+                }
             }
 
             if (_failedProjects != null && _failedProjects.Count > 0)
             {
-                // BUG 1401: if we are going to show the Summary window,
-                // then hide the progress window.
-                _providerServices.ProgressWindow.Close();
-
                 _providerServices.UserNotifierServices.ShowSummaryWindow(_failedProjects);
             }
 
@@ -414,19 +399,14 @@ namespace NuGet.Dialog.Providers
             }
         }
 
-        private void ClearProgressMessages()
+        protected void ShowProgressWindow(bool cancelable)
         {
-            _providerServices.ProgressWindow.ClearMessages();
-        }
-
-        protected void ShowProgressWindow()
-        {
-            _providerServices.ProgressWindow.Show(ProgressWindowTitle, PackageManagerWindow.CurrentInstance);
+            _providerServices.ProgressWindow.Show(ProgressWindowTitle, cancelable);
         }
 
         protected void HideProgressWindow()
         {
-            _providerServices.ProgressWindow.Hide();
+            CloseProgressWindow();
         }
 
         protected void CloseProgressWindow()
@@ -471,7 +451,7 @@ namespace NuGet.Dialog.Providers
             return true;
         }
 
-        protected virtual void OnExecuteCompleted(PackageItem item)
+        protected virtual void OnExecuteSuccessfullyCompleted(PackageItem item)
         {
             // After every operation, just update the status of all packages in the current node.
             // Strictly speaking, this is not required; only affected packages need to be updated.
@@ -505,26 +485,22 @@ namespace NuGet.Dialog.Providers
         {
             string formattedMessage = String.Format(CultureInfo.CurrentCulture, message, args);
 
+            WriteLineToOutputWindow(formattedMessage);
+
             // for the dialog we ignore debug messages
             if (_providerServices.ProgressWindow.IsOpen && level != MessageLevel.Debug)
             {
-                _providerServices.ProgressWindow.AddMessage(level, formattedMessage);
+                bool canceled = _providerServices.ProgressWindow.UpdateMessageAndQueryStatus(formattedMessage);
+                if (canceled)
+                {
+                    throw new OperationCanceledException();
+                }
             }
-
-            WriteLineToOutputWindow(formattedMessage);
         }
 
         protected void WriteLineToOutputWindow(string message = "")
         {
             _outputConsole.Value.WriteLine(message);
-        }
-
-        protected void ShowProgress(string operation, int percentComplete)
-        {
-            if (_providerServices.ProgressWindow.IsOpen)
-            {
-                _providerServices.ProgressWindow.ShowProgress(operation, percentComplete);
-            }
         }
 
         protected void RegisterPackageOperationEvents(IPackageManager packageManager, IProjectManager projectManager)
@@ -680,7 +656,7 @@ namespace NuGet.Dialog.Providers
                     return false;
                 }
 
-                ShowProgressWindow();
+                ShowProgressWindow(cancelable: true);
             }
 
             return true;

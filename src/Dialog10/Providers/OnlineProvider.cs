@@ -164,7 +164,7 @@ namespace NuGet.Dialog.Providers
 
         protected bool CheckPSScriptAndShowLicenseAgreement(PackageItem item, IVsPackageManager packageManager, out IList<PackageOperation> operations)
         {
-            ShowProgressWindow();
+            ShowProgressWindow(cancelable: true);
 
             CheckInstallPSScripts(
                 item.PackageIdentity, 

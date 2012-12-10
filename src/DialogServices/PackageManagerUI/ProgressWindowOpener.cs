@@ -1,310 +1,127 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Threading;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.PackageManagerUI
 {
     public sealed class ProgressWindowOpener : IProgressWindowOpener
     {
-        private static readonly TimeSpan DelayInterval = TimeSpan.FromMilliseconds(500);
-
-        private ProgressDialog _currentWindow;
-        private readonly Dispatcher _uiDispatcher;
-        private DateTime _lastShowTime = DateTime.MinValue;
-
-        private readonly Lazy<DispatcherTimer> _closeTimer;
-        private readonly Lazy<DispatcherTimer> _showTimer;
+        private IVsThreadedWaitDialog2 _currentWindow;
+        private readonly IVsThreadedWaitDialogFactory _waitDialogFactory;
+        private bool _cancelable;
+        private string _title;
 
         public ProgressWindowOpener()
+            : this(ServiceLocator.GetGlobalService<SVsThreadedWaitDialogFactory, IVsThreadedWaitDialogFactory>())
         {
-            _uiDispatcher = Dispatcher.CurrentDispatcher;
-
-            _showTimer = new Lazy<DispatcherTimer>(() =>
-            {
-                var timer = new DispatcherTimer
-                {
-                    Interval = DelayInterval
-                };
-                timer.Tick += new EventHandler(OnShowTimerTick);
-                return timer;
-            });
-
-            _closeTimer = new Lazy<DispatcherTimer>(() =>
-            {
-                var timer = new DispatcherTimer();
-                timer.Tick += new EventHandler(OnCloseTimerTick);
-                return timer;
-            });
         }
 
-        private DispatcherTimer CloseTimer
+        internal ProgressWindowOpener(IVsThreadedWaitDialogFactory waitDialogFactory)
+        {
+            if (waitDialogFactory == null)
+            {
+                throw new ArgumentNullException("waitDialogFactory");
+            }
+            _waitDialogFactory = waitDialogFactory;
+        }
+
+        public bool IsOpen
         {
             get
             {
-                return _closeTimer.Value;
+                return _currentWindow != null;
             }
-        }
-
-        private bool IsPendingShow
-        {
-            get
-            {
-                return _showTimer.IsValueCreated && _showTimer.Value.IsEnabled;
-            }
-        }
-
-        private void CancelPendingShow()
-        {
-            if (_showTimer.IsValueCreated)
-            {
-                _showTimer.Value.Stop();
-            }
-        }
-
-        private void OnShowTimerTick(object sender, EventArgs e)
-        {
-            CancelPendingShow();
-
-            if (!_currentWindow.IsVisible)
-            {
-                _currentWindow.Show();
-                _lastShowTime = DateTime.Now;
-            }
-        }
-
-        private void CancelPendingClose()
-        {
-            if (_closeTimer.IsValueCreated)
-            {
-                CloseTimer.Stop();
-            }
-        }
-
-        private void OnCloseTimerTick(object sender, EventArgs e)
-        {
-            CancelPendingClose();
-            HandleClose(hideOnly: (bool)CloseTimer.Tag);
         }
 
         /// <summary>
-        /// Show the progress window with the specified title, after a delay of 500ms.
+        /// Show the progress window with the specified title and whether to show the Cancel button.
         /// </summary>
         /// <param name="title">The window title</param>
         /// <remarks>
         /// This method can be called from worker thread.
         /// </remarks>
-        public void Show(string title, Window owner)
+        public void Show(string title, bool cancelable)
         {
-            if (!_uiDispatcher.CheckAccess())
+            if (_currentWindow == null)
             {
-                // must use BeginInvoke() here to avoid blocking the worker thread
-                _uiDispatcher.BeginInvoke(new Action<string, Window>(Show), DispatcherPriority.Send, title, owner);
-                return;
-            }
-
-            if (!IsPendingShow)
-            {
-                CancelPendingClose();
-
-                if (_currentWindow == null)
+                lock (_waitDialogFactory)
                 {
-                    _currentWindow = new ProgressDialog() { Owner = owner };
-                    _currentWindow.Closed += OnWindowClosed;
+                    if (_currentWindow == null)
+                    {
+                        _waitDialogFactory.CreateInstance(out _currentWindow);
+                        _cancelable = cancelable;
+                        _title = title;
+                        ThreadHelper.Generic.Invoke(() =>
+                            {
+                                _currentWindow.StartWaitDialog(
+                                    "Manage NuGet Packages",
+                                    title,
+                                    null,
+                                    varStatusBmpAnim: null,
+                                    szStatusBarText: null,
+                                    iDelayToShowDialog: 0,
+                                    fIsCancelable: _cancelable,
+                                    fShowMarqueeProgress: true);
+                            }
+                        );
+                    }
                 }
-                _currentWindow.Title = title;
-
-                _showTimer.Value.Start();
-            }
-        }
-
-        private void OnWindowClosed(object sender, EventArgs e)
-        {
-            if (_currentWindow != null)
-            {
-                _currentWindow.Closed -= OnWindowClosed;
-                _currentWindow = null;
-            }
-        }
-
-        /// <summary>
-        /// Hide the progress window if it is open.
-        /// </summary>
-        /// <remarks>
-        /// This method can be called from worker thread.
-        /// </remarks>
-        public void Hide()
-        {
-            if (!_uiDispatcher.CheckAccess())
-            {
-                // must use BeginInvoke() here to avoid blocking the worker thread
-                _uiDispatcher.BeginInvoke(new Action(Hide), DispatcherPriority.Send);
-                return;
-            }
-
-            if (IsOpen)
-            {
-                CancelPendingShow();
-                HandleClose(hideOnly: true);
-            }
-        }
-
-        /// <summary>
-        /// This property is only logical. The dialog may not be actually visible even if 
-        /// the property returns true, due to the delay in showing.
-        /// </summary>
-        public bool IsOpen
-        {
-            get
-            {
-                return _currentWindow != null && (_currentWindow.IsVisible || IsPendingShow);
             }
         }
 
         public bool Close()
         {
-            if (IsOpen)
+            if (_currentWindow != null)
             {
-                CancelPendingShow();
-                HandleClose(hideOnly: false);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        private void HandleClose(bool hideOnly)
-        {
-            TimeSpan elapsed = DateTime.Now - _lastShowTime;
-            if (elapsed >= DelayInterval)
-            {
-                // if the dialog has been shown for more than 500ms, just close it
-                if (_currentWindow != null && _currentWindow.IsVisible)
+                lock (_waitDialogFactory)
                 {
-                    if (hideOnly)
+                    if (_currentWindow != null)
                     {
-                        _currentWindow.Hide();
-                    }
-                    else
-                    {
-                        _currentWindow.ForceClose();
+                        ThreadHelper.Generic.Invoke(() =>
+                            {
+                                int canceled;
+                                _currentWindow.EndWaitDialog(out canceled);
+                            });
+
+                        _currentWindow = null;
+                        _title = null;
+                        return true;
                     }
                 }
             }
-            else
-            {
-                CloseTimer.Tag = hideOnly;
-                // otherwise, set a timer so that we close it after it has been shown for 500ms
-                CloseTimer.Interval = DelayInterval - elapsed;
-                CloseTimer.Start();
-            }
-        }
 
-        public void SetCompleted(bool successful)
-        {
-            if (successful)
-            {
-                Close();
-            }
-            else if (_currentWindow != null)
-            {
-                _currentWindow.SetErrorState();
-            }
+            return false;
         }
 
         /// <summary>
-        /// Add a logging message to the progress window.
+        /// Add a message to the progress window.
         /// </summary>
         /// <remarks>
         /// This method can be called from worker thread.
         /// </remarks>
-        public void AddMessage(MessageLevel level, string message)
+        public bool UpdateMessageAndQueryStatus(string message)
         {
-            if (!_uiDispatcher.CheckAccess())
-            {
-                _uiDispatcher.BeginInvoke(new Action<MessageLevel, string>(AddMessage), DispatcherPriority.Send, level, message);
-                return;
-            }
-
             if (IsOpen)
             {
-                Brush messageBrush;
-
-                // select message color based on MessageLevel value.
-                // these colors match the colors in the console, which are set in MyHostUI.cs
-                if (SystemParameters.HighContrast)
+                return ThreadHelper.Generic.Invoke(() =>
                 {
-                    // Use the plain System brush
-                    messageBrush = SystemColors.ControlTextBrush;
-                }
-                else
-                {
-                    switch (level)
-                    {
-                        case MessageLevel.Debug:
-                            messageBrush = Brushes.DarkGray;
-                            break;
+                    bool canceled;
+                    _currentWindow.UpdateProgress(
+                        _title,
+                        message,
+                        String.Empty,
+                        0,
+                        0,
+                        fDisableCancel: !_cancelable,
+                        pfCanceled: out canceled);
 
-                        case MessageLevel.Error:
-                            messageBrush = Brushes.Red;
-                            break;
-
-                        case MessageLevel.Warning:
-                            messageBrush = Brushes.Magenta;
-                            break;
-
-                        default:
-                            messageBrush = Brushes.Black;
-                            break;
-                    }
-                }
-
-                _currentWindow.AddMessage(message, messageBrush);
-            }
-        }
-
-        public void ClearMessages()
-        {
-            if (!_uiDispatcher.CheckAccess())
-            {
-                _uiDispatcher.Invoke(new Action(ClearMessages), DispatcherPriority.Send);
-                return;
+                    return canceled;
+                });
             }
 
-            if (_currentWindow != null)
-            {
-                _currentWindow.ClearMessages();
-            }
-        }
-
-        public void ShowProgress(string operation, int percentComplete)
-        {
-            if (!_uiDispatcher.CheckAccess())
-            {
-                _uiDispatcher.BeginInvoke(new Action<string, int>(ShowProgress), DispatcherPriority.Send, operation, percentComplete);
-                return;
-            }
-
-            if (operation == null)
-            {
-                throw new ArgumentNullException("operation");
-            }
-
-            if (IsOpen)
-            {
-                if (percentComplete < 0)
-                {
-                    percentComplete = 0;
-                }
-                else if (percentComplete > 100)
-                {
-                    percentComplete = 100;
-                }
-
-                _currentWindow.ShowProgress(operation, percentComplete);
-            }
+            return false;
         }
     }
 }

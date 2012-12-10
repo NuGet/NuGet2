@@ -56,7 +56,7 @@ namespace NuGet.Dialog.Providers
             {
                 IList<Project> selectedProjectsList;
 
-                ShowProgressWindow();
+                ShowProgressWindow(cancelable: true);
                 bool isProjectLevel = _activePackageManager.IsProjectLevel(item.PackageIdentity);
                 if (isProjectLevel)
                 {
@@ -66,6 +66,7 @@ namespace NuGet.Dialog.Providers
                         item.PackageIdentity,
                         DetermineProjectCheckState,
                         ignored => true);
+
                     if (selectedProjects == null)
                     {
                         // user presses Cancel button on the Solution dialog
@@ -120,7 +121,7 @@ namespace NuGet.Dialog.Providers
         protected bool CheckPSScriptAndShowLicenseAgreement(
             PackageItem item, IList<Project> projects, IVsPackageManager packageManager, out IList<PackageOperation> operations)
         {
-            ShowProgressWindow();
+            ShowProgressWindow(cancelable: true);
 
             // combine the operations of all selected project
             var allOperations = new List<PackageOperation>();

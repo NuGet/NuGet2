@@ -125,7 +125,7 @@ namespace NuGet.Dialog.Providers
                 }
             }
 
-            ShowProgressWindow();
+            ShowProgressWindow(cancelable: hasInstallWork);
 
             // now install the packages that are checked
             // Bug 1357: It's crucial that we perform all installs before uninstalls
@@ -220,7 +220,7 @@ namespace NuGet.Dialog.Providers
                 return false;
             }
 
-            ShowProgressWindow();
+            ShowProgressWindow(cancelable: false);
             try
             {
                 RegisterPackageOperationEvents(PackageManager, null);
@@ -257,7 +257,7 @@ namespace NuGet.Dialog.Providers
             };
         }
 
-        protected override void OnExecuteCompleted(PackageItem item)
+        protected override void OnExecuteSuccessfullyCompleted(PackageItem item)
         {
             _lastExecutionItem = item;
             SelectedNode.PackageLoadCompleted += SelectedNode_PackageLoadCompleted;
