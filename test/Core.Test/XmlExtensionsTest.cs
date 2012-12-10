@@ -288,7 +288,7 @@ namespace NuGet.Test
             Assert.Equal(@"<tests>
   <test name=""One"" value=""foo"" />
   <!-- this is a comment -->
-</tests>".Replace("",""), result.ToString());
+</tests>", result.ToString());
         }
 
         [Fact]
