@@ -353,6 +353,45 @@ namespace NuGet.VisualStudio.Test
         }
 
         /// <summary>
+        /// Tests that when installing a solution level package, itself plus all other solution level 
+        /// packages it depends on will be added to the solution package config.
+        /// </summary>
+        [Fact]
+        public void InstallSolutionLevelPackageAllSolutionLevelPackagesAreAddedToSolutionPackageConfig()
+        {
+            // Arrange 
+            var localRepository = new MockSharedPackageRepository();
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), new MockPackageRepository());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IDeleteOnRestartManager>().Object, new Mock<VsPackageInstallerEvents>().Object);
+
+            var packageBar1 = PackageUtility.CreatePackage("bar1", "2.0",
+                dependencies: new PackageDependency[] { new PackageDependency("bar2") },
+                tools: new[] { "install.ps1" });
+            sourceRepository.AddPackage(packageBar1);
+
+            var packageBar2 = PackageUtility.CreatePackage("bar2", "2.0",
+                tools: new[] { "install.ps1" });
+            sourceRepository.AddPackage(packageBar2);
+
+            var operations = new PackageOperation[] {  
+                 new PackageOperation(packageBar1, PackageAction.Install), 
+                 new PackageOperation(packageBar2, PackageAction.Install)
+            };
+
+            // Act 
+            packageManager.InstallPackage(
+                projectManager, packageBar1, operations,
+                ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance);
+
+            // Assert
+            Assert.True(localRepository.IsReferenced("bar1", new SemanticVersion("2.0")));
+            Assert.True(localRepository.IsReferenced("bar2", new SemanticVersion("2.0")));
+        }
+
+        /// <summary>
         /// Tests that a solution level packages is not added to the solution package config
         /// if its action is Uninstall.
         /// </summary>
