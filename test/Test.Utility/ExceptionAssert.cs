@@ -6,7 +6,7 @@ namespace NuGet.Test
 {
     public static class ExceptionAssert
     {
-        private readonly string ArgumentExceptionMessageFormat = "{0}" + Environment.NewLine + "Parameter name: {1}";
+        private static readonly string ArgumentExceptionMessageFormat = "{0}" + Environment.NewLine + "Parameter name: {1}";
 
         public static void Throws<TException>(Assert.ThrowsDelegate act) where TException : Exception
         {
