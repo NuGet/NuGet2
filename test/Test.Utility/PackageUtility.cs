@@ -7,7 +7,7 @@ namespace NuGet.Test
     using System.Runtime.Versioning;
     using System.Text;
     using Moq;
-	using NuGet.Test.Utility;
+    using NuGet.Test.Utility;
 
     public class PackageUtility
     {
