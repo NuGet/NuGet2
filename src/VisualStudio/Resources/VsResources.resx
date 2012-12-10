@@ -347,4 +347,13 @@ Packages installed into Website projects will not be restored during build. Cons
   <data name="PackageRestoreSkipForSolution" xml:space="preserve">
     <value>Skipped reinstalling package '{0}' because the package does not exist in the package source.</value>
   </data>
+  <data name="FailedToRemoveReference" xml:space="preserve">
+    <value>Case insensitive search for reference '{0}', to be removed, returned more than 1 match. Request could not be performed.</value>
+  </data>
+  <data name="Warning_FailedToFindMatchForRemoveReference" xml:space="preserve">
+    <value>Failed to find match for removing reference '{0}'.</value>
+  </data>
+  <data name="Warning_NoExactMatchForReference" xml:space="preserve">
+    <value>No exact match found for removing reference '{0}'. Trying case-insensitive search...</value>
+  </data>
 </root>
