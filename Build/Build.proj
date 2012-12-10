@@ -132,6 +132,7 @@
     </Target>
 
     <Target Name="GoMono" DependsOnTargets="RestorePackages; BuildMono; RunTests" />
+    <Target Name="GoMonoNoTests" DependsOnTargets="RestorePackages; BuildMono" />
 
     <Target Name="CheckFxCop">
         <Error

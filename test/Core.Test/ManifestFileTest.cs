@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NuGet.Test.Utility;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Xunit;
 
@@ -11,7 +12,7 @@ namespace NuGet.Test
         public void ManifestFileReturnsNoValidationResultsIfSourceAndTargetPathAreValid()
         {
             // Arrange
-            var manifestFile = new ManifestFile { Source = @"bin\release\MyLib.dll", Target = @"lib" };
+            var manifestFile = new ManifestFile { Source = PathFixUtility.FixPath(@"bin\release\MyLib.dll"), Target = @"lib" };
             var validationContext = new ValidationContext(new object(), null, null);
 
             // Act

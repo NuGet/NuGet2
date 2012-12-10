@@ -7,6 +7,7 @@ namespace NuGet.Test
     using System.Runtime.Versioning;
     using System.Text;
     using Moq;
+	using NuGet.Test.Utility;
 
     public class PackageUtility
     {
@@ -271,7 +272,7 @@ namespace NuGet.Test
             var files = new List<IPackageFile>();
             foreach (var fileName in fileNames)
             {
-                string path = Path.Combine(directory, fileName);
+                string path = PathFixUtility.FixPath(Path.Combine(directory, fileName));
                 var mockFile = new Mock<IPackageFile>();
                 mockFile.Setup(m => m.Path).Returns(path);
                 mockFile.Setup(m => m.GetStream()).Returns(() => new MemoryStream(Encoding.Default.GetBytes(path)));

@@ -5,6 +5,7 @@ using System.Security;
 using Moq;
 using NuGet.Test.Mocks;
 using Xunit;
+using NuGet.Test.Utility;
 
 namespace NuGet.Test
 {
@@ -119,10 +120,10 @@ namespace NuGet.Test
         public void MachineCacheUsesEnvironmentSpecifiedLocationIfProvided()
         {
             // Arrange
-            var expectedPath = @"c:\temp\some\directory";
+            var expectedPath = PathFixUtility.FixPath(@"c:\temp\some\directory");
 
             // Act
-            var cachePath = MachineCache.GetCachePath(_ => @"c:\temp\some\directory", _ => { throw new Exception("This shouldn't be called."); });
+            var cachePath = MachineCache.GetCachePath(_ => PathFixUtility.FixPath(@"c:\temp\some\directory"), _ => { throw new Exception("This shouldn't be called."); });
 
             // Assert
             Assert.Equal(expectedPath, cachePath);
@@ -132,8 +133,8 @@ namespace NuGet.Test
         public void MachineCacheDoesntUseEnvironmentSpecifiedLocationIfNotProvided()
         {
             // Arrange
-            string appDataPath = @"x:\user\the-dude\the-dude's-stash";
-            string expectedPath = @"x:\user\the-dude\the-dude's-stash\NuGet\Cache";
+            string appDataPath = PathFixUtility.FixPath(@"x:\user\the-dude\the-dude's-stash");
+            string expectedPath = PathFixUtility.FixPath(@"x:\user\the-dude\the-dude's-stash\NuGet\Cache");
 
             // Act
             var cachePath = MachineCache.GetCachePath(_ => "", _ => appDataPath);
