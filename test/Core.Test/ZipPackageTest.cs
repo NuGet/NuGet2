@@ -50,9 +50,15 @@ namespace NuGet.Test
 			Assert.Equal(new SemanticVersion("1.0"), package.Version);
 			Assert.Equal("David", package.Authors.First());
 			Assert.Equal("Copyright", package.Copyright);
-			var files = package.GetFiles().ToList();
+
+			//Order is not gauranteed (or required) from GetFiles(), 
+			//but we rely on the order for a few of the asserts, 
+			//and it appears to not behave the same way on Mono,
+			//so we call "order by" here to force a specific order.
+			var files = package.GetFiles().OrderBy(k=>k.Path).ToList();
+	
 			Assert.Equal(2, files.Count);
-			Assert.Equal(PathFixUtility.FixPath(@"content\foo"), files[0].Path);
+			Assert.Equal(PathFixUtility.FixPath(@"content\foo"), files[0].Path); 
 			Assert.Equal(PathFixUtility.FixPath(@"lib\40\A.dll"), files[1].Path);
 			var assemblyReferences = package.AssemblyReferences.ToList();
 			Assert.Equal(1, assemblyReferences.Count);
