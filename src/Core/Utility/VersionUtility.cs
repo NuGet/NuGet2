@@ -566,32 +566,32 @@ namespace NuGet
 
             for (int i = 0; i < knownFolders.Length; i++)
             {
-				string folderPrefix = knownFolders[i] + System.IO.Path.DirectorySeparatorChar;
-				if (filePath.Length > folderPrefix.Length &&
-					filePath.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase))
-				{
-					string frameworkPart = filePath.Substring(folderPrefix.Length);
+                string folderPrefix = knownFolders[i] + System.IO.Path.DirectorySeparatorChar;
+                if (filePath.Length > folderPrefix.Length &&
+                    filePath.StartsWith(folderPrefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    string frameworkPart = filePath.Substring(folderPrefix.Length);
 
-					try
-					{
-						return VersionUtility.ParseFrameworkFolderName(
-							frameworkPart,
-							strictParsing: knownFolders[i] != Constants.ContentDirectory,
-							effectivePath: out effectivePath);
-					}
-					catch (ArgumentException)
-					{
-						// if the parsing fails, we treat it as if this file
-						// doesn't have target framework.
-						effectivePath = frameworkPart;
-						return null;
-					}
-				}
-				
+                    try
+                    {
+                        return VersionUtility.ParseFrameworkFolderName(
+                            frameworkPart,
+                            strictParsing: knownFolders[i] != Constants.ContentDirectory,
+                            effectivePath: out effectivePath);
+                    }
+                    catch (ArgumentException)
+                    {
+                        // if the parsing fails, we treat it as if this file
+                        // doesn't have target framework.
+                        effectivePath = frameworkPart;
+                        return null;
+                    }
+                }
+
             }
 
             effectivePath = filePath;
-			return null;
+            return null;
         }
 
         public static FrameworkName ParseFrameworkFolderName(string path)
