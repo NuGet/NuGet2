@@ -16,6 +16,7 @@ namespace NuGet.VisualStudio
             { VsConstants.WixProjectTypeGuid, (project, fileSystemProvider) => new WixProjectSystem(project, fileSystemProvider) },
             { VsConstants.JsProjectTypeGuid, (project, fileSystemProvider) => new JsProjectSystem(project, fileSystemProvider) },
             { VsConstants.WindowsStoreProjectTypeGuid, (project, fileSystemProvider) => new WindowsStoreProjectSystem(project, fileSystemProvider) },
+            { VsConstants.AzureCloudServiceProjectTypeGuid, (project, fileSystemProvider) => new AzureCloudServiceProjectSystem(project, fileSystemProvider) },
         };
 
         public static IProjectSystem CreateProjectSystem(Project project, IFileSystemProvider fileSystemProvider)

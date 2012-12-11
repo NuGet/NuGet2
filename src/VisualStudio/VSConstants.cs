@@ -14,6 +14,7 @@ namespace NuGet.VisualStudio
         internal const string NemerleProjectTypeGuid = "{edcc3b85-0bad-11db-bc1a-00112fde8b61}";
         internal const string InstallShieldLimitedEditionTypeGuid = "{FBB4BD86-BF63-432a-A6FB-6CF3A1288F83}";
         internal const string WindowsStoreProjectTypeGuid = "{BC8A1FFA-BEE3-4634-8014-F334798102B3}";
+        internal const string AzureCloudServiceProjectTypeGuid = "{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}";
 
         // Copied from EnvDTE.Constants since that type can't be embedded
         internal const string VsProjectItemKindPhysicalFile = "{6BB5F8EE-4483-11D3-8BCF-00C04F8EC28C}";

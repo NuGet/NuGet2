@@ -36,7 +36,8 @@ namespace NuGet.VisualStudio
                                                                           VsConstants.JsProjectTypeGuid,
                                                                           VsConstants.FsharpProjectTypeGuid,
                                                                           VsConstants.NemerleProjectTypeGuid,
-                                                                          VsConstants.WixProjectTypeGuid };
+                                                                          VsConstants.WixProjectTypeGuid,
+                                                                          VsConstants.AzureCloudServiceProjectTypeGuid };
 
         private static readonly HashSet<string> _unsupportedProjectTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
                                                                             VsConstants.LightSwitchProjectTypeGuid,
@@ -47,9 +48,9 @@ namespace NuGet.VisualStudio
         private static readonly IEnumerable<string> _folderKinds = new[] { VsConstants.VsProjectItemKindPhysicalFolder };
 
         // List of project types that cannot have references added to them
-        private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[] { VsConstants.WixProjectTypeGuid };
+        private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[] { VsConstants.WixProjectTypeGuid, VsConstants.AzureCloudServiceProjectTypeGuid };
         // List of project types that cannot have binding redirects added
-        private static readonly string[] _unsupportedProjectTypesForBindingRedirects = new[] { VsConstants.WixProjectTypeGuid, VsConstants.JsProjectTypeGuid, VsConstants.NemerleProjectTypeGuid };
+        private static readonly string[] _unsupportedProjectTypesForBindingRedirects = new[] { VsConstants.WixProjectTypeGuid, VsConstants.JsProjectTypeGuid, VsConstants.NemerleProjectTypeGuid, VsConstants.AzureCloudServiceProjectTypeGuid };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
 
