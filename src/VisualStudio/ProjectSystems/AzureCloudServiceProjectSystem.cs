@@ -31,24 +31,24 @@ namespace NuGet.VisualStudio
 
         protected override void AddFileToContainer( string fullPath, ProjectItems container )
         {
-           // You can't add files to an Azure project
+            // You can't add files to an Azure project
         }
 
         protected override void AddFileToProject(string path)
         {
-           // You can't add files to an Azure project
+            // You can't add files to an Azure project
         }
 
         public override void DeleteDirectory(string path, bool recursive = false)
         {
-           var fileSystem = new PhysicalFileSystem( Root );
-           fileSystem.DeleteDirectory( path, recursive ); 
+            var fileSystem = new PhysicalFileSystem( Root );
+            fileSystem.DeleteDirectory( path, recursive ); 
         }
 
         public override void DeleteFile( string path )
         {
-           var fileSystem = new PhysicalFileSystem( Root );
-           fileSystem.DeleteFile( path ); 
+            var fileSystem = new PhysicalFileSystem( Root );
+            fileSystem.DeleteFile( path ); 
         }
 
         public override void RemoveReference(string name)
