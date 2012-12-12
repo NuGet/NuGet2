@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using EnvDTE;
 
 namespace NuGet.VisualStudio
@@ -35,12 +36,14 @@ namespace NuGet.VisualStudio
 
         public override void DeleteDirectory(string path, bool recursive = false)
         {
-           // You can't remove a directory from an Azure project
+           var fileSystem = new PhysicalFileSystem( Root );
+           fileSystem.DeleteDirectory( path, recursive ); 
         }
 
         public override void DeleteFile( string path )
         {
-           // You can't remove files from an Azure project
+           var fileSystem = new PhysicalFileSystem( Root );
+           fileSystem.DeleteFile( path ); 
         }
 
         public override void RemoveReference(string name)
