@@ -69,7 +69,15 @@ namespace NuGet.VisualStudio
 
         public override bool IsSupportedFile(string path)
         {
-            return true;
+            string fileName = Path.GetFileName(path);
+
+            bool isWebConfigFile = (fileName.StartsWith("web.", StringComparison.OrdinalIgnoreCase) &&
+                                    fileName.EndsWith(".config", StringComparison.OrdinalIgnoreCase));
+
+            bool isAppConfigFile = (fileName.StartsWith("app.", StringComparison.OrdinalIgnoreCase) &&
+                                    fileName.EndsWith(".config", StringComparison.OrdinalIgnoreCase));
+
+            return !(isAppConfigFile || isWebConfigFile);
         }
 
         public override dynamic GetPropertyValue(string propertyName)
