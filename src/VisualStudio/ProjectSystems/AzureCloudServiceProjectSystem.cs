@@ -34,6 +34,11 @@ namespace NuGet.VisualStudio
            // You can't add files to an Azure project
         }
 
+        protected override void AddFileToProject(string path)
+        {
+           // You can't add files to an Azure project
+        }
+
         public override void DeleteDirectory(string path, bool recursive = false)
         {
            var fileSystem = new PhysicalFileSystem( Root );
