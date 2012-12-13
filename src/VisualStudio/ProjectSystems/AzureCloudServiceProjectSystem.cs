@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using EnvDTE;
+using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio
 {
@@ -29,26 +31,47 @@ namespace NuGet.VisualStudio
             // References aren't allowed for Azure projects
         }
 
-        protected override void AddFileToContainer( string fullPath, ProjectItems container )
+        protected override void AddFileToContainer(string fullPath, ProjectItems container)
         {
             // You can't add files to an Azure project
         }
 
-        protected override void AddFileToProject(string path)
+        public override void AddFile(string path, Stream stream)
         {
-            // You can't add files to an Azure project
+            Project.EnsureCheckedOutIfExists(this, path);
+            BaseFileSystem.AddFile(path, stream);
         }
 
         public override void DeleteDirectory(string path, bool recursive = false)
         {
-            var fileSystem = new PhysicalFileSystem(Root);
-            fileSystem.DeleteDirectory(path, recursive); 
+            // Only delete this folder if it is empty and we didn't specify that we want to recurse
+            if (!recursive && (base.GetFiles(path, "*.*", recursive).Any() || base.GetDirectories(path).Any()))
+            {
+                Logger.Log(MessageLevel.Warning, VsResources.Warning_DirectoryNotEmpty, path);
+                return;
+            }
+
+            // Workaround for TFS update issue. If we're bound to TFS, do not try and delete directories.
+            if (!(BaseFileSystem is ISourceControlFileSystem))
+            {
+                BaseFileSystem.DeleteDirectory(path, recursive);
+                Logger.Log(MessageLevel.Debug, VsResources.Debug_RemovedFolder, path);
+            }
         }
 
         public override void DeleteFile(string path)
         {
-            var fileSystem = new PhysicalFileSystem( Root );
-            fileSystem.DeleteFile(path); 
+            BaseFileSystem.DeleteFile(path);
+
+            string folderPath = Path.GetDirectoryName(path);
+            if (!String.IsNullOrEmpty(folderPath))
+            {
+                Logger.Log(MessageLevel.Debug, VsResources.Debug_RemovedFileFromFolder, Path.GetFileName(path), folderPath);
+            }
+            else
+            {
+                Logger.Log(MessageLevel.Debug, VsResources.Debug_RemovedFile, Path.GetFileName(path));
+            }
         }
 
         public override void RemoveReference(string name)
