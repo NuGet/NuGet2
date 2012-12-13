@@ -5,6 +5,7 @@ Release notes
 - Add support for MonoAndroid, MonoTouch and MonoMac framework identifiers.
 - Add to all commands new option -ConfigFile, which enables user to use his/her own config file instead of the default one %AppData%\nuget\nuget.config.
 - Add support for UNC and directory path as source for push and delete commands.
+- Add support for Azure project.
 
 *** v2.2 ***
 
