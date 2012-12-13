@@ -6,14 +6,14 @@ namespace NuGet.VisualStudio
 {
     public class AzureCloudServiceProjectSystem : VsProjectSystem
     {
-       public AzureCloudServiceProjectSystem( Project project, IFileSystemProvider fileSystemProvider )
-            : base(project, fileSystemProvider)
-        {
-        }
-
         private const string RootNamespace = "RootNamespace";
         private const string OutputName = "OutputName";
         private const string DefaultNamespace = "Azure";
+
+       public AzureCloudServiceProjectSystem(Project project, IFileSystemProvider fileSystemProvider)
+            : base(project, fileSystemProvider)
+        {
+        }
 
         public override bool IsBindingRedirectSupported
         {
@@ -24,7 +24,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public override void AddReference(string referencePath, System.IO.Stream stream)
+        public override void AddReference(string referencePath, Stream stream)
         {
             // References aren't allowed for Azure projects
         }
@@ -41,14 +41,14 @@ namespace NuGet.VisualStudio
 
         public override void DeleteDirectory(string path, bool recursive = false)
         {
-            var fileSystem = new PhysicalFileSystem( Root );
-            fileSystem.DeleteDirectory( path, recursive ); 
+            var fileSystem = new PhysicalFileSystem(Root);
+            fileSystem.DeleteDirectory(path, recursive); 
         }
 
-        public override void DeleteFile( string path )
+        public override void DeleteFile(string path)
         {
             var fileSystem = new PhysicalFileSystem( Root );
-            fileSystem.DeleteFile( path ); 
+            fileSystem.DeleteFile(path); 
         }
 
         public override void RemoveReference(string name)
