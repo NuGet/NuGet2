@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using Xunit;
 using Xunit.Extensions;
 
@@ -1543,6 +1544,60 @@ public class Cl_{0} {{
             Assert.Equal(new SemanticVersion("1.1"), package.Version);
             Assert.Equal("Auth", package.Authors.First());
             Assert.Equal("Desc", package.Description);
+        }
+
+        [Fact]
+        public void PackageCommand_WhenSpecifyingProjectFilePropertiesArePropagatedToMsBuild()
+        {
+            // Arrange            
+            WriteProjectFile("Runner.cs", @"using System;
+public class Runner { 
+    public static void Run() { 
+        Console.WriteLine(""Hello World"");
+    }
+}");
+            WriteAssemblyInfo("LegacyProcessorProject",
+                               "8.6.0.0",
+                               "OlIsCool",
+                               "This is a test. Ignore me");
+
+            CreateProject("LegacyProcessorProject",
+                          compile: new[] { "Runner.cs"});
+
+            // re-write the project file's PropertyGroup conditions to support x86 instead of AnyCPU
+            /*
+             * The following two lines:
+              <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' "">
+              <PropertyGroup Condition="" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' "">
+             * ...will be changed to read:
+              <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+              <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+             */
+            var projectFilePath = Path.Combine(ProjectFilesFolder, "LegacyProcessorProject.csproj");
+            var nt = new NameTable();
+            var xnm = new XmlNamespaceManager(nt);
+            xnm.AddNamespace("msbuild", "http://schemas.microsoft.com/developer/msbuild/2003");
+            var doc = new XmlDocument(nt);
+            doc.Load(projectFilePath);
+            var propertyGroupNodes = doc.SelectNodes("/msbuild:Project/msbuild:PropertyGroup[@Condition]", xnm);
+            Assert.NotNull(propertyGroupNodes);
+            foreach (XmlElement pgNode in propertyGroupNodes)
+            {
+                var condition = pgNode.Attributes["Condition"];
+                condition.Value = condition.Value.Replace("AnyCPU", "x86");
+            }
+            doc.Save(projectFilePath);
+
+            string[] args = new string[] { "pack", "-Build", "-Properties", "Configuration=Release;Platform=x86" };
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
+
+            // Act
+            int result = Program.Main(args);
+
+            // Assert
+            Assert.Equal(0, result);
+            Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
+            Assert.True(File.Exists("LegacyProcessorProject.8.6.0.0.nupkg"));
         }
 
         [Fact]

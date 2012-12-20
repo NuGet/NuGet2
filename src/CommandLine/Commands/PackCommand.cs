@@ -340,6 +340,12 @@ namespace NuGet.Commands
                 Build = Build,
             };
 
+            // Add the additional Properties to the properties of the Project Factory
+            foreach (var property in Properties)
+            {
+                factory.ProjectProperties.Add(property.Key, property.Value);
+            }
+
             // Create a builder for the main package as well as the sources/symbols package
             PackageBuilder mainPackageBuilder = factory.CreateBuilder(BasePath);
 
