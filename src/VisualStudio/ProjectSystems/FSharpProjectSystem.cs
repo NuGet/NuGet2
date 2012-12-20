@@ -1,5 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using EnvDTE;
+using NuGet.VisualStudio.Resources;
+using VSLangProj;
 
 namespace NuGet.VisualStudio
 {
@@ -40,5 +44,59 @@ namespace NuGet.VisualStudio
             ProjectItem projectItem = Project.GetProjectItem(path);
             return (projectItem != null);
         }
+
+        /// <summary>
+        /// WORKAROUND:
+        /// This override is in place to handle the case-sensitive call to Project.Object.References.Item
+        /// There are certain assemblies where the AssemblyName and Assembly file name do not match in case
+        /// And, this causes a mismatch. For more information, Refer to the RemoveReference of the base class
+        /// </summary>
+        /// <param name="name"></param>
+        public override void RemoveReference(string name)
+        {
+            try
+            {
+                var referenceName = System.IO.Path.GetFileNameWithoutExtension(name);
+                Reference reference = Project.Object.References.Item(referenceName);
+
+                if (reference == null)
+                {
+                    // No exact match found for referenceName. Trying case-insensitive search
+                    Logger.Log(MessageLevel.Warning, VsResources.Warning_NoExactMatchForReference, referenceName);
+                    foreach (Reference r in Project.Object.References)
+                    {
+                        if (String.Equals(referenceName, r.Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (reference == null)
+                            {
+                                reference = r;
+                            }
+                            else
+                            {
+                                var message = String.Format(CultureInfo.CurrentCulture, VsResources.FailedToRemoveReference, referenceName);
+                                Logger.Log(MessageLevel.Error, message);
+                                throw new InvalidOperationException(message);
+                            }
+                        }
+                    }
+                }
+
+                // At this point, the necessary case-sensitive and case-insensitive search are performed
+                if (reference != null)
+                {
+                    reference.Remove();
+                    Logger.Log(MessageLevel.Debug, VsResources.Debug_RemoveReference, name, ProjectName);
+                }
+                else
+                {
+                    Logger.Log(MessageLevel.Warning, VsResources.FailedToRemoveReference, referenceName);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Log(MessageLevel.Warning, e.Message);
+            }
+        }
+
     }
 }

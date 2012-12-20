@@ -243,6 +243,12 @@ namespace NuGet.VisualStudio
                 string referenceName = Path.GetFileNameWithoutExtension(name);
 
                 // Remove the reference from the project
+                // NOTE:- Project.Object.References.Item requires Reference.Identity
+                //        which is, the Assembly name without path or extension
+                //        But, we pass in the assembly file name. And, this works for
+                //        almost all the assemblies since Assembly Name is the same as the assembly file name
+                //        In case of F#, the input parameter is case-sensitive as well
+                //        Hence, an override to THIS function is added to take care of that
                 var reference = Project.Object.References.Item(referenceName);
                 if (reference != null)
                 {
