@@ -5,3 +5,4 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyDescription("NuGet Command Line Tool")]
 
 [assembly: InternalsVisibleTo("NuGet.Test")]
+[assembly: InternalsVisibleTo("NuGet.Test.Integration")]

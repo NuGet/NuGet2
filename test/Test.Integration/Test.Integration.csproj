@@ -50,6 +50,7 @@
     <Compile Include="NuGetCommandLine\NuSpecFileContext.cs" />
     <Compile Include="Core\PathResolverTest.cs" />
     <Compile Include="NuGetCommandLine\NugetProgramStatic.cs" />
+    <Compile Include="NuGetCommandLine\ProjectFactoryTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
