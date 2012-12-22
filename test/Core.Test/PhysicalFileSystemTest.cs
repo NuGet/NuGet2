@@ -59,7 +59,18 @@ namespace NuGet.Test
             var target = new PhysicalFileSystem(root);
 
             // Act and Assert
-            ExceptionAssert.ThrowsArgNull(() => target.AddFile(Path.GetRandomFileName(), null), "stream");
+            ExceptionAssert.ThrowsArgNull(() => target.AddFile(Path.GetRandomFileName(), stream: null), "stream");
+        }
+
+        [Fact]
+        public void AddFileThrowsArgumentNullExceptionIfWriteToStreamIsNull()
+        {
+            // Arrange
+            var root = Path.GetRandomFileName();
+            var target = new PhysicalFileSystem(root);
+
+            // Act and Assert
+            ExceptionAssert.ThrowsArgNull(() => target.AddFile(Path.GetRandomFileName(), writeToStream: null), "writeToStream");
         }
 
         [Theory]

@@ -1,11 +1,10 @@
+using System.IO;
+using Moq;
+using NuGet.Test.Mocks;
+using Xunit;
+
 namespace NuGet.Test
 {
-    using System.IO;
-    using Moq;
-    using NuGet.Test.Mocks;
-    using Xunit;
-
-
     public class FileSystemExtensionsTest
     {
         [Fact]

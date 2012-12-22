@@ -179,15 +179,7 @@ namespace NuGet
             }
             else
             {
-                AddFile(fileSystem, path, write);
-            }
-        }
-
-        internal static void AddFile(this IFileSystem fileSystem, string path, Action<Stream> write)
-        {
-            using (var stream = fileSystem.CreateFile(path))
-            {
-                write(stream);
+                fileSystem.AddFile(path, write);
             }
         }
 

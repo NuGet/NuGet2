@@ -58,7 +58,17 @@ namespace NuGet.TeamFoundationServer
             var root = Path.GetRandomFileName();
             var target = new TfsFileSystem(workspace, root);
 
-            ExceptionAssert.ThrowsArgNull(() => target.AddFile(Path.GetRandomFileName(), null), "stream");
+            ExceptionAssert.ThrowsArgNull(() => target.AddFile(Path.GetRandomFileName(), stream: null), "stream");
+        }
+
+        [Fact]
+        public void AddFileThrowsArgumentNullExceptionIfWriteToStreamIsNull()
+        {
+            var workspace = Mock.Of<ITfsWorkspace>();
+            var root = Path.GetRandomFileName();
+            var target = new TfsFileSystem(workspace, root);
+
+            ExceptionAssert.ThrowsArgNull(() => target.AddFile(Path.GetRandomFileName(), writeToStream: null), "writeToStream");
         }
 
         [Fact]

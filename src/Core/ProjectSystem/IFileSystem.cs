@@ -16,7 +16,7 @@ namespace NuGet
         bool FileExists(string path);
         bool DirectoryExists(string path);
         void AddFile(string path, Stream stream);
-        Stream CreateFile(string path);
+        void AddFile(string path, Action<Stream> writeToStream);
         Stream OpenFile(string path);
         DateTimeOffset GetLastModified(string path);
         DateTimeOffset GetCreated(string path);

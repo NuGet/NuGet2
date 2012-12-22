@@ -56,13 +56,28 @@ namespace NuGet
                 throw new ArgumentNullException("stream");
             }
 
+            AddFileCore(path, targetStream => stream.CopyTo(targetStream));
+        }
+
+        public virtual void AddFile(string path, Action<Stream> writeToStream)
+        {
+            if (writeToStream == null)
+            {
+                throw new ArgumentNullException("writeToStream");
+            }
+
+            AddFileCore(path, writeToStream);
+        }
+
+        private void AddFileCore(string path, Action<Stream> writeToStream)
+        {
             EnsureDirectory(Path.GetDirectoryName(path));
 
             string fullPath = GetFullPath(path);
 
             using (Stream outputStream = File.Create(fullPath))
             {
-                stream.CopyTo(outputStream);
+                writeToStream(outputStream);
             }
 
             WriteAddedFileAndDirectory(path);
@@ -243,20 +258,6 @@ namespace NuGet
         {
             path = GetFullPath(path);
             return File.OpenRead(path);
-        }
-
-        public virtual Stream CreateFile(string path)
-        {
-            path = GetFullPath(path);
-
-            // before creating the file, ensure the parent directory exists first.
-            string directory = Path.GetDirectoryName(path);
-            if (!Directory.Exists(directory)) 
-            {
-                Directory.CreateDirectory(directory);
-            }
-            
-            return File.Create(path);
         }
 
         protected string MakeRelativePath(string fullPath)

@@ -34,6 +34,21 @@ namespace NuGet.TeamFoundationServer
                 throw new ArgumentNullException("stream");
             }
 
+            AddFileCore(path, () => base.AddFile(path, stream));
+        }
+
+        public override void AddFile(string path, Action<Stream> writeToStream)
+        {
+            if (writeToStream == null)
+            {
+                throw new ArgumentNullException("writeToStream");
+            }
+
+            AddFileCore(path, () => base.AddFile(path, writeToStream));
+        }
+
+        private void AddFileCore(string path, Action addFile)
+        {
             string fullPath = GetFullPath(path);
 
             // See if there are any pending changes for this file
@@ -54,47 +69,13 @@ namespace NuGet.TeamFoundationServer
                 requiresEdit = Workspace.PendEdit(fullPath);
             }
 
-            // Write to the underlying file system. 
-            base.AddFile(path, stream);
+            // Write to the underlying file system.
+            addFile();
 
             // If we didn't have to edit the file, this must be a new file.
             if (!sourceControlBound)
             {
                 Workspace.PendAdd(fullPath);
-            }
-        }
-
-        public override Stream CreateFile(string path)
-        {
-            string fullPath = GetFullPath(path);
-
-            if (!base.FileExists(path))
-            {
-                // if this file doesn't exist, it's a new file
-                Stream stream = base.CreateFile(path);
-                Workspace.PendAdd(fullPath);
-                return stream;
-            }
-            else
-            {
-                // otherwise it's an edit.
-
-                bool requiresEdit = false;
-                
-                bool sourceControlBound = IsSourceControlBound(path);
-                if (sourceControlBound)
-                {
-                    // only pend edit if the file is not already in edit state
-                    var pendingChanges = Workspace.GetPendingChanges(fullPath, RecursionType.None);
-                    requiresEdit = !pendingChanges.Any(c => c.IsEdit || c.IsAdd);
-                }
-
-                if (requiresEdit)
-                {
-                    Workspace.PendEdit(fullPath);
-                }
-
-                return base.CreateFile(path);
             }
         }
 

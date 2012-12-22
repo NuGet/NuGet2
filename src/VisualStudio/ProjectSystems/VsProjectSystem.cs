@@ -86,6 +86,16 @@ namespace NuGet.VisualStudio
 
         public override void AddFile(string path, Stream stream)
         {
+            AddFileCore(path, () => base.AddFile(path, stream));
+        }
+
+        public override void AddFile(string path, Action<Stream> writeToStream)
+        {
+            AddFileCore(path, () => base.AddFile(path, writeToStream));
+        }
+
+        private void AddFileCore(string path, Action addFile)
+        {
             bool fileExistsInProject = FileExistsInProject(path);
 
             // If the file exists on disk but not in the project then skip it
@@ -96,7 +106,7 @@ namespace NuGet.VisualStudio
             else
             {
                 EnsureCheckedOutIfExists(path);
-                base.AddFile(path, stream);
+                addFile();
                 if (!fileExistsInProject)
                 {
                     AddFileToProject(path);
@@ -291,7 +301,6 @@ namespace NuGet.VisualStudio
                 AddFileToContainer(fullPath, container);
             });
 
-
             Logger.Log(MessageLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);
         }
 
@@ -376,7 +385,9 @@ namespace NuGet.VisualStudio
 
         private void EnsureCheckedOutIfExists(string path)
         {
-            Project.EnsureCheckedOutIfExists(this, path);        }
+            Project.EnsureCheckedOutIfExists(this, path);        
+        }
+
         private static bool AssemblyNamesMatch(AssemblyName name1, AssemblyName name2)
         {
             return name1.Name.Equals(name2.Name, StringComparison.OrdinalIgnoreCase) &&

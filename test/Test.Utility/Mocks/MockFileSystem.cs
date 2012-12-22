@@ -143,18 +143,6 @@ namespace NuGet.Test.Mocks
             return factory();
         }
 
-        public virtual Stream CreateFile(string path)
-        {
-            Paths[path] = () => Stream.Null;
-            
-            Action<Stream> streamClose = (stream) => {
-                stream.Seek(0, SeekOrigin.Begin);
-                AddFile(path, stream);
-            };
-            var memoryStream = new EventMemoryStream(streamClose);
-            return memoryStream;
-        }
-
         public string ReadAllText(string path)
         {
             return OpenFile(path).ReadToEnd();
@@ -198,6 +186,15 @@ namespace NuGet.Test.Mocks
         public virtual void AddFile(string path, Stream stream)
         {
             AddFile(path, stream, overrideIfExists: true);
+        }
+
+        public virtual void AddFile(string path, Action<Stream> writeToStream)
+        {
+            var ms = new MemoryStream();
+            writeToStream(ms);
+            byte[] buffer = ms.ToArray();
+            Paths[path] = () => new MemoryStream(buffer);
+            _createdTime[path] = DateTime.UtcNow;
         }
 
         public virtual void AddFile(string path, Func<Stream> getStream)

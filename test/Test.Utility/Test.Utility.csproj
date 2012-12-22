@@ -35,7 +35,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mocks\EventMemoryStream.cs" />
     <Compile Include="Mocks\MockSharedPackageRepository.cs" />
     <Compile Include="Mocks\MockFileSystem.cs" />
     <Compile Include="Mocks\MockPackageRepository.cs" />
