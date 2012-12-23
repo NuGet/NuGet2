@@ -321,7 +321,7 @@ namespace NuGet
                 // Reset the flag so that we no longer need to download the package since it exists and is valid.
                 refreshPackage = false;
 
-                // Make a note that we the backing store for the ZipPackage is the machine cache.
+                // Make a note that the backing store for the ZipPackage is the machine cache.
                 _usingMachineCache = true;
             }
 

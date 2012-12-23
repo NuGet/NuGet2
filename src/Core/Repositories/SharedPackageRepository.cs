@@ -134,7 +134,7 @@ namespace NuGet
                 string nupkgPath = partialPath + Constants.PackageExtension;
                 if (FileSystem.FileExists(nupkgPath))
                 {
-                    yield return new ZipPackage(FileSystem.OpenFile(nupkgPath));
+                    yield return new ZipPackage(FileSystem.GetFullPath(nupkgPath));
                 }
             }
         }
