@@ -150,13 +150,13 @@ namespace NuGet.Commands
 
             Console.WriteLine(NuGetResources.PackageCommandSuccess, outputPath);
 
-            return new ZipPackage(outputPath);
+            return new OptimizedZipPackage(outputPath);
         }
 
         private void PrintVerbose(string outputPath)
         {
             Console.WriteLine();
-            var package = new ZipPackage(outputPath);
+            var package = new OptimizedZipPackage(outputPath);
 
             Console.WriteLine("Id: {0}", package.Id);
             Console.WriteLine("Version: {0}", package.Version);

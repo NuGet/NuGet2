@@ -75,6 +75,11 @@ namespace NuGet
             // Do nothing
         }
 
+        public Stream CreateFile(string path)
+        {
+            return Stream.Null;
+        }
+
         public Stream OpenFile(string path)
         {
             return Stream.Null;

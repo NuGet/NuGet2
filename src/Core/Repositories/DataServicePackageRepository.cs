@@ -230,8 +230,7 @@ namespace NuGet
                 { "versions", "'" + versions + "'" },
                 { "includePrerelease", ToString(includePrerelease) },
                 { "includeAllVersions", ToString(includeAllVersions) },
-                { "targetFrameworks", "'" + UrlEncodeOdataParameter(targetFrameworksValue) + "'" },
-               
+                { "targetFrameworks", "'" + UrlEncodeOdataParameter(targetFrameworksValue) + "'" }
             };
 
             var query = Context.CreateQuery<DataServicePackage>(GetUpdatesSvcMethod, serviceParameters);

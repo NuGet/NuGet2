@@ -19,20 +19,20 @@ namespace NuGet.PowerShell.Commands
 
         protected JsonApiCommandBase()
             : this(
-				ServiceLocator.GetInstance<ISolutionManager>(),
-				ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
-				ServiceLocator.GetInstance<IHttpClientEvents>(),
+                ServiceLocator.GetInstance<ISolutionManager>(),
+                ServiceLocator.GetInstance<IVsPackageManagerFactory>(),
+                ServiceLocator.GetInstance<IHttpClientEvents>(),
                 ServiceLocator.GetInstance<IPackageRepositoryFactory>(),
-				ServiceLocator.GetInstance<IVsPackageSourceProvider>())
+                ServiceLocator.GetInstance<IVsPackageSourceProvider>())
         {
         }
 
         protected JsonApiCommandBase(
-			ISolutionManager solutionManager,
-			IVsPackageManagerFactory packageManagerFactory,
+            ISolutionManager solutionManager,
+            IVsPackageManagerFactory packageManagerFactory,
             IHttpClientEvents httpClientEvents,
             IPackageRepositoryFactory repositoryFactory,
-			IVsPackageSourceProvider packageSourceProvider)
+            IVsPackageSourceProvider packageSourceProvider)
             : base(solutionManager, packageManagerFactory, httpClientEvents)
         {
             _repositoryFactory = repositoryFactory;
@@ -73,8 +73,10 @@ namespace NuGet.PowerShell.Commands
         {
             var jsonSerializer = new DataContractJsonSerializer(typeof(T[]));
             var httpClient = new HttpClient(apiEndpointUri);
-            using (var stream = new MemoryStream(httpClient.DownloadData()))
+            using (var stream = new MemoryStream())
             {
+                httpClient.DownloadData(stream);
+                stream.Seek(0, SeekOrigin.Begin);
                 return jsonSerializer.ReadObject(stream) as T[];
             }
         }

@@ -222,7 +222,9 @@ function global:Run-Test {
                 $failedTests = @($results.GetEnumerator() | ? { $_.Value.Error -and !$_.Value.Skipped } | % { $_.Name })
                 if ($failedTests -gt 0)
                 {
-                    Write-Warning "There are $($failedTests.Count) failed tests. Re-running them one more time..."
+                    Write-Warning "There are $($failedTests.Count) failed test(s). Re-running them one more time..."
+
+                    $dte.Solution.Close()
                     $tests = @($failedTests | % { Get-ChildItem "function:\Test-$_" })
                 }
                 else 

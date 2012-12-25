@@ -7,6 +7,7 @@
                 <TypeName>NuGet.ZipPackage</TypeName>
                 <TypeName>NuGet.DataServicePackage</TypeName>
                 <TypeName>NuGet.UnzippedPackage</TypeName>
+                <TypeName>NuGet.OptimizedZipPackage</TypeName>
             </ViewSelectedBy>
 
             <TableControl>
@@ -54,6 +55,7 @@
             <Name>NuGet.IPackage.List</Name>
             <ViewSelectedBy>
                 <TypeName>NuGet.ZipPackage</TypeName>
+                <TypeName>NuGet.OptimizedZipPackage</TypeName>
                 <TypeName>NuGet.UnzippedPackage</TypeName>
             </ViewSelectedBy>
 

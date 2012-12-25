@@ -15,6 +15,12 @@ namespace NuGet
         {
         }
 
+        public PhysicalPackageFile(PhysicalPackageFile file)
+        {
+            SourcePath = file.SourcePath;
+            TargetPath = file.TargetPath;
+        }
+
         internal PhysicalPackageFile(Func<Stream> streamFactory)
         {
             _streamFactory = streamFactory;
@@ -101,10 +107,18 @@ namespace NuGet
 
         public override int GetHashCode()
         {
-            HashCodeCombiner combiner = new HashCodeCombiner();
-            combiner.AddObject(SourcePath);
-            combiner.AddObject(TargetPath);
-            return combiner.CombinedHash;
+            int hash = 0;
+            if (SourcePath != null)
+            {
+                hash = SourcePath.GetHashCode();
+            }
+
+            if (TargetPath != null)
+            {
+                hash = hash * 4567 + TargetPath.GetHashCode();
+            }
+
+            return hash;
         }
     }
 }

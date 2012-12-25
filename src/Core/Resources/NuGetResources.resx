@@ -373,4 +373,7 @@
   <data name="ErrorReadingPackage" xml:space="preserve">
     <value>Unable to read package from path '{0}'.</value>
   </data>
+  <data name="FileDoesNotExit" xml:space="preserve">
+    <value>File '{0}' does not exist.</value>
+  </data>
 </root>

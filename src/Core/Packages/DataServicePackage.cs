@@ -302,7 +302,7 @@ namespace NuGet
             return this.GetFullName();
         }
 
-        internal void EnsurePackage(IPackageRepository cacheRepository)
+        internal void EnsurePackage(IPackageCacheRepository cacheRepository)
         {
             // OData caches instances of DataServicePackage while updating their property values. As a result, 
             // the ZipPackage that we downloaded may no longer be valid (as indicated by a newer hash). 
@@ -310,11 +310,12 @@ namespace NuGet
             // we'll simply verify the file exists between successive calls.
             IPackageMetadata packageMetadata = this;
             bool refreshPackage = _package == null || 
+                                  (_package is OptimizedZipPackage && !((OptimizedZipPackage)_package).IsValid) ||
                                   !String.Equals(OldHash, PackageHash, StringComparison.OrdinalIgnoreCase) || 
                                   (_usingMachineCache && !cacheRepository.Exists(Id, packageMetadata.Version));
-            if (refreshPackage
-                && TryGetPackage(cacheRepository, packageMetadata, out _package)
-                && _package.GetHash(HashProvider).Equals(PackageHash, StringComparison.OrdinalIgnoreCase))
+            if (refreshPackage && 
+                TryGetPackage(cacheRepository, packageMetadata, out _package) && 
+                _package.GetHash(HashProvider).Equals(PackageHash, StringComparison.OrdinalIgnoreCase))
             {
                 OldHash = PackageHash;
 
@@ -327,19 +328,18 @@ namespace NuGet
 
             if (refreshPackage)
             {
-                // We either do not have a package available locally or they are invalid. Download the package from the server.
-                _package = Downloader.DownloadPackage(DownloadUrl, this);
+                using (Stream targetStream = cacheRepository.CreatePackageStream(packageMetadata.Id, packageMetadata.Version))
+                {
+                    // We either do not have a package available locally or they are invalid. Download the package from the server.
+                    Downloader.DownloadPackage(DownloadUrl, this, targetStream);
+                }
+
+                _package = cacheRepository.FindPackage(packageMetadata.Id, packageMetadata.Version);
 
                 // Make a note that we are using an in-memory instance of the package.
                 _usingMachineCache = false;
 
-                // Add the package to the cache
-                cacheRepository.AddPackage(_package);
-
                 OldHash = PackageHash;
-
-                // Clear any cached items for this package
-                ZipPackage.ClearCache(_package);
             }
         }
 

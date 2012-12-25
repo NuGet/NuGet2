@@ -253,16 +253,10 @@ namespace NuGet
 
         protected virtual IPackage OpenPackage(string path)
         {
-            var nuspecPath = Path.ChangeExtension(path, Constants.ManifestExtension);
-            if (FileSystem.FileExists(nuspecPath))
-            {
-                return new UnzippedPackage(FileSystem, Path.GetFileNameWithoutExtension(nuspecPath));
-            }
-
-            ZipPackage package;
+            OptimizedZipPackage package;
             try
             {
-                package = new ZipPackage(() => FileSystem.OpenFile(path), _enableCaching);
+                package = new OptimizedZipPackage(FileSystem, path);
             }
             catch (FileFormatException ex)
             {
@@ -271,8 +265,6 @@ namespace NuGet
             // Set the last modified date on the package
             package.Published = FileSystem.GetLastModified(path);
 
-            // Clear the cache whenever we open a new package file
-            ZipPackage.ClearCache(package);
             return package;
         }
 

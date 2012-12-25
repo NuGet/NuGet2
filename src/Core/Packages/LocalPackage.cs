@@ -262,13 +262,13 @@ namespace NuGet
             var fileName = Path.GetFileName(filePath);
 
             return filePath.StartsWith(Constants.LibDirectory, StringComparison.OrdinalIgnoreCase) &&
-                // empty file
+                   // empty file
                    (fileName == Constants.PackageEmptyFileName ||
-                // Exclude resource assemblies
-                    !filePath.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
-                    Constants.AssemblyReferencesExtensions.Contains(Path.GetExtension(filePath), StringComparer.OrdinalIgnoreCase) &&
-                // If references are listed, ensure that the file is listed in it.
-                    (references.IsEmpty() || references.Contains(fileName)));
+                   // Exclude resource assemblies
+                   !filePath.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
+                   Constants.AssemblyReferencesExtensions.Contains(Path.GetExtension(filePath), StringComparer.OrdinalIgnoreCase) &&
+                   // If references are listed, ensure that the file is listed in it.
+                   (references.IsEmpty() || references.Contains(fileName)));
         }
 
         public override string ToString()

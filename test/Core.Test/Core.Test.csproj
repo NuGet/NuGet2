@@ -74,6 +74,7 @@
     <Compile Include="NetPortableProfileTest.cs" />
     <Compile Include="NullFileSystemTest.cs" />
     <Compile Include="NullSettingsTest.cs" />
+    <Compile Include="OptimizedZipPackageTest.cs" />
     <Compile Include="PackageDependencyTest.cs" />
     <Compile Include="PackageExtensionsTest.cs" />
     <Compile Include="PackageHelperTest.cs" />

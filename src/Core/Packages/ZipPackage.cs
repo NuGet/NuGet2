@@ -42,7 +42,7 @@ namespace NuGet
             EnsureManifest();
         }
 
-        internal ZipPackage(string filePath, bool enableCaching)
+        private ZipPackage(string filePath, bool enableCaching)
         {
             if (String.IsNullOrEmpty(filePath))
             {
@@ -171,7 +171,7 @@ namespace NuGet
             return String.Format(CultureInfo.InvariantCulture, CacheKeyFormat, AssembliesCacheKey, Id, Version);
         }
 
-        private static bool IsPackageFile(PackagePart part)
+        internal static bool IsPackageFile(PackagePart part)
         {
             string path = UriUtility.GetPath(part.Uri);
             // We exclude any opc files and the manifest file (.nuspec)

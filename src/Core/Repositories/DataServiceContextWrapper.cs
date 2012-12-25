@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Services.Client;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -150,22 +151,20 @@ namespace NuGet
 
             // Make a request to the metadata uri and get the schema
             var client = new HttpClient(metadataUri);
-            byte[] data = client.DownloadData();
 
-            if (data == null)
+            using (MemoryStream stream = new MemoryStream())
             {
-                return null;
+                client.DownloadData(stream);
+
+                stream.Seek(0, SeekOrigin.Begin);
+                return ExtractMetadataFromSchema(stream);
             }
-
-            string schema = Encoding.UTF8.GetString(data);
-
-            return ExtractMetadataFromSchema(schema);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "If the docuument is in fails to parse in any way, we want to not fail.")]
-        internal static DataServiceMetadata ExtractMetadataFromSchema(string schema)
+        internal static DataServiceMetadata ExtractMetadataFromSchema(Stream schemaStream)
         {
-            if (String.IsNullOrEmpty(schema))
+            if (schemaStream == null)
             {
                 return null;
             }
@@ -174,7 +173,7 @@ namespace NuGet
 
             try
             {
-                schemaDocument = XDocument.Parse(schema);
+                schemaDocument = XDocument.Load(schemaStream);
             }
             catch
             {

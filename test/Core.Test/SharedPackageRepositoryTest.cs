@@ -14,10 +14,10 @@ namespace NuGet.Test
         [InlineData("A", "2.0", "A.2.0\\A.2.0.nuspec", "A.2.0\\A.2.0.nupkg")]
         [InlineData("B", "1.0.0-alpha", "B.1.0.0-alpha\\B.1.0.0-alpha.nuspec", "B.1.0.0-alpha\\B.1.0.0-alpha.nupkg")]
         [InlineData("C", "3.1.2.4-rtm", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nuspec", "C.3.1.2.4-rtm\\C.3.1.2.4-rtm.nupkg")]
-        public void CallAddPackageWillAddBothNuspecFileAndNupkgFile(string id, string version, string nuspecPath, string nupkgPath)
+        public void CallAddPackageWillOnlyAddNupkgFile(string id, string version, string nuspecPath, string nupkgPath)
         {
             // Arrange
-            var fileSystem = new MockFileSystem("x:\root");
+            var fileSystem = new MockFileSystem("x:\\root");
             var configFileSystem = new MockFileSystem();
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
 
@@ -25,12 +25,12 @@ namespace NuGet.Test
             repository.AddPackage(PackageUtility.CreatePackage(id, version));
 
             // Assert
-            Assert.True(fileSystem.FileExists(nuspecPath));
+            Assert.False(fileSystem.FileExists(nuspecPath));
             Assert.True(fileSystem.FileExists(nupkgPath));
         }
 
         [Fact]
-        public void CallAddPackageWillAddNuspecWhichHasReferencesData()
+        public void CallAddPackageWillNotAddNuspec()
         {
             // Arrange
             var fileSystem = new MockFileSystem("x:\root");
@@ -43,15 +43,8 @@ namespace NuGet.Test
                                                                assemblyReferences: new [] { "net40\\A.dll", "sl45\\B.dll", "A.dll", "win8\\C.dll" }));
 
             // Assert
-            Assert.True(fileSystem.FileExists("A.1.0\\A.1.0.nuspec"));
-
-            Stream manifestContentStream = fileSystem.OpenFile("A.1.0\\A.1.0.nuspec");
-            Manifest manifest = Manifest.ReadFrom(manifestContentStream);
-
-            Assert.Equal(3, manifest.Metadata.References.Count);
-            Assert.Equal("A.dll", manifest.Metadata.References[0].File);
-            Assert.Equal("B.dll", manifest.Metadata.References[1].File);
-            Assert.Equal("C.dll", manifest.Metadata.References[2].File);
+            Assert.False(fileSystem.FileExists("A.1.0\\A.1.0.nuspec"));
+            Assert.True(fileSystem.FileExists("A.1.0\\A.1.0.nupkg"));
         }
 
         [Theory]
@@ -61,7 +54,7 @@ namespace NuGet.Test
         public void CallRemovePackageWillRemoveNuspecFile(string id, string version, string unexpectedPath)
         {
             // Arrange
-            var fileSystem = new MockFileSystem("x:\root");
+            var fileSystem = new MockFileSystem("x:\\root");
             fileSystem.AddFile(unexpectedPath);
             var configFileSystem = new MockFileSystem();
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
@@ -80,7 +73,7 @@ namespace NuGet.Test
         public void CallRemovePackageWillRemoveNupkgFile(string id, string version, string unexpectedPath)
         {
             // Arrange
-            var fileSystem = new MockFileSystem("x:\root");
+            var fileSystem = new MockFileSystem("x:\\root");
             fileSystem.AddFile(unexpectedPath);
             var configFileSystem = new MockFileSystem();
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
@@ -99,7 +92,7 @@ namespace NuGet.Test
         public void CallRemovePackageWillRemoveBothNupkgFileAndNuSpecFile(string id, string version, string nuspecPath, string nupkgPath)
         {
             // Arrange
-            var fileSystem = new MockFileSystem("x:\root");
+            var fileSystem = new MockFileSystem("x:\\root");
             fileSystem.AddFile(nuspecPath);
             fileSystem.AddFile(nupkgPath);
             var configFileSystem = new MockFileSystem();
@@ -122,7 +115,7 @@ namespace NuGet.Test
         public void ExistChecksForPresenceOfPackageFileUnderDirectory(string id, string version, string path)
         {
             // Arrange
-            var fileSystem = new MockFileSystem("x:\root");
+            var fileSystem = new MockFileSystem("x:\\root");
             fileSystem.CreateDirectory(path);
             fileSystem.AddFile(path + "\\" + path + ".nupkg");
 
@@ -142,10 +135,10 @@ namespace NuGet.Test
         [InlineData("C", "3.1.2.4-rtm", "C.3.1.2.4-rtm")]
         [InlineData("D", "4.0", "D.4.0.0.0")]
         [InlineData("E", "5.1.4", "E.5.1.4.0")]
-        public void ExistChecksForPresenceOfManifestFileUnderDirectory(string id, string version, string path)
+        public void ExistDoesNotCheckForPresenceOfManifestFileUnderDirectory(string id, string version, string path)
         {
             // Arrange
-            var fileSystem = new MockFileSystem("x:\root");
+            var fileSystem = new MockFileSystem("x:\\root");
             fileSystem.CreateDirectory(path);
             fileSystem.AddFile(path + "\\" + path + ".nuspec");
 
@@ -156,29 +149,18 @@ namespace NuGet.Test
             bool exists = repository.Exists(id, new SemanticVersion(version));
 
             // Assert
-            Assert.True(exists);
+            Assert.False(exists);
         }
 
         [Fact]
-        public void FindPackageReturnUnzippedPackageObject()
+        public void FindPackageReturnOptimizedZipPackageObject()
         {
             // Arrange
-            string manifestContent = @"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
-  <metadata>
-    <version>1.0-alpha</version>
-    <authors>dotnetjunky</authors>
-    <owners />
-    <id>One</id>
-    <title />
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>My package description.</description>
-  </metadata>
-  <files />
-</package>";
+            var packageStream = GetPackageStream("one", "1.0.0-alpha");
 
-            var fileSystem = new MockFileSystem("x:\root");
-            fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nuspec", manifestContent.AsStream());
+            var fileSystem = new MockFileSystem("x:\\root");
+            fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nupkg", packageStream);
+            
             var configFileSystem = new MockFileSystem();
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
 
@@ -186,14 +168,14 @@ namespace NuGet.Test
             IPackage package = repository.FindPackage("one", new SemanticVersion("1.0.0-alpha"));
 
             // Assert
-            Assert.IsType<UnzippedPackage>(package);
-            Assert.Equal("One", package.Id);
+            Assert.True(package is OptimizedZipPackage);
+            Assert.Equal("one", package.Id);
             Assert.Equal(new SemanticVersion("1.0.0-alpha"), package.Version);
-            Assert.Equal(new string[] { "dotnetjunky" }, package.Authors);
+            Assert.Equal("Test description", package.Description);
         }
 
         [Fact]
-        public void FindPackagesByIdReturnsAnUnzippedInstanceIfANuspecIsAvailableAndAZipPackageOtherwise()
+        public void FindPackagesByIdAlwaysReturnsOptimizedZipPackageEvenIfNuspecIfPresent()
         {
             // Arrange
             string manifestContent = @"<?xml version=""1.0""?>
@@ -207,12 +189,11 @@ namespace NuGet.Test
   <files />
 </package>";
 
-            var fileSystem = new MockFileSystem("x:\root");
+            var fileSystem = new MockFileSystem("x:\\root");
             fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nuspec", manifestContent.AsStream());
-            fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nupkg", Stream.Null);
 
-            var packageStream = GetPackageStream("One", "1.0.0");
-            fileSystem.AddFile("one.1.0\\one.1.0.nupkg", packageStream);
+            var packageStream = GetPackageStream("One", "1.0.0-alpha");
+            fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nupkg", packageStream);
 
             var configFileSystem = new MockFileSystem();
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
@@ -221,16 +202,11 @@ namespace NuGet.Test
             var packages = repository.FindPackagesById("one").ToList();
 
             // Assert
-            Assert.Equal(2, packages.Count);
+            Assert.Equal(1, packages.Count);
             var package = packages[0]; 
-            Assert.IsType<UnzippedPackage>(package);
+            Assert.True(package is OptimizedZipPackage);
             Assert.Equal("One", package.Id);
             Assert.Equal(new SemanticVersion("1.0.0-alpha"), package.Version);
-
-            package = packages[1];
-            Assert.IsType<ZipPackage>(package);
-            Assert.Equal("One", package.Id);
-            Assert.Equal(new SemanticVersion("1.0.0"), package.Version);
         }
 
         [Fact]

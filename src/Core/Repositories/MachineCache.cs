@@ -9,13 +9,13 @@ namespace NuGet
     /// <summary>
     /// The machine cache represents a location on the machine where packages are cached. It is a specific implementation of a local repository and can be used as such.
     /// </summary>
-    public class MachineCache : LocalPackageRepository
+    public class MachineCache : LocalPackageRepository, IPackageCacheRepository
     {
         /// <summary>
         /// Maximum number of packages that can live in this cache.
         /// </summary>
         private const int MaxPackages = 100;
-        
+
         private const string NuGetCachePathEnvironmentVariable = "NuGetCachePath";
 
         private static readonly Lazy<MachineCache> _instance = new Lazy<MachineCache>(() => CreateDefault(GetCachePath));
@@ -85,6 +85,12 @@ namespace NuGet
             return FileSystem.FileExists(packagePath);
         }
 
+        public Stream CreatePackageStream(string packageId, SemanticVersion version)
+        {
+            string packagePath = GetPackageFilePath(packageId, version);
+            return FileSystem.CreateFile(packagePath);
+        }
+
         public void Clear()
         {
             TryClear(GetPackageFiles().ToList());
@@ -94,7 +100,7 @@ namespace NuGet
         {
             foreach (var packageFile in files)
             {
-               TryAct(() => FileSystem.DeleteFileSafe(packageFile));
+                TryAct(() => FileSystem.DeleteFileSafe(packageFile));
             }
         }
 
@@ -112,7 +118,8 @@ namespace NuGet
         /// Determines the cache path to use for NuGet.exe. By default, NuGet caches files under %LocalAppData%\NuGet\Cache.
         /// This path can be overridden by specifying a value in the NuGetCachePath environment variable.
         /// </summary>
-        internal static string GetCachePath() {
+        internal static string GetCachePath()
+        {
             return GetCachePath(Environment.GetEnvironmentVariable, Environment.GetFolderPath);
         }
 
@@ -145,7 +152,7 @@ namespace NuGet
                 action();
             }
             catch (IOException)
-            { 
+            {
             }
             catch (UnauthorizedAccessException)
             {

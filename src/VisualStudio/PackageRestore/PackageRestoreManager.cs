@@ -1,19 +1,19 @@
-﻿using EnvDTE;
-using Microsoft.VisualStudio.Project;
-using Microsoft.VisualStudio.Project.Designers;
-using Microsoft.VisualStudio.Shell.Interop;
-using NuGet.VisualStudio.Resources;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using EnvDTE;
+using Microsoft.VisualStudio.Project;
+using Microsoft.VisualStudio.Project.Designers;
+using Microsoft.VisualStudio.Shell.Interop;
+using NuGet.VisualStudio.Resources;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
-using System.Diagnostics.CodeAnalysis;
 
 namespace NuGet.VisualStudio
 {
@@ -479,7 +479,10 @@ namespace NuGet.VisualStudio
 
             if (!fromCache)
             {
-                _localCacheRepository.AddPackage(package);
+                if (!_localCacheRepository.Exists(package))
+                {
+                    _localCacheRepository.AddPackage(package);
+                }
 
                 // swap to the Zip package to avoid potential downloading package twice
                 package = _localCacheRepository.FindPackage(package.Id, package.Version);

@@ -260,6 +260,22 @@ namespace NuGet
             return File.OpenRead(path);
         }
 
+        public virtual Stream CreateFile(string path)
+        {
+            string fullPath = GetFullPath(path);
+
+            // before creating the file, ensure the parent directory exists first.
+            string directory = Path.GetDirectoryName(fullPath);
+            if (!Directory.Exists(directory)) 
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            WriteAddedFileAndDirectory(path);
+
+            return File.Create(fullPath);
+        }
+
         protected string MakeRelativePath(string fullPath)
         {
             return fullPath.Substring(Root.Length).TrimStart(Path.DirectorySeparatorChar);

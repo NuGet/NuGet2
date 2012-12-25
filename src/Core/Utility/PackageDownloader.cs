@@ -13,33 +13,30 @@ namespace NuGet
         public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
         public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
 
-        public virtual IPackage DownloadPackage(Uri uri, IPackageMetadata package)
+        public virtual void DownloadPackage(Uri uri, IPackageMetadata package, Stream targetStream)
         {
             if (uri == null)
             {
                 throw new ArgumentNullException("uri");
-            }
-            if (package == null)
-            {
-                throw new ArgumentNullException("package");
             }
 
             var downloadClient = new HttpClient(uri)
                                  {
                                      UserAgent = HttpUtility.CreateUserAgentString(DefaultUserAgentClient)
                                  };
-            return DownloadPackage(downloadClient, package);
+            DownloadPackage(downloadClient, package, targetStream);
         }
 
-        public IPackage DownloadPackage(IHttpClient downloadClient, IPackageMetadata package)
+        public void DownloadPackage(IHttpClient downloadClient, IPackageMetadata package, Stream targetStream)
         {
             if (downloadClient == null)
             {
                 throw new ArgumentNullException("downloadClient");
             }
-            if (package == null)
+
+            if (targetStream == null)
             {
-                throw new ArgumentNullException("package");
+                throw new ArgumentNullException("targetStream");
             }
 
             // Get the operation display text
@@ -60,10 +57,7 @@ namespace NuGet
                 downloadClient.ProgressAvailable += progressAvailableHandler;
                 downloadClient.SendingRequest += beforeSendingRequesthandler;
 
-                // TODO: This gets held onto in memory which we want to get rid of eventually
-                byte[] buffer = downloadClient.DownloadData();
-                Func<Stream> streamFactory = () => new MemoryStream(buffer, writable: false);
-                return new ZipPackage(streamFactory, enableCaching: true);
+                downloadClient.DownloadData(targetStream);
             }
             finally
             {

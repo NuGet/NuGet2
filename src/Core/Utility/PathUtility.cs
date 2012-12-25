@@ -45,6 +45,15 @@ namespace NuGet
             return path + trailingCharacter;
         }
 
+        public static void EnsureParentDirectory(string filePath)
+        {
+            string directory = Path.GetDirectoryName(filePath);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+        }
+
         /// <summary>
         /// Returns path2 relative to path1
         /// </summary>

@@ -66,6 +66,7 @@
     <Compile Include="Authoring\ManifestVersionUtility.cs" />
     <Compile Include="Authoring\NullPropertyProvider.cs" />
     <Compile Include="Authoring\PackageDependencySet.cs" />
+    <Compile Include="Authoring\PhysicalPackageAssemblyReference.cs" />
     <Compile Include="Configuration\SettingsCredentialProvider.cs" />
     <Compile Include="Configuration\ISettings.cs" />
     <Compile Include="Configuration\NullSettings.cs" />
@@ -97,11 +98,13 @@
     <Compile Include="NETPortable\NetPortableProfileTable.cs" />
     <Compile Include="PackageRestoreConsent.cs" />
     <Compile Include="Packages\LocalPackage.cs" />
+    <Compile Include="Packages\OptimizedZipPackage.cs" />
     <Compile Include="Packages\UnzippedPackage.cs" />
     <Compile Include="Repositories\ILatestPackageLookup.cs" />
     <Compile Include="ProjectSystem\IBatchProcessor.cs" />
     <Compile Include="Repositories\ICloneableRepository.cs" />
     <Compile Include="Repositories\ICultureAwareRepository.cs" />
+    <Compile Include="Repositories\IPackageCacheRepository.cs" />
     <Compile Include="Repositories\IPackageReferenceRepository.cs" />
     <Compile Include="Repositories\IOperationAwareRepository.cs" />
     <Compile Include="Repositories\IServiceBasedRepository.cs" />

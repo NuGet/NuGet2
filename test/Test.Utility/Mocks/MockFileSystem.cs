@@ -143,6 +143,18 @@ namespace NuGet.Test.Mocks
             return factory();
         }
 
+        public virtual Stream CreateFile(string path)
+        {
+            Paths[path] = () => Stream.Null;
+            
+            Action<Stream> streamClose = (stream) => {
+                stream.Seek(0, SeekOrigin.Begin);
+                AddFile(path, stream);
+            };
+            var memoryStream = new EventMemoryStream(streamClose);
+            return memoryStream;
+        }
+
         public string ReadAllText(string path)
         {
             return OpenFile(path).ReadToEnd();
@@ -150,9 +162,10 @@ namespace NuGet.Test.Mocks
 
         public virtual bool DirectoryExists(string path)
         {
-            return Paths.Select(file => file.Key)
+            string pathPrefix = PathUtility.EnsureTrailingSlash(path);
+            return Paths.Keys
                         .Any(file => file.Equals(path, StringComparison.OrdinalIgnoreCase) ||
-                                     Path.GetDirectoryName(file).Equals(path, StringComparison.OrdinalIgnoreCase));
+                                     file.StartsWith(pathPrefix, StringComparison.OrdinalIgnoreCase));
         }
 
         public virtual IEnumerable<string> GetDirectories(string path)

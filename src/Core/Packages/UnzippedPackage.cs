@@ -95,12 +95,11 @@ namespace NuGet
             return from p in _repositoryFileSystem.GetFiles(libDirectory, "*.*", recursive: true)
                    let targetPath = GetPackageRelativePath(p)
                    where IsAssemblyReference(targetPath)
-                   let file = new PhysicalPackageFile(() => _repositoryFileSystem.OpenFile(p))
-                              {
-                                  SourcePath = _repositoryFileSystem.GetFullPath(p),
-                                  TargetPath = targetPath
-                              }
-                   select new ZipPackageAssemblyReference(file);
+                   select new PhysicalPackageAssemblyReference
+                            {
+                                SourcePath = _repositoryFileSystem.GetFullPath(p),
+                                TargetPath = targetPath
+                            };
         }
 
         private IEnumerable<string> GetPackageFilePaths()

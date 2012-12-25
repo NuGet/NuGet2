@@ -33,6 +33,7 @@ namespace NuGet.Test.Integration.Core
             var findPackage = repository.FindPackage(id, new SemanticVersion(version));
 
             // Assert
+            Assert.True(findPackage is OptimizedZipPackage);
             AssertPackage(id, version, findPackage);
         }
 
@@ -51,6 +52,7 @@ namespace NuGet.Test.Integration.Core
             var findPackage = repository.FindPackage(id, new SemanticVersion(version));
             
             // Assert
+            Assert.True(findPackage is OptimizedZipPackage);
             AssertPackage(id, version, findPackage);
         }
 
@@ -99,6 +101,7 @@ namespace NuGet.Test.Integration.Core
             var findPackage = repository.FindPackage(id, new SemanticVersion(version));
 
             // Assert
+            Assert.True(findPackage is OptimizedZipPackage);
             AssertPackage(id, version, findPackage);
         }
 
@@ -118,6 +121,8 @@ namespace NuGet.Test.Integration.Core
             var result2 = repository.FindPackage("test.extensions", new SemanticVersion("1.3-alpha"));
 
             // Assert
+            Assert.True(result1 is OptimizedZipPackage);
+            Assert.True(result2 is OptimizedZipPackage);
             AssertPackage("test.extensions", "1.0", result1);
             AssertPackage("test.extensions", "1.3.0-alpha", result2);
         }
@@ -161,6 +166,11 @@ namespace NuGet.Test.Integration.Core
             var packages = repository.FindPackagesById(id).ToList();
 
             // Assert
+            foreach (var p in packages)
+            {
+                Assert.True(p is OptimizedZipPackage);
+            }
+
             Assert.Equal(3, packages.Count);
             Assert.Equal("1.2", packages[0].Version.ToString());
             Assert.Equal("1.3", packages[1].Version.ToString());

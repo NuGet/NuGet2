@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Moq;
 using Xunit;
@@ -6,7 +7,6 @@ using Xunit.Extensions;
 
 namespace NuGet.Test
 {
-
     public class DataServicePackageRepositoryTest
     {
         [Fact]
@@ -199,7 +199,7 @@ namespace NuGet.Test
                 IEnumerable<string> sampleProperties, IEnumerable<string> expectedMethods)
         {
             // Act
-            var schemaMetadata = DataServiceContextWrapper.ExtractMetadataFromSchema(schema);
+            var schemaMetadata = DataServiceContextWrapper.ExtractMetadataFromSchema(schema.AsStream());
 
             // Assert
             Assert.NotNull(schemaMetadata);
@@ -217,12 +217,12 @@ namespace NuGet.Test
         public void ExtractMetadataReturnsNullForBadSchema(string schema)
         {
             // Act
-            var schemaMetadata = DataServiceContextWrapper.ExtractMetadataFromSchema(schema);
+            var stream = schema == null ? (Stream)null : schema.AsStream();
+            var schemaMetadata = DataServiceContextWrapper.ExtractMetadataFromSchema(stream);
 
             // Assert
             Assert.Null(schemaMetadata);
         }
-
 
         private class NuGetFeedSchema
         {

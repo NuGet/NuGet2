@@ -131,11 +131,10 @@ namespace NuGet
             }
         }
 
-        public byte[] DownloadData()
+        public void DownloadData(Stream targetStream)
         {
             const int ChunkSize = 1024 * 4; // 4KB
 
-            byte[] buffer;
             using (var response = GetResponse())
             {
                 // Total response length
@@ -146,11 +145,7 @@ namespace NuGet
                     // the ContentLength = -1. In which case, we copy the whole stream and do not report progress.
                     if (length < 0)
                     {
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            stream.CopyTo(memoryStream, ChunkSize);
-                            buffer = memoryStream.ToArray();
-                        }
+                        stream.CopyTo(targetStream);
 
                         // reporting fake progress as 100%
                         OnProgressAvailable(100);
@@ -160,16 +155,18 @@ namespace NuGet
                         // We read the response stream chunk by chunk (each chunk is 4KB). 
                         // After reading each chunk, we report the progress based on the total number bytes read so far.
                         int totalReadSoFar = 0;
-                        buffer = new byte[length];
+                        byte[] buffer = new byte[ChunkSize];
                         while (totalReadSoFar < length)
                         {
-                            int bytesRead = stream.Read(buffer, totalReadSoFar, Math.Min(length - totalReadSoFar, ChunkSize));
+                            int bytesRead = stream.Read(buffer, 0, Math.Min(length - totalReadSoFar, ChunkSize));
                             if (bytesRead == 0)
                             {
                                 break;
                             }
                             else
                             {
+                                targetStream.Write(buffer, 0, bytesRead);
+
                                 totalReadSoFar += bytesRead;
                                 OnProgressAvailable((totalReadSoFar * 100) / length);
                             }
@@ -177,8 +174,6 @@ namespace NuGet
                     }
                 }
             }
-
-            return buffer;
         }
 
         private void OnProgressAvailable(int percentage)

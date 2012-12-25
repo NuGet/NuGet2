@@ -123,7 +123,7 @@ namespace NuGet.Commands
         private void PushPackageCore(string source, string apiKey, PackageServer packageServer, string packageToPush, TimeSpan timeout)
         {
             // Push the package to the server
-            var package = new ZipPackage(packageToPush);
+            var package = new OptimizedZipPackage(packageToPush);
 
             string sourceName = CommandLineUtility.GetSourceDisplayName(source);
             Console.WriteLine(NuGetResources.PushCommandPushingPackage, package.GetFullName(), sourceName);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Net;
 
 namespace NuGet
@@ -26,6 +27,6 @@ namespace NuGet
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This is expensive")]
         WebResponse GetResponse();
         void InitializeRequest(WebRequest request);
-        byte[] DownloadData();
+        void DownloadData(Stream targetStream);
     }
 }

@@ -114,6 +114,12 @@ namespace NuGet.VisualStudio
             }
         }
 
+        public override Stream CreateFile(string path)
+        {
+            EnsureCheckedOutIfExists(path);
+            return base.CreateFile(path);
+        }
+
         public override void DeleteDirectory(string path, bool recursive = false)
         {
             // Only delete this folder if it is empty and we didn't specify that we want to recurse

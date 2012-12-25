@@ -79,6 +79,40 @@ namespace NuGet.TeamFoundationServer
             }
         }
 
+        public override Stream CreateFile(string path)
+        {
+            string fullPath = GetFullPath(path);
+
+            if (!base.FileExists(path))
+            {
+                // if this file doesn't exist, it's a new file
+                Stream stream = base.CreateFile(path);
+                Workspace.PendAdd(fullPath);
+                return stream;
+            }
+            else
+            {
+                // otherwise it's an edit.
+
+                bool requiresEdit = false;
+
+                bool sourceControlBound = IsSourceControlBound(path);
+                if (sourceControlBound)
+                {
+                    // only pend edit if the file is not already in edit state
+                    var pendingChanges = Workspace.GetPendingChanges(fullPath, RecursionType.None);
+                    requiresEdit = !pendingChanges.Any(c => c.IsEdit || c.IsAdd);
+                }
+
+                if (requiresEdit)
+                {
+                    Workspace.PendEdit(fullPath);
+                }
+
+                return base.CreateFile(path);
+            }
+        }
+
         public override void DeleteFile(string path)
         {
             string fullPath = GetFullPath(path);
