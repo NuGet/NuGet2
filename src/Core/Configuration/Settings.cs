@@ -339,7 +339,7 @@ namespace NuGet
             }
             else
             {
-                sectionElement.Add(new XElement("add",
+                sectionElement.AddIndented(new XElement("add",
                                                     new XAttribute("key", key),
                                                     new XAttribute("value", value)));
             }
@@ -367,7 +367,7 @@ namespace NuGet
             {
                 return false;
             }
-            elementToDelete.Remove();
+            elementToDelete.RemoveIndented();
             Save();
             return true;
         }
@@ -385,7 +385,7 @@ namespace NuGet
                 return false;
             }
 
-            sectionElement.Remove();
+            sectionElement.RemoveIndented();
             Save();
             return true;
         }
@@ -439,7 +439,7 @@ namespace NuGet
             if (section == null)
             {
                 section = new XElement(sectionName);
-                parentElement.Add(section);
+                parentElement.AddIndented(section);
             }
             return section;
         }

@@ -34,7 +34,7 @@ namespace NuGet
         {
             using (Stream configStream = fileSystem.OpenFile(path))
             {
-                return XDocument.Load(configStream);
+                return XDocument.Load(configStream, LoadOptions.PreserveWhitespace);
             }
         }
 

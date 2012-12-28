@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Xunit;
@@ -339,6 +340,101 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal("<configuration />", result.ToString());
+        }
+
+        [Fact]
+        public void AddWithIndentWorksForSelfEnclosedElement()
+        {
+            const string xml = @"<root>
+  <container />
+</root>";
+            XElement root = XElement.Parse(xml, LoadOptions.PreserveWhitespace);
+            XElement container = root.Elements().First();
+            XElement content = XElement.Parse("<a><b>text</b><c/></a>");
+
+            container.AddIndented(content);
+
+            Assert.Equal(@"<root>
+  <container>
+    <a>
+      <b>text</b>
+      <c />
+    </a>
+  </container>
+</root>", root.ToString());
+        }
+
+        [Fact]
+        public void AddWithIndentWorksForEmptyElement()
+        {
+            const string xml = @"<root>
+  <container>
+  </container>
+</root>";
+            XElement root = XElement.Parse(xml, LoadOptions.PreserveWhitespace);
+            XElement container = root.Elements().First();
+            XElement content = XElement.Parse("<a><b>text</b><c/></a>");
+
+            container.AddIndented(content);
+
+            Assert.Equal(@"<root>
+  <container>
+    <a>
+      <b>text</b>
+      <c />
+    </a>
+  </container>
+</root>", root.ToString());
+        }
+
+        [Fact]
+        public void AddWithIndentWorksForElementWithChildren()
+        {
+            const string xml = @"<root>
+  <container>
+    <child />
+  </container>
+</root>";
+            XElement root = XElement.Parse(xml, LoadOptions.PreserveWhitespace);
+            XElement container = root.Elements().First();
+            XElement content = XElement.Parse("<a><b>text</b><c/></a>");
+
+            container.AddIndented(content);
+
+            Assert.Equal(@"<root>
+  <container>
+    <child />
+    <a>
+      <b>text</b>
+      <c />
+    </a>
+  </container>
+</root>", root.ToString());
+        }
+
+        [Fact]
+        public void AddWithIndentUsesTabs()
+        {
+            string xml = @"<root>
+  <container>
+    <child />
+  </container>
+</root>".Replace("  ", "\t");
+            XElement root = XElement.Parse(xml, LoadOptions.PreserveWhitespace);
+            XElement container = root.Elements().First();
+            XElement content = XElement.Parse("<a><b>text</b><c/></a>");
+
+            container.AddIndented(content);
+
+            Assert.Equal(@"<root>
+  <container>
+    <child />
+    <a>
+      <b>text</b>
+      <c />
+    </a>
+  </container>
+</root>".Replace("  ", "\t"), root.ToString());
         }
 
         private static void AssertAttributeValue(XElement element, string attributeName, string expectedAttributeValue)

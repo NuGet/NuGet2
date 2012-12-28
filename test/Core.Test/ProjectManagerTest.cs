@@ -750,15 +750,18 @@ namespace NuGet.Test
             projectManager.AddPackageReference("A");
 
             // Assert
+            // TODO Config transformation should preserve white-space (formatting)
+            // It does not at the moment, therefore <system.web> element has different indent than <configSections>.
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <configSections>
     <add a=""n"" />
   </configSections>
-  <system.web>
-    <compilation debug=""true"" targetFramework=""4.0"" />
-  </system.web>
-</configuration>", mockProjectSystem.OpenFile("web.config").ReadToEnd());
+    <system.web>
+        <compilation debug=""true"" targetFramework=""4.0"" />
+    </system.web>
+</configuration>
+", mockProjectSystem.OpenFile("web.config").ReadToEnd());
         }
 
         [Fact]
@@ -798,10 +801,11 @@ namespace NuGet.Test
             // Assert
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
-  <system.web>
-    <compilation baz=""test"" />
-  </system.web>
-</configuration>", mockProjectSystem.OpenFile("web.config").ReadToEnd());
+    <system.web>
+        <compilation baz=""test"" />
+    </system.web>
+</configuration>
+", mockProjectSystem.OpenFile("web.config").ReadToEnd());
         }
 
         [Fact]

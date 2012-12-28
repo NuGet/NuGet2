@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using Moq;
 using NuGet.Runtime;
 using NuGet.Test.Mocks;
@@ -71,24 +70,24 @@ namespace NuGet.Test
             string outputContent = mockFileSystem.OpenFile("config").ReadToEnd();
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
-  <runtime>
-    <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
-      <dependentAssembly>
-        <assemblyIdentity name=""System.Web.Mvc"" publicKeyToken=""31bf3856ad364e35"" />
-        <bindingRedirect oldVersion=""1.0.0.0"" newVersion=""2.0.0.0"" />
-      </dependentAssembly>
-      <dependentAssembly>
-        <assemblyIdentity name=""AssemblyName"" publicKeyToken=""token"" culture=""neutral"" />
-        <bindingRedirect oldVersion=""0.0.0.0-3.0.0.0"" newVersion=""3.0.0.0"" />
-      </dependentAssembly>
-    </assemblyBinding>
-    <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
-      <dependentAssembly>
-        <assemblyIdentity name=""A.Library"" publicKeyToken=""a34a755ec277222f"" />
-        <bindingRedirect oldVersion=""1.0.0.0-2.0.0.0"" newVersion=""2.0.0.0"" />
-      </dependentAssembly>
-    </assemblyBinding>
-  </runtime>
+    <runtime>
+        <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
+            <dependentAssembly>
+                <assemblyIdentity name=""System.Web.Mvc"" publicKeyToken=""31bf3856ad364e35"" />
+                <bindingRedirect oldVersion=""1.0.0.0"" newVersion=""2.0.0.0"" />
+            </dependentAssembly>
+            <dependentAssembly>
+                <assemblyIdentity name=""AssemblyName"" publicKeyToken=""token"" culture=""neutral"" />
+                <bindingRedirect oldVersion=""0.0.0.0-3.0.0.0"" newVersion=""3.0.0.0"" />
+            </dependentAssembly>
+        </assemblyBinding>
+        <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
+            <dependentAssembly>
+                <assemblyIdentity name=""A.Library"" publicKeyToken=""a34a755ec277222f"" />
+                <bindingRedirect oldVersion=""1.0.0.0-2.0.0.0"" newVersion=""2.0.0.0"" />
+            </dependentAssembly>
+        </assemblyBinding>
+    </runtime>
 </configuration>", outputContent);
         }
 
@@ -101,7 +100,7 @@ namespace NuGet.Test
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
-    <dependentAssembly>
+      <dependentAssembly>
         <assemblyIdentity name=""AssemblyName"" publicKeyToken=""token"" culture=""neutral"" />
         <bindingRedirect oldVersion=""0.0.0.0-3.0.0.0"" newVersion=""3.0.0.0"" />
       </dependentAssembly>
@@ -139,7 +138,7 @@ namespace NuGet.Test
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
-    <dependentAssembly>
+      <dependentAssembly>
         <assemblyIdentity name=""AssemblyName"" publicKeyToken=""token"" culture=""neutral"" />
         <bindingRedirect oldVersion=""0.0.0.0-3.0.0.0"" newVersion=""3.0.0.0"" />
       </dependentAssembly>
@@ -176,14 +175,14 @@ namespace NuGet.Test
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
-    <dependentAssembly>
+      <dependentAssembly>
         <assemblyIdentity name=""AssemblyName"" publicKeyToken=""token"" culture=""neutral"" />
         <bindingRedirect oldVersion=""0.0.0.0-1.0.0.0"" newVersion=""2.0.0.0"" />
-    </dependentAssembly>
-    <dependentAssembly>
+      </dependentAssembly>
+      <dependentAssembly>
         <assemblyIdentity name=""AssemblyName"" publicKeyToken=""token"" culture=""neutral"" />
         <bindingRedirect oldVersion=""1.5.0.0-3.0.0.0"" newVersion=""3.0.0.0"" />
-    </dependentAssembly>
+      </dependentAssembly>
     </assemblyBinding>
   </runtime>
 </configuration>");
@@ -220,7 +219,7 @@ namespace NuGet.Test
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
     </assemblyBinding>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
-    <dependentAssembly>
+      <dependentAssembly>
         <assemblyIdentity name=""AssemblyName"" publicKeyToken=""token"" culture=""neutral"" />
         <bindingRedirect oldVersion=""0.0.0.0-3.0.0.0"" newVersion=""3.0.0.0"" />
       </dependentAssembly>
@@ -239,7 +238,8 @@ namespace NuGet.Test
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
   <runtime>
-    <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1""></assemblyBinding>
+    <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
+    </assemblyBinding>
   </runtime>
 </configuration>", outputContent);
         }
@@ -253,11 +253,11 @@ namespace NuGet.Test
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
-    <dependentAssembly>
+      <dependentAssembly>
         <assemblyIdentity name=""System.Web.Mvc"" publicKeyToken=""31bf3856ad364e35"" />
         <bindingRedirect oldVersion=""1.0.0.0"" newVersion=""2.0.0.0"" />
       </dependentAssembly>
-    <dependentAssembly>
+      <dependentAssembly>
         <assemblyIdentity name=""AssemblyName"" publicKeyToken=""token"" culture=""neutral"" />
         <bindingRedirect oldVersion=""0.0.0.0-3.0.0.0"" newVersion=""3.0.0.0"" />
       </dependentAssembly>
@@ -287,7 +287,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddBindingRedirectUpdatesElementsPreservingComments()
+        public void AddBindingRedirectUpdatesElementsPreservingCommentsAndWhitespace()
         {
             // Arrange
             var mockFileSystem = new MockFileSystem();
@@ -295,8 +295,7 @@ namespace NuGet.Test
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
-      <dependentAssembly>
-        <assemblyIdentity name=""AssemblyName"" publicKeyToken=""token"" culture=""neutral"" />
+      <dependentAssembly><assemblyIdentity name=""AssemblyName"" publicKeyToken=""token"" culture=""neutral"" />
         <!-- This is a comment that should not be removed -->
         <bindingRedirect oldVersion=""2.0.0.0"" newVersion=""3.0.0.0"" />
       </dependentAssembly>
@@ -317,8 +316,7 @@ namespace NuGet.Test
 <configuration>
   <runtime>
     <assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
-      <dependentAssembly>
-        <assemblyIdentity name=""AssemblyName"" publicKeyToken=""token"" culture=""neutral"" />
+      <dependentAssembly><assemblyIdentity name=""AssemblyName"" publicKeyToken=""token"" culture=""neutral"" />
         <!-- This is a comment that should not be removed -->
         <bindingRedirect oldVersion=""0.0.0.0-4.0.0.0"" newVersion=""4.0.0.0"" />
       </dependentAssembly>
