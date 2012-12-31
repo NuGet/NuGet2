@@ -13,6 +13,7 @@ Release notes
 - Added support for multiple repositories for preinstalled packages in project templates.
 - Add -AsPath option to nuget.exe Config command.
 - Updates tab in Manage Packages dialog now honors the 'allowedVersions' constraints in packages.config.
+- Added Update All button in the dialog to allow updating all packages with one click.
 
 *** v2.2 ***
 

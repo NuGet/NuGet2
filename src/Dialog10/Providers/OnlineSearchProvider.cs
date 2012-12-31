@@ -55,6 +55,11 @@ namespace NuGet.Dialog.Providers
             return sortDescriptors;
         }
 
+        public override void OnPackageLoadCompleted(PackagesTreeNodeBase selectedNode)
+        {
+            _baseProvider.OnPackageLoadCompleted(selectedNode);
+        }
+
         protected internal override void RemoveSearchNode()
         {
             _baseProvider.RemoveSearchNode();

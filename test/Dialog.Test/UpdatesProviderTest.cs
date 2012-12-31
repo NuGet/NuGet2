@@ -392,6 +392,7 @@ namespace NuGet.Dialog.Test
                 userNotifierServices,
                 mockProgressWindowOpener.Object,
                 new Mock<IProviderSettings>().Object,
+                new Mock<IUpdateAllUIService>().Object,
                 scriptExecutor,
                 new MockOutputConsoleProvider(),
                 new Mock<IVsCommonOperations>().Object

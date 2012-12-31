@@ -12,13 +12,13 @@ using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using NuGet.VisualStudio;
 using NuGetConsole;
-using NuGetConsole.Host.PowerShellProvider;
 
 namespace NuGet.Dialog.Providers
 {
     /// <summary>
     /// Base class for all tree node types.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification="This is due to the native of this class.")]
     internal abstract class PackagesProviderBase : VsExtensionsProvider, ILogger, IDisposable
     {
         private PackagesSearchNode _searchNode;
@@ -143,6 +143,14 @@ namespace NuGet.Dialog.Providers
             }
         }
 
+        public virtual bool SupportsExecuteAllCommand
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         public override IVsExtensionsTreeNode ExtensionsTree
         {
             get
@@ -249,7 +257,6 @@ namespace NuGet.Dialog.Providers
         {
             if (_searchNode != null)
             {
-
                 // When remove the search node, the dialog will automatically select the first node (All node)
                 // Since we are going to restore the previously selected node anyway, we don't want the first node
                 // to refresh. Hence suppress it here.
@@ -330,7 +337,7 @@ namespace NuGet.Dialog.Providers
             OperationCoordinator.IsBusy = true;
 
             _readmeFile = null;
-            _originalPackageId = item.Id;
+            _originalPackageId = item != null ? item.Id : null;
             _progressProvider.ProgressAvailable += OnProgressAvailable;
 
             _uiCulture = System.Threading.Thread.CurrentThread.CurrentUICulture;
@@ -348,8 +355,11 @@ namespace NuGet.Dialog.Providers
             worker.RunWorkerAsync(item);
 
             // write an introductory sentence before every operation starts to make the console easier to read
-            string progressMessage = GetProgressMessage(item.PackageIdentity);
-            WriteLineToOutputWindow("------- " + progressMessage + " -------");
+            if (item != null)
+            {
+                string progressMessage = GetProgressMessage(item.PackageIdentity);
+                WriteLineToOutputWindow("------- " + progressMessage + " -------");
+            }
         }
 
         private void OnProgressAvailable(object sender, ProgressEventArgs e)
@@ -364,7 +374,7 @@ namespace NuGet.Dialog.Providers
             System.Threading.Thread.CurrentThread.CurrentCulture = _culture;
 
             var item = (PackageItem)e.Argument;
-            bool succeeded = ExecuteCore(item);
+            bool succeeded = item == null ? ExecuteAllCore() : ExecuteCore(item); 
             e.Cancel = !succeeded;
             e.Result = item;
         }
@@ -385,6 +395,13 @@ namespace NuGet.Dialog.Providers
                 {
                     OnExecuteCompleted((PackageItem)e.Result);
                     _providerServices.ProgressWindow.SetCompleted(successful: true);
+
+                    // if this is an Execute All command, hide the Update All button after successful execution
+                    if (SupportsExecuteAllCommand && e.Result == null)
+                    {
+                        _providerServices.UpdateAllUIService.Hide();
+                    }
+
                     OpenReadMeFile();
 
                     CollapseNodes();
@@ -475,6 +492,11 @@ namespace NuGet.Dialog.Providers
             return true;
         }
 
+        protected virtual bool ExecuteAllCore()
+        {
+            return true;
+        }
+
         protected virtual void OnExecuteCompleted(PackageItem item)
         {
             // After every operation, just update the status of all packages in the current node.
@@ -487,6 +509,10 @@ namespace NuGet.Dialog.Providers
                     node.UpdateEnabledStatus();
                 }
             }
+        }
+
+        public virtual void OnPackageLoadCompleted(PackagesTreeNodeBase selectedNode)
+        {
         }
 
         public virtual string NoItemsMessage
@@ -618,50 +644,47 @@ namespace NuGet.Dialog.Providers
             return _solutionManager.GetProject(projectSystem.UniqueName);
         }
 
-        protected void CheckInstallPSScripts(
+        protected bool ShowLicenseAgreement(
             IPackage package,
-            IPackageRepository sourceRepository,
-            FrameworkName targetFramework,
-            bool includePrerelease,
+            IVsPackageManager packageManager,
+            IEnumerable<Project> projects,
             out IList<PackageOperation> operations)
         {
-            CheckInstallPSScripts(
-                package,
-                LocalRepository,
-                sourceRepository,
-                targetFramework,
-                includePrerelease,
-                out operations);
+            var allOperations = new List<PackageOperation>();
+
+            foreach (Project project in projects)
+            {
+                var walker = new InstallWalker(
+                    packageManager.GetProjectManager(project).LocalRepository,
+                    packageManager.SourceRepository,
+                    project.GetTargetFrameworkName(),
+                    this,
+                    ignoreDependencies: false,
+                    allowPrereleaseVersions: IncludePrerelease);
+
+                allOperations.AddRange(walker.ResolveOperations(package));
+            }
+
+            operations = allOperations.Reduce();
+            return ShowLicenseAgreement(packageManager, operations);
         }
 
-        protected void CheckInstallPSScripts(
+        protected bool ShowLicenseAgreement(
             IPackage package,
-            IPackageRepository localRepository,
-            IPackageRepository sourceRepository,
+            IVsPackageManager packageManager,
             FrameworkName targetFramework,
-            bool includePrerelease,
-            out IList<PackageOperation> operations)
+            out IList<PackageOperation> operations)   
         {
-            // Review: Is there any way the user could get into a position that we would need to allow pre release versions here?
             var walker = new InstallWalker(
-                localRepository,
-                sourceRepository,
+                LocalRepository,
+                packageManager.SourceRepository,
                 targetFramework,
                 this,
                 ignoreDependencies: false,
-                allowPrereleaseVersions: includePrerelease);
+                allowPrereleaseVersions: IncludePrerelease);
 
             operations = walker.ResolveOperations(package).ToList();
-            var scriptPackages = from o in operations
-                                 where o.Package.HasPowerShellScript()
-                                 select o.Package;
-            if (scriptPackages.Any())
-            {
-                if (!RegistryHelper.CheckIfPowerShell2Installed())
-                {
-                    throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
-                }
-            }
+            return ShowLicenseAgreement(packageManager, operations);
         }
 
         protected bool ShowLicenseAgreement(IVsPackageManager packageManager, IEnumerable<PackageOperation> operations)
@@ -678,7 +701,8 @@ namespace NuGet.Dialog.Providers
                 // hide the progress window if we are going to show license window
                 HideProgressWindow();
 
-                bool accepted = _providerServices.UserNotifierServices.ShowLicenseWindow(licensePackages);
+                bool accepted = _providerServices.UserNotifierServices.ShowLicenseWindow(
+                    licensePackages.Distinct(PackageEqualityComparer.IdAndVersion));
                 if (!accepted)
                 {
                     return false;

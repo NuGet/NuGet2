@@ -19,7 +19,7 @@ namespace NuGet.Dialog.Test
             var baseProvider = new Mock<PackagesProviderBase>(
                 new MockPackageRepository(), 
                 new ResourceDictionary(),
-                new ProviderServices(null, null, null, null, null, null), 
+                new ProviderServices(null, null, null, null, null, null, null), 
                 new Mock<IProgressProvider>().Object, 
                 new Mock<ISolutionManager>().Object);
 
@@ -42,7 +42,7 @@ namespace NuGet.Dialog.Test
             var baseProvider = new Mock<PackagesProviderBase>(
                  new MockPackageRepository(),
                  new ResourceDictionary(),
-                 new ProviderServices(null, null, null, null, null, null),
+                 new ProviderServices(null, null, null, null, null, null, null),
                  new Mock<IProgressProvider>().Object,
                  new Mock<ISolutionManager>().Object);
             baseProvider.SetupSet(p => p.IncludePrerelease = includePrerelease).Callback<bool>(a => assignedValue = a);

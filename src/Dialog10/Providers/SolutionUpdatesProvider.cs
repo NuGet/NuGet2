@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using EnvDTE;
@@ -76,6 +77,8 @@ namespace NuGet.Dialog.Providers
                     {
                         return false;
                     }
+
+                    ShowProgressWindow();
                 }
                 else
                 {
@@ -84,8 +87,8 @@ namespace NuGet.Dialog.Providers
                 }
 
                 IList<PackageOperation> operations;
-                bool acceptLicense = isProjectLevel ? CheckPSScriptAndShowLicenseAgreement(item, selectedProjectsList, _activePackageManager, out operations)
-                                                    : CheckPSScriptAndShowLicenseAgreement(item, _activePackageManager, out operations);
+                bool acceptLicense = isProjectLevel ? ShowLicenseAgreement(item.PackageIdentity, _activePackageManager, selectedProjectsList, out operations)
+                                                    : ShowLicenseAgreement(item.PackageIdentity, _activePackageManager, targetFramework: null, operations: out operations);
 
                 if (!acceptLicense)
                 {
@@ -126,41 +129,45 @@ namespace NuGet.Dialog.Providers
             }
         }
 
+        protected override bool ExecuteAllCore()
+        {
+            if (SelectedNode == null || SelectedNode.Extensions == null || SelectedNode.Extensions.Count == 0)
+            {
+                return false;
+            }
+
+            ShowProgressWindow();
+
+            _activePackageManager = GetActivePackageManager();
+            Debug.Assert(_activePackageManager != null);
+
+            IDisposable action = _activePackageManager.SourceRepository.StartOperation(OperationName);
+
+            try
+            {
+                bool accepted = ShowLicenseAgreementForAllPackages(_activePackageManager);
+                if (!accepted)
+                {
+                    return false;
+                }
+                
+                RegisterPackageOperationEvents(_activePackageManager, null);
+                _activePackageManager.UpdatePackages(updateDependencies: true, allowPrereleaseVersions: IncludePrerelease, logger: this, eventListener: this);
+                return true;
+            }
+            finally
+            {
+                UnregisterPackageOperationEvents(_activePackageManager, null);
+                action.Dispose();
+            }
+        }
+
         public override IVsExtension CreateExtension(IPackage package)
         {
             return new PackageItem(this, package)
             {
                 CommandName = Resources.Dialog_UpdateButton
             };
-        }
-
-        protected bool CheckPSScriptAndShowLicenseAgreement(
-            PackageItem item, IList<Project> projects, IVsPackageManager packageManager, out IList<PackageOperation> operations)
-        {
-            ShowProgressWindow();
-
-            // combine the operations of all selected project
-            var allOperations = new List<PackageOperation>();
-            foreach (Project project in projects)
-            {
-                IProjectManager projectManager = packageManager.GetProjectManager(project);
-
-                IList<PackageOperation> projectOperations;
-                CheckInstallPSScripts(
-                    item.PackageIdentity,
-                    projectManager.LocalRepository,
-                    packageManager.SourceRepository,
-                    project.GetTargetFrameworkName(),
-                    IncludePrerelease,
-                    out projectOperations);
-
-                allOperations.AddRange(projectOperations);
-            }
-
-            // reduce the operations before checking for license agreements
-            operations = allOperations.Reduce();
-
-            return ShowLicenseAgreement(packageManager, operations);
         }
 
         public void OnBeforeAddPackageReference(Project project)

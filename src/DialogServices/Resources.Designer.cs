@@ -295,15 +295,6 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This package (or one of its dependencies) contains PowerShell scripts but the PowerShell 2.0 (or newer) runtime is not installed on this machine..
-        /// </summary>
-        public static string Dialog_PackageHasPSScript {
-            get {
-                return ResourceManager.GetString("Dialog_PackageHasPSScript", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to This package is already installed..
         /// </summary>
         public static string Dialog_PackageInstalledTooltip {
@@ -538,6 +529,24 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Update _All.
+        /// </summary>
+        public static string Dialog_UpdateAllButton {
+            get {
+                return ResourceManager.GetString("Dialog_UpdateAllButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are more than 1 update available..
+        /// </summary>
+        public static string Dialog_UpdateAllLabel {
+            get {
+                return ResourceManager.GetString("Dialog_UpdateAllLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to _Update.
         /// </summary>
         public static string Dialog_UpdateButton {
@@ -588,15 +597,6 @@ namespace NuGet.Dialog {
         public static string Dialog_VersionLabel {
             get {
                 return ResourceManager.GetString("Dialog_VersionLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to ({0} Votes).
-        /// </summary>
-        public static string Dialog_VotesCount {
-            get {
-                return ResourceManager.GetString("Dialog_VotesCount", resourceCulture);
             }
         }
         

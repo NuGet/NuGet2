@@ -575,6 +575,7 @@ namespace NuGet.Dialog.Test
                 mockWindowServices.Object,
                 mockProgressWindowOpener.Object,
                 new Mock<IProviderSettings>().Object,
+                new Mock<IUpdateAllUIService>().Object,
                 scriptExecutor,
                 new MockOutputConsoleProvider(),
                 new Mock<IVsCommonOperations>().Object

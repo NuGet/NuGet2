@@ -17,6 +17,7 @@ namespace NuGet.Dialog.Providers
         private readonly IPackage _packageIdentity;
         private readonly bool _isUpdateItem, _isPrerelease;
         private bool _isSelected;
+        private bool? _isEnabled;
         private readonly ObservableCollection<Project> _referenceProjectNames;
         private readonly SemanticVersion _oldPackageVersion;
         private IEnumerable<object> _displayDependencies;
@@ -217,12 +218,19 @@ namespace NuGet.Dialog.Providers
         {
             get
             {
-                return _provider.CanExecute(this);
+                if (!_isEnabled.HasValue)
+                {
+                    _isEnabled = _provider.CanExecute(this);
+                }
+
+                return _isEnabled.Value;
             }
         }
 
         internal void UpdateEnabledStatus()
         {
+            // set to null to force re-evaluation of the property value
+            _isEnabled = null;
             OnNotifyPropertyChanged("IsEnabled");
         }
 

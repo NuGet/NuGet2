@@ -150,8 +150,15 @@ namespace NuGet.Dialog.Providers
 
             using (activePackageManager.SourceRepository.StartOperation(OperationName))
             {
+                ShowProgressWindow();
+
                 IList<PackageOperation> operations;
-                bool acceptLicense = CheckPSScriptAndShowLicenseAgreement(item, activePackageManager, out operations);
+                bool acceptLicense = ShowLicenseAgreement(
+                    item.PackageIdentity,
+                    activePackageManager,
+                    _project.GetTargetFrameworkName(),
+                    out operations);
+
                 if (!acceptLicense)
                 {
                     return false;
@@ -160,20 +167,6 @@ namespace NuGet.Dialog.Providers
                 ExecuteCommandOnProject(_project, item, activePackageManager, operations);
                 return true;
             }
-        }
-
-        protected bool CheckPSScriptAndShowLicenseAgreement(PackageItem item, IVsPackageManager packageManager, out IList<PackageOperation> operations)
-        {
-            ShowProgressWindow();
-
-            CheckInstallPSScripts(
-                item.PackageIdentity, 
-                packageManager.SourceRepository,
-                _project.GetTargetFrameworkName(),
-                IncludePrerelease, 
-                out operations);
-
-            return ShowLicenseAgreement(packageManager, operations);
         }
 
         protected void ExecuteCommandOnProject(Project activeProject, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations)

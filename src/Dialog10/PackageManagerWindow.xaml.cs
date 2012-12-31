@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
@@ -36,8 +37,10 @@ namespace NuGet.Dialog
         private readonly IProviderSettings _providerSettings;
         private readonly IProductUpdateService _productUpdateService;
         private readonly IOptionsPageActivator _optionsPageActivator;
+        private readonly IUpdateAllUIService _updateAllUIService;
         private readonly Project _activeProject;
         private string _searchText;
+        
 
         public PackageManagerWindow(Project project, string dialogParameters = null) :
             this(project,
@@ -95,6 +98,7 @@ namespace NuGet.Dialog
             _smartOutputConsoleProvider = new SmartOutputConsoleProvider(providerServices.OutputConsoleProvider);
             providerServices.OutputConsoleProvider = _smartOutputConsoleProvider;
             _providerSettings = providerServices.ProviderSettings;
+            _updateAllUIService = providerServices.UpdateAllUIService;
 
             AddUpdateBar(productUpdateService);
             AddRestoreBar(packageRestoreManager);
@@ -102,6 +106,7 @@ namespace NuGet.Dialog
             InsertDisclaimerElement();
             AdjustSortComboBoxWidth();
             PreparePrereleaseComboBox();
+            InsertUpdateAllButton(providerServices.UpdateAllUIService);
 
             SetupProviders(
                 project,
@@ -485,6 +490,8 @@ namespace NuGet.Dialog
             // flush output messages to the Output console at once when the dialog is closed.
             _smartOutputConsoleProvider.Flush();
 
+            _updateAllUIService.DisposeElement();
+
             CurrentInstance = null;
         }
 
@@ -518,6 +525,39 @@ namespace NuGet.Dialog
 
                     // add the inner grid to the first column of the original grid
                     grid.Children.Add(innerGrid);
+                }
+            }
+        }
+
+        private void InsertUpdateAllButton(IUpdateAllUIService updateAllUIService)
+        {
+            Grid grid = LogicalTreeHelper.FindLogicalNode(explorer, "resGrid") as Grid;
+            if (grid != null && grid.Children.Count > 0)
+            {
+                ListView listView = grid.FindDescendant<ListView>();
+                if (listView != null)
+                {
+                    Grid firstGrid = (Grid)listView.Parent;
+                    firstGrid.Children.Remove(listView);
+
+                    var newGrid = new Grid
+                    {
+                        Margin = listView.Margin
+                    };
+
+                    newGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) });
+                    newGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+                    var updateAllContainer = updateAllUIService.CreateUIElement();
+                    updateAllContainer.Margin = new Thickness(5, 2, 0, 5);
+                    updateAllContainer.UpdateInvoked += OnUpdateButtonClick;
+                    newGrid.Children.Add(updateAllContainer);
+
+                    listView.Margin = new Thickness();
+                    Grid.SetRow(listView, 1);
+                    newGrid.Children.Add(listView);
+
+                    firstGrid.Children.Insert(0, newGrid);
                 }
             }
         }
@@ -624,10 +664,31 @@ namespace NuGet.Dialog
                     _hasOpenedOnlineProvider = true;
                     _productUpdateService.CheckForAvailableUpdateAsync();
                 }
+
+                _updateAllUIService.Hide();
             }
             else
             {
                 _prereleaseComboBox.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't care about exception handling here.")]
+        private void OnUpdateButtonClick(object sender, RoutedEventArgs e)
+        {
+            var provider = explorer.SelectedProvider as PackagesProviderBase;
+            if (provider != null)
+            {
+                try
+                {
+                    provider.Execute(item: null);
+                }
+                catch (Exception exception)
+                {
+                    MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
+
+                    ExceptionHelper.WriteToActivityLog(exception);
+                }
             }
         }
 

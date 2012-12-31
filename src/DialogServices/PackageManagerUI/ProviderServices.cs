@@ -11,11 +11,13 @@ namespace NuGet.Dialog.Providers
         public IOutputConsoleProvider OutputConsoleProvider { get; set; }
         public IProviderSettings ProviderSettings { get; private set; }
         public IVsCommonOperations VsCommonOperations { get; private set; }
+        public IUpdateAllUIService UpdateAllUIService { get; private set; }
 
         public ProviderServices() :
             this(new UserNotifierServices(),
                  new ProgressWindowOpener(),
                  new ProviderSettingsManager(),
+                 new UpdateAllUIService(),
                  ServiceLocator.GetInstance<IScriptExecutor>(),
                  ServiceLocator.GetInstance<IOutputConsoleProvider>(),
                  ServiceLocator.GetInstance<IVsCommonOperations>()) 
@@ -26,6 +28,7 @@ namespace NuGet.Dialog.Providers
             IUserNotifierServices userNotifierServices,
             IProgressWindowOpener progressWindow,
             IProviderSettings selectedProviderSettings,
+            IUpdateAllUIService updateAllUIService,
             IScriptExecutor scriptExecutor,
             IOutputConsoleProvider outputConsoleProvider,
             IVsCommonOperations vsCommonOperations)
@@ -36,6 +39,7 @@ namespace NuGet.Dialog.Providers
             OutputConsoleProvider = outputConsoleProvider;
             ProviderSettings = selectedProviderSettings;
             VsCommonOperations = vsCommonOperations;
+            UpdateAllUIService = updateAllUIService;
         }
     }
 }

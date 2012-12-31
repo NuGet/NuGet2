@@ -35,6 +35,7 @@ namespace NuGet.Dialog.Test
                        new Mock<IUserNotifierServices>().Object,
                        new Mock<IProgressWindowOpener>().Object,
                        new Mock<IProviderSettings>().Object,
+                       new Mock<IUpdateAllUIService>().Object,
                        new Mock<IScriptExecutor>().Object,
                        new MockOutputConsoleProvider(),
                        new Mock<IVsCommonOperations>().Object),

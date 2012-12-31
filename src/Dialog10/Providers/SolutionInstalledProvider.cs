@@ -117,7 +117,7 @@ namespace NuGet.Dialog.Providers
                     }
                 }
 
-                removeDepedencies = AskRemoveDependencyAndCheckUninstallPSScript(package, uninstallRepositories, uninstallFrameworks);
+                removeDepedencies = AskRemoveDependency(package, uninstallRepositories, uninstallFrameworks);
                 if (removeDepedencies == null)
                 {
                     // user cancels the operation.
@@ -132,7 +132,7 @@ namespace NuGet.Dialog.Providers
             // to avoid the package file being deleted before an install.
             if (hasInstallWork)
             {
-                bool successful = InstallPackageIntoProjects(allProjects, selectedProjectsSet, package);
+                bool successful = InstallPackageIntoProjects(package, allProjects, selectedProjectsSet);
                 if (!successful)
                 {
                     return false;
@@ -158,27 +158,12 @@ namespace NuGet.Dialog.Providers
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want one failed project to affect the other projects.")]
-        private bool InstallPackageIntoProjects(IList<Project> allProjects, HashSet<string> selectedProjectsSet, IPackage package)
+        private bool InstallPackageIntoProjects(IPackage package, IList<Project> allProjects, HashSet<string> selectedProjectsSet)
         {
-            var allOperations = new List<PackageOperation>();
-            foreach (Project project in allProjects)
-            {
-                if (selectedProjectsSet.Contains(project.UniqueName))
-                {
-                    IList<PackageOperation> operations;
-                    CheckInstallPSScripts(
-                        package,
-                        PackageManager.GetProjectManager(project).LocalRepository,
-                        PackageManager.SourceRepository,
-                        targetFramework: project.GetTargetFrameworkName(),
-                        includePrerelease: true,
-                        operations: out operations);
+            var selectedProjects = allProjects.Where(p => selectedProjectsSet.Contains(p.UniqueName));
 
-                    allOperations.AddRange(operations);
-                }
-            }
-
-            bool accepted = ShowLicenseAgreement(PackageManager, allOperations.Reduce());
+            IList<PackageOperation> operations;
+            bool accepted = ShowLicenseAgreement(package, PackageManager, selectedProjects, out operations);
             if (!accepted)
             {
                 return false;
@@ -209,7 +194,7 @@ namespace NuGet.Dialog.Providers
         private bool UninstallSolutionPackage(IPackage package)
         {
             CheckDependentPackages(package, LocalRepository, targetFramework: null);
-            bool? result = AskRemoveDependencyAndCheckUninstallPSScript(
+            bool? result = AskRemoveDependency(
                 package,
                 new[] { LocalRepository },
                 new FrameworkName[] { null });

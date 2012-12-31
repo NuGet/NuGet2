@@ -66,9 +66,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>CommonResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="..\VsConsole\PowerShellHostProvider\RegistryHelper.cs">
-      <Link>RegistryHelper.cs</Link>
-    </Compile>
     <Compile Include="Nodes\EmptyTreeNode.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Providers\InstalledProvider.cs" />

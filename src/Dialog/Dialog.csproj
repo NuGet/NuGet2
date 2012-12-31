@@ -123,9 +123,6 @@
     <Compile Include="..\Dialog10\Providers\UpdatesProvider.cs">
       <Link>Providers\UpdatesProvider.cs</Link>
     </Compile>
-    <Compile Include="..\VsConsole\PowerShellHostProvider\RegistryHelper.cs">
-      <Link>RegistryHelper.cs</Link>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

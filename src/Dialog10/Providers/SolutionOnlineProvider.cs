@@ -80,6 +80,8 @@ namespace NuGet.Dialog.Providers
 
                     // save the checked state of projects so that we can restore them the next time
                     SaveProjectCheckStates(selectedProjectsList);
+
+                    ShowProgressWindow();
                 }
                 else
                 {
@@ -88,8 +90,8 @@ namespace NuGet.Dialog.Providers
                 }
 
                 IList<PackageOperation> operations;
-                bool acceptLicense = isProjectLevel ? CheckPSScriptAndShowLicenseAgreement(item, selectedProjectsList, _activePackageManager, out operations)
-                                                    : CheckPSScriptAndShowLicenseAgreement(item, _activePackageManager, out operations);
+                bool acceptLicense = isProjectLevel ? ShowLicenseAgreement(item.PackageIdentity, _activePackageManager, selectedProjectsList, out operations)
+                                                    : ShowLicenseAgreement(item.PackageIdentity, _activePackageManager, targetFramework: null, operations: out operations);
                 if (!acceptLicense)
                 {
                     return false;
@@ -115,35 +117,6 @@ namespace NuGet.Dialog.Providers
 
                 return true;
             }
-        }
-
-        protected bool CheckPSScriptAndShowLicenseAgreement(
-            PackageItem item, IList<Project> projects, IVsPackageManager packageManager, out IList<PackageOperation> operations)
-        {
-            ShowProgressWindow();
-
-            // combine the operations of all selected project
-            var allOperations = new List<PackageOperation>();
-            foreach (Project project in projects)
-            {
-                IProjectManager projectManager = packageManager.GetProjectManager(project);
-
-                IList<PackageOperation> projectOperations;
-                CheckInstallPSScripts(
-                    item.PackageIdentity,
-                    projectManager.LocalRepository,
-                    packageManager.SourceRepository,
-                    project.GetTargetFrameworkName(),
-                    IncludePrerelease,
-                    out projectOperations);
-
-                allOperations.AddRange(projectOperations);
-            }
-
-            // reduce the operations before checking for license agreements
-            operations = allOperations.Reduce();
-
-            return ShowLicenseAgreement(packageManager, operations);
         }
 
         private void SaveProjectCheckStates(IList<Project> selectedProjects)

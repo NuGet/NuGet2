@@ -11,7 +11,6 @@ using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
 using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
-using NuGetConsole.Host.PowerShellProvider;
 
 namespace NuGet.Dialog.Providers
 {
@@ -143,7 +142,7 @@ namespace NuGet.Dialog.Providers
         {
             CheckDependentPackages(item.PackageIdentity, LocalRepository, _targetFramework);
 
-            bool? removeDependencies = AskRemoveDependencyAndCheckUninstallPSScript(
+            bool? removeDependencies = AskRemoveDependency(
                 item.PackageIdentity,
                 new [] { LocalRepository },
                 new [] { _targetFramework });
@@ -183,7 +182,7 @@ namespace NuGet.Dialog.Providers
             }
         }
 
-        protected bool? AskRemoveDependencyAndCheckUninstallPSScript(
+        protected bool? AskRemoveDependency(
             IPackage package,
             IList<IPackageRepository> localRepositories,
             IList<FrameworkName> targetFrameworks)
@@ -228,34 +227,6 @@ namespace NuGet.Dialog.Providers
                         + packageNames;
 
                 removeDependencies = _userNotifierServices.ShowRemoveDependenciesWindow(message);
-            }
-
-            if (removeDependencies == null)
-            {
-                return removeDependencies;
-            }
-
-            bool hasScriptPackages;
-            if (removeDependencies == true)
-            {
-                // if user wants to remove dependencies, we need to check all of them for PS scripts
-                var scriptPackages = from o in allOperations
-                                     where o.Package.HasPowerShellScript()
-                                     select o.Package;
-                hasScriptPackages = scriptPackages.Any();
-            }
-            else
-            {
-                // otherwise, just check the to-be-uninstalled package
-                hasScriptPackages = package.HasPowerShellScript(new string[] { PowerShellScripts.Uninstall });
-            }
-
-            if (hasScriptPackages)
-            {
-                if (!RegistryHelper.CheckIfPowerShell2Installed())
-                {
-                    throw new InvalidOperationException(Resources.Dialog_PackageHasPSScript);
-                }
             }
 
             return removeDependencies;

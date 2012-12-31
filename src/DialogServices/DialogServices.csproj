@@ -49,6 +49,10 @@
     </Compile>
     <Compile Include="PackageManagerUI\Controls\TextBlockControl.cs" />
     <Compile Include="PackageManagerUI\Converters\DescriptionLabelConverter.cs" />
+    <Compile Include="PackageManagerUI\IUpdateAllUIService.cs" />
+    <Compile Include="PackageManagerUI\UpdateAllUI.xaml.cs">
+      <DependentUpon>UpdateAllUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="QueryExtensions.cs" />
     <Compile Include="PackageManagerUI\IProviderSettings.cs" />
     <Compile Include="NativeMethods.cs" />
@@ -97,6 +101,7 @@
     <Compile Include="SolutionExplorer\SolutionExplorerViewModel.cs" />
     <Compile Include="SolutionExplorer\SolutionWalker.cs" />
     <Compile Include="UIResources.cs" />
+    <Compile Include="PackageManagerUI\UpdateAllUIService.cs" />
     <Compile Include="Visualizer\Visualizer.cs" />
     <Compile Include="WindowSizePersistenceHelper.cs" />
   </ItemGroup>
@@ -117,6 +122,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="PackageManagerUI\SummaryWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="PackageManagerUI\UpdateAllUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

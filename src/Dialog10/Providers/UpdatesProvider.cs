@@ -1,17 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer;
+using NuGet.Dialog.PackageManagerUI;
 using NuGet.VisualStudio;
-using System.Diagnostics;
 
 namespace NuGet.Dialog.Providers
 {
     internal class UpdatesProvider : OnlineProvider
     {
         private readonly Project _project;
+        private readonly IUpdateAllUIService _updateAllUIService;
 
         public UpdatesProvider(
             Project project,
@@ -35,6 +37,7 @@ namespace NuGet.Dialog.Providers
                 solutionManager)
         {
             _project = project;
+            _updateAllUIService = providerServices.UpdateAllUIService;
         }
 
         public override string Name
@@ -54,6 +57,14 @@ namespace NuGet.Dialog.Providers
         }
 
         public override bool RefreshOnNodeSelection
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        public override bool SupportsExecuteAllCommand
         {
             get
             {
@@ -103,7 +114,87 @@ namespace NuGet.Dialog.Providers
 
         protected override void ExecuteCommand(IProjectManager projectManager, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations)
         {
-            activePackageManager.UpdatePackage(projectManager, item.PackageIdentity, operations, updateDependencies: true, allowPrereleaseVersions: IncludePrerelease, logger: this);
+            activePackageManager.UpdatePackage(
+                projectManager, 
+                item.PackageIdentity, 
+                operations, 
+                updateDependencies: true, 
+                allowPrereleaseVersions: IncludePrerelease, 
+                logger: this);
+        }
+
+        protected override bool ExecuteAllCore()
+        {
+            if (SelectedNode == null || SelectedNode.Extensions == null || SelectedNode.Extensions.Count == 0)
+            {
+                return false;
+            }
+
+            ShowProgressWindow();
+
+            IVsPackageManager activePackageManager = GetActivePackageManager();
+            Debug.Assert(activePackageManager != null);
+
+            IDisposable action = activePackageManager.SourceRepository.StartOperation(OperationName);
+            IProjectManager projectManager = activePackageManager.GetProjectManager(_project);
+
+            try
+            {
+                bool accepted = ShowLicenseAgreementForAllPackages(activePackageManager);
+                if (!accepted)
+                {
+                    return false;
+                }
+
+                RegisterPackageOperationEvents(activePackageManager, projectManager);
+                activePackageManager.UpdatePackages(projectManager, updateDependencies: true, allowPrereleaseVersions: IncludePrerelease, logger: this);
+                return true;
+            }
+            finally
+            {
+                UnregisterPackageOperationEvents(activePackageManager, projectManager);
+                action.Dispose();
+            }
+        }
+
+        protected bool ShowLicenseAgreementForAllPackages(IVsPackageManager activePackageManager)
+        {
+            var allOperations = new List<PackageOperation>();
+
+            var allPackages = SelectedNode.GetPackages(String.Empty, IncludePrerelease).ToList();
+            foreach (var package in allPackages)
+            {
+                var installWalker = new InstallWalker(
+                    LocalRepository,
+                    activePackageManager.SourceRepository,
+                    _project.GetTargetFrameworkName(),
+                    logger: this,
+                    ignoreDependencies: false,
+                    allowPrereleaseVersions: IncludePrerelease);
+
+                var operations = installWalker.ResolveOperations(package);
+                allOperations.AddRange(operations);
+            }
+
+            return ShowLicenseAgreement(activePackageManager, allOperations.Reduce());
+        }
+
+        public override void OnPackageLoadCompleted(PackagesTreeNodeBase selectedNode)
+        {
+            base.OnPackageLoadCompleted(selectedNode);
+            UpdateNumberOfPackages(selectedNode);
+        }
+
+        private void UpdateNumberOfPackages(PackagesTreeNodeBase selectedNode)
+        {
+            if (selectedNode != null && !selectedNode.IsSearchResultsNode && selectedNode.TotalNumberOfPackages > 1)
+            {
+                _updateAllUIService.Show();
+            }
+            else
+            {
+                _updateAllUIService.Hide();
+            }
         }
 
         public override IVsExtension CreateExtension(IPackage package)

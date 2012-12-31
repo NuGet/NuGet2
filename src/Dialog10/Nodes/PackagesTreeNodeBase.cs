@@ -16,7 +16,6 @@ namespace NuGet.Dialog.Providers
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
     internal abstract class PackagesTreeNodeBase : IVsExtensionsTreeNode, IVsPageDataSource, IVsSortDataSource, IVsProgressPaneConsumer, INotifyPropertyChanged, IVsMessagePaneConsumer
     {
-
         // The number of extensions to show per page.
         private const int DefaultItemsPerPage = 10;
 
@@ -136,7 +135,7 @@ namespace NuGet.Dialog.Providers
         }
 
         /// <summary>
-        /// List of templates at this node
+        /// List of templates at this node for the current page only
         /// </summary>
 #if VS10
         public IList<IVsExtension> Extensions
@@ -202,6 +201,14 @@ namespace NuGet.Dialog.Providers
             {
                 _currentPage = value;
                 NotifyPropertyChanged();
+            }
+        }
+
+        public int TotalNumberOfPackages
+        {
+            get
+            {
+                return _totalCount;
             }
         }
 
@@ -492,6 +499,9 @@ namespace NuGet.Dialog.Providers
                 }
             }
 
+            Provider.OnPackageLoadCompleted(this);
+
+            // for unit tests
             PackageLoadCompleted(this, EventArgs.Empty);
             NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageLoadEnd);            
         }
