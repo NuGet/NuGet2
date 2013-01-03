@@ -15,6 +15,8 @@ namespace NuGet
         private readonly string _source;
         private readonly string _userAgent;
 
+        public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
+
         public PackageServer(string source, string userAgent)
         {
             if (String.IsNullOrEmpty(source))
@@ -73,9 +75,10 @@ namespace NuGet
         private void PushPackageToServer(string apiKey, Func<Stream> packageStreamFactory, int timeout) 
         {
             HttpClient client = GetClient("", "PUT", "application/octet-stream");
-
+            
             client.SendingRequest += (sender, e) =>
             {
+                SendingRequest(this, e);
                 var request = (HttpWebRequest)e.Request;
 
                 // Set the timeout
@@ -148,9 +151,10 @@ namespace NuGet
             // Review: Do these values need to be encoded in any way?
             var url = String.Join("/", packageId, packageVersion);
             HttpClient client = GetClient(url, "DELETE", "text/html");
-
+            
             client.SendingRequest += (sender, e) =>
             {
+                SendingRequest(this, e);
                 var request = (HttpWebRequest)e.Request;
                 request.Headers.Add(ApiKeyHeader, apiKey);
             };

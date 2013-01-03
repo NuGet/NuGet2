@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,20 @@ namespace NuGet.Common
 {
     public class Console : IConsole
     {
+        public Console()
+        {
+            // setup CancelKeyPress handler so that the console colors are
+            // restored to their original values when nuget.exe is interrupted
+            // by Ctrl-C.
+            var originalForegroundColor = System.Console.ForegroundColor;
+            var originalBackgroundColor = System.Console.BackgroundColor;
+            System.Console.CancelKeyPress += (sender, e) =>
+            {
+                System.Console.ForegroundColor = originalForegroundColor;
+                System.Console.BackgroundColor = originalBackgroundColor;
+            };
+        }
+
         public int CursorLeft
         {
             get

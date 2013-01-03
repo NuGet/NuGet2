@@ -5,6 +5,13 @@ namespace NuGet.Common
     {
         public static readonly string UserAgent = "NuGet Command Line";
 
+        private readonly IConsole _console;
+
+        public CommandLineRepositoryFactory(IConsole console)
+        {
+            _console = console;
+        }
+
         public override IPackageRepository CreateRepository(string packageSource)
         {
             var repository = base.CreateRepository(packageSource);
@@ -14,6 +21,10 @@ namespace NuGet.Common
             {
                 httpClientEvents.SendingRequest += (sender, args) =>
                 {
+                    if (_console.Verbosity == Verbosity.Detailed)
+                    {
+                        _console.WriteError("{0} {1}", args.Request.Method, args.Request.RequestUri);
+                    }
                     string userAgent = HttpUtility.CreateUserAgentString(CommandLineConstants.UserAgent);
                     HttpUtility.SetUserAgent(args.Request, userAgent);
                 };

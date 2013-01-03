@@ -35,6 +35,13 @@ namespace NuGet.Commands
             //If the user passed a source use it for the gallery location
             string source = SourceProvider.ResolveAndValidateSource(Source) ?? NuGetConstants.DefaultGalleryServerUrl;
             var gallery = new PackageServer(source, CommandLineConstants.UserAgent);
+            gallery.SendingRequest += (sender, e) =>
+            {
+                if (Console.Verbosity == NuGet.Verbosity.Detailed)
+                {
+                    Console.WriteError("{0} {1}", e.Request.Method, e.Request.RequestUri);
+                }
+            };
 
             //If the user did not pass an API Key look in the config file
             string apiKey = GetApiKey(source);

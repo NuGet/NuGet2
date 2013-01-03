@@ -93,7 +93,7 @@ namespace NuGet.Commands
                     SourceProvider, 
                     Console);
                 HttpClient.DefaultCredentialProvider = credentialProvider;
-                RepositoryFactory = new NuGet.Common.CommandLineRepositoryFactory();
+                RepositoryFactory = new NuGet.Common.CommandLineRepositoryFactory(Console);
 
                 ExecuteCommand();
             }

@@ -118,7 +118,7 @@ namespace NuGet
                 using (var container = new CompositionContainer(catalog))
                 {
                     container.ComposeExportedValue<IConsole>(console);
-                    container.ComposeExportedValue<IPackageRepositoryFactory>(new NuGet.Common.CommandLineRepositoryFactory());
+                    container.ComposeExportedValue<IPackageRepositoryFactory>(new NuGet.Common.CommandLineRepositoryFactory(console));
                     container.ComposeExportedValue<IFileSystem>(fileSystem);
                     container.ComposeParts(this);
                 }

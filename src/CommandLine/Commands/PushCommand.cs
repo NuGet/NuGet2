@@ -106,6 +106,14 @@ namespace NuGet.Commands
         private void PushPackage(string packagePath, string source, string apiKey, TimeSpan timeout)
         {
             var packageServer = new PackageServer(source, CommandLineConstants.UserAgent);
+            packageServer.SendingRequest += (sender, e) =>
+            {
+                if (Console.Verbosity == NuGet.Verbosity.Detailed)
+                {
+                    Console.WriteError("{0} {1}", e.Request.Method, e.Request.RequestUri);
+                }
+            };
+            
             IEnumerable<string> packagesToPush = GetPackagesToPush(packagePath);
 
             if (!packagesToPush.Any())
