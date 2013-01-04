@@ -125,12 +125,45 @@ namespace NuGet
         [XmlArrayItem("frameworkAssembly")]
         public List<ManifestFrameworkAssembly> FrameworkAssemblies { get; set; }
 
+        /// <summary>
+        /// This property should be used only by the XML serializer. Do not use it in code.
+        /// </summary>
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "value", Justification = "The propert setter is not supported.")]
         [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
-        [XmlArray("references")]
-        [XmlArrayItem("reference")]
+        [XmlArray("references", IsNullable = false)]
+        [XmlArrayItem("group", typeof(ManifestReferenceSet))]
+        [XmlArrayItem("reference", typeof(ManifestReference))]
         [ManifestVersion(2)]
-        public List<ManifestReference> References { get; set; }
+        public List<object> ReferenceSetsSerialize
+        {
+            get
+            {
+                if (ReferenceSets == null)
+                {
+                    return null;
+                }
+
+                if (ReferenceSets.Any(set => set.TargetFramework != null))
+                {
+                    return ReferenceSets.Cast<object>().ToList();
+                }
+                else
+                {
+                    return ReferenceSets.SelectMany(set => set.References).Cast<object>().ToList();
+                }
+            }
+            set
+            {
+                // this property is only used for serialization.
+                throw new InvalidOperationException();
+            }
+        }
+
+        [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
+        [XmlIgnore]
+        public List<ManifestReferenceSet> ReferenceSets { get; set; }
 
         SemanticVersion IPackageMetadata.Version
         {

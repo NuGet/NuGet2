@@ -493,6 +493,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;references&gt; element must not contain both &lt;group&gt; and &lt;reference&gt; child elements..
+        /// </summary>
+        internal static string Manifest_ReferencesHasMixedElements {
+            get {
+                return ResourceManager.GetString("Manifest_ReferencesHasMixedElements", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} is required..
         /// </summary>
         internal static string Manifest_RequiredMetadataMissing {

@@ -22,6 +22,7 @@ namespace NuGet
         {
             var manifestMetadata = new ManifestMetadata();
             manifestMetadata.DependencySets = new List<ManifestDependencySet>();
+            manifestMetadata.ReferenceSets = new List<ManifestReferenceSet>();
 
             XNode node = xElement.FirstNode;
             while (node != null)
@@ -93,27 +94,57 @@ namespace NuGet
                     manifestMetadata.Tags = value;
                     break;
                 case "dependencies":
-                    manifestMetadata.DependencySets = ReadDependencySet(element);
+                    manifestMetadata.DependencySets = ReadDependencySets(element);
                     break;
                 case "frameworkAssemblies":
                     manifestMetadata.FrameworkAssemblies = ReadFrameworkAssemblies(element);
                     break;
                 case "references":
-                    manifestMetadata.References = ReadReferences(element);
+                    manifestMetadata.ReferenceSets = ReadReferenceSets(element);
                     break;
             }
         }
 
-        private static List<ManifestReference> ReadReferences(XElement referenceElement)
+        private static List<ManifestReferenceSet> ReadReferenceSets(XElement referencesElement)
         {
-            if (!referenceElement.HasElements)
+            if (!referencesElement.HasElements)
             {
-                return new List<ManifestReference>(0);
+                return new List<ManifestReferenceSet>(0);
             }
 
-            return (from element in referenceElement.Elements()
+            if (referencesElement.ElementsNoNamespace("group").Any() &&
+                referencesElement.ElementsNoNamespace("reference").Any())
+            {
+                throw new InvalidDataException(NuGetResources.Manifest_ReferencesHasMixedElements);
+            }
+
+            var references = ReadReference(referencesElement);
+            if (references.Count > 0)
+            {
+                // old format, <reference> is direct child of <references>
+                var referenceSet = new ManifestReferenceSet
+                {
+                    References = references
+                };
+                return new List<ManifestReferenceSet> { referenceSet };
+            }
+            else
+            {
+                var groups = referencesElement.ElementsNoNamespace("group");
+                return (from element in groups
+                        select new ManifestReferenceSet
+                        {
+                            TargetFramework = element.GetOptionalAttributeValue("targetFramework").SafeTrim(),
+                            References = ReadReference(element)
+                        }).ToList();
+            }
+        }
+
+        public static List<ManifestReference> ReadReference(XElement referenceElement)
+        {
+            return (from element in referenceElement.ElementsNoNamespace("reference")
                     select new ManifestReference { File = element.GetOptionalAttributeValue("file").SafeTrim() }
-                    ).ToList();
+                   ).ToList();
         }
 
         private static List<ManifestFrameworkAssembly> ReadFrameworkAssemblies(XElement frameworkElement)
@@ -131,7 +162,7 @@ namespace NuGet
                     }).ToList();
         }
 
-        private static List<ManifestDependencySet> ReadDependencySet(XElement dependenciesElement)
+        private static List<ManifestDependencySet> ReadDependencySets(XElement dependenciesElement)
         {
             if (!dependenciesElement.HasElements)
             {

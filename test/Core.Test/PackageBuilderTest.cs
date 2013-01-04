@@ -124,7 +124,7 @@ namespace NuGet.Test
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
             };
-            builder.PackageAssemblyReferences.Add("foo.dll");
+            builder.PackageAssemblyReferences.Add(new PackageReferenceSet(null, new string[] { "foo.dll" }));
             builder.Authors.Add("David");
             var ms = new MemoryStream();
 
@@ -416,6 +416,94 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void CreatePackageUsesV5SchemaNamespaceIfReferencesTargetFramework()
+        {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = "A",
+                Version = new SemanticVersion("1.0"),
+                Description = "Descriptions",
+            };
+            builder.Authors.Add("Luan");
+            builder.PackageAssemblyReferences.Add(
+                new PackageReferenceSet(
+                    new FrameworkName(".NET, Version=3.0"),
+                    new[] { "one.dll" }));
+            builder.Files.Add(CreatePackageFile("lib\\one.dll"));
+
+            using (var ms = new MemoryStream())
+            {
+                builder.Save(ms);
+
+                ms.Seek(0, SeekOrigin.Begin);
+
+                var manifestStream = GetManifestStream(ms);
+
+                // Assert
+                Assert.Equal(@"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>Luan</authors>
+    <owners>Luan</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+    <references>
+      <group targetFramework="".NET3.0"">
+        <reference file=""one.dll"" />
+      </group>
+    </references>
+  </metadata>
+</package>", manifestStream.ReadToEnd());
+            }
+        }
+
+        [Fact]
+        public void CreatePackageDoesNotUseV5SchemaNamespaceIfReferencesHasOnlyNullTargetFramework()
+        {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = "A",
+                Version = new SemanticVersion("1.0"),
+                Description = "Descriptions",
+            };
+            builder.Authors.Add("Luan");
+            builder.PackageAssemblyReferences.Add(
+                new PackageReferenceSet(
+                    null,
+                    new[] { "one.dll" }));
+            builder.Files.Add(CreatePackageFile("lib\\one.dll"));
+
+            using (var ms = new MemoryStream())
+            {
+                builder.Save(ms);
+
+                ms.Seek(0, SeekOrigin.Begin);
+
+                var manifestStream = GetManifestStream(ms);
+
+                // Assert
+                Assert.Equal(@"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>Luan</authors>
+    <owners>Luan</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+    <references>
+      <reference file=""one.dll"" />
+    </references>
+  </metadata>
+</package>", manifestStream.ReadToEnd());
+            }
+        }
+
+        [Fact]
         public void CreatePackageTrimsExtraWhitespace()
         {
             // Arrange
@@ -595,7 +683,7 @@ namespace NuGet.Test
             };
             builder.Authors.Add("Test");
             builder.Files.Add(new PhysicalPackageFile { TargetPath = @"lib\Foo.dll" });
-            builder.PackageAssemblyReferences.Add("Bar.dll");
+            builder.PackageAssemblyReferences.Add(new PackageReferenceSet(null, new string[] { "Bar.dll" }));
 
             ExceptionAssert.Throws<InvalidDataException>(() => builder.Save(new MemoryStream()),
                 "Invalid assembly reference 'Bar.dll'. Ensure that a file named 'Bar.dll' exists in the lib directory.");
@@ -798,6 +886,29 @@ Description is required.");
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The required attribute 'id' is missing.");
+        }
+
+        [Fact]
+        public void ReferencesContainMixedElementsThrows()
+        {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package><metadata>
+    <id>Artem.XmlProviders</id>
+    <version>2.5</version>
+    <authors>Velio Ivanov</authors>
+    <language>en-us</language>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <references>
+        <reference file=""a.dll"" />
+        <group>
+           <reference file=""b.dll"" />
+        </group>
+    </references>
+</metadata></package>";
+
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidDataException>(() => new PackageBuilder(spec.AsStream(), null), "<references> element must not contain both <group> and <reference> child elements.");
         }
 
         [Fact]
@@ -1185,10 +1296,10 @@ Description is required.");
                 new PhysicalPackageFile { TargetPath = @"lib\net40\bar.dll" },
                 new PhysicalPackageFile { TargetPath = @"lib\net40\baz.exe" },
             };
-            var packageAssemblyReferences = new[] { "foo.dll", "bar", "baz" };
+            var packageAssemblyReferences = new PackageReferenceSet(null, new string[] { "foo.dll", "bar", "baz" });
 
             // Act and Assert
-            PackageBuilder.ValidateReferenceAssemblies(files, packageAssemblyReferences);
+            PackageBuilder.ValidateReferenceAssemblies(files, new[] { packageAssemblyReferences });
 
             // If we've got this far, no exceptions were thrown.
             Assert.True(true);
@@ -1203,10 +1314,10 @@ Description is required.");
                 new PhysicalPackageFile { TargetPath = @"lib\net20\bar.dll" },
                 new PhysicalPackageFile { TargetPath = @"lib\net20\baz.qux" },
             };
-            var packageAssemblyReferences = new[] { "foo.dll", "bar", "baz" };
+            var packageAssemblyReferences = new PackageReferenceSet(new FrameworkName("Silverlight, Version=1.0"), new string[] { "foo.dll", "bar", "baz" });
 
             // Act and Assert
-            ExceptionAssert.Throws<InvalidDataException>(() => PackageBuilder.ValidateReferenceAssemblies(files, packageAssemblyReferences),
+            ExceptionAssert.Throws<InvalidDataException>(() => PackageBuilder.ValidateReferenceAssemblies(files, new [] { packageAssemblyReferences }),
                 "Invalid assembly reference 'baz'. Ensure that a file named 'baz' exists in the lib directory.");
         }
 
@@ -1478,7 +1589,10 @@ Enabling license acceptance requires a license url.");
             Assert.Equal("Velio Ivanov", packageBuilder.Authors.Single());
             Assert.Equal("Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).", packageBuilder.Description);
             Assert.Equal("en-US", packageBuilder.Language);
-            Assert.Equal("foo.dll", packageBuilder.PackageAssemblyReferences.Single());
+
+            var packageReferenceSet = packageBuilder.PackageAssemblyReferences.Single();
+            Assert.Null(packageReferenceSet.TargetFramework);
+            Assert.Equal("foo.dll", packageReferenceSet.References.Single());
         }
 
         [Fact]

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Serialization;
-using System.Collections.Generic;
 
 namespace NuGet
 {
@@ -11,22 +10,32 @@ namespace NuGet
     {
         public const int DefaultVersion = 1;
         public const int SemverVersion = 3;
-        public const int TargetFrameworkSupportVersion = 4;
+        public const int TargetFrameworkSupportForDependencyContentsAndToolsVersion = 4;
+        public const int TargetFrameworkSupportForReferencesVersion = 5;
         private static readonly Type[] _xmlAttributes = new[] { typeof(XmlElementAttribute), typeof(XmlAttributeAttribute), typeof(XmlArrayAttribute) };
 
         public static int GetManifestVersion(ManifestMetadata metadata)
         {
-            return Math.Max(VisitObject(metadata), GetVersionFromMetadata(metadata));
+            return Math.Max(VisitObject(metadata), GetMaxVersionFromMetadata(metadata));
         }
 
-        private static int GetVersionFromMetadata(ManifestMetadata metadata)
+        private static int GetMaxVersionFromMetadata(ManifestMetadata metadata)
         {
+            // Important: check for version 5 before version 4
+            bool referencesHasTargetFramework =
+              metadata.ReferenceSets != null &&
+              metadata.ReferenceSets.Any(r => r.TargetFramework != null);
+            if (referencesHasTargetFramework)
+            {
+                return TargetFrameworkSupportForReferencesVersion;
+            }
+
             bool dependencyHasTargetFramework =
                 metadata.DependencySets != null &&
                 metadata.DependencySets.Any(d => d.TargetFramework != null);
             if (dependencyHasTargetFramework)
             {
-                return TargetFrameworkSupportVersion;
+                return TargetFrameworkSupportForDependencyContentsAndToolsVersion;
             }
 
             SemanticVersion semanticVersion;

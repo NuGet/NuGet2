@@ -688,6 +688,8 @@ namespace NuGet
             return hasItems;
         }
 
+        
+
         internal static Version NormalizeVersion(Version verison)
         {
             return new Version(verison.Major,

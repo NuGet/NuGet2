@@ -20,7 +20,6 @@ namespace NuGet
     public class OptimizedZipPackage : LocalPackage
     {
         private Dictionary<string, PhysicalPackageFile> _files;
-        private ICollection<IPackageAssemblyReference> _assemblyReferences;
         private ICollection<FrameworkName> _supportedFrameworks;
         private readonly IFileSystem _fileSystem;
         private readonly IFileSystem _expandedFileSystem;
@@ -42,7 +41,7 @@ namespace NuGet
             if (!File.Exists(fullPackagePath))
             {
                 throw new ArgumentException(
-                    String.Format(CultureInfo.CurrentCulture, NuGetResources.FileDoesNotExit, fullPackagePath), 
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.FileDoesNotExit, fullPackagePath),
                     "fullPackagePath");
             }
 
@@ -123,20 +122,13 @@ namespace NuGet
             return _files.Values;
         }
 
-        protected override IEnumerable<IPackageAssemblyReference> GetAssemblyReferencesBase()
+        protected override IEnumerable<IPackageAssemblyReference> GetUnfilteredAssemblyReferences()
         {
             EnsurePackageFiles();
 
-            if (_assemblyReferences == null)
-            {
-                var references = from file in _files.Values
-                                 where IsAssemblyReference(file)
-                                 select (IPackageAssemblyReference)new PhysicalPackageAssemblyReference(file);
-
-                _assemblyReferences = new ReadOnlyCollection<IPackageAssemblyReference>(references.ToList());
-            }
-
-            return _assemblyReferences;
+            return from file in _files.Values
+                   where IsAssemblyReference(file.Path)
+                   select (IPackageAssemblyReference)new PhysicalPackageAssemblyReference(file);
         }
 
         public override IEnumerable<FrameworkName> GetSupportedFrameworks()
@@ -191,7 +183,6 @@ namespace NuGet
             }
 
             _files = new Dictionary<string, PhysicalPackageFile>();
-            _assemblyReferences = null;
             _supportedFrameworks = null;
 
             using (Stream stream = GetStream())
@@ -210,7 +201,7 @@ namespace NuGet
                 {
                     string path = UriUtility.GetPath(file.Uri);
                     string filePath = Path.Combine(_expandedFolderPath, path);
-                    
+
                     using (Stream partStream = file.GetStream())
                     {
                         // only copy the package part to disk if there doesn't exist

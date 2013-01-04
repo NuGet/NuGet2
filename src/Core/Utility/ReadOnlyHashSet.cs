@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace NuGet
 {
@@ -19,6 +17,21 @@ namespace NuGet
             }
 
             _backingSet = new HashSet<T>(items);
+        }
+
+        public ReadOnlyHashSet(IEnumerable<T> items, IEqualityComparer<T> comparer)
+        {
+            if (items == null)
+            {
+                throw new ArgumentNullException("items");
+            }
+
+            if (comparer == null)
+            {
+                throw new ArgumentNullException("comparer");
+            }
+
+            _backingSet = new HashSet<T>(items, comparer);
         }
         
         public ReadOnlyHashSet(ISet<T> backingSet)

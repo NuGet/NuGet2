@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using NuGet.Resources;
 using System.Runtime.Versioning;
 
 namespace NuGet
@@ -10,7 +9,7 @@ namespace NuGet
     public abstract class LocalPackage : IPackage
     {
         private const string ResourceAssemblyExtension = ".resources.dll";
-        private HashSet<string> _references;
+        private IList<IPackageAssemblyReference> _assemblyReferences;
 
         protected LocalPackage()
         {
@@ -168,11 +167,17 @@ namespace NuGet
         {
             get
             {
-                return GetAssemblyReferencesBase();
+                if (_assemblyReferences == null)
+                {
+                    var unfilteredAssemblyReferences = GetUnfilteredAssemblyReferences();
+                    _assemblyReferences = FilterAssemblyReferences(unfilteredAssemblyReferences, PackageReferenceSets);
+                }
+
+                return _assemblyReferences;
             }
         }
 
-        protected IList<ManifestReference> ManifestReferences
+        protected IList<PackageReferenceSet> PackageReferenceSets
         {
             get;
             private set;
@@ -180,8 +185,7 @@ namespace NuGet
 
         public virtual IEnumerable<FrameworkName> GetSupportedFrameworks()
         {
-            return FrameworkAssemblies.SelectMany(f => f.SupportedFrameworks)
-                                      .Distinct();
+            return FrameworkAssemblies.SelectMany(f => f.SupportedFrameworks).Distinct();
         }
 
         public IEnumerable<IPackageFile> GetFiles()
@@ -195,7 +199,7 @@ namespace NuGet
         protected abstract IEnumerable<IPackageFile> GetFilesBase();
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This operation can be expensive.")]
-        protected abstract IEnumerable<IPackageAssemblyReference> GetAssemblyReferencesBase();
+        protected abstract IEnumerable<IPackageAssemblyReference> GetUnfilteredAssemblyReferences();
 
         protected void ReadManifest(Stream manifestStream)
         {
@@ -219,10 +223,7 @@ namespace NuGet
             DependencySets = metadata.DependencySets;
             FrameworkAssemblies = metadata.FrameworkAssemblies;
             Copyright = metadata.Copyright;
-            ManifestReferences = manifest.Metadata.References;
-
-            IEnumerable<string> references = (ManifestReferences ?? Enumerable.Empty<ManifestReference>()).Select(c => c.File);
-            _references = new HashSet<string>(references, StringComparer.OrdinalIgnoreCase);
+            PackageReferenceSets = manifest.Metadata.ReferenceSets.Select(r => new PackageReferenceSet(r)).ToList();
 
             // Ensure tags start and end with an empty " " so we can do contains filtering reliably
             if (!String.IsNullOrEmpty(Tags))
@@ -231,48 +232,64 @@ namespace NuGet
             }
         }
 
-        protected bool IsAssemblyReference(IPackageFile file)
-        {
-            if (_references == null)
+        internal protected static bool IsAssemblyReference(string filePath)
+        {           
+            // assembly reference must be under lib/
+            if (!filePath.StartsWith(Constants.LibDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
             {
-                throw new InvalidOperationException(NuGetResources.Manifest_NotAvailable);
+                return false;
             }
 
-            return IsAssemblyReference(file, _references);
-        }
-
-        protected bool IsAssemblyReference(string filePath)
-        {
-            if (_references == null)
-            {
-                throw new InvalidOperationException(NuGetResources.Manifest_NotAvailable);
-            }
-
-            return IsAssemblyReference(filePath, _references);
-        }
-
-        internal static bool IsAssemblyReference(IPackageFile file, IEnumerable<string> references)
-        {
-            return IsAssemblyReference(file.Path, references);
-        }
-
-        internal static bool IsAssemblyReference(string filePath, IEnumerable<string> references)
-        {
-            // Assembly references are in lib/ and have a .dll/.exe/.winmd extension OR if it is an empty folder.
             var fileName = Path.GetFileName(filePath);
 
-            return filePath.StartsWith(Constants.LibDirectory, StringComparison.OrdinalIgnoreCase) &&
-                   // empty file
-                   (fileName == Constants.PackageEmptyFileName ||
-                   // Exclude resource assemblies
-                   !filePath.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
-                   Constants.AssemblyReferencesExtensions.Contains(Path.GetExtension(filePath), StringComparer.OrdinalIgnoreCase) &&
-                   // If references are listed, ensure that the file is listed in it.
-                   (references.IsEmpty() || references.Contains(fileName)));
+            // if it's an empty folder, yes
+            if (fileName == Constants.PackageEmptyFileName)
+            {
+                return true;
+            }
+
+            // Assembly reference must have a .dll|.exe|.winmd extension and is not a resource assembly;
+            return !filePath.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
+                Constants.AssemblyReferencesExtensions.Contains(Path.GetExtension(filePath), StringComparer.OrdinalIgnoreCase);
+        }
+
+        private IList<IPackageAssemblyReference> FilterAssemblyReferences(
+            IEnumerable<IPackageAssemblyReference> unfilteredAssemblyReferences, 
+            IList<PackageReferenceSet> packageReferenceSets)
+        {
+            if (packageReferenceSets.IsEmpty())
+            {
+                return unfilteredAssemblyReferences.ToList();
+            }
+
+            var results = new List<IPackageAssemblyReference>();
+
+            // we group assembly references by TargetFramework
+            var assembliesGroupedByFx = unfilteredAssemblyReferences.ToLookup(d => d.TargetFramework);
+            foreach (var group in assembliesGroupedByFx)
+            {
+                FrameworkName fileTargetFramework = group.Key;
+
+                IEnumerable<PackageReferenceSet> bestMatches;
+                if (VersionUtility.TryGetCompatibleItems(fileTargetFramework, PackageReferenceSets, out bestMatches))
+                {
+                    // now examine each assembly file, check if it appear in the References list for the correponding target framework
+                    foreach (var assemblyFile in group)
+                    {
+                        if (bestMatches.Any(m => m.References.Contains(assemblyFile.Name)))
+                        {
+                            results.Add(assemblyFile);
+                        }
+                    }
+                }
+            }
+
+            return results;
         }
 
         public override string ToString()
         {
+            // extension method, must have 'this'.
             return this.GetFullName();
         }
     }

@@ -53,7 +53,7 @@ namespace NuGet
             Files = new Collection<IPackageFile>();
             DependencySets = new Collection<PackageDependencySet>();
             FrameworkReferences = new Collection<FrameworkAssemblyReference>();
-            PackageAssemblyReferences = new Collection<string>();
+            PackageAssemblyReferences = new Collection<PackageReferenceSet>();
             Authors = new HashSet<string>();
             Owners = new HashSet<string>();
             Tags = new HashSet<string>();
@@ -167,7 +167,7 @@ namespace NuGet
             private set;
         }
 
-        public Collection<string> PackageAssemblyReferences
+        public Collection<PackageReferenceSet> PackageAssemblyReferences
         {
             get;
             private set;
@@ -239,7 +239,7 @@ namespace NuGet
                 // Validate and write the manifest
                 WriteManifest(package,
                     requiresV4TargetFrameworkSchema ?
-                        ManifestVersionUtility.TargetFrameworkSupportVersion :
+                        ManifestVersionUtility.TargetFrameworkSupportForDependencyContentsAndToolsVersion :
                         ManifestVersionUtility.DefaultVersion);
 
                 // Write the files to the package
@@ -298,15 +298,18 @@ namespace NuGet
             }
         }
 
-        internal static void ValidateReferenceAssemblies(IEnumerable<IPackageFile> files, IEnumerable<string> packageAssemblyReferences)
+        internal static void ValidateReferenceAssemblies(IEnumerable<IPackageFile> files, IEnumerable<PackageReferenceSet> packageAssemblyReferences)
         {
             var libFiles = new HashSet<string>(from file in files
                                                where !String.IsNullOrEmpty(file.Path) && file.Path.StartsWith("lib", StringComparison.OrdinalIgnoreCase)
                                                select Path.GetFileName(file.Path), StringComparer.OrdinalIgnoreCase);
 
-            foreach (var reference in packageAssemblyReferences)
+            foreach (var reference in packageAssemblyReferences.SelectMany(p => p.References))
             {
-                if (!libFiles.Contains(reference) && !libFiles.Contains(reference + ".dll") && !libFiles.Contains(reference + ".exe"))
+                if (!libFiles.Contains(reference) && 
+                    !libFiles.Contains(reference + ".dll") && 
+                    !libFiles.Contains(reference + ".exe") &&
+                    !libFiles.Contains(reference + ".winmd"))
                 {
                     throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_InvalidReference, reference));
                 }
@@ -359,9 +362,10 @@ namespace NuGet
 
             DependencySets.AddRange(metadata.DependencySets);
             FrameworkReferences.AddRange(metadata.FrameworkAssemblies);
-            if (manifestMetadata.References != null)
+
+            if (manifestMetadata.ReferenceSets != null)
             {
-                PackageAssemblyReferences.AddRange(manifestMetadata.References.Select(reference => reference.File));
+                PackageAssemblyReferences.AddRange(manifestMetadata.ReferenceSets.Select(r => new PackageReferenceSet(r)));
             }
         }
 

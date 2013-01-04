@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+using Moq;
 using NuGet.Test.Mocks;
 using NuGet.Test.Utility;
 using Xunit;
@@ -142,6 +144,166 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void AssemblyReferencesIsFilteredCorrectlyWhenReferenceIsEmpty()
+        {
+            // Arrange
+            var files = new IPackageFile[] {
+                CreatePackageFile(@"lib\net40\one.dll"),
+            };
+
+            var references = new PackageReferenceSet[] {
+            };
+
+            var ms = GetPackageStream(files, references);
+
+            var fileSystem = new MockFileSystem("x:\\");
+            fileSystem.AddFile("pam.nupkg", ms);
+
+            var expandedFileSystem = new MockFileSystem("y:\\");
+
+            var ozp = new TestableOptimizedZipPackage(fileSystem, "pam.nupkg", expandedFileSystem);
+
+            // Act
+            var assemblies = ozp.AssemblyReferences.ToList();
+
+            // Assert
+            Assert.Equal(1, assemblies.Count);
+            Assert.Equal(@"lib\net40\one.dll", assemblies[0].Path);
+        }
+
+        [Fact]
+        public void AssemblyReferencesIsFilteredCorrectlyWithOnlyNullTargetFramework()
+        {
+            // Arrange
+            var files = new IPackageFile[] {
+                CreatePackageFile(@"lib\net40\one.dll"),
+                CreatePackageFile(@"lib\net40\two.dll"),
+
+                CreatePackageFile(@"lib\sl30\one.dll"),
+                CreatePackageFile(@"lib\sl30\two.dll"),
+
+                CreatePackageFile(@"lib\net45\foo.dll"),
+                CreatePackageFile(@"lib\net45\bar.dll")
+            };
+
+            var references = new PackageReferenceSet[] {
+                new PackageReferenceSet(
+                    null,
+                    new [] { "two.dll", "bar.dll" }),
+            };
+
+            var ms = GetPackageStream(files, references);
+
+            var fileSystem = new MockFileSystem("x:\\");
+            fileSystem.AddFile("pam.nupkg", ms);
+
+            var expandedFileSystem = new MockFileSystem("y:\\");
+
+            var ozp = new TestableOptimizedZipPackage(fileSystem, "pam.nupkg", expandedFileSystem);
+
+            // Act
+            var assemblies = ozp.AssemblyReferences.OrderBy(p => p.Path).ToList();
+
+            // Assert
+            Assert.Equal(3, assemblies.Count);
+            Assert.Equal(@"lib\net40\two.dll", assemblies[0].Path);
+            Assert.Equal(@"lib\net45\bar.dll", assemblies[1].Path);
+            Assert.Equal(@"lib\sl30\two.dll", assemblies[2].Path);
+        }
+
+        [Fact]
+        public void AssemblyReferencesIsFilteredCorrectlyAccordingToTargetFramework()
+        {
+            // Arrange
+            var files = new IPackageFile[] {
+                CreatePackageFile(@"lib\net40\one.dll"),
+                CreatePackageFile(@"lib\net40\two.dll"),
+
+                CreatePackageFile(@"lib\sl30\one.dll"),
+                CreatePackageFile(@"lib\sl30\two.dll"),
+
+                CreatePackageFile(@"lib\net45\foo.dll"),
+                CreatePackageFile(@"lib\net45\bar.dll")
+            };
+
+            var references = new PackageReferenceSet[] {
+                new PackageReferenceSet(
+                    new FrameworkName("Silverlight, Version=2.0"),
+                    new [] { "two.dll" }),
+                
+                new PackageReferenceSet(
+                    new FrameworkName(".NET, Version=4.0"),
+                    new string[0]),
+
+                new PackageReferenceSet(
+                    new FrameworkName(".NET, Version=4.5"),
+                    new string[] { "foo.dll", "bar.dll" }),
+            };
+
+            var ms = GetPackageStream(files, references);
+
+            var fileSystem = new MockFileSystem("x:\\");
+            fileSystem.AddFile("pam.nupkg", ms);
+
+            var expandedFileSystem = new MockFileSystem("y:\\");
+
+            var ozp = new TestableOptimizedZipPackage(fileSystem, "pam.nupkg", expandedFileSystem);
+
+            // Act
+            var assemblies = ozp.AssemblyReferences.OrderBy(p => p.Path).ToList();
+
+            // Assert
+            Assert.Equal(3, assemblies.Count);
+            Assert.Equal(@"lib\net45\bar.dll", assemblies[0].Path);
+            Assert.Equal(@"lib\net45\foo.dll", assemblies[1].Path);
+            Assert.Equal(@"lib\sl30\two.dll", assemblies[2].Path);
+        }
+
+        [Fact]
+        public void AssemblyReferencesIsFilteredCorrectlyAccordingToTargetFramework2()
+        {
+            // Arrange
+            var files = new IPackageFile[] {
+                CreatePackageFile(@"lib\net40\one.dll"),
+
+                CreatePackageFile(@"lib\sl30\one.dll"),
+                CreatePackageFile(@"lib\sl30\two.dll"),
+
+                CreatePackageFile(@"lib\net45\foo.dll"),
+                CreatePackageFile(@"lib\net45\bar.dll")
+            };
+
+            var references = new PackageReferenceSet[] {
+                new PackageReferenceSet(
+                    null,
+                    new [] { "one.dll" }),
+                
+                new PackageReferenceSet(
+                    new FrameworkName(".NET, Version=4.5"),
+                    new string[] { "foo.dll", "bar.dll" }),
+            };
+
+            var ms = GetPackageStream(files, references);
+
+            var fileSystem = new MockFileSystem("x:\\");
+            fileSystem.AddFile("pam.nupkg", ms);
+
+            var expandedFileSystem = new MockFileSystem("y:\\");
+
+            var ozp = new TestableOptimizedZipPackage(fileSystem, "pam.nupkg", expandedFileSystem);
+
+            // Act
+            var assemblies = ozp.AssemblyReferences.OrderBy(p => p.Path).ToList();
+
+            // Assert
+            Assert.Equal(4, assemblies.Count);
+            Assert.Equal(@"lib\net40\one.dll", assemblies[0].Path);
+            Assert.Equal(@"lib\net45\bar.dll", assemblies[1].Path);
+            Assert.Equal(@"lib\net45\foo.dll", assemblies[2].Path);
+            Assert.Equal(@"lib\sl30\one.dll", assemblies[3].Path);
+        }
+
+        [Fact]
         public void CallingGetSupportedFrameworksExpandFilesIntoSpecifiedFileSystem()
         {
             // Arrange
@@ -207,7 +369,9 @@ namespace NuGet.Test
             Assert.Equal("happy new year", expandedFileSystem.ReadAllText("random\\content\\foo"));
         }
 
-        private static MemoryStream GetPackageStream()
+        private static MemoryStream GetPackageStream(
+            IEnumerable<IPackageFile> files = null,
+            IEnumerable<PackageReferenceSet> references = null)
         {
             var builder = new PackageBuilder();
             builder.Id = "Package";
@@ -216,15 +380,26 @@ namespace NuGet.Test
             builder.Description = "This is a test package";
             builder.ReleaseNotes = "This is a release note.";
             builder.Copyright = "Copyright";
-            builder.Files.AddRange(
-                PackageUtility.CreateFiles(
-                    new[] { PathFixUtility.FixPath(@"lib\40\A.dll"), PathFixUtility.FixPath(@"content\foo") }
-                ));
+            if (files != null)
+            {
+                builder.Files.AddRange(files);
+            }
+            else
+            {
+                builder.Files.AddRange(
+                    PackageUtility.CreateFiles(
+                        new[] { PathFixUtility.FixPath(@"lib\40\A.dll"), PathFixUtility.FixPath(@"content\foo") }
+                    ));
+            }
 
             builder.FrameworkReferences.AddRange(
                 new[] { new FrameworkAssemblyReference("A", new[] { VersionUtility.ParseFrameworkName("sl50") }),
                         new FrameworkAssemblyReference("B", new[] { VersionUtility.ParseFrameworkName("windows8") })
                       });
+            if (references != null)
+            {
+                builder.PackageAssemblyReferences.AddRange(references);
+            }
             
             var ms = new MemoryStream();
             builder.Save(ms);
@@ -251,6 +426,20 @@ namespace NuGet.Test
                 HasCalledExpandedFolderPath = true;
                 return "random";
             }
+        }
+
+        private static IPackageFile CreatePackageFile(string name)
+        {
+            var file = new Mock<IPackageFile>();
+            file.SetupGet(f => f.Path).Returns(name);
+            file.Setup(f => f.GetStream()).Returns(new MemoryStream());
+
+            string effectivePath;
+            var fx = VersionUtility.ParseFrameworkNameFromFilePath(name, out effectivePath);
+            file.SetupGet(f => f.EffectivePath).Returns(effectivePath);
+            file.SetupGet(f => f.TargetFramework).Returns(fx);
+
+            return file.Object;
         }
     }
 }

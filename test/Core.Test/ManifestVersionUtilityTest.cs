@@ -79,8 +79,13 @@ namespace NuGet.Test
                 FrameworkAssemblies = new List<ManifestFrameworkAssembly> {  
                     new ManifestFrameworkAssembly { AssemblyName = "System.Data.dll" }
                 },
-                References = new List<ManifestReference> {
-                    new ManifestReference { File = "Foo.dll" }
+                ReferenceSets = new List<ManifestReferenceSet> {
+                    new ManifestReferenceSet
+                    {
+                        References = new List<ManifestReference> {
+                            new ManifestReference { File = "Foo.dll" }
+                        }
+                    }
                 }
             };
 
@@ -104,7 +109,7 @@ namespace NuGet.Test
                 FrameworkAssemblies = new List<ManifestFrameworkAssembly>
                 {
                 },
-                References = new List<ManifestReference>
+                ReferenceSets = new List<ManifestReferenceSet>
                 {
                 }
             };

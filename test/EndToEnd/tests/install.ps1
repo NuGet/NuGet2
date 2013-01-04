@@ -2041,7 +2041,29 @@ function Test-InstallPackageRespectAssemblyReferenceFilterOnSecondProject
     
     # Act
     $q | Install-Package B -Source $context.RepositoryPath
+
+    # Assert
     Assert-Package $q 'B' '1.0.0'
     Assert-Reference $q 'GrayscaleEffect'
     Assert-Null (Get-AssemblyReference $q 'Ookii.Dialogs.Wpf')
+}
+
+function Test-InstallPackageRespectReferencesAccordingToDifferentFrameworks
+{
+    # Arrange
+    $p1 = New-SilverlightClassLibrary
+    $p2 = New-ConsoleApplication
+
+    # Act
+    ($p1, $p2) | Install-Package RefPackage -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p1 'RefPackage'
+    Assert-Reference $p1 'fear'
+    Assert-Null (Get-AssemblyReference $p1 'mafia')
+
+    Assert-Package $p2 'RefPackage'
+    Assert-Reference $p2 'one'
+    Assert-Reference $p2 'three'
+    Assert-Null (Get-AssemblyReference $p2 'two')
 }

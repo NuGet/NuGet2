@@ -31,16 +31,16 @@ namespace NuGet
         internal const string SchemaVersionV4 = "http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd";
 
         /// <summary>
-        /// This is the minimum version of schema that allows specifying
-        /// target frameworks for package dependencies.
+        /// Added 'targetFramework' attribute for 'references' elements.
         /// </summary>
-        internal const int TargetFrameworkInDependencyMinVersion = 4;
+        internal const string SchemaVersionV5 = "http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd";
 
         private static readonly string[] VersionToSchemaMappings = new[] {
             SchemaVersionV1,
             SchemaVersionV2,
             SchemaVersionV3,
-            SchemaVersionV4
+            SchemaVersionV4,
+            SchemaVersionV5,
         };
 
         // Mapping from schema to resource name
@@ -49,6 +49,7 @@ namespace NuGet
             { SchemaVersionV2, "NuGet.Authoring.nuspec.xsd" },
             { SchemaVersionV3, "NuGet.Authoring.nuspec.xsd" },
             { SchemaVersionV4, "NuGet.Authoring.nuspec.xsd" },
+            { SchemaVersionV5, "NuGet.Authoring.nuspec.xsd" },
         };
 
         private static readonly ConcurrentDictionary<string, string> _schemaCache = new ConcurrentDictionary<string, string>(

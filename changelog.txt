@@ -9,6 +9,7 @@ Release notes
 - Added a parameter to View.PackageManagerConsole. Using this parameter, PSCmdlets of Package Manager Console can be invoked from anywhere inside VS.
 - Reduce overall memory consumption significantly, avoiding OutOfMemory exception in certain circumstances.
 - Nuget.exe outputs the http requests it is making when -Verbosity is set to detailed.
+- Allow setting assembly References per target framework.
 
 *** v2.2 ***
 

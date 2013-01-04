@@ -376,4 +376,7 @@
   <data name="FileDoesNotExit" xml:space="preserve">
     <value>File '{0}' does not exist.</value>
   </data>
+  <data name="Manifest_ReferencesHasMixedElements" xml:space="preserve">
+    <value>&lt;references&gt; element must not contain both &lt;group&gt; and &lt;reference&gt; child elements.</value>
+  </data>
 </root>

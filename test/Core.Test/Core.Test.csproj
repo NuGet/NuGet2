@@ -65,6 +65,7 @@
     <Compile Include="DefaultPackagePathResolverTest.cs" />
     <Compile Include="EnumerableExtensionsTest.cs" />
     <Compile Include="Extensions\VersionExtensionsTest.cs" />
+    <Compile Include="LocalPackageTest.cs" />
     <Compile Include="MachineCacheTest.cs" />
     <Compile Include="ManifestFileTest.cs" />
     <Compile Include="ManifestSchemaUtilityTest.cs" />

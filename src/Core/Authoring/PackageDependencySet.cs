@@ -19,7 +19,7 @@ namespace NuGet
             }
 
             _targetFramework = targetFramework;
-            _dependencies = new ReadOnlyCollection<PackageDependency>(dependencies.ToArray());
+            _dependencies = new ReadOnlyCollection<PackageDependency>(dependencies.ToList());
         }
 
         public FrameworkName TargetFramework

@@ -97,12 +97,13 @@ namespace NuGet
                        .Distinct();
         }
 
-        protected override IEnumerable<IPackageAssemblyReference> GetAssemblyReferencesBase()
+        protected override IEnumerable<IPackageAssemblyReference> GetUnfilteredAssemblyReferences()
         {
             if (_enableCaching)
             {
                 return MemoryCache.Instance.GetOrAdd(GetAssembliesCacheKey(), GetAssembliesNoCache, CacheTimeout);
             }
+
             return GetAssembliesNoCache();
         }
 
@@ -118,7 +119,7 @@ namespace NuGet
         private List<IPackageAssemblyReference> GetAssembliesNoCache()
         {
             return (from file in GetFiles()
-                    where IsAssemblyReference(file)
+                    where IsAssemblyReference(file.Path)
                     select (IPackageAssemblyReference)new ZipPackageAssemblyReference(file)).ToList();
         }
 

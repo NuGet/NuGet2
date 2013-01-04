@@ -4,7 +4,6 @@ using System.Xml.Serialization;
 
 namespace NuGet
 {
-    [XmlType("group")]
     public class ManifestDependencySet
     {
         [XmlAttribute("targetFramework")]

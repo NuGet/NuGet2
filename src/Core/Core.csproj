@@ -61,11 +61,13 @@
     <Compile Include="Authoring\ManifestMetadata.cs" />
     <Compile Include="Authoring\ManifestReader.cs" />
     <Compile Include="Authoring\ManifestReference.cs" />
+    <Compile Include="Authoring\ManifestReferenceSet.cs" />
     <Compile Include="Authoring\ManifestSchemaUtility.cs" />
     <Compile Include="Authoring\ManifestVersionAttribute.cs" />
     <Compile Include="Authoring\ManifestVersionUtility.cs" />
     <Compile Include="Authoring\NullPropertyProvider.cs" />
     <Compile Include="Authoring\PackageDependencySet.cs" />
+    <Compile Include="Authoring\PackageReferenceSet.cs" />
     <Compile Include="Authoring\PhysicalPackageAssemblyReference.cs" />
     <Compile Include="Configuration\SettingsCredentialProvider.cs" />
     <Compile Include="Configuration\ISettings.cs" />

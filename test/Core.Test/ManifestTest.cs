@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Xml.Linq;
 using Xunit;
-using System.Runtime.Versioning;
 
 namespace NuGet.Test
 {
@@ -100,10 +100,22 @@ namespace NuGet.Test
                     Version = "1.0",
                     Authors = "test-author",
                     Description = "desc",
-                    References = new List<ManifestReference> {
-                        new ManifestReference { File = "Foo?.dll" },
-                        new ManifestReference { File = "Bar*.dll" },
-                        new ManifestReference { File = @"net40\baz.dll" }
+                    ReferenceSets = new List<ManifestReferenceSet> {
+                        new ManifestReferenceSet
+                        {
+                            References = new List<ManifestReference> {
+                                new ManifestReference { File = "Foo?.dll" },
+                                new ManifestReference { File = "Bar*.dll" },
+                                new ManifestReference { File = @"net40\baz.dll" }
+                            }
+                        },
+                        new ManifestReferenceSet
+                        {
+                            TargetFramework = ".NETFramework, Version=4.0",
+                            References = new List<ManifestReference> {
+                                new ManifestReference { File = "wee?dd.dll" }
+                            }
+                        }
                     }
                 },
                 Files = new List<ManifestFile> {
@@ -113,7 +125,7 @@ namespace NuGet.Test
 
             // Act and Assert
             ExceptionAssert.Throws<ValidationException>(() => Manifest.Validate(manifest),
-                "Assembly reference 'Foo?.dll' contains invalid characters.\r\nAssembly reference 'Bar*.dll' contains invalid characters.\r\nAssembly reference 'net40\\baz.dll' contains invalid characters.");
+                "Assembly reference 'Foo?.dll' contains invalid characters.\r\nAssembly reference 'Bar*.dll' contains invalid characters.\r\nAssembly reference 'net40\\baz.dll' contains invalid characters.\r\nAssembly reference 'wee?dd.dll' contains invalid characters.");
         }
 
         [Fact]
@@ -164,6 +176,24 @@ namespace NuGet.Test
         [Fact]
         public void ReadFromReadsAllMetadataValues()
         {
+            var references = new List<ManifestReferenceSet>
+            {
+                new ManifestReferenceSet {
+                    TargetFramework = null,
+                    References = new List<ManifestReference> 
+                    {
+                        new ManifestReference { File = "Test.dll" },
+                    }
+                },
+                new ManifestReferenceSet {
+                    TargetFramework = "hello",
+                    References = new List<ManifestReference> 
+                    {
+                        new ManifestReference { File = "world.winmd" },
+                    }
+                }
+            };
+
             // Arrange
             var manifestStream = CreateManifest(id: "Test-Pack2", version: "1.0.0-alpha", title: "blah", authors: "Outercurve",
                 licenseUrl: "http://nuget.org/license", projectUrl: "http://nuget.org/project", iconUrl: "https://nuget.org/icon",
@@ -171,7 +201,7 @@ namespace NuGet.Test
                 copyright: "Copyright 2012", language: "fr-FR", tags: "Test Unit",
                 dependencies: new[] { new ManifestDependency { Id = "Test", Version = "1.2.0" } },
                 assemblyReference: new[] { new ManifestFrameworkAssembly { AssemblyName = "System.Data", TargetFramework = "4.0" } },
-                references: new[] { "Test.dll" }
+                references: references
             );
 
             var expectedManifest = new Manifest
@@ -201,7 +231,23 @@ namespace NuGet.Test
                             }
                     },
                     FrameworkAssemblies = new List<ManifestFrameworkAssembly> { new ManifestFrameworkAssembly { AssemblyName = "System.Data", TargetFramework = "4.0" } },
-                    References = new List<ManifestReference> { new ManifestReference { File = "Test.dll" } }
+                    ReferenceSets = new List<ManifestReferenceSet>
+                    {
+                        new ManifestReferenceSet {
+                            TargetFramework = null,
+                            References = new List<ManifestReference> 
+                            {
+                                new ManifestReference { File = "Test.dll" },
+                            }
+                        },
+                        new ManifestReferenceSet {
+                            TargetFramework = "hello",
+                            References = new List<ManifestReference> 
+                            {
+                                new ManifestReference { File = "world.winmd" },
+                            }
+                        }
+                    }
                 }
             };
 
@@ -365,7 +411,6 @@ namespace NuGet.Test
             }
         }
 
-
         private void AssertManifest(Manifest expected, Manifest actual)
         {
             Assert.Equal(expected.Metadata.Id, actual.Metadata.Id);
@@ -397,11 +442,11 @@ namespace NuGet.Test
                     AssertFrameworkAssemblies(expected.Metadata.FrameworkAssemblies[i], actual.Metadata.FrameworkAssemblies[i]);
                 }
             }
-            if (expected.Metadata.References != null)
+            if (expected.Metadata.ReferenceSets != null)
             {
-                for (int i = 0; i < expected.Metadata.References.Count; i++)
+                for (int i = 0; i < expected.Metadata.ReferenceSets.Count; i++)
                 {
-                    AssertReference(expected.Metadata.References[i], actual.Metadata.References[i]);
+                    AssertReference(expected.Metadata.ReferenceSets[i], actual.Metadata.ReferenceSets[i]);
                 }
             }
             if (expected.Files != null)
@@ -447,6 +492,16 @@ namespace NuGet.Test
             Assert.Equal(expected.File, actual.File);
         }
 
+        private static void AssertReference(ManifestReferenceSet expected, ManifestReferenceSet actual)
+        {
+            Assert.Equal(expected.TargetFramework, actual.TargetFramework);
+            Assert.Equal(expected.References.Count, actual.References.Count);
+            for (int i = 0; i < expected.References.Count; i++)
+            {
+                AssertReference(expected.References[i], actual.References[i]);
+            }
+        }
+
         public static Stream CreateManifest(string id = "Test-Pack",
                                             string version = "1.0.0",
                                             string title = null,
@@ -464,7 +519,7 @@ namespace NuGet.Test
                                             string tags = null,
                                             IEnumerable<ManifestDependency> dependencies = null,
                                             IEnumerable<ManifestFrameworkAssembly> assemblyReference = null,
-                                            IEnumerable<string> references = null,
+                                            IEnumerable<ManifestReferenceSet> references = null,
                                             IEnumerable<ManifestFile> files = null)
         {
             var document = new XDocument(new XElement("package"));
@@ -527,10 +582,23 @@ namespace NuGet.Test
                     assemblyReference.Select(r => new XElement("frameworkAssembly",
                         new XAttribute("assemblyName", r.AssemblyName), new XAttribute("targetFramework", r.TargetFramework)))));
             }
+
             if (references != null)
             {
-                metadata.Add(new XElement("references", references.Select(r => new XElement("reference", new XAttribute("file", r)))));
+                if (references.Any(r => r.TargetFramework != null))
+                {
+                    metadata.Add(new XElement("references",
+                        references.Select(r => new XElement("group",
+                            r.TargetFramework != null ? new XAttribute("targetFramework", r.TargetFramework) : null,
+                            r.References.Select(f => new XElement("reference", new XAttribute("file", f.File))))
+                        )));
+                }
+                else
+                {
+                    metadata.Add(new XElement("references", references.SelectMany(r => r.References).Select(r => new XElement("reference", new XAttribute("file", r.File)))));
+                }
             }
+
             if (files != null)
             {
                 var filesNode = new XElement("files");

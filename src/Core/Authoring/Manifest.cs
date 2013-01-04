@@ -145,9 +145,9 @@ namespace NuGet
                     Summary = metadata.Summary.SafeTrim(),
                     ReleaseNotes = metadata.ReleaseNotes.SafeTrim(),
                     Language = metadata.Language.SafeTrim(),
-                    DependencySets = CreateDependencySet(metadata),
+                    DependencySets = CreateDependencySets(metadata),
                     FrameworkAssemblies = CreateFrameworkAssemblies(metadata),
-                    References = CreateReferences(metadata)
+                    ReferenceSets = CreateReferenceSets(metadata)
                 }
             };
         }
@@ -166,7 +166,7 @@ namespace NuGet
             return null;
         }
 
-        private static List<ManifestReference> CreateReferences(IPackageMetadata metadata)
+        private static List<ManifestReferenceSet> CreateReferenceSets(IPackageMetadata metadata)
         {
             IPackageBuilder packageBuilder = metadata as IPackageBuilder;
 
@@ -174,11 +174,27 @@ namespace NuGet
             {
                 return null;
             }
-            return (from reference in packageBuilder.PackageAssemblyReferences
+
+            return (from referenceSet in packageBuilder.PackageAssemblyReferences
+                    select new ManifestReferenceSet 
+                    {
+                        TargetFramework = referenceSet.TargetFramework != null ? VersionUtility.GetFrameworkString(referenceSet.TargetFramework) : null,
+                        References = CreateReferences(referenceSet) 
+                    }).ToList();
+        }
+
+        private static List<ManifestReference> CreateReferences(PackageReferenceSet referenceSet)
+        {
+            if (referenceSet.References == null)
+            {
+                return new List<ManifestReference>();
+            }
+
+            return (from reference in referenceSet.References
                     select new ManifestReference { File = reference.SafeTrim() }).ToList();
         }
 
-        private static List<ManifestDependencySet> CreateDependencySet(IPackageMetadata metadata)
+        private static List<ManifestDependencySet> CreateDependencySets(IPackageMetadata metadata)
         {
             if (metadata.DependencySets.IsEmpty())
             {
@@ -315,7 +331,7 @@ namespace NuGet
             {
                 TryValidate(manifest.Metadata.DependencySets.SelectMany(d => d.Dependencies), results);
             }
-            TryValidate(manifest.Metadata.References, results);
+            TryValidate(manifest.Metadata.ReferenceSets, results);
 
             if (results.Any())
             {
