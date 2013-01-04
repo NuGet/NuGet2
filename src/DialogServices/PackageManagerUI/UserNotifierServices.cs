@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Windows.Threading;
 using EnvDTE;
 using NuGet.VisualStudio;
-using System.Runtime.Versioning;
 
 namespace NuGet.Dialog.PackageManagerUI
 {
@@ -41,8 +41,13 @@ namespace NuGet.Dialog.PackageManagerUI
 
             // call ShowModal() instead of ShowDialog() so that the dialog
             // automatically centers within parent window
-            bool? dialogResult = licenseWidow.ShowModal();
-            return dialogResult ?? false;
+            using (NuGetEventTrigger.Instance.TriggerEventBeginEnd(
+                NuGetEvent.LicenseWindowBegin,
+                NuGetEvent.LicenseWindowEnd))
+            {
+                bool? dialogResult = licenseWidow.ShowModal();
+                return dialogResult ?? false;
+            }
         }
 
         public IEnumerable<Project> ShowProjectSelectorWindow(
@@ -79,7 +84,14 @@ namespace NuGet.Dialog.PackageManagerUI
                 };
                 window.InstructionText.Text = instructionText;
 
-                bool? dialogResult = window.ShowModal();
+                bool? dialogResult = null;
+                using (NuGetEventTrigger.Instance.TriggerEventBeginEnd(
+                    NuGetEvent.SelectProjectDialogBegin,
+                    NuGetEvent.SelectProjectDialogEnd))
+                {
+                    dialogResult = window.ShowModal();
+                }
+
                 if (dialogResult ?? false)
                 {
                     return viewModel.GetSelectedProjects();

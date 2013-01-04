@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using NuGet.VisualStudio;
 
 namespace NuGet.Dialog.PackageManagerUI
 {
@@ -109,6 +110,7 @@ namespace NuGet.Dialog.PackageManagerUI
 
                 if (_currentWindow == null)
                 {
+                    NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.ProgressDialogBegin);
                     _currentWindow = new ProgressDialog() { Owner = owner };
                     _currentWindow.Closed += OnWindowClosed;
                 }
@@ -124,6 +126,7 @@ namespace NuGet.Dialog.PackageManagerUI
             {
                 _currentWindow.Closed -= OnWindowClosed;
                 _currentWindow = null;
+                NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.ProgressDialogEnd);
             }
         }
 

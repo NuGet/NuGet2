@@ -64,8 +64,9 @@ namespace NuGet.VisualStudio
                     if (task.IsFaulted)
                     {
                         ShowErrorUI();
-                        
-                    }                    
+                    }
+
+                    NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageRestoreCompleted);
                 }, 
                 uiScheduler);
         }

@@ -78,6 +78,8 @@
     <Compile Include="SkipAssemblyReferencesPackage.cs" />
     <Compile Include="SolutionFolderFileSystem.cs" />
     <Compile Include="TfsSourceControlFileSystemProviderPicker.cs" />
+    <Compile Include="Utility\NuGetEventTrigger.cs" />
+    <Compile Include="Utility\NuGetEvent.cs" />
     <Compile Include="Utility\PathHelper.cs" />
     <Compile Include="Utility\SourceControlHelper.cs" />
     <Compile Include="Utility\UriHelper.cs" />

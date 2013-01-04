@@ -296,9 +296,10 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                 throw new ArgumentNullException("command");
             }
 
+            NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageManagerConsoleCommandExecutionBegin);
             _updateWorkingDirectoryPending = false;
             ActiveConsole = console;
-
+            
             string fullCommand;
             if (ComplexCommand.AddLine(command, out fullCommand) && !string.IsNullOrEmpty(fullCommand))
             {
@@ -315,6 +316,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                 _updateWorkingDirectoryPending = false;
                 _targetDir = null;
             }
+            NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageManagerConsoleCommandExecutionEnd);
         }
 
         public void Abort()

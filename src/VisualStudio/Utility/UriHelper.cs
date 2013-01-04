@@ -23,6 +23,7 @@ namespace NuGet.VisualStudio
                 // REVIEW: Will this allow a package author to execute arbitrary program on user's machine?
                 // We have limited the url to be HTTP only, but is it sufficient?
                 System.Diagnostics.Process.Start(url.AbsoluteUri);
+                NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.LinkOpened);
             }
         }
 

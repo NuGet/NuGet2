@@ -324,6 +324,8 @@ namespace NuGet.Dialog.Providers
                 return;
             }
 
+            NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageOperationBegin);
+            
             // disable all operations while this install is in progress
             OperationCoordinator.IsBusy = true;
 
@@ -412,6 +414,8 @@ namespace NuGet.Dialog.Providers
             {
                 ExecuteCompletedCallback();
             }
+
+            NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageOperationEnd);
         }
 
         private void ClearProgressMessages()

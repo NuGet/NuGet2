@@ -291,6 +291,7 @@ namespace NuGet.Dialog.Providers
                 uiScheduler = TaskScheduler.Default;
             }
 
+            NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageLoadBegin);
             Task.Factory.StartNew(
                 (state) => ExecuteAsync(pageNumber, _currentCancellationSource.Token),
                 _currentCancellationSource,
@@ -492,6 +493,7 @@ namespace NuGet.Dialog.Providers
             }
 
             PackageLoadCompleted(this, EventArgs.Empty);
+            NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageLoadEnd);            
         }
 
         private void UpdateNewPackages(IList<IPackage> packages)
