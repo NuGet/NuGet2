@@ -11,6 +11,7 @@ using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.TextManager.Interop;
 using NuGet.VisualStudio;
 using NuGetConsole.Implementation.Console;
@@ -22,7 +23,7 @@ namespace NuGetConsole.Implementation
     /// This class implements the tool window.
     /// </summary>
     [Guid("0AD07096-BBA9-4900-A651-0598D26F6D24")]
-    public sealed class PowerConsoleToolWindow : ToolWindowPane, IOleCommandTarget
+    public sealed class PowerConsoleToolWindow : ToolWindowPane, IOleCommandTarget, IPowerConsoleService
     {
         /// <summary>
         /// Get VS IComponentModel service.
@@ -561,5 +562,108 @@ namespace NuGetConsole.Implementation
                 base.Content = value;
             }
         }
+
+        #region IPowerConsoleService Region
+
+        public event EventHandler ExecuteEnd;
+        private ITextSnapshot _snapshot;
+        private int _previousPosition;
+
+        public bool Execute(string command, object[] inputs)
+        {
+            if (ConsoleStatus.IsBusy)
+            {
+                VSOutputConsole.WriteLine(Resources.PackageManagerConsoleBusy);
+                throw new InvalidOperationException(Resources.PackageManagerConsoleBusy);
+            }
+
+            if (!String.IsNullOrEmpty(command))
+            {
+                WpfConsole.SetExecutionMode(isExecuting: true);
+                // Cast the ToolWindowPane to PowerConsoleToolWindow
+                // Access the IHost from PowerConsoleToolWindow as follows PowerConsoleToolWindow.WpfConsole.Host
+                // Cast IHost to IAsyncHost
+                // Also, register for IAsyncHost.ExecutedEnd and return only when the command is completed
+                IPrivateWpfConsole powerShellConsole = (IPrivateWpfConsole)WpfConsole;
+                IHost host = powerShellConsole.Host;
+
+                var asynchost = host as IAsyncHost;
+                if (asynchost != null)
+                {
+                    asynchost.ExecuteEnd += PowerConsoleCommand_ExecuteEnd;
+                }
+
+                // Here, we store the snapshot of the powershell Console output text buffer
+                // Snapshot has reference to the buffer and the current length of the buffer
+                // And, upon execution of the command, (check the commandexecuted handler)
+                // the changes to the buffer is identified and copied over to the VS output window
+                if (powerShellConsole.InputLineStart != null && powerShellConsole.InputLineStart.Value.Snapshot != null)
+                {
+                    _snapshot = powerShellConsole.InputLineStart.Value.Snapshot;
+                }
+
+                // We should write the command to the console just to imitate typical user action before executing it
+                // Asserts get fired otherwise. Also, the log is displayed in a disorderly fashion
+                powerShellConsole.WriteLine(command);
+
+                return host.Execute(powerShellConsole, command, null);
+            }
+            return false;
+        }
+
+        private void PowerConsoleCommand_ExecuteEnd(object sender, EventArgs e)
+        {
+            // Flush the change in console text buffer onto the output window for testability
+            // If the VSOutputConsole could not be obtained, just ignore
+            if (VSOutputConsole != null && _snapshot != null)
+            {
+                if (_previousPosition < _snapshot.Length)
+                {
+                    VSOutputConsole.WriteLine(_snapshot.GetText(_previousPosition, (_snapshot.Length - _previousPosition)));
+                }
+                _previousPosition = _snapshot.Length;
+            }
+
+            (sender as IAsyncHost).ExecuteEnd -= PowerConsoleCommand_ExecuteEnd;
+            WpfConsole.SetExecutionMode(isExecuting: false);
+
+            // This does NOT imply that the command succeeded. It just indicates that the console is ready for input now
+            VSOutputConsole.WriteLine(Resources.PackageManagerConsoleCommandExecuted);
+            ExecuteEnd.Raise(this, EventArgs.Empty);
+        }
+
+
+        private IConsole _vsOutputConsole = null;
+        private IConsole VSOutputConsole
+        {
+            get
+            {
+                if (_vsOutputConsole == null)
+                {
+                    IOutputConsoleProvider outputConsoleProvider = ServiceLocator.GetInstance<IOutputConsoleProvider>();
+                    if (null != outputConsoleProvider)
+                    {
+                        _vsOutputConsole = outputConsoleProvider.CreateOutputConsole(requirePowerShellHost: false);
+                    }
+                }
+                return _vsOutputConsole;
+            }
+        }
+
+        private IConsoleStatus _consoleStatus;
+        private IConsoleStatus ConsoleStatus
+        {
+            get
+            {
+                if (_consoleStatus == null)
+                {
+                    _consoleStatus = ServiceLocator.GetInstance<IConsoleStatus>();
+                    Debug.Assert(_consoleStatus != null);
+                }
+
+                return _consoleStatus;
+            }
+        }
+        #endregion
     }
 }
