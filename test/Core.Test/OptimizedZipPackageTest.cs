@@ -107,7 +107,7 @@ namespace NuGet.Test
             var expandedFileSystem = new MockFileSystem("y:\\");
 
             var ozp = new TestableOptimizedZipPackage(fileSystem, "pam.nupkg", expandedFileSystem);
-            var files = ozp.GetFiles().ToList();
+            ozp.GetFiles().ToList();
 
             Assert.True(expandedFileSystem.FileExists("random\\content\\foo"));
             Assert.True(expandedFileSystem.FileExists("random\\lib\\40\\A.dll"));
@@ -115,7 +115,7 @@ namespace NuGet.Test
             ozp.Reset();
 
             // Act
-            files = ozp.GetFiles().ToList();
+            ozp.GetFiles().ToList();
 
             // Assert
             Assert.False(ozp.HasCalledExpandedFolderPath);
