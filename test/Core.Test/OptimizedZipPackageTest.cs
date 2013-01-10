@@ -361,7 +361,7 @@ namespace NuGet.Test
             var ozp = new TestableOptimizedZipPackage(fileSystem, "pam.nupkg", expandedFileSystem);
 
             // Act
-            var files = ozp.GetFiles().ToList();
+            ozp.GetFiles().ToList();
 
             // Assert
             Assert.True(expandedFileSystem.FileExists("random\\content\\foo"));
