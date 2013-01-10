@@ -241,6 +241,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The &apos;packages&apos; and &apos;versionConstraints&apos; parameters must have the same number of elements..
+        /// </summary>
+        internal static string GetUpdatesParameterMismatch {
+            get {
+                return ResourceManager.GetString("GetUpdatesParameterMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The schema version of &apos;{0}&apos; is incompatible with version {1} of NuGet. Please upgrade NuGet to the latest version from http://go.microsoft.com/fwlink/?LinkId=213942..
         /// </summary>
         internal static string IncompatibleSchema {

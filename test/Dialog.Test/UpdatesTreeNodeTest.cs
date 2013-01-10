@@ -180,9 +180,9 @@ namespace NuGet.Dialog.Test
             IEnumerable<IPackage> actual = null;
 
             var sourceRepository = new Mock<IServiceBasedRepository>(MockBehavior.Strict);
-            sourceRepository.Setup(s => s.GetUpdates(It.IsAny<IEnumerable<IPackage>>(), true, false, It.IsAny<IEnumerable<FrameworkName>>()))
+            sourceRepository.Setup(s => s.GetUpdates(It.IsAny<IEnumerable<IPackage>>(), true, false, It.IsAny<IEnumerable<FrameworkName>>(), It.IsAny<IEnumerable<IVersionSpec>>()))
                             .Returns(new[] { PackageUtility.CreatePackage("Foo", "1.1") })
-                            .Callback((IEnumerable<IPackage> a, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> frameworks) => actual = a)
+                            .Callback((IEnumerable<IPackage> a, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> frameworks, IEnumerable<IVersionSpec> constraints) => actual = a)
                             .Verifiable();
 
             PackagesProviderBase provider = new MockPackagesProvider(new string[] { ".NETFramework,Version=3.0" });

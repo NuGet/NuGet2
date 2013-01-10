@@ -113,7 +113,7 @@ namespace NuGet.PowerShell.Commands.Test
                 PackageUtility.CreatePackage("Pack2", "1.4")
             };
             var packageRepository = new Mock<IServiceBasedRepository>(MockBehavior.Strict);
-            packageRepository.Setup(s => s.GetUpdates(It.IsAny<IEnumerable<IPackage>>(), prerelease, allVersions, It.IsAny<IEnumerable<FrameworkName>>()))
+            packageRepository.Setup(s => s.GetUpdates(It.IsAny<IEnumerable<IPackage>>(), prerelease, allVersions, It.IsAny<IEnumerable<FrameworkName>>(), It.IsAny<IEnumerable<IVersionSpec>>()))
                              .Returns(updates)
                              .Verifiable();
 

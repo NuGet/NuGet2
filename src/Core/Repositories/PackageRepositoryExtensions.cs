@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Versioning;
+using NuGet.Resources;
 
 namespace NuGet
 {
@@ -380,7 +381,8 @@ namespace NuGet
             IEnumerable<IPackage> packages,
             bool includePrerelease,
             bool includeAllVersions,
-            IEnumerable<FrameworkName> targetFrameworks = null)
+            IEnumerable<FrameworkName> targetFrameworks = null,
+            IEnumerable<IVersionSpec> versionConstraints = null)
         {
             if (packages.IsEmpty())
             {
@@ -388,12 +390,17 @@ namespace NuGet
             }
 
             var serviceBasedRepository = repository as IServiceBasedRepository;
-            return serviceBasedRepository != null ? serviceBasedRepository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFrameworks) :
-                                                    repository.GetUpdatesCore(packages, includePrerelease, includeAllVersions, targetFrameworks);
+            return serviceBasedRepository != null ? serviceBasedRepository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFrameworks, versionConstraints) :
+                                                    repository.GetUpdatesCore(packages, includePrerelease, includeAllVersions, targetFrameworks, versionConstraints);
         }
 
-        public static IEnumerable<IPackage> GetUpdatesCore(this IPackageRepository repository, IEnumerable<IPackageMetadata> packages, bool includePrerelease, bool includeAllVersions, 
-            IEnumerable<FrameworkName> targetFramework)
+        public static IEnumerable<IPackage> GetUpdatesCore(
+            this IPackageRepository repository,
+            IEnumerable<IPackageMetadata> packages,
+            bool includePrerelease,
+            bool includeAllVersions,
+            IEnumerable<FrameworkName> targetFramework,
+            IEnumerable<IVersionSpec> versionConstraints)
         {
             List<IPackageMetadata> packageList = packages.ToList();
 
@@ -402,23 +409,46 @@ namespace NuGet
                 return Enumerable.Empty<IPackage>();
             }
 
+            IList<IVersionSpec> versionConstraintList;
+            if (versionConstraints == null) 
+            {
+                versionConstraintList = new IVersionSpec[packageList.Count];
+            }
+            else 
+            {
+                versionConstraintList = versionConstraints.ToList();
+            }
+
+            if (packageList.Count != versionConstraintList.Count)
+            {
+                throw new ArgumentException(NuGetResources.GetUpdatesParameterMismatch);
+            }
 
             // These are the packages that we need to look at for potential updates.
             ILookup<string, IPackage> sourcePackages = GetUpdateCandidates(repository, packageList, includePrerelease)
                                                                             .ToList()
                                                                             .ToLookup(package => package.Id, StringComparer.OrdinalIgnoreCase);
 
-            var updates = from package in packageList
-                          from candidate in sourcePackages[package.Id]
-                          where (candidate.Version > package.Version) &&
-                                 SupportsTargetFrameworks(targetFramework, candidate)
-                          select candidate;
+            var results = new List<IPackage>();
+            for (int i = 0; i < packageList.Count; i++)
+            {
+                var package = packageList[i];
+                var constraint = versionConstraintList[i];
+
+                var updates = from candidate in sourcePackages[package.Id]
+                              where (candidate.Version > package.Version) &&
+                                     SupportsTargetFrameworks(targetFramework, candidate) &&
+                                     (constraint == null || constraint.Satisfies(candidate.Version))
+                              select candidate;
+
+                results.AddRange(updates);
+            }
 
             if (!includeAllVersions)
             {
-                return updates.CollapseById();
+                return results.CollapseById();
             }
-            return updates;
+            return results;
         }
 
         private static bool SupportsTargetFrameworks(IEnumerable<FrameworkName> targetFramework, IPackage package)

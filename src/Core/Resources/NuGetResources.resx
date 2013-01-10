@@ -379,4 +379,7 @@
   <data name="Manifest_ReferencesHasMixedElements" xml:space="preserve">
     <value>&lt;references&gt; element must not contain both &lt;group&gt; and &lt;reference&gt; child elements.</value>
   </data>
+  <data name="GetUpdatesParameterMismatch" xml:space="preserve">
+    <value>The 'packages' and 'versionConstraints' parameters must have the same number of elements.</value>
+  </data>
 </root>

@@ -127,7 +127,8 @@ namespace NuGet.Server.DataServices
         }
 
         [WebGet]
-        public IQueryable<Package> GetUpdates(string packageIds, string versions, bool includePrerelease, bool includeAllVersions, string targetFrameworks)
+        public IQueryable<Package> GetUpdates(
+            string packageIds, string versions, bool includePrerelease, bool includeAllVersions, string targetFrameworks, string versionConstraints)
         {
             if (String.IsNullOrEmpty(packageIds) || String.IsNullOrEmpty(versions))
             {
@@ -138,8 +139,11 @@ namespace NuGet.Server.DataServices
             var versionValues = versions.Trim().Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
             var targetFrameworkValues = String.IsNullOrEmpty(targetFrameworks) ? null :
                                                                                  targetFrameworks.Split('|').Select(VersionUtility.ParseFrameworkName).ToList();
+            var versionConstraintValues = String.IsNullOrEmpty(versionConstraints)
+                                            ? new string[idValues.Length]
+                                            : versionConstraints.Split('|');
 
-            if ((idValues.Length == 0) || (idValues.Length != versionValues.Length))
+            if (idValues.Length == 0 || idValues.Length != versionValues.Length || idValues.Length != versionConstraintValues.Length)
             {
                 // Exit early if the request looks invalid
                 return Enumerable.Empty<Package>().AsQueryable();
@@ -151,8 +155,16 @@ namespace NuGet.Server.DataServices
                 packagesToUpdate.Add(new PackageBuilder { Id = idValues[i], Version = new SemanticVersion(versionValues[i]) });
             }
 
+            var versionConstraintsList = new IVersionSpec[versionConstraintValues.Length];
+            for (int i = 0; i < versionConstraintsList.Length; i++)
+            {
+                if (!String.IsNullOrEmpty(versionConstraintValues[i]))
+                {
+                    VersionUtility.TryParseVersionSpec(versionConstraintValues[i], out versionConstraintsList[i]);
+                }
+            }
 
-            return from package in Repository.GetUpdatesCore(packagesToUpdate, includePrerelease, includeAllVersions, targetFrameworkValues).AsQueryable()
+            return from package in Repository.GetUpdatesCore(packagesToUpdate, includePrerelease, includeAllVersions, targetFrameworkValues, versionConstraintsList).AsQueryable()
                    select Repository.GetMetadataPackage(package);
         }
     }

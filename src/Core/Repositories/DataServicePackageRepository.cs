@@ -212,25 +212,32 @@ namespace NuGet
             return new SmartDataServiceQuery<DataServicePackage>(Context, query);
         }
 
-        public IEnumerable<IPackage> GetUpdates(IEnumerable<IPackage> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFrameworks)
+        public IEnumerable<IPackage> GetUpdates(
+            IEnumerable<IPackage> packages, 
+            bool includePrerelease, 
+            bool includeAllVersions, 
+            IEnumerable<FrameworkName> targetFrameworks,
+            IEnumerable<IVersionSpec> versionConstraints)
         {
             if (!Context.SupportsServiceMethod(GetUpdatesSvcMethod))
             {
                 // If there's no search method then we can't filter by target framework
-                return PackageRepositoryExtensions.GetUpdatesCore(this, packages, includePrerelease, includeAllVersions, targetFrameworks);
+                return PackageRepositoryExtensions.GetUpdatesCore(this, packages, includePrerelease, includeAllVersions, targetFrameworks, versionConstraints);
             }
 
             // Pipe all the things!
             string ids = String.Join("|", packages.Select(p => p.Id));
             string versions = String.Join("|", packages.Select(p => p.Version.ToString()));
             string targetFrameworksValue = targetFrameworks.IsEmpty() ? "" : String.Join("|", targetFrameworks.Select(VersionUtility.GetShortFrameworkName));
+            string versionConstraintsValue = versionConstraints.IsEmpty() ? "" : String.Join("|", versionConstraints.Select(v => v == null ? "" : v.ToString()));
 
             var serviceParameters = new Dictionary<string, object> {
                 { "packageIds", "'" + ids + "'" },
                 { "versions", "'" + versions + "'" },
                 { "includePrerelease", ToString(includePrerelease) },
                 { "includeAllVersions", ToString(includeAllVersions) },
-                { "targetFrameworks", "'" + UrlEncodeOdataParameter(targetFrameworksValue) + "'" }
+                { "targetFrameworks", "'" + UrlEncodeOdataParameter(targetFrameworksValue) + "'" },
+                { "versionConstraints", "'" + UrlEncodeOdataParameter(versionConstraintsValue) + "'" }
             };
 
             var query = Context.CreateQuery<DataServicePackage>(GetUpdatesSvcMethod, serviceParameters);

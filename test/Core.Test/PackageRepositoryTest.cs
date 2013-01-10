@@ -245,7 +245,7 @@ namespace NuGet.Test
             remoteRepo.GetUpdates(localRepo.GetPackages(), includePrerelease: false, includeAllVersions: false);
 
             // Assert
-            serviceRepository.Verify(s => s.GetUpdates(It.IsAny<IEnumerable<IPackage>>(), false, false, It.IsAny<IEnumerable<FrameworkName>>()), Times.Never());
+            serviceRepository.Verify(s => s.GetUpdates(It.IsAny<IEnumerable<IPackage>>(), false, false, It.IsAny<IEnumerable<FrameworkName>>(), It.IsAny<IEnumerable<IVersionSpec>>()), Times.Never());
         }
 
         [Fact]

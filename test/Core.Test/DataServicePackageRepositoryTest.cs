@@ -165,12 +165,13 @@ namespace NuGet.Test
                    {
                        // Assert
                        Assert.Equal("GetUpdates", entitySet);
-                       Assert.Equal(5, parameters.Count);
+                       Assert.Equal(6, parameters.Count);
                        Assert.Equal("'TaylorSwift'", parameters["packageIds"]);
                        Assert.Equal("'1.0-alpha'", parameters["versions"]);
                        Assert.Equal("true", parameters["includePrerelease"]);
                        Assert.Equal("false", parameters["includeAllVersions"]);
                        Assert.Equal("'wp%7Cportable-net45%2Bwin80'", parameters["targetFrameworks"]);
+                       Assert.Equal("'%5B2.3%2C%204.0%5D'", parameters["versionConstraints"]);
                    })
                    .Returns(new Mock<IDataServiceQuery<DataServicePackage>>().Object)
                    .Verifiable();
@@ -179,13 +180,17 @@ namespace NuGet.Test
 
             // Act
             repository.Object.GetUpdates(
-                new [] { package },
+                new[] { package },
                 includePrerelease: true,
                 includeAllVersions: false,
-                targetFrameworks: new [] 
+                targetFrameworks: new[] 
                     {
                         VersionUtility.ParseFrameworkName("sl3-wp"),
                         VersionUtility.ParseFrameworkName("portable-net45+win8")
+                    },
+                versionConstraints: new [] 
+                    { 
+                        VersionUtility.ParseVersionSpec("[2.3,4.0]")
                     }
             );
 

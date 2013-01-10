@@ -30,12 +30,23 @@ namespace NuGet.Dialog.Providers
             // when trying to count it.
             IList<FrameworkName> solutionFrameworks = Provider.SupportedFrameworks.Select(s => new FrameworkName(s)).ToList();
 
-            // The allow prerelease flag passed to this method indiciates if we are allowed to show prerelease packages as part of the updates and does not
-            // reflect the filtering of packages we are looking for updates to.
+            // The allow prerelease flag passed to this method indicates if we are allowed to show prerelease packages as part of the updates 
+            // and does not reflect the filtering of packages we are looking for updates to.
             var packages = _localRepository.GetPackages();
             if (!String.IsNullOrEmpty(searchTerm))
             {
                 packages = packages.Find(searchTerm);
+            }
+
+            // Tf the local repository contains constraints for each package, we send the version constraints to the GetUpdates() service.
+            IPackageConstraintProvider constraintProvider = _localRepository as IPackageConstraintProvider;
+            if (constraintProvider != null)
+            {
+                IList<IPackage> packagesList = packages.ToList();
+                IList<IVersionSpec> constraintList = packagesList.Select(p => constraintProvider.GetConstraint(p.Id)).ToList();
+
+                return Repository.GetUpdates(packagesList, allowPrereleaseVersions, includeAllVersions: false, targetFrameworks: solutionFrameworks, versionConstraints: constraintList)
+                                 .AsQueryable();
             }
 
             return Repository.GetUpdates(packages, allowPrereleaseVersions, includeAllVersions: false, targetFrameworks: solutionFrameworks)
@@ -44,8 +55,8 @@ namespace NuGet.Dialog.Providers
 
         protected override IQueryable<IPackage> CollapsePackageVersions(IQueryable<IPackage> packages)
         {
-            // GetUpdates collapses package versions to start with. Additionally, our method of using the IsLatest might not work here because we might have a package that 
-            // is not the latest version but is the only compatible package that satisfies the result set.
+            // GetUpdates collapses package versions to start with. Additionally, our method of using the IsLatest might not work here because
+            // we might have a package that is not the latest version but is the only compatible package that satisfies the result set.
             return packages;
         }
     }

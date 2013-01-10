@@ -74,9 +74,14 @@ namespace NuGet.VisualStudio
             return _primaryRepository.FindPackagesById(packageId);
         }
 
-        public IEnumerable<IPackage> GetUpdates(IEnumerable<IPackage> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFrameworks)
+        public IEnumerable<IPackage> GetUpdates(
+            IEnumerable<IPackage> packages, 
+            bool includePrerelease, 
+            bool includeAllVersions, 
+            IEnumerable<FrameworkName> targetFrameworks,
+            IEnumerable<IVersionSpec> versionConstraints)
         {
-            return _primaryRepository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFrameworks);
+            return _primaryRepository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFrameworks, versionConstraints);
         }
 
         public IPackage FindPackage(string packageId, SemanticVersion version)

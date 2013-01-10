@@ -183,9 +183,14 @@ namespace NuGet.Server.Infrastructure
             return packages;
         }
 
-        public IEnumerable<IPackage> GetUpdates(IEnumerable<IPackage> packages, bool includePrerelease, bool includeAllVersions, IEnumerable<FrameworkName> targetFramework)
+        public IEnumerable<IPackage> GetUpdates(
+            IEnumerable<IPackage> packages, 
+            bool includePrerelease, 
+            bool includeAllVersions, 
+            IEnumerable<FrameworkName> targetFramework,
+            IEnumerable<IVersionSpec> versionConstraints)
         {
-            return this.GetUpdatesCore(packages, includePrerelease, includeAllVersions, targetFramework);
+            return this.GetUpdatesCore(packages, includePrerelease, includeAllVersions, targetFramework, versionConstraints);
         }
 
         private DerivedPackageData CalculateDerivedData(IPackage package, string path)
