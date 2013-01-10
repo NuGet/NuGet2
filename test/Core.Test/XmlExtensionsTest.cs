@@ -345,6 +345,7 @@ namespace NuGet.Test
         [Fact]
         public void AddWithIndentWorksForSelfEnclosedElement()
         {
+            // Arrange
             const string xml = @"<root>
   <container />
 </root>";
@@ -352,8 +353,10 @@ namespace NuGet.Test
             XElement container = root.Elements().First();
             XElement content = XElement.Parse("<a><b>text</b><c/></a>");
 
+            // Act
             container.AddIndented(content);
 
+            // Assert
             Assert.Equal(@"<root>
   <container>
     <a>
@@ -367,6 +370,7 @@ namespace NuGet.Test
         [Fact]
         public void AddWithIndentWorksForEmptyElement()
         {
+            // Arrange
             const string xml = @"<root>
   <container>
   </container>
@@ -375,8 +379,10 @@ namespace NuGet.Test
             XElement container = root.Elements().First();
             XElement content = XElement.Parse("<a><b>text</b><c/></a>");
 
+            // Act
             container.AddIndented(content);
 
+            // Assert
             Assert.Equal(@"<root>
   <container>
     <a>
@@ -390,6 +396,7 @@ namespace NuGet.Test
         [Fact]
         public void AddWithIndentWorksForElementWithChildren()
         {
+            // Arrange
             const string xml = @"<root>
   <container>
     <child />
@@ -399,8 +406,10 @@ namespace NuGet.Test
             XElement container = root.Elements().First();
             XElement content = XElement.Parse("<a><b>text</b><c/></a>");
 
+            // Act
             container.AddIndented(content);
 
+            // Assert
             Assert.Equal(@"<root>
   <container>
     <child />
@@ -415,6 +424,7 @@ namespace NuGet.Test
         [Fact]
         public void AddWithIndentUsesTabs()
         {
+            // Arrange
             string xml = @"<root>
   <container>
     <child />
@@ -424,8 +434,10 @@ namespace NuGet.Test
             XElement container = root.Elements().First();
             XElement content = XElement.Parse("<a><b>text</b><c/></a>");
 
+            // Act
             container.AddIndented(content);
 
+            // Assert
             Assert.Equal(@"<root>
   <container>
     <child />
