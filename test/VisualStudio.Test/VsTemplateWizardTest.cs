@@ -17,24 +17,24 @@ namespace NuGet.VisualStudio.Test
     {
         private static readonly XNamespace VSTemplateNamespace = "http://schemas.microsoft.com/developer/vstemplate/2005";
 
-        private class RepositoryWithPackages
+        private class VsTemplatePackagesNode
         {
-            public RepositoryWithPackages(string repository, XObject[] repositoryChildren)
+            public VsTemplatePackagesNode(string repository, XObject[] repositoryChildren)
             {
                 this.Repository = repository;
-                this.RepositoryChildren = repositoryChildren;
+                this.ChildNodes = repositoryChildren;
             }
 
             public string Repository { get; private set; }
-            public XObject[] RepositoryChildren { get; private set; }
+            public XObject[] ChildNodes { get; private set; }
         }
 
         private static XDocument BuildDocument(string repository = "template", params XObject[] packagesChildren)
         {
-            return BuildDocument(new[] { new RepositoryWithPackages(repository, packagesChildren) });
+            return BuildDocument(new[] { new VsTemplatePackagesNode(repository, packagesChildren) });
         }
 
-        private static XDocument BuildDocument(IEnumerable<RepositoryWithPackages> repositoriesWithPackages)
+        private static XDocument BuildDocument(IEnumerable<VsTemplatePackagesNode> repositoriesWithPackages)
         {
             var elements = new List<XObject>();
 
@@ -48,7 +48,7 @@ namespace NuGet.VisualStudio.Test
                         children.Add(new XAttribute("repository", repository.Repository));
                     }
 
-                    children.AddRange(repository.RepositoryChildren);
+                    children.AddRange(repository.ChildNodes);
 
                     elements.AddRange(new[] { new XElement(VSTemplateNamespace + "packages", children) });
                 }
@@ -195,8 +195,8 @@ namespace NuGet.VisualStudio.Test
             var registryKey = "AspNetMvc4";
             var registryValue = @"C:\AspNetMvc4\Packages";
 
-            var extensionRepository = new RepositoryWithPackages("extension", new XObject[] { new XAttribute("repositoryId", "myExtensionId"), BuildPackageElement("packageFromExtension", "1.0") });
-            var registryRepository = new RepositoryWithPackages("registry", new XObject[] { new XAttribute("keyName", registryKey), BuildPackageElement("packageFromRegistry", "2.0") });
+            var extensionRepository = new VsTemplatePackagesNode("extension", new XObject[] { new XAttribute("repositoryId", "myExtensionId"), BuildPackageElement("packageFromExtension", "1.0") });
+            var registryRepository = new VsTemplatePackagesNode("registry", new XObject[] { new XAttribute("keyName", registryKey), BuildPackageElement("packageFromRegistry", "2.0") });
 
             var document = BuildDocument(new[] { extensionRepository, registryRepository });
             var wizard = new VsTemplateWizard(null, null, null, null, null, null);
