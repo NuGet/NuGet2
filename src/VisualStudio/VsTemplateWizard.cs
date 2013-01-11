@@ -70,8 +70,6 @@ namespace NuGet.VisualStudio
             IEnumerable<XElement> packagesElements = document.Root.ElementsNoNamespace("WizardData")
                 .ElementsNoNamespace("packages");
 
-            List<VsTemplateWizardInstallerConfiguration> configurations = new List<VsTemplateWizardInstallerConfiguration>();
-
             foreach (var packagesElement in packagesElements)
             {
                 string isPreunzippedString = packagesElement.GetOptionalAttributeValue("isPreunzipped");
@@ -88,10 +86,8 @@ namespace NuGet.VisualStudio
                     repositoryPath = GetRepositoryPath(packagesElement, repositoryType, vsTemplatePath, vsExtensionManager, registryKeys);
                 }
 
-                configurations.Add(new VsTemplateWizardInstallerConfiguration(repositoryPath, packages, isPreunzipped));
+                yield return new VsTemplateWizardInstallerConfiguration(repositoryPath, packages, isPreunzipped);
             }
-
-            return configurations;
         }
 
         private IEnumerable<VsTemplateWizardPackageInfo> GetPackages(XElement packagesElement)

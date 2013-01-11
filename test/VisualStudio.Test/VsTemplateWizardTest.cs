@@ -238,9 +238,10 @@ namespace NuGet.VisualStudio.Test
             var wizard = new TestableVsTemplateWizard();
 
             // Act
+            // Use .Count() to force enumeration of the yielded results
             ExceptionAssert.Throws<WizardBackoutException>(() =>
                                                            wizard.GetConfigurationFromXmlDocument(document,
-                                                               @"C:\Some\file.vstemplate"));
+                                                               @"C:\Some\file.vstemplate").Count());
 
             // Assert
             Assert.Equal(
@@ -260,9 +261,10 @@ namespace NuGet.VisualStudio.Test
             extensionManagerMock.Setup(em => em.TryGetInstalledExtension("myExtensionId", out extension)).Returns(false);
 
             // Act
+            // Use .Count() to force enumeration of the yielded results
             ExceptionAssert.Throws<WizardBackoutException>(() => wizard.GetConfigurationFromXmlDocument(document,
                 @"C:\Some\file.vstemplate",
-                vsExtensionManager: extensionManagerMock.Object));
+                vsExtensionManager: extensionManagerMock.Object).Count());
 
             // Assert
             Assert.Equal(
@@ -395,9 +397,10 @@ namespace NuGet.VisualStudio.Test
             var wizard = new TestableVsTemplateWizard();
 
             // Act
+            // Use .Count() to force enumeration of the yielded results
             ExceptionAssert.Throws<WizardBackoutException>(() =>
                                                            wizard.GetConfigurationFromXmlDocument(document,
-                                                               @"C:\Some\file.vstemplate", registryKeys: Enumerable.Empty<IRegistryKey>()));
+                                                               @"C:\Some\file.vstemplate", registryKeys: Enumerable.Empty<IRegistryKey>()).Count());
 
             // Assert
             Assert.Equal(
@@ -421,9 +424,10 @@ namespace NuGet.VisualStudio.Test
             registryKey.Setup(r => r.OpenSubKey(registryPath)).Returns<IRegistryKey>(null);
 
             // Act
+            // Use .Count() to force enumeration of the yielded results
             ExceptionAssert.Throws<WizardBackoutException>(() =>
                                                            wizard.GetConfigurationFromXmlDocument(document,
-                                                               @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object }));
+                                                               @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object }).Count());
 
             // Assert
             Assert.Equal(
@@ -446,9 +450,10 @@ namespace NuGet.VisualStudio.Test
             hkcu.Setup(r => r.OpenSubKey(registryPath)).Returns(hkcu_repository.Object);
 
             // Act
+            // Use .Count() to force enumeration of the yielded results
             ExceptionAssert.Throws<WizardBackoutException>(() =>
                                                            wizard.GetConfigurationFromXmlDocument(document,
-                                                               registryPath, registryKeys: new[] { hkcu.Object }));
+                                                               registryPath, registryKeys: new[] { hkcu.Object }).Count());
 
             // Assert
             Assert.Equal(
@@ -464,8 +469,9 @@ namespace NuGet.VisualStudio.Test
             var wizard = new TestableVsTemplateWizard();
 
             // Act
+            // Use .Count() to force enumeration of the yielded results
             ExceptionAssert.Throws<WizardBackoutException>(() => wizard.GetConfigurationFromXmlDocument(document,
-                @"C:\Some\file.vstemplate"));
+                @"C:\Some\file.vstemplate").Count());
 
             // Assert
             Assert.Equal(
@@ -670,8 +676,9 @@ namespace NuGet.VisualStudio.Test
             var wizard = new TestableVsTemplateWizard();
 
             // Act
+            // Use .Count() to force enumeration of the yielded results
             ExceptionAssert.Throws<WizardBackoutException>(() => wizard.GetConfigurationFromXmlDocument(document,
-                @"C:\Some\file.vstemplate"));
+                @"C:\Some\file.vstemplate").Count());
 
             // Assert
             Assert.Equal("The project template lists one or more packages with missing, empty, or invalid values for the \"id\" or \"version\" attributes. Both attributes are required and must have valid values.", wizard.ErrorMessages.Single());
