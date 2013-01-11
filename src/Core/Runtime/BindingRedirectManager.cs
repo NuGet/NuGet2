@@ -54,7 +54,7 @@ namespace NuGet.Runtime
             {
                 // Add the runtime element to the configuration document
                 runtime = new XElement("runtime");
-                document.Root.Add(runtime);
+                document.Root.AddIndented(runtime);
             }
 
             // Get all of the current bindings in config
@@ -87,7 +87,8 @@ namespace NuGet.Runtime
                     assemblyBindingElement = GetAssemblyBindingElement(runtime);
                 }
                 // Add the binding to that element
-                assemblyBindingElement.Add(bindingRedirect.ToXElement());
+
+                assemblyBindingElement.AddIndented(bindingRedirect.ToXElement());
             }
 
             // Save the file
@@ -139,13 +140,14 @@ namespace NuGet.Runtime
             XElement parentElement = element.Parent;
 
             // Remove the element from the document if we find a match
-            element.Remove();
+            element.RemoveIndented();
 
             if (!parentElement.HasElements)
             {
-                parentElement.Remove();
+                parentElement.RemoveIndented();
             }
         }
+
 
         private static XElement GetAssemblyBindingElement(XElement runtime)
         {
@@ -157,7 +159,7 @@ namespace NuGet.Runtime
             }
 
             assemblyBinding = new XElement(AssemblyBindingName);
-            runtime.Add(assemblyBinding);
+            runtime.AddIndented(assemblyBinding);
 
             return assemblyBinding;
         }
