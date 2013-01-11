@@ -12,6 +12,7 @@ Release notes
 - Allow setting assembly References per target framework.
 - Added support for multiple repositories for preinstalled packages in project templates.
 - Add -AsPath option to nuget.exe Config command.
+- Updates tab in Manage Packages dialog now honors the 'allowedVersions' constraints in packages.config.
 
 *** v2.2 ***
 
@@ -21,4 +22,4 @@ Release notes
 
      <file src=”scripts\” target=”contents\scripts” />
 
-  This will also allow package authors to create empty directory easily. 
+  This will also allow package authors to create empty directory easily.

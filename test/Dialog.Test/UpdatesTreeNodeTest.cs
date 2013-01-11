@@ -10,13 +10,11 @@ using Xunit;
 
 namespace NuGet.Dialog.Test
 {
-
     public class UpdatesTreeNodeTest
     {
         [Fact]
         public void PropertyNameIsCorrect()
         {
-
             // Arrange
             MockPackageRepository localRepository = new MockPackageRepository();
             MockPackageRepository sourceRepository = new MockPackageRepository();
@@ -50,6 +48,54 @@ namespace NuGet.Dialog.Test
         }
 
         [Fact]
+        public void GetPackagesReturnsUpdatesConformingToVersionConstraints()
+        {
+            // Arrange
+            var localRepository = new Mock<IPackageRepository>();
+            localRepository.Setup(l => l.GetPackages()).Returns(new IPackage[] { PackageUtility.CreatePackage("A", "1.0") }.AsQueryable());
+
+            Mock<IPackageConstraintProvider> constraintProvider = localRepository.As<IPackageConstraintProvider>();
+            constraintProvider.Setup(c => c.GetConstraint("A")).Returns(VersionUtility.ParseVersionSpec("(1.0,2.0]"));
+
+            MockPackageRepository sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.5"));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "2.5"));
+
+            UpdatesTreeNode node = CreateUpdatesTreeNode(localRepository.Object, sourceRepository, includePrerelease: false);
+
+            // Act
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
+
+            // Assert
+            Assert.Equal(1, packages.Count);
+            AssertPackage(packages[0], "A", "1.5");
+        }
+
+        [Fact]
+        public void GetPackagesReturnsUpdatesIgnoreConstraintIfConstraintIsNull()
+        {
+            // Arrange
+            var localRepository = new Mock<IPackageRepository>();
+            localRepository.Setup(l => l.GetPackages()).Returns(new IPackage[] { PackageUtility.CreatePackage("A", "1.0") }.AsQueryable());
+
+            Mock<IPackageConstraintProvider> constraintProvider = localRepository.As<IPackageConstraintProvider>();
+            constraintProvider.Setup(c => c.GetConstraint("A")).Returns((IVersionSpec)null);
+
+            MockPackageRepository sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.5"));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "2.5"));
+
+            UpdatesTreeNode node = CreateUpdatesTreeNode(localRepository.Object, sourceRepository, includePrerelease: false);
+
+            // Act
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
+
+            // Assert
+            Assert.Equal(1, packages.Count);
+            AssertPackage(packages[0], "A", "2.5");
+        }
+
+        [Fact]
         public void GetPackagesReturnsNoResultsIfPackageDoesNotExistInSourceRepository()
         {
             // Arrange
@@ -72,7 +118,6 @@ namespace NuGet.Dialog.Test
         [Fact]
         public void GetPackagesIngoresLowerVersions()
         {
-
             // Arrange
             MockPackageRepository localRepository = new MockPackageRepository();
             MockPackageRepository sourceRepository = new MockPackageRepository();
@@ -95,7 +140,6 @@ namespace NuGet.Dialog.Test
         [Fact]
         public void GetPackagesReturnsUpdatesForEachPackageFoundInTheSourceRepository()
         {
-
             // Arrange
             MockPackageRepository localRepository = new MockPackageRepository();
             MockPackageRepository sourceRepository = new MockPackageRepository();

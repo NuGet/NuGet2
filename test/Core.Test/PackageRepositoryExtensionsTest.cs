@@ -7,6 +7,7 @@ using NuGet.Test.Mocks;
 using Xunit;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System;
 
 namespace NuGet.Test
 {
@@ -143,6 +144,105 @@ namespace NuGet.Test
 
             Assert.Equal("A", foundPackages[2].Id);
             Assert.Equal(new SemanticVersion("3.0-alpha"), foundPackages[2].Version);
+        }
+
+        [Fact]
+        public void GetUpdatesReturnPackagesConformingToVersionConstraints()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "2.0", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "3.0", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "3.0-alpha", new string[] { "hello" }));
+
+            var packages = new IPackage[] 
+            {
+                PackageUtility.CreatePackage("A", "1.5")
+            };
+
+            // Act
+            var foundPackages = PackageRepositoryExtensions.GetUpdates(
+                sourceRepository,
+                packages,
+                includePrerelease: true,
+                includeAllVersions: true,
+                targetFrameworks: Enumerable.Empty<FrameworkName>(),
+                versionConstraints: new[] { VersionUtility.ParseVersionSpec("(0.0,3.0)") }
+                ).ToList();
+
+            // Assert
+            Assert.Equal(2, foundPackages.Count);
+
+            Assert.Equal("A", foundPackages[0].Id);
+            Assert.Equal(new SemanticVersion("2.0"), foundPackages[0].Version);
+
+            Assert.Equal("A", foundPackages[1].Id);
+            Assert.Equal(new SemanticVersion("3.0-alpha"), foundPackages[1].Version);
+        }
+
+        [Fact]
+        public void GetUpdatesReturnPackagesUseCorrectConstraintsCorrespondingToIds()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "2.0", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "3.0", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "3.0-alpha", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "1.0-alpha", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "2.0", new string[] { "hello" }));
+
+            var packages = new IPackage[] 
+            {
+                PackageUtility.CreatePackage("A", "1.5"),
+                PackageUtility.CreatePackage("B", "1.0")
+            };
+
+            // Act
+            var foundPackages = PackageRepositoryExtensions.GetUpdates(
+                sourceRepository,
+                packages,
+                includePrerelease: true,
+                includeAllVersions: false,
+                targetFrameworks: Enumerable.Empty<FrameworkName>(),
+                versionConstraints: new[] { VersionUtility.ParseVersionSpec("(0.0,3.0)"), VersionUtility.ParseVersionSpec("(2.0,)") }
+                ).ToList();
+
+            // Assert
+            Assert.Equal(1, foundPackages.Count);
+
+            Assert.Equal("A", foundPackages[0].Id);
+            Assert.Equal(new SemanticVersion("3.0-alpha"), foundPackages[0].Version);
+        }
+
+        [Fact]
+        public void GetUpdatesThrowsIfPackagdIdsAndVersionConstraintsHaveDifferentNumberOfElements()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "2.0", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "3.0", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "3.0-alpha", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "1.0-alpha", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "2.0", new string[] { "hello" }));
+
+            var packages = new IPackage[] 
+            {
+                PackageUtility.CreatePackage("A", "1.5"),
+                PackageUtility.CreatePackage("B", "1.0")
+            };
+
+            // Act
+            Assert.Throws<ArgumentException>(() => PackageRepositoryExtensions.GetUpdates(
+                sourceRepository,
+                packages,
+                includePrerelease: true,
+                includeAllVersions: false,
+                targetFrameworks: Enumerable.Empty<FrameworkName>(),
+                versionConstraints: new[] { VersionUtility.ParseVersionSpec("(2.0,)") }
+                ));
         }
     }
 }
