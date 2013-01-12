@@ -49,14 +49,14 @@ namespace NuGet.VisualStudio
         [Import]
         public Lazy<IRepositorySettings> RepositorySettings { get; set; }
 
-        private IEnumerable<VsTemplateWizardInstallerConfiguration> GetConfigurationFromVsTemplateFile(string vsTemplatePath)
+        private IEnumerable<VsTemplateWizardInstallerConfiguration> GetConfigurationsFromVsTemplateFile(string vsTemplatePath)
         {
             XDocument document = LoadDocument(vsTemplatePath);
 
-            return GetConfigurationFromXmlDocument(document, vsTemplatePath);
+            return GetConfigurationsFromXmlDocument(document, vsTemplatePath);
         }
 
-        internal IEnumerable<VsTemplateWizardInstallerConfiguration> GetConfigurationFromXmlDocument(
+        internal IEnumerable<VsTemplateWizardInstallerConfiguration> GetConfigurationsFromXmlDocument(
             XDocument document,
             string vsTemplatePath,
             object vsExtensionManager = null,
@@ -356,7 +356,7 @@ namespace NuGet.VisualStudio
             if (customParams.Length > 0)
             {
                 var vsTemplatePath = (string)customParams[0];
-                _configurations = GetConfigurationFromVsTemplateFile(vsTemplatePath);
+                _configurations = GetConfigurationsFromVsTemplateFile(vsTemplatePath);
             }
 
             if (replacementsDictionary != null)
