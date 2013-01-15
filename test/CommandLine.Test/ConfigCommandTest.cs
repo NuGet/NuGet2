@@ -42,7 +42,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetValue("config", "test")).Returns("value").Verifiable();
+            settings.Setup(s => s.GetValue("config", "test", false)).Returns("value").Verifiable();
 
             var console = new MockConsole();
             var command = new ConfigCommand()

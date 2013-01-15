@@ -11,7 +11,7 @@ namespace NuGet
             return settings.GetValue(ConfigSection, "repositoryPath", isPath: true);
         }
 
-        public static string GetDecryptedValue(this ISettings settings, string section, string key)
+        public static string GetDecryptedValue(this ISettings settings, string section, string key, bool isPath = false)
         {
             if (String.IsNullOrEmpty(section))
             {
@@ -23,7 +23,7 @@ namespace NuGet
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "key");
             }
 
-            var encryptedString = settings.GetValue(section, key);
+            var encryptedString = settings.GetValue(section, key, isPath);
             if (encryptedString == null)
             {
                 return null;
@@ -67,10 +67,13 @@ namespace NuGet
         /// <param name="settings">The settings instance to retrieve </param>
         /// <param name="key">The key to look up</param>
         /// <param name="decrypt">Determines if the retrieved value needs to be decrypted.</param>
+        /// <param name="isPath">Determines if the retrieved value is returned as a path.</param>
         /// <returns>Null if the key was not found, value from config otherwise.</returns>
-        public static string GetConfigValue(this ISettings settings, string key, bool decrypt = false)
+        public static string GetConfigValue(this ISettings settings, string key, bool decrypt = false, bool isPath = false)
         {
-            return decrypt ? settings.GetDecryptedValue(ConfigSection, key) : settings.GetValue(ConfigSection, key);
+            return decrypt ? 
+                settings.GetDecryptedValue(ConfigSection, key, isPath) : 
+                settings.GetValue(ConfigSection, key, isPath);
         }
 
         /// <summary>

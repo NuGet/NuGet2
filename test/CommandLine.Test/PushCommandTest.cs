@@ -27,7 +27,7 @@ namespace NuGet.Test
         private static ISettings CreateSettings(string defaultPushSource = null)
         {
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetValue("config", "DefaultPushSource")).Returns(defaultPushSource);
+            settings.Setup(s => s.GetValue("config", "DefaultPushSource", false)).Returns(defaultPushSource);
             return settings.Object;
         }
 

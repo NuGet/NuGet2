@@ -127,8 +127,11 @@ nuget.config HTTP_PROXY</value>
   <data name="ConfigCommandSetDesc" xml:space="preserve">
     <value>One on more key-value pairs to be set in config.</value>
   </data>
+  <data name="ConfigCommandAsPathDesc" xml:space="preserve">
+    <value>Returns the config value as a path. This option is ignored when -Set is specified.</value>
+  </data>
   <data name="ConfigCommandSummary" xml:space="preserve">
-    <value>-Set name=value</value>
+    <value>&lt;-Set name=value | name&gt;</value>
   </data>
   <data name="DeleteCommandDescription" xml:space="preserve">
     <value>Deletes a package from the server.</value>
@@ -424,5 +427,5 @@ nuget update -Self</value>
   </data>
   <data name="InstallCommandDisableParallel" xml:space="preserve">
     <value>Disable parallel nuget package installs.</value>
-  </data>
+  </data>  
 </root>

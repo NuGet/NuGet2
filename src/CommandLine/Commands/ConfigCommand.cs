@@ -18,6 +18,13 @@ namespace NuGet.Commands
             get { return _setValues; }
         }
 
+        [Option(typeof(NuGetCommand), "ConfigCommandAsPathDesc")]
+        public bool AsPath
+        {
+            get;
+            set;
+        }
+
         public override void ExecuteCommand()
         {
             if (Settings == null)
@@ -44,7 +51,7 @@ namespace NuGet.Commands
             }
             else if (!String.IsNullOrEmpty(getKey))
             {
-                string value = Settings.GetConfigValue(getKey);
+                string value = Settings.GetConfigValue(getKey, isPath: AsPath);
                 if (String.IsNullOrEmpty(value))
                 {
                     Console.WriteWarning(NuGetResources.ConfigCommandKeyNotFound, getKey);

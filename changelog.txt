@@ -11,6 +11,7 @@ Release notes
 - Nuget.exe outputs the http requests it is making when -Verbosity is set to detailed.
 - Allow setting assembly References per target framework.
 - Added support for multiple repositories for preinstalled packages in project templates.
+- Add -AsPath option to nuget.exe Config command.
 
 *** v2.2 ***
 

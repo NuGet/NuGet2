@@ -31,9 +31,9 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetValue("config", "http_proxy")).Returns(host);
-            settings.Setup(s => s.GetValue("config", "http_proxy.user")).Returns("user");
-            settings.Setup(s => s.GetValue("config", "http_proxy.password")).Returns(_password);
+            settings.Setup(s => s.GetValue("config", "http_proxy", false)).Returns(host);
+            settings.Setup(s => s.GetValue("config", "http_proxy.user", false)).Returns("user");
+            settings.Setup(s => s.GetValue("config", "http_proxy.password", false)).Returns(_password);
             var environment = Mock.Of<IEnvironmentVariableReader>();
             var proxyCache = new ProxyCache(settings.Object, environment);
 
@@ -51,9 +51,9 @@ namespace NuGet.Test
             string host = "http://127.0.0.1";
             string user = "username";
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetValue("config", "http_proxy")).Returns(host);
-            settings.Setup(s => s.GetValue("config", "http_proxy.user")).Returns(user);
-            settings.Setup(s => s.GetValue("config", "http_proxy.password")).Returns(_password);
+            settings.Setup(s => s.GetValue("config", "http_proxy", false)).Returns(host);
+            settings.Setup(s => s.GetValue("config", "http_proxy.user", false)).Returns(user);
+            settings.Setup(s => s.GetValue("config", "http_proxy.password", false)).Returns(_password);
             var environment = Mock.Of<IEnvironmentVariableReader>();
             var proxyCache = new ProxyCache(settings.Object, environment);
 
@@ -70,9 +70,9 @@ namespace NuGet.Test
             // Arrange
             string host = "http://127.0.0.1";
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetValue("config", "http_proxy")).Returns(host);
-            settings.Setup(s => s.GetValue("config", "http_proxy.user")).Returns<string>(null);
-            settings.Setup(s => s.GetValue("config", "http_proxy.password")).Returns<string>(null);
+            settings.Setup(s => s.GetValue("config", "http_proxy", false)).Returns(host);
+            settings.Setup(s => s.GetValue("config", "http_proxy.user", false)).Returns<string>(null);
+            settings.Setup(s => s.GetValue("config", "http_proxy.password", false)).Returns<string>(null);
             var environment = Mock.Of<IEnvironmentVariableReader>();
             var proxyCache = new ProxyCache(settings.Object, environment);
 

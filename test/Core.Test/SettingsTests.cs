@@ -875,7 +875,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetValue("config", "foo"))
+            settings.Setup(s => s.GetValue("config", "foo", false))
                     .Returns("bar")
                     .Verifiable();
 
@@ -893,7 +893,7 @@ namespace NuGet.Test
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
             var value = EncryptionUtility.EncryptString("hello world");
-            settings.Setup(s => s.GetValue("config", "foo"))
+            settings.Setup(s => s.GetValue("config", "foo", false))
                     .Returns(value)
                     .Verifiable();
 
