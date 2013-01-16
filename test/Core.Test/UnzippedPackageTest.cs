@@ -98,6 +98,28 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void GetStreamReturnsCorrectContentWhenNupkgFileIsNestedInsidePackageFolder()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            fileSystem.CreateDirectory("A.1.0.0");
+            fileSystem.AddFile("A.1.0.0\\A.1.0.0.nupkg", "aaa");
+            fileSystem.AddFile(
+                "A.1.0.0\\A.1.0.0.nuspec",
+                CreatePackageManifestContent("A", "1.0.0"));
+
+            var package = new UnzippedPackage(fileSystem, "A.1.0.0");
+
+            // Act
+            Stream stream = package.GetStream();
+
+            // Assert
+            Assert.NotNull(stream);
+            string content = stream.ReadToEnd();
+            Assert.Equal("aaa", content);
+        }
+
+        [Fact]
         public void GetFilesReturnsCorrectFiles()
         {
             // Arrange

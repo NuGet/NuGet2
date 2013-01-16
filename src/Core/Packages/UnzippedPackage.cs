@@ -35,7 +35,7 @@ namespace NuGet
         /// <summary>
         /// Create an uninstance of UnzippedPackage class
         /// </summary>
-        /// <param name="repositoryDirectory">The root directory which contains the .nupkg file and the corresponding unippws directory.</param>
+        /// <param name="repositoryDirectory">The root directory which contains the .nupkg file and the corresponding unzipped directory.</param>
         /// <param name="packageName">Contains the file name without the extension of the nupkg file.</param>
         public UnzippedPackage(string repositoryDirectory, string packageName)
             : this(new PhysicalFileSystem(repositoryDirectory), packageName)
@@ -63,7 +63,15 @@ namespace NuGet
 
         public override Stream GetStream()
         {
-            return _repositoryFileSystem.OpenFile(_packageFileName);
+            // first check the .nupkg file directly under root, e.g. \A.1.0.0.nupkg
+            if (_repositoryFileSystem.FileExists(_packageFileName)) 
+            {
+                return _repositoryFileSystem.OpenFile(_packageFileName);
+            }
+
+            // if not exists, check under \A.1.0.0\A.1.0.0.nupkg
+            string path = Path.Combine(_packageName, _packageFileName);
+            return _repositoryFileSystem.OpenFile(path);
         }
 
         public override IEnumerable<FrameworkName> GetSupportedFrameworks()
