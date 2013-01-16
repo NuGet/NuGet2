@@ -33,6 +33,11 @@
       <Word>Dir</Word>
       <Word>Mvc</Word>
       <Word>Vsix</Word>
+      <Word>Prerelease</Word>
+      <Word>Preprocessor</Word>
+      <Word>Percent</Word>
+      <Word>Callback</Word>
+      <Word>Color</Word>
     </Recognized>
     <Deprecated>
       <Term PreferredAlternate=""></Term>
