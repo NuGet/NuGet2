@@ -10,6 +10,7 @@ Release notes
 - Reduce overall memory consumption significantly, avoiding OutOfMemory exception in certain circumstances.
 - Nuget.exe outputs the http requests it is making when -Verbosity is set to detailed.
 - Allow setting assembly References per target framework.
+- Added support for multiple repositories for preinstalled packages in project templates.
 
 *** v2.2 ***
 

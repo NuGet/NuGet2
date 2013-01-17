@@ -22,7 +22,7 @@ namespace NuGet.VisualStudio
 
         private readonly IVsPackageInstaller _installer;
         private readonly IVsWebsiteHandler _websiteHandler;
-        private VsTemplateWizardInstallerConfiguration _configuration;
+        private IEnumerable<VsTemplateWizardInstallerConfiguration> _configurations;
         private DTE _dte;
         private readonly IVsPackageInstallerServices _packageServices;
         private readonly IOutputConsoleProvider _consoleProvider;
@@ -49,14 +49,14 @@ namespace NuGet.VisualStudio
         [Import]
         public Lazy<IRepositorySettings> RepositorySettings { get; set; }
 
-        private VsTemplateWizardInstallerConfiguration GetConfigurationFromVsTemplateFile(string vsTemplatePath)
+        private IEnumerable<VsTemplateWizardInstallerConfiguration> GetConfigurationsFromVsTemplateFile(string vsTemplatePath)
         {
             XDocument document = LoadDocument(vsTemplatePath);
 
-            return GetConfigurationFromXmlDocument(document, vsTemplatePath);
+            return GetConfigurationsFromXmlDocument(document, vsTemplatePath);
         }
 
-        internal VsTemplateWizardInstallerConfiguration GetConfigurationFromXmlDocument(
+        internal IEnumerable<VsTemplateWizardInstallerConfiguration> GetConfigurationsFromXmlDocument(
             XDocument document,
             string vsTemplatePath,
             object vsExtensionManager = null,
@@ -67,11 +67,10 @@ namespace NuGet.VisualStudio
             bool isPreunzipped = false;
 
             // Ignore XML namespaces since VS does not check them either when loading vstemplate files.
-            XElement packagesElement = document.Root.ElementsNoNamespace("WizardData")
-                .ElementsNoNamespace("packages")
-                .FirstOrDefault();
+            IEnumerable<XElement> packagesElements = document.Root.ElementsNoNamespace("WizardData")
+                .ElementsNoNamespace("packages");
 
-            if (packagesElement != null)
+            foreach (var packagesElement in packagesElements)
             {
                 string isPreunzippedString = packagesElement.GetOptionalAttributeValue("isPreunzipped");
                 if (!String.IsNullOrEmpty(isPreunzippedString))
@@ -86,9 +85,9 @@ namespace NuGet.VisualStudio
                     RepositoryType repositoryType = GetRepositoryType(packagesElement);
                     repositoryPath = GetRepositoryPath(packagesElement, repositoryType, vsTemplatePath, vsExtensionManager, registryKeys);
                 }
-            }
 
-            return new VsTemplateWizardInstallerConfiguration(repositoryPath, packages, isPreunzipped);
+                yield return new VsTemplateWizardInstallerConfiguration(repositoryPath, packages, isPreunzipped);
+            }
         }
 
         private IEnumerable<VsTemplateWizardPackageInfo> GetPackages(XElement packagesElement)
@@ -309,21 +308,24 @@ namespace NuGet.VisualStudio
 
         private void TemplateFinishedGenerating(Project project)
         {
-            if (_configuration.Packages.Any())
+            foreach (var configuration in _configurations)
             {
-                PerformPackageInstall(_installer, project, _configuration);
-
-                // RepositorySettings = null in unit tests
-                if (project.IsWebSite() && RepositorySettings != null)
+                if (configuration.Packages.Any())
                 {
-                    using (_vsCommonOperations.SaveSolutionExplorerNodeStates(_solutionManager))
-                    {
-                        CreateRefreshFilesInBin(
-                            project,
-                            RepositorySettings.Value.RepositoryPath,
-                            _configuration.Packages.Where(p => p.SkipAssemblyReferences));
+                    PerformPackageInstall(_installer, project, configuration);
 
-                        CopyNativeBinariesToBin(project, RepositorySettings.Value.RepositoryPath, _configuration.Packages);
+                    // RepositorySettings = null in unit tests
+                    if (project.IsWebSite() && RepositorySettings != null)
+                    {
+                        using (_vsCommonOperations.SaveSolutionExplorerNodeStates(_solutionManager))
+                        {
+                            CreateRefreshFilesInBin(
+                                project,
+                                RepositorySettings.Value.RepositoryPath,
+                                configuration.Packages.Where(p => p.SkipAssemblyReferences));
+
+                            CopyNativeBinariesToBin(project, RepositorySettings.Value.RepositoryPath, configuration.Packages);
+                        }
                     }
                 }
             }
@@ -354,7 +356,7 @@ namespace NuGet.VisualStudio
             if (customParams.Length > 0)
             {
                 var vsTemplatePath = (string)customParams[0];
-                _configuration = GetConfigurationFromVsTemplateFile(vsTemplatePath);
+                _configurations = GetConfigurationsFromVsTemplateFile(vsTemplatePath);
             }
 
             if (replacementsDictionary != null)

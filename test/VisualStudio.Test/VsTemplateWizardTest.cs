@@ -17,17 +17,45 @@ namespace NuGet.VisualStudio.Test
     {
         private static readonly XNamespace VSTemplateNamespace = "http://schemas.microsoft.com/developer/vstemplate/2005";
 
+        private class VsTemplatePackagesNode
+        {
+            public VsTemplatePackagesNode(string repository, XObject[] repositoryChildren)
+            {
+                Repository = repository;
+                ChildNodes = repositoryChildren;
+            }
+
+            public string Repository { get; private set; }
+            public XObject[] ChildNodes { get; private set; }
+        }
+
         private static XDocument BuildDocument(string repository = "template", params XObject[] packagesChildren)
         {
-            var children = new List<object>();
-            if (repository != null)
+            return BuildDocument(new[] { new VsTemplatePackagesNode(repository, packagesChildren) });
+        }
+
+        private static XDocument BuildDocument(IEnumerable<VsTemplatePackagesNode> repositoriesWithPackages)
+        {
+            var elements = new List<XObject>();
+
+            if (repositoriesWithPackages != null && repositoriesWithPackages.Any())
             {
-                children.Add(new XAttribute("repository", repository));
+                foreach (var repository in repositoriesWithPackages)
+                {
+                    var children = new List<XObject>();
+                    if (repository.Repository != null)
+                    {
+                        children.Add(new XAttribute("repository", repository.Repository));
+                    }
+
+                    children.AddRange(repository.ChildNodes);
+
+                    elements.AddRange(new[] { new XElement(VSTemplateNamespace + "packages", children) });
+                }
             }
-            children.AddRange(packagesChildren);
+
             return new XDocument(new XElement("VSTemplate",
-                new XElement(VSTemplateNamespace + "WizardData",
-                    new XElement(VSTemplateNamespace + "packages", children))));
+                new XElement(VSTemplateNamespace + "WizardData", elements)));
         }
 
         private static XDocument BuildDocumentWithPackage(string repository, XObject additionalChild = null)
@@ -61,11 +89,10 @@ namespace NuGet.VisualStudio.Test
             var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             // Act
-            var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
+            var results = wizard.GetConfigurationsFromXmlDocument(document, @"C:\Some\file.vstemplate");
 
             // Assert
-            Assert.Equal(0, result.Packages.Count);
-            Assert.Equal(null, result.RepositoryPath);
+            Assert.Empty(results);
         }
 
         [Theory]
@@ -83,10 +110,11 @@ namespace NuGet.VisualStudio.Test
             var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             // Act
-            var result = wizard.GetConfigurationFromXmlDocument(document, @"c:\some\file.vstemplate");
+            var results = wizard.GetConfigurationsFromXmlDocument(document, @"c:\some\file.vstemplate");
 
             // Assert
-            Assert.Equal(expectedResult, result.IsPreunzipped);
+            Assert.Equal(1, results.Count());
+            Assert.Equal(expectedResult, results.First().IsPreunzipped);
         }
 
         [Fact]
@@ -100,26 +128,26 @@ namespace NuGet.VisualStudio.Test
             var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             // Act
-            var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
+            var results = wizard.GetConfigurationsFromXmlDocument(document, @"C:\Some\file.vstemplate");
 
             // Assert
-            Assert.Equal(0, result.Packages.Count);
-            Assert.Equal(null, result.RepositoryPath);
+            Assert.Empty(results);
         }
 
         [Fact]
         public void GetConfigurationFromXmlDocument_WorksWithEmptyPackagesElement()
         {
             // Arrange
-            var document = BuildDocument(null);
+            var document = BuildDocument((string)null);
             var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             // Act
-            var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
+            var results = wizard.GetConfigurationsFromXmlDocument(document, @"C:\Some\file.vstemplate");
 
             // Assert
-            Assert.Equal(0, result.Packages.Count);
-            Assert.Equal(null, result.RepositoryPath);
+            Assert.Equal(1, results.Count());
+            Assert.Empty(results.Single().Packages);
+            Assert.Equal(null, results.Single().RepositoryPath);
         }
 
         [Fact]
@@ -130,11 +158,12 @@ namespace NuGet.VisualStudio.Test
             var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             // Act
-            var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
+            var results = wizard.GetConfigurationsFromXmlDocument(document, @"C:\Some\file.vstemplate");
 
             // Assert
-            Assert.Equal(1, result.Packages.Count);
-            Assert.Equal(@"C:\Some", result.RepositoryPath);
+            Assert.Equal(1, results.Count());
+            Assert.Equal(1, results.Single().Packages.Count);
+            Assert.Equal(@"C:\Some", results.Single().RepositoryPath);
         }
 
         [Fact]
@@ -150,11 +179,55 @@ namespace NuGet.VisualStudio.Test
             extensionManagerMock.Setup(em => em.TryGetInstalledExtension("myExtensionId", out extension)).Returns(true);
 
             // Act
-            var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate", vsExtensionManager: extensionManagerMock.Object);
+            var results = wizard.GetConfigurationsFromXmlDocument(document, @"C:\Some\file.vstemplate", vsExtensionManager: extensionManagerMock.Object);
 
             // Assert
-            Assert.Equal(1, result.Packages.Count);
-            Assert.Equal(@"C:\Extension\Dir\Packages", result.RepositoryPath);
+            Assert.Equal(1, results.Count());
+            Assert.Equal(1, results.Single().Packages.Count);
+            Assert.Equal(@"C:\Extension\Dir\Packages", results.Single().RepositoryPath);
+        }
+
+        [Fact]
+        public void GetConfigurationFromXmlDocument_WorksWithMultipleRepositories()
+        {
+            // Arrange
+            var registryPath = @"SOFTWARE\NuGet\Repository";
+            var registryKey = "AspNetMvc4";
+            var registryValue = @"C:\AspNetMvc4\Packages";
+
+            var extensionRepository = new VsTemplatePackagesNode("extension", new XObject[] { new XAttribute("repositoryId", "myExtensionId"), BuildPackageElement("packageFromExtension", "1.0") });
+            var registryRepository = new VsTemplatePackagesNode("registry", new XObject[] { new XAttribute("keyName", registryKey), BuildPackageElement("packageFromRegistry", "2.0") });
+
+            var document = BuildDocument(new[] { extensionRepository, registryRepository });
+            var wizard = new VsTemplateWizard(null, null, null, null, null, null);
+            var extensionManagerMock = new Mock<IVsExtensionManager>();
+            var extensionMock = new Mock<IInstalledExtension>();
+            extensionMock.Setup(e => e.InstallPath).Returns(@"C:\Extension\Dir");
+            var extension = extensionMock.Object;
+            extensionManagerMock.Setup(em => em.TryGetInstalledExtension("myExtensionId", out extension)).Returns(true);
+
+            var hkcu_repository = new Mock<IRegistryKey>();
+            var hkcu = new Mock<IRegistryKey>();
+            hkcu_repository.Setup(k => k.GetValue(registryKey)).Returns(registryValue);
+            hkcu.Setup(r => r.OpenSubKey(registryPath)).Returns(hkcu_repository.Object);
+
+            // Act
+            var results = wizard.GetConfigurationsFromXmlDocument(document, @"C:\Some\file.vstemplate", vsExtensionManager: extensionManagerMock.Object, registryKeys: new[] { hkcu.Object });
+
+            // Assert
+            Assert.Equal(2, results.Count());
+            var extensionResult = results.First();
+            var registryResult = results.Last();
+
+            Assert.Equal(1, extensionResult.Packages.Count);
+            Assert.Equal(@"C:\Extension\Dir\Packages", extensionResult.RepositoryPath);
+            Assert.Equal("packageFromExtension", extensionResult.Packages.Single().Id);
+            Assert.Equal(new SemanticVersion("1.0"), extensionResult.Packages.Single().Version);
+
+            Assert.Equal(1, registryResult.Packages.Count);
+            Assert.Equal(registryValue, registryResult.RepositoryPath);
+            Assert.Equal("packageFromRegistry", registryResult.Packages.Single().Id);
+            Assert.Equal(new SemanticVersion("2.0"), registryResult.Packages.Single().Version);
         }
 
         [Fact]
@@ -165,9 +238,10 @@ namespace NuGet.VisualStudio.Test
             var wizard = new TestableVsTemplateWizard();
 
             // Act
+            // Use .ToList() to force enumeration of the yielded results
             ExceptionAssert.Throws<WizardBackoutException>(() =>
-                                                           wizard.GetConfigurationFromXmlDocument(document,
-                                                               @"C:\Some\file.vstemplate"));
+                                                           wizard.GetConfigurationsFromXmlDocument(document,
+                                                               @"C:\Some\file.vstemplate").ToList());
 
             // Assert
             Assert.Equal(
@@ -187,9 +261,10 @@ namespace NuGet.VisualStudio.Test
             extensionManagerMock.Setup(em => em.TryGetInstalledExtension("myExtensionId", out extension)).Returns(false);
 
             // Act
-            ExceptionAssert.Throws<WizardBackoutException>(() => wizard.GetConfigurationFromXmlDocument(document,
+            // Use .ToList() to force enumeration of the yielded results
+            ExceptionAssert.Throws<WizardBackoutException>(() => wizard.GetConfigurationsFromXmlDocument(document,
                 @"C:\Some\file.vstemplate",
-                vsExtensionManager: extensionManagerMock.Object));
+                vsExtensionManager: extensionManagerMock.Object).ToList());
 
             // Assert
             Assert.Equal(
@@ -214,10 +289,11 @@ namespace NuGet.VisualStudio.Test
             hkcu.Setup(r => r.OpenSubKey(registryPath)).Returns(hkcu_repository.Object);
 
             // Act
-            var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object });
+            var results = wizard.GetConfigurationsFromXmlDocument(document, @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object });
 
             // Assert
-            Assert.Equal(registryValue, result.RepositoryPath);
+            Assert.Equal(1, results.Count());
+            Assert.Equal(registryValue, results.Single().RepositoryPath);
         }
 
         [Fact]
@@ -242,10 +318,11 @@ namespace NuGet.VisualStudio.Test
             hklm.Setup(r => r.OpenSubKey(registryPath)).Returns(hklm_repository.Object);
 
             // Act
-            var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object, hklm.Object });
+            var results = wizard.GetConfigurationsFromXmlDocument(document, @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object, hklm.Object });
 
             // Assert
-            Assert.Equal(registryValue, result.RepositoryPath);
+            Assert.Equal(1, results.Count());
+            Assert.Equal(registryValue, results.Single().RepositoryPath);
         }
 
         [Fact]
@@ -273,10 +350,11 @@ namespace NuGet.VisualStudio.Test
             hklm.Setup(r => r.OpenSubKey(registryPath)).Returns(hklm_repository.Object);
 
             // Act
-            var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object, hklm.Object });
+            var results = wizard.GetConfigurationsFromXmlDocument(document, @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object, hklm.Object });
 
             // Assert
-            Assert.Equal(registryValue, result.RepositoryPath);
+            Assert.Equal(1, results.Count());
+            Assert.Equal(registryValue, results.Single().RepositoryPath);
         }
 
         [Fact]
@@ -304,10 +382,11 @@ namespace NuGet.VisualStudio.Test
             hklm.Setup(r => r.OpenSubKey(registryPath)).Returns(hklm_repository.Object);
 
             // Act
-            var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object, hklm.Object });
+            var results = wizard.GetConfigurationsFromXmlDocument(document, @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object, hklm.Object });
 
             // Assert
-            Assert.Equal(registryValue, result.RepositoryPath);
+            Assert.Equal(1, results.Count());
+            Assert.Equal(registryValue, results.Single().RepositoryPath);
         }
 
         [Fact]
@@ -318,9 +397,10 @@ namespace NuGet.VisualStudio.Test
             var wizard = new TestableVsTemplateWizard();
 
             // Act
+            // Use .ToList() to force enumeration of the yielded results
             ExceptionAssert.Throws<WizardBackoutException>(() =>
-                                                           wizard.GetConfigurationFromXmlDocument(document,
-                                                               @"C:\Some\file.vstemplate", registryKeys: Enumerable.Empty<IRegistryKey>()));
+                                                           wizard.GetConfigurationsFromXmlDocument(document,
+                                                               @"C:\Some\file.vstemplate", registryKeys: Enumerable.Empty<IRegistryKey>()).ToList());
 
             // Assert
             Assert.Equal(
@@ -344,9 +424,10 @@ namespace NuGet.VisualStudio.Test
             registryKey.Setup(r => r.OpenSubKey(registryPath)).Returns<IRegistryKey>(null);
 
             // Act
+            // Use .ToList() to force enumeration of the yielded results
             ExceptionAssert.Throws<WizardBackoutException>(() =>
-                                                           wizard.GetConfigurationFromXmlDocument(document,
-                                                               @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object }));
+                                                           wizard.GetConfigurationsFromXmlDocument(document,
+                                                               @"C:\Some\file.vstemplate", registryKeys: new[] { hkcu.Object }).ToList());
 
             // Assert
             Assert.Equal(
@@ -369,9 +450,10 @@ namespace NuGet.VisualStudio.Test
             hkcu.Setup(r => r.OpenSubKey(registryPath)).Returns(hkcu_repository.Object);
 
             // Act
+            // Use .ToList() to force enumeration of the yielded results
             ExceptionAssert.Throws<WizardBackoutException>(() =>
-                                                           wizard.GetConfigurationFromXmlDocument(document,
-                                                               registryPath, registryKeys: new[] { hkcu.Object }));
+                                                           wizard.GetConfigurationsFromXmlDocument(document,
+                                                               registryPath, registryKeys: new[] { hkcu.Object }).ToList());
 
             // Assert
             Assert.Equal(
@@ -387,8 +469,9 @@ namespace NuGet.VisualStudio.Test
             var wizard = new TestableVsTemplateWizard();
 
             // Act
-            ExceptionAssert.Throws<WizardBackoutException>(() => wizard.GetConfigurationFromXmlDocument(document,
-                @"C:\Some\file.vstemplate"));
+            // Use .ToList() to force enumeration of the yielded results
+            ExceptionAssert.Throws<WizardBackoutException>(() => wizard.GetConfigurationsFromXmlDocument(document,
+                @"C:\Some\file.vstemplate").ToList());
 
             // Assert
             Assert.Equal(
@@ -528,11 +611,12 @@ namespace NuGet.VisualStudio.Test
             var wizard = new VsTemplateWizard(null, null, null, null, null, null);
 
             // Act
-            var result = wizard.GetConfigurationFromXmlDocument(document, @"C:\Some\file.vstemplate");
+            var results = wizard.GetConfigurationsFromXmlDocument(document, @"C:\Some\file.vstemplate");
 
             // Assert
-            Assert.Equal(expectedPackages.Count(), result.Packages.Count);
-            foreach (var pair in expectedPackages.Zip(result.Packages,
+            Assert.Equal(1, results.Count());
+            Assert.Equal(expectedPackages.Count(), results.Single().Packages.Count);
+            foreach (var pair in expectedPackages.Zip(results.Single().Packages,
                 (expectedPackage, resultPackage) => new { expectedPackage, resultPackage }))
             {
                 Assert.Equal(pair.expectedPackage.Id, pair.resultPackage.Id);
@@ -592,8 +676,9 @@ namespace NuGet.VisualStudio.Test
             var wizard = new TestableVsTemplateWizard();
 
             // Act
-            ExceptionAssert.Throws<WizardBackoutException>(() => wizard.GetConfigurationFromXmlDocument(document,
-                @"C:\Some\file.vstemplate"));
+            // Use .ToList() to force enumeration of the yielded results
+            ExceptionAssert.Throws<WizardBackoutException>(() => wizard.GetConfigurationsFromXmlDocument(document,
+                @"C:\Some\file.vstemplate").ToList());
 
             // Assert
             Assert.Equal("The project template lists one or more packages with missing, empty, or invalid values for the \"id\" or \"version\" attributes. Both attributes are required and must have valid values.", wizard.ErrorMessages.Single());

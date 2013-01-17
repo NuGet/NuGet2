@@ -58,7 +58,7 @@
         <Build>$([MSBuild]::Add(1, $([MSBuild]::Subtract($([System.DateTime]::Now.Year), $(VersionStartYear)))))$([System.DateTime]::Now.ToString("MMdd"))</Build>
         <Revision>$(BUILD_NUMBER)</Revision>
         <Version>$(MajorVersion).$(MinorVersion).$(Build).$(Revision)</Version>
-        <PackageVersion>$(MajorVersion).$(MinorVersion).0</PackageVersion>
+        <PackageVersion>$(MajorVersion).$(MinorVersion).1</PackageVersion>
     </PropertyGroup>
 
     <PropertyGroup>

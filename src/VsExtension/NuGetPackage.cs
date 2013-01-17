@@ -252,7 +252,7 @@ namespace NuGet.Tools
             // passed which is of type OleMenuCmdEventArgs
             string command = null;
             OleMenuCmdEventArgs eventArgs = e as OleMenuCmdEventArgs;
-            if (eventArgs != null && eventArgs.InValue != null && eventArgs.InValue is string)
+            if (eventArgs != null && eventArgs.InValue != null)
             {
                 command = eventArgs.InValue as string;
             }
