@@ -253,19 +253,33 @@ namespace NuGet
 
         protected virtual IPackage OpenPackage(string path)
         {
-            OptimizedZipPackage package;
-            try
+            if (FileSystem.FileExists(path))
             {
-                package = new OptimizedZipPackage(FileSystem, path);
-            }
-            catch (FileFormatException ex)
-            {
-                throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ErrorReadingPackage, path), ex);
-            }
-            // Set the last modified date on the package
-            package.Published = FileSystem.GetLastModified(path);
+                OptimizedZipPackage package;
+                try
+                {
+                    package = new OptimizedZipPackage(FileSystem, path);
+                }
+                catch (FileFormatException ex)
+                {
+                    throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ErrorReadingPackage, path), ex);
+                }
+                // Set the last modified date on the package
+                package.Published = FileSystem.GetLastModified(path);
 
-            return package;
+                return package;
+            }
+            else
+            {
+                // if the .nupkg file doesn't exist, fall back to searching for the .nuspec file
+                var nuspecPath = Path.ChangeExtension(path, Constants.ManifestExtension);
+                if (FileSystem.FileExists(nuspecPath))
+                {
+                    return new UnzippedPackage(FileSystem, Path.GetFileNameWithoutExtension(nuspecPath));
+                }
+            }
+
+            return null;
         }
 
         protected virtual string GetPackageFilePath(IPackage package)
