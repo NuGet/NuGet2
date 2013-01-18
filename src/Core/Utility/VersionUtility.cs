@@ -30,6 +30,12 @@ namespace NuGet
             "Microsoft.Security",
             "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes",
             Justification = "The type FrameworkName is immutable.")]
+        public static readonly FrameworkName NativeProjectFramework = new FrameworkName("Native", new Version());
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Security",
+            "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes",
+            Justification = "The type FrameworkName is immutable.")]
         public static readonly FrameworkName UnsupportedFrameworkName = new FrameworkName("Unsupported", new Version());
         private static readonly Version _emptyVersion = new Version();
 
@@ -55,6 +61,7 @@ namespace NuGet
             { "MonoAndroid", "MonoAndroid" },
             { "MonoTouch", "MonoTouch" },
             { "MonoMac", "MonoMac" },
+            { "native", "native"}
         };
 
         private static readonly Dictionary<string, string> _knownProfiles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {

@@ -378,6 +378,29 @@ namespace NuGet.VisualStudio
             return null;
         }
 
+        public virtual void AddImport(string targetPath, ProjectImportLocation location)
+        {
+            if (String.IsNullOrEmpty(targetPath))
+            {
+                throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
+            }
+
+            string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
+            Project.AddImportStatement(relativeTargetPath, location);
+            Project.Save();
+        }
+
+        public virtual void RemoveImport(string targetPath)
+        {
+            if (String.IsNullOrEmpty(targetPath))
+            {
+                throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
+            }
+            string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
+            Project.RemoveImportStatement(relativeTargetPath);
+            Project.Save();
+        }
+
         public virtual bool IsSupportedFile(string path)
         {
             string fileName = Path.GetFileName(path);
