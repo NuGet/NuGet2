@@ -134,10 +134,9 @@ namespace NuGet
                 {
                     yield return new SharedOptimizedZipPackage(FileSystem, nupkgPath);
                 }
-
-                // always search for .nuspec-based packages last
-                if (FileSystem.FileExists(partialPath + Constants.ManifestExtension))
+                else if (FileSystem.FileExists(partialPath + Constants.ManifestExtension))
                 {
+                    // always search for .nuspec-based packages last
                     yield return new UnzippedPackage(FileSystem, directory);
                     continue;
                 }

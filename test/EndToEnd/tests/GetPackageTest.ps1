@@ -193,10 +193,10 @@ function Test-GetPackageForFSharpProjectReturnsCorrectPackages2 {
     # Arrange
     $p = New-FSharpConsoleApplication
 
-	# Note that installation of the second package on a project involves update of an existing packages.config
-	# which is different from the installation of the first package
+    # Note that installation of the second package on a project involves update of an existing packages.config
+    # which is different from the installation of the first package
     Install-Package jQuery -Version 1.5 -Source $context.RepositoryPath
-	Install-Package MyAwesomeLibrary -Version 1.0 -Source $context.RepositoryPath
+    Install-Package MyAwesomeLibrary -Version 1.0 -Source $context.RepositoryPath
 
     # Act
     $result = @(Get-Package -ProjectName $p.Name)
@@ -317,11 +317,11 @@ function Test-GetPackagesDoesNotShowPrereleasePackagesWhenSwitchIsNotSpecified {
     Assert-AreEqual 3 $packages.Count
     Assert-AreEqual "PackageWithDependencyOnPrereleaseTestPackage" $packages[0].Id
     Assert-AreEqual "1.0" $packages[0].Version
-	Assert-AreEqual "PreReleaseTestPackage" $packages[1].Id
+    Assert-AreEqual "PreReleaseTestPackage" $packages[1].Id
     Assert-AreEqual "1.0.0" $packages[1].Version
     Assert-AreEqual "PreReleaseTestPackage.A" $packages[2].Id
     Assert-AreEqual "1.0.0" $packages[2].Version
-	
+    
 }
 
 function Test-GetPackagesAllVersionsDoesNotShowPrereleasePackagesWhenSwitchIsNotSpecified {
@@ -334,7 +334,7 @@ function Test-GetPackagesAllVersionsDoesNotShowPrereleasePackagesWhenSwitchIsNot
 
     # Assert
     Assert-AreEqual 3 $packages.Count
-	Assert-AreEqual "PackageWithDependencyOnPrereleaseTestPackage" $packages[0].Id
+    Assert-AreEqual "PackageWithDependencyOnPrereleaseTestPackage" $packages[0].Id
     Assert-AreEqual "1.0" $packages[0].Version
     Assert-AreEqual "PreReleaseTestPackage" $packages[1].Id
     Assert-AreEqual "1.0.0" $packages[1].Version
@@ -354,7 +354,7 @@ function Test-GetPackagesWithPrereleaseSwitchShowsPrereleasePackages {
     Assert-AreEqual 3 $packages.Count
     Assert-AreEqual "PackageWithDependencyOnPrereleaseTestPackage" $packages[0].Id
     Assert-AreEqual "1.0" $packages[0].Version
-	Assert-AreEqual "PreReleaseTestPackage" $packages[1].Id
+    Assert-AreEqual "PreReleaseTestPackage" $packages[1].Id
     Assert-AreEqual "1.0.1-a" $packages[1].Version
     Assert-AreEqual "PreReleaseTestPackage.A" $packages[2].Id
     Assert-AreEqual "1.0.0" $packages[2].Version
@@ -372,8 +372,8 @@ function Test-GetPackagesWithAllAndPrereleaseSwitchShowsAllPackages {
     Assert-AreEqual 7 $packages.Count
     Assert-AreEqual "PackageWithDependencyOnPrereleaseTestPackage" $packages[0].Id
     Assert-AreEqual "1.0" $packages[0].Version
-	
-	Assert-AreEqual "PreReleaseTestPackage" $packages[1].Id
+    
+    Assert-AreEqual "PreReleaseTestPackage" $packages[1].Id
     Assert-AreEqual "1.0.0-a" $packages[1].Version
 
     Assert-AreEqual "PreReleaseTestPackage" $packages[2].Id
@@ -492,22 +492,22 @@ function Test-GetPackageUpdatesReturnAllVersionsAndPrereleaseVersionsIfTwoFlagsA
 
 function Test-GetInstalledPackageWithFilterReturnsCorrectPackage
 {
-	param
-	(
-		$context
-	)
+    param
+    (
+        $context
+    )
 
-	# Arrange
+    # Arrange
     $p = New-ClassLibrary
     
-	$p | Install-Package PrereleaseTestPackage -Version '1.0.0-b' -Source $context.RepositoryRoot
+    $p | Install-Package PrereleaseTestPackage -Version '1.0.0-b' -Source $context.RepositoryRoot
     Assert-Package $p 'PrereleaseTestPackage' '1.0.0-b'
     
-	# Act
-	$packages = @(Get-Package 'Prerelease')
+    # Act
+    $packages = @(Get-Package 'Prerelease')
 
-	# Assert
-	Assert-AreEqual 1 $packages.Count
-	Assert-AreEqual 'PrereleaseTestPackage' $packages[0].Id
-	Assert-AreEqual '1.0.0-b' $packages[0].Version
+    # Assert
+    Assert-AreEqual 1 $packages.Count
+    Assert-AreEqual 'PrereleaseTestPackage' $packages[0].Id
+    Assert-AreEqual '1.0.0-b' $packages[0].Version
 }

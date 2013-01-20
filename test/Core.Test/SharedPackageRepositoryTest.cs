@@ -174,7 +174,7 @@ namespace NuGet.Test
 
             var fileSystem = new MockFileSystem("x:\\root");
             fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nupkg", packageStream);
-            fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nuspace", "rubbish".AsStream());
+            fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nuspec", "rubbish".AsStream());
             
             var configFileSystem = new MockFileSystem();
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
@@ -187,6 +187,29 @@ namespace NuGet.Test
             Assert.Equal("one", package.Id);
             Assert.Equal(new SemanticVersion("1.0.0-alpha"), package.Version);
             Assert.Equal("Test description", package.Description);
+        }
+
+        [Fact]
+        public void GetPackagesDoesNotReturnDuplicatedPackagesIfBothNuspecAndNupkgFilesArePresent()
+        {
+            // Arrange
+            var packageStream = GetPackageStream("one", "1.0.0-alpha");
+
+            var fileSystem = new MockFileSystem("x:\\root");
+            fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nupkg", packageStream);
+            fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nuspec", "rubbish".AsStream());
+
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            var packages = repository.GetPackages().ToList();
+
+            // Assert
+            Assert.Equal(1, packages.Count);
+            Assert.True(packages[0] is OptimizedZipPackage);
+            Assert.Equal("one", packages[0].Id);
+            Assert.Equal(new SemanticVersion("1.0.0-alpha"), packages[0].Version);
         }
 
         [Fact]
