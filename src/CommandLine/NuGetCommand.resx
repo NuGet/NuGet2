@@ -431,4 +431,7 @@ nuget update -Self</value>
   <data name="PackageCommandMinClientVersion" xml:space="preserve">
     <value>Set the minClientVersion attribute for the created package.</value>
   </data>
+  <data name="InstallCommandSaveOnExpand" xml:space="preserve">
+    <value>Specifies types of files to save after package installation: nuspec, nupkg, nuspec;nupkg.</value>
+  </data>
 </root>

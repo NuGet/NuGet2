@@ -37,6 +37,13 @@ namespace NuGet.ServerExtensions
             get { return _source.Source; }
         }
 
+        // SaveOnExpand property does not apply to this class
+        public PackageSaveProperties PackageSave
+        {
+            set { throw new NotSupportedException(); }
+            get { throw new NotSupportedException(); }
+        }
+
         public bool SupportsPrereleasePackages
         {
             get { return _source.SupportsPrereleasePackages; }

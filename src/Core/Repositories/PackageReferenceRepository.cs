@@ -39,6 +39,12 @@ namespace NuGet
             }
         }
 
+        public PackageSaveProperties PackageSave
+        {
+            get { throw new NotSupportedException(); }
+            set { throw new NotSupportedException(); }
+        }
+
         public bool SupportsPrereleasePackages
         {
             get { return true; }

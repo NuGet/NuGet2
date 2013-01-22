@@ -144,12 +144,44 @@ namespace NuGet.VisualStudio
                     storeFileSystem, 
                     configSettingsFileSystem);
 
+                var settings = Settings.LoadDefaultSettings(configSettingsFileSystem);
+                repository.PackageSave = CalculateSaveOnExpand(settings);
                 _repositoryInfo = new RepositoryInfo(path, configFolderPath, fileSystem, repository);
             }
 
             return _repositoryInfo;
         }
 
+        private PackageSaveProperties CalculateSaveOnExpand(ISettings settings)
+        {
+            PackageSaveProperties retValue = PackageSaveProperties.None;
+            if (settings != null)
+            {
+                string saveOnExpandValue = settings.GetConfigValue("SaveOnExpand");
+                if (!string.IsNullOrEmpty(saveOnExpandValue))
+                {
+                    foreach (var v in saveOnExpandValue.Split(';'))
+                    {
+                        if (v.Equals(PackageSaveProperties.Nupkg.ToString(), StringComparison.OrdinalIgnoreCase))
+                        {
+                            retValue |= PackageSaveProperties.Nupkg;
+                        }
+                        else if (v.Equals(PackageSaveProperties.Nuspec.ToString(), StringComparison.OrdinalIgnoreCase))
+                        {
+                            retValue |= PackageSaveProperties.Nuspec;
+                        }
+                    }
+                }
+            }
+
+            if (retValue == PackageSaveProperties.None)
+            {
+                retValue = PackageSaveProperties.Nupkg;
+            }
+
+            return retValue;
+        }
+        
         protected internal virtual IFileSystem GetConfigSettingsFileSystem(string configFolderPath)
         {
             return new SolutionFolderFileSystem(ServiceLocator.GetInstance<DTE>().Solution, VsConstants.NuGetSolutionSettingsFolder, configFolderPath);

@@ -101,7 +101,7 @@ namespace NuGet
                     return new UnzippedPackage(FileSystem, packageDirectory);
                 }
             }
-            
+
             return null;
         }
 
@@ -132,7 +132,7 @@ namespace NuGet
                 string nupkgPath = partialPath + Constants.PackageExtension;
                 if (FileSystem.FileExists(nupkgPath))
                 {
-                    yield return new SharedOptimizedZipPackage(FileSystem, nupkgPath);
+                    yield return new SharedOptimizedZipPackage(FileSystem, nupkgPath);                    
                 }
                 else if (FileSystem.FileExists(partialPath + Constants.ManifestExtension))
                 {
@@ -145,28 +145,6 @@ namespace NuGet
 
         public override void AddPackage(IPackage package)
         {
-            // Starting from 2.1, we save the nuspec file into the subdirectory with the name as <packageId>.<version>
-            // for example, for jQuery version 1.0, it will be "jQuery.1.0\\jQuery.1.0.nuspec"
-            string packageFilePath = GetManifestFilePath(package.Id, package.Version);
-            Manifest manifest = Manifest.Create(package);
-
-            // The IPackage object doesn't carry the References information.
-            // Thus we set the References for the manifest to the set of all valid assembly references
-            manifest.Metadata.ReferenceSets = package.AssemblyReferences
-                                                  .GroupBy(f => f.TargetFramework)
-                                                  .Select(
-                                                    g => new ManifestReferenceSet
-                                                         {
-                                                             TargetFramework = g.Key == null ? null : VersionUtility.GetFrameworkString(g.Key),
-                                                             References = g.Select(p => new ManifestReference { File = p.Name }).ToList()
-                                                         })
-                                                  .ToList();
-
-            FileSystem.AddFileWithCheck(packageFilePath, manifest.Save);
-
-            // But in order to maintain backwards compatibility with older versions of NuGet, 
-            // we will save the .nupkg file too. This way, 2.1 will read the .nuspec file, and 
-            // pre 2.1 will read the .nupkg
             base.AddPackage(package);
 
             // if this is a solution-level package, add it to the solution's packages.config file

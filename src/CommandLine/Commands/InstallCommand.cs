@@ -23,6 +23,8 @@ namespace NuGet.Commands
         private readonly List<string> _sources = new List<string>();
 
         private static readonly bool _isMonoRuntime = Type.GetType("Mono.Runtime") != null;
+
+        private PackageSaveProperties _saveOnExpand;
         
         [Option(typeof(NuGetCommand), "InstallCommandSourceDescription")]
         public ICollection<string> Source
@@ -54,6 +56,9 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "InstallCommandDisableParallel")]
         public bool DisableParallel { get; set; }
 
+        [Option(typeof(NuGetCommand), "InstallCommandSaveOnExpand")]
+        public string SaveOnExpand { get; set; }
+
         /// <remarks>
         /// Meant for unit testing.
         /// </remarks>
@@ -83,8 +88,43 @@ namespace NuGet.Commands
             DisableParallel = _isMonoRuntime;
         }
 
+        private void CalculateSaveOnExpand()
+        {
+            string saveOnExpandValue = SaveOnExpand;
+            if (string.IsNullOrEmpty(saveOnExpandValue))
+            {
+                saveOnExpandValue = Settings.GetConfigValue("SaveOnExpand");
+            }
+
+            _saveOnExpand = PackageSaveProperties.None;
+            if (!string.IsNullOrEmpty(saveOnExpandValue))
+            {
+                foreach (var v in saveOnExpandValue.Split(';'))
+                {
+                    if (v.Equals(PackageSaveProperties.Nupkg.ToString(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        _saveOnExpand |= PackageSaveProperties.Nupkg;
+                    }
+                    else if (v.Equals(PackageSaveProperties.Nuspec.ToString(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        _saveOnExpand |= PackageSaveProperties.Nuspec;
+                    }
+                    else
+                    {
+                        Console.WriteWarning("Invalid SaveOnExpand value {0}.", _saveOnExpand);
+                    }
+                }
+
+                if (_saveOnExpand == PackageSaveProperties.None)
+                {
+                    Console.WriteWarning("Invalid SaveOnExpand value {0}. The option is ignored.", _saveOnExpand);
+                }
+            }
+        }
+
         public override void ExecuteCommand()
         {
+            CalculateSaveOnExpand();
             string installPath = ResolveInstallPath();
             IFileSystem fileSystem = CreateFileSystem(installPath);
 
@@ -307,11 +347,14 @@ namespace NuGet.Commands
             var pathResolver = new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions);
 
             IPackageRepository localRepository = new LocalPackageRepository(pathResolver, fileSystem);
+            if (_saveOnExpand != PackageSaveProperties.None)
+            {
+                localRepository.PackageSave = _saveOnExpand;
+            }
             var packageManager = new PackageManager(repository, pathResolver, fileSystem, localRepository)
                                  {
                                      Logger = Console
                                  };
-
             return packageManager;
         }
 

@@ -44,6 +44,12 @@ namespace NuGet.VisualStudio
             }
         }
 
+        public PackageSaveProperties PackageSave
+        {
+            set { throw new NotSupportedException(); }
+            get { throw new NotSupportedException(); }
+        }
+
         public bool SupportsPrereleasePackages
         {
             get
