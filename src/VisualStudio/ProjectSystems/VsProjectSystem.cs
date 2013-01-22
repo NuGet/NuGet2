@@ -10,7 +10,6 @@ using System.Runtime.Versioning;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using NuGet.VisualStudio.Resources;
-using VSLangProj;
 using MsBuildProject = Microsoft.Build.Evaluation.Project;
 using MsBuildProjectItem = Microsoft.Build.Evaluation.ProjectItem;
 using Project = EnvDTE.Project;
@@ -197,7 +196,7 @@ namespace NuGet.VisualStudio
                 }
 
                 // Add a reference to the project
-                Reference reference = Project.Object.References.Add(assemblyPath);
+                dynamic reference = Project.Object.References.Add(assemblyPath);
 
                 // if we copied the assembly to temp folder earlier, delete it now since we no longer need it.
                 if (usedTempFile)
@@ -443,7 +442,7 @@ namespace NuGet.VisualStudio
             return y.Path.CompareTo(x.Path);
         }
 
-        private static void TrySetCopyLocal(Reference reference)
+        private static void TrySetCopyLocal(dynamic reference)
         {
             // Always set copy local to true for references that we add
             try
