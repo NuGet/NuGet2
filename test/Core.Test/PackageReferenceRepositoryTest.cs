@@ -151,6 +151,32 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void RemovingAndAddingPackageReferenceWithSameIdPreservesDevelopmentFlag()
+        {
+            // Arrange
+            var sharedRepository = new Mock<ISharedPackageRepository>();
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" developmentDependency=""false"" />
+</packages>");
+            var referenceRepository = new PackageReferenceRepository(fileSystem, sharedRepository.Object);
+            var A10 = PackageUtility.CreatePackage("A");
+            var A20 = PackageUtility.CreatePackage("A", "2.0");
+
+            // Act
+            referenceRepository.RemovePackage(A10);
+            referenceRepository.AddPackage(A20);
+
+            // Assert
+            Assert.True(fileSystem.FileExists("packages.config"));
+            AssertConfig(@"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""2.0"" developmentDependency=""false"" />
+</packages>", fileSystem.ReadAllText("packages.config"));
+        }
+
+        [Fact]
         public void RemovePackageRemovesEntryFromPackagesConfig()
         {
             // Arrange

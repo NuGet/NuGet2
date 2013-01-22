@@ -419,7 +419,8 @@ namespace NuGet.Commands
             var packages = new List<IPackage>();
 
             IDictionary<Tuple<string, SemanticVersion>, PackageReference> packageReferences = file.GetPackageReferences()
-                                                                                          .ToDictionary(r => Tuple.Create(r.Id, r.Version));
+                                                                                            .Where(r => !r.IsDevelopmentDependency)
+                                                                                            .ToDictionary(r => Tuple.Create(r.Id, r.Version));
 
             foreach (PackageReference reference in packageReferences.Values)
             {

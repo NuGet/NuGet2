@@ -15,6 +15,7 @@ namespace NuGet
     {
         private readonly string _path;
         private readonly Dictionary<string, string> _constraints = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, string> _developmentFlags = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         public PackageReferenceFile(string path) :
             this(new PhysicalFileSystem(Path.GetDirectoryName(path)),
@@ -60,6 +61,7 @@ namespace NuGet
                 string versionString = e.GetOptionalAttributeValue("version");
                 string versionConstraintString = e.GetOptionalAttributeValue("allowedVersions");
                 string targetFrameworkString = e.GetOptionalAttributeValue("targetFramework");
+                string developmentFlagString = e.GetOptionalAttributeValue("developmentDependency");
                 SemanticVersion version = null;
 
                 if (String.IsNullOrEmpty(id))
@@ -102,7 +104,18 @@ namespace NuGet
                     }
                 } 
 
-                yield return new PackageReference(id, version, versionConstaint, targetFramework);
+                var developmentFlag = false;
+                if (!String.IsNullOrEmpty(developmentFlagString))
+                {
+                    if (!bool.TryParse(developmentFlagString, out developmentFlag))
+                    {
+                        throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ReferenceFile_InvalidDevelopmentFlag, developmentFlagString, _path));
+                    }
+
+                    _developmentFlags[id] = developmentFlagString;
+                }
+
+                yield return new PackageReference(id, version, versionConstaint, targetFramework, developmentFlag);
             }
         }
 
@@ -168,6 +181,13 @@ namespace NuGet
                 newElement.Add(new XAttribute("allowedVersions", versionConstraint));
             }
 
+            // Restore the development dependency flag
+            string developmentFlag;
+            if (_developmentFlags.TryGetValue(id, out developmentFlag))
+            {
+                newElement.Add(new XAttribute("developmentDependency", developmentFlag));
+            }
+
             document.Root.Add(newElement);
 
             SaveDocument(document);
@@ -219,6 +239,13 @@ namespace NuGet
                 if (!String.IsNullOrEmpty(versionConstraint))
                 {
                     _constraints[id] = versionConstraint;
+                }
+
+                // Preserve the developmentDependency attribute for this package id (if any defined)
+                var developmentFlag = element.GetOptionalAttributeValue("developmentDependency");
+                if (!String.IsNullOrEmpty(developmentFlag))
+                {
+                    _developmentFlags[id] = developmentFlag;
                 }
 
                 // Remove the element from the xml dom
