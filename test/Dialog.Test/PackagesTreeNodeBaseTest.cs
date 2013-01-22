@@ -10,10 +10,8 @@ using Xunit;
 
 namespace NuGet.Dialog.Test
 {
-
     public class PackagesTreeNodeBaseTest
     {
-
         [Fact]
         public void ParentPropertyIsCorrect()
         {
@@ -184,6 +182,8 @@ namespace NuGet.Dialog.Test
 
                                    Assert.Equal("A7", node.Extensions[0].Name);
                                    Assert.Equal("A6", node.Extensions[1].Name);
+
+                                   Assert.Equal(10, node.TotalNumberOfPackages);
                                },
                                pageSize: 2,
                                numberOfPackages: 10);
@@ -208,6 +208,8 @@ namespace NuGet.Dialog.Test
                                    Assert.Equal("A2", node.Extensions[2].Name);
                                    Assert.Equal("A1", node.Extensions[3].Name);
                                    Assert.Equal("A0", node.Extensions[4].Name);
+
+                                   Assert.Equal(5, node.TotalNumberOfPackages);
                                },
                                numberOfPackages: 5);
         }

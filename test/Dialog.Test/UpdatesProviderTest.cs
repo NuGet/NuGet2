@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -46,6 +47,16 @@ namespace NuGet.Dialog.Test
 
             // Act & Assert
             Assert.True(provider.RefreshOnNodeSelection);
+        }
+
+        [Fact]
+        public void SupportsExecuteAllCommandIsTrue()
+        {
+            // Arrange
+            var provider = CreateUpdatesProvider();
+
+            // Act && Arrange
+            Assert.True(provider.SupportsExecuteAllCommand);
         }
 
         [Fact]
@@ -256,6 +267,84 @@ namespace NuGet.Dialog.Test
             manualEvent.WaitOne();
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ExecuteAllMethodCallsUpdatePackagesMethodOnPackageManager(bool includePrerelease)
+        {
+            // Local repository contains Package A 1.0 and Package B
+            // Source repository contains Package A 2.0 and Package C
+
+            var packageA1 = PackageUtility.CreatePackage("A", "1.0");
+            var packageA2 = PackageUtility.CreatePackage("A", "2.0");
+            var packageB = PackageUtility.CreatePackage("B", "2.0");
+            var packageC = PackageUtility.CreatePackage("C", "3.0");
+
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            localRepository.AddPackage(packageA1);
+            localRepository.AddPackage(packageB);
+
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(packageA2);
+            sourceRepository.AddPackage(packageC);
+
+            var project = new Mock<Project>();
+
+            var projectManager = new Mock<IProjectManager>();
+            projectManager.Setup(p => p.LocalRepository).Returns(localRepository);
+
+            var packageManager = new Mock<IVsPackageManager>();
+            packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project.Object))).Returns(projectManager.Object);
+
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(s => s.GetProject(It.IsAny<string>())).Returns(project.Object);
+
+            var mockWindowServices = new Mock<IUserNotifierServices>();
+            var provider = CreateUpdatesProvider(packageManager.Object, localRepository, project: project.Object, userNotifierServices: mockWindowServices.Object, solutionManager: solutionManager.Object);
+            provider.IncludePrerelease = includePrerelease;
+            var extensionA = new PackageItem(provider, packageA2);
+            var extensionC = new PackageItem(provider, packageC);
+
+            provider.SelectedNode = (UpdatesTreeNode)provider.ExtensionsTree.Nodes[0];
+            var allExtensions = provider.SelectedNode.Extensions;
+            allExtensions.Add(extensionA);
+            allExtensions.Add(extensionC);
+
+            var manualEvent = new ManualResetEvent(false);
+
+            Exception exception = null;
+
+            provider.ExecuteCompletedCallback = delegate
+            {
+                try
+                {
+                    // Assert
+                    Assert.Equal(RepositoryOperationNames.Update, sourceRepository.LastOperation);
+
+                    mockWindowServices.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
+                    packageManager.Verify(p => p.UpdatePackages(projectManager.Object, true, includePrerelease, provider), Times.Once());
+                }
+                catch (Exception ex)
+                {
+                    exception = ex;
+                }
+                finally
+                {
+                    manualEvent.Set();
+                }
+            };
+
+            // Act
+            provider.Execute(item: null);
+
+            // do not allow the method to return
+            manualEvent.WaitOne();
+
+            Assert.Null(exception);
+        }
+
         [Fact]
         public void ExecuteMethodInvokeInstallScriptAndUninstallScript()
         {
@@ -331,9 +420,9 @@ namespace NuGet.Dialog.Test
             Project project = null,
             IScriptExecutor scriptExecutor = null,
             IUserNotifierServices userNotifierServices = null,
-            ISolutionManager solutionManager = null)
+            ISolutionManager solutionManager = null,
+            IUpdateAllUIService updateAllService = null)
         {
-
             if (packageManager == null)
             {
                 var packageManagerMock = new Mock<IVsPackageManager>();
@@ -392,7 +481,7 @@ namespace NuGet.Dialog.Test
                 userNotifierServices,
                 mockProgressWindowOpener.Object,
                 new Mock<IProviderSettings>().Object,
-                new Mock<IUpdateAllUIService>().Object,
+                updateAllService ?? new Mock<IUpdateAllUIService>().Object,
                 scriptExecutor,
                 new MockOutputConsoleProvider(),
                 new Mock<IVsCommonOperations>().Object

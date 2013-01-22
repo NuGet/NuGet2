@@ -25,6 +25,16 @@ namespace NuGet.Dialog.Test
             Assert.True(provider.ShowPrereleaseComboBox);
         }
 
+        [Fact]
+        public void SupportsExecuteAllCommandIsTrue()
+        {
+            // Arrange
+            var provider = CreateSolutionUpdatesProvider();
+
+            // Act && Arrange
+            Assert.True(provider.SupportsExecuteAllCommand);
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -111,6 +121,100 @@ namespace NuGet.Dialog.Test
 
             // do not allow the method to return
             manualEvent.Wait();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ExecuteAllMethodCallUpdateAllPackageOnAllProjects(bool includePrerelease)
+        {
+            // Arrange
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+            var packageB = PackageUtility.CreatePackage("B", "2.0");
+            var packageC = PackageUtility.CreatePackage("C", "3.0");
+            var packageB2 = PackageUtility.CreatePackage("B", "4.0");
+
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageC);
+            sourceRepository.AddPackage(packageB);
+            sourceRepository.AddPackage(packageB2);
+
+            var localRepository = new MockPackageRepository();
+            localRepository.AddPackage(packageB);
+
+            var projectManager1 = new Mock<IProjectManager>();
+            projectManager1.Setup(p => p.LocalRepository).Returns(localRepository);
+
+            var projectManager2 = new Mock<IProjectManager>();
+            projectManager2.Setup(p => p.LocalRepository).Returns(localRepository);
+
+            var project1 = MockProjectUtility.CreateMockProject("Project1");
+            var project2 = MockProjectUtility.CreateMockProject("Project2");
+
+            var packageManager = new Mock<IVsPackageManager>();
+            packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project1))).Returns(projectManager1.Object);
+            packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project2))).Returns(projectManager2.Object);
+            packageManager.Setup(p => p.IsProjectLevel(It.IsAny<IPackage>())).Returns(true);
+
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(p => p.GetProject(It.Is<string>(s => s == "Project1"))).Returns(project1);
+            solutionManager.Setup(p => p.GetProject(It.Is<string>(s => s == "Project2"))).Returns(project2);
+            solutionManager.Setup(p => p.GetProjects()).Returns(new Project[] { project1, project2 });
+
+            var mockWindowService = new Mock<IUserNotifierServices>();
+            mockWindowService.Setup(p => p.ShowProjectSelectorWindow(
+                It.IsAny<string>(),
+                It.IsAny<IPackage>(),
+                It.IsAny<Predicate<Project>>(),
+                It.IsAny<Predicate<Project>>())).Returns(new Project[] { project1, project2 });
+
+            var provider = CreateSolutionUpdatesProvider(packageManager.Object, localRepository, solutionManager: solutionManager.Object, userNotifierServices: mockWindowService.Object);
+            provider.IncludePrerelease = includePrerelease;
+            var extensionTree = provider.ExtensionsTree;
+            var extensionB2 = new PackageItem(provider, packageB2);
+
+            var firstTreeNode = (SimpleTreeNode)extensionTree.Nodes[0];
+            firstTreeNode.Repository.AddPackage(packageA);
+            firstTreeNode.Repository.AddPackage(packageB);
+            firstTreeNode.Repository.AddPackage(packageC);
+            firstTreeNode.Extensions.Add(extensionB2);
+
+            provider.SelectedNode = firstTreeNode;
+            IVsPackageManager activePackageManager = provider.GetActivePackageManager();
+            Mock<IVsPackageManager> mockPackageManager = Mock.Get<IVsPackageManager>(activePackageManager);
+
+            var manualEvent = new ManualResetEventSlim(false);
+            Exception exception = null;
+
+            provider.ExecuteCompletedCallback = delegate
+            {
+                try
+                {
+                    // Assert
+                    Assert.Equal(RepositoryOperationNames.Update, sourceRepository.LastOperation);
+                    mockPackageManager.Verify(
+                        p => p.UpdatePackages(true, includePrerelease, provider, provider), 
+                        Times.Once());
+                }
+                catch (Exception ex)
+                {
+                    exception = ex;
+                }
+                finally
+                {
+                    manualEvent.Set();
+                }
+            };
+
+            // Act
+            provider.Execute(item: null);
+
+            // do not allow the method to return
+            manualEvent.Wait();
+
+            Assert.Null(exception);
         }
 
         [Fact]

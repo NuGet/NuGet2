@@ -179,6 +179,25 @@ namespace NuGet.Dialog.Providers
             return ShowLicenseAgreement(activePackageManager, allOperations.Reduce());
         }
 
+        protected override void OnExecuteCompleted(PackageItem item)
+        {
+            base.OnExecuteCompleted(item);
+
+            // When this was the Update All command execution, 
+            // an individual Update command may have updated all remaining packages.
+            // If there are no more updates left, we hide the Update All button. 
+            // 
+            // However, we only want to do so if there's only one page of result, because
+            // we don't want to download all packages in all pages just to check for this condition.
+            if (SelectedNode != null && SelectedNode.TotalNumberOfPackages > 1 && SelectedNode.TotalPages == 1)
+            {
+                if (SelectedNode.Extensions.OfType<PackageItem>().All(p => !p.IsEnabled))
+                {
+                    _updateAllUIService.Hide();
+                }
+            }
+        }
+
         public override void OnPackageLoadCompleted(PackagesTreeNodeBase selectedNode)
         {
             base.OnPackageLoadCompleted(selectedNode);
@@ -228,6 +247,11 @@ namespace NuGet.Dialog.Providers
 
         protected override string GetProgressMessage(IPackage package)
         {
+            if (package == null)
+            {
+                return Resources.Dialog_UpdateAllProgress;
+            }
+
             return Resources.Dialog_UpdateProgress + package.ToString();
         }
     }

@@ -17,7 +17,6 @@ namespace NuGet.Dialog.Test
 {
     public class InstalledProviderTest
     {
-
         [Fact]
         public void NamePropertyIsCorrect()
         {
@@ -36,6 +35,16 @@ namespace NuGet.Dialog.Test
 
             // Act & Assert
             Assert.False(provider.ShowPrereleaseComboBox);
+        }
+
+        [Fact]
+        public void SupportsExecuteAllCommandIsFalse()
+        {
+            // Arrange
+            var provider = CreateInstalledProvider();
+
+            // Act && Arrange
+            Assert.False(provider.SupportsExecuteAllCommand);
         }
 
         [Fact]

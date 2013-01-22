@@ -27,6 +27,17 @@ namespace NuGet.Dialog.Test
             Assert.True(provider.ShowPrereleaseComboBox);
         }
 
+
+        [Fact]
+        public void SupportsExecuteAllCommandIsFalse()
+        {
+            // Arrange
+            var provider = CreateSolutionOnlineProvider();
+
+            // Act && Arrange
+            Assert.False(provider.SupportsExecuteAllCommand);
+        }
+
         [Fact]
         public void CreateExtensionsDoesNotSetCurrentVersionAttribute()
         {

@@ -15,7 +15,6 @@
             MinWidth="75"
             MinHeight="23"
             Margin="5,0,25,0"
-            Command="Cut"
             DockPanel.Dock="Right">
         </Button>
 

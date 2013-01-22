@@ -343,6 +343,9 @@
     <value>Update _All</value>
   </data>
   <data name="Dialog_UpdateAllLabel" xml:space="preserve">
-    <value>There are more than 1 update available.</value>
+    <value>There are more than one update available.</value>
+  </data>
+  <data name="Dialog_UpdateAllProgress" xml:space="preserve">
+    <value>Update all packages...</value>
   </data>
 </root>

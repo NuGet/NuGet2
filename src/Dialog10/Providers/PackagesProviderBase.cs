@@ -74,7 +74,6 @@ namespace NuGet.Dialog.Providers
         protected PackagesProviderBase(PackagesProviderBase other) :
             this(other._localRepository, other._resources, other._providerServices, other._progressProvider, other._solutionManager)
         {
-
         }
 
         /// <summary>
@@ -331,6 +330,9 @@ namespace NuGet.Dialog.Providers
                 return;
             }
 
+            // If 'item' == null, it means this is an Execute All command. In the context of the Updates provider, 
+            // it is the Update All button execution. 
+
             NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.PackageOperationBegin);
             
             // disable all operations while this install is in progress
@@ -355,11 +357,8 @@ namespace NuGet.Dialog.Providers
             worker.RunWorkerAsync(item);
 
             // write an introductory sentence before every operation starts to make the console easier to read
-            if (item != null)
-            {
-                string progressMessage = GetProgressMessage(item.PackageIdentity);
-                WriteLineToOutputWindow("------- " + progressMessage + " -------");
-            }
+            string progressMessage = GetProgressMessage(item == null ? null : item.PackageIdentity);
+            WriteLineToOutputWindow("------- " + progressMessage + " -------");
         }
 
         private void OnProgressAvailable(object sender, ProgressEventArgs e)
@@ -396,7 +395,7 @@ namespace NuGet.Dialog.Providers
                     OnExecuteCompleted((PackageItem)e.Result);
                     _providerServices.ProgressWindow.SetCompleted(successful: true);
 
-                    // if this is an Execute All command, hide the Update All button after successful execution
+                    // if this is an Execute All command (in which e.Result = null), hide the Update All button after successful execution
                     if (SupportsExecuteAllCommand && e.Result == null)
                     {
                         _providerServices.UpdateAllUIService.Hide();

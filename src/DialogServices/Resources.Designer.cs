@@ -538,11 +538,20 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There are more than 1 update available..
+        ///   Looks up a localized string similar to There are more than one update available..
         /// </summary>
         public static string Dialog_UpdateAllLabel {
             get {
                 return ResourceManager.GetString("Dialog_UpdateAllLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update all packages....
+        /// </summary>
+        public static string Dialog_UpdateAllProgress {
+            get {
+                return ResourceManager.GetString("Dialog_UpdateAllProgress", resourceCulture);
             }
         }
         

@@ -26,6 +26,16 @@ namespace NuGet.Dialog.Test
         }
 
         [Fact]
+        public void SupportsExecuteAllCommandIsFalse()
+        {
+            // Arrange
+            var provider = CreateSolutionInstalledProvider();
+
+            // Act && Arrange
+            Assert.False(provider.SupportsExecuteAllCommand);
+        }
+
+        [Fact]
         public void CreateExtensionsDoesNotSetCurrentVersionAttribute()
         {
             // Arrange

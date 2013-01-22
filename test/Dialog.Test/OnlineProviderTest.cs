@@ -39,6 +39,16 @@ namespace NuGet.Dialog.Test
         }
 
         [Fact]
+        public void SupportsExecuteAllCommandIsFalse()
+        {
+            // Arrange
+            var provider = CreateOnlineProvider();
+
+            // Act && Arrange
+            Assert.False(provider.SupportsExecuteAllCommand);
+        }
+
+        [Fact]
         public void ShowPrereleaseComboBoxIsTrue()
         {
             // Arrange
