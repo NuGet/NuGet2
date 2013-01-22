@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Xunit;
-using Xunit.Extensions;
 
 namespace NuGet.Test.Integration.NuGetCommandLine
 {

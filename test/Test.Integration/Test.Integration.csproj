@@ -48,6 +48,7 @@
     <Compile Include="Core\LocalPackageRepositoryTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetConfigCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetDeleteCommandTest.cs" />
+    <Compile Include="NuGetCommandLine\NuGetInstallCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetListCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetCommandLineTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetPackCommandTest.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="NuGetCommandLine\NuSpecFileContext.cs" />
     <Compile Include="Core\PathResolverTest.cs" />
     <Compile Include="NuGetCommandLine\NugetProgramStatic.cs" />
+    <Compile Include="NuGetCommandLine\PackageCreator.cs" />
     <Compile Include="NuGetCommandLine\ProjectFactoryTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetSourcesCommandTest.cs" />
     <Compile Include="NuGetCommandLine\Util.cs" />
