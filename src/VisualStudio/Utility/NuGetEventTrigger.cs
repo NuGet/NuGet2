@@ -26,6 +26,11 @@ namespace NuGet.VisualStudio
                     AppDomain.CurrentDomain.BaseDirectory,
                     @"EventTrigger.dll");
 
+                if (!File.Exists(assemblyFile))
+                {
+                    return;
+                }
+
                 var assembly = Assembly.Load(AssemblyName.GetAssemblyName(assemblyFile));
                 var type = assembly.GetType("EventTrigger");
                 if (type == null)
