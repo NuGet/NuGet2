@@ -39,7 +39,7 @@ namespace NuGet
             }
         }
 
-        public PackageSaveProperties PackageSave
+        public PackageFileTypes FilesToSave
         {
             get { throw new NotSupportedException(); }
             set { throw new NotSupportedException(); }

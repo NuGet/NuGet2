@@ -186,5 +186,55 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 Util.DeleteDirectory(source);
             }
         }
+
+        // Test that SaveOnExpand specified in nuget.config file is used.
+        [Fact]
+        public void InstallCommand_SaveOnExpandInConfigFile()
+        {
+            var tempPath = Path.GetTempPath();
+            var source = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var outputDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
+
+            try
+            {
+                // Arrange            
+                Util.CreateDirectory(source);
+                Util.CreateDirectory(outputDirectory);
+
+                var packageFileName = Util.CreateTestPackage(
+                    "testPackage1", "1.1.0", source);
+
+                var configFile = Path.Combine(tempPath, "nuget.config");
+                string[] args = new string[] { 
+                    "config", "-Set", "SaveOnExpand=nuspec",
+                    "-ConfigFile", configFile };
+                int r = Program.Main(args);
+
+                // Act
+                args = new string[] { 
+                    "install", "testPackage1", 
+                    "-OutputDirectory", outputDirectory,
+                    "-Source", source, 
+                    "-ConfigFile", configFile };
+                r = Program.Main(args);
+
+                // Assert
+                Assert.Equal(0, r);
+
+                var nuspecFile = Path.Combine(
+                    outputDirectory,
+                    @"testPackage1.1.1.0\testPackage1.1.1.0.nuspec");
+
+                Assert.True(File.Exists(nuspecFile));
+                var nupkgFiles = Directory.GetFiles(outputDirectory, "*.nupkg", SearchOption.AllDirectories);
+                Assert.Equal(0, nupkgFiles.Length);
+            }
+            finally
+            {
+                // Cleanup
+                Util.DeleteDirectory(outputDirectory);
+                Util.DeleteDirectory(source);
+            }
+        }
     }
 }

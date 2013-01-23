@@ -320,7 +320,7 @@ namespace NuGet.PowerShell.Commands.Test
         {
             // Arrange
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
-            sharedRepository.SetupSet(s => s.PackageSave = PackageSaveProperties.Nupkg);
+            sharedRepository.SetupSet(s => s.FilesToSave = PackageFileTypes.Nupkg);
 
             var packageRepository = new MockPackageRepository { PackageUtility.CreatePackage("A", "1.0.0-a") };
             var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, new Mock<IDeleteOnRestartManager>().Object, null);
@@ -342,7 +342,7 @@ namespace NuGet.PowerShell.Commands.Test
             // Arrange
             var packageA = PackageUtility.CreatePackage("A", "1.0.0-a");
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
-            sharedRepository.SetupSet(s => s.PackageSave = PackageSaveProperties.Nupkg);
+            sharedRepository.SetupSet(s => s.FilesToSave = PackageFileTypes.Nupkg);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
             sharedRepository.Setup(s => s.IsReferenced("A", new SemanticVersion("1.0.0-a"))).Returns(true);
@@ -377,7 +377,7 @@ namespace NuGet.PowerShell.Commands.Test
             var packageA1 = PackageUtility.CreatePackage("A", "1.0.0");
             var packageA2 = PackageUtility.CreatePackage("A", "2.0.0", listed: false);
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
-            sharedRepository.SetupSet(s => s.PackageSave = PackageSaveProperties.Nupkg);
+            sharedRepository.SetupSet(s => s.FilesToSave = PackageFileTypes.Nupkg);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA1));
             sharedRepository.Setup(s => s.IsReferenced("A", new SemanticVersion("1.0.0"))).Returns(true);
@@ -404,7 +404,7 @@ namespace NuGet.PowerShell.Commands.Test
             var packageA1 = PackageUtility.CreatePackage("A", "1.0.0");
             var packageA2 = PackageUtility.CreatePackage("A", "1.0.1-alpha", listed: false);
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
-            sharedRepository.SetupSet(s => s.PackageSave = PackageSaveProperties.Nupkg);
+            sharedRepository.SetupSet(s => s.FilesToSave = PackageFileTypes.Nupkg);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA1));
             sharedRepository.Setup(s => s.IsReferenced("A", new SemanticVersion("1.0.0"))).Returns(true);
@@ -434,7 +434,7 @@ namespace NuGet.PowerShell.Commands.Test
             var packageA1 = PackageUtility.CreatePackage("A", "1.0.0");
             var packageA2 = PackageUtility.CreatePackage("A", "2.0.0", listed: false);
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
-            sharedRepository.SetupSet(s => s.PackageSave = PackageSaveProperties.Nupkg);
+            sharedRepository.SetupSet(s => s.FilesToSave = PackageFileTypes.Nupkg);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA2));
             sharedRepository.Setup(s => s.IsReferenced("A", new SemanticVersion("2.0.0"))).Returns(true);
@@ -462,7 +462,7 @@ namespace NuGet.PowerShell.Commands.Test
             var packageA1 = PackageUtility.CreatePackage("A", "1.0.0");
             var packageA2 = PackageUtility.CreatePackage("A", "1.0.0-ReleaseCandidate", listed: false);
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
-            sharedRepository.SetupSet(s => s.PackageSave = PackageSaveProperties.Nupkg);
+            sharedRepository.SetupSet(s => s.FilesToSave = PackageFileTypes.Nupkg);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA2));
             sharedRepository.Setup(s => s.IsReferenced("A", new SemanticVersion("1.0.0-ReleaseCandidate"))).Returns(true);
@@ -491,7 +491,7 @@ namespace NuGet.PowerShell.Commands.Test
             var packageA = PackageUtility.CreatePackage("A", "1.0.0", dependencies: new [] { new PackageDependency("B") });
             var packageB = PackageUtility.CreatePackage("B", "1.0.0", listed: false);
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
-            sharedRepository.SetupSet(s => s.PackageSave = PackageSaveProperties.Nupkg);
+            sharedRepository.SetupSet(s => s.FilesToSave = PackageFileTypes.Nupkg);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
             sharedRepository.Setup(s => s.AddPackage(packageB)).Verifiable();
@@ -523,7 +523,7 @@ namespace NuGet.PowerShell.Commands.Test
             var packageA = PackageUtility.CreatePackage("A", versionA, dependencies: new[] { new PackageDependency("B") });
             var packageB = PackageUtility.CreatePackage("B", versionB, listed: false);
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
-            sharedRepository.SetupSet(s => s.PackageSave = PackageSaveProperties.Nupkg);
+            sharedRepository.SetupSet(s => s.FilesToSave = PackageFileTypes.Nupkg);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA)).Verifiable();
             sharedRepository.Setup(s => s.AddPackage(packageB)).Verifiable();
@@ -671,7 +671,7 @@ namespace NuGet.PowerShell.Commands.Test
             packageA.Setup(p => p.GetFiles()).Returns(new IPackageFile[] { readme.Object });
 
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
-            sharedRepository.SetupSet(s => s.PackageSave = PackageSaveProperties.Nupkg);
+            sharedRepository.SetupSet(s => s.FilesToSave = PackageFileTypes.Nupkg);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA.Object)).Verifiable();
             sharedRepository.Setup(s => s.IsReferenced("A", new SemanticVersion("1.0"))).Returns(true);
@@ -726,7 +726,7 @@ namespace NuGet.PowerShell.Commands.Test
             packageB.Setup(p => p.GetFiles()).Returns(new IPackageFile[] { readmeB.Object });
 
             var sharedRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
-            sharedRepository.SetupSet(s => s.PackageSave = PackageSaveProperties.Nupkg);
+            sharedRepository.SetupSet(s => s.FilesToSave = PackageFileTypes.Nupkg);
             sharedRepository.Setup(s => s.GetPackages()).Returns(Enumerable.Empty<IPackage>().AsQueryable());
             sharedRepository.Setup(s => s.AddPackage(packageA.Object));
             sharedRepository.Setup(s => s.AddPackage(packageB.Object));

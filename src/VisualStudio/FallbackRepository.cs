@@ -24,15 +24,15 @@ namespace NuGet.VisualStudio
             get { return _primaryRepository.Source; }
         }
 
-        public PackageSaveProperties PackageSave
+        public PackageFileTypes FilesToSave
         {
             get
             {
-                return _primaryRepository.PackageSave;
+                return _primaryRepository.FilesToSave;
             }
             set
             {
-                _primaryRepository.PackageSave = value;
+                _primaryRepository.FilesToSave = value;
             }
         }
 

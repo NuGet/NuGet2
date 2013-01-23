@@ -728,7 +728,7 @@ namespace NuGet.PowerShell.Commands.Test
                                         PackageUtility.CreatePackage("C", "1.0.0")
                                     };
             var localRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
-            localRepository.SetupSet(p => p.PackageSave = PackageSaveProperties.Nupkg);
+            localRepository.SetupSet(p => p.FilesToSave = PackageFileTypes.Nupkg);
             localRepository.Setup(p => p.GetPackages()).Returns(localPackages.AsQueryable()).Verifiable();
 
             var packageManager = new VsPackageManager(
@@ -787,7 +787,7 @@ namespace NuGet.PowerShell.Commands.Test
                                         PackageUtility.CreatePackage("C", "1.0.0")
                                     };
             var localRepository = new Mock<ISharedPackageRepository>(MockBehavior.Strict);
-            localRepository.SetupSet(p => p.PackageSave = PackageSaveProperties.Nupkg);
+            localRepository.SetupSet(p => p.FilesToSave = PackageFileTypes.Nupkg);
             localRepository.Setup(p => p.GetPackages()).Returns(localPackages.AsQueryable()).Verifiable();
 
             var packageManager = new VsPackageManager(

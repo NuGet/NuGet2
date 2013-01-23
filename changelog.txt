@@ -12,6 +12,7 @@ Release notes
 - Allow setting assembly References per target framework.
 - Add support for multiple repositories for preinstalled packages in project templates.
 - Add -AsPath option to nuget.exe Config command.
+- Add -SaveOnExpand option to nuget.exe Install command.
 - Updates tab in Manage Packages dialog now honors the 'allowedVersions' constraints in packages.config.
 - Added Update All button in the dialog to allow updating all packages with one click.
 - Add the 'minClientVersion' attribute to manifest schema to allow packages to require minimum version of NuGet.

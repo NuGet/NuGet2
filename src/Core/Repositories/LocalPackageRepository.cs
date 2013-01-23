@@ -81,7 +81,7 @@ namespace NuGet
 
         public override void AddPackage(IPackage package)
         {
-            if (PackageSave.HasFlag(PackageSaveProperties.Nuspec))
+            if (FilesToSave.HasFlag(PackageFileTypes.Nuspec))
             {
                 // Starting from 2.1, we save the nuspec file into the subdirectory with the name as <packageId>.<version>
                 // for example, for jQuery version 1.0, it will be "jQuery.1.0\\jQuery.1.0.nuspec"
@@ -103,7 +103,7 @@ namespace NuGet
                 FileSystem.AddFileWithCheck(packageFilePath, manifest.Save);
             }
 
-            if (PackageSave.HasFlag(PackageSaveProperties.Nupkg))
+            if (FilesToSave.HasFlag(PackageFileTypes.Nupkg))
             {
                 string packageFilePath = GetPackageFilePath(package);
 

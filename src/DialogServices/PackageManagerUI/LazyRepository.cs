@@ -25,15 +25,15 @@ namespace NuGet.Dialog.Providers
             }
         }
 
-        public PackageSaveProperties PackageSave
+        public PackageFileTypes FilesToSave
         {
             get
             {
-                return Repository.PackageSave;
+                return Repository.FilesToSave;
             }
             set
             {
-                Repository.PackageSave = value;
+                Repository.FilesToSave = value;
             }
         }
 

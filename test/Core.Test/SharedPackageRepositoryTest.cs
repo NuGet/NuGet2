@@ -20,7 +20,7 @@ namespace NuGet.Test
             var fileSystem = new MockFileSystem("x:\\root");
             var configFileSystem = new MockFileSystem();
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
-            repository.PackageSave = PackageSaveProperties.Nupkg | PackageSaveProperties.Nuspec;
+            repository.FilesToSave = PackageFileTypes.Nupkg | PackageFileTypes.Nuspec;
 
             // Act            
             repository.AddPackage(PackageUtility.CreatePackage(id, version));
@@ -37,7 +37,7 @@ namespace NuGet.Test
             var fileSystem = new MockFileSystem("x:\\root");
             var configFileSystem = new MockFileSystem();
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
-            repository.PackageSave = PackageSaveProperties.Nupkg | PackageSaveProperties.Nuspec;
+            repository.FilesToSave = PackageFileTypes.Nupkg | PackageFileTypes.Nuspec;
 
             // Act
             repository.AddPackage(PackageUtility.CreatePackage("A",

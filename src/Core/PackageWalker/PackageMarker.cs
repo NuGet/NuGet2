@@ -23,7 +23,7 @@ namespace NuGet
         }
 
         // SaveOnExpand property does not apply to this class
-        public PackageSaveProperties PackageSave
+        public PackageFileTypes FilesToSave
         {
             set { throw new NotSupportedException(); }
             get { throw new NotSupportedException(); }

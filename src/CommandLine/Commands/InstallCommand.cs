@@ -24,7 +24,7 @@ namespace NuGet.Commands
 
         private static readonly bool _isMonoRuntime = Type.GetType("Mono.Runtime") != null;
 
-        private PackageSaveProperties _saveOnExpand;
+        private PackageFileTypes _saveOnExpand;
         
         [Option(typeof(NuGetCommand), "InstallCommandSourceDescription")]
         public ICollection<string> Source
@@ -96,18 +96,18 @@ namespace NuGet.Commands
                 saveOnExpandValue = Settings.GetConfigValue("SaveOnExpand");
             }
 
-            _saveOnExpand = PackageSaveProperties.None;
+            _saveOnExpand = PackageFileTypes.None;
             if (!string.IsNullOrEmpty(saveOnExpandValue))
             {
                 foreach (var v in saveOnExpandValue.Split(';'))
                 {
-                    if (v.Equals(PackageSaveProperties.Nupkg.ToString(), StringComparison.OrdinalIgnoreCase))
+                    if (v.Equals(PackageFileTypes.Nupkg.ToString(), StringComparison.OrdinalIgnoreCase))
                     {
-                        _saveOnExpand |= PackageSaveProperties.Nupkg;
+                        _saveOnExpand |= PackageFileTypes.Nupkg;
                     }
-                    else if (v.Equals(PackageSaveProperties.Nuspec.ToString(), StringComparison.OrdinalIgnoreCase))
+                    else if (v.Equals(PackageFileTypes.Nuspec.ToString(), StringComparison.OrdinalIgnoreCase))
                     {
-                        _saveOnExpand |= PackageSaveProperties.Nuspec;
+                        _saveOnExpand |= PackageFileTypes.Nuspec;
                     }
                     else
                     {
@@ -115,7 +115,7 @@ namespace NuGet.Commands
                     }
                 }
 
-                if (_saveOnExpand == PackageSaveProperties.None)
+                if (_saveOnExpand == PackageFileTypes.None)
                 {
                     Console.WriteWarning("Invalid SaveOnExpand value {0}. The option is ignored.", _saveOnExpand);
                 }
@@ -347,14 +347,15 @@ namespace NuGet.Commands
             var pathResolver = new DefaultPackagePathResolver(fileSystem, useSideBySidePaths: AllowMultipleVersions);
 
             IPackageRepository localRepository = new LocalPackageRepository(pathResolver, fileSystem);
-            if (_saveOnExpand != PackageSaveProperties.None)
+            if (_saveOnExpand != PackageFileTypes.None)
             {
-                localRepository.PackageSave = _saveOnExpand;
+                localRepository.FilesToSave = _saveOnExpand;
             }
             var packageManager = new PackageManager(repository, pathResolver, fileSystem, localRepository)
                                  {
                                      Logger = Console
                                  };
+
             return packageManager;
         }
 

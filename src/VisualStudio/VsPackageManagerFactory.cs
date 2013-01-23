@@ -145,16 +145,16 @@ namespace NuGet.VisualStudio
                     configSettingsFileSystem);
 
                 var settings = Settings.LoadDefaultSettings(configSettingsFileSystem);
-                repository.PackageSave = CalculateSaveOnExpand(settings);
+                repository.FilesToSave = CalculateSaveOnExpand(settings);
                 _repositoryInfo = new RepositoryInfo(path, configFolderPath, fileSystem, repository);
             }
 
             return _repositoryInfo;
         }
 
-        private PackageSaveProperties CalculateSaveOnExpand(ISettings settings)
+        private PackageFileTypes CalculateSaveOnExpand(ISettings settings)
         {
-            PackageSaveProperties retValue = PackageSaveProperties.None;
+            PackageFileTypes retValue = PackageFileTypes.None;
             if (settings != null)
             {
                 string saveOnExpandValue = settings.GetConfigValue("SaveOnExpand");
@@ -162,21 +162,21 @@ namespace NuGet.VisualStudio
                 {
                     foreach (var v in saveOnExpandValue.Split(';'))
                     {
-                        if (v.Equals(PackageSaveProperties.Nupkg.ToString(), StringComparison.OrdinalIgnoreCase))
+                        if (v.Equals(PackageFileTypes.Nupkg.ToString(), StringComparison.OrdinalIgnoreCase))
                         {
-                            retValue |= PackageSaveProperties.Nupkg;
+                            retValue |= PackageFileTypes.Nupkg;
                         }
-                        else if (v.Equals(PackageSaveProperties.Nuspec.ToString(), StringComparison.OrdinalIgnoreCase))
+                        else if (v.Equals(PackageFileTypes.Nuspec.ToString(), StringComparison.OrdinalIgnoreCase))
                         {
-                            retValue |= PackageSaveProperties.Nuspec;
+                            retValue |= PackageFileTypes.Nuspec;
                         }
                     }
                 }
             }
 
-            if (retValue == PackageSaveProperties.None)
+            if (retValue == PackageFileTypes.None)
             {
-                retValue = PackageSaveProperties.Nupkg;
+                retValue = PackageFileTypes.Nupkg;
             }
 
             return retValue;
