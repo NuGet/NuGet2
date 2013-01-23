@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-using System.Xml.Schema;
 using System.Xml.Serialization;
 using NuGet.Resources;
 
@@ -101,10 +100,10 @@ namespace NuGet
                 e.Name = XName.Get(e.Name.LocalName, schemaNamespace);
             }
 
-            // Validate the schema
-            ValidateManifestSchema(document, schemaNamespace);
+            // Validate the schema version
+            CheckSchemaVersion(document);
 
-            // Serialize it
+            // Deserialize it
             var manifest = ManifestReader.ReadManifest(document);
 
             // Validate before returning
@@ -147,8 +146,9 @@ namespace NuGet
                     Language = metadata.Language.SafeTrim(),
                     DependencySets = CreateDependencySets(metadata),
                     FrameworkAssemblies = CreateFrameworkAssemblies(metadata),
-                    ReferenceSets = CreateReferenceSets(metadata)
-                }
+                    ReferenceSets = CreateReferenceSets(metadata),
+                    RequiredMinVersionString = metadata.RequiredMinVersion.ToStringSafe()
+                },
             };
         }
 
@@ -245,28 +245,6 @@ namespace NuGet
                 return null;
             }
             return String.Join(",", values);
-        }
-
-        private static void ValidateManifestSchema(XDocument document, string schemaNamespace)
-        {
-            CheckSchemaVersion(document);
-
-            // Create the schema set
-            var schemaSet = new XmlSchemaSet();
-            using (TextReader reader = ManifestSchemaUtility.GetSchemaReader(schemaNamespace))
-            {
-                schemaSet.Add(schemaNamespace, XmlReader.Create(reader));
-            }
-
-            // Validate the document
-            document.Validate(schemaSet, (sender, e) =>
-            {
-                if (e.Severity == XmlSeverityType.Error)
-                {
-                    // Throw an exception if there is a validation error
-                    throw new InvalidOperationException(e.Message);
-                }
-            });
         }
 
         private static void CheckSchemaVersion(XDocument document)

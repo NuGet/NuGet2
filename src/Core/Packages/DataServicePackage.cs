@@ -266,6 +266,12 @@ namespace NuGet
             }
         }
 
+        public Version RequiredMinVersion
+        {
+            get;
+            set;
+        }
+
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences
         {
             get
@@ -412,5 +418,6 @@ namespace NuGet
             }
             return package != null;
         }
+
     }
 }

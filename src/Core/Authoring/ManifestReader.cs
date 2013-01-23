@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -9,6 +11,8 @@ namespace NuGet
 {
     internal static class ManifestReader
     {
+        private static readonly string[] RequiredElements = new string[] { "id", "version", "authors", "description" };
+
         public static Manifest ReadManifest(XDocument document)
         {
             return new Manifest
@@ -23,6 +27,10 @@ namespace NuGet
             var manifestMetadata = new ManifestMetadata();
             manifestMetadata.DependencySets = new List<ManifestDependencySet>();
             manifestMetadata.ReferenceSets = new List<ManifestReferenceSet>();
+            manifestMetadata.RequiredMinVersionString = xElement.GetOptionalAttributeValue("requiredMinVersion");
+
+            // we store all child elements under <metadata> so that we can easily check for required elements.
+            var allElements = new HashSet<string>();
 
             XNode node = xElement.FirstNode;
             while (node != null)
@@ -30,20 +38,32 @@ namespace NuGet
                 var element = node as XElement;
                 if (element != null)
                 {
-                    ReadMetadataValue(manifestMetadata, element);
+                    ReadMetadataValue(manifestMetadata, element, allElements);
                 }
                 node = node.NextNode;
+            }
+
+            // now check for required elements, which include <id>, <version>, <authors> and <description>
+            foreach (var requiredElement in RequiredElements)
+            {
+                if (!allElements.Contains(requiredElement))
+                {
+                    throw new InvalidDataException(
+                        String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_RequiredMetadataMissing, requiredElement));
+                }
             }
 
             return manifestMetadata;
         }
 
-        private static void ReadMetadataValue(ManifestMetadata manifestMetadata, XElement element)
+        private static void ReadMetadataValue(ManifestMetadata manifestMetadata, XElement element, HashSet<string> allElements)
         {
             if (element.Value == null)
             {
                 return;
             }
+
+            allElements.Add(element.Name.LocalName);
 
             string value = element.Value.SafeTrim();
             switch (element.Name.LocalName)
@@ -143,7 +163,9 @@ namespace NuGet
         public static List<ManifestReference> ReadReference(XElement referenceElement)
         {
             return (from element in referenceElement.ElementsNoNamespace("reference")
-                    select new ManifestReference { File = element.GetOptionalAttributeValue("file").SafeTrim() }
+                    let fileAttribute = element.Attribute("file")
+                    where fileAttribute != null && !String.IsNullOrEmpty(fileAttribute.Value)
+                    select new ManifestReference { File = fileAttribute.Value.SafeTrim() }
                    ).ToList();
         }
 
@@ -154,10 +176,12 @@ namespace NuGet
                 return new List<ManifestFrameworkAssembly>(0);
             }
 
-            return (from element in frameworkElement.Elements()
+            return (from element in frameworkElement.ElementsNoNamespace("frameworkAssembly")
+                    let assemblyNameAttribute = element.Attribute("assemblyName")
+                    where assemblyNameAttribute != null && !String.IsNullOrEmpty(assemblyNameAttribute.Value)
                     select new ManifestFrameworkAssembly
                     {
-                        AssemblyName = element.GetOptionalAttributeValue("assemblyName").SafeTrim(),
+                        AssemblyName = assemblyNameAttribute.Value.SafeTrim(),
                         TargetFramework = element.GetOptionalAttributeValue("targetFramework").SafeTrim()
                     }).ToList();
         }
@@ -203,9 +227,11 @@ namespace NuGet
         {
             // element is <dependency>
             return (from element in containerElement.ElementsNoNamespace("dependency")
+                    let idElement = element.Attribute("id")
+                    where idElement != null && !String.IsNullOrEmpty(idElement.Value)
                     select new ManifestDependency
                     {
-                        Id = element.GetOptionalAttributeValue("id").SafeTrim(),
+                        Id = idElement.Value.SafeTrim(),
                         Version = element.GetOptionalAttributeValue("version").SafeTrim()
                     }).ToList();
         }
@@ -218,13 +244,19 @@ namespace NuGet
             }
 
             List<ManifestFile> files = new List<ManifestFile>();
-            foreach (var file in xElement.Elements())
+            foreach (var file in xElement.ElementsNoNamespace("file"))
             {
+                var srcElement = file.Attribute("src");
+                if (srcElement == null || String.IsNullOrEmpty(srcElement.Value))
+                {
+                    continue;
+                }
+
                 string target = file.GetOptionalAttributeValue("target").SafeTrim();
                 string exclude = file.GetOptionalAttributeValue("exclude").SafeTrim();
 
                 // Multiple sources can be specified by using semi-colon separated values. 
-                files.AddRange(from source in file.GetOptionalAttributeValue("src").Trim(';').Split(';')
+                files.AddRange(from source in srcElement.Value.Trim(';').Split(';')
                                select new ManifestFile { Source = source.SafeTrim(), Target = target.SafeTrim(), Exclude = exclude.SafeTrim() });
             }
             return files;

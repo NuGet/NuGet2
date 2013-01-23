@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
+using System.Linq;
 using NuGet.Resources;
 
 namespace NuGet
@@ -32,6 +30,7 @@ namespace NuGet
 
         /// <summary>
         /// Added 'targetFramework' attribute for 'references' elements.
+        /// Added 'minVersion' attribute
         /// </summary>
         internal const string SchemaVersionV5 = "http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd";
 
@@ -43,26 +42,6 @@ namespace NuGet
             SchemaVersionV5,
         };
 
-        // Mapping from schema to resource name
-        private static readonly Dictionary<string, string> SchemaToResourceMappings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
-            { SchemaVersionV1, "NuGet.Authoring.nuspec.xsd" },
-            { SchemaVersionV2, "NuGet.Authoring.nuspec.xsd" },
-            { SchemaVersionV3, "NuGet.Authoring.nuspec.xsd" },
-            { SchemaVersionV4, "NuGet.Authoring.nuspec.xsd" },
-            { SchemaVersionV5, "NuGet.Authoring.nuspec.xsd" },
-        };
-
-        private static readonly ConcurrentDictionary<string, string> _schemaCache = new ConcurrentDictionary<string, string>(
-            concurrencyLevel: 4, capacity: 5, comparer: StringComparer.OrdinalIgnoreCase);
-
-        public static int GetVersionFromNamespace(string @namespace)
-        {
-            int index = Math.Max(0, Array.IndexOf(VersionToSchemaMappings, @namespace));
-
-            // we count version from 1 instead of 0
-            return index + 1;
-        }
-
         public static string GetSchemaNamespace(int version)
         {
             // Versions are internally 0-indexed but stored with a 1 index so decrement it by 1
@@ -73,32 +52,9 @@ namespace NuGet
             return VersionToSchemaMappings[version - 1];
         }
 
-        public static TextReader GetSchemaReader(string schemaNamespace)
-        {
-            string schemaResourceName;
-            if (!SchemaToResourceMappings.TryGetValue(schemaNamespace, out schemaResourceName))
-            {
-                throw new ArgumentException(String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_InvalidSchemaNamespace,
-                    schemaNamespace));
-            }
-
-            string cachedContent = _schemaCache.GetOrAdd(schemaNamespace, _ =>
-            {
-                // Update the xsd with the right schema namespace
-                var assembly = typeof(Manifest).Assembly;
-                using (var reader = new StreamReader(assembly.GetManifestResourceStream(schemaResourceName)))
-                {
-                    string content = reader.ReadToEnd();
-                    return String.Format(CultureInfo.InvariantCulture, content, schemaNamespace);
-                }
-            });
-
-            return new StringReader(cachedContent);
-        }
-
         public static bool IsKnownSchema(string schemaNamespace)
         {
-            return SchemaToResourceMappings.ContainsKey(schemaNamespace);
+            return VersionToSchemaMappings.Contains(schemaNamespace, StringComparer.OrdinalIgnoreCase);
         }
     }
 }

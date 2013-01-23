@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+using NuGet.Resources;
 
 namespace NuGet
 {
@@ -115,6 +117,12 @@ namespace NuGet
             set;
         }
 
+        public Version RequiredMinVersion
+        {
+            get;
+            private set;
+        }
+
         public bool IsAbsoluteLatestVersion
         {
             get
@@ -204,6 +212,7 @@ namespace NuGet
         protected void ReadManifest(Stream manifestStream)
         {
             Manifest manifest = Manifest.ReadFrom(manifestStream);
+
             IPackageMetadata metadata = manifest.Metadata;
 
             Id = metadata.Id;
@@ -224,6 +233,7 @@ namespace NuGet
             FrameworkAssemblies = metadata.FrameworkAssemblies;
             Copyright = metadata.Copyright;
             PackageReferenceSets = manifest.Metadata.ReferenceSets.Select(r => new PackageReferenceSet(r)).ToList();
+            RequiredMinVersion = metadata.RequiredMinVersion;
 
             // Ensure tags start and end with an empty " " so we can do contains filtering reliably
             if (!String.IsNullOrEmpty(Tags))

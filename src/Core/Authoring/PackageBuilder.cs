@@ -213,6 +213,12 @@ namespace NuGet
             }
         }
 
+        public Version RequiredMinVersion
+        {
+            get;
+            private set;
+        }
+
         public void Save(Stream stream)
         {
             // Make sure we're saving a valid package id
@@ -354,6 +360,7 @@ namespace NuGet
             ReleaseNotes = metadata.ReleaseNotes;
             Language = metadata.Language;
             Copyright = metadata.Copyright;
+            RequiredMinVersion = metadata.RequiredMinVersion;
 
             if (metadata.Tags != null)
             {

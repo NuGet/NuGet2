@@ -511,6 +511,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The &apos;requiredMinVersion&apos; attribute in the package manifest has invalid value. It must be a valid version string..
+        /// </summary>
+        internal static string Manifest_InvalidRequiredMinVersion {
+            get {
+                return ResourceManager.GetString("Manifest_InvalidRequiredMinVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid schema namespace &apos;{0}&apos;..
         /// </summary>
         internal static string Manifest_InvalidSchemaNamespace {
@@ -543,6 +552,15 @@ namespace NuGet.Resources {
         internal static string Manifest_ReferencesHasMixedElements {
             get {
                 return ResourceManager.GetString("Manifest_ReferencesHasMixedElements", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The required element &apos;{0}&apos; is missing from the manifest..
+        /// </summary>
+        internal static string Manifest_RequiredElementMissing {
+            get {
+                return ResourceManager.GetString("Manifest_RequiredElementMissing", resourceCulture);
             }
         }
         
@@ -642,6 +660,15 @@ namespace NuGet.Resources {
         internal static string PackageHasDependents {
             get {
                 return ResourceManager.GetString("PackageHasDependents", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The &apos;{0}&apos; package requires NuGet client version &apos;{1}&apos; or above, but the current NuGet version is &apos;{2}&apos;..
+        /// </summary>
+        internal static string PackageMinVersionNotSatisfied {
+            get {
+                return ResourceManager.GetString("PackageMinVersionNotSatisfied", resourceCulture);
             }
         }
         
