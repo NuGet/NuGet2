@@ -23,7 +23,9 @@ namespace NuGet.Common
                 {
                     if (_console.Verbosity == Verbosity.Detailed)
                     {
-                        _console.WriteError("{0} {1}", args.Request.Method, args.Request.RequestUri);
+                        _console.WriteLine(
+                            System.ConsoleColor.Green,
+                            "{0} {1}", args.Request.Method, args.Request.RequestUri);
                     }
                     string userAgent = HttpUtility.CreateUserAgentString(CommandLineConstants.UserAgent);
                     HttpUtility.SetUserAgent(args.Request, userAgent);

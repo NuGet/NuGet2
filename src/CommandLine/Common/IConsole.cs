@@ -12,12 +12,13 @@ namespace NuGet.Common
 
         void Write(object value);
         void Write(string value);
-        void Write(string format, params object[] args);
+        void Write(string format, params object[] args);        
 
         void WriteLine();
         void WriteLine(object value);
         void WriteLine(string value);
         void WriteLine(string format, params object[] args);
+        void WriteLine(ConsoleColor color, string value, params object[] args);
 
         void WriteError(object value);
         void WriteError(string value);

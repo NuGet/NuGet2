@@ -159,6 +159,11 @@ namespace NuGet.Common
             WriteColor(Out, ConsoleColor.Yellow, message, args);
         }
 
+        public void WriteLine(ConsoleColor color, string value, params object[] args)
+        {
+            WriteColor(Out, color, value, args);
+        }
+
         private static void WriteColor(TextWriter writer, ConsoleColor color, string value, params object[] args)
         {
             var currentColor = System.Console.ForegroundColor;

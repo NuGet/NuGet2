@@ -39,7 +39,7 @@ namespace NuGet.Commands
             {
                 if (Console.Verbosity == NuGet.Verbosity.Detailed)
                 {
-                    Console.WriteError("{0} {1}", e.Request.Method, e.Request.RequestUri);
+                    Console.WriteLine(ConsoleColor.Green, "{0} {1}", e.Request.Method, e.Request.RequestUri);
                 }
             };
 

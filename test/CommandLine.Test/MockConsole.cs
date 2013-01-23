@@ -74,6 +74,11 @@ namespace NuGet.Test
             WriteLine();
         }
 
+        public void WriteLine(ConsoleColor color, string value, params object[] args)
+        {
+            WriteLine(value, args);
+        }
+
         public void WriteError(object value)
         {
             Write(value);
