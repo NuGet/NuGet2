@@ -38,13 +38,6 @@ namespace NuGet
 
             Func<Exception, string> getErrorMessage = e => e.Message;
 
-            // When we're detailed, get the whole exception including the stack
-            // This is useful for debugging errors.
-            if (console.Verbosity == Verbosity.Detailed)
-            {
-                getErrorMessage = e => e.ToString();
-            }
-
             try
             {
                 // Remove NuGet.exe.old
@@ -79,6 +72,14 @@ namespace NuGet
                 else
                 {
                     SetConsoleInteractivity(console, command as Command);
+
+                    // When we're detailed, get the whole exception including the stack
+                    // This is useful for debugging errors.
+                    if (console.Verbosity == Verbosity.Detailed)
+                    {
+                        getErrorMessage = e => e.ToString();
+                    }
+            
                     command.Execute();
                 }
             }
