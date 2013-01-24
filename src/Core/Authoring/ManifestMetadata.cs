@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Xml.Serialization;
@@ -26,7 +27,7 @@ namespace NuGet
                 Version version = null;
                 if (!String.IsNullOrEmpty(value) && !System.Version.TryParse(value, out version))
                 {
-                    throw new ArgumentException(NuGetResources.Manifest_InvalidRequiredMinVersion);
+                    throw new InvalidDataException(NuGetResources.Manifest_InvalidRequiredMinVersion);
                 }
 
                 _requiredMinVersionString = value;

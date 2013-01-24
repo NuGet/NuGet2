@@ -15,9 +15,16 @@ namespace NuGet
 
         public static Manifest ReadManifest(XDocument document)
         {
+            var metadataElement = document.Root.ElementsNoNamespace("metadata").FirstOrDefault();
+            if (metadataElement == null)
+            {
+                throw new InvalidDataException(
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_RequiredElementMissing, "metadata"));
+            }
+
             return new Manifest
             {
-                Metadata = ReadMetadata(document.Root.ElementsNoNamespace("metadata").First()),
+                Metadata = ReadMetadata(metadataElement),
                 Files = ReadFilesList(document.Root.ElementsNoNamespace("files").FirstOrDefault())
             };
         }
@@ -49,7 +56,7 @@ namespace NuGet
                 if (!allElements.Contains(requiredElement))
                 {
                     throw new InvalidDataException(
-                        String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_RequiredMetadataMissing, requiredElement));
+                        String.Format(CultureInfo.CurrentCulture, NuGetResources.Manifest_RequiredElementMissing, requiredElement));
                 }
             }
 
@@ -225,6 +232,8 @@ namespace NuGet
 
         private static List<ManifestDependency> ReadDependencies(XElement containerElement)
         {
+
+
             // element is <dependency>
             return (from element in containerElement.ElementsNoNamespace("dependency")
                     let idElement = element.Attribute("id")

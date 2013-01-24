@@ -1,14 +1,14 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.Versioning;
+using System.Text;
+using Moq;
+using NuGet.Test.Utility;
+
 namespace NuGet.Test
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Runtime.Versioning;
-    using System.Text;
-    using Moq;
-    using NuGet.Test.Utility;
-
     public class PackageUtility
     {
         public static IPackage CreateProjectLevelPackage(string id, string version = "1.0", IEnumerable<PackageDependency> dependencies = null)
@@ -28,7 +28,8 @@ namespace NuGet.Test
                                               bool listed = true,
                                               string tags = "",
                                               string language = null,
-                                              IEnumerable<string> satelliteAssemblies = null)
+                                              IEnumerable<string> satelliteAssemblies = null,
+                                              string requiredMinVersion = null)
         {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
             satelliteAssemblies = satelliteAssemblies ?? Enumerable.Empty<string>();
@@ -45,7 +46,8 @@ namespace NuGet.Test
                                  listed,
                                  tags,
                                  language,
-                                 CreateAssemblyReferences(satelliteAssemblies));
+                                 CreateAssemblyReferences(satelliteAssemblies),
+                                 requiredMinVersion);
         }
 
         public static IPackage CreatePackage(string id,
@@ -58,7 +60,8 @@ namespace NuGet.Test
                                               string description,
                                               string summary,
                                               bool listed,
-                                              string tags)
+                                              string tags,
+                                              string requiredMinVersion = null)
         {
             return CreatePackage(id,
                                  version,
@@ -72,7 +75,8 @@ namespace NuGet.Test
                                  listed,
                                  tags,
                                  language: null,
-                                 satelliteAssemblies: null);
+                                 satelliteAssemblies: null,
+                                 requiredMinVersion: requiredMinVersion);
         }
 
         public static IPackage CreatePackageWithDependencySets(string id,
@@ -87,7 +91,8 @@ namespace NuGet.Test
                                               bool listed = true,
                                               string tags = "",
                                               string language = null,
-                                              IEnumerable<string> satelliteAssemblies = null)
+                                              IEnumerable<string> satelliteAssemblies = null,
+                                              string requiredMinVersion = null)
         {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
             satelliteAssemblies = satelliteAssemblies ?? Enumerable.Empty<string>();
@@ -104,7 +109,8 @@ namespace NuGet.Test
                                  listed,
                                  tags,
                                  language,
-                                 CreateAssemblyReferences(satelliteAssemblies));
+                                 CreateAssemblyReferences(satelliteAssemblies),
+                                 requiredMinVersion);
         }
 
         public static IPackage CreatePackage(string id,
@@ -119,7 +125,8 @@ namespace NuGet.Test
                                               bool listed,
                                               string tags,
                                               string language,
-                                              IEnumerable<IPackageAssemblyReference> satelliteAssemblies)
+                                              IEnumerable<IPackageAssemblyReference> satelliteAssemblies,
+                                              string requiredMinVersion = null)
         {
             var dependencySets = new List<PackageDependencySet>
             {
@@ -138,7 +145,8 @@ namespace NuGet.Test
                                  listed,
                                  tags,
                                  language,
-                                 satelliteAssemblies);
+                                 satelliteAssemblies,
+                                 requiredMinVersion);
         }
 
         public static IPackage CreatePackage(string id,
@@ -153,7 +161,8 @@ namespace NuGet.Test
                                               bool listed,
                                               string tags,
                                               string language,
-                                              IEnumerable<IPackageAssemblyReference> satelliteAssemblies)
+                                              IEnumerable<IPackageAssemblyReference> satelliteAssemblies,
+                                              string requiredMinVersion = null)
         {
             content = content ?? Enumerable.Empty<string>();
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>();
@@ -195,6 +204,7 @@ namespace NuGet.Test
             mockPackage.Setup(m => m.ReleaseNotes).Returns("");
             mockPackage.Setup(m => m.Owners).Returns(new string[0]);
             mockPackage.Setup(m => m.Copyright).Returns("");
+            mockPackage.Setup(m => m.RequiredMinVersion).Returns(requiredMinVersion == null ? new Version() : Version.Parse(requiredMinVersion));
             if (!listed)
             {
                 mockPackage.Setup(m => m.Published).Returns(Constants.Unpublished);

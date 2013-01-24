@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.Versioning;
 using System.Xml.Linq;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Test
 {
@@ -173,6 +174,36 @@ namespace NuGet.Test
             AssertManifest(expectedManifest, manifest);
         }
 
+        [Theory]
+        [InlineData("abc")]
+        [InlineData("1")]
+        [InlineData("1.0.2.4.2")]
+        [InlineData("abc.2")]
+        [InlineData("1.2-alpha")]
+        public void InvalidReuiredMinVersionValueWillThrow(string minVersionValue)
+        {
+            // Arrange
+            var manifestStream = CreateManifest(requiredMinVersion: minVersionValue);
+
+            // Act && Assert
+            ExceptionAssert.Throws<InvalidDataException>(
+                () => Manifest.ReadFrom(manifestStream),
+                "The 'requiredMinVersion' attribute in the package manifest has invalid value. It must be a valid version string.");
+        }
+
+        [Fact]
+        public void EmptyReuiredMinVersionValueWillNotThrow()
+        {
+            // Arrange
+            var manifestStream = CreateManifest(requiredMinVersion: "");
+
+            // Act
+            var manifest = Manifest.ReadFrom(manifestStream);
+
+            // Assert
+            Assert.Null(manifest.Metadata.RequiredMinVersion);
+        }
+
         [Fact]
         public void ReadFromReadsAllMetadataValues()
         {
@@ -201,7 +232,8 @@ namespace NuGet.Test
                 copyright: "Copyright 2012", language: "fr-FR", tags: "Test Unit",
                 dependencies: new[] { new ManifestDependency { Id = "Test", Version = "1.2.0" } },
                 assemblyReference: new[] { new ManifestFrameworkAssembly { AssemblyName = "System.Data", TargetFramework = "4.0" } },
-                references: references
+                references: references,
+                requiredMinVersion: "2.0.1.0"
             );
 
             var expectedManifest = new Manifest
@@ -247,7 +279,8 @@ namespace NuGet.Test
                                 new ManifestReference { File = "world.winmd" },
                             }
                         }
-                    }
+                    },
+                    RequiredMinVersionString = "2.0.1.0"
                 }
             };
 
@@ -427,6 +460,7 @@ namespace NuGet.Test
             Assert.Equal(expected.Metadata.RequireLicenseAcceptance, actual.Metadata.RequireLicenseAcceptance);
             Assert.Equal(expected.Metadata.Summary, actual.Metadata.Summary);
             Assert.Equal(expected.Metadata.Tags, actual.Metadata.Tags);
+            Assert.Equal(expected.Metadata.RequiredMinVersion, actual.Metadata.RequiredMinVersion);
 
             if (expected.Metadata.DependencySets != null)
             {
@@ -520,11 +554,18 @@ namespace NuGet.Test
                                             IEnumerable<ManifestDependency> dependencies = null,
                                             IEnumerable<ManifestFrameworkAssembly> assemblyReference = null,
                                             IEnumerable<ManifestReferenceSet> references = null,
-                                            IEnumerable<ManifestFile> files = null)
+                                            IEnumerable<ManifestFile> files = null,
+                                            string requiredMinVersion = null)
         {
             var document = new XDocument(new XElement("package"));
             var metadata = new XElement("metadata", new XElement("id", id), new XElement("version", version),
                                                     new XElement("description", description), new XElement("authors", authors));
+
+            if (requiredMinVersion != null)
+            {
+                metadata.Add(new XAttribute("requiredMinVersion", requiredMinVersion));
+            }
+            
             document.Root.Add(metadata);
 
             if (title != null)

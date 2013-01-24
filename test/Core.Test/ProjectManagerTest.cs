@@ -178,6 +178,94 @@ namespace NuGet.Test
             Assert.True(projectSystem.ReferenceExists("portable.dll"));
         }
 
+        [Fact]
+        public void AddPackageReferenceThrowsIfTheRequiredMinVersionIsNotSatisfied()
+        {
+            // Arrange            
+            Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
+            Version requiredVersion = new Version(nugetVersion.Major, nugetVersion.Minor, nugetVersion.Build, nugetVersion.Revision + 1);
+
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, requiredMinVersion: requiredVersion.ToString());
+            sourceRepository.AddPackage(packageA);
+
+            string expectedErrorMessage = 
+                String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "A 1.0", requiredVersion.ToString(), nugetVersion.ToString());
+
+            // Act && Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), expectedErrorMessage);
+        }
+
+        [Fact]
+        public void AddPackageReferenceThrowsIfTheRequiredMinVersionOfADependencyIsNotSatisfied()
+        {
+            // Arrange            
+            Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
+            Version requiredVersion = new Version(nugetVersion.Major, nugetVersion.Minor, nugetVersion.Build, nugetVersion.Revision + 1);
+
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A", 
+                "1.0", 
+                assemblyReferences: new[] { "lib\\me.dll" },
+                dependencies: new PackageDependency[] { new PackageDependency("B") });
+            IPackage packageB = PackageUtility.CreatePackage("B", "2.0", assemblyReferences: new[] { "lib\\you.dll" }, requiredMinVersion: requiredVersion.ToString());
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageB);
+
+            string expectedErrorMessage =
+                String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "B 2.0", requiredVersion.ToString(), nugetVersion.ToString());
+
+            // Act && Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), expectedErrorMessage);
+        }
+
+        [Fact]
+        public void AddPackageReferenceDoesNotThrowIfTheRequiredMinVersionIsEqualNuGetVersion()
+        {
+            // Arrange            
+            Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
+            Version requiredVersion = nugetVersion;
+
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, requiredMinVersion: requiredVersion.ToString());
+            sourceRepository.AddPackage(packageA);
+
+            // Act && Assert
+            projectManager.AddPackageReference("A");
+        }
+
+        [Fact]
+        public void AddPackageReferenceDoesNotThrowIfTheRequiredMinVersionIsLessThanNuGetVersion()
+        {
+            // Arrange            
+            Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
+            Version requiredVersion;
+            if (nugetVersion.Minor > 0)
+            {
+                requiredVersion = new Version(nugetVersion.Major, nugetVersion.Minor - 1, nugetVersion.Build, nugetVersion.Revision);
+            }
+            else
+            {
+                requiredVersion = new Version(nugetVersion.Major - 1, nugetVersion.Minor, nugetVersion.Build, nugetVersion.Revision);
+            }
+
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, requiredMinVersion: requiredVersion.ToString());
+            sourceRepository.AddPackage(packageA);
+
+            // Act && Assert
+            projectManager.AddPackageReference("A");
+        }
+
         [Theory]
         [InlineData("net20\\one.txt", ".NETFramework, Version=4.0")]
         [InlineData("silverlight3\\one.txt", "Silverlight, Version=4.0")]
@@ -1236,6 +1324,69 @@ namespace NuGet.Test
 
             // Assert
             Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("2.0-alpha")));
+        }
+
+        [Fact]
+        public void UpdatePackageReferenceThrowsIfTheNewPackageHasRequiredMinVersionNotSatisfied()
+        {
+            // Arrange
+            Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
+            Version requiredVersion = new Version(nugetVersion.Major, nugetVersion.Minor, nugetVersion.Build, nugetVersion.Revision + 1);
+
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+
+            var packageA1 = PackageUtility.CreatePackage("A", "1.0", content: new string[] { "good" });
+            var packageA2 = PackageUtility.CreatePackage("A", "2.0-alpha", content: new string[] { "excellent" }, requiredMinVersion: requiredVersion.ToString());
+
+            // project has A 1.0 installed
+            projectManager.LocalRepository.AddPackage(packageA1);
+
+            sourceRepository.AddPackage(packageA2);
+
+            string expectedErrorMessage =
+                String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "A 2.0-alpha", requiredVersion.ToString(), nugetVersion.ToString());
+
+            // Act && Assert
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => projectManager.UpdatePackageReference("A", version: null, updateDependencies: false, allowPrereleaseVersions: true),
+                expectedErrorMessage);
+        }
+
+        [Fact]
+        public void UpdatePackageReferenceThrowsIfTheNewPackageHasDependencyRequiredMinVersionNotSatisfied()
+        {
+            // Arrange
+            Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
+            Version requiredVersion = new Version(nugetVersion.Major, nugetVersion.Minor, nugetVersion.Build, nugetVersion.Revision + 1);
+
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+
+            var packageA1 = PackageUtility.CreatePackage("A", "1.0", content: new string[] { "good" });
+            var packageA2 = PackageUtility.CreatePackage(
+                "A", 
+                "2.0-alpha", 
+                content: new string[] { "excellent" }, 
+                dependencies: new PackageDependency[] { new PackageDependency("B") });
+
+            IPackage packageB = PackageUtility.CreatePackage("B", "2.0", assemblyReferences: new[] { "lib\\you.dll" }, requiredMinVersion: requiredVersion.ToString());
+
+            // project has A 1.0 installed
+            projectManager.LocalRepository.AddPackage(packageA1);
+
+            sourceRepository.AddPackage(packageA2);
+            sourceRepository.AddPackage(packageB);
+
+            string expectedErrorMessage =
+                String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "B 2.0", requiredVersion.ToString(), nugetVersion.ToString());
+
+            // Act && Assert
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => projectManager.UpdatePackageReference("A", version: null, updateDependencies: true, allowPrereleaseVersions: true),
+                expectedErrorMessage);
         }
 
         [Fact]

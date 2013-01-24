@@ -1358,3 +1358,19 @@ function Test-FinishFailedUpdateOnSolutionOpen
     Assert-False $physicalFileSystem.FileExists("SolutionOnlyPackage.1.0.deleteme")
     Assert-True $physicalFileSystem.DirectoryExists("SolutionOnlyPackage.2.0")
 }
+
+function Test-UpdatePackageThrowsIfRequiredMinVersionIsNotSatisfied
+{
+    # Arrange
+    $p = New-SilverlightClassLibrary
+
+    $p | Install-Package kitty -version 1.0.0 -Source $context.RepositoryPath
+
+    $currentVersion = $host.Version.ToString()
+
+    # Act & Assert
+    Assert-Throws { $p | Update-Package Kitty -Source $context.RepositoryPath } "The 'kitty 2.0.0' package requires NuGet client version '5.0.0.1' or above, but the current NuGet version is '$currentVersion'."
+
+    Assert-NoPackage $p "Kitty" -Version 2.0.0
+    Assert-Package $p "Kitty" -Version 1.0.0
+}

@@ -2067,3 +2067,15 @@ function Test-InstallPackageRespectReferencesAccordingToDifferentFrameworks
     Assert-Reference $p2 'three'
     Assert-Null (Get-AssemblyReference $p2 'two')
 }
+
+function Test-InstallPackageThrowsIfRequiredMinVersionIsNotSatisfied
+{
+    # Arrange
+    $p = New-SilverlightClassLibrary
+
+    $currentVersion = $host.Version.ToString()
+
+    # Act & Assert
+    Assert-Throws { $p | Install-Package Kitty -Source $context.RepositoryPath } "The 'kitty 1.0.0' package requires NuGet client version '5.0.0.1' or above, but the current NuGet version is '$currentVersion'."
+    Assert-NoPackage $p "Kitty"
+}

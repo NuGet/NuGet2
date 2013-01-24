@@ -37,6 +37,32 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
+        public void InstallPackageThrowsIfRequiredMinVersionIsNotSatisfied()
+        {
+            // Arrange
+            Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
+            Version requiredVersion = new Version(nugetVersion.Major, nugetVersion.Minor, nugetVersion.Build, nugetVersion.Revision + 1);
+
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), new MockPackageRepository());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IDeleteOnRestartManager>().Object, new Mock<VsPackageInstallerEvents>().Object);
+
+            var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" }, requiredMinVersion: requiredVersion.ToString());
+            sourceRepository.AddPackage(package);
+
+            string expectedErrorMessage =
+                String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "foo 1.0", requiredVersion.ToString(), nugetVersion.ToString());
+
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => packageManager.InstallPackage(projectManager, "foo", new SemanticVersion("1.0"), ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance),
+                expectedErrorMessage);
+        }
+
+        [Fact]
         public void InstallPackageUsesProjectTargetFramework()
         {
             // Arrange
@@ -541,6 +567,38 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             Assert.False(packageManager.LocalRepository.Exists(A10));
+        }
+
+        [Fact]
+        public void UpdatePackageThrowsIfNewPackageHasRequiredMinVersionNotSatisfied()
+        {
+            // Arrange
+            Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
+            Version requiredVersion = new Version(nugetVersion.Major, nugetVersion.Minor, nugetVersion.Build, nugetVersion.Revision + 1);
+
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            localRepository.Setup(m => m.IsReferenced("A", new SemanticVersion("1.0"))).Returns(false);
+            var projectRepository = new MockProjectPackageRepository(localRepository.Object);
+            var sourceRepository = new MockPackageRepository();
+            var fileSystem = new MockFileSystem();
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            var A10 = PackageUtility.CreatePackage("A", "1.0", new[] { "hello" });
+            var A20 = PackageUtility.CreatePackage("A", "2.0", new[] { "hello" }, requiredMinVersion: requiredVersion.ToString());
+            sourceRepository.AddPackage(A10);
+            sourceRepository.AddPackage(A20);
+            localRepository.Object.AddPackage(A10);
+            localRepository.Object.AddPackage(A20);
+            projectRepository.Add(A10);
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository.Object, new Mock<IDeleteOnRestartManager>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var projectManager = new ProjectManager(localRepository.Object, pathResolver, new MockProjectSystem(), projectRepository);
+
+            string expectedErrorMessage =
+                String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "A 2.0", requiredVersion.ToString(), nugetVersion.ToString());
+
+            // Act && Assert
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance),
+                expectedErrorMessage);
         }
 
         [Fact]

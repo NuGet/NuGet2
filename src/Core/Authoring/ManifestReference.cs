@@ -21,7 +21,7 @@ namespace NuGet
         {
             if (String.IsNullOrEmpty(File))
             {
-                yield return new ValidationResult(NuGetResources.Manifest_RequiredMetadataMissing, new[] { "File" });
+                yield return new ValidationResult(NuGetResources.Manifest_RequiredElementMissing, new[] { "File" });
             }
             else if (File.IndexOfAny(_referenceFileInvalidCharacters) != -1)
             {

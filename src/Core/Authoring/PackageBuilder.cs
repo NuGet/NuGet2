@@ -216,7 +216,7 @@ namespace NuGet
         public Version RequiredMinVersion
         {
             get;
-            private set;
+            set;
         }
 
         public void Save(Stream stream)
