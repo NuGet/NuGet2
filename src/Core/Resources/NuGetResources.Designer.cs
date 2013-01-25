@@ -322,6 +322,42 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Adding &apos;{0}&apos; to {1}..
+        /// </summary>
+        internal static string Log_BeginAddPackageReference {
+            get {
+                return ResourceManager.GetString("Log_BeginAddPackageReference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Installing &apos;{0}&apos;..
+        /// </summary>
+        internal static string Log_BeginInstallPackage {
+            get {
+                return ResourceManager.GetString("Log_BeginInstallPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Removing &apos;{0}&apos; from {1}..
+        /// </summary>
+        internal static string Log_BeginRemovePackageReference {
+            get {
+                return ResourceManager.GetString("Log_BeginRemovePackageReference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uninstalling &apos;{0}&apos;..
+        /// </summary>
+        internal static string Log_BeginUninstallPackage {
+            get {
+                return ResourceManager.GetString("Log_BeginUninstallPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No updates available for &apos;{0}&apos;..
         /// </summary>
         internal static string Log_NoUpdatesAvailable {

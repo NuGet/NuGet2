@@ -174,6 +174,9 @@ namespace NuGet
 
         protected void AddPackageReferenceToProject(IPackage package)
         {
+            string packageFullName = package.GetFullName();
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_BeginAddPackageReference, packageFullName, Project.ProjectName);
+
             PackageOperationEventArgs args = CreateOperation(package);
             OnPackageReferenceAdding(args);
 
@@ -184,7 +187,7 @@ namespace NuGet
 
             ExtractPackageFilesToProject(package);
 
-            Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyAddedPackageReference, package.GetFullName(), Project.ProjectName);
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyAddedPackageReference, packageFullName, Project.ProjectName);
             OnPackageReferenceAdded(args);
         }
 
@@ -313,6 +316,9 @@ namespace NuGet
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         private void RemovePackageReferenceFromProject(IPackage package)
         {
+            string packageFullName = package.GetFullName();
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_BeginRemovePackageReference, packageFullName, Project.ProjectName);
+
             PackageOperationEventArgs args = CreateOperation(package);
             OnPackageReferenceRemoving(args);
 
@@ -359,7 +365,7 @@ namespace NuGet
             // Remove package to the repository
             LocalRepository.RemovePackage(package);
 
-            Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyRemovedPackageReference, package.GetFullName(), Project.ProjectName);
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyRemovedPackageReference, packageFullName, Project.ProjectName);
             OnPackageReferenceRemoved(args);
         }
 

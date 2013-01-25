@@ -382,4 +382,16 @@
   <data name="GetUpdatesParameterMismatch" xml:space="preserve">
     <value>The 'packages' and 'versionConstraints' parameters must have the same number of elements.</value>
   </data>
+  <data name="Log_BeginAddPackageReference" xml:space="preserve">
+    <value>Adding '{0}' to {1}.</value>
+  </data>
+  <data name="Log_BeginInstallPackage" xml:space="preserve">
+    <value>Installing '{0}'.</value>
+  </data>
+  <data name="Log_BeginRemovePackageReference" xml:space="preserve">
+    <value>Removing '{0}' from {1}.</value>
+  </data>
+  <data name="Log_BeginUninstallPackage" xml:space="preserve">
+    <value>Uninstalling '{0}'.</value>
+  </data>
 </root>

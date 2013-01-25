@@ -163,6 +163,9 @@ namespace NuGet
 
         protected void ExecuteInstall(IPackage package)
         {
+            string packageFullName = package.GetFullName();
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_BeginInstallPackage, packageFullName);
+
             PackageOperationEventArgs args = CreateOperation(package);
             OnInstalling(args);
 
@@ -175,7 +178,7 @@ namespace NuGet
 
             LocalRepository.AddPackage(package);
 
-            Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageInstalledSuccessfully, package.GetFullName());
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_PackageInstalledSuccessfully, packageFullName);
 
             OnInstalled(args);
         }
@@ -272,6 +275,9 @@ namespace NuGet
 
         protected virtual void ExecuteUninstall(IPackage package)
         {
+            string packageFullName = package.GetFullName();
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_BeginUninstallPackage, packageFullName);
+
             PackageOperationEventArgs args = CreateOperation(package);
             OnUninstalling(args);
 
@@ -284,7 +290,7 @@ namespace NuGet
             
             LocalRepository.RemovePackage(package);
 
-            Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyUninstalledPackage, package.GetFullName());
+            Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyUninstalledPackage, packageFullName);
 
             OnUninstalled(args);
         }
