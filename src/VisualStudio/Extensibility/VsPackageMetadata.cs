@@ -30,6 +30,11 @@ namespace NuGet.VisualStudio
             get { return _package.Version; }
         }
 
+        public string VersionString
+        {
+            get { return _package.Version.ToString(); }
+        }
+
         public string Title
         {
             get { return _package.Title; }

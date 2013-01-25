@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace NuGet.VisualStudio
@@ -8,7 +9,9 @@ namespace NuGet.VisualStudio
     public interface IVsPackageMetadata
     {
         string Id { get; }
+        [Obsolete("Do not use this property because it will require referencing NuGet.Core.dll assembly. Use the VersionString property instead.")]
         SemanticVersion Version { get; }
+        string VersionString { get;  }
         string Title { get; }
         string Description { get; }
         IEnumerable<string> Authors { get; }
