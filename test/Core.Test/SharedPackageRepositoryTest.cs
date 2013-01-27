@@ -46,7 +46,7 @@ namespace NuGet.Test
             Assert.True(fileSystem.FileExists("A.1.0\\A.1.0.nuspec"));
 
             Stream manifestContentStream = fileSystem.OpenFile("A.1.0\\A.1.0.nuspec");
-            Manifest manifest = Manifest.ReadFrom(manifestContentStream);
+            Manifest manifest = Manifest.ReadFrom(manifestContentStream, validateSchema: true);
 
             Assert.Equal(2, manifest.Metadata.ReferenceSets.Count);
 

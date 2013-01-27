@@ -168,7 +168,7 @@ namespace NuGet.Test
             };
 
             // Act 
-            var manifest = Manifest.ReadFrom(manifestStream);
+            var manifest = Manifest.ReadFrom(manifestStream, validateSchema: true);
 
             // Assert
             AssertManifest(expectedManifest, manifest);
@@ -187,7 +187,7 @@ namespace NuGet.Test
 
             // Act && Assert
             ExceptionAssert.Throws<InvalidDataException>(
-                () => Manifest.ReadFrom(manifestStream),
+                () => Manifest.ReadFrom(manifestStream, validateSchema: true),
                 "The 'requiredMinVersion' attribute in the package manifest has invalid value. It must be a valid version string.");
         }
 
@@ -198,7 +198,7 @@ namespace NuGet.Test
             var manifestStream = CreateManifest(requiredMinVersion: "");
 
             // Act
-            var manifest = Manifest.ReadFrom(manifestStream);
+            var manifest = Manifest.ReadFrom(manifestStream, validateSchema: true);
 
             // Assert
             Assert.Null(manifest.Metadata.RequiredMinVersion);
@@ -285,7 +285,7 @@ namespace NuGet.Test
             };
 
             // Act 
-            var manifest = Manifest.ReadFrom(manifestStream);
+            var manifest = Manifest.ReadFrom(manifestStream, validateSchema: true);
 
             // Assert
             AssertManifest(expectedManifest, manifest);
@@ -311,10 +311,63 @@ namespace NuGet.Test
             };
 
             // Act 
-            var manifest = Manifest.ReadFrom(manifestStream);
+            var manifest = Manifest.ReadFrom(manifestStream, validateSchema: true);
 
             // Assert
             AssertManifest(expectedManifest, manifest);
+        }
+
+        [Fact]
+        public void ReadFromDoesNotThrowIfValidateSchemaIsFalse()
+        {
+            // Arrange
+            string content = @"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd"">
+  <metadata hello=""world"">
+    <id>A</id>
+    <version>1.0</version>
+    <authors>Luan</authors>
+    <owners>Luan</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+    
+    <extra>This element is not defined in schema.</extra>
+  </metadata>
+  <clark>meko</clark>
+  <files>
+      <file src=""my.txt"" destination=""outdir"" />
+  </files>
+</package>";
+            // Act
+            var manifest = Manifest.ReadFrom(content.AsStream(), validateSchema: false);
+
+            // Assert
+            Assert.Equal("A", manifest.Metadata.Id);
+            Assert.Equal("1.0", manifest.Metadata.Version);
+            Assert.Equal("Luan", manifest.Metadata.Authors);
+            Assert.False(manifest.Metadata.RequireLicenseAcceptance);
+            Assert.Equal("Descriptions", manifest.Metadata.Description);
+        }
+
+        [Fact]
+        public void ReadFromThrowIfValidateSchemaIsTrue()
+        {
+            // Arrange
+            string content = @"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd"">
+  <metadata hello=""world"">
+    <id>A</id>
+    <version>1.0</version>
+    <authors>Luan</authors>
+    <owners>Luan</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+  </metadata>
+</package>";
+            // Act && Assert
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => Manifest.ReadFrom(content.AsStream(), validateSchema: true),
+                "The 'hello' attribute is not declared.");
         }
 
         [Fact]
@@ -432,7 +485,7 @@ namespace NuGet.Test
             memoryStream.Seek(0, SeekOrigin.Begin);
 
             // read the serialized manifest.
-            var newManifest = Manifest.ReadFrom(memoryStream);
+            var newManifest = Manifest.ReadFrom(memoryStream, validateSchema: true);
             Assert.Equal(newManifest.Metadata.Id, manifest.Metadata.Id);
             Assert.Equal(newManifest.Metadata.Authors, manifest.Metadata.Authors);
             Assert.Equal(newManifest.Metadata.Description, manifest.Metadata.Description);

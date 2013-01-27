@@ -275,9 +275,9 @@
     <Compile Include="Packages\ZipPackageFile.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Authoring\nuspec.xsd">
+    <EmbeddedResource Include="Authoring\nuspec.xsd">
       <SubType>Designer</SubType>
-    </None>
+    </EmbeddedResource>
     <None Include="Properties\NuGet.Core.nuspec" />
   </ItemGroup>
   <ItemGroup>

@@ -795,8 +795,8 @@ Description is required.");
             // Act and Assert
             ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec1.AsStream(), null), "Data at the root level is invalid. Line 1, position 1.");
             ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec2.AsStream(), null), "Root element is missing.");
-            ExceptionAssert.Throws<InvalidDataException>(() => new PackageBuilder(spec3.AsStream(), null));
-            ExceptionAssert.Throws<InvalidDataException>(() => new PackageBuilder(spec4.AsStream(), null));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec3.AsStream(), null));
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec4.AsStream(), null));
         }
 
         [Fact]
@@ -812,7 +812,7 @@ Description is required.");
   </metadata></package>";
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidDataException>(() => new PackageBuilder(spec.AsStream(), null), "The required element 'id' is missing from the manifest.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'id' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
         [Fact]
@@ -870,7 +870,7 @@ Description is required.");
   </metadata></package>";
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidDataException>(() => new PackageBuilder(spec.AsStream(), null), "The required element 'version' is missing from the manifest.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'version' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
         [Fact]
@@ -886,7 +886,7 @@ Description is required.");
   </metadata></package>";
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidDataException>(() => new PackageBuilder(spec.AsStream(), null), "The required element 'authors' is missing from the manifest.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'authors' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
         [Fact]
@@ -902,11 +902,11 @@ Description is required.");
   </metadata></package>";
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidDataException>(() => new PackageBuilder(spec.AsStream(), null), "The required element 'description' is missing from the manifest.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'description' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
         [Fact]
-        public void MalformedDependenciesIsIgnored()
+        public void MalformedDependenciesThrows()
         {
             // Arrange
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -918,24 +918,11 @@ Description is required.");
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
     <dependencies>
         <dependency />
-        <dependency id=""B"" />
     </dependencies>
   </metadata></package>";
 
-            var builder = new PackageBuilder(spec.AsStream(), null);
-            var memoryStream = new MemoryStream();
-
-            // Act
-            builder.Save(memoryStream);
-
-            memoryStream.Seek(0, SeekOrigin.Begin);
-            var package = new ZipPackage(memoryStream);
-
-            // Assert
-            Assert.Equal(1, package.DependencySets.Count());
-            var dset = package.DependencySets.First();
-            Assert.Equal(1, dset.Dependencies.Count);
-            Assert.Equal("B", dset.Dependencies.First().Id);
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The required attribute 'id' is missing.");
         }
 
         [Fact]
@@ -962,7 +949,7 @@ Description is required.");
         }
 
         [Fact]
-        public void MissingFileSrcIsIgnored()
+        public void MissingFileSrcThrows()
         {
             // Act
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -981,17 +968,32 @@ Description is required.");
   </files>
 </package>";
 
-            var builder = new PackageBuilder(spec.AsStream(), null);
-            var memoryStream = new MemoryStream();
-
-            // Act
-            builder.Save(memoryStream);
-
-            memoryStream.Seek(0, SeekOrigin.Begin);
-            var package = new ZipPackage(memoryStream);
-
             // Assert
-            Assert.Equal(0, package.GetFiles().Count());
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The required attribute 'src' is missing.");
+        }
+
+        [Fact]
+        public void MisplacedFileNodeThrows()
+        {
+            // Arrange
+            string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<package><metadata>
+    <id>Artem.XmlProviders</id>
+    <version>2.5</version>
+    <authors>Velio Ivanov</authors>
+    <language>en-us</language>
+    <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
+    <dependencies>
+        <dependency id=""foo"" />
+    </dependencies>
+  <files>
+    <file />
+  </files>
+  </metadata>
+</package>";
+
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null));
         }
 
         [Fact]
@@ -1665,7 +1667,7 @@ Enabling license acceptance requires a license url.");
 </package>";
 
             // Act
-            ExceptionAssert.Throws<InvalidDataException>(() => new PackageBuilder(spec.AsStream(), null), "The required element 'metadata' is missing from the manifest.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'package' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
 
         [Fact]

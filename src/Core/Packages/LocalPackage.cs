@@ -211,7 +211,7 @@ namespace NuGet
 
         protected void ReadManifest(Stream manifestStream)
         {
-            Manifest manifest = Manifest.ReadFrom(manifestStream);
+            Manifest manifest = Manifest.ReadFrom(manifestStream, validateSchema: false);
 
             IPackageMetadata metadata = manifest.Metadata;
 

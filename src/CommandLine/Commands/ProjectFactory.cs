@@ -610,7 +610,7 @@ namespace NuGet.Commands
             {
                 // Don't validate the manifest since this might be a partial manifest
                 // The bulk of the metadata might be coming from the project.
-                Manifest manifest = Manifest.ReadFrom(stream, this);
+                Manifest manifest = Manifest.ReadFrom(stream, this, validateSchema: true);
                 builder.Populate(manifest.Metadata);
 
                 if (manifest.Files != null)

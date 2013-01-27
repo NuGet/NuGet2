@@ -6,14 +6,14 @@ Release notes
 - Add to all commands new option -ConfigFile, which enables user to use his/her own config file instead of the default one %AppData%\nuget\nuget.config.
 - Add support for UNC and directory path as source for push and delete commands.
 - Add support for Azure project.
-- Added a parameter to View.PackageManagerConsole. Using this parameter, PSCmdlets of Package Manager Console can be invoked from anywhere inside VS.
+- Add a parameter to View.PackageManagerConsole. Using this parameter, PSCmdlets of Package Manager Console can be invoked from anywhere inside VS.
 - Reduce overall memory consumption significantly, avoiding OutOfMemory exception in certain circumstances.
 - Nuget.exe outputs the http requests it is making when -Verbosity is set to detailed.
 - Allow setting assembly References per target framework.
-- Added support for multiple repositories for preinstalled packages in project templates.
+- Add support for multiple repositories for preinstalled packages in project templates.
 - Add -AsPath option to nuget.exe Config command.
 - Updates tab in Manage Packages dialog now honors the 'allowedVersions' constraints in packages.config.
-- Added Update All button in the dialog to allow updating all packages with one click.
+- Added Update All button in the dialog to allow updating all packages with one click.- Add the 'requiredMinVersion' attribute to manifest schema to allow packages to require minimum version of NuGet.
 
 *** v2.2 ***
 

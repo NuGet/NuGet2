@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
+using System.Xml.Schema;
 using System.Xml.Serialization;
 using NuGet.Resources;
 
@@ -75,12 +76,12 @@ namespace NuGet
             serializer.Serialize(stream, this, ns);
         }
 
-        public static Manifest ReadFrom(Stream stream)
+        public static Manifest ReadFrom(Stream stream, bool validateSchema)
         {
-            return ReadFrom(stream, NullPropertyProvider.Instance);
+            return ReadFrom(stream, NullPropertyProvider.Instance, validateSchema);
         }
 
-        public static Manifest ReadFrom(Stream stream, IPropertyProvider propertyProvider)
+        public static Manifest ReadFrom(Stream stream, IPropertyProvider propertyProvider, bool validateSchema)
         {
             XDocument document;
             if (propertyProvider == NullPropertyProvider.Instance)
@@ -100,8 +101,14 @@ namespace NuGet
                 e.Name = XName.Get(e.Name.LocalName, schemaNamespace);
             }
 
-            // Validate the schema version
+            // Validate if the schema is a known one
             CheckSchemaVersion(document);
+
+            if (validateSchema)
+            {
+                // Validate the schema
+                ValidateManifestSchema(document, schemaNamespace);
+            }
 
             // Deserialize it
             var manifest = ManifestReader.ReadManifest(document);
@@ -245,6 +252,20 @@ namespace NuGet
                 return null;
             }
             return String.Join(",", values);
+        }
+
+        private static void ValidateManifestSchema(XDocument document, string schemaNamespace)
+        {
+            var schemaSet = ManifestSchemaUtility.GetManifestSchemaSet(schemaNamespace);
+
+            document.Validate(schemaSet, (sender, e) =>
+            {
+                if (e.Severity == XmlSeverityType.Error)
+                {
+                    // Throw an exception if there is a validation error
+                    throw new InvalidOperationException(e.Message);
+                }
+            });
         }
 
         private static void CheckSchemaVersion(XDocument document)
