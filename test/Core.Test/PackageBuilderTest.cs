@@ -792,6 +792,9 @@ Description is required.");
             string spec3 = @"<?xml version=""1.0"" encoding=""utf-8""?><package />";
             string spec4 = @"<?xml version=""1.0"" encoding=""utf-8""?><package><metadata></metadata></package>";
 
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
             // Act and Assert
             ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec1.AsStream(), null), "Data at the root level is invalid. Line 1, position 1.");
             ExceptionAssert.Throws<XmlException>(() => new PackageBuilder(spec2.AsStream(), null), "Root element is missing.");
@@ -810,6 +813,9 @@ Description is required.");
     <language>en-us</language>
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
   </metadata></package>";
+
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'id' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
@@ -869,6 +875,9 @@ Description is required.");
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
   </metadata></package>";
 
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'version' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
@@ -885,6 +894,9 @@ Description is required.");
     <description>Implementation of XML ASP.NET Providers (XmlRoleProvider, XmlMembershipProvider and XmlProfileProvider).</description>
   </metadata></package>";
 
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'authors' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
         }
@@ -900,6 +912,9 @@ Description is required.");
     <authors>Velio Ivanov</authors>
     <language>en-us</language>
   </metadata></package>";
+
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'description' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
@@ -920,6 +935,9 @@ Description is required.");
         <dependency />
     </dependencies>
   </metadata></package>";
+
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The required attribute 'id' is missing.");
@@ -967,6 +985,9 @@ Description is required.");
     <file />
   </files>
 </package>";
+
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The required attribute 'src' is missing.");
@@ -1479,6 +1500,9 @@ Enabling license acceptance requires a license url.");
   </metadata>
 </package>";
 
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
             // Act
             ExceptionAssert.Throws<UriFormatException>(() => new PackageBuilder(spec.AsStream(), null), "Invalid URI: The format of the URI could not be determined.");
         }
@@ -1665,6 +1689,9 @@ Enabling license acceptance requires a license url.");
             string spec = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <package>  
 </package>";
+
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
             // Act
             ExceptionAssert.Throws<InvalidOperationException>(() => new PackageBuilder(spec.AsStream(), null), "The element 'package' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd' has incomplete content. List of possible elements expected: 'metadata' in namespace 'http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'.");
