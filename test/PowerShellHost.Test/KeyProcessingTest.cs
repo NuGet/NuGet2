@@ -155,7 +155,7 @@ namespace PowerShellHost.Test
                         [cmdletbinding(supportsshouldprocess=$true)]param();
                         $pscmdlet.shouldprocess('do', 'this')
                     }
-                    test-confirm -confirm")
+                    [System.Threading.Thread]::CurrentThread.CurrentUICulture = [Globalization.CultureInfo]'en-US'; test-confirm -confirm")
                         .Invoke<bool>()
                         .FirstOrDefault();
 
