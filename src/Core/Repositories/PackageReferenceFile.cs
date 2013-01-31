@@ -69,7 +69,7 @@ namespace NuGet
                     // If the id is empty, ignore the record unless unspecified versions are allowed
                     continue;
                 }
-                
+
                 if (String.IsNullOrEmpty(versionString))
                 {
                     // If the version is empty, ignore the record unless unspecified versions are allowed
@@ -102,12 +102,12 @@ namespace NuGet
                     {
                         targetFramework = null;
                     }
-                } 
+                }
 
                 var developmentFlag = false;
                 if (!String.IsNullOrEmpty(developmentFlagString))
                 {
-                    if (!bool.TryParse(developmentFlagString, out developmentFlag))
+                    if (!Boolean.TryParse(developmentFlagString, out developmentFlag))
                     {
                         throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ReferenceFile_InvalidDevelopmentFlag, developmentFlagString, _path));
                     }
