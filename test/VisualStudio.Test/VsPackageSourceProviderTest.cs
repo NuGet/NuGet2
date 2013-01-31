@@ -66,7 +66,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetValues("packageSources"))
+            userSettings.Setup(s => s.GetValues("packageSources", true))
                         .Returns(new[] { new KeyValuePair<string, string>("my source", "http://nuget.org") });
             var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
             var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
@@ -87,7 +87,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetValues("packageSources"))
+            userSettings.Setup(s => s.GetValues("packageSources", true))
                         .Returns(new[] { new KeyValuePair<string, string>("NuGet official package source", "https://go.microsoft.com/fwlink/?LinkID=206669") });
 
             // disable the official source

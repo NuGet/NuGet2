@@ -51,7 +51,7 @@ namespace NuGet
         /// </summary>
         public IEnumerable<PackageSource> LoadPackageSources()
         {
-            IList<KeyValuePair<string, string>> settingsValue = _settingsManager.GetValues(PackageSourcesSectionName);
+            IList<KeyValuePair<string, string>> settingsValue = _settingsManager.GetValues(PackageSourcesSectionName, isPath: true);
             if (!settingsValue.IsEmpty())
             {
                 // put disabled package source names into the hash set
