@@ -6,12 +6,10 @@ namespace NuGet
         bool IsReferenced(string packageId, SemanticVersion version);
 
         /// <summary>
-        /// Adds an entry to the solution-level packages.config file
+        /// Gets whether the repository contains a solution-level package with the specified id and version.
         /// </summary>
-        /// <param name="packageId">The package id.</param>
-        /// <param name="version">The version.</param>
-        void AddPackageReferenceEntry(string packageId, SemanticVersion version);
-
+        bool IsSolutionReferenced(string packageId, SemanticVersion version);
+        
         /// <summary>
         /// Registers a new repository for the shared repository
         /// </summary>

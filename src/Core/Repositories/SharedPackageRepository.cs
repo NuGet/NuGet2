@@ -168,6 +168,12 @@ namespace NuGet
             // we will save the .nupkg file too. This way, 2.1 will read the .nuspec file, and 
             // pre 2.1 will read the .nupkg
             base.AddPackage(package);
+
+            // if this is a solution-level package, add it to the solution's packages.config file
+            if (_packageReferenceFile != null && IsSolutionLevel(package))
+            {
+                _packageReferenceFile.AddEntry(package.Id, package.Version);
+            }
         }
 
         public override void RemovePackage(IPackage package)
@@ -186,6 +192,11 @@ namespace NuGet
             {
                 _packageReferenceFile.DeleteEntry(package.Id, package.Version);
             }
+        }
+
+        public bool IsSolutionReferenced(string packageId, SemanticVersion version)
+        {
+            return _packageReferenceFile != null && _packageReferenceFile.EntryExists(packageId, version);
         }
 
         protected virtual IPackageRepository CreateRepository(string path)
@@ -405,6 +416,11 @@ namespace NuGet
                 return PathUtility.GetRelativePath(root, path);
             }
             return path;
+        }
+
+        private bool IsSolutionLevel(IPackage package)
+        {
+            return !package.HasProjectContent() && !IsReferenced(package.Id, package.Version);
         }
 
         private string GetManifestFilePath(string packageId, SemanticVersion version)

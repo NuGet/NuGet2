@@ -161,8 +161,6 @@ namespace NuGet.VisualStudio
                     allowPrereleaseVersions);
 
                 AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
-
-                AddSolutionPackageConfigEntry(package);
             });
         }
 
@@ -929,14 +927,6 @@ namespace NuGet.VisualStudio
                     }
 
                     action();
-                    
-                    foreach (var operation in operations)
-                    {
-                        if (operation.Action == PackageAction.Install)
-                        {
-                            AddSolutionPackageConfigEntry(operation.Package);
-                        }
-                    }
                 });
             }
             finally
@@ -1339,15 +1329,6 @@ namespace NuGet.VisualStudio
                         logger.Log(MessageLevel.Error, ExceptionUtility.Unwrap(e).Message);
                     }
                 }
-            }
-        }
-
-        private void AddSolutionPackageConfigEntry(IPackage package)
-        {
-            var sharedPackageRepository = LocalRepository as ISharedPackageRepository;
-            if (sharedPackageRepository != null && !IsProjectLevel(package))
-            {
-                sharedPackageRepository.AddPackageReferenceEntry(package.Id, package.Version);
             }
         }
 
