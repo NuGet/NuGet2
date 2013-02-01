@@ -323,6 +323,36 @@ namespace NuGet.Test
             AssertPackageSource(values[1], "two", "twosource", true);
             Assert.Equal("user1", values[1].UserName);
             Assert.Equal("topsecret", values[1].Password);
+            Assert.False(values[1].IsPasswordClearText);
+        }
+
+        [Fact]
+        public void LoadPackageSourcesReadsClearTextCredentialPairs()
+        {
+            // Arrange
+            const string clearTextPassword = "topsecret";
+
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetValues("packageSources"))
+                    .Returns(new[] { new KeyValuePair<string, string>("one", "onesource"), 
+                                     new KeyValuePair<string, string>("two", "twosource"), 
+                                     new KeyValuePair<string, string>("three", "threesource")
+                                });
+
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", "two"))
+                    .Returns(new[] { new KeyValuePair<string, string>("Username", "user1"), new KeyValuePair<string, string>("ClearTextPassword", clearTextPassword) });
+
+            var provider = CreatePackageSourceProvider(settings.Object);
+
+            // Act
+            var values = provider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.Equal(3, values.Count);
+            AssertPackageSource(values[1], "two", "twosource", true);
+            Assert.Equal("user1", values[1].UserName);
+            Assert.True(values[1].IsPasswordClearText);
+            Assert.Equal("topsecret", values[1].Password);
         }
 
         [Fact]
@@ -414,6 +444,37 @@ namespace NuGet.Test
                             ProtectedData.Unprotect(Convert.FromBase64String(values[1].Value), entropyBytes, DataProtectionScope.CurrentUser));
                         Assert.Equal("Password", values[1].Key);
                         Assert.Equal("password", decryptedPassword);
+                    })
+                    .Verifiable();
+
+            var provider = CreatePackageSourceProvider(settings.Object);
+
+            // Act
+            provider.SavePackageSources(sources);
+
+            // Assert
+            settings.Verify();
+        }
+
+        [Fact]
+        public void SavePackageSourcesSavesClearTextCredentials()
+        {
+            // Arrange
+            var sources = new[] { new PackageSource("one"), 
+                                  new PackageSource("twosource", "twoname") { UserName = "User", Password = "password", IsPasswordClearText = true}, 
+                                  new PackageSource("three") 
+            };
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.DeleteSection("packageSources")).Returns(true).Verifiable();
+            settings.Setup(s => s.DeleteSection("packageSourceCredentials")).Returns(true).Verifiable();
+
+            settings.Setup(s => s.SetNestedValues("packageSourceCredentials", It.IsAny<string>(), It.IsAny<IList<KeyValuePair<string, string>>>()))
+                    .Callback((string section, string key, IList<KeyValuePair<string, string>> values) =>
+                    {
+                        Assert.Equal("twoname", key);
+                        Assert.Equal(2, values.Count);
+                        AssertKVP(new KeyValuePair<string, string>("Username", "User"), values[0]);
+                        AssertKVP(new KeyValuePair<string, string>("ClearTextPassword", "password"), values[1]);
                     })
                     .Verifiable();
 

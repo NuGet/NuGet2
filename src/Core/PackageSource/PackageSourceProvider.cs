@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 
 namespace NuGet
 {
@@ -12,6 +11,7 @@ namespace NuGet
         private const string CredentialsSectionName = "packageSourceCredentials";
         private const string UsernameToken = "Username";
         private const string PasswordToken = "Password";
+        private const string ClearTextPasswordToken = "ClearTextPassword";
         private readonly ISettings _settingsManager;
         private readonly IEnumerable<PackageSource> _defaultPackageSources;
         private readonly IDictionary<PackageSource, PackageSource> _migratePackageSources;
@@ -64,13 +64,14 @@ namespace NuGet
                                            {
                                                string name = p.Key;
                                                string src = p.Value;
-                                               NetworkCredential creds = ReadCredential(name);
+                                               PackageSourceCredential creds = ReadCredential(name);
 
                                                // We always set the isOfficial bit to false here, as Core doesn't have the concept of an official package source.
                                                return new PackageSource(src, name, isEnabled: !disabledSources.Contains(name), isOfficial: false)
                                                {
-                                                   UserName = creds != null ? creds.UserName : null,
-                                                   Password = creds != null ? creds.Password : null
+                                                   UserName = creds != null ? creds.Username : null,
+                                                   Password = creds != null ? creds.Password : null,
+                                                   IsPasswordClearText = creds != null && creds.IsPasswordClearText
                                                };
 
                                            }).ToList();
@@ -85,17 +86,26 @@ namespace NuGet
             return _defaultPackageSources;
         }
 
-        private NetworkCredential ReadCredential(string sourceName)
+        private PackageSourceCredential ReadCredential(string sourceName)
         {
             var values = _settingsManager.GetNestedValues(CredentialsSectionName, sourceName);
             if (!values.IsEmpty())
             {
                 string userName = values.FirstOrDefault(k => k.Key.Equals(UsernameToken, StringComparison.OrdinalIgnoreCase)).Value;
-                string password = values.FirstOrDefault(k => k.Key.Equals(PasswordToken, StringComparison.OrdinalIgnoreCase)).Value;
 
-                if (!String.IsNullOrEmpty(userName) && !String.IsNullOrEmpty(password))
+                if (!String.IsNullOrEmpty(userName))
                 {
-                    return new NetworkCredential(userName, EncryptionUtility.DecryptString(password));
+                    string encryptedPassword = values.FirstOrDefault(k => k.Key.Equals(PasswordToken, StringComparison.OrdinalIgnoreCase)).Value;
+                    if (!String.IsNullOrEmpty(encryptedPassword))
+                    {
+                        return new PackageSourceCredential(userName, EncryptionUtility.DecryptString(encryptedPassword), isPasswordClearText: false);
+                    }
+
+                    string clearTextPassword = values.FirstOrDefault(k => k.Key.Equals(ClearTextPasswordToken, StringComparison.Ordinal)).Value;
+                    if (!String.IsNullOrEmpty(clearTextPassword))
+                    {
+                        return new PackageSourceCredential(userName, clearTextPassword, isPasswordClearText: true);
+                    }
                 }
             }
             return null;
@@ -149,9 +159,17 @@ namespace NuGet
             {
                 _settingsManager.SetNestedValues(CredentialsSectionName, source.Name, new[] {
                     new KeyValuePair<string, string>(UsernameToken, source.UserName),
-                    new KeyValuePair<string, string>(PasswordToken, EncryptionUtility.EncryptString(source.Password)) 
+                    ReadPasswordValues(source)
                 });
             }
+        }
+
+        private KeyValuePair<string, string> ReadPasswordValues(PackageSource source)
+        {
+            string passwordToken = source.IsPasswordClearText ? ClearTextPasswordToken : PasswordToken;
+            string passwordValue = source.IsPasswordClearText ? source.Password : EncryptionUtility.EncryptString(source.Password);
+
+            return new KeyValuePair<string, string>(passwordToken, passwordValue);
         }
 
         public void DisablePackageSource(PackageSource source)
@@ -176,6 +194,20 @@ namespace NuGet
             // It doesn't matter what value it is.
             // As long as the package source name is persisted in the <disabledPackageSources> section, the source is disabled.
             return String.IsNullOrEmpty(value);
+        }
+
+        private class PackageSourceCredential
+        {
+            public string Username { get; private set; }
+            public string Password { get; private set; }
+            public bool IsPasswordClearText { get; private set; }
+
+            public PackageSourceCredential(string username, string password, bool isPasswordClearText)
+            {
+                Username = username;
+                Password = password;
+                IsPasswordClearText = isPasswordClearText;
+            }
         }
     }
 }
