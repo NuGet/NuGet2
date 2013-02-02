@@ -538,7 +538,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There are more than one update available..
+        ///   Looks up a localized string similar to There are multiple updates available..
         /// </summary>
         public static string Dialog_UpdateAllLabel {
             get {
