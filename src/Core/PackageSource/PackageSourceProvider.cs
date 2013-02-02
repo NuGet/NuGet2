@@ -164,7 +164,7 @@ namespace NuGet
             }
         }
 
-        private KeyValuePair<string, string> ReadPasswordValues(PackageSource source)
+        private static KeyValuePair<string, string> ReadPasswordValues(PackageSource source)
         {
             string passwordToken = source.IsPasswordClearText ? ClearTextPasswordToken : PasswordToken;
             string passwordValue = source.IsPasswordClearText ? source.Password : EncryptionUtility.EncryptString(source.Password);
