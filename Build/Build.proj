@@ -58,7 +58,8 @@
         <Build>$([MSBuild]::Add(1, $([MSBuild]::Subtract($([System.DateTime]::Now.Year), $(VersionStartYear)))))$([System.DateTime]::Now.ToString("MMdd"))</Build>
         <Revision>$(BUILD_NUMBER)</Revision>
         <Version>$(MajorVersion).$(MinorVersion).$(Build).$(Revision)</Version>
-        <PackageVersion>$(MajorVersion).$(MinorVersion).1-alpha</PackageVersion>
+        <PackageVersion>$(MajorVersion).$(MinorVersion).0-alpha</PackageVersion>
+        <PackageInformationalVersion>$(MajorVersion).$(MinorVersion).0</PackageInformationalVersion>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -82,7 +83,7 @@
         </RegexTransform>
         <RegexTransform Include="$(NuGetRoot)\Common\CommonAssemblyInfo.cs">
           <Find>AssemblyInformationalVersion\("\d+\.\d+\.\d+"\)</Find>
-          <ReplaceWith>AssemblyInformationalVersion("$(PackageVersion)")</ReplaceWith>
+          <ReplaceWith>AssemblyInformationalVersion("$(PackageInformationalVersion)")</ReplaceWith>
         </RegexTransform>
         <RegexTransform Include="$(NuGetSrcRoot)\VsConsole\PowerShellHost\Scripts\nuget.psd1">
             <Find><![CDATA[ModuleVersion = '\d+\.\d+\.\d+\.\d+']]></Find>
