@@ -208,10 +208,12 @@ function global:Run-Test {
                     if($tests.Count -gt 1) {
                         $dte.Solution.Close()
                     }
-         
-                    # Cleanup the output from running the generate packages tool
-                    Remove-Item (Join-Path $repositoryPath Packages) -Force -Recurse -ErrorAction SilentlyContinue
-                    Remove-Item (Join-Path $repositoryPath Assemblies) -Force -Recurse -ErrorAction SilentlyContinue
+
+                    if (Test-Path $repositoryPath) {
+                        # Cleanup the output from running the generate packages tool
+                        Remove-Item (Join-Path $repositoryPath Packages) -Force -Recurse -ErrorAction SilentlyContinue
+                        Remove-Item (Join-Path $repositoryPath Assemblies) -Force -Recurse -ErrorAction SilentlyContinue
+                    }
                 }
             }
 
