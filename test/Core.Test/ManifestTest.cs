@@ -364,6 +364,10 @@ namespace NuGet.Test
     <description>Descriptions</description>
   </metadata>
 </package>";
+
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
+
             // Act && Assert
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => Manifest.ReadFrom(content.AsStream(), validateSchema: true),

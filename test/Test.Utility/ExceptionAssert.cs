@@ -6,8 +6,6 @@ namespace NuGet.Test
 {
     public static class ExceptionAssert
     {
-        private static readonly string ArgumentExceptionMessageFormat = "{0}" + Environment.NewLine + "Parameter name: {1}";
-
         public static void Throws<TException>(Assert.ThrowsDelegate act) where TException : Exception
         {
             Throws<TException>(act, ex => { });
@@ -77,7 +75,10 @@ namespace NuGet.Test
             Throws<TArgException>(act, ex =>
                 {
                     Assert.Equal(paramName, ex.ParamName);
-                    Assert.Equal(String.Format(ArgumentExceptionMessageFormat, message, paramName), ex.Message);
+                    var lines = ex.Message.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                    Assert.Equal(2, lines.Length);
+                    Assert.Equal(message, lines[0]);
+                    Assert.True(lines[1].EndsWith(paramName));
                 });
         }
     }
