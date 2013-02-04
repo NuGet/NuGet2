@@ -40,7 +40,7 @@ namespace GenerateTestPackages
             bool deleteDir = true;
             using (var fileStream = File.OpenRead(nuspecPath))
             {
-                var manifest = Manifest.ReadFrom(fileStream);
+                var manifest = Manifest.ReadFrom(fileStream, validateSchema: true);
                 var packageBuilder = new PackageBuilder();
                 packageBuilder.Populate(manifest.Metadata);
                 if (!manifest.Files.IsEmpty())
