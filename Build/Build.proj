@@ -154,7 +154,7 @@
     </Target>
 
     <Target Name="Build">
-        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true" BuildInParallel="$(BuildTestsInParallel)" />
+        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true" />
     </Target>
 
     <Target Name="BuildMono">
