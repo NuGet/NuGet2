@@ -33,6 +33,156 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void AddPackageReferenceAppliesPackageReferencesCorrectly()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.0",
+                assemblyReferences: new[] { "lib\\a.dll", "lib\\b.dll" });
+            sourceRepository.AddPackage(packageA);
+
+            Mock<IPackage> mockPackageA = Mock.Get<IPackage>(packageA);
+            mockPackageA.Setup(m => m.PackageAssemblyReferences).Returns(
+                    new PackageReferenceSet[] { 
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net40"), new [] { "a.dll" }),
+                        new PackageReferenceSet(null, new [] { "b.dll" })
+                    }
+                );
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(projectManager.LocalRepository.Exists("A"));
+            Assert.True(projectSystem.ReferenceExists("a.dll"));
+            Assert.False(projectSystem.ReferenceExists("b.dll"));
+        }
+
+        [Fact]
+        public void AddPackageReferenceAppliesPackageReferencesCorrectly2()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.0",
+                assemblyReferences: new[] { "lib\\net35\\a.dll", "lib\\net35\\b.dll" });
+            sourceRepository.AddPackage(packageA);
+
+            Mock<IPackage> mockPackageA = Mock.Get<IPackage>(packageA);
+            mockPackageA.Setup(m => m.PackageAssemblyReferences).Returns(
+                    new PackageReferenceSet[] { 
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net40"), new [] { "a.dll" }),
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net45"), new [] { "b.dll" })
+                    }
+                );
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(projectManager.LocalRepository.Exists("A"));
+            Assert.False(projectSystem.ReferenceExists("a.dll"));
+            Assert.True(projectSystem.ReferenceExists("b.dll"));
+        }
+
+        [Fact]
+        public void AddPackageReferenceAppliesPackageReferencesCorrectly3()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName("Silverlight, Version=4.5"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.0",
+                assemblyReferences: new[] { "lib\\a.dll", "lib\\b.dll", "lib\\c.dll" });
+            sourceRepository.AddPackage(packageA);
+
+            Mock<IPackage> mockPackageA = Mock.Get<IPackage>(packageA);
+            mockPackageA.Setup(m => m.PackageAssemblyReferences).Returns(
+                    new PackageReferenceSet[] { 
+                        new PackageReferenceSet(null, new [] { "b.dll", "a.dll", "d.dll" })
+                    }
+                );
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(projectManager.LocalRepository.Exists("A"));
+            Assert.True(projectSystem.ReferenceExists("a.dll"));
+            Assert.True(projectSystem.ReferenceExists("b.dll"));
+            Assert.False(projectSystem.ReferenceExists("c.dll"));
+        }
+
+        [Fact]
+        public void AddPackageReferenceAppliesPackageReferencesCorrectlyWhenReferencesFilterOutAllAssemblies()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.0",
+                assemblyReferences: new[] { "lib\\net35\\a.dll", "lib\\net35\\b.dll" });
+            sourceRepository.AddPackage(packageA);
+
+            Mock<IPackage> mockPackageA = Mock.Get<IPackage>(packageA);
+            mockPackageA.Setup(m => m.PackageAssemblyReferences).Returns(
+                    new PackageReferenceSet[] { 
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net40"), new [] { "c.dll" }),
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net45"), new [] { "d.dll" })
+                    }
+                );
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(projectManager.LocalRepository.Exists("A"));
+            Assert.False(projectSystem.ReferenceExists("a.dll"));
+            Assert.False(projectSystem.ReferenceExists("b.dll"));
+        }
+
+        [Fact]
+        public void AddPackageReferenceAppliesPackageReferencesCorrectlyWhenReferenceDoesNotMatch()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5"));
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A",
+                "1.0",
+                assemblyReferences: new[] { "lib\\net35\\a.dll", "lib\\net35\\b.dll" });
+            sourceRepository.AddPackage(packageA);
+
+            Mock<IPackage> mockPackageA = Mock.Get<IPackage>(packageA);
+            mockPackageA.Setup(m => m.PackageAssemblyReferences).Returns(
+                    new PackageReferenceSet[] { 
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("sl50"), new [] { "a.dll" }),
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("wp8"), new [] { "b.dll" })
+                    }
+                );
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(projectManager.LocalRepository.Exists("A"));
+            Assert.True(projectSystem.ReferenceExists("a.dll"));
+            Assert.True(projectSystem.ReferenceExists("b.dll"));
+        }
+
+        [Fact]
         public void AddingPackageReferenceThrowsExceptionPackageReferenceIsAdded()
         {
             // Arrange            
@@ -156,7 +306,6 @@ namespace NuGet.Test
 
             Assert.True(projectSystem.FileExists("me.txt"));
             Assert.False(projectSystem.FileExists("you.txt"));
-
         }
 
         [Fact]
@@ -1788,9 +1937,123 @@ namespace NuGet.Test
             // Act
             projectManager.RemovePackageReference("A");
 
-            // Assert            
+            // Assert
             Assert.False(projectManager.LocalRepository.Exists(packageA));
             Assert.True(projectManager.LocalRepository.Exists(packageB));
+        }
+
+        [Fact]
+        public void RemovingPackageRemoveAssembliesCorrectlyAccordingToReferences()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5"));
+            projectSystem.AddReference("a.dll");
+            projectSystem.AddReference("b.dll");
+            projectSystem.AddReference("c.dll");
+
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+
+            IPackage packageA = PackageUtility.CreatePackage(
+                 "A",
+                 "1.0",
+                 assemblyReferences: new[] { "lib\\net35\\a.dll", "lib\\net35\\b.dll" });
+
+            Mock<IPackage> mockPackageA = Mock.Get<IPackage>(packageA);
+            mockPackageA.Setup(m => m.PackageAssemblyReferences).Returns(
+                    new PackageReferenceSet[] { 
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net40"), new [] { "a.dll" }),
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("wp8"), new [] { "b.dll" })
+                    }
+                );
+
+            projectManager.LocalRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.RemovePackageReference("A");
+
+            // Assert
+            Assert.False(projectManager.LocalRepository.Exists(packageA));
+            Assert.False(projectSystem.ReferenceExists("a.dll"));
+            Assert.True(projectSystem.ReferenceExists("b.dll"));
+            Assert.True(projectSystem.ReferenceExists("c.dll"));
+        }
+
+        [Fact]
+        public void RemovingPackageRemoveAssembliesCorrectlyAccordingToReferences2()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5"));
+            projectSystem.AddReference("a.dll");
+            projectSystem.AddReference("b.dll");
+            projectSystem.AddReference("c.dll");
+
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+
+            IPackage packageA = PackageUtility.CreatePackage(
+                 "A",
+                 "1.0",
+                 assemblyReferences: new[] { "lib\\net35\\a.dll", "lib\\net35\\b.dll" });
+
+            Mock<IPackage> mockPackageA = Mock.Get<IPackage>(packageA);
+            mockPackageA.Setup(m => m.PackageAssemblyReferences).Returns(
+                    new PackageReferenceSet[] { 
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net50"), new [] { "a.dll" }),
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("wp8"), new [] { "b.dll" })
+                    }
+                );
+
+            projectManager.LocalRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.RemovePackageReference("A");
+
+            // Assert
+            Assert.False(projectManager.LocalRepository.Exists(packageA));
+            Assert.False(projectSystem.ReferenceExists("a.dll"));
+            Assert.False(projectSystem.ReferenceExists("b.dll"));
+            Assert.True(projectSystem.ReferenceExists("c.dll"));
+        }
+
+        [Fact]
+        public void RemovingPackageRemoveAssembliesCorrectlyAccordingToReferences3()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5"));
+            projectSystem.AddReference("a.dll");
+            projectSystem.AddReference("b.dll");
+            projectSystem.AddReference("c.dll");
+
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+
+            IPackage packageA = PackageUtility.CreatePackage(
+                 "A",
+                 "1.0",
+                 assemblyReferences: new[] { "lib\\net35\\a.dll", "lib\\net35\\b.dll" });
+
+            Mock<IPackage> mockPackageA = Mock.Get<IPackage>(packageA);
+            mockPackageA.Setup(m => m.PackageAssemblyReferences).Returns(
+                    new PackageReferenceSet[] { 
+                        new PackageReferenceSet(VersionUtility.ParseFrameworkName("net50"), new [] { "a.dll" }),
+                        new PackageReferenceSet(null, new [] { "b.dll" })
+                    }
+                );
+
+            projectManager.LocalRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.RemovePackageReference("A");
+
+            // Assert
+            Assert.False(projectManager.LocalRepository.Exists(packageA));
+            Assert.True(projectSystem.ReferenceExists("a.dll"));
+            Assert.False(projectSystem.ReferenceExists("b.dll"));
+            Assert.True(projectSystem.ReferenceExists("c.dll"));
         }
 
         [Fact]

@@ -254,6 +254,14 @@ namespace NuGet
             }
         }
 
+        public ICollection<PackageReferenceSet> PackageAssemblyReferences
+        {
+            get 
+            {
+                return Package.PackageAssemblyReferences;
+            }
+        }
+
         SemanticVersion IPackageMetadata.Version
         {
             get
@@ -418,6 +426,5 @@ namespace NuGet
             }
             return package != null;
         }
-
     }
 }

@@ -957,3 +957,22 @@ function Test-FinishFailedUninstallOnSolutionOpenOfProjectLevelPackage
     Assert-False $physicalFileSystem.FileExists("PackageWithTextFile.1.0.deleteme")
 }
 
+function Test-UninstallPackageUninstallAssemblyReferencesHonoringPackageReferencesAccordingToProjectFramework
+{
+    # Arrange
+    $p = New-ClassLibrary
+
+    $p | Install-Package mars -Source $repositoryPath
+    $p | Install-Package natal -Source $repositoryPath
+
+    Assert-Package $p mars
+    Assert-Package $p natal
+
+    # Act
+    $p | Uninstall-Package natal
+
+    # Assert
+    Assert-Reference $p one
+    Assert-Null (Get-AssemblyReference $p two)
+    Assert-Null (Get-AssemblyReference $p three)
+}

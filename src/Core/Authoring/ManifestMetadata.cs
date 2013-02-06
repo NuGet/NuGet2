@@ -288,6 +288,33 @@ namespace NuGet
             }
         }
 
+        ICollection<PackageReferenceSet> IPackageMetadata.PackageAssemblyReferences
+        {
+            get
+            {
+                if (ReferenceSets == null)
+                {
+                    return new PackageReferenceSet[0];
+                }
+
+                var referenceSets = ReferenceSets.Select(r => new PackageReferenceSet(r));
+
+                var referenceSetGroups = referenceSets.GroupBy(set => set.TargetFramework);
+                var groupedReferenceSets = referenceSetGroups.Select(group => new PackageReferenceSet(group.Key, group.SelectMany(g => g.References)))
+                                                             .ToList();
+
+                int nullTargetFrameworkIndex = groupedReferenceSets.FindIndex(set => set.TargetFramework == null);
+                if (nullTargetFrameworkIndex > -1)
+                {
+                    var nullFxReferenceSet = groupedReferenceSets[nullTargetFrameworkIndex];
+                    groupedReferenceSets.RemoveAt(nullTargetFrameworkIndex);
+                    groupedReferenceSets.Insert(0, nullFxReferenceSet);
+                }
+
+                return groupedReferenceSets;
+            }
+        }
+
         IEnumerable<FrameworkAssemblyReference> IPackageMetadata.FrameworkAssemblies
         {
             get

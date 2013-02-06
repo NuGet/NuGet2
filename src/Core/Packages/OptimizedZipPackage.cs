@@ -122,7 +122,7 @@ namespace NuGet
             return _files.Values;
         }
 
-        protected override IEnumerable<IPackageAssemblyReference> GetUnfilteredAssemblyReferences()
+        protected override IEnumerable<IPackageAssemblyReference> GetAssemblyReferencesCore()
         {
             EnsurePackageFiles();
 
