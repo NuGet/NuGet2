@@ -137,5 +137,38 @@ namespace NuGet.Test
             // Assert
             ExceptionAssert.Throws<InvalidDataException>(() => values.ToList(), "Unable to parse version value '1.23.4$-2.0' from 'packages.config'.");
         }
+
+        [Theory]
+        [InlineData("foo")]
+        [InlineData("bar")]
+        [InlineData("baz")]
+        [InlineData("on")]
+        [InlineData("off")]
+        [InlineData("yes")]
+        [InlineData("no")]
+        [InlineData("0")]
+        [InlineData("1")]
+        public void GetPackageReferencesThrowsIfDevelopmentFlagIsInvalid(string text)
+        {
+            // Arrange
+            var configFormat = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.3.4"" developmentDependency=""{0}"" />
+</packages>";
+
+            var config = string.Format(CultureInfo.InvariantCulture, configFormat, text);
+            var expectedMessage = string.Format(CultureInfo.InvariantCulture, "Unable to parse developmentDependency value '{0}' from 'packages.config'.", text);
+
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", config);
+            var packageReferenceFile = new PackageReferenceFile(fileSystem, "packages.config");
+
+            // Act
+            var exception = Record.Exception(() => packageReferenceFile.GetPackageReferences().ToList());
+
+            // Assert
+            Assert.IsType<InvalidDataException>(exception);
+            Assert.Equal(expectedMessage, exception.Message);
+        }
     }
 }
