@@ -985,3 +985,22 @@ function Test-UnInstallPackageWithXdtTransformUnTransformsTheFile
     Assert-AreEqual "true" $content.configuration["system.web"].compilation.debug
     Assert-Null $content.configuration["system.web"].customErrors
 }
+function Test-UninstallPackageUninstallAssemblyReferencesHonoringPackageReferencesAccordingToProjectFramework
+{
+    # Arrange
+    $p = New-ClassLibrary
+
+    $p | Install-Package mars -Source $repositoryPath
+    $p | Install-Package natal -Source $repositoryPath
+
+    Assert-Package $p mars
+    Assert-Package $p natal
+
+    # Act
+    $p | Uninstall-Package natal
+
+    # Assert
+    Assert-Reference $p one
+    Assert-Null (Get-AssemblyReference $p two)
+    Assert-Null (Get-AssemblyReference $p three)
+}

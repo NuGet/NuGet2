@@ -8,7 +8,7 @@ using NuGet.Server.Infrastructure;
 
 namespace NuGet.Server
 {
-    public class PackageService
+    public class PackageService : IPackageService
     {
         private const string ApiKeyHeader = "X-NUGET-APIKEY";
         private readonly IServerPackageRepository _serverRepository;

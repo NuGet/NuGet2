@@ -206,6 +206,11 @@ namespace NuGet
 
         public IList<KeyValuePair<string, string>> GetValues(string section)
         {
+            return GetValues(section, isPath: false);
+        }
+
+        public IList<KeyValuePair<string, string>> GetValues(string section, bool isPath)
+        {
             if (String.IsNullOrEmpty(section))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
@@ -215,19 +220,19 @@ namespace NuGet
             var curr = this;
             while (curr != null)
             {
-                curr.PopulateValues(section, values);
+                curr.PopulateValues(section, values, isPath);
                 curr = curr._next;
             }
 
             return values.AsReadOnly();
         }
 
-        private void PopulateValues(string section, List<KeyValuePair<string, string>> current)
+        private void PopulateValues(string section, List<KeyValuePair<string, string>> current, bool isPath)
         {
             var sectionElement = GetSection(_config.Root, section);
             if (sectionElement != null)
             {
-                ReadSection(sectionElement, current);
+                ReadSection(sectionElement, current, isPath);
             }
         }
 
@@ -266,7 +271,7 @@ namespace NuGet
             {
                 return;
             }
-            ReadSection(subSection, current);
+            ReadSection(subSection, current, isPath: false);
         }
 
         public void SetValue(string section, string key, string value)
@@ -390,7 +395,7 @@ namespace NuGet
             return true;
         }
 
-        private void ReadSection(XContainer sectionElement, ICollection<KeyValuePair<string, string>> values)
+        private void ReadSection(XContainer sectionElement, ICollection<KeyValuePair<string, string>> values, bool isPath)
         {
             var elements = sectionElement.Elements();
 
@@ -399,7 +404,7 @@ namespace NuGet
                 string elementName = element.Name.LocalName;
                 if (elementName.Equals("add", StringComparison.OrdinalIgnoreCase))
                 {
-                    values.Add(ReadValue(element));
+                    values.Add(ReadValue(element, isPath));
                 }
                 else if (elementName.Equals("clear", StringComparison.OrdinalIgnoreCase))
                 {
@@ -413,17 +418,28 @@ namespace NuGet
             _fileSystem.AddFile(_fileName, _config.Save);
         }
 
-        private KeyValuePair<string, string> ReadValue(XElement element)
+        // When isPath is true, then the setting value is checked to see if it can be interpreted
+        // as relative path. If it can, the returned value will be the full path of the relative path.
+        // If it cannot be interpreted as relative path, the value is returned as-is.
+        private KeyValuePair<string, string> ReadValue(XElement element, bool isPath)
         {
             var keyAttribute = element.Attribute("key");
-            var valueAttribute = element.Attribute("value");
+            var valueAttribute = element.Attribute("value");            
 
             if (keyAttribute == null || String.IsNullOrEmpty(keyAttribute.Value) || valueAttribute == null)
             {
                 throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UserSettings_UnableToParseConfigFile, ConfigFilePath));
             }
 
-            return new KeyValuePair<string, string>(keyAttribute.Value, valueAttribute.Value);
+            var value = valueAttribute.Value;
+            Uri uri;
+            if (isPath && Uri.TryCreate(value, UriKind.Relative, out uri))
+            {
+                string configDirectory = Path.GetDirectoryName(ConfigFilePath);
+                value = _fileSystem.GetFullPath(Path.Combine(configDirectory, value));
+            }
+
+            return new KeyValuePair<string, string>(keyAttribute.Value, value);
         }
 
         private static XElement GetSection(XElement parentElement, string section)

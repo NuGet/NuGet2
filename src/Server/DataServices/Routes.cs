@@ -57,9 +57,9 @@ namespace NuGet.Server
 #endif
         }
 
-        private static PackageService CreatePackageService()
+        private static IPackageService CreatePackageService()
         {
-            return NinjectBootstrapper.Kernel.Get<PackageService>();
+            return NinjectBootstrapper.Kernel.Get<IPackageService>();
         }
     }
 }

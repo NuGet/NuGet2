@@ -208,7 +208,16 @@ namespace NuGet.Dialog.Providers
         {
             if (selectedNode != null && !selectedNode.IsSearchResultsNode && selectedNode.TotalNumberOfPackages > 1)
             {
-                _updateAllUIService.Show();
+                // After performing Update All, if user switches to another page, we don't want to show 
+                // the Update All button again. Here we check to make sure there's at least one enabled package.
+                if (selectedNode.Extensions.OfType<PackageItem>().Any(p => p.IsEnabled))
+                {
+                    _updateAllUIService.Show();
+                }
+                else
+                {
+                    _updateAllUIService.Hide();
+                }
             }
             else
             {

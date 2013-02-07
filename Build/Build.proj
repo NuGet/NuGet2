@@ -27,8 +27,6 @@
         <ExeDropDirectory>$(NuGetDropDirectory)\Console</ExeDropDirectory>
         <ServerExtensionsBuildDirectory>$(NuGetSrcRoot)\CommandLine.ServerExtensions\bin\$(ConfigFolderPath)</ServerExtensionsBuildDirectory>
         <ServerExtensionsDropDirectory>$(NuGetDropDirectory)\CommandLine.ServerExtensions</ServerExtensionsDropDirectory>
-        <BootStrapperBuildDirectory>$(NuGetSrcRoot)\Bootstrapper\bin\$(ConfigFolderPath)</BootStrapperBuildDirectory>
-        <BootStrapperDropDirectory>$(NuGetDropDirectory)\Bootstrapper</BootStrapperDropDirectory>
         <VisualStudioAddInBuildDirectory>$(NuGetSrcRoot)\VsExtension\bin\$(ConfigFolderPath)</VisualStudioAddInBuildDirectory>
         <VisualStudioAddInDropDirectory>$(NuGetDropDirectory)\VisualStudioAddIn</VisualStudioAddInDropDirectory>
         <EndToEndTestsDirectory>$(NuGetTestRoot)\EndToEnd</EndToEndTestsDirectory>
@@ -113,7 +111,6 @@
 
     <ItemGroup>
         <MonoProjects Include="$(NuGetSrcRoot)\Core\Core.csproj"/>
-        <MonoProjects Include="$(NuGetSrcRoot)\Bootstrapper\Bootstrapper.csproj"/>
         <MonoProjects Include="$(NuGetSrcRoot)\CommandLine\CommandLine.csproj"/>
         <MonoProjects Include="@(TestProjects)" />
     </ItemGroup>
@@ -127,7 +124,7 @@
     <Target Name="Go"
         DependsOnTargets="CheckFxCop; UpdateVsixVersion; RestorePackages; Build; ReportFxCopResults;
                                     VerifyAssembliesInVsix; RunTests; CreateDropDirectories; CopyExecutableOutputToDropDirectory; 
-                                    CopyBootStrapperOutputToDropDirectory; CopyServerExtensionsOutputToDropDirectory;
+                                    CopyServerExtensionsOutputToDropDirectory;
                                     CopyVisualStudioAddInOutputToDropDirectory; CopyEndToEndTestsToDropDirectory;
                                     CopyServerOutputToDropDirectory; CopyLicenseToAllDirectories; BuildPackages">
     </Target>
@@ -158,7 +155,7 @@
     </Target>
 
     <Target Name="Build">
-        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true" BuildInParallel="$(BuildTestsInParallel)" />
+        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true" />
     </Target>
 
     <Target Name="BuildMono">
@@ -205,7 +202,6 @@
         <MakeDir Directories="$(ArtifactDropDirectory)" Condition="!Exists('$(ArtifactDropDirectory)')" />
         <MakeDir Directories="$(NuGetDropDirectory)" Condition="!Exists('$(NuGetDropDirectory)')" />
         <MakeDir Directories="$(ExeDropDirectory)" Condition="!Exists('$(ExeDropDirectory)')" />
-        <MakeDir Directories="$(BootStrapperDropDirectory)" Condition="!Exists('$(BootStrapperDropDirectory)')" />
         <MakeDir Directories="$(VisualStudioAddInDropDirectory)" Condition="!Exists('$(VisualStudioAddInDropDirectory)')" />
         <MakeDir Directories="$(ServerDropDirectory)" Condition="!Exists('$(ServerDropDirectory)')" />
         <MakeDir Directories="$(NuGetCoreDropDirectory)" Condition="!Exists('$(NuGetCoreDropDirectory)')" />
@@ -221,14 +217,6 @@
         </ItemGroup>
         <Message Text="Copying the NuGet Console output to $(ExeDropDirectory)" />
         <Copy ContinueOnError="false" SourceFiles="@(ExecutableFiles)" DestinationFolder="$(ExeDropDirectory)" />
-    </Target>
-
-    <Target Name="CopyBootStrapperOutputToDropDirectory">
-        <ItemGroup>
-            <BootStrapperOutputItems Exclude="$(BootStrapperBuildDirectory)\**\*.pdb" Include="$(BootStrapperBuildDirectory)\**\*.*" />
-        </ItemGroup>
-        <Message Text="Copying the NuGet BootStrapper output to $(BootStrapperDropDirectory)" />
-        <Copy ContinueOnError="false" SourceFiles="@(BootStrapperOutputItems)" DestinationFiles="@(BootStrapperOutputItems ->'$(BootStrapperDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
 
     <Target Name="CopyServerExtensionsOutputToDropDirectory">

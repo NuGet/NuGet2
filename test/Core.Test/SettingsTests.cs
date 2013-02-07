@@ -1018,6 +1018,47 @@ namespace NuGet.Test
             AssertEqualCollections(result, new [] { "key3", "value3", "key4", "value4"});            
         }
 
+        [Fact]
+        public void GetValuesWithIsPathTrue()
+        {
+            // Arrange
+            var mockFileSystem = new MockFileSystem(@"c:\root");
+            var nugetConfigPath = "NuGet.Config";
+            string config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <SectionName>
+    <!-- values that are relative paths -->
+    <add key=""key1"" value=""..\value1"" />
+    <add key=""key2"" value=""a\b\c"" />
+    <add key=""key3"" value="".\a\b\c"" />
+
+    <!-- values that are not relative paths -->
+    <add key=""key4"" value=""c:\value2"" />
+    <add key=""key5"" value=""http://value3"" />    
+    <add key=""key6"" value=""\\a\b\c"" />
+    <add key=""key7"" value=""\a\b\c"" />
+  </SectionName>
+</configuration>";
+            mockFileSystem.AddFile(nugetConfigPath, config);
+            Settings settings = new Settings(mockFileSystem);
+
+            // Act
+            var result = settings.GetValues("SectionName", isPath: true);
+
+            // Assert
+            AssertEqualCollections(
+                result, 
+                new[] { 
+                    "key1", @"c:\root\..\value1",
+                    "key2", @"c:\root\a\b\c",
+                    "key3", @"c:\root\.\a\b\c",
+
+                    "key4", @"c:\value2",
+                    "key5", @"http://value3",
+                    "key6", @"\\a\b\c",
+                    "key7", @"\a\b\c"
+                });
+        }
 
 
         [Fact]

@@ -97,7 +97,7 @@ namespace NuGet
                        .Distinct();
         }
 
-        protected override IEnumerable<IPackageAssemblyReference> GetUnfilteredAssemblyReferences()
+        protected override IEnumerable<IPackageAssemblyReference> GetAssemblyReferencesCore()
         {
             if (_enableCaching)
             {

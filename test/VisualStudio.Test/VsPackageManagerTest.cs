@@ -1066,8 +1066,10 @@ namespace NuGet.VisualStudio.Test
             Assert.True(projectRepository.Exists("A", new SemanticVersion("2.0")));
             Assert.True(projectRepository.Exists("B", new SemanticVersion("1.0")));
 
+            
             // assert that packages.config for solution-level is not created.
-            localRepository.Verify(r => r.AddPackageReferenceEntry(It.IsAny<string>(), It.IsAny<SemanticVersion>()), Times.Never());
+            Assert.False(localRepository.Object.IsSolutionReferenced("A", new SemanticVersion("2.0")));
+            Assert.False(localRepository.Object.IsSolutionReferenced("B", new SemanticVersion("1.0")));
         }
 
         [Theory]
@@ -1119,7 +1121,8 @@ namespace NuGet.VisualStudio.Test
             Assert.True(projectRepository.Exists("B", new SemanticVersion("1.0")));
 
             // assert that packages.config for solution-level is not created.
-            localRepository.Verify(r => r.AddPackageReferenceEntry(It.IsAny<string>(), It.IsAny<SemanticVersion>()), Times.Never());
+            Assert.False(localRepository.Object.IsSolutionReferenced("A", new SemanticVersion("2.0")));
+            Assert.False(localRepository.Object.IsSolutionReferenced("B", new SemanticVersion("1.0")));
         }
 
         [Theory]
@@ -1130,7 +1133,7 @@ namespace NuGet.VisualStudio.Test
             // Arrange
             // Source repository has A -> B, where B is a project-level package and A is a meta-package.
             // We want to make sure A is added to the packages.config of the project, and NOT packages.config of the solution
-            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var localRepository = new MockSharedPackageRepository();
 
             var sourceRepository = new MockPackageRepository();
             var packageA = PackageUtility.CreatePackage("A", "2.0", tools: new[] { "install.ps1" });
@@ -1144,15 +1147,12 @@ namespace NuGet.VisualStudio.Test
                 sourceRepository,
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
-                localRepository.Object,
+                localRepository,
                 new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
-            var projectRepository = new MockProjectPackageRepository(localRepository.Object);
-            var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
-
-            localRepository.Setup(r => r.IsReferenced(It.IsAny<string>(), It.IsAny<SemanticVersion>())).
-                Returns((string id, SemanticVersion version) => projectRepository.Exists(id, version));
+            var projectRepository = new MockProjectPackageRepository(localRepository);
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, projectRepository);
 
             // Act
             packageManager.InstallPackage(
@@ -1167,7 +1167,7 @@ namespace NuGet.VisualStudio.Test
             Assert.True(!projectRepository.Exists("A", new SemanticVersion("2.0")));
 
             // assert that packages.config for solution-level is created.
-            localRepository.Verify(r => r.AddPackageReferenceEntry("A", new SemanticVersion("2.0")), Times.Once());
+            Assert.True(localRepository.IsSolutionReferenced("A", new SemanticVersion("2.0")));
         }
 
         [Theory]
@@ -1178,7 +1178,7 @@ namespace NuGet.VisualStudio.Test
             // Arrange
             // Source repository has A -> B, where B is a project-level package and A is a meta-package.
             // We want to make sure A is added to the packages.config of the project, and NOT packages.config of the solution
-            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>();
+            var localRepository = new MockSharedPackageRepository();
 
             var sourceRepository = new MockPackageRepository();
             var packageA = PackageUtility.CreatePackage("A", "2.0", tools: new[] { "install.ps1" });
@@ -1192,15 +1192,12 @@ namespace NuGet.VisualStudio.Test
                 sourceRepository,
                 new Mock<IFileSystemProvider>().Object,
                 projectSystem,
-                localRepository.Object,
+                localRepository,
                 new Mock<IDeleteOnRestartManager>().Object,
                 new Mock<VsPackageInstallerEvents>().Object);
 
-            var projectRepository = new MockProjectPackageRepository(localRepository.Object);
-            var projectManager = new ProjectManager(localRepository.Object, pathResolver, projectSystem, projectRepository);
-
-            localRepository.Setup(r => r.IsReferenced(It.IsAny<string>(), It.IsAny<SemanticVersion>())).
-                Returns((string id, SemanticVersion version) => projectRepository.Exists(id, version));
+            var projectRepository = new MockProjectPackageRepository(localRepository);
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, projectRepository);
 
             // Act
             packageManager.InstallPackage(
@@ -1216,7 +1213,7 @@ namespace NuGet.VisualStudio.Test
             Assert.True(!projectRepository.Exists("A", new SemanticVersion("2.0")));
 
             // assert that packages.config for solution-level is created.
-            localRepository.Verify(r => r.AddPackageReferenceEntry("A", new SemanticVersion("2.0")), Times.Once());
+            Assert.True(localRepository.IsSolutionReferenced("A", new SemanticVersion("2.0")));
         }
 
         // This repository better simulates what happens when we're running the package manager in vs

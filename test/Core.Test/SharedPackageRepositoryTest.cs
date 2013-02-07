@@ -257,7 +257,7 @@ namespace NuGet.Test
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object, configFileSystem);
 
             // Act
-            repository.AddPackage(PackageUtility.CreatePackage("A", "2.0"));
+            repository.AddPackage(PackageUtility.CreatePackage("A", "2.0", assemblyReferences: new [] {"lib\\this.dll"}));
 
             // Assert
             Assert.False(configFileSystem.FileExists("packages.config"));
@@ -277,7 +277,7 @@ namespace NuGet.Test
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem.Object), fileSystem.Object, configFileSystem);
 
             // Act
-            repository.AddPackage(PackageUtility.CreatePackage("B", "1.0"));
+            repository.AddPackage(PackageUtility.CreatePackage("B", "1.0", content: new [] { "whack.txt" }));
 
             // Assert
             Assert.True(configFileSystem.FileExists("packages.config"));
@@ -339,13 +339,29 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackageDoesNotAddReferencesToSolutionLevelPackagesToSolutionConfigFile()
+        public void AddPackageAddReferencesToSolutionLevelPackagesToSolutionConfigFile()
         {
             // Arrange
             var fileSystem = new MockFileSystem();
             var configFileSystem = new MockFileSystem();
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
             var solutionPackage = PackageUtility.CreatePackage("SolutionLevel", tools: new[] { "Install.ps1" });
+
+            // Act
+            repository.AddPackage(solutionPackage);
+
+            // Assert
+            Assert.True(configFileSystem.FileExists("packages.config"));
+        }
+
+        [Fact]
+        public void AddPackageDoesNotAddEntryToSolutionConfigFileForProjectLevelPackage()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+            var solutionPackage = PackageUtility.CreatePackage("SolutionLevel", content: new[] { "file.txt" });
 
             // Act
             repository.AddPackage(solutionPackage);
