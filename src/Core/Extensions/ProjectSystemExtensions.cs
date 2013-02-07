@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -63,17 +62,7 @@ namespace NuGet
                         }
                         else
                         {
-                            string conflictMessage = String.Format(CultureInfo.CurrentCulture, NuGetResources.FileConflictMessage, path, project.ProjectName);
-                            var resolution = project.Logger.ResolveFileConflict(conflictMessage);
-                            if (resolution == FileConflictResolution.Overwrite || resolution == FileConflictResolution.OverwriteAll)
-                            {
-                                project.Logger.Log(MessageLevel.Info, NuGetResources.Info_OverwriteExistingFile, path);
-                                project.AddFile(path, file.GetStream());
-                            }
-                            else
-                            {
-                                project.Logger.Log(MessageLevel.Warning, NuGetResources.Warning_FileAlreadyExists, path);
-                            }
+                            TryAddFile(project, file, path);
                         }
                     }
                 }
@@ -84,6 +73,31 @@ namespace NuGet
                 {
                     batchProcessor.EndProcessing();
                 }
+            }
+        }
+
+        public static void TryAddFile(IProjectSystem project, IPackageFile file, string path)
+        {
+            if (project.FileExists(path))
+            {
+                // file exists, ask user if he wants to overwrite or ignore
+                string conflictMessage = String.Format(CultureInfo.CurrentCulture, NuGetResources.FileConflictMessage, path, project.ProjectName);
+                var resolution = project.Logger.ResolveFileConflict(conflictMessage);
+                if (resolution == FileConflictResolution.Overwrite || resolution == FileConflictResolution.OverwriteAll)
+                {
+                    // overwrite
+                    project.Logger.Log(MessageLevel.Info, NuGetResources.Info_OverwriteExistingFile, path);
+                    project.AddFile(path, file.GetStream());
+                }
+                else
+                {
+                    // ignore
+                    project.Logger.Log(MessageLevel.Warning, NuGetResources.Warning_FileAlreadyExists, path);
+                }
+            }
+            else
+            {
+                project.AddFile(path, file.GetStream());
             }
         }
 
