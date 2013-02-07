@@ -317,5 +317,14 @@ namespace NuGet.Common
                     break;
             }
         }
+
+        public FileConflictResolution ResolveFileConflict(string message)
+        {
+            return FileConflictResolution.Ignore;
+        }
+
+        public void ResetFileConflictResolution()
+        {
+        }
     }
 }

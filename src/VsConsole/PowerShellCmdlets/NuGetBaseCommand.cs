@@ -7,6 +7,7 @@ using System.Linq;
 using System.Management.Automation;
 using EnvDTE;
 using NuGet.VisualStudio;
+using NuGet.VisualStudio.Resources;
 
 namespace NuGet.PowerShell.Commands
 {
@@ -24,6 +25,8 @@ namespace NuGet.PowerShell.Commands
         private readonly IVsPackageManagerFactory _vsPackageManagerFactory;
         private ProgressRecordCollection _progressRecordCache;
         private readonly IHttpClientEvents _httpClientEvents;
+        private bool _conflictResolutionOverwriteAll;
+        private bool _conflictResolutionIgnoreAll;
 
         protected NuGetBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory, IHttpClientEvents httpClientEvents)
         {
@@ -447,17 +450,38 @@ namespace NuGet.PowerShell.Commands
             WriteProgress(ProgressActivityIds.DownloadPackageId, e.Operation, e.PercentComplete);
         }
 
+        private void OnSendingRequest(object sender, WebRequestEventArgs e)
+        {
+            HttpUtility.SetUserAgent(e.Request, _psCommandsUserAgent.Value);
+        }
+
+        public FileConflictResolution ResolveFileConflict(string message)
+        {
+            if (_conflictResolutionOverwriteAll)
+            {
+                return FileConflictResolution.Overwrite;
+            }
+
+            if (_conflictResolutionIgnoreAll)
+            {
+                return FileConflictResolution.Ignore;
+            }
+
+            bool shouldOverwrite = ShouldContinue(message, VsResources.FileConflictTitle, ref _conflictResolutionOverwriteAll, ref _conflictResolutionIgnoreAll);
+            return shouldOverwrite ? FileConflictResolution.Overwrite : FileConflictResolution.Ignore;
+        }
+
+        public void ResetFileConflictResolution()
+        {
+            _conflictResolutionOverwriteAll = _conflictResolutionIgnoreAll = false;
+        }
+
         private class ProgressRecordCollection : KeyedCollection<int, ProgressRecord>
         {
             protected override int GetKeyForItem(ProgressRecord item)
             {
                 return item.ActivityId;
             }
-        }
-
-        private void OnSendingRequest(object sender, WebRequestEventArgs e)
-        {
-            HttpUtility.SetUserAgent(e.Request, _psCommandsUserAgent.Value);
         }
     }
 }

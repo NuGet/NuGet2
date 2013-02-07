@@ -216,6 +216,9 @@ namespace NuGet
 
             try
             {
+                // Tell the IFileConflictResolver to start afresh, forgetting Yes To All/No To All answers
+                Logger.ResetFileConflictResolution();
+
                 // Add content files
                 Project.AddFiles(contentFiles, _fileTransformers);
 

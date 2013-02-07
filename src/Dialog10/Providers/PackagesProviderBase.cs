@@ -37,6 +37,7 @@ namespace NuGet.Dialog.Providers
         private CultureInfo _uiCulture, _culture;
         private readonly ISolutionManager _solutionManager;
         private IDisposable _expandedNodesDisposable;
+        private bool _conflictResolutionOverwriteAll, _conflictResolutionIgnoreAll;
 
         protected PackagesProviderBase(
             IPackageRepository localRepository, 
@@ -744,6 +745,34 @@ namespace NuGet.Dialog.Providers
                 _expandedNodesDisposable.Dispose();
                 _expandedNodesDisposable = null;
             }
+        }
+
+        public FileConflictResolution ResolveFileConflict(string message)
+        {
+            if (_conflictResolutionOverwriteAll) 
+            {
+                return FileConflictResolution.Overwrite;
+            }
+
+            if (_conflictResolutionIgnoreAll)
+            {
+                return FileConflictResolution.Ignore;
+            }
+
+            HideProgressWindow();
+
+            FileConflictResolution resolution = _providerServices.UserNotifierServices.ShowFileConflictResolution(message);
+            _conflictResolutionIgnoreAll = (resolution == FileConflictResolution.IgnoreAll);
+            _conflictResolutionOverwriteAll = (resolution == FileConflictResolution.OverwriteAll);
+
+            ShowProgressWindow();
+
+            return resolution;
+        }
+
+        public void ResetFileConflictResolution()
+        {
+            _conflictResolutionIgnoreAll = _conflictResolutionOverwriteAll = false;
         }
 
         public virtual void Dispose()

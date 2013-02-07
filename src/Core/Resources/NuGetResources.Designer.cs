@@ -232,6 +232,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File &apos;{0}&apos; already exists in project &apos;{1}&apos;. Do you want to overwrite or ignore it?.
+        /// </summary>
+        internal static string FileConflictMessage {
+            get {
+                return ResourceManager.GetString("FileConflictMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File &apos;{0}&apos; does not exist..
         /// </summary>
         internal static string FileDoesNotExit {
@@ -255,6 +264,15 @@ namespace NuGet.Resources {
         internal static string IncompatibleSchema {
             get {
                 return ResourceManager.GetString("IncompatibleSchema", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Overwrite existing file &apos;{0}&apos;..
+        /// </summary>
+        internal static string Info_OverwriteExistingFile {
+            get {
+                return ResourceManager.GetString("Info_OverwriteExistingFile", resourceCulture);
             }
         }
         

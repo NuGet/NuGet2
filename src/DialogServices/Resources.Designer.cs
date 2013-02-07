@@ -637,6 +637,24 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Ignore _All.
+        /// </summary>
+        public static string IgnoreAllLabel {
+            get {
+                return ResourceManager.GetString("IgnoreAllLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to I_gnore.
+        /// </summary>
+        public static string IgnoreLabel {
+            get {
+                return ResourceManager.GetString("IgnoreLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to I _Accept.
         /// </summary>
         public static string License_Accept {
@@ -705,6 +723,24 @@ namespace NuGet.Dialog {
         public static string NoFxDependencyGroup {
             get {
                 return ResourceManager.GetString("NoFxDependencyGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Over_write All.
+        /// </summary>
+        public static string OverwriteAllLabel {
+            get {
+                return ResourceManager.GetString("OverwriteAllLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to _Overwrite.
+        /// </summary>
+        public static string OverwriteLabel {
+            get {
+                return ResourceManager.GetString("OverwriteLabel", resourceCulture);
             }
         }
         

@@ -148,5 +148,14 @@ namespace NuGet.Test
         {
             throw new NotSupportedException();
         }
+
+        public FileConflictResolution ResolveFileConflict(string message)
+        {
+            return FileConflictResolution.Ignore;
+        }
+
+        public void ResetFileConflictResolution()
+        {
+        }
     }
 }

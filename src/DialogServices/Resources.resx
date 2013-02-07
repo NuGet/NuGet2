@@ -348,4 +348,16 @@
   <data name="Dialog_UpdateAllProgress" xml:space="preserve">
     <value>Update all packages...</value>
   </data>
+  <data name="IgnoreAllLabel" xml:space="preserve">
+    <value>Ignore _All</value>
+  </data>
+  <data name="IgnoreLabel" xml:space="preserve">
+    <value>I_gnore</value>
+  </data>
+  <data name="OverwriteAllLabel" xml:space="preserve">
+    <value>Over_write All</value>
+  </data>
+  <data name="OverwriteLabel" xml:space="preserve">
+    <value>_Overwrite</value>
+  </data>
 </root>

@@ -1,7 +1,7 @@
 namespace NuGet
 {
-    public interface ILogger
+    public interface ILogger : IFileConflictResolver
     {
-        void Log(MessageLevel level, string message, params object[] args);
+        void Log(MessageLevel level, string message, params object[] args);       
     }
 }

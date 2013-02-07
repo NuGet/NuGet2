@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using NuGet.Resources;
 
 namespace NuGet
 {
@@ -61,7 +63,17 @@ namespace NuGet
                         }
                         else
                         {
-                            project.AddFileWithCheck(path, file.GetStream);
+                            string conflictMessage = String.Format(CultureInfo.CurrentCulture, NuGetResources.FileConflictMessage, path, project.ProjectName);
+                            var resolution = project.Logger.ResolveFileConflict(conflictMessage);
+                            if (resolution == FileConflictResolution.Overwrite || resolution == FileConflictResolution.OverwriteAll)
+                            {
+                                project.Logger.Log(MessageLevel.Info, NuGetResources.Info_OverwriteExistingFile, path);
+                                project.AddFile(path, file.GetStream());
+                            }
+                            else
+                            {
+                                project.Logger.Log(MessageLevel.Warning, NuGetResources.Warning_FileAlreadyExists, path);
+                            }
                         }
                     }
                 }
