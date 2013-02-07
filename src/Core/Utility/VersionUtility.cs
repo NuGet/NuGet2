@@ -748,6 +748,11 @@ namespace NuGet
         /// <param name="targetFrameworkName">The package's target framework</param>
         internal static bool IsCompatible(FrameworkName frameworkName, FrameworkName targetFrameworkName)
         {
+            if (frameworkName == null)
+            {
+                return true;
+            }
+
             // Treat portable library specially
             if (targetFrameworkName.IsPortableFramework())
             {
