@@ -184,8 +184,8 @@ function Test-UninstallSpecificPackageThrowsIfNotInstalledInProject {
     # Arrange
     $p1 = New-ClassLibrary
     $p2 = New-FSharpLibrary
-    $p1 | Install-Package Antlr -Version 3.1.1
-    $p2 | Install-Package Antlr -Version 3.1.3.42154
+    $p1 | Install-Package Antlr -Version 3.1.1 -Source $context.RepositoryPath
+    $p2 | Install-Package Antlr -Version 3.1.3.42154 -Source $context.RepositoryPath
 
     # Act
     Assert-Throws { $p2 | Uninstall-Package Antlr -Version 3.1.1 } "Unable to find package 'Antlr 3.1.1' in '$($p2.Name)'."
@@ -195,8 +195,8 @@ function Test-UninstallSpecificVersionOfPackage {
     # Arrange
     $p1 = New-ClassLibrary
     $p2 = New-FSharpLibrary
-    $p1 | Install-Package Antlr -Version 3.1.1
-    $p2 | Install-Package Antlr -Version 3.1.3.42154
+    $p1 | Install-Package Antlr -Version 3.1.1 -Source $context.RepositoryPath
+    $p2 | Install-Package Antlr -Version 3.1.3.42154 -Source $context.RepositoryPath
 
     # Act
     $p1 | Uninstall-Package Antlr -Version 3.1.1
@@ -234,8 +234,8 @@ function Test-UninstallAmbiguousProjectLevelPackageFromSolutionLevel {
     # Arrange
     $p1 = New-ClassLibrary
     $p2 = New-FSharpLibrary
-    $p1 | Install-Package Antlr -Version 3.1.1
-    $p2 | Install-Package Antlr -Version 3.1.3.42154
+    $p1 | Install-Package Antlr -Version 3.1.1 -Source $context.RepositoryPath
+    $p2 | Install-Package Antlr -Version 3.1.3.42154 -Source $context.RepositoryPath
     Remove-ProjectItem $p1 packages.config
     Remove-ProjectItem $p2 packages.config
 
