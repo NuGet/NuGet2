@@ -21,8 +21,8 @@ namespace NuGet.VisualStudio
                     {
                         ICollection<VsHierarchyItem> expandedNodes =
                             GetExpandedProjectHierarchyItems(project);
-                        Debug.Assert(!results.ContainsKey(project.UniqueName));
-                        results[project.UniqueName] =
+                        Debug.Assert(!results.ContainsKey(project.GetUniqueName()));
+                        results[project.GetUniqueName()] =
                             new HashSet<VsHierarchyItem>(expandedNodes);
                     }
                     return results;
@@ -38,7 +38,7 @@ namespace NuGet.VisualStudio
                     foreach (Project project in solutionManager.GetProjects())
                     {
                         ISet<VsHierarchyItem> expandedNodes;
-                        if (ignoreNodes.TryGetValue(project.UniqueName, out expandedNodes) &&
+                        if (ignoreNodes.TryGetValue(project.GetUniqueName(), out expandedNodes) &&
                             expandedNodes != null)
                         {
                             CollapseProjectHierarchyItems(project, expandedNodes);
@@ -117,7 +117,7 @@ namespace NuGet.VisualStudio
 
             // Get the solution
             IVsSolution solution = ServiceLocator.GetGlobalService<SVsSolution, IVsSolution>();
-            int hr = solution.GetProjectOfUniqueName(project.UniqueName, out hierarchy);
+            int hr = solution.GetProjectOfUniqueName(project.GetUniqueName(), out hierarchy);
 
             if (hr != VSConstants.S_OK)
             {

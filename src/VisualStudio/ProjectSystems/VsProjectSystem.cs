@@ -57,7 +57,7 @@ namespace NuGet.VisualStudio
         {
             get
             {
-                return Project.UniqueName;
+                return Project.GetUniqueName();
             }
         }
 

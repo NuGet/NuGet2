@@ -469,7 +469,7 @@ namespace NuGet.VisualStudio
             });
 
             List<Project> dependents;
-            if (dependentProjects.TryGetValue(project.UniqueName, out dependents))
+            if (dependentProjects.TryGetValue(project.GetUniqueName(), out dependents))
             {
                 return dependents;
             }
@@ -482,7 +482,7 @@ namespace NuGet.VisualStudio
                                          Project dependent)
         {
             List<Project> dependents;
-            if (!dependentProjects.TryGetValue(project.UniqueName, out dependents))
+            if (!dependentProjects.TryGetValue(project.GetUniqueName(), out dependents))
             {
                 dependents = new List<Project>();
                 dependentProjects[project.UniqueName] = dependents;
