@@ -232,14 +232,24 @@ namespace NuGet.Dialog.Providers
 
         public override IVsExtension CreateExtension(IPackage package)
         {
+            IEnumerable<Project> projects = GetReferenceProjects(package);
+            if (projects.IsEmpty())
+            {
+                var repository = PackageManager.LocalRepository as ISharedPackageRepository;
+                if (repository != null && !repository.IsSolutionReferenced(package.Id, package.Version))
+                {
+                    return null;
+                }
+            }
+
             string commandText = PackageManager.IsProjectLevel(package) ?
                 Resources.Dialog_SolutionManageButton :
                 Resources.Dialog_UninstallButton;
 
-            return new PackageItem(this, package, GetReferenceProjects(package))
+            return new PackageItem(this, package, projects)
             {
                 CommandName = commandText
-            };
+            };           
         }
 
         protected override void OnExecuteCompleted(PackageItem item)
