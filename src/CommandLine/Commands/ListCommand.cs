@@ -97,6 +97,10 @@ namespace NuGet.Commands
                         Console.PrintJustified(0, p.Id);
                         Console.PrintJustified(1, p.Version.ToString());
                         Console.PrintJustified(1, p.Description);
+                        if (!string.IsNullOrEmpty(p.LicenseUrl.AbsoluteUri))
+                        {
+                            Console.PrintJustified(1, p.LicenseUrl.AbsoluteUri);
+                        }
                         Console.WriteLine();
                         hasPackages = true;
                     }
