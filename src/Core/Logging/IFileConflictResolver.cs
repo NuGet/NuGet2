@@ -3,6 +3,5 @@
     public interface IFileConflictResolver
     {
         FileConflictResolution ResolveFileConflict(string message);
-        void ResetFileConflictResolution();
     }
 }

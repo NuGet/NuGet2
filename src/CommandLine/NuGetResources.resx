@@ -498,4 +498,7 @@
   <data name="Error_SourceProviderIsNull" xml:space="preserve">
     <value>Property SourceProvider is null.</value>
   </data>
+  <data name="FileConflictConfirmMessage" xml:space="preserve">
+    <value>Overwrite (Y)  Ignore (N)  Overwrite All (L)  Ignore All (K) : </value>
+  </data>
 </root>

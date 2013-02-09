@@ -250,6 +250,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Overwrite (Y)  Ignore (N)  Overwrite All (L)  Ignore All (K) : .
+        /// </summary>
+        internal static string FileConflictConfirmMessage {
+            get {
+                return ResourceManager.GetString("FileConflictConfirmMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Found 1 project with a packages.config file. ({0}).
         /// </summary>
         internal static string FoundProject {

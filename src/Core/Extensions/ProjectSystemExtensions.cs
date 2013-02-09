@@ -15,7 +15,6 @@ namespace NuGet
                                     IEnumerable<IPackageFile> files,
                                     IDictionary<string, IPackageFileTransformer> fileTransformers)
         {
-
             // Convert files to a list
             List<IPackageFile> fileList = files.ToList();
 
@@ -27,6 +26,7 @@ namespace NuGet
                 fileList.Sort(fileComparer);
             }
 
+            bool overwriteAll = false, ignoreAll = false;
             var batchProcessor = project as IBatchProcessor<string>;
 
             try
@@ -62,7 +62,7 @@ namespace NuGet
                         }
                         else
                         {
-                            TryAddFile(project, file, path);
+                            TryAddFile(project, file, path, ref overwriteAll, ref ignoreAll);
                         }
                     }
                 }
@@ -76,13 +76,30 @@ namespace NuGet
             }
         }
 
-        public static void TryAddFile(IProjectSystem project, IPackageFile file, string path)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
+        public static void TryAddFile(IProjectSystem project, IPackageFile file, string path, ref bool overwriteAll, ref bool ignoreAll)
         {
             if (project.FileExists(path))
             {
-                // file exists, ask user if he wants to overwrite or ignore
-                string conflictMessage = String.Format(CultureInfo.CurrentCulture, NuGetResources.FileConflictMessage, path, project.ProjectName);
-                var resolution = project.Logger.ResolveFileConflict(conflictMessage);
+                FileConflictResolution resolution;
+                if (overwriteAll)
+                {
+                    resolution = FileConflictResolution.Overwrite;
+                }
+                else if (ignoreAll)
+                {
+                    resolution = FileConflictResolution.Ignore;
+                }
+                else
+                {
+                    // file exists, ask user if he wants to overwrite or ignore
+                    string conflictMessage = String.Format(CultureInfo.CurrentCulture, NuGetResources.FileConflictMessage, path, project.ProjectName);
+                    resolution = project.Logger.ResolveFileConflict(conflictMessage);
+
+                    overwriteAll = (resolution == FileConflictResolution.OverwriteAll);
+                    ignoreAll = (resolution == FileConflictResolution.IgnoreAll);
+                }
+
                 if (resolution == FileConflictResolution.Overwrite || resolution == FileConflictResolution.OverwriteAll)
                 {
                     // overwrite

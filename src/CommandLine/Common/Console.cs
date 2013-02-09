@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -321,10 +320,40 @@ namespace NuGet.Common
         public FileConflictResolution ResolveFileConflict(string message)
         {
             return FileConflictResolution.Ignore;
-        }
 
-        public void ResetFileConflictResolution()
-        {
+            //if (IsNonInteractive)
+            //{
+            //    // always ignore file if running in non-interactive mode
+            //    return FileConflictResolution.Ignore;
+            //}
+
+            //WriteColor(System.Console.Out, ConsoleColor.Green, message);
+            //WriteColor(System.Console.Out, ConsoleColor.White, NuGetResources.FileConflictConfirmMessage);
+
+            //char[] acceptedAnswers = new char[] { 'Y', 'N', 'L', 'K' };
+            //char answer;
+            //do
+            //{
+            //    var readKeyInfo = System.Console.ReadKey();
+            //    answer = readKeyInfo.KeyChar;
+            //}
+            //while (Array.IndexOf(acceptedAnswers, answer) == -1);
+
+            //switch (answer) 
+            //{
+            //    case 'Y':
+            //        return FileConflictResolution.Overwrite;
+
+            //    case 'L':
+            //        return FileConflictResolution.OverwriteAll;
+
+            //    case 'K':
+            //        return FileConflictResolution.IgnoreAll;
+
+            //    case 'N':
+            //    default:
+            //        return FileConflictResolution.Ignore;
+            //}
         }
     }
 }

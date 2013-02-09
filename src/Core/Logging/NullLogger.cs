@@ -20,9 +20,5 @@ namespace NuGet
         {
             return FileConflictResolution.Ignore;
         }
-
-        public void ResetFileConflictResolution()
-        {
-        }
     }
 }
