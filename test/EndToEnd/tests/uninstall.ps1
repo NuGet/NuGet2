@@ -110,15 +110,15 @@ function Test-SimpleFSharpUninstall {
     
     # Act
     Install-Package Ninject -Project $p.Name -Source $context.RepositoryPath
-    Assert-Reference $p Ninject
+    Assert-NotNull (Get-ProjectItem $p two.txt)
     Assert-Package $p Ninject
     Assert-SolutionPackage Ninject
     Uninstall-Package Ninject -Project $p.Name
     
     # Assert
     Assert-Null (Get-ProjectPackage $p Ninject)
-    Assert-Null (Get-AssemblyReference $p Ninject)
     Assert-Null (Get-SolutionPackage Ninject)
+    Assert-Null (Get-ProjectItem $ two.txt)
 }
 
 function Test-FSharpDependentPackageUninstall {
