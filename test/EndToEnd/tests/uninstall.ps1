@@ -109,7 +109,7 @@ function Test-SimpleFSharpUninstall {
     $p = New-FSharpLibrary
     
     # Act
-    Install-Package Ninject -Project $p.Name 
+    Install-Package Ninject -Project $p.Name -Source $context.RepositoryPath
     Assert-Reference $p Ninject
     Assert-Package $p Ninject
     Assert-SolutionPackage Ninject

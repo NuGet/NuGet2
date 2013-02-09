@@ -312,7 +312,7 @@ function Test-InstallCanPipeToFSharpProjects {
     $p = New-FSharpLibrary
 
     # Act
-    $p | Install-Package elmah -Version 1.1
+    $p | Install-Package elmah -Version 1.1 -source $context.RepositoryPath
 
     # Assert
     Assert-Package $p elmah
