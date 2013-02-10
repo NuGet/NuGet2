@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -19,6 +20,9 @@ namespace NuGet
     /// </remarks>
     public class OptimizedZipPackage : LocalPackage
     {
+        private static ConcurrentDictionary<PackageName, IFileSystem> _cachedExpandedFileSytem = 
+            new ConcurrentDictionary<PackageName, IFileSystem>();
+
         private Dictionary<string, PhysicalPackageFile> _files;
         private ICollection<FrameworkName> _supportedFrameworks;
         private readonly IFileSystem _fileSystem;
@@ -48,9 +52,11 @@ namespace NuGet
             string directory = Path.GetDirectoryName(fullPackagePath);
             _fileSystem = new PhysicalFileSystem(directory);
             _packagePath = Path.GetFileName(fullPackagePath);
-            _expandedFileSystem = new PhysicalFileSystem(Path.GetTempPath());
-
+            
             EnsureManifest();
+
+            PackageName packageName = new PackageName(Id, Version);
+            _expandedFileSystem = _cachedExpandedFileSytem.GetOrAdd(packageName, name => new PhysicalFileSystem(Path.GetTempPath()));
         }
 
         /// <summary>
@@ -59,8 +65,24 @@ namespace NuGet
         /// <param name="fileSystem">The file system which contains the .nupkg file.</param>
         /// <param name="packagePath">The relative package path within the file system.</param>
         public OptimizedZipPackage(IFileSystem fileSystem, string packagePath)
-            : this(fileSystem, packagePath, new PhysicalFileSystem(Path.GetTempPath()))
         {
+            if (fileSystem == null)
+            {
+                throw new ArgumentNullException("fileSystem");
+            }
+
+            if (String.IsNullOrEmpty(packagePath))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packagePath");
+            }
+
+            _fileSystem = fileSystem;
+            _packagePath = packagePath;
+
+            EnsureManifest();
+
+            PackageName packageName = new PackageName(Id, Version);
+            _expandedFileSystem = _cachedExpandedFileSytem.GetOrAdd(packageName, name => new PhysicalFileSystem(Path.GetTempPath()));
         }
 
         /// <summary>
