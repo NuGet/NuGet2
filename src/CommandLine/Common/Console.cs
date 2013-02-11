@@ -319,41 +319,8 @@ namespace NuGet.Common
 
         public FileConflictResolution ResolveFileConflict(string message)
         {
+            // TODO: Print out message to console and ask for user's choice.
             return FileConflictResolution.Ignore;
-
-            //if (IsNonInteractive)
-            //{
-            //    // always ignore file if running in non-interactive mode
-            //    return FileConflictResolution.Ignore;
-            //}
-
-            //WriteColor(System.Console.Out, ConsoleColor.Green, message);
-            //WriteColor(System.Console.Out, ConsoleColor.White, NuGetResources.FileConflictConfirmMessage);
-
-            //char[] acceptedAnswers = new char[] { 'Y', 'N', 'L', 'K' };
-            //char answer;
-            //do
-            //{
-            //    var readKeyInfo = System.Console.ReadKey();
-            //    answer = readKeyInfo.KeyChar;
-            //}
-            //while (Array.IndexOf(acceptedAnswers, answer) == -1);
-
-            //switch (answer) 
-            //{
-            //    case 'Y':
-            //        return FileConflictResolution.Overwrite;
-
-            //    case 'L':
-            //        return FileConflictResolution.OverwriteAll;
-
-            //    case 'K':
-            //        return FileConflictResolution.IgnoreAll;
-
-            //    case 'N':
-            //    default:
-            //        return FileConflictResolution.Ignore;
-            //}
         }
     }
 }
