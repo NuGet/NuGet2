@@ -12,6 +12,7 @@
     <AssemblyName>NuGet.VisualStudio</AssemblyName>
     <CodeAnalysisRuleSet>..\..\NuGet.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DeleteOnRestart\DeleteOnRestartManager.cs" />
@@ -186,7 +187,6 @@
     <Reference Include="WindowsBase" />
     <Reference Include="VsWebSite.Interop, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Common Files\Microsoft Shared\MSEnv\PublicAssemblies\VsWebSite.Interop.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

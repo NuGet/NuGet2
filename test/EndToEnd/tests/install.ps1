@@ -270,12 +270,12 @@ function Test-FSharpSimpleWithAssemblyReference {
     $p = New-FSharpConsoleApplication
     
     # Act
-    Install-Package Antlr -Project $p.Name
+    Install-Package Antlr -Project $p.Name -Source $context.RepositoryPath
     
     # Assert
     Assert-Package $p Antlr
     Assert-SolutionPackage Antlr
-    Assert-Reference $p Antlr3.Runtime
+    Assert-Reference $p Runtime
 }
 
 function Test-WebsiteInstallPackageWithRootNamespace {
@@ -312,7 +312,7 @@ function Test-InstallCanPipeToFSharpProjects {
     $p = New-FSharpLibrary
 
     # Act
-    $p | Install-Package elmah -Version 1.1
+    $p | Install-Package elmah -Version 1.1 -source $context.RepositoryPath
 
     # Assert
     Assert-Package $p elmah

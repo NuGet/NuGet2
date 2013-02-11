@@ -43,6 +43,7 @@
             <Using Namespace="Microsoft.Build.Framework" />
             <Code Type="Fragment" Language="cs">
                 <![CDATA[
+            bool successful = true;
             foreach(ITaskItem item in Items) 
             {
                 string fileName = item.GetMetadata("Filename");
@@ -50,8 +51,10 @@
                 if(!fileName.StartsWith("NuGet") && fileName != "Microsoft.Web.XmlTransform") 
                 {
                     Log.LogError("The assembly '{0}' is not expected to be in the VSIX.", fileName);
+                    successful = false;
                 }
             }
+            return successful;
           ]]>
             </Code>
         </Task>

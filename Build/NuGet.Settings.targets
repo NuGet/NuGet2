@@ -4,6 +4,7 @@
         <NuGetRoot Condition=" '$(NuGetRoot)' == '' ">$(MsBuildThisFileDirectory)..</NuGetRoot>
         <Configuration Condition=" '$(Configuration)' == '' Or '$(Configuration)' == 'CI' ">Debug</Configuration>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <PlatformTarget>x86</PlatformTarget>
         <ProductVersion>8.0.30703</ProductVersion>
         <SchemaVersion>2.0</SchemaVersion>
         <AppDesignerFolder>Properties</AppDesignerFolder>

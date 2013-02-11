@@ -109,16 +109,16 @@ function Test-SimpleFSharpUninstall {
     $p = New-FSharpLibrary
     
     # Act
-    Install-Package Ninject -Project $p.Name 
-    Assert-Reference $p Ninject
+    Install-Package Ninject -Project $p.Name -Source $context.RepositoryPath
+    Assert-NotNull (Get-ProjectItem $p two.txt)
     Assert-Package $p Ninject
     Assert-SolutionPackage Ninject
     Uninstall-Package Ninject -Project $p.Name
     
     # Assert
     Assert-Null (Get-ProjectPackage $p Ninject)
-    Assert-Null (Get-AssemblyReference $p Ninject)
     Assert-Null (Get-SolutionPackage Ninject)
+    Assert-Null (Get-ProjectItem $ two.txt)
 }
 
 function Test-FSharpDependentPackageUninstall {
@@ -184,8 +184,8 @@ function Test-UninstallSpecificPackageThrowsIfNotInstalledInProject {
     # Arrange
     $p1 = New-ClassLibrary
     $p2 = New-FSharpLibrary
-    $p1 | Install-Package Antlr -Version 3.1.1
-    $p2 | Install-Package Antlr -Version 3.1.3.42154
+    $p1 | Install-Package Antlr -Version 3.1.1 -Source $context.RepositoryPath
+    $p2 | Install-Package Antlr -Version 3.1.3.42154 -Source $context.RepositoryPath
 
     # Act
     Assert-Throws { $p2 | Uninstall-Package Antlr -Version 3.1.1 } "Unable to find package 'Antlr 3.1.1' in '$($p2.Name)'."
@@ -195,8 +195,8 @@ function Test-UninstallSpecificVersionOfPackage {
     # Arrange
     $p1 = New-ClassLibrary
     $p2 = New-FSharpLibrary
-    $p1 | Install-Package Antlr -Version 3.1.1
-    $p2 | Install-Package Antlr -Version 3.1.3.42154
+    $p1 | Install-Package Antlr -Version 3.1.1 -Source $context.RepositoryPath
+    $p2 | Install-Package Antlr -Version 3.1.3.42154 -Source $context.RepositoryPath
 
     # Act
     $p1 | Uninstall-Package Antlr -Version 3.1.1
@@ -234,8 +234,8 @@ function Test-UninstallAmbiguousProjectLevelPackageFromSolutionLevel {
     # Arrange
     $p1 = New-ClassLibrary
     $p2 = New-FSharpLibrary
-    $p1 | Install-Package Antlr -Version 3.1.1
-    $p2 | Install-Package Antlr -Version 3.1.3.42154
+    $p1 | Install-Package Antlr -Version 3.1.1 -Source $context.RepositoryPath
+    $p2 | Install-Package Antlr -Version 3.1.3.42154 -Source $context.RepositoryPath
     Remove-ProjectItem $p1 packages.config
     Remove-ProjectItem $p2 packages.config
 
