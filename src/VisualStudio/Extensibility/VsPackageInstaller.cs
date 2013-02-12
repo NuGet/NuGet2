@@ -32,23 +32,26 @@ namespace NuGet.VisualStudio
             InstallPackage(source, project, packageId, version == null ? (SemanticVersion)null : new SemanticVersion(version), ignoreDependencies);
         }
 
-		public void InstallPackage(string source, Project project, string packageId, string version, bool ignoreDependencies) {
-			InstallPackage(source, project, packageId, ToSemanticVersion(version), ignoreDependencies);
-		}
+        public void InstallPackage(string source, Project project, string packageId, string version, bool ignoreDependencies)
+        {
+            InstallPackage(source, project, packageId, ToSemanticVersion(version), ignoreDependencies);
+        }
 
-		public void InstallPackage(IPackageRepository repository, Project project, string packageId, string version, bool ignoreDependencies, bool skipAssemblyReferences) 
-		{
-			InstallPackage(repository, project, packageId, ToSemanticVersion(version), ignoreDependencies, skipAssemblyReferences: skipAssemblyReferences);
-		}
+        public void InstallPackage(IPackageRepository repository, Project project, string packageId, string version, bool ignoreDependencies, bool skipAssemblyReferences)
+        {
+            InstallPackage(repository, project, packageId, ToSemanticVersion(version), ignoreDependencies, skipAssemblyReferences: skipAssemblyReferences);
+        }
 
-		internal void InstallPackage(string source, Project project, string packageId, SemanticVersion version, bool ignoreDependencies) {
-			if (String.IsNullOrEmpty(source)) {
-				throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "source");
-			}
+        internal void InstallPackage(string source, Project project, string packageId, SemanticVersion version, bool ignoreDependencies)
+        {
+            if (String.IsNullOrEmpty(source))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "source");
+            }
 
-			IPackageRepository repository = _repositoryFactory.CreateRepository(source);
-			InstallPackage(repository, project, packageId, version, ignoreDependencies, skipAssemblyReferences: false);
-		}
+            IPackageRepository repository = _repositoryFactory.CreateRepository(source);
+            InstallPackage(repository, project, packageId, version, ignoreDependencies, skipAssemblyReferences: false);
+        }
 
         internal void InstallPackage(IPackageRepository repository, Project project, string packageId, SemanticVersion version, bool ignoreDependencies, bool skipAssemblyReferences)
         {
@@ -60,7 +63,7 @@ namespace NuGet.VisualStudio
             using (_vsCommonOperations.SaveSolutionExplorerNodeStates(_solutionManager))
             {
                 IVsPackageManager packageManager = _packageManagerFactory.CreatePackageManager(repository,
-                                                                                               useFallbackForDependencies : false);
+                                                                                               useFallbackForDependencies: false);
                 IProjectManager projectManager = packageManager.GetProjectManager(project);
 
                 EventHandler<PackageOperationEventArgs> installedHandler = (sender, e) =>
@@ -74,7 +77,7 @@ namespace NuGet.VisualStudio
                                                                            {
                                                                                _scriptExecutor.ExecuteScript(
                                                                                    e.InstallPath,
-                                                                                   PowerShellScripts.Install, 
+                                                                                   PowerShellScripts.Install,
                                                                                    e.Package,
                                                                                    project,
                                                                                    project.GetTargetFrameworkName(),
@@ -88,12 +91,12 @@ namespace NuGet.VisualStudio
                     packageManager.PackageInstalled += installedHandler;
                     packageManager.BindingRedirectEnabled = false;
                     packageManager.InstallPackage(
-                        projectManager, 
-                        packageId, 
-                        version, 
+                        projectManager,
+                        packageId,
+                        version,
                         ignoreDependencies,
-                        allowPrereleaseVersions: true, 
-                        skipAssemblyReferences: skipAssemblyReferences, 
+                        allowPrereleaseVersions: true,
+                        skipAssemblyReferences: skipAssemblyReferences,
                         logger: NullLogger.Instance);
                 }
                 finally
@@ -105,8 +108,9 @@ namespace NuGet.VisualStudio
             }
         }
 
-		private static SemanticVersion ToSemanticVersion(string version) {
-			return version == null ? (SemanticVersion)null : new SemanticVersion(version);
-		}
+        private static SemanticVersion ToSemanticVersion(string version)
+        {
+            return version == null ? (SemanticVersion)null : new SemanticVersion(version);
+        }
     }
 }

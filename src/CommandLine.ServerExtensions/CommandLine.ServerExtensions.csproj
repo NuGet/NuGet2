@@ -8,6 +8,7 @@
     <CodeAnalysisRuleSet>..\..\NuGet.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
     <ProjectGuid>{52EA04DC-1DA5-4E45-B13C-0A10F4B71662}</ProjectGuid>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

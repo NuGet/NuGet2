@@ -73,7 +73,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetValues("packageSources")).Returns(
+            settings.Setup(s => s.GetValues("packageSources", true)).Returns(
                 new[] { 
                     new KeyValuePair<string, string>("one", "onesource"),
                     new KeyValuePair<string, string>("two", "twosource"),
@@ -122,7 +122,7 @@ namespace NuGet.Test
             // Arrange
             var expectedSources = new[] { new PackageSource("one", "one"), new PackageSource("two", "two"), new PackageSource("three", "three") };
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetValues("packageSources"))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new KeyValuePair<string, string>("one", "one"), 
                                      new KeyValuePair<string, string>("two", "two"), 
                                      new KeyValuePair<string, string>("three", "three")
@@ -173,7 +173,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetValues("packageSources"))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new KeyValuePair<string, string>("one", "onesource"), 
                                      new KeyValuePair<string, string>("two", "twosource"), 
                                      new KeyValuePair<string, string>("three", "threesource")
@@ -199,7 +199,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>(MockBehavior.Strict);
-            settings.Setup(s => s.GetValues("packageSources"))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new KeyValuePair<string, string>("one", "onesource"), 
                                      new KeyValuePair<string, string>("two", "twosource"), 
                                      new KeyValuePair<string, string>("three", "threesource")
@@ -276,7 +276,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetValues("packageSources"))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new KeyValuePair<string, string>("one", "onesource"), 
                                      new KeyValuePair<string, string>("two", "twosource"), 
                                      new KeyValuePair<string, string>("three", "threesource")
@@ -304,7 +304,7 @@ namespace NuGet.Test
             string encryptedPassword = EncryptionUtility.EncryptString("topsecret");
            
             var settings = new Mock<ISettings>();
-            settings.Setup(s => s.GetValues("packageSources"))
+            settings.Setup(s => s.GetValues("packageSources", true))
                     .Returns(new[] { new KeyValuePair<string, string>("one", "onesource"), 
                                      new KeyValuePair<string, string>("two", "twosource"), 
                                      new KeyValuePair<string, string>("three", "threesource")

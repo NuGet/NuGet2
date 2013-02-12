@@ -1069,6 +1069,19 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void IsCompatibleReturnsTrueIfProjectFrameworkIsNully()
+        {
+            // Arrange
+            FrameworkName net40Client = VersionUtility.ParseFrameworkName("net40-client");
+
+            // Act
+            var result = VersionUtility.IsCompatible(null, net40Client);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
         public void ParseVersionThrowsIfExclusiveMinAndMaxVersionSpecContainsNoValues()
         {
             // Arrange

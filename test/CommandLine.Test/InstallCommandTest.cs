@@ -719,8 +719,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var exception = Assert.Throws<AggregateException>(() => installCommand.ExecuteCommand());
 
             // Assert
-            Assert.Equal("Package restore is disabled by default. To give consent, open the Visual Studio Options dialog, click on Package Manager node and check 'Allow NuGet to download missing packages during build.' You can also give consent by setting the environment variable 'EnableNuGetPackageRestore' to 'true'.",
-                         exception.InnerException.Message);
+            var innerException = Assert.IsAssignableFrom<InvalidOperationException>(exception.InnerException);
+            // The culture can't be forced to en-US as the error message is generated in another thread.
+            // Hence, only check the error message if the language is english.
+            var culture = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+            if (culture == "en" || culture == "iv") // english or invariant
+                Assert.Equal("Package restore is disabled by default. To give consent, open the Visual Studio Options dialog, click on Package Manager node and check 'Allow NuGet to download missing packages during build.' You can also give consent by setting the environment variable 'EnableNuGetPackageRestore' to 'true'.",
+                    exception.InnerException.Message);
         }
 
         [Fact]

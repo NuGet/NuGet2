@@ -18,15 +18,42 @@ namespace NuGet.Test.Mocks
         {
             _references = new List<Tuple<string, SemanticVersion>>();
         }
+
+        public override void AddPackage(IPackage package)
+        {
+            base.AddPackage(package);
+
+            if (!package.HasProjectContent())
+            {
+                AddPackageReferenceEntry(package.Id, package.Version);
+            }
+        }
+
+        public override void RemovePackage(IPackage package)
+        {
+            base.RemovePackage(package);
+
+            RemovePackageReferenceEntry(package.Id, package.Version);
+        }
         
         public bool IsReferenced(string packageId, SemanticVersion version)
         {
             return _references.Any(r => r.Item1 == packageId && r.Item2 == version);
         }
 
-        public void AddPackageReferenceEntry(string packageId, SemanticVersion version)
+        public bool IsSolutionReferenced(string packageId, SemanticVersion version)
+        {
+            return _references.Contains(Tuple.Create(packageId, version));
+        }
+
+        private void AddPackageReferenceEntry(string packageId, SemanticVersion version)
         {
             _references.Add(Tuple.Create(packageId, version));
+        }
+
+        private void RemovePackageReferenceEntry(string packageId, SemanticVersion version)
+        {
+            _references.Remove(Tuple.Create(packageId, version));
         }
 
         public void RegisterRepository(string path)

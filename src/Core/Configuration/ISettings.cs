@@ -9,6 +9,10 @@ namespace NuGet
         string GetValue(string section, string key, bool isPath);
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is the best fit for this internal class")]
         IList<KeyValuePair<string, string>> GetValues(string section);
+
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is the best fit for this internal class")]
+        IList<KeyValuePair<string, string>> GetValues(string section, bool isPath);
+
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "This is the best fit for this internal class")]
         IList<KeyValuePair<string, string>> GetNestedValues(string section, string key);
         

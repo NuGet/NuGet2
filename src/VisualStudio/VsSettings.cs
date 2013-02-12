@@ -90,11 +90,16 @@ namespace NuGet.VisualStudio
 
         public IList<KeyValuePair<string, string>> GetValues(string section)
         {
+            return GetValues(section, isPath: false);
+        }
+
+        public IList<KeyValuePair<string, string>> GetValues(string section, bool isPath)
+        {
             if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
             {
-                return SolutionSettings.GetValues(section);
+                return SolutionSettings.GetValues(section, isPath);
             }
-            return _defaultSettings.GetValues(section);
+            return _defaultSettings.GetValues(section, isPath);
         }
 
         public IList<KeyValuePair<string, string>> GetNestedValues(string section, string key)

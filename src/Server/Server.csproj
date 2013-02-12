@@ -4,7 +4,7 @@
   <PropertyGroup>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
-    <UpgradeBackupLocation>  
+    <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>4.0</OldToolsVersion>
   </PropertyGroup>
@@ -12,6 +12,7 @@
   <PropertyGroup>
     <ProjectGuid>{793B20A9-E263-4B54-BB31-305B602087CE}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputType>Library</OutputType>
     <RootNamespace>NuGet.Server</RootNamespace>
     <AssemblyName>NuGet.Server</AssemblyName>
@@ -58,6 +59,7 @@
     </Compile>
     <Compile Include="DataServices\Package.cs" />
     <Compile Include="DataServices\PackageContext.cs" />
+    <Compile Include="Publishing\IPackageService.cs" />
     <Compile Include="Publishing\PackageService.cs" />
     <Compile Include="Infrastructure\Bindings.cs" />
     <Compile Include="Infrastructure\Helpers.cs" />

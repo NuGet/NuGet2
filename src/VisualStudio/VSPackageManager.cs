@@ -48,19 +48,20 @@ namespace NuGet.VisualStudio
 
         internal void EnsureCached(Project project)
         {
-            if (_projects.ContainsKey(project.UniqueName))
+            string projectUniqueName = project.GetUniqueName();
+            if (_projects.ContainsKey(projectUniqueName))
             {
                 return;
             }
 
-            _projects[project.UniqueName] = CreateProjectManager(project);
+            _projects[projectUniqueName] = CreateProjectManager(project);
         }
 
         public virtual IProjectManager GetProjectManager(Project project)
         {
             EnsureCached(project);
             IProjectManager projectManager;
-            bool projectExists = _projects.TryGetValue(project.UniqueName, out projectManager);
+            bool projectExists = _projects.TryGetValue(project.GetUniqueName(), out projectManager);
             Debug.Assert(projectExists, "Unknown project");
             return projectManager;
         }
@@ -161,8 +162,6 @@ namespace NuGet.VisualStudio
                     allowPrereleaseVersions);
 
                 AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
-
-                AddSolutionPackageConfigEntry(package);
             });
         }
 
@@ -929,14 +928,6 @@ namespace NuGet.VisualStudio
                     }
 
                     action();
-                    
-                    foreach (var operation in operations)
-                    {
-                        if (operation.Action == PackageAction.Install)
-                        {
-                            AddSolutionPackageConfigEntry(operation.Package);
-                        }
-                    }
                 });
             }
             finally
@@ -1339,15 +1330,6 @@ namespace NuGet.VisualStudio
                         logger.Log(MessageLevel.Error, ExceptionUtility.Unwrap(e).Message);
                     }
                 }
-            }
-        }
-
-        private void AddSolutionPackageConfigEntry(IPackage package)
-        {
-            var sharedPackageRepository = LocalRepository as ISharedPackageRepository;
-            if (sharedPackageRepository != null && !IsProjectLevel(package))
-            {
-                sharedPackageRepository.AddPackageReferenceEntry(package.Id, package.Version);
             }
         }
 

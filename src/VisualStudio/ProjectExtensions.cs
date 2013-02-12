@@ -192,17 +192,28 @@ namespace NuGet.VisualStudio
             return projectItem != null;
         }
 
-        public static bool ContainsFile(this Project project, string name)
+        public static bool ContainsFile(this Project project, string path)
         {
-            IVsProject vsProject = (IVsProject)project.ToVsHierarchy();
-            if (vsProject == null)
+            if (string.Equals(project.Kind, VsConstants.WixProjectTypeGuid, StringComparison.OrdinalIgnoreCase))
             {
-                return false;
+                // For Wix project, IsDocumentInProject() returns not found
+                // even though the file is in the project. So we use GetProjectItem()
+                // instead.
+                ProjectItem item = project.GetProjectItem(path);
+                return item != null;
             }
-            int pFound;
-            uint itemId;
-            int hr = vsProject.IsDocumentInProject(name, out pFound, new VSDOCUMENTPRIORITY[0], out itemId);
-            return ErrorHandler.Succeeded(hr) && pFound == 1;
+            else
+            {
+                IVsProject vsProject = (IVsProject)project.ToVsHierarchy();
+                if (vsProject == null)
+                {
+                    return false;
+                }
+                int pFound;
+                uint itemId;
+                int hr = vsProject.IsDocumentInProject(path, out pFound, new VSDOCUMENTPRIORITY[0], out itemId);
+                return ErrorHandler.Succeeded(hr) && pFound == 1;
+            }
         }
 
         /// <summary>
@@ -238,6 +249,18 @@ namespace NuGet.VisualStudio
         public static bool SupportsConfig(this Project project)
         {
             return !IsClassLibrary(project);
+        }
+
+        public static string GetUniqueName(this Project project)
+        {
+            try
+            {
+                return project.UniqueName;
+            }
+            catch (COMException)
+            {
+                return project.FullName;
+            }
         }
 
         private static bool IsClassLibrary(this Project project)
@@ -564,7 +587,7 @@ namespace NuGet.VisualStudio
 
             // Get the vs solution
             IVsSolution solution = ServiceLocator.GetInstance<IVsSolution>();
-            int hr = solution.GetProjectOfUniqueName(project.UniqueName, out hierarchy);
+            int hr = solution.GetProjectOfUniqueName(project.GetUniqueName(), out hierarchy);
 
             if (hr != VsConstants.S_OK)
             {

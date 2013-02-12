@@ -96,7 +96,7 @@ namespace NuGet
                           };
         }
 
-        protected override IEnumerable<IPackageAssemblyReference> GetUnfilteredAssemblyReferences()
+        protected override IEnumerable<IPackageAssemblyReference> GetAssemblyReferencesCore()
         {
             string libDirectory = Path.Combine(_packageName, Constants.LibDirectory);
 

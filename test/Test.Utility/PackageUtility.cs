@@ -205,6 +205,7 @@ namespace NuGet.Test
             mockPackage.Setup(m => m.Owners).Returns(new string[0]);
             mockPackage.Setup(m => m.Copyright).Returns("");
             mockPackage.Setup(m => m.RequiredMinVersion).Returns(requiredMinVersion == null ? new Version() : Version.Parse(requiredMinVersion));
+            mockPackage.Setup(m => m.PackageAssemblyReferences).Returns(new PackageReferenceSet[0]);
             if (!listed)
             {
                 mockPackage.Setup(m => m.Published).Returns(Constants.Unpublished);

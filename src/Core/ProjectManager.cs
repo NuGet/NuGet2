@@ -217,6 +217,10 @@ namespace NuGet
                            NuGetResources.UnableToFindCompatibleItems, package.GetFullName(), targetFrameworkString));
             }
 
+            // IMPORTANT: this filtering has to be done AFTER the 'if' statement above,
+            // so that we don't throw the exception in case the <References> filters out all assemblies.
+            FilterAssemblyReferences(assemblyReferences, package.PackageAssemblyReferences);
+
             try
             {
                 var importFiles = new List<IPackageFile>(2);
@@ -298,6 +302,19 @@ namespace NuGet
             }
         }
 
+        private void FilterAssemblyReferences(List<IPackageAssemblyReference> assemblyReferences, ICollection<PackageReferenceSet> packageAssemblyReferences)
+        {
+            if (packageAssemblyReferences != null && packageAssemblyReferences.Count > 0)
+            {
+                var packageReferences = Project.GetCompatibleItemsCore(packageAssemblyReferences).FirstOrDefault();
+                if (packageReferences != null)
+                {
+                    // remove all assemblies of which names do not appear in the References list
+                    assemblyReferences.RemoveAll(assembly => !packageReferences.References.Contains(assembly.Name, StringComparer.OrdinalIgnoreCase));
+                }
+            }
+        }
+
         public bool IsInstalled(IPackage package)
         {
             return LocalRepository.Exists(package);
@@ -364,21 +381,22 @@ namespace NuGet
 
             // Get other references
             var otherAssemblyReferences = from p in otherPackages
-                                          let assemblyReferences = GetCompatibleItemsForPackage(p.Id, p.AssemblyReferences)
+                                          let assemblyReferences = GetFilteredAssembliesToDelete(p)
                                           from assemblyReference in assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>() // This can happen if package installed left the project in a bad state
                                           select assemblyReference;
 
             // Get content files from other packages
             // Exclude transform files since they are treated specially
             var otherContentFiles = from p in otherPackages
-                                    from file in GetCompatibleItemsForPackage(p.Id, p.GetContentFiles())
+                                    from file in GetCompatibleInstalledItemsForPackage(p.Id, p.GetContentFiles())
                                     where !_fileTransformers.ContainsKey(Path.GetExtension(file.Path))
                                     select file;
 
             // Get the files and references for this package, that aren't in use by any other packages so we don't have to do reference counting
-            var assemblyReferencesToDelete = GetCompatibleItemsForPackage(package.Id, package.AssemblyReferences)
+            var assemblyReferencesToDelete = GetFilteredAssembliesToDelete(package)
                                              .Except(otherAssemblyReferences, PackageFileComparer.Default);
-            var contentFilesToDelete = GetCompatibleItemsForPackage(package.Id, package.GetContentFiles())
+
+            var contentFilesToDelete = GetCompatibleInstalledItemsForPackage(package.Id, package.GetContentFiles())
                                        .Except(otherContentFiles, PackageFileComparer.Default).ToList();
 
             // Look up the .targets and .props import files.
@@ -420,6 +438,23 @@ namespace NuGet
 
             Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyRemovedPackageReference, packageFullName, Project.ProjectName);
             OnPackageReferenceRemoved(args);
+        }
+
+        private IList<IPackageAssemblyReference> GetFilteredAssembliesToDelete(IPackage package)
+        {
+            List<IPackageAssemblyReference> assemblyReferences = GetCompatibleInstalledItemsForPackage(package.Id, package.AssemblyReferences).ToList();
+            if (assemblyReferences.Count == 0)
+            {
+                return assemblyReferences;
+            }
+
+            var packageReferences = GetCompatibleInstalledItemsForPackage(package.Id, package.PackageAssemblyReferences).FirstOrDefault();
+            if (packageReferences != null) 
+            {
+                assemblyReferences.RemoveAll(p => !packageReferences.References.Contains(p.Name, StringComparer.OrdinalIgnoreCase));
+            }
+
+            return assemblyReferences;
         }
 
         public void UpdatePackageReference(string packageId)
@@ -543,7 +578,11 @@ namespace NuGet
             return Project.TargetFramework;
         }
 
-        private IEnumerable<T> GetCompatibleItemsForPackage<T>(string packageId, IEnumerable<T> items) where T : IFrameworkTargetable
+        /// <summary>
+        /// This method uses the 'targetFramework' attribute in the packages.config to determine compatible items.
+        /// Hence, it's only good for uninstall operations.
+        /// </summary>
+        private IEnumerable<T> GetCompatibleInstalledItemsForPackage<T>(string packageId, IEnumerable<T> items) where T : IFrameworkTargetable
         {
             FrameworkName packageFramework = GetPackageTargetFramework(packageId);
             if (packageFramework == null)
