@@ -140,7 +140,6 @@ namespace NuGet.Test
             Assert.Equal(expectedPath, effectivePath);
         }
 
-
         [Fact]
         public void ParseFrameworkNameNormalizesNativeFrameworkNames()
         {

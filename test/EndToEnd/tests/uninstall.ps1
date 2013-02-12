@@ -959,6 +959,8 @@ function Test-FinishFailedUninstallOnSolutionOpenOfProjectLevelPackage
 
 function Test-UninstallPackageUninstallAssemblyReferencesHonoringPackageReferencesAccordingToProjectFramework
 {
+    param ($context)
+    
     # Arrange
     $p = New-ClassLibrary
 
@@ -975,4 +977,25 @@ function Test-UninstallPackageUninstallAssemblyReferencesHonoringPackageReferenc
     Assert-Reference $p one
     Assert-Null (Get-AssemblyReference $p two)
     Assert-Null (Get-AssemblyReference $p three)
+}
+
+function Test-UninstallPackageRemoveImportStatement
+{
+    param ($context)
+
+    # Arrange
+    $p = New-SilverlightClassLibrary
+
+    $p | Install-Package PackageWithImport -Source $context.RepositoryPath
+
+    Assert-Package $p PackageWithImport
+    Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\content\PackageWithImport.targets"
+    Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\content\PackageWithImport.props"
+
+    # Act
+    $p | Uninstall-Package PackageWithImport
+
+    Assert-NoPackage $p PackageWithImport
+    Assert-NoProjectImport $p "..\packages\PackageWithImport.2.0.0\content\PackageWithImport.targets"
+    Assert-NoProjectImport $p "..\packages\PackageWithImport.2.0.0\content\PackageWithImport.props"
 }
