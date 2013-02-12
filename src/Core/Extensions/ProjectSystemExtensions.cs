@@ -8,7 +8,6 @@ using NuGet.Resources;
 
 namespace NuGet
 {
-    // REVIEW: Do we need this class? Should this logic be moved to ProjectManager?
     public static class ProjectSystemExtensions
     {
         public static void AddFiles(this IProjectSystem project,
@@ -26,7 +25,6 @@ namespace NuGet
                 fileList.Sort(fileComparer);
             }
 
-            bool overwriteAll = false, ignoreAll = false;
             var batchProcessor = project as IBatchProcessor<string>;
 
             try
@@ -62,7 +60,7 @@ namespace NuGet
                         }
                         else
                         {
-                            TryAddFile(project, file, path, ref overwriteAll, ref ignoreAll);
+                            TryAddFile(project, file, path);
                         }
                     }
                 }
@@ -76,30 +74,13 @@ namespace NuGet
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
-        public static void TryAddFile(IProjectSystem project, IPackageFile file, string path, ref bool overwriteAll, ref bool ignoreAll)
+        public static void TryAddFile(IProjectSystem project, IPackageFile file, string path)
         {
             if (project.FileExists(path))
             {
-                FileConflictResolution resolution;
-                if (overwriteAll)
-                {
-                    resolution = FileConflictResolution.Overwrite;
-                }
-                else if (ignoreAll)
-                {
-                    resolution = FileConflictResolution.Ignore;
-                }
-                else
-                {
-                    // file exists, ask user if he wants to overwrite or ignore
-                    string conflictMessage = String.Format(CultureInfo.CurrentCulture, NuGetResources.FileConflictMessage, path, project.ProjectName);
-                    resolution = project.Logger.ResolveFileConflict(conflictMessage);
-
-                    overwriteAll = (resolution == FileConflictResolution.OverwriteAll);
-                    ignoreAll = (resolution == FileConflictResolution.IgnoreAll);
-                }
-
+                // file exists, ask user if he wants to overwrite or ignore
+                string conflictMessage = String.Format(CultureInfo.CurrentCulture, NuGetResources.FileConflictMessage, path, project.ProjectName);
+                FileConflictResolution resolution = project.Logger.ResolveFileConflict(conflictMessage);
                 if (resolution == FileConflictResolution.Overwrite || resolution == FileConflictResolution.OverwriteAll)
                 {
                     // overwrite

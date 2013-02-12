@@ -25,6 +25,7 @@ namespace NuGet.PowerShell.Commands
         private readonly IVsPackageManagerFactory _vsPackageManagerFactory;
         private ProgressRecordCollection _progressRecordCache;
         private readonly IHttpClientEvents _httpClientEvents;
+        private bool _overwriteAll, _ignoreAll;
 
         protected NuGetBaseCommand(ISolutionManager solutionManager, IVsPackageManagerFactory vsPackageManagerFactory, IHttpClientEvents httpClientEvents)
         {
@@ -455,19 +456,17 @@ namespace NuGet.PowerShell.Commands
 
         public FileConflictResolution ResolveFileConflict(string message)
         {
-            bool overwriteAll = false, ignoreAll = false;
-
-            bool shouldOverwrite = ShouldContinue(message, VsResources.FileConflictTitle, ref overwriteAll, ref ignoreAll);
-
-            if (overwriteAll)
+            if (_overwriteAll)
             {
                 return FileConflictResolution.OverwriteAll;
             }
 
-            if (ignoreAll)
+            if (_ignoreAll)
             {
                 return FileConflictResolution.IgnoreAll;
             }
+
+            bool shouldOverwrite = ShouldContinue(message, VsResources.FileConflictTitle, ref _overwriteAll, ref _ignoreAll);
 
             return shouldOverwrite ? FileConflictResolution.Overwrite : FileConflictResolution.Ignore;
         }

@@ -37,6 +37,7 @@ namespace NuGet.Dialog.Providers
         private CultureInfo _uiCulture, _culture;
         private readonly ISolutionManager _solutionManager;
         private IDisposable _expandedNodesDisposable;
+        private bool _overwriteAll, _ignoreAll;
 
         protected PackagesProviderBase(
             IPackageRepository localRepository, 
@@ -337,6 +338,9 @@ namespace NuGet.Dialog.Providers
             
             // disable all operations while this install is in progress
             OperationCoordinator.IsBusy = true;
+
+            // before every new operation, reset these two flags so that we'll ask for conflict resolution again
+            _overwriteAll = _ignoreAll = false;
 
             _readmeFile = null;
             _originalPackageId = item != null ? item.Id : null;
@@ -748,8 +752,22 @@ namespace NuGet.Dialog.Providers
 
         public FileConflictResolution ResolveFileConflict(string message)
         {
+            if (_overwriteAll)
+            {
+                return FileConflictResolution.OverwriteAll;
+            }
+
+            if (_ignoreAll)
+            {
+                return FileConflictResolution.IgnoreAll;
+            }
+
             HideProgressWindow();
+
             FileConflictResolution resolution = _providerServices.UserNotifierServices.ShowFileConflictResolution(message);
+            _overwriteAll = resolution == FileConflictResolution.OverwriteAll;
+            _ignoreAll = resolution == FileConflictResolution.IgnoreAll;
+
             ShowProgressWindow();
 
             return resolution;

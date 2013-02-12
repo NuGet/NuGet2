@@ -248,7 +248,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddFilesHonorsStopAskingForResolutionAfterIgnoreAll()
+        public void AddFilesAskingForResolutionForEveryConflict()
         {
             var resolutions = new FileConflictResolution[] 
             { 
@@ -288,63 +288,12 @@ namespace NuGet.Test
             Assert.True(project.FileExists("e.txt"));
             Assert.True(project.FileExists("f.txt"));
 
-            logger.Verify(l => l.ResolveFileConflict(It.IsAny<string>()), Times.Exactly(4));
+            logger.Verify(l => l.ResolveFileConflict(It.IsAny<string>()), Times.Exactly(6));
 
             Assert.Equal("this is a", project.ReadAllText("a.txt"));
             Assert.Equal("content\\b.txt", project.ReadAllText("b.txt"));
             Assert.Equal("this is c", project.ReadAllText("c.txt"));
             Assert.Equal("this is d", project.ReadAllText("d.txt"));
-            Assert.Equal("this is e", project.ReadAllText("e.txt"));
-            Assert.Equal("this is f", project.ReadAllText("f.txt"));
-        }
-
-        [Fact]
-        public void AddFilesHonorsStopAskingForResolutionAfterOverwriteAll()
-        {
-            var resolutions = new FileConflictResolution[] 
-            { 
-                FileConflictResolution.Overwrite,
-                FileConflictResolution.Ignore,
-                FileConflictResolution.OverwriteAll,
-                FileConflictResolution.Overwrite,
-                FileConflictResolution.OverwriteAll,
-                FileConflictResolution.Overwrite,
-            };
-
-            var index = 0;
-            var logger = new Mock<ILogger>();
-            logger.Setup(l => l.ResolveFileConflict(It.IsAny<string>()))
-                  .Returns(() => resolutions[index++]);
-
-            // Arrange
-            var project = new MockProjectSystem();
-            project.AddFile("a.txt", "this is a");
-            project.AddFile("b.txt", "this is b");
-            project.AddFile("c.txt", "this is c");
-            project.AddFile("d.txt", "this is d");
-            project.AddFile("e.txt", "this is e");
-            project.AddFile("f.txt", "this is f");
-            project.Logger = logger.Object;
-
-            var files = PackageUtility.CreateFiles(new[] { "a.txt", "b.txt", "c.txt", "d.txt", "e.txt", "f.txt" }, "content");
-
-            // Act
-            project.AddFiles(files, new Dictionary<string, IPackageFileTransformer>());
-
-            // Assert
-            Assert.True(project.FileExists("a.txt"));
-            Assert.True(project.FileExists("b.txt"));
-            Assert.True(project.FileExists("c.txt"));
-            Assert.True(project.FileExists("d.txt"));
-            Assert.True(project.FileExists("e.txt"));
-            Assert.True(project.FileExists("f.txt"));
-
-            logger.Verify(l => l.ResolveFileConflict(It.IsAny<string>()), Times.Exactly(3));
-
-            Assert.Equal("content\\a.txt", project.ReadAllText("a.txt"));
-            Assert.Equal("this is b", project.ReadAllText("b.txt"));
-            Assert.Equal("content\\c.txt", project.ReadAllText("c.txt"));
-            Assert.Equal("content\\d.txt", project.ReadAllText("d.txt"));
             Assert.Equal("content\\e.txt", project.ReadAllText("e.txt"));
             Assert.Equal("content\\f.txt", project.ReadAllText("f.txt"));
         }

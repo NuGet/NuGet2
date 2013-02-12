@@ -853,6 +853,68 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void AddPackageAskToResolveConflictForEveryFile()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var localRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            projectSystem.AddFile("one.txt", "this is one");
+            projectSystem.AddFile("two.txt", "this is two");
+
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", content: new[] { "one.txt", "two.txt" });
+            sourceRepository.AddPackage(packageA);
+
+            var logger = new Mock<ILogger>();
+            logger.Setup(l => l.ResolveFileConflict(It.IsAny<string>())).Returns(FileConflictResolution.OverwriteAll);
+            projectManager.Logger = projectSystem.Logger = logger.Object;
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(localRepository.Exists("A"));
+            Assert.Equal("content\\one.txt", projectSystem.ReadAllText("one.txt"));
+            Assert.Equal("content\\two.txt", projectSystem.ReadAllText("two.txt"));
+
+            logger.Verify(l => l.ResolveFileConflict(It.IsAny<string>()), Times.Exactly(2));
+        }
+
+        [Fact]
+        public void AddPackageAskToResolveConflictForEveryFileWithDependency()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var localRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            projectSystem.AddFile("one.txt", "this is one");
+            projectSystem.AddFile("two.txt", "this is two");
+
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A", "1.0", content: new[] { "one.txt" }, dependencies: new PackageDependency[] { new PackageDependency("B") });
+            sourceRepository.AddPackage(packageA);
+
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0", content: new[] { "two.txt" });
+            sourceRepository.AddPackage(packageB);
+
+            var logger = new Mock<ILogger>();
+            logger.Setup(l => l.ResolveFileConflict(It.IsAny<string>())).Returns(FileConflictResolution.OverwriteAll);
+            projectManager.Logger = projectSystem.Logger = logger.Object;
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(localRepository.Exists("A"));
+            Assert.Equal("content\\one.txt", projectSystem.ReadAllText("one.txt"));
+            Assert.Equal("content\\two.txt", projectSystem.ReadAllText("two.txt"));
+
+            logger.Verify(l => l.ResolveFileConflict(It.IsAny<string>()), Times.Exactly(2));
+        }
+
+        [Fact]
         public void RemovePackageWithTransformFile()
         {
             // Arrange
