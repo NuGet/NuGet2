@@ -6,6 +6,7 @@ using Moq;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
+using NuGet.VisualStudio;
 using Xunit;
 
 namespace NuGet.Dialog.Test
@@ -45,6 +46,33 @@ namespace NuGet.Dialog.Test
             // Assert
             Assert.Equal(1, packages.Count);
             AssertPackage(packages[0], "A", "1.5");
+        }
+
+        [Fact]
+        public void GetPackagesReturnsUpdatesWhenThereAreMultipleVersionsOfTheSamePackageId()
+        {
+            // Arrange
+            var localRepository = new MockPackageRepository();
+            var sourceRepository = new MockServiceBasePackageRepository();
+
+            UpdatesTreeNode node = CreateUpdatesTreeNode(localRepository, sourceRepository, includePrerelease: false);
+
+            localRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0-rtm"));
+            localRepository.AddPackage(PackageUtility.CreatePackage("B", "1.0"));
+            localRepository.AddPackage(PackageUtility.CreatePackage("A", "2.0"));
+            localRepository.AddPackage(PackageUtility.CreatePackage("A", "3.0"));
+
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "2.5"));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "4.0-beta"));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("C", "1.2.3.4-alpha"));
+
+            // Act
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
+
+            // Assert
+            Assert.Equal(2, packages.Count);
+            AssertPackage(packages[0], "B", "4.0-beta");
+            AssertPackage(packages[1], "A", "2.5");
         }
 
         [Fact]
