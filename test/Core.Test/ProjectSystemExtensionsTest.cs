@@ -224,7 +224,7 @@ namespace NuGet.Test
             project.AddFiles(files, new Dictionary<string, IPackageFileTransformer>());
 
             // Assert
-            logger.Verify(l => l.ResolveFileConflict("File 'a.txt' already exists in project 'x:\\root'. Do you want to overwrite or ignore it?"), Times.Once());
+            logger.Verify(l => l.ResolveFileConflict("File 'a.txt' already exists in project 'x:\\root'. Do you want to overwrite it?"), Times.Once());
         }
 
         [Fact]

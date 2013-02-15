@@ -637,24 +637,6 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ignore _All.
-        /// </summary>
-        public static string IgnoreAllLabel {
-            get {
-                return ResourceManager.GetString("IgnoreAllLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to I_gnore.
-        /// </summary>
-        public static string IgnoreLabel {
-            get {
-                return ResourceManager.GetString("IgnoreLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to I _Accept.
         /// </summary>
         public static string License_Accept {
@@ -718,6 +700,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No To _All.
+        /// </summary>
+        public static string NoAllLabel {
+            get {
+                return ResourceManager.GetString("NoAllLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to (not framework specific).
         /// </summary>
         public static string NoFxDependencyGroup {
@@ -727,20 +718,11 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Over_write All.
+        ///   Looks up a localized string similar to _No.
         /// </summary>
-        public static string OverwriteAllLabel {
+        public static string NoLabel {
             get {
-                return ResourceManager.GetString("OverwriteAllLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to _Overwrite.
-        /// </summary>
-        public static string OverwriteLabel {
-            get {
-                return ResourceManager.GetString("OverwriteLabel", resourceCulture);
+                return ResourceManager.GetString("NoLabel", resourceCulture);
             }
         }
         
@@ -786,6 +768,24 @@ namespace NuGet.Dialog {
         public static string Visualizer_Project {
             get {
                 return ResourceManager.GetString("Visualizer_Project", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yes _To All.
+        /// </summary>
+        public static string YesAllLabel {
+            get {
+                return ResourceManager.GetString("YesAllLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to _Yes.
+        /// </summary>
+        public static string YesLabel {
+            get {
+                return ResourceManager.GetString("YesLabel", resourceCulture);
             }
         }
     }

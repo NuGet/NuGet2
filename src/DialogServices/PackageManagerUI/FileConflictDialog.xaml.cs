@@ -45,8 +45,9 @@ namespace NuGet.Dialog.PackageManagerUI
         private void OnButtonClick(object sender, System.Windows.RoutedEventArgs e)
         {
             var button = (Button)sender;
-            int tagValue = Convert.ToInt32(button.Tag, System.Globalization.CultureInfo.InvariantCulture);
-            UserSelection = (FileConflictResolution)tagValue;
+            string tagValue = (string)button.Tag;
+
+            UserSelection = (FileConflictResolution)Enum.Parse(typeof(FileConflictResolution), tagValue);
 
             DialogResult = true;
         }

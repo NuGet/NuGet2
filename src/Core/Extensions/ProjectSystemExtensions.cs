@@ -74,6 +74,13 @@ namespace NuGet
             }
         }
 
+        /// <summary>
+        /// Try to add the specified the project with the target path. If there's an existing file in the project with the same name, 
+        /// it will ask the logger for the resolution, which has 4 choices: Overwrite|Ignore|Overwrite All|Ignore All
+        /// </summary>
+        /// <param name="project"></param>
+        /// <param name="file"></param>
+        /// <param name="path"></param>
         public static void TryAddFile(IProjectSystem project, IPackageFile file, string path)
         {
             if (project.FileExists(path))
@@ -106,7 +113,6 @@ namespace NuGet
                                        IEnumerable<IPackage> otherPackages,
                                        IDictionary<string, IPackageFileTransformer> fileTransformers)
         {
-
             IPackageFileTransformer transformer;
             // First get all directories that contain files
             var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(ResolveTargetPath(project, fileTransformers, p.EffectivePath, out transformer)));

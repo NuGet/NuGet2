@@ -25,15 +25,16 @@
         <Style TargetType="{x:Type Button}">
             <Setter Property="Margin" Value="6,6,6,2" />
             <Setter Property="Padding" Value="10,3,10,3" />
+            <Setter Property="MinWidth" Value="75" />
         </Style>
     </Window.Resources>
     
     <DockPanel Margin="10">
         <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="{x:Static resources:Resources.OverwriteLabel}" Tag="0" AutomationProperties.AutomationId="YesButton" Click="OnButtonClick" />
-            <Button Content="{x:Static resources:Resources.IgnoreLabel}" Tag="1" AutomationProperties.AutomationId="NoButton" Click="OnButtonClick" />
-            <Button Content="{x:Static resources:Resources.OverwriteAllLabel}" Tag="2" AutomationProperties.AutomationId="YesToAllButton" Click="OnButtonClick" />
-            <Button Content="{x:Static resources:Resources.IgnoreAllLabel}" Tag="3" AutomationProperties.AutomationId="NoToAllButton" Click="OnButtonClick" />
+            <Button Content="{x:Static resources:Resources.YesLabel}" Tag="Overwrite" AutomationProperties.AutomationId="YesButton" Click="OnButtonClick" />
+            <Button Content="{x:Static resources:Resources.NoLabel}" Tag="Ignore" AutomationProperties.AutomationId="NoButton" Click="OnButtonClick" />
+            <Button Content="{x:Static resources:Resources.YesAllLabel}" Tag="OverwriteAll" AutomationProperties.AutomationId="YesToAllButton" Click="OnButtonClick" />
+            <Button Content="{x:Static resources:Resources.NoAllLabel}" Tag="IgnoreAll" AutomationProperties.AutomationId="NoToAllButton" Click="OnButtonClick" />
         </StackPanel>
 
         <TextBlock 
