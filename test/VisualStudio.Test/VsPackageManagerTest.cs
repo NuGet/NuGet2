@@ -37,7 +37,7 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
-        public void InstallPackageThrowsIfRequiredMinVersionIsNotSatisfied()
+        public void InstallPackageThrowsIfMinClientVersionIsNotSatisfied()
         {
             // Arrange
             Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
@@ -50,7 +50,7 @@ namespace NuGet.VisualStudio.Test
             var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), new MockPackageRepository());
             var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IDeleteOnRestartManager>().Object, new Mock<VsPackageInstallerEvents>().Object);
 
-            var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" }, requiredMinVersion: requiredVersion.ToString());
+            var package = PackageUtility.CreatePackage("foo", "1.0", new[] { "hello" }, minClientVersion: requiredVersion.ToString());
             sourceRepository.AddPackage(package);
 
             string expectedErrorMessage =
@@ -570,7 +570,7 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
-        public void UpdatePackageThrowsIfNewPackageHasRequiredMinVersionNotSatisfied()
+        public void UpdatePackageThrowsIfNewPackageHasMinClientVersionNotSatisfied()
         {
             // Arrange
             Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
@@ -583,7 +583,7 @@ namespace NuGet.VisualStudio.Test
             var fileSystem = new MockFileSystem();
             var pathResolver = new DefaultPackagePathResolver(fileSystem);
             var A10 = PackageUtility.CreatePackage("A", "1.0", new[] { "hello" });
-            var A20 = PackageUtility.CreatePackage("A", "2.0", new[] { "hello" }, requiredMinVersion: requiredVersion.ToString());
+            var A20 = PackageUtility.CreatePackage("A", "2.0", new[] { "hello" }, minClientVersion: requiredVersion.ToString());
             sourceRepository.AddPackage(A10);
             sourceRepository.AddPackage(A20);
             localRepository.Object.AddPackage(A10);

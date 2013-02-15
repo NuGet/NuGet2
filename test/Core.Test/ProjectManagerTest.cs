@@ -328,7 +328,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackageReferenceThrowsIfTheRequiredMinVersionIsNotSatisfied()
+        public void AddPackageReferenceThrowsIfTheMinClientVersionIsNotSatisfied()
         {
             // Arrange            
             Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
@@ -337,7 +337,7 @@ namespace NuGet.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, requiredMinVersion: requiredVersion.ToString());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, minClientVersion: requiredVersion.ToString());
             sourceRepository.AddPackage(packageA);
 
             string expectedErrorMessage = 
@@ -348,7 +348,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackageReferenceThrowsIfTheRequiredMinVersionOfADependencyIsNotSatisfied()
+        public void AddPackageReferenceThrowsIfTheMinClientVersionOfADependencyIsNotSatisfied()
         {
             // Arrange            
             Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
@@ -362,7 +362,7 @@ namespace NuGet.Test
                 "1.0", 
                 assemblyReferences: new[] { "lib\\me.dll" },
                 dependencies: new PackageDependency[] { new PackageDependency("B") });
-            IPackage packageB = PackageUtility.CreatePackage("B", "2.0", assemblyReferences: new[] { "lib\\you.dll" }, requiredMinVersion: requiredVersion.ToString());
+            IPackage packageB = PackageUtility.CreatePackage("B", "2.0", assemblyReferences: new[] { "lib\\you.dll" }, minClientVersion: requiredVersion.ToString());
             sourceRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageB);
 
@@ -374,7 +374,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackageReferenceDoesNotThrowIfTheRequiredMinVersionIsEqualNuGetVersion()
+        public void AddPackageReferenceDoesNotThrowIfTheMinClientVersionIsEqualNuGetVersion()
         {
             // Arrange            
             Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
@@ -383,7 +383,7 @@ namespace NuGet.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, requiredMinVersion: requiredVersion.ToString());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, minClientVersion: requiredVersion.ToString());
             sourceRepository.AddPackage(packageA);
 
             // Act && Assert
@@ -391,7 +391,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackageReferenceDoesNotThrowIfTheRequiredMinVersionIsLessThanNuGetVersion()
+        public void AddPackageReferenceDoesNotThrowIfTheMinClientVersionIsLessThanNuGetVersion()
         {
             // Arrange            
             Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
@@ -408,7 +408,7 @@ namespace NuGet.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, requiredMinVersion: requiredVersion.ToString());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, minClientVersion: requiredVersion.ToString());
             sourceRepository.AddPackage(packageA);
 
             // Act && Assert
@@ -1476,7 +1476,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void UpdatePackageReferenceThrowsIfTheNewPackageHasRequiredMinVersionNotSatisfied()
+        public void UpdatePackageReferenceThrowsIfTheNewPackageHasMinClientVersionNotSatisfied()
         {
             // Arrange
             Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
@@ -1487,7 +1487,7 @@ namespace NuGet.Test
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             var packageA1 = PackageUtility.CreatePackage("A", "1.0", content: new string[] { "good" });
-            var packageA2 = PackageUtility.CreatePackage("A", "2.0-alpha", content: new string[] { "excellent" }, requiredMinVersion: requiredVersion.ToString());
+            var packageA2 = PackageUtility.CreatePackage("A", "2.0-alpha", content: new string[] { "excellent" }, minClientVersion: requiredVersion.ToString());
 
             // project has A 1.0 installed
             projectManager.LocalRepository.AddPackage(packageA1);
@@ -1504,7 +1504,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void UpdatePackageReferenceThrowsIfTheNewPackageHasDependencyRequiredMinVersionNotSatisfied()
+        public void UpdatePackageReferenceThrowsIfTheNewPackageHasDependencyMinClientVersionNotSatisfied()
         {
             // Arrange
             Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
@@ -1521,7 +1521,7 @@ namespace NuGet.Test
                 content: new string[] { "excellent" }, 
                 dependencies: new PackageDependency[] { new PackageDependency("B") });
 
-            IPackage packageB = PackageUtility.CreatePackage("B", "2.0", assemblyReferences: new[] { "lib\\you.dll" }, requiredMinVersion: requiredVersion.ToString());
+            IPackage packageB = PackageUtility.CreatePackage("B", "2.0", assemblyReferences: new[] { "lib\\you.dll" }, minClientVersion: requiredVersion.ToString());
 
             // project has A 1.0 installed
             projectManager.LocalRepository.AddPackage(packageA1);

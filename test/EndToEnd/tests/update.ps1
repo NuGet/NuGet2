@@ -1359,7 +1359,7 @@ function Test-FinishFailedUpdateOnSolutionOpen
     Assert-True $physicalFileSystem.DirectoryExists("SolutionOnlyPackage.2.0")
 }
 
-function Test-UpdatePackageThrowsIfRequiredMinVersionIsNotSatisfied
+function Test-UpdatePackageThrowsIfMinClientVersionIsNotSatisfied
 {
     param ($context)
 

@@ -2074,7 +2074,7 @@ function Test-InstallPackageRespectReferencesAccordingToDifferentFrameworks
     Assert-Null (Get-AssemblyReference $p2 'two')
 }
 
-function Test-InstallPackageThrowsIfRequiredMinVersionIsNotSatisfied
+function Test-InstallPackageThrowsIfMinClientVersionIsNotSatisfied
 {
     param ($context)
 

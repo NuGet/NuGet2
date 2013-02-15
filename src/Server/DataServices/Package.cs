@@ -48,7 +48,7 @@ namespace NuGet.Server.DataServices
             IsLatestVersion = package.IsLatestVersion;
             Path = derivedData.Path;
             FullPath = derivedData.FullPath;
-            RequiredMinVersion = package.RequiredMinVersion == null ? null : package.RequiredMinVersion.ToString();
+            MinClientVersion = package.MinClientVersion == null ? null : package.MinClientVersion.ToString();
         }
 
         internal string FullPath
@@ -207,7 +207,7 @@ namespace NuGet.Server.DataServices
             set;
         }
 
-        public string RequiredMinVersion
+        public string MinClientVersion
         {
             get;
             set;

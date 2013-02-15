@@ -36,6 +36,6 @@ namespace NuGet
         /// </summary>
         IEnumerable<PackageDependencySet> DependencySets { get; }
 
-        Version RequiredMinVersion { get; }
+        Version MinClientVersion { get; }
     }
 }

@@ -183,25 +183,25 @@ namespace NuGet.Test
         public void InvalidReuiredMinVersionValueWillThrow(string minVersionValue)
         {
             // Arrange
-            var manifestStream = CreateManifest(requiredMinVersion: minVersionValue);
+            var manifestStream = CreateManifest(minClientVersion: minVersionValue);
 
             // Act && Assert
             ExceptionAssert.Throws<InvalidDataException>(
                 () => Manifest.ReadFrom(manifestStream, validateSchema: true),
-                "The 'requiredMinVersion' attribute in the package manifest has invalid value. It must be a valid version string.");
+                "The 'minClientVersion' attribute in the package manifest has invalid value. It must be a valid version string.");
         }
 
         [Fact]
         public void EmptyReuiredMinVersionValueWillNotThrow()
         {
             // Arrange
-            var manifestStream = CreateManifest(requiredMinVersion: "");
+            var manifestStream = CreateManifest(minClientVersion: "");
 
             // Act
             var manifest = Manifest.ReadFrom(manifestStream, validateSchema: true);
 
             // Assert
-            Assert.Null(manifest.Metadata.RequiredMinVersion);
+            Assert.Null(manifest.Metadata.MinClientVersion);
         }
 
         [Fact]
@@ -233,7 +233,7 @@ namespace NuGet.Test
                 dependencies: new[] { new ManifestDependency { Id = "Test", Version = "1.2.0" } },
                 assemblyReference: new[] { new ManifestFrameworkAssembly { AssemblyName = "System.Data", TargetFramework = "4.0" } },
                 references: references,
-                requiredMinVersion: "2.0.1.0"
+                minClientVersion: "2.0.1.0"
             );
 
             var expectedManifest = new Manifest
@@ -280,7 +280,7 @@ namespace NuGet.Test
                             }
                         }
                     },
-                    RequiredMinVersionString = "2.0.1.0"
+                    MinClientVersionString = "2.0.1.0"
                 }
             };
 
@@ -575,7 +575,7 @@ namespace NuGet.Test
             Assert.Equal(expected.Metadata.RequireLicenseAcceptance, actual.Metadata.RequireLicenseAcceptance);
             Assert.Equal(expected.Metadata.Summary, actual.Metadata.Summary);
             Assert.Equal(expected.Metadata.Tags, actual.Metadata.Tags);
-            Assert.Equal(expected.Metadata.RequiredMinVersion, actual.Metadata.RequiredMinVersion);
+            Assert.Equal(expected.Metadata.MinClientVersion, actual.Metadata.MinClientVersion);
 
             if (expected.Metadata.DependencySets != null)
             {
@@ -670,15 +670,15 @@ namespace NuGet.Test
                                             IEnumerable<ManifestFrameworkAssembly> assemblyReference = null,
                                             IEnumerable<ManifestReferenceSet> references = null,
                                             IEnumerable<ManifestFile> files = null,
-                                            string requiredMinVersion = null)
+                                            string minClientVersion = null)
         {
             var document = new XDocument(new XElement("package"));
             var metadata = new XElement("metadata", new XElement("id", id), new XElement("version", version),
                                                     new XElement("description", description), new XElement("authors", authors));
 
-            if (requiredMinVersion != null)
+            if (minClientVersion != null)
             {
-                metadata.Add(new XAttribute("requiredMinVersion", requiredMinVersion));
+                metadata.Add(new XAttribute("minClientVersion", minClientVersion));
             }
             
             document.Root.Add(metadata);
