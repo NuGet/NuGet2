@@ -1361,6 +1361,8 @@ function Test-FinishFailedUpdateOnSolutionOpen
 
 function Test-UpdatePackageThrowsIfRequiredMinVersionIsNotSatisfied
 {
+    param ($context)
+
     # Arrange
     $p = New-SilverlightClassLibrary
 

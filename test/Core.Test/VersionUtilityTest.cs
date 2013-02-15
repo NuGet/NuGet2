@@ -141,6 +141,20 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void ParseFrameworkNameNormalizesNativeFrameworkNames()
+        {
+            // Arrange
+            Version defaultVersion = new Version("0.0");
+
+            // Act
+            var frameworkName = VersionUtility.ParseFrameworkName("native");
+
+            // Assert
+            Assert.Equal("native", frameworkName.Identifier);
+            Assert.Equal(defaultVersion, frameworkName.Version);
+        }
+
+        [Fact]
         public void ParseFrameworkNameNormalizesSupportedNetFrameworkNames()
         {
             // Arrange

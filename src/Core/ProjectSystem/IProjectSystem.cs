@@ -9,7 +9,7 @@ namespace NuGet
         string ProjectName { get; }
 
         /// <summary>
-        /// Method called when adding a assembly reference to the project.
+        /// Method called when adding an assembly reference to the project.
         /// </summary>
         /// <param name="referencePath">Physical path to the assembly file relative to the project root.</param>
         /// <param name="stream">Contents of the assembly file.</param>
@@ -24,5 +24,7 @@ namespace NuGet
         bool IsSupportedFile(string path);
         string ResolvePath(string path);
         bool IsBindingRedirectSupported { get; }
+        void AddImport(string targetPath, ProjectImportLocation location);
+        void RemoveImport(string targetPath);
     }
 }

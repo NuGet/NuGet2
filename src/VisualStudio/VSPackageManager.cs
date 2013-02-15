@@ -213,7 +213,7 @@ namespace NuGet.VisualStudio
                 PackageUninstalling += uninstallingHandler;
                 PackageUninstalled += uninstalledHandler;
 
-                if (appliesToProject)
+                if (appliesToProject)  
                 {
                     RemovePackageReference(projectManager, packageId, forceRemove, removeDependencies);
                 }

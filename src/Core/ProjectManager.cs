@@ -22,6 +22,8 @@ namespace NuGet
         private IPackageConstraintProvider _constraintProvider;
         private readonly IPackageReferenceRepository _packageReferenceRepository;
 
+        private static readonly string[] ImportFileExtensions = new string[] { ".props", ".targets" };
+
         private static readonly IDictionary<string, IPackageFileTransformer> _fileTransformers = new Dictionary<string, IPackageFileTransformer>(StringComparer.OrdinalIgnoreCase) {
             { ".transform", new XmlTransfomer(GetConfigMappings()) },
             { ".pp", new Preprocessor() }
@@ -197,8 +199,8 @@ namespace NuGet
             // BUG 491: Installing a package with incompatible binaries still does a partial install.
             // Resolve assembly references and content files first so that if this fails we never do anything to the project
             List<IPackageAssemblyReference> assemblyReferences = Project.GetCompatibleItemsCore(package.AssemblyReferences).ToList();
-            IList<FrameworkAssemblyReference> frameworkReferences = Project.GetCompatibleItemsCore(package.FrameworkAssemblies).ToList();
-            IList<IPackageFile> contentFiles = Project.GetCompatibleItemsCore(package.GetContentFiles()).ToList();
+            List<FrameworkAssemblyReference> frameworkReferences = Project.GetCompatibleItemsCore(package.FrameworkAssemblies).ToList();
+            List<IPackageFile> contentFiles = Project.GetCompatibleItemsCore(package.GetContentFiles()).ToList();
 
             // If the package doesn't have any compatible assembly references or content files,
             // throw, unless it's a meta package.
@@ -221,6 +223,22 @@ namespace NuGet
 
             try
             {
+                var importFiles = new List<IPackageFile>(2);
+                foreach (var extension in ImportFileExtensions)
+                {
+                    // Extract the <id>.targets or <id>.props file from the package, if exists, 
+                    // and adds an <import> statement to the project instead of adding it as a content file.
+                    string importFileName = package.Id + extension;
+                    IPackageFile importFile = contentFiles.Find(p => p.EffectivePath.Equals(importFileName, StringComparison.OrdinalIgnoreCase));
+                    if (importFile != null)
+                    {
+                        // prevent adding this import file to the project
+                        contentFiles.Remove(importFile);
+
+                        importFiles.Add(importFile);
+                    }
+                }
+
                 // Add content files
                 Project.AddFiles(contentFiles, _fileTransformers);
 
@@ -252,6 +270,17 @@ namespace NuGet
                     if (!Project.ReferenceExists(frameworkReference.AssemblyName))
                     {
                         Project.AddFrameworkReference(frameworkReference.AssemblyName);
+                    }
+                }
+
+                if (importFiles.Count > 0)
+                {
+                    foreach (var importFile in importFiles)
+                    {
+                        string fullImportFilePath = Path.Combine(PathResolver.GetInstallPath(package), importFile.Path);
+                        Project.AddImport(
+                            fullImportFilePath, 
+                            importFile.Path.EndsWith(".props", StringComparison.OrdinalIgnoreCase) ? ProjectImportLocation.Top : ProjectImportLocation.Bottom);
                     }
                 }
             }
@@ -368,7 +397,22 @@ namespace NuGet
                                              .Except(otherAssemblyReferences, PackageFileComparer.Default);
 
             var contentFilesToDelete = GetCompatibleInstalledItemsForPackage(package.Id, package.GetContentFiles())
-                                       .Except(otherContentFiles, PackageFileComparer.Default);
+                                       .Except(otherContentFiles, PackageFileComparer.Default).ToList();
+
+            // Look up the .targets and .props import files.
+            var importFiles = new List<IPackageFile>(2);
+            foreach (var extension in ImportFileExtensions)
+            {
+                string importFileName = package.Id + extension;
+                IPackageFile importFile = contentFilesToDelete.Find(p => p.EffectivePath.Equals(importFileName, StringComparison.OrdinalIgnoreCase));
+                if (importFile != null)
+                {
+                    // import file was not added to project in the first place, so no need to remove it
+                    contentFilesToDelete.Remove(importFile);
+
+                    importFiles.Add(importFile);
+                }
+            }
 
             // Delete the content files
             Project.DeleteFiles(contentFilesToDelete, otherPackages, _fileTransformers);
@@ -377,6 +421,16 @@ namespace NuGet
             foreach (IPackageAssemblyReference assemblyReference in assemblyReferencesToDelete)
             {
                 Project.RemoveReference(assemblyReference.Name);
+            }
+
+            // remove the <Import> statement from projects for the .targets and .props files
+            if (importFiles.Count > 0)
+            {
+                foreach (var importFile in importFiles)
+                {
+                    string fullImportFilePath = Path.Combine(PathResolver.GetInstallPath(package), importFile.Path);
+                    Project.RemoveImport(fullImportFilePath);
+                }
             }
 
             // Remove package to the repository
