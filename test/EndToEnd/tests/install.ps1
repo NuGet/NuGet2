@@ -2103,3 +2103,20 @@ function Test-InstallPackageAddImportStatement
     Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\content\PackageWithImport.targets"
     Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\content\PackageWithImport.props"
 }
+
+function Test-ReinstallSolutionLevelPackageWorks
+{
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary
+    $p | Install-Package SolutionLevelPkg -Source $context.RepositoryRoot
+    
+    Assert-SolutionPackage SolutionLevelPkg
+
+    # Act
+    Update-Package -Reinstall -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-SolutionPackage SolutionLevelPkg
+}
