@@ -406,6 +406,9 @@
   <data name="FileConflictMessage" xml:space="preserve">
     <value>File '{0}' already exists in project '{1}'. Do you want to overwrite or ignore it?</value>
   </data>
+  <data name="Manifest_ReferencesIsEmpty" xml:space="preserve">
+    <value>The element package\metadata\references\group must contain at least one &lt;reference&gt; child element.</value>
+  </data>
   <data name="Info_OverwriteExistingFile" xml:space="preserve">
     <value>Overwrite existing file '{0}'.</value>
   </data>

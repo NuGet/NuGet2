@@ -12,6 +12,7 @@ namespace NuGet.VisualStudio
         private static Dictionary<string, ProjectThunk> _factories = new Dictionary<string, ProjectThunk>(StringComparer.OrdinalIgnoreCase) {
             { VsConstants.WebApplicationProjectTypeGuid, (project, fileSystemProvider) => new WebProjectSystem(project, fileSystemProvider) },
             { VsConstants.WebSiteProjectTypeGuid, (project, fileSystemProvider) => new WebSiteProjectSystem(project, fileSystemProvider) },
+            { VsConstants.CppProjectTypeGuid, (project, fileSystemProvider) => new NativeProjectSystem(project, fileSystemProvider) },
             { VsConstants.FsharpProjectTypeGuid, (project, fileSystemProvider) => new FSharpProjectSystem(project, fileSystemProvider) },
             { VsConstants.WixProjectTypeGuid, (project, fileSystemProvider) => new WixProjectSystem(project, fileSystemProvider) },
             { VsConstants.JsProjectTypeGuid, (project, fileSystemProvider) => new JsProjectSystem(project, fileSystemProvider) },

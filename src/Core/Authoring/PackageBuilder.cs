@@ -167,7 +167,7 @@ namespace NuGet
             private set;
         }
 
-        public Collection<PackageReferenceSet> PackageAssemblyReferences
+        public ICollection<PackageReferenceSet> PackageAssemblyReferences
         {
             get;
             private set;

@@ -533,7 +533,11 @@ namespace NuGet.Dialog.Providers
 
             while (newPackagesIndex < packages.Count)
             {
-                _extensions.Add(Provider.CreateExtension(packages[newPackagesIndex++]));
+                var extension = Provider.CreateExtension(packages[newPackagesIndex++]);
+                if (extension != null)
+                {
+                    _extensions.Add(extension);
+                }
             }
            
             if (_extensions.Count > 0)

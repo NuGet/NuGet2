@@ -153,7 +153,7 @@ namespace NuGet.Dialog.Test
             packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project1))).Returns(projectManager1.Object);
             packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project2))).Returns(projectManager2.Object);
             packageManager.Setup(p => p.IsProjectLevel(It.IsAny<IPackage>())).Returns(true);
-
+            
             var provider = CreateSolutionInstalledProvider(packageManager.Object, localRepository);
             var extensionTree = provider.ExtensionsTree;
 
@@ -449,7 +449,7 @@ namespace NuGet.Dialog.Test
         public void SolutionInstalledProviderUnsubscribeToEventWhenDisposed()
         {
             // Arrange
-            var restoreManager = new Mock<IPackageRestoreManager>();
+            var restoreManager = new Mock<IPackageRestoreManager>();            
 
             var provider = CreateSolutionInstalledProvider(packageRestoreManager: restoreManager.Object);
 
@@ -481,7 +481,7 @@ namespace NuGet.Dialog.Test
                 var packageManagerMock = new Mock<IVsPackageManager>();
                 var sourceRepository = new MockPackageRepository();
                 packageManagerMock.Setup(p => p.SourceRepository).Returns(sourceRepository);
-
+                
                 packageManager = packageManagerMock.Object;
             }
 

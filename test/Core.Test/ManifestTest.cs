@@ -375,6 +375,64 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void ReadFromThrowIfReferenceGroupIsEmptyAndValidateSchemaIsTrue()
+        {
+            // Arrange
+            string content = @"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>Luan</authors>
+    <owners>Luan</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+    <references>
+        <group>
+        </group>
+    </references>
+  </metadata>
+</package>";
+
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
+
+            // Act && Assert
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => Manifest.ReadFrom(content.AsStream(), validateSchema: true),
+                "The element 'group' in namespace 'http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd' has incomplete content. List of possible elements expected: 'reference' in namespace 'http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd'.");
+        }
+
+        [Fact]
+        public void ReadFromThrowIfReferenceGroupIsEmptyAndValidateSchemaIsFalse()
+        {
+            // Arrange
+            string content = @"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>Luan</authors>
+    <owners>Luan</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+    <references>
+        <group>
+        </group>
+    </references>
+  </metadata>
+</package>";
+
+            // Switch to invariant culture to ensure the error message is in english.
+            System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
+
+            // Act && Assert
+            ExceptionAssert.Throws<InvalidDataException>(
+                () => Manifest.ReadFrom(content.AsStream(), validateSchema: false),
+                @"The element package\metadata\references\group must contain at least one <reference> child element.");
+        }
+
+        [Fact]
         public void ManifestGroupDependencySetsByTargetFrameworkAndPutNullFrameworkFirst()
         {
             // Arrange

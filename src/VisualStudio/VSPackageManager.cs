@@ -48,19 +48,20 @@ namespace NuGet.VisualStudio
 
         internal void EnsureCached(Project project)
         {
-            if (_projects.ContainsKey(project.UniqueName))
+            string projectUniqueName = project.GetUniqueName();
+            if (_projects.ContainsKey(projectUniqueName))
             {
                 return;
             }
 
-            _projects[project.UniqueName] = CreateProjectManager(project);
+            _projects[projectUniqueName] = CreateProjectManager(project);
         }
 
         public virtual IProjectManager GetProjectManager(Project project)
         {
             EnsureCached(project);
             IProjectManager projectManager;
-            bool projectExists = _projects.TryGetValue(project.UniqueName, out projectManager);
+            bool projectExists = _projects.TryGetValue(project.GetUniqueName(), out projectManager);
             Debug.Assert(projectExists, "Unknown project");
             return projectManager;
         }
@@ -212,7 +213,7 @@ namespace NuGet.VisualStudio
                 PackageUninstalling += uninstallingHandler;
                 PackageUninstalled += uninstalledHandler;
 
-                if (appliesToProject)
+                if (appliesToProject)  
                 {
                     RemovePackageReference(projectManager, packageId, forceRemove, removeDependencies);
                 }

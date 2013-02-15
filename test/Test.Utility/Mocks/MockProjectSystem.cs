@@ -8,6 +8,8 @@ namespace NuGet.Test.Mocks
     public class MockProjectSystem : MockFileSystem, IProjectSystem
     {
         private FrameworkName _frameworkName;
+        private HashSet<string> _topImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private HashSet<string> _bottomImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         public MockProjectSystem()
             : this(VersionUtility.DefaultTargetFramework)
@@ -89,6 +91,41 @@ namespace NuGet.Test.Mocks
         public void ChangeTargetFramework(FrameworkName newTargetFramework)
         {
             _frameworkName = newTargetFramework;
+        }
+
+        public void AddImport(string targetPath, ProjectImportLocation location)
+        {
+            if (location == ProjectImportLocation.Top)
+            {
+                _topImports.Add(targetPath);
+            }
+            else
+            {
+                _bottomImports.Add(targetPath);
+            }
+        }
+
+        public void RemoveImport(string targetPath)
+        {
+            _topImports.Remove(targetPath);
+            _bottomImports.Remove(targetPath);
+        }
+
+        public bool ImportExists(string targetPath)
+        {
+            return _topImports.Contains(targetPath) || _bottomImports.Contains(targetPath);
+        }
+
+        public bool ImportExists(string targetPath, ProjectImportLocation location)
+        {
+            if (location == ProjectImportLocation.Top)
+            {
+                return _topImports.Contains(targetPath);
+            }
+            else
+            {
+                return _bottomImports.Contains(targetPath);
+            }
         }
     }
 }

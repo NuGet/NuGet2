@@ -15,7 +15,8 @@ Release notes
 - Updates tab in Manage Packages dialog now honors the 'allowedVersions' constraints in packages.config.
 - Added Update All button in the dialog to allow updating all packages with one click.
 - Add the 'requiredMinVersion' attribute to manifest schema to allow packages to require minimum version of NuGet.
-- Allow users to overwrite files if there's a file conflict in package and project.
+- Allow users to overwrite files if there's a file conflict in package and project.- Add support for C++ projects.
+- Enable package to import .targets or .props file into project.
 
 *** v2.2 ***
 

@@ -574,6 +574,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The element package\metadata\references\group must contain at least one &lt;reference&gt; child element..
+        /// </summary>
+        internal static string Manifest_ReferencesIsEmpty {
+            get {
+                return ResourceManager.GetString("Manifest_ReferencesIsEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The required element &apos;{0}&apos; is missing from the manifest..
         /// </summary>
         internal static string Manifest_RequiredElementMissing {

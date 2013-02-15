@@ -2,12 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using EnvDTE;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Project;
+using Microsoft.VisualStudio.Project.Designers;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using VSLangProj;
@@ -33,6 +37,7 @@ namespace NuGet.VisualStudio
                                                                           VsConstants.WebSiteProjectTypeGuid, 
                                                                           VsConstants.CsharpProjectTypeGuid, 
                                                                           VsConstants.VbProjectTypeGuid,
+                                                                          VsConstants.CppProjectTypeGuid,
                                                                           VsConstants.JsProjectTypeGuid,
                                                                           VsConstants.FsharpProjectTypeGuid,
                                                                           VsConstants.NemerleProjectTypeGuid,
@@ -48,9 +53,22 @@ namespace NuGet.VisualStudio
         private static readonly IEnumerable<string> _folderKinds = new[] { VsConstants.VsProjectItemKindPhysicalFolder };
 
         // List of project types that cannot have references added to them
-        private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[] { VsConstants.WixProjectTypeGuid, VsConstants.AzureCloudServiceProjectTypeGuid };
+        private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[] 
+            { 
+                VsConstants.WixProjectTypeGuid, 
+                VsConstants.AzureCloudServiceProjectTypeGuid,
+                VsConstants.CppProjectTypeGuid,
+            };
+
         // List of project types that cannot have binding redirects added
-        private static readonly string[] _unsupportedProjectTypesForBindingRedirects = new[] { VsConstants.WixProjectTypeGuid, VsConstants.JsProjectTypeGuid, VsConstants.NemerleProjectTypeGuid, VsConstants.AzureCloudServiceProjectTypeGuid };
+        private static readonly string[] _unsupportedProjectTypesForBindingRedirects = new[] 
+            { 
+                VsConstants.WixProjectTypeGuid, 
+                VsConstants.JsProjectTypeGuid, 
+                VsConstants.NemerleProjectTypeGuid, 
+                VsConstants.AzureCloudServiceProjectTypeGuid,
+                VsConstants.CppProjectTypeGuid,
+            };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
 
@@ -174,17 +192,28 @@ namespace NuGet.VisualStudio
             return projectItem != null;
         }
 
-        public static bool ContainsFile(this Project project, string name)
+        public static bool ContainsFile(this Project project, string path)
         {
-            IVsProject vsProject = (IVsProject)project.ToVsHierarchy();
-            if (vsProject == null) 
+            if (string.Equals(project.Kind, VsConstants.WixProjectTypeGuid, StringComparison.OrdinalIgnoreCase))
             {
-                return false;
+                // For Wix project, IsDocumentInProject() returns not found
+                // even though the file is in the project. So we use GetProjectItem()
+                // instead.
+                ProjectItem item = project.GetProjectItem(path);
+                return item != null;
             }
-            int pFound;
-            uint itemId;
-            int hr = vsProject.IsDocumentInProject( name, out pFound, new VSDOCUMENTPRIORITY[0], out itemId);
-            return ErrorHandler.Succeeded(hr) && pFound == 1;
+            else
+            {
+                IVsProject vsProject = (IVsProject)project.ToVsHierarchy();
+                if (vsProject == null)
+                {
+                    return false;
+                }
+                int pFound;
+                uint itemId;
+                int hr = vsProject.IsDocumentInProject(path, out pFound, new VSDOCUMENTPRIORITY[0], out itemId);
+                return ErrorHandler.Succeeded(hr) && pFound == 1;
+            }
         }
 
         /// <summary>
@@ -222,6 +251,18 @@ namespace NuGet.VisualStudio
             return !IsClassLibrary(project);
         }
 
+        public static string GetUniqueName(this Project project)
+        {
+            try
+            {
+                return project.UniqueName;
+            }
+            catch (COMException)
+            {
+                return project.FullName;
+            }
+        }
+
         private static bool IsClassLibrary(this Project project)
         {
             if (project.IsWebSite())
@@ -238,6 +279,11 @@ namespace NuGet.VisualStudio
         public static bool IsJavaScriptProject(this Project project)
         {
             return project != null && VsConstants.JsProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool IsNativeProject(this Project project)
+        {
+            return project != null && VsConstants.CppProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
         }
 
         // TODO: Return null for library projects
@@ -291,6 +337,12 @@ namespace NuGet.VisualStudio
                     fullPath = Path.GetDirectoryName(fullPath);
                 }
             }
+            else
+            {
+                // C++ projects do not have FullPath property, but do have ProjectDirectory one.
+                fullPath = project.GetPropertyValue<string>("ProjectDirectory");
+            }
+
             return fullPath;
         }
 
@@ -309,6 +361,13 @@ namespace NuGet.VisualStudio
 
                 // Review: What about future versions? Let's not worry about that for now.
                 return ".NETCore, Version=4.5";
+            }
+
+            if (project.IsNativeProject())
+            {
+                // The C++ project does not have a TargetFrameworkMoniker property set. 
+                // We hard-code the return value to Native.
+                return "Native, Version=0.0";
             }
 
             return project.GetPropertyValue<string>("TargetFrameworkMoniker");
@@ -463,7 +522,7 @@ namespace NuGet.VisualStudio
         public static bool IsWebProject(this Project project)
         {
             string[] types = project.GetProjectTypeGuids();
-            return types.Contains(VsConstants.WebSiteProjectTypeGuid, StringComparer.OrdinalIgnoreCase) || 
+            return types.Contains(VsConstants.WebSiteProjectTypeGuid, StringComparer.OrdinalIgnoreCase) ||
                    types.Contains(VsConstants.WebApplicationProjectTypeGuid, StringComparer.OrdinalIgnoreCase);
         }
 
@@ -528,7 +587,7 @@ namespace NuGet.VisualStudio
 
             // Get the vs solution
             IVsSolution solution = ServiceLocator.GetInstance<IVsSolution>();
-            int hr = solution.GetProjectOfUniqueName(project.UniqueName, out hierarchy);
+            int hr = solution.GetProjectOfUniqueName(project.GetUniqueName(), out hierarchy);
 
             if (hr != VsConstants.S_OK)
             {
@@ -734,6 +793,83 @@ namespace NuGet.VisualStudio
                 }
 
                 return String.Join("\\", nameParts);
+            }
+        }
+
+        public static void AddImportStatement(this Project project, string targetsPath, ProjectImportLocation location)
+        {
+            AddImportStatement(project.AsMSBuildProject(), targetsPath, location);
+        }
+
+        public static void AddImportStatement(this MsBuildProject buildProject, string targetsPath, ProjectImportLocation location)
+        {
+            // adds an <Import> element to this project file if it doesn't already exist.
+            if (buildProject.Xml.Imports == null ||
+                buildProject.Xml.Imports.All(import => !targetsPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase)))
+            {
+                ProjectImportElement pie = buildProject.Xml.AddImport(targetsPath);
+                pie.Condition = "Exists('" + targetsPath + "')";
+                if (location == ProjectImportLocation.Top)
+                {
+                    // There's no public constructor to create a ProjectImportElement directly.
+                    // So we have to cheat by adding Import at the end, then remove it and insert at the beginning
+                    pie.Parent.RemoveChild(pie);
+                    buildProject.Xml.InsertBeforeChild(pie, buildProject.Xml.FirstChild);
+                }
+
+                buildProject.ReevaluateIfNecessary();
+            }
+        }
+
+        public static void RemoveImportStatement(this Project project, string targetsPath)
+        {
+            RemoveImportStatement(project.AsMSBuildProject(), targetsPath);
+        }
+
+        public static void RemoveImportStatement(this MsBuildProject buildProject, string targetsPath)
+        {
+            if (buildProject.Xml.Imports != null)
+            {
+                // search for this import statement and remove it
+                var importElement = buildProject.Xml.Imports.FirstOrDefault(
+                    import => targetsPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase));
+
+                if (importElement != null)
+                {
+                    importElement.Parent.RemoveChild(importElement);
+                    buildProject.ReevaluateIfNecessary();
+                }
+            }
+        }
+
+        // This method should only be called in VS 2012 or above
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void DoWorkInWriterLock(this Project project, Action<MsBuildProject> action)
+        {
+            IVsBrowseObjectContext context = project.Object as IVsBrowseObjectContext;
+            if (context == null)
+            {
+                IVsHierarchy hierarchy = project.ToVsHierarchy();
+                context = hierarchy as IVsBrowseObjectContext;
+            }
+
+            if (context != null)
+            {
+                var service = context.UnconfiguredProject.ProjectService.Services.DirectAccessService;
+                if (service != null)
+                {
+                    // This has to run on Main thread, otherwise it will dead-lock (for C++ projects at least)
+                    ThreadHelper.Generic.Invoke(() =>
+                        service.Write(
+                            context.UnconfiguredProject.FullPath,
+                            dwa =>
+                            {
+                                MsBuildProject buildProject = dwa.GetProject(context.UnconfiguredProject.Services.SuggestedConfiguredProject);
+                                action(buildProject);
+                            },
+                            ProjectAccess.Read | ProjectAccess.Write)
+                    );
+                }
             }
         }
 

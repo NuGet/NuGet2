@@ -270,12 +270,12 @@ function Test-FSharpSimpleWithAssemblyReference {
     $p = New-FSharpConsoleApplication
     
     # Act
-    Install-Package Antlr -Project $p.Name
+    Install-Package Antlr -Project $p.Name -Source $context.RepositoryPath
     
     # Assert
     Assert-Package $p Antlr
     Assert-SolutionPackage Antlr
-    Assert-Reference $p Antlr3.Runtime
+    Assert-Reference $p Runtime
 }
 
 function Test-WebsiteInstallPackageWithRootNamespace {
@@ -312,7 +312,7 @@ function Test-InstallCanPipeToFSharpProjects {
     $p = New-FSharpLibrary
 
     # Act
-    $p | Install-Package elmah -Version 1.1
+    $p | Install-Package elmah -Version 1.1 -source $context.RepositoryPath
 
     # Assert
     Assert-Package $p elmah
@@ -2010,6 +2010,8 @@ function Test-InstallPackageDoesNotUninstallDependencyGraphWhenSafeUpdatingADepe
 
 function Test-InstallPackageRespectAssemblyReferenceFilterOnDependencyPackages
 {
+    param ($context)
+
     # Arrange
     $p = New-ClassLibrary
 
@@ -2026,6 +2028,8 @@ function Test-InstallPackageRespectAssemblyReferenceFilterOnDependencyPackages
 
 function Test-InstallPackageRespectAssemblyReferenceFilterOnSecondProject
 {
+    param ($context)
+    
     # Arrange
     $p = New-ClassLibrary
 
@@ -2050,6 +2054,8 @@ function Test-InstallPackageRespectAssemblyReferenceFilterOnSecondProject
 
 function Test-InstallPackageRespectReferencesAccordingToDifferentFrameworks
 {
+    param ($context)
+
     # Arrange
     $p1 = New-SilverlightClassLibrary
     $p2 = New-ConsoleApplication
@@ -2070,6 +2076,8 @@ function Test-InstallPackageRespectReferencesAccordingToDifferentFrameworks
 
 function Test-InstallPackageThrowsIfRequiredMinVersionIsNotSatisfied
 {
+    param ($context)
+
     # Arrange
     $p = New-SilverlightClassLibrary
 
@@ -2078,4 +2086,20 @@ function Test-InstallPackageThrowsIfRequiredMinVersionIsNotSatisfied
     # Act & Assert
     Assert-Throws { $p | Install-Package Kitty -Source $context.RepositoryPath } "The 'kitty 1.0.0' package requires NuGet client version '5.0.0.1' or above, but the current NuGet version is '$currentVersion'."
     Assert-NoPackage $p "Kitty"
+}
+
+function Test-InstallPackageAddImportStatement
+{
+    param ($context)
+
+    # Arrange
+    $p = New-SilverlightClassLibrary
+
+    # Act
+    $p | Install-Package PackageWithImport -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p PackageWithImport 2.0.0
+    Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\content\PackageWithImport.targets"
+    Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\content\PackageWithImport.props"
 }

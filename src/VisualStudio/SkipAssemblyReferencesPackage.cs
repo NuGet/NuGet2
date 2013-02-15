@@ -161,5 +161,10 @@ namespace NuGet.VisualStudio
         {
             get { return _basePackage.RequiredMinVersion; }
         }
+
+        public ICollection<PackageReferenceSet> PackageAssemblyReferences
+        {
+            get { return _basePackage.PackageAssemblyReferences; }
+        }
     }
 }
