@@ -184,6 +184,8 @@ namespace NuGet.Dialog.Test
             // Act
             var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
 
+            packages.Sort(PackageComparer.Version);
+
             // Assert
             Assert.Equal(2, packages.Count);
             AssertPackage(packages[0], "A", "1.9");
@@ -208,6 +210,7 @@ namespace NuGet.Dialog.Test
 
             // Act
             var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
+            packages.Sort(PackageComparer.Version);      
 
             // Assert
             Assert.Equal(2, packages.Count);
@@ -235,6 +238,8 @@ namespace NuGet.Dialog.Test
 
             // Act
             var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
+
+            packages.Sort(PackageComparer.Version);
 
             // Assert
             Assert.Equal(2, packages.Count);
