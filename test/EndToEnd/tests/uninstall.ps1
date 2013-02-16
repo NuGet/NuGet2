@@ -989,13 +989,13 @@ function Test-UninstallPackageRemoveImportStatement
     $p | Install-Package PackageWithImport -Source $context.RepositoryPath
 
     Assert-Package $p PackageWithImport
-    Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\content\PackageWithImport.targets"
-    Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\content\PackageWithImport.props"
+    Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\build\PackageWithImport.targets"
+    Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\build\PackageWithImport.props"
 
     # Act
     $p | Uninstall-Package PackageWithImport
 
     Assert-NoPackage $p PackageWithImport
-    Assert-NoProjectImport $p "..\packages\PackageWithImport.2.0.0\content\PackageWithImport.targets"
-    Assert-NoProjectImport $p "..\packages\PackageWithImport.2.0.0\content\PackageWithImport.props"
+    Assert-NoProjectImport $p "..\packages\PackageWithImport.2.0.0\build\PackageWithImport.targets"
+    Assert-NoProjectImport $p "..\packages\PackageWithImport.2.0.0\build\PackageWithImport.props"
 }

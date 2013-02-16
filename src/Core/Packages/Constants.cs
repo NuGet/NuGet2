@@ -30,6 +30,11 @@ namespace NuGet
         /// Represents the tools directory in the package.
         /// </summary>
         public static readonly string ToolsDirectory = "tools";
+
+        /// <summary>
+        /// Represents the build directory in the package.
+        /// </summary>
+        public static readonly string BuildDirectory = "build";
         
         public static readonly string BinDirectory = "bin";
         public static readonly string SettingsFileName = "NuGet.Config";

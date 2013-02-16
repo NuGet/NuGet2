@@ -2100,15 +2100,16 @@ namespace NuGet.Test
             // Arrange
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5"), "x:\\root");
-            projectSystem.AddImport(@"x:\root\A.1.0\content\net35\A.props", ProjectImportLocation.Top);
-            projectSystem.AddImport(@"x:\root\A.1.0\content\net35\A.targets", ProjectImportLocation.Bottom);
+            projectSystem.AddImport(@"x:\root\A.1.0\build\net35\A.props", ProjectImportLocation.Top);
+            projectSystem.AddImport(@"x:\root\A.1.0\build\net35\A.targets", ProjectImportLocation.Bottom);
             
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
-            IPackage packageA = PackageUtility.CreatePackage(
-                 "A",
-                 "1.0",
-                 content: new[] { "net35\\A.props", "net35\\A.targets" });
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0");
+
+            var mockPackageA = Mock.Get(packageA);
+            var files = PackageUtility.CreateFiles(new[] { "build\\net35\\A.targets", "build\\net35\\a.props" });
+            mockPackageA.Setup(p => p.GetFiles()).Returns(files);
 
             projectManager.LocalRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageA);
@@ -2244,10 +2245,13 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var mockRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
-            var packageA = PackageUtility.CreatePackage("A", "1.0",
-                                                        new[] { "native\\A.targets", "native\\a.props", "native\\foo.css" });
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+            
+            var mockPackageA = Mock.Get(packageA);
+            var files = PackageUtility.CreateFiles(new[] { "build\\native\\A.targets", "build\\native\\a.props" });
+            mockPackageA.Setup(p => p.GetFiles()).Returns(files);
 
-            mockRepository.AddPackage(packageA);
+            mockRepository.AddPackage(mockPackageA.Object);
 
             // Act
             projectManager.AddPackageReference("A");
@@ -2255,13 +2259,11 @@ namespace NuGet.Test
             // Assert
             Assert.True(localRepository.Exists("A"));
 
-            Assert.Equal(1, projectSystem.Paths.Count);
-            Assert.True(projectSystem.FileExists(@"foo.css"));
             Assert.False(projectSystem.FileExists(@"a.targets"));
             Assert.False(projectSystem.FileExists(@"A.props"));
 
-            Assert.True(projectSystem.ImportExists("x:\\root\\A.1.0\\content\\native\\A.props", ProjectImportLocation.Top));
-            Assert.True(projectSystem.ImportExists("x:\\root\\A.1.0\\content\\native\\A.targets", ProjectImportLocation.Bottom));
+            Assert.True(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\native\\A.props", ProjectImportLocation.Top));
+            Assert.True(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\native\\A.targets", ProjectImportLocation.Bottom));
         }
 
         [Fact]
@@ -2272,10 +2274,13 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var mockRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
-            var packageA = PackageUtility.CreatePackage("A", "1.0",
-                                                        new[] { "A.targets", "a.props", "foo.css" });
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
 
-            mockRepository.AddPackage(packageA);
+            var mockPackageA = Mock.Get(packageA);
+            var files = PackageUtility.CreateFiles(new[] { "build\\A.targets", "build\\a.props", "content\\foo.css" });
+            mockPackageA.Setup(p => p.GetFiles()).Returns(files);
+
+            mockRepository.AddPackage(mockPackageA.Object);
 
             // Act
             projectManager.AddPackageReference("A");
@@ -2288,8 +2293,8 @@ namespace NuGet.Test
             Assert.False(projectSystem.FileExists(@"a.targets"));
             Assert.False(projectSystem.FileExists(@"A.props"));
 
-            Assert.True(projectSystem.ImportExists("x:\\root\\A.1.0\\content\\A.props", ProjectImportLocation.Top));
-            Assert.True(projectSystem.ImportExists("x:\\root\\A.1.0\\content\\A.targets", ProjectImportLocation.Bottom));
+            Assert.True(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\A.props", ProjectImportLocation.Top));
+            Assert.True(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\A.targets", ProjectImportLocation.Bottom));
         }
 
         [Fact]
@@ -2300,24 +2305,21 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var mockRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
-            var packageA = PackageUtility.CreatePackage("A", "1.0",
-                                                        new[] { "native\\A.1.0.targets", "native\\B.props", "native\\foo.css" });
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
 
-            mockRepository.AddPackage(packageA);
+            var mockPackageA = Mock.Get(packageA);
+            var files = PackageUtility.CreateFiles(new[] { "build\\native\\A.1.0.targets", "build\\native\\B.props", "content\\native\\foo.css" });
+            mockPackageA.Setup(p => p.GetFiles()).Returns(files);
+
+            mockRepository.AddPackage(mockPackageA.Object);
 
             // Act
             projectManager.AddPackageReference("A");
 
             // Assert
             Assert.True(localRepository.Exists("A"));
-
-            Assert.Equal(3, projectSystem.Paths.Count);
-            Assert.True(projectSystem.FileExists(@"foo.css"));
-            Assert.True(projectSystem.FileExists(@"A.1.0.targets"));
-            Assert.True(projectSystem.FileExists(@"B.props"));
-
-            Assert.False(projectSystem.ImportExists("x:\\root\\A.1.0\\content\\native\\A.1.0.targets"));
-            Assert.False(projectSystem.ImportExists("x:\\root\\A.1.0\\content\\native\\b.props"));
+            Assert.False(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\native\\A.1.0.targets"));
+            Assert.False(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\native\\b.props"));
         }
 
         [Fact]
@@ -2328,10 +2330,13 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var mockRepository = new MockPackageRepository();
             var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
-            var packageA = PackageUtility.CreatePackage("A", "1.0",
-                                                        new[] { "native\\foo\\A.targets", "native\\bar\\A.props", "native\\foo.css" });
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
 
-            mockRepository.AddPackage(packageA);
+            var mockPackageA = Mock.Get(packageA);
+            var files = PackageUtility.CreateFiles(new[] { "build\\native\\foo\\A.targets", "build\\native\\bar\\B.props", "content\\native\\foo.css" });
+            mockPackageA.Setup(p => p.GetFiles()).Returns(files);
+
+            mockRepository.AddPackage(mockPackageA.Object);
 
             // Act
             projectManager.AddPackageReference("A");
@@ -2339,13 +2344,8 @@ namespace NuGet.Test
             // Assert
             Assert.True(localRepository.Exists("A"));
 
-            Assert.Equal(3, projectSystem.Paths.Count);
-            Assert.True(projectSystem.FileExists(@"foo.css"));
-            Assert.True(projectSystem.FileExists(@"foo\A.targets"));
-            Assert.True(projectSystem.FileExists(@"bar\a.props"));
-
-            Assert.False(projectSystem.ImportExists("x:\\root\\A.1.0\\content\\native\\foo\\A.targets"));
-            Assert.False(projectSystem.ImportExists("x:\\root\\A.1.0\\content\\native\\bar\\A.props"));
+            Assert.False(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\native\\foo\\A.targets"));
+            Assert.False(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\native\\bar\\A.props"));
         }
 
         [Fact]

@@ -10,8 +10,8 @@
         <description>My package description.</description>
     </metadata>
     <files>
-        <file src="content\PackageWithImport.targets" target="content\PackageWithImport.targets" />
-        <file src="content\PackageWithImport.props" target="content\PackageWithImport.props" />
+        <file src="build\PackageWithImport.targets" target="build\PackageWithImport.targets" />
+        <file src="build\PackageWithImport.props" target="build\PackageWithImport.props" />
         <file src="content\one.txt" target="content\one.txt" />
     </files>
 </package>
