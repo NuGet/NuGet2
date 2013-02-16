@@ -23,8 +23,8 @@ namespace NuGet.Dialog.Test
         {
         }
 
-        public MockPackagesProvider(IPackageRepository localRepository, IVsPackageManager packageManagerr)
-            : this(localRepository, packageManagerr, Enumerable.Empty<string>())
+        public MockPackagesProvider(IPackageRepository localRepository, IVsPackageManager packageManager)
+            : this(localRepository, packageManager, Enumerable.Empty<string>())
         {
         }
 

@@ -38,18 +38,27 @@ namespace NuGet.Dialog.Providers
                 packages = packages.Find(searchTerm);
             }
 
+            // Fix Bug #3034: When showing updates in solution-level dialog, it can happen that the local repository includes
+            // both jQuery 1.7 and jQuery 1.9 (from two different projects). To shows update for the jQuery 1.7, we need to make
+            // sure to remove jQuery 1.9 from the list.
+            // To do so, we sort all packages by increasing version, and call Distinct() which effectively remove higher versions of each package id
+            List<IPackage> packagesList = packages.ToList();
+            if (packagesList.Count > 0)
+            {
+                packagesList.Sort(PackageComparer.Version);
+                packagesList = packagesList.Distinct(PackageEqualityComparer.Id).ToList();
+            }
+
             // Tf the local repository contains constraints for each package, we send the version constraints to the GetUpdates() service.
             IPackageConstraintProvider constraintProvider = _localRepository as IPackageConstraintProvider;
             if (constraintProvider != null)
             {
-                IList<IPackage> packagesList = packages.ToList();
-                IList<IVersionSpec> constraintList = packagesList.Select(p => constraintProvider.GetConstraint(p.Id)).ToList();
-
+                IEnumerable<IVersionSpec> constraintList = packagesList.Select(p => constraintProvider.GetConstraint(p.Id));
                 return Repository.GetUpdates(packagesList, allowPrereleaseVersions, includeAllVersions: false, targetFrameworks: solutionFrameworks, versionConstraints: constraintList)
                                  .AsQueryable();
             }
 
-            return Repository.GetUpdates(packages, allowPrereleaseVersions, includeAllVersions: false, targetFrameworks: solutionFrameworks)
+            return Repository.GetUpdates(packagesList, allowPrereleaseVersions, includeAllVersions: false, targetFrameworks: solutionFrameworks)
                              .AsQueryable();
         }
 

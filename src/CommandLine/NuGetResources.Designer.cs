@@ -601,6 +601,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The value of MinClientVersion argument is not a valid version..
+        /// </summary>
+        internal static string PackageCommandInvalidMinClientVersion {
+            get {
+                return ResourceManager.GetString("PackageCommandInvalidMinClientVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Description: {0}.
         /// </summary>
         internal static string PackageCommandIssueDescription {

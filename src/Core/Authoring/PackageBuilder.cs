@@ -213,7 +213,7 @@ namespace NuGet
             }
         }
 
-        public Version RequiredMinVersion
+        public Version MinClientVersion
         {
             get;
             set;
@@ -360,7 +360,7 @@ namespace NuGet
             ReleaseNotes = metadata.ReleaseNotes;
             Language = metadata.Language;
             Copyright = metadata.Copyright;
-            RequiredMinVersion = metadata.RequiredMinVersion;
+            MinClientVersion = metadata.MinClientVersion;
 
             if (metadata.Tags != null)
             {

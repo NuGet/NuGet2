@@ -115,7 +115,7 @@ namespace NuGet
             set;
         }
 
-        public Version RequiredMinVersion
+        public Version MinClientVersion
         {
             get;
             private set;
@@ -230,7 +230,7 @@ namespace NuGet
             FrameworkAssemblies = metadata.FrameworkAssemblies;
             Copyright = metadata.Copyright;
             PackageAssemblyReferences = metadata.PackageAssemblyReferences;
-            RequiredMinVersion = metadata.RequiredMinVersion;
+            MinClientVersion = metadata.MinClientVersion;
 
             // Ensure tags start and end with an empty " " so we can do contains filtering reliably
             if (!String.IsNullOrEmpty(Tags))

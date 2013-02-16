@@ -81,7 +81,7 @@ namespace NuGet
 
         public void Walk(IPackage package)
         {
-            CheckPackageRequiredMinVersion(package);
+            CheckPackageMinClientVersion(package);
 
             // Do nothing if we saw this package already
             if (Marker.IsVisited(package))
@@ -159,13 +159,13 @@ namespace NuGet
             OnAfterPackageWalk(package);
         }
 
-        private static void CheckPackageRequiredMinVersion(IPackage package)
+        private static void CheckPackageMinClientVersion(IPackage package)
         {
             // validate that the current version of NuGet satisfies the minVersion attribute specified in the .nuspec
-            if (NuGetVersion.Value < package.RequiredMinVersion)
+            if (NuGetVersion.Value < package.MinClientVersion)
             {
                 throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageMinVersionNotSatisfied, package.GetFullName(), package.RequiredMinVersion, NuGetVersion.Value));
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageMinVersionNotSatisfied, package.GetFullName(), package.MinClientVersion, NuGetVersion.Value));
             }
         }
 

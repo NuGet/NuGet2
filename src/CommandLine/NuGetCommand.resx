@@ -427,5 +427,8 @@ nuget update -Self</value>
   </data>
   <data name="InstallCommandDisableParallel" xml:space="preserve">
     <value>Disable parallel nuget package installs.</value>
-  </data>  
+  </data>
+  <data name="PackageCommandMinClientVersion" xml:space="preserve">
+    <value>Set the minClientVersion attribute for the created package.</value>
+  </data>
 </root>

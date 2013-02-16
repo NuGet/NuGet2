@@ -154,7 +154,7 @@ namespace NuGet
                     DependencySets = CreateDependencySets(metadata),
                     FrameworkAssemblies = CreateFrameworkAssemblies(metadata),
                     ReferenceSets = CreateReferenceSets(metadata),
-                    RequiredMinVersionString = metadata.RequiredMinVersion.ToStringSafe()
+                    MinClientVersionString = metadata.MinClientVersion.ToStringSafe()
                 },
             };
         }
