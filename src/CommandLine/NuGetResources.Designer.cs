@@ -61,6 +61,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add file &apos;{0}&apos; to package as &apos;{1}&apos;.
+        /// </summary>
+        internal static string AddFileToPackage {
+            get {
+                return ResourceManager.GetString("AddFileToPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ambiguous command &apos;{0}&apos;. Possible values: {1}..
         /// </summary>
         internal static string AmbiguousCommand {
@@ -79,7 +88,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Building project for target framework &apos;{0}&apos;..
+        ///   Looks up a localized string similar to Building project &apos;{0}&apos; for target framework &apos;{1}&apos;..
         /// </summary>
         internal static string BuildingProjectTargetingFramework {
             get {
@@ -246,6 +255,15 @@ namespace NuGet {
         internal static string FailedToBuildProject {
             get {
                 return ResourceManager.GetString("FailedToBuildProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File &apos;{0}&apos; is not added because the package already contains file &apos;{1}&apos;.
+        /// </summary>
+        internal static string FileNotAddedToPackage {
+            get {
+                return ResourceManager.GetString("FileNotAddedToPackage", resourceCulture);
             }
         }
         

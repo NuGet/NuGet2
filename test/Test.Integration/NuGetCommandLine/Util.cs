@@ -63,5 +63,20 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 Directory.Delete(directory, true);
             }
         }
+
+        /// <summary>
+        /// Creates a file with the specified content.
+        /// </summary>
+        /// <param name="directory">The directory of the created file.</param>
+        /// <param name="fileName">The name of the created file.</param>
+        /// <param name="fileContent">The content of the created file.</param>
+        public static void CreateFile(string directory, string fileName, string fileContent)
+        {
+            var fileFullName = Path.Combine(directory, fileName);
+            using (var writer = new StreamWriter(fileFullName))
+            {
+                writer.Write(fileContent);
+            }
+        }
     }
 }

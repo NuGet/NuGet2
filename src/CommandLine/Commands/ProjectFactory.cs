@@ -232,7 +232,11 @@ namespace NuGet.Commands
             {
                 if (TargetFramework != null)
                 {
-                    Logger.Log(MessageLevel.Info, NuGetResources.BuildingProjectTargetingFramework, TargetFramework);
+                    Logger.Log(
+                        MessageLevel.Info, 
+                        NuGetResources.BuildingProjectTargetingFramework, 
+                        _project.FullPath,
+                        TargetFramework);
                 }
 
                 using (var projectCollection = new ProjectCollection(ToolsetDefinitionLocations.Registry | ToolsetDefinitionLocations.ConfigurationFile))
@@ -335,22 +339,40 @@ namespace NuGet.Commands
             return allowedExtensions.Select(extension => Directory.GetFiles(path, fileNameWithoutExtension + extension)).SelectMany(a => a);
         }
 
+        /// <summary>
+        /// Recursively execute the specified action on the current project and
+        /// projects referenced by the current project.
+        /// </summary>
+        /// <param name="action">The action to be executed.</param>
         private void RecursivelyApply(Action<ProjectFactory> action)
         {
-            RecursivelyApply(action, new ProjectCollection());
+            using (var projectCollection = new ProjectCollection())
+            {
+                RecursivelyApply(action, projectCollection);
+            }
         }
 
+        /// <summary>
+        /// Recursively execute the specified action on the current project and
+        /// projects referenced by the current project.
+        /// </summary>
+        /// <param name="action">The action to be executed.</param>
+        /// <param name="alreadyAppliedProjects">The collection of projects that have been processed.
+        /// It is used to avoid processing the same project more than once.</param>
         private void RecursivelyApply(Action<ProjectFactory> action, ProjectCollection alreadyAppliedProjects)
         {
             action(this);
             foreach (var item in _project.GetItems(ProjectReferenceItemType))
             {
                 string fullPath = item.GetMetadataValue("FullPath");
-                if (alreadyAppliedProjects.GetLoadedProjects(fullPath).IsEmpty())
+                if (!string.IsNullOrEmpty(fullPath) && 
+                    alreadyAppliedProjects.GetLoadedProjects(fullPath).IsEmpty())
                 {
                     var referencedProject = new ProjectFactory(alreadyAppliedProjects.LoadProject(fullPath));
+                    referencedProject.Logger = _logger;
                     referencedProject.IncludeSymbols = IncludeSymbols;
-                    referencedProject.TargetPath = referencedProject.ResolveTargetPath();
+                    referencedProject.Build = Build;
+                    referencedProject.BuildProject();
                     referencedProject.RecursivelyApply(action, alreadyAppliedProjects);
                 }
             }
@@ -415,14 +437,9 @@ namespace NuGet.Commands
                         SourcePath = file,
                         TargetPath = Path.Combine(targetFolder, Path.GetFileName(file))
                     };
-
-                    if (!builder.Files.Any(p => packageFile.Path == p.Path))
-                    {
-                        builder.Files.Add(packageFile);
-                    }
+                    AddFileToBuilder(builder, packageFile);
                 }
             }
-
         }
 
         private void ProcessDependencies(PackageBuilder builder)
@@ -431,7 +448,7 @@ namespace NuGet.Commands
             var packagesAndDependencies = new Dictionary<String, Tuple<IPackage, PackageDependency>>();
             RecursivelyApply(p => p.AddDependencies(packagesAndDependencies));
 
-            // list of all dependencpackages
+            // list of all dependency packages
             var packages = packagesAndDependencies.Values.Select(t => t.Item1).ToList();
 
             // Add the transform file to the package builder
@@ -477,8 +494,8 @@ namespace NuGet.Commands
             IPackageRepository repository = GetPackagesRepository();
 
             // Collect all packages
-            IDictionary<Tuple<string, SemanticVersion>, PackageReference> packageReferences = file.GetPackageReferences()
-                                                                                          .ToDictionary(r => Tuple.Create(r.Id, r.Version));
+            IDictionary<PackageName, PackageReference> packageReferences = 
+                file.GetPackageReferences().ToDictionary(r => new PackageName(r.Id, r.Version));
             // add all packages and create an associated dependency to the dictionary
             foreach (PackageReference reference in packageReferences.Values)
             {
@@ -495,12 +512,12 @@ namespace NuGet.Commands
             }
         }
 
-        private static IVersionSpec GetVersionConstraint(IDictionary<Tuple<string, SemanticVersion>, PackageReference> packageReferences, IPackage package)
+        private static IVersionSpec GetVersionConstraint(IDictionary<PackageName, PackageReference> packageReferences, IPackage package)
         {
             IVersionSpec defaultVersionConstraint = VersionUtility.ParseVersionSpec(package.Version.ToString());
 
             PackageReference packageReference;
-            var key = Tuple.Create(package.Id, package.Version);
+            var key = new PackageName(package.Id, package.Version);
             if (!packageReferences.TryGetValue(key, out packageReference))
             {
                 return defaultVersionConstraint;
@@ -739,11 +756,33 @@ namespace NuGet.Commands
                     SourcePath = fullPath,
                     TargetPath = targetPath
                 };
+                AddFileToBuilder(builder, packageFile);
+            }
+        }
 
-                if (!builder.Files.Any(p => packageFile.Path == p.Path))
-                {
-                    builder.Files.Add(packageFile);
-                }
+        private void AddFileToBuilder(PackageBuilder builder, PhysicalPackageFile packageFile)
+        {
+            if (!builder.Files.Any(p => packageFile.Path == p.Path))
+            {
+                WriteDetail(NuGetResources.AddFileToPackage, packageFile.SourcePath, packageFile.TargetPath);
+                builder.Files.Add(packageFile);
+            }
+            else
+            {
+                _logger.Log(
+                    MessageLevel.Warning,
+                    NuGetResources.FileNotAddedToPackage, 
+                    packageFile.SourcePath, 
+                    packageFile.TargetPath);
+            }
+        }
+
+        private void WriteDetail(string format, params object[] args)
+        {
+            var console = _logger as NuGet.Common.Console;
+            if (console != null && console.Verbosity == Verbosity.Detailed)
+            {
+                console.WriteLine(format, args);
             }
         }
 
