@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Management.Automation;
+using System.Management.Automation.Host;
 using EnvDTE;
 using NuGet.VisualStudio;
 using NuGet.VisualStudio.Resources;
@@ -466,9 +468,35 @@ namespace NuGet.PowerShell.Commands
                 return FileConflictResolution.IgnoreAll;
             }
 
-            bool shouldOverwrite = ShouldContinue(message, VsResources.FileConflictTitle, ref _overwriteAll, ref _ignoreAll);
+            var choices = new Collection<ChoiceDescription>
+            {
+                new ChoiceDescription(Resources.Cmdlet_Yes),
+                new ChoiceDescription(Resources.Cmdlet_YesAll),
+                new ChoiceDescription(Resources.Cmdlet_No),
+                new ChoiceDescription(Resources.Cmdlet_NoAll)
+            };
 
-            return shouldOverwrite ? FileConflictResolution.Overwrite : FileConflictResolution.Ignore;
+            int choice = Host.UI.PromptForChoice(VsResources.FileConflictTitle, message, choices, defaultChoice: 0);
+
+            Debug.Assert(choice >= 0 && choice < 4);
+            switch (choice) 
+            {
+                case 0:
+                    return FileConflictResolution.Overwrite;
+
+                case 1:
+                    _overwriteAll = true;
+                    return FileConflictResolution.OverwriteAll;
+
+                case 2:
+                    return FileConflictResolution.Ignore;
+
+                case 3:
+                    _ignoreAll = true;
+                    return FileConflictResolution.IgnoreAll;
+            }
+
+            return FileConflictResolution.Ignore;
         }
 
         private class ProgressRecordCollection : KeyedCollection<int, ProgressRecord>
