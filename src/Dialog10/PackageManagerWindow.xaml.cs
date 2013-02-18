@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -21,7 +20,8 @@ namespace NuGet.Dialog
     {
         internal static PackageManagerWindow CurrentInstance;
         private const string DialogUserAgentClient = "NuGet Add Package Dialog";
-        private readonly Lazy<string> _dialogUserAgent = new Lazy<string>(() => HttpUtility.CreateUserAgentString(DialogUserAgentClient));
+        private readonly Lazy<string> _dialogUserAgent = new Lazy<string>(
+            () => HttpUtility.CreateUserAgentString(DialogUserAgentClient, VsVersionHelper.GetFullVsVersionString()));
 
         private static readonly string[] Providers = new string[] { "Installed", "Online", "Updates" };
         private const string SearchInSwitch = "/searchin:";
@@ -705,7 +705,8 @@ namespace NuGet.Dialog
 
         private void OnSendingRequest(object sender, WebRequestEventArgs e)
         {
-            HttpUtility.SetUserAgent(e.Request, _dialogUserAgent.Value);
+            string projectGuids = _activeProject == null ? null : _activeProject.GetAllProjectTypeGuid();
+            HttpUtility.SetUserAgent(e.Request, _dialogUserAgent.Value, projectGuids);
         }
 
         private void CanExecuteClose(object sender, CanExecuteRoutedEventArgs e)

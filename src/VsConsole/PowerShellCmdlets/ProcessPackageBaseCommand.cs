@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Runtime.Versioning;
@@ -131,6 +130,18 @@ namespace NuGet.PowerShell.Commands
                 return null;
             }
 
+            Project project = GetProject();
+            if (project == null)
+            {
+                // No project specified and default project was null
+                return null;
+            }
+
+            return GetProjectManager(project);
+        }
+
+        private Project GetProject()
+        {
             Project project = null;
 
             // If the user specified a project then use it
@@ -152,13 +163,7 @@ namespace NuGet.PowerShell.Commands
                 Debug.Assert(project != null, "default project should never be invalid");
             }
 
-            if (project == null)
-            {
-                // No project specified and default project was null
-                return null;
-            }
-
-            return GetProjectManager(project);
+            return project;
         }
 
         private Tuple<IProjectManager, Project> GetProjectManager(Project project)
@@ -345,6 +350,13 @@ namespace NuGet.PowerShell.Commands
                 _expandedNodesDisposable.Dispose();
                 _expandedNodesDisposable = null;
             }
+        }
+
+        protected override void OnSendingRequest(object sender, WebRequestEventArgs e)
+        {
+            Project project = GetProject();
+            var projectGuids = project == null ? null : project.GetAllProjectTypeGuid();
+            HttpUtility.SetUserAgent(e.Request, DefaultUserAgent, projectGuids);
         }
     }
 }

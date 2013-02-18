@@ -20,7 +20,8 @@ namespace NuGet.PowerShell.Commands
     {
         // User Agent. Do NOT localize
         private const string PSCommandsUserAgentClient = "NuGet Package Manager Console";
-        private readonly Lazy<string> _psCommandsUserAgent = new Lazy<string>(() => HttpUtility.CreateUserAgentString(PSCommandsUserAgentClient));
+        private readonly Lazy<string> _psCommandsUserAgent = new Lazy<string>(
+            () => HttpUtility.CreateUserAgentString(PSCommandsUserAgentClient, VsVersionHelper.GetFullVsVersionString()));
 
         private IVsPackageManager _packageManager;
         private readonly ISolutionManager _solutionManager;
@@ -34,6 +35,14 @@ namespace NuGet.PowerShell.Commands
             _solutionManager = solutionManager;
             _vsPackageManagerFactory = vsPackageManagerFactory;
             _httpClientEvents = httpClientEvents;
+        }
+
+        protected string DefaultUserAgent
+        {
+            get
+            {
+                return _psCommandsUserAgent.Value;
+            }
         }
 
         private ProgressRecordCollection ProgressRecordCache
@@ -451,7 +460,7 @@ namespace NuGet.PowerShell.Commands
             WriteProgress(ProgressActivityIds.DownloadPackageId, e.Operation, e.PercentComplete);
         }
 
-        private void OnSendingRequest(object sender, WebRequestEventArgs e)
+        protected virtual void OnSendingRequest(object sender, WebRequestEventArgs e)
         {
             HttpUtility.SetUserAgent(e.Request, _psCommandsUserAgent.Value);
         }

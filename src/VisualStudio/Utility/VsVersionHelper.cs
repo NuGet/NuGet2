@@ -34,5 +34,11 @@ namespace NuGet.VisualStudio
             }
             return MaxVsVersion;
         }
+
+        public static string GetFullVsVersionString()
+        {
+            DTE dte = ServiceLocator.GetInstance<DTE>();
+            return "VS " + dte.Edition + "/" + dte.Version;
+        }
     }
 }
