@@ -50,6 +50,7 @@
     <Compile Include="NuGetCommandLine\NuGetDeleteCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetListCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetCommandLineTest.cs" />
+    <Compile Include="NuGetCommandLine\NuGetPackCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetPushCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuSpecFileContext.cs" />
     <Compile Include="Core\PathResolverTest.cs" />
