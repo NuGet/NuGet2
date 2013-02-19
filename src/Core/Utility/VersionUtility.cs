@@ -568,7 +568,8 @@ namespace NuGet
             { 
                 Constants.ContentDirectory,
                 Constants.LibDirectory,
-                Constants.ToolsDirectory
+                Constants.ToolsDirectory,
+                Constants.BuildDirectory
             };
 
             for (int i = 0; i < knownFolders.Length; i++)

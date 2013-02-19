@@ -2100,8 +2100,8 @@ function Test-InstallPackageAddImportStatement
 
     # Assert
     Assert-Package $p PackageWithImport 2.0.0
-    Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\content\PackageWithImport.targets"
-    Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\content\PackageWithImport.props"
+    Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\build\PackageWithImport.targets"
+    Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\build\PackageWithImport.props"
 }
 
 function Test-ReinstallSolutionLevelPackageWorks
