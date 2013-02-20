@@ -507,4 +507,7 @@
   <data name="FileNotAddedToPackage" xml:space="preserve">
     <value>File '{0}' is not added because the package already contains file '{1}'</value>
   </data>
+  <data name="Error_ProcessingNuspecFile" xml:space="preserve">
+    <value>Error occurred when processing file '{0}': {1}</value>
+  </data>
 </root>

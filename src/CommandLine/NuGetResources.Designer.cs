@@ -232,6 +232,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error occurred when processing file &apos;{0}&apos;: {1}.
+        /// </summary>
+        internal static string Error_ProcessingNuspecFile {
+            get {
+                return ResourceManager.GetString("Error_ProcessingNuspecFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Property Settings is null..
         /// </summary>
         internal static string Error_SettingsIsNull {

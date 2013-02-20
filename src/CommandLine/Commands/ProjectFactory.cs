@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -366,6 +367,7 @@ namespace NuGet.Commands
             {
                 string fullPath = item.GetMetadataValue("FullPath");
                 if (!string.IsNullOrEmpty(fullPath) && 
+                    !NuspecFileExists(fullPath) &&
                     alreadyAppliedProjects.GetLoadedProjects(fullPath).IsEmpty())
                 {
                     var referencedProject = new ProjectFactory(alreadyAppliedProjects.LoadProject(fullPath));
@@ -375,6 +377,83 @@ namespace NuGet.Commands
                     referencedProject.BuildProject();
                     referencedProject.RecursivelyApply(action, alreadyAppliedProjects);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Returns whether a project file has a corresponding nuspec file.
+        /// </summary>
+        /// <param name="projectFileFullName">The name of the project file.</param>
+        /// <returns>True if there is a corresponding nuspec file.</returns>
+        private static bool NuspecFileExists(string projectFileFullName)
+        {
+            var nuspecFile = Path.ChangeExtension(projectFileFullName, Constants.ManifestExtension);
+            return File.Exists(nuspecFile);
+        }
+
+        /// <summary>
+        /// Adds referenced projects that have corresponding nuspec files as dependencies.
+        /// </summary>
+        /// <param name="dependencies">The dependencies collection where the new dependencies
+        /// are added into.</param>
+        private void AddProjectReferenceDependencies(Dictionary<string, PackageDependency> dependencies)
+        {
+            var processedProjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var projectsToProcess = new Queue<Project>();
+
+            using (var projectCollection = new ProjectCollection())
+            {
+                projectsToProcess.Enqueue(_project);
+                while (projectsToProcess.Count > 0)
+                {
+                    var project = projectsToProcess.Dequeue();
+                    processedProjects.Add(project.FullPath);
+
+                    foreach (var projectReference in project.GetItems(ProjectReferenceItemType))
+                    {
+                        string fullPath = projectReference.GetMetadataValue("FullPath");
+                        if (string.IsNullOrEmpty(fullPath) ||
+                            processedProjects.Contains(fullPath))
+                        {
+                            continue;
+                        }
+
+                        if (NuspecFileExists(fullPath))
+                        {
+                            var nuspecFileName = Path.ChangeExtension(fullPath, Constants.ManifestExtension);
+                            var dependency = CreateDependencyFromNuspecFile(nuspecFileName);
+                            dependencies[dependency.Id] = dependency;
+                        }
+                        else
+                        {
+                            var referencedProject = projectCollection.LoadProject(fullPath);
+                            projectsToProcess.Enqueue(referencedProject);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static PackageDependency CreateDependencyFromNuspecFile(string nuspecFileName)
+        {
+            try
+            {
+                using (var stream = File.OpenRead(nuspecFileName))
+                {
+                    var manifest = Manifest.ReadFrom(stream, validateSchema: true);
+                    return new PackageDependency(
+                        manifest.Metadata.Id,
+                        VersionUtility.ParseVersionSpec(manifest.Metadata.Version));
+                }
+            }
+            catch (Exception ex)
+            {
+                var message = string.Format(
+                    CultureInfo.InvariantCulture,
+                    NuGetResources.Error_ProcessingNuspecFile,
+                    nuspecFileName,
+                    ex.Message);
+                throw new CommandLineException(message, ex);
             }
         }
 
@@ -471,6 +550,8 @@ namespace NuGet.Commands
                 var dependency = packagesAndDependencies[package.Id].Item2;
                 dependencies[dependency.Id] = dependency;
             }
+
+            AddProjectReferenceDependencies(dependencies);
 
             // TO FIX: when we persist the target framework into packages.config file, 
             // we need to pull that info into building the PackageDependencySet object
