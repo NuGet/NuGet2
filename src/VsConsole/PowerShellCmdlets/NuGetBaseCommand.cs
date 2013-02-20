@@ -456,7 +456,7 @@ namespace NuGet.PowerShell.Commands
             HttpUtility.SetUserAgent(e.Request, _psCommandsUserAgent.Value);
         }
 
-        public FileConflictResolution ResolveFileConflict(string message)
+        public virtual FileConflictResolution ResolveFileConflict(string message)
         {
             if (_overwriteAll)
             {
