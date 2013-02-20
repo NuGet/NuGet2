@@ -663,7 +663,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void CreatePackageUsesV5SchemaNamespaceIfRequiredMinVersionIsSet()
+        public void CreatePackageUsesV5SchemaNamespaceIfMinClientVersionIsSet()
         {
             // Arrange
             var builder = new PackageBuilder()
@@ -671,7 +671,7 @@ namespace NuGet.Test
                 Id = "A",
                 Version = new SemanticVersion("1.0"),
                 Description = "Descriptions",
-                RequiredMinVersion = new Version("2.0")
+                MinClientVersion = new Version("2.0")
             };
             builder.Authors.Add("Luan");
             builder.Files.Add(CreatePackageFile("a.txt"));
@@ -687,7 +687,7 @@ namespace NuGet.Test
                 // Assert
                 Assert.Equal(@"<?xml version=""1.0""?>
 <package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
-  <metadata requiredMinVersion=""2.0"">
+  <metadata minClientVersion=""2.0"">
     <id>A</id>
     <version>1.0</version>
     <authors>Luan</authors>

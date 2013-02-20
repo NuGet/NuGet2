@@ -44,6 +44,8 @@ namespace NuGet.Commands
             ".nproj"
         };
 
+        private Version _minClientVersionValue;
+
         [Option(typeof(NuGetCommand), "PackageCommandOutputDirDescription")]
         public string OutputDirectory { get; set; }
 
@@ -89,6 +91,9 @@ namespace NuGet.Commands
             }
         }
 
+        [Option(typeof(NuGetCommand), "PackageCommandMinClientVersion")]
+        public string MinClientVersion { get; set; }
+
         [ImportMany]
         public IEnumerable<IPackageRule> Rules { get; set; }
 
@@ -108,6 +113,14 @@ namespace NuGet.Commands
             // If the BasePath is not specified, use the directory of the input file (nuspec / proj) file
             BasePath = String.IsNullOrEmpty(BasePath) ? Path.GetDirectoryName(Path.GetFullPath(path)) : BasePath;
 
+            if (!String.IsNullOrEmpty(MinClientVersion))
+            {
+                if (!System.Version.TryParse(MinClientVersion, out _minClientVersionValue))
+                {
+                    throw new CommandLineException(NuGetResources.PackageCommandInvalidMinClientVersion);
+                }
+            }
+
             IPackage package = BuildPackage(path);
             if (package != null && !NoPackageAnalysis)
             {
@@ -120,6 +133,11 @@ namespace NuGet.Commands
             if (!String.IsNullOrEmpty(Version))
             {
                 builder.Version = new SemanticVersion(Version);
+            }
+
+            if (_minClientVersionValue != null)
+            {
+                builder.MinClientVersion = _minClientVersionValue;
             }
 
             outputPath = outputPath ?? GetOutputPath(builder);

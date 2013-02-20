@@ -201,13 +201,14 @@ namespace NuGet
             // BUG 491: Installing a package with incompatible binaries still does a partial install.
             // Resolve assembly references and content files first so that if this fails we never do anything to the project
             List<IPackageAssemblyReference> assemblyReferences = Project.GetCompatibleItemsCore(package.AssemblyReferences).ToList();
-            IList<FrameworkAssemblyReference> frameworkReferences = Project.GetCompatibleItemsCore(package.FrameworkAssemblies).ToList();
-            IList<IPackageFile> contentFiles = Project.GetCompatibleItemsCore(package.GetContentFiles()).ToList();
+            List<FrameworkAssemblyReference> frameworkReferences = Project.GetCompatibleItemsCore(package.FrameworkAssemblies).ToList();
+            List<IPackageFile> contentFiles = Project.GetCompatibleItemsCore(package.GetContentFiles()).ToList();
+            List<IPackageFile> buildFiles = Project.GetCompatibleItemsCore(package.GetBuildFiles()).ToList();
 
             // If the package doesn't have any compatible assembly references or content files,
             // throw, unless it's a meta package.
-            if (assemblyReferences.Count == 0 && frameworkReferences.Count == 0 && contentFiles.Count == 0 &&
-                (package.FrameworkAssemblies.Any() || package.AssemblyReferences.Any() || package.GetContentFiles().Any()))
+            if (assemblyReferences.Count == 0 && frameworkReferences.Count == 0 && contentFiles.Count == 0 && buildFiles.Count == 0 &&
+                (package.FrameworkAssemblies.Any() || package.AssemblyReferences.Any() || package.GetContentFiles().Any() || package.GetBuildFiles().Any()))
             {
                 // for portable framework, we want to show the friendly short form (e.g. portable-win8+net45+wp8) instead of ".NETPortable, Profile=Profile104".
                 string targetFrameworkString = VersionUtility.IsPortableFramework(Project.TargetFramework) 
@@ -257,6 +258,14 @@ namespace NuGet
                     {
                         Project.AddFrameworkReference(frameworkReference.AssemblyName);
                     }
+                }
+
+                foreach (var importFile in buildFiles)
+                {
+                    string fullImportFilePath = Path.Combine(PathResolver.GetInstallPath(package), importFile.Path);
+                    Project.AddImport(
+                        fullImportFilePath, 
+                        importFile.Path.EndsWith(".props", StringComparison.OrdinalIgnoreCase) ? ProjectImportLocation.Top : ProjectImportLocation.Bottom);
                 }
             }
             finally
@@ -374,6 +383,8 @@ namespace NuGet
             var contentFilesToDelete = GetCompatibleInstalledItemsForPackage(package.Id, package.GetContentFiles())
                                        .Except(otherContentFiles, PackageFileComparer.Default);
 
+            var buildFilesToDelete = GetCompatibleInstalledItemsForPackage(package.Id, package.GetBuildFiles());
+
             // Delete the content files
             Project.DeleteFiles(contentFilesToDelete, otherPackages, _fileTransformers);
 
@@ -381,6 +392,13 @@ namespace NuGet
             foreach (IPackageAssemblyReference assemblyReference in assemblyReferencesToDelete)
             {
                 Project.RemoveReference(assemblyReference.Name);
+            }
+
+            // remove the <Import> statement from projects for the .targets and .props files
+            foreach (var importFile in buildFilesToDelete)
+            {
+                string fullImportFilePath = Path.Combine(PathResolver.GetInstallPath(package), importFile.Path);
+                Project.RemoveImport(fullImportFilePath);
             }
 
             // Remove package to the repository

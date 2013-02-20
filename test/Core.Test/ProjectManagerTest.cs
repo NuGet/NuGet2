@@ -328,7 +328,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackageReferenceThrowsIfTheRequiredMinVersionIsNotSatisfied()
+        public void AddPackageReferenceThrowsIfTheMinClientVersionIsNotSatisfied()
         {
             // Arrange            
             Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
@@ -337,7 +337,7 @@ namespace NuGet.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, requiredMinVersion: requiredVersion.ToString());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, minClientVersion: requiredVersion.ToString());
             sourceRepository.AddPackage(packageA);
 
             string expectedErrorMessage = 
@@ -348,7 +348,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackageReferenceThrowsIfTheRequiredMinVersionOfADependencyIsNotSatisfied()
+        public void AddPackageReferenceThrowsIfTheMinClientVersionOfADependencyIsNotSatisfied()
         {
             // Arrange            
             Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
@@ -362,7 +362,7 @@ namespace NuGet.Test
                 "1.0", 
                 assemblyReferences: new[] { "lib\\me.dll" },
                 dependencies: new PackageDependency[] { new PackageDependency("B") });
-            IPackage packageB = PackageUtility.CreatePackage("B", "2.0", assemblyReferences: new[] { "lib\\you.dll" }, requiredMinVersion: requiredVersion.ToString());
+            IPackage packageB = PackageUtility.CreatePackage("B", "2.0", assemblyReferences: new[] { "lib\\you.dll" }, minClientVersion: requiredVersion.ToString());
             sourceRepository.AddPackage(packageA);
             sourceRepository.AddPackage(packageB);
 
@@ -374,7 +374,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackageReferenceDoesNotThrowIfTheRequiredMinVersionIsEqualNuGetVersion()
+        public void AddPackageReferenceDoesNotThrowIfTheMinClientVersionIsEqualNuGetVersion()
         {
             // Arrange            
             Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
@@ -383,7 +383,7 @@ namespace NuGet.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, requiredMinVersion: requiredVersion.ToString());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, minClientVersion: requiredVersion.ToString());
             sourceRepository.AddPackage(packageA);
 
             // Act && Assert
@@ -391,7 +391,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AddPackageReferenceDoesNotThrowIfTheRequiredMinVersionIsLessThanNuGetVersion()
+        public void AddPackageReferenceDoesNotThrowIfTheMinClientVersionIsLessThanNuGetVersion()
         {
             // Arrange            
             Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
@@ -408,7 +408,7 @@ namespace NuGet.Test
             var sourceRepository = new MockPackageRepository();
             var projectSystem = new MockProjectSystem(VersionUtility.ParseFrameworkName("net40"));
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, requiredMinVersion: requiredVersion.ToString());
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", assemblyReferences: new[] { "lib\\me.dll" }, minClientVersion: requiredVersion.ToString());
             sourceRepository.AddPackage(packageA);
 
             // Act && Assert
@@ -1481,7 +1481,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void UpdatePackageReferenceThrowsIfTheNewPackageHasRequiredMinVersionNotSatisfied()
+        public void UpdatePackageReferenceThrowsIfTheNewPackageHasMinClientVersionNotSatisfied()
         {
             // Arrange
             Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
@@ -1492,7 +1492,7 @@ namespace NuGet.Test
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
 
             var packageA1 = PackageUtility.CreatePackage("A", "1.0", content: new string[] { "good" });
-            var packageA2 = PackageUtility.CreatePackage("A", "2.0-alpha", content: new string[] { "excellent" }, requiredMinVersion: requiredVersion.ToString());
+            var packageA2 = PackageUtility.CreatePackage("A", "2.0-alpha", content: new string[] { "excellent" }, minClientVersion: requiredVersion.ToString());
 
             // project has A 1.0 installed
             projectManager.LocalRepository.AddPackage(packageA1);
@@ -1509,7 +1509,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void UpdatePackageReferenceThrowsIfTheNewPackageHasDependencyRequiredMinVersionNotSatisfied()
+        public void UpdatePackageReferenceThrowsIfTheNewPackageHasDependencyMinClientVersionNotSatisfied()
         {
             // Arrange
             Version nugetVersion = typeof(IPackage).Assembly.GetName().Version;
@@ -1526,7 +1526,7 @@ namespace NuGet.Test
                 content: new string[] { "excellent" }, 
                 dependencies: new PackageDependency[] { new PackageDependency("B") });
 
-            IPackage packageB = PackageUtility.CreatePackage("B", "2.0", assemblyReferences: new[] { "lib\\you.dll" }, requiredMinVersion: requiredVersion.ToString());
+            IPackage packageB = PackageUtility.CreatePackage("B", "2.0", assemblyReferences: new[] { "lib\\you.dll" }, minClientVersion: requiredVersion.ToString());
 
             // project has A 1.0 installed
             projectManager.LocalRepository.AddPackage(packageA1);
@@ -2100,6 +2100,63 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void RemovingPackageRemoveImportFile()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5"), "x:\\root");
+            projectSystem.AddImport(@"x:\root\A.1.0\build\net35\A.props", ProjectImportLocation.Top);
+            projectSystem.AddImport(@"x:\root\A.1.0\build\net35\A.targets", ProjectImportLocation.Bottom);
+            
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0");
+
+            var mockPackageA = Mock.Get(packageA);
+            var files = PackageUtility.CreateFiles(new[] { "build\\net35\\A.targets", "build\\net35\\a.props" });
+            mockPackageA.Setup(p => p.GetFiles()).Returns(files);
+
+            projectManager.LocalRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.RemovePackageReference("A");
+
+            // Assert
+            Assert.False(projectManager.LocalRepository.Exists(packageA));
+            Assert.False(projectSystem.ImportExists(@"x:\root\A.1.0\content\net35\A.props"));
+            Assert.False(projectSystem.ImportExists(@"x:\root\A.1.0\content\net35\A.targets"));
+        }
+
+        [Fact]
+        public void RemovingPackageDoesNotRemoveImportFileIfFilePatternDoesNotMatch()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem(new FrameworkName(".NETFramework, Version=4.5"), "x:\\root");
+            projectSystem.AddImport(@"x:\root\A.1.0\content\net35\A.props", ProjectImportLocation.Top);
+            projectSystem.AddImport(@"x:\root\A.1.0\content\net35\A.targets", ProjectImportLocation.Bottom);
+
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+
+            IPackage packageA = PackageUtility.CreatePackage(
+                 "A",
+                 "1.0",
+                 content: new[] { "net35\\A.1.0.props", "net35\\B.targets" });
+
+            projectManager.LocalRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageA);
+
+            // Act
+            projectManager.RemovePackageReference("A");
+
+            // Assert
+            Assert.False(projectManager.LocalRepository.Exists(packageA));
+            Assert.True(projectSystem.ImportExists(@"x:\root\A.1.0\content\net35\A.props"));
+            Assert.True(projectSystem.ImportExists(@"x:\root\A.1.0\content\net35\A.targets"));
+        }
+
+        [Fact]
         public void ReAddingAPackageReferenceAfterRemovingADependencyShouldReReferenceAllDependencies()
         {
             // Arrange
@@ -2183,6 +2240,117 @@ namespace NuGet.Test
                 () => projectManager.AddPackageReference("A"));
 
             Assert.False(localRepository.Exists(mockPackage.Object));
+        }
+
+        [Fact]
+        public void AddPackageReferenceImportsTargetOrPropFile()
+        {
+            // Arrange
+            var projectSystem = new MockProjectSystem(new FrameworkName("Native", new Version("2.0")), "x:\\root");
+            var localRepository = new MockPackageRepository();
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+            
+            var mockPackageA = Mock.Get(packageA);
+            var files = PackageUtility.CreateFiles(new[] { "build\\native\\A.targets", "build\\native\\a.props" });
+            mockPackageA.Setup(p => p.GetFiles()).Returns(files);
+
+            mockRepository.AddPackage(mockPackageA.Object);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(localRepository.Exists("A"));
+
+            Assert.False(projectSystem.FileExists(@"a.targets"));
+            Assert.False(projectSystem.FileExists(@"A.props"));
+
+            Assert.True(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\native\\A.props", ProjectImportLocation.Top));
+            Assert.True(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\native\\A.targets", ProjectImportLocation.Bottom));
+        }
+
+        [Fact]
+        public void AddPackageReferenceImportsTargetOrPropFileAtContentRoot()
+        {
+            // Arrange
+            var projectSystem = new MockProjectSystem(new FrameworkName("Native", new Version("2.0")), "x:\\root");
+            var localRepository = new MockPackageRepository();
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+
+            var mockPackageA = Mock.Get(packageA);
+            var files = PackageUtility.CreateFiles(new[] { "build\\A.targets", "build\\a.props", "content\\foo.css" });
+            mockPackageA.Setup(p => p.GetFiles()).Returns(files);
+
+            mockRepository.AddPackage(mockPackageA.Object);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(localRepository.Exists("A"));
+
+            Assert.Equal(1, projectSystem.Paths.Count);
+            Assert.True(projectSystem.FileExists(@"foo.css"));
+            Assert.False(projectSystem.FileExists(@"a.targets"));
+            Assert.False(projectSystem.FileExists(@"A.props"));
+
+            Assert.True(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\A.props", ProjectImportLocation.Top));
+            Assert.True(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\A.targets", ProjectImportLocation.Bottom));
+        }
+
+        [Fact]
+        public void AddPackageReferenceDoesNotImportsTargetOrPropFileThatHaveNonMatchingName()
+        {
+            // Arrange
+            var projectSystem = new MockProjectSystem(new FrameworkName("Native", new Version("2.0")), "x:\\root");
+            var localRepository = new MockPackageRepository();
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+
+            var mockPackageA = Mock.Get(packageA);
+            var files = PackageUtility.CreateFiles(new[] { "build\\native\\A.1.0.targets", "build\\native\\B.props", "content\\native\\foo.css" });
+            mockPackageA.Setup(p => p.GetFiles()).Returns(files);
+
+            mockRepository.AddPackage(mockPackageA.Object);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(localRepository.Exists("A"));
+            Assert.False(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\native\\A.1.0.targets"));
+            Assert.False(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\native\\b.props"));
+        }
+
+        [Fact]
+        public void AddPackageReferenceDoesNotImportsTargetOrPropFileThatAreNotAtContentRoot()
+        {
+            // Arrange
+            var projectSystem = new MockProjectSystem(new FrameworkName("Native", new Version("2.0")), "x:\\root");
+            var localRepository = new MockPackageRepository();
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            var packageA = PackageUtility.CreatePackage("A", "1.0");
+
+            var mockPackageA = Mock.Get(packageA);
+            var files = PackageUtility.CreateFiles(new[] { "build\\native\\foo\\A.targets", "build\\native\\bar\\B.props", "content\\native\\foo.css" });
+            mockPackageA.Setup(p => p.GetFiles()).Returns(files);
+
+            mockRepository.AddPackage(mockPackageA.Object);
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(localRepository.Exists("A"));
+
+            Assert.False(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\native\\foo\\A.targets"));
+            Assert.False(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\native\\bar\\A.props"));
         }
 
         [Fact]

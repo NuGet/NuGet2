@@ -105,18 +105,18 @@ function Assert-NoPackage {
     
     # Check for existance on disk of packages.config
     if ((Join-Path (Get-ProjectDir $Project) packages.config) -eq $false)
-	{
-		return
-	}
+    {
+        return
+    }
     
     # Check for the project item
     # Assert-NotNull (Get-ProjectItem $Project packages.config) "packages.config does not exist in $($Project.Name)"
     
     $repository = Get-ProjectRepository $Project
-	if (!$repository) 
-	{
-		return
-	}
+    if (!$repository) 
+    {
+        return
+    }
     
     if($Version) {
         $actualVersion = [NuGet.SemanticVersion]::Parse($Version)
@@ -171,6 +171,50 @@ function Assert-NoSolutionPackage {
     } 
     
     Assert-Fail "Package $Id $Version does EXIST at solution level"
+}
+
+function Assert-ProjectImport {
+    param(
+        [parameter(Mandatory = $true)]
+        $project,
+        [parameter(Mandatory = $true)]
+        [string]$importFile
+    )
+
+    $project.Save()
+    $doc = [xml](Get-Content $project.FullName)
+
+    if (!$doc.Project.Import)
+    {
+        Assert-Fail "Project $($project.Name) does NOT contain the import file `'$importFile`'"
+    }
+
+    $matchedImports = @($doc.Project.Import) | ? { $_.Project -eq $importFile }
+    if (!$matchedImports)
+    {
+        Assert-Fail "Project $($project.Name) does NOT contain the import file `'$importFile`'"
+    }
+}
+
+function Assert-NoProjectImport {
+    param(
+        [parameter(Mandatory = $true)]
+        $project,
+        [parameter(Mandatory = $true)]
+        [string]$importFile
+    )
+
+    $project.Save()
+    $doc = [xml](Get-Content $project.FullName)
+
+    if ($doc.Project.Import)
+    {
+        $matchedImports = @($doc.Project.Import) | ? { $_.Project -eq $importFile }
+        if ($matchedImports)
+        {
+            Assert-Fail "Project $($project.Name) does contain the import file `'$importFile`'"
+        }
+    }
 }
 
 function Get-PackagesDir {

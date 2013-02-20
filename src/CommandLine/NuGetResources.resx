@@ -498,4 +498,7 @@
   <data name="Error_SourceProviderIsNull" xml:space="preserve">
     <value>Property SourceProvider is null.</value>
   </data>
+  <data name="PackageCommandInvalidMinClientVersion" xml:space="preserve">
+    <value>The value of MinClientVersion argument is not a valid version.</value>
+  </data>
 </root>

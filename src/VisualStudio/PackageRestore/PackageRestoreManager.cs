@@ -280,47 +280,23 @@ namespace NuGet.VisualStudio
             if (project.IsWebSite())
             {
                 // Can't do anything with Website
-                // Also, the Javascript Metro project system has some weird bugs 
-                // that cause havoc with the package restore mechanism
                 return;
             }
 
-            if (project.IsJavaScriptProject())
+            if (!VsVersionHelper.IsVisualStudio2010 && 
+                (project.IsJavaScriptProject() ||  project.IsNativeProject()))
             {
-                EnablePackageRestoreForJavaScriptProject(project);
+                project.DoWorkInWriterLock(
+                    buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
+
+                // When inside the Write lock, calling Project.Save() will cause a deadlock.
+                // Thus we will save it after and outside of the Write lock.
+                project.Save();
             }
             else
             {
                 MsBuildProject buildProject = project.AsMSBuildProject();
                 EnablePackageRestore(project, buildProject, saveProjectWhenDone: true);
-            }
-        }
-
-        // This method will only be called in VS 2012
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void EnablePackageRestoreForJavaScriptProject(Project javaScriptProject)
-        {
-            IVsHierarchy hierarchy = javaScriptProject.ToVsHierarchy();
-            IVsBrowseObjectContext context = hierarchy as IVsBrowseObjectContext;
-            if (context != null)
-            {
-                var service = context.UnconfiguredProject.ProjectService.Services.DirectAccessService;
-                if (service != null)
-                {
-                    service.Write(
-                        context.UnconfiguredProject.FullPath,
-                        dwa =>
-                        {
-                            MsBuildProject buildProject = dwa.GetProject(context.UnconfiguredProject.Services.SuggestedConfiguredProject);
-
-                            // When inside the Write lock, calling Project.Save() will cause a deadlock.
-                            // Thus we will save it after and outside of the Write lock.
-                            EnablePackageRestore(javaScriptProject, buildProject, saveProjectWhenDone: false);
-                        },
-                        ProjectAccess.Read | ProjectAccess.Write);
-
-                    javaScriptProject.Save();
-                }
             }
         }
 
@@ -338,14 +314,7 @@ namespace NuGet.VisualStudio
         private void AddNuGetTargets(MsBuildProject buildProject)
         {
             string targetsPath = Path.Combine(@"$(SolutionDir)", NuGetTargetsFile);
-
-            // adds an <Import> element to this project file.
-            if (buildProject.Xml.Imports == null ||
-                buildProject.Xml.Imports.All(import => !targetsPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase)))
-            {
-                buildProject.Xml.AddImport(targetsPath);
-                buildProject.ReevaluateIfNecessary();
-            }
+            buildProject.AddImportStatement(targetsPath, ProjectImportLocation.Bottom);
         }
 
         private void AddSolutionDirProperty(MsBuildProject buildProject)

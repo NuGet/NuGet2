@@ -122,5 +122,44 @@ namespace NuGet.Common
         {
             return ProjectCollection.GlobalProjectCollection.GetLoadedProjects(projectFile).FirstOrDefault() ?? new Project(projectFile);
         }
+
+        public void AddImport(string targetPath, ProjectImportLocation location)
+        {
+            if (targetPath == null)
+            {
+                throw new ArgumentNullException("targetPath");
+            }
+
+            // adds an <Import> element to this project file.
+            if (Project.Xml.Imports == null ||
+                Project.Xml.Imports.All(import => !targetPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase)))
+            {
+                Project.Xml.AddImport(targetPath);
+                Project.ReevaluateIfNecessary();
+                Project.Save();
+            }
+        }
+
+        public void RemoveImport(string targetPath)
+        {
+            if (targetPath == null)
+            {
+                throw new ArgumentNullException("targetPath");
+            }
+
+            if (Project.Xml.Imports != null)
+            {
+                // search for this import statement and remove it
+                var importElement = Project.Xml.Imports.FirstOrDefault(
+                    import => targetPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase));
+
+                if (importElement != null)
+                {
+                    Project.Xml.RemoveChild(importElement);
+                    Project.ReevaluateIfNecessary();
+                    Project.Save();
+                }
+            }
+        }
     }
 }

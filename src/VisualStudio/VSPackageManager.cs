@@ -213,7 +213,7 @@ namespace NuGet.VisualStudio
                 PackageUninstalling += uninstallingHandler;
                 PackageUninstalled += uninstalledHandler;
 
-                if (appliesToProject)
+                if (appliesToProject)  
                 {
                     RemovePackageReference(projectManager, packageId, forceRemove, removeDependencies);
                 }
@@ -624,7 +624,10 @@ namespace NuGet.VisualStudio
                         () =>
                         {
                             UninstallPackage(package, forceRemove: true, removeDependencies: !updateDependencies);
-                            InstallPackage(package, ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions || !package.IsReleaseVersion());
+
+                            // Bug 2883: We must NOT use the overload that accepts 'package' object here, 
+                            // because after the UninstallPackage() call above, the package no longer exists. 
+                            InstallPackage(package.Id, package.Version, ignoreDependencies: !updateDependencies, allowPrereleaseVersions: allowPrereleaseVersions || !package.IsReleaseVersion());
                         });
                 }
                 else

@@ -34,7 +34,7 @@ namespace NuGet
             var manifestMetadata = new ManifestMetadata();
             manifestMetadata.DependencySets = new List<ManifestDependencySet>();
             manifestMetadata.ReferenceSets = new List<ManifestReferenceSet>();
-            manifestMetadata.RequiredMinVersionString = xElement.GetOptionalAttributeValue("requiredMinVersion");
+            manifestMetadata.MinClientVersionString = xElement.GetOptionalAttributeValue("minClientVersion");
 
             // we store all child elements under <metadata> so that we can easily check for required elements.
             var allElements = new HashSet<string>();

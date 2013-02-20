@@ -2010,6 +2010,8 @@ function Test-InstallPackageDoesNotUninstallDependencyGraphWhenSafeUpdatingADepe
 
 function Test-InstallPackageRespectAssemblyReferenceFilterOnDependencyPackages
 {
+    param ($context)
+
     # Arrange
     $p = New-ClassLibrary
 
@@ -2026,6 +2028,8 @@ function Test-InstallPackageRespectAssemblyReferenceFilterOnDependencyPackages
 
 function Test-InstallPackageRespectAssemblyReferenceFilterOnSecondProject
 {
+    param ($context)
+    
     # Arrange
     $p = New-ClassLibrary
 
@@ -2050,6 +2054,8 @@ function Test-InstallPackageRespectAssemblyReferenceFilterOnSecondProject
 
 function Test-InstallPackageRespectReferencesAccordingToDifferentFrameworks
 {
+    param ($context)
+
     # Arrange
     $p1 = New-SilverlightClassLibrary
     $p2 = New-ConsoleApplication
@@ -2068,8 +2074,10 @@ function Test-InstallPackageRespectReferencesAccordingToDifferentFrameworks
     Assert-Null (Get-AssemblyReference $p2 'two')
 }
 
-function Test-InstallPackageThrowsIfRequiredMinVersionIsNotSatisfied
+function Test-InstallPackageThrowsIfMinClientVersionIsNotSatisfied
 {
+    param ($context)
+
     # Arrange
     $p = New-SilverlightClassLibrary
 
@@ -2095,4 +2103,37 @@ function Test-InstallPackageWithXdtTransformTransformsTheFile
 
     Assert-AreEqual "false" $content.configuration["system.web"].compilation.debug
     Assert-NotNull $content.configuration["system.web"].customErrors
+}
+
+function Test-InstallPackageAddImportStatement
+{
+    param ($context)
+
+    # Arrange
+    $p = New-SilverlightClassLibrary
+
+    # Act
+    $p | Install-Package PackageWithImport -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p PackageWithImport 2.0.0
+    Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\build\PackageWithImport.targets"
+    Assert-ProjectImport $p "..\packages\PackageWithImport.2.0.0\build\PackageWithImport.props"
+}
+
+function Test-ReinstallSolutionLevelPackageWorks
+{
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary
+    $p | Install-Package SolutionLevelPkg -Source $context.RepositoryRoot
+    
+    Assert-SolutionPackage SolutionLevelPkg
+
+    # Act
+    Update-Package -Reinstall -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-SolutionPackage SolutionLevelPkg
 }
