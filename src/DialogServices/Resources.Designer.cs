@@ -700,7 +700,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No To _All.
+        ///   Looks up a localized string similar to No to A_ll.
         /// </summary>
         public static string NoAllLabel {
             get {
@@ -772,7 +772,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Yes _To All.
+        ///   Looks up a localized string similar to Yes to _All.
         /// </summary>
         public static string YesAllLabel {
             get {
