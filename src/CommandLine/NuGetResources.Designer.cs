@@ -250,11 +250,11 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Overwrite (Y)  Ignore (N)  Overwrite All (L)  Ignore All (K) : .
+        ///   Looks up a localized string similar to [Y] Yes  [A] Yes to All  [N] No  [L] No to All ?.
         /// </summary>
-        internal static string FileConflictConfirmMessage {
+        internal static string FileConflictChoiceText {
             get {
-                return ResourceManager.GetString("FileConflictConfirmMessage", resourceCulture);
+                return ResourceManager.GetString("FileConflictChoiceText", resourceCulture);
             }
         }
         

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security;
+using NuGet;
 
 namespace NuGet.Common
 {
@@ -319,8 +321,35 @@ namespace NuGet.Common
 
         public FileConflictResolution ResolveFileConflict(string message)
         {
-            // TODO: Print out message to console and ask for user's choice.
-            return FileConflictResolution.Ignore;
+            // make the question stand out from previous text
+            WriteLine();
+
+            WriteLine(ConsoleColor.Yellow, "File Conflict.");
+            WriteLine(message);
+
+            // Yes - Yes To All - No - No To All
+            var acceptedAnswers = new List<string> { "Y", "A", "N", "L" };
+            var choices = new[]
+            {
+                FileConflictResolution.Overwrite,
+                FileConflictResolution.OverwriteAll,
+                FileConflictResolution.Ignore,
+                FileConflictResolution.IgnoreAll
+            };
+
+            while (true)
+            {
+                Write(NuGetResources.FileConflictChoiceText);
+                string answer = ReadLine();                
+                if (!String.IsNullOrEmpty(answer)) 
+                {
+                    int index = acceptedAnswers.FindIndex(a => a.Equals(answer, StringComparison.OrdinalIgnoreCase));
+                    if (index > -1)
+                    {
+                        return choices[index];
+                    }
+                }
+            }
         }
     }
 }

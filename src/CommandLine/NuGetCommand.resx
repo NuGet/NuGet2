@@ -431,4 +431,7 @@ nuget update -Self</value>
   <data name="PackageCommandMinClientVersion" xml:space="preserve">
     <value>Set the minClientVersion attribute for the created package.</value>
   </data>
+  <data name="UpdateCommandFileConflictAction" xml:space="preserve">
+    <value>Set default action when a file from a package already exists in the target project. If not specified, it will prompt for each conflict file.</value>
+  </data>
 </root>

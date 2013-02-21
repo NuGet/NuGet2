@@ -85,6 +85,7 @@
     <Compile Include="DebugHelper.cs" />
     <Compile Include="DefaultManifestValuesRule.cs" />
     <Compile Include="DefaultPackageRules.cs" />
+    <Compile Include="FileConflictOption.cs" />
     <Compile Include="NuGetCommand.cs">
       <DependentUpon>NuGetCommand.resx</DependentUpon>
     </Compile>

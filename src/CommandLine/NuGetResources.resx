@@ -501,4 +501,8 @@
   <data name="PackageCommandInvalidMinClientVersion" xml:space="preserve">
     <value>The value of MinClientVersion argument is not a valid version.</value>
   </data>
+  <data name="FileConflictChoiceText" xml:space="preserve">
+    <value>[Y] Yes  [A] Yes to All  [N] No  [L] No to All ?</value>
+    <comment>Please do not localize the letters inside the [] brackets.</comment>
+  </data>
 </root>

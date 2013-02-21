@@ -38,7 +38,7 @@ namespace NuGet.PowerShell.Commands
         /// Filter value.
         /// </summary>
         [Parameter]
-        public SwitchParameter ExactMatch { get; set; }
+        public SwitchParameter ExactMatch   { get; set; }
 
         protected override void ProcessRecordCore()
         {
