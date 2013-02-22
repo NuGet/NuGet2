@@ -13,7 +13,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     {
         // Test that when creating a package from project file, referenced projects
         // are also included in the package.
-        [Fact]
+        [Fact(Skip="Has problem running on CI server")]
         public void PackCommand_WithProjectReferences()
         {
             var oldCurrentDirectory = Directory.GetCurrentDirectory();
@@ -127,7 +127,7 @@ namespace Proj2
 
         // Test that when creating a symbols package from project file, referenced projects
         // are also included in the package.
-        [Fact]
+        [Fact(Skip = "Has problem running on CI server")]
         public void PackCommand_WithProjectReferences_Symbols()
         {
             var oldCurrentDirectory = Directory.GetCurrentDirectory();
@@ -255,7 +255,7 @@ namespace Proj2
 
         // Test that when creating a package from project file, a referenced project that
         // has a nuspec file is added as dependency.
-        [Fact]
+        [Fact(Skip = "Has problem running on CI server")]
         public void PackCommand_ReferencedProjectWithNuspecFile()
         {
             var oldCurrentDirectory = Directory.GetCurrentDirectory();
