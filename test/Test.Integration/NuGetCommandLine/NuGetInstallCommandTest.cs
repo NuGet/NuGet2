@@ -204,7 +204,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 var packageFileName = Util.CreateTestPackage(
                     "testPackage1", "1.1.0", source);
 
-                var configFile = Path.Combine(tempPath, "nuget.config");
+                var configFile = Path.Combine(source, "nuget.config");
                 string[] args = new string[] { 
                     "config", "-Set", "SaveOnExpand=nuspec",
                     "-ConfigFile", configFile };

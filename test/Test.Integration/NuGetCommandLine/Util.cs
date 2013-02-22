@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Moq;
 using Xunit;
 
 namespace NuGet.Test.Integration.NuGetCommandLine
@@ -15,27 +16,22 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         /// <returns>The name of the created package file.</returns>
         public static string CreateTestPackage(string packageId, string version, string path)
         {
-            var currentDirectory = Directory.GetCurrentDirectory();
-            var tempPath = Path.GetTempPath();
-            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
-            CreateDirectory(packageDirectory);
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = packageId,
+                Version = new SemanticVersion(version),
+                Description = "Descriptions",
+            };
+            builder.Authors.Add("test");
+            builder.Files.Add(CreatePackageFile(@"content\test1.txt"));
 
-            Directory.SetCurrentDirectory(packageDirectory);
-            string[] args = new string[] { "spec", packageId };
-            int r = Program.Main(args);
-            Assert.Equal(0, r);
+            var packageFileName = Path.Combine(path, packageId + "." + version + ".nupkg");
+            using (var stream = new FileStream(packageFileName, FileMode.CreateNew))
+            {
+                builder.Save(stream);
+            }
 
-            args = new string[] { "pack", "-Version", version };
-            r = Program.Main(args);
-            Assert.Equal(0, r);
-
-            var packageFileName = string.Format("{0}.{1}.nupkg", packageId, version);
-            File.Move(packageFileName, Path.Combine(path, packageFileName));
-
-            Directory.SetCurrentDirectory(currentDirectory);
-            Directory.Delete(packageDirectory, true);
-
-            return Path.Combine(path, packageFileName);
+            return packageFileName;
         }
 
         /// <summary>
@@ -74,6 +70,20 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             {
                 writer.Write(fileContent);
             }
+        }
+
+        private static IPackageFile CreatePackageFile(string name)
+        {
+            var file = new Mock<IPackageFile>();
+            file.SetupGet(f => f.Path).Returns(name);
+            file.Setup(f => f.GetStream()).Returns(new MemoryStream());
+
+            string effectivePath;
+            var fx = VersionUtility.ParseFrameworkNameFromFilePath(name, out effectivePath);
+            file.SetupGet(f => f.EffectivePath).Returns(effectivePath);
+            file.SetupGet(f => f.TargetFramework).Returns(fx);
+
+            return file.Object;
         }
     }
 }
