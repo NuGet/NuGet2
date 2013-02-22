@@ -98,6 +98,8 @@ namespace NuGet.Commands
 
         public bool IncludeSymbols { get; set; }
 
+        public bool IncludeReferencedProjects { get; set; }
+
         public bool Build { get; set; }
 
         public Dictionary<string, string> ProjectProperties { get; private set; }
@@ -148,19 +150,19 @@ namespace NuGet.Commands
             }
 
             // Add output files
-            RecursivelyApply(p => p.AddOutputFiles(builder));
+            ApplyAction(p => p.AddOutputFiles(builder));
 
             // if there is a .nuspec file, only add content files if the <files /> element is not empty.
             if (manifest == null || manifest.Files == null || manifest.Files.Count > 0)
             {
                 // Add content files
-                RecursivelyApply(p => p.AddFiles(builder, ContentItemType, ContentFolder));
+                ApplyAction(p => p.AddFiles(builder, ContentItemType, ContentFolder));
             }
 
             // Add sources if this is a symbol package
             if (IncludeSymbols)
             {
-                RecursivelyApply(p => p.AddFiles(builder, SourcesItemType, SourcesFolder));
+                ApplyAction(p => p.AddFiles(builder, SourcesItemType, SourcesFolder));
             }
 
             ProcessDependencies(builder);
@@ -340,6 +342,18 @@ namespace NuGet.Commands
             return allowedExtensions.Select(extension => Directory.GetFiles(path, fileNameWithoutExtension + extension)).SelectMany(a => a);
         }
 
+        private void ApplyAction(Action<ProjectFactory> action)
+        {
+            if (IncludeReferencedProjects)
+            {
+                RecursivelyApply(action);
+            }
+            else
+            {
+                action(this);
+            }
+        }
+
         /// <summary>
         /// Recursively execute the specified action on the current project and
         /// projects referenced by the current project.
@@ -374,6 +388,7 @@ namespace NuGet.Commands
                     referencedProject.Logger = _logger;
                     referencedProject.IncludeSymbols = IncludeSymbols;
                     referencedProject.Build = Build;
+                    referencedProject.IncludeReferencedProjects = IncludeReferencedProjects;
                     referencedProject.BuildProject();
                     referencedProject.RecursivelyApply(action, alreadyAppliedProjects);
                 }
@@ -551,7 +566,10 @@ namespace NuGet.Commands
                 dependencies[dependency.Id] = dependency;
             }
 
-            AddProjectReferenceDependencies(dependencies);
+            if (IncludeReferencedProjects)
+            {
+                AddProjectReferenceDependencies(dependencies);
+            }
 
             // TO FIX: when we persist the target framework into packages.config file, 
             // we need to pull that info into building the PackageDependencySet object

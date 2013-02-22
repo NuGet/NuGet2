@@ -82,6 +82,9 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "PackageCommandExcludeEmptyDirectories")]
         public bool ExcludeEmptyDirectories { get; set; }
 
+        [Option(typeof(NuGetCommand), "PackageCommandIncludeReferencedProjects")]
+        public bool IncludeReferencedProjects { get; set; }
+
         [Option(typeof(NuGetCommand), "PackageCommandPropertiesDescription")]
         public Dictionary<string, string> Properties
         {
@@ -357,6 +360,7 @@ namespace NuGet.Commands
                 IsTool = Tool,
                 Logger = Console,
                 Build = Build,
+                IncludeReferencedProjects = IncludeReferencedProjects
             };
 
             // Add the additional Properties to the properties of the Project Factory
