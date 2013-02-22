@@ -470,13 +470,13 @@ namespace NuGet.PowerShell.Commands
 
             var choices = new Collection<ChoiceDescription>
             {
-                new ChoiceDescription(Resources.Cmdlet_Yes),
-                new ChoiceDescription(Resources.Cmdlet_YesAll),
-                new ChoiceDescription(Resources.Cmdlet_No),
-                new ChoiceDescription(Resources.Cmdlet_NoAll)
+                new ChoiceDescription(Resources.Cmdlet_Yes, Resources.Cmdlet_FileConflictYesHelp),
+                new ChoiceDescription(Resources.Cmdlet_YesAll, Resources.Cmdlet_FileConflictYesAllHelp),
+                new ChoiceDescription(Resources.Cmdlet_No, Resources.Cmdlet_FileConflictNoHelp),
+                new ChoiceDescription(Resources.Cmdlet_NoAll, Resources.Cmdlet_FileConflictNoAllHelp)
             };
 
-            int choice = Host.UI.PromptForChoice(VsResources.FileConflictTitle, message, choices, defaultChoice: 0);
+            int choice = Host.UI.PromptForChoice(VsResources.FileConflictTitle, message, choices, defaultChoice: 2);
 
             Debug.Assert(choice >= 0 && choice < 4);
             switch (choice) 
