@@ -384,7 +384,12 @@ namespace NuGet.Commands
                     !NuspecFileExists(fullPath) &&
                     alreadyAppliedProjects.GetLoadedProjects(fullPath).IsEmpty())
                 {
-                    var referencedProject = new ProjectFactory(alreadyAppliedProjects.LoadProject(fullPath));
+                    var project = new Project(
+                        fullPath, 
+                        globalProperties: null, 
+                        toolsVersion: null, 
+                        projectCollection: alreadyAppliedProjects);
+                    var referencedProject = new ProjectFactory(project);
                     referencedProject.Logger = _logger;
                     referencedProject.IncludeSymbols = IncludeSymbols;
                     referencedProject.Build = Build;
@@ -441,7 +446,11 @@ namespace NuGet.Commands
                         }
                         else
                         {
-                            var referencedProject = projectCollection.LoadProject(fullPath);
+                            var referencedProject = new Project(
+                                fullPath, 
+                                globalProperties: null, 
+                                toolsVersion: null, 
+                                projectCollection: projectCollection);
                             projectsToProcess.Enqueue(referencedProject);
                         }
                     }
