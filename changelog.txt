@@ -18,6 +18,8 @@ Release notes
 - Add the -minClientVersion argument to the nuget.exe pack command 
 - Add support for C++ projects.
 - Enable package to import .targets or .props file into project.
+- When building a package from a project, projects referenced by the project are either added as a dependency
+of the package, if nuspec file exists, or are added into the package if nuspec file doesn't exist.
 - Add XDT support. 
 
 *** v2.2 ***

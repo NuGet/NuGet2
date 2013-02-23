@@ -234,7 +234,8 @@ namespace NuGet.Commands
                 return packageFile.Path;
             }
             var path = physicalPackageFile.SourcePath;
-            int index = path.IndexOf(BasePath, StringComparison.OrdinalIgnoreCase);
+            // Make sure that the basepath has a directory separator
+            int index = path.IndexOf(BasePath.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
             if (index != -1)
             {
                 // Since wildcards are going to be relative to the base path, remove the BasePath portion of the file's source path. 
