@@ -28,6 +28,6 @@ Release notes
 - The Quick Launch feature.
 - In .nuspec, allow specifying an entire directory in the <file> element using this syntax:
 
-     <file src=”scripts\” target=”contents\scripts” />
+     <file src="scripts\" target="contents\scripts" />
 
   This will also allow package authors to create empty directory easily.
