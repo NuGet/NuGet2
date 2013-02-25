@@ -97,7 +97,7 @@ namespace NuGet.Commands
                         Console.PrintJustified(0, p.Id);
                         Console.PrintJustified(1, p.Version.ToString());
                         Console.PrintJustified(1, p.Description);
-                        if (!string.IsNullOrEmpty(p.LicenseUrl.AbsoluteUri))
+                        if (p.LicenseUrl != null && !string.IsNullOrEmpty(p.LicenseUrl.AbsoluteUri))
                         {
                             Console.PrintJustified(1, p.LicenseUrl.AbsoluteUri);
                         }
