@@ -100,7 +100,8 @@ namespace Proj2
                 string[] args = new string[] {
                     "pack",
                     "proj2.csproj",
-                    "-build"
+                    "-build",
+                    "-IncludeReferencedProjects"
                 };
                 int r = Program.Main(args);
                 Assert.Equal(0, r);
@@ -211,7 +212,8 @@ namespace Proj2
                     "pack",
                     "proj2.csproj",
                     "-build",
-                    "-symbols"
+                    "-symbols",
+                    "-IncludeReferencedProjects"
                 };
                 int r = Program.Main(args);
                 Assert.Equal(0, r);
@@ -335,7 +337,8 @@ namespace Proj2
                 string[] args = new string[] {
                     "pack",
                     "proj1.csproj",
-                    "-build"
+                    "-build",
+                    "-IncludeReferencedProjects"
                 };
                 int r = Program.Main(args);
                 Assert.Equal(0, r);
