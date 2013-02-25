@@ -498,4 +498,7 @@
   <data name="Error_SourceProviderIsNull" xml:space="preserve">
     <value>Property SourceProvider is null.</value>
   </data>
+  <data name="ListCommand_LicenseUrl" xml:space="preserve">
+    <value>License url: {0}</value>
+  </data>
 </root>

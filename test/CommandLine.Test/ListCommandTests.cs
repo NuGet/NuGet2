@@ -92,7 +92,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             Mock<IConsole> consoleMock = new Mock<IConsole>();
             IConsole console = consoleMock.Object;
 
-            consoleMock.Setup(x => x.PrintJustified(1, "ftp://test/somelicense.txts")).Verifiable("could not find license url");
+            consoleMock.Setup(x => x.PrintJustified(1, "License url: ftp://test/somelicense.txts")).Verifiable("could not find license url");
             ListCommand cmd = new ListCommand()
             {
                 RepositoryFactory = factory,
@@ -102,7 +102,6 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             cmd.Console = console;
             cmd.Arguments.Add("SearchPackage");
             cmd.Verbosity = Verbosity.Detailed;
-
 
             // Act
             var packages = cmd.GetPackages();

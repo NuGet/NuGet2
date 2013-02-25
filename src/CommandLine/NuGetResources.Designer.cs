@@ -466,6 +466,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to License url: {0}.
+        /// </summary>
+        internal static string ListCommand_LicenseUrl {
+            get {
+                return ResourceManager.GetString("ListCommand_LicenseUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No packages found..
         /// </summary>
         internal static string ListCommandNoPackages {
