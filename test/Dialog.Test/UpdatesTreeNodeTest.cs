@@ -57,12 +57,12 @@ namespace NuGet.Dialog.Test
 
             UpdatesTreeNode node = CreateUpdatesTreeNode(localRepository, sourceRepository, includePrerelease: false);
 
-            localRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0-rtm"));
+            localRepository.AddPackage(PackageUtility.CreatePackage("A", "9.0-rtm"));
             localRepository.AddPackage(PackageUtility.CreatePackage("B", "1.0"));
-            localRepository.AddPackage(PackageUtility.CreatePackage("A", "2.0"));
-            localRepository.AddPackage(PackageUtility.CreatePackage("A", "3.0"));
+            localRepository.AddPackage(PackageUtility.CreatePackage("A", "9.0"));
+            localRepository.AddPackage(PackageUtility.CreatePackage("A", "10.0"));
 
-            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "2.5"));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "9.5"));
             sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "4.0-beta"));
             sourceRepository.AddPackage(PackageUtility.CreatePackage("C", "1.2.3.4-alpha"));
 
@@ -71,8 +71,8 @@ namespace NuGet.Dialog.Test
 
             // Assert
             Assert.Equal(2, packages.Count);
-            AssertPackage(packages[0], "B", "4.0-beta");
-            AssertPackage(packages[1], "A", "2.5");
+            AssertPackage(packages[0], "A", "9.5");
+            AssertPackage(packages[1], "B", "4.0-beta");
         }
 
         [Fact]
