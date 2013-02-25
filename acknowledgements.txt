@@ -1,0 +1,4 @@
+*** NuGet Hall of Fame ***
+
+Mike Roth - Show License url when listing packages and verbosity is detailed. 
+adamralph - Add developmentDependency attribute to packages.config and use it in pack command to only include runtime packages (#1956)
