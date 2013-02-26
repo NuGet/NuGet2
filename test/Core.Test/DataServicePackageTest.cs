@@ -97,6 +97,35 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void MinClientVersionReturnsParsedValue()
+        {
+            // Arrange
+            var package = new DataServicePackage
+            {
+                MinClientVersion = "2.4.0.1"
+            };
+
+            // Act
+            Version minClientVersion = (package as IPackageMetadata).MinClientVersion;
+
+            // Assert
+            Assert.Equal("2.4.0.1", minClientVersion.ToString());
+        }
+
+        [Fact]
+        public void MinClientVersionReturnsNullValue()
+        {
+            // Arrange
+            var package = new DataServicePackage();
+
+            // Act
+            Version minClientVersion = (package as IPackageMetadata).MinClientVersion;
+
+            // Assert
+            Assert.Null(minClientVersion);
+        }
+
+        [Fact]
         public void EnsurePackageDownloadsThePackageIfItIsNotCachedInMemoryOnInMachineCache()
         {
             // Arrange
