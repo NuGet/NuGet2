@@ -133,6 +133,7 @@
                             Style="{StaticResource TileToolTipStyle}"/>
                     </Image.ToolTip>
                 </Image>
+                
                 <Button 
                     x:Name="ExecuteButton"
                     Command="{x:Static self:PackageManagerWindowCommands.PackageOperationCommand}"
@@ -140,16 +141,40 @@
                     IsDefault="True"
                     Visibility="Collapsed"
                     Style="{StaticResource DetailButtonStyle}" />
+                
+                <self:TextBlockControl
+                    x:Name="IncompatibleText"
+                    Style="{StaticResource DetailMetadataLabelStyle}"
+                    FontWeight="SemiBold"
+                    Visibility="Collapsed"
+                    TextWrapping="Wrap"
+                    HorizontalAlignment="Center"
+                    FontSize="10">
+                    <TextBlock.Inlines>
+                        <Run Text="{x:Static resources:Resources.Dialog_RequireNuGetLabel}" />
+                        <LineBreak />
+                        <Run Text="{Binding PackageIdentity.MinClientVersion, Mode=OneWay, StringFormat='v{0}'}" />
+                    </TextBlock.Inlines>
+                </self:TextBlockControl>
             </StackPanel>
         </Grid>
         
         <DataTemplate.Triggers>
-            <MultiDataTrigger >
+            <MultiDataTrigger>
                 <MultiDataTrigger.Conditions>
                     <Condition Binding="{Binding IsSelected}" Value="True" />
                     <Condition Binding="{Binding IsEnabled}" Value="True" />
+                    <Condition Binding="{Binding SatisfyMinClientVersion}" Value="True" />
                 </MultiDataTrigger.Conditions>
                 <Setter TargetName="ExecuteButton" Property="Visibility" Value="Visible" />
+            </MultiDataTrigger>
+
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding IsEnabled}" Value="True" />
+                    <Condition Binding="{Binding SatisfyMinClientVersion}" Value="False" />
+                </MultiDataTrigger.Conditions>
+                <Setter TargetName="IncompatibleText" Property="Visibility" Value="Visible" />
             </MultiDataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
