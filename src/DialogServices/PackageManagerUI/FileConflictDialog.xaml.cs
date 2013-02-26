@@ -15,7 +15,7 @@ namespace NuGet.Dialog.PackageManagerUI
             InitializeComponent();
         }
 
-        protected override void OnSourceInitialized(System.EventArgs e)
+        protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
 

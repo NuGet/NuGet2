@@ -17,6 +17,7 @@
      WindowStyle="SingleBorderWindow"
      WindowStartupLocation="CenterOwner"
      SizeToContent="WidthAndHeight"
+     FocusManager.FocusedElement="{Binding ElementName=NoButton, Mode=OneTime}"
      Title="{x:Static vsresources:VsResources.FileConflictTitle}"
      Background="{DynamicResource {x:Static resources:UIResources.WindowBackgroundBrushKey}}"
      AutomationProperties.AutomationId="NuGetFileConflictWindow">
@@ -33,7 +34,7 @@
         <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,3" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="{x:Static resources:Resources.YesLabel}" Tag="Overwrite" AutomationProperties.AutomationId="YesButton" Click="OnButtonClick" />
             <Button Content="{x:Static resources:Resources.YesAllLabel}" Tag="OverwriteAll" AutomationProperties.AutomationId="YesToAllButton" Click="OnButtonClick" />
-            <Button Content="{x:Static resources:Resources.NoLabel}" Tag="Ignore" AutomationProperties.AutomationId="NoButton" Click="OnButtonClick" IsDefault="True" />
+            <Button x:Name="NoButton" Content="{x:Static resources:Resources.NoLabel}" Tag="Ignore" AutomationProperties.AutomationId="NoButton" Click="OnButtonClick" IsDefault="True" />
             <Button Content="{x:Static resources:Resources.NoAllLabel}" Tag="IgnoreAll" AutomationProperties.AutomationId="NoToAllButton" Click="OnButtonClick" />
         </StackPanel>
 
