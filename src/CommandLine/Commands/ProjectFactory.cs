@@ -682,7 +682,7 @@ namespace NuGet.Commands
 
             if (!String.IsNullOrEmpty(solutionDir))
             {
-                ProjectProperties.Add("SolutionDir", solutionDir);
+                ProjectProperties["SolutionDir"] = solutionDir;
             }
         }
 
