@@ -1,4 +1,5 @@
 ﻿using EnvDTE;
+using System;
 using System.IO;
 
 namespace NuGet.VisualStudio
@@ -20,6 +21,16 @@ namespace NuGet.VisualStudio
 
         public override void AddFile(string path, Stream stream)
         {
+            AddFileCore(path, () => base.AddFile(path, stream));
+        }
+
+        public override void AddFile(string path, Action<Stream> writeToStream)
+        {
+            AddFileCore(path, () => base.AddFile(path, writeToStream));
+        }
+
+        private void AddFileCore(string path, Action action)
+        {
             EnsureSolutionFolder();
             if (_solutionFolder != null)
             {
@@ -29,8 +40,9 @@ namespace NuGet.VisualStudio
                     // If the file already exists, check it out.
                     _solutionFolder.EnsureCheckedOutIfExists(this, path);
                 }
-                base.AddFile(path, stream);
-                
+
+                action();
+
                 if (!fileExistsInProject)
                 {
                     // Add the file to the solution directory if it does not already exist.

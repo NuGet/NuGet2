@@ -2120,3 +2120,22 @@ function Test-ReinstallSolutionLevelPackageWorks
     # Assert
     Assert-SolutionPackage SolutionLevelPkg
 }
+
+function Test-InstallSolutionLevelPackageAddPackagesConfigToSolution
+{
+    param($context)
+
+    # Arrange 
+    $p = new-ConsoleApplication
+    $p | Install-Package SolutionLevelPkg -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-SolutionPackage SolutionLevelPkg
+
+    $nugetFolder = $dte.Solution.Projects | ? { $_.Name -eq ".nuget" }
+    Assert-NotNull $nugetFolder "The '.nuget' solution folder is missing"
+
+    $configFile = $nugetFolder.ProjectItems.Item("packages.config")
+
+    Assert-NotNull $configFile "The 'packages.config' is not found under '.nuget' solution folder"
+}
