@@ -97,7 +97,7 @@ namespace NuGet
                 else
                 {
                     // ignore
-                    project.Logger.Log(MessageLevel.Warning, NuGetResources.Warning_FileAlreadyExists, path);
+                    project.Logger.Log(MessageLevel.Info, NuGetResources.Warning_FileAlreadyExists, path);
                 }
             }
             else
