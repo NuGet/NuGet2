@@ -120,7 +120,11 @@ namespace NuGet.Common
 
         public bool FileExistsInProject(string path)
         {
-            return true;
+            // some ItemTypes which starts with _ are added by various MSBuild tasks for their own purposes
+            // and they do not represent content files of the projects. Therefore, we exclude them when checking for file existence.
+            return Project.Items.Any(
+                i => i.EvaluatedInclude.Equals(path, StringComparison.OrdinalIgnoreCase) && 
+                     (String.IsNullOrEmpty(i.ItemType) || i.ItemType[0] != '_'));
         }
 
         private static Project GetProject(string projectFile)

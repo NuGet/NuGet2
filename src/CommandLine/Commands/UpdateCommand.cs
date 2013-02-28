@@ -91,7 +91,6 @@ namespace NuGet.Commands
                                               .Where(p => p.Project != null)
                                               .ToList();
 
-
             if (projects.Count == 0)
             {
                 Console.WriteLine(NuGetResources.NoProjectsFound);
