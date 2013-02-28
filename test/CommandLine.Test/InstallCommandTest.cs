@@ -719,7 +719,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var exception = Assert.Throws<AggregateException>(() => installCommand.ExecuteCommand());
 
             // Assert
-            var innerException = Assert.IsAssignableFrom<InvalidOperationException>(exception.InnerException);
+#pragma warning disable 0219
+           // mono compiler complains that innerException is assigned but not used.
+            var innerException = Assert.IsAssignableFrom<InvalidOperationException>(exception.InnerException);           
+#pragma warning restore 0219
+
             // The culture can't be forced to en-US as the error message is generated in another thread.
             // Hence, only check the error message if the language is english.
             var culture = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;

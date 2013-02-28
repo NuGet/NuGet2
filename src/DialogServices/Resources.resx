@@ -304,7 +304,7 @@
     <value>Published Date</value>
   </data>
   <data name="Dialog_NoCompatibleProjectNoFrameworkNames" xml:space="preserve">
-    <value>'{0}' could not be installed because it is not compatible with any project in the solution. The package doesn't target any framework.</value>
+    <value>'{0}' could not be installed because it is not compatible with any project in the solution.</value>
   </data>
   <data name="Dialog_SolutionInstalledProviderNoItem" xml:space="preserve">
     <value>No packages are installed in the current solution.</value>
@@ -347,5 +347,8 @@
   </data>
   <data name="Dialog_UpdateAllProgress" xml:space="preserve">
     <value>Update all packages...</value>
+  </data>
+  <data name="Dialog_RequireNuGetLabel" xml:space="preserve">
+    <value>Requires NuGet</value>
   </data>
 </root>

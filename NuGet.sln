@@ -197,6 +197,7 @@ Global
 		{793B20A9-E263-4B54-BB31-305B602087CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{793B20A9-E263-4B54-BB31-305B602087CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{793B20A9-E263-4B54-BB31-305B602087CE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{793B20A9-E263-4B54-BB31-305B602087CE}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{793B20A9-E263-4B54-BB31-305B602087CE}.Mono Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{793B20A9-E263-4B54-BB31-305B602087CE}.Mono Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{793B20A9-E263-4B54-BB31-305B602087CE}.Mono Release|Any CPU.ActiveCfg = Release|Any CPU

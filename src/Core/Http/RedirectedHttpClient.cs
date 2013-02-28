@@ -42,6 +42,14 @@ namespace NuGet
             }
         }
 
+        public override Uri OriginalUri
+        {
+            get
+            {
+                return _originalUri;
+            }
+        }
+
         internal IHttpClient CachedClient
         {
             get

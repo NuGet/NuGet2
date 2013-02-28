@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -433,5 +433,8 @@ nuget update -Self</value>
   </data>
   <data name="InstallCommandSaveOnExpand" xml:space="preserve">
     <value>Specifies types of files to save after package installation: nuspec, nupkg, nuspec;nupkg.</value>
+  </data>
+  <data name="PackageCommandIncludeReferencedProjects" xml:space="preserve">
+    <value>Include referenced projects either as dependencies or as part of the package.</value>
   </data>
 </root>

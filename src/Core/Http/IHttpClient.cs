@@ -18,6 +18,11 @@ namespace NuGet
             get;
         }
 
+        Uri OriginalUri
+        {
+            get;
+        }
+
         bool AcceptCompression
         {
             get;
