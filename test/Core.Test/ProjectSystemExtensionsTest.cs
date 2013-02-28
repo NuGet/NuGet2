@@ -248,6 +248,29 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void AddFilesDoNotCallResolveFileConflictIfTheConflictFileDoesNotBelongToProject()
+        {
+            var logger = new Mock<ILogger>();
+
+            // Arrange
+            var project = new MockProjectSystem();
+            project.AddFile("a.txt", "this is a");
+            project.AddFile("b.txt", "this is b");
+            project.ExcludeFileFromProject("b.txt");
+            project.Logger = logger.Object;
+
+            var files = PackageUtility.CreateFiles(new[] { "b.txt", "d.txt" }, "content");
+
+            // Act
+            project.AddFiles(files, new Dictionary<string, IPackageFileTransformer>());
+
+            // Assert
+            Assert.True(project.FileExists("d.txt"));
+            Assert.False(project.FileExistsInProject("b.txt"));
+            logger.Verify(l => l.ResolveFileConflict(It.IsAny<string>()), Times.Never());
+        }
+
+        [Fact]
         public void AddFilesAskingForResolutionForEveryConflict()
         {
             var resolutions = new FileConflictResolution[] 

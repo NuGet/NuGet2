@@ -26,5 +26,6 @@ namespace NuGet
         bool IsBindingRedirectSupported { get; }
         void AddImport(string targetPath, ProjectImportLocation location);
         void RemoveImport(string targetPath);
+        bool FileExistsInProject(string path);
     }
 }

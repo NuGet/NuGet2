@@ -83,9 +83,9 @@ namespace NuGet
         /// <param name="path"></param>
         public static void TryAddFile(IProjectSystem project, IPackageFile file, string path)
         {
-            if (project.FileExists(path))
+            if (project.FileExists(path) && project.FileExistsInProject(path))
             {
-                // file exists, ask user if he wants to overwrite or ignore
+                // file exists in project, ask user if he wants to overwrite or ignore
                 string conflictMessage = String.Format(CultureInfo.CurrentCulture, NuGetResources.FileConflictMessage, path, project.ProjectName);
                 FileConflictResolution resolution = project.Logger.ResolveFileConflict(conflictMessage);
                 if (resolution == FileConflictResolution.Overwrite || resolution == FileConflictResolution.OverwriteAll)

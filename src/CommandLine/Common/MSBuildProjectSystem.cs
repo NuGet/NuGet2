@@ -118,6 +118,11 @@ namespace NuGet.Common
             Project.Save();
         }
 
+        public bool FileExistsInProject(string path)
+        {
+            return true;
+        }
+
         private static Project GetProject(string projectFile)
         {
             return ProjectCollection.GlobalProjectCollection.GetLoadedProjects(projectFile).FirstOrDefault() ?? new Project(projectFile);
