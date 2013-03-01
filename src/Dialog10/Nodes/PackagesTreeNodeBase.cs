@@ -35,6 +35,7 @@ namespace NuGet.Dialog.Providers
         private bool _isExpanded;
         private bool _isSelected;
         private bool _loadingInProgress;
+        private bool _includePrereleaseWhenLastLoaded;
         private readonly bool _collapseVersions;
 
         private CancellationTokenSource _currentCancellationSource;
@@ -284,6 +285,8 @@ namespace NuGet.Dialog.Providers
 
             // avoid more than one loading occurring at the same time
             _loadingInProgress = true;
+
+            _includePrereleaseWhenLastLoaded = Provider.IncludePrerelease;
 
             _currentCancellationSource = new CancellationTokenSource();
 
@@ -608,10 +611,23 @@ namespace NuGet.Dialog.Providers
             if (!Provider.SuppressNextRefresh)
             {
                 Provider.SelectedNode = this;
-                if (Provider.RefreshOnNodeSelection && !this.IsSearchResultsNode)
+                if (!this.IsSearchResultsNode)
                 {
-                    Refresh();
-                }
+                    // If user switches back to this node, and the Include Prerelease combox box value
+                    // has changed, we need to reload the packages.
+                    //
+                    // This 'if' statement must come before the next one, so that we favor setting 
+                    // 'resetQueryBeforeRefresh' to true.
+                    if (_includePrereleaseWhenLastLoaded != Provider.IncludePrerelease)
+                    {
+                        Refresh(resetQueryBeforeRefresh: true);
+                    }
+
+                    if (Provider.RefreshOnNodeSelection) 
+                    {
+                        Refresh();
+                    }
+                } 
             }
         }
     }

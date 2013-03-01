@@ -1588,6 +1588,22 @@ public class Cl_{0} {{
             }
         }
 
+        // Tests that when error occurs accessing an URL source in install command,
+        // the error message will contain the URL of the source.
+        [Fact]
+        public void PackageCommand_InstallCommandDisplaySourceOnError()
+        {
+            // Act
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
+            int result = Program.Main(
+                new[] { "install", "test_package", "-source", "http://localhost/" });
+
+            // Assert
+            Assert.NotEqual(0, result);
+            var message = consoleOutput.ToString();
+            Assert.True(message.Contains("http://localhost/"));
+        }
+
         private static string SavePackage(string id, string version)
         {
             string tempPath = Path.Combine(_testRootDirectory, Path.GetRandomFileName());

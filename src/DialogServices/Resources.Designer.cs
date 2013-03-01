@@ -367,6 +367,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Requires NuGet.
+        /// </summary>
+        public static string Dialog_RequireNuGetLabel {
+            get {
+                return ResourceManager.GetString("Dialog_RequireNuGetLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to All.
         /// </summary>
         public static string Dialog_RootNodeAll {

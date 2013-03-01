@@ -231,6 +231,61 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
+        public void GetConfigurationFromXmlDocument_IsPreunzippedDefaultsToFalseFromMultipleRepositories()
+        {
+            // Arrange
+            var extensionRepository = new VsTemplatePackagesNode("registry", new XObject[] { new XAttribute("isPreunzipped", "true") });
+            var registryRepository = new VsTemplatePackagesNode("extension", new XObject[0]);
+
+            var document = BuildDocument(new[] { extensionRepository, registryRepository });
+            var wizard = new VsTemplateWizard(null, null, null, null, null, null);
+            var extensionManagerMock = new Mock<IVsExtensionManager>();
+            var extensionMock = new Mock<IInstalledExtension>();
+            var extension = extensionMock.Object;
+            extensionManagerMock.Setup(em => em.TryGetInstalledExtension("myExtensionId", out extension)).Returns(true);
+
+            var hkcu = new Mock<IRegistryKey>();
+
+            // Act
+            var results = wizard.GetConfigurationsFromXmlDocument(document, @"C:\Some\file.vstemplate", vsExtensionManager: extensionManagerMock.Object, registryKeys: new[] { hkcu.Object });
+
+            // Assert
+            Assert.Equal(2, results.Count());
+            var registryResult = results.First();
+            var extensionResult = results.Last();
+
+            Assert.False(extensionResult.IsPreunzipped);
+        }
+
+        [Fact]
+        public void GetConfigurationFromXmlDocument_IsPreunzippedCanBeSetOnMultipleRepositories()
+        {
+            // Arrange
+            var firstRepository = new VsTemplatePackagesNode("", new XObject[] { new XAttribute("isPreunzipped", "true") });
+            var secondRepository = new VsTemplatePackagesNode("", new XObject[] { new XAttribute("isPreunzipped", "false") });
+            var thirdRepository = new VsTemplatePackagesNode("", new XObject[] { new XAttribute("isPreunzipped", "true") });
+
+
+            var document = BuildDocument(new[] { firstRepository, secondRepository, thirdRepository });
+            var wizard = new VsTemplateWizard(null, null, null, null, null, null);
+            var extensionManagerMock = new Mock<IVsExtensionManager>();
+            var extensionMock = new Mock<IInstalledExtension>();
+            var extension = extensionMock.Object;
+            extensionManagerMock.Setup(em => em.TryGetInstalledExtension("myExtensionId", out extension)).Returns(true);
+
+            var hkcu = new Mock<IRegistryKey>();
+
+            // Act
+            var results = wizard.GetConfigurationsFromXmlDocument(document, @"C:\Some\file.vstemplate", vsExtensionManager: extensionManagerMock.Object, registryKeys: new[] { hkcu.Object });
+
+            // Assert
+            Assert.Equal(3, results.Count());
+            Assert.True(results.First().IsPreunzipped);
+            Assert.False(results.Skip(1).First().IsPreunzipped);
+            Assert.True(results.Last().IsPreunzipped);
+        }
+
+        [Fact]
         public void GetConfigurationFromXmlDocument_ShowErrorForMissingRepositoryIdAttributeWhenInExtensionRepositoryMode()
         {
             // Arrange

@@ -15,30 +15,28 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         /// <param name="packageId">The id of the created package.</param>
         /// <param name="version">The version of the created package.</param>
         /// <param name="path">The directory where the package is created.</param>
-        /// <returns>The name of the created package file.</returns>
+        /// <returns>The full path of the created package file.</returns>
         public static string CreateTestPackage(string packageId, string version, string path)
         {
-            var currentDirectory = Directory.GetCurrentDirectory();
-            var tempPath = Path.GetTempPath();
-            var packageDirectory = Path.Combine(tempPath, Guid.NewGuid().ToString());
-            CreateDirectory(packageDirectory);
+            var packageBuilder = new PackageBuilder
+            {
+                Id = packageId,
+                Version = new SemanticVersion(version),
+                Description = "Test desc"
+            };
 
-            Directory.SetCurrentDirectory(packageDirectory);
-            string[] args = new string[] { "spec", packageId };
-            int r = Program.Main(args);
-            Assert.Equal(0, r);
-
-            args = new string[] { "pack", "-Version", version };
-            r = Program.Main(args);
-            Assert.Equal(0, r);
+            var dependencies = new PackageDependency("Dummy");
+            packageBuilder.DependencySets.Add(new PackageDependencySet(null, new[] { dependencies }));
+            packageBuilder.Authors.Add("test author");
 
             var packageFileName = string.Format("{0}.{1}.nupkg", packageId, version);
-            File.Move(packageFileName, Path.Combine(path, packageFileName));
+            var packageFileFullPath = Path.Combine(path, packageFileName);
+            using (var fileStream = File.Create(packageFileFullPath))
+            {
+                packageBuilder.Save(fileStream);
+            }
 
-            Directory.SetCurrentDirectory(currentDirectory);
-            Directory.Delete(packageDirectory, true);
-
-            return Path.Combine(path, packageFileName);
+            return packageFileFullPath;
         }
 
         /// <summary>

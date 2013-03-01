@@ -62,16 +62,16 @@ namespace NuGet.VisualStudio
             object vsExtensionManager = null,
             IEnumerable<IRegistryKey> registryKeys = null)
         {
-            IList<VsTemplateWizardPackageInfo> packages = new VsTemplateWizardPackageInfo[0];
-            string repositoryPath = null;
-            bool isPreunzipped = false;
-
             // Ignore XML namespaces since VS does not check them either when loading vstemplate files.
             IEnumerable<XElement> packagesElements = document.Root.ElementsNoNamespace("WizardData")
                 .ElementsNoNamespace("packages");
 
             foreach (var packagesElement in packagesElements)
             {
+                IList<VsTemplateWizardPackageInfo> packages = new VsTemplateWizardPackageInfo[0];
+                string repositoryPath = null;
+                bool isPreunzipped = false;
+
                 string isPreunzippedString = packagesElement.GetOptionalAttributeValue("isPreunzipped");
                 if (!String.IsNullOrEmpty(isPreunzippedString))
                 {
