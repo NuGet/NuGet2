@@ -336,7 +336,7 @@ namespace NuGet.Commands
             return packageSorter.GetPackagesByDependencyOrder(new ReadOnlyPackageRepository(packages)).Reverse();
         }
 
-        void ILogger.Log(MessageLevel level, string message, params object[] args)
+        public void Log(MessageLevel level, string message, params object[] args)
         {
             if (Verbose && Console != null)
             {
@@ -344,7 +344,7 @@ namespace NuGet.Commands
             }
         }
 
-        FileConflictResolution IFileConflictResolver.ResolveFileConflict(string message)
+        public FileConflictResolution ResolveFileConflict(string message)
         {
             // the -FileConflictAction is set to Overwrite or user has chosen Overwrite All previously
             if (FileConflictAction == FileConflictOption.Overwrite || _overwriteAll)
