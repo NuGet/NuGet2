@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using System.Configuration;
 
 namespace NuGet.Test.Integration.NuGetCommandLine
 {    
@@ -13,10 +14,11 @@ namespace NuGet.Test.Integration.NuGetCommandLine
     {
         // Test that when creating a package from project file, referenced projects
         // are also included in the package.
-        [Fact(Skip="Has problem running on CI server")]
+        [Fact]
         public void PackCommand_WithProjectReferences()
         {
-            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
             var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
             
             try
@@ -95,16 +97,13 @@ namespace Proj2
     }
 }");
                 
-                // Act
-                Directory.SetCurrentDirectory(proj2Directory);
-                string[] args = new string[] {
-                    "pack",
-                    "proj2.csproj",
-                    "-build",
-                    "-IncludeReferencedProjects"
-                };
-                int r = Program.Main(args);
-                Assert.Equal(0, r);
+                // Act 
+                var r = CommandRunner.Run(
+                    nugetexe, 
+                    proj2Directory, 
+                    "pack proj2.csproj -build -IncludeReferencedProjects",
+                    waitForExit: true);                    
+                Assert.Equal(0, r.Item1);
 
                 // Assert
                 var package = new OptimizedZipPackage(Path.Combine(proj2Directory, "proj2.0.0.0.0.nupkg"));
@@ -121,23 +120,22 @@ namespace Proj2
             }
             finally
             {
-                Directory.SetCurrentDirectory(oldCurrentDirectory);
                 Directory.Delete(workingDirectory, true);
             }
         }
 
         // Test that when creating a symbols package from project file, referenced projects
         // are also included in the package.
-        [Fact(Skip = "Has problem running on CI server")]
+        [Fact]
         public void PackCommand_WithProjectReferences_Symbols()
         {
-            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
             var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
             try
             {
                 Util.CreateDirectory(workingDirectory);
-                Directory.SetCurrentDirectory(workingDirectory);
 
                 // create project 1
                 Util.CreateFile(
@@ -208,15 +206,12 @@ namespace Proj2
 }");
 
                 // Act
-                string[] args = new string[] {
-                    "pack",
-                    "proj2.csproj",
-                    "-build",
-                    "-symbols",
-                    "-IncludeReferencedProjects"
-                };
-                int r = Program.Main(args);
-                Assert.Equal(0, r);
+                var r = CommandRunner.Run(
+                    nugetexe, 
+                    workingDirectory,
+                    "pack proj2.csproj -build -symbols -IncludeReferencedProjects",
+                    waitForExit: true);                    
+                Assert.Equal(0, r.Item1);
 
                 // Assert
                 var package = new OptimizedZipPackage(Path.Combine(workingDirectory, "proj2.0.0.0.0.nupkg"));
@@ -250,17 +245,17 @@ namespace Proj2
             }
             finally
             {
-                Directory.SetCurrentDirectory(oldCurrentDirectory);
                 Directory.Delete(workingDirectory, true);
             }
         }
 
         // Test that when creating a package from project file, a referenced project that
         // has a nuspec file is added as dependency.
-        [Fact(Skip = "Has problem running on CI server")]
+        [Fact]
         public void PackCommand_ReferencedProjectWithNuspecFile()
         {
-            var oldCurrentDirectory = Directory.GetCurrentDirectory();
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
             var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
 
             try
@@ -332,16 +327,13 @@ namespace Proj2
 </package>");
 
                 // Act
-                var proj1Directory = Path.Combine(workingDirectory, "proj1");
-                Directory.SetCurrentDirectory(proj1Directory);
-                string[] args = new string[] {
-                    "pack",
-                    "proj1.csproj",
-                    "-build",
-                    "-IncludeReferencedProjects"
-                };
-                int r = Program.Main(args);
-                Assert.Equal(0, r);
+                var proj1Directory = Path.Combine(workingDirectory, "proj1");                
+                var r = CommandRunner.Run(
+                    nugetexe, 
+                    proj1Directory, 
+                    "pack proj1.csproj -build -IncludeReferencedProjects",
+                    waitForExit: true);                    
+                Assert.Equal(0, r.Item1);
 
                 // Assert
                 var package = new OptimizedZipPackage(Path.Combine(proj1Directory, "proj1.0.0.0.0.nupkg"));
@@ -371,7 +363,6 @@ namespace Proj2
             }
             finally
             {
-                Directory.SetCurrentDirectory(oldCurrentDirectory);
                 Directory.Delete(workingDirectory, true);
             }
         }
