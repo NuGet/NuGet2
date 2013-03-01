@@ -18,6 +18,9 @@ Release notes
 - Add the -minClientVersion argument to the nuget.exe pack command 
 - Add support for C++ projects.
 - Enable package to import .targets or .props file into project.
+- When building a package from a project, when -IncludeReferencedProjects is specified, projects 
+  referenced by the project are either added as a dependency of the package, if nuspec file exists, 
+  or are added into the package if nuspec file doesn't exist.
 - Allow users to overwrite files if there's a file conflict in package and project.
 
 *** v2.2 ***
@@ -26,6 +29,6 @@ Release notes
 - The Quick Launch feature.
 - In .nuspec, allow specifying an entire directory in the <file> element using this syntax:
 
-     <file src=”scripts\” target=”contents\scripts” />
+     <file src="scripts\" target="contents\scripts" />
 
   This will also allow package authors to create empty directory easily.

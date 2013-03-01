@@ -82,6 +82,9 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "PackageCommandExcludeEmptyDirectories")]
         public bool ExcludeEmptyDirectories { get; set; }
 
+        [Option(typeof(NuGetCommand), "PackageCommandIncludeReferencedProjects")]
+        public bool IncludeReferencedProjects { get; set; }
+
         [Option(typeof(NuGetCommand), "PackageCommandPropertiesDescription")]
         public Dictionary<string, string> Properties
         {
@@ -234,7 +237,8 @@ namespace NuGet.Commands
                 return packageFile.Path;
             }
             var path = physicalPackageFile.SourcePath;
-            int index = path.IndexOf(BasePath, StringComparison.OrdinalIgnoreCase);
+            // Make sure that the basepath has a directory separator
+            int index = path.IndexOf(BasePath.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
             if (index != -1)
             {
                 // Since wildcards are going to be relative to the base path, remove the BasePath portion of the file's source path. 
@@ -356,6 +360,7 @@ namespace NuGet.Commands
                 IsTool = Tool,
                 Logger = Console,
                 Build = Build,
+                IncludeReferencedProjects = IncludeReferencedProjects
             };
 
             // Add the additional Properties to the properties of the Project Factory

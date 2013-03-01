@@ -220,7 +220,7 @@
     <value>The API Key '{0}' was saved for {1}.</value>
   </data>
   <data name="BuildingProjectTargetingFramework" xml:space="preserve">
-    <value>Building project for target framework '{0}'.</value>
+    <value>Building project '{0}' for target framework '{1}'.</value>
   </data>
   <data name="FailedToBuildProject" xml:space="preserve">
     <value>Failed to build '{0}'.</value>
@@ -500,6 +500,15 @@
   </data>
   <data name="PackageCommandInvalidMinClientVersion" xml:space="preserve">
     <value>The value of MinClientVersion argument is not a valid version.</value>
+  </data>
+  <data name="AddFileToPackage" xml:space="preserve">
+    <value>Add file '{0}' to package as '{1}'</value>
+  </data>
+  <data name="FileNotAddedToPackage" xml:space="preserve">
+    <value>File '{0}' is not added because the package already contains file '{1}'</value>
+  </data>
+  <data name="Error_ProcessingNuspecFile" xml:space="preserve">
+    <value>Error occurred when processing file '{0}': {1}</value>
   </data>
   <data name="FileConflictChoiceText" xml:space="preserve">
     <value>[Y] Yes  [A] Yes to All  [N] No  [L] No to All ?</value>

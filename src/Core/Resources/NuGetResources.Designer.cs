@@ -205,6 +205,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An error occurred while loading packages from&apos;{0}&apos;: {1}.
+        /// </summary>
+        internal static string ErrorLoadingPackages {
+            get {
+                return ResourceManager.GetString("ErrorLoadingPackages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error reading &apos;{0}&apos;..
         /// </summary>
         internal static string ErrorReadingFile {
@@ -502,6 +511,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The &apos;minClientVersion&apos; attribute in the package manifest has invalid value. It must be a valid version string..
+        /// </summary>
+        internal static string Manifest_InvalidMinClientVersion {
+            get {
+                return ResourceManager.GetString("Manifest_InvalidMinClientVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A stable release of a package should not have on a prerelease dependency. Either modify the version spec of dependency &quot;{0}&quot; or update the version field..
         /// </summary>
         internal static string Manifest_InvalidPrereleaseDependency {
@@ -525,15 +543,6 @@ namespace NuGet.Resources {
         internal static string Manifest_InvalidReferenceFile {
             get {
                 return ResourceManager.GetString("Manifest_InvalidReferenceFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The &apos;minClientVersion&apos; attribute in the package manifest has invalid value. It must be a valid version string..
-        /// </summary>
-        internal static string Manifest_InvalidMinClientVersion {
-            get {
-                return ResourceManager.GetString("Manifest_InvalidMinClientVersion", resourceCulture);
             }
         }
         

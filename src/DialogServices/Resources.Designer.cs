@@ -223,7 +223,7 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; could not be installed because it is not compatible with any project in the solution. The package doesn&apos;t target any framework..
+        ///   Looks up a localized string similar to &apos;{0}&apos; could not be installed because it is not compatible with any project in the solution..
         /// </summary>
         public static string Dialog_NoCompatibleProjectNoFrameworkNames {
             get {
@@ -363,6 +363,15 @@ namespace NuGet.Dialog {
         public static string Dialog_ReportAbuse {
             get {
                 return ResourceManager.GetString("Dialog_ReportAbuse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requires NuGet.
+        /// </summary>
+        public static string Dialog_RequireNuGetLabel {
+            get {
+                return ResourceManager.GetString("Dialog_RequireNuGetLabel", resourceCulture);
             }
         }
         

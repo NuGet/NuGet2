@@ -22,6 +22,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -50,6 +51,7 @@
     <Compile Include="NuGetCommandLine\NuGetDeleteCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetListCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetCommandLineTest.cs" />
+    <Compile Include="NuGetCommandLine\NuGetPackCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetPushCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuSpecFileContext.cs" />
     <Compile Include="Core\PathResolverTest.cs" />
