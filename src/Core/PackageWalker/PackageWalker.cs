@@ -10,7 +10,6 @@ namespace NuGet
 {
     public abstract class PackageWalker
     {
-        private static Lazy<Version> NuGetVersion = new Lazy<Version>(() => typeof(IPackage).Assembly.GetName().Version);
         private readonly Dictionary<IPackage, PackageWalkInfo> _packageLookup = new Dictionary<IPackage, PackageWalkInfo>();
         private readonly FrameworkName _targetFramework;
 
@@ -162,10 +161,10 @@ namespace NuGet
         private static void CheckPackageMinClientVersion(IPackage package)
         {
             // validate that the current version of NuGet satisfies the minVersion attribute specified in the .nuspec
-            if (NuGetVersion.Value < package.MinClientVersion)
+            if (Constants.NuGetVersion < package.MinClientVersion)
             {
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageMinVersionNotSatisfied, package.GetFullName(), package.MinClientVersion, NuGetVersion.Value));
+                throw new NuGetVersionNotSatisfiedException(
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageMinVersionNotSatisfied, package.GetFullName(), package.MinClientVersion, Constants.NuGetVersion));
             }
         }
 

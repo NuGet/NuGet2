@@ -13,11 +13,14 @@ namespace NuGet.Dialog.PackageManagerUI
     /// </summary>
     public partial class ProgressDialog : DialogWindow
     {
+        private bool _completed;
 
         public ProgressDialog()
         {
             InitializeComponent();
         }
+
+        public bool UpgradeNuGetRequested { get; private set; }
 
         protected override void OnSourceInitialized(System.EventArgs e)
         {
@@ -28,13 +31,15 @@ namespace NuGet.Dialog.PackageManagerUI
             NativeMethods.RemoveMenu(hMenu, menuItemCount - 1, NativeMethods.MF_BYPOSITION);
         }
 
-        internal void SetErrorState()
+        internal void SetErrorState(bool showUpgradeButton)
         {
+            _completed = true;
             OkButton.IsEnabled = true;
             ProgressBar.IsIndeterminate = false;
             ProgressBar.Value = ProgressBar.Maximum;
             ProgressBar.Foreground = Brushes.Red;
             StatusText.Text = NuGet.Dialog.Resources.Dialog_OperationFailed;
+            UpgradeButton.Visibility = showUpgradeButton ? Visibility.Visible : Visibility.Collapsed;
         }
 
         private void OkButton_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -47,7 +52,7 @@ namespace NuGet.Dialog.PackageManagerUI
             base.OnClosing(e);
 
             // do not allow user to close the form when the operation has not completed
-            e.Cancel = !OkButton.IsEnabled;
+            e.Cancel = !_completed;
 
             if (!e.Cancel)
             {
@@ -62,8 +67,14 @@ namespace NuGet.Dialog.PackageManagerUI
 
         public void ForceClose()
         {
-            OkButton.IsEnabled = true;
+            _completed = true;
             Close();
+        }
+
+        private void UpgradeButton_Click(object sender, RoutedEventArgs e)
+        {
+            UpgradeNuGetRequested = true;
+            ForceClose();
         }
 
         public void AddMessage(string message, Brush messageColor)

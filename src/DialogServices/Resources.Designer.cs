@@ -601,6 +601,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to _Upgrade NuGet.
+        /// </summary>
+        public static string Dialog_UpgradeNuGet {
+            get {
+                return ResourceManager.GetString("Dialog_UpgradeNuGet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Version:.
         /// </summary>
         public static string Dialog_VersionLabel {
