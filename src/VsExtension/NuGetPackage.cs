@@ -1,5 +1,6 @@
 extern alias dialog;
 extern alias dialog10;
+extern alias dialog11;
 using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
@@ -22,6 +23,7 @@ using NuGetConsole.Implementation;
 using NuGetConsole.Implementation.Console;
 using ManagePackageDialog = dialog::NuGet.Dialog.PackageManagerWindow;
 using VS10ManagePackageDialog = dialog10::NuGet.Dialog.PackageManagerWindow;
+using VS11ManagePackageDialog = dialog11::NuGet.Dialog.PackageManagerWindow;
 
 namespace NuGet.Tools
 {
@@ -334,9 +336,21 @@ namespace NuGet.Tools
 
         private static void ShowManageLibraryPackageDialog(Project project, string parameterString = null)
         {
-            DialogWindow window = VsVersionHelper.IsVisualStudio2010 ?
-                GetVS10PackageManagerWindow(project, parameterString) :
-                GetPackageManagerWindow(project, parameterString);
+            DialogWindow window;
+
+            if (VsVersionHelper.IsVisualStudio2010)
+            {
+                window = GetVS10PackageManagerWindow(project, parameterString);
+            }
+            else if (VsVersionHelper.IsVisualStudio2012)
+            {
+                window = GetVS11PackageManagerWindow(project, parameterString);
+            }
+            else
+            {
+                window = GetPackageManagerWindow(project, parameterString);
+            }
+
             try
             {
                 window.ShowModal();
@@ -352,6 +366,12 @@ namespace NuGet.Tools
         private static DialogWindow GetVS10PackageManagerWindow(Project project, string parameterString)
         {
             return new VS10ManagePackageDialog(project, parameterString);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static DialogWindow GetVS11PackageManagerWindow(Project project, string parameterString)
+        {
+            return new VS11ManagePackageDialog(project, parameterString);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

@@ -5,7 +5,7 @@ namespace NuGet.VisualStudio
 {
     public static class VsVersionHelper
     {
-        private const int MaxVsVersion = 11;
+        private const int MaxVsVersion = 12;
         private static readonly Lazy<int> _vsMajorVersion = new Lazy<int>(GetMajorVsVersion);
 
         public static int VsMajorVersion
@@ -16,6 +16,11 @@ namespace NuGet.VisualStudio
         public static bool IsVisualStudio2010
         {
             get { return VsMajorVersion == 10; }
+        }
+
+        public static bool IsVisualStudio2012
+        {
+            get { return VsMajorVersion == 11; }
         }
 
         private static int GetMajorVsVersion()

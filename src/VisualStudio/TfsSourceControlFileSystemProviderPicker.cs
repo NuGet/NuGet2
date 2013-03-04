@@ -25,7 +25,19 @@ namespace NuGet.VisualStudio
             {
                 var assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-                string assemblyName = VsVersionHelper.IsVisualStudio2010 ? "NuGet.TeamFoundationServer10.dll" : "NuGet.TeamFoundationServer.dll";
+                string assemblyName;
+                if (VsVersionHelper.IsVisualStudio2010)
+                {
+                    assemblyName = "NuGet.TeamFoundationServer10.dll";
+                }
+                else if (VsVersionHelper.IsVisualStudio2012)
+                {
+                    assemblyName = "NuGet.TeamFoundationServer11.dll";
+                }
+                else 
+                {
+                    assemblyName = "NuGet.TeamFoundationServer.dll";
+                }
 
                 try
                 {

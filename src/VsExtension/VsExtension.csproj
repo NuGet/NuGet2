@@ -105,6 +105,11 @@
       <Name>Dialog10</Name>
       <Aliases>dialog10</Aliases>
     </ProjectReference>
+    <ProjectReference Include="..\Dialog11\Dialog11.csproj">
+      <Project>{fd1e159b-a36f-49e4-856d-8555a20d09cf}</Project>
+      <Name>Dialog11</Name>
+      <Aliases>dialog11</Aliases>
+    </ProjectReference>
     <ProjectReference Include="..\DialogServices\DialogServices.csproj">
       <Project>{05497432-8899-4ED4-BB97-7B5EA3E911DB}</Project>
       <Name>DialogServices</Name>
@@ -121,6 +126,10 @@
     <ProjectReference Include="..\TeamFoundationServer10\TeamFoundationServer10.csproj">
       <Project>{3F786922-B4F3-4C6E-B22F-3D764BA5B3B8}</Project>
       <Name>TeamFoundationServer10</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TeamFoundationServer11\TeamFoundationServer11.csproj">
+      <Project>{5220a205-0c3f-4cd5-b1b4-7cd5b8298d7a}</Project>
+      <Name>TeamFoundationServer11</Name>
     </ProjectReference>
     <ProjectReference Include="..\VisualStudio.Interop\VisualStudio.Interop.csproj">
       <Project>{7DB43FE1-75E1-49F9-B2C8-06A552BA2144}</Project>

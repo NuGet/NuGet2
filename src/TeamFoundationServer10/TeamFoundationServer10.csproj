@@ -4,7 +4,7 @@
   <PropertyGroup>
     <ProjectGuid>{3F786922-B4F3-4C6E-B22F-3D764BA5B3B8}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>NuGet.TeamFoundationServer10</RootNamespace>
+    <RootNamespace>NuGet.TeamFoundationServer</RootNamespace>
     <AssemblyName>NuGet.TeamFoundationServer10</AssemblyName>
     <CodeAnalysisRuleSet>..\..\NuGet.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
