@@ -842,7 +842,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        // This method should only be called in VS 2012 or above
+        // This method should only be called in VS 2012
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void DoWorkInWriterLock(this Project project, Action<MsBuildProject> action)
         {

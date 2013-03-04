@@ -286,8 +286,17 @@ namespace NuGet.VisualStudio
             if (!VsVersionHelper.IsVisualStudio2010 && 
                 (project.IsJavaScriptProject() ||  project.IsNativeProject()))
             {
-                project.DoWorkInWriterLock(
-                    buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
+                if (VsVersionHelper.IsVisualStudio2012)
+                {
+                    project.DoWorkInWriterLock(
+                        buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
+                }
+                else
+                {
+                    NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+                        project.ToVsHierarchy(),
+                        buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
+                }
 
                 // When inside the Write lock, calling Project.Save() will cause a deadlock.
                 // Thus we will save it after and outside of the Write lock.
