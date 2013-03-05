@@ -210,6 +210,9 @@
       <HintPath>..\..\lib\VS10\Microsoft.VisualStudio.Shell.10.0.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="NuGet.VisualStudio12">
+      <HintPath>..\..\lib\NuGet.VisualStudio12.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
