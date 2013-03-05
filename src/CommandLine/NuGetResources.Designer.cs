@@ -1177,6 +1177,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} key already exists in Properties collection. Overriding value..
+        /// </summary>
+        internal static string Warning_DuplicatePropertyKey {
+            get {
+                return ResourceManager.GetString("Warning_DuplicatePropertyKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; was included in the project but doesn&apos;t exist. Skipping....
         /// </summary>
         internal static string Warning_FileDoesNotExist {

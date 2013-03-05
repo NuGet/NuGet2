@@ -366,6 +366,10 @@ namespace NuGet.Commands
             // Add the additional Properties to the properties of the Project Factory
             foreach (var property in Properties)
             {
+                if (factory.ProjectProperties.ContainsKey(property.Key))
+                {
+                    Console.WriteWarning(NuGetResources.Warning_DuplicatePropertyKey, property.Key);
+                }
                 factory.ProjectProperties[property.Key] = property.Value;
             }
 
