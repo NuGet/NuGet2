@@ -293,6 +293,8 @@ namespace NuGet.VisualStudio
                 }
                 else
                 {
+                    // TODO: Find a way to do this forDev12
+
                     //NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
                     //    project.ToVsHierarchy(),
                     //    buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
