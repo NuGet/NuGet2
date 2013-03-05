@@ -9,7 +9,6 @@ namespace NuGet.VisualStudio12
 {
     public static class ProjectHelper
     {
-        [MethodImpl(MethodImplOptions.NoInlining)]
         public static async void DoWorkInWriterLock(IVsHierarchy hierarchy, Action<MsBuildProject> action)
         {
             IVsBrowseObjectContext context = hierarchy as IVsBrowseObjectContext;
