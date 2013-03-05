@@ -176,7 +176,15 @@
             <VsixAssemblies Include="$(TempVsixDirectory)\*.dll" />
         </ItemGroup>
 
-        <CheckUnexpectedAssemblies Items="@(VsixAssemblies)" />
+        <CheckUnexpectedAssemblies Items="@(VsixAssemblies)">
+            <Output TaskParameter="InvalidItems" ItemName="InvalidFiles" />
+        </CheckUnexpectedAssemblies>
+
+        <Delete Files="@(InvalidFiles)" />
+        <Exec Command="&quot;$(ZipExe)&quot; a -r &quot;$(VisualStudioAddInBuildDirectory)\NuGet.Tools.zip&quot; &quot;$(TempVsixDirectory)\*.*&quot;" />
+
+        <Delete Files="$(VsixFileLocation)" />
+        <Move SourceFiles="$(VisualStudioAddInBuildDirectory)\NuGet.Tools.zip" DestinationFiles="$(VisualStudioAddInBuildDirectory)\NuGet.Tools.vsix" />
 
         <RemoveDir Directories="$(TempVsixDirectory)" ContinueOnError="true" />
     </Target>
