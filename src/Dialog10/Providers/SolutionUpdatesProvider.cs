@@ -54,16 +54,21 @@ namespace NuGet.Dialog.Providers
                         item.PackageIdentity,
                         // Selector function to return the initial checkbox state for a Project.
                         // We check a project if it has the current package installed by Id, but not version
-                        project => _activePackageManager.GetProjectManager(project).LocalRepository.Exists(item.Id),
+                        project => 
+                            {
+                                var localRepository = _activePackageManager.GetProjectManager(project).LocalRepository;
+                                return localRepository.Exists(item.Id) && IsVersionConstraintSatisfied(item, localRepository);
+                            },
                         project =>
-                        {
-                            var localRepository = _activePackageManager.GetProjectManager(project).LocalRepository;
+                            {
+                                var localRepository = _activePackageManager.GetProjectManager(project).LocalRepository;
 
-                            // for the Updates solution dialog, we only enable a project if it has an old version of 
-                            // the package installed.
-                            return localRepository.Exists(item.Id) &&
-                                   !localRepository.Exists(item.Id, item.PackageIdentity.Version);
-                        }
+                                // for the Updates solution dialog, we only enable a project if it has an old version of 
+                                // the package installed.
+                                return localRepository.Exists(item.Id) && 
+                                       !localRepository.Exists(item.Id, item.PackageIdentity.Version) &&
+                                       IsVersionConstraintSatisfied(item, localRepository);
+                            }
                     );
 
                     if (selectedProjects == null)
@@ -127,6 +132,22 @@ namespace NuGet.Dialog.Providers
 
                 return true;
             }
+        }
+
+        private static bool IsVersionConstraintSatisfied(PackageItem item, IPackageRepository localRepository)
+        {
+            // honors the version constraint set in the allowedVersion attribute of packages.config file
+            var constraintProvider = localRepository as IPackageConstraintProvider;
+            if (constraintProvider != null)
+            {
+                IVersionSpec constraint = constraintProvider.GetConstraint(item.Id);
+                if (constraint != null && !constraint.Satisfies(item.PackageIdentity.Version))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         protected override bool ExecuteAllCore()
