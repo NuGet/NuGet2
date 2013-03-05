@@ -18,7 +18,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <Prefer32Bit>false</Prefer32Bit>
-    <OutputPath>..\..\..\..\lib\</OutputPath>
+    <OutputPath>..\..\..\..\lib\VS12-unsigned\</OutputPath>
     <DebugType>none</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Mono Release'">
@@ -31,7 +31,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>mskey.snk</AssemblyOriginatorKeyFile>
@@ -46,10 +46,12 @@
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Threading">
       <HintPath>..\..\..\..\lib\Microsoft.Threading.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.ComponentModelHost, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.VisualStudio.ProjectSystem.V12Only">
       <HintPath>..\..\..\..\lib\Microsoft.VisualStudio.ProjectSystem.V12Only.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="System" />
