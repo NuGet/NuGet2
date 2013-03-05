@@ -19,7 +19,8 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <Prefer32Bit>false</Prefer32Bit>
     <OutputPath>..\..\..\..\lib\VS12-unsigned\</OutputPath>
-    <DebugType>none</DebugType>
+    <DebugType>pdbonly</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Mono Release'">
     <Prefer32Bit>false</Prefer32Bit>
