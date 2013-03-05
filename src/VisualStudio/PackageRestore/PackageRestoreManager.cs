@@ -293,9 +293,9 @@ namespace NuGet.VisualStudio
                 }
                 else
                 {
-                    NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
-                        project.ToVsHierarchy(),
-                        buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
+                    //NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+                    //    project.ToVsHierarchy(),
+                    //    buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
                 }
 
                 // When inside the Write lock, calling Project.Save() will cause a deadlock.
