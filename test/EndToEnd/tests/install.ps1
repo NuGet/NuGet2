@@ -3,7 +3,7 @@
     $project = New-ConsoleApplication
     
     # Act
-    Install-Package FakeItEasy -Project $project.Name
+    Install-Package FakeItEasy -Project $project.Name -version 1.8.0
     
     # Assert
     Assert-Reference $project Castle.Core
@@ -1087,7 +1087,7 @@ function Test-PackageInstallAcceptsAllAsSourceName {
     $project = New-ConsoleApplication
     
     # Act
-    Install-Package FakeItEasy -Project $project.Name -Source 'All'
+    Install-Package FakeItEasy -Project $project.Name -Source 'All' -Version 1.8.0
     
     # Assert
     Assert-Reference $project Castle.Core
@@ -1270,7 +1270,7 @@ function Test-SinglePackageInstallIntoSingleProjectWhenSolutionPathHasComma {
     $project = New-ConsoleApplication
     
     # Act
-    Install-Package FakeItEasy -Project $project.Name
+    Install-Package FakeItEasy -Project $project.Name -Version 1.8.0
     
     # Assert
     Assert-Reference $project Castle.Core
