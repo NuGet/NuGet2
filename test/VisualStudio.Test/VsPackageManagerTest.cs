@@ -57,7 +57,7 @@ namespace NuGet.VisualStudio.Test
                 String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "foo 1.0", requiredVersion.ToString(), nugetVersion.ToString());
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<NuGetVersionNotSatisfiedException>(
                 () => packageManager.InstallPackage(projectManager, "foo", new SemanticVersion("1.0"), ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance),
                 expectedErrorMessage);
         }
@@ -596,7 +596,7 @@ namespace NuGet.VisualStudio.Test
                 String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "A 2.0", requiredVersion.ToString(), nugetVersion.ToString());
 
             // Act && Assert
-            ExceptionAssert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<NuGetVersionNotSatisfiedException>(
                 () => packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance),
                 expectedErrorMessage);
         }

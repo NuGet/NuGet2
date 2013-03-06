@@ -344,7 +344,7 @@ namespace NuGet.Test
                 String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "A 1.0", requiredVersion.ToString(), nugetVersion.ToString());
 
             // Act && Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), expectedErrorMessage);
+            ExceptionAssert.Throws<NuGetVersionNotSatisfiedException>(() => projectManager.AddPackageReference("A"), expectedErrorMessage);
         }
 
         [Fact]
@@ -370,7 +370,7 @@ namespace NuGet.Test
                 String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "B 2.0", requiredVersion.ToString(), nugetVersion.ToString());
 
             // Act && Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), expectedErrorMessage);
+            ExceptionAssert.Throws<NuGetVersionNotSatisfiedException>(() => projectManager.AddPackageReference("A"), expectedErrorMessage);
         }
 
         [Fact]
@@ -1560,7 +1560,7 @@ namespace NuGet.Test
                 String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "A 2.0-alpha", requiredVersion.ToString(), nugetVersion.ToString());
 
             // Act && Assert
-            ExceptionAssert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<NuGetVersionNotSatisfiedException>(
                 () => projectManager.UpdatePackageReference("A", version: null, updateDependencies: false, allowPrereleaseVersions: true),
                 expectedErrorMessage);
         }
@@ -1595,7 +1595,7 @@ namespace NuGet.Test
                 String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "B 2.0", requiredVersion.ToString(), nugetVersion.ToString());
 
             // Act && Assert
-            ExceptionAssert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<NuGetVersionNotSatisfiedException>(
                 () => projectManager.UpdatePackageReference("A", version: null, updateDependencies: true, allowPrereleaseVersions: true),
                 expectedErrorMessage);
         }
