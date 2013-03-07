@@ -20,8 +20,8 @@ namespace NuGet
     /// </remarks>
     public class OptimizedZipPackage : LocalPackage
     {
-        private static ConcurrentDictionary<PackageName, IFileSystem> _cachedExpandedFileSytem = 
-            new ConcurrentDictionary<PackageName, IFileSystem>();
+        private static readonly ConcurrentDictionary<PackageName, string> _cachedExpandedFolder = new ConcurrentDictionary<PackageName, string>();
+        private static readonly IFileSystem _tempFileSystem = new PhysicalFileSystem(Path.Combine(Path.GetTempPath(), "nuget"));
 
         private Dictionary<string, PhysicalPackageFile> _files;
         private ICollection<FrameworkName> _supportedFrameworks;
@@ -52,11 +52,9 @@ namespace NuGet
             string directory = Path.GetDirectoryName(fullPackagePath);
             _fileSystem = new PhysicalFileSystem(directory);
             _packagePath = Path.GetFileName(fullPackagePath);
+            _expandedFileSystem = _tempFileSystem;
             
             EnsureManifest();
-
-            PackageName packageName = new PackageName(Id, Version);
-            _expandedFileSystem = _cachedExpandedFileSytem.GetOrAdd(packageName, name => new PhysicalFileSystem(Path.GetTempPath()));
         }
 
         /// <summary>
@@ -78,11 +76,9 @@ namespace NuGet
 
             _fileSystem = fileSystem;
             _packagePath = packagePath;
+            _expandedFileSystem = _tempFileSystem;
 
             EnsureManifest();
-
-            PackageName packageName = new PackageName(Id, Version);
-            _expandedFileSystem = _cachedExpandedFileSytem.GetOrAdd(packageName, name => new PhysicalFileSystem(Path.GetTempPath()));
         }
 
         /// <summary>
@@ -199,7 +195,9 @@ namespace NuGet
 
         private void EnsurePackageFiles()
         {
-            if (_files != null && _expandedFileSystem.DirectoryExists(_expandedFolderPath))
+            if (_files != null &&
+                _expandedFolderPath != null &&
+                _expandedFileSystem.DirectoryExists(_expandedFolderPath))
             {
                 return;
             }
@@ -207,12 +205,21 @@ namespace NuGet
             _files = new Dictionary<string, PhysicalPackageFile>();
             _supportedFrameworks = null;
 
+            var packageName = new PackageName(Id, Version);
+
+            // Only use the cache for expanded folders under %temp%.
+            if (_expandedFileSystem == _tempFileSystem)
+            {
+                _expandedFolderPath = _cachedExpandedFolder.GetOrAdd(packageName, _ => GetExpandedFolderPath());
+            }
+            else
+            {
+                _expandedFolderPath = GetExpandedFolderPath();
+            }
+
             using (Stream stream = GetStream())
             {
                 Package package = Package.Open(stream);
-
-                _expandedFolderPath = GetExpandedFolderPath();
-
                 // unzip files inside package
                 var files = from part in package.GetParts()
                             where ZipPackage.IsPackageFile(part)
@@ -251,7 +258,30 @@ namespace NuGet
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         protected virtual string GetExpandedFolderPath()
         {
-            return Path.Combine("nuget", Path.GetRandomFileName());
+            return Path.GetRandomFileName();
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        public static void PurgeCache() 
+        {
+            lock (_cachedExpandedFolder)
+            {
+                if (_cachedExpandedFolder.Count > 0)
+                {
+                    foreach (var expandedFolder in _cachedExpandedFolder.Values)
+                    {
+                        try
+                        {
+                            _tempFileSystem.DeleteDirectory(expandedFolder, recursive: true);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+
+                    _cachedExpandedFolder.Clear();
+                }
+            }
         }
     }
 }
