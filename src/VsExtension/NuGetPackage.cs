@@ -54,6 +54,7 @@ namespace NuGet.Tools
 
         private uint _solutionNotBuildingAndNotDebuggingContextCookie;
         private DTE _dte;
+        private DTEEvents _dteEvents;
         private IConsoleStatus _consoleStatus;
         private IVsMonitorSelection _vsMonitorSelection;
         private bool? _isVisualizerSupported;
@@ -157,6 +158,9 @@ namespace NuGet.Tools
 
             _dte = (DTE)GetService(typeof(SDTE));
             Debug.Assert(_dte != null);
+
+            _dteEvents = _dte.Events.DTEEvents;
+            _dteEvents.OnBeginShutdown += OnBeginShutDown;
 
             // set default credential provider for the HttpClient
             var webProxy = (IVsWebProxy)GetService(typeof(SVsWebProxy));
@@ -462,6 +466,14 @@ namespace NuGet.Tools
             }
 
             return null;
+        }
+
+        private void OnBeginShutDown()
+        {
+            _dteEvents.OnBeginShutdown -= OnBeginShutDown;
+            _dteEvents = null;
+
+            OptimizedZipPackage.PurgeCache();
         }
     }
 }
