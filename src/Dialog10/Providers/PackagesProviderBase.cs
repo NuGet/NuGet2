@@ -450,7 +450,7 @@ namespace NuGet.Dialog.Providers
             _providerServices.ProgressWindow.Hide();
         }
 
-        protected void CloseProgressWindow()
+        protected internal void CloseProgressWindow()
         {
             _providerServices.ProgressWindow.Close();
         }
