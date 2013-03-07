@@ -267,7 +267,7 @@ function Test-FSharpSimpleInstallWithContentFiles {
 
 function Test-FSharpSimpleWithAssemblyReference {
     # Arrange
-    $p = New-FSharpConsoleApplication
+    $p = New-FSharpLibrary
     
     # Act
     Install-Package Antlr -Project $p.Name -Source $context.RepositoryPath
