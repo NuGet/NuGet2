@@ -409,7 +409,7 @@ namespace NuGet.Dialog
                 catch (Exception exception)
                 {
                     MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
-
+                    provider.CloseProgressWindow();
                     ExceptionHelper.WriteToActivityLog(exception);
                 }
             }
@@ -689,7 +689,7 @@ namespace NuGet.Dialog
                 catch (Exception exception)
                 {
                     MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
-
+                    provider.CloseProgressWindow();
                     ExceptionHelper.WriteToActivityLog(exception);
                 }
             }

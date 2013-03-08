@@ -267,7 +267,7 @@ function Test-FSharpSimpleInstallWithContentFiles {
 
 function Test-FSharpSimpleWithAssemblyReference {
     # Arrange
-    $p = New-FSharpConsoleApplication
+    $p = New-FSharpLibrary
     
     # Act
     Install-Package Antlr -Project $p.Name -Source $context.RepositoryPath
@@ -1071,7 +1071,7 @@ function Test-PackageInstallAcceptsSourceName {
     $project = New-ConsoleApplication
     
     # Act
-    Install-Package FakeItEasy -Project $project.Name -Source 'NuGet Official package Source'
+    Install-Package FakeItEasy -Project $project.Name -Source 'NuGet Official package Source' -Version 1.8.0
     
     # Assert
     Assert-Reference $project Castle.Core

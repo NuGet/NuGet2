@@ -194,7 +194,8 @@ namespace NuGet.VisualStudio
 
         public static bool ContainsFile(this Project project, string path)
         {
-            if (string.Equals(project.Kind, VsConstants.WixProjectTypeGuid, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(project.Kind, VsConstants.WixProjectTypeGuid, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(project.Kind, VsConstants.NemerleProjectTypeGuid, StringComparison.OrdinalIgnoreCase))
             {
                 // For Wix project, IsDocumentInProject() returns not found
                 // even though the file is in the project. So we use GetProjectItem()
