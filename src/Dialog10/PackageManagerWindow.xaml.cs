@@ -6,7 +6,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using EnvDTE;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
@@ -40,7 +39,6 @@ namespace NuGet.Dialog
         private readonly IUpdateAllUIService _updateAllUIService;
         private readonly Project _activeProject;
         private string _searchText;
-        
 
         public PackageManagerWindow(Project project, string dialogParameters = null) :
             this(project,
@@ -99,6 +97,11 @@ namespace NuGet.Dialog
             providerServices.OutputConsoleProvider = _smartOutputConsoleProvider;
             _providerSettings = providerServices.ProviderSettings;
             _updateAllUIService = providerServices.UpdateAllUIService;
+            providerServices.ProgressWindow.UpgradeNuGetRequested += (_, __) =>
+                {
+                    Close();
+                    productUpdateService.Update();
+                };
 
             AddUpdateBar(productUpdateService);
             AddRestoreBar(packageRestoreManager);
@@ -406,7 +409,7 @@ namespace NuGet.Dialog
                 catch (Exception exception)
                 {
                     MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
-
+                    provider.CloseProgressWindow();
                     ExceptionHelper.WriteToActivityLog(exception);
                 }
             }
@@ -686,7 +689,7 @@ namespace NuGet.Dialog
                 catch (Exception exception)
                 {
                     MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
-
+                    provider.CloseProgressWindow();
                     ExceptionHelper.WriteToActivityLog(exception);
                 }
             }

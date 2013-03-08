@@ -367,15 +367,6 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Requires NuGet.
-        /// </summary>
-        public static string Dialog_RequireNuGetLabel {
-            get {
-                return ResourceManager.GetString("Dialog_RequireNuGetLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to All.
         /// </summary>
         public static string Dialog_RootNodeAll {
@@ -606,6 +597,15 @@ namespace NuGet.Dialog {
         public static string Dialog_UpdatesSolutionInstruction {
             get {
                 return ResourceManager.GetString("Dialog_UpdatesSolutionInstruction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to _Upgrade NuGet.
+        /// </summary>
+        public static string Dialog_UpgradeNuGet {
+            get {
+                return ResourceManager.GetString("Dialog_UpgradeNuGet", resourceCulture);
             }
         }
         

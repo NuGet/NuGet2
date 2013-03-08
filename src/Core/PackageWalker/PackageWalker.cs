@@ -163,13 +163,8 @@ namespace NuGet
             // validate that the current version of NuGet satisfies the minVersion attribute specified in the .nuspec
             if (Constants.NuGetVersion < package.MinClientVersion)
             {
-                throw new InvalidOperationException(
-                    String.Format(
-                        CultureInfo.CurrentCulture, 
-                        NuGetResources.PackageMinVersionNotSatisfied, 
-                        package.GetFullName(), 
-                        package.MinClientVersion, 
-                        Constants.NuGetVersion));
+                throw new NuGetVersionNotSatisfiedException(
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageMinVersionNotSatisfied, package.GetFullName(), package.MinClientVersion, Constants.NuGetVersion));
             }
         }
 

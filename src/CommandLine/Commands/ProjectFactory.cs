@@ -394,6 +394,7 @@ namespace NuGet.Commands
                     referencedProject.IncludeSymbols = IncludeSymbols;
                     referencedProject.Build = Build;
                     referencedProject.IncludeReferencedProjects = IncludeReferencedProjects;
+                    referencedProject.ProjectProperties = ProjectProperties;
                     referencedProject.BuildProject();
                     referencedProject.RecursivelyApply(action, alreadyAppliedProjects);
                 }
@@ -549,7 +550,7 @@ namespace NuGet.Commands
         {
             // get all packages and dependencies, including the ones in project references
             var packagesAndDependencies = new Dictionary<String, Tuple<IPackage, PackageDependency>>();
-            RecursivelyApply(p => p.AddDependencies(packagesAndDependencies));
+            ApplyAction(p => p.AddDependencies(packagesAndDependencies));
 
             // list of all dependency packages
             var packages = packagesAndDependencies.Values.Select(t => t.Item1).ToList();
