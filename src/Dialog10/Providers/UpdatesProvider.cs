@@ -114,9 +114,9 @@ namespace NuGet.Dialog.Providers
 
         protected override void ExecuteCommand(IProjectManager projectManager, PackageItem item, IVsPackageManager activePackageManager, IList<PackageOperation> operations)
         {
-            activePackageManager.UpdatePackage(
+            activePackageManager.UpdatePackages(
                 projectManager, 
-                item.PackageIdentity, 
+                new [] { item.PackageIdentity }, 
                 operations, 
                 updateDependencies: true, 
                 allowPrereleaseVersions: IncludePrerelease, 
@@ -138,16 +138,27 @@ namespace NuGet.Dialog.Providers
             IDisposable action = activePackageManager.SourceRepository.StartOperation(OperationName);
             IProjectManager projectManager = activePackageManager.GetProjectManager(_project);
 
+            List<PackageOperation> allOperations;
+            bool accepted = ShowLicenseAgreementForAllPackages(activePackageManager, out allOperations);
+            if (!accepted)
+            {
+                return false;
+            }
+
             try
             {
-                bool accepted = ShowLicenseAgreementForAllPackages(activePackageManager);
-                if (!accepted)
-                {
-                    return false;
-                }
-
                 RegisterPackageOperationEvents(activePackageManager, projectManager);
-                activePackageManager.UpdatePackages(projectManager, updateDependencies: true, allowPrereleaseVersions: IncludePrerelease, logger: this);
+
+                var allUpdatePackages = SelectedNode.GetPackages(String.Empty, IncludePrerelease);
+
+                activePackageManager.UpdatePackages(
+                    projectManager, 
+                    allUpdatePackages, 
+                    allOperations, 
+                    updateDependencies: true, 
+                    allowPrereleaseVersions: IncludePrerelease, 
+                    logger: this);
+
                 return true;
             }
             finally
@@ -157,26 +168,33 @@ namespace NuGet.Dialog.Providers
             }
         }
 
-        protected bool ShowLicenseAgreementForAllPackages(IVsPackageManager activePackageManager)
+        protected bool ShowLicenseAgreementForAllPackages(IVsPackageManager activePackageManager, out List<PackageOperation> allOperations)
         {
-            var allOperations = new List<PackageOperation>();
+            allOperations = new List<PackageOperation>();
 
-            var allPackages = SelectedNode.GetPackages(String.Empty, IncludePrerelease).ToList();
+            var installWalker = new InstallWalker(
+                LocalRepository,
+                activePackageManager.SourceRepository,
+                _project.GetTargetFrameworkName(),
+                logger: this,
+                ignoreDependencies: false,
+                allowPrereleaseVersions: IncludePrerelease);
+
+            var allPackages = SelectedNode.GetPackages(String.Empty, IncludePrerelease);
             foreach (var package in allPackages)
             {
-                var installWalker = new InstallWalker(
-                    LocalRepository,
-                    activePackageManager.SourceRepository,
-                    _project.GetTargetFrameworkName(),
-                    logger: this,
-                    ignoreDependencies: false,
-                    allowPrereleaseVersions: IncludePrerelease);
-
-                var operations = installWalker.ResolveOperations(package);
-                allOperations.AddRange(operations);
+                if (allOperations.FindIndex(
+                        operation => operation.Action == PackageAction.Install &&
+                                     operation.Package.Id == package.Id &&
+                                     operation.Package.Version == package.Version) == -1)
+                {
+                    var operations = installWalker.ResolveOperations(package);
+                    allOperations.AddRange(operations);
+                }
             }
 
-            return ShowLicenseAgreement(activePackageManager, allOperations.Reduce());
+            allOperations = (List<PackageOperation>)allOperations.Reduce();
+            return ShowLicenseAgreement(activePackageManager, allOperations);
         }
 
         protected override void OnExecuteCompleted(PackageItem item)
