@@ -37,10 +37,15 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "InstallCommandSolutionDirectory")]
         public string SolutionDirectory { get; set; }        
 
+        [Option(typeof(NuGetCommand), "InstallCommandProject")]
+        public string Project { get; set; }
+
         private bool AllowMultipleVersions
         {
             get { return !ExcludeVersion; }
         }
+
+        private string _projectFile;
 
         [ImportingConstructor]
         public InstallCommand()
@@ -54,7 +59,7 @@ namespace NuGet.Commands
             // On mono, parallel builds are broken for some reason. See https://gist.github.com/4201936 for the errors
             // That are thrown.
             DisableParallelProcessing = EnvironmentUtility.IsMonoRuntime;
-        }
+        }        
 
         public override void ExecuteCommand()
         {
@@ -77,11 +82,131 @@ namespace NuGet.Commands
             }
             else
             {
-                string packageId = Arguments[0];
-                SemanticVersion version = Version != null ? new SemanticVersion(Version) : null;
-                InstallPackage(fileSystem, packageId, version);
+                if (string.IsNullOrEmpty(Project))
+                {
+                    string packageId = Arguments[0];
+					SemanticVersion version = Version != null ? new SemanticVersion(Version) : null;
+					InstallPackage(fileSystem, packageId, version);
+                }
+                else
+                {
+                    InstallIntoProject();
+                }                
             }
         }
+
+        private void InstallIntoProject()
+        {
+            LocateProjectFile();
+            CalculateSolutionDirectory();
+            Console.WriteLine("Solution directory is {0}", SolutionDirectory);
+
+            string installPath = ResolveInstallPath();
+            IFileSystem fileSystem = CreateFileSystem(installPath);
+
+            string packageId = Arguments[0];
+            SemanticVersion version = Version != null ? new SemanticVersion(Version) : null;
+
+            InstallPackage(fileSystem, packageId, version);
+        }
+
+        private void LocateProjectFile()
+        {
+            if (FileSystem.FileExists(Project))
+            {
+                _projectFile = FileSystem.GetFullPath(Project);
+                return;
+            }
+
+            if (FileSystem.DirectoryExists(Project))
+            {
+                var projects = GetProjectFilesInDirectory(Project);
+                if (projects.Count == 1)
+                {
+                    _projectFile = FileSystem.GetFullPath(projects[0]);
+                    Console.WriteLine("Project file is {0}", _projectFile);
+                    return;
+                }
+
+                if (projects.Count > 1)
+                {
+                    throw new InvalidOperationException("Multiple project files found");
+                }
+
+                // count == 0
+                throw new InvalidOperationException("No project file is found");
+            }
+
+            throw new InvalidOperationException("Invalid value of -Project");
+        }
+
+        // Returns true if there exists exactly one solution file
+        // containing _projectFile, in directory 'dir'. 
+        private bool SolutionFileExists(string dir)
+        {
+            var solutionFiles = FileSystem.GetFiles(dir, "*.sln")
+                .Where(s => SolutionFileContainsProject(s, _projectFile))
+                .ToList();
+            if (solutionFiles.Count == 1)
+            {
+                var solutionFile = FileSystem.GetFullPath(solutionFiles[0]);
+                SolutionDirectory = Path.GetDirectoryName(solutionFile);
+                return true;
+            }
+
+            return false;
+        }
+
+        private void CalculateSolutionDirectory()
+        {
+            var dir = Path.GetDirectoryName(_projectFile);
+            if (SolutionFileExists(dir))
+            {
+                return;
+            }
+
+            dir = Path.GetDirectoryName(dir);
+            if (dir != null)
+            {
+                if (SolutionFileExists(dir))
+                {
+                    return;
+                }
+            }
+
+            SolutionDirectory = Path.GetDirectoryName(_projectFile);
+        }
+
+        private bool SolutionFileContainsProject(string solutionFile, string projectFile)
+        {
+            ISolutionParser solutionParser;
+            if (EnvironmentUtility.IsMonoRuntime)
+            {
+                solutionParser = new XBuildSolutionParser();
+            }
+            else
+            {
+                solutionParser = new MSBuildSolutionParser();
+            }
+
+            return solutionParser.GetAllProjectFileNames(FileSystem, solutionFile).Any(
+                s => String.Equals(s, projectFile, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private IList<string> GetProjectFilesInDirectory(string directory)
+        {
+            var projectFiles = new List<string>();
+            foreach (var file in FileSystem.GetFiles(directory, "*.*"))
+            {
+                var ext = Path.GetExtension(file);
+                if (MSBuildProjectSystem.KnownProjectExtensions.Contains(ext))
+                {
+                    projectFiles.Add(file);
+                }
+            }
+
+            return projectFiles;
+        }        
 
         protected virtual PackageReferenceFile GetPackageReferenceFile(string path)
         {
@@ -409,6 +534,38 @@ namespace NuGet.Commands
             // install is needed. In this case, uninstall the existing pacakge.
             packageManager.UninstallPackage(installedPackage, forceRemove: false, removeDependencies: true);
             return true;
+        }
+        
+        protected override IPackageManager CreatePackageManager(IFileSystem packagesFolderFileSystem, bool useSideBySidePaths, bool checkDowngrade = true)
+        {
+            if (string.IsNullOrEmpty(_projectFile))
+            {
+                return base.CreatePackageManager(
+                    packagesFolderFileSystem,
+                    useSideBySidePaths, 
+                    checkDowngrade);
+            }
+            else
+            {
+                var repository = CreateRepository();
+                var pathResolver = new DefaultPackagePathResolver(packagesFolderFileSystem, useSideBySidePaths);
+                IPackageRepository localRepository = new LocalPackageRepository(pathResolver, packagesFolderFileSystem);
+                if (EffectivePackageSaveMode != PackageSaveModes.None)
+                {
+                    localRepository.PackageSaveMode = EffectivePackageSaveMode;
+                }
+                var packageManager = new MSBuildPackageManager(
+                    repository, 
+                    pathResolver,
+                    packagesFolderFileSystem, 
+                    localRepository,
+                    _projectFile,
+                    SolutionDirectory)
+                {
+                    Logger = Console
+                };
+                return packageManager;
+            }
         }
 
         protected internal virtual IFileSystem CreateFileSystem(string path)

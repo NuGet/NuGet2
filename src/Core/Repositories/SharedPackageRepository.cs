@@ -13,6 +13,8 @@ namespace NuGet
     {
         private const string StoreFilePath = "repositories.config";
         private readonly PackageReferenceFile _packageReferenceFile;
+
+        // the file system where repositories.config is.
         private readonly IFileSystem _storeFileSystem;
 
         public SharedPackageRepository(string path)

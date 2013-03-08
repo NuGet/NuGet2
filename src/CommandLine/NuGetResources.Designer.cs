@@ -16662,6 +16662,16 @@ namespace NuGet {
         
         /// <summary>
         ///   Looks up a localized string similar to Byl nalezen balíček symbolů {0}, ale pro server symbolů nebyl zadán žádný klíč API. Chcete-li uložit klíč API, spusťte příkaz NuGet.exe setApiKey [klíč API z webu http://www.NuGet.org]..
+        ///   Looks up a localized string similar to &apos;{0}&apos; already exists. Skipping....
+        /// </summary>
+        internal static string Warning_FileExists {
+            get {
+                return ResourceManager.GetString("Warning_FileExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Option &apos;NoPrompt&apos; has been deprecated. Use &apos;NonInteractive&apos; instead..
         /// </summary>
         internal static string Warning_SymbolServerNotConfigured_csy {
             get {

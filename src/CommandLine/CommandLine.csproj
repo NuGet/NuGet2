@@ -72,10 +72,12 @@
     <Compile Include="Commands\UpdateCommand.cs" />
     <Compile Include="Common\CachedPackageSourceProvider.cs" />
     <Compile Include="Common\MSBuildSolutionParser.cs" />
+    <Compile Include="Common\MSBuildPackageManager.cs" />
     <Compile Include="Common\PackageExtractor.cs" />
     <Compile Include="Common\SelfUpdater.cs" />
     <Compile Include="Common\Solution.cs" />
     <Compile Include="Common\ProjectInSolution.cs" />
+    <Compile Include="Common\WixProjectSystem.cs" />
     <Compile Include="Common\XBuildSolutionParser.cs" />
     <Compile Include="Common\Verbosity.cs" />
     <Compile Include="Common\AggregateRepositoryHelper.cs" />
@@ -124,6 +126,8 @@
       <Link>Common\CommonResources.cs</Link>
     </Compile>
     <Compile Include="StrictSemanticVersionValidationRule.cs" />
+    <Compile Include="Commands\UninstallCommand.cs" />
+    <Compile Include="WebApplicatioProject.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">

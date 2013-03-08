@@ -81,7 +81,7 @@ namespace NuGet
             set;
         }
 
-        private string PackageReferenceFileFullPath
+        public string PackageReferenceFileFullPath
         {
             get
             {

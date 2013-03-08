@@ -77,7 +77,7 @@ namespace NuGet.Commands
                     throw new CommandLineException(NuGetResources.UnableToFindProject, inputFile);
                 }
 
-                UpdatePackages(new MSBuildProjectSystem(inputFile));
+                UpdatePackages(MSBuildProjectSystem.Create(inputFile));
                 return;
             }
                 
@@ -291,7 +291,7 @@ namespace NuGet.Commands
                 throw new CommandLineException(LocalizedResourceManager.GetString("MultipleProjectFilesFound"), packageReferenceFilePath);
             }
 
-            return new MSBuildProjectSystem(projectFiles[0]);
+            return MSBuildProjectSystem.Create(projectFiles[0]);
         }
 
         internal void UpdatePackages(IPackageRepository localRepository,

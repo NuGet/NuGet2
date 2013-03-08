@@ -6024,4 +6024,7 @@ Oluşturma sırasında NuGet'in paketleri indirmesini önlemek için, Visual Stu
   <data name="HelpCommandForMoreInfo_cht" xml:space="preserve">
     <value>如需詳細資訊，請造訪 {0}</value>
   </data>
+  <data name="Warning_FileExists" xml:space="preserve">
+    <value>'{0}' already exists. Skipping...</value>
+  </data>
 </root>
