@@ -1463,7 +1463,7 @@ function Test-InstallPackageConsidersPrereleasePackagesWhenResolvingDependencyWh
     $a | Install-Package -Source $context.RepositoryRoot PrereleaseTestPackage -Prerelease
     Assert-Package $a 'PrereleaseTestPackage' '1.0.1-a'
 
-    $a | Install-Package -Source $context.RepositoryRoot PackageWithDependencyOnPrereleaseTestPackage
+    $a | Install-Package -Source $context.RepositoryRoot PackageWithDependencyOnPrereleaseTestPackage -FileConflictAction Overwrite
     Assert-Package $a 'PrereleaseTestPackage' '1.0.1-a'
     Assert-Package $a 'PackageWithDependencyOnPrereleaseTestPackage' '1.0.0'
 }
