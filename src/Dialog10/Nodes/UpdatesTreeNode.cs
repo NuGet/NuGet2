@@ -12,6 +12,9 @@ namespace NuGet.Dialog.Providers
     internal class UpdatesTreeNode : SimpleTreeNode
     {
         private readonly IPackageRepository _localRepository;
+
+        // This is used to cache update packages. 
+        // Index 0 is for includePrerelease = true. Index 1 is for includePrerelease = false
         private readonly IList<IPackage>[] _updatePackagesCache = new IList<IPackage>[2];
 
         public UpdatesTreeNode(
