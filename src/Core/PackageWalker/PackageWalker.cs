@@ -245,12 +245,21 @@ namespace NuGet
                 return PackageTargets.Project;
             }
 
-            if (package.IsDependencyOnly())
+            if (IsDependencyOnly(package))
             {
                 return PackageTargets.None;
             }
 
             return PackageTargets.External;
+        }
+
+        /// <summary>
+        /// Returns true if a package has dependencies but no \tools directory
+        /// </summary>
+        private static bool IsDependencyOnly(IPackage package)
+        {
+            return !package.GetFiles().Any(f => f.Path.StartsWith(@"tools\", StringComparison.OrdinalIgnoreCase)) &&
+                   package.DependencySets.SelectMany(d => d.Dependencies).Any();
         }
     }
 }

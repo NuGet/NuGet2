@@ -2132,3 +2132,18 @@ function Test-InstallSolutionLevelPackageAddPackagesConfigToSolution
 
     Assert-NotNull $configFile "The 'packages.config' is not found under '.nuget' solution folder"
 }
+
+function Test-InstallMetadataPackageAddPackageToProject
+{
+    param($context)
+
+    # Arrange
+    $p = new-ClassLibrary
+    
+    # Act
+    $p | Install-Package MetadataPackage -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p MetadataPackage
+    Assert-Package $p DependencyPackage
+}

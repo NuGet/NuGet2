@@ -2267,6 +2267,54 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void AddPackageReferenceAllowsAddingMetadataPackage()
+        {
+            // Arrange
+            var projectSystem = new MockProjectSystem();
+            var localRepository = new MockPackageRepository();
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            
+            var packageA = PackageUtility.CreatePackage("A", "1.0", new [] { "hello.txt" });
+            var packageB = PackageUtility.CreatePackage("B", "2.0", dependencies: new[] { new PackageDependency("A") });
+
+            var mockPackageB = Mock.Get(packageB);
+            var files = PackageUtility.CreateFiles(new[] { "readme.txt", "foo.bar" });
+            mockPackageB.Setup(p => p.GetFiles()).Returns(files);
+            
+            mockRepository.AddPackage(packageA);
+            mockRepository.AddPackage(packageB);
+
+            // Act
+            projectManager.AddPackageReference("B");
+
+            // Assert
+            Assert.True(localRepository.Exists("A"));
+            Assert.True(localRepository.Exists("B"));
+        }
+
+        [Fact]
+        public void AddPackageReferenceDoesNotAllowAddingDependencyPackageWhichHasToolsFiles()
+        {
+            // Arrange
+            var projectSystem = new MockProjectSystem();
+            var localRepository = new MockPackageRepository();
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+
+            var packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "hello.txt" });
+            var packageB = PackageUtility.CreatePackage("B", "2.0", dependencies: new[] { new PackageDependency("A") }, tools: new [] { "aaaa.txt" });
+
+            mockRepository.AddPackage(packageA);
+            mockRepository.AddPackage(packageB);
+
+            // Act
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => projectManager.AddPackageReference("B"),
+                "External packages cannot depend on packages that target projects.");
+        }
+
+        [Fact]
         public void AddPackageReferenceImportsTargetOrPropFileAtContentRoot()
         {
             // Arrange
