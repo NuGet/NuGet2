@@ -550,25 +550,18 @@ function Test-SimpleBindingRedirects {
     $a = New-WebApplication
     $b = New-WebSite
     
-
     $projects = @($a, $b)
 
     # Act
     $projects | Install-Package B -Version 2.0 -Source $context.RepositoryPath
     $projects | Install-Package A -Version 1.0 -Source $context.RepositoryPath
-    $projects | Install-Package D -Version 2.0 -Source $context.RepositoryPath
-    $projects | Install-Package C -Version 1.0 -Source $context.RepositoryPath
 
     # Assert
     $projects | %{ Assert-Reference $_ A 1.0.0.0; 
-                   Assert-Reference $_ B 2.0.0.0; 
-                   Assert-Reference $_ C 1.0.0.0;
-                   Assert-Reference $_ D 2.0.0.0; }
+                   Assert-Reference $_ B 2.0.0.0; }
 
     Assert-BindingRedirect $a web.config B '0.0.0.0-2.0.0.0' '2.0.0.0'
-    Assert-BindingRedirect $a web.config D '0.0.0.0-2.0.0.0' '2.0.0.0'
     Assert-BindingRedirect $b web.config B '0.0.0.0-2.0.0.0' '2.0.0.0'
-    Assert-BindingRedirect $b web.config D '0.0.0.0-2.0.0.0' '2.0.0.0'
 }
 
 function Test-BindingRedirectDoesNotAddToSilverlightProject {
