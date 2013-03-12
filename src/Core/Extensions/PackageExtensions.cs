@@ -77,6 +77,17 @@ namespace NuGet
             return package.GetFiles(Constants.ToolsDirectory);
         }
 
+        public static IEnumerable<IPackageFile> GetBuildFiles(this IPackage package)
+        {
+            // build files must be either <package id>.props or <package id>.targets
+            string targetsFile = package.Id + ".targets";
+            string propsFile = package.Id + ".props";
+
+            return package.GetFiles(Constants.BuildDirectory)
+                          .Where(p => targetsFile.Equals(p.EffectivePath, StringComparison.OrdinalIgnoreCase) ||
+                                      propsFile.Equals(p.EffectivePath, StringComparison.OrdinalIgnoreCase));
+        }
+
         public static IEnumerable<IPackageFile> GetLibFiles(this IPackage package)
         {
             return package.GetFiles(Constants.LibDirectory);
@@ -146,11 +157,11 @@ namespace NuGet
             // there are tests that directly inject items into the AssemblyReferences collection
             // without having those files represented in the Lib folder.  We keep the redundant
             // check to play it on the safe side.
-
             return package.FrameworkAssemblies.Any() ||
                    package.AssemblyReferences.Any() ||
                    package.GetContentFiles().Any() ||
-                   package.GetLibFiles().Any();
+                   package.GetLibFiles().Any() ||
+                   package.GetBuildFiles().Any();
         }
 
         public static IEnumerable<PackageDependency> GetCompatiblePackageDependencies(this IPackageMetadata package, FrameworkName targetFramework)
@@ -190,7 +201,6 @@ namespace NuGet
         {
             return source.DistinctLast(PackageEqualityComparer.Id, PackageComparer.Version);
         }
-
 
         /// <summary>
         /// Collapses the packages by Id picking up the highest version for each Id that it encounters

@@ -172,47 +172,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void AssemblyReferencesIsFilteredCorrectlyWithOnlyNullTargetFramework()
-        {
-            // Arrange
-            var files = new IPackageFile[] {
-                CreatePackageFile(@"lib\net40\one.dll"),
-                CreatePackageFile(@"lib\net40\two.dll"),
-
-                CreatePackageFile(@"lib\sl30\one.dll"),
-                CreatePackageFile(@"lib\sl30\two.dll"),
-
-                CreatePackageFile(@"lib\net45\foo.dll"),
-                CreatePackageFile(@"lib\net45\bar.dll")
-            };
-
-            var references = new PackageReferenceSet[] {
-                new PackageReferenceSet(
-                    null,
-                    new [] { "two.dll", "bar.dll" }),
-            };
-
-            var ms = GetPackageStream(files, references);
-
-            var fileSystem = new MockFileSystem("x:\\");
-            fileSystem.AddFile("pam.nupkg", ms);
-
-            var expandedFileSystem = new MockFileSystem("y:\\");
-
-            var ozp = new TestableOptimizedZipPackage(fileSystem, "pam.nupkg", expandedFileSystem);
-
-            // Act
-            var assemblies = ozp.AssemblyReferences.OrderBy(p => p.Path).ToList();
-
-            // Assert
-            Assert.Equal(3, assemblies.Count);
-            Assert.Equal(@"lib\net40\two.dll", assemblies[0].Path);
-            Assert.Equal(@"lib\net45\bar.dll", assemblies[1].Path);
-            Assert.Equal(@"lib\sl30\two.dll", assemblies[2].Path);
-        }
-
-        [Fact]
-        public void AssemblyReferencesIsFilteredCorrectlyAccordingToTargetFramework()
+        public void AssemblyReferencesIsNotFilteredAccordingToTargetFramework()
         {
             // Arrange
             var files = new IPackageFile[] {
@@ -230,10 +190,6 @@ namespace NuGet.Test
                 new PackageReferenceSet(
                     new FrameworkName("Silverlight, Version=2.0"),
                     new [] { "two.dll" }),
-                
-                new PackageReferenceSet(
-                    new FrameworkName(".NET, Version=4.0"),
-                    new string[0]),
 
                 new PackageReferenceSet(
                     new FrameworkName(".NET, Version=4.5"),
@@ -253,54 +209,13 @@ namespace NuGet.Test
             var assemblies = ozp.AssemblyReferences.OrderBy(p => p.Path).ToList();
 
             // Assert
-            Assert.Equal(3, assemblies.Count);
-            Assert.Equal(@"lib\net45\bar.dll", assemblies[0].Path);
-            Assert.Equal(@"lib\net45\foo.dll", assemblies[1].Path);
-            Assert.Equal(@"lib\sl30\two.dll", assemblies[2].Path);
-        }
-
-        [Fact]
-        public void AssemblyReferencesIsFilteredCorrectlyAccordingToTargetFramework2()
-        {
-            // Arrange
-            var files = new IPackageFile[] {
-                CreatePackageFile(@"lib\net40\one.dll"),
-
-                CreatePackageFile(@"lib\sl30\one.dll"),
-                CreatePackageFile(@"lib\sl30\two.dll"),
-
-                CreatePackageFile(@"lib\net45\foo.dll"),
-                CreatePackageFile(@"lib\net45\bar.dll")
-            };
-
-            var references = new PackageReferenceSet[] {
-                new PackageReferenceSet(
-                    null,
-                    new [] { "one.dll" }),
-                
-                new PackageReferenceSet(
-                    new FrameworkName(".NET, Version=4.5"),
-                    new string[] { "foo.dll", "bar.dll" }),
-            };
-
-            var ms = GetPackageStream(files, references);
-
-            var fileSystem = new MockFileSystem("x:\\");
-            fileSystem.AddFile("pam.nupkg", ms);
-
-            var expandedFileSystem = new MockFileSystem("y:\\");
-
-            var ozp = new TestableOptimizedZipPackage(fileSystem, "pam.nupkg", expandedFileSystem);
-
-            // Act
-            var assemblies = ozp.AssemblyReferences.OrderBy(p => p.Path).ToList();
-
-            // Assert
-            Assert.Equal(4, assemblies.Count);
+            Assert.Equal(6, assemblies.Count);
             Assert.Equal(@"lib\net40\one.dll", assemblies[0].Path);
-            Assert.Equal(@"lib\net45\bar.dll", assemblies[1].Path);
-            Assert.Equal(@"lib\net45\foo.dll", assemblies[2].Path);
-            Assert.Equal(@"lib\sl30\one.dll", assemblies[3].Path);
+            Assert.Equal(@"lib\net40\two.dll", assemblies[1].Path);
+            Assert.Equal(@"lib\net45\bar.dll", assemblies[2].Path);
+            Assert.Equal(@"lib\net45\foo.dll", assemblies[3].Path);
+            Assert.Equal(@"lib\sl30\one.dll", assemblies[4].Path);
+            Assert.Equal(@"lib\sl30\two.dll", assemblies[5].Path);
         }
 
         [Fact]

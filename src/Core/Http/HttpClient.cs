@@ -40,6 +40,11 @@ namespace NuGet
             }
         }
 
+        public virtual Uri OriginalUri
+        {
+            get { return _uri; }
+        }
+
         public string Method
         {
             get;

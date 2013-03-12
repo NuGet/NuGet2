@@ -120,6 +120,28 @@ namespace NuGet.Test
             Assert.False(fileSystem.FileExists(nupkgPath));
         }
 
+        [Fact]
+        public void CallRemovePackageWillRemoveTheWholePackageDirecotry()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\\root");
+            fileSystem.AddFile("A.2.0\\A.2.0.nupkg");
+            fileSystem.AddFile("A.2.0\\A.2.0.nuspec");
+            fileSystem.AddFile("A.2.0\\random");
+            fileSystem.AddFile("A.2.0\\content\\file.txt");
+            fileSystem.AddFile("A.2.0\\readme.txt");
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            repository.RemovePackage(PackageUtility.CreatePackage("A", "2.0"));
+
+            // Assert
+            Assert.False(fileSystem.FileExists("A.2.0\\A.2.0.nupkg"));
+            Assert.False(fileSystem.FileExists("A.2.0\\A.2.0.nuspec"));
+            Assert.False(fileSystem.DirectoryExists("A.2.0"));
+        }
+
         [Theory]
         [InlineData("A", "2.0.0.0", "A.2.0")]
         [InlineData("B", "1.0.0.0-alpha", "B.1.0.0-alpha")]

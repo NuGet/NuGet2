@@ -118,6 +118,48 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             Assert.True(consoleOutput.ToString().Contains("Successfully created package"));
         }
 
+        [Theory]
+        [InlineData("abcd")]
+        [InlineData("1")]
+        [InlineData("2ab")]
+        [InlineData("1.2.3.4-alpha")]
+        public void PackageCommand_ThrowsWhenMinClientVersionIsInvalid(string minVersionValue)
+        {
+            //Arrange
+            string nuspecFile = Path.Combine(OneSpecfolder, "antlr.nuspec");
+            File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
+            File.WriteAllText(Path.Combine(OneSpecfolder, "foo.txt"), "test");
+            string[] args = new string[] { "pack", "-minClientVersion", minVersionValue };
+            Directory.SetCurrentDirectory(OneSpecfolder);
+
+            //Act
+            int result = Program.Main(args);
+
+            //Assert
+            Assert.Equal(1, result);
+            Assert.True(consoleOutput.ToString().Contains("The value of MinClientVersion argument is not a valid version."));
+        }
+
+        [Fact]
+        public void PackageCommand_CreatesPackageAppliesMinClientVersionValue()
+        {
+            //Arrange
+            string nuspecFile = Path.Combine(OneSpecfolder, "antlr.nuspec");
+            File.WriteAllText(nuspecFile, NuSpecFileContext.FileContents);
+            File.WriteAllText(Path.Combine(OneSpecfolder, "foo.txt"), "test");
+            string[] args = new string[] { "pack", "-minClientVersion", "2.4" };
+            Directory.SetCurrentDirectory(OneSpecfolder);
+
+            //Act
+            int result = Program.Main(args);
+
+            //Assert
+            Assert.Equal(0, result);
+
+            IPackage package = new OptimizedZipPackage(Path.GetFullPath("antlr.3.1.1.nupkg"));
+            Assert.Equal(new Version("2.4"), package.MinClientVersion);
+        }
+
         [Fact]
         public void SetapikeyCommand_WithConfigOption()
         {
@@ -1544,6 +1586,22 @@ public class Cl_{0} {{
                 Environment.SetEnvironmentVariable("EnableNuGetPackageRestore", oldEnvironmentVariable,
                                                    EnvironmentVariableTarget.Process);
             }
+        }
+
+        // Tests that when error occurs accessing an URL source in install command,
+        // the error message will contain the URL of the source.
+        [Fact]
+        public void PackageCommand_InstallCommandDisplaySourceOnError()
+        {
+            // Act
+            Directory.SetCurrentDirectory(ProjectFilesFolder);
+            int result = Program.Main(
+                new[] { "install", "test_package", "-source", "http://localhost/" });
+
+            // Assert
+            Assert.NotEqual(0, result);
+            var message = consoleOutput.ToString();
+            Assert.True(message.Contains("http://localhost/"));
         }
 
         private static string SavePackage(string id, string version)

@@ -393,7 +393,7 @@ namespace NuGet.Dialog.Providers
                 else
                 {
                     OnExecuteCompleted((PackageItem)e.Result);
-                    _providerServices.ProgressWindow.SetCompleted(successful: true);
+                    _providerServices.ProgressWindow.SetCompleted(successful: true, showUpgradeNuGetButton: false);
 
                     // if this is an Execute All command (in which e.Result = null), hide the Update All button after successful execution
                     if (SupportsExecuteAllCommand && e.Result == null)
@@ -410,7 +410,8 @@ namespace NuGet.Dialog.Providers
             {
                 // show error message in the progress window in case of error
                 Log(MessageLevel.Error, ExceptionUtility.Unwrap(e.Error).Message);
-                _providerServices.ProgressWindow.SetCompleted(successful: false);
+                _providerServices.ProgressWindow.SetCompleted(
+                    successful: false, showUpgradeNuGetButton: e.Error is NuGetVersionNotSatisfiedException);
             }
 
             if (_failedProjects != null && _failedProjects.Count > 0)
@@ -449,7 +450,7 @@ namespace NuGet.Dialog.Providers
             _providerServices.ProgressWindow.Hide();
         }
 
-        protected void CloseProgressWindow()
+        protected internal void CloseProgressWindow()
         {
             _providerServices.ProgressWindow.Close();
         }

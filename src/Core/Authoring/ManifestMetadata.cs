@@ -15,28 +15,28 @@ namespace NuGet
     public class ManifestMetadata : IPackageMetadata, IValidatableObject
     {
         private string _owners;
-        private string _requiredMinVersionString;
+        private string _minClientVersionString;
 
-        [XmlAttribute("requiredMinVersion")]
+        [XmlAttribute("minClientVersion")]
         [ManifestVersion(5)]
-        public string RequiredMinVersionString
+        public string MinClientVersionString
         {
-            get { return _requiredMinVersionString; }
+            get { return _minClientVersionString; }
             set
             {
                 Version version = null;
                 if (!String.IsNullOrEmpty(value) && !System.Version.TryParse(value, out version))
                 {
-                    throw new InvalidDataException(NuGetResources.Manifest_InvalidRequiredMinVersion);
+                    throw new InvalidDataException(NuGetResources.Manifest_InvalidMinClientVersion);
                 }
 
-                _requiredMinVersionString = value;
-                RequiredMinVersion = version;
+                _minClientVersionString = value;
+                MinClientVersion = version;
             }
         }
 
         [XmlIgnore]
-        public Version RequiredMinVersion { get; private set; }
+        public Version MinClientVersion { get; private set; }
 
         [Required(ErrorMessageResourceType = typeof(NuGetResources), ErrorMessageResourceName = "Manifest_RequiredMetadataMissing")]
         [XmlElement("id")]
@@ -285,6 +285,33 @@ namespace NuGet
                 }
 
                 return groupedDependencySets;
+            }
+        }
+
+        ICollection<PackageReferenceSet> IPackageMetadata.PackageAssemblyReferences
+        {
+            get
+            {
+                if (ReferenceSets == null)
+                {
+                    return new PackageReferenceSet[0];
+                }
+
+                var referenceSets = ReferenceSets.Select(r => new PackageReferenceSet(r));
+
+                var referenceSetGroups = referenceSets.GroupBy(set => set.TargetFramework);
+                var groupedReferenceSets = referenceSetGroups.Select(group => new PackageReferenceSet(group.Key, group.SelectMany(g => g.References)))
+                                                             .ToList();
+
+                int nullTargetFrameworkIndex = groupedReferenceSets.FindIndex(set => set.TargetFramework == null);
+                if (nullTargetFrameworkIndex > -1)
+                {
+                    var nullFxReferenceSet = groupedReferenceSets[nullTargetFrameworkIndex];
+                    groupedReferenceSets.RemoveAt(nullTargetFrameworkIndex);
+                    groupedReferenceSets.Insert(0, nullFxReferenceSet);
+                }
+
+                return groupedReferenceSets;
             }
         }
 

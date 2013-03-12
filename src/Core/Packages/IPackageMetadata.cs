@@ -25,12 +25,17 @@ namespace NuGet
         /// Specifies assemblies from GAC that the package depends on.
         /// </summary>
         IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies { get; }
+        
+        /// <summary>
+        /// Returns sets of References specified in the manifest.
+        /// </summary>
+        ICollection<PackageReferenceSet> PackageAssemblyReferences { get; }
 
         /// <summary>
         /// Specifies sets other packages that the package depends on.
         /// </summary>
         IEnumerable<PackageDependencySet> DependencySets { get; }
 
-        Version RequiredMinVersion { get; }
+        Version MinClientVersion { get; }
     }
 }

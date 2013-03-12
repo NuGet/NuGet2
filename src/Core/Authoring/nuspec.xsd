@@ -25,7 +25,7 @@
 
     <xs:complexType name="referenceGroup">
         <xs:sequence>
-            <xs:element name="reference" minOccurs="0" maxOccurs="unbounded" type="reference">
+            <xs:element name="reference" minOccurs="1" maxOccurs="unbounded" type="reference">
             </xs:element>
         </xs:sequence>
         <xs:attribute name="targetFramework" type="xs:string" use="optional" />
@@ -85,7 +85,7 @@
                                 </xs:complexType>
                             </xs:element>
                         </xs:all>
-                        <xs:attribute name="requiredMinVersion" use="optional" type="xs:string" />
+                        <xs:attribute name="minClientVersion" use="optional" type="xs:string" />
                     </xs:complexType>
                 </xs:element>
                 <xs:element name="files" minOccurs="0" maxOccurs="1" nillable="true">

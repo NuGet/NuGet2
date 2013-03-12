@@ -184,6 +184,12 @@ namespace NuGet
             set;
         }
 
+        public string MinClientVersion
+        {
+            get;
+            set;
+        }
+
         private string OldHash { get; set; }
 
         private IPackage Package
@@ -254,6 +260,14 @@ namespace NuGet
             }
         }
 
+        public ICollection<PackageReferenceSet> PackageAssemblyReferences
+        {
+            get 
+            {
+                return Package.PackageAssemblyReferences;
+            }
+        }
+
         SemanticVersion IPackageMetadata.Version
         {
             get
@@ -266,10 +280,17 @@ namespace NuGet
             }
         }
 
-        public Version RequiredMinVersion
+        Version IPackageMetadata.MinClientVersion
         {
-            get;
-            set;
+            get
+            {
+                if (!String.IsNullOrEmpty(MinClientVersion))
+                {
+                    return new Version(MinClientVersion);
+                }
+
+                return null;
+            }
         }
 
         public IEnumerable<IPackageAssemblyReference> AssemblyReferences
@@ -418,6 +439,5 @@ namespace NuGet
             }
             return package != null;
         }
-
     }
 }

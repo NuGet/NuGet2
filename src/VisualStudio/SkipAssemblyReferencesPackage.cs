@@ -157,9 +157,14 @@ namespace NuGet.VisualStudio
             return _basePackage.GetSupportedFrameworks();
         }
 
-        public Version RequiredMinVersion
+        public Version MinClientVersion
         {
-            get { return _basePackage.RequiredMinVersion; }
+            get { return _basePackage.MinClientVersion; }
+        }
+
+        public ICollection<PackageReferenceSet> PackageAssemblyReferences
+        {
+            get { return _basePackage.PackageAssemblyReferences; }
         }
     }
 }

@@ -178,15 +178,15 @@ namespace NuGet
 
         public override void RemovePackage(IPackage package)
         {
-            string packageFilePath = GetManifestFilePath(package.Id, package.Version);
-            if (FileSystem.FileExists(packageFilePath))
-            {
-                // delete .nuspec file
-                FileSystem.DeleteFileSafe(packageFilePath);
-            }
+            // Delete the entire package directory
+            FileSystem.DeleteDirectorySafe(PathResolver.GetPackageDirectory(package), recursive: true);
 
-            // call the base class to delete .nupkg file if there is one
-            base.RemovePackage(package);
+            // If this is the last package delete the package directory
+            if (!FileSystem.GetFilesSafe(String.Empty).Any() &&
+                !FileSystem.GetDirectoriesSafe(String.Empty).Any())
+            {
+                FileSystem.DeleteDirectorySafe(String.Empty, recursive: false);
+            }
 
             if (_packageReferenceFile != null)
             {
