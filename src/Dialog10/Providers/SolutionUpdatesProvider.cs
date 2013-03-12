@@ -166,14 +166,24 @@ namespace NuGet.Dialog.Providers
 
             try
             {
-                bool accepted = ShowLicenseAgreementForAllPackages(_activePackageManager);
+                List<PackageOperation> allOperations;
+                bool accepted = ShowLicenseAgreementForAllPackages(_activePackageManager, out allOperations);
                 if (!accepted)
                 {
                     return false;
                 }
                 
                 RegisterPackageOperationEvents(_activePackageManager, null);
-                _activePackageManager.UpdatePackages(updateDependencies: true, allowPrereleaseVersions: IncludePrerelease, logger: this, eventListener: this);
+
+                var allUpdatePackages = SelectedNode.GetPackages(String.Empty, IncludePrerelease);
+                _activePackageManager.UpdateSolutionPackages(
+                    allUpdatePackages, 
+                    allOperations, 
+                    updateDependencies: true, 
+                    allowPrereleaseVersions: IncludePrerelease, 
+                    logger: this, 
+                    eventListener: this);
+
                 return true;
             }
             finally
