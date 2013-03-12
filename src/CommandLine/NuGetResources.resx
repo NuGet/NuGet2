@@ -510,6 +510,9 @@
   <data name="Error_ProcessingNuspecFile" xml:space="preserve">
     <value>Error occurred when processing file '{0}': {1}</value>
   </data>
+  <data name="Warning_DuplicatePropertyKey" xml:space="preserve">
+    <value>'{0}' key already exists in Properties collection. Overriding value.</value>
+  </data>
   <data name="ListCommand_LicenseUrl" xml:space="preserve">
     <value>License url: {0}</value>
   </data>

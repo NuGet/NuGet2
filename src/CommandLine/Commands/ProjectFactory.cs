@@ -680,7 +680,12 @@ namespace NuGet.Commands
 
             if (!String.IsNullOrEmpty(solutionDir))
             {
-                ProjectProperties.Add("SolutionDir", solutionDir);
+                if (this.ProjectProperties.ContainsKey("SolutionDir"))
+                {
+                    this.Logger.Log(MessageLevel.Warning, NuGetResources.Warning_DuplicatePropertyKey, "SolutionDir");
+                }
+
+                ProjectProperties["SolutionDir"] = solutionDir;
             }
         }
 
