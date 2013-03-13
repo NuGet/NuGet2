@@ -13,6 +13,10 @@ namespace NuGet.Dialog.Providers
     {
         private readonly IPackageRepository _localRepository;
 
+        // This is used to cache update packages. 
+        // Index 0 is for includePrerelease = true. Index 1 is for includePrerelease = false
+        private readonly IList<IPackage>[] _updatePackagesCache = new IList<IPackage>[2];
+
         public UpdatesTreeNode(
             PackagesProviderBase provider,
             string category,
@@ -24,10 +28,29 @@ namespace NuGet.Dialog.Providers
             _localRepository = localRepository;
         }
 
+        public override void Refresh(bool resetQueryBeforeRefresh = false)
+        {
+            // if we are about the refresh the packages, we need to clear the cache
+            _updatePackagesCache[0] = _updatePackagesCache[1] = null;
+            base.Refresh(resetQueryBeforeRefresh);
+        }
+
         public override IQueryable<IPackage> GetPackages(string searchTerm, bool allowPrereleaseVersions)
         {
+            int cacheIndex = -1;
+
+            // if this not a search request, we'll cache the request
+            if (String.IsNullOrEmpty(searchTerm))
+            {
+                cacheIndex = allowPrereleaseVersions ? 0 : 1;
+            }
+
+            if (cacheIndex > -1 && _updatePackagesCache[cacheIndex] != null)
+            {
+                return _updatePackagesCache[cacheIndex].AsQueryable();
+            }
+
             // We need to call ToList() here so that we don't evaluate the enumerable twice
-            // when trying to count it.
             IList<FrameworkName> solutionFrameworks = Provider.SupportedFrameworks.Select(s => new FrameworkName(s)).ToList();
 
             // The allow prerelease flag passed to this method indicates if we are allowed to show prerelease packages as part of the updates 
@@ -49,17 +72,32 @@ namespace NuGet.Dialog.Providers
                 packagesList = packagesList.Distinct(PackageEqualityComparer.Id).ToList();
             }
 
-            // Tf the local repository contains constraints for each package, we send the version constraints to the GetUpdates() service.
+            IQueryable<IPackage> updatePackages;
+
+            // If the local repository contains constraints for each package, we send the version constraints to the GetUpdates() service.
             IPackageConstraintProvider constraintProvider = _localRepository as IPackageConstraintProvider;
             if (constraintProvider != null)
             {
                 IEnumerable<IVersionSpec> constraintList = packagesList.Select(p => constraintProvider.GetConstraint(p.Id));
-                return Repository.GetUpdates(packagesList, allowPrereleaseVersions, includeAllVersions: false, targetFrameworks: solutionFrameworks, versionConstraints: constraintList)
+                updatePackages = Repository.GetUpdates(packagesList, allowPrereleaseVersions, includeAllVersions: false, targetFrameworks: solutionFrameworks, versionConstraints: constraintList)
                                  .AsQueryable();
             }
+            else
+            {
+                updatePackages = Repository.GetUpdates(packagesList, allowPrereleaseVersions, includeAllVersions: false, targetFrameworks: solutionFrameworks)
+                                .AsQueryable();
+            }
 
-            return Repository.GetUpdates(packagesList, allowPrereleaseVersions, includeAllVersions: false, targetFrameworks: solutionFrameworks)
-                             .AsQueryable();
+            if (cacheIndex > -1)
+            {
+                _updatePackagesCache[cacheIndex] = updatePackages.ToList();
+
+                // IMPORTANT: We must return this list, instead of 'updatePackages' directly to avoid additional request 
+                // when the downstream code try to sort the results.
+                return _updatePackagesCache[cacheIndex].AsQueryable();
+            }
+
+            return updatePackages;
         }
 
         protected override IQueryable<IPackage> CollapsePackageVersions(IQueryable<IPackage> packages)

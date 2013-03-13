@@ -6,8 +6,8 @@ using Moq;
 using NuGet.Dialog.Providers;
 using NuGet.Test;
 using NuGet.Test.Mocks;
-using NuGet.VisualStudio;
 using Xunit;
+using Xunit.Extensions;
 
 namespace NuGet.Dialog.Test
 {
@@ -245,6 +245,189 @@ namespace NuGet.Dialog.Test
             Assert.Equal(2, packages.Count);
             AssertPackage(packages[0], "A", "1.5");
             AssertPackage(packages[1], "B", "2.0");
+        }
+
+        [Fact]
+        public void GetPackagesCacheResultsWhenIncludePrereleaseIsFalse()
+        {
+            // Arrange
+            MockPackageRepository localRepository = new MockPackageRepository();
+            localRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
+            localRepository.AddPackage(PackageUtility.CreatePackage("B", "1.0"));
+
+            MockPackageRepository sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.5"));
+
+
+            PackagesProviderBase provider = new MockPackagesProvider();
+
+            IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
+            var node = new UpdatesTreeNode(provider, "Mock", parentTreeNode, localRepository, sourceRepository);
+
+            // Act 1
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: false).ToList();
+
+            // Assert 1
+            Assert.Equal(1, packages.Count);
+            AssertPackage(packages[0], "A", "1.5");
+
+            // Act 2
+
+            // now we modify the source repository to test if the GetPackages() return the old results
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "2.0"));
+            packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: false).ToList();
+
+            // Assert 2
+            Assert.Equal(1, packages.Count);
+            AssertPackage(packages[0], "A", "1.5");
+        }
+
+        [Fact]
+        public void GetPackagesCacheResultsWhenIncludePrereleaseIsTrue()
+        {
+            // Arrange
+            MockPackageRepository localRepository = new MockPackageRepository();
+            localRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
+            localRepository.AddPackage(PackageUtility.CreatePackage("B", "1.0"));
+
+            MockPackageRepository sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.5-alpha"));
+
+
+            PackagesProviderBase provider = new MockPackagesProvider();
+
+            IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
+            var node = new UpdatesTreeNode(provider, "Mock", parentTreeNode, localRepository, sourceRepository);
+
+            // Act 1
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
+
+            // Assert 1
+            Assert.Equal(1, packages.Count);
+            AssertPackage(packages[0], "A", "1.5-alpha");
+
+            // Act 2
+
+            // now we modify the source repository to test if the GetPackages() return the old results
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "2.0-beta"));
+            packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
+
+            // Assert 2
+            Assert.Equal(1, packages.Count);
+            AssertPackage(packages[0], "A", "1.5-alpha");
+        }
+
+        [Fact]
+        public void GetPackagesDoesNotCacheResultsWhenIncludePrereleaseValueIsDifferent()
+        {
+            // Arrange
+            MockPackageRepository localRepository = new MockPackageRepository();
+            localRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
+            localRepository.AddPackage(PackageUtility.CreatePackage("B", "1.0"));
+
+            MockPackageRepository sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.5-alpha"));
+
+
+            PackagesProviderBase provider = new MockPackagesProvider();
+
+            IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
+            var node = new UpdatesTreeNode(provider, "Mock", parentTreeNode, localRepository, sourceRepository);
+
+            // Act 1
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: false).ToList();
+
+            // Assert 1
+            Assert.Equal(0, packages.Count);
+
+            // Act 2
+
+            // now we modify the source repository to test if the GetPackages() return the old results
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "2.0-beta"));
+            packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
+            packages.Sort(PackageComparer.Version);
+
+            // Assert 2
+            Assert.Equal(2, packages.Count);
+            AssertPackage(packages[0], "A", "1.5-alpha");
+            AssertPackage(packages[1], "B", "2.0-beta");
+        }
+
+        [Fact]
+        public void GetPackagesDoesNotCacheResultsWhenSearchTermIsNotNull()
+        {
+            // Arrange
+            MockPackageRepository localRepository = new MockPackageRepository();
+            localRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
+            localRepository.AddPackage(PackageUtility.CreatePackage("B", "1.0"));
+
+            MockPackageRepository sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.5-alpha"));
+
+
+            PackagesProviderBase provider = new MockPackagesProvider();
+
+            IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
+            var node = new UpdatesTreeNode(provider, "Mock", parentTreeNode, localRepository, sourceRepository);
+
+            // Act 1
+            var packages = node.GetPackages(searchTerm: "A", allowPrereleaseVersions: true).ToList();
+
+            // Assert 1
+            Assert.Equal(1, packages.Count);
+            AssertPackage(packages[0], "A", "1.5-alpha");
+
+            // Act 2
+
+            // now we modify the source repository to test if the GetPackages() return the old results
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "2.0-beta"));
+            packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
+            packages.Sort(PackageComparer.Version);
+
+            // Assert 2
+            Assert.Equal(2, packages.Count);
+            AssertPackage(packages[0], "A", "1.5-alpha");
+            AssertPackage(packages[1], "B", "2.0-beta");
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void GetPackagesDoesNotCacheResultsWhenRefreshIsCalled(bool resetQueryBeforeRefresh)
+        {
+            // Arrange
+            MockPackageRepository localRepository = new MockPackageRepository();
+            localRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
+            localRepository.AddPackage(PackageUtility.CreatePackage("B", "1.0"));
+
+            MockPackageRepository sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.5-alpha"));
+
+
+            PackagesProviderBase provider = new MockPackagesProvider();
+
+            IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
+            var node = new UpdatesTreeNode(provider, "Mock", parentTreeNode, localRepository, sourceRepository);
+
+            // Act 1
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
+
+            // Assert 1
+            Assert.Equal(1, packages.Count);
+            AssertPackage(packages[0], "A", "1.5-alpha");
+
+            // Act 2
+            node.Refresh(resetQueryBeforeRefresh);
+
+            // now we modify the source repository to test if the GetPackages() return the old results
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "2.0-beta"));
+            packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
+            packages.Sort(PackageComparer.Version);
+
+            // Assert 2
+            Assert.Equal(2, packages.Count);
+            AssertPackage(packages[0], "A", "1.5-alpha");
+            AssertPackage(packages[1], "B", "2.0-beta");
         }
 
         [Fact]

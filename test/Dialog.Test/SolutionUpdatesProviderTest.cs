@@ -195,7 +195,13 @@ namespace NuGet.Dialog.Test
                     // Assert
                     Assert.Equal(RepositoryOperationNames.Update, sourceRepository.LastOperation);
                     mockPackageManager.Verify(
-                        p => p.UpdatePackages(true, includePrerelease, provider, provider), 
+                        p => p.UpdateSolutionPackages(
+                            It.IsAny<IEnumerable<IPackage>>(),
+                            It.IsAny<IEnumerable<PackageOperation>>(), 
+                            true, 
+                            includePrerelease, 
+                            provider, 
+                            provider), 
                         Times.Once());
                 }
                 catch (Exception ex)

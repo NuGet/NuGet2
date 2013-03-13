@@ -255,7 +255,7 @@ namespace NuGet.Dialog.Test
                 Assert.Equal(RepositoryOperationNames.Update, sourceRepository.LastOperation);
 
                 mockWindowServices.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
-                packageManager.Verify(p => p.UpdatePackage(projectManager.Object, packageA2, It.IsAny<IEnumerable<PackageOperation>>(), true, includePrerelease, provider), Times.Once());
+                packageManager.Verify(p => p.UpdatePackages(projectManager.Object, new [] { packageA2 }, It.IsAny<IEnumerable<PackageOperation>>(), true, includePrerelease, provider), Times.Once());
 
                 manualEvent.Set();
             };
@@ -324,7 +324,13 @@ namespace NuGet.Dialog.Test
                     Assert.Equal(RepositoryOperationNames.Update, sourceRepository.LastOperation);
 
                     mockWindowServices.Verify(p => p.ShowLicenseWindow(It.IsAny<IEnumerable<IPackage>>()), Times.Never());
-                    packageManager.Verify(p => p.UpdatePackages(projectManager.Object, true, includePrerelease, provider), Times.Once());
+                    packageManager.Verify(p => p.UpdatePackages(
+                        projectManager.Object, 
+                        It.IsAny<IEnumerable<IPackage>>(),
+                        It.IsAny<IEnumerable<PackageOperation>>(), 
+                        true, 
+                        includePrerelease, 
+                        provider), Times.Once());
                 }
                 catch (Exception ex)
                 {
@@ -372,8 +378,8 @@ namespace NuGet.Dialog.Test
             var packageManager = new Mock<IVsPackageManager>();
             packageManager.Setup(p => p.SourceRepository).Returns(sourceRepository);
             packageManager.Setup(p => p.GetProjectManager(It.Is<Project>(s => s == project.Object))).Returns(projectManager);
-            packageManager.Setup(p => p.UpdatePackage(
-               projectManager, It.IsAny<IPackage>(), It.IsAny<IEnumerable<PackageOperation>>(), true, false, It.IsAny<ILogger>())).Callback(
+            packageManager.Setup(p => p.UpdatePackages(
+               projectManager, It.IsAny<IEnumerable<IPackage>>(), It.IsAny<IEnumerable<PackageOperation>>(), true, false, It.IsAny<ILogger>())).Callback(
                () =>
                {
                    projectManager.AddPackageReference("A", new SemanticVersion("2.0"), false, false);
