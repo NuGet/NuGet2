@@ -97,7 +97,7 @@ namespace NuGet.PowerShell.Commands
         public SwitchParameter IncludePrerelease { get; set; }
 
         [Parameter]
-        public FileConflictOption FileConflictAction { get; set; }
+        public FileConflictAction FileConflictAction { get; set; }
 
         protected override IVsPackageManager CreatePackageManager()
         {
@@ -231,12 +231,12 @@ namespace NuGet.PowerShell.Commands
 
         public override FileConflictResolution ResolveFileConflict(string message)
         {
-            if (FileConflictAction == FileConflictOption.Overwrite)
+            if (FileConflictAction == FileConflictAction.Overwrite)
             {
                 return FileConflictResolution.Overwrite;
             }
 
-            if (FileConflictAction == FileConflictOption.Ignore)
+            if (FileConflictAction == FileConflictAction.Ignore)
             {
                 return FileConflictResolution.Ignore;
             }

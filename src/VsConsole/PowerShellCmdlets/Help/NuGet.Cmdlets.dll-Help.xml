@@ -51,7 +51,7 @@
           <maml:name>IncludePrerelease</maml:name>
         </command:parameter>
         <command:parameter required="false" position="named">
-          <maml:name>FileConflictOption</maml:name>
+          <maml:name>FileConflictAction</maml:name>
         </command:parameter>
       </command:syntaxItem>
     </command:syntax>

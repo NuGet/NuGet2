@@ -1,6 +1,6 @@
 ﻿namespace NuGet.PowerShell.Commands
 {
-    public enum FileConflictOption
+    public enum FileConflictAction
     {
         None,
         Overwrite,
