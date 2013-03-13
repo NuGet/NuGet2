@@ -435,6 +435,6 @@ nuget update -Self</value>
     <value>Include referenced projects either as dependencies or as part of the package.</value>
   </data>
   <data name="UpdateCommandFileConflictAction" xml:space="preserve">
-    <value>Set default action when a file from a package already exists in the target project. If not specified, it will prompt for each conflict file.</value>
+    <value>Set default action when a file from a package already exists in the target project. Set to Overwrite to always overwrite files. Set to Ignore to skip files. If not specified, it will prompt for each conflicting file.</value>
   </data>
 </root>
