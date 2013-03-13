@@ -420,7 +420,15 @@ namespace NuGet
 
         private bool IsSolutionLevel(IPackage package)
         {
-            return !package.HasProjectContent() && !IsReferenced(package.Id, package.Version);
+            // A package is solution level if it doesn't have project content & doesn't have dependency & not referenced by any project.
+            //
+            // Technically, the second condition is not totally accurate because a solution-level package can depend on another 
+            // solution-level package. However, doing that check here is expensive and we haven't seen such a package. 
+            // This condition here is more geared towards guarding against metadata packages, i.e. we shouldn't treat metadata packages 
+            // as solution-level ones.
+            return !package.HasProjectContent() && 
+                   !package.DependencySets.SelectMany(p => p.Dependencies).Any() &&
+                   !IsReferenced(package.Id, package.Version);
         }
 
         private string GetManifestFilePath(string packageId, SemanticVersion version)
