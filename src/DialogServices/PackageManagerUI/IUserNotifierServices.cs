@@ -14,5 +14,6 @@ namespace NuGet.Dialog.PackageManagerUI
             Predicate<Project> enabledStateSelector);
         void ShowSummaryWindow(object failedProjects);
         bool? ShowRemoveDependenciesWindow(string message);
+        FileConflictResolution ShowFileConflictResolution(string message);
     }
 }

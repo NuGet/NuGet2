@@ -403,10 +403,16 @@
   <data name="Manifest_RequiredMetadataMissing" xml:space="preserve">
     <value>{0} is required.</value>
   </data>
+  <data name="FileConflictMessage" xml:space="preserve">
+    <value>File '{0}' already exists in project '{1}'. Do you want to overwrite it?</value>
+  </data>
   <data name="Manifest_ReferencesIsEmpty" xml:space="preserve">
     <value>The element package\metadata\references\group must contain at least one &lt;reference&gt; child element.</value>
   </data>
   <data name="ErrorLoadingPackages" xml:space="preserve">
     <value>An error occurred while loading packages from'{0}': {1}</value>
+  </data>
+  <data name="Info_OverwriteExistingFile" xml:space="preserve">
+    <value>Overwrite existing file '{0}'.</value>
   </data>
 </root>

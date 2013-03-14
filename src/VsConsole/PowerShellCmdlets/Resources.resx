@@ -177,4 +177,28 @@
   <data name="Cmdlet_PackageIdAndVersionNotFound" xml:space="preserve">
     <value>Package with the Id '{0}' and version '{1}' is not found in the specified source.</value>
   </data>
+  <data name="Cmdlet_No" xml:space="preserve">
+    <value>&amp;No</value>
+  </data>
+  <data name="Cmdlet_NoAll" xml:space="preserve">
+    <value>No to Al&amp;l</value>
+  </data>
+  <data name="Cmdlet_Yes" xml:space="preserve">
+    <value>&amp;Yes</value>
+  </data>
+  <data name="Cmdlet_YesAll" xml:space="preserve">
+    <value>Yes to &amp;All</value>
+  </data>
+  <data name="Cmdlet_FileConflictNoAllHelp" xml:space="preserve">
+    <value>Skip this file and all subsequent files</value>
+  </data>
+  <data name="Cmdlet_FileConflictNoHelp" xml:space="preserve">
+    <value>Skip this file</value>
+  </data>
+  <data name="Cmdlet_FileConflictYesAllHelp" xml:space="preserve">
+    <value>Overwrite this file and all subsequent files</value>
+  </data>
+  <data name="Cmdlet_FileConflictYesHelp" xml:space="preserve">
+    <value>Overwrite this file</value>
+  </data>
 </root>

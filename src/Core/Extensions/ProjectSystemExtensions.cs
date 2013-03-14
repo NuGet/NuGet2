@@ -1,20 +1,19 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using NuGet.Resources;
 
 namespace NuGet
 {
-    // REVIEW: Do we need this class? Should this logic be moved to ProjectManager?
     public static class ProjectSystemExtensions
     {
         public static void AddFiles(this IProjectSystem project,
                                     IEnumerable<IPackageFile> files,
                                     IDictionary<string, IPackageFileTransformer> fileTransformers)
         {
-
             // Convert files to a list
             List<IPackageFile> fileList = files.ToList();
 
@@ -61,7 +60,7 @@ namespace NuGet
                         }
                         else
                         {
-                            project.AddFileWithCheck(path, file.GetStream);
+                            TryAddFile(project, file, path);
                         }
                     }
                 }
@@ -75,6 +74,38 @@ namespace NuGet
             }
         }
 
+        /// <summary>
+        /// Try to add the specified the project with the target path. If there's an existing file in the project with the same name, 
+        /// it will ask the logger for the resolution, which has 4 choices: Overwrite|Ignore|Overwrite All|Ignore All
+        /// </summary>
+        /// <param name="project"></param>
+        /// <param name="file"></param>
+        /// <param name="path"></param>
+        public static void TryAddFile(IProjectSystem project, IPackageFile file, string path)
+        {
+            if (project.FileExists(path) && project.FileExistsInProject(path))
+            {
+                // file exists in project, ask user if he wants to overwrite or ignore
+                string conflictMessage = String.Format(CultureInfo.CurrentCulture, NuGetResources.FileConflictMessage, path, project.ProjectName);
+                FileConflictResolution resolution = project.Logger.ResolveFileConflict(conflictMessage);
+                if (resolution == FileConflictResolution.Overwrite || resolution == FileConflictResolution.OverwriteAll)
+                {
+                    // overwrite
+                    project.Logger.Log(MessageLevel.Info, NuGetResources.Info_OverwriteExistingFile, path);
+                    project.AddFile(path, file.GetStream());
+                }
+                else
+                {
+                    // ignore
+                    project.Logger.Log(MessageLevel.Info, NuGetResources.Warning_FileAlreadyExists, path);
+                }
+            }
+            else
+            {
+                project.AddFile(path, file.GetStream());
+            }
+        }
+
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want delete to be robust, when exceptions occur we log then and move on")]
         public static void DeleteFiles(this IProjectSystem project,
@@ -82,7 +113,6 @@ namespace NuGet
                                        IEnumerable<IPackage> otherPackages,
                                        IDictionary<string, IPackageFileTransformer> fileTransformers)
         {
-
             IPackageFileTransformer transformer;
             // First get all directories that contain files
             var directoryLookup = files.ToLookup(p => Path.GetDirectoryName(ResolveTargetPath(project, fileTransformers, p.EffectivePath, out transformer)));
