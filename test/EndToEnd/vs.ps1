@@ -128,7 +128,7 @@ function New-Project {
 
     # Return the project
 
-	for ($counter = 0; $counter -lt 3; $counter++)
+	for ($counter = 0; $counter -lt 5; $counter++)
 	{
 		if ($SolutionFolder) {
 			$solutionFolderPath = Get-SolutionFolderPathRecursive $SolutionFolder
@@ -143,7 +143,7 @@ function New-Project {
 			break;
 		}
 
-		[System.Threading.Thread]::Sleep(50)
+		[System.Threading.Thread]::Sleep(100)
 	}
     
     if(!$project) {
