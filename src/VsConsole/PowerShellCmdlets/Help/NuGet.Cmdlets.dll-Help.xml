@@ -50,6 +50,9 @@
         <command:parameter required="false" position="named">
           <maml:name>IncludePrerelease</maml:name>
         </command:parameter>
+        <command:parameter required="false" position="named">
+          <maml:name>FileConflictAction</maml:name>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
 
@@ -104,6 +107,12 @@
           <maml:para>Indicates whether this command will consider prerelease packages. If omitted, only stable packages are considered.</maml:para>
         </maml:description>
       </command:parameter>
+        <command:parameter required="false" position="named">
+            <maml:name>FileConflictAction</maml:name>
+            <maml:description>
+                <maml:para>Indicates what this command should do if a file from the package's content folder already exists in the project.</maml:para>
+            </maml:description>
+        </command:parameter>
     </command:parameters>
 
     <!-- Examples section  -->
@@ -567,6 +576,9 @@
         <command:parameter required="false" position="named">
           <maml:name>Reinstall</maml:name>
         </command:parameter>
+        <command:parameter required="false" position="named">
+          <maml:name>FileConflictAction</maml:name>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
 
@@ -633,6 +645,12 @@
           <maml:para>Reinstall packages with the existing versions.</maml:para>
         </maml:description>
       </command:parameter>
+        <command:parameter required="false" position="named">
+            <maml:name>FileConflictAction</maml:name>
+            <maml:description>
+                <maml:para>Indicates what this command should do if a file from the package's content folder already exists in the project.</maml:para>
+            </maml:description>
+        </command:parameter>
     </command:parameters>
 
     <command:examples>

@@ -21,6 +21,7 @@ Release notes
 - When building a package from a project, when -IncludeReferencedProjects is specified, projects 
   referenced by the project are either added as a dependency of the package, if nuspec file exists, 
   or are added into the package if nuspec file doesn't exist.
+- Allow users to overwrite files if there's a file conflict in package and project.
 
 *** v2.2 ***
 

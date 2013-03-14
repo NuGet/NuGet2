@@ -510,4 +510,8 @@
   <data name="Error_ProcessingNuspecFile" xml:space="preserve">
     <value>Error occurred when processing file '{0}': {1}</value>
   </data>
+  <data name="FileConflictChoiceText" xml:space="preserve">
+    <value>[Y] Yes  [A] Yes to All  [N] No  [L] No to All ?</value>
+    <comment>Please do not localize the letters inside the [] brackets.</comment>
+  </data>
 </root>

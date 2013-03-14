@@ -1,4 +1,5 @@
 using System;
+
 namespace NuGet
 {
     public interface IPackageManager

@@ -15,5 +15,10 @@ namespace NuGet
         public void Log(MessageLevel level, string message, params object[] args)
         {
         }
+
+        public FileConflictResolution ResolveFileConflict(string message)
+        {
+            return FileConflictResolution.Ignore;
+        }
     }
 }

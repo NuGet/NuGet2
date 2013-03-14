@@ -46,18 +46,12 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             }
         }
 
-        #region IHostUISupportsMultipleChoiceSelection Members
-
-        public Collection<int> PromptForChoice(string caption,
-                                               string message,
-                                               Collection<ChoiceDescription> choices,
-                                               IEnumerable<int> defaultChoices)
+        public Collection<int> PromptForChoice(
+            string caption, string message, Collection<ChoiceDescription> choices, IEnumerable<int> defaultChoices)
         {
             WriteErrorLine("IHostUISupportsMultipleChoiceSelection.PromptForChoice not implemented.");
             return null;
         }
-
-        #endregion
 
         private static Type GetFieldType(FieldDescription field)
         {
@@ -261,13 +255,13 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             return cancelled;
         }
 
-        public override int PromptForChoice(
-            string caption, string message, Collection<ChoiceDescription> choices, int defaultChoice)
+        public override int PromptForChoice(string caption, string message, Collection<ChoiceDescription> choices, int defaultChoice)
         {
             if (!String.IsNullOrEmpty(caption))
             {
                 WriteLine(caption);
             }
+
             if (!String.IsNullOrEmpty(message))
             {
                 WriteLine(message);
@@ -287,27 +281,23 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                     accelerators[index] = String.Empty; // default to empty
 
                     // accelerator marker found?
-                    if ((ampIndex != -1) &&
-                        (ampIndex < (label.Length - 1)))
+                    if (ampIndex != -1 && ampIndex < label.Length - 1)
                     {
                         // grab the letter after '&'
                         accelerators[index] = label
                             .Substring(ampIndex + 1, 1)
                             .ToUpper(CultureInfo.CurrentCulture);
                     }
+
                     Write(String.Format(CultureInfo.CurrentCulture, "[{0}] {1}  ",
                                         accelerators[index],
-                        // remove the redundant marker from output
+                                        // remove the redundant marker from output
                                         label.Replace("&", String.Empty)));
                 }
-                Write(
-                    String.Format(
-                        CultureInfo.CurrentCulture,
-                        Resources.PromptForChoiceSuffix,
-                        accelerators[defaultChoice]));
 
-                string input = ReadLine();
+                Write(String.Format(CultureInfo.CurrentCulture, Resources.PromptForChoiceSuffix, accelerators[defaultChoice]));
 
+                string input = ReadLine().Trim();
                 switch (input.Length)
                 {
                     case 0:
@@ -318,14 +308,28 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                         }
                         chosen = defaultChoice;
                         break;
+
                     case 1:
-                        // single letter accelerator, e.g. "Y"
-                        chosen = Array.FindIndex(
-                            accelerators,
-                            accelerator => accelerator.Equals(
-                                input,
-                                StringComparison.OrdinalIgnoreCase));
+                        if (input[0] == '?')
+                        {
+                            // show help
+                            for (int index = 0; index < choices.Count; index++)
+                            {
+                                WriteLine(String.Format(
+                                    CultureInfo.CurrentCulture, "{0} - {1}.", accelerators[index], choices[index].HelpMessage));
+                            }
+                        }
+                        else
+                        {
+                            // single letter accelerator, e.g. "Y"
+                            chosen = Array.FindIndex(
+                                accelerators,
+                                accelerator => accelerator.Equals(
+                                    input,
+                                    StringComparison.OrdinalIgnoreCase));
+                        }
                         break;
+
                     default:
                         // match against entire label, e.g. "Yes"
                         chosen = Array.FindIndex(
@@ -393,6 +397,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                         }
                     }
                 }
+
                 return builder.ToString();
             }
             catch (PipelineStoppedException)
@@ -406,10 +411,7 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             }
         }
 
-        [SuppressMessage(
-            "Microsoft.Reliability",
-            "CA2000:Dispose objects before losing scope",
-            Justification = "Caller's responsibility to dispose.")]
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller's responsibility to dispose.")]
         public override SecureString ReadLineAsSecureString()
         {
             var secureString = new SecureString();

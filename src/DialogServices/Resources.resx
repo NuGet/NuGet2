@@ -348,7 +348,19 @@
   <data name="Dialog_UpdateAllProgress" xml:space="preserve">
     <value>Update all packages...</value>
   </data>
-  <data name="Dialog_RequireNuGetLabel" xml:space="preserve">
-    <value>Requires NuGet</value>
+  <data name="Dialog_UpgradeNuGet" xml:space="preserve">
+    <value>_Upgrade NuGet</value>
+  </data>
+  <data name="NoAllLabel" xml:space="preserve">
+    <value>No to A_ll</value>
+  </data>
+  <data name="NoLabel" xml:space="preserve">
+    <value>_No</value>
+  </data>
+  <data name="YesAllLabel" xml:space="preserve">
+    <value>Yes to _All</value>
+  </data>
+  <data name="YesLabel" xml:space="preserve">
+    <value>_Yes</value>
   </data>
 </root>

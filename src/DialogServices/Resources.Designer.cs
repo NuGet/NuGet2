@@ -367,15 +367,6 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Requires NuGet.
-        /// </summary>
-        public static string Dialog_RequireNuGetLabel {
-            get {
-                return ResourceManager.GetString("Dialog_RequireNuGetLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to All.
         /// </summary>
         public static string Dialog_RootNodeAll {
@@ -610,6 +601,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to _Upgrade NuGet.
+        /// </summary>
+        public static string Dialog_UpgradeNuGet {
+            get {
+                return ResourceManager.GetString("Dialog_UpgradeNuGet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Version:.
         /// </summary>
         public static string Dialog_VersionLabel {
@@ -709,11 +709,29 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No to A_ll.
+        /// </summary>
+        public static string NoAllLabel {
+            get {
+                return ResourceManager.GetString("NoAllLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to (not framework specific).
         /// </summary>
         public static string NoFxDependencyGroup {
             get {
                 return ResourceManager.GetString("NoFxDependencyGroup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to _No.
+        /// </summary>
+        public static string NoLabel {
+            get {
+                return ResourceManager.GetString("NoLabel", resourceCulture);
             }
         }
         
@@ -759,6 +777,24 @@ namespace NuGet.Dialog {
         public static string Visualizer_Project {
             get {
                 return ResourceManager.GetString("Visualizer_Project", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yes to _All.
+        /// </summary>
+        public static string YesAllLabel {
+            get {
+                return ResourceManager.GetString("YesAllLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to _Yes.
+        /// </summary>
+        public static string YesLabel {
+            get {
+                return ResourceManager.GetString("YesLabel", resourceCulture);
             }
         }
     }

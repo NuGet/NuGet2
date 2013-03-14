@@ -37,6 +37,7 @@ namespace NuGet.Dialog.Providers
         private CultureInfo _uiCulture, _culture;
         private readonly ISolutionManager _solutionManager;
         private IDisposable _expandedNodesDisposable;
+        private bool _overwriteAll, _ignoreAll;
 
         protected PackagesProviderBase(
             IPackageRepository localRepository, 
@@ -338,6 +339,9 @@ namespace NuGet.Dialog.Providers
             // disable all operations while this install is in progress
             OperationCoordinator.IsBusy = true;
 
+            // before every new operation, reset these two flags so that we'll ask for conflict resolution again
+            _overwriteAll = _ignoreAll = false;
+
             _readmeFile = null;
             _originalPackageId = item != null ? item.Id : null;
             _progressProvider.ProgressAvailable += OnProgressAvailable;
@@ -393,7 +397,7 @@ namespace NuGet.Dialog.Providers
                 else
                 {
                     OnExecuteCompleted((PackageItem)e.Result);
-                    _providerServices.ProgressWindow.SetCompleted(successful: true);
+                    _providerServices.ProgressWindow.SetCompleted(successful: true, showUpgradeNuGetButton: false);
 
                     // if this is an Execute All command (in which e.Result = null), hide the Update All button after successful execution
                     if (SupportsExecuteAllCommand && e.Result == null)
@@ -410,7 +414,8 @@ namespace NuGet.Dialog.Providers
             {
                 // show error message in the progress window in case of error
                 Log(MessageLevel.Error, ExceptionUtility.Unwrap(e.Error).Message);
-                _providerServices.ProgressWindow.SetCompleted(successful: false);
+                _providerServices.ProgressWindow.SetCompleted(
+                    successful: false, showUpgradeNuGetButton: e.Error is NuGetVersionNotSatisfiedException);
             }
 
             if (_failedProjects != null && _failedProjects.Count > 0)
@@ -449,7 +454,7 @@ namespace NuGet.Dialog.Providers
             _providerServices.ProgressWindow.Hide();
         }
 
-        protected void CloseProgressWindow()
+        protected internal void CloseProgressWindow()
         {
             _providerServices.ProgressWindow.Close();
         }
@@ -744,6 +749,29 @@ namespace NuGet.Dialog.Providers
                 _expandedNodesDisposable.Dispose();
                 _expandedNodesDisposable = null;
             }
+        }
+
+        public FileConflictResolution ResolveFileConflict(string message)
+        {
+            if (_overwriteAll)
+            {
+                return FileConflictResolution.OverwriteAll;
+            }
+
+            if (_ignoreAll)
+            {
+                return FileConflictResolution.IgnoreAll;
+            }
+
+            HideProgressWindow();
+
+            FileConflictResolution resolution = _providerServices.UserNotifierServices.ShowFileConflictResolution(message);
+            _overwriteAll = resolution == FileConflictResolution.OverwriteAll;
+            _ignoreAll = resolution == FileConflictResolution.IgnoreAll;
+
+            ShowProgressWindow();
+
+            return resolution;
         }
 
         public virtual void Dispose()

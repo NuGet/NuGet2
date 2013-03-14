@@ -227,14 +227,6 @@ namespace NuGet.Dialog.Providers
             }
         }
 
-        public bool SatisfyMinClientVersion
-        {
-            get
-            {
-                return _packageIdentity.MinClientVersion == null || _packageIdentity.MinClientVersion <= Constants.NuGetVersion;
-            }
-        }
-
         internal void UpdateEnabledStatus()
         {
             // set to null to force re-evaluation of the property value

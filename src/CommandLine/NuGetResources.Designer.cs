@@ -277,6 +277,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [Y] Yes  [A] Yes to All  [N] No  [L] No to All ?.
+        /// </summary>
+        internal static string FileConflictChoiceText {
+            get {
+                return ResourceManager.GetString("FileConflictChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Found 1 project with a packages.config file. ({0}).
         /// </summary>
         internal static string FoundProject {

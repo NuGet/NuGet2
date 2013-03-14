@@ -79,12 +79,12 @@ namespace NuGet
                     {
                         getErrorMessage = e => e.ToString();
                     }
-            
+
                     command.Execute();
                 }
             }
             catch (AggregateException exception)
-            { 
+            {
                 string message;
                 Exception unwrappedEx = ExceptionUtility.Unwrap(exception);
                 if (unwrappedEx == exception)
@@ -105,6 +105,11 @@ namespace NuGet
                 console.WriteError(getErrorMessage(ExceptionUtility.Unwrap(e)));
                 return 1;
             }
+            finally
+            {
+                OptimizedZipPackage.PurgeCache();
+            }
+
             return 0;
         }
 

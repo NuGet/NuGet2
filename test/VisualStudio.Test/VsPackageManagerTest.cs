@@ -57,7 +57,7 @@ namespace NuGet.VisualStudio.Test
                 String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "foo 1.0", requiredVersion.ToString(), nugetVersion.ToString());
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<NuGetVersionNotSatisfiedException>(
                 () => packageManager.InstallPackage(projectManager, "foo", new SemanticVersion("1.0"), ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance),
                 expectedErrorMessage);
         }
@@ -596,7 +596,7 @@ namespace NuGet.VisualStudio.Test
                 String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "A 2.0", requiredVersion.ToString(), nugetVersion.ToString());
 
             // Act && Assert
-            ExceptionAssert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<NuGetVersionNotSatisfiedException>(
                 () => packageManager.UpdatePackage(projectManager, "A", version: null, updateDependencies: true, allowPrereleaseVersions: false, logger: NullLogger.Instance),
                 expectedErrorMessage);
         }
@@ -626,6 +626,57 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             Assert.True(packageManager.LocalRepository.Exists(A10));
+        }
+
+        [Fact]
+        public void UpdatePackagesWithOperationsAddPackageCorrectly()
+        {
+            // Arrange            
+            var localRepository = new MockSharedPackageRepository();
+
+            var projectRepository = new MockProjectPackageRepository(localRepository);
+            var sourceRepository = new MockPackageRepository();
+            var fileSystem = new MockFileSystem();
+            var pathResolver = new DefaultPackagePathResolver(fileSystem);
+            var A1 = PackageUtility.CreatePackage("A", "1.0", new[] { "hello1" });
+            var A2 = PackageUtility.CreatePackage("A", "2.0", new[] { "hello2" });
+            var A3 = PackageUtility.CreatePackage("A", "3.0", new[] { "hello3" });
+
+            var B1 = PackageUtility.CreatePackage("B", "1.0", new[] { "world1" });
+            var B2 = PackageUtility.CreatePackage("B", "2.0", new[] { "world2" });
+
+            sourceRepository.AddPackage(A2);
+            sourceRepository.AddPackage(A3);
+            sourceRepository.AddPackage(B1);
+            sourceRepository.AddPackage(B2);
+
+            localRepository.AddPackage(A1);
+            localRepository.AddPackage(B1);
+
+            projectRepository.Add(A1);
+            projectRepository.Add(B1);
+
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, fileSystem, localRepository, new Mock<IDeleteOnRestartManager>().Object, new Mock<VsPackageInstallerEvents>().Object);
+            var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), projectRepository);
+ 
+            var operations = new PackageOperation[] {
+                new PackageOperation(A3, PackageAction.Install),
+                new PackageOperation(B2, PackageAction.Install)
+            };
+
+            // Act
+            packageManager.UpdatePackages(projectManager, new[] { A3, B2 }, operations, updateDependencies: true, allowPrereleaseVersions: true, logger: NullLogger.Instance);
+
+            // Assert
+            Assert.True(localRepository.Exists("A", new SemanticVersion("3.0")));
+            Assert.False(localRepository.Exists("A", new SemanticVersion("2.0")));
+            Assert.False(localRepository.Exists("A", new SemanticVersion("1.0")));
+
+            Assert.True(localRepository.Exists("B", new SemanticVersion("2.0")));
+            Assert.False(localRepository.Exists("B", new SemanticVersion("1.0")));
+
+            Assert.True(projectRepository.Exists("A", new SemanticVersion("3.0")));
+            Assert.True(projectRepository.Exists("B", new SemanticVersion("2.0")));
         }
 
         [Fact]
@@ -836,6 +887,8 @@ namespace NuGet.VisualStudio.Test
             Assert.True(packageManager.LocalRepository.Exists(package2));
             Assert.True(!packageManager.LocalRepository.Exists(package3));
         }
+
+
 
         [Fact]
         public void InstallPackageDoesNotInstallPackageWithIndirectDependencyThatIsPrerelease()
