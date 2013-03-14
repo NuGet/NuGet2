@@ -612,11 +612,11 @@ function Test-UpdatePackageWithSafeFlag {
 
     # Assert
     Assert-Package $p1 A 1.0.3
-    Assert-Package $p1 B 1.0.3
-    Assert-Package $p1 C 1.0.0.1
+    Assert-Package $p1 B 1.0.0
+    Assert-Package $p1 C 1.0.0.0
     Assert-SolutionPackage A 1.0.3
-    Assert-SolutionPackage B 1.0.3
-    Assert-SolutionPackage C 1.0.0.1
+    Assert-SolutionPackage B 1.0.0
+    Assert-SolutionPackage C 1.0.0.0
 }
 
 function Test-UpdatePackageDiamondDependenciesBottomNodeConflictingPackages {
@@ -685,10 +685,10 @@ function Test-UpdateAllPackagesInASingleProjectWithMultipleProjects {
 
     # Assert
     Assert-Package $p1 jQuery 1.6.1
-    Assert-Package $p2 jQuery 1.5.2
+    Assert-Package $p2 jQuery 1.5.1
     Assert-Package $p1 jQuery.UI.Combined 1.8.13
     Assert-Package $p2 jQuery.UI.Combined 1.8.11
-    Assert-SolutionPackage jQuery 1.5.2
+    Assert-SolutionPackage jQuery 1.5.1
     Assert-SolutionPackage jQuery 1.6.1
     Assert-SolutionPackage jQuery.UI.Combined 1.8.11
     Assert-SolutionPackage jQuery.UI.Combined 1.8.13
@@ -706,9 +706,10 @@ function Test-UpdateAllPackagesInASingleProjectWithSafeFlagAndMultipleProjects {
 
     # Assert
     Assert-Package $p1 jQuery 1.5.2
-    Assert-Package $p2 jQuery 1.5.2
+    Assert-Package $p2 jQuery 1.5.1
     Assert-Package $p1 jQuery.UI.Combined 1.8.13
     Assert-Package $p2 jQuery.UI.Combined 1.8.11
+    Assert-SolutionPackage jQuery 1.5.1
     Assert-SolutionPackage jQuery 1.5.2
     Assert-SolutionPackage jQuery.UI.Combined 1.8.11
     Assert-SolutionPackage jQuery.UI.Combined 1.8.13
