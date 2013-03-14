@@ -356,4 +356,7 @@ Packages installed into Website projects will not be restored during build. Cons
   <data name="Warning_NoExactMatchForReference" xml:space="preserve">
     <value>No exact match found for removing reference '{0}'. Trying case-insensitive search...</value>
   </data>
+  <data name="FileConflictTitle" xml:space="preserve">
+    <value>File Conflict</value>
+  </data>
 </root>

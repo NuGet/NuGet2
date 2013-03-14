@@ -10,6 +10,7 @@ namespace NuGet.Test.Mocks
         private FrameworkName _frameworkName;
         private HashSet<string> _topImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private HashSet<string> _bottomImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private HashSet<string> _excludedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         public MockProjectSystem()
             : this(VersionUtility.DefaultTargetFramework)
@@ -126,6 +127,16 @@ namespace NuGet.Test.Mocks
             {
                 return _bottomImports.Contains(targetPath);
             }
+        }
+
+        public void ExcludeFileFromProject(string path)
+        {
+            _excludedFiles.Add(path);
+        }
+
+        public bool FileExistsInProject(string path)
+        {
+            return FileExists(path) && !_excludedFiles.Contains(path);
         }
     }
 }

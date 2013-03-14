@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using NuGet.Common;
@@ -9,10 +10,11 @@ namespace NuGet.Commands
 {
     [Command(typeof(NuGetCommand), "update", "UpdateCommandDescription", UsageSummary = "<packages.config|solution>",
         UsageExampleResourceName = "UpdateCommandUsageExamples")]
-    public class UpdateCommand : Command
+    public class UpdateCommand : Command, ILogger
     {
         private readonly List<string> _sources = new List<string>();
         private readonly List<string> _ids = new List<string>();
+        private bool _overwriteAll, _ignoreAll;
         
         [Option(typeof(NuGetCommand), "UpdateCommandSourceDescription")]
         public ICollection<string> Source
@@ -40,6 +42,9 @@ namespace NuGet.Commands
 
         [Option(typeof(NuGetCommand), "UpdateCommandPrerelease")]
         public bool Prerelease { get; set; }
+
+        [Option(typeof(NuGetCommand), "UpdateCommandFileConflictAction")]
+        public FileConflictOption FileConflictAction { get; set; }
 
         public override void ExecuteCommand()
         {
@@ -85,7 +90,6 @@ namespace NuGet.Commands
             var projects = packagesConfigFiles.Select(GetProject)
                                               .Where(p => p.Project != null)
                                               .ToList();
-
 
             if (projects.Count == 0)
             {
@@ -185,10 +189,9 @@ namespace NuGet.Commands
             var sharedPackageRepository = new SharedPackageRepository(pathResolver, sharedRepositoryFileSystem, sharedRepositoryFileSystem);
             var localRepository = new PackageReferenceRepository(project, sharedPackageRepository);
             sourceRepository = sourceRepository ?? AggregateRepositoryHelper.CreateAggregateRepositoryFromSources(RepositoryFactory, SourceProvider, Source);
-            IPackageConstraintProvider constraintProvider = localRepository;
 
             Console.WriteLine(NuGetResources.UpdatingProject, project.ProjectName);
-            UpdatePackages(localRepository, sharedRepositoryFileSystem, sharedPackageRepository, sourceRepository, constraintProvider, pathResolver, project);
+            UpdatePackages(localRepository, sharedRepositoryFileSystem, sharedPackageRepository, sourceRepository, localRepository, pathResolver, project);
             project.Save();
         }
 
@@ -281,10 +284,7 @@ namespace NuGet.Commands
                 PackageExtractor.InstallPackage(packageManager, eventArgs.Package);
             };
 
-            if (Verbose)
-            {
-                projectManager.Logger = Console;
-            }
+            projectManager.Logger = project.Logger = this;
 
             using (sourceRepository.StartOperation(RepositoryOperationNames.Update))
             {
@@ -334,6 +334,40 @@ namespace NuGet.Commands
             }
             var packageSorter = new PackageSorter(targetFramework: null);
             return packageSorter.GetPackagesByDependencyOrder(new ReadOnlyPackageRepository(packages)).Reverse();
+        }
+
+        public void Log(MessageLevel level, string message, params object[] args)
+        {
+            if (Verbose && Console != null)
+            {
+                Console.Log(level, message, args);
+            }
+        }
+
+        public FileConflictResolution ResolveFileConflict(string message)
+        {
+            // the -FileConflictAction is set to Overwrite or user has chosen Overwrite All previously
+            if (FileConflictAction == FileConflictOption.Overwrite || _overwriteAll)
+            {
+                return FileConflictResolution.Overwrite;
+            }
+
+            // the -FileConflictAction is set to Ignore or user has chosen Ignore All previously
+            if (FileConflictAction == FileConflictOption.Ignore || _ignoreAll)
+            {
+                return FileConflictResolution.Ignore;
+            }
+
+            // otherwise, prompt user for choice, unless we're in non-interactive mode
+            if (Console != null && !Console.IsNonInteractive)
+            {
+                var resolution = Console.ResolveFileConflict(message);
+                _overwriteAll = (resolution == FileConflictResolution.OverwriteAll);
+                _ignoreAll = (resolution == FileConflictResolution.IgnoreAll);
+                return resolution;
+            }
+
+            return FileConflictResolution.Ignore;
         }
 
         private class ProjectPair

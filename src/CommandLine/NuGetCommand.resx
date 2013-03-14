@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -433,5 +433,8 @@ nuget update -Self</value>
   </data>
   <data name="PackageCommandIncludeReferencedProjects" xml:space="preserve">
     <value>Include referenced projects either as dependencies or as part of the package.</value>
+  </data>
+  <data name="UpdateCommandFileConflictAction" xml:space="preserve">
+    <value>Set default action when a file from a package already exists in the target project. Set to Overwrite to always overwrite files. Set to Ignore to skip files. If not specified, it will prompt for each conflicting file.</value>
   </data>
 </root>

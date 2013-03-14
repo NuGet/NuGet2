@@ -124,7 +124,7 @@ function Test-SimpleFSharpUninstall {
 function Test-FSharpDependentPackageUninstall {
     # Arrange
     $p = New-FSharpLibrary
-    $p | Install-Package -Source $context.RepositoryRoot PackageWithDependencyOnPrereleaseTestPackage
+    $p | Install-Package -Source $context.RepositoryRoot PackageWithDependencyOnPrereleaseTestPackage -FileConflictAction Overwrite
 
     # Act & Assert
     Assert-Throws { $p | Uninstall-Package PreReleaseTestPackage } "Unable to uninstall 'PreReleaseTestPackage 1.0.0' because 'PackageWithDependencyOnPrereleaseTestPackage 1.0' depends on it."

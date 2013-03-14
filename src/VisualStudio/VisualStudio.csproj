@@ -147,7 +147,6 @@
       <HintPath>..\..\lib\Microsoft.VisualStudio.Project.V11Only.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Settings, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\VS10\Microsoft.VisualStudio.Settings.dll</HintPath>
       <Private>False</Private>
     </Reference>

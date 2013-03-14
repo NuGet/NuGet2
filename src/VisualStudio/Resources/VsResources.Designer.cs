@@ -286,6 +286,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File Conflict.
+        /// </summary>
+        public static string FileConflictTitle {
+            get {
+                return ResourceManager.GetString("FileConflictTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ignore for now.
         /// </summary>
         public static string IgnoreUpgrade {

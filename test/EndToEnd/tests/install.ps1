@@ -1456,7 +1456,7 @@ function Test-InstallPackageConsidersPrereleasePackagesWhenResolvingDependencyWh
     $a | Install-Package -Source $context.RepositoryRoot PrereleaseTestPackage -Prerelease
     Assert-Package $a 'PrereleaseTestPackage' '1.0.1-a'
 
-    $a | Install-Package -Source $context.RepositoryRoot PackageWithDependencyOnPrereleaseTestPackage
+    $a | Install-Package -Source $context.RepositoryRoot PackageWithDependencyOnPrereleaseTestPackage -FileConflictAction Overwrite
     Assert-Package $a 'PrereleaseTestPackage' '1.0.1-a'
     Assert-Package $a 'PackageWithDependencyOnPrereleaseTestPackage' '1.0.0'
 }
@@ -2148,4 +2148,19 @@ function Test-InstallSolutionLevelPackageAddPackagesConfigToSolution
     $configFile = $nugetFolder.ProjectItems.Item("packages.config")
 
     Assert-NotNull $configFile "The 'packages.config' is not found under '.nuget' solution folder"
+}
+
+function Test-InstallMetadataPackageAddPackageToProject
+{
+    param($context)
+
+    # Arrange
+    $p = new-ClassLibrary
+    
+    # Act
+    $p | Install-Package MetadataPackage -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p MetadataPackage
+    Assert-Package $p DependencyPackage
 }
