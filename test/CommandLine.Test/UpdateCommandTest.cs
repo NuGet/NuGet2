@@ -87,7 +87,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                 RepositoryFactory = repositoryFactory.Object,
                 SourceProvider = packageSourceProvider.Object,
                 Console = console.Object,
-                FileConflictAction = FileConflictOption.Overwrite
+                FileConflictAction = FileConflictAction.Overwrite
             };
 
             // Act
@@ -136,7 +136,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                 RepositoryFactory = repositoryFactory.Object,
                 SourceProvider = packageSourceProvider.Object,
                 Console = console.Object,
-                FileConflictAction = FileConflictOption.Ignore
+                FileConflictAction = FileConflictAction.Ignore
             };
 
             // Act

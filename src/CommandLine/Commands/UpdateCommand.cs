@@ -44,7 +44,7 @@ namespace NuGet.Commands
         public bool Prerelease { get; set; }
 
         [Option(typeof(NuGetCommand), "UpdateCommandFileConflictAction")]
-        public FileConflictOption FileConflictAction { get; set; }
+        public FileConflictAction FileConflictAction { get; set; }
 
         public override void ExecuteCommand()
         {
@@ -347,13 +347,13 @@ namespace NuGet.Commands
         public FileConflictResolution ResolveFileConflict(string message)
         {
             // the -FileConflictAction is set to Overwrite or user has chosen Overwrite All previously
-            if (FileConflictAction == FileConflictOption.Overwrite || _overwriteAll)
+            if (FileConflictAction == FileConflictAction.Overwrite || _overwriteAll)
             {
                 return FileConflictResolution.Overwrite;
             }
 
             // the -FileConflictAction is set to Ignore or user has chosen Ignore All previously
-            if (FileConflictAction == FileConflictOption.Ignore || _ignoreAll)
+            if (FileConflictAction == FileConflictAction.Ignore || _ignoreAll)
             {
                 return FileConflictResolution.Ignore;
             }
