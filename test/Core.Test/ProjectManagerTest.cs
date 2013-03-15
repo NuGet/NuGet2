@@ -166,6 +166,103 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void UpdatePackageReferenceShouldLeaveDependencyPackageAloneIfItSatisfiesTheVersionConstraint()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA1 = PackageUtility.CreatePackage(
+                "A",
+                "1.0.0",
+                assemblyReferences: new[] { "lib\\a1.dll" });
+
+            IPackage packageA2 = PackageUtility.CreatePackage(
+                "A",
+                "2.0.0",
+                dependencies: new[] { new PackageDependency("B", VersionUtility.ParseVersionSpec("1.0.0")) },
+                assemblyReferences: new[] { "lib\\a2.dll" });
+
+            IPackage packageB1 = PackageUtility.CreatePackage(
+               "B",
+               "1.0.0",
+               assemblyReferences: new[] { "lib\\b1.dll" });
+
+            IPackage packageB2 = PackageUtility.CreatePackage(
+               "B",
+               "1.0.2",
+               assemblyReferences: new[] { "lib\\b2.dll" });
+
+            sourceRepository.AddPackage(packageA1);
+            sourceRepository.AddPackage(packageA2);
+            sourceRepository.AddPackage(packageB1);
+            sourceRepository.AddPackage(packageB2);
+
+            projectManager.LocalRepository.AddPackage(packageA1);
+            projectManager.LocalRepository.AddPackage(packageB1);
+
+            // Act
+            // Now install B, which depends on A >= 1.1.0.
+            projectManager.UpdatePackageReference("A");
+
+            // Assert
+            // NuGet should leave version 1.1.2 intact, because it already satisfies the version spec
+            // It should not upgrade A to 1.1.9
+            Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("2.0.0")));
+            Assert.True(projectManager.LocalRepository.Exists("B", new SemanticVersion("1.0")));
+            Assert.False(projectManager.LocalRepository.Exists("B", new SemanticVersion("1.0.2")));
+        }
+
+        [Fact]
+        public void UpdatePackageReferenceShouldLeaveDependencyPackageAloneIfItSatisfiesTheVersionConstraint2()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA1 = PackageUtility.CreatePackage(
+                "A",
+                "1.0.0",
+                dependencies: new[] { new PackageDependency("B", VersionUtility.ParseVersionSpec("1.0.0")) },
+                assemblyReferences: new[] { "lib\\a1.dll" });
+
+            IPackage packageA2 = PackageUtility.CreatePackage(
+                "A",
+                "2.0.0",
+                dependencies: new[] { new PackageDependency("B", VersionUtility.ParseVersionSpec("1.0.0")) },
+                assemblyReferences: new[] { "lib\\a2.dll" });
+
+            IPackage packageB1 = PackageUtility.CreatePackage(
+               "B",
+               "1.0.0",
+               assemblyReferences: new[] { "lib\\b1.dll" });
+
+            IPackage packageB2 = PackageUtility.CreatePackage(
+               "B",
+               "1.0.2",
+               assemblyReferences: new[] { "lib\\b2.dll" });
+
+            sourceRepository.AddPackage(packageA1);
+            sourceRepository.AddPackage(packageA2);
+            sourceRepository.AddPackage(packageB1);
+            sourceRepository.AddPackage(packageB2);
+
+            projectManager.LocalRepository.AddPackage(packageA1);
+            projectManager.LocalRepository.AddPackage(packageB1);
+
+            // Act
+            // Now install B, which depends on A >= 1.1.0.
+            projectManager.UpdatePackageReference("A");
+
+            // Assert
+            // NuGet should leave version 1.1.2 intact, because it already satisfies the version spec
+            // It should not upgrade A to 1.1.9
+            Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("2.0.0")));
+            Assert.True(projectManager.LocalRepository.Exists("B", new SemanticVersion("1.0")));
+            Assert.False(projectManager.LocalRepository.Exists("B", new SemanticVersion("1.0.2")));
+        }
+
+        [Fact]
         public void AddPackageReferenceAppliesPackageReferencesCorrectlyWhenReferencesFilterOutAllAssemblies()
         {
             // Arrange            
