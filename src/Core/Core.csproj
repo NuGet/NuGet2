@@ -204,9 +204,8 @@
     <Compile Include="Utility\VersionSpec.cs" />
     <Compile Include="Utility\WebRequestEventArgs.cs" />
     <Compile Include="FileModifiers\XdtTransformer.cs" />
-    <Reference Include="Microsoft.Web.XmlTransform, Version=1.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.Web.Xdt.1.0.0-alpha\lib\net40\Microsoft.Web.XmlTransform.dll</HintPath>
+    <Reference Include="Microsoft.Web.XmlTransform">
+      <HintPath>..\..\lib\Microsoft.Web.XmlTransform.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -289,7 +288,6 @@
     <EmbeddedResource Include="Authoring\nuspec.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <None Include="packages.config" />
     <None Include="Properties\NuGet.Core.nuspec" />
   </ItemGroup>
   <ItemGroup>

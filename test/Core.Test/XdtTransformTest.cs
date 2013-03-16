@@ -2,7 +2,7 @@
 using NuGet.Test.Mocks;
 using Xunit;
 
-namespace NuGet.VisualStudio.Test
+namespace NuGet.Test
 {
     public class XdtTransformTest
     {
@@ -59,7 +59,7 @@ namespace NuGet.VisualStudio.Test
             Assert.Equal(
 @"<configuration>
     <system.web>
-        <compilation debug=""false"" />
+        <compilation debug=""false""/>
     </system.web>
 </configuration>
 ", mockProjectSystem.OpenFile("web.config").ReadToEnd());
