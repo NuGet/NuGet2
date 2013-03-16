@@ -77,17 +77,17 @@ namespace NuGet.Dialog.Providers
             // in some rare cases, the project instance returned by GetProjects() may be different 
             // than the ones in selectedProjectSet.
             var selectedProjectsSet = new HashSet<string>(
-                selectedProjects.Select(p => p.UniqueName),
+                selectedProjects.Select(p => p.GetUniqueName()),
                 StringComparer.OrdinalIgnoreCase);
 
             // now determine if user has actually made any change to the checkboxes
             IList<Project> allProjects = _solutionManager.GetProjects().ToList();
 
             bool hasInstallWork = allProjects.Any(p =>
-                selectedProjectsSet.Contains(p.UniqueName) && !IsPackageInstalledInProject(p, package));
+                selectedProjectsSet.Contains(p.GetUniqueName()) && !IsPackageInstalledInProject(p, package));
 
             bool hasUninstallWork = allProjects.Any(p =>
-                !selectedProjectsSet.Contains(p.UniqueName) && IsPackageInstalledInProject(p, package));
+                !selectedProjectsSet.Contains(p.GetUniqueName()) && IsPackageInstalledInProject(p, package));
 
             if (!hasInstallWork && !hasUninstallWork)
             {
@@ -109,7 +109,7 @@ namespace NuGet.Dialog.Providers
                 foreach (Project project in allProjects)
                 {
                     // check if user wants to uninstall the package in this project
-                    if (!selectedProjectsSet.Contains(project.UniqueName))
+                    if (!selectedProjectsSet.Contains(project.GetUniqueName()))
                     {
                         uninstallProjects.Add(project);
                         uninstallRepositories.Add(PackageManager.GetProjectManager(project).LocalRepository);
@@ -160,7 +160,7 @@ namespace NuGet.Dialog.Providers
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want one failed project to affect the other projects.")]
         private bool InstallPackageIntoProjects(IPackage package, IList<Project> allProjects, HashSet<string> selectedProjectsSet)
         {
-            var selectedProjects = allProjects.Where(p => selectedProjectsSet.Contains(p.UniqueName));
+            var selectedProjects = allProjects.Where(p => selectedProjectsSet.Contains(p.GetUniqueName()));
 
             IList<PackageOperation> operations;
             bool accepted = ShowLicenseAgreement(package, PackageManager, selectedProjects, out operations);
@@ -174,7 +174,7 @@ namespace NuGet.Dialog.Providers
             // to avoid the package file being deleted before an install.
             foreach (Project project in allProjects)
             {
-                if (selectedProjectsSet.Contains(project.UniqueName))
+                if (selectedProjectsSet.Contains(project.GetUniqueName()))
                 {
                     try
                     {

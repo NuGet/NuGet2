@@ -377,6 +377,22 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void AddPackageDoesNotAddReferencesToMetadataPackagesToSolutionConfigFile()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+            var solutionPackage = PackageUtility.CreatePackage("MetadataPackage", dependencies: new [] { new PackageDependency("A") }, tools: new[] { "Install.ps1" });
+
+            // Act
+            repository.AddPackage(solutionPackage);
+
+            // Assert
+            Assert.False(configFileSystem.FileExists("packages.config"));
+        }
+
+        [Fact]
         public void AddPackageDoesNotAddEntryToSolutionConfigFileForProjectLevelPackage()
         {
             // Arrange

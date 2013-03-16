@@ -458,7 +458,7 @@ namespace NuGet.VisualStudio
             {
                 foreach (var proj in GetProjects())
                 {
-                    if (project.SupportsReferences())
+                    if (proj.SupportsReferences())
                     {
                         foreach (var referencedProject in proj.GetReferencedProjects())
                         {
@@ -477,15 +477,15 @@ namespace NuGet.VisualStudio
             return Enumerable.Empty<Project>();
         }
 
-        private static void AddDependentProject(IDictionary<string, List<Project>> dependentProjects,
-                                         Project project,
-                                         Project dependent)
+        private static void AddDependentProject(IDictionary<string, List<Project>> dependentProjects, Project project, Project dependent)
         {
+            string uniqueName = project.GetUniqueName();
+
             List<Project> dependents;
-            if (!dependentProjects.TryGetValue(project.GetUniqueName(), out dependents))
+            if (!dependentProjects.TryGetValue(uniqueName, out dependents))
             {
                 dependents = new List<Project>();
-                dependentProjects[project.UniqueName] = dependents;
+                dependentProjects[uniqueName] = dependents;
             }
             dependents.Add(dependent);
         }
