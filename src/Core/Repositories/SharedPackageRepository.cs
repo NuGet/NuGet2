@@ -178,10 +178,27 @@ namespace NuGet
 
         public override void RemovePackage(IPackage package)
         {
-            // Delete the entire package directory
+            // IMPORTANT (bug #3114) Even though we delete the entire package's directory, 
+            // we still need to explicitly delete the .nuspec and .nupkg files in order to 
+            // undo pending TFS add operations, if any.
+            string manifestFilePath = GetManifestFilePath(package.Id, package.Version);
+            if (FileSystem.FileExists(manifestFilePath))
+            {
+                // delete .nuspec file
+                FileSystem.DeleteFileSafe(manifestFilePath);
+            }
+            
+            string packageFilePath = GetPackageFilePath(package);
+            if (FileSystem.FileExists(packageFilePath))
+            {
+                // Delete the .nupkg file
+                FileSystem.DeleteFileSafe(packageFilePath);
+            }
+
+            // Now delete the entire package's directory, just in case some files are left behind
             FileSystem.DeleteDirectorySafe(PathResolver.GetPackageDirectory(package), recursive: true);
 
-            // If this is the last package delete the package directory
+            // If this is the last package delete the 'packages' directory
             if (!FileSystem.GetFilesSafe(String.Empty).Any() &&
                 !FileSystem.GetDirectoriesSafe(String.Empty).Any())
             {

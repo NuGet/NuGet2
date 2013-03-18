@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Moq;
@@ -121,7 +122,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void CallRemovePackageWillRemoveTheWholePackageDirecotry()
+        public void CallRemovePackageWillRemoveTheWholePackageDirectory()
         {
             // Arrange
             var fileSystem = new MockFileSystem("x:\\root");
@@ -140,6 +141,31 @@ namespace NuGet.Test
             Assert.False(fileSystem.FileExists("A.2.0\\A.2.0.nupkg"));
             Assert.False(fileSystem.FileExists("A.2.0\\A.2.0.nuspec"));
             Assert.False(fileSystem.DirectoryExists("A.2.0"));
+        }
+
+        [Fact]
+        public void CallRemovePackageWillDeleteNuspecAndNupkgFileBeforeDeletingTheWholePackageDirectory()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystemWithDeleteVerification();
+            fileSystem.AddFile("A.2.0\\A.2.0.nupkg");
+            fileSystem.AddFile("A.2.0\\A.2.0.nuspec");
+            fileSystem.AddFile("A.2.0\\random");
+            fileSystem.AddFile("A.2.0\\content\\file.txt");
+            fileSystem.AddFile("A.2.0\\readme.txt");
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            repository.RemovePackage(PackageUtility.CreatePackage("A", "2.0"));
+
+            // Assert
+            Assert.False(fileSystem.FileExists("A.2.0\\A.2.0.nupkg"));
+            Assert.False(fileSystem.FileExists("A.2.0\\A.2.0.nuspec"));
+            Assert.False(fileSystem.DirectoryExists("A.2.0"));
+
+            Assert.True(fileSystem.IsFileDeleted("A.2.0\\A.2.0.nupkg"));
+            Assert.True(fileSystem.IsFileDeleted("A.2.0\\A.2.0.nuspec"));
         }
 
         [Theory]
@@ -764,6 +790,22 @@ namespace NuGet.Test
             memoryStream.Seek(0, SeekOrigin.Begin);
 
             return memoryStream;
+        }
+
+        private class MockFileSystemWithDeleteVerification : MockFileSystem
+        {
+            private readonly HashSet<string> _deletedFiles = new HashSet<string>();
+
+            public override void DeleteFile(string path)
+            {
+                _deletedFiles.Add(path);
+                base.DeleteFile(path);
+            }
+
+            public bool IsFileDeleted(string path)
+            {
+                return _deletedFiles.Contains(path);
+            }
         }
     }
 }
