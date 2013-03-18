@@ -124,8 +124,7 @@ namespace Proj2
             }
         }
 
-        // Test that when creating a symbols package from project file, referenced projects
-        // are also included in the package.
+        // Test that -IncludeReferencedProjects and -Symbols cannot be used together.
         [Fact]
         public void PackCommand_WithProjectReferences_Symbols()
         {
@@ -210,38 +209,11 @@ namespace Proj2
                     nugetexe, 
                     workingDirectory,
                     "pack proj2.csproj -build -symbols -IncludeReferencedProjects",
-                    waitForExit: true);                    
-                Assert.Equal(0, r.Item1);
-
+                    waitForExit: true);    
+                
                 // Assert
-                var package = new OptimizedZipPackage(Path.Combine(workingDirectory, "proj2.0.0.0.0.nupkg"));
-                var files = package.GetFiles().Select(f => f.Path).ToArray();
-                Array.Sort(files);
-                Assert.Equal(
-                    files,
-                    new string[] 
-                    { 
-                        @"content\proj1_file2.txt",
-                        @"lib\net40\proj1.dll", 
-                        @"lib\net40\proj2.dll" 
-                    });
-
-                var symbolPackage = new OptimizedZipPackage(
-                    Path.Combine(workingDirectory, "proj2.0.0.0.0.symbols.nupkg"));
-                files = symbolPackage.GetFiles().Select(f => f.Path).ToArray();
-                Array.Sort(files);
-                Assert.Equal(
-                    files,
-                    new string[] 
-                    { 
-                        @"content\proj1_file2.txt",
-                        @"lib\net40\proj1.dll",
-                        @"lib\net40\proj1.pdb", 
-                        @"lib\net40\proj2.dll",
-                        @"lib\net40\proj2.pdb",
-                        @"src\proj1_file1.cs",
-                        @"src\proj2_file1.cs"
-                    });
+                Assert.NotEqual(0, r.Item1);
+                Assert.True(r.Item2.Contains("not supported"));
             }
             finally
             {

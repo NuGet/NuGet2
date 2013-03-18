@@ -514,4 +514,7 @@
     <value>[Y] Yes  [A] Yes to All  [N] No  [L] No to All ?</value>
     <comment>Please do not localize the letters inside the [] brackets.</comment>
   </data>
+  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported" xml:space="preserve">
+    <value>Specifying both -IncludeReferencedProjects and -Symbols is not supported.</value>
+  </data>
 </root>

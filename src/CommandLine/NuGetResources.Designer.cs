@@ -232,6 +232,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Specifying both -IncludeReferencedProjects and -Symbols is not supported..
+        /// </summary>
+        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported {
+            get {
+                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error occurred when processing file &apos;{0}&apos;: {1}.
         /// </summary>
         internal static string Error_ProcessingNuspecFile {

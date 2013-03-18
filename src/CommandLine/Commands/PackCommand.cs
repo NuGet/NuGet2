@@ -102,11 +102,17 @@ namespace NuGet.Commands
 
         public override void ExecuteCommand()
         {
+            if (IncludeReferencedProjects && Symbols)
+            {
+                throw new CommandLineException(
+                    NuGetResources.Error_IncludeReferencedProjectsAndSymbolsNotSupported);
+            }
+
             if (Verbose)
             {
                 Console.WriteWarning(NuGetResources.Option_VerboseDeprecated);
                 Verbosity = Verbosity.Detailed;
-            }
+            }            
 
             // Get the input file
             string path = GetInputFile();
