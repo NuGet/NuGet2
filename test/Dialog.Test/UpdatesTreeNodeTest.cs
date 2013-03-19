@@ -430,6 +430,46 @@ namespace NuGet.Dialog.Test
             AssertPackage(packages[1], "B", "2.0-beta");
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void GetPackagesDoesNotCacheResultsWhenOnClosedIsCalled(bool resetQueryBeforeRefresh)
+        {
+            // Arrange
+            MockPackageRepository localRepository = new MockPackageRepository();
+            localRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0"));
+            localRepository.AddPackage(PackageUtility.CreatePackage("B", "1.0"));
+
+            MockPackageRepository sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.5-alpha"));
+
+
+            PackagesProviderBase provider = new MockPackagesProvider();
+
+            IVsExtensionsTreeNode parentTreeNode = new Mock<IVsExtensionsTreeNode>().Object;
+            var node = new UpdatesTreeNode(provider, "Mock", parentTreeNode, localRepository, sourceRepository);
+
+            // Act 1
+            var packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
+
+            // Assert 1
+            Assert.Equal(1, packages.Count);
+            AssertPackage(packages[0], "A", "1.5-alpha");
+
+            // Act 2
+            node.OnClosed();
+
+            // now we modify the source repository to test if the GetPackages() return the old results
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("B", "2.0-beta"));
+            packages = node.GetPackages(searchTerm: null, allowPrereleaseVersions: true).ToList();
+            packages.Sort(PackageComparer.Version);
+
+            // Assert 2
+            Assert.Equal(2, packages.Count);
+            AssertPackage(packages[0], "A", "1.5-alpha");
+            AssertPackage(packages[1], "B", "2.0-beta");
+        }
+
         [Fact]
         public void GetPackagesFindsUpdatesForFilteredSetOfPackages()
         {

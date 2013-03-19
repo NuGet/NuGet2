@@ -35,6 +35,14 @@ namespace NuGet.Dialog.Providers
             base.Refresh(resetQueryBeforeRefresh);
         }
 
+        internal override void OnClosed()
+        {
+            // if focus switches away from this node, we need to clear the cache
+            // so that the next time it becomes active, it will reload packages.
+            _updatePackagesCache[0] = _updatePackagesCache[1] = null;
+            base.OnClosed();
+        }
+
         public override IQueryable<IPackage> GetPackages(string searchTerm, bool allowPrereleaseVersions)
         {
             int cacheIndex = -1;
