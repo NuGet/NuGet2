@@ -254,6 +254,12 @@ namespace NuGet.VisualStudio
 
         public static string GetUniqueName(this Project project)
         {
+            if (project.IsWixProject())
+            {
+                // Wix project doesn't offer UniqueName property
+                return project.FullName;
+            }
+
             try
             {
                 return project.UniqueName;
@@ -527,15 +533,20 @@ namespace NuGet.VisualStudio
                    types.Contains(VsConstants.WebApplicationProjectTypeGuid, StringComparer.OrdinalIgnoreCase);
         }
 
+        public static bool IsWebSite(this Project project)
+        {
+            return project.Kind != null && project.Kind.Equals(VsConstants.WebSiteProjectTypeGuid, StringComparison.OrdinalIgnoreCase);
+        }
+
         public static bool IsWindowsStoreApp(this Project project)
         {
             string[] types = project.GetProjectTypeGuids();
             return types.Contains(VsConstants.WindowsStoreProjectTypeGuid, StringComparer.OrdinalIgnoreCase);
         }
 
-        public static bool IsWebSite(this Project project)
+        public static bool IsWixProject(this Project project)
         {
-            return project.Kind != null && project.Kind.Equals(VsConstants.WebSiteProjectTypeGuid, StringComparison.OrdinalIgnoreCase);
+            return project.Kind != null && project.Kind.Equals(VsConstants.WixProjectTypeGuid, StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool IsSupported(this Project project)

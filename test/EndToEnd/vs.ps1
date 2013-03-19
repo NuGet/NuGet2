@@ -128,7 +128,7 @@ function New-Project {
 
     # Return the project
 
-	for ($counter = 0; $counter -lt 5; $counter++)
+	for ($counter = 0; $counter -lt 20; $counter++)
 	{
 		if ($SolutionFolder) {
 			$solutionFolderPath = Get-SolutionFolderPathRecursive $SolutionFolder

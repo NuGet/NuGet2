@@ -22,6 +22,7 @@ Release notes
   referenced by the project are either added as a dependency of the package, if nuspec file exists, 
   or are added into the package if nuspec file doesn't exist.
 - Allow users to overwrite files if there's a file conflict in package and project.
+- NuGet won't update a dependency package if the installed version already satisfies the constraint of dependency version. (#1681)
 
 *** v2.2 ***
 

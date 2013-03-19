@@ -1994,7 +1994,7 @@ function Test-InstallPackageDoesNotUninstallDependencyGraphWhenSafeUpdatingADepe
     
     # Assert - 2
     Assert-Package $p microsoft-web-helpers 2.0.20710.0
-    Assert-Package $p Microsoft.AspNet.WebPages.Administration 2.0.20713.0
+    Assert-Package $p Microsoft.AspNet.WebPages.Administration 2.0.20710.0
     Assert-Package $p Microsoft.Web.Infrastructure 1.0
     Assert-Package $p NuGet.Core 1.6.2
     Assert-Package $p Microsoft.AspNet.WebPages 2.0.20710.0

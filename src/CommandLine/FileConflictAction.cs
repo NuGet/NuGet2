@@ -1,7 +1,7 @@
 ﻿
 namespace NuGet
 {
-    public enum FileConflictOption
+    public enum FileConflictAction
     {
         None,
         Overwrite,
