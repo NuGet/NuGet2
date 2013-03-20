@@ -506,7 +506,8 @@ namespace NuGet.Commands
             var allowedOutputExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
                 ".dll",
                 ".exe",
-                ".xml"
+                ".xml",
+                ".winmd"
             };
 
             if (IncludeSymbols)
