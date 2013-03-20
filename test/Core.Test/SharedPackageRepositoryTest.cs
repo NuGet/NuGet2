@@ -218,7 +218,7 @@ namespace NuGet.Test
         public void FindPackageReturnOptimizedZipPackageObject()
         {
             // Arrange
-            var packageStream = GetPackageStream("one", "1.0.0-alpha");
+            var packageStream = PackageUtility.CreateSimplePackageStream("one", "1.0.0-alpha");
 
             var fileSystem = new MockFileSystem("x:\\root");
             fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nupkg", packageStream);
@@ -241,7 +241,7 @@ namespace NuGet.Test
         public void GetPackagesDoesNotReturnDuplicatedPackagesIfBothNuspecAndNupkgFilesArePresent()
         {
             // Arrange
-            var packageStream = GetPackageStream("one", "1.0.0-alpha");
+            var packageStream = PackageUtility.CreateSimplePackageStream("one", "1.0.0-alpha");
 
             var fileSystem = new MockFileSystem("x:\\root");
             fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nupkg", packageStream);
@@ -278,7 +278,7 @@ namespace NuGet.Test
             var fileSystem = new MockFileSystem("x:\\root");
             fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nuspec", manifestContent.AsStream());
 
-            var packageStream = GetPackageStream("One", "1.0.0-alpha");
+            var packageStream = PackageUtility.CreateSimplePackageStream("One", "1.0.0-alpha");
             fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nupkg", packageStream);
 
             var configFileSystem = new MockFileSystem();
@@ -767,29 +767,6 @@ namespace NuGet.Test
             {
                 return null;
             }
-        }
-
-        private static Stream GetPackageStream(string id, string version = "1.0")
-        {
-            var packageBuilder = new PackageBuilder
-            {
-                Id = id,
-                Version = SemanticVersion.Parse(version),
-                Description = "Test description",
-            };
-
-            var dependencySet = new PackageDependencySet(VersionUtility.DefaultTargetFramework,
-                new PackageDependency[] {
-                    new PackageDependency("Foo")
-                });
-            packageBuilder.DependencySets.Add(dependencySet);
-            packageBuilder.Authors.Add("foo");
-
-            var memoryStream = new MemoryStream();
-            packageBuilder.Save(memoryStream);
-            memoryStream.Seek(0, SeekOrigin.Begin);
-
-            return memoryStream;
         }
 
         private class MockFileSystemWithDeleteVerification : MockFileSystem

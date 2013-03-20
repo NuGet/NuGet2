@@ -142,5 +142,18 @@ namespace NuGet.Test
             // Assert
             Assert.Equal(expectedPath, cachePath);
         }
+
+        [Fact]
+        public void CreatePackageStreamReturnsNullForNullFileSystem()
+        {
+            // Arrange
+            var cache = new MachineCache(NullFileSystem.Instance);
+
+            // Act
+            Stream stream = cache.CreatePackageStream("A", new SemanticVersion("2.0-alpha"));
+
+            // Assert
+            Assert.Null(stream);
+        }
     }
 }

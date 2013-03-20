@@ -87,6 +87,11 @@ namespace NuGet
 
         public Stream CreatePackageStream(string packageId, SemanticVersion version)
         {
+            if (FileSystem is NullFileSystem)
+            {
+                return null;
+            }
+
             string packagePath = GetPackageFilePath(packageId, version);
             return FileSystem.CreateFile(packagePath);
         }
