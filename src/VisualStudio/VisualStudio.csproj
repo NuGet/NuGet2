@@ -77,6 +77,9 @@
     <Compile Include="ProjectSystems\WindowsStoreProjectSystem.cs" />
     <Compile Include="ProjectSystems\WixProjectSystem.cs" />
     <Compile Include="RegistryKeyWrapper.cs" />
+    <Compile Include="Settings\SettingsManagerWrapper.cs" />
+    <Compile Include="Settings\SettingsStoreWrapper.cs" />
+    <Compile Include="Settings\WritableSettingsStoreWrapper.cs" />
     <Compile Include="SkipAssemblyReferencesPackage.cs" />
     <Compile Include="SolutionFolderFileSystem.cs" />
     <Compile Include="TfsSourceControlFileSystemProviderPicker.cs" />
@@ -170,6 +173,9 @@
     <Reference Include="Microsoft.VisualStudio.TemplateWizardInterface, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
+    <Reference Include="NuGet.VisualStudio.Types">
+      <HintPath>..\..\lib\NuGet.VisualStudio.Types.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -204,7 +210,7 @@
     <Compile Include="PSScriptExecutor.cs" />
     <Compile Include="RepositorySettings.cs" />
     <Compile Include="RuntimeHelpers.cs" />
-    <Compile Include="SettingsManagerBase.cs" />
+    <Compile Include="Settings\SettingsManagerBase.cs" />
     <Compile Include="SmartOutputConsoleProvider.cs" />
     <Compile Include="VsFileSystemProvider.cs" />
     <Compile Include="Extensibility\VsPackageInstaller.cs" />
@@ -284,6 +290,7 @@
     <None Include="Properties\install.ps1" />
     <None Include="Properties\NuGet.VisualStudio.nuspec" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
