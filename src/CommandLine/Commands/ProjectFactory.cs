@@ -433,22 +433,22 @@ namespace NuGet.Commands
                             continue;
                         }
 
+                        var loadedProjects = projectCollection.GetLoadedProjects(fullPath);
+                        var referencedProject = loadedProjects.Count > 0 ?
+                            loadedProjects.First() :
+                            new Project(
+                                fullPath,
+                                globalProperties: null,
+                                toolsVersion: null,
+                                projectCollection: projectCollection);
+
                         if (NuspecFileExists(fullPath))
                         {
-                            var nuspecFileName = Path.ChangeExtension(fullPath, Constants.ManifestExtension);
-                            var dependency = CreateDependencyFromNuspecFile(nuspecFileName);
+                            var dependency = CreateDependencyFromProject(referencedProject);
                             dependencies[dependency.Id] = dependency;
                         }
                         else
                         {
-                            var loadedProjects = projectCollection.GetLoadedProjects(fullPath);
-                            var referencedProject = loadedProjects.Count > 0 ?
-                                loadedProjects.First() :
-                                new Project(
-                                    fullPath,
-                                    globalProperties: null,
-                                    toolsVersion: null,
-                                    projectCollection: projectCollection);
                             projectsToProcess.Enqueue(referencedProject);
                         }
                     }
@@ -456,24 +456,39 @@ namespace NuGet.Commands
             }
         }
 
-        private static PackageDependency CreateDependencyFromNuspecFile(string nuspecFileName)
+        // Creates a package dependency from the given project, which has a corresponding
+        // nuspec file.
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to continue regardless of any error we encounter extracting metadata.")]
+        private PackageDependency CreateDependencyFromProject(Project project)
         {
             try
             {
-                using (var stream = File.OpenRead(nuspecFileName))
+                var projectFactory = new ProjectFactory(project);
+                projectFactory.Build = Build;
+                projectFactory.ProjectProperties = ProjectProperties;
+                projectFactory.BuildProject();
+                var builder = new PackageBuilder();
+                try
                 {
-                    var manifest = Manifest.ReadFrom(stream, validateSchema: true);
-                    return new PackageDependency(
-                        manifest.Metadata.Id,
-                        VersionUtility.ParseVersionSpec(manifest.Metadata.Version));
+                    AssemblyMetadataExtractor.ExtractMetadata(builder, projectFactory.TargetPath);
                 }
+                catch
+                {
+                    projectFactory.ExtractMetadataFromProject(builder);
+                }
+
+                projectFactory.InitializeProperties(builder);
+                projectFactory.ProcessNuspec(builder, null);
+                return new PackageDependency(
+                    builder.Id,
+                    VersionUtility.ParseVersionSpec(builder.Version.ToString()));
             }
             catch (Exception ex)
             {
                 var message = string.Format(
                     CultureInfo.InvariantCulture,
                     NuGetResources.Error_ProcessingNuspecFile,
-                    nuspecFileName,
+                    project.FullPath,
                     ex.Message);
                 throw new CommandLineException(message, ex);
             }
