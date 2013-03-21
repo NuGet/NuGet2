@@ -37,6 +37,63 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
+        public void InstallMetadataPackageInstallsIntoProjectAndPackageManager()
+        {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), new MockPackageRepository());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IDeleteOnRestartManager>().Object, new Mock<VsPackageInstallerEvents>().Object);
+
+            var packageA = PackageUtility.CreatePackage("A", "1.0", dependencies: new [] { new PackageDependency("B") } );
+            var packageB = PackageUtility.CreatePackage("B", "1.0", content: new [] { "hello.txt" } );
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageB);
+
+            // Act
+            packageManager.InstallPackage(projectManager, "A", new SemanticVersion("1.0"), ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance);
+
+            // Assert
+            Assert.True(packageManager.LocalRepository.Exists(packageA));
+            Assert.True(projectManager.LocalRepository.Exists(packageA));
+
+            Assert.True(packageManager.LocalRepository.Exists(packageB));
+            Assert.True(projectManager.LocalRepository.Exists(packageB));
+        }
+
+        [Fact]
+        public void InstallMetadataPackageWithReadMeInstallsIntoProjectAndPackageManager()
+        {
+            // Arrange
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(projectSystem);
+            var projectManager = new ProjectManager(localRepository, pathResolver, new MockProjectSystem(), new MockPackageRepository());
+            var packageManager = new VsPackageManager(TestUtils.GetSolutionManager(), sourceRepository, new Mock<IFileSystemProvider>().Object, projectSystem, localRepository, new Mock<IDeleteOnRestartManager>().Object, new Mock<VsPackageInstallerEvents>().Object);
+
+            var packageA = PackageUtility.CreatePackage("A", "1.0", dependencies: new[] { new PackageDependency("B") });
+            var mockPackageA = Mock.Get(packageA);
+            mockPackageA.Setup(m => m.GetFiles()).Returns(PackageUtility.CreateFiles(new[] { "readme.txt" }));
+
+            var packageB = PackageUtility.CreatePackage("B", "1.0", content: new[] { "hello.txt" });
+            sourceRepository.AddPackage(packageA);
+            sourceRepository.AddPackage(packageB);
+
+            // Act
+            packageManager.InstallPackage(projectManager, "A", new SemanticVersion("1.0"), ignoreDependencies: false, allowPrereleaseVersions: false, logger: NullLogger.Instance);
+
+            // Assert
+            Assert.True(packageManager.LocalRepository.Exists(packageA));
+            Assert.True(projectManager.LocalRepository.Exists(packageA));
+
+            Assert.True(packageManager.LocalRepository.Exists(packageB));
+            Assert.True(projectManager.LocalRepository.Exists(packageB));
+        }
+
+        [Fact]
         public void InstallPackageThrowsIfMinClientVersionIsNotSatisfied()
         {
             // Arrange
