@@ -140,6 +140,13 @@ namespace NuGet
                 string localAppDataPath = getFolderPath(Environment.SpecialFolder.LocalApplicationData);
                 if (String.IsNullOrEmpty(localAppDataPath))
                 {
+                    // there's a bug on Windows Azure Web Sites environment where calling through the Environment.GetFolderPath()
+                    // will returns empty string, but the environment variable will return the correct value
+                    localAppDataPath = getEnvironmentVariable("LocalAppData");
+                }
+
+                if (String.IsNullOrEmpty(localAppDataPath))
+                {
                     return null;
                 }
                 return Path.Combine(localAppDataPath, "NuGet", "Cache");
