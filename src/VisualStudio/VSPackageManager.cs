@@ -867,15 +867,23 @@ namespace NuGet.VisualStudio
         /// Check to see if this package applies to a project based on 2 criteria:
         /// 1. The package has project content (i.e. content that can be applied to a project lib or content files)
         /// 2. The package is referenced by any other project
+        /// 3. The package has at least one dependecy
         /// 
         /// This logic will probably fail in one edge case. If there is a meta package that applies to a project
         /// that ended up not being installed in any of the projects and it only exists at solution level.
         /// If this happens, then we think that the following operation applies to the solution instead of showing an error.
         /// To solve that edge case we'd have to walk the graph to find out what the package applies to.
+        /// 
+        /// Technically, the third condition is not totally accurate because a solution-level package can depend on another 
+        /// solution-level package. However, doing that check here is expensive and we haven't seen such a package. 
+        /// This condition here is more geared towards guarding against metadata packages, i.e. we shouldn't treat metadata packages 
+        /// as solution-level ones.
         /// </summary>
         public bool IsProjectLevel(IPackage package)
         {
-            return package.HasProjectContent() || _sharedRepository.IsReferenced(package.Id, package.Version);
+            return package.HasProjectContent() ||
+                 package.DependencySets.SelectMany(p => p.Dependencies).Any() ||
+                _sharedRepository.IsReferenced(package.Id, package.Version);               
         }
 
         private Exception CreateAmbiguousUpdateException(IProjectManager projectManager, IList<IPackage> packages)

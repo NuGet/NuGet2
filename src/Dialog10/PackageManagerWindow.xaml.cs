@@ -463,11 +463,18 @@ namespace NuGet.Dialog
 
         private void OnCategorySelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            PackagesTreeNodeBase selectedNode = explorer.SelectedExtensionTreeNode as PackagesTreeNodeBase;
-            if (selectedNode != null)
+            PackagesTreeNodeBase oldNode = e.OldValue as PackagesTreeNodeBase;
+            if (oldNode != null)
+            {
+                // notify the previously selected node that it was closed.
+                oldNode.OnClosed();
+            }
+
+            PackagesTreeNodeBase newNode = e.NewValue as PackagesTreeNodeBase;
+            if (newNode != null)
             {
                 // notify the selected node that it is opened.
-                selectedNode.OnOpened();
+                newNode.OnOpened();
             }
         }
 

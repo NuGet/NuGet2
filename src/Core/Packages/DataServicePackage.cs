@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Services.Common;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -329,6 +330,7 @@ namespace NuGet
             return this.GetFullName();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times"), System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         internal void EnsurePackage(IPackageCacheRepository cacheRepository)
         {
             // OData caches instances of DataServicePackage while updating their property values. As a result, 
@@ -355,16 +357,46 @@ namespace NuGet
 
             if (refreshPackage)
             {
-                using (Stream targetStream = cacheRepository.CreatePackageStream(packageMetadata.Id, packageMetadata.Version))
+                // We either do not have a package available locally or they are invalid. Download the package from the server.
+                Stream targetStream = null;
+                try
                 {
-                    // We either do not have a package available locally or they are invalid. Download the package from the server.
+                    targetStream = cacheRepository.CreatePackageStream(packageMetadata.Id, packageMetadata.Version);
+
+                    // this can happen when access to the %LocalAppData% directory is blocked, e.g. on Windows Azure Web Site build
+                    if (targetStream != null)
+                    {
+                        _usingMachineCache = true;
+                    }
+                    else
+                    {
+                        // if we can't store the package into machine cache, store it in memory
+                        targetStream = new MemoryStream();
+                        _usingMachineCache = false;
+                    }
+    
+                    // download package into the stream
                     Downloader.DownloadPackage(DownloadUrl, this, targetStream);
                 }
+                finally
+                {
+                    if (targetStream != null && _usingMachineCache)
+                    {
+                        targetStream.Dispose();
+                    }
+                }
 
-                _package = cacheRepository.FindPackage(packageMetadata.Id, packageMetadata.Version);
-
-                // Make a note that we are using an in-memory instance of the package.
-                _usingMachineCache = false;
+                if (_usingMachineCache)
+                {
+                    _package = cacheRepository.FindPackage(packageMetadata.Id, packageMetadata.Version);
+                    Debug.Assert(_package != null);
+                }
+                else
+                {
+                    targetStream.Seek(0, SeekOrigin.Begin);
+                    _package = new ZipPackage(targetStream);
+                    targetStream.Dispose();
+                }
 
                 OldHash = PackageHash;
             }

@@ -339,6 +339,81 @@ namespace Proj2
             }
         }
 
+        // Test that recognized tokens such as $id$ in the nuspec file of the 
+        // referenced project are replaced.
+        [Fact]
+        public void PackCommand_NuspecFileWithTokens()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(workingDirectory);
+
+                CreateTestProject(workingDirectory, "proj1",
+                    new string[] { 
+                        @"..\proj2\proj2.csproj"
+                    });
+                CreateTestProject(workingDirectory, "proj2", null, "v4.0", "1.2");                
+                Util.CreateFile(
+                    Path.Combine(workingDirectory, "proj2"),
+                    "proj2.nuspec",
+@"<package xmlns='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd'>
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>Proj2</title>
+    <authors>test</authors>
+    <owners>test</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Description</description>
+    <copyright>Copyright ©  2013</copyright>
+    <dependencies>
+      <dependency id='p1' version='1.5.11' />
+    </dependencies>
+  </metadata>
+</package>");
+                
+                // Act
+                var proj1Directory = Path.Combine(workingDirectory, "proj1");
+                var r = CommandRunner.Run(
+                    nugetexe,
+                    proj1Directory,
+                    "pack proj1.csproj -build -IncludeReferencedProjects",
+                    waitForExit: true);
+                Assert.Equal(0, r.Item1);
+
+                // Assert
+                var package = new OptimizedZipPackage(Path.Combine(proj1Directory, "proj1.0.0.0.0.nupkg"));
+                var files = package.GetFiles().Select(f => f.Path).ToArray();
+                Array.Sort(files);
+
+                Assert.Equal(
+                    files,
+                    new string[] 
+                    { 
+                        @"lib\net40\proj1.dll"
+                    });
+
+                // proj2 is added as dependencies.
+                var dependencies = package.DependencySets.First().Dependencies.OrderBy(d => d.Id);
+                Assert.Equal(
+                    dependencies,
+                    new PackageDependency[]
+                    {
+                        new PackageDependency("proj2", VersionUtility.ParseVersionSpec("1.2.0.0"))
+                    },
+                    new PackageDepencyComparer());
+            }
+            finally
+            {
+                Directory.Delete(workingDirectory, true);
+            }
+        }
+
         // Test that option -IncludeReferencedProjects works correctly for the case
         // where the same project is referenced by multiple projects in the 
         // reference hierarchy.
@@ -718,11 +793,13 @@ namespace Proj2
         /// <param name="projectName">The name of the project.</param>
         /// <param name="referencedProject">The list of projects referenced by this project. Can be null.</param>
         /// <param name="targetFrameworkVersion">The target framework version of the project.</param>
+        /// <param name="version">The version of the assembly.</param>
         private void CreateTestProject(
             string baseDirectory, 
             string projectName, 
             string[] referencedProject,
-            string targetFrameworkVersion = "v4.0")
+            string targetFrameworkVersion = "v4.0",
+            string version = "0.0.0.0")
         {
             var projectDirectory = Path.Combine(baseDirectory, projectName);
             Util.CreateDirectory(projectDirectory);
@@ -761,8 +838,11 @@ namespace Proj2
 
             Util.CreateFile(
                 projectDirectory,
-                "file1.cs",                
+                "file1.cs",
 @"using System;
+using System.Reflection;
+
+[assembly: AssemblyVersion(" + "\"" + version + "\"" + @")]
 
 namespace " + projectName + @" 
 {
