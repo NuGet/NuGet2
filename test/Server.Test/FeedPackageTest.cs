@@ -16,7 +16,7 @@ namespace Server.Test
         {
             // Arrange
             // This is not pretty but it's the most effective way.
-            var excludedProperties = new[] { "Owners", "ReportAbuseUrl", "GalleryDetailsUrl", "DownloadUrl", "Rating", "RatingsCount", "Language", 
+            var excludedProperties = new[] { "ReportAbuseUrl", "GalleryDetailsUrl", "DownloadUrl", "Rating", "RatingsCount", "Language", 
                                              "AssemblyReferences", "FrameworkAssemblies", "DependencySets", "PackageAssemblyReferences"
             };
             var feedPackageProperties = new HashSet<string>(typeof(NuGet.Server.DataServices.Package).GetProperties().Select(p => p.Name), StringComparer.Ordinal);
