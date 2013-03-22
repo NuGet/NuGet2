@@ -130,6 +130,36 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void MachineCacheUsesLocalAppEnvironmentIfGetFolderPathReturnsEmpty()
+        {
+            // Arrange
+            var expectedPath = PathFixUtility.FixPath(@"c:\temp\some\directory\NuGet\Cache");
+
+            // Act
+            var cachePath = MachineCache.GetCachePath(
+                env => env == "LocalAppData" ? @"c:\temp\some\directory" : null,
+                _ => String.Empty);
+
+            // Assert
+            Assert.Equal(expectedPath, cachePath);
+        }
+
+        [Fact]
+        public void MachineCacheUsesGetFolderPathIfProvided()
+        {
+            // Arrange
+            var expectedPath = PathFixUtility.FixPath(@"d:\root\NuGet\Cache");
+
+            // Act
+            var cachePath = MachineCache.GetCachePath(
+                env => env == "LocalAppData" ? @"c:\temp\some\directory" : null,
+                _ => @"d:\root\");
+
+            // Assert
+            Assert.Equal(expectedPath, cachePath);
+        }
+
+        [Fact]
         public void MachineCacheDoesntUseEnvironmentSpecifiedLocationIfNotProvided()
         {
             // Arrange
@@ -141,6 +171,19 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal(expectedPath, cachePath);
+        }
+
+        [Fact]
+        public void CreatePackageStreamReturnsNullForNullFileSystem()
+        {
+            // Arrange
+            var cache = new MachineCache(NullFileSystem.Instance);
+
+            // Act
+            Stream stream = cache.CreatePackageStream("A", new SemanticVersion("2.0-alpha"));
+
+            // Assert
+            Assert.Null(stream);
         }
     }
 }

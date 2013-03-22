@@ -621,6 +621,7 @@ namespace NuGet.Dialog.Providers
                     if (_includePrereleaseWhenLastLoaded != Provider.IncludePrerelease)
                     {
                         Refresh(resetQueryBeforeRefresh: true);
+                        return;
                     }
 
                     if (Provider.RefreshOnNodeSelection) 
@@ -629,6 +630,13 @@ namespace NuGet.Dialog.Providers
                     }
                 } 
             }
+        }
+
+        /// <summary>
+        /// Called when thid focu switches away from this node
+        /// </summary>
+        internal virtual void OnClosed()
+        {
         }
     }
 }

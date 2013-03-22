@@ -299,5 +299,28 @@ namespace NuGet.Test
             }
             return files;
         }
+
+        public static Stream CreateSimplePackageStream(string id, string version = "1.0")
+        {
+            var packageBuilder = new PackageBuilder
+            {
+                Id = id,
+                Version = SemanticVersion.Parse(version),
+                Description = "Test description",
+            };
+
+            var dependencySet = new PackageDependencySet(VersionUtility.DefaultTargetFramework,
+                new PackageDependency[] {
+                    new PackageDependency("Foo")
+                });
+            packageBuilder.DependencySets.Add(dependencySet);
+            packageBuilder.Authors.Add("foo");
+
+            var memoryStream = new MemoryStream();
+            packageBuilder.Save(memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+
+            return memoryStream;
+        }
     }
 }
