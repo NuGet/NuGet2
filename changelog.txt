@@ -1,6 +1,6 @@
 Release notes
 
-*** v2.3 ***
+*** v2.5 ***
 
 - Add support for MonoAndroid, MonoTouch and MonoMac framework identifiers.
 - Add to all commands new option -ConfigFile, which enables user to use his/her own config file instead of the default one %AppData%\nuget\nuget.config.
@@ -24,6 +24,7 @@ Release notes
 - Allow users to overwrite files if there's a file conflict in package and project.
 - NuGet won't update a dependency package if the installed version already satisfies the constraint of dependency version. (#1681)
 - Support Clear Text Password when storing package source credentials in nuget.cofig files (Use 'ClearTextPassword' instead of 'Password' attribute)
+- Add the -StorePasswordInClearText to 'nuget.exe source' command.
 
 *** v2.2 ***
 
