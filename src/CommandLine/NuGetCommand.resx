@@ -437,4 +437,7 @@ nuget update -Self</value>
   <data name="UpdateCommandFileConflictAction" xml:space="preserve">
     <value>Set default action when a file from a package already exists in the target project. Set to Overwrite to always overwrite files. Set to Ignore to skip files. If not specified, it will prompt for each conflicting file.</value>
   </data>
+  <data name="SourcesCommandStorePasswordInClearTextDescription" xml:space="preserve">
+    <value>Enables storing portable package source credentials by disabling password encryption.</value>
+  </data>
 </root>

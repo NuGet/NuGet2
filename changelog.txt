@@ -1,6 +1,12 @@
 Release notes
 
-*** v2.3 ***
+*** v2.6 ***
+ 
+- Show License Url when listing packages and verbosity is detailed. 
+- Add developmentDependency attribute to packages.config and use it in pack command to only include runtime packages (#1956)
+- Add the -StorePasswordInClearText to 'nuget.exe source' command.
+
+*** v2.5 ***
 
 - Add support for MonoAndroid, MonoTouch and MonoMac framework identifiers.
 - Add to all commands new option -ConfigFile, which enables user to use his/her own config file instead of the default one %AppData%\nuget\nuget.config.
