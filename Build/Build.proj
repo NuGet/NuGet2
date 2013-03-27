@@ -48,7 +48,7 @@
 
     <PropertyGroup>
         <MajorVersion>2</MajorVersion>
-        <MinorVersion>3</MinorVersion>
+        <MinorVersion>5</MinorVersion>
         <!-- Ensure that we come up with a new version every 65535 years -->
         <VersionStartYear>2010</VersionStartYear>
 
@@ -293,6 +293,6 @@
         <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(ServerDropDirectory)&quot; -Build -p AdditionalSettingsImport=$(AdditionalSettingsImport) -p Configuration=Release -Symbols -exclude **\NuGet.Core.*" WorkingDirectory="$(ServerBuildDirectory)" />
         <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(NuGetCoreDropDirectory)&quot; -Build -Symbols -p AdditionalSettingsImport=$(AdditionalSettingsImport)" WorkingDirectory="$(NuGetCoreBuildDirectory)" />
         <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(NuGetBuildDropDirectory)&quot;" WorkingDirectory="$(NuGetSrcRoot)\Build" />
-        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(NuGetVisualStudioDropDirectory)&quot; -Build -p AdditionalSettingsImport=$(AdditionalSettingsImport)" WorkingDirectory="$(NuGetVisualStudioBuildDirectory)" />
+        <Exec Command="&quot;$(NuGetExe)&quot; pack -NoPackageAnalysis -Version $(PackageVersion) -o &quot;$(NuGetVisualStudioDropDirectory)&quot; -Build -p AdditionalSettingsImport=$(AdditionalSettingsImport) -p Configuration=Release -exclude **\NuGet.Core.*" WorkingDirectory="$(NuGetVisualStudioBuildDirectory)" />
     </Target>
 </Project>

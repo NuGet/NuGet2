@@ -118,9 +118,57 @@ namespace NuGet.Common
             Project.Save();
         }
 
+        public bool FileExistsInProject(string path)
+        {
+            // some ItemTypes which starts with _ are added by various MSBuild tasks for their own purposes
+            // and they do not represent content files of the projects. Therefore, we exclude them when checking for file existence.
+            return Project.Items.Any(
+                i => i.EvaluatedInclude.Equals(path, StringComparison.OrdinalIgnoreCase) && 
+                     (String.IsNullOrEmpty(i.ItemType) || i.ItemType[0] != '_'));
+        }
+
         private static Project GetProject(string projectFile)
         {
             return ProjectCollection.GlobalProjectCollection.GetLoadedProjects(projectFile).FirstOrDefault() ?? new Project(projectFile);
+        }
+
+        public void AddImport(string targetPath, ProjectImportLocation location)
+        {
+            if (targetPath == null)
+            {
+                throw new ArgumentNullException("targetPath");
+            }
+
+            // adds an <Import> element to this project file.
+            if (Project.Xml.Imports == null ||
+                Project.Xml.Imports.All(import => !targetPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase)))
+            {
+                Project.Xml.AddImport(targetPath);
+                Project.ReevaluateIfNecessary();
+                Project.Save();
+            }
+        }
+
+        public void RemoveImport(string targetPath)
+        {
+            if (targetPath == null)
+            {
+                throw new ArgumentNullException("targetPath");
+            }
+
+            if (Project.Xml.Imports != null)
+            {
+                // search for this import statement and remove it
+                var importElement = Project.Xml.Imports.FirstOrDefault(
+                    import => targetPath.Equals(import.Project, StringComparison.OrdinalIgnoreCase));
+
+                if (importElement != null)
+                {
+                    Project.Xml.RemoveChild(importElement);
+                    Project.ReevaluateIfNecessary();
+                    Project.Save();
+                }
+            }
         }
     }
 }

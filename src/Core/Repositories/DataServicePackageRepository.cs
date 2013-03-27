@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.Versioning;
+using NuGet.Resources;
 
 namespace NuGet
 {
@@ -197,19 +198,31 @@ namespace NuGet
 
         public IEnumerable<IPackage> FindPackagesById(string packageId)
         {
-            if (!Context.SupportsServiceMethod(FindPackagesByIdSvcMethod))
+            try
             {
-                // If there's no search method then we can't filter by target framework
-                return PackageRepositoryExtensions.FindPackagesByIdCore(this, packageId);
-            }
+                if (!Context.SupportsServiceMethod(FindPackagesByIdSvcMethod))
+                {
+                    // If there's no search method then we can't filter by target framework
+                    return PackageRepositoryExtensions.FindPackagesByIdCore(this, packageId);
+                }
 
-            var serviceParameters = new Dictionary<string, object> {
+                var serviceParameters = new Dictionary<string, object> {
                 { "id", "'" + UrlEncodeOdataParameter(packageId) + "'" }
             };
 
-            // Create a query for the search service method
-            var query = Context.CreateQuery<DataServicePackage>(FindPackagesByIdSvcMethod, serviceParameters);
-            return new SmartDataServiceQuery<DataServicePackage>(Context, query);
+                // Create a query for the search service method
+                var query = Context.CreateQuery<DataServicePackage>(FindPackagesByIdSvcMethod, serviceParameters);
+                return new SmartDataServiceQuery<DataServicePackage>(Context, query);
+            }
+            catch (Exception ex)
+            {
+                var message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    NuGetResources.ErrorLoadingPackages,
+                    _httpClient.OriginalUri,
+                    ex.Message);
+                throw new InvalidOperationException(message, ex);
+            }
         }
 
         public IEnumerable<IPackage> GetUpdates(

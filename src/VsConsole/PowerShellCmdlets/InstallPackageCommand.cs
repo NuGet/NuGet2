@@ -57,6 +57,9 @@ namespace NuGet.PowerShell.Commands
         [Parameter, Alias("Prerelease")]
         public SwitchParameter IncludePrerelease { get; set; }
 
+        [Parameter]
+        public FileConflictAction FileConflictAction { get; set; }
+
         protected override IVsPackageManager CreatePackageManager()
         {
             if (!SolutionManager.IsSolutionOpen)
@@ -97,6 +100,21 @@ namespace NuGet.PowerShell.Commands
             {
                 UnsubscribeFromProgressEvents();
             }
+        }
+
+        public override FileConflictResolution ResolveFileConflict(string message)
+        {
+            if (FileConflictAction == FileConflictAction.Overwrite)
+            {
+                return FileConflictResolution.Overwrite;
+            }
+
+            if (FileConflictAction == FileConflictAction.Ignore)
+            {
+                return FileConflictResolution.Ignore;
+            }
+
+            return base.ResolveFileConflict(message);
         }
 
         protected override void EndProcessing()

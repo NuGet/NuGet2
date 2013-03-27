@@ -178,15 +178,32 @@ namespace NuGet
 
         public override void RemovePackage(IPackage package)
         {
-            string packageFilePath = GetManifestFilePath(package.Id, package.Version);
-            if (FileSystem.FileExists(packageFilePath))
+            // IMPORTANT (bug #3114) Even though we delete the entire package's directory, 
+            // we still need to explicitly delete the .nuspec and .nupkg files in order to 
+            // undo pending TFS add operations, if any.
+            string manifestFilePath = GetManifestFilePath(package.Id, package.Version);
+            if (FileSystem.FileExists(manifestFilePath))
             {
                 // delete .nuspec file
+                FileSystem.DeleteFileSafe(manifestFilePath);
+            }
+            
+            string packageFilePath = GetPackageFilePath(package);
+            if (FileSystem.FileExists(packageFilePath))
+            {
+                // Delete the .nupkg file
                 FileSystem.DeleteFileSafe(packageFilePath);
             }
 
-            // call the base class to delete .nupkg file if there is one
-            base.RemovePackage(package);
+            // Now delete the entire package's directory, just in case some files are left behind
+            FileSystem.DeleteDirectorySafe(PathResolver.GetPackageDirectory(package), recursive: true);
+
+            // If this is the last package delete the 'packages' directory
+            if (!FileSystem.GetFilesSafe(String.Empty).Any() &&
+                !FileSystem.GetDirectoriesSafe(String.Empty).Any())
+            {
+                FileSystem.DeleteDirectorySafe(String.Empty, recursive: false);
+            }
 
             if (_packageReferenceFile != null)
             {
@@ -420,7 +437,15 @@ namespace NuGet
 
         private bool IsSolutionLevel(IPackage package)
         {
-            return !package.HasProjectContent() && !IsReferenced(package.Id, package.Version);
+            // A package is solution level if it doesn't have project content & doesn't have dependency & not referenced by any project.
+            //
+            // Technically, the second condition is not totally accurate because a solution-level package can depend on another 
+            // solution-level package. However, doing that check here is expensive and we haven't seen such a package. 
+            // This condition here is more geared towards guarding against metadata packages, i.e. we shouldn't treat metadata packages 
+            // as solution-level ones.
+            return !package.HasProjectContent() && 
+                   !package.DependencySets.SelectMany(p => p.Dependencies).Any() &&
+                   !IsReferenced(package.Id, package.Version);
         }
 
         private string GetManifestFilePath(string packageId, SemanticVersion version)

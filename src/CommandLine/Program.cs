@@ -38,13 +38,6 @@ namespace NuGet
 
             Func<Exception, string> getErrorMessage = e => e.Message;
 
-            // When we're detailed, get the whole exception including the stack
-            // This is useful for debugging errors.
-            if (console.Verbosity == Verbosity.Detailed)
-            {
-                getErrorMessage = e => e.ToString();
-            }
-
             try
             {
                 // Remove NuGet.exe.old
@@ -79,11 +72,19 @@ namespace NuGet
                 else
                 {
                     SetConsoleInteractivity(console, command as Command);
+
+                    // When we're detailed, get the whole exception including the stack
+                    // This is useful for debugging errors.
+                    if (console.Verbosity == Verbosity.Detailed)
+                    {
+                        getErrorMessage = e => e.ToString();
+                    }
+
                     command.Execute();
                 }
             }
             catch (AggregateException exception)
-            { 
+            {
                 string message;
                 Exception unwrappedEx = ExceptionUtility.Unwrap(exception);
                 if (unwrappedEx == exception)
@@ -104,6 +105,11 @@ namespace NuGet
                 console.WriteError(getErrorMessage(ExceptionUtility.Unwrap(e)));
                 return 1;
             }
+            finally
+            {
+                OptimizedZipPackage.PurgeCache();
+            }
+
             return 0;
         }
 

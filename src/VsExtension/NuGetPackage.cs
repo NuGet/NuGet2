@@ -49,11 +49,12 @@ namespace NuGet.Tools
     {
         // This product version will be updated by the build script to match the daily build version.
         // It is displayed in the Help - About box of Visual Studio
-        public const string ProductVersion = "2.3.0.0";
+        public const string ProductVersion = "2.5.0.0";
         private static readonly string[] _visualizerSupportedSKUs = new[] { "Premium", "Ultimate" };
 
         private uint _solutionNotBuildingAndNotDebuggingContextCookie;
         private DTE _dte;
+        private DTEEvents _dteEvents;
         private IConsoleStatus _consoleStatus;
         private IVsMonitorSelection _vsMonitorSelection;
         private bool? _isVisualizerSupported;
@@ -157,6 +158,9 @@ namespace NuGet.Tools
 
             _dte = (DTE)GetService(typeof(SDTE));
             Debug.Assert(_dte != null);
+
+            _dteEvents = _dte.Events.DTEEvents;
+            _dteEvents.OnBeginShutdown += OnBeginShutDown;
 
             // set default credential provider for the HttpClient
             var webProxy = (IVsWebProxy)GetService(typeof(SVsWebProxy));
@@ -462,6 +466,14 @@ namespace NuGet.Tools
             }
 
             return null;
+        }
+
+        private void OnBeginShutDown()
+        {
+            _dteEvents.OnBeginShutdown -= OnBeginShutDown;
+            _dteEvents = null;
+
+            OptimizedZipPackage.PurgeCache();
         }
     }
 }

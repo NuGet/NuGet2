@@ -11,7 +11,7 @@ namespace NuGet.VisualStudio
         public ProjectName(Project project)
         {
             FullName = project.FullName;
-            UniqueName = project.UniqueName;
+            UniqueName = project.GetUniqueName();
             ShortName = project.Name;
             CustomUniqueName = project.GetCustomUniqueName();
         }

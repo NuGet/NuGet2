@@ -39,7 +39,7 @@ namespace NuGet.VisualStudio
             base.AddGacReference("*" + name);
         }
 
-        protected override bool FileExistsInProject(string path)
+        public override bool FileExistsInProject(string path)
         {
             ProjectItem projectItem = Project.GetProjectItem(path);
             return (projectItem != null);

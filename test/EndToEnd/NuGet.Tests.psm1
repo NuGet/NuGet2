@@ -217,12 +217,12 @@ function global:Run-Test {
                 }
             }
 
-            # After the first run, rerun the failed tests if any
+            # After the first run, rerun the failed tests if any, but only if there are more than 1 test run.
 
             if ($counter -eq 0)
             {
                 $failedTests = @($results.GetEnumerator() | ? { $_.Value.Error -and !$_.Value.Skipped } | % { $_.Name })
-                if ($failedTests -gt 0)
+                if ($failedTests -gt 0 -and $results.Count -gt 1)
                 {
                     Write-Warning "There are $($failedTests.Count) failed test(s). Re-running them one more time..."
 

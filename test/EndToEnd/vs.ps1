@@ -125,15 +125,26 @@ function New-Project {
 
     # Set the focus back on the shell
     $window.SetFocus()
-    
+
     # Return the project
-    if ($SolutionFolder) {
-        $solutionFolderPath = Get-SolutionFolderPathRecursive $SolutionFolder
-        $project = Get-Project "$($solutionFolderPath)$projectName" -ErrorAction SilentlyContinue
-    }
-    else {
-        $project = Get-Project $projectName -ErrorAction SilentlyContinue
-    }
+
+	for ($counter = 0; $counter -lt 20; $counter++)
+	{
+		if ($SolutionFolder) {
+			$solutionFolderPath = Get-SolutionFolderPathRecursive $SolutionFolder
+			$project = Get-Project "$($solutionFolderPath)$projectName" -ErrorAction SilentlyContinue
+		}
+		else {
+			$project = Get-Project $projectName -ErrorAction SilentlyContinue
+		}
+
+		if ($project)
+		{
+			break;
+		}
+
+		[System.Threading.Thread]::Sleep(100)
+	}
     
     if(!$project) {
         $project = Get-Project "$destPath\"

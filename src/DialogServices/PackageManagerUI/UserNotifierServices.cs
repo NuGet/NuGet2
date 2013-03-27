@@ -150,5 +150,28 @@ namespace NuGet.Dialog.PackageManagerUI
 
             return MessageHelper.ShowQueryMessage(message, title: null, showCancelButton: true);
         }
+
+        public FileConflictResolution ShowFileConflictResolution(string question)
+        {
+            if (!_uiDispatcher.CheckAccess())
+            {
+                object result = _uiDispatcher.Invoke(
+                    new Func<string, FileConflictResolution>(ShowFileConflictResolution),
+                    question);
+                return (FileConflictResolution)result;
+            }
+
+            var window = new FileConflictDialog
+            {
+                Question = question
+            };
+
+            if (window.ShowModal() ?? false)
+            {
+                return window.UserSelection;
+            }
+
+            return FileConflictResolution.IgnoreAll;
+        }
     }
 }

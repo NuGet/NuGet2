@@ -10,7 +10,6 @@ namespace NuGet
 {
     public abstract class PackageWalker
     {
-        private static Lazy<Version> NuGetVersion = new Lazy<Version>(() => typeof(IPackage).Assembly.GetName().Version);
         private readonly Dictionary<IPackage, PackageWalkInfo> _packageLookup = new Dictionary<IPackage, PackageWalkInfo>();
         private readonly FrameworkName _targetFramework;
 
@@ -81,7 +80,7 @@ namespace NuGet
 
         public void Walk(IPackage package)
         {
-            CheckPackageRequiredMinVersion(package);
+            CheckPackageMinClientVersion(package);
 
             // Do nothing if we saw this package already
             if (Marker.IsVisited(package))
@@ -159,13 +158,13 @@ namespace NuGet
             OnAfterPackageWalk(package);
         }
 
-        private static void CheckPackageRequiredMinVersion(IPackage package)
+        private static void CheckPackageMinClientVersion(IPackage package)
         {
             // validate that the current version of NuGet satisfies the minVersion attribute specified in the .nuspec
-            if (NuGetVersion.Value < package.RequiredMinVersion)
+            if (Constants.NuGetVersion < package.MinClientVersion)
             {
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageMinVersionNotSatisfied, package.GetFullName(), package.RequiredMinVersion, NuGetVersion.Value));
+                throw new NuGetVersionNotSatisfiedException(
+                    String.Format(CultureInfo.CurrentCulture, NuGetResources.PackageMinVersionNotSatisfied, package.GetFullName(), package.MinClientVersion, Constants.NuGetVersion));
             }
         }
 
@@ -246,12 +245,21 @@ namespace NuGet
                 return PackageTargets.Project;
             }
 
-            if (package.IsDependencyOnly())
+            if (IsDependencyOnly(package))
             {
                 return PackageTargets.None;
             }
 
             return PackageTargets.External;
+        }
+
+        /// <summary>
+        /// Returns true if a package has dependencies but no \tools directory
+        /// </summary>
+        private static bool IsDependencyOnly(IPackage package)
+        {
+            return !package.GetFiles().Any(f => f.Path.StartsWith(@"tools\", StringComparison.OrdinalIgnoreCase)) &&
+                   package.DependencySets.SelectMany(d => d.Dependencies).Any();
         }
     }
 }

@@ -72,7 +72,8 @@ namespace NuGet.VisualStudio
 
         private static void AddBindingRedirects(ISolutionManager solutionManager, Project project, IFileSystemProvider fileSystemProvider, AppDomain domain, HashSet<string> projects, IDictionary<string, HashSet<string>> projectAssembliesCache)
         {
-            if (projects.Contains(project.UniqueName))
+            string projectUniqueName = project.GetUniqueName();
+            if (projects.Contains(projectUniqueName))
             {
                 return;
             }
@@ -88,7 +89,7 @@ namespace NuGet.VisualStudio
                 AddBindingRedirects(solutionManager, dependentProject, fileSystemProvider, domain, projects, projectAssembliesCache);
             }
 
-            projects.Add(project.UniqueName);
+            projects.Add(projectUniqueName);
         }
     }
 }

@@ -8,7 +8,6 @@ using Xunit;
 
 namespace NuGet.Test.NuGetCommandLine.Commands
 {
-
     public class PackCommandTest
     {
         [Fact]

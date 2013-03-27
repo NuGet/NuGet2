@@ -29,7 +29,7 @@ namespace NuGet.Test
                                               string tags = "",
                                               string language = null,
                                               IEnumerable<string> satelliteAssemblies = null,
-                                              string requiredMinVersion = null)
+                                              string minClientVersion = null)
         {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
             satelliteAssemblies = satelliteAssemblies ?? Enumerable.Empty<string>();
@@ -47,7 +47,7 @@ namespace NuGet.Test
                                  tags,
                                  language,
                                  CreateAssemblyReferences(satelliteAssemblies),
-                                 requiredMinVersion);
+                                 minClientVersion);
         }
 
         public static IPackage CreatePackage(string id,
@@ -61,7 +61,7 @@ namespace NuGet.Test
                                               string summary,
                                               bool listed,
                                               string tags,
-                                              string requiredMinVersion = null)
+                                              string minClientVersion = null)
         {
             return CreatePackage(id,
                                  version,
@@ -76,7 +76,7 @@ namespace NuGet.Test
                                  tags,
                                  language: null,
                                  satelliteAssemblies: null,
-                                 requiredMinVersion: requiredMinVersion);
+                                 minClientVersion: minClientVersion);
         }
 
         public static IPackage CreatePackageWithDependencySets(string id,
@@ -92,7 +92,7 @@ namespace NuGet.Test
                                               string tags = "",
                                               string language = null,
                                               IEnumerable<string> satelliteAssemblies = null,
-                                              string requiredMinVersion = null)
+                                              string minClientVersion = null)
         {
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<string>();
             satelliteAssemblies = satelliteAssemblies ?? Enumerable.Empty<string>();
@@ -110,7 +110,7 @@ namespace NuGet.Test
                                  tags,
                                  language,
                                  CreateAssemblyReferences(satelliteAssemblies),
-                                 requiredMinVersion);
+                                 minClientVersion);
         }
 
         public static IPackage CreatePackage(string id,
@@ -126,7 +126,7 @@ namespace NuGet.Test
                                               string tags,
                                               string language,
                                               IEnumerable<IPackageAssemblyReference> satelliteAssemblies,
-                                              string requiredMinVersion = null)
+                                              string minClientVersion = null)
         {
             var dependencySets = new List<PackageDependencySet>
             {
@@ -146,7 +146,7 @@ namespace NuGet.Test
                                  tags,
                                  language,
                                  satelliteAssemblies,
-                                 requiredMinVersion);
+                                 minClientVersion);
         }
 
         public static IPackage CreatePackage(string id,
@@ -162,7 +162,7 @@ namespace NuGet.Test
                                               string tags,
                                               string language,
                                               IEnumerable<IPackageAssemblyReference> satelliteAssemblies,
-                                              string requiredMinVersion = null)
+                                              string minClientVersion = null)
         {
             content = content ?? Enumerable.Empty<string>();
             assemblyReferences = assemblyReferences ?? Enumerable.Empty<IPackageAssemblyReference>();
@@ -204,7 +204,8 @@ namespace NuGet.Test
             mockPackage.Setup(m => m.ReleaseNotes).Returns("");
             mockPackage.Setup(m => m.Owners).Returns(new string[0]);
             mockPackage.Setup(m => m.Copyright).Returns("");
-            mockPackage.Setup(m => m.RequiredMinVersion).Returns(requiredMinVersion == null ? new Version() : Version.Parse(requiredMinVersion));
+            mockPackage.Setup(m => m.MinClientVersion).Returns(minClientVersion == null ? new Version() : Version.Parse(minClientVersion));
+            mockPackage.Setup(m => m.PackageAssemblyReferences).Returns(new PackageReferenceSet[0]);
             if (!listed)
             {
                 mockPackage.Setup(m => m.Published).Returns(Constants.Unpublished);
@@ -297,6 +298,29 @@ namespace NuGet.Test
                 files.Add(mockFile.Object);
             }
             return files;
+        }
+
+        public static Stream CreateSimplePackageStream(string id, string version = "1.0")
+        {
+            var packageBuilder = new PackageBuilder
+            {
+                Id = id,
+                Version = SemanticVersion.Parse(version),
+                Description = "Test description",
+            };
+
+            var dependencySet = new PackageDependencySet(VersionUtility.DefaultTargetFramework,
+                new PackageDependency[] {
+                    new PackageDependency("Foo")
+                });
+            packageBuilder.DependencySets.Add(dependencySet);
+            packageBuilder.Authors.Add("foo");
+
+            var memoryStream = new MemoryStream();
+            packageBuilder.Save(memoryStream);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+
+            return memoryStream;
         }
     }
 }

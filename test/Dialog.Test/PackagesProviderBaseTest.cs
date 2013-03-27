@@ -7,13 +7,11 @@ using NuGet.Test;
 using NuGet.Test.Mocks;
 using NuGet.VisualStudio;
 using Xunit;
-using EnvDTE;
 
 namespace NuGet.Dialog.Test
 {
     public class PackagesProviderBaseTest
     {
-
         [Fact]
         public void CtorThrowsIfResourcesArgumentIsNull()
         {
@@ -184,7 +182,9 @@ namespace NuGet.Dialog.Test
                        new Mock<IUpdateAllUIService>().Object,
                        new Mock<IScriptExecutor>().Object,
                        new MockOutputConsoleProvider(),
-                       new Mock<IVsCommonOperations>().Object), new Mock<IProgressProvider>().Object, new Mock<ISolutionManager>().Object)
+                       new Mock<IVsCommonOperations>().Object), 
+                       new Mock<IProgressProvider>().Object, 
+                       new Mock<ISolutionManager>().Object)
             {
             }
 

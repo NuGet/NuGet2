@@ -141,7 +141,7 @@ namespace NuGet.VisualStudio.Test
                 AddFileToProject(path);
             }
 
-            protected override bool FileExistsInProject(string path)
+            public override bool FileExistsInProject(string path)
             {
                 return _files.Contains(path);
             }

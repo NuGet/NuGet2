@@ -184,7 +184,7 @@ nuget push -?</value>
     <value>If set, the destination folder will contain only the package name, not the version number</value>
   </data>
   <data name="InstallCommandNoCache" xml:space="preserve">
-    <value>Disable looking up packages from local machine cache.</value>
+    <value>Disable using the machine cache as the first package source.</value>
   </data>
   <data name="InstallCommandOutputDirDescription" xml:space="preserve">
     <value>Specifies the directory in which packages will be installed. If none specified, uses the current directory.</value>
@@ -427,5 +427,14 @@ nuget update -Self</value>
   </data>
   <data name="InstallCommandDisableParallel" xml:space="preserve">
     <value>Disable parallel nuget package installs.</value>
-  </data>  
+  </data>
+  <data name="PackageCommandMinClientVersion" xml:space="preserve">
+    <value>Set the minClientVersion attribute for the created package.</value>
+  </data>
+  <data name="PackageCommandIncludeReferencedProjects" xml:space="preserve">
+    <value>Include referenced projects either as dependencies or as part of the package.</value>
+  </data>
+  <data name="UpdateCommandFileConflictAction" xml:space="preserve">
+    <value>Set default action when a file from a package already exists in the target project. Set to Overwrite to always overwrite files. Set to Ignore to skip files. If not specified, it will prompt for each conflicting file.</value>
+  </data>
 </root>

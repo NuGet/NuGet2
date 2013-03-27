@@ -97,6 +97,35 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void MinClientVersionReturnsParsedValue()
+        {
+            // Arrange
+            var package = new DataServicePackage
+            {
+                MinClientVersion = "2.4.0.1"
+            };
+
+            // Act
+            Version minClientVersion = (package as IPackageMetadata).MinClientVersion;
+
+            // Assert
+            Assert.Equal("2.4.0.1", minClientVersion.ToString());
+        }
+
+        [Fact]
+        public void MinClientVersionReturnsNullValue()
+        {
+            // Arrange
+            var package = new DataServicePackage();
+
+            // Act
+            Version minClientVersion = (package as IPackageMetadata).MinClientVersion;
+
+            // Assert
+            Assert.Null(minClientVersion);
+        }
+
+        [Fact]
         public void EnsurePackageDownloadsThePackageIfItIsNotCachedInMemoryOnInMachineCache()
         {
             // Arrange
@@ -129,6 +158,48 @@ namespace NuGet.Test
             context.Verify();
             packageDownloader.Verify();
             Assert.True(mockRepository.Exists(zipPackage));
+        }
+
+        [Fact]
+        public void EnsurePackageStorePackageInMemoryIfMachineCacheIsNotAvailable()
+        {
+            // Arrange
+            var zipPackage = PackageUtility.CreatePackage("A", "1.2");
+
+            var uri = new Uri("http://nuget.org");
+            var mockRepository = new Mock<MockPackageRepository>().As<IPackageCacheRepository>();
+            mockRepository.Setup(s => s.CreatePackageStream(It.IsAny<string>(), It.IsAny<SemanticVersion>())).Returns((Stream)null);
+
+            var packageDownloader = new Mock<PackageDownloader>();
+            packageDownloader.Setup(d => d.DownloadPackage(uri, It.IsAny<IPackageMetadata>(), It.IsAny<Stream>()))
+                             .Callback(new Action<Uri, IPackageMetadata, Stream>(
+                                 (url, metadata, stream) => PackageUtility.CreateSimplePackageStream("A", "1.2").CopyTo(stream)))
+                             .Verifiable();
+            var hashProvider = new Mock<IHashProvider>(MockBehavior.Strict);
+
+            var context = new Mock<IDataServiceContext>();
+            context.Setup(c => c.GetReadStreamUri(It.IsAny<object>())).Returns(uri).Verifiable();
+
+            var servicePackage = new DataServicePackage
+            {
+                Id = "A",
+                Version = "1.2",
+                PackageHash = "NEWHASH",
+                Downloader = packageDownloader.Object,
+                HashProvider = hashProvider.Object,
+                Context = context.Object
+            };
+
+            // Act
+            servicePackage.EnsurePackage(mockRepository.Object);
+
+            // Assert
+            context.Verify();
+            packageDownloader.Verify();
+
+            var foundPackage = servicePackage._package;
+            Assert.NotNull(foundPackage);
+            Assert.True(foundPackage is ZipPackage);
         }
 
         [Fact]

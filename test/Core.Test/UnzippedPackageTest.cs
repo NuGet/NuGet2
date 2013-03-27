@@ -211,9 +211,10 @@ namespace NuGet.Test
             IList<IPackageAssemblyReference> files = package.AssemblyReferences.OrderBy(p => p.Path).ToList();
 
             // Assert
-            Assert.Equal(2, files.Count);
+            Assert.Equal(3, files.Count);
             Assert.Equal(@"lib\net45\jQuery.dll", files[0].Path);
-            Assert.Equal(@"lib\sl3\nunit.winmd", files[1].Path);
+            Assert.Equal(@"lib\sl3\nunit.exe", files[1].Path);
+            Assert.Equal(@"lib\sl3\nunit.winmd", files[2].Path);
         }
 
         [Fact]

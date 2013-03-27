@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
-using NuGet.Resources;
 
 namespace NuGet
 {
@@ -117,7 +115,7 @@ namespace NuGet
             set;
         }
 
-        public Version RequiredMinVersion
+        public Version MinClientVersion
         {
             get;
             private set;
@@ -177,15 +175,14 @@ namespace NuGet
             {
                 if (_assemblyReferences == null)
                 {
-                    var unfilteredAssemblyReferences = GetUnfilteredAssemblyReferences();
-                    _assemblyReferences = FilterAssemblyReferences(unfilteredAssemblyReferences, PackageReferenceSets);
+                    _assemblyReferences = GetAssemblyReferencesCore().ToList();
                 }
 
                 return _assemblyReferences;
             }
         }
 
-        protected IList<PackageReferenceSet> PackageReferenceSets
+        public ICollection<PackageReferenceSet> PackageAssemblyReferences
         {
             get;
             private set;
@@ -202,12 +199,12 @@ namespace NuGet
         }
 
         public abstract Stream GetStream();
-
+        
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This operation can be expensive.")]
         protected abstract IEnumerable<IPackageFile> GetFilesBase();
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "This operation can be expensive.")]
-        protected abstract IEnumerable<IPackageAssemblyReference> GetUnfilteredAssemblyReferences();
+        protected abstract IEnumerable<IPackageAssemblyReference> GetAssemblyReferencesCore();
 
         protected void ReadManifest(Stream manifestStream)
         {
@@ -232,8 +229,8 @@ namespace NuGet
             DependencySets = metadata.DependencySets;
             FrameworkAssemblies = metadata.FrameworkAssemblies;
             Copyright = metadata.Copyright;
-            PackageReferenceSets = manifest.Metadata.ReferenceSets.Select(r => new PackageReferenceSet(r)).ToList();
-            RequiredMinVersion = metadata.RequiredMinVersion;
+            PackageAssemblyReferences = metadata.PackageAssemblyReferences;
+            MinClientVersion = metadata.MinClientVersion;
 
             // Ensure tags start and end with an empty " " so we can do contains filtering reliably
             if (!String.IsNullOrEmpty(Tags))
@@ -261,40 +258,6 @@ namespace NuGet
             // Assembly reference must have a .dll|.exe|.winmd extension and is not a resource assembly;
             return !filePath.EndsWith(ResourceAssemblyExtension, StringComparison.OrdinalIgnoreCase) &&
                 Constants.AssemblyReferencesExtensions.Contains(Path.GetExtension(filePath), StringComparer.OrdinalIgnoreCase);
-        }
-
-        private IList<IPackageAssemblyReference> FilterAssemblyReferences(
-            IEnumerable<IPackageAssemblyReference> unfilteredAssemblyReferences, 
-            IList<PackageReferenceSet> packageReferenceSets)
-        {
-            if (packageReferenceSets.IsEmpty())
-            {
-                return unfilteredAssemblyReferences.ToList();
-            }
-
-            var results = new List<IPackageAssemblyReference>();
-
-            // we group assembly references by TargetFramework
-            var assembliesGroupedByFx = unfilteredAssemblyReferences.ToLookup(d => d.TargetFramework);
-            foreach (var group in assembliesGroupedByFx)
-            {
-                FrameworkName fileTargetFramework = group.Key;
-
-                IEnumerable<PackageReferenceSet> bestMatches;
-                if (VersionUtility.TryGetCompatibleItems(fileTargetFramework, PackageReferenceSets, out bestMatches))
-                {
-                    // now examine each assembly file, check if it appear in the References list for the correponding target framework
-                    foreach (var assemblyFile in group)
-                    {
-                        if (bestMatches.Any(m => m.References.Contains(assemblyFile.Name)))
-                        {
-                            results.Add(assemblyFile);
-                        }
-                    }
-                }
-            }
-
-            return results;
         }
 
         public override string ToString()

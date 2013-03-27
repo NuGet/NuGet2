@@ -44,6 +44,8 @@ namespace NuGet.Commands
             ".nproj"
         };
 
+        private Version _minClientVersionValue;
+
         [Option(typeof(NuGetCommand), "PackageCommandOutputDirDescription")]
         public string OutputDirectory { get; set; }
 
@@ -80,6 +82,9 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "PackageCommandExcludeEmptyDirectories")]
         public bool ExcludeEmptyDirectories { get; set; }
 
+        [Option(typeof(NuGetCommand), "PackageCommandIncludeReferencedProjects")]
+        public bool IncludeReferencedProjects { get; set; }
+
         [Option(typeof(NuGetCommand), "PackageCommandPropertiesDescription")]
         public Dictionary<string, string> Properties
         {
@@ -89,16 +94,25 @@ namespace NuGet.Commands
             }
         }
 
+        [Option(typeof(NuGetCommand), "PackageCommandMinClientVersion")]
+        public string MinClientVersion { get; set; }
+
         [ImportMany]
         public IEnumerable<IPackageRule> Rules { get; set; }
 
         public override void ExecuteCommand()
         {
+            if (IncludeReferencedProjects && Symbols)
+            {
+                throw new CommandLineException(
+                    NuGetResources.Error_IncludeReferencedProjectsAndSymbolsNotSupported);
+            }
+
             if (Verbose)
             {
                 Console.WriteWarning(NuGetResources.Option_VerboseDeprecated);
                 Verbosity = Verbosity.Detailed;
-            }
+            }            
 
             // Get the input file
             string path = GetInputFile();
@@ -107,6 +121,14 @@ namespace NuGet.Commands
 
             // If the BasePath is not specified, use the directory of the input file (nuspec / proj) file
             BasePath = String.IsNullOrEmpty(BasePath) ? Path.GetDirectoryName(Path.GetFullPath(path)) : BasePath;
+
+            if (!String.IsNullOrEmpty(MinClientVersion))
+            {
+                if (!System.Version.TryParse(MinClientVersion, out _minClientVersionValue))
+                {
+                    throw new CommandLineException(NuGetResources.PackageCommandInvalidMinClientVersion);
+                }
+            }
 
             IPackage package = BuildPackage(path);
             if (package != null && !NoPackageAnalysis)
@@ -120,6 +142,11 @@ namespace NuGet.Commands
             if (!String.IsNullOrEmpty(Version))
             {
                 builder.Version = new SemanticVersion(Version);
+            }
+
+            if (_minClientVersionValue != null)
+            {
+                builder.MinClientVersion = _minClientVersionValue;
             }
 
             outputPath = outputPath ?? GetOutputPath(builder);
@@ -216,7 +243,8 @@ namespace NuGet.Commands
                 return packageFile.Path;
             }
             var path = physicalPackageFile.SourcePath;
-            int index = path.IndexOf(BasePath, StringComparison.OrdinalIgnoreCase);
+            // Make sure that the basepath has a directory separator
+            int index = path.IndexOf(BasePath.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
             if (index != -1)
             {
                 // Since wildcards are going to be relative to the base path, remove the BasePath portion of the file's source path. 
@@ -338,6 +366,7 @@ namespace NuGet.Commands
                 IsTool = Tool,
                 Logger = Console,
                 Build = Build,
+                IncludeReferencedProjects = IncludeReferencedProjects
             };
 
             // Add the additional Properties to the properties of the Project Factory

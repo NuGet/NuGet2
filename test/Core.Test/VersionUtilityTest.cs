@@ -141,6 +141,20 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void ParseFrameworkNameNormalizesNativeFrameworkNames()
+        {
+            // Arrange
+            Version defaultVersion = new Version("0.0");
+
+            // Act
+            var frameworkName = VersionUtility.ParseFrameworkName("native");
+
+            // Assert
+            Assert.Equal("native", frameworkName.Identifier);
+            Assert.Equal(defaultVersion, frameworkName.Version);
+        }
+
+        [Fact]
         public void ParseFrameworkNameNormalizesSupportedNetFrameworkNames()
         {
             // Arrange
@@ -1048,6 +1062,19 @@ namespace NuGet.Test
 
             // Act
             var result = VersionUtility.IsCompatible(net40Client, Enumerable.Empty<FrameworkName>());
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void IsCompatibleReturnsTrueIfProjectFrameworkIsNully()
+        {
+            // Arrange
+            FrameworkName net40Client = VersionUtility.ParseFrameworkName("net40-client");
+
+            // Act
+            var result = VersionUtility.IsCompatible(null, net40Client);
 
             // Assert
             Assert.True(result);
