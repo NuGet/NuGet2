@@ -14,7 +14,7 @@ namespace NuGet
         /// <summary>
         /// Maximum number of packages that can live in this cache.
         /// </summary>
-        private const int MaxPackages = 100;
+        private const int MaxPackages = 200;
 
         private const string NuGetCachePathEnvironmentVariable = "NuGetCachePath";
 
