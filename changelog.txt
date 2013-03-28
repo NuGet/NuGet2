@@ -24,6 +24,7 @@ Release notes
 - Allow users to overwrite files if there's a file conflict in package and project.
 - NuGet won't update a dependency package if the installed version already satisfies the constraint of dependency version. (#1681)
 - Add XDT support. 
+- Support Clear Text Password when storing package source credentials in nuget.cofig files (Use 'ClearTextPassword' instead of 'Password' attribute)
 
 *** v2.2 ***
 

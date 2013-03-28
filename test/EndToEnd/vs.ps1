@@ -228,7 +228,9 @@ function New-WebSite {
         [parameter(ValueFromPipeline = $true)]$SolutionFolder
     )
 
-    $SolutionFolder | New-Project EmptyWeb $ProjectName
+	New-WebApplication
+
+    #$SolutionFolder | New-Project EmptyWeb $ProjectName
 }
 
 function New-FSharpLibrary {

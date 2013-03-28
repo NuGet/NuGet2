@@ -12,3 +12,4 @@ Adam Ralph - Added recognized words to custom dictionary to allow build.cmd to s
 Bruno Roggeri - Fix unit tests when running in localized VS.
 garethevans -  Extracted interface from PackageService
 Maxime Brugidou - Handle project dependencies when packing (#936)
+Xavier Decoster - Support Clear Text Password when storing package source credentials in nuget.cofig files (#2991, #3164)
