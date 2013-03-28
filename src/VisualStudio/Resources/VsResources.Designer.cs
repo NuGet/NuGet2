@@ -774,6 +774,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Package {0} of version {1} is not referenced by any project..
+        /// </summary>
+        public static string Warning_PackageNotReferencedByAnyProject {
+            get {
+                return ResourceManager.GetString("Warning_PackageNotReferencedByAnyProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Install failed. Rolling back....
         /// </summary>
         public static string Warning_RollingBack {
