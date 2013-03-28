@@ -1,6 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using EnvDTE;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.VCProjectEngine;
+using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio
 {
@@ -84,6 +88,63 @@ namespace NuGet.VisualStudio
         protected override void AddFileToContainer(string fullPath, ProjectItems container)
         {
             container.AddFromFile(Path.GetFileName(fullPath));
+        }
+
+        protected override void AddFileToProject(string path)
+        {
+            if (ExcludeFile(path))
+            {
+                return;
+            }
+
+            // Get the project items for the folder path
+            string folderPath = Path.GetDirectoryName(path);
+            string fullPath = GetFullPath(path);
+
+            ThreadHelper.Generic.Invoke(() =>
+            {
+                ProjectItems container = GetFolder(folderPath);
+
+                // Add the file to project or folder
+                AddFileToContainer(fullPath, container);
+            });
+
+            Logger.Log(MessageLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);
+        }
+
+        private ProjectItems GetFolder(string folderPath)
+        {
+            if (string.IsNullOrEmpty(folderPath))
+            {
+                return Project.ProjectItems;
+            }
+
+            ProjectItem item = Project.ProjectItems.Item(folderPath);
+            if (item == null)
+            {
+                if (VsVersionHelper.IsVisualStudio2010)
+                {
+                    VisualStudio10.VCProjectHelper.AddProjectFilter(Project.Object, folderPath);
+                }
+                else
+                {
+                    AddProjectFilter(Project.Object, folderPath);
+                }
+
+                item = Project.ProjectItems.Item(folderPath);
+            }
+
+            return item.ProjectItems;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void AddProjectFilter(object project, string folderPath)
+        {
+            var vcProject = project as VCProject;
+            if (vcProject != null)
+            {
+                vcProject.AddFilter(folderPath);
+            }
         }
     }
 }
