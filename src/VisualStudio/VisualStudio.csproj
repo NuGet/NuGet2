@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <NoWarn>1762</NoWarn>
@@ -137,7 +137,6 @@
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="$(ComponentHostAssembly)" />
-    <Reference Include="$(VCProjectEngineAssembly)" />
     <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="$(VisualStudioShellAssembly)">
       <EmbedInteropTypes>False</EmbedInteropTypes>
