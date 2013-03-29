@@ -55,16 +55,25 @@
         <TextBlock DockPanel.Dock="Bottom" Margin="0,0,0,3" TextWrapping="Wrap" Text="{x:Static resources:Resources.License_LicenseText}" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.CaptionTextKey}}" />
 
         <ItemsControl
-            ScrollViewer.VerticalScrollBarVisibility="Auto"
             Grid.Row="1" 
             Margin="0,0,0,3" 
             MinHeight="130" 
-            Padding="3" 
-            BorderThickness="1" 
-            BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" 
-            Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
             ItemsSource="{Binding}"
             ItemTemplate="{StaticResource LicenseItemTemplate}">
+            <ItemsControl.Template>
+                <ControlTemplate TargetType="{x:Type ItemsControl}">
+                    <Border BorderThickness="1" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+                        <ScrollViewer 
+                            Padding="3" 
+                            Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" 
+                            CanContentScroll="True" 
+                            VerticalScrollBarVisibility="Auto" 
+                            HorizontalScrollBarVisibility="Disabled">
+                            <ItemsPresenter></ItemsPresenter>
+                        </ScrollViewer>
+                    </Border>                    
+                </ControlTemplate>
+            </ItemsControl.Template>
         </ItemsControl>
 
     </DockPanel>
