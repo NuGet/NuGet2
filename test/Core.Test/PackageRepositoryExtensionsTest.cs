@@ -152,7 +152,7 @@ namespace NuGet.Test
             // Arrange
             var sourceRepository = new MockPackageRepository();
             sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0", new string[] { "hello" }));
-            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "2.0", new string[] { "hello", "world" }, tools: new string[] { "build\\one.ps1" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "2.0", new string[] { "hello", "world" }, tools: new string[] { "build\\install.ps1" }));
 
             var packages = new IPackage[] 
             {
@@ -160,7 +160,7 @@ namespace NuGet.Test
             };
 
             // Act
-            var foundPackages = PackageRepositoryExtensions.GetUpdates(sourceRepository, packages, includePrerelease: true, targetFrameworks: Enumerable.Empty<FrameworkName>(),
+            var foundPackages = PackageRepositoryExtensions.GetUpdates(sourceRepository, packages, includePrerelease: true, targetFrameworks:new [] { new FrameworkName("NETFramework, Version=4.5") },
                                                                        includeAllVersions: true).ToList();
 
             // Assert
@@ -168,7 +168,7 @@ namespace NuGet.Test
 
             Assert.Equal("A", foundPackages[0].Id);
             Assert.Equal(new SemanticVersion("2.0"), foundPackages[0].Version);
-        }
+        }   
 
         [Fact]
         public void GetUpdatesReturnPackagesConformingToVersionConstraints()
