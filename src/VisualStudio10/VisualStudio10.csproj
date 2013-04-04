@@ -19,6 +19,11 @@
       <HintPath>..\..\lib\VS10\Microsoft.VisualStudio.ExtensionManager.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Microsoft.VisualStudio.VCProjectEngine, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>..\..\lib\VS10\Microsoft.VisualStudio.VCProjectEngine.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
@@ -27,6 +32,7 @@
     </Compile>
     <Compile Include="GalleryEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VCProjectHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\..\CodeAnalysisDictionary.xml">

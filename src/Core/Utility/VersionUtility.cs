@@ -584,7 +584,7 @@ namespace NuGet
                     {
                         return VersionUtility.ParseFrameworkFolderName(
                             frameworkPart,
-                            strictParsing: knownFolders[i] != Constants.ContentDirectory,
+                            strictParsing: knownFolders[i] == Constants.LibDirectory,
                             effectivePath: out effectivePath);
                     }
                     catch (ArgumentException)
