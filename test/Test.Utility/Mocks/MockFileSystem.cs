@@ -253,5 +253,11 @@ namespace NuGet.Test.Mocks
                 return DateTime.UtcNow;
             }
         }
+
+
+        public void MakeFileWritable(string path)
+        {
+            // Nothing to do here.
+        }
     }
 }

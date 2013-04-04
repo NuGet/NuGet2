@@ -359,4 +359,7 @@ Packages installed into Website projects will not be restored during build. Cons
   <data name="FileConflictTitle" xml:space="preserve">
     <value>File Conflict</value>
   </data>
+  <data name="Warning_PackageNotReferencedByAnyProject" xml:space="preserve">
+    <value>Package {0} of version {1} is not referenced by any project.</value>
+  </data>
 </root>

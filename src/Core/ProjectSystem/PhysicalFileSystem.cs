@@ -106,7 +106,8 @@ namespace NuGet
 
             try
             {
-                path = GetFullPath(path);
+                MakeFileWritable(path);
+                path = GetFullPath(path);                
                 File.Delete(path);
                 string folderPath = Path.GetDirectoryName(path);
                 if (!String.IsNullOrEmpty(folderPath))
@@ -285,6 +286,16 @@ namespace NuGet
         {
             path = GetFullPath(path);
             Directory.CreateDirectory(path);
+        }
+
+        public void MakeFileWritable(string path)
+        {
+            path = GetFullPath(path);
+            FileAttributes attributes = File.GetAttributes(path);
+            if (attributes.HasFlag(FileAttributes.ReadOnly))
+            {
+                File.SetAttributes(path, attributes & ~FileAttributes.ReadOnly);
+            }
         }
     }
 }
