@@ -415,4 +415,7 @@
   <data name="Info_OverwriteExistingFile" xml:space="preserve">
     <value>Overwrite existing file '{0}'.</value>
   </data>
+  <data name="ReferenceFile_InvalidDevelopmentFlag" xml:space="preserve">
+    <value>Unable to parse developmentDependency value '{0}' from '{1}'.</value>
+  </data>
 </root>

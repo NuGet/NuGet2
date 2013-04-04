@@ -1,5 +1,10 @@
 Release notes
 
+*** v2.6 ***
+ 
+- Show License Url when listing packages and verbosity is detailed. 
+- Add developmentDependency attribute to packages.config and use it in pack command to only include runtime packages (#1956)
+
 *** v2.5 ***
 
 - Add support for MonoAndroid, MonoTouch and MonoMac framework identifiers.

@@ -174,7 +174,7 @@ namespace NuGet.ServerExtensions
             }
             else
             {
-                return new[] { new PackageReference(packageId, GetVersion(), versionConstraint: null, targetFramework: null) };
+                return new[] { new PackageReference(packageId, GetVersion(), versionConstraint: null, targetFramework: null, isDevelopmentDependency: false) };
             }
         }
 
