@@ -14,3 +14,4 @@ garethevans -  Extracted interface from PackageService
 Maxime Brugidou - Handle project dependencies when packing (#936)
 Xavier Decoster - Support Clear Text Password when storing package source credentials in nuget.cofig files (#2991, #3164)
 Xavier Decoster - Add -StorePasswordInClearText parameter to the 'nuget.exe source' command. (#3192)
+jmanning - Fix Get-Package help description (#3190 and #3191)
