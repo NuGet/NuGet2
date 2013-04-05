@@ -88,5 +88,31 @@ namespace NuGet.Test
             // Assert
             Assert.Equal(root, fullPath);
         }
+
+        // Tests that deleting read-only files works.
+        [Fact]
+        public void DeleteReadonlyFile()
+        {
+            // Arrange
+            var root = Path.Combine(Path.GetTempPath());
+            var path = Path.GetRandomFileName();
+            var target = new PhysicalFileSystem(root);
+            using (var memStream = new MemoryStream(
+                System.Text.Encoding.UTF8.GetBytes("hello")))
+            {
+                target.AddFile(path, memStream);
+            }
+
+            // Make the file read-only
+            var fullPath = Path.Combine(root, path);
+            File.SetAttributes(fullPath, File.GetAttributes(fullPath) | FileAttributes.ReadOnly);
+            Assert.True(File.GetAttributes(fullPath).HasFlag(FileAttributes.ReadOnly));
+
+            // Act
+            target.DeleteFile(path);
+
+            // Assert
+            Assert.True(!File.Exists(fullPath));
+        }
     }
 }
