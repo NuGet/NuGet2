@@ -228,12 +228,12 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         public void AddCommandAddsSourceToSourceProviderWithPasswordInClearTextWhenStorePasswordInClearTextIsTrue()
         {
             // Arrange
-            var expectedSources = new[] { new PackageSource("http://TestSource", "TestName") { IsPasswordClearText = true }, new PackageSource("http://new-source", "new-source-name") { IsPasswordClearText = true } };
+            var expectedSources = new[] { new PackageSource("http://TestSource", "TestName"), new PackageSource("http://new-source", "new-source-name") { IsPasswordClearText = true } };
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
             packageSourceProvider.Setup(s => s.LoadPackageSources())
-                                 .Returns(new[] { new PackageSource("http://TestSource", "TestName") { IsPasswordClearText = true } });
+                                 .Returns(new[] { new PackageSource("http://TestSource", "TestName") });
             packageSourceProvider.Setup(s => s.SavePackageSources(It.IsAny<IEnumerable<PackageSource>>()))
-                .Callback((IEnumerable<PackageSource> source) => Assert.Equal(expectedSources, source));
+                .Callback((IEnumerable<PackageSource> source) => Assert.Equal(expectedSources, source)).Verifiable();
             var sourceCommand = new SourcesCommand()
             {
                 SourceProvider = packageSourceProvider.Object,
