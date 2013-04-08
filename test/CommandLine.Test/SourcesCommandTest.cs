@@ -78,7 +78,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                 Name = name
             };
             sourceCommand.Arguments.Add("ADD");
-            
+
             // Act and Assert
             ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, "The name specified cannot be empty. Please provide a valid name.");
         }
@@ -94,7 +94,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                 Name = "All"
             };
             sourceCommand.Arguments.Add("ADD");
-            
+
             // Act and Assert
             ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, "Package source name 'All' is a reserved name.");
         }
@@ -202,7 +202,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         public void AddCommandAddsSourceToSourceProvider()
         {
             // Arrange
-            var expectedSources = new [] { new PackageSource("http://TestSource", "TestName"), new PackageSource("http://new-source", "new-source-name") };
+            var expectedSources = new[] { new PackageSource("http://TestSource", "TestName"), new PackageSource("http://new-source", "new-source-name") };
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
             packageSourceProvider.Setup(s => s.LoadPackageSources())
                                  .Returns(new[] { new PackageSource("http://TestSource", "TestName") });
@@ -213,6 +213,33 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                 SourceProvider = packageSourceProvider.Object,
                 Name = "new-source-name",
                 Source = "http://new-source"
+            };
+            sourceCommand.Arguments.Add("add");
+            sourceCommand.Console = new MockConsole();
+
+            // Act 
+            sourceCommand.ExecuteCommand();
+
+            // Assert
+            packageSourceProvider.Verify();
+        }
+
+        [Fact]
+        public void AddCommandAddsSourceToSourceProviderWithPasswordInClearTextWhenStorePasswordInClearTextIsTrue()
+        {
+            // Arrange
+            var expectedSources = new[] { new PackageSource("http://TestSource", "TestName"), new PackageSource("http://new-source", "new-source-name") { IsPasswordClearText = true } };
+            var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+            packageSourceProvider.Setup(s => s.LoadPackageSources())
+                                 .Returns(new[] { new PackageSource("http://TestSource", "TestName") });
+            packageSourceProvider.Setup(s => s.SavePackageSources(It.IsAny<IEnumerable<PackageSource>>()))
+                .Callback((IEnumerable<PackageSource> source) => Assert.Equal(expectedSources, source)).Verifiable();
+            var sourceCommand = new SourcesCommand()
+            {
+                SourceProvider = packageSourceProvider.Object,
+                Name = "new-source-name",
+                Source = "http://new-source",
+                StorePasswordInClearText = true
             };
             sourceCommand.Arguments.Add("add");
             sourceCommand.Console = new MockConsole();
@@ -359,7 +386,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             sourceCommand.Arguments.Add("update");
 
             // Act and Assert
-            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand, 
+            ExceptionAssert.Throws<CommandLineException>(sourceCommand.ExecuteCommand,
                 "The source specified has already been added to the list of available package sources. Please provide a unique source.");
         }
 
@@ -427,11 +454,13 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
             packageSourceProvider.Setup(c => c.LoadPackageSources()).Returns(sources);
             packageSourceProvider.Setup(c => c.SavePackageSources(It.IsAny<IEnumerable<PackageSource>>()))
-                                 .Callback((IEnumerable<PackageSource> actualSources) => {
+                                 .Callback((IEnumerable<PackageSource> actualSources) =>
+                                 {
                                      Assert.Equal(expectedSources, actualSources);
                                      var s = actualSources.ElementAt(1);
                                      Assert.Equal(userName, s.UserName);
                                      Assert.Equal(password, s.Password);
+                                     Assert.False(s.IsPasswordClearText);
                                  })
                                  .Verifiable();
 
@@ -442,6 +471,47 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                 Source = "http://abcd-source",
                 UserName = userName,
                 Password = password
+            };
+            sourceCommand.Arguments.Add("update");
+            sourceCommand.Console = new MockConsole();
+
+            // Act 
+            sourceCommand.ExecuteCommand();
+
+            // Assert
+            packageSourceProvider.Verify();
+        }
+
+        [Fact]
+        public void UpdateCommandStoresPasswordInClearTextWhenStorePasswordInClearTextIsTrue()
+        {
+            // Arrange
+            string userName = "UserName";
+            string password = "test-pass";
+            var sources = new[] { new PackageSource("First") { IsPasswordClearText = true }, new PackageSource("Abcd") { IsPasswordClearText = true }, new PackageSource("http://test-source", "source") { IsPasswordClearText = true } };
+            var expectedSources = new[] { new PackageSource("First") { IsPasswordClearText = true }, new PackageSource("http://abcd-source", "Abcd") { IsPasswordClearText = true }, 
+                                          new PackageSource("http://test-source", "source")  { IsPasswordClearText = true }};
+            var packageSourceProvider = new Mock<IPackageSourceProvider>(MockBehavior.Strict);
+            packageSourceProvider.Setup(c => c.LoadPackageSources()).Returns(sources);
+            packageSourceProvider.Setup(c => c.SavePackageSources(It.IsAny<IEnumerable<PackageSource>>()))
+                                 .Callback((IEnumerable<PackageSource> actualSources) =>
+                                 {
+                                     Assert.Equal(expectedSources, actualSources);
+                                     var s = actualSources.ElementAt(1);
+                                     Assert.Equal(userName, s.UserName);
+                                     Assert.Equal(password, s.Password);
+                                     Assert.True(s.IsPasswordClearText);
+                                 })
+                                 .Verifiable();
+
+            var sourceCommand = new SourcesCommand()
+            {
+                SourceProvider = packageSourceProvider.Object,
+                Name = "Abcd",
+                Source = "http://abcd-source",
+                UserName = userName,
+                Password = password,
+                StorePasswordInClearText = true
             };
             sourceCommand.Arguments.Add("update");
             sourceCommand.Console = new MockConsole();
