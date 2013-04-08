@@ -485,8 +485,15 @@ namespace NuGet.Dialog.Providers
                 }
                 else if (task.IsFaulted)
                 {
-                    // show error message in the Message pane
-                    ShowMessagePane(ExceptionUtility.Unwrap(exception).Message);
+                    if (cancellationSource.IsCancellationRequested)
+                    {
+                        HideProgressPane();
+                    }
+                    else
+                    {
+                        // show error message in the Message pane
+                        ShowMessagePane(ExceptionUtility.Unwrap(exception).Message);
+                    }
                 }
                 else
                 {
