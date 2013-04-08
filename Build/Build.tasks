@@ -36,6 +36,7 @@
     <UsingTask TaskName="CheckUnexpectedAssemblies" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
         <ParameterGroup>
             <Items ParameterType="Microsoft.Build.Framework.ITaskItem[]" />
+            <InvalidItems ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
         </ParameterGroup>
         <Task>
             <Using Namespace="System.IO" />
@@ -43,18 +44,18 @@
             <Using Namespace="Microsoft.Build.Framework" />
             <Code Type="Fragment" Language="cs">
                 <![CDATA[
-            bool successful = true;
+            var outputItems = new List<ITaskItem>();
             foreach(ITaskItem item in Items) 
             {
                 string fileName = item.GetMetadata("Filename");
               
                 if(!fileName.StartsWith("NuGet") && fileName != "Microsoft.Web.XmlTransform") 
                 {
-                    Log.LogError("The assembly '{0}' is not expected to be in the VSIX.", fileName);
-                    successful = false;
+                    Log.LogWarning("The assembly '{0}' is not expected to be in the VSIX.", fileName);
+                    outputItems.Add(item);
                 }
             }
-            return successful;
+            InvalidItems = outputItems.ToArray();
           ]]>
             </Code>
         </Task>

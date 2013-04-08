@@ -902,14 +902,19 @@ namespace NuGet.VisualStudio
         public static void EnsureCheckedOutIfExists(this Project project, IFileSystem fileSystem, string path)
         {
             var fullPath = fileSystem.GetFullPath(path);
-            if (fileSystem.FileExists(path) &&
-                project.DTE.SourceControl != null &&
+
+            if (fileSystem.FileExists(path))
+            {
+                fileSystem.MakeFileWritable(path);
+
+                if (project.DTE.SourceControl != null &&
                 project.DTE.SourceControl.IsItemUnderSCC(fullPath) &&
                 !project.DTE.SourceControl.IsItemCheckedOut(fullPath))
-            {
+                {
 
-                // Check out the item
-                project.DTE.SourceControl.CheckOutItem(fullPath);
+                    // Check out the item
+                    project.DTE.SourceControl.CheckOutItem(fullPath);
+                }
             }
         }
 

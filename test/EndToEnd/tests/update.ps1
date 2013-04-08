@@ -1377,3 +1377,61 @@ function Test-UpdatePackageThrowsIfMinClientVersionIsNotSatisfied
     Assert-NoPackage $p "Kitty" -Version 2.0.0
     Assert-Package $p "Kitty" -Version 1.0.0
 }
+
+function Test-UpdatePackageWhenAnUnusedVersionOfPackageIsPresentInPackagesFolder
+{
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Install TestUpdatePackage 1.0.0 at solution level only
+    $p | Install-Package TestUpdatePackage -version 1.0.0 -Source $context.RepositoryRoot
+    Remove-ProjectItem $p packages.config
+
+    # Install TestUpdatePackage 1.0.1 in project
+    $p | Install-Package TestUpdatePackage -version 1.0.1 -Source $context.RepositoryRoot
+
+    # Check that TestUpdatePackage 1.0.0 is solution level only and 1.0.1 is in project level
+    Assert-NoPackage $p TestUpdatePackage -Version 1.0.0
+    Assert-Package $p TestUpdatePackage 1.0.1
+    Assert-SolutionPackage TestUpdatePackage 1.0.0
+    Assert-SolutionPackage TestUpdatePackage 1.0.1
+
+    # Act
+    Update-Package -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-NoPackage $p TestUpdatePackage -Version 1.0.1
+    Assert-NoPackage $p TestUpdatePackage -Version 1.0.0
+    Assert-Package $p TestUpdatePackage 2.0.0
+    Assert-NoSolutionPackage TestUpdatePackage 1.0.1
+    Assert-SolutionPackage TestUpdatePackage 1.0.0
+    Assert-SolutionPackage TestUpdatePackage 2.0.0
+}
+
+function Test-UpdatePackageThrowsWhenOnlyUnusedVersionsOfAPackageIsPresentInPackagesFolder
+{
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    # Install TestUpdatePackage 1.0.0 at solution level only
+    $p | Install-Package TestUpdatePackage -version 1.0.0 -Source $context.RepositoryRoot
+    Remove-ProjectItem $p packages.config
+
+    # Install TestUpdatePackage 1.0.1 in project
+    $p | Install-Package TestUpdatePackage -version 1.0.1 -Source $context.RepositoryRoot
+    Remove-ProjectItem $p packages.config
+
+    # Check that both the versions of TestUpdatePackage is solution level only
+    Assert-NoPackage $p TestUpdatePackage -Version 1.0.0
+    Assert-NoPackage $p TestUpdatePackage 1.0.1
+    Assert-SolutionPackage TestUpdatePackage 1.0.0
+    Assert-SolutionPackage TestUpdatePackage 1.0.1
+
+    # Act & Assert
+    # Update specific package here. Because, when all packages are updated, the PackageNotInstalledException gets caught. We want it to be thrown
+    Assert-Throws { Update-Package TestUpdatePackage -Source $context.RepositoryRoot } "'TestUpdatePackage' was not installed in any project. Update failed."
+}

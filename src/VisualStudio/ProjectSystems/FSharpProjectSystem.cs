@@ -54,16 +54,22 @@ namespace NuGet.VisualStudio
         /// <param name="name"></param>
         public override void RemoveReference(string name)
         {
+            RemoveReferenceCore(name, Project.Object.References);
+        }
+
+        internal void RemoveReferenceCore(string name, References references)
+        {
             try
             {
                 var referenceName = System.IO.Path.GetFileNameWithoutExtension(name);
-                Reference reference = Project.Object.References.Item(referenceName);
+
+                Reference reference = references.Item(referenceName);
 
                 if (reference == null)
                 {
                     // No exact match found for referenceName. Trying case-insensitive search
                     Logger.Log(MessageLevel.Warning, VsResources.Warning_NoExactMatchForReference, referenceName);
-                    foreach (Reference r in Project.Object.References)
+                    foreach (Reference r in references)
                     {
                         if (String.Equals(referenceName, r.Name, StringComparison.OrdinalIgnoreCase))
                         {
@@ -89,7 +95,7 @@ namespace NuGet.VisualStudio
                 }
                 else
                 {
-                    Logger.Log(MessageLevel.Warning, VsResources.FailedToRemoveReference, referenceName);
+                    Logger.Log(MessageLevel.Warning, VsResources.Warning_FailedToFindMatchForRemoveReference, referenceName);
                 }
             }
             catch (Exception e)

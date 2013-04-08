@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Globalization;
 using EnvDTE;
 using Moq;
-using Xunit;
 using NuGet.Test.Mocks;
+using NuGet.VisualStudio.Resources;
+using VSLangProj;
+using Xunit;
 using Xunit.Extensions;
 
 namespace NuGet.VisualStudio.Test
@@ -114,6 +117,111 @@ namespace NuGet.VisualStudio.Test
             }
 
             return null;
+        }
+
+        [Fact]
+        public void FSharpProjectSystemRemoveReference()
+        {
+            var project = new Mock<Project>();
+            project.Setup(p => p.Properties.Item("FullPath").Value).Returns("x:\\");
+            project.Setup(p => p.Name).Returns("Project");
+
+            var reference = new Mock<Reference>();
+            reference.Setup(r => r.Name).Returns("AbC");
+            reference.Setup(r => r.Remove()).Verifiable();
+
+            var enumerableReferences = new Reference[] { reference.Object };
+
+            var references = new Mock<References>();
+            references.Setup(s => s.Item(It.IsAny<object>())).Returns((Reference)null);
+            references.Setup(s => s.GetEnumerator()).Returns(enumerableReferences.GetEnumerator());
+
+            var fileSystem = new Mock<IFileSystem>();
+            var fileSystemProvider = new Mock<IFileSystemProvider>();
+            fileSystemProvider.Setup(f => f.GetFileSystem("x:\\")).Returns(fileSystem.Object);
+
+            var logger = new Mock<ILogger>();
+
+            FSharpProjectSystem projectSystem = new FSharpProjectSystem(project.Object, fileSystemProvider.Object);
+            projectSystem.Logger = logger.Object;
+
+            // Act
+            projectSystem.RemoveReferenceCore("aBc", references.Object);
+
+            // Assert
+            reference.Verify();
+            logger.Verify(l => l.Log(MessageLevel.Debug, VsResources.Debug_RemoveReference, "aBc", "Project"));
+        }
+
+        [Fact]
+        public void FSharpProjectSystemRemoveReferenceFailedToFindMatch()
+        {
+            var project = new Mock<Project>();
+            project.Setup(p => p.Properties.Item("FullPath").Value).Returns("x:\\");
+            project.Setup(p => p.Name).Returns("Project");
+
+            var reference = new Mock<Reference>();
+            reference.Setup(r => r.Name).Returns("AbC");
+
+            var enumerableReferences = new Reference[] { reference.Object };
+
+            var references = new Mock<References>();
+            references.Setup(s => s.Item(It.IsAny<object>())).Returns((Reference)null);
+            references.Setup(s => s.GetEnumerator()).Returns(enumerableReferences.GetEnumerator());
+
+            var fileSystem = new Mock<IFileSystem>();
+            var fileSystemProvider = new Mock<IFileSystemProvider>();
+            fileSystemProvider.Setup(f => f.GetFileSystem("x:\\")).Returns(fileSystem.Object);
+
+            var logger = new Mock<ILogger>();
+
+            FSharpProjectSystem projectSystem = new FSharpProjectSystem(project.Object, fileSystemProvider.Object);
+            projectSystem.Logger = logger.Object;
+
+            // Act
+            projectSystem.RemoveReferenceCore("aBcD", references.Object);
+
+            // Assert
+            reference.Verify(r => r.Remove(), Times.Never());
+            logger.Verify(l => l.Log(MessageLevel.Warning, VsResources.Warning_FailedToFindMatchForRemoveReference, "aBcD"));
+        }
+
+        [Fact]
+        public void FSharpProjectSystemRemoveReferenceFailsMultipleMatches()
+        {
+            var project = new Mock<Project>();
+            project.Setup(p => p.Properties.Item("FullPath").Value).Returns("x:\\");
+            project.Setup(p => p.Name).Returns("Project");
+
+            var reference1 = new Mock<Reference>();
+            reference1.Setup(r => r.Name).Returns("AbC");
+
+            var reference2 = new Mock<Reference>();
+            reference2.Setup(r => r.Name).Returns("abc");
+
+            var enumerableReferences = new Reference[] { reference1.Object, reference2.Object };
+
+            var references = new Mock<References>();
+            references.Setup(s => s.Item(It.IsAny<object>())).Returns((Reference)null);
+            references.Setup(s => s.GetEnumerator()).Returns(enumerableReferences.GetEnumerator());
+
+            var fileSystem = new Mock<IFileSystem>();
+            var fileSystemProvider = new Mock<IFileSystemProvider>();
+            fileSystemProvider.Setup(f => f.GetFileSystem("x:\\")).Returns(fileSystem.Object);
+
+            var logger = new Mock<ILogger>();
+
+            FSharpProjectSystem projectSystem = new FSharpProjectSystem(project.Object, fileSystemProvider.Object);
+            projectSystem.Logger = logger.Object;
+
+            // Act
+            projectSystem.RemoveReferenceCore("aBc", references.Object);
+
+            // Assert
+            reference1.Verify(r => r.Remove(), Times.Never());
+            reference2.Verify(r => r.Remove(), Times.Never());
+            var message = String.Format(CultureInfo.CurrentCulture, VsResources.FailedToRemoveReference, "aBc");
+            logger.Verify(l => l.Log(MessageLevel.Error, message));
         }
     }
 }

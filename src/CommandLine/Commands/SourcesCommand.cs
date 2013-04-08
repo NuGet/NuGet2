@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
 
 namespace NuGet.Commands
@@ -21,6 +20,9 @@ namespace NuGet.Commands
         [Option(typeof(NuGetCommand), "SourcesCommandPasswordDescription")]
         public string Password { get; set; }
 
+        [Option(typeof(NuGetCommand), "SourcesCommandStorePasswordInClearTextDescription")]
+        public bool StorePasswordInClearText { get; set; }
+        
         public override void ExecuteCommand()
         {
             if (SourceProvider == null)
@@ -179,6 +181,7 @@ namespace NuGet.Commands
             sourceList.RemoveAt(existingSourceIndex);
             existingSource.UserName = UserName;
             existingSource.Password = Password;
+            existingSource.IsPasswordClearText = StorePasswordInClearText;
             
             sourceList.Insert(existingSourceIndex, existingSource);
             SourceProvider.SavePackageSources(sourceList);

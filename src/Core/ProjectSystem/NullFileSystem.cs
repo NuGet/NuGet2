@@ -99,5 +99,10 @@ namespace NuGet
         {
             return DateTimeOffset.MinValue;
         }
+
+        public void MakeFileWritable(string path)
+        {
+            // Nothing to do here.
+        }
     }
 }

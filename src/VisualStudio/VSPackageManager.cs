@@ -827,11 +827,11 @@ namespace NuGet.VisualStudio
             return package;
         }
 
-        private IPackage FindLocalPackage(string packageId, out bool appliesToProject)
+        internal IPackage FindLocalPackage(string packageId, out bool appliesToProject)
         {
             // It doesn't matter if there are multiple versions of the package installed at solution level, 
             // we just want to know that one exists.
-            var packages = LocalRepository.FindPackagesById(packageId).ToList();
+            var packages = LocalRepository.FindPackagesById(packageId).OrderByDescending(p => p.Version).ToList();
 
             // Can't find the package in the solution.
             if (!packages.Any())
@@ -841,26 +841,36 @@ namespace NuGet.VisualStudio
                     VsResources.UnknownPackage, packageId));
             }
 
-            IPackage package = packages.FirstOrDefault();
-            appliesToProject = IsProjectLevel(package);
-
-            if (!appliesToProject)
+            foreach (IPackage package in packages)
             {
-                if (packages.Count > 1)
+                appliesToProject = IsProjectLevel(package);
+
+                if (!appliesToProject)
                 {
-                    throw CreateAmbiguousUpdateException(projectManager: null, packages: packages);
+                    if (packages.Count > 1)
+                    {
+                        throw CreateAmbiguousUpdateException(projectManager: null, packages: packages);
+                    }
                 }
-            }
-            else if (!_sharedRepository.IsReferenced(package.Id, package.Version))
-            {
-                // If this package applies to a project but isn't installed in any project then 
-                // it's probably a borked install.
-                throw new PackageNotInstalledException(
-                    String.Format(CultureInfo.CurrentCulture,
-                    VsResources.PackageNotInstalledInAnyProject, packageId));
+                else if (!_sharedRepository.IsReferenced(package.Id, package.Version))
+                {
+                    Logger.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture,
+                        VsResources.Warning_PackageNotReferencedByAnyProject, package.Id, package.Version));
+
+                    // Try next package
+                    continue;
+                }
+
+                // Found a package with package Id as 'packageId' which is installed in at least 1 project
+                return package;
             }
 
-            return package;
+            // There are one or more packages with package Id as 'packageId'
+            // BUT, none of them is installed in a project
+            // it's probably a borked install.
+            throw new PackageNotInstalledException(
+                String.Format(CultureInfo.CurrentCulture,
+                VsResources.PackageNotInstalledInAnyProject, packageId));
         }
 
         /// <summary>
