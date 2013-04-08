@@ -118,7 +118,7 @@ namespace NuGet.Test
             var version = ManifestVersionUtility.GetManifestVersion(metadata);
 
             // Assert
-            Assert.Equal(2, version);
+            Assert.Equal(1, version);
         }
 
         [Fact]
