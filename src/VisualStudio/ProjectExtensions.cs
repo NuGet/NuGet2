@@ -43,7 +43,8 @@ namespace NuGet.VisualStudio
                                                                           VsConstants.NemerleProjectTypeGuid,
                                                                           VsConstants.WixProjectTypeGuid,
                                                                           VsConstants.SynergexProjectTypeGuid,
-                                                                          VsConstants.AzureCloudServiceProjectTypeGuid };
+                                                                          VsConstants.AzureCloudServiceProjectTypeGuid,
+                                                                          VsConstants.NomadForVisualStudioProjectTypeGuid };
 
         private static readonly HashSet<string> _unsupportedProjectTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
                                                                             VsConstants.LightSwitchProjectTypeGuid,
@@ -70,6 +71,7 @@ namespace NuGet.VisualStudio
                 VsConstants.AzureCloudServiceProjectTypeGuid,
                 VsConstants.CppProjectTypeGuid,
                 VsConstants.SynergexProjectTypeGuid,
+                VsConstants.NomadForVisualStudioProjectTypeGuid,
             };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
