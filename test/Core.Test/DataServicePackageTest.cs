@@ -164,8 +164,6 @@ namespace NuGet.Test
         public void EnsurePackageStorePackageInMemoryIfMachineCacheIsNotAvailable()
         {
             // Arrange
-            var zipPackage = PackageUtility.CreatePackage("A", "1.2");
-
             var uri = new Uri("http://nuget.org");
             var mockRepository = new Mock<MockPackageRepository>().As<IPackageCacheRepository>();
             mockRepository.Setup(s => s.CreatePackageStream(It.IsAny<string>(), It.IsAny<SemanticVersion>())).Returns((Stream)null);
