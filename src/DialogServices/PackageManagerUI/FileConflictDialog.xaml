@@ -45,6 +45,6 @@
             Margin="0,3,0,3" 
             TextWrapping="Wrap" 
             VerticalAlignment="Top"
-            Foreground="{DynamicResource {x:Static vsfx:VsBrushes.CaptionTextKey}}" />
+            Foreground="{DynamicResource {x:Static vsfx:VsBrushes.WindowTextKey}}" />
     </DockPanel>
 </pfui:DialogWindow>
