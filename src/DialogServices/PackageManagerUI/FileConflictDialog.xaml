@@ -19,7 +19,7 @@
      SizeToContent="WidthAndHeight"
      FocusManager.FocusedElement="{Binding ElementName=NoButton, Mode=OneTime}"
      Title="{x:Static vsresources:VsResources.FileConflictTitle}"
-     Background="{DynamicResource {x:Static resources:UIResources.WindowBackgroundBrushKey}}"
+     Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}"
      AutomationProperties.AutomationId="NuGetFileConflictWindow">
     
     <Window.Resources>
