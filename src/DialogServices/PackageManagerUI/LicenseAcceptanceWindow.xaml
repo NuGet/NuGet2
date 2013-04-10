@@ -52,7 +52,7 @@
             <Button Content="{x:Static resources:Resources.License_Accept}" AutomationProperties.AutomationId="AcceptButton" Click="OnAcceptButtonClick" />
         </StackPanel>
 
-        <TextBlock DockPanel.Dock="Bottom" Margin="0,0,0,3" TextWrapping="Wrap" Text="{x:Static resources:Resources.License_LicenseText}" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.CaptionTextKey}}" />
+        <TextBlock DockPanel.Dock="Bottom" Margin="0,0,0,3" TextWrapping="Wrap" Text="{x:Static resources:Resources.License_LicenseText}" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.WindowTextKey}}" />
 
         <ItemsControl
             Grid.Row="1" 
