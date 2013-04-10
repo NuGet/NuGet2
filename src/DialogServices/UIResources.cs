@@ -29,7 +29,7 @@ namespace NuGet.Dialog
                         _windowBackgroundBrushKey = GetObject(
                             "Microsoft.VisualStudio.ExtensionsExplorer.UI.ColorResources, Microsoft.VisualStudio.ExtensionsExplorer.UI", // Class Name, Assembly Name
                             "BackgroundBrushKey", // Property Name
-                            VsBrushes.NewProjectBackgroundKey);
+                            VsBrushes.NewProjectBackgroundKey);  
                     }
 
                     return _windowBackgroundBrushKey;
