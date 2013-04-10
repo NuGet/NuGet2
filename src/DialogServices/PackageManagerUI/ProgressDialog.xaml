@@ -15,11 +15,11 @@
     MinHeight="230" 
     MinWidth="300"
     resources:WindowSizePersistenceHelper.WindowToken="ProgressWindow"
-    Background="{DynamicResource {x:Static resources:UIResources.WindowBackgroundBrushKey}}"
+    Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}"
     AutomationProperties.AutomationId="NuGetProgressWindow">
     
     <DockPanel>
-        <TextBlock DockPanel.Dock="Top" Text="{Binding Title, ElementName=Root}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" FontWeight="Bold" Margin="10" x:Name="StatusText" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.CaptionTextKey}}" />
+        <TextBlock DockPanel.Dock="Top" Text="{Binding Title, ElementName=Root}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" FontWeight="Bold" Margin="10" x:Name="StatusText" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.WindowTextKey}}" />
         <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" Margin="20,0,20,5" Height="26" Width="Auto" x:Name="ProgressBar" />
         <DockPanel DockPanel.Dock="Bottom" Margin="20,10,21,10" LastChildFill="False">
             <Button x:Name="UpgradeButton" DockPanel.Dock="Left" Padding="10,2,10,2" Content="{x:Static resources:Resources.Dialog_UpgradeNuGet}" Visibility="Collapsed" Click="UpgradeButton_Click" />

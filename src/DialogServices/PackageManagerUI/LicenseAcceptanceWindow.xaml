@@ -16,7 +16,7 @@
     WindowStartupLocation="CenterOwner"
     resources:WindowSizePersistenceHelper.WindowToken="LicenseWindow"
     Title="{x:Static resources:Resources.License_DialogTitle}"
-    Background="{DynamicResource {x:Static resources:UIResources.WindowBackgroundBrushKey}}"
+    Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}"
     AutomationProperties.AutomationId="NuGetLicenseWindow"
     >
     
@@ -45,7 +45,7 @@
     </Window.Resources>
     
     <DockPanel Margin="10">
-        <TextBlock DockPanel.Dock="Top" Margin="0,3,0,3" Text="{x:Static resources:Resources.License_HeaderText}" TextWrapping="Wrap" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.CaptionTextKey}}" />        
+        <TextBlock DockPanel.Dock="Top" Margin="0,3,0,3" Text="{x:Static resources:Resources.License_HeaderText}" TextWrapping="Wrap" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.WindowTextKey}}" />        
 
         <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,3" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="{x:Static resources:Resources.License_Decline}" AutomationProperties.AutomationId="DeclineButton" Click="OnDeclineButtonClick" IsCancel="True" />
