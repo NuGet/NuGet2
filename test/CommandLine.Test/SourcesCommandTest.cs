@@ -34,6 +34,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Act
             sourceCommand.ExecuteCommand();
 
+            expectedText = expectedText.Replace("\n", "\r\n");
+
             // Assert
             Assert.Equal(expectedText, console.Output);
         }
@@ -60,6 +62,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 
             // Act
             sourceCommand.ExecuteCommand();
+
+            expectedText = expectedText.Replace("\n", "\r\n");
 
             // Assert
             Assert.Equal(expectedText, console.Output);
