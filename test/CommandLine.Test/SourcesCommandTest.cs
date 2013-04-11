@@ -22,11 +22,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             {
                 SourceProvider = packageSourceProvider.Object,
             };
-            string expectedText =
-@"Registered Sources:
-  1.  FirstName [Enabled]
-      FirstSource
-";
+
             var console = new MockConsole();
 
             sourceCommand.Console = console;
@@ -34,7 +30,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Act
             sourceCommand.ExecuteCommand();
 
-            expectedText = expectedText.Replace("\n", "\r\n");
+            string expectedText =
+@"Registered Sources:
+  1.  FirstName [Enabled]
+      FirstSource
+";
 
             // Assert
             Assert.Equal(expectedText, console.Output);
@@ -51,11 +51,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
                 SourceProvider = packageSourceProvider.Object
             };
             sourceCommand.Arguments.Add("list");
-            string expectedText =
-@"Registered Sources:
-  1.  FirstName [Disabled]
-      FirstSource
-";
+
             var console = new MockConsole();
 
             sourceCommand.Console = console;
@@ -63,8 +59,11 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Act
             sourceCommand.ExecuteCommand();
 
-            expectedText = expectedText.Replace("\n", "\r\n");
-
+            string expectedText =
+@"Registered Sources:
+  1.  FirstName [Disabled]
+      FirstSource
+";
             // Assert
             Assert.Equal(expectedText, console.Output);
         }
