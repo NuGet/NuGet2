@@ -25,16 +25,16 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 
             var console = new MockConsole();
 
-            sourceCommand.Console = console;
-
-            // Act
-            sourceCommand.ExecuteCommand();
-
             string expectedText =
 @"Registered Sources:
   1.  FirstName [Enabled]
       FirstSource
 ";
+
+            sourceCommand.Console = console;
+
+            // Act
+            sourceCommand.ExecuteCommand();
 
             // Assert
             Assert.Equal(expectedText, console.Output);
@@ -54,16 +54,17 @@ namespace NuGet.Test.NuGetCommandLine.Commands
 
             var console = new MockConsole();
 
-            sourceCommand.Console = console;
-
-            // Act
-            sourceCommand.ExecuteCommand();
-
             string expectedText =
 @"Registered Sources:
   1.  FirstName [Disabled]
       FirstSource
 ";
+
+            sourceCommand.Console = console;
+
+            // Act
+            sourceCommand.ExecuteCommand();
+
             // Assert
             Assert.Equal(expectedText, console.Output);
         }
