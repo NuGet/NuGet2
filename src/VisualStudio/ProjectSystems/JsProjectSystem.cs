@@ -21,7 +21,7 @@ namespace NuGet.VisualStudio
             base.AddFile(path, stream);
         }
 
-        protected override void AddFileToContainer(string fullPath, ProjectItems container)
+        protected override void AddFileToContainer(string fullPath, string folderPath, ProjectItems container)
         {
             container.AddFromFile(fullPath);
         }
