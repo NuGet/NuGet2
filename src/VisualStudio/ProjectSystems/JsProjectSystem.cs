@@ -1,13 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using EnvDTE;
+using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio
 {
     /// <summary>
-    /// This project system represents the JavaScript Metro project in Windows8
+    /// This project system represents the JavaScript project in Windows8
     /// </summary>
-    public class JsProjectSystem : VsProjectSystem
+    public class JsProjectSystem : VsProjectSystem, IBatchProcessor<string>
     {
         public JsProjectSystem(Project project, IFileSystemProvider fileSystemProvider) :
             base(project, fileSystemProvider)
@@ -16,14 +18,26 @@ namespace NuGet.VisualStudio
 
         public override void AddFile(string path, Stream stream)
         {
-            // ensure the parent folder is created before adding file to the project
+            // ensure the parent folder is created before adding file to the project            
             Project.GetProjectItems(Path.GetDirectoryName(path), createIfNotExists: true);
             base.AddFile(path, stream);
         }
 
-        protected override void AddFileToContainer(string fullPath, string folderPath, ProjectItems container)
+        protected override void AddFileToProject(string path)
         {
-            container.AddFromFile(fullPath);
+            if (ExcludeFile(path))
+            {
+                return;
+            }
+
+            string folderPath = Path.GetDirectoryName(path);
+            string fullPath = GetFullPath(path);
+
+            // Add the file to project or folder
+            ProjectItems container = Project.GetProjectItems(folderPath, createIfNotExists: true);
+            AddFileToContainer(fullPath, folderPath, container);
+
+            Logger.Log(MessageLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);
         }
 
         public override void DeleteDirectory(string path, bool recursive = false)
@@ -71,15 +85,35 @@ namespace NuGet.VisualStudio
             }
             else
             {
-                // For VS 2012 or above, the operation has to be done inside the Writer lock
-
                 if (String.IsNullOrEmpty(targetPath))
                 {
                     throw new ArgumentNullException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "targetPath");
                 }
+
+                // For VS 2012 or above, the operation has to be done inside the Writer lock
                 string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
                 Project.DoWorkInWriterLock(buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
                 Project.Save();
+            }
+        }
+
+        public void BeginProcessing(IEnumerable<string> batch, PackageAction action)
+        {
+            // JS projects does not handle TFS operations automatically when calling DTE APIs.
+            // We do it manually here. Note the TfsFileSystem implements IBatchProcessor.
+            var processor = BaseFileSystem as IBatchProcessor<string>;
+            if (processor != null)
+            {
+                processor.BeginProcessing(batch, action);
+            }
+        }
+
+        public void EndProcessing()
+        {
+            var processor = BaseFileSystem as IBatchProcessor<string>;
+            if (processor != null)
+            {
+                processor.EndProcessing();
             }
         }
     }
