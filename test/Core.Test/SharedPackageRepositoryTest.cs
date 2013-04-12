@@ -31,7 +31,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void CallAddPackageWillAddNuspecWhichHasReferencesData()
+        public void CallAddPackageWillAddNuspecWithReferencesPreserved()
         {
             // Arrange
             var fileSystem = new MockFileSystem("x:\\root");
@@ -39,9 +39,15 @@ namespace NuGet.Test
             var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
 
             // Act
-            repository.AddPackage(PackageUtility.CreatePackage("A",
-                                                               "1.0",
-                                                               assemblyReferences: new[] { "lib\\net40\\A.dll", "lib\\B.dll" }));
+            var package = PackageUtility.CreatePackage("A", "1.0", content: new[] { "A.txt", "scripts\\b.txt" });
+            var mockedPackage = Mock.Get(package);
+            mockedPackage.Setup(m => m.PackageAssemblyReferences).Returns(
+                new PackageReferenceSet[] { 
+                    new PackageReferenceSet(new FrameworkName(".NETFramework, Version=4.0"), new [] { "A.dll" }),
+                    new PackageReferenceSet(null, new [] { "B.dll" }),
+                });
+
+            repository.AddPackage(package);
 
             // Assert
             Assert.True(fileSystem.FileExists("A.1.0\\A.1.0.nuspec"));
@@ -60,6 +66,27 @@ namespace NuGet.Test
             Assert.Null(set2.TargetFramework);
             Assert.Equal(1, set2.References.Count);
             Assert.Equal("B.dll", set2.References[0].File);
+        }
+
+        [Fact]
+        public void AddedNuspecDoesNotAddReferencesSectionIfNotPresent()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\\root");
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            var package = PackageUtility.CreatePackage("A", "1.0", content: new[] { "A.txt", "scripts\\b.txt" });
+            repository.AddPackage(package);
+
+            // Assert
+            Assert.True(fileSystem.FileExists("A.1.0\\A.1.0.nuspec"));
+
+            Stream manifestContentStream = fileSystem.OpenFile("A.1.0\\A.1.0.nuspec");
+            Manifest manifest = Manifest.ReadFrom(manifestContentStream, validateSchema: true);
+
+            Assert.Equal(0, manifest.Metadata.ReferenceSets.Count);
         }
 
         [Theory]

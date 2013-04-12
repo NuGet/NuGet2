@@ -33,6 +33,10 @@ namespace NuGet.Commands
             set;
         }
 
+        // TODO: Temporarily hide the real ConfigFile parameter from the help text.
+        // When we fix #3231, we should remove this property.
+        public new string ConfigFile { get; set; }
+
         public override void ExecuteCommand()
         {
             var manifest = new Manifest();

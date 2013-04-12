@@ -16,13 +16,7 @@ namespace NuGet
 
         public void TransformFile(IPackageFile file, string targetPath, IProjectSystem projectSystem)
         {
-            if (!projectSystem.FileExists(targetPath))
-            {
-                using (Stream stream = Process(file, projectSystem).AsStream())
-                {
-                    projectSystem.AddFile(targetPath, stream);
-                }
-            }
+            ProjectSystemExtensions.TryAddFile(projectSystem, targetPath, () => Process(file, projectSystem).AsStream());
         }
 
         public void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, IProjectSystem projectSystem)

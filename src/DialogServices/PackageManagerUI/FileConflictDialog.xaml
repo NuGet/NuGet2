@@ -19,7 +19,7 @@
      SizeToContent="WidthAndHeight"
      FocusManager.FocusedElement="{Binding ElementName=NoButton, Mode=OneTime}"
      Title="{x:Static vsresources:VsResources.FileConflictTitle}"
-     Background="{DynamicResource {x:Static resources:UIResources.WindowBackgroundBrushKey}}"
+     Background="{DynamicResource {x:Static vsfx:VsBrushes.WindowKey}}"
      AutomationProperties.AutomationId="NuGetFileConflictWindow">
     
     <Window.Resources>
@@ -45,6 +45,6 @@
             Margin="0,3,0,3" 
             TextWrapping="Wrap" 
             VerticalAlignment="Top"
-            Foreground="{DynamicResource {x:Static vsfx:VsBrushes.CaptionTextKey}}" />
+            Foreground="{DynamicResource {x:Static vsfx:VsBrushes.WindowTextKey}}" />
     </DockPanel>
 </pfui:DialogWindow>

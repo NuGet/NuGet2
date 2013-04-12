@@ -2,16 +2,15 @@
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using Task = System.Threading.Tasks.Task;
 using Window = System.Windows.Window;
-using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 
 namespace NuGet.VisualStudio
 {
-
     [Export(typeof(IProductUpdateService))]
     internal class ProductUpdateService : IProductUpdateService
     {
@@ -174,15 +173,14 @@ namespace NuGet.VisualStudio
             if (layoutRoot != null)
             {
                 // first, search for the Extension Explorer control inside the Extension manager window
-                var explorerControl = layoutRoot.FindName("explorer") as VSExtensionsExplorerCtl;
+                var explorerControl = layoutRoot.FindName("explorer") as UserControl;
                 if (explorerControl != null)
                 {
-                    // now get the Updates provider, which should be the last one according to the SortOrder
-                    var updatesProvider = explorerControl.Providers.OrderByDescending(p => p.SortOrder).FirstOrDefault();
-                    if (updatesProvider != null)
+                    var providerExpander = explorerControl.FindName("m_Providers") as ListView;
+                    if (providerExpander != null && providerExpander.Items.Count > 0)
                     {
-                        // Select the updates provider
-                        explorerControl.SelectedProvider = updatesProvider;
+                        // now get the Updates provider, which should be the last one.
+                        providerExpander.SelectedIndex = providerExpander.Items.Count - 1;
                     }
                 }
             }

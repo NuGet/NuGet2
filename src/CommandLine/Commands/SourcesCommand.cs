@@ -139,7 +139,7 @@ namespace NuGet.Commands
                 throw new CommandLineException(NuGetResources.SourcesCommandUniqueSource);
             }
 
-            var newPackageSource = new PackageSource(Source, Name) { UserName = UserName, Password = Password };
+            var newPackageSource = new PackageSource(Source, Name) { UserName = UserName, Password = Password, IsPasswordClearText = StorePasswordInClearText };
             sourceList.Add(newPackageSource);
             SourceProvider.SavePackageSources(sourceList);
             Console.WriteLine(NuGetResources.SourcesCommandSourceAddedSuccessfully, Name);
