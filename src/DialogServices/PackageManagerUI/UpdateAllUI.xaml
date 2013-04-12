@@ -8,9 +8,12 @@
              xmlns:local="clr-namespace:NuGet.Dialog"
              xmlns:vsfx="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.10.0" 
              d:DesignHeight="30" d:DesignWidth="400">
+    <UserControl.CommandBindings>
+        <CommandBinding Command="Open" CanExecute="CommandBinding_CanExecute" Executed="CommandBinding_Executed" />
+    </UserControl.CommandBindings>
     <DockPanel LastChildFill="True">
         <Button
-            x:Name="UpdateButton"
+            Command="Open"
             Content="{x:Static local:Resources.Dialog_UpdateAllButton}"
             MinWidth="75"
             MinHeight="23"

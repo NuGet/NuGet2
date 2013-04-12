@@ -16,7 +16,7 @@
             </Trigger>
 
             <Trigger Property="NavigateUri" Value="{x:Null}">
-                <Setter Property="Foreground" Value="{DynamicResource {x:Static vsshell:VsBrushes.CaptionTextKey}}" />
+                <Setter Property="Foreground" Value="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" />
                 <Setter Property="TextBlock.TextDecorations" Value="{x:Null}" />
                 <Setter Property="IsEnabled" Value="False" />
             </Trigger>

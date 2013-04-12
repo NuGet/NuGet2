@@ -188,7 +188,7 @@ namespace NuGet.VisualStudio
             if (projectItem == null)
             {
                 // Try to get the nested project item
-                return TryGetFileNestedFile(projectItems, name, out projectItem);
+                return TryGetNestedFile(projectItems, name, out projectItem);
             }
 
             return projectItem != null;
@@ -220,11 +220,11 @@ namespace NuGet.VisualStudio
         }
 
         /// <summary>
-        /// // If we didn't find the project item at the top level, then we look one more level down.
+        /// If we didn't find the project item at the top level, then we look one more level down.
         /// In VS files can have other nested files like foo.aspx and foo.aspx.cs or web.config and web.debug.config. 
         /// These are actually top level files in the file system but are represented as nested project items in VS.            
         /// </summary>
-        private static bool TryGetFileNestedFile(ProjectItems projectItems, string name, out ProjectItem projectItem)
+        private static bool TryGetNestedFile(ProjectItems projectItems, string name, out ProjectItem projectItem)
         {
             string parentFileName;
             if (!_knownNestedFiles.TryGetValue(name, out parentFileName))
@@ -908,10 +908,9 @@ namespace NuGet.VisualStudio
                 fileSystem.MakeFileWritable(path);
 
                 if (project.DTE.SourceControl != null &&
-                project.DTE.SourceControl.IsItemUnderSCC(fullPath) &&
-                !project.DTE.SourceControl.IsItemCheckedOut(fullPath))
+                    project.DTE.SourceControl.IsItemUnderSCC(fullPath) &&
+                    !project.DTE.SourceControl.IsItemCheckedOut(fullPath))
                 {
-
                     // Check out the item
                     project.DTE.SourceControl.CheckOutItem(fullPath);
                 }

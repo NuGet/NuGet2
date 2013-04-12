@@ -95,6 +95,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Utility\VsVersionHelper.cs" />
+    <Compile Include="VCProjectHelper.cs" />
     <Compile Include="VisualStudioCredentialProvider.cs" />
     <Compile Include="Extensibility\VsPackageInstallerEvents.cs" />
     <Compile Include="Extensibility\VsPackageInstallerServices.cs" />
@@ -129,8 +130,6 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="$(ExtensionManagerAssembly)" />
-    <Reference Include="$(ExtensionsExplorerAssembly)" />
-    <Reference Include="$(ExtensionsExplorerUIAssembly)" />
     <Reference Include="EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
