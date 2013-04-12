@@ -42,6 +42,7 @@ namespace NuGet
                         continue;
                     }
 
+                    // Resolve the target path
                     IPackageFileTransformer installTransformer;
                     string path = ResolveTargetPath(project, fileTransformers, fte => fte.InstallExtension, file.EffectivePath, out installTransformer);
 
@@ -61,7 +62,7 @@ namespace NuGet
                             {
                                 continue;
                             }
-                            TryAddFile(project, file, path);
+                            TryAddFile(project, path, file.GetStream);
                         }
                     }
                 }
@@ -79,10 +80,7 @@ namespace NuGet
         /// Try to add the specified the project with the target path. If there's an existing file in the project with the same name, 
         /// it will ask the logger for the resolution, which has 4 choices: Overwrite|Ignore|Overwrite All|Ignore All
         /// </summary>
-        /// <param name="project"></param>
-        /// <param name="file"></param>
-        /// <param name="path"></param>
-        public static void TryAddFile(IProjectSystem project, IPackageFile file, string path)
+        internal static void TryAddFile(IProjectSystem project, string path, Func<Stream> content)
         {
             if (project.FileExists(path) && project.FileExistsInProject(path))
             {
@@ -93,7 +91,10 @@ namespace NuGet
                 {
                     // overwrite
                     project.Logger.Log(MessageLevel.Info, NuGetResources.Info_OverwriteExistingFile, path);
-                    project.AddFile(path, file.GetStream());
+                    using (Stream stream = content())
+                    {
+                        project.AddFile(path, stream);
+                    }
                 }
                 else
                 {
@@ -103,7 +104,10 @@ namespace NuGet
             }
             else
             {
-                project.AddFile(path, file.GetStream());
+                using (Stream stream = content())
+                {
+                    project.AddFile(path, stream);
+                }
             }
         }
 

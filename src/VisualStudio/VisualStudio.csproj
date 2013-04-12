@@ -92,6 +92,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Utility\VsVersionHelper.cs" />
+    <Compile Include="VCProjectHelper.cs" />
     <Compile Include="VisualStudioCredentialProvider.cs" />
     <Compile Include="Extensibility\VsPackageInstallerEvents.cs" />
     <Compile Include="Extensibility\VsPackageInstallerServices.cs" />

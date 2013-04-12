@@ -100,6 +100,10 @@ namespace NuGet.Commands
         [ImportMany]
         public IEnumerable<IPackageRule> Rules { get; set; }
 
+        // TODO: Temporarily hide the real ConfigFile parameter from the help text.
+        // When we fix #3230, we should remove this property.
+        public new string ConfigFile { get; set; }
+
         public override void ExecuteCommand()
         {
             if (IncludeReferencedProjects && Symbols)
