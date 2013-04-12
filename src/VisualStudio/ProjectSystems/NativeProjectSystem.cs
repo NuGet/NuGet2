@@ -1,9 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.CompilerServices;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.VCProjectEngine;
 using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio
@@ -85,11 +83,6 @@ namespace NuGet.VisualStudio
             }
         }
 
-        protected override void AddFileToContainer(string fullPath, ProjectItems container)
-        {
-            container.AddFromFile(Path.GetFileName(fullPath));
-        }
-
         protected override void AddFileToProject(string path)
         {
             if (ExcludeFile(path))
@@ -103,47 +96,42 @@ namespace NuGet.VisualStudio
 
             ThreadHelper.Generic.Invoke(() =>
             {
-                ProjectItems container = GetFolder(folderPath);
-
-                // Add the file to project or folder
-                AddFileToContainer(fullPath, container);
+                if (VsVersionHelper.IsVisualStudio2010)
+                {
+                    VisualStudio10.VCProjectHelper.AddFileToProject(Project.Object, fullPath, folderPath);
+                }
+                else
+                {
+                    VCProjectHelper.AddFileToProject(Project.Object, fullPath, folderPath);
+                }
             });
 
             Logger.Log(MessageLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);
         }
 
-        private ProjectItems GetFolder(string folderPath)
+        public override void DeleteFile(string path)
         {
-            if (string.IsNullOrEmpty(folderPath))
-            {
-                return Project.ProjectItems;
-            }
+            string folderPath = Path.GetDirectoryName(path);
+            string fullPath = GetFullPath(path);
 
-            ProjectItem item = Project.ProjectItems.Item(folderPath);
-            if (item == null)
+            bool succeeded = VsVersionHelper.IsVisualStudio2010 
+                ? VisualStudio10.VCProjectHelper.RemoveFileFromProject(Project.Object, fullPath, folderPath)
+                : VCProjectHelper.RemoveFileFromProject(Project.Object, fullPath, folderPath);
+            
+            if (succeeded)
             {
-                if (VsVersionHelper.IsVisualStudio2010)
+                // The RemoveFileFromProject() method only removes file from project.
+                // We want to delete it from disk too.
+                BaseFileSystem.DeleteFile(path);
+
+                if (!String.IsNullOrEmpty(folderPath))
                 {
-                    VisualStudio10.VCProjectHelper.AddProjectFilter(Project.Object, folderPath);
+                    Logger.Log(MessageLevel.Debug, VsResources.Debug_RemovedFileFromFolder, Path.GetFileName(path), folderPath);
                 }
                 else
                 {
-                    AddProjectFilter(Project.Object, folderPath);
+                    Logger.Log(MessageLevel.Debug, VsResources.Debug_RemovedFile, Path.GetFileName(path));
                 }
-
-                item = Project.ProjectItems.Item(folderPath);
-            }
-
-            return item.ProjectItems;
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void AddProjectFilter(object project, string folderPath)
-        {
-            var vcProject = project as VCProject;
-            if (vcProject != null)
-            {
-                vcProject.AddFilter(folderPath);
             }
         }
     }

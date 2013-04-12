@@ -303,13 +303,13 @@ namespace NuGet.VisualStudio
             {
                 ProjectItems container = Project.GetProjectItems(folderPath, createIfNotExists: true);
                 // Add the file to project or folder
-                AddFileToContainer(fullPath, container);
+                AddFileToContainer(fullPath, folderPath, container);
             });
 
             Logger.Log(MessageLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);
         }
 
-        protected virtual void AddFileToContainer(string fullPath, ProjectItems container)
+        protected virtual void AddFileToContainer(string fullPath, string folderPath, ProjectItems container)
         {
             container.AddFromFileCopy(fullPath);
         }

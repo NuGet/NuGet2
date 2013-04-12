@@ -22,10 +22,13 @@ namespace NuGet.VisualStudio.Test
 
 
             Mock<Project> project = new Mock<Project>();
+            Mock<DTE> dte = new Mock<DTE>();
             project.SetupGet(p => p.Name).Returns(name);
             project.SetupGet(p => p.FullName).Returns(name);
             project.SetupGet(p => p.UniqueName).Returns(name);
             project.SetupGet(p => p.Kind).Returns(kind);
+            project.SetupGet(p => p.DTE).Returns(dte.Object);
+            dte.SetupGet(d => d.SourceControl).Returns((SourceControl)null);
 
             Mock<Properties> properties = new Mock<Properties>();
             if (propertyGetter != null)

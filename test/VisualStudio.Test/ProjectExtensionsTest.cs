@@ -5,6 +5,7 @@ using Moq;
 namespace NuGet.VisualStudio.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
+    using System.IO;
 
     public class ProjectExtensionsTest
     {
@@ -116,5 +117,23 @@ namespace NuGet.VisualStudio.Test
             Assert.True(result);
         }
 
+        // Tests that EnsureCheckedOutIfExists() calls MakeFileWritetable()
+        [Fact]
+        public void EnsureCheckedOutIfExistsOnReadOnlyFiles()
+        {
+            // Arrange
+            var project = TestUtils.GetProject("Name");
+            var mockFileSystem = new Mock<IFileSystem>();
+            var fileName = "testFile";
+            mockFileSystem.Setup(f => f.GetFullPath(fileName)).Returns(fileName);
+            mockFileSystem.Setup(f => f.FileExists(fileName)).Returns(true);
+            mockFileSystem.Setup(f => f.MakeFileWritable(fileName));
+
+            // Act
+            project.EnsureCheckedOutIfExists(mockFileSystem.Object, fileName);
+
+            // Assert
+            mockFileSystem.Verify(f => f.MakeFileWritable(fileName));
+        }
     }
 }

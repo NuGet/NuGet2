@@ -31,7 +31,7 @@ namespace NuGet.VisualStudio
             // References aren't allowed for Azure projects
         }
 
-        protected override void AddFileToContainer(string fullPath, ProjectItems container)
+        protected override void AddFileToContainer(string fullPath, string folderPath, ProjectItems container)
         {
             // You can't add files to an Azure project
         }
