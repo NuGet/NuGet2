@@ -7,6 +7,7 @@ BenPhegan - Increase machine cache size to 200. (#2610)
 derigel - Fix NuGet dialog showing updates in the wrong tab (#3217)
 KevinBoyleRG - Enable support for Nomad project (#3234)
 corinblaikie - Fix push command fails with exit code 0 when file doesn't exist. (#3252)
+veselkamartin - Fix bug with Add-BindingRedirect command when a project references a database project. (#3226)
 
 *** NuGet Hall of Fame 2.5 ***
 
