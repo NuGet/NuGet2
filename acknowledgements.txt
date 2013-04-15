@@ -6,6 +6,7 @@ tkrafael - Avoid duplicate Properties key in nuget.exe pack command.
 BenPhegan - Increase machine cache size to 200. (#2610)
 derigel - Fix NuGet dialog showing updates in the wrong tab (#3217)
 KevinBoyleRG - Enable support for Nomad project (#3234)
+corinblaikie - Fix push command fails with exit code 0 when file doesn't exist. (#3252)
 
 *** NuGet Hall of Fame 2.5 ***
 
