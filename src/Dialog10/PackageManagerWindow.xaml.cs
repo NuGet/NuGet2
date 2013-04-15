@@ -1,12 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using EnvDTE;
+using Microsoft.VisualStudio.ExtensionsExplorer;
 using Microsoft.VisualStudio.ExtensionsExplorer.UI;
 using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -53,6 +56,7 @@ namespace NuGet.Dialog
                  ServiceLocator.GetInstance<IOptionsPageActivator>(),
                  ServiceLocator.GetInstance<IDeleteOnRestartManager>(),
                  ServiceLocator.GetGlobalService<SVsShell, IVsShell4>(),
+                 ServiceLocator.GetInstances<IPackageProvider>().ToList(),
                  dialogParameters)
         {
         }
@@ -69,6 +73,7 @@ namespace NuGet.Dialog
                                     IOptionsPageActivator optionPageActivator,
                                     IDeleteOnRestartManager deleteOnRestartManager,
                                     IVsShell4 vsRestarter,
+                                    IList<IPackageProvider> packageProviders,
                                     string dialogParameters)
             : base(F1Keyword)
         {
@@ -121,7 +126,8 @@ namespace NuGet.Dialog
                 httpClientEvents,
                 solutionManager,
                 packageRestoreManager,
-                restartRequestBar);
+                restartRequestBar,
+                packageProviders);
 
             ProcessDialogParameters(dialogParameters);
         }
@@ -229,7 +235,8 @@ namespace NuGet.Dialog
                                     IHttpClientEvents httpClientEvents,
                                     ISolutionManager solutionManager,
                                     IPackageRestoreManager packageRestoreManager,
-                                    RestartRequestBar restartRequestBar)
+                                    RestartRequestBar restartRequestBar,
+                                    IList<IPackageProvider> packageProviders)
         {
 
             // This package manager is not used for installing from a remote source, and therefore does not need a fallback repository for resolving dependencies
@@ -327,6 +334,9 @@ namespace NuGet.Dialog
             explorer.Providers.Add(onlineProvider);
             explorer.Providers.Add(updatesProvider);
 
+            var externalProvider = new ExternalProvider(Resources, "Suggested Packages", packageProviders);
+            explorer.Providers.Add(externalProvider);
+
             installedProvider.IncludePrerelease =
                 onlineProvider.IncludePrerelease =
                 updatesProvider.IncludePrerelease = _providerSettings.IncludePrereleasePackages;
@@ -415,6 +425,23 @@ namespace NuGet.Dialog
             }
         }
 
+        private void CanExecuteSuggestPackages(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+            e.Handled = true;
+        }
+
+        private void ExecutedSuggestPackages(object sender, ExecutedRoutedEventArgs e)
+        {
+            var packageProvider = explorer.SelectedExtension as SuggestedPackage;
+            if (packageProvider != null)
+            {
+                Close();
+                packageProvider.Execute();
+                e.Handled = true;
+            }
+        }
+
         private void ExecutedClose(object sender, EventArgs e)
         {
             Close();
@@ -489,10 +516,14 @@ namespace NuGet.Dialog
 
         private void OnDialogWindowClosed(object sender, EventArgs e)
         {
-            foreach (PackagesProviderBase provider in explorer.Providers)
+            foreach (IVsExtensionsProvider provider in explorer.Providers)
             {
-                // give each provider a chance to clean up itself
-                provider.Dispose();
+                var disposable = provider as IDisposable;
+                if (disposable != null)
+                {
+                    // give each provider a chance to clean up itself
+                    disposable.Dispose();
+                }
             }
 
             explorer.Providers.Clear();
@@ -665,9 +696,7 @@ namespace NuGet.Dialog
             {
                 explorer.NoItemsMessage = selectedProvider.NoItemsMessage;
                 _prereleaseComboBox.Visibility = selectedProvider.ShowPrereleaseComboBox ? Visibility.Visible : Visibility.Collapsed;
-
-                // save the selected provider to user settings
-                _providerSettings.SelectedProvider = explorer.Providers.IndexOf(selectedProvider);
+               
                 // if this is the first time online provider is opened, call to check for update
                 if (selectedProvider == explorer.Providers[1] && !_hasOpenedOnlineProvider)
                 {
@@ -681,6 +710,9 @@ namespace NuGet.Dialog
             {
                 _prereleaseComboBox.Visibility = Visibility.Collapsed;
             }
+
+            // save the selected provider to user settings
+            _providerSettings.SelectedProvider = explorer.Providers.IndexOf(explorer.SelectedProvider);
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't care about exception handling here.")]

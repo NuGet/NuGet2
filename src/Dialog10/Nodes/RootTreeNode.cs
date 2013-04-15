@@ -12,8 +12,6 @@ namespace NuGet.Dialog.Providers
     {
         private readonly IList<IVsExtensionsTreeNode> nodes = new ObservableCollection<IVsExtensionsTreeNode>();
 
-        #region IVsExtensionsTreeNode Members
-
 #if VS10
         private readonly IList<IVsExtension> extensions = new ObservableCollection<IVsExtension>();
 
@@ -24,7 +22,8 @@ namespace NuGet.Dialog.Providers
 #else
         private readonly IList extensions = new ObservableCollection<IVsExtension>();
 
-        public IList Extensions {
+        public IList Extensions
+        {
             get { return extensions; }
         }
 #endif
@@ -48,8 +47,7 @@ namespace NuGet.Dialog.Providers
 
         public string Name
         {
-            get;
-            set;
+            get { return string.Empty; }
         }
 
         public IList<IVsExtensionsTreeNode> Nodes
@@ -59,16 +57,7 @@ namespace NuGet.Dialog.Providers
 
         public IVsExtensionsTreeNode Parent
         {
-            get;
-            set;
-        }
-
-        #endregion
-
-        public RootPackagesTreeNode(IVsExtensionsTreeNode parent, string name)
-        {
-            this.Parent = parent;
-            this.Name = name;
+            get { return null; }
         }
     }
 }

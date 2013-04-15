@@ -157,7 +157,7 @@ namespace NuGet.Dialog.Providers
             {
                 if (RootNode == null)
                 {
-                    RootNode = new RootPackagesTreeNode(null, String.Empty);
+                    RootNode = new RootPackagesTreeNode();
                     CreateExtensionsTree();
                 }
 

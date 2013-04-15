@@ -299,4 +299,95 @@
             </DataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
+
+    <DataTemplate x:Key="SuggestedPackageItemTemplate">
+        <Grid Style="{StaticResource TileTemplateGridStyle}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MinWidth="38" SharedSizeGroup="IconColumn" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Image Margin="0,3,0,0" VerticalAlignment="Top" Style="{StaticResource TileImageStyle}" Source="{Binding IconUrl, Converter={StaticResource urlConverter}, TargetNullValue={StaticResource BitmapImage_DefaultIcon}}">
+            </Image>
+
+            <StackPanel Grid.Column="1" Style="{StaticResource TileMiddleStackPanelStyle}">
+                <self:TextBlockControl  
+                    Text="{Binding Name}" 
+                    Style="{StaticResource TileTitleTextBoxStyle}">
+                    <TextBlock.ToolTip>
+                        <TextBlock Text="{Binding Name}" Style="{StaticResource TileToolTipStyle}"/>
+                    </TextBlock.ToolTip>
+                </self:TextBlockControl>
+
+                <self:TextBlockControl
+                    x:Name="SummaryText"
+                    Text="{Binding Description, Converter={StaticResource NormalizeTextConverter}}" 
+                    Style="{StaticResource TileDescriptionTextBoxStyle}">
+                    <self:TextBlockControl.ToolTip>
+                        <TextBlock Text="{Binding Description, Converter={StaticResource NormalizeTextConverter}}" Style="{StaticResource TileToolTipStyle}"/>
+                    </self:TextBlockControl.ToolTip>
+                </self:TextBlockControl>
+            </StackPanel>
+
+            <Button 
+                x:Name="ExecuteButton"
+                Grid.Column="2"
+                Margin="6,6,6,3"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Command="{x:Static self:PackageManagerWindowCommands.SuggestPackagesCommand}"
+                Content="Open"
+                Visibility="Collapsed"
+                Style="{StaticResource DetailButtonStyle}" />
+        </Grid>
+
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                <Setter TargetName="ExecuteButton" Property="Visibility" Value="Visible" />
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+
+    <DataTemplate x:Key="SuggestedPackageDetailTemplate">
+        <DataTemplate.Resources>
+            <self:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+            <self:StringCollectionsToStringConverter x:Key="authorNamesConverter" />
+        </DataTemplate.Resources>
+
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Focusable="False">
+            <StackPanel Margin="8">
+                <!-- Authors -->
+                <DockPanel>
+                    <self:TextBlockControl DockPanel.Dock="Left" Text="{x:Static resources:Resources.Dialog_CreatedByLabel}" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <self:TextBlockControl Text="{Binding Publisher}" Style="{StaticResource DetailMetadataValueStyle}" TextWrapping="Wrap" />
+                </DockPanel>
+
+                <!-- Name -->
+                <StackPanel Style="{StaticResource DetailMetadataStyle}">
+                    <self:TextBlockControl Text="Name:" Style="{StaticResource DetailMetadataLabelStyle}" />
+                    <self:TextBlockControl Text="{Binding Name}" Style="{StaticResource DetailMetadataValueStyle}" />
+                </StackPanel>
+
+                <!-- Description -->
+                <self:TextBlockControl Margin="0,3,0,0" Style="{StaticResource DescriptionLabelStyle}" Text="Description:">
+                </self:TextBlockControl>
+
+                <self:TextBlockControl
+                    AutomationProperties.AutomationId="PackageDescription"
+                    Text="{Binding Description, Converter={StaticResource NormalizeTextConverter}, Mode=OneWay}"
+                    Style="{StaticResource DetailMetadataValueStyle}"
+                    TextWrapping="Wrap"
+                    Margin="0,5">
+                </self:TextBlockControl>
+
+                <!-- Provider Url -->
+                <TextBlock AutomationProperties.AutomationId="ProjectInfoLinkContainer" ToolTip="{Binding PackageIdentity.ProjectUrl, Mode=OneTime}" Visibility="{Binding PublisherUrl, Converter={StaticResource urlConverter}}">
+                    <Hyperlink AutomationProperties.AutomationId="ProjectInfoLink" Style="{StaticResource CommonHyperlinkStyle}" NavigateUri="{Binding PublisherUrl, Mode=OneTime}" Command="{x:Static self:PackageManagerWindowCommands.OpenExternalLink}">
+                        <Run Text="More information" />
+                    </Hyperlink>
+                </TextBlock>
+            </StackPanel>
+        </ScrollViewer>
+    </DataTemplate>
 </ResourceDictionary>

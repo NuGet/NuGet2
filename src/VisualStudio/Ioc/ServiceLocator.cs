@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
@@ -46,6 +47,12 @@ namespace NuGet.VisualStudio
             return GetDTEService<TService>() ??
                    GetComponentModelService<TService>() ?? 
                    GetGlobalService<TService, TService>();
+        }
+
+        public static IEnumerable<T> GetInstances<T>() where T : class
+        {
+            IComponentModel componentModel = GetGlobalService<SComponentModel, IComponentModel>();
+            return componentModel.GetExtensions<T>();
         }
 
         public static TInterface GetGlobalService<TService, TInterface>() where TInterface : class

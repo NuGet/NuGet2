@@ -18,20 +18,18 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("serviceProvider");
             }
 
-            _settingsManager = new Lazy<ISettingsManager>(() => LoadSettingsManager(serviceProvider));
+            _settingsManager = new Lazy<ISettingsManager>
+                (
+                    () => (VsVersionHelper.IsVisualStudio2010 || VsVersionHelper.IsVisualStudio2012)
+                            ? new SettingsManagerWrapper(serviceProvider)
+                            : LoadSettingsManager(serviceProvider)
+                );
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         private ISettingsManager LoadSettingsManager(IServiceProvider serviceProvider)
         {
-            if (VsVersionHelper.IsVisualStudio2010 || VsVersionHelper.IsVisualStudio2012)
-            {
-                return new SettingsManagerWrapper(serviceProvider);
-            }
-            else
-            {
-                return new NuGet.VisualStudio12.SettingsManagerWrapper(serviceProvider);
-            }
+            return new NuGet.VisualStudio12.SettingsManagerWrapper(serviceProvider);
         }
 
         protected bool ReadBool(string settingsRoot, string property, bool defaultValue = false)
