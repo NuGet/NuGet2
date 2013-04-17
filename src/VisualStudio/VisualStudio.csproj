@@ -71,7 +71,6 @@
     <Compile Include="ProjectCache.cs" />
     <Compile Include="ProjectEventArgs.cs" />
     <Compile Include="ProjectName.cs" />
-    <Compile Include="ProjectSystems\AzureCloudServiceProjectSystem.cs" />
     <Compile Include="ProjectSystems\IVsProjectSystem.cs" />
     <Compile Include="ProjectSystems\JsProjectSystem.cs" />
     <Compile Include="ProjectSystems\NativeProjectSystem.cs" />

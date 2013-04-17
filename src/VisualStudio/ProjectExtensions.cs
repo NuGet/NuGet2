@@ -42,8 +42,7 @@ namespace NuGet.VisualStudio
                                                                           VsConstants.FsharpProjectTypeGuid,
                                                                           VsConstants.NemerleProjectTypeGuid,
                                                                           VsConstants.WixProjectTypeGuid,
-                                                                          VsConstants.SynergexProjectTypeGuid,
-                                                                          VsConstants.AzureCloudServiceProjectTypeGuid };
+                                                                          VsConstants.SynergexProjectTypeGuid };
 
         private static readonly HashSet<string> _unsupportedProjectTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
                                                                             VsConstants.LightSwitchProjectTypeGuid,
@@ -57,7 +56,6 @@ namespace NuGet.VisualStudio
         private static readonly string[] _unsupportedProjectTypesForAddingReferences = new[] 
             { 
                 VsConstants.WixProjectTypeGuid, 
-                VsConstants.AzureCloudServiceProjectTypeGuid,
                 VsConstants.CppProjectTypeGuid,
             };
 
@@ -67,7 +65,6 @@ namespace NuGet.VisualStudio
                 VsConstants.WixProjectTypeGuid, 
                 VsConstants.JsProjectTypeGuid, 
                 VsConstants.NemerleProjectTypeGuid, 
-                VsConstants.AzureCloudServiceProjectTypeGuid,
                 VsConstants.CppProjectTypeGuid,
                 VsConstants.SynergexProjectTypeGuid,
             };
