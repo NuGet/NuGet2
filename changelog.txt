@@ -5,7 +5,6 @@ Release notes
 - Add support for MonoAndroid, MonoTouch and MonoMac framework identifiers.
 - Add to all commands new option -ConfigFile, which enables user to use his/her own config file instead of the default one %AppData%\nuget\nuget.config.
 - Add support for UNC and directory path as source for push and delete commands.
-- Add support for Azure project.
 - Add a parameter to View.PackageManagerConsole. Using this parameter, PSCmdlets of Package Manager Console can be invoked from anywhere inside VS.
 - Reduce overall memory consumption significantly, avoiding OutOfMemory exception in certain circumstances.
 - Nuget.exe outputs the http requests it is making when -Verbosity is set to detailed.
