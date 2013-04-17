@@ -1,5 +1,9 @@
 Release notes
 
+*** v2.6 ***
+
+- Add XDT support. 
+
 *** v2.5 ***
 
 - Add support for MonoAndroid, MonoTouch and MonoMac framework identifiers.
@@ -22,7 +26,6 @@ Release notes
   or are added into the package if nuspec file doesn't exist.
 - Allow users to overwrite files if there's a file conflict in package and project.
 - NuGet won't update a dependency package if the installed version already satisfies the constraint of dependency version. (#1681)
-- Add XDT support. 
 - Support Clear Text Password when storing package source credentials in nuget.cofig files (Use 'ClearTextPassword' instead of 'Password' attribute)
 - Add the -StorePasswordInClearText to 'nuget.exe source' command.
 
