@@ -74,9 +74,6 @@
     <Compile Include="..\Dialog10\Nodes\EmptyTreeNode.cs">
       <Link>Nodes\EmptyTreeNode.cs</Link>
     </Compile>
-    <Compile Include="..\Dialog10\Nodes\ExternalPackagesTreeNode.cs">
-      <Link>Nodes\ExternalPackagesTreeNode.cs</Link>
-    </Compile>
     <Compile Include="..\Dialog10\Nodes\PackagesSearchNode.cs">
       <Link>Nodes\PackagesSearchNode.cs</Link>
     </Compile>
@@ -102,9 +99,6 @@
     <Compile Include="..\Dialog10\PackageSortDescriptor.cs">
       <Link>PackageSortDescriptor.cs</Link>
     </Compile>
-    <Compile Include="..\Dialog10\Providers\ExternalProvider.cs">
-      <Link>Providers\ExternalProvider.cs</Link>
-    </Compile>
     <Compile Include="..\Dialog10\Providers\InstalledProvider.cs">
       <Link>Providers\InstalledProvider.cs</Link>
     </Compile>
@@ -128,9 +122,6 @@
     </Compile>
     <Compile Include="..\Dialog10\Providers\UpdatesProvider.cs">
       <Link>Providers\UpdatesProvider.cs</Link>
-    </Compile>
-    <Compile Include="..\Dialog10\SuggestedPackage.cs">
-      <Link>SuggestedPackage.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

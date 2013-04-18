@@ -18,12 +18,7 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("serviceProvider");
             }
 
-            _settingsManager = new Lazy<ISettingsManager>
-                (
-                    () => (VsVersionHelper.IsVisualStudio2010 || VsVersionHelper.IsVisualStudio2012)
-                            ? new SettingsManagerWrapper(serviceProvider)
-                            : LoadSettingsManager(serviceProvider)
-                );
+            _settingsManager = new Lazy<ISettingsManager>(() => LoadSettingsManager(serviceProvider));
         }
 
         private ISettingsManager LoadSettingsManager(IServiceProvider serviceProvider)

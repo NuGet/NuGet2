@@ -44,12 +44,7 @@
             Command="{x:Static dialogCommands:PackageManagerWindowCommands.PackageOperationCommand}"
             CanExecute="CanExecuteCommandOnPackage"
             Executed="ExecutedPackageCommand" />
-
-        <CommandBinding 
-            Command="{x:Static dialogCommands:PackageManagerWindowCommands.SuggestPackagesCommand}"
-            CanExecute="CanExecuteSuggestPackages"
-            Executed="ExecutedSuggestPackages" />
-
+        
         <CommandBinding
             Command="ApplicationCommands.Close"
             CanExecute="CanExecuteClose"

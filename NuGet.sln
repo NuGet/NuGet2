@@ -57,10 +57,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "src\Server\Server.csproj", "{793B20A9-E263-4B54-BB31-305B602087CE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VsExtension", "src\VsExtension\VsExtension.csproj", "{D0F9864B-D782-4471-81A2-29555E5DC0D7}"
-	ProjectSection(ProjectDependencies) = postProject
-		{5220A205-0C3F-4CD5-B1B4-7CD5B8298D7A} = {5220A205-0C3F-4CD5-B1B4-7CD5B8298D7A}
-		{3DD213F7-999B-4C15-9560-BF9C96CB8C52} = {3DD213F7-999B-4C15-9560-BF9C96CB8C52}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console", "src\VsConsole\Console\Console.csproj", "{50E33DA2-AF14-486D-81B8-BD8409744A38}"
 EndProject

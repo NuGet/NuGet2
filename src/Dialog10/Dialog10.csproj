@@ -68,8 +68,6 @@
     </Compile>
     <Compile Include="Nodes\EmptyTreeNode.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Nodes\ExternalPackagesTreeNode.cs" />
-    <Compile Include="Providers\ExternalProvider.cs" />
     <Compile Include="Providers\InstalledProvider.cs" />
     <Compile Include="LoadPageResult.cs" />
     <Compile Include="Providers\OnlineProvider.cs" />
@@ -90,7 +88,6 @@
     <Compile Include="Providers\SolutionUpdatesProvider.cs" />
     <Compile Include="Providers\UpdatesProvider.cs" />
     <Compile Include="Nodes\UpdatesTreeNode.cs" />
-    <Compile Include="SuggestedPackage.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj">
