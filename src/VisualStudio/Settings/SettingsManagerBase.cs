@@ -26,8 +26,26 @@ namespace NuGet.VisualStudio
                 );
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private ISettingsManager LoadSettingsManager(IServiceProvider serviceProvider)
+        {
+            if (VsVersionHelper.IsVisualStudio2010 || VsVersionHelper.IsVisualStudio2012)
+            {
+                return LoadSettingsManagerForVS10And11(serviceProvider);
+            }
+            else
+            {
+                return LoadSettingsManagerForVS12(serviceProvider);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private ISettingsManager LoadSettingsManagerForVS10And11(IServiceProvider serviceProvider)
+        {
+            return new SettingsManagerWrapper(serviceProvider);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private ISettingsManager LoadSettingsManagerForVS12(IServiceProvider serviceProvider)
         {
             return new NuGet.VisualStudio12.SettingsManagerWrapper(serviceProvider);
         }
