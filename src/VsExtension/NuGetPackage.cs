@@ -359,7 +359,7 @@ namespace NuGet.Tools
             {
                 window.ShowModal();
             }
-            catch (TargetInvocationException exception)
+            catch (Exception exception)
             {
                 MessageHelper.ShowErrorMessage(exception, Resources.ErrorDialogBoxTitle);
                 ExceptionHelper.WriteToActivityLog(exception);

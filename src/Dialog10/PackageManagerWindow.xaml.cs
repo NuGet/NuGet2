@@ -432,6 +432,7 @@ namespace NuGet.Dialog
         /// <summary>
         /// Called when coming back from the Options dialog
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private static void OnActivated(Project project)
         {
             var window = new PackageManagerWindow(project);
@@ -439,7 +440,7 @@ namespace NuGet.Dialog
             {
                 window.ShowModal();
             }
-            catch (TargetInvocationException exception)
+            catch (Exception exception)
             {
                 MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
                 ExceptionHelper.WriteToActivityLog(exception);
