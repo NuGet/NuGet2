@@ -213,6 +213,9 @@ namespace NuGet
 
         protected override IPackage OpenPackage(string path)
         {
+            if (!FileSystem.FileExists(path))
+              return null;
+
             string extension = Path.GetExtension(path);
             if (extension.Equals(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase))
             {
