@@ -340,23 +340,23 @@ namespace NuGet.Tools
 
         private static void ShowManageLibraryPackageDialog(Project project, string parameterString = null)
         {
-            DialogWindow window;
-
-            if (VsVersionHelper.IsVisualStudio2010)
-            {
-                window = GetVS10PackageManagerWindow(project, parameterString);
-            }
-            else if (VsVersionHelper.IsVisualStudio2012)
-            {
-                window = GetVS11PackageManagerWindow(project, parameterString);
-            }
-            else
-            {
-                window = GetPackageManagerWindow(project, parameterString);
-            }
-
             try
             {
+                DialogWindow window;
+
+                if (VsVersionHelper.IsVisualStudio2010)
+                {
+                    window = GetVS10PackageManagerWindow(project, parameterString);
+                }
+                else if (VsVersionHelper.IsVisualStudio2012)
+                {
+                    window = GetVS11PackageManagerWindow(project, parameterString);
+                }
+                else
+                {
+                    window = GetPackageManagerWindow(project, parameterString);
+                }
+
                 window.ShowModal();
             }
             catch (Exception exception)
