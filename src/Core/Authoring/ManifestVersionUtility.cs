@@ -13,7 +13,7 @@ namespace NuGet
 
         public const int TargetFrameworkSupportForDependencyContentsAndToolsVersion = 4;
         public const int TargetFrameworkSupportForReferencesVersion = 5;
-        public const int XdtTransformationVersion = 5;
+        public const int XdtTransformationVersion = 6;
 
         private static readonly Type[] _xmlAttributes = new[] { typeof(XmlElementAttribute), typeof(XmlAttributeAttribute), typeof(XmlArrayAttribute) };
 

@@ -443,7 +443,7 @@ namespace NuGet.Test
 
                 // Assert
                 Assert.Equal(@"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+<package xmlns=""http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd"">
   <metadata>
     <id>A</id>
     <version>1.0</version>
@@ -480,7 +480,7 @@ namespace NuGet.Test
 
                 // Assert
                 Assert.Equal(@"<?xml version=""1.0""?>
-<package xmlns=""http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd"">
+<package xmlns=""http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd"">
   <metadata>
     <id>A</id>
     <version>1.0</version>

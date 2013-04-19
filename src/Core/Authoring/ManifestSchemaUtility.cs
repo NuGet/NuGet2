@@ -35,9 +35,13 @@ namespace NuGet
         /// <summary>
         /// Added 'targetFramework' attribute for 'references' elements.
         /// Added 'minClientVersion' attribute
-        /// Allows XDT transformation
         /// </summary>
         internal const string SchemaVersionV5 = "http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd";
+
+        /// <summary>
+        /// Allows XDT transformation
+        /// </summary>
+        internal const string SchemaVersionV6 = "http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd";
 
         private static readonly string[] VersionToSchemaMappings = new[] {
             SchemaVersionV1,
@@ -45,6 +49,7 @@ namespace NuGet
             SchemaVersionV3,
             SchemaVersionV4,
             SchemaVersionV5,
+            SchemaVersionV6
         };
 
         private static ConcurrentDictionary<string, XmlSchemaSet> _manifestSchemaSetCache = new ConcurrentDictionary<string, XmlSchemaSet>(StringComparer.OrdinalIgnoreCase);
