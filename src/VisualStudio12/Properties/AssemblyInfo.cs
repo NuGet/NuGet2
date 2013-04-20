@@ -2,8 +2,8 @@
 using System.Resources;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("VisualStudio10")]
-[assembly: AssemblyDescription("This assembly contains types that are meant to be loaded only in Visual Studio 2010.")]
+[assembly: AssemblyTitle("VisualStudio2013")]
+[assembly: AssemblyDescription("This assembly contains types that are meant to be loaded only in Visual Studio 2013.")]
 
 [assembly: Guid("E2F5E00C-AABA-49AF-BA9A-977FB158CCBD")]
 
@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 
 [assembly: ComVisible(false)]
 
-[assembly: AssemblyVersion("2.3.0.0")]
-[assembly: AssemblyInformationalVersion("2.3.0")]
+[assembly: AssemblyVersion("2.6.0.0")]
+[assembly: AssemblyInformationalVersion("2.6.0")]
 
 [assembly: NeutralResourcesLanguage("en-US")]
