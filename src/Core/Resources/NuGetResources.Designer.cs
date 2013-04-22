@@ -205,6 +205,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There are no writable config files..
+        /// </summary>
+        internal static string Error_NoWritableConfig {
+            get {
+                return ResourceManager.GetString("Error_NoWritableConfig", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An error occurred while loading packages from&apos;{0}&apos;: {1}.
         /// </summary>
         internal static string ErrorLoadingPackages {

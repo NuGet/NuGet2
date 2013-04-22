@@ -53,5 +53,19 @@ namespace NuGet.VisualStudio
 
             return edition + "/" + dte.Version;
         }
+
+        public static string GetSKU()
+        {
+            DTE dte = ServiceLocator.GetInstance<DTE>();
+            string sku = dte.Edition;
+            if (sku.Equals("Ultimate", StringComparison.OrdinalIgnoreCase) || 
+                sku.Equals("Premium", StringComparison.OrdinalIgnoreCase) || 
+                sku.Equals("Professional", StringComparison.OrdinalIgnoreCase))
+            {
+                sku = "Pro";
+            }
+
+            return sku;
+        }
     }
 }

@@ -224,5 +224,33 @@ namespace NuGet.VisualStudio.Test
             Assert.Null(fileSystem);
 
         }
+
+        [Fact]
+        public void GetValueFromMachineWideSettings()
+        {
+            // Arrange
+            var solutionManager = new Mock<MockSolutionManager>();
+            solutionManager.Setup(s => s.IsSolutionOpen).Returns(false);
+
+            var fileSystem = new MockFileSystem();            
+            fileSystem.AddFile(@"a.config", @"
+<configuration>
+  <config>
+    <add key=""key1"" value=""value1"" />
+  </config>
+</configuration>");
+            var settings = new Settings[] {
+                new Settings(fileSystem, "a.config")
+            };
+            var machineWideSettings = new Mock<IMachineWideSettings>();
+            machineWideSettings.SetupGet(m => m.Settings).Returns(settings);
+
+            // Act
+            var vsSettings = new VsSettings(solutionManager.Object, machineWideSettings.Object);
+
+            // Assert
+            var value = vsSettings.GetConfigValue("key1");
+            Assert.Equal("value1", value);
+        }
     }
 }

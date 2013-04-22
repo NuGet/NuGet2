@@ -108,7 +108,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var fileSystem = GetFileSystemWithDefaultConfig();
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
-                settings: Settings.LoadDefaultSettings(fileSystem));
+                settings: Settings.LoadDefaultSettings(fileSystem, null, null));
 
             // Act
             string installPath = installCommand.ResolveInstallPath();
@@ -123,7 +123,8 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var fileSystem = GetFileSystemWithConfigWithCredential();
             var installCommand = new Mock<TestInstallCommand>(
-                GetFactory(), GetSourceProvider(), fileSystem, null, null, null, Settings.LoadDefaultSettings(fileSystem))
+                GetFactory(), GetSourceProvider(), fileSystem, null, null, null, 
+                Settings.LoadDefaultSettings(fileSystem, null, null))
                 {
                     CallBase = true
                 };
@@ -159,7 +160,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var fileSystem = GetFileSystemWithDefaultConfig();
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
-                                                        settings: Settings.LoadDefaultSettings(fileSystem))
+                                                        settings: Settings.LoadDefaultSettings(fileSystem, null, null))
                                      {
                                          OutputDirectory = @"Bar\Baz"
                                      };
@@ -179,7 +180,7 @@ namespace NuGet.Test.NuGetCommandLine.Commands
             // Arrange
             var fileSystem = GetFileSystemWithDefaultConfig(input);
             var installCommand = new TestInstallCommand(GetFactory(), GetSourceProvider(), fileSystem,
-                settings: Settings.LoadDefaultSettings(fileSystem));
+                settings: Settings.LoadDefaultSettings(fileSystem, null, null));
 
             // Act
             string installPath = installCommand.ResolveInstallPath();

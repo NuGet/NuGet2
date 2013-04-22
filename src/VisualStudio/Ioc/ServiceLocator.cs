@@ -84,7 +84,7 @@ namespace NuGet.VisualStudio
         {
             Guid guidService = serviceType.GUID;
             Guid riid = guidService;
-            var serviceProvider = dte as VsServiceProvider;
+            var serviceProvider = dte as VsServiceProvider;            
 
             IntPtr servicePtr;
             int hr = serviceProvider.QueryService(ref guidService, ref riid, out servicePtr);

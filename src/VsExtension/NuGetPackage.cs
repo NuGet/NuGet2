@@ -65,6 +65,7 @@ namespace NuGet.Tools
         private OleMenuCommand _managePackageForSolutionDialogCommand;
         private OleMenuCommandService _mcs;
         private bool _powerConsoleCommandExecuting;
+        private IMachineWideSettings _machineWideSettings;
 
         public NuGetPackage()
         {
@@ -142,6 +143,20 @@ namespace NuGet.Tools
             }
         }
 
+        private IMachineWideSettings MachineWideSettings
+        {
+            get
+            {
+                if (_machineWideSettings == null)
+                {
+                    _machineWideSettings = ServiceLocator.GetInstance<IMachineWideSettings>();
+                    Debug.Assert(_machineWideSettings != null);
+                }
+
+                return _machineWideSettings;
+            }
+        }
+
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
         /// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -166,10 +181,13 @@ namespace NuGet.Tools
             var webProxy = (IVsWebProxy)GetService(typeof(SVsWebProxy));
             Debug.Assert(webProxy != null);
 
-            var settings = Settings.LoadDefaultSettings(_solutionManager == null ? null : _solutionManager.SolutionFileSystem);
+            var settings = Settings.LoadDefaultSettings(
+                _solutionManager == null ? null : _solutionManager.SolutionFileSystem,
+                configFileName: null,
+                machineWideSettings: MachineWideSettings);
             var packageSourceProvider = new PackageSourceProvider(settings);
             HttpClient.DefaultCredentialProvider = new SettingsCredentialProvider(new VSRequestCredentialProvider(webProxy), packageSourceProvider);
-
+            
             // when NuGet loads, if the current solution has package 
             // restore mode enabled, we make sure every thing is set up correctly.
             // For example, projects which were added outside of VS need to have
