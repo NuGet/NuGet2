@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -45,6 +46,9 @@ namespace NuGet.Commands
         private const string PackagesFolder = "packages";
         private const string TransformFileExtension = ".transform";
 
+        [Import]
+        public IMachineWideSettings MachineWideSettings { get; set; }
+
         public ProjectFactory(string path, IDictionary<string, string> projectProperties)
             : this(new Project(path, projectProperties, null))
         {
@@ -71,7 +75,10 @@ namespace NuGet.Commands
             {
                 if (null == _settings)
                 {
-                    _settings = Settings.LoadDefaultSettings(new PhysicalFileSystem(_project.DirectoryPath));
+                    _settings = Settings.LoadDefaultSettings(
+                        new PhysicalFileSystem(_project.DirectoryPath),
+                        null,
+                        MachineWideSettings);
                 }
                 return _settings;
             }

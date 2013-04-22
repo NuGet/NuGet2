@@ -132,7 +132,10 @@ namespace NuGet.Commands
                 var solutionSettingsFile = Path.Combine(SolutionDirectory.TrimEnd(Path.DirectorySeparatorChar), NuGetConstants.NuGetSolutionSettingsFolder);
                 var fileSystem = CreateFileSystem(solutionSettingsFile);
 
-                currentSettings = NuGet.Settings.LoadDefaultSettings(fileSystem);
+                currentSettings = NuGet.Settings.LoadDefaultSettings(
+                    fileSystem, 
+                    configFileName: null,
+                    machineWideSettings: MachineWideSettings);
 
                 // Recreate the source provider and credential provider
                 SourceProvider = PackageSourceBuilder.CreateSourceProvider(currentSettings);

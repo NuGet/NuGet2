@@ -415,10 +415,17 @@
   <data name="Info_OverwriteExistingFile" xml:space="preserve">
     <value>Overwrite existing file '{0}'.</value>
   </data>
+
   <data name="ReferenceFile_InvalidDevelopmentFlag" xml:space="preserve">
     <value>Unable to parse developmentDependency value '{0}' from '{1}'.</value>
   </data>
   <data name="XdtError" xml:space="preserve">
     <value>An error occurred while applying transformation to '{0}' in project '{1}':</value>
+
+
+  </data>
+  <data name="Error_NoWritableConfig" xml:space="preserve">
+    <value>There are no writable config files.</value>
+
   </data>
 </root>

@@ -176,7 +176,8 @@ namespace NuGet.Test.Integration.NuGetCommandLine
             // Assert
             var settings = Settings.LoadDefaultSettings(
                 new PhysicalFileSystem(testDirectory),
-                "test_nuget.config");
+                "test_nuget.config",
+                null);
             var apiKey = CommandLineUtility.GetApiKey(settings, NuGetConstants.DefaultGalleryServerUrl);
             Assert.Equal("A", apiKey);
 

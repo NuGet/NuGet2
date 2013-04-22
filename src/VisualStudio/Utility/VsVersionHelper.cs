@@ -29,5 +29,36 @@ namespace NuGet.VisualStudio
             }
             return MaxVsVersion;
         }
+
+
+        private static string GetFullVsVersionString()
+        {
+            DTE dte = ServiceLocator.GetInstance<DTE>();
+
+            string edition = dte.Edition;
+            if (!edition.StartsWith("VS", StringComparison.OrdinalIgnoreCase))
+            {
+                edition = "VS " + edition;
+            }
+
+            return edition + "/" + dte.Version;
+        }
+
+
+
+        public static string GetSKU()
+        {
+            DTE dte = ServiceLocator.GetInstance<DTE>();
+            string sku = dte.Edition;
+            if (sku.Equals("Ultimate", StringComparison.OrdinalIgnoreCase) || 
+                sku.Equals("Premium", StringComparison.OrdinalIgnoreCase) || 
+                sku.Equals("Professional", StringComparison.OrdinalIgnoreCase))
+            {
+                sku = "Pro";
+            }
+
+            return sku;
+
+        }
     }
 }

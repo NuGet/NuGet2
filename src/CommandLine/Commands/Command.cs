@@ -32,6 +32,9 @@ namespace NuGet.Commands
         [Import]
         public ICommandManager Manager { get; set; }
 
+        [Import]
+        public IMachineWideSettings MachineWideSettings { get; set; }
+
         [Option("help", AltName = "?")]
         public bool Help { get; set; }
 
@@ -72,7 +75,10 @@ namespace NuGet.Commands
             {
                 if (String.IsNullOrEmpty(ConfigFile))
                 {
-                    Settings = NuGet.Settings.LoadDefaultSettings(FileSystem);
+                    Settings = NuGet.Settings.LoadDefaultSettings(
+                        FileSystem, 
+                        configFileName: null, 
+                        machineWideSettings: MachineWideSettings);
                 }
                 else
                 {
@@ -81,7 +87,8 @@ namespace NuGet.Commands
                     var configFileSystem = new PhysicalFileSystem(directory);
                     Settings = NuGet.Settings.LoadDefaultSettings(
                         configFileSystem,
-                        configFileName);
+                        configFileName,
+                        MachineWideSettings);
                 }
 
                 SourceProvider = PackageSourceBuilder.CreateSourceProvider(Settings);

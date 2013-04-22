@@ -97,6 +97,7 @@
     <Compile Include="Http\STSAuthHelper.cs" />
     <Compile Include="Http\WIFTypeProvider.cs" />
     <Compile Include="IEnvironmentVariableReader.cs" />
+    <Compile Include="IMachineWideSettings.cs" />
     <Compile Include="Logging\FileConflictResolution.cs" />
     <Compile Include="Logging\IFileConflictResolver.cs" />
     <Compile Include="NETPortable\NetPortableProfile.cs" />
