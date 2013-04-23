@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Moq;
@@ -31,7 +32,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void CallAddPackageWillAddNuspecWhichHasReferencesData()
+        public void CallAddPackageWillAddNuspecWithReferencesPreserved()
         {
             // Arrange
             var fileSystem = new MockFileSystem("x:\\root");
@@ -40,9 +41,15 @@ namespace NuGet.Test
             repository.FilesToSave = PackageFileTypes.Nupkg | PackageFileTypes.Nuspec;
 
             // Act
-            repository.AddPackage(PackageUtility.CreatePackage("A",
-                                                               "1.0",
-                                                               assemblyReferences: new[] { "lib\\net40\\A.dll", "lib\\B.dll" }));
+            var package = PackageUtility.CreatePackage("A", "1.0", content: new[] { "A.txt", "scripts\\b.txt" });
+            var mockedPackage = Mock.Get(package);
+            mockedPackage.Setup(m => m.PackageAssemblyReferences).Returns(
+                new PackageReferenceSet[] { 
+                    new PackageReferenceSet(new FrameworkName(".NETFramework, Version=4.0"), new [] { "A.dll" }),
+                    new PackageReferenceSet(null, new [] { "B.dll" }),
+                });
+
+            repository.AddPackage(package);
 
             // Assert
             Assert.True(fileSystem.FileExists("A.1.0\\A.1.0.nuspec"));
@@ -61,6 +68,27 @@ namespace NuGet.Test
             Assert.Null(set2.TargetFramework);
             Assert.Equal(1, set2.References.Count);
             Assert.Equal("B.dll", set2.References[0].File);
+        }
+
+        [Fact]
+        public void AddedNuspecDoesNotAddReferencesSectionIfNotPresent()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\\root");
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            var package = PackageUtility.CreatePackage("A", "1.0", content: new[] { "A.txt", "scripts\\b.txt" });
+            repository.AddPackage(package);
+
+            // Assert
+            Assert.True(fileSystem.FileExists("A.1.0\\A.1.0.nuspec"));
+
+            Stream manifestContentStream = fileSystem.OpenFile("A.1.0\\A.1.0.nuspec");
+            Manifest manifest = Manifest.ReadFrom(manifestContentStream, validateSchema: true);
+
+            Assert.Equal(0, manifest.Metadata.ReferenceSets.Count);
         }
 
         [Theory]
@@ -123,7 +151,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void CallRemovePackageWillRemoveTheWholePackageDirecotry()
+        public void CallRemovePackageWillRemoveTheWholePackageDirectory()
         {
             // Arrange
             var fileSystem = new MockFileSystem("x:\\root");
@@ -142,6 +170,31 @@ namespace NuGet.Test
             Assert.False(fileSystem.FileExists("A.2.0\\A.2.0.nupkg"));
             Assert.False(fileSystem.FileExists("A.2.0\\A.2.0.nuspec"));
             Assert.False(fileSystem.DirectoryExists("A.2.0"));
+        }
+
+        [Fact]
+        public void CallRemovePackageWillDeleteNuspecAndNupkgFileBeforeDeletingTheWholePackageDirectory()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystemWithDeleteVerification();
+            fileSystem.AddFile("A.2.0\\A.2.0.nupkg");
+            fileSystem.AddFile("A.2.0\\A.2.0.nuspec");
+            fileSystem.AddFile("A.2.0\\random");
+            fileSystem.AddFile("A.2.0\\content\\file.txt");
+            fileSystem.AddFile("A.2.0\\readme.txt");
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            repository.RemovePackage(PackageUtility.CreatePackage("A", "2.0"));
+
+            // Assert
+            Assert.False(fileSystem.FileExists("A.2.0\\A.2.0.nupkg"));
+            Assert.False(fileSystem.FileExists("A.2.0\\A.2.0.nuspec"));
+            Assert.False(fileSystem.DirectoryExists("A.2.0"));
+
+            Assert.True(fileSystem.IsFileDeleted("A.2.0\\A.2.0.nupkg"));
+            Assert.True(fileSystem.IsFileDeleted("A.2.0\\A.2.0.nuspec"));
         }
 
         [Theory]
@@ -194,7 +247,7 @@ namespace NuGet.Test
         public void FindPackageReturnOptimizedZipPackageObject()
         {
             // Arrange
-            var packageStream = GetPackageStream("one", "1.0.0-alpha");
+            var packageStream = PackageUtility.CreateSimplePackageStream("one", "1.0.0-alpha");
 
             var fileSystem = new MockFileSystem("x:\\root");
             fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nupkg", packageStream);
@@ -211,6 +264,29 @@ namespace NuGet.Test
             Assert.Equal("one", package.Id);
             Assert.Equal(new SemanticVersion("1.0.0-alpha"), package.Version);
             Assert.Equal("Test description", package.Description);
+        }
+
+        [Fact]
+        public void GetPackagesDoesNotReturnDuplicatedPackagesIfBothNuspecAndNupkgFilesArePresent()
+        {
+            // Arrange
+            var packageStream = PackageUtility.CreateSimplePackageStream("one", "1.0.0-alpha");
+
+            var fileSystem = new MockFileSystem("x:\\root");
+            fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nupkg", packageStream);
+            fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nuspec", "rubbish".AsStream());
+
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+
+            // Act
+            var packages = repository.GetPackages().ToList();
+
+            // Assert
+            Assert.Equal(1, packages.Count);
+            Assert.True(packages[0] is OptimizedZipPackage);
+            Assert.Equal("one", packages[0].Id);
+            Assert.Equal(new SemanticVersion("1.0.0-alpha"), packages[0].Version);
         }
 
         [Fact]
@@ -231,7 +307,7 @@ namespace NuGet.Test
             var fileSystem = new MockFileSystem("x:\\root");
             fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nuspec", manifestContent.AsStream());
 
-            var packageStream = GetPackageStream("One", "1.0.0-alpha");
+            var packageStream = PackageUtility.CreateSimplePackageStream("One", "1.0.0-alpha");
             fileSystem.AddFile("one.1.0.0-alpha\\one.1.0.0-alpha.nupkg", packageStream);
 
             var configFileSystem = new MockFileSystem();
@@ -353,6 +429,22 @@ namespace NuGet.Test
 
             // Assert
             Assert.True(configFileSystem.FileExists("packages.config"));
+        }
+
+        [Fact]
+        public void AddPackageDoesNotAddReferencesToMetadataPackagesToSolutionConfigFile()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+            var solutionPackage = PackageUtility.CreatePackage("MetadataPackage", dependencies: new [] { new PackageDependency("A") }, tools: new[] { "Install.ps1" });
+
+            // Act
+            repository.AddPackage(solutionPackage);
+
+            // Assert
+            Assert.False(configFileSystem.FileExists("packages.config"));
         }
 
         [Fact]
@@ -706,27 +798,20 @@ namespace NuGet.Test
             }
         }
 
-        private static Stream GetPackageStream(string id, string version = "1.0")
+        private class MockFileSystemWithDeleteVerification : MockFileSystem
         {
-            var packageBuilder = new PackageBuilder
+            private readonly HashSet<string> _deletedFiles = new HashSet<string>();
+
+            public override void DeleteFile(string path)
             {
-                Id = id,
-                Version = SemanticVersion.Parse(version),
-                Description = "Test description",
-            };
+                _deletedFiles.Add(path);
+                base.DeleteFile(path);
+            }
 
-            var dependencySet = new PackageDependencySet(VersionUtility.DefaultTargetFramework,
-                new PackageDependency[] {
-                    new PackageDependency("Foo")
-                });
-            packageBuilder.DependencySets.Add(dependencySet);
-            packageBuilder.Authors.Add("foo");
-
-            var memoryStream = new MemoryStream();
-            packageBuilder.Save(memoryStream);
-            memoryStream.Seek(0, SeekOrigin.Begin);
-
-            return memoryStream;
+            public bool IsFileDeleted(string path)
+            {
+                return _deletedFiles.Contains(path);
+            }
         }
     }
 }

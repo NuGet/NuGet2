@@ -85,6 +85,36 @@ namespace NuGet.Test.NuGetCommandLine.Commands
         }
 
         [Fact]
+        public void GetPackageThatHasLicensesWithVerbositySetToDetailed()
+        {
+            // Arrange
+            IPackageRepositoryFactory factory = CreatePackageRepositoryFactory();
+            Mock<IConsole> consoleMock = new Mock<IConsole>();
+            IConsole console = consoleMock.Object;
+
+            consoleMock.Setup(x => x.PrintJustified(1, "License url: ftp://test/somelicense.txts")).Verifiable("could not find license url");
+            ListCommand cmd = new ListCommand()
+            {
+                RepositoryFactory = factory,
+                SourceProvider = GetSourceProvider()
+            };
+            cmd.Source.Add(DefaultRepoUrl);
+            cmd.Console = console;
+            cmd.Arguments.Add("SearchPackage");
+            cmd.Verbosity = Verbosity.Detailed;
+
+            // Act
+            var packages = cmd.GetPackages();
+            cmd.ExecuteCommand();
+
+            // Assert
+            var url = packages.First().LicenseUrl;
+            Assert.Equal(1, packages.Count());
+            Assert.Equal(new Uri("ftp://test/somelicense.txts"), packages.First().LicenseUrl);
+            consoleMock.Verify();
+        }
+
+        [Fact]
         public void GetPackageCollapsesVersionsByDefault()
         {
             // Arrange

@@ -7,6 +7,7 @@
   <PropertyGroup>
     <ProjectGuid>{7765C89E-790C-4D1E-A877-227E5FE3C90B}</ProjectGuid>
     <OutputType>Library</OutputType>
+    <DefineConstants>$(DefineConstants);VS10</DefineConstants>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuGet.VisualStudio10</RootNamespace>
     <AssemblyName>NuGet.VisualStudio10</AssemblyName>
@@ -14,9 +15,15 @@
     <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualStudio.ExtensionManager, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualStudio.ExtensionManager, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\VS10\Microsoft.VisualStudio.ExtensionManager.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.VCProjectEngine, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>..\..\lib\VS10\Microsoft.VisualStudio.VCProjectEngine.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -24,6 +31,9 @@
   <ItemGroup>
     <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\VisualStudio\VCProjectHelper.cs">
+      <Link>VCProjectHelper.cs</Link>
     </Compile>
     <Compile Include="GalleryEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -125,10 +125,10 @@ namespace NuGet.Dialog.Providers
 
             foreach (Project project in _solutionManager.GetProjects())
             {
-                if (!String.IsNullOrEmpty(project.UniqueName))
+                if (!String.IsNullOrEmpty(project.GetUniqueName()))
                 {
                     bool checkState = selectedProjectSet.Contains(project);
-                    _checkStateCache[project.UniqueName] = checkState;
+                    _checkStateCache[project.GetUniqueName()] = checkState;
                 }
             }
         }
@@ -136,8 +136,8 @@ namespace NuGet.Dialog.Providers
         private static bool DetermineProjectCheckState(Project project)
         {
             bool checkState;
-            if (String.IsNullOrEmpty(project.UniqueName) ||
-                !_checkStateCache.TryGetValue(project.UniqueName, out checkState))
+            if (String.IsNullOrEmpty(project.GetUniqueName()) ||
+                !_checkStateCache.TryGetValue(project.GetUniqueName(), out checkState))
             {
                 checkState = true;
             }

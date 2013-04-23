@@ -14,7 +14,7 @@ namespace NuGet
         /// <summary>
         /// Maximum number of packages that can live in this cache.
         /// </summary>
-        private const int MaxPackages = 100;
+        private const int MaxPackages = 200;
 
         private const string NuGetCachePathEnvironmentVariable = "NuGetCachePath";
 
@@ -87,6 +87,11 @@ namespace NuGet
 
         public Stream CreatePackageStream(string packageId, SemanticVersion version)
         {
+            if (FileSystem is NullFileSystem)
+            {
+                return null;
+            }
+
             string packagePath = GetPackageFilePath(packageId, version);
             return FileSystem.CreateFile(packagePath);
         }
@@ -133,6 +138,13 @@ namespace NuGet
             else
             {
                 string localAppDataPath = getFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                if (String.IsNullOrEmpty(localAppDataPath))
+                {
+                    // there's a bug on Windows Azure Web Sites environment where calling through the Environment.GetFolderPath()
+                    // will returns empty string, but the environment variable will return the correct value
+                    localAppDataPath = getEnvironmentVariable("LocalAppData");
+                }
+
                 if (String.IsNullOrEmpty(localAppDataPath))
                 {
                     return null;

@@ -236,7 +236,7 @@ namespace NuGet.Commands
 
             var satellitePackages = new List<IPackage>();
 
-            if(DisableParallel)
+            if (DisableParallel)
             {
                 foreach(var package in packageReferences)
                 {

@@ -39,6 +39,8 @@ namespace NuGet.Dialog.PackageManagerUI
             });
         }
 
+        public event EventHandler UpgradeNuGetRequested = delegate { };
+
         private DispatcherTimer CloseTimer
         {
             get
@@ -124,9 +126,16 @@ namespace NuGet.Dialog.PackageManagerUI
         {
             if (_currentWindow != null)
             {
+                bool upgradeRequested = _currentWindow.UpgradeNuGetRequested;
+                
                 _currentWindow.Closed -= OnWindowClosed;
                 _currentWindow = null;
                 NuGetEventTrigger.Instance.TriggerEvent(NuGetEvent.ProgressDialogEnd);
+
+                if (upgradeRequested)
+                {
+                    UpgradeNuGetRequested(this, EventArgs.Empty);
+                }
             }
         }
 
@@ -205,7 +214,7 @@ namespace NuGet.Dialog.PackageManagerUI
             }
         }
 
-        public void SetCompleted(bool successful)
+        public void SetCompleted(bool successful, bool showUpgradeNuGetButton)
         {
             if (successful)
             {
@@ -213,7 +222,7 @@ namespace NuGet.Dialog.PackageManagerUI
             }
             else if (_currentWindow != null)
             {
-                _currentWindow.SetErrorState();
+                _currentWindow.SetErrorState(showUpgradeNuGetButton);
             }
         }
 

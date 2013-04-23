@@ -147,6 +147,30 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void GetUpdatesReturnPackageWhenSourcePackageHasNullTargetFrameworkInToolsFolder()
+        {
+            // Arrange
+            var sourceRepository = new MockPackageRepository();
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "1.0", new string[] { "hello" }));
+            sourceRepository.AddPackage(PackageUtility.CreatePackage("A", "2.0", new string[] { "hello", "world" }, tools: new string[] { "build\\install.ps1" }));
+
+            var packages = new IPackage[] 
+            {
+                PackageUtility.CreatePackage("A", "1.5")
+            };
+
+            // Act
+            var foundPackages = PackageRepositoryExtensions.GetUpdates(sourceRepository, packages, includePrerelease: true, targetFrameworks:new [] { new FrameworkName("NETFramework, Version=4.5") },
+                                                                       includeAllVersions: true).ToList();
+
+            // Assert
+            Assert.Equal(1, foundPackages.Count);
+
+            Assert.Equal("A", foundPackages[0].Id);
+            Assert.Equal(new SemanticVersion("2.0"), foundPackages[0].Version);
+        }   
+
+        [Fact]
         public void GetUpdatesReturnPackagesConformingToVersionConstraints()
         {
             // Arrange

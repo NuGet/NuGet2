@@ -116,11 +116,7 @@ namespace NuGet.Commands
             
             IEnumerable<string> packagesToPush = GetPackagesToPush(packagePath);
 
-            if (!packagesToPush.Any())
-            {
-                Console.WriteError(String.Format(CultureInfo.CurrentCulture, NuGetResources.UnableToFindFile, packagePath));
-                return;
-            }
+            EnsurePackageFileExists(packagePath, packagesToPush);
 
             foreach (string packageToPush in packagesToPush)
             {
@@ -168,6 +164,14 @@ namespace NuGet.Commands
                 packagePath = packagePath + Constants.PackageExtension;
             }
             return packagePath;
+        }
+
+        private static void EnsurePackageFileExists(string packagePath, IEnumerable<string> packagesToPush)
+        {
+            if (!packagesToPush.Any())
+            {
+                throw new CommandLineException(String.Format(CultureInfo.CurrentCulture, NuGetResources.UnableToFindFile, packagePath));
+            }
         }
 
         private string GetApiKey(string source)

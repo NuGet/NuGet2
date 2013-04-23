@@ -13,25 +13,27 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         /// <param name="packageId">The id of the created package.</param>
         /// <param name="version">The version of the created package.</param>
         /// <param name="path">The directory where the package is created.</param>
-        /// <returns>The name of the created package file.</returns>
+        /// <returns>The full path of the created package file.</returns>
         public static string CreateTestPackage(string packageId, string version, string path)
         {
-            PackageBuilder builder = new PackageBuilder()
+            var packageBuilder = new PackageBuilder
             {
                 Id = packageId,
                 Version = new SemanticVersion(version),
-                Description = "Descriptions",
+                Description = "Test desc"
             };
-            builder.Authors.Add("test");
-            builder.Files.Add(CreatePackageFile(@"content\test1.txt"));
 
-            var packageFileName = Path.Combine(path, packageId + "." + version + ".nupkg");
-            using (var stream = new FileStream(packageFileName, FileMode.CreateNew))
+            packageBuilder.Files.Add(CreatePackageFile(@"content\test1.txt"));
+            packageBuilder.Authors.Add("test author");
+
+            var packageFileName = string.Format("{0}.{1}.nupkg", packageId, version);
+            var packageFileFullPath = Path.Combine(path, packageFileName);
+            using (var fileStream = File.Create(packageFileFullPath))
             {
-                builder.Save(stream);
+                packageBuilder.Save(fileStream);
             }
 
-            return packageFileName;
+            return packageFileFullPath;
         }
 
         /// <summary>

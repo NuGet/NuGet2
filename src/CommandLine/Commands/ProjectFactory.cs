@@ -19,7 +19,6 @@ namespace NuGet.Commands
     internal class ProjectFactory : IPropertyProvider
     {
         private readonly Project _project;
-        private FrameworkName _frameworkName;
         private ILogger _logger;
         private ISettings _settings;
 
@@ -56,7 +55,14 @@ namespace NuGet.Commands
             _project = project;
             ProjectProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             AddSolutionDir();
-            _settings = null;            
+            _settings = null;
+
+            // Get the target framework of the project
+            string targetFrameworkMoniker = _project.GetPropertyValue("TargetFrameworkMoniker");
+            if (!String.IsNullOrEmpty(targetFrameworkMoniker))
+            {
+                TargetFramework = new FrameworkName(targetFrameworkMoniker);
+            }
         }
 
         private ISettings DefaultSettings
@@ -79,21 +85,8 @@ namespace NuGet.Commands
 
         private FrameworkName TargetFramework
         {
-            get
-            {
-                if (_frameworkName == null)
-                {
-                    // Get the target framework of the project
-                    string targetFrameworkMoniker = _project.GetPropertyValue("TargetFrameworkMoniker");
-
-                    if (!String.IsNullOrEmpty(targetFrameworkMoniker))
-                    {
-                        _frameworkName = new FrameworkName(targetFrameworkMoniker);
-                    }
-                }
-
-                return _frameworkName;
-            }
+            get;
+            set;
         }
 
         public bool IncludeSymbols { get; set; }
@@ -394,6 +387,8 @@ namespace NuGet.Commands
                     referencedProject.IncludeSymbols = IncludeSymbols;
                     referencedProject.Build = Build;
                     referencedProject.IncludeReferencedProjects = IncludeReferencedProjects;
+                    referencedProject.ProjectProperties = ProjectProperties;
+                    referencedProject.TargetFramework = TargetFramework;
                     referencedProject.BuildProject();
                     referencedProject.RecursivelyApply(action, alreadyAppliedProjects);
                 }
@@ -438,19 +433,22 @@ namespace NuGet.Commands
                             continue;
                         }
 
+                        var loadedProjects = projectCollection.GetLoadedProjects(fullPath);
+                        var referencedProject = loadedProjects.Count > 0 ?
+                            loadedProjects.First() :
+                            new Project(
+                                fullPath,
+                                globalProperties: null,
+                                toolsVersion: null,
+                                projectCollection: projectCollection);
+
                         if (NuspecFileExists(fullPath))
                         {
-                            var nuspecFileName = Path.ChangeExtension(fullPath, Constants.ManifestExtension);
-                            var dependency = CreateDependencyFromNuspecFile(nuspecFileName);
+                            var dependency = CreateDependencyFromProject(referencedProject);
                             dependencies[dependency.Id] = dependency;
                         }
                         else
                         {
-                            var referencedProject = new Project(
-                                fullPath, 
-                                globalProperties: null, 
-                                toolsVersion: null, 
-                                projectCollection: projectCollection);
                             projectsToProcess.Enqueue(referencedProject);
                         }
                     }
@@ -458,24 +456,39 @@ namespace NuGet.Commands
             }
         }
 
-        private static PackageDependency CreateDependencyFromNuspecFile(string nuspecFileName)
+        // Creates a package dependency from the given project, which has a corresponding
+        // nuspec file.
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to continue regardless of any error we encounter extracting metadata.")]
+        private PackageDependency CreateDependencyFromProject(Project project)
         {
             try
             {
-                using (var stream = File.OpenRead(nuspecFileName))
+                var projectFactory = new ProjectFactory(project);
+                projectFactory.Build = Build;
+                projectFactory.ProjectProperties = ProjectProperties;
+                projectFactory.BuildProject();
+                var builder = new PackageBuilder();
+                try
                 {
-                    var manifest = Manifest.ReadFrom(stream, validateSchema: true);
-                    return new PackageDependency(
-                        manifest.Metadata.Id,
-                        VersionUtility.ParseVersionSpec(manifest.Metadata.Version));
+                    AssemblyMetadataExtractor.ExtractMetadata(builder, projectFactory.TargetPath);
                 }
+                catch
+                {
+                    projectFactory.ExtractMetadataFromProject(builder);
+                }
+
+                projectFactory.InitializeProperties(builder);
+                projectFactory.ProcessNuspec(builder, null);
+                return new PackageDependency(
+                    builder.Id,
+                    VersionUtility.ParseVersionSpec(builder.Version.ToString()));
             }
             catch (Exception ex)
             {
                 var message = string.Format(
                     CultureInfo.InvariantCulture,
                     NuGetResources.Error_ProcessingNuspecFile,
-                    nuspecFileName,
+                    project.FullPath,
                     ex.Message);
                 throw new CommandLineException(message, ex);
             }
@@ -493,7 +506,8 @@ namespace NuGet.Commands
             var allowedOutputExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
                 ".dll",
                 ".exe",
-                ".xml"
+                ".xml",
+                ".winmd"
             };
 
             if (IncludeSymbols)
@@ -549,7 +563,6 @@ namespace NuGet.Commands
         {
             // get all packages and dependencies, including the ones in project references
             var packagesAndDependencies = new Dictionary<String, Tuple<IPackage, PackageDependency>>();
-            
             ApplyAction(p => p.AddDependencies(packagesAndDependencies));
 
             // list of all dependency packages
@@ -683,7 +696,12 @@ namespace NuGet.Commands
 
             if (!String.IsNullOrEmpty(solutionDir))
             {
-                ProjectProperties.Add("SolutionDir", solutionDir);
+                if (this.ProjectProperties.ContainsKey("SolutionDir"))
+                {
+                    this.Logger.Log(MessageLevel.Warning, NuGetResources.Warning_DuplicatePropertyKey, "SolutionDir");
+                }
+
+                ProjectProperties["SolutionDir"] = solutionDir;
             }
         }
 

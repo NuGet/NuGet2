@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security;
+using NuGet;
 
 namespace NuGet.Common
 {
@@ -315,6 +316,39 @@ namespace NuGet.Common
                 case MessageLevel.Debug:
                     WriteColor(Out, ConsoleColor.Gray, message, args);
                     break;
+            }
+        }
+
+        public FileConflictResolution ResolveFileConflict(string message)
+        {
+            // make the question stand out from previous text
+            WriteLine();
+
+            WriteLine(ConsoleColor.Yellow, "File Conflict.");
+            WriteLine(message);
+
+            // Yes - Yes To All - No - No To All
+            var acceptedAnswers = new List<string> { "Y", "A", "N", "L" };
+            var choices = new[]
+            {
+                FileConflictResolution.Overwrite,
+                FileConflictResolution.OverwriteAll,
+                FileConflictResolution.Ignore,
+                FileConflictResolution.IgnoreAll
+            };
+
+            while (true)
+            {
+                Write(NuGetResources.FileConflictChoiceText);
+                string answer = ReadLine();                
+                if (!String.IsNullOrEmpty(answer)) 
+                {
+                    int index = acceptedAnswers.FindIndex(a => a.Equals(answer, StringComparison.OrdinalIgnoreCase));
+                    if (index > -1)
+                    {
+                        return choices[index];
+                    }
+                }
             }
         }
     }

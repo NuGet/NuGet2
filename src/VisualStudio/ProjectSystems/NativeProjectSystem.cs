@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using EnvDTE;
+using Microsoft.VisualStudio.Shell;
+using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio
 {
@@ -81,9 +83,56 @@ namespace NuGet.VisualStudio
             }
         }
 
-        protected override void AddFileToContainer(string fullPath, ProjectItems container)
+        protected override void AddFileToProject(string path)
         {
-            container.AddFromFile(Path.GetFileName(fullPath));
+            if (ExcludeFile(path))
+            {
+                return;
+            }
+
+            // Get the project items for the folder path
+            string folderPath = Path.GetDirectoryName(path);
+            string fullPath = GetFullPath(path);
+
+            ThreadHelper.Generic.Invoke(() =>
+            {
+                if (VsVersionHelper.IsVisualStudio2010)
+                {
+                    VisualStudio10.VCProjectHelper.AddFileToProject(Project.Object, fullPath, folderPath);
+                }
+                else
+                {
+                    VCProjectHelper.AddFileToProject(Project.Object, fullPath, folderPath);
+                }
+            });
+
+            Logger.Log(MessageLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);
+        }
+
+        public override void DeleteFile(string path)
+        {
+            string folderPath = Path.GetDirectoryName(path);
+            string fullPath = GetFullPath(path);
+
+            bool succeeded = VsVersionHelper.IsVisualStudio2010 
+                ? VisualStudio10.VCProjectHelper.RemoveFileFromProject(Project.Object, fullPath, folderPath)
+                : VCProjectHelper.RemoveFileFromProject(Project.Object, fullPath, folderPath);
+            
+            if (succeeded)
+            {
+                // The RemoveFileFromProject() method only removes file from project.
+                // We want to delete it from disk too.
+                BaseFileSystem.DeleteFile(path);
+
+                if (!String.IsNullOrEmpty(folderPath))
+                {
+                    Logger.Log(MessageLevel.Debug, VsResources.Debug_RemovedFileFromFolder, Path.GetFileName(path), folderPath);
+                }
+                else
+                {
+                    Logger.Log(MessageLevel.Debug, VsResources.Debug_RemovedFile, Path.GetFileName(path));
+                }
+            }
         }
     }
 }

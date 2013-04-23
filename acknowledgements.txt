@@ -1,5 +1,15 @@
+*** NuGet Hall of Fame 2.6 ***
 
-*** NuGet Hall of Fame ***
+Mike Roth - Show License url when listing packages and verbosity is detailed. 
+adamralph - Add developmentDependency attribute to packages.config and use it in pack command to only include runtime packages (#1956)
+tkrafael - Avoid duplicate Properties key in nuget.exe pack command.
+BenPhegan - Increase machine cache size to 200. (#2610)
+derigel - Fix NuGet dialog showing updates in the wrong tab (#3217)
+KevinBoyleRG - Enable support for Nomad project (#3234)
+corinblaikie - Fix push command fails with exit code 0 when file doesn't exist. (#3252)
+veselkamartin - Fix bug with Add-BindingRedirect command when a project references a database project. (#3226)
+
+*** NuGet Hall of Fame 2.5 ***
 
 Daniel Plaisted - Add MonoAndroid, MonoTouch, and MonoMac to the list of known target framework identifiers. (#2847)
 Andres G. Aragoneses - Fix spelling of NuGet.targets for a case-sensitive OS (#2865)
@@ -12,3 +22,6 @@ Adam Ralph - Added recognized words to custom dictionary to allow build.cmd to s
 Bruno Roggeri - Fix unit tests when running in localized VS.
 garethevans -  Extracted interface from PackageService
 Maxime Brugidou - Handle project dependencies when packing (#936)
+Xavier Decoster - Support Clear Text Password when storing package source credentials in nuget.cofig files (#2991, #3164)
+Xavier Decoster - Add -StorePasswordInClearText parameter to the 'nuget.exe source' command. (#3192)
+jmanning - Fix Get-Package help description (#3190 and #3191)

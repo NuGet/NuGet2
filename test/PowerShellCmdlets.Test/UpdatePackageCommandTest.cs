@@ -388,14 +388,18 @@ namespace NuGet.PowerShell.Commands.Test
         public void UpdatePackageDoNotUpdateToUnlistedPackageWithPrerelease(string versionA1, string versionA2)
         {
             // Arrange
-            var packageA1 = PackageUtility.CreatePackage("A", versionA1, dependencies: new[] { new PackageDependency("B") });
+            var packageA1 = PackageUtility.CreatePackage("A", versionA1);
             var packageA2 = PackageUtility.CreatePackage("A", versionA2, listed: false);
 
-            var sharedRepository = new Mock<ISharedPackageRepository>();
-            sharedRepository.Setup(s => s.GetPackages()).Returns(new [] { packageA1 }.AsQueryable());
+            var sharedRepository = new MockSharedPackageRepository();
+            sharedRepository.AddPackage(packageA1);
 
             var packageRepository = new MockPackageRepository { packageA1, packageA2 };
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, new Mock<IDeleteOnRestartManager>().Object, new VsPackageInstallerEvents());
+            var packageManager = new MockVsPackageManager(
+                TestUtils.GetSolutionManagerWithProjects(),
+                packageRepository,
+                sharedRepository);
+
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
@@ -406,7 +410,8 @@ namespace NuGet.PowerShell.Commands.Test
             cmdlet.Execute();
 
             // Assert
-            sharedRepository.Verify(s => s.AddPackage(packageA2), Times.Never());
+            Assert.True(sharedRepository.Contains(packageA1));
+            Assert.False(sharedRepository.Contains(packageA2));
         }
 
         [Theory]
@@ -417,14 +422,18 @@ namespace NuGet.PowerShell.Commands.Test
         public void SafeUpdatePackageDoNotUpdateToUnlistedPackageWithPrerelease(string versionA1, string versionA2)
         {
             // Arrange
-            var packageA1 = PackageUtility.CreatePackage("A", versionA1, dependencies: new[] { new PackageDependency("B") });
+            var packageA1 = PackageUtility.CreatePackage("A", versionA1);
             var packageA2 = PackageUtility.CreatePackage("A", versionA2, listed: false);
 
-            var sharedRepository = new Mock<ISharedPackageRepository>();
-            sharedRepository.Setup(s => s.GetPackages()).Returns(new[] { packageA1 }.AsQueryable());
+            var sharedRepository = new MockSharedPackageRepository();
+            sharedRepository.AddPackage(packageA1);
 
             var packageRepository = new MockPackageRepository { packageA1, packageA2 };
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, new Mock<IDeleteOnRestartManager>().Object, new VsPackageInstallerEvents());
+            var packageManager = new MockVsPackageManager(
+                TestUtils.GetSolutionManagerWithProjects(), 
+                packageRepository, 
+                sharedRepository);
+
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
@@ -436,7 +445,7 @@ namespace NuGet.PowerShell.Commands.Test
             cmdlet.Execute();
 
             // Assert
-            sharedRepository.Verify(s => s.AddPackage(packageA2), Times.Never());
+            Assert.False(sharedRepository.Contains(packageA2));
         }
 
         [Theory]
@@ -445,14 +454,18 @@ namespace NuGet.PowerShell.Commands.Test
         public void UpdatePackageDoNotUpdateToUnlistedPackage(string versionA1, string versionA2)
         {
             // Arrange
-            var packageA1 = PackageUtility.CreatePackage("A", versionA1, dependencies: new[] { new PackageDependency("B") });
+            var packageA1 = PackageUtility.CreatePackage("A", versionA1);
             var packageA2 = PackageUtility.CreatePackage("A", versionA2, listed: false);
 
-            var sharedRepository = new Mock<ISharedPackageRepository>();
-            sharedRepository.Setup(s => s.GetPackages()).Returns(new[] { packageA1 }.AsQueryable());
+            var sharedRepository = new MockSharedPackageRepository();
+            sharedRepository.AddPackage(packageA1);
 
             var packageRepository = new MockPackageRepository { packageA1, packageA2 };
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, new Mock<IDeleteOnRestartManager>().Object, new VsPackageInstallerEvents());
+            var packageManager = new MockVsPackageManager(
+                TestUtils.GetSolutionManagerWithProjects(),
+                packageRepository,
+                sharedRepository);
+
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
@@ -462,7 +475,8 @@ namespace NuGet.PowerShell.Commands.Test
             cmdlet.Execute();
 
             // Assert
-            sharedRepository.Verify(s => s.AddPackage(packageA2), Times.Never());
+            Assert.True(sharedRepository.Contains(packageA1));
+            Assert.False(sharedRepository.Contains(packageA2));
         }
 
         [Theory]
@@ -471,14 +485,18 @@ namespace NuGet.PowerShell.Commands.Test
         public void SafeUpdatePackageDoNotUpdateToUnlistedPackage(string versionA1, string versionA2)
         {
             // Arrange
-            var packageA1 = PackageUtility.CreatePackage("A", versionA1, dependencies: new[] { new PackageDependency("B") });
+            var packageA1 = PackageUtility.CreatePackage("A", versionA1);
             var packageA2 = PackageUtility.CreatePackage("A", versionA2, listed: false);
 
-            var sharedRepository = new Mock<ISharedPackageRepository>();
-            sharedRepository.Setup(s => s.GetPackages()).Returns(new[] { packageA1 }.AsQueryable());
+            var sharedRepository = new MockSharedPackageRepository();
+            sharedRepository.AddPackage(packageA1);
 
             var packageRepository = new MockPackageRepository { packageA1, packageA2 };
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, new Mock<IDeleteOnRestartManager>().Object, new VsPackageInstallerEvents());
+            var packageManager = new MockVsPackageManager(
+                TestUtils.GetSolutionManagerWithProjects(), 
+                packageRepository, 
+                sharedRepository);
+            
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
@@ -489,7 +507,8 @@ namespace NuGet.PowerShell.Commands.Test
             cmdlet.Execute();
 
             // Assert
-            sharedRepository.Verify(s => s.AddPackage(packageA2), Times.Never());
+            Assert.True(sharedRepository.Contains(packageA1));
+            Assert.False(sharedRepository.Contains(packageA2));
         }
 
         [Theory]
@@ -501,15 +520,19 @@ namespace NuGet.PowerShell.Commands.Test
         public void UpdatePackageUpdateToUnlistedPackageIfVersionIsSet(string versionA1, string versionA2)
         {
             // Arrange
-            var packageA1 = PackageUtility.CreatePackage("A", versionA1, dependencies: new[] { new PackageDependency("B") });
+            var packageA1 = PackageUtility.CreatePackage("A", versionA1);
             var packageA2 = PackageUtility.CreatePackage("A", versionA2, listed: false);
 
-            var sharedRepository = new Mock<ISharedPackageRepository>();
-            sharedRepository.Setup(s => s.GetPackages()).Returns(new[] { packageA1 }.AsQueryable());
-            sharedRepository.Setup(s => s.AddPackage(packageA2)).Verifiable();
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true };
+            var sharedRepository = localRepository.As<ISharedPackageRepository>();
+            localRepository.Object.AddPackage(packageA1);
 
             var packageRepository = new MockPackageRepository { packageA1, packageA2 };
-            var packageManager = new VsPackageManager(TestUtils.GetSolutionManagerWithProjects("foo"), packageRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem(), sharedRepository.Object, new Mock<IDeleteOnRestartManager>().Object, new VsPackageInstallerEvents());
+            var packageManager = new MockVsPackageManager(
+                TestUtils.GetSolutionManagerWithProjects(), 
+                packageRepository, 
+                sharedRepository.Object);
+
             var packageManagerFactory = new Mock<IVsPackageManagerFactory>(MockBehavior.Strict);
             packageManagerFactory.Setup(m => m.CreatePackageManager()).Returns(packageManager);
 
@@ -520,7 +543,8 @@ namespace NuGet.PowerShell.Commands.Test
             cmdlet.Execute();
 
             // Assert
-            sharedRepository.Verify();
+            Assert.False(localRepository.Object.Contains(packageA1));
+            Assert.True(localRepository.Object.Contains(packageA2));
         }
 
         private static IVsPackageSourceProvider GetPackageSourceProvider(params PackageSource[] sources)
@@ -539,6 +563,14 @@ namespace NuGet.PowerShell.Commands.Test
 
             public MockVsPackageManager(IPackageRepository sourceRepository)
                 : base(new Mock<ISolutionManager>().Object, sourceRepository, new Mock<IFileSystemProvider>().Object, new Mock<IFileSystem>().Object, new Mock<ISharedPackageRepository>().Object, new Mock<IDeleteOnRestartManager>().Object, new Mock<VsPackageInstallerEvents>().Object)
+            {
+            }
+
+            public MockVsPackageManager(
+                ISolutionManager solutionManager,
+                IPackageRepository sourceRepository,
+                ISharedPackageRepository localRepository)
+                : base(solutionManager, sourceRepository, new Mock<IFileSystemProvider>().Object, new MockFileSystem("x:\\root"), localRepository, new Mock<IDeleteOnRestartManager>().Object, new Mock<VsPackageInstallerEvents>().Object)
             {
             }
 

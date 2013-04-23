@@ -31,6 +31,7 @@
       <Link>CommonResources.cs</Link>
     </Compile>
     <Compile Include="AddBindingRedirectCommand.cs" />
+    <Compile Include="FileConflictAction.cs" />
     <Compile Include="GetRemotePackageVersionCommand.cs" />
     <Compile Include="GetRemotePackageIdCommand.cs" />
     <Compile Include="FindPackageCommand.cs" />

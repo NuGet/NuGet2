@@ -96,6 +96,8 @@
     <Compile Include="Http\STSAuthHelper.cs" />
     <Compile Include="Http\WIFTypeProvider.cs" />
     <Compile Include="IEnvironmentVariableReader.cs" />
+    <Compile Include="Logging\FileConflictResolution.cs" />
+    <Compile Include="Logging\IFileConflictResolver.cs" />
     <Compile Include="NETPortable\NetPortableProfile.cs" />
     <Compile Include="NETPortable\NetPortableProfileCollection.cs" />
     <Compile Include="NETPortable\NetPortableProfileTable.cs" />
@@ -103,6 +105,7 @@
     <Compile Include="Packages\LocalPackage.cs" />
     <Compile Include="Packages\OptimizedZipPackage.cs" />
     <Compile Include="Packages\UnzippedPackage.cs" />
+    <Compile Include="PackageWalker\NuGetVersionNotSatisfiedException.cs" />
     <Compile Include="ProjectSystem\ProjectImportLocation.cs" />
     <Compile Include="Repositories\ILatestPackageLookup.cs" />
     <Compile Include="ProjectSystem\IBatchProcessor.cs" />

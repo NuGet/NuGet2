@@ -3,7 +3,7 @@
     $project = New-ConsoleApplication
     
     # Act
-    Install-Package FakeItEasy -Project $project.Name
+    Install-Package FakeItEasy -Project $project.Name -version 1.8.0
     
     # Assert
     Assert-Reference $project Castle.Core
@@ -267,7 +267,7 @@ function Test-FSharpSimpleInstallWithContentFiles {
 
 function Test-FSharpSimpleWithAssemblyReference {
     # Arrange
-    $p = New-FSharpConsoleApplication
+    $p = New-FSharpLibrary
     
     # Act
     Install-Package Antlr -Project $p.Name -Source $context.RepositoryPath
@@ -550,25 +550,18 @@ function Test-SimpleBindingRedirects {
     $a = New-WebApplication
     $b = New-WebSite
     
-
     $projects = @($a, $b)
 
     # Act
     $projects | Install-Package B -Version 2.0 -Source $context.RepositoryPath
     $projects | Install-Package A -Version 1.0 -Source $context.RepositoryPath
-    $projects | Install-Package D -Version 2.0 -Source $context.RepositoryPath
-    $projects | Install-Package C -Version 1.0 -Source $context.RepositoryPath
 
     # Assert
     $projects | %{ Assert-Reference $_ A 1.0.0.0; 
-                   Assert-Reference $_ B 2.0.0.0; 
-                   Assert-Reference $_ C 1.0.0.0;
-                   Assert-Reference $_ D 2.0.0.0; }
+                   Assert-Reference $_ B 2.0.0.0; }
 
     Assert-BindingRedirect $a web.config B '0.0.0.0-2.0.0.0' '2.0.0.0'
-    Assert-BindingRedirect $a web.config D '0.0.0.0-2.0.0.0' '2.0.0.0'
     Assert-BindingRedirect $b web.config B '0.0.0.0-2.0.0.0' '2.0.0.0'
-    Assert-BindingRedirect $b web.config D '0.0.0.0-2.0.0.0' '2.0.0.0'
 }
 
 function Test-BindingRedirectDoesNotAddToSilverlightProject {
@@ -1071,7 +1064,7 @@ function Test-PackageInstallAcceptsSourceName {
     $project = New-ConsoleApplication
     
     # Act
-    Install-Package FakeItEasy -Project $project.Name -Source 'NuGet Official package Source'
+    Install-Package FakeItEasy -Project $project.Name -Source 'NuGet Official package Source' -Version 1.8.0
     
     # Assert
     Assert-Reference $project Castle.Core
@@ -1087,7 +1080,7 @@ function Test-PackageInstallAcceptsAllAsSourceName {
     $project = New-ConsoleApplication
     
     # Act
-    Install-Package FakeItEasy -Project $project.Name -Source 'All'
+    Install-Package FakeItEasy -Project $project.Name -Source 'All' -Version 1.8.0
     
     # Assert
     Assert-Reference $project Castle.Core
@@ -1270,7 +1263,7 @@ function Test-SinglePackageInstallIntoSingleProjectWhenSolutionPathHasComma {
     $project = New-ConsoleApplication
     
     # Act
-    Install-Package FakeItEasy -Project $project.Name
+    Install-Package FakeItEasy -Project $project.Name -Version 1.8.0
     
     # Assert
     Assert-Reference $project Castle.Core
@@ -1463,7 +1456,7 @@ function Test-InstallPackageConsidersPrereleasePackagesWhenResolvingDependencyWh
     $a | Install-Package -Source $context.RepositoryRoot PrereleaseTestPackage -Prerelease
     Assert-Package $a 'PrereleaseTestPackage' '1.0.1-a'
 
-    $a | Install-Package -Source $context.RepositoryRoot PackageWithDependencyOnPrereleaseTestPackage
+    $a | Install-Package -Source $context.RepositoryRoot PackageWithDependencyOnPrereleaseTestPackage -FileConflictAction Overwrite
     Assert-Package $a 'PrereleaseTestPackage' '1.0.1-a'
     Assert-Package $a 'PackageWithDependencyOnPrereleaseTestPackage' '1.0.0'
 }
@@ -2001,7 +1994,7 @@ function Test-InstallPackageDoesNotUninstallDependencyGraphWhenSafeUpdatingADepe
     
     # Assert - 2
     Assert-Package $p microsoft-web-helpers 2.0.20710.0
-    Assert-Package $p Microsoft.AspNet.WebPages.Administration 2.0.20713.0
+    Assert-Package $p Microsoft.AspNet.WebPages.Administration 2.0.20710.0
     Assert-Package $p Microsoft.Web.Infrastructure 1.0
     Assert-Package $p NuGet.Core 1.6.2
     Assert-Package $p Microsoft.AspNet.WebPages 2.0.20710.0
@@ -2119,4 +2112,38 @@ function Test-ReinstallSolutionLevelPackageWorks
 
     # Assert
     Assert-SolutionPackage SolutionLevelPkg
+}
+
+function Test-InstallSolutionLevelPackageAddPackagesConfigToSolution
+{
+    param($context)
+
+    # Arrange 
+    $p = new-ConsoleApplication
+    $p | Install-Package SolutionLevelPkg -Source $context.RepositoryRoot
+
+    # Assert
+    Assert-SolutionPackage SolutionLevelPkg
+
+    $nugetFolder = $dte.Solution.Projects | ? { $_.Name -eq ".nuget" }
+    Assert-NotNull $nugetFolder "The '.nuget' solution folder is missing"
+
+    $configFile = $nugetFolder.ProjectItems.Item("packages.config")
+
+    Assert-NotNull $configFile "The 'packages.config' is not found under '.nuget' solution folder"
+}
+
+function Test-InstallMetadataPackageAddPackageToProject
+{
+    param($context)
+
+    # Arrange
+    $p = new-ClassLibrary
+    
+    # Act
+    $p | Install-Package MetadataPackage -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p MetadataPackage
+    Assert-Package $p DependencyPackage
 }

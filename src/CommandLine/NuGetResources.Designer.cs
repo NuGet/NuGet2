@@ -232,6 +232,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Specifying both -IncludeReferencedProjects and -Symbols is not supported..
+        /// </summary>
+        internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported {
+            get {
+                return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error occurred when processing file &apos;{0}&apos;: {1}.
         /// </summary>
         internal static string Error_ProcessingNuspecFile {
@@ -273,6 +282,15 @@ namespace NuGet {
         internal static string FileNotAddedToPackage {
             get {
                 return ResourceManager.GetString("FileNotAddedToPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Y] Yes  [A] Yes to All  [N] No  [L] No to All ?.
+        /// </summary>
+        internal static string FileConflictChoiceText {
+            get {
+                return ResourceManager.GetString("FileConflictChoiceText", resourceCulture);
             }
         }
         
@@ -489,6 +507,15 @@ namespace NuGet {
         internal static string InvalidSource {
             get {
                 return ResourceManager.GetString("InvalidSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to License url: {0}.
+        /// </summary>
+        internal static string ListCommand_LicenseUrl {
+            get {
+                return ResourceManager.GetString("ListCommand_LicenseUrl", resourceCulture);
             }
         }
         
@@ -1173,6 +1200,15 @@ namespace NuGet {
         internal static string Warning_DefaultSpecValueTitle {
             get {
                 return ResourceManager.GetString("Warning_DefaultSpecValueTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} key already exists in Properties collection. Overriding value..
+        /// </summary>
+        internal static string Warning_DuplicatePropertyKey {
+            get {
+                return ResourceManager.GetString("Warning_DuplicatePropertyKey", resourceCulture);
             }
         }
         

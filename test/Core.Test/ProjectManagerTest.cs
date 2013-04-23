@@ -123,6 +123,146 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void AddPackageReferenceShouldLeaveDependencyPackageAloneIfItSatisfiesTheVersionConstraint()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA1 = PackageUtility.CreatePackage(
+                "A",
+                "1.1.2",
+                assemblyReferences: new[] { "lib\\a1.dll" });
+
+            IPackage packageA2 = PackageUtility.CreatePackage(
+                "A",
+                "1.1.9",
+                assemblyReferences: new[] { "lib\\a2.dll" });
+
+            IPackage packageB = PackageUtility.CreatePackage(
+               "B",
+               "1.0",
+               dependencies: new [] { new PackageDependency("A", VersionUtility.ParseVersionSpec("1.1.0")) },
+               assemblyReferences: new[] { "lib\\b.dll" });
+
+            sourceRepository.AddPackage(packageA1);
+            sourceRepository.AddPackage(packageA2);
+            sourceRepository.AddPackage(packageB);
+
+            // first install package A, version 1.1.2 into project
+            projectManager.AddPackageReference(packageA1, ignoreDependencies: true, allowPrereleaseVersions: true);
+            Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("1.1.2")));
+
+            // Act
+            // Now install B, which depends on A >= 1.1.0.
+            projectManager.AddPackageReference("B");
+
+            // Assert
+            // NuGet should leave version 1.1.2 intact, because it already satisfies the version spec
+            // It should not upgrade A to 1.1.9
+            Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("1.1.2")));
+            Assert.True(projectManager.LocalRepository.Exists("B", new SemanticVersion("1.0")));
+            Assert.False(projectManager.LocalRepository.Exists("A", new SemanticVersion("1.1.9")));
+        }
+
+        [Fact]
+        public void UpdatePackageReferenceShouldLeaveDependencyPackageAloneIfItSatisfiesTheVersionConstraint()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA1 = PackageUtility.CreatePackage(
+                "A",
+                "1.0.0",
+                assemblyReferences: new[] { "lib\\a1.dll" });
+
+            IPackage packageA2 = PackageUtility.CreatePackage(
+                "A",
+                "2.0.0",
+                dependencies: new[] { new PackageDependency("B", VersionUtility.ParseVersionSpec("1.0.0")) },
+                assemblyReferences: new[] { "lib\\a2.dll" });
+
+            IPackage packageB1 = PackageUtility.CreatePackage(
+               "B",
+               "1.0.0",
+               assemblyReferences: new[] { "lib\\b1.dll" });
+
+            IPackage packageB2 = PackageUtility.CreatePackage(
+               "B",
+               "1.0.2",
+               assemblyReferences: new[] { "lib\\b2.dll" });
+
+            sourceRepository.AddPackage(packageA1);
+            sourceRepository.AddPackage(packageA2);
+            sourceRepository.AddPackage(packageB1);
+            sourceRepository.AddPackage(packageB2);
+
+            projectManager.LocalRepository.AddPackage(packageA1);
+            projectManager.LocalRepository.AddPackage(packageB1);
+
+            // Act
+            // Now install B, which depends on A >= 1.1.0.
+            projectManager.UpdatePackageReference("A");
+
+            // Assert
+            // NuGet should leave version 1.1.2 intact, because it already satisfies the version spec
+            // It should not upgrade A to 1.1.9
+            Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("2.0.0")));
+            Assert.True(projectManager.LocalRepository.Exists("B", new SemanticVersion("1.0")));
+            Assert.False(projectManager.LocalRepository.Exists("B", new SemanticVersion("1.0.2")));
+        }
+
+        [Fact]
+        public void UpdatePackageReferenceShouldLeaveDependencyPackageAloneIfItSatisfiesTheVersionConstraint2()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, new MockPackageRepository());
+            IPackage packageA1 = PackageUtility.CreatePackage(
+                "A",
+                "1.0.0",
+                dependencies: new[] { new PackageDependency("B", VersionUtility.ParseVersionSpec("1.0.0")) },
+                assemblyReferences: new[] { "lib\\a1.dll" });
+
+            IPackage packageA2 = PackageUtility.CreatePackage(
+                "A",
+                "2.0.0",
+                dependencies: new[] { new PackageDependency("B", VersionUtility.ParseVersionSpec("1.0.0")) },
+                assemblyReferences: new[] { "lib\\a2.dll" });
+
+            IPackage packageB1 = PackageUtility.CreatePackage(
+               "B",
+               "1.0.0",
+               assemblyReferences: new[] { "lib\\b1.dll" });
+
+            IPackage packageB2 = PackageUtility.CreatePackage(
+               "B",
+               "1.0.2",
+               assemblyReferences: new[] { "lib\\b2.dll" });
+
+            sourceRepository.AddPackage(packageA1);
+            sourceRepository.AddPackage(packageA2);
+            sourceRepository.AddPackage(packageB1);
+            sourceRepository.AddPackage(packageB2);
+
+            projectManager.LocalRepository.AddPackage(packageA1);
+            projectManager.LocalRepository.AddPackage(packageB1);
+
+            // Act
+            // Now install B, which depends on A >= 1.1.0.
+            projectManager.UpdatePackageReference("A");
+
+            // Assert
+            // NuGet should leave version 1.1.2 intact, because it already satisfies the version spec
+            // It should not upgrade A to 1.1.9
+            Assert.True(projectManager.LocalRepository.Exists("A", new SemanticVersion("2.0.0")));
+            Assert.True(projectManager.LocalRepository.Exists("B", new SemanticVersion("1.0")));
+            Assert.False(projectManager.LocalRepository.Exists("B", new SemanticVersion("1.0.2")));
+        }
+
+        [Fact]
         public void AddPackageReferenceAppliesPackageReferencesCorrectlyWhenReferencesFilterOutAllAssemblies()
         {
             // Arrange            
@@ -344,7 +484,7 @@ namespace NuGet.Test
                 String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "A 1.0", requiredVersion.ToString(), nugetVersion.ToString());
 
             // Act && Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), expectedErrorMessage);
+            ExceptionAssert.Throws<NuGetVersionNotSatisfiedException>(() => projectManager.AddPackageReference("A"), expectedErrorMessage);
         }
 
         [Fact]
@@ -370,7 +510,7 @@ namespace NuGet.Test
                 String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "B 2.0", requiredVersion.ToString(), nugetVersion.ToString());
 
             // Act && Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => projectManager.AddPackageReference("A"), expectedErrorMessage);
+            ExceptionAssert.Throws<NuGetVersionNotSatisfiedException>(() => projectManager.AddPackageReference("A"), expectedErrorMessage);
         }
 
         [Fact]
@@ -1002,6 +1142,68 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void AddPackageAskToResolveConflictForEveryFile()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var localRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            projectSystem.AddFile("one.txt", "this is one");
+            projectSystem.AddFile("two.txt", "this is two");
+
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", content: new[] { "one.txt", "two.txt" });
+            sourceRepository.AddPackage(packageA);
+
+            var logger = new Mock<ILogger>();
+            logger.Setup(l => l.ResolveFileConflict(It.IsAny<string>())).Returns(FileConflictResolution.OverwriteAll);
+            projectManager.Logger = projectSystem.Logger = logger.Object;
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(localRepository.Exists("A"));
+            Assert.Equal("content\\one.txt", projectSystem.ReadAllText("one.txt"));
+            Assert.Equal("content\\two.txt", projectSystem.ReadAllText("two.txt"));
+
+            logger.Verify(l => l.ResolveFileConflict(It.IsAny<string>()), Times.Exactly(2));
+        }
+
+        [Fact]
+        public void AddPackageAskToResolveConflictForEveryFileWithDependency()
+        {
+            // Arrange            
+            var sourceRepository = new MockPackageRepository();
+            var localRepository = new MockPackageRepository();
+            var projectSystem = new MockProjectSystem();
+            projectSystem.AddFile("one.txt", "this is one");
+            projectSystem.AddFile("two.txt", "this is two");
+
+            var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            IPackage packageA = PackageUtility.CreatePackage(
+                "A", "1.0", content: new[] { "one.txt" }, dependencies: new PackageDependency[] { new PackageDependency("B") });
+            sourceRepository.AddPackage(packageA);
+
+            IPackage packageB = PackageUtility.CreatePackage("B", "1.0", content: new[] { "two.txt" });
+            sourceRepository.AddPackage(packageB);
+
+            var logger = new Mock<ILogger>();
+            logger.Setup(l => l.ResolveFileConflict(It.IsAny<string>())).Returns(FileConflictResolution.OverwriteAll);
+            projectManager.Logger = projectSystem.Logger = logger.Object;
+
+            // Act
+            projectManager.AddPackageReference("A");
+
+            // Assert
+            Assert.True(localRepository.Exists("A"));
+            Assert.Equal("content\\one.txt", projectSystem.ReadAllText("one.txt"));
+            Assert.Equal("content\\two.txt", projectSystem.ReadAllText("two.txt"));
+
+            logger.Verify(l => l.ResolveFileConflict(It.IsAny<string>()), Times.Exactly(2));
+        }
+
+        [Fact]
         public void RemovePackageWithTransformFile()
         {
             // Arrange
@@ -1498,7 +1700,7 @@ namespace NuGet.Test
                 String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "A 2.0-alpha", requiredVersion.ToString(), nugetVersion.ToString());
 
             // Act && Assert
-            ExceptionAssert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<NuGetVersionNotSatisfiedException>(
                 () => projectManager.UpdatePackageReference("A", version: null, updateDependencies: false, allowPrereleaseVersions: true),
                 expectedErrorMessage);
         }
@@ -1533,7 +1735,7 @@ namespace NuGet.Test
                 String.Format("The '{0}' package requires NuGet client version '{1}' or above, but the current NuGet version is '{2}'.", "B 2.0", requiredVersion.ToString(), nugetVersion.ToString());
 
             // Act && Assert
-            ExceptionAssert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<NuGetVersionNotSatisfiedException>(
                 () => projectManager.UpdatePackageReference("A", version: null, updateDependencies: true, allowPrereleaseVersions: true),
                 expectedErrorMessage);
         }
@@ -2264,6 +2466,54 @@ namespace NuGet.Test
 
             Assert.True(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\native\\A.props", ProjectImportLocation.Top));
             Assert.True(projectSystem.ImportExists("x:\\root\\A.1.0\\build\\native\\A.targets", ProjectImportLocation.Bottom));
+        }
+
+        [Fact]
+        public void AddPackageReferenceAllowsAddingMetadataPackage()
+        {
+            // Arrange
+            var projectSystem = new MockProjectSystem();
+            var localRepository = new MockPackageRepository();
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+            
+            var packageA = PackageUtility.CreatePackage("A", "1.0", new [] { "hello.txt" });
+            var packageB = PackageUtility.CreatePackage("B", "2.0", dependencies: new[] { new PackageDependency("A") });
+
+            var mockPackageB = Mock.Get(packageB);
+            var files = PackageUtility.CreateFiles(new[] { "readme.txt", "foo.bar" });
+            mockPackageB.Setup(p => p.GetFiles()).Returns(files);
+            
+            mockRepository.AddPackage(packageA);
+            mockRepository.AddPackage(packageB);
+
+            // Act
+            projectManager.AddPackageReference("B");
+
+            // Assert
+            Assert.True(localRepository.Exists("A"));
+            Assert.True(localRepository.Exists("B"));
+        }
+
+        [Fact]
+        public void AddPackageReferenceDoesNotAllowAddingDependencyPackageWhichHasToolsFiles()
+        {
+            // Arrange
+            var projectSystem = new MockProjectSystem();
+            var localRepository = new MockPackageRepository();
+            var mockRepository = new MockPackageRepository();
+            var projectManager = new ProjectManager(mockRepository, new DefaultPackagePathResolver(projectSystem), projectSystem, localRepository);
+
+            var packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "hello.txt" });
+            var packageB = PackageUtility.CreatePackage("B", "2.0", dependencies: new[] { new PackageDependency("A") }, tools: new [] { "aaaa.txt" });
+
+            mockRepository.AddPackage(packageA);
+            mockRepository.AddPackage(packageB);
+
+            // Act
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => projectManager.AddPackageReference("B"),
+                "External packages cannot depend on packages that target projects.");
         }
 
         [Fact]
@@ -3195,7 +3445,7 @@ namespace NuGet.Test
 
             // Assert 2
             Assert.Contains(packageA, localRepository);
-            Assert.Contains(packageB101, localRepository);
+            Assert.Contains(packageB10, localRepository);
             Assert.Contains(packageC, localRepository);
         }
 

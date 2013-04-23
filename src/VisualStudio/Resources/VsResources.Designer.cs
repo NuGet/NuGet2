@@ -286,6 +286,15 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File Conflict.
+        /// </summary>
+        public static string FileConflictTitle {
+            get {
+                return ResourceManager.GetString("FileConflictTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Ignore for now.
         /// </summary>
         public static string IgnoreUpgrade {
@@ -761,6 +770,15 @@ namespace NuGet.VisualStudio.Resources {
         public static string Warning_NoExactMatchForReference {
             get {
                 return ResourceManager.GetString("Warning_NoExactMatchForReference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Package {0} of version {1} is not referenced by any project..
+        /// </summary>
+        public static string Warning_PackageNotReferencedByAnyProject {
+            get {
+                return ResourceManager.GetString("Warning_PackageNotReferencedByAnyProject", resourceCulture);
             }
         }
         

@@ -17,19 +17,19 @@ namespace NuGet.Test
             // Arrange
             var mockFileSystem = new MockFileSystem();
             MachineCache cache = new MachineCache(mockFileSystem);
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 200; i++)
             {
                 cache.AddPackage(PackageUtility.CreatePackage("A", i + ".0"));
             }
 
             // Assert - 1
-            Assert.Equal(100, cache.GetPackageFiles().Count());
+            Assert.Equal(200, cache.GetPackageFiles().Count());
 
             // Act
             cache.AddPackage(PackageUtility.CreatePackage("B"));
 
             // Assert
-            Assert.Equal(81, cache.GetPackageFiles().Count());
+            Assert.Equal(161, cache.GetPackageFiles().Count());
         }
 
         [Fact]
@@ -130,6 +130,36 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void MachineCacheUsesLocalAppEnvironmentIfGetFolderPathReturnsEmpty()
+        {
+            // Arrange
+            var expectedPath = PathFixUtility.FixPath(@"c:\temp\some\directory\NuGet\Cache");
+
+            // Act
+            var cachePath = MachineCache.GetCachePath(
+                env => env == "LocalAppData" ? @"c:\temp\some\directory" : null,
+                _ => String.Empty);
+
+            // Assert
+            Assert.Equal(expectedPath, cachePath);
+        }
+
+        [Fact]
+        public void MachineCacheUsesGetFolderPathIfProvided()
+        {
+            // Arrange
+            var expectedPath = PathFixUtility.FixPath(@"d:\root\NuGet\Cache");
+
+            // Act
+            var cachePath = MachineCache.GetCachePath(
+                env => env == "LocalAppData" ? @"c:\temp\some\directory" : null,
+                _ => @"d:\root\");
+
+            // Assert
+            Assert.Equal(expectedPath, cachePath);
+        }
+
+        [Fact]
         public void MachineCacheDoesntUseEnvironmentSpecifiedLocationIfNotProvided()
         {
             // Arrange
@@ -141,6 +171,19 @@ namespace NuGet.Test
 
             // Assert
             Assert.Equal(expectedPath, cachePath);
+        }
+
+        [Fact]
+        public void CreatePackageStreamReturnsNullForNullFileSystem()
+        {
+            // Arrange
+            var cache = new MachineCache(NullFileSystem.Instance);
+
+            // Act
+            Stream stream = cache.CreatePackageStream("A", new SemanticVersion("2.0-alpha"));
+
+            // Assert
+            Assert.Null(stream);
         }
     }
 }

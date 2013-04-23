@@ -238,7 +238,6 @@ namespace NuGet.VisualStudio
             ILogger logger,
             IPackageOperationEventListener packageOperationEventListener)
         {
-
             if (operations == null)
             {
                 throw new ArgumentNullException("operations");
@@ -304,11 +303,11 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public void UpdatePackage(IProjectManager projectManager, IPackage package, IEnumerable<PackageOperation> operations, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger)
+        public void UpdatePackages(IProjectManager projectManager, IEnumerable<IPackage> packages, IEnumerable<PackageOperation> operations, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger)
         {
-            if (package == null)
+            if (packages == null)
             {
-                throw new ArgumentNullException("package");
+                throw new ArgumentNullException("packages");
             }
 
             if (operations == null)
@@ -316,7 +315,18 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("operations");
             }
 
-            ExecuteOperationsWithPackage(projectManager, package, operations, () => UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies, allowPrereleaseVersions), logger);
+            ExecuteOperationsWithPackage(
+                projectManager, 
+                null, 
+                operations, 
+                () => 
+                    {
+                        foreach (var package in packages)
+                        {
+                            UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies, allowPrereleaseVersions);
+                        }
+                    }, 
+                logger);
         }
 
         public void UpdatePackage(string packageId, IVersionSpec versionSpec, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger, IPackageOperationEventListener eventListener)
@@ -349,6 +359,71 @@ namespace NuGet.VisualStudio
         public void UpdatePackages(IProjectManager projectManager, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger)
         {
             UpdatePackages(projectManager, updateDependencies, safeUpdate: false, allowPrereleaseVersions: allowPrereleaseVersions, logger: logger);
+        }
+
+        public void UpdateSolutionPackages(IEnumerable<IPackage> packages, IEnumerable<PackageOperation> operations, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger, IPackageOperationEventListener eventListener)
+        {
+            if (packages == null)
+            {
+                throw new ArgumentNullException("packages");
+            }
+
+            if (operations == null) 
+            {
+                throw new ArgumentNullException("operations");
+            }
+
+            try
+            {
+                InitializeLogger(logger, null);
+
+                RunSolutionAction(() =>
+                {
+                    // update all packages in the 'packages' folder
+                    foreach (var operation in operations)
+                    {
+                        Execute(operation);
+                    }
+
+                    if (eventListener == null)
+                    {
+                        eventListener = NullPackageOperationEventListener.Instance;
+                    }
+
+                    foreach (Project project in _solutionManager.GetProjects())
+                    {
+                        try
+                        {
+                            eventListener.OnBeforeAddPackageReference(project);
+
+                            IProjectManager projectManager = GetProjectManager(project);
+                            InitializeLogger(logger, projectManager);
+
+                            foreach (var package in packages)
+                            {
+                                // only perform update when the local package exists and has smaller version than the new version
+                                var localPackage = projectManager.LocalRepository.FindPackage(package.Id);
+                                if (localPackage != null && localPackage.Version < package.Version)
+                                {
+                                    UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies: true, allowPrereleaseVersions: allowPrereleaseVersions);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            eventListener.OnAddPackageReferenceError(project, ex);
+                        }
+                        finally
+                        {
+                            eventListener.OnAfterAddPackageReference(project);
+                        }
+                    }
+                });
+            }
+            finally
+            {
+                ClearLogger(null);
+            }
         }
 
         public void SafeUpdatePackages(IProjectManager projectManager, bool updateDependencies, bool allowPrereleaseVersions, ILogger logger)
@@ -752,11 +827,11 @@ namespace NuGet.VisualStudio
             return package;
         }
 
-        private IPackage FindLocalPackage(string packageId, out bool appliesToProject)
+        internal IPackage FindLocalPackage(string packageId, out bool appliesToProject)
         {
             // It doesn't matter if there are multiple versions of the package installed at solution level, 
             // we just want to know that one exists.
-            var packages = LocalRepository.FindPackagesById(packageId).ToList();
+            var packages = LocalRepository.FindPackagesById(packageId).OrderByDescending(p => p.Version).ToList();
 
             // Can't find the package in the solution.
             if (!packages.Any())
@@ -766,41 +841,59 @@ namespace NuGet.VisualStudio
                     VsResources.UnknownPackage, packageId));
             }
 
-            IPackage package = packages.FirstOrDefault();
-            appliesToProject = IsProjectLevel(package);
-
-            if (!appliesToProject)
+            foreach (IPackage package in packages)
             {
-                if (packages.Count > 1)
+                appliesToProject = IsProjectLevel(package);
+
+                if (!appliesToProject)
                 {
-                    throw CreateAmbiguousUpdateException(projectManager: null, packages: packages);
+                    if (packages.Count > 1)
+                    {
+                        throw CreateAmbiguousUpdateException(projectManager: null, packages: packages);
+                    }
                 }
-            }
-            else if (!_sharedRepository.IsReferenced(package.Id, package.Version))
-            {
-                // If this package applies to a project but isn't installed in any project then 
-                // it's probably a borked install.
-                throw new PackageNotInstalledException(
-                    String.Format(CultureInfo.CurrentCulture,
-                    VsResources.PackageNotInstalledInAnyProject, packageId));
+                else if (!_sharedRepository.IsReferenced(package.Id, package.Version))
+                {
+                    Logger.Log(MessageLevel.Warning, String.Format(CultureInfo.CurrentCulture,
+                        VsResources.Warning_PackageNotReferencedByAnyProject, package.Id, package.Version));
+
+                    // Try next package
+                    continue;
+                }
+
+                // Found a package with package Id as 'packageId' which is installed in at least 1 project
+                return package;
             }
 
-            return package;
+            // There are one or more packages with package Id as 'packageId'
+            // BUT, none of them is installed in a project
+            // it's probably a borked install.
+            throw new PackageNotInstalledException(
+                String.Format(CultureInfo.CurrentCulture,
+                VsResources.PackageNotInstalledInAnyProject, packageId));
         }
 
         /// <summary>
         /// Check to see if this package applies to a project based on 2 criteria:
         /// 1. The package has project content (i.e. content that can be applied to a project lib or content files)
         /// 2. The package is referenced by any other project
+        /// 3. The package has at least one dependecy
         /// 
         /// This logic will probably fail in one edge case. If there is a meta package that applies to a project
         /// that ended up not being installed in any of the projects and it only exists at solution level.
         /// If this happens, then we think that the following operation applies to the solution instead of showing an error.
         /// To solve that edge case we'd have to walk the graph to find out what the package applies to.
+        /// 
+        /// Technically, the third condition is not totally accurate because a solution-level package can depend on another 
+        /// solution-level package. However, doing that check here is expensive and we haven't seen such a package. 
+        /// This condition here is more geared towards guarding against metadata packages, i.e. we shouldn't treat metadata packages 
+        /// as solution-level ones.
         /// </summary>
         public bool IsProjectLevel(IPackage package)
         {
-            return package.HasProjectContent() || _sharedRepository.IsReferenced(package.Id, package.Version);
+            return package.HasProjectContent() ||
+                 package.DependencySets.SelectMany(p => p.Dependencies).Any() ||
+                _sharedRepository.IsReferenced(package.Id, package.Version);               
         }
 
         private Exception CreateAmbiguousUpdateException(IProjectManager projectManager, IList<IPackage> packages)
@@ -925,7 +1018,7 @@ namespace NuGet.VisualStudio
                             Execute(operation);
                         }
                     }
-                    else if (LocalRepository.Exists(package))
+                    else if (package != null && LocalRepository.Exists(package))
                     {
                         Logger.Log(MessageLevel.Info, VsResources.Log_PackageAlreadyInstalled, package.GetFullName());
                     }

@@ -42,7 +42,9 @@ namespace NuGet.VisualStudio
                                                                           VsConstants.FsharpProjectTypeGuid,
                                                                           VsConstants.NemerleProjectTypeGuid,
                                                                           VsConstants.WixProjectTypeGuid,
-                                                                          VsConstants.AzureCloudServiceProjectTypeGuid };
+                                                                          VsConstants.SynergexProjectTypeGuid,
+                                                                          VsConstants.AzureCloudServiceProjectTypeGuid,
+                                                                          VsConstants.NomadForVisualStudioProjectTypeGuid };
 
         private static readonly HashSet<string> _unsupportedProjectTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
                                                                             VsConstants.LightSwitchProjectTypeGuid,
@@ -68,6 +70,8 @@ namespace NuGet.VisualStudio
                 VsConstants.NemerleProjectTypeGuid, 
                 VsConstants.AzureCloudServiceProjectTypeGuid,
                 VsConstants.CppProjectTypeGuid,
+                VsConstants.SynergexProjectTypeGuid,
+                VsConstants.NomadForVisualStudioProjectTypeGuid,
             };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
@@ -186,7 +190,7 @@ namespace NuGet.VisualStudio
             if (projectItem == null)
             {
                 // Try to get the nested project item
-                return TryGetFileNestedFile(projectItems, name, out projectItem);
+                return TryGetNestedFile(projectItems, name, out projectItem);
             }
 
             return projectItem != null;
@@ -194,7 +198,8 @@ namespace NuGet.VisualStudio
 
         public static bool ContainsFile(this Project project, string path)
         {
-            if (string.Equals(project.Kind, VsConstants.WixProjectTypeGuid, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(project.Kind, VsConstants.WixProjectTypeGuid, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(project.Kind, VsConstants.NemerleProjectTypeGuid, StringComparison.OrdinalIgnoreCase))
             {
                 // For Wix project, IsDocumentInProject() returns not found
                 // even though the file is in the project. So we use GetProjectItem()
@@ -217,11 +222,11 @@ namespace NuGet.VisualStudio
         }
 
         /// <summary>
-        /// // If we didn't find the project item at the top level, then we look one more level down.
+        /// If we didn't find the project item at the top level, then we look one more level down.
         /// In VS files can have other nested files like foo.aspx and foo.aspx.cs or web.config and web.debug.config. 
         /// These are actually top level files in the file system but are represented as nested project items in VS.            
         /// </summary>
-        private static bool TryGetFileNestedFile(ProjectItems projectItems, string name, out ProjectItem projectItem)
+        private static bool TryGetNestedFile(ProjectItems projectItems, string name, out ProjectItem projectItem)
         {
             string parentFileName;
             if (!_knownNestedFiles.TryGetValue(name, out parentFileName))
@@ -253,6 +258,12 @@ namespace NuGet.VisualStudio
 
         public static string GetUniqueName(this Project project)
         {
+            if (project.IsWixProject())
+            {
+                // Wix project doesn't offer UniqueName property
+                return project.FullName;
+            }
+
             try
             {
                 return project.UniqueName;
@@ -526,15 +537,20 @@ namespace NuGet.VisualStudio
                    types.Contains(VsConstants.WebApplicationProjectTypeGuid, StringComparer.OrdinalIgnoreCase);
         }
 
+        public static bool IsWebSite(this Project project)
+        {
+            return project.Kind != null && project.Kind.Equals(VsConstants.WebSiteProjectTypeGuid, StringComparison.OrdinalIgnoreCase);
+        }
+
         public static bool IsWindowsStoreApp(this Project project)
         {
             string[] types = project.GetProjectTypeGuids();
             return types.Contains(VsConstants.WindowsStoreProjectTypeGuid, StringComparer.OrdinalIgnoreCase);
         }
 
-        public static bool IsWebSite(this Project project)
+        public static bool IsWixProject(this Project project)
         {
-            return project.Kind != null && project.Kind.Equals(VsConstants.WebSiteProjectTypeGuid, StringComparison.OrdinalIgnoreCase);
+            return project.Kind != null && project.Kind.Equals(VsConstants.WixProjectTypeGuid, StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool IsSupported(this Project project)
@@ -670,13 +686,25 @@ namespace NuGet.VisualStudio
             }
 
             var projects = new List<Project>();
-            References references = project.Object.References;
-            foreach (Reference reference in references)
+            References references;
+            try
             {
-                // Get the referenced project from the reference if any
-                if (reference.SourceProject != null)
+                references = project.Object.References;
+            }
+            catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
+            {
+                //References property doesn't exist, project does not have references
+                references = null;
+            }
+            if (references != null)
+            {
+                foreach (Reference reference in references)
                 {
-                    projects.Add(reference.SourceProject);
+                    // Get the referenced project from the reference if any
+                    if (reference.SourceProject != null)
+                    {
+                        projects.Add(reference.SourceProject);
+                    }
                 }
             }
             return projects;
@@ -721,15 +749,27 @@ namespace NuGet.VisualStudio
             }
 
             var assemblies = new HashSet<string>(PathComparer.Default);
-            References references = project.Object.References;
-            foreach (Reference reference in references)
+            References references;
+            try
             {
-                // Get the referenced project from the reference if any
-                if (reference.SourceProject == null &&
-                    reference.CopyLocal &&
-                    File.Exists(reference.Path))
+                references = project.Object.References;
+            }
+            catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
+            {
+                //References property doesn't exist, project does not have references
+                references = null;
+            }
+            if (references != null)
+            {
+                foreach (Reference reference in references)
                 {
-                    assemblies.Add(reference.Path);
+                    // Get the referenced project from the reference if any
+                    if (reference.SourceProject == null &&
+                        reference.CopyLocal &&
+                        File.Exists(reference.Path))
+                    {
+                        assemblies.Add(reference.Path);
+                    }
                 }
             }
             return assemblies;
@@ -888,14 +928,18 @@ namespace NuGet.VisualStudio
         public static void EnsureCheckedOutIfExists(this Project project, IFileSystem fileSystem, string path)
         {
             var fullPath = fileSystem.GetFullPath(path);
-            if (fileSystem.FileExists(path) &&
-                project.DTE.SourceControl != null &&
-                project.DTE.SourceControl.IsItemUnderSCC(fullPath) &&
-                !project.DTE.SourceControl.IsItemCheckedOut(fullPath))
-            {
 
-                // Check out the item
-                project.DTE.SourceControl.CheckOutItem(fullPath);
+            if (fileSystem.FileExists(path))
+            {
+                fileSystem.MakeFileWritable(path);
+
+                if (project.DTE.SourceControl != null &&
+                    project.DTE.SourceControl.IsItemUnderSCC(fullPath) &&
+                    !project.DTE.SourceControl.IsItemCheckedOut(fullPath))
+                {
+                    // Check out the item
+                    project.DTE.SourceControl.CheckOutItem(fullPath);
+                }
             }
         }
 

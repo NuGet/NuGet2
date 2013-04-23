@@ -83,5 +83,20 @@ namespace NuGet.Test
             Assert.Equal(srcCmdLine, push.ResolveSource(@"X:\test\foobar.symbols.nupkg"));
         }
 
+        [Fact]
+        public void PushCommandThrowsAnExceptionWhenPackageFileDoesntExist()
+        {
+            // Arrange            
+            var packageFilename = "non.existant.file.nupkg";
+
+            var push = new PushCommand();
+            push.Arguments.Add(packageFilename);
+            push.ApiKey = "apikey";
+            var expectedErrorMessage = String.Format("File does not exist ({0}).", packageFilename);
+
+            // Act & Assert            
+            ExceptionAssert.Throws<CommandLineException>(() => push.Execute(), expectedErrorMessage);
+        }
+
     }
 }

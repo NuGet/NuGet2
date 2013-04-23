@@ -45,26 +45,35 @@
     </Window.Resources>
     
     <DockPanel Margin="10">
-        <TextBlock DockPanel.Dock="Top" Margin="0,3,0,3" Text="{x:Static resources:Resources.License_HeaderText}" TextWrapping="Wrap" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.CaptionTextKey}}" />        
+        <TextBlock DockPanel.Dock="Top" Margin="0,3,0,3" Text="{x:Static resources:Resources.License_HeaderText}" TextWrapping="Wrap" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.WindowTextKey}}" />        
 
         <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,3" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="{x:Static resources:Resources.License_Decline}" AutomationProperties.AutomationId="DeclineButton" Click="OnDeclineButtonClick" IsCancel="True" />
             <Button Content="{x:Static resources:Resources.License_Accept}" AutomationProperties.AutomationId="AcceptButton" Click="OnAcceptButtonClick" />
         </StackPanel>
 
-        <TextBlock DockPanel.Dock="Bottom" Margin="0,0,0,3" TextWrapping="Wrap" Text="{x:Static resources:Resources.License_LicenseText}" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.CaptionTextKey}}" />
+        <TextBlock DockPanel.Dock="Bottom" Margin="0,0,0,3" TextWrapping="Wrap" Text="{x:Static resources:Resources.License_LicenseText}" Foreground="{DynamicResource {x:Static vsfx:VsBrushes.WindowTextKey}}" />
 
         <ItemsControl
-            ScrollViewer.VerticalScrollBarVisibility="Auto"
             Grid.Row="1" 
             Margin="0,0,0,3" 
             MinHeight="130" 
-            Padding="3" 
-            BorderThickness="1" 
-            BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" 
-            Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}"
             ItemsSource="{Binding}"
             ItemTemplate="{StaticResource LicenseItemTemplate}">
+            <ItemsControl.Template>
+                <ControlTemplate TargetType="{x:Type ItemsControl}">
+                    <Border BorderThickness="1" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+                        <ScrollViewer 
+                            Padding="3" 
+                            Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" 
+                            CanContentScroll="True" 
+                            VerticalScrollBarVisibility="Auto" 
+                            HorizontalScrollBarVisibility="Disabled">
+                            <ItemsPresenter></ItemsPresenter>
+                        </ScrollViewer>
+                    </Border>                    
+                </ControlTemplate>
+            </ItemsControl.Template>
         </ItemsControl>
 
     </DockPanel>

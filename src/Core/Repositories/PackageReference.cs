@@ -5,18 +5,20 @@ namespace NuGet
 {
     public class PackageReference : IEquatable<PackageReference>
     {
-        public PackageReference(string id, SemanticVersion version, IVersionSpec versionConstraint, FrameworkName targetFramework)
+        public PackageReference(string id, SemanticVersion version, IVersionSpec versionConstraint, FrameworkName targetFramework, bool isDevelopmentDependency)
         {
             Id = id;
             Version = version;
             VersionConstraint = versionConstraint;
             TargetFramework = targetFramework;
+            IsDevelopmentDependency = isDevelopmentDependency;
         }
 
         public string Id { get; private set; }
         public SemanticVersion Version { get; private set; }
         public IVersionSpec VersionConstraint { get; set; }
         public FrameworkName TargetFramework { get; private set; }
+        public bool IsDevelopmentDependency { get; private set; }
 
         public override bool Equals(object obj)
         {

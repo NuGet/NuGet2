@@ -510,4 +510,20 @@
   <data name="Error_ProcessingNuspecFile" xml:space="preserve">
     <value>Error occurred when processing file '{0}': {1}</value>
   </data>
+  <data name="Warning_DuplicatePropertyKey" xml:space="preserve">
+    <value>'{0}' key already exists in Properties collection. Overriding value.</value>
+  </data>
+  <data name="ListCommand_LicenseUrl" xml:space="preserve">
+    <value>License url: {0}</value>
+  </data>
+  <data name="FileConflictChoiceText" xml:space="preserve">
+    <value>[Y] Yes  [A] Yes to All  [N] No  [L] No to All ?</value>
+    <comment>Please do not localize the letters inside the [] brackets.</comment>
+  </data>
+  <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported" xml:space="preserve">
+    <value>Specifying both -IncludeReferencedProjects and -Symbols is not supported.</value>
+  </data>
+  <data name="ListCommand_LicenseUrl" xml:space="preserve">
+    <value>License url: {0}</value>
+  </data>
 </root>

@@ -1,8 +1,8 @@
+using System;
+using System.Linq;
+
 namespace NuGet
 {
-    using System;
-    using System.Linq;
-
     public abstract class PackageRepositoryBase : IPackageRepository
     {
         private PackageFileTypes _packageSave;

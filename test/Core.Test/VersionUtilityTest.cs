@@ -33,7 +33,7 @@ namespace NuGet.Test
         [InlineData("content\\netmf\\CSS\\jQuery.css", "0.0", ".NETMicroFramework", "CSS\\jQuery.css")]
         [InlineData("tools\\winrt45\\install.ps1", "4.5", ".NETCore", "install.ps1")]
         [InlineData("tools\\winrt10\\uninstall.ps1", "1.0", ".NETCore", "uninstall.ps1")]
-        [InlineData("tools\\winkt10\\uninstall.ps1", "0.0", "Unsupported", "uninstall.ps1")]
+        [InlineData("tools\\winkt10\\uninstall.ps1", null, null, "winkt10\\uninstall.ps1")]
         [InlineData("tools\\init.ps1", null, null, "init.ps1")]
         [InlineData("random\\foo.txt", null, null, "random\\foo.txt")]
         public void TestParseFrameworkFolderNameFromFilePath(
