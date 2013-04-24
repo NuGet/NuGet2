@@ -15,7 +15,7 @@ namespace NuGet.Commands
         private readonly List<string> _sources = new List<string>();
         private readonly List<string> _ids = new List<string>();
         private bool _overwriteAll, _ignoreAll;
-        
+
         [Option(typeof(NuGetCommand), "UpdateCommandSourceDescription")]
         public ICollection<string> Source
         {
@@ -286,11 +286,11 @@ namespace NuGet.Commands
 
             projectManager.Logger = project.Logger = this;
 
-            using (sourceRepository.StartOperation(RepositoryOperationNames.Update))
+            foreach (var package in GetPackages(localRepository))
             {
-                foreach (var package in GetPackages(localRepository))
+                if (localRepository.Exists(package.Id))
                 {
-                    if (localRepository.Exists(package.Id))
+                    using (sourceRepository.StartOperation(RepositoryOperationNames.Update, package.Id))
                     {
                         try
                         {
@@ -314,6 +314,7 @@ namespace NuGet.Commands
                     }
                 }
             }
+
         }
 
         private IEnumerable<IPackage> GetPackages(IPackageRepository repository)

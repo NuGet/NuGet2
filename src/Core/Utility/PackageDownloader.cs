@@ -1,7 +1,6 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Net;
 using NuGet.Resources;
 
 namespace NuGet
@@ -12,6 +11,12 @@ namespace NuGet
 
         public event EventHandler<ProgressEventArgs> ProgressAvailable = delegate { };
         public event EventHandler<WebRequestEventArgs> SendingRequest = delegate { };
+
+        public string CurrentDownloadPackageId
+        {
+            get;
+            private set;
+        }
 
         public virtual void DownloadPackage(Uri uri, IPackageMetadata package, Stream targetStream)
         {
@@ -41,6 +46,7 @@ namespace NuGet
 
             // Get the operation display text
             string operation = String.Format(CultureInfo.CurrentCulture, NuGetResources.DownloadProgressStatus, package.Id, package.Version);
+            CurrentDownloadPackageId = package.Id;
 
             EventHandler<ProgressEventArgs> progressAvailableHandler = (sender, e) =>
             {
@@ -49,7 +55,7 @@ namespace NuGet
 
             EventHandler<WebRequestEventArgs> beforeSendingRequesthandler = (sender, e) =>
             {
-                OnSendingRequest(e.Request);
+                OnSendingRequest(e);
             };
 
             try
@@ -63,6 +69,7 @@ namespace NuGet
             {
                 downloadClient.ProgressAvailable -= progressAvailableHandler;
                 downloadClient.SendingRequest -= beforeSendingRequesthandler;
+                CurrentDownloadPackageId = null;
             }
         }
 
@@ -71,9 +78,9 @@ namespace NuGet
             ProgressAvailable(this, e);
         }
 
-        private void OnSendingRequest(WebRequest webRequest)
+        private void OnSendingRequest(WebRequestEventArgs webRequestArgs)
         {
-            SendingRequest(this, new WebRequestEventArgs(webRequest));
+            SendingRequest(this, webRequestArgs);
         }
     }
 }

@@ -11,13 +11,15 @@ namespace NuGet
 {
     public class DataServicePackageRepository : PackageRepositoryBase, IHttpClientEvents, IServiceBasedRepository, ICloneableRepository, ICultureAwareRepository, IOperationAwareRepository
     {
+        private const string FindPackagesByIdSvcMethod = "FindPackagesById";
+        private const string SearchSvcMethod = "Search";
+        private const string GetUpdatesSvcMethod = "GetUpdates";
+
         private IDataServiceContext _context;
         private readonly IHttpClient _httpClient;
         private readonly PackageDownloader _packageDownloader;
         private CultureInfo _culture;
-        private const string FindPackagesByIdSvcMethod = "FindPackagesById";
-        private const string SearchSvcMethod = "Search";
-        private const string GetUpdatesSvcMethod = "GetUpdates";
+        private Tuple<string, string> _currentOperation;
 
         // Just forward calls to the package downloader
         public event EventHandler<ProgressEventArgs> ProgressAvailable
@@ -46,13 +48,6 @@ namespace NuGet
             }
         }
 
-        public PackageDownloader PackageDownloader
-        {
-            get { return _packageDownloader; }
-        }
-
-        public string CurrentOperation { get; private set; }
-
         public DataServicePackageRepository(Uri serviceRoot)
             : this(new HttpClient(serviceRoot))
         {
@@ -79,11 +74,27 @@ namespace NuGet
 
             _packageDownloader = packageDownloader;
 
-            SendingRequest += (sender, e) =>
+            _packageDownloader.SendingRequest += (sender, e) =>
             {
-                if (!String.IsNullOrEmpty(CurrentOperation))
+                if (_currentOperation != null)
                 {
-                    e.Request.Headers[RepositoryOperationNames.OperationHeaderName] = CurrentOperation;
+                    string operation = _currentOperation.Item1;
+                    string mainPackageId = _currentOperation.Item2;
+
+                    if (!String.IsNullOrEmpty(mainPackageId) && !String.IsNullOrEmpty(_packageDownloader.CurrentDownloadPackageId))
+                    {
+                        if (mainPackageId != _packageDownloader.CurrentDownloadPackageId)
+                        {
+                            operation = operation + "-Dependency";
+                        }
+                    }
+
+                    e.Request.Headers[RepositoryOperationNames.OperationHeaderName] = operation;
+
+                    if (operation != _currentOperation.Item1)
+                    {
+                        e.Request.Headers[RepositoryOperationNames.DependentPackageHeaderName] = mainPackageId;
+                    }
                 }
             };
         }
@@ -188,7 +199,7 @@ namespace NuGet
 
             if (SupportsPrereleasePackages)
             {
-                searchParameters.Add("includePrerelease", ToString(allowPrereleaseVersions));
+                searchParameters.Add("includePrerelease", ToLowerCaseString(allowPrereleaseVersions));
             }
 
             // Create a query for the search service method
@@ -247,8 +258,8 @@ namespace NuGet
             var serviceParameters = new Dictionary<string, object> {
                 { "packageIds", "'" + ids + "'" },
                 { "versions", "'" + versions + "'" },
-                { "includePrerelease", ToString(includePrerelease) },
-                { "includeAllVersions", ToString(includeAllVersions) },
+                { "includePrerelease", ToLowerCaseString(includePrerelease) },
+                { "includeAllVersions", ToLowerCaseString(includeAllVersions) },
                 { "targetFrameworks", "'" + UrlEncodeOdataParameter(targetFrameworksValue) + "'" },
                 { "versionConstraints", "'" + UrlEncodeOdataParameter(versionConstraintsValue) + "'" }
             };
@@ -262,13 +273,13 @@ namespace NuGet
             return new DataServicePackageRepository(_httpClient, _packageDownloader);
         }
 
-        public IDisposable StartOperation(string operation)
+        public IDisposable StartOperation(string operation, string mainPackageId)
         {
-            string oldOperation = CurrentOperation;
-            CurrentOperation = operation;
+            Tuple<string, string> oldOperation = _currentOperation;
+            _currentOperation = Tuple.Create(operation, mainPackageId);
             return new DisposableAction(() =>
             {
-                CurrentOperation = oldOperation;
+                _currentOperation = oldOperation;
             });
         }
 
@@ -286,7 +297,7 @@ namespace NuGet
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "OData expects a lower case value.")]
-        private static string ToString(bool value)
+        private static string ToLowerCaseString(bool value)
         {
             return value.ToString().ToLowerInvariant();
         }

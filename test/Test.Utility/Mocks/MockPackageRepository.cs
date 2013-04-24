@@ -152,7 +152,7 @@ namespace NuGet.Test.Mocks
             }
         }
 
-        public IDisposable StartOperation(string operation)
+        public IDisposable StartOperation(string operation, string mainPackageId)
         {
             LastOperation = null;
             return new DisposableAction(() => { LastOperation = operation; });
