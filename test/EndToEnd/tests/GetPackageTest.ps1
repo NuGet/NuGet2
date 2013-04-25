@@ -37,7 +37,8 @@ function Test-GetPackageWithUpdatesListsUpdates {
     Assert-AreEqual 2 $packages.Count
 }
 
-function Test-GetPackageCollapsesPackageVersionsForListAvailable {
+function Test-GetPackageCollapsesPackageVersionsForListAvailable 
+{
     # Act
     $packages = Get-Package -ListAvailable jQuery 
     $packagesWithMoreThanOne = $packages | group "Id" | Where { $_.count -gt 1 } 
@@ -46,17 +47,6 @@ function Test-GetPackageCollapsesPackageVersionsForListAvailable {
     # Ensure we have at least some packages
     Assert-True (1 -le $packages.Count)
     Assert-Null $packagesWithMoreThanOne
-}    
-
-function Test-GetPackageAllVersionReturnsMultipleVersions {
-    # Act
-    $packages = Get-Package -AllVersions -Remote jQuery
-    $packageWithMoreThanOneVersion = $packages | group "Id" | Where { $_.count -gt 1 } 
-
-    # Assert
-    # Ensure we have at least some packages
-    Assert-True (1 -le $packages.Count) 
-    Assert-True ($packageWithMoreThanOneVersion.Count -gt 0)
 }
 
 function Test-GetPackageAcceptsSourceName {
