@@ -178,7 +178,7 @@ nuget push -?</value>
     <value>[command]</value>
   </data>
   <data name="InstallCommandDescription" xml:space="preserve">
-    <value>Installs a package using the specified sources. If no sources are specified, all sources defined in the NuGet configuration file are used.  If the configuration file specifies no sources, uses the default NuGet feed.</value>
+    <value>Installs a package using the specified sources. If no sources are specified, all sources defined in the NuGet configuration file are used. If the configuration file specifies no sources, uses the default NuGet feed.</value>
   </data>
   <data name="InstallCommandExcludeVersionDescription" xml:space="preserve">
     <value>If set, the destination folder will contain only the package name, not the version number</value>
@@ -343,7 +343,7 @@ nuget setapikey 4003d786-cc37-4004-bfdf-c4f3e8ef9b3a -Source http://example.com/
     <value>&lt;API key&gt; [options]</value>
   </data>
   <data name="SourcesCommandDescription" xml:space="preserve">
-    <value>Provides the ability to manage list of sources located in  %AppData%\NuGet\NuGet.config</value>
+    <value>Provides the ability to manage list of sources located in %AppData%\NuGet\NuGet.config</value>
   </data>
   <data name="SourcesCommandNameDescription" xml:space="preserve">
     <value>Name of the source.</value>

@@ -92,11 +92,11 @@ namespace NuGet.Commands
             foreach (var command in commands)
             {
                 PrintCommand(maxWidth, command);
+                Console.WriteLine();
             }
 
             if (_helpUrl != null)
             {
-                Console.WriteLine();
                 Console.WriteLine("For more information, visit {0}", _helpUrl);
             }
         }
