@@ -10,6 +10,7 @@ namespace NuGet.Test.Mocks
         private readonly string _source;
         
         public string LastOperation { get; private set; }
+        public string LastMainPackageId { get; private set; }
 
         public MockPackageRepository()
             : this("")
@@ -155,7 +156,12 @@ namespace NuGet.Test.Mocks
         public IDisposable StartOperation(string operation, string mainPackageId)
         {
             LastOperation = null;
-            return new DisposableAction(() => { LastOperation = operation; });
+            LastMainPackageId = null;
+            return new DisposableAction(() => 
+            { 
+                LastOperation = operation;
+                LastMainPackageId = mainPackageId;
+            });
         }
     }
 }

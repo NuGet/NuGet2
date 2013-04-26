@@ -114,13 +114,16 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("projects");
             }
 
-            ExecuteOperationsWithPackage(
-                projects,
-                package,
-                operations,
-                projectManager => AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies, allowPrereleaseVersions),
-                logger,
-                packageOperationEventListener);
+            using (StartInstallOperation(package.Id))
+            {
+                ExecuteOperationsWithPackage(
+                    projects,
+                    package,
+                    operations,
+                    projectManager => AddPackageReference(projectManager, package.Id, package.Version, ignoreDependencies, allowPrereleaseVersions),
+                    logger,
+                    packageOperationEventListener);
+            }
         }
 
         public virtual void InstallPackage(
