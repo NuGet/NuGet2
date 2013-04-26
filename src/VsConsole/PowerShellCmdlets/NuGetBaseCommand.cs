@@ -21,7 +21,7 @@ namespace NuGet.PowerShell.Commands
         // User Agent. Do NOT localize
         private const string PSCommandsUserAgentClient = "NuGet Package Manager Console";
         private readonly Lazy<string> _psCommandsUserAgent = new Lazy<string>(
-            () => HttpUtility.CreateUserAgentString(PSCommandsUserAgentClient, VsVersionHelper.GetFullVsVersionString()));
+            () => HttpUtility.CreateUserAgentString(PSCommandsUserAgentClient, VsVersionHelper.FullVsEdition));
 
         private IVsPackageManager _packageManager;
         private readonly ISolutionManager _solutionManager;

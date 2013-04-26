@@ -21,7 +21,7 @@ namespace NuGet.Dialog
         internal static PackageManagerWindow CurrentInstance;
         private const string DialogUserAgentClient = "NuGet Add Package Dialog";
         private readonly Lazy<string> _dialogUserAgent = new Lazy<string>(
-            () => HttpUtility.CreateUserAgentString(DialogUserAgentClient, VsVersionHelper.GetFullVsVersionString()));
+            () => HttpUtility.CreateUserAgentString(DialogUserAgentClient, VsVersionHelper.FullVsEdition));
 
         private static readonly string[] Providers = new string[] { "Installed", "Online", "Updates" };
         private const string SearchInSwitch = "/searchin:";

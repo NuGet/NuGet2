@@ -7,6 +7,7 @@ namespace NuGet.VisualStudio
     {
         private const int MaxVsVersion = 12;
         private static readonly Lazy<int> _vsMajorVersion = new Lazy<int>(GetMajorVsVersion);
+        private static readonly Lazy<string> _fullVsEdition = new Lazy<string>(GetFullVsVersionString);
 
         public static int VsMajorVersion
         {
@@ -23,6 +24,11 @@ namespace NuGet.VisualStudio
             get { return VsMajorVersion == 11; }
         }
 
+        public static string FullVsEdition
+        {
+            get { return _fullVsEdition.Value; }
+        }
+
         private static int GetMajorVsVersion()
         {
             DTE dte = ServiceLocator.GetInstance<DTE>();
@@ -35,10 +41,17 @@ namespace NuGet.VisualStudio
             return MaxVsVersion;
         }
 
-        public static string GetFullVsVersionString()
+        private static string GetFullVsVersionString()
         {
             DTE dte = ServiceLocator.GetInstance<DTE>();
-            return "VS " + dte.Edition + "/" + dte.Version;
+
+            string edition = dte.Edition;
+            if (!edition.StartsWith("VS", StringComparison.OrdinalIgnoreCase))
+            {
+                edition = "VS " + edition;
+            }
+
+            return edition + "/" + dte.Version;
         }
     }
 }
