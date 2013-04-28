@@ -5,6 +5,7 @@
         <version>$version$</version>
         <description>$description$</description>
         <authors>Outercurve Foundation</authors>
+        <owners>$author$</owners>
         <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
         <projectUrl>http://nuget.codeplex.com</projectUrl>
         <copyright>$copyright$</copyright>
