@@ -8,6 +8,7 @@
         <owners>$author$</owners>
         <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
         <projectUrl>http://nuget.codeplex.com</projectUrl>
+        <copyright>$copyright$</copyright>
         <frameworkAssemblies>
           <frameworkAssembly assemblyName="System.ServiceModel" />
           <frameworkAssembly assemblyName="System.ServiceModel.Web" />
