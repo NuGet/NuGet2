@@ -782,6 +782,74 @@ namespace Proj2
             }
         }
 
+        // Test that exclude masks starting with '**' work also
+        // for files outside of the package/project root.
+        [Fact]
+        public void PackCommand_ExcludesFilesOutsideRoot()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+            var projDirectory = Path.Combine(workingDirectory, "package");
+            var otherDirectory = Path.Combine(workingDirectory, "other");
+
+            try
+            {
+                // Arrange
+                Util.CreateDirectory(workingDirectory);
+                Util.CreateDirectory(projDirectory);
+                Util.CreateDirectory(otherDirectory);
+
+                Util.CreateFile(projDirectory, "include.me", "some text");
+                Util.CreateFile(projDirectory, "exclude.me", "some text");
+                Util.CreateFile(otherDirectory, "exclude.me", "some text");
+
+                Util.CreateFile(
+                    projDirectory,
+                    "package.nuspec",
+@"<package xmlns='http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd'>
+  <metadata>
+    <id>ExcludeBug</id>
+    <version>0.1.0.0</version>
+    <authors>test</authors>
+    <description>Sample package for reproducing bug in file/@exclude matching.</description>
+  </metadata>
+  <files>
+    <file src=""**"" exclude=""**\exclude.me"" target=""Content\package"" />
+    <file src=""..\other\**"" exclude=""**\exclude.me"" target=""Content\other"" />
+  </files>
+</package>");
+                
+                // Act
+                var r = CommandRunner.Run(
+                    nugetexe,
+                    projDirectory,
+                    "pack package.nuspec",
+                    waitForExit: true);
+
+                Assert.Equal(0, r.Item1);
+
+                // Assert
+                var package = new OptimizedZipPackage(Path.Combine(projDirectory, "ExcludeBug.0.1.0.0.nupkg"));
+                var files = package.GetFiles().Select(f => f.Path).ToArray();
+                Array.Sort(files);
+
+                Assert.Equal(
+                    files,
+                    new string[] 
+                    { 
+                        @"Content\package\include.me"
+                    });
+
+            }
+            finally
+            {
+                Directory.Delete(workingDirectory, true);
+            }
+        }
+
+
         /// <summary>
         /// Creates a simple project.
         /// </summary>
