@@ -1,5 +1,11 @@
 Release notes
 
+*** v2.6 ***
+
+- Add VS version info to User-Agent when making requests to gallery.
+- When sending Operation header, differentiate between direct package download and indrect download as a dependency of another package.
+- Implement NuGet config extensibility point: NuGet now reads machine wide config files in %programdata%\NuGet\Config.
+
 *** v2.5 ***
 
 - Add support for MonoAndroid, MonoTouch and MonoMac framework identifiers.
