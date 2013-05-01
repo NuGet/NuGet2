@@ -307,6 +307,29 @@ namespace NuGet
             return values.AsReadOnly();
         }
 
+        public IList<SettingValue> GetSettingValues(string section, bool isPath)
+        {
+            if (String.IsNullOrEmpty(section))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "section");
+            }
+
+            var settingValues = new List<SettingValue>();
+            var curr = this;
+            while (curr != null)
+            {
+                var values = new List<KeyValuePair<string, string>>();
+                curr.PopulateValues(section, values, isPath);
+                foreach (var v in values)
+                {
+                    settingValues.Add(new SettingValue(v.Key, v.Value, curr.IsMachineWideSettings));
+                }
+                curr = curr._next;
+            }
+
+            return settingValues.AsReadOnly();
+        }
+
         private void PopulateValues(string section, List<KeyValuePair<string, string>> current, bool isPath)
         {
             var sectionElement = GetSection(_config.Root, section);

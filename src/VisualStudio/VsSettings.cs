@@ -105,7 +105,7 @@ namespace NuGet.VisualStudio
                 return SolutionSettings.GetValue(section, key, isPath);
             }
             return _defaultSettings.GetValue(section, key, isPath);
-        }
+        }        
 
         public IList<KeyValuePair<string, string>> GetValues(string section)
         {
@@ -119,6 +119,15 @@ namespace NuGet.VisualStudio
                 return SolutionSettings.GetValues(section, isPath);
             }
             return _defaultSettings.GetValues(section, isPath);
+        }
+
+        public IList<SettingValue> GetSettingValues(string section, bool isPath)
+        {
+            if (section.Equals(SolutionConfigSection, StringComparison.OrdinalIgnoreCase))
+            {
+                return SolutionSettings.GetSettingValues(section, isPath);
+            }
+            return _defaultSettings.GetSettingValues(section, isPath);
         }
 
         public IList<KeyValuePair<string, string>> GetNestedValues(string section, string key)

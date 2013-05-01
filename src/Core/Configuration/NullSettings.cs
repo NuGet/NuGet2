@@ -34,6 +34,11 @@ namespace NuGet
             return new List<KeyValuePair<string, string>>().AsReadOnly();
         }
 
+        public IList<SettingValue> GetSettingValues(string section, bool isPath)
+        {
+            return new List<SettingValue>().AsReadOnly();
+        }
+
         public IList<KeyValuePair<string, string>> GetNestedValues(string section, string key)
         {
             return new List<KeyValuePair<string, string>>().AsReadOnly();
