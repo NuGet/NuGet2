@@ -51,7 +51,41 @@ namespace NuGet
         /// </summary>
         public IEnumerable<PackageSource> LoadPackageSources()
         {
-            IList<KeyValuePair<string, string>> settingsValue = _settingsManager.GetValues(PackageSourcesSectionName, isPath: true);
+            var sources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var settingsValue = new List<SettingValue>();            
+            IList<SettingValue> values = _settingsManager.GetSettingValues(PackageSourcesSectionName, isPath: true);            
+            
+            if (!values.IsEmpty())
+            {
+                var machineWideSources = new List<SettingValue>();
+
+                // remove duplicate sources. Pick the one with the highest priority.
+                // note that Reverse() is needed because items in 'values' is in
+                // ascending priority order.
+                foreach (var settingValue in values.Reverse())
+                {
+                    if (!sources.Contains(settingValue.Key))
+                    {
+                        if (settingValue.IsMachineWide)
+                        {
+                            machineWideSources.Add(settingValue);
+                        }
+                        else
+                        {
+                            settingsValue.Add(settingValue); 
+                        }
+
+                        sources.Add(settingValue.Key);
+                    }
+                }
+
+                // Reverse the the list to be backward compatible
+                settingsValue.Reverse();
+
+                // Add machine wide sources at the end
+                settingsValue.AddRange(machineWideSources);
+            }
+
             if (!settingsValue.IsEmpty())
             {
                 // put disabled package source names into the hash set
@@ -71,7 +105,8 @@ namespace NuGet
                                                {
                                                    UserName = creds != null ? creds.Username : null,
                                                    Password = creds != null ? creds.Password : null,
-                                                   IsPasswordClearText = creds != null && creds.IsPasswordClearText
+                                                   IsPasswordClearText = creds != null && creds.IsPasswordClearText,
+                                                   IsMachineWide = p.IsMachineWide
                                                };
 
                                            }).ToList();

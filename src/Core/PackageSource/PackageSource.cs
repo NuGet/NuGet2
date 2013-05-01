@@ -14,6 +14,8 @@ namespace NuGet
 
         public bool IsOfficial { get; set; }
 
+        public bool IsMachineWide { get; set; }
+
         public bool IsEnabled { get; set; }
 
         public string UserName { get; set; }
@@ -88,7 +90,7 @@ namespace NuGet
 
         public PackageSource Clone()
         {
-            return new PackageSource(Source, Name, IsEnabled, IsOfficial) { UserName = UserName, Password = Password, IsPasswordClearText = IsPasswordClearText };
+            return new PackageSource(Source, Name, IsEnabled, IsOfficial) { UserName = UserName, Password = Password, IsPasswordClearText = IsPasswordClearText, IsMachineWide = IsMachineWide };
         }
     }
 }

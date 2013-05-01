@@ -185,10 +185,28 @@ namespace NuGet.VisualStudio
                 var officialPackageSource = _packageSources.FirstOrDefault(IsOfficialPackageSource);
                 if (officialPackageSource == null)
                 {
-                    // if there is no official source, add one, but make it disabled
+                    // if there is no official source, add one
                     officialPackageSource = NuGetDefaultSource.Clone();
-                    officialPackageSource.IsEnabled = false;
-                    _packageSources.Add(officialPackageSource);
+
+                    // make it disabled if there are non machine wide sources                    
+                    if (_packageSources.Exists(p => !p.IsMachineWide))
+                    {
+                        officialPackageSource.IsEnabled = false;
+                    }
+                    else
+                    {
+                        officialPackageSource.IsEnabled = true;
+                    }
+
+                    int firstMachineWideSource = _packageSources.FindIndex(p => p.IsMachineWide);
+                    if (firstMachineWideSource >= 0)
+                    {
+                        _packageSources.Insert(firstMachineWideSource, officialPackageSource);
+                    }
+                    else
+                    {
+                        _packageSources.Add(officialPackageSource);
+                    }
                 }
                 officialPackageSource.IsOfficial = true;
 

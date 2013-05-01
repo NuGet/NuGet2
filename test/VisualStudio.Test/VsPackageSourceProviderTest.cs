@@ -61,13 +61,66 @@ namespace NuGet.VisualStudio.Test
             Assert.Equal("https://nuget.org/api/v2/", sources[0].Source);
         }
 
+        // Test that when there are non-machine wide user specified sources, the
+        // official source is added but disabled.
+        [Fact]
+        public void DefaultSourceAddedButDisabled()
+        {
+            // Arrange
+            var userSettings = new Mock<ISettings>();
+            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
+                        .Returns(new[] { 
+                            new SettingValue("Test1", "https://test1", true),
+                            new SettingValue("Test2", "https://test2", false) 
+                        });
+            var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
+            var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
+
+            // Act
+            var sources = provider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.Equal(3, sources.Count);
+
+            Assert.Equal("https://test2", sources[0].Source);
+
+            Assert.Equal("https://nuget.org/api/v2/", sources[1].Source);
+            Assert.False(sources[1].IsEnabled);
+            
+            Assert.Equal("https://test1", sources[2].Source);
+        }
+
+        // Test that when there are machine wide user specified sources, but no non-machine
+        // wide user specified sources, then the official source is added and ENABLED.
+        [Fact]
+        public void DefaultSourceAddedAndEnabled()
+        {
+            // Arrange
+            var userSettings = new Mock<ISettings>();
+            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
+                        .Returns(new[] { 
+                            new SettingValue("Test1", "https://test1", true),
+                            new SettingValue("Test2", "https://test2", true) 
+                        });
+            var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
+            var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
+
+            // Act
+            var sources = provider.LoadPackageSources().ToList();
+
+            // Assert
+            Assert.Equal(3, sources.Count);
+            Assert.Equal("https://nuget.org/api/v2/", sources[0].Source);
+            Assert.True(sources[0].IsEnabled);
+        }
+
         [Fact]
         public void LoadPackageSourcesAddOfficialSourceIfMissing()
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetValues("packageSources", true))
-                        .Returns(new[] { new KeyValuePair<string, string>("my source", "http://nuget.org") });
+            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
+                        .Returns(new[] { new SettingValue("my source", "http://nuget.org", false) });
             var sourceProvider = CreateDefaultSourceProvider(userSettings.Object);
             var provider = new VsPackageSourceProvider(userSettings.Object, sourceProvider, new Mock<IVsShellInfo>().Object);
 
@@ -87,8 +140,8 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var userSettings = new Mock<ISettings>();
-            userSettings.Setup(s => s.GetValues("packageSources", true))
-                        .Returns(new[] { new KeyValuePair<string, string>("NuGet official package source", "https://go.microsoft.com/fwlink/?LinkID=206669") });
+            userSettings.Setup(s => s.GetSettingValues("packageSources", true))
+                        .Returns(new[] { new SettingValue("NuGet official package source", "https://go.microsoft.com/fwlink/?LinkID=206669", false) });
 
             // disable the official source
             userSettings.Setup(s => s.GetValues("disabledPackageSources"))
