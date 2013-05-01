@@ -21,33 +21,6 @@ namespace NuGet
         private CultureInfo _culture;
         private Tuple<string, string> _currentOperation;
 
-        // Just forward calls to the package downloader
-        public event EventHandler<ProgressEventArgs> ProgressAvailable
-        {
-            add
-            {
-                _packageDownloader.ProgressAvailable += value;
-            }
-            remove
-            {
-                _packageDownloader.ProgressAvailable -= value;
-            }
-        }
-
-        public event EventHandler<WebRequestEventArgs> SendingRequest
-        {
-            add
-            {
-                _packageDownloader.SendingRequest += value;
-                _httpClient.SendingRequest += value;
-            }
-            remove
-            {
-                _packageDownloader.SendingRequest -= value;
-                _httpClient.SendingRequest -= value;
-            }
-        }
-
         public DataServicePackageRepository(Uri serviceRoot)
             : this(new HttpClient(serviceRoot))
         {
@@ -99,6 +72,33 @@ namespace NuGet
             };
         }
 
+        // Just forward calls to the package downloader
+        public event EventHandler<ProgressEventArgs> ProgressAvailable
+        {
+            add
+            {
+                _packageDownloader.ProgressAvailable += value;
+            }
+            remove
+            {
+                _packageDownloader.ProgressAvailable -= value;
+            }
+        }
+
+        public event EventHandler<WebRequestEventArgs> SendingRequest
+        {
+            add
+            {
+                _packageDownloader.SendingRequest += value;
+                _httpClient.SendingRequest += value;
+            }
+            remove
+            {
+                _packageDownloader.SendingRequest -= value;
+                _httpClient.SendingRequest -= value;
+            }
+        }
+
         public CultureInfo Culture
         {
             get
@@ -112,6 +112,12 @@ namespace NuGet
                 }
                 return _culture;
             }
+        }
+
+        // Do NOT delete this property. It is used by the functional test.
+        public PackageDownloader PackageDownloader
+        {
+            get { return _packageDownloader; }
         }
 
         public override string Source
