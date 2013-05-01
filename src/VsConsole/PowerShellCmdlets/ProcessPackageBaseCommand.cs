@@ -130,7 +130,7 @@ namespace NuGet.PowerShell.Commands
                 return null;
             }
 
-            Project project = GetProject();
+            Project project = GetProject(throwIfNotExists: true);
             if (project == null)
             {
                 // No project specified and default project was null
@@ -140,7 +140,7 @@ namespace NuGet.PowerShell.Commands
             return GetProjectManager(project);
         }
 
-        private Project GetProject()
+        private Project GetProject(bool throwIfNotExists)
         {
             Project project = null;
 
@@ -150,7 +150,7 @@ namespace NuGet.PowerShell.Commands
                 project = SolutionManager.GetProject(ProjectName);
 
                 // If that project was invalid then throw
-                if (project == null)
+                if (project == null && throwIfNotExists)
                 {
                     ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
                 }
@@ -347,7 +347,7 @@ namespace NuGet.PowerShell.Commands
 
         protected override void OnSendingRequest(object sender, WebRequestEventArgs e)
         {
-            Project project = GetProject();
+            Project project = GetProject(throwIfNotExists: false);
             var projectGuids = project == null ? null : project.GetAllProjectTypeGuid();
             HttpUtility.SetUserAgent(e.Request, DefaultUserAgent, projectGuids);
         }

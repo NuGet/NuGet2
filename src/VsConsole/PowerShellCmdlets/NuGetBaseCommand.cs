@@ -126,6 +126,16 @@ namespace NuGet.PowerShell.Commands
                 // unhandled exceptions should be terminating
                 ErrorHandler.HandleException(ex, terminating: true);
             }
+            finally
+            {
+                UnsubscribeEvents();
+            }
+        }
+
+        protected override void StopProcessing()
+        {
+            UnsubscribeEvents();
+            base.StopProcessing();
         }
 
         /// <summary>
@@ -156,11 +166,10 @@ namespace NuGet.PowerShell.Commands
 
         protected override void EndProcessing()
         {
-            if (_httpClientEvents != null)
-            {
-                _httpClientEvents.SendingRequest -= OnSendingRequest;
-            }
+            UnsubscribeEvents();
         }
+
+        
 
         protected void SubscribeToProgressEvents()
         {
@@ -506,6 +515,14 @@ namespace NuGet.PowerShell.Commands
             }
 
             return FileConflictResolution.Ignore;
+        }
+
+        private void UnsubscribeEvents()
+        {
+            if (_httpClientEvents != null)
+            {
+                _httpClientEvents.SendingRequest -= OnSendingRequest;
+            }
         }
 
         private class ProgressRecordCollection : KeyedCollection<int, ProgressRecord>
