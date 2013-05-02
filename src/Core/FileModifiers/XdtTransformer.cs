@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using Microsoft.Web.XmlTransform;
+using NuGet.Resources;
 
 namespace NuGet
 {
@@ -25,28 +29,41 @@ namespace NuGet
             {
                 string content = Preprocessor.Process(file, projectSystem);
 
-                using (var transformation = new XmlTransformation(content, isTransformAFile: false, logger: null))
+                try
                 {
-                    using (var document = new XmlTransformableDocument())
+                    using (var transformation = new XmlTransformation(content, isTransformAFile: false, logger: null))
                     {
-                        document.PreserveWhitespace = true;
-                        
-                        // make sure we close the input stream immediately so that we can override 
-                        // the file below when we save to it.
-                        using (var inputStream = projectSystem.OpenFile(targetPath))
+                        using (var document = new XmlTransformableDocument())
                         {
-                            document.Load(inputStream);
-                        }
+                            document.PreserveWhitespace = true;
 
-                        bool succeeded = transformation.Apply(document);
-                        if (succeeded)
-                        {
-                            using (var fileStream = projectSystem.CreateFile(targetPath))
-                            { 
-                                document.Save(fileStream);
+                            // make sure we close the input stream immediately so that we can override 
+                            // the file below when we save to it.
+                            using (var inputStream = projectSystem.OpenFile(targetPath))
+                            {
+                                document.Load(inputStream);
+                            }
+
+                            bool succeeded = transformation.Apply(document);
+                            if (succeeded)
+                            {
+                                using (var fileStream = projectSystem.CreateFile(targetPath))
+                                {
+                                    document.Save(fileStream);
+                                }
                             }
                         }
                     }
+                }
+                catch (Exception exception)
+                {
+                    throw new InvalidDataException(
+                        String.Format(
+                            CultureInfo.CurrentCulture, 
+                            NuGetResources.XdtError + " " + exception.Message,
+                            targetPath, 
+                            projectSystem.ProjectName), 
+                        exception);
                 }
             }
         }

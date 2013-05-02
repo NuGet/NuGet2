@@ -415,4 +415,7 @@
   <data name="Info_OverwriteExistingFile" xml:space="preserve">
     <value>Overwrite existing file '{0}'.</value>
   </data>
+  <data name="XdtError" xml:space="preserve">
+    <value>An error occurred while applying transformation to '{0}' in project '{1}':</value>
+  </data>
 </root>
