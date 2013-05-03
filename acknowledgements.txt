@@ -11,6 +11,7 @@ veselkamartin - Fix bug with Add-BindingRedirect command when a project referenc
 derigel - Fix Project.TargetFramework can be null in ProjectManager 
 MiroslaveBajtos - Fix bug of nuget.pack parsing wildcard in the 'exclude' attribute incorrectly.(#2891)
 zippy1981 - Fix bug NuGet.targets does not pass $(Platform) to nuget.exe when restoring packages. (#3307)
+benerdin - Fix bug in nuget.exe package command which would allow adding files with the same name but different casing, eventually causing "Item already exists" exception. (#3294)
 
 *** NuGet Hall of Fame 2.5 ***
 
