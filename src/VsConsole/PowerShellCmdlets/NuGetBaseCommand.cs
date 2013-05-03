@@ -19,7 +19,7 @@ namespace NuGet.PowerShell.Commands
     public abstract class NuGetBaseCommand : PSCmdlet, ILogger, IErrorHandler
     {
         // User Agent. Do NOT localize
-        private const string PSCommandsUserAgentClient = "NuGet Package Manager Console";
+        private const string PSCommandsUserAgentClient = "NuGet VS PowerShell Console";
         private readonly Lazy<string> _psCommandsUserAgent = new Lazy<string>(
             () => HttpUtility.CreateUserAgentString(PSCommandsUserAgentClient, VsVersionHelper.FullVsEdition));
 

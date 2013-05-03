@@ -19,9 +19,12 @@ namespace NuGet.Dialog
     public partial class PackageManagerWindow : DialogWindow
     {
         internal static PackageManagerWindow CurrentInstance;
-        private const string DialogUserAgentClient = "NuGet Add Package Dialog";
+        private const string DialogUserAgentClient = "NuGet VS Packages Dialog";
+        private const string DialogForSolutionUserAgentClient = "NuGet VS Packages Dialog - Solution";
         private readonly Lazy<string> _dialogUserAgent = new Lazy<string>(
             () => HttpUtility.CreateUserAgentString(DialogUserAgentClient, VsVersionHelper.FullVsEdition));
+        private readonly Lazy<string> _dialogForSolutionUserAgent = new Lazy<string>(
+            () => HttpUtility.CreateUserAgentString(DialogForSolutionUserAgentClient, VsVersionHelper.FullVsEdition));
 
         private static readonly string[] Providers = new string[] { "Installed", "Online", "Updates" };
         private const string SearchInSwitch = "/searchin:";
@@ -706,7 +709,10 @@ namespace NuGet.Dialog
         private void OnSendingRequest(object sender, WebRequestEventArgs e)
         {
             string projectGuids = _activeProject == null ? null : _activeProject.GetAllProjectTypeGuid();
-            HttpUtility.SetUserAgent(e.Request, _dialogUserAgent.Value, projectGuids);
+            HttpUtility.SetUserAgent(
+                e.Request, 
+                _activeProject == null ? _dialogForSolutionUserAgent.Value : _dialogUserAgent.Value, 
+                projectGuids);
         }
 
         private void CanExecuteClose(object sender, CanExecuteRoutedEventArgs e)
