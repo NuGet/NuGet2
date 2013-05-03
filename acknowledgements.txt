@@ -13,7 +13,7 @@ MiroslaveBajtos - Fix bug of nuget.pack parsing wildcard in the 'exclude' attrib
 zippy1981 - Fix bug NuGet.targets does not pass $(Platform) to nuget.exe when restoring packages. (#3307)
 benerdin - Fix bug in nuget.exe package command which would allow adding files with the same name but different casing, eventually causing "Item already exists" exception. (#3294)
 derigel - Fix SharedPackageRepository FindPackage/FindPackagesById will fail on non-existent packageId (#3248)
-
+dcazzulino - Add Version property to NetPortableProfile class. (#2990)
 
 *** NuGet Hall of Fame 2.5 ***
 
