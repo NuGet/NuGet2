@@ -43,44 +43,5 @@ namespace NuGet.Test
             // Assert
             Assert.Equal(new FrameworkName("Silverlight, Version=4.0, Profile=WindowsPhone71"), fx);
         }
-
-        [Fact]
-        public void BuiltInProfileReportsProperFrameworkVersion()
-        {
-            var profile = NetPortableProfileTable.GetProfile("Profile1");
-
-            // Assert
-            Assert.Equal("v4.0", profile.FrameworkVersion);
-        }
-
-        [Fact]
-        public void BuiltInCustomProfileStringReportsProperFrameworkVersion()
-        {
-            var profile = NetPortableProfile.Parse("win+net40+sl40+wp+Xbox40");
-
-            // Assert
-            Assert.Equal("v4.0", profile.FrameworkVersion);
-        }
-
-        [Fact]
-        public void BuiltIn45ProfileReportsProperFrameworkVersion()
-        {
-            var profile = NetPortableProfileTable.GetProfile("Profile7");
-
-            // Assert
-            Assert.Equal("v4.5", profile.FrameworkVersion);
-
-            System.Console.WriteLine(profile.CustomProfileString);
-        }
-
-        [Fact]
-        public void BuiltIn45CustomProfileStringReportsProperFrameworkVersion()
-        {
-            var profile = NetPortableProfile.Parse("win+net45");
-
-            // Assert
-            Assert.Equal("v4.5", profile.FrameworkVersion);
-        }
-
     }
 }
