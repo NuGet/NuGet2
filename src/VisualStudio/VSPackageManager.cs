@@ -83,7 +83,7 @@ namespace NuGet.VisualStudio
             // available packages to perform updates on dependent packages
             var sourceRepository = CreateProjectManagerSourceRepository();
 
-            var projectManager = new ProjectManager(sourceRepository, PathResolver, projectSystem, repository);
+            var projectManager = new ProjectManager(sourceRepository, PathResolver, projectSystem, repository);            
 
             // The package reference repository also provides constraints for packages (via the allowedVersions attribute)
             projectManager.ConstraintProvider = repository;
@@ -151,7 +151,7 @@ namespace NuGet.VisualStudio
 
             using (StartInstallOperation(packageId))
             {
-                IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
+                IPackage package = PackageRepositoryHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
                 if (skipAssemblyReferences)
                 {
                     package = new SkipAssemblyReferencesPackage(package);
