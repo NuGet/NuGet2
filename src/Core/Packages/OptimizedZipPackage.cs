@@ -233,9 +233,16 @@ namespace NuGet
 
                     using (Stream partStream = file.GetStream())
                     {
-                        using (Stream targetStream = _expandedFileSystem.CreateFile(filePath))
+                        try
                         {
-                            partStream.CopyTo(targetStream);
+                            using (Stream targetStream = _expandedFileSystem.CreateFile(filePath))
+                            {
+                                partStream.CopyTo(targetStream);
+                            }
+                        }
+                        catch (IOException)
+                        {
+                            // if the file is read-only or has an access denied issue, we just ignore it
                         }
                     }
 
