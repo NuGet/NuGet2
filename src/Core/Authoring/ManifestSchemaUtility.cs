@@ -91,7 +91,12 @@ namespace NuGet
                     using (var reader = new StringReader(formattedContent))
                     {
                         var schemaSet = new XmlSchemaSet();
-                        schemaSet.Add(schema, XmlReader.Create(reader));
+
+                        var settings = new XmlReaderSettings 
+                        {
+                            DtdProcessing = DtdProcessing.Prohibit 
+                        };
+                        schemaSet.Add(schema, XmlReader.Create(reader, settings));
                         return schemaSet;
                     }
                 });
