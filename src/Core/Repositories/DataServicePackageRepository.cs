@@ -56,7 +56,7 @@ namespace NuGet
 
                     if (!String.IsNullOrEmpty(mainPackageId) && !String.IsNullOrEmpty(_packageDownloader.CurrentDownloadPackageId))
                     {
-                        if (mainPackageId != _packageDownloader.CurrentDownloadPackageId)
+                        if (!mainPackageId.Equals(_packageDownloader.CurrentDownloadPackageId, StringComparison.OrdinalIgnoreCase))
                         {
                             operation = operation + "-Dependency";
                         }
@@ -64,7 +64,7 @@ namespace NuGet
 
                     e.Request.Headers[RepositoryOperationNames.OperationHeaderName] = operation;
 
-                    if (operation != _currentOperation.Item1)
+                    if (!operation.Equals(_currentOperation.Item1, StringComparison.OrdinalIgnoreCase))
                     {
                         e.Request.Headers[RepositoryOperationNames.DependentPackageHeaderName] = mainPackageId;
                     }
