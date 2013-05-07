@@ -1,61 +1,58 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Runtime.Versioning;
 using NuGet.Resources;
 
 namespace NuGet
 {
     public static class PackageHelper
     {
-        public static IPackage ResolvePackage(IPackageRepository sourceRepository, IPackageRepository localRepository, string packageId, SemanticVersion version, bool allowPrereleaseVersions)
+        public static bool IsManifest(string path)
         {
-            return ResolvePackage(sourceRepository, localRepository, constraintProvider: NullConstraintProvider.Instance, packageId: packageId, version: version, allowPrereleaseVersions: allowPrereleaseVersions);
+            return Path.GetExtension(path).Equals(Constants.ManifestExtension, StringComparison.OrdinalIgnoreCase);
         }
 
-        public static IPackage ResolvePackage(IPackageRepository sourceRepository, IPackageRepository localRepository, IPackageConstraintProvider constraintProvider,
-            string packageId, SemanticVersion version, bool allowPrereleaseVersions)
+        public static bool IsPackageFile(string path)
         {
-            if (String.IsNullOrEmpty(packageId))
+            return Path.GetExtension(path).Equals(Constants.PackageExtension, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool IsAssembly(string path)
+        {
+            return path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) ||
+                   path.EndsWith(".winmd", StringComparison.OrdinalIgnoreCase) ||
+                   path.EndsWith(".exe", StringComparison.OrdinalIgnoreCase);
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "3#", Justification="We need to return the runtime package.")]
+        public static bool IsSatellitePackage(
+            IPackageMetadata package, 
+            IPackageRepository repository,
+            FrameworkName targetFramework,
+            out IPackage runtimePackage)
+        {
+            // A satellite package has the following properties:
+            //     1) A package suffix that matches the package's language, with a dot preceding it
+            //     2) A dependency on the package with the same Id minus the language suffix
+            //     3) The dependency can be found by Id in the repository (as its path is needed for installation)
+            // Example: foo.ja-jp, with a dependency on foo
+
+            runtimePackage = null;
+
+            if (package.IsSatellitePackage())
             {
-                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageId");
-            }
+                string runtimePackageId = package.Id.Substring(0, package.Id.Length - (package.Language.Length + 1));
+                PackageDependency dependency = package.FindDependency(runtimePackageId, targetFramework);
 
-            IPackage package = null;
-
-            // If we're looking for an exact version of a package then try local first
-            if (version != null)
-            {
-                package = localRepository.FindPackage(packageId, version, allowPrereleaseVersions, allowUnlisted: true);
-            }
-
-            if (package == null)
-            {
-                // Try to find it in the source (regardless of version)
-                // We use resolve package here since we want to take any constraints into account
-                package = sourceRepository.FindPackage(packageId, version, constraintProvider, allowPrereleaseVersions, allowUnlisted: false);
-
-                // If we already have this package installed, use the local copy so we don't 
-                // end up using the one from the source repository
-                if (package != null)
+                if (dependency != null)
                 {
-                    package = localRepository.FindPackage(package.Id, package.Version, allowPrereleaseVersions, allowUnlisted: true) ?? package;
+                    runtimePackage = repository.FindPackage(runtimePackageId, versionSpec: dependency.VersionSpec, allowPrereleaseVersions: true, allowUnlisted: true);
                 }
             }
 
-            // We still didn't find it so throw
-            if (package == null)
-            {
-                if (version != null)
-                {
-                    throw new InvalidOperationException(
-                        String.Format(CultureInfo.CurrentCulture,
-                        NuGetResources.UnknownPackageSpecificVersion, packageId, version));
-                }
-                throw new InvalidOperationException(
-                    String.Format(CultureInfo.CurrentCulture,
-                    NuGetResources.UnknownPackage, packageId));
-            }
-
-            return package;
+            return runtimePackage != null;
         }
 
         /// <summary>

@@ -11,7 +11,7 @@ namespace NuGet.Test
         public void ResolveUnknownPackageThrows()
         {
             ExceptionAssert.Throws<InvalidOperationException>(
-                () => PackageHelper.ResolvePackage(new MockPackageRepository(), new MockPackageRepository(), "elmah", null, allowPrereleaseVersions: false),
+                () => PackageRepositoryHelper.ResolvePackage(new MockPackageRepository(), new MockPackageRepository(), "elmah", null, allowPrereleaseVersions: false),
                 "Unable to find package 'elmah'.");
         }
 
@@ -19,7 +19,7 @@ namespace NuGet.Test
         public void ResolveSpecificVersionOfUnknownPackageThrows()
         {
             ExceptionAssert.Throws<InvalidOperationException>(
-                () => PackageHelper.ResolvePackage(new MockPackageRepository(), new MockPackageRepository(), "elmah", new SemanticVersion("1.1"), allowPrereleaseVersions: false),
+                () => PackageRepositoryHelper.ResolvePackage(new MockPackageRepository(), new MockPackageRepository(), "elmah", new SemanticVersion("1.1"), allowPrereleaseVersions: false),
                 "Unable to find version '1.1' of package 'elmah'.");
         }
     }

@@ -56,7 +56,7 @@ namespace NuGet.ServerExtensions
 
         public bool MirrorPackage(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)
         {
-            IPackage package = PackageHelper.ResolvePackage(SourceRepository, TargetRepository, packageId, version, allowPrereleaseVersions);
+            IPackage package = PackageRepositoryHelper.ResolvePackage(SourceRepository, TargetRepository, packageId, version, allowPrereleaseVersions);
 
             return MirrorPackage(package, ignoreDependencies, allowPrereleaseVersions);
         }

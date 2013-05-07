@@ -155,6 +155,27 @@ namespace NuGet
             }
         }
 
+        public static void DeleteFileAndParentDirectoriesIfEmpty(this IFileSystem fileSystem, string filePath)
+        {
+            // first delete the file itself
+            fileSystem.DeleteFileSafe(filePath);
+
+            // now delete all parent directories if they are empty
+            for (string path = Path.GetDirectoryName(filePath); !String.IsNullOrEmpty(path); path = Path.GetDirectoryName(path))
+            {
+                if (fileSystem.GetFiles(path, "*.*").Any() || fileSystem.GetDirectories(path).Any())
+                {
+                    // if this directory is not empty, stop
+                    break;
+                }
+                else
+                {
+                    // otherwise, delete it, and move up to its parent
+                    fileSystem.DeleteDirectorySafe(path, recursive: false);
+                }
+            }
+        }
+
         internal static void AddFileWithCheck(this IFileSystem fileSystem, string path, Func<Stream> streamFactory)
         {
             if (fileSystem.FileExists(path))

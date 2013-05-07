@@ -957,6 +957,34 @@ function Test-FinishFailedUninstallOnSolutionOpenOfProjectLevelPackage
     Assert-False $physicalFileSystem.FileExists("PackageWithTextFile.1.0.deleteme")
 }
 
+
+function Test-UnInstallPackageWithXdtTransformUnTransformsTheFile
+{
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    $p | Install-Package XdtPackage -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p 'XdtPackage' '1.0.0'
+
+    $content = [xml](Get-Content (Get-ProjectItemPath $p web.config))
+
+    Assert-AreEqual "false" $content.configuration["system.web"].compilation.debug
+    Assert-NotNull $content.configuration["system.web"].customErrors
+
+    # Act 2
+    $p | UnInstall-Package XdtPackage
+
+    # Assert 2
+    Assert-NoPackage $p 'XdtPackage' '1.0.0'
+
+    $content = [xml](Get-Content (Get-ProjectItemPath $p web.config))
+
+    Assert-AreEqual "true" $content.configuration["system.web"].compilation.debug
+    Assert-Null $content.configuration["system.web"].customErrors
+}
 function Test-UninstallPackageUninstallAssemblyReferencesHonoringPackageReferencesAccordingToProjectFramework
 {
     param ($context)

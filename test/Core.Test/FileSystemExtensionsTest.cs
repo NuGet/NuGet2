@@ -39,5 +39,58 @@ namespace NuGet.Test
             // Assert
             mockFileSystem.Verify(m => m.AddFile("A", It.IsAny<Stream>()), Times.Never());
         }
+
+        [Fact]
+        public void DeleteFileAndEmptyParentDirectoriesCorrectly()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\\");
+            fileSystem.AddFile("foo\\bar\\hell\\x.txt");
+
+            // Act
+            fileSystem.DeleteFileAndParentDirectoriesIfEmpty("foo\\bar\\hell\\x.txt");
+
+            // Assert
+            Assert.False(fileSystem.FileExists("foo\\bar\\hell\\x.txt"));
+            Assert.False(fileSystem.DirectoryExists("foo"));
+            Assert.False(fileSystem.DirectoryExists("foo\\bar"));
+            Assert.False(fileSystem.DirectoryExists("foo\\bar\\hell"));
+        }
+
+        [Fact]
+        public void DeleteFileAndEmptyParentDirectoriesDoNotDeleteDirectoryIfNotEmpty()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\\");
+            fileSystem.AddFile("foo\\bar\\hell\\x.txt");
+            fileSystem.AddFile("foo\\bar\\hell\\y.txt");
+
+            // Act
+            fileSystem.DeleteFileAndParentDirectoriesIfEmpty("foo\\bar\\hell\\x.txt");
+
+            // Assert
+            Assert.False(fileSystem.FileExists("foo\\bar\\hell\\x.txt"));
+            Assert.True(fileSystem.DirectoryExists("foo"));
+            Assert.True(fileSystem.DirectoryExists("foo\\bar"));
+            Assert.True(fileSystem.DirectoryExists("foo\\bar\\hell"));
+        }
+
+        [Fact]
+        public void DeleteFileAndEmptyParentDirectoriesDoNotDeleteParentDirectoryIfNotEmpty()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem("x:\\");
+            fileSystem.AddFile("foo\\bar\\hell\\x.txt");
+            fileSystem.AddFile("foo\\bar\\y.txt");
+
+            // Act
+            fileSystem.DeleteFileAndParentDirectoriesIfEmpty("foo\\bar\\hell\\x.txt");
+
+            // Assert
+            Assert.False(fileSystem.FileExists("foo\\bar\\hell\\x.txt"));
+            Assert.True(fileSystem.DirectoryExists("foo"));
+            Assert.True(fileSystem.DirectoryExists("foo\\bar"));
+            Assert.False(fileSystem.DirectoryExists("foo\\bar\\hell"));
+        }
     }
 }

@@ -122,7 +122,7 @@ namespace NuGet.VisualStudio
             {
                 // The RemoveFileFromProject() method only removes file from project.
                 // We want to delete it from disk too.
-                BaseFileSystem.DeleteFile(path);
+                BaseFileSystem.DeleteFileAndParentDirectoriesIfEmpty(path);
 
                 if (!String.IsNullOrEmpty(folderPath))
                 {

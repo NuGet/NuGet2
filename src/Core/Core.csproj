@@ -83,6 +83,7 @@
     <Compile Include="Extensions\SettingsExtensions.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Extensions\VersionExtensions.cs" />
+    <Compile Include="FileModifiers\FileTransformExtensions.cs" />
     <Compile Include="Http\CredentialStore.cs" />
     <Compile Include="Http\CredentialType.cs" />
     <Compile Include="Http\ICredentialCache.cs" />
@@ -194,7 +195,7 @@
     <Compile Include="Utility\IVersionSpec.cs" />
     <Compile Include="Utility\MemoryCache.cs" />
     <Compile Include="Utility\PackageComparer.cs" />
-    <Compile Include="Utility\PackageHelper.cs" />
+    <Compile Include="Utility\PackageRepositoryHelper.cs" />
     <Compile Include="Utility\PackageIdValidator.cs" />
     <Compile Include="Utility\PathValidator.cs" />
     <Compile Include="Http\RedirectedHttpClient.cs" />
@@ -202,6 +203,10 @@
     <Compile Include="Utility\ReadOnlyHashSet.cs" />
     <Compile Include="Utility\VersionSpec.cs" />
     <Compile Include="Utility\WebRequestEventArgs.cs" />
+    <Compile Include="FileModifiers\XdtTransformer.cs" />
+    <Reference Include="Microsoft.Web.XmlTransform">
+      <HintPath>..\..\lib\Microsoft.Web.XmlTransform.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -263,7 +268,7 @@
     <Compile Include="Utility\CryptoHashProvider.cs" />
     <Compile Include="Extensions\StreamExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Utility\PackageUtility.cs" />
+    <Compile Include="Utility\PackageHelper.cs" />
     <Compile Include="Utility\XmlUtility.cs" />
     <Compile Include="ProjectSystem\IProjectSystem.cs" />
     <Compile Include="Repositories\PackageRepositoryBase.cs" />
