@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using System.IO;
 using System.Reflection;
 using EnvDTE80;
 
@@ -23,8 +22,6 @@ namespace NuGet.VisualStudio
         {
             if (_cachedTfsFileSystemProvider == null)
             {
-                var assemblyDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
                 string assemblyName;
                 if (VsVersionHelper.IsVisualStudio2010)
                 {
@@ -38,10 +35,11 @@ namespace NuGet.VisualStudio
                 {
                     assemblyName = "NuGet.TeamFoundationServer.dll";
                 }
-
+                
                 try
                 {
-                    var assembly = Assembly.LoadFrom(Path.Combine(assemblyDirectory, assemblyName));
+                    Assembly assembly = RuntimeHelpers.LoadAssemblySmart(assemblyName);
+
                     if (assembly != null)
                     {
                         var type = assembly.GetType(typeName, throwOnError: false);
