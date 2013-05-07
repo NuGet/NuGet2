@@ -170,6 +170,55 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void WithMachineWideSources()
+        {
+            // Arrange           
+            var settings = new Mock<ISettings>();
+            settings.Setup(s => s.GetSettingValues("packageSources", true))
+                    .Returns(new[] { new SettingValue("one", "one", true), 
+                                     new SettingValue("two", "two", false), 
+                                     new SettingValue("three", "three", false)
+                                });
+
+            settings.Setup(s => s.SetValues("packageSources", It.IsAny<IList<KeyValuePair<string, string>>>()))
+                    .Callback((string section, IList<KeyValuePair<string, string>> values) =>
+                    {
+                        // verifies that only sources "two" and "three" are passed.
+                        // the machine wide source "one" is not.
+                        Assert.Equal(2, values.Count);
+                        Assert.Equal("two", values[0].Key);
+                        Assert.Equal("two", values[0].Value);
+                        Assert.Equal("three", values[1].Key);
+                        Assert.Equal("three", values[1].Value);
+                    })
+                    .Verifiable();
+
+            settings.Setup(s => s.SetValues("disabledPackageSources", It.IsAny<IList<KeyValuePair<string, string>>>()))
+                .Callback((string section, IList<KeyValuePair<string, string>> values) =>
+                {
+                    // verifies that the machine wide source "one" is passed here
+                    // since it is disabled.                    
+                    Assert.Equal(1, values.Count);
+                    Assert.Equal("one", values[0].Key);
+                    Assert.Equal("true", values[0].Value);
+                })
+                .Verifiable();
+
+            var provider = CreatePackageSourceProvider(settings.Object);
+
+            // Act
+            var sources = provider.LoadPackageSources().ToList();
+
+            // disable the machine wide source "one", and save the result in provider.
+            Assert.Equal("one", sources[2].Name);
+            sources[2].IsEnabled = false;    
+            provider.SavePackageSources(sources); 
+   
+            // Assert
+            // all assertions are done inside Callback()'s
+        }
+
+        [Fact]
         public void LoadPackageSourcesReturnCorrectDataFromSettings()
         {
             // Arrange
