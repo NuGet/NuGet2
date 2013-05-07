@@ -177,7 +177,9 @@ namespace NuGet
             // and write the new ones
             _settingsManager.SetValues(
                 PackageSourcesSectionName,
-                sources.Select(p => new KeyValuePair<string, string>(p.Name, p.Source)).ToList());
+                sources.Where(p => !p.IsMachineWide)
+                    .Select(p => new KeyValuePair<string, string>(p.Name, p.Source))
+                    .ToList());
 
             // overwrite new values for the <disabledPackageSources> section
             _settingsManager.DeleteSection(DisabledPackageSourcesSectionName);
