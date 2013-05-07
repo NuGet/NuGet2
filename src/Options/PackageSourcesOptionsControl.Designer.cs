@@ -49,6 +49,8 @@ namespace NuGet.Options
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.addButton = new System.Windows.Forms.Button();
+            this.MachineWideSourcesLabel = new System.Windows.Forms.Label();
+            this.MachineWidePackageSourcesListBox = new System.Windows.Forms.ListBox();
             this.imageList2 = new System.Windows.Forms.ImageList(this.components);
             this.PackageSourcesContextMenu.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -158,12 +160,14 @@ namespace NuGet.Options
             resources.ApplyResources(this.tableLayoutPanel1, "tableLayoutPanel1");
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.PackageSourcesListBox, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.NewPackageNameLabel, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.NewPackageSourceLabel, 0, 3);
-            this.tableLayoutPanel1.Controls.Add(this.NewPackageName, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.NewPackageSource, 1, 3);
-            this.tableLayoutPanel1.Controls.Add(this.BrowseButton, 2, 3);
-            this.tableLayoutPanel1.Controls.Add(this.updateButton, 3, 3);
+            this.tableLayoutPanel1.Controls.Add(this.MachineWideSourcesLabel, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.MachineWidePackageSourcesListBox, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageNameLabel, 0, 4);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageSourceLabel, 0, 5);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageName, 1, 4);
+            this.tableLayoutPanel1.Controls.Add(this.NewPackageSource, 1, 5);
+            this.tableLayoutPanel1.Controls.Add(this.BrowseButton, 2, 5);
+            this.tableLayoutPanel1.Controls.Add(this.updateButton, 3, 5);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             // 
             // tableLayoutPanel2
@@ -186,6 +190,27 @@ namespace NuGet.Options
             this.addButton.UseVisualStyleBackColor = true;
             this.addButton.Click += new System.EventHandler(this.OnAddButtonClick);
             // 
+            // MachineWideSourcesLabel
+            // 
+            this.tableLayoutPanel1.SetColumnSpan(this.MachineWideSourcesLabel, 4);
+            resources.ApplyResources(this.MachineWideSourcesLabel, "MachineWideSourcesLabel");
+            this.MachineWideSourcesLabel.Name = "MachineWideSourcesLabel";
+            // 
+            // MachineWidePackageSourcesListBox
+            // 
+            this.MachineWidePackageSourcesListBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tableLayoutPanel1.SetColumnSpan(this.MachineWidePackageSourcesListBox, 4);
+            this.MachineWidePackageSourcesListBox.ContextMenuStrip = this.PackageSourcesContextMenu;
+            this.MachineWidePackageSourcesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable;
+            this.MachineWidePackageSourcesListBox.FormattingEnabled = true;
+            resources.ApplyResources(this.MachineWidePackageSourcesListBox, "MachineWidePackageSourcesListBox");
+            this.MachineWidePackageSourcesListBox.Name = "MachineWidePackageSourcesListBox";
+            this.MachineWidePackageSourcesListBox.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.PackageSourcesListBox_DrawItem);
+            this.MachineWidePackageSourcesListBox.MeasureItem += new System.Windows.Forms.MeasureItemEventHandler(this.PackageSourcesListBox_MeasureItem);
+            this.MachineWidePackageSourcesListBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.PackageSourcesListBox_KeyUp);
+            this.MachineWidePackageSourcesListBox.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PackageSourcesListBox_MouseMove);
+            this.MachineWidePackageSourcesListBox.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PackageSourcesListBox_MouseUp);
+            // 
             // imageList2
             // 
             this.imageList2.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList2.ImageStream")));
@@ -207,6 +232,7 @@ namespace NuGet.Options
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -231,5 +257,7 @@ namespace NuGet.Options
         private ImageList imageList1;
         private ImageList imageList2;
         private Button addButton;
+        private Label MachineWideSourcesLabel;
+        private ListBox MachineWidePackageSourcesListBox;
     }
 }
