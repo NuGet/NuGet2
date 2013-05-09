@@ -41,6 +41,7 @@ namespace NuGet.Dialog
         private readonly IOptionsPageActivator _optionsPageActivator;
         private readonly IUpdateAllUIService _updateAllUIService;
         private readonly Project _activeProject;
+        private readonly string _projectGuids;
         private string _searchText;
 
         public PackageManagerWindow(Project project, string dialogParameters = null) :
@@ -60,6 +61,7 @@ namespace NuGet.Dialog
         {
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         private PackageManagerWindow(Project project,
                                     DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,
@@ -105,6 +107,8 @@ namespace NuGet.Dialog
                     Close();
                     productUpdateService.Update();
                 };
+
+            _projectGuids = _activeProject == null ? null : _activeProject.GetAllProjectTypeGuid(); 
 
             AddUpdateBar(productUpdateService);
             AddRestoreBar(packageRestoreManager);
@@ -708,11 +712,10 @@ namespace NuGet.Dialog
 
         private void OnSendingRequest(object sender, WebRequestEventArgs e)
         {
-            string projectGuids = _activeProject == null ? null : _activeProject.GetAllProjectTypeGuid();
             HttpUtility.SetUserAgent(
-                e.Request, 
-                _activeProject == null ? _dialogForSolutionUserAgent.Value : _dialogUserAgent.Value, 
-                projectGuids);
+                e.Request,
+                _activeProject == null ? _dialogForSolutionUserAgent.Value : _dialogUserAgent.Value,
+                _projectGuids);
         }
 
         private void CanExecuteClose(object sender, CanExecuteRoutedEventArgs e)
