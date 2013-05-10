@@ -95,9 +95,6 @@ namespace NuGet.Options
                 // Always enable addButton for PackageSourceListBox
                 addButton.Enabled = true;
 
-                NewPackageName.Text = selectedSource.Name;
-                NewPackageSource.Text = selectedSource.Source;
-
                 NewPackageName.Enabled = NewPackageSource.Enabled = true;
             }
             else if (selectedMachineSource != null)
@@ -105,9 +102,6 @@ namespace NuGet.Options
                 // THIS BLOCK corresponds to MachineWidePackageSourcesListBox
 
                 addButton.Enabled = removeButton.Enabled = MoveUpButton.Enabled = MoveDownButton.Enabled = BrowseButton.Enabled = updateButton.Enabled = false;
-
-                NewPackageName.Text = selectedMachineSource.Name;
-                NewPackageSource.Text = selectedMachineSource.Source;
 
                 NewPackageName.Enabled = NewPackageSource.Enabled = false;
             }
@@ -571,12 +565,30 @@ namespace NuGet.Options
         {
             MachineWidePackageSourcesListBox.ClearSelected();
             UpdateUI();
+
+            UpdateTextBoxes((PackageSource)_packageSources.Current);
         }
 
         private void OnSelectedMachineWidePackageSourceChanged(object sender, EventArgs e)
         {
             PackageSourcesListBox.ClearSelected();
             UpdateUI();
+
+            UpdateTextBoxes((PackageSource)_machineWidepackageSources.Current);
+        }
+
+        private void UpdateTextBoxes(PackageSource packageSource)
+        {
+            if (packageSource != null)
+            {
+                NewPackageName.Text = packageSource.Name;
+                NewPackageSource.Text = packageSource.Source;
+            }
+            else
+            {
+                NewPackageName.Text = String.Empty;
+                NewPackageSource.Text = String.Empty;
+            }
         }
 
         private void OnBrowseButtonClicked(object sender, EventArgs e)
