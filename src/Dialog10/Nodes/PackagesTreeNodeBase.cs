@@ -487,6 +487,7 @@ namespace NuGet.Dialog.Providers
                 {
                     // show error message in the Message pane
                     ShowMessagePane(ExceptionUtility.Unwrap(exception).Message);
+                    HideProgressPane();
                 }
                 else
                 {
