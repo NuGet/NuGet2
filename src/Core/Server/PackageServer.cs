@@ -80,8 +80,8 @@ namespace NuGet
             {
                 SendingRequest(this, e);
                 var request = (HttpWebRequest)e.Request;
-				request.AllowWriteStreamBuffering = false;
-				request.KeepAlive = false;
+                request.AllowWriteStreamBuffering = false;
+                request.KeepAlive = false;
 
                 // Set the timeout
                 if (timeout <= 0)
