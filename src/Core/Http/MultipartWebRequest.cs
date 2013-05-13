@@ -44,8 +44,8 @@ namespace NuGet
         {
             string boundary = "---------------------------" + DateTime.Now.Ticks.ToString("x", CultureInfo.InvariantCulture);
             request.ContentType = "multipart/form-data; boundary=" + boundary;
-
             request.ContentLength = GetLength(request, boundary);
+            
             using (Stream stream = request.GetRequestStream())
             {
                 foreach (var item in _formData)
@@ -63,21 +63,14 @@ namespace NuGet
                     stream.Write(headerBytes, 0, headerBytes.Length);
 
                     Stream fileStream = file.FileFactory();
-                    byte[] buffer = new byte[1024];
-                    int bytesRead = 0;
-                    while ((bytesRead = fileStream.Read(buffer, 0, buffer.Length)) != 0)
-                    {
-                        stream.Write(buffer, 0, bytesRead);
-                    } // end while
+                    fileStream.CopyTo(stream);
                     fileStream.Close();
                     stream.Write(newlineBytes, 0, newlineBytes.Length);
                 }
                 string trailer = String.Format(CultureInfo.InvariantCulture, "--{0}--", boundary);
                 byte[] trailerBytes = Encoding.UTF8.GetBytes(trailer);
-                stream.Write(trailerBytes, 0, trailerBytes.Length);
-                
-            }
-          
+                stream.Write(trailerBytes, 0, trailerBytes.Length);                
+            }          
         }
 
         private int GetLength(WebRequest request, string boundary)
@@ -110,6 +103,7 @@ namespace NuGet
                 fileStream.Close();
                 byteLength += newlineBytes.Length;
             }
+            
             string trailer = String.Format(CultureInfo.InvariantCulture, "--{0}--", boundary);
             byte[] trailerBytes = Encoding.UTF8.GetBytes(trailer);
             
