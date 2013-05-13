@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using NuGet.Runtime;
@@ -135,7 +136,7 @@ namespace NuGet.VisualStudio
 
         private static string ConvertToHexString(byte[] data)
         {
-            return String.Concat(data.Select(b => b.ToString("x")));
+            return new SoapHexBinary(data).ToString();
         }
     }
 }
