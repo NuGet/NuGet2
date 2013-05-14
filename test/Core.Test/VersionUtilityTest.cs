@@ -1269,6 +1269,16 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void GetShortNameForNetCore451ReturnsWindows81()
+        {
+            // Act
+            string shortName = VersionUtility.GetShortFrameworkName(new FrameworkName(".NETCore, Version=v4.5.1"));
+
+            // Assert
+            Assert.Equal("win81", shortName);
+        }
+
+        [Fact]
         public void GetShortNameForWindowsPhoneReturnsWP()
         {
             // Act
