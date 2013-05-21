@@ -86,7 +86,7 @@ namespace NuGet
             XDocument document;
             if (propertyProvider == NullPropertyProvider.Instance)
             {
-                document = XDocument.Load(stream);
+                document = XmlUtility.LoadSafe(stream, ignoreWhiteSpace: true);
             }
             else
             {

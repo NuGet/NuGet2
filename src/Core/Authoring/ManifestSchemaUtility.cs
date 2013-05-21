@@ -94,8 +94,10 @@ namespace NuGet
 
                         var settings = new XmlReaderSettings 
                         {
-                            DtdProcessing = DtdProcessing.Prohibit 
+                            DtdProcessing = DtdProcessing.Prohibit,
+                            XmlResolver = null
                         };
+
                         schemaSet.Add(schema, XmlReader.Create(reader, settings));
                         return schemaSet;
                     }

@@ -380,7 +380,7 @@ namespace NuGet
                     {
                         try
                         {
-                            return XDocument.Load(stream);
+                            return XmlUtility.LoadSafe(stream);
                         }
                         catch (XmlException)
                         {

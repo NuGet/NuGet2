@@ -760,7 +760,7 @@ namespace NuGet.Commands
                     {
                         // It's possible for the repositoryPath element to be missing in older versions of 
                         // a NuGet.config file.
-                        var repositoryPathElement = XDocument.Load(stream).Root.Element("repositoryPath");
+                        var repositoryPathElement = XmlUtility.LoadSafe(stream).Root.Element("repositoryPath");
                         if (repositoryPathElement != null)
                         {
                             return repositoryPathElement.Value;

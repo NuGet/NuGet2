@@ -243,7 +243,7 @@ namespace NuGet.VisualStudio
 
         internal virtual XDocument LoadDocument(string path)
         {
-            return XDocument.Load(path);
+            return XmlUtility.LoadSafe(path);
         }
 
         private void PerformPackageInstall(

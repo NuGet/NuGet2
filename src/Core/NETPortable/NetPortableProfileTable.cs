@@ -114,7 +114,7 @@ namespace NuGet
         {
             try
             {
-                var document = XDocument.Load(stream);
+                var document = XmlUtility.LoadSafe(stream);
                 var root = document.Root;
                 if (root.Name.LocalName.Equals("Framework", StringComparison.Ordinal))
                 {
