@@ -133,8 +133,8 @@
 
     <Target Name="CheckFxCop">
         <Error
-            Condition="!Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll') And !Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\CodeAnalysis\fxcoptask.dll')"
-            Text="FxCop not found at $(MSBuildExtensionsPath)\Microsoft\VisualStudio\[v10.0|v11.0]\CodeAnalysis\fxcoptask.dll. Cannot proceed." />
+            Condition="!Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\CodeAnalysis\fxcoptask.dll') And !Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v11.0\CodeAnalysis\fxcoptask.dll') And !Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v12.0\CodeAnalysis\fxcoptask.dll')"
+            Text="FxCop not found at $(MSBuildExtensionsPath)\Microsoft\VisualStudio\[v10.0|v11.0|v12.0]\CodeAnalysis\fxcoptask.dll. Cannot proceed." />
     </Target>
 
     <Target Name="UpdateVsixVersion" Condition="'$(BUILD_NUMBER)' != ''">
@@ -154,7 +154,7 @@
     </Target>
 
     <Target Name="Build">
-        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true" />
+        <MSBuild Projects="$(NuGetRoot)\NuGet.sln" Targets="Build" Properties="EnableCodeAnalysis=true;BuildForDev12=$(BuildForDev12)" />
     </Target>
 
     <Target Name="BuildMono">
@@ -291,7 +291,7 @@
         <Copy ContinueOnError="false" SourceFiles="@(LicenseFileItems)" DestinationFiles="@(LicenseFileItems -&gt;'$(ServerDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
 
-    <Target Name="BuildPackages">
+    <Target Name="BuildPackages" Condition=" '$(BuildForDev12)' != 'true' ">
         <PropertyGroup>
             <NuGetExe>$(ExeDropDirectory)\NuGet.exe</NuGetExe>
         </PropertyGroup>

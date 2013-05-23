@@ -40,6 +40,9 @@
     <Compile Include="IVsTemplateWizard.cs" />
     <Compile Include="IVsWebsiteHandler.cs" />
     <Compile Include="IWindowSettingsManager.cs" />
+    <Compile Include="Settings\ISettingsManager.cs" />
+    <Compile Include="Settings\ISettingsStore.cs" />
+    <Compile Include="Settings\IWritableSettingsStore.cs" />
     <Compile Include="VsMachineWideSettings.cs" />
     <Compile Include="MessageHelper.cs" />
     <Compile Include="NativeMethods.cs" />
@@ -148,13 +151,13 @@
       <Private>False</Private>
       <HintPath>..\..\lib\VS11\Microsoft.VisualStudio.Project.V11Only.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.Settings, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=x86">
-      <HintPath>..\..\lib\VS10\Microsoft.VisualStudio.Settings.dll</HintPath>
+    <Reference Include="$(SettingsAssembly)" Condition=" '$(BuildForDev12)' != 'true' ">
+      <HintPath>$(SettingsAssemblyHintPath)</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.Shell.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+    <Reference Include="$(ShellAssembly)">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\VS10\Microsoft.VisualStudio.Shell.10.0.dll</HintPath>
+      <HintPath>$(ShellAssemblyHintPath)</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -172,12 +175,9 @@
     <Reference Include="Microsoft.VisualStudio.TemplateWizardInterface, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.VCProjectEngine, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\..\lib\Microsoft.VisualStudio.VCProjectEngine.dll</HintPath>
+    <Reference Include="$(VCProjectEngineAssembly)">
+      <HintPath>$(VCProjectEngineAssemblyHintPath)</HintPath>
       <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="NuGet.VisualStudio.Types">
-      <HintPath>..\..\lib\NuGet.VisualStudio.Types.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -295,11 +295,4 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

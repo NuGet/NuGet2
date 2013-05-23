@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell.Settings;
-using NuGet.VisualStudio.Types;
 
 namespace NuGet.VisualStudio
 {

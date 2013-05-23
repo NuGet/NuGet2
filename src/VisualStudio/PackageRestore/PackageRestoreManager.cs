@@ -290,17 +290,18 @@ namespace NuGet.VisualStudio
                 {
                     project.DoWorkInWriterLock(
                         buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
+
+                    // When inside the Write lock, calling Project.Save() will cause a deadlock.
+                    // Thus we will save it after and outside of the Write lock.
+                    project.Save();
                 }
                 else
                 {
                     NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+                        project,
                         project.ToVsHierarchy(),
                         buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
                 }
-
-                // When inside the Write lock, calling Project.Save() will cause a deadlock.
-                // Thus we will save it after and outside of the Write lock.
-                project.Save();
             }
             else
             {

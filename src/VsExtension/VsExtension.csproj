@@ -48,7 +48,7 @@
     <Compile Include="PkgCmdID.cs" />
     <Compile Include="NuGetPackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProvideBindingPath.cs" />
+    <Compile Include="ProvideBindingPath.cs" Condition=" '$(BuildForDev12)' != 'true' " />
     <Compile Include="ProvideSearchProviderAttribute.cs" />
     <Compile Include="Resources.Designer.cs">
       <DependentUpon>Resources.resx</DependentUpon>
@@ -225,9 +225,9 @@
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.9.0, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-    <Reference Include="Microsoft.VisualStudio.Shell.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+    <Reference Include="$(ShellAssembly)">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\VS10\Microsoft.VisualStudio.Shell.10.0.dll</HintPath>
+      <HintPath>$(ShellAssemblyHintPath)</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />

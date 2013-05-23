@@ -10,19 +10,33 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NuGet.VisualStudio12</RootNamespace>
     <AssemblyName>NuGet.VisualStudio12</AssemblyName>
+    <RunCodeAnalysis Condition="'$(EnableCodeAnalysis)'=='true'">true</RunCodeAnalysis>
+    <DefineConstants Condition=" '$(BuildForDev12)' == 'true' ">$(DefineConstants);VS12</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Build" />
+    <Reference Include="$(MSBuildAssembly)" />
+    <Reference Include="$(ShellAssembly)">
+        <HintPath>$(ShellAssemblyHintPath)</HintPath>
+    </Reference>
+    <Reference Include="envdte, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.ProjectSystem.V12Only">
+      <HintPath>..\..\lib\Microsoft.VisualStudio.ProjectSystem.V12Only.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-    <Reference Include="NuGet.VisualStudio.Types">
-      <HintPath>..\..\lib\NuGet.VisualStudio.Types.dll</HintPath>
+    <Reference Include="Microsoft.VisualStudio.Threading">
+      <HintPath>..\..\lib\Microsoft.VisualStudio.Threading.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\Common\CommonAssemblyInfo.cs">
+      <Link>Properties\CommonAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="ProjectHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SettingsManagerWrapper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

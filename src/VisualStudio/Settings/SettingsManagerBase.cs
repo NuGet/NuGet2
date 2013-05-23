@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using Microsoft.VisualStudio.Settings;
-using Microsoft.VisualStudio.Shell.Settings;
-using NuGet.VisualStudio.Types;
 
 namespace NuGet.VisualStudio
 {
     public abstract class SettingsManagerBase
     {
-        private readonly Lazy<ISettingsManager> _settingsManager;
+        private readonly ISettingsManager _settingsManager;
 
         protected SettingsManagerBase(IServiceProvider serviceProvider)
         {
@@ -18,36 +14,12 @@ namespace NuGet.VisualStudio
                 throw new ArgumentNullException("serviceProvider");
             }
 
-            _settingsManager = new Lazy<ISettingsManager>(() => LoadSettingsManager(serviceProvider));
-        }
-
-        private ISettingsManager LoadSettingsManager(IServiceProvider serviceProvider)
-        {
-            if (VsVersionHelper.IsVisualStudio2010 || VsVersionHelper.IsVisualStudio2012)
-            {
-                return LoadSettingsManagerForVS10And11(serviceProvider);
-            }
-            else
-            {
-                return LoadSettingsManagerForVS12(serviceProvider);
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private ISettingsManager LoadSettingsManagerForVS10And11(IServiceProvider serviceProvider)
-        {
-            return new SettingsManagerWrapper(serviceProvider);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private ISettingsManager LoadSettingsManagerForVS12(IServiceProvider serviceProvider)
-        {
-            return new NuGet.VisualStudio12.SettingsManagerWrapper(serviceProvider);
+            _settingsManager = new SettingsManagerWrapper(serviceProvider);
         }
 
         protected bool ReadBool(string settingsRoot, string property, bool defaultValue = false)
         {
-            var userSettingsStore = _settingsManager.Value.GetReadOnlySettingsStore();
+            var userSettingsStore = _settingsManager.GetReadOnlySettingsStore();
             if (userSettingsStore != null && userSettingsStore.CollectionExists(settingsRoot))
             {
                 return userSettingsStore.GetBoolean(settingsRoot, property, defaultValue);
@@ -69,7 +41,7 @@ namespace NuGet.VisualStudio
 
         protected int ReadInt32(string settingsRoot, string property, int defaultValue = 0)
         {
-            var userSettingsStore = _settingsManager.Value.GetReadOnlySettingsStore();
+            var userSettingsStore = _settingsManager.GetReadOnlySettingsStore();
             if (userSettingsStore != null && userSettingsStore.CollectionExists(settingsRoot))
             {
                 return userSettingsStore.GetInt32(settingsRoot, property, defaultValue);
@@ -91,7 +63,7 @@ namespace NuGet.VisualStudio
 
         protected string ReadString(string settingsRoot, string property, string defaultValue = "")
         {
-            var userSettingsStore = _settingsManager.Value.GetReadOnlySettingsStore();
+            var userSettingsStore = _settingsManager.GetReadOnlySettingsStore();
             if (userSettingsStore != null && userSettingsStore.CollectionExists(settingsRoot))
             {
                 return userSettingsStore.GetString(settingsRoot, property, defaultValue);
@@ -104,7 +76,7 @@ namespace NuGet.VisualStudio
 
         protected string[] ReadStrings(string settingsRoot, string[] properties, string defaultValue = "")
         {
-            var userSettingsStore = _settingsManager.Value.GetReadOnlySettingsStore();
+            var userSettingsStore = _settingsManager.GetReadOnlySettingsStore();
             if (userSettingsStore != null && userSettingsStore.CollectionExists(settingsRoot))
             {
                 string[] values = new string[properties.Length];
@@ -158,7 +130,7 @@ namespace NuGet.VisualStudio
 
         protected void ClearAllSettings(string settingsRoot)
         {
-            IWritableSettingsStore userSettingsStore = _settingsManager.Value.GetWritableSettingsStore();
+            IWritableSettingsStore userSettingsStore = _settingsManager.GetWritableSettingsStore();
             if (userSettingsStore != null && userSettingsStore.CollectionExists(settingsRoot))
             {
                 userSettingsStore.DeleteCollection(settingsRoot);
@@ -167,7 +139,7 @@ namespace NuGet.VisualStudio
 
         private IWritableSettingsStore GetWritableSettingsStore(string settingsRoot)
         {
-            IWritableSettingsStore userSettingsStore = _settingsManager.Value.GetWritableSettingsStore();
+            IWritableSettingsStore userSettingsStore = _settingsManager.GetWritableSettingsStore();
             if (userSettingsStore != null && !userSettingsStore.CollectionExists(settingsRoot))
             {
                 userSettingsStore.CreateCollection(settingsRoot);

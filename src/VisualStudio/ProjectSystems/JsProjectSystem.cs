@@ -72,8 +72,18 @@ namespace NuGet.VisualStudio
                 }
 
                 string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
-                Project.DoWorkInWriterLock(buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
-                Project.Save();
+                if (VsVersionHelper.IsVisualStudio2012)
+                {
+                    Project.DoWorkInWriterLock(buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
+                    Project.Save();
+                }
+                else
+                {
+                    NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+                        Project,
+                        Project.ToVsHierarchy(),
+                        buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
+                }
             }
         }
 
@@ -92,8 +102,19 @@ namespace NuGet.VisualStudio
 
                 // For VS 2012 or above, the operation has to be done inside the Writer lock
                 string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
-                Project.DoWorkInWriterLock(buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
-                Project.Save();
+                if (VsVersionHelper.IsVisualStudio2012)
+                {
+                    Project.DoWorkInWriterLock(buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
+                    Project.Save();
+                }
+                else
+                {
+                    NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+                        Project,
+                        Project.ToVsHierarchy(),
+                        buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
+                }
+
             }
         }
 
