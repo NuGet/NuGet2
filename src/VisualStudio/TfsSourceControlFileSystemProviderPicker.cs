@@ -25,15 +25,15 @@ namespace NuGet.VisualStudio
                 string assemblyName;
                 if (VsVersionHelper.IsVisualStudio2010)
                 {
-                    assemblyName = "NuGet.TeamFoundationServer10.dll";
+                    assemblyName = "NuGet.TeamFoundationServer10";
                 }
                 else if (VsVersionHelper.IsVisualStudio2012)
                 {
-                    assemblyName = "NuGet.TeamFoundationServer11.dll";
+                    assemblyName = "NuGet.TeamFoundationServer11";
                 }
                 else 
                 {
-                    assemblyName = "NuGet.TeamFoundationServer.dll";
+                    assemblyName = "NuGet.TeamFoundationServer";
                 }
                 
                 try

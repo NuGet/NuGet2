@@ -124,7 +124,7 @@ namespace NuGet.VisualStudio
             else
             {
                 var assemblyDirectory = Path.GetDirectoryName(executingAssembly.Location);
-                return Assembly.LoadFrom(Path.Combine(assemblyDirectory, assemblyName));
+                return Assembly.LoadFrom(Path.Combine(assemblyDirectory, assemblyName + ".dll"));
             }
         }
 
