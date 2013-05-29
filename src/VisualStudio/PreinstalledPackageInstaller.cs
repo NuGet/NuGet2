@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -33,21 +34,22 @@ namespace NuGet.VisualStudio
             _solutionManager = solutionManager;
         }
 
-        internal string GetExtensionRepositoryPath(string repositoryId, object vsExtensionManager, Action<string> errorHandler)
+        internal string GetExtensionRepositoryPath(string repositoryId, object vsExtensionManager, Action<string> throwingErrorHandler)
         {
-            var extensionManagerShim = new ExtensionManagerShim(vsExtensionManager, errorHandler);
+            var extensionManagerShim = new ExtensionManagerShim(vsExtensionManager, throwingErrorHandler);
             string installPath;
 
             if (!extensionManagerShim.TryGetExtensionInstallPath(repositoryId, out installPath))
             {
-                errorHandler(String.Format(VsResources.TemplateWizard_InvalidExtensionId,
+                throwingErrorHandler(String.Format(VsResources.TemplateWizard_InvalidExtensionId,
                     repositoryId));
+                Debug.Fail("The throwingErrorHandler did not throw");
             }
 
             return Path.Combine(installPath, "Packages");
         }
 
-        internal string GetRegistryRepositoryPath(string keyName, IEnumerable<IRegistryKey> registryKeys, Action<string> errorHandler)
+        internal string GetRegistryRepositoryPath(string keyName, IEnumerable<IRegistryKey> registryKeys, Action<string> throwingErrorHandler)
         {
             IRegistryKey repositoryKey = null;
             string repositoryValue = null;
@@ -79,12 +81,14 @@ namespace NuGet.VisualStudio
 
             if (repositoryKey == null)
             {
-                errorHandler(String.Format(VsResources.TemplateWizard_RegistryKeyError, RegistryKeyRoot));
+                throwingErrorHandler(String.Format(VsResources.TemplateWizard_RegistryKeyError, RegistryKeyRoot));
+                Debug.Fail("throwingErrorHandler did not throw");
             }
 
             if (String.IsNullOrEmpty(repositoryValue))
             {
-                errorHandler(String.Format(VsResources.TemplateWizard_InvalidRegistryValue, keyName, RegistryKeyRoot));
+                throwingErrorHandler(String.Format(VsResources.TemplateWizard_InvalidRegistryValue, keyName, RegistryKeyRoot));
+                Debug.Fail("throwingErrorHandler did not throw");
             }
 
             // Ensure a trailing slash so that the path always gets read as a directory
