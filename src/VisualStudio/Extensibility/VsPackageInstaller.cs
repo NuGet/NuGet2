@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using EnvDTE;
+using NuGetConsole;
 
 namespace NuGet.VisualStudio
 {
@@ -10,22 +12,64 @@ namespace NuGet.VisualStudio
         private readonly IVsPackageManagerFactory _packageManagerFactory;
         private readonly IScriptExecutor _scriptExecutor;
         private readonly IPackageRepositoryFactory _repositoryFactory;
+        private readonly IOutputConsoleProvider _consoleProvider;
         private readonly IVsCommonOperations _vsCommonOperations;
         private readonly ISolutionManager _solutionManager;
+        private readonly IVsWebsiteHandler _websiteHandler;
+        private readonly IVsPackageInstallerServices _packageServices;
+        private readonly IEnumerable<IRegistryKey> _registryKeys;
+        private readonly object _vsExtensionManager;
 
         [ImportingConstructor]
         public VsPackageInstaller(IVsPackageManagerFactory packageManagerFactory,
                                   IScriptExecutor scriptExecutor,
                                   IPackageRepositoryFactory repositoryFactory,
+                                  IOutputConsoleProvider consoleProvider,
                                   IVsCommonOperations vsCommonOperations,
-                                  ISolutionManager solutionManager)
+                                  ISolutionManager solutionManager,
+                                  IVsWebsiteHandler websiteHandler,
+                                  IVsPackageInstallerServices packageServices)
         {
             _packageManagerFactory = packageManagerFactory;
             _scriptExecutor = scriptExecutor;
             _repositoryFactory = repositoryFactory;
+            _consoleProvider = consoleProvider;
             _vsCommonOperations = vsCommonOperations;
             _solutionManager = solutionManager;
+            _websiteHandler = websiteHandler;
+            _packageServices = packageServices;
         }
+
+        internal VsPackageInstaller(IVsPackageManagerFactory packageManagerFactory,
+                                    IScriptExecutor scriptExecutor,
+                                    IPackageRepositoryFactory repositoryFactory,
+                                    IOutputConsoleProvider consoleProvider,
+                                    IVsCommonOperations vsCommonOperations,
+                                    ISolutionManager solutionManager,
+                                    IVsWebsiteHandler websiteHandler,
+                                    IVsPackageInstallerServices packageServices,
+                                    IEnumerable<IRegistryKey> registryKeys)
+            : this(packageManagerFactory, scriptExecutor, repositoryFactory, consoleProvider, vsCommonOperations, solutionManager, websiteHandler, packageServices)
+        {
+            _registryKeys = registryKeys;
+        }
+
+        internal VsPackageInstaller(IVsPackageManagerFactory packageManagerFactory,
+                                    IScriptExecutor scriptExecutor,
+                                    IPackageRepositoryFactory repositoryFactory,
+                                    IOutputConsoleProvider consoleProvider,
+                                    IVsCommonOperations vsCommonOperations,
+                                    ISolutionManager solutionManager,
+                                    IVsWebsiteHandler websiteHandler,
+                                    IVsPackageInstallerServices packageServices,
+                                    object vsExtensionManager)
+            : this(packageManagerFactory, scriptExecutor, repositoryFactory, consoleProvider, vsCommonOperations, solutionManager, websiteHandler, packageServices)
+        {
+            _vsExtensionManager = vsExtensionManager;
+        }
+
+        [Import]
+        public Lazy<IRepositorySettings> RepositorySettings { get; set; }
 
         public void InstallPackage(string source, Project project, string packageId, Version version, bool ignoreDependencies)
         {
@@ -106,6 +150,47 @@ namespace NuGet.VisualStudio
                     packageManager.PackageInstalled -= installedHandler;
                 }
             }
+        }
+
+        public void InstallPackagesFromRegistryRepository(string keyName, bool isPreUnzipped, Project project, IDictionary<string, string> packageVersions)
+        {
+            var preinstalledPackageInstaller = new PreinstalledPackageInstaller(_websiteHandler, _packageServices, _vsCommonOperations, _solutionManager);
+            var repositoryPath = preinstalledPackageInstaller.GetRegistryRepositoryPath(keyName, _registryKeys, ThrowError);
+
+            var config = GetPreinstalledPackageConfiguration(isPreUnzipped, packageVersions, repositoryPath);
+            preinstalledPackageInstaller.PerformPackageInstall(this, project, config, RepositorySettings, ShowWarning, ThrowError);
+        }
+
+        public void InstallPackagesFromVSExtensionRepository(string extensionId, bool isPreUnzipped, Project project, IDictionary<string, string> packageVersions)
+        {
+            var preinstalledPackageInstaller = new PreinstalledPackageInstaller(_websiteHandler, _packageServices, _vsCommonOperations, _solutionManager);
+            var repositoryPath = preinstalledPackageInstaller.GetExtensionRepositoryPath(extensionId, _vsExtensionManager, ThrowError);
+
+            var config = GetPreinstalledPackageConfiguration(isPreUnzipped, packageVersions, repositoryPath);
+            preinstalledPackageInstaller.PerformPackageInstall(this, project, config, RepositorySettings, ShowWarning, ThrowError);
+        }
+
+        private static PreinstalledPackageConfiguration GetPreinstalledPackageConfiguration(bool isPreUnzipped, IDictionary<string, string> packageVersions, string repositoryPath)
+        {
+            List<PreinstalledPackageInfo> packageInfos = new List<PreinstalledPackageInfo>();
+            foreach (var package in packageVersions)
+            {
+                packageInfos.Add(new PreinstalledPackageInfo(package.Key, package.Value));
+            }
+
+            var config = new PreinstalledPackageConfiguration(repositoryPath, packageInfos, isPreUnzipped);
+            return config;
+        }
+
+        private static void ThrowError(string message)
+        {
+            throw new InvalidOperationException(message);
+        }
+
+        private void ShowWarning(string message)
+        {
+            IConsole console = _consoleProvider.CreateOutputConsole(requirePowerShellHost: false);
+            console.WriteLine(message);
         }
 
         private static SemanticVersion ToSemanticVersion(string version)

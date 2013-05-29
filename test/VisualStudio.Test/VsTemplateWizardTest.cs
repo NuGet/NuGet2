@@ -542,8 +542,8 @@ namespace NuGet.VisualStudio.Test
                 BuildPackageElement("MyOtherPackage", "2.0")
             };
             var expectedPackages = new[] {
-                new VsTemplateWizardPackageInfo("MyPackage", "1.0"),
-                new VsTemplateWizardPackageInfo("MyOtherPackage", "2.0")
+                new PreinstalledPackageInfo("MyPackage", "1.0"),
+                new PreinstalledPackageInfo("MyOtherPackage", "2.0")
             };
             var document = BuildDocument("template", content);
 
@@ -554,7 +554,7 @@ namespace NuGet.VisualStudio.Test
         public void GetConfigurationFromXmlDocument_WorksWithDocumentWithNoNamespace()
         {
             var expectedPackages = new[] {
-                new VsTemplateWizardPackageInfo("MyPackage", "1.0"),
+                new PreinstalledPackageInfo("MyPackage", "1.0"),
             };
             var document =
                 new XDocument(new XElement("VSTemplate",
@@ -569,7 +569,7 @@ namespace NuGet.VisualStudio.Test
         public void GetConfigurationFromXmlDocument_WorksWithSemanticVersions()
         {
             var expectedPackages = new[] {
-                new VsTemplateWizardPackageInfo("MyPackage", "4.0.0-ctp-2"),
+                new PreinstalledPackageInfo("MyPackage", "4.0.0-ctp-2"),
             };
             var document =
                 new XDocument(new XElement("VSTemplate",
@@ -660,7 +660,7 @@ namespace NuGet.VisualStudio.Test
             Assert.Equal(expectedPath, nugetFolder);
         }
 
-        private static void VerifyParsedPackages(XDocument document, IEnumerable<VsTemplateWizardPackageInfo> expectedPackages)
+        private static void VerifyParsedPackages(XDocument document, IEnumerable<PreinstalledPackageInfo> expectedPackages)
         {
             // Arrange
             var wizard = new VsTemplateWizard(null, null, null, null, null, null);
@@ -1254,6 +1254,12 @@ namespace NuGet.VisualStudio.Test
             internal override void ShowErrorMessage(string message)
             {
                 ErrorMessages.Add(message);
+            }
+
+            internal override void ThrowWizardBackoutError(string message)
+            {
+                ErrorMessages.Add(message);
+                throw new WizardBackoutException();
             }
         }
     }
