@@ -12,6 +12,9 @@ using NuGet.VisualStudio.Resources;
 
 namespace NuGet.VisualStudio
 {
+    /// <summary>
+    /// Provides functionality for installing packages already on disk from an installer (MSI or VSIX).
+    /// </summary>
     internal class PreinstalledPackageInstaller
     {
         private const string RegistryKeyRoot = @"SOFTWARE\NuGet\Repository";
@@ -34,21 +37,35 @@ namespace NuGet.VisualStudio
             _solutionManager = solutionManager;
         }
 
-        internal string GetExtensionRepositoryPath(string repositoryId, object vsExtensionManager, Action<string> throwingErrorHandler)
+        /// <summary>
+        /// Gets the folder location where packages have been laid down for the specified extension.
+        /// </summary>
+        /// <param name="extensionId">The installed extension.</param>
+        /// <param name="vsExtensionManager">The VS Extension manager instance.</param>
+        /// <param name="throwingErrorHandler">An error handler that accepts the error message string and then throws the appropriate exception.</param>
+        /// <returns>The absolute path to the extension's packages folder.</returns>
+        internal string GetExtensionRepositoryPath(string extensionId, object vsExtensionManager, Action<string> throwingErrorHandler)
         {
             var extensionManagerShim = new ExtensionManagerShim(vsExtensionManager, throwingErrorHandler);
             string installPath;
 
-            if (!extensionManagerShim.TryGetExtensionInstallPath(repositoryId, out installPath))
+            if (!extensionManagerShim.TryGetExtensionInstallPath(extensionId, out installPath))
             {
-                throwingErrorHandler(String.Format(VsResources.TemplateWizard_InvalidExtensionId,
-                    repositoryId));
+                throwingErrorHandler(String.Format(VsResources.PreinstalledPackages_InvalidExtensionId,
+                    extensionId));
                 Debug.Fail("The throwingErrorHandler did not throw");
             }
 
             return Path.Combine(installPath, "Packages");
         }
 
+        /// <summary>
+        /// Gets the folder location where packages have been laid down in a registry-specified location.
+        /// </summary>
+        /// <param name="keyName">The registry key name that specifies the packages location.</param>
+        /// <param name="registryKeys">The optional list of parent registry keys to look in (used for unit tests).</param>
+        /// <param name="throwingErrorHandler">An error handler that accepts the error message string and then throws the appropriate exception.</param>
+        /// <returns>The absolute path to the packages folder specified in the registry.</returns>
         internal string GetRegistryRepositoryPath(string keyName, IEnumerable<IRegistryKey> registryKeys, Action<string> throwingErrorHandler)
         {
             IRegistryKey repositoryKey = null;
@@ -81,13 +98,13 @@ namespace NuGet.VisualStudio
 
             if (repositoryKey == null)
             {
-                throwingErrorHandler(String.Format(VsResources.TemplateWizard_RegistryKeyError, RegistryKeyRoot));
+                throwingErrorHandler(String.Format(VsResources.PreinstalledPackages_RegistryKeyError, RegistryKeyRoot));
                 Debug.Fail("throwingErrorHandler did not throw");
             }
 
             if (String.IsNullOrEmpty(repositoryValue))
             {
-                throwingErrorHandler(String.Format(VsResources.TemplateWizard_InvalidRegistryValue, keyName, RegistryKeyRoot));
+                throwingErrorHandler(String.Format(VsResources.PreinstalledPackages_InvalidRegistryValue, keyName, RegistryKeyRoot));
                 Debug.Fail("throwingErrorHandler did not throw");
             }
 
@@ -97,6 +114,15 @@ namespace NuGet.VisualStudio
             return Path.GetDirectoryName(repositoryValue);
         }
 
+        /// <summary>
+        /// Installs one or more packages into the specified project.
+        /// </summary>
+        /// <param name="packageInstaller">The package installer service that performs the actual package installation.</param>
+        /// <param name="project">The target project for installation.</param>
+        /// <param name="configuration">The packages to install, where to install them from, and additional options for their installation.</param>
+        /// <param name="repositorySettings">The repository settings for the packages being installed.</param>
+        /// <param name="warningHandler">An action that accepts a warning message and presents it to the user, allowing execution to continue.</param>
+        /// <param name="errorHandler">An action that accepts an error message and presents it to the user, allowing execution to continue.</param>
         internal void PerformPackageInstall(
             IVsPackageInstaller packageInstaller,
             Project project,
@@ -121,7 +147,7 @@ namespace NuGet.VisualStudio
                     if (!_packageServices.IsPackageInstalled(project, package.Id, package.Version))
                     {
                         // No? Raise a warning (likely written to the Output window) and ignore this package.
-                        warningHandler(String.Format(VsResources.TemplateWizard_VersionConflict, package.Id, package.Version));
+                        warningHandler(String.Format(VsResources.PreinstalledPackages_VersionConflict, package.Id, package.Version));
                     }
                     // Yes? Just silently ignore this package!
                 }
@@ -131,7 +157,7 @@ namespace NuGet.VisualStudio
                     {
                         if (InfoHandler != null)
                         {
-                            InfoHandler(String.Format(CultureInfo.CurrentCulture, VsResources.TemplateWizard_PackageInstallStatus, package.Id, package.Version));
+                            InfoHandler(String.Format(CultureInfo.CurrentCulture, VsResources.PreinstalledPackages_PackageInstallStatus, package.Id, package.Version));
                         }
 
                         packageInstaller.InstallPackage(repository, project, package.Id, package.Version.ToString(), ignoreDependencies: true, skipAssemblyReferences: package.SkipAssemblyReferences);
@@ -146,7 +172,7 @@ namespace NuGet.VisualStudio
             if (failedPackageErrors.Any())
             {
                 var errorString = new StringBuilder();
-                errorString.AppendFormat(VsResources.TemplateWizard_FailedToInstallPackage, repositoryPath);
+                errorString.AppendFormat(VsResources.PreinstalledPackages_FailedToInstallPackage, repositoryPath);
                 errorString.AppendLine();
                 errorString.AppendLine();
                 errorString.Append(String.Join(Environment.NewLine, failedPackageErrors));
@@ -169,15 +195,27 @@ namespace NuGet.VisualStudio
             }
         }
 
+        /// <summary>
+        /// For Website projects, adds necessary "refresh" files in the bin folder for added references.
+        /// </summary>
+        /// <param name="project">The target Website project.</param>
+        /// <param name="repositoryPath">The local repository path.</param>
+        /// <param name="packageInfos">The packages that were installed.</param>
         private void CreateRefreshFilesInBin(Project project, string repositoryPath, IEnumerable<PreinstalledPackageInfo> packageInfos)
         {
             IEnumerable<PackageName> packageNames = packageInfos.Select(pi => new PackageName(pi.Id, pi.Version));
             _websiteHandler.AddRefreshFilesForReferences(project, new PhysicalFileSystem(repositoryPath), packageNames);
         }
 
+        /// <summary>
+        /// By convention, we copy all files under the NativeBinaries folder under package root to the bin folder of the Website.
+        /// </summary>
+        /// <param name="project">The target Website project.</param>
+        /// <param name="repositoryPath">The local repository path.</param>
+        /// <param name="packageInfos">The packages that were installed.</param>
         private void CopyNativeBinariesToBin(Project project, string repositoryPath, IEnumerable<PreinstalledPackageInfo> packageInfos)
         {
-            // By convention, we copy all files under the NativeBinaries folder under package root to the bin folder of the website
+            // 
             IEnumerable<PackageName> packageNames = packageInfos.Select(pi => new PackageName(pi.Id, pi.Version));
             _websiteHandler.CopyNativeBinaries(project, new PhysicalFileSystem(repositoryPath), packageNames);
         }
@@ -231,7 +269,7 @@ namespace NuGet.VisualStudio
                 {
                     // if any of the types or methods cannot be loaded throw an error. this indicates that some API in
                     // Microsoft.VisualStudio.ExtensionManager got changed.
-                    errorHandler(VsResources.TemplateWizard_ExtensionManagerError);
+                    errorHandler(VsResources.PreinstalledPackages_ExtensionManagerError);
                 }
             }
 
