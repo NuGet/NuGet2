@@ -624,7 +624,9 @@ namespace NuGet.Commands
 
             // Collect all packages
             IDictionary<PackageName, PackageReference> packageReferences = 
-                file.GetPackageReferences().ToDictionary(r => new PackageName(r.Id, r.Version));
+                file.GetPackageReferences()
+                .Where(r => !r.IsDevelopmentDependency)
+                .ToDictionary(r => new PackageName(r.Id, r.Version));
             // add all packages and create an associated dependency to the dictionary
             foreach (PackageReference reference in packageReferences.Values)
             {
