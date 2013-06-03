@@ -49,7 +49,7 @@
             {
                 string fileName = item.GetMetadata("Filename");
               
-                if(!fileName.StartsWith("NuGet")) 
+                if(!fileName.StartsWith("NuGet") && fileName != "Microsoft.Web.XmlTransform") 
                 {
                     Log.LogWarning("The assembly '{0}' is not expected to be in the VSIX.", fileName);
                     outputItems.Add(item);

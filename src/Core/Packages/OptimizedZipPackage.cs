@@ -53,7 +53,7 @@ namespace NuGet
             _fileSystem = new PhysicalFileSystem(directory);
             _packagePath = Path.GetFileName(fullPackagePath);
             _expandedFileSystem = _tempFileSystem;
-            
+
             EnsureManifest();
         }
 
@@ -233,14 +233,9 @@ namespace NuGet
 
                     using (Stream partStream = file.GetStream())
                     {
-                        // only copy the package part to disk if there doesn't exist
-                        // a file with the same name.
-                        if (!_expandedFileSystem.FileExists(filePath))
+                        using (Stream targetStream = _expandedFileSystem.CreateFile(filePath))
                         {
-                            using (Stream targetStream = _expandedFileSystem.CreateFile(filePath))
-                            {
-                                partStream.CopyTo(targetStream);
-                            }
+                            partStream.CopyTo(targetStream);
                         }
                     }
 
@@ -262,7 +257,7 @@ namespace NuGet
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public static void PurgeCache() 
+        public static void PurgeCache()
         {
             lock (_cachedExpandedFolder)
             {

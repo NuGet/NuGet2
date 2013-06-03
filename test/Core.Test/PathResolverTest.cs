@@ -364,5 +364,19 @@ namespace NuGet.Test
             Assert.Equal(@"bin\debug\baz.dll", files[0].Path);
             Assert.Equal(@"bin\debug\notbaz.dll", files[1].Path);
         }
+
+        [Fact]
+        public void NormalizeExcludeWildcardIgnoresBasePathForWildcardMatchingAnySubdirectory()
+        {
+            // Arrange
+            var wildcard = @"**\exclude.me";
+            var basePath = @"c:\base\path";
+
+            // Act
+            var result = PathResolver.NormalizeWildcardForExcludedFiles(basePath, wildcard);
+
+            // Assert
+            Assert.Equal(wildcard, result);
+        }
     }
 }

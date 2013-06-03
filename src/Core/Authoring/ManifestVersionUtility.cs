@@ -10,8 +10,11 @@ namespace NuGet
     {
         public const int DefaultVersion = 1;
         public const int SemverVersion = 3;
+
         public const int TargetFrameworkSupportForDependencyContentsAndToolsVersion = 4;
         public const int TargetFrameworkSupportForReferencesVersion = 5;
+        public const int XdtTransformationVersion = 6;
+
         private static readonly Type[] _xmlAttributes = new[] { typeof(XmlElementAttribute), typeof(XmlAttributeAttribute), typeof(XmlArrayAttribute) };
 
         public static int GetManifestVersion(ManifestMetadata metadata)
@@ -25,6 +28,7 @@ namespace NuGet
             bool referencesHasTargetFramework =
               metadata.ReferenceSets != null &&
               metadata.ReferenceSets.Any(r => r.TargetFramework != null);
+
             if (referencesHasTargetFramework)
             {
                 return TargetFrameworkSupportForReferencesVersion;

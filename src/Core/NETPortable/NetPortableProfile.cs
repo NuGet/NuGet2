@@ -13,8 +13,33 @@ namespace NuGet
     {
         private string _customProfile;
 
+        /// <summary>
+        /// Creates a portable profile with the given name and supported frameworks.
+        /// </summary>
         public NetPortableProfile(string name, IEnumerable<FrameworkName> supportedFrameworks)
+            // This zero version is compatible with the existing behavior, which used 
+            // the string "v0.0" as the version for constructed instances of this class always.
+            : this("v0.0", name, supportedFrameworks)
         {
+        }
+
+        // NOTE: this is a new constructor provided, which passes in the framework version 
+        // of the given profile in addition to the name. 
+        // The existing behavior was to pass "v0.0" as the framework version, so 
+        // that's what the fixed parameter is in the backwards-compatible constructor above.
+        /// <summary>
+        /// Creates a portable profile for the given framework version, profile name and 
+        /// supported frameworks.
+        /// </summary>
+        /// <param name="version">.NET framework version that the profile belongs to, like "v4.0".</param>
+        /// <param name="name">Name of the portable profile, like "win+net45".</param>
+        /// <param name="supportedFrameworks">Supported frameworks.</param>
+        public NetPortableProfile(string version, string name, IEnumerable<FrameworkName> supportedFrameworks)
+        {
+            if (String.IsNullOrEmpty(version))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "version");
+            }
             if (String.IsNullOrEmpty(name))
             {
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "name");
@@ -38,14 +63,25 @@ namespace NuGet
 
             Name = name;
             SupportedFrameworks = new ReadOnlyHashSet<FrameworkName>(frameworks);
+            FrameworkVersion = version;
         }
 
+        /// <summary>
+        /// Gets the profile name.
+        /// </summary>
         public string Name { get; private set; }
+
+        /// <summary>
+        /// Gets the framework version that this profile belongs to.
+        /// </summary>
+        public string FrameworkVersion { get; private set; }
 
         public ISet<FrameworkName> SupportedFrameworks { get; private set; }
 
         public bool Equals(NetPortableProfile other)
         {
+            // NOTE: equality and hashcode does not change when you add Version, since 
+            // no two profiles across framework versions have the same name.
             return Name.Equals(other.Name, StringComparison.OrdinalIgnoreCase) &&
                    SupportedFrameworks.SetEquals(other.SupportedFrameworks);
         }
@@ -107,15 +143,22 @@ namespace NuGet
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "profileValue");
             }
 
-            if (profileValue.StartsWith("Profile", StringComparison.OrdinalIgnoreCase))
+            // Previously, only the full "ProfileXXX" long .NET name could be used for this method.
+            // This was inconsistent with the way the "custom profile string" (like "sl4+net45+wp7")
+            // was supported in other places. By fixing the way the profile table indexes the cached 
+            // profiles, we can now indeed access by either naming, so we don't need the old check 
+            // for the string starting with "Profile".
+            var result = NetPortableProfileTable.GetProfile(profileValue);
+            if (result != null)
             {
-                return NetPortableProfileTable.GetProfile(profileValue);
+                return result;
             }
 
             VersionUtility.ValidatePortableFrameworkProfilePart(profileValue);
 
             var supportedFrameworks = profileValue.Split(new [] {'+'}, StringSplitOptions.RemoveEmptyEntries)
                                                   .Select(VersionUtility.ParseFrameworkName);
+
             return new NetPortableProfile(profileValue, supportedFrameworks);
         }
     }

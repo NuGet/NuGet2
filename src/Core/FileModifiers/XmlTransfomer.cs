@@ -6,17 +6,17 @@ using System.Xml.Linq;
 
 namespace NuGet
 {
-    internal class XmlTransfomer : IPackageFileTransformer
+    internal class XmlTransformer : IPackageFileTransformer
     {
         private readonly IDictionary<XName, Action<XElement, XElement>> _nodeActions;
 
-        public XmlTransfomer(IDictionary<XName, Action<XElement, XElement>> nodeActions)
+        public XmlTransformer(IDictionary<XName, Action<XElement, XElement>> nodeActions)
         {
             _nodeActions = nodeActions;
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We are creating a new stream for the caller to use")]
-        public void TransformFile(IPackageFile file, string targetPath, IProjectSystem projectSystem)
+        public virtual void TransformFile(IPackageFile file, string targetPath, IProjectSystem projectSystem)
         {
             // Get the xml fragment
             XElement xmlFragment = GetXml(file, projectSystem);
@@ -30,7 +30,7 @@ namespace NuGet
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We are creating a new stream for the caller to use")]
-        public void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, IProjectSystem projectSystem)
+        public virtual void RevertFile(IPackageFile file, string targetPath, IEnumerable<IPackageFile> matchingFiles, IProjectSystem projectSystem)
         {
             // Get the xml snippet
             XElement xmlFragment = GetXml(file, projectSystem);
@@ -45,7 +45,10 @@ namespace NuGet
             document.Root.Except(xmlFragment.Except(mergedFragments));
 
             // Save the new content to the file system
-            projectSystem.AddFile(targetPath, document.Save);
+            using (var fileStream = projectSystem.CreateFile(targetPath))
+            {
+                document.Save(fileStream);
+            }
         }
 
         private static XElement GetXml(IPackageFile file, IProjectSystem projectSystem)
