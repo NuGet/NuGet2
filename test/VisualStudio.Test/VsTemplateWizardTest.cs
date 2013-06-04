@@ -7,9 +7,10 @@ using Microsoft.VisualStudio.ExtensionManager;
 using Microsoft.VisualStudio.TemplateWizard;
 using Moq;
 using NuGet.Test;
+using NuGet.VisualStudio.Resources;
+using NuGetConsole;
 using Xunit;
 using Xunit.Extensions;
-using NuGetConsole;
 
 namespace NuGet.VisualStudio.Test
 {
@@ -299,8 +300,8 @@ namespace NuGet.VisualStudio.Test
                                                                @"C:\Some\file.vstemplate").ToList());
 
             // Assert
-            Assert.Equal(
-                "The project template is configured to use an Extension-specific package repository but the Extension ID has not been specified. Use the \"repositoryId\" attribute to specify the Extension ID.",
+            Assert.Equal(                
+                VsResources.TemplateWizard_MissingExtensionId,
                 wizard.ErrorMessages.Single());
         }
 
@@ -323,7 +324,7 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             Assert.Equal(
-                "The project template has a reference to a missing Extension. Could not find an Extension with ID 'myExtensionId'.",
+                String.Format(VsResources.PreinstalledPackages_InvalidExtensionId, "myExtensionId"),
                 wizard.ErrorMessages.Single());
         }
 
@@ -459,7 +460,7 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             Assert.Equal(
-                "The project template is configured to use a Registry-provided package repository but the Registry value name has not been specified. Use the \"keyName\" attribute to specify the Registry value.",
+                VsResources.TemplateWizard_MissingRegistryKeyName,
                 wizard.ErrorMessages.Single());
         }
 
@@ -486,7 +487,7 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             Assert.Equal(
-                String.Format("The project template is configured to use a Registry-provided package repository but there was an error accessing Registry key '{0}'.", registryPath),
+                String.Format(VsResources.PreinstalledPackages_RegistryKeyError, registryPath),
                 wizard.ErrorMessages.Single());
         }
 
@@ -512,7 +513,7 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             Assert.Equal(
-                String.Format("The project template has a reference to a missing Registry value. Could not find a Registry key with name '{0}' under '{1}'.", registryKey, registryPath),
+                String.Format(VsResources.PreinstalledPackages_InvalidRegistryValue, registryKey, registryPath),
                 wizard.ErrorMessages.Single());
         }
 
@@ -736,7 +737,9 @@ namespace NuGet.VisualStudio.Test
                 @"C:\Some\file.vstemplate").ToList());
 
             // Assert
-            Assert.Equal("The project template lists one or more packages with missing, empty, or invalid values for the \"id\" or \"version\" attributes. Both attributes are required and must have valid values.", wizard.ErrorMessages.Single());
+            Assert.Equal(
+                VsResources.TemplateWizard_InvalidPackageElementAttributes,
+                wizard.ErrorMessages.Single());
         }
 
         [Fact]
