@@ -165,7 +165,7 @@ namespace NuGet.VisualStudio.Test
 
             // Act & Assert            
             var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromRegistryRepository(registryKey, false, null, packages));
-            Assert.Equal(string.Format(NuGet.VisualStudio.Resources.VsResources.TemplateWizard_RegistryKeyError, registryPath), exception.Message);
+            Assert.Equal(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_RegistryKeyError, registryPath), exception.Message);
         }
 
         [Fact]
@@ -186,7 +186,7 @@ namespace NuGet.VisualStudio.Test
 
             // Act & Assert            
             var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromRegistryRepository(registryKey, false, null, packages));
-            Assert.Equal(string.Format(NuGet.VisualStudio.Resources.VsResources.TemplateWizard_InvalidRegistryValue, registryKey, registryPath), exception.Message);
+            Assert.Equal(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_InvalidRegistryValue, registryKey, registryPath), exception.Message);
         }
 
         [Fact]
@@ -265,7 +265,7 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             Assert.Single(consoleOutput);
-            Assert.True(consoleOutput.Single().Contains(string.Format(NuGet.VisualStudio.Resources.VsResources.TemplateWizard_VersionConflict, packageId, packageVersion)));
+            Assert.True(consoleOutput.Single().Contains(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_VersionConflict, packageId, packageVersion)));
         }
 
         [Fact]
@@ -339,7 +339,7 @@ namespace NuGet.VisualStudio.Test
 
             // Act & Assert            
             var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromVSExtensionRepository(extensionId, false, null, packages));
-            Assert.Equal(string.Format(NuGet.VisualStudio.Resources.VsResources.TemplateWizard_InvalidExtensionId, extensionId), exception.Message);
+            Assert.Equal(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_InvalidExtensionId, extensionId), exception.Message);
         }
 
         [Fact]
@@ -418,7 +418,7 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             Assert.Single(consoleOutput);
-            Assert.True(consoleOutput.Single().Contains(string.Format(NuGet.VisualStudio.Resources.VsResources.TemplateWizard_VersionConflict, packageId, packageVersion)));
+            Assert.True(consoleOutput.Single().Contains(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_VersionConflict, packageId, packageVersion)));
         }
 
         [Fact]

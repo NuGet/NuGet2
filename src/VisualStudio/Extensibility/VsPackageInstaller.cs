@@ -40,6 +40,10 @@ namespace NuGet.VisualStudio
             _packageServices = packageServices;
         }
 
+        /// <summary>
+        /// Creates an instance of the package installer for unit testing of registry-based preinstalled packages. This should only be used for unit tests.
+        /// </summary>
+        /// <param name="registryKeys">The optional list of parent registry keys to look in (used for unit tests).</param>
         internal VsPackageInstaller(IVsPackageManagerFactory packageManagerFactory,
                                     IScriptExecutor scriptExecutor,
                                     IPackageRepositoryFactory repositoryFactory,
@@ -54,6 +58,10 @@ namespace NuGet.VisualStudio
             _registryKeys = registryKeys;
         }
 
+        /// <summary>
+        /// Creates an instance of the package installer for unit testing of extension-based preinstalled packages.  This should only be used for unit tests.
+        /// </summary>
+        /// <param name="vsExtensionManager">A mock extension manager instance (used for unit tests).</param>
         internal VsPackageInstaller(IVsPackageManagerFactory packageManagerFactory,
                                     IScriptExecutor scriptExecutor,
                                     IPackageRepositoryFactory repositoryFactory,
@@ -154,6 +162,21 @@ namespace NuGet.VisualStudio
 
         public void InstallPackagesFromRegistryRepository(string keyName, bool isPreUnzipped, Project project, IDictionary<string, string> packageVersions)
         {
+            if (String.IsNullOrEmpty(keyName))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "keyName");
+            }
+
+            if (project == null)
+            {
+                throw new ArgumentNullException("project");
+            }
+
+            if (packageVersions.IsEmpty())
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageVersions");
+            }
+
             var preinstalledPackageInstaller = new PreinstalledPackageInstaller(_websiteHandler, _packageServices, _vsCommonOperations, _solutionManager);
             var repositoryPath = preinstalledPackageInstaller.GetRegistryRepositoryPath(keyName, _registryKeys, ThrowError);
 
@@ -163,6 +186,21 @@ namespace NuGet.VisualStudio
 
         public void InstallPackagesFromVSExtensionRepository(string extensionId, bool isPreUnzipped, Project project, IDictionary<string, string> packageVersions)
         {
+            if (String.IsNullOrEmpty(extensionId))
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "extensionId");
+            }
+
+            if (project == null)
+            {
+                throw new ArgumentNullException("project");
+            }
+
+            if (packageVersions.IsEmpty())
+            {
+                throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "packageVersions");
+            }
+            
             var preinstalledPackageInstaller = new PreinstalledPackageInstaller(_websiteHandler, _packageServices, _vsCommonOperations, _solutionManager);
             var repositoryPath = preinstalledPackageInstaller.GetExtensionRepositoryPath(extensionId, _vsExtensionManager, ThrowError);
 

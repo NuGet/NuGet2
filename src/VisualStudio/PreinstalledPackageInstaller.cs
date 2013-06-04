@@ -215,7 +215,6 @@ namespace NuGet.VisualStudio
         /// <param name="packageInfos">The packages that were installed.</param>
         private void CopyNativeBinariesToBin(Project project, string repositoryPath, IEnumerable<PreinstalledPackageInfo> packageInfos)
         {
-            // 
             IEnumerable<PackageName> packageNames = packageInfos.Select(pi => new PackageName(pi.Id, pi.Version));
             _websiteHandler.CopyNativeBinaries(project, new PhysicalFileSystem(repositoryPath), packageNames);
         }
