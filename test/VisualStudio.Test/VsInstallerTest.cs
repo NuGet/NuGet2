@@ -158,13 +158,14 @@ namespace NuGet.VisualStudio.Test
             var hkcu_repository = new Mock<IRegistryKey>();
             var hkcu = new Mock<IRegistryKey>();
             hkcu.Setup(r => r.OpenSubKey(registryPath)).Returns((IRegistryKey)null);
+            var project = TestUtils.GetProject("Foo");
 
             var installer = new VsPackageInstaller(null, null, null, null, null, null, null, null, new[] { hkcu.Object });
             var packages = new Dictionary<string, string>();
             packages.Add("A", "1.0.0");
 
             // Act & Assert            
-            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromRegistryRepository(registryKey, false, null, packages));
+            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromRegistryRepository(registryKey, false, project, packages));
             Assert.Equal(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_RegistryKeyError, registryPath), exception.Message);
         }
 
@@ -179,13 +180,14 @@ namespace NuGet.VisualStudio.Test
             var hkcu = new Mock<IRegistryKey>();
             hkcu_repository.Setup(r => r.GetValue(registryKey)).Returns(registryValue);
             hkcu.Setup(r => r.OpenSubKey(registryPath)).Returns(hkcu_repository.Object);
+            var project = TestUtils.GetProject("Foo");            
 
             var installer = new VsPackageInstaller(null, null, null, null, null, null, null, null, new[] { hkcu.Object });
             var packages = new Dictionary<string, string>();
             packages.Add("A", "1.0.0");
 
             // Act & Assert            
-            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromRegistryRepository(registryKey, false, null, packages));
+            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromRegistryRepository(registryKey, false, project, packages));
             Assert.Equal(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_InvalidRegistryValue, registryKey, registryPath), exception.Message);
         }
 
@@ -328,6 +330,7 @@ namespace NuGet.VisualStudio.Test
         {
             // Arrange
             var extensionId = "myExtensionId";
+            var project = TestUtils.GetProject("Foo");
 
             var extensionManagerMock = new Mock<IVsExtensionManager>();
             IInstalledExtension extension = null;
@@ -338,7 +341,7 @@ namespace NuGet.VisualStudio.Test
             packages.Add("A", "1.0.0");
 
             // Act & Assert            
-            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromVSExtensionRepository(extensionId, false, null, packages));
+            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromVSExtensionRepository(extensionId, false, project, packages));
             Assert.Equal(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_InvalidExtensionId, extensionId), exception.Message);
         }
 
