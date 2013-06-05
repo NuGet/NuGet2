@@ -4,11 +4,11 @@ Change Log / Release Notes
 ## NuGet 2.7
 
 * [#3281](http://nuget.codeplex.com/workitem/3281) - Support 'Preinstalled Package' functionality outside of VS templates
+* Show License Url when listing packages and verbosity is detailed. 
+* [#1956](http://nuget.codeplex.com/workitem/1956) - Add developmentDependency attribute to packages.config and use it in pack command to only include runtime packages
 
 ## NuGet 2.6
 
-* Show License Url when listing packages and verbosity is detailed. 
-* [#1956](http://nuget.codeplex.com/workitem/1956) - Add developmentDependency attribute to packages.config and use it in pack command to only include runtime packages
 * Add XDT support
 
 ## NuGet 2.5
