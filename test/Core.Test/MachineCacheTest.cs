@@ -17,19 +17,19 @@ namespace NuGet.Test
             // Arrange
             var mockFileSystem = new MockFileSystem();
             MachineCache cache = new MachineCache(mockFileSystem);
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 200; i++)
             {
                 cache.AddPackage(PackageUtility.CreatePackage("A", i + ".0"));
             }
 
             // Assert - 1
-            Assert.Equal(100, cache.GetPackageFiles().Count());
+            Assert.Equal(200, cache.GetPackageFiles().Count());
 
             // Act
             cache.AddPackage(PackageUtility.CreatePackage("B"));
 
             // Assert
-            Assert.Equal(81, cache.GetPackageFiles().Count());
+            Assert.Equal(161, cache.GetPackageFiles().Count());
         }
 
         [Fact]

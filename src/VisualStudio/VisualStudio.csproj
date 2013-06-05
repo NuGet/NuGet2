@@ -60,6 +60,7 @@
     <Compile Include="PackageSource\AggregatePackageSource.cs" />
     <Compile Include="PackageSource\IVsPackageSourceProvider.cs" />
     <Compile Include="PowershellScripts.cs" />
+    <Compile Include="PreinstalledPackageInstaller.cs" />
     <Compile Include="ProductUpdate\IProductUpdateService.cs" />
     <Compile Include="ProductUpdate\IProductUpdateSettings.cs" />
     <Compile Include="ProductUpdate\IUpdateWorker.cs" />
@@ -108,8 +109,8 @@
     <Compile Include="VsShellInfo.cs" />
     <Compile Include="VsSourceControlTracker.cs" />
     <Compile Include="VsTemplateWizard.cs" />
-    <Compile Include="VsTemplateWizardInstallerConfiguration.cs" />
-    <Compile Include="VsTemplateWizardPackageInfo.cs" />
+    <Compile Include="PreinstalledPackageConfiguration.cs" />
+    <Compile Include="PreinstalledPackageInfo.cs" />
     <Compile Include="VsWebsiteHandler.cs" />
     <Compile Include="WindowSettingsManager.cs" />
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">

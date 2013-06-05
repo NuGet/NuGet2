@@ -468,6 +468,69 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error accessing Extension Manager..
+        /// </summary>
+        public static string PreinstalledPackages_ExtensionManagerError {
+            get {
+                return ResourceManager.GetString("PreinstalledPackages_ExtensionManagerError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not add all required packages to the project. The following packages failed to install from &apos;{0}&apos;:.
+        /// </summary>
+        public static string PreinstalledPackages_FailedToInstallPackage {
+            get {
+                return ResourceManager.GetString("PreinstalledPackages_FailedToInstallPackage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The preinstalled packages have a reference to a missing Extension. Could not find an Extension with ID &apos;{0}&apos;..
+        /// </summary>
+        public static string PreinstalledPackages_InvalidExtensionId {
+            get {
+                return ResourceManager.GetString("PreinstalledPackages_InvalidExtensionId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The preinstalled packages have a reference to a missing Registry value. Could not find a Registry key with name &apos;{0}&apos; under &apos;{1}&apos;..
+        /// </summary>
+        public static string PreinstalledPackages_InvalidRegistryValue {
+            get {
+                return ResourceManager.GetString("PreinstalledPackages_InvalidRegistryValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adding {0}.{1} to project....
+        /// </summary>
+        public static string PreinstalledPackages_PackageInstallStatus {
+            get {
+                return ResourceManager.GetString("PreinstalledPackages_PackageInstallStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The preinstalled packages are configured to use a Registry-provided package repository but there was an error accessing Registry key &apos;{0}&apos;..
+        /// </summary>
+        public static string PreinstalledPackages_RegistryKeyError {
+            get {
+                return ResourceManager.GetString("PreinstalledPackages_RegistryKeyError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Attempting to install version &apos;{1}&apos; of &apos;{0}&apos; but the project already includes a different version. Skipping....
+        /// </summary>
+        public static string PreinstalledPackages_VersionConflict {
+            get {
+                return ResourceManager.GetString("PreinstalledPackages_VersionConflict", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No project was specified..
         /// </summary>
         public static string ProjectNotSpecified {
@@ -558,47 +621,11 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error accessing Extension Manager..
-        /// </summary>
-        public static string TemplateWizard_ExtensionManagerError {
-            get {
-                return ResourceManager.GetString("TemplateWizard_ExtensionManagerError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Could not add all required packages to the project. The following packages failed to install from &apos;{0}&apos;:.
-        /// </summary>
-        public static string TemplateWizard_FailedToInstallPackage {
-            get {
-                return ResourceManager.GetString("TemplateWizard_FailedToInstallPackage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The project template has a reference to a missing Extension. Could not find an Extension with ID &apos;{0}&apos;..
-        /// </summary>
-        public static string TemplateWizard_InvalidExtensionId {
-            get {
-                return ResourceManager.GetString("TemplateWizard_InvalidExtensionId", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The project template lists one or more packages with missing, empty, or invalid values for the &quot;id&quot; or &quot;version&quot; attributes. Both attributes are required and must have valid values..
         /// </summary>
         public static string TemplateWizard_InvalidPackageElementAttributes {
             get {
                 return ResourceManager.GetString("TemplateWizard_InvalidPackageElementAttributes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The project template has a reference to a missing Registry value. Could not find a Registry key with name &apos;{0}&apos; under &apos;{1}&apos;..
-        /// </summary>
-        public static string TemplateWizard_InvalidRegistryValue {
-            get {
-                return ResourceManager.GetString("TemplateWizard_InvalidRegistryValue", resourceCulture);
             }
         }
         
@@ -635,33 +662,6 @@ namespace NuGet.VisualStudio.Resources {
         public static string TemplateWizard_MissingRegistryKeyName {
             get {
                 return ResourceManager.GetString("TemplateWizard_MissingRegistryKeyName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Adding {0}.{1} to project....
-        /// </summary>
-        public static string TemplateWizard_PackageInstallStatus {
-            get {
-                return ResourceManager.GetString("TemplateWizard_PackageInstallStatus", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The project template is configured to use a Registry-provided package repository but there was an error accessing Registry key &apos;{0}&apos;..
-        /// </summary>
-        public static string TemplateWizard_RegistryKeyError {
-            get {
-                return ResourceManager.GetString("TemplateWizard_RegistryKeyError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Attempting to install version &apos;{1}&apos; of &apos;{0}&apos; but the project already includes a different version. Skipping....
-        /// </summary>
-        public static string TemplateWizard_VersionConflict {
-            get {
-                return ResourceManager.GetString("TemplateWizard_VersionConflict", resourceCulture);
             }
         }
         

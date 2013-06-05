@@ -480,7 +480,7 @@ namespace NuGet
             var exclusions = exclude.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var item in exclusions)
             {
-                string wildCard = PathResolver.NormalizeWildcard(basePath, item);
+                string wildCard = PathResolver.NormalizeWildcardForExcludedFiles(basePath, item);
                 PathResolver.FilterPackageFiles(searchFiles, p => p.SourcePath, new[] { wildCard });
             }
         }

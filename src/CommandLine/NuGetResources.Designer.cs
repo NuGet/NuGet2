@@ -511,6 +511,15 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to License url: {0}.
+        /// </summary>
+        internal static string ListCommand_LicenseUrl {
+            get {
+                return ResourceManager.GetString("ListCommand_LicenseUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No packages found..
         /// </summary>
         internal static string ListCommandNoPackages {
@@ -1191,6 +1200,15 @@ namespace NuGet {
         internal static string Warning_DefaultSpecValueTitle {
             get {
                 return ResourceManager.GetString("Warning_DefaultSpecValueTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} key already exists in Properties collection. Overriding value..
+        /// </summary>
+        internal static string Warning_DuplicatePropertyKey {
+            get {
+                return ResourceManager.GetString("Warning_DuplicatePropertyKey", resourceCulture);
             }
         }
         

@@ -703,7 +703,12 @@ namespace NuGet.Commands
 
             if (!String.IsNullOrEmpty(solutionDir))
             {
-                ProjectProperties.Add("SolutionDir", solutionDir);
+                if (this.ProjectProperties.ContainsKey("SolutionDir"))
+                {
+                    this.Logger.Log(MessageLevel.Warning, NuGetResources.Warning_DuplicatePropertyKey, "SolutionDir");
+                }
+
+                ProjectProperties["SolutionDir"] = solutionDir;
             }
         }
 
@@ -891,7 +896,7 @@ namespace NuGet.Commands
 
         private void AddFileToBuilder(PackageBuilder builder, PhysicalPackageFile packageFile)
         {
-            if (!builder.Files.Any(p => packageFile.Path == p.Path))
+            if (!builder.Files.Any(p => packageFile.Path.Equals(p.Path, StringComparison.OrdinalIgnoreCase)))
             {
                 WriteDetail(NuGetResources.AddFileToPackage, packageFile.SourcePath, packageFile.TargetPath);
                 builder.Files.Add(packageFile);

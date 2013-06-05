@@ -11,7 +11,14 @@ namespace NuGet
 {
     public static class NetPortableProfileTable
     {
+        // This collection is the original indexed collection where profiles are indexed by 
+        // the full "ProfileXXX" naming. 
         private static NetPortableProfileCollection _portableProfiles;
+        // In order to make the NetPortableProfile.Parse capable of also parsing so-called 
+        // "custom profile string" version (i.e. "net40-client"), we need an alternate index
+        // by this key. I used dictionary here since I saw no value in creating a custom collection 
+        // like it's done already for the _portableProfiles. Not sure why it's done that way there.
+        private static IDictionary<string, NetPortableProfile> _portableProfilesByCustomProfileString;
 
         public static NetPortableProfile GetProfile(string profileName)
         {
@@ -20,12 +27,19 @@ namespace NuGet
                 throw new ArgumentException(CommonResources.Argument_Cannot_Be_Null_Or_Empty, "profileName");
             }
 
+            // Original behavior fully preserved, as we first try the original behavior.
+            // NOTE: this could be a single TryGetValue if this collection was kept as a dictionary...
             if (Profiles.Contains(profileName))
             {
                 return Profiles[profileName];
             }
 
-            return null;
+            // If we didn't get a profile by the simple profile name, try now with 
+            // the custom profile string (i.e. "net40-client")
+            NetPortableProfile result = null;
+            _portableProfilesByCustomProfileString.TryGetValue(profileName, out result);
+
+            return result;
         }
 
         internal static NetPortableProfileCollection Profiles
@@ -34,7 +48,10 @@ namespace NuGet
             {
                 if (_portableProfiles == null)
                 {
-                    _portableProfiles = BuildPortableProfileCollection();
+                    // We use the setter so that we can consistently set both the 
+                    // existing collection as well as the CustomProfileString-indexed one.
+                    // This keeps both in sync.
+                    Profiles = BuildPortableProfileCollection();
                 }
 
                 return _portableProfiles;
@@ -43,6 +60,7 @@ namespace NuGet
             {
                 // This setter is only for Unit Tests.
                 _portableProfiles = value;
+                _portableProfilesByCustomProfileString = _portableProfiles.ToDictionary(x => x.CustomProfileString);
             }
         }
 
@@ -59,20 +77,22 @@ namespace NuGet
                 foreach (string versionDir in Directory.EnumerateDirectories(portableRootDirectory, "v*", SearchOption.TopDirectoryOnly))
                 {
                     string profileFilesPath = versionDir + @"\Profile\";
-                    profileCollection.AddRange(LoadProfilesFromFramework(profileFilesPath));
+                    profileCollection.AddRange(LoadProfilesFromFramework(versionDir, profileFilesPath));
                 }
             }
 
             return profileCollection;
         }
 
-        private static IEnumerable<NetPortableProfile> LoadProfilesFromFramework(string profileFilesPath)
+        private static IEnumerable<NetPortableProfile> LoadProfilesFromFramework(string version, string profileFilesPath)
         {
             if (Directory.Exists(profileFilesPath))
             {
                 try
                 {
-                    return Directory.EnumerateDirectories(profileFilesPath, "Profile*").Select(LoadPortableProfile);
+                    // Note the only change here is that we also pass the .NET framework version (which exists as a parent folder of the 
+                    // actual profile directory, so that we don't lose that information.
+                    return Directory.EnumerateDirectories(profileFilesPath, "Profile*").Select(profileDir => LoadPortableProfile(version, profileDir));
                 }
                 catch (IOException)
                 {
@@ -80,26 +100,29 @@ namespace NuGet
                 catch (SecurityException)
                 {
                 }
+                catch (UnauthorizedAccessException)
+                {
+                }
             }
 
             return Enumerable.Empty<NetPortableProfile>();
         }
 
-        private static NetPortableProfile LoadPortableProfile(string profileDirectory)
+        private static NetPortableProfile LoadPortableProfile(string version, string profileDirectory)
         {
             string profileName = Path.GetFileName(profileDirectory);
 
             string supportedFrameworkDirectory = Path.Combine(profileDirectory, "SupportedFrameworks");
             if (!Directory.Exists(supportedFrameworkDirectory))
             {
-                return new NetPortableProfile(profileName, Enumerable.Empty<FrameworkName>());
+                return new NetPortableProfile(version, profileName, Enumerable.Empty<FrameworkName>());
             }
 
             var supportedFrameworks = Directory.EnumerateFiles(supportedFrameworkDirectory, "*.xml")
                                                .Select(LoadSupportedFramework)
                                                .Where(p => p != null);
 
-            return new NetPortableProfile(profileName, supportedFrameworks);
+            return new NetPortableProfile(version, profileName, supportedFrameworks);
         }
 
         private static FrameworkName LoadSupportedFramework(string frameworkFile)

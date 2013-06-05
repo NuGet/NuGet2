@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using NuGet.Common;
 
@@ -97,6 +98,11 @@ namespace NuGet.Commands
                         Console.PrintJustified(0, p.Id);
                         Console.PrintJustified(1, p.Version.ToString());
                         Console.PrintJustified(1, p.Description);
+                        if (p.LicenseUrl != null && !string.IsNullOrEmpty(p.LicenseUrl.AbsoluteUri))
+                        {
+                            Console.PrintJustified(1, 
+                                String.Format(CultureInfo.InvariantCulture, NuGetResources.ListCommand_LicenseUrl, p.LicenseUrl.AbsoluteUri));
+                        }
                         Console.WriteLine();
                         hasPackages = true;
                     }

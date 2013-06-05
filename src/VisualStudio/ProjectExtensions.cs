@@ -42,7 +42,8 @@ namespace NuGet.VisualStudio
                                                                           VsConstants.FsharpProjectTypeGuid,
                                                                           VsConstants.NemerleProjectTypeGuid,
                                                                           VsConstants.WixProjectTypeGuid,
-                                                                          VsConstants.SynergexProjectTypeGuid };
+                                                                          VsConstants.SynergexProjectTypeGuid,
+                                                                          VsConstants.NomadForVisualStudioProjectTypeGuid };
 
         private static readonly HashSet<string> _unsupportedProjectTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
                                                                             VsConstants.LightSwitchProjectTypeGuid,
@@ -67,6 +68,7 @@ namespace NuGet.VisualStudio
                 VsConstants.NemerleProjectTypeGuid, 
                 VsConstants.CppProjectTypeGuid,
                 VsConstants.SynergexProjectTypeGuid,
+                VsConstants.NomadForVisualStudioProjectTypeGuid,
             };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
@@ -706,13 +708,25 @@ namespace NuGet.VisualStudio
             }
 
             var projects = new List<Project>();
-            References references = project.Object.References;
-            foreach (Reference reference in references)
+            References references;
+            try
             {
-                // Get the referenced project from the reference if any
-                if (reference.SourceProject != null)
+                references = project.Object.References;
+            }
+            catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
+            {
+                //References property doesn't exist, project does not have references
+                references = null;
+            }
+            if (references != null)
+            {
+                foreach (Reference reference in references)
                 {
-                    projects.Add(reference.SourceProject);
+                    // Get the referenced project from the reference if any
+                    if (reference.SourceProject != null)
+                    {
+                        projects.Add(reference.SourceProject);
+                    }
                 }
             }
             return projects;
@@ -757,15 +771,27 @@ namespace NuGet.VisualStudio
             }
 
             var assemblies = new HashSet<string>(PathComparer.Default);
-            References references = project.Object.References;
-            foreach (Reference reference in references)
+            References references;
+            try
             {
-                // Get the referenced project from the reference if any
-                if (reference.SourceProject == null &&
-                    reference.CopyLocal &&
-                    File.Exists(reference.Path))
+                references = project.Object.References;
+            }
+            catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
+            {
+                //References property doesn't exist, project does not have references
+                references = null;
+            }
+            if (references != null)
+            {
+                foreach (Reference reference in references)
                 {
-                    assemblies.Add(reference.Path);
+                    // Get the referenced project from the reference if any
+                    if (reference.SourceProject == null &&
+                        reference.CopyLocal &&
+                        File.Exists(reference.Path))
+                    {
+                        assemblies.Add(reference.Path);
+                    }
                 }
             }
             return assemblies;

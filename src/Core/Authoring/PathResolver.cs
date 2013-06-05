@@ -34,8 +34,13 @@ namespace NuGet
             source.RemoveAll(matchedFiles.Contains);
         }
 
-        public static string NormalizeWildcard(string basePath, string wildcard)
+        public static string NormalizeWildcardForExcludedFiles(string basePath, string wildcard)
         {
+            if (wildcard.StartsWith("**", StringComparison.OrdinalIgnoreCase))
+            {
+                // Allow any path to match the first '**' segment, see issue 2891 for more details.
+                return wildcard;
+            }
             basePath = NormalizeBasePath(basePath, ref wildcard);
             return Path.Combine(basePath, wildcard);
         }

@@ -211,9 +211,10 @@ namespace NuGet
                 (package.FrameworkAssemblies.Any() || package.AssemblyReferences.Any() || package.GetContentFiles().Any() || package.GetBuildFiles().Any()))
             {
                 // for portable framework, we want to show the friendly short form (e.g. portable-win8+net45+wp8) instead of ".NETPortable, Profile=Profile104".
-                string targetFrameworkString = VersionUtility.IsPortableFramework(Project.TargetFramework) 
-                                                    ? VersionUtility.GetShortFrameworkName(Project.TargetFramework) 
-                                                    : Project.TargetFramework.ToString();
+                FrameworkName targetFramework = Project.TargetFramework;
+                string targetFrameworkString = targetFramework.IsPortableFramework()
+                                                    ? VersionUtility.GetShortFrameworkName(targetFramework)
+                                                    : targetFramework != null ? targetFramework.ToString() : null;
 
                 throw new InvalidOperationException(
                            String.Format(CultureInfo.CurrentCulture,
