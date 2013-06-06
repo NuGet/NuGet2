@@ -6,6 +6,7 @@ Change Log / Release Notes
 * [#3281](http://nuget.codeplex.com/workitem/3281) - Support 'Preinstalled Package' functionality outside of VS templates
 * Show License Url when listing packages and verbosity is detailed. 
 * [#1956](http://nuget.codeplex.com/workitem/1956) - Add developmentDependency attribute to packages.config and use it in pack command to only include runtime packages
+* [#3386](https://nuget.codeplex.com/workitem/3386) - Group-Policy compatible feature for providing NuGet defaults including the ability to override nuget.org
 
 ## NuGet 2.6
 

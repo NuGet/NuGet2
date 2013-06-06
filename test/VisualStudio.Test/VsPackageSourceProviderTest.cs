@@ -147,7 +147,7 @@ namespace NuGet.VisualStudio.Test
             userSettings.Setup(s => s.GetValues("disabledPackageSources"))
                         .Returns(new[] { new KeyValuePair<string, string>("NuGet official package source", "true") });
 
-            var provider = new VsPackageSourceProvider(userSettings.Object, new Mock<IVsShellInfo>().Object);
+            var provider = new VsPackageSourceProvider(userSettings.Object, CreateDefaultSourceProvider(userSettings.Object), new Mock<IVsShellInfo>().Object);
 
             // Act
             var sources = provider.LoadPackageSources().ToList();
@@ -171,7 +171,7 @@ namespace NuGet.VisualStudio.Test
             userSettings.Setup(s => s.GetValues("activePackageSource"))
                         .Returns(new[] { new KeyValuePair<string, string>("one", "onesource") });
 
-            var provider = new VsPackageSourceProvider(userSettings.Object, new Mock<IVsShellInfo>().Object);
+            var provider = new VsPackageSourceProvider(userSettings.Object, CreateDefaultSourceProvider(userSettings.Object), new Mock<IVsShellInfo>().Object);
 
             // Act
             var activeSource = provider.ActivePackageSource;
@@ -203,7 +203,7 @@ namespace NuGet.VisualStudio.Test
             var settings = new Mock<ISettings>();
             settings.Setup(s => s.GetValue("activePackageSource", "NuGet official package source"))
                     .Returns("https://go.microsoft.com/fwlink/?LinkID=206669");
-            var provider = new VsPackageSourceProvider(settings.Object, new Mock<IVsShellInfo>().Object);
+            var provider = new VsPackageSourceProvider(settings.Object, CreateDefaultSourceProvider(settings.Object), new Mock<IVsShellInfo>().Object);
 
             // Act
             PackageSource activePackageSource = provider.ActivePackageSource;
@@ -387,7 +387,7 @@ namespace NuGet.VisualStudio.Test
             var packageSources = provider.LoadPackageSources().ToList();
 
             // Assert
-            Assert.Equal(4, packageSources.Count);
+            Assert.Equal(3, packageSources.Count);
             AssertPackageSource(packageSources[0], "Windows 8 Packages", NuGetConstants.VSExpressForWindows8FeedUrl);
             Assert.False(packageSources[0].IsEnabled);
         }
@@ -537,7 +537,7 @@ namespace NuGet.VisualStudio.Test
 
         private static PackageSourceProvider CreateDefaultSourceProvider(ISettings settings)
         {
-            return new PackageSourceProvider(settings, VsPackageSourceProvider.DefaultSources, VsPackageSourceProvider.FeedsToMigrate);
+            return new PackageSourceProvider(settings, VsPackageSourceProvider.DefaultSources, VsPackageSourceProvider.FeedsToMigrate, configurationDefaultSources: null);
         }
     }
 }

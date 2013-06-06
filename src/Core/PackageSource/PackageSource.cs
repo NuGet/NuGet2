@@ -12,6 +12,10 @@ namespace NuGet
         [DataMember]
         public string Source { get; private set; }
 
+        /// <summary>
+        /// This does not represent just the NuGet Official Feed alone
+        /// It may also represent a Default Package Source set by Configuration Defaults
+        /// </summary>
         public bool IsOfficial { get; set; }
 
         public bool IsMachineWide { get; set; }

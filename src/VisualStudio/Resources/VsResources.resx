@@ -198,7 +198,7 @@
   <data name="AggregateSourceName" xml:space="preserve">
     <value>All</value>
   </data>
-  <data name="OfficialSourceName" xml:space="preserve">
+  <data name="NuGetOfficialSourceName" xml:space="preserve">
     <value>NuGet official package source</value>
   </data>
   <data name="FailedToAddGacReference" xml:space="preserve">

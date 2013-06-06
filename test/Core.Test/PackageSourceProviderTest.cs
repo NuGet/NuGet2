@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Moq;
+using NuGet.Test.Mocks;
 using Xunit;
 using Xunit.Extensions;
 
@@ -29,7 +30,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            var provider = new PackageSourceProvider(settings.Object, defaultSources: null);
+            var provider = CreatePackageSourceProvider(settings.Object, providerDefaultSources: null);
 
             // Act
             var values = provider.LoadPackageSources();
@@ -43,7 +44,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>();
-            var provider = new PackageSourceProvider(settings.Object, defaultSources: new PackageSource[] { });
+            var provider = CreatePackageSourceProvider(settings.Object, providerDefaultSources: new PackageSource[] { });
 
             // Act
             var values = provider.LoadPackageSources();
@@ -57,7 +58,7 @@ namespace NuGet.Test
         {
             // Arrange
             var settings = new Mock<ISettings>().Object;
-            var provider = new PackageSourceProvider(settings, defaultSources: new[] { new PackageSource("A"), new PackageSource("B") });
+            var provider = CreatePackageSourceProvider(settings, providerDefaultSources: new[] { new PackageSource("A"), new PackageSource("B") });
 
             // Act
             var values = provider.LoadPackageSources().ToList();
@@ -89,7 +90,7 @@ namespace NuGet.Test
                     .Callback<string, IList<KeyValuePair<string, string>>>((_, savedVals) => { savedSettingValues = savedVals; })
                     .Verifiable();            
 
-            var provider = new PackageSourceProvider(settings.Object,
+            var provider = CreatePackageSourceProvider(settings.Object,
                 null,
                 new Dictionary<PackageSource, PackageSource> {
                     { new PackageSource("onesource", "one"), new PackageSource("goodsource", "good") },
@@ -268,6 +269,193 @@ namespace NuGet.Test
             AssertPackageSource(values[0], "one", "onesource", true);
             AssertPackageSource(values[1], "two", "twosource", false);
             AssertPackageSource(values[2], "three", "threesource", true);
+        }
+
+        /// <summary>
+        /// The following test tests case 1 listed in PackageSourceProvider.SetDefaultPackageSources(...)
+        /// Case 1. Default Package Source is already present matching both feed source and the feed name
+        /// </summary>
+        [Fact]
+        public void LoadPackageSourcesWhereALoadedSourceMatchesDefaultSourceInNameAndSource()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            settings.Setup(s => s.GetSettingValues("packageSources", true))
+                    .Returns(new[] { new SettingValue("one", "onesource", false)});
+
+            // Disable package source one
+            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new[] { new KeyValuePair<string, string>("one", "true") });
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+
+            string configurationDefaultsFileContent = @"
+<configuration>
+    <packageSources>
+        <add key='one' value='onesource' />
+    </packageSources>
+</configuration>";
+
+            var mockFileSystem = new MockFileSystem();
+            var configurationDefaultsPath = "NuGetDefaults.config";
+            mockFileSystem.AddFile(configurationDefaultsPath, configurationDefaultsFileContent);
+            ConfigurationDefaults configurationDefaults = new ConfigurationDefaults(mockFileSystem, configurationDefaultsPath);
+
+            var provider = CreatePackageSourceProvider(settings.Object, providerDefaultSources: null, migratePackageSources: null, configurationDefaultSources: configurationDefaults.DefaultPackageSources);
+
+            // Act
+            var values = provider.LoadPackageSources();
+
+            // Assert
+            Assert.Equal(1, values.Count());
+            // Package source 'one' represents case 1. No real change takes place. IsOfficial will become true though. IsEnabled remains false as it is ISettings
+            AssertPackageSource(values.First(), "one", "onesource", false, false, true);
+        }
+
+        /// <summary>
+        /// The following test tests case 2 listed in PackageSourceProvider.SetDefaultPackageSources(...)
+        /// Case 2. Default Package Source is already present matching feed source but with a different feed name. DO NOTHING
+        /// </summary>
+        [Fact]
+        public void LoadPackageSourcesWhereALoadedSourceMatchesDefaultSourceInSourceButNotInName()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            settings.Setup(s => s.GetSettingValues("packageSources", true))
+                    .Returns(new[] { new SettingValue("two", "twosource", false) });
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+
+            string configurationDefaultsFileContent = @"
+<configuration>
+    <packageSources>
+        <add key='twodefault' value='twosource' />
+    </packageSources>
+    <disabledPackageSources>
+        <add key='twodefault' value='true' />
+    </disabledPackageSources>
+</configuration>";
+
+            var mockFileSystem = new MockFileSystem();
+            var configurationDefaultsPath = "NuGetDefaults.config";
+            mockFileSystem.AddFile(configurationDefaultsPath, configurationDefaultsFileContent);
+            ConfigurationDefaults configurationDefaults = new ConfigurationDefaults(mockFileSystem, configurationDefaultsPath);
+
+            var provider = CreatePackageSourceProvider(settings.Object, providerDefaultSources: null, migratePackageSources: null, configurationDefaultSources: configurationDefaults.DefaultPackageSources);
+
+            // Act
+            var values = provider.LoadPackageSources();
+
+            // Assert
+            Assert.Equal(1, values.Count());
+            // Package source 'two' represents case 2. No Change effected. The existing feed will not be official
+            AssertPackageSource(values.First(), "two", "twosource", true, false, false);
+        }
+
+        /// <summary>
+        /// The following test tests case 3 listed in PackageSourceProvider.SetDefaultPackageSources(...)
+        /// Case 3. Default Package Source is not present, but there is another feed source with the same feed name. Override that feed entirely
+        /// </summary>
+        [Fact]
+        public void LoadPackageSourcesWhereALoadedSourceMatchesDefaultSourceInNameButNotInSource()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            settings.Setup(s => s.GetSettingValues("packageSources", true))
+                    .Returns(new[] { new SettingValue("three", "threesource", false) });
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+
+            string configurationDefaultsFileContent = @"
+<configuration>
+    <packageSources>
+        <add key='three' value='threedefaultsource' />
+    </packageSources>
+</configuration>";
+
+            var mockFileSystem = new MockFileSystem();
+            var configurationDefaultsPath = "NuGetDefaults.config";
+            mockFileSystem.AddFile(configurationDefaultsPath, configurationDefaultsFileContent);
+            ConfigurationDefaults configurationDefaults = new ConfigurationDefaults(mockFileSystem, configurationDefaultsPath);
+
+            var provider = CreatePackageSourceProvider(settings.Object, providerDefaultSources: null, migratePackageSources: null, configurationDefaultSources: configurationDefaults.DefaultPackageSources);
+
+            // Act
+            var values = provider.LoadPackageSources();
+
+            // Assert
+            Assert.Equal(1, values.Count());
+            // Package source 'three' represents case 3. Completely overwritten. Noticeably, Feed Source will match Configuration Default settings
+            AssertPackageSource(values.First(), "three", "threedefaultsource", true, false, true);
+        }
+
+        /// <summary>
+        /// The following test tests case 3 listed in PackageSourceProvider.SetDefaultPackageSources(...)
+        /// Case 4. Default Package Source is not present, simply, add it
+        /// </summary>
+        [Fact]
+        public void LoadPackageSourcesWhereNoLoadedSourceMatchesADefaultSource()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>(MockBehavior.Strict);
+            settings.Setup(s => s.GetSettingValues("packageSources", true))
+                    .Returns(new List<SettingValue>());
+            settings.Setup(s => s.GetNestedValues("packageSourceCredentials", It.IsAny<string>())).Returns(new KeyValuePair<string, string>[0]);
+            settings.Setup(s => s.GetValues("disabledPackageSources")).Returns(new KeyValuePair<string, string>[0]);
+
+            string configurationDefaultsFileContent = @"
+<configuration>
+    <packageSources>
+        <add key='four' value='foursource' />
+    </packageSources>
+</configuration>";
+
+            var mockFileSystem = new MockFileSystem();
+            var configurationDefaultsPath = "NuGetDefaults.config";
+            mockFileSystem.AddFile(configurationDefaultsPath, configurationDefaultsFileContent);
+            ConfigurationDefaults configurationDefaults = new ConfigurationDefaults(mockFileSystem, configurationDefaultsPath);
+
+            var provider = CreatePackageSourceProvider(settings.Object, providerDefaultSources: null, migratePackageSources: null, configurationDefaultSources: configurationDefaults.DefaultPackageSources);
+
+            // Act
+            var values = provider.LoadPackageSources();
+
+
+            // Assert
+            Assert.Equal(1, values.Count());
+            // Package source 'four' represents case 4. Simply Added to the list increasing the count by 1. ISettings only has 3 package sources. But, LoadPackageSources returns 4
+            AssertPackageSource(values.First(), "four", "foursource", true, false, true);
+        }
+
+        [Fact]
+        public void LoadPackageSourcesDoesNotReturnProviderDefaultsWhenConfigurationDefaultPackageSourcesIsNotEmpty()
+        {
+            // Arrange
+            var settings = new Mock<ISettings>().Object;
+
+            string configurationDefaultsFileContent = @"
+<configuration>
+    <packageSources>
+        <add key='configurationDefaultOne' value='configurationDefaultOneSource' />
+        <add key='configurationDefaultTwo' value='configurationDefaultTwoSource' />
+    </packageSources>
+</configuration>";
+
+            var mockFileSystem = new MockFileSystem();
+            var configurationDefaultsPath = "NuGetDefaults.config";
+            mockFileSystem.AddFile(configurationDefaultsPath, configurationDefaultsFileContent);
+            ConfigurationDefaults configurationDefaults = new ConfigurationDefaults(mockFileSystem, configurationDefaultsPath);
+
+            var provider = CreatePackageSourceProvider(settings,
+                providerDefaultSources: new[] { new PackageSource("providerDefaultA"), new PackageSource("providerDefaultB") },
+                migratePackageSources: null,
+                configurationDefaultSources: configurationDefaults.DefaultPackageSources);
+
+            // Act
+            var values = provider.LoadPackageSources();
+
+            // Assert
+            Assert.Equal(2, values.Count());
+            Assert.Equal("configurationDefaultOneSource", values.First().Source);
+            Assert.Equal("configurationDefaultTwoSource", values.Last().Source);
         }
 
         [Fact]
@@ -739,18 +927,23 @@ namespace NuGet.Test
             Assert.Equal(source, result);
         }
 
-        private void AssertPackageSource(PackageSource ps, string name, string source, bool isEnabled, bool isMachineWide = false)
+        private void AssertPackageSource(PackageSource ps, string name, string source, bool isEnabled, bool isMachineWide = false, bool isOfficial = false)
         {
             Assert.Equal(name, ps.Name);
             Assert.Equal(source, ps.Source);
             Assert.True(ps.IsEnabled == isEnabled);
             Assert.True(ps.IsMachineWide == isMachineWide);
+            Assert.True(ps.IsOfficial == isOfficial);
         }
 
-        private IPackageSourceProvider CreatePackageSourceProvider(ISettings settings = null)
+        private IPackageSourceProvider CreatePackageSourceProvider(
+            ISettings settings = null,
+            IEnumerable<PackageSource> providerDefaultSources = null,
+            IDictionary<PackageSource, PackageSource> migratePackageSources = null,
+            IEnumerable<PackageSource> configurationDefaultSources = null)
         {
             settings = settings ?? new Mock<ISettings>().Object;
-            return new PackageSourceProvider(settings);
+            return new PackageSourceProvider(settings, providerDefaultSources, migratePackageSources, configurationDefaultSources);
         }
 
         private static void AssertKVP(KeyValuePair<string, string> expected, KeyValuePair<string, string> actual)

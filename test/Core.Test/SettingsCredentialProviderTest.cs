@@ -30,7 +30,7 @@ namespace NuGet.Test
             underlyingProvider.Setup(p => p.GetCredentials(It.IsAny<Uri>(), It.IsAny<IWebProxy>(), CredentialType.ProxyCredentials, false))
                               .Returns<ICredentials>(null).Verifiable();
 
-            var packageSourceProvider = new PackageSourceProvider(NullSettings.Instance);
+            var packageSourceProvider = new PackageSourceProvider(NullSettings.Instance, null, null, null);
             var settingsCredentialProvider = new SettingsCredentialProvider(underlyingProvider.Object, packageSourceProvider);
 
             // Act
