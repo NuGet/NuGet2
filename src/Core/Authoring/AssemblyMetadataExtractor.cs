@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -46,42 +47,57 @@ namespace NuGet
         private sealed class MetadataExtractor : MarshalByRefObject
         {
             [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "It's a marshal by ref object used to collection information in another app domain")]
-            [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.Reflection.Assembly.LoadFrom", Justification = "We need to load the assembly to extract metadata")]
             public AssemblyMetadata GetMetadata(string path)
             {
-                Assembly assembly = Assembly.LoadFrom(path);
-                AssemblyName assemblyName = assembly.GetName();
+                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += ReflectionOnlyAssemblyResolve;
 
-                SemanticVersion version;
-                string assemblyInformationalVersion = GetAttributeValueOrDefault<AssemblyInformationalVersionAttribute>(assembly, a => a.InformationalVersion);
-                if (!SemanticVersion.TryParse(assemblyInformationalVersion, out version))
+                try
                 {
-                    version = new SemanticVersion(assemblyName.Version);
+                    Assembly assembly = Assembly.ReflectionOnlyLoadFrom(path);
+                    AssemblyName assemblyName = assembly.GetName();
+
+                    var attributes = CustomAttributeData.GetCustomAttributes(assembly);
+
+                    SemanticVersion version;
+                    string assemblyInformationalVersion = GetAttributeValueOrDefault<AssemblyInformationalVersionAttribute>(attributes);
+                    if (!SemanticVersion.TryParse(assemblyInformationalVersion, out version))
+                    {
+                        version = new SemanticVersion(assemblyName.Version);
+                    }
+
+                    return new AssemblyMetadata
+                    {
+                        Name = assemblyName.Name,
+                        Version = version,
+                        Title = GetAttributeValueOrDefault<AssemblyTitleAttribute>(attributes),
+                        Company = GetAttributeValueOrDefault<AssemblyCompanyAttribute>(attributes),
+                        Description = GetAttributeValueOrDefault<AssemblyDescriptionAttribute>(attributes),
+                        Copyright = GetAttributeValueOrDefault<AssemblyCopyrightAttribute>(attributes)
+                    };
                 }
-
-                return new AssemblyMetadata
+                finally
                 {
-                    Name = assemblyName.Name,
-                    Version = version,
-                    Title = GetAttributeValueOrDefault<AssemblyTitleAttribute>(assembly, a => a.Title),
-                    Company = GetAttributeValueOrDefault<AssemblyCompanyAttribute>(assembly, a => a.Company),
-                    Description = GetAttributeValueOrDefault<AssemblyDescriptionAttribute>(assembly, a => a.Description),
-                    Copyright = GetAttributeValueOrDefault<AssemblyCopyrightAttribute>(assembly, a => a.Copyright)
-                };
+                    AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve -= ReflectionOnlyAssemblyResolve;
+                }
             }
 
-            private static string GetAttributeValueOrDefault<T>(Assembly assembly, Func<T, string> selector) where T : Attribute
+            private static Assembly ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
             {
-                // Get the attribute
-                T attribute = assembly.GetCustomAttribute<T>();
+                return Assembly.ReflectionOnlyLoad(args.Name);
+            }
 
-                if (attribute != null)
+            private static string GetAttributeValueOrDefault<T>(IList<CustomAttributeData> attributes) where T : Attribute
+            {
+                foreach (var attribute in attributes)
                 {
-                    string value = selector(attribute);
-                    // Return the value only if it isn't null or empty so that we can use ?? to fall back
-                    if (!String.IsNullOrEmpty(value))
+                    if (attribute.AttributeType == typeof(T))
                     {
-                        return value;
+                        string value = attribute.ConstructorArguments[0].Value.ToString();
+                        // Return the value only if it isn't null or empty so that we can use ?? to fall back
+                        if (!String.IsNullOrEmpty(value))
+                        {
+                            return value;
+                        }
                     }
                 }
                 return null;
