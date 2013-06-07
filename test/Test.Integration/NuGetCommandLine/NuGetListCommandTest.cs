@@ -36,6 +36,36 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         }
 
         [Fact]
+        public void ListCommand_ShowLicenseUrlWithDetailedVerbosity()
+        {
+            // Arrange
+            var tempPath = Path.GetTempPath();
+            var repositoryPath = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            Util.CreateDirectory(repositoryPath);
+            Util.CreateTestPackage("testPackage1", "1.1.0", repositoryPath, new Uri("http://kaka"));
+
+            string[] args = new string[] { "list", "-Source", repositoryPath, "-verbosity", "detailed" };
+            MemoryStream memoryStream = new MemoryStream();
+            TextWriter writer = new StreamWriter(memoryStream);
+            Console.SetOut(writer);
+
+            // Act
+            int r = Program.Main(args);
+            writer.Close();
+
+            // Assert
+            Assert.Equal(0, r);
+            var output = Encoding.Default.GetString(memoryStream.ToArray());
+            string[] lines = output.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+
+            Assert.Equal(4, lines.Length);
+            Assert.Equal("testPackage1", lines[0]);
+            Assert.Equal(" 1.1.0", lines[1]);
+            Assert.Equal(" Test desc", lines[2]);
+            Assert.Equal(" License url: http://kaka", lines[3]);
+        }
+
+        [Fact]
         public void ListCommand_WithUserSpecifiedConfigFile()
         {
             // Arrange

@@ -16,7 +16,7 @@ namespace NuGet.Test.Integration.NuGetCommandLine
         /// <param name="version">The version of the created package.</param>
         /// <param name="path">The directory where the package is created.</param>
         /// <returns>The full path of the created package file.</returns>
-        public static string CreateTestPackage(string packageId, string version, string path)
+        public static string CreateTestPackage(string packageId, string version, string path, Uri licenseUrl = null)
         {
             var packageBuilder = new PackageBuilder
             {
@@ -24,6 +24,11 @@ namespace NuGet.Test.Integration.NuGetCommandLine
                 Version = new SemanticVersion(version),
                 Description = "Test desc"
             };
+
+            if (licenseUrl != null)
+            {
+                packageBuilder.LicenseUrl = licenseUrl;
+            }
 
             var dependencies = new PackageDependency("Dummy");
             packageBuilder.DependencySets.Add(new PackageDependencySet(null, new[] { dependencies }));
