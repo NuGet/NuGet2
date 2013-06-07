@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using NuGet.Runtime;
@@ -46,10 +47,31 @@ namespace NuGet
         [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "It's constructed using CreateInstanceAndUnwrap in another app domain")]
         private sealed class MetadataExtractor : MarshalByRefObject
         {
+
+            private class AssemblyResolver
+            {
+                private readonly string _lookupPath;
+
+                public AssemblyResolver(string assemblyPath)
+                {
+                    _lookupPath = Path.GetDirectoryName(assemblyPath);
+                }
+
+                public Assembly ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
+                {
+                    var name = new AssemblyName(args.Name);
+                    var assemblyPath = Path.Combine(_lookupPath, name.Name + ".dll");
+                    return File.Exists(assemblyPath) ? 
+                        Assembly.ReflectionOnlyLoadFrom(assemblyPath) : // load from same folder as parent assembly
+                        Assembly.ReflectionOnlyLoad(args.Name);         // load from GAC
+                }
+            }
+
             [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "It's a marshal by ref object used to collection information in another app domain")]
             public AssemblyMetadata GetMetadata(string path)
             {
-                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += ReflectionOnlyAssemblyResolve;
+                var resolver = new AssemblyResolver(path);
+                AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve += resolver.ReflectionOnlyAssemblyResolve;
 
                 try
                 {
@@ -77,13 +99,8 @@ namespace NuGet
                 }
                 finally
                 {
-                    AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve -= ReflectionOnlyAssemblyResolve;
+                    AppDomain.CurrentDomain.ReflectionOnlyAssemblyResolve -= resolver.ReflectionOnlyAssemblyResolve;
                 }
-            }
-
-            private static Assembly ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)
-            {
-                return Assembly.ReflectionOnlyLoad(args.Name);
             }
 
             private static string GetAttributeValueOrDefault<T>(IList<CustomAttributeData> attributes) where T : Attribute
