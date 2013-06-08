@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
@@ -10,8 +11,6 @@ using System.Windows.Forms.VisualStyles;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio;
-using NuGet.VisualStudio.Resources;
-using System.Diagnostics;
 
 namespace NuGet.Options
 {
@@ -87,15 +86,13 @@ namespace NuGet.Options
                 MoveDownButton.Enabled = selectedSource != null && PackageSourcesListBox.SelectedIndex < PackageSourcesListBox.Items.Count - 1;
 
                 // do not allow deleting the official NuGet source
-                removeButton.Enabled = selectedSource != null && !selectedSource.IsOfficial;
-
-                // do not allow editing the official NuGet source
-                BrowseButton.Enabled = updateButton.Enabled = selectedSource != null && !selectedSource.IsOfficial;
+                bool allowEditing = selectedSource != null && !selectedSource.IsOfficial;
+                
+                BrowseButton.Enabled = updateButton.Enabled = removeButton.Enabled = allowEditing;
+                NewPackageName.ReadOnly = NewPackageSource.ReadOnly = !allowEditing;
 
                 // Always enable addButton for PackageSourceListBox
                 addButton.Enabled = true;
-
-                NewPackageName.Enabled = NewPackageSource.Enabled = true;
             }
             else if (selectedMachineSource != null)
             {
@@ -103,7 +100,7 @@ namespace NuGet.Options
 
                 addButton.Enabled = removeButton.Enabled = MoveUpButton.Enabled = MoveDownButton.Enabled = BrowseButton.Enabled = updateButton.Enabled = false;
 
-                NewPackageName.Enabled = NewPackageSource.Enabled = false;
+                NewPackageName.ReadOnly = NewPackageSource.ReadOnly = true;
             }
         }
 
@@ -355,9 +352,10 @@ namespace NuGet.Options
 
         private void PackageSourcesContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
-            if (e.ClickedItem == CopyPackageSourceStripMenuItem && PackageSourcesListBox.SelectedItem != null)
+            var currentListBox = PackageSourcesContextMenu.SourceControl as ListBox;
+            if (currentListBox != null && currentListBox.SelectedItem != null && e.ClickedItem == CopyPackageSourceStripMenuItem)
             {
-                CopySelectedItem((PackageSource)PackageSourcesListBox.SelectedItem);
+                CopySelectedItem((PackageSource)currentListBox.SelectedItem);
             }
         }
 
