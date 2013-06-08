@@ -107,7 +107,7 @@ namespace NuGet
             {
                 foreach (var attribute in attributes)
                 {
-                    if (attribute.AttributeType == typeof(T))
+                    if (attribute.Constructor.DeclaringType == typeof(T))
                     {
                         string value = attribute.ConstructorArguments[0].Value.ToString();
                         // Return the value only if it isn't null or empty so that we can use ?? to fall back
