@@ -493,6 +493,18 @@ namespace NuGet.Dialog.Providers
                 }
                 else if (!task.IsCanceled)
                 {
+                    if (cancellationSource.IsCancellationRequested)
+                    {
+                        HideProgressPane();
+                    }
+                    else
+                    {
+                        // show error message in the Message pane
+                        ShowMessagePane(ExceptionUtility.Unwrap(exception).Message);
+                    }
+                }
+                else
+                {
                     LoadPageResult result = task.Result;
 
                     UpdateNewPackages(result.Packages.ToList());

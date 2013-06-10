@@ -198,12 +198,12 @@ namespace NuGet.Options
             // 
             // MachineWidePackageSourcesListBox
             // 
-            resources.ApplyResources(this.MachineWidePackageSourcesListBox, "MachineWidePackageSourcesListBox");
             this.MachineWidePackageSourcesListBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.tableLayoutPanel1.SetColumnSpan(this.MachineWidePackageSourcesListBox, 4);
             this.MachineWidePackageSourcesListBox.ContextMenuStrip = this.PackageSourcesContextMenu;
             this.MachineWidePackageSourcesListBox.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable;
             this.MachineWidePackageSourcesListBox.FormattingEnabled = true;
+            resources.ApplyResources(this.MachineWidePackageSourcesListBox, "MachineWidePackageSourcesListBox");
             this.MachineWidePackageSourcesListBox.Name = "MachineWidePackageSourcesListBox";
             this.MachineWidePackageSourcesListBox.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.PackageSourcesListBox_DrawItem);
             this.MachineWidePackageSourcesListBox.MeasureItem += new System.Windows.Forms.MeasureItemEventHandler(this.PackageSourcesListBox_MeasureItem);

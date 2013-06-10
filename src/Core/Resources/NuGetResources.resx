@@ -423,5 +423,11 @@
   </data>
   <data name="XdtError" xml:space="preserve">
     <value>An error occurred while applying transformation to '{0}' in project '{1}':</value>
+
+
+  </data>
+  <data name="Error_NoWritableConfig" xml:space="preserve">
+    <value>There are no writable config files.</value>
+
   </data>
 </root>
