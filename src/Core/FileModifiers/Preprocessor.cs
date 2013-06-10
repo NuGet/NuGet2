@@ -33,7 +33,7 @@ namespace NuGet
             }
         }
 
-        internal static string Process(Stream stream, IPropertyProvider propertyProvider, bool throwIfNotFound = true)
+        public static string Process(Stream stream, IPropertyProvider propertyProvider, bool throwIfNotFound = true)
         {
             string text = stream.ReadToEnd();
             return _tokenRegex.Replace(text, match => ReplaceToken(match, propertyProvider, throwIfNotFound));

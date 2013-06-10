@@ -142,7 +142,7 @@ namespace NuGet
                 path = GetFullPath(path);
                 Directory.Delete(path, recursive);
 
-                // The directory is not guranteed to be gone since there could be
+                // The directory is not guaranteed to be gone since there could be
                 // other open handles. Wait, up to half a second, until the directory is gone.
                 for (int i = 0; Directory.Exists(path) && i < 5; ++i)
                 {

@@ -19,7 +19,7 @@ namespace NuGet.Analysis.Rules
                 // if under 'lib' directly
                 if (directory.Equals(Constants.LibDirectory, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (PackageUtility.IsAssembly(path))
+                    if (PackageHelper.IsAssembly(path))
                     {
                         yield return CreatePackageIssueForAssembliesUnderLib(path);
                     }

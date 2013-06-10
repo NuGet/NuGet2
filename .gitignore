@@ -20,5 +20,6 @@ src/Server/Server.Publish.xml
 DebugConstants.cs
 *.log
 packages/*
+!packages/Microsoft.Web.Xdt.1.0.0-alpha/
 *.userprefs
 .DS_Store

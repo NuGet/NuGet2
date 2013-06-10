@@ -69,10 +69,12 @@ namespace NuGet.VisualStudio
                             var parent = file.Parent;
                             file.Remove();
                             DeleteAllParentFilters(parent);
-                            return true;
+                            break;
                         }
-                    }
+                    }                    
                 }
+
+                return true;
             }
 
             return false;

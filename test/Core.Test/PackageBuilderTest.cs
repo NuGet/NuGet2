@@ -416,6 +416,164 @@ namespace NuGet.Test
             }
         }
 
+        [Theory]
+        [InlineData("content\\web.config.install.xdt")]
+        [InlineData("content\\app.config.uninstall.xdt")]
+        [InlineData("content\\winrt45\\foo.uninstall.xdt")]
+        [InlineData("content\\winrt45\\sub\\bar.uninstall.xdt")]
+        public void CreatePackageUsesV5SchemaNamespaceIfContentHasTransformFile(string packagePath)
+        {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = "A",
+                Version = new SemanticVersion("1.0"),
+                Description = "Descriptions",
+            };
+            builder.Authors.Add("Luan");
+            builder.Files.Add(CreatePackageFile(packagePath));
+
+            using (var ms = new MemoryStream())
+            {
+                builder.Save(ms);
+
+                ms.Seek(0, SeekOrigin.Begin);
+
+                var manifestStream = GetManifestStream(ms);
+
+                // Assert
+                Assert.Equal(@"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>Luan</authors>
+    <owners>Luan</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+  </metadata>
+</package>", manifestStream.ReadToEnd());
+            }
+        }
+
+        [Fact]
+        public void CreatePackageUsesV5SchemaNamespaceIfContentHasBothInstallAndUninstallTransformFile()
+        {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = "A",
+                Version = new SemanticVersion("1.0"),
+                Description = "Descriptions",
+            };
+            builder.Authors.Add("Luan");
+            builder.Files.Add(CreatePackageFile("content\\web.config.install.xdt"));
+            builder.Files.Add(CreatePackageFile("content\\app.config.uninstall.xdt"));
+
+            using (var ms = new MemoryStream())
+            {
+                builder.Save(ms);
+
+                ms.Seek(0, SeekOrigin.Begin);
+
+                var manifestStream = GetManifestStream(ms);
+
+                // Assert
+                Assert.Equal(@"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>Luan</authors>
+    <owners>Luan</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+  </metadata>
+</package>", manifestStream.ReadToEnd());
+            }
+        }
+
+        [Theory]
+        [InlineData("lib\\web.config.install.xdt")]
+        [InlineData("lib\\app.config.uninstall.xdt")]
+        [InlineData("tools\\foo.uninstall.xdt")]
+        [InlineData("random\\sub\\bar.uninstall.xdt")]
+        public void CreatePackageDoesNotUseV5SchemaNamespaceIfTransformFileIsOutsideContent(string packagePath)
+        {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = "A",
+                Version = new SemanticVersion("1.0"),
+                Description = "Descriptions",
+            };
+            builder.Authors.Add("Luan");
+            builder.Files.Add(CreatePackageFile(packagePath));
+
+            using (var ms = new MemoryStream())
+            {
+                builder.Save(ms);
+
+                ms.Seek(0, SeekOrigin.Begin);
+
+                var manifestStream = GetManifestStream(ms);
+
+                // Assert
+                Assert.Equal(@"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>Luan</authors>
+    <owners>Luan</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+  </metadata>
+</package>", manifestStream.ReadToEnd());
+            }
+        }
+
+        [Theory]
+        [InlineData("content\\web.config.install2.xdt")]
+        [InlineData("content\\app.config.xdt")]
+        [InlineData("content\\foo.update.xdt")]
+        [InlineData("content\\sub\\bar.xdt.uninstall")]
+        [InlineData("content\\sub\\bar.xdt.install")]
+        public void CreatePackageDoesNotUseV5SchemaNamespaceIfTransformFileExtensionIsNotComplete(string packagePath)
+        {
+            // Arrange
+            PackageBuilder builder = new PackageBuilder()
+            {
+                Id = "A",
+                Version = new SemanticVersion("1.0"),
+                Description = "Descriptions",
+            };
+            builder.Authors.Add("Luan");
+            builder.Files.Add(CreatePackageFile(packagePath));
+
+            using (var ms = new MemoryStream())
+            {
+                builder.Save(ms);
+
+                ms.Seek(0, SeekOrigin.Begin);
+
+                var manifestStream = GetManifestStream(ms);
+
+                // Assert
+                Assert.Equal(@"<?xml version=""1.0""?>
+<package xmlns=""http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd"">
+  <metadata>
+    <id>A</id>
+    <version>1.0</version>
+    <authors>Luan</authors>
+    <owners>Luan</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Descriptions</description>
+  </metadata>
+</package>", manifestStream.ReadToEnd());
+            }
+        }
+
         [Fact]
         public void CreatePackageUsesV5SchemaNamespaceIfReferencesTargetFramework()
         {

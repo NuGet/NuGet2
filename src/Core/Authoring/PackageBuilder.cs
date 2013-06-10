@@ -238,15 +238,10 @@ namespace NuGet
             ValidateDependencySets(Version, DependencySets);
             ValidateReferenceAssemblies(Files, PackageAssemblyReferences);
 
-            bool requiresV4TargetFrameworkSchema = RequiresV4TargetFrameworkSchema(Files);
-
             using (Package package = Package.Open(stream, FileMode.Create))
             {
                 // Validate and write the manifest
-                WriteManifest(package,
-                    requiresV4TargetFrameworkSchema ?
-                        ManifestVersionUtility.TargetFrameworkSupportForDependencyContentsAndToolsVersion :
-                        ManifestVersionUtility.DefaultVersion);
+                WriteManifest(package, DetermineMinimumSchemaVersion(Files));
 
                 // Write the files to the package
                 WriteFiles(package);
@@ -260,6 +255,23 @@ namespace NuGet
                 package.PackageProperties.Keywords = ((IPackageMetadata)this).Tags;
                 package.PackageProperties.Title = Title;
             }
+        }
+
+        private static int DetermineMinimumSchemaVersion(Collection<IPackageFile> Files)
+        {
+            if (HasXdtTransformFile(Files))
+            {
+                // version 5
+                return ManifestVersionUtility.XdtTransformationVersion;
+            }
+
+            if (RequiresV4TargetFrameworkSchema(Files))
+            {
+                // version 4
+                return ManifestVersionUtility.TargetFrameworkSupportForDependencyContentsAndToolsVersion;
+            }
+
+            return ManifestVersionUtility.DefaultVersion;
         }
 
         private static bool RequiresV4TargetFrameworkSchema(ICollection<IPackageFile> files)
@@ -283,6 +295,15 @@ namespace NuGet
                      f.EffectivePath == Constants.PackageEmptyFileName);
 
             return hasEmptyLibFolder;
+        }
+
+        private static bool HasXdtTransformFile(ICollection<IPackageFile> contentFiles)
+        {
+            return contentFiles.Any(file => 
+                file.Path != null &&
+                file.Path.StartsWith(Constants.ContentDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) &&
+                (file.Path.EndsWith(".install.xdt", StringComparison.OrdinalIgnoreCase) || 
+                 file.Path.EndsWith(".uninstall.xdt", StringComparison.OrdinalIgnoreCase)));
         }
 
         internal static void ValidateDependencySets(SemanticVersion version, IEnumerable<PackageDependencySet> dependencies)
@@ -459,14 +480,14 @@ namespace NuGet
             var exclusions = exclude.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var item in exclusions)
             {
-                string wildCard = PathResolver.NormalizeWildcard(basePath, item);
+                string wildCard = PathResolver.NormalizeWildcardForExcludedFiles(basePath, item);
                 PathResolver.FilterPackageFiles(searchFiles, p => p.SourcePath, new[] { wildCard });
             }
         }
 
         private static void CreatePart(Package package, string path, Stream sourceStream)
         {
-            if (PackageUtility.IsManifest(path))
+            if (PackageHelper.IsManifest(path))
             {
                 return;
             }

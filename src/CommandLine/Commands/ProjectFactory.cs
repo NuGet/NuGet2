@@ -125,9 +125,9 @@ namespace NuGet.Commands
                 // Populate the package builder with initial metadata from the assembly/exe
                 AssemblyMetadataExtractor.ExtractMetadata(builder, TargetPath);
             }
-            catch
+            catch (Exception e)
             {
-                Logger.Log(MessageLevel.Warning, NuGetResources.UnableToExtractAssemblyMetadata, Path.GetFileName(TargetPath));
+                Logger.Log(MessageLevel.Warning, NuGetResources.UnableToExtractAssemblyMetadata, Path.GetFileName(TargetPath), e.Message);
                 ExtractMetadataFromProject(builder);
             }
 
@@ -889,7 +889,7 @@ namespace NuGet.Commands
 
         private void AddFileToBuilder(PackageBuilder builder, PhysicalPackageFile packageFile)
         {
-            if (!builder.Files.Any(p => packageFile.Path == p.Path))
+            if (!builder.Files.Any(p => packageFile.Path.Equals(p.Path, StringComparison.OrdinalIgnoreCase)))
             {
                 WriteDetail(NuGetResources.AddFileToPackage, packageFile.SourcePath, packageFile.TargetPath);
                 builder.Files.Add(packageFile);

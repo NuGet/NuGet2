@@ -22,9 +22,12 @@ namespace NuGet
         private IPackageConstraintProvider _constraintProvider;
         private readonly IPackageReferenceRepository _packageReferenceRepository;
 
-        private static readonly IDictionary<string, IPackageFileTransformer> _fileTransformers = new Dictionary<string, IPackageFileTransformer>(StringComparer.OrdinalIgnoreCase) {
-            { ".transform", new XmlTransfomer(GetConfigMappings()) },
-            { ".pp", new Preprocessor() }
+        private readonly IDictionary<FileTransformExtensions, IPackageFileTransformer> _fileTransformers = 
+            new Dictionary<FileTransformExtensions, IPackageFileTransformer>() 
+        {
+            { new FileTransformExtensions(".transform", ".transform"), new XmlTransformer(GetConfigMappings()) },
+            { new FileTransformExtensions(".pp", ".pp"), new Preprocessor() },
+            { new FileTransformExtensions(".install.xdt", ".uninstall.xdt"), new XdtTransformer() }
         };
 
         public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IProjectSystem project, IPackageRepository localRepository)
@@ -113,7 +116,7 @@ namespace NuGet
 
         public virtual void AddPackageReference(string packageId, SemanticVersion version, bool ignoreDependencies, bool allowPrereleaseVersions)
         {
-            IPackage package = PackageHelper.ResolvePackage(SourceRepository, LocalRepository, NullConstraintProvider.Instance, packageId, version, allowPrereleaseVersions);
+            IPackage package = PackageRepositoryHelper.ResolvePackage(SourceRepository, LocalRepository, NullConstraintProvider.Instance, packageId, version, allowPrereleaseVersions);
             AddPackageReference(package, ignoreDependencies, allowPrereleaseVersions);
         }
 
@@ -192,6 +195,7 @@ namespace NuGet
             OnPackageReferenceAdded(args);
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         protected virtual void ExtractPackageFilesToProject(IPackage package)
         {
             // BUG 491: Installing a package with incompatible binaries still does a partial install.
@@ -207,9 +211,10 @@ namespace NuGet
                 (package.FrameworkAssemblies.Any() || package.AssemblyReferences.Any() || package.GetContentFiles().Any() || package.GetBuildFiles().Any()))
             {
                 // for portable framework, we want to show the friendly short form (e.g. portable-win8+net45+wp8) instead of ".NETPortable, Profile=Profile104".
-                string targetFrameworkString = VersionUtility.IsPortableFramework(Project.TargetFramework) 
-                                                    ? VersionUtility.GetShortFrameworkName(Project.TargetFramework) 
-                                                    : Project.TargetFramework.ToString();
+                FrameworkName targetFramework = Project.TargetFramework;
+                string targetFrameworkString = targetFramework.IsPortableFramework()
+                                                    ? VersionUtility.GetShortFrameworkName(targetFramework)
+                                                    : targetFramework != null ? targetFramework.ToString() : null;
 
                 throw new InvalidOperationException(
                            String.Format(CultureInfo.CurrentCulture,
@@ -369,7 +374,7 @@ namespace NuGet
             // Exclude transform files since they are treated specially
             var otherContentFiles = from p in otherPackages
                                     from file in GetCompatibleInstalledItemsForPackage(p.Id, p.GetContentFiles())
-                                    where !_fileTransformers.ContainsKey(Path.GetExtension(file.Path))
+                                    where !IsTransformFile(file.Path) 
                                     select file;
 
             // Get the files and references for this package, that aren't in use by any other packages so we don't have to do reference counting
@@ -402,6 +407,13 @@ namespace NuGet
 
             Logger.Log(MessageLevel.Info, NuGetResources.Log_SuccessfullyRemovedPackageReference, packageFullName, Project.ProjectName);
             OnPackageReferenceRemoved(args);
+        }
+
+        private bool IsTransformFile(string path)
+        {
+            return _fileTransformers.Keys.Any(
+                file => path.EndsWith(file.InstallExtension, StringComparison.OrdinalIgnoreCase) ||
+                        path.EndsWith(file.UninstallExtension, StringComparison.OrdinalIgnoreCase));
         }
 
         private IList<IPackageAssemblyReference> GetFilteredAssembliesToDelete(IPackage package)

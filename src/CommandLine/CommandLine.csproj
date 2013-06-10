@@ -29,6 +29,10 @@
     <Reference Include="Microsoft.Build" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Web.XmlTransform, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\Microsoft.Web.XmlTransform.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -165,7 +169,7 @@
     <Delete Files="$(ILMergeOutputFilePath)" Condition="Exists($(ILMergeOutputFilePath))" />
     <!-- ILMerge does not yet support .NET 4.0  http://nitoprograms.blogspot.com/2010/09/using-ilmerge-with-net-40-andor-rx.html /targetplatform:v4,"%ProgramFiles%\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.0" -->
     <Error Condition="!Exists('$(FrameworkPath)')" Text="Could not find 4.0 reference assemblies in $(FrameworkPath)" />
-    <Exec Command="&quot;$(ILMergeExe)&quot; /targetplatform:&quot;v4, $(FrameworkPath)&quot; /internalize:&quot;$(ILMergeInternalizeIgnoreFile)&quot; /target:exe /out:&quot;Merged\$(ILMergeOutputFile)&quot; /log:&quot;Merged\ilmerge.msbuild.log&quot; /ndebug /allowDup NuGet.exe NuGet.Core.dll" WorkingDirectory="$(OutputPath)" />
+    <Exec Command="&quot;$(ILMergeExe)&quot; /targetplatform:&quot;v4, $(FrameworkPath)&quot; /internalize:&quot;$(ILMergeInternalizeIgnoreFile)&quot; /target:exe /out:&quot;Merged\$(ILMergeOutputFile)&quot; /log:&quot;Merged\ilmerge.msbuild.log&quot; /ndebug /allowDup NuGet.exe NuGet.Core.dll Microsoft.Web.XmlTransform.dll" WorkingDirectory="$(OutputPath)" />
   </Target>
   <Target Name="AfterBuild">
     <CallTarget Targets="MergeExecutable" />

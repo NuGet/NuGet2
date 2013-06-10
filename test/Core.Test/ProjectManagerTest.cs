@@ -1051,18 +1051,21 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var projectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object, localRepository);
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "a", "b", "packages.config.pp", "PACKAGES.config.transform" });
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", 
+                new[] { "a", "b", "packages.config.pp", "PACKAGES.config.transform", "packages.config.install.xdt", "packages.config.uninstall.xdt" });
             sourceRepository.AddPackage(packageA);
 
             // Act
             projectManager.AddPackageReference("A");
 
             // Assert
-            Assert.Equal(4, projectSystem.Object.Paths.Count);
+            Assert.Equal(6, projectSystem.Object.Paths.Count);
             Assert.True(projectSystem.Object.FileExists("a"));
             Assert.True(projectSystem.Object.FileExists("b"));
             Assert.True(projectSystem.Object.FileExists("packages.config.pp"));
             Assert.True(projectSystem.Object.FileExists("packages.config.transform"));
+            Assert.True(projectSystem.Object.FileExists("packages.config.install.xdt"));
+            Assert.True(projectSystem.Object.FileExists("packages.config.uninstall.xdt"));
             Assert.True(localRepository.Exists("A"));
             Assert.False(projectSystem.Object.FileExists("packages.config"));
         }
@@ -1075,18 +1078,20 @@ namespace NuGet.Test
             var localRepository = new MockPackageRepository();
             var projectSystem = new Mock<MockProjectSystem>() { CallBase = true };
             var projectManager = new ProjectManager(sourceRepository, new DefaultPackagePathResolver(projectSystem.Object), projectSystem.Object, localRepository);
-            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "a", "b", "sub\\packages.config.pp", "local\\PACKAGES.config.transform" });
+            IPackage packageA = PackageUtility.CreatePackage("A", "1.0", new[] { "a", "b", "sub\\packages.config.pp", "local\\PACKAGES.config.transform", "fod\\packages.config.Install.XDT", "car\\Packages.Config.uninstall.Xdt" });
             sourceRepository.AddPackage(packageA);
 
             // Act
             projectManager.AddPackageReference("A");
 
             // Assert
-            Assert.Equal(4, projectSystem.Object.Paths.Count);
+            Assert.Equal(6, projectSystem.Object.Paths.Count);
             Assert.True(projectSystem.Object.FileExists("a"));
             Assert.True(projectSystem.Object.FileExists("b"));
             Assert.True(projectSystem.Object.FileExists("sub\\packages.config.pp"));
             Assert.True(projectSystem.Object.FileExists("local\\packages.config.transform"));
+            Assert.True(projectSystem.Object.FileExists("fod\\packages.config.install.xdt"));
+            Assert.True(projectSystem.Object.FileExists("car\\packages.config.uninstall.xdt"));
             Assert.True(localRepository.Exists("A"));
             Assert.False(projectSystem.Object.FileExists("sub\\packages.config"));
             Assert.False(projectSystem.Object.FileExists("local\\packages.config"));

@@ -262,7 +262,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void SkipExistingFilesWhileExpandingFiles()
+        public void DoNotSkipExistingFilesWhileExpandingFiles()
         {
             // Arrange
             var ms = GetPackageStream();
@@ -281,7 +281,7 @@ namespace NuGet.Test
             // Assert
             Assert.True(expandedFileSystem.FileExists("random\\content\\foo"));
             Assert.True(expandedFileSystem.FileExists("random\\lib\\40\\A.dll"));
-            Assert.Equal("happy new year", expandedFileSystem.ReadAllText("random\\content\\foo"));
+            Assert.Equal("content\\foo", expandedFileSystem.ReadAllText("random\\content\\foo"));
         }
 
         private static MemoryStream GetPackageStream(
