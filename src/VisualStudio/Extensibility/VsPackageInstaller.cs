@@ -160,11 +160,6 @@ namespace NuGet.VisualStudio
             }
         }
 
-        public void InstallPackagesFromRegistryRepository(string keyName, bool isPreUnzipped, Project project, IDictionary<string, string> packageVersions)
-        {
-            InstallPackagesFromRegistryRepository(keyName, isPreUnzipped, false, project, packageVersions);
-        }
-
         public void InstallPackagesFromRegistryRepository(string keyName, bool isPreUnzipped, bool skipAssemblyReferences, Project project, IDictionary<string, string> packageVersions)
         {
             if (String.IsNullOrEmpty(keyName))
@@ -187,11 +182,6 @@ namespace NuGet.VisualStudio
 
             var config = GetPreinstalledPackageConfiguration(isPreUnzipped, skipAssemblyReferences, packageVersions, repositoryPath);
             preinstalledPackageInstaller.PerformPackageInstall(this, project, config, RepositorySettings, ShowWarning, ThrowError);
-        }
-
-        public void InstallPackagesFromVSExtensionRepository(string extensionId, bool isPreUnzipped, Project project, IDictionary<string, string> packageVersions)
-        {
-            InstallPackagesFromVSExtensionRepository(extensionId, isPreUnzipped, false, project, packageVersions);
         }
 
         public void InstallPackagesFromVSExtensionRepository(string extensionId, bool isPreUnzipped, bool skipAssemblyReferences, Project project, IDictionary<string, string> packageVersions)
