@@ -297,5 +297,26 @@ namespace NuGet
                 File.SetAttributes(path, attributes & ~FileAttributes.ReadOnly);
             }
         }
+
+        public virtual void MoveFile(string source, string destination)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException("source");
+            }
+            if (destination == null)
+            {
+                throw new ArgumentNullException("destination");
+            }
+            string srcFull = GetFullPath(source);
+            string destFull = GetFullPath(destination);
+
+            if (string.Equals(srcFull, destFull, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            File.Move(srcFull, destFull);
+        }
     }
 }

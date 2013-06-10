@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace NuGet.Common
 {
@@ -26,11 +22,7 @@ namespace NuGet.Common
         /// <seealso cref="http://social.msdn.microsoft.com/forums/en-us/clr/thread/D0B3BF82-4D23-47C8-8706-CC847157AC81"/>
         private static string GenerateUniqueToken(IPackageManager packageManager, string packageId, SemanticVersion version)
         {
-            var packagePath = packageManager.FileSystem.GetFullPath(packageManager.PathResolver.GetPackageFileName(packageId, version));
-            var pathBytes = Encoding.UTF8.GetBytes(packagePath);
-            var hashProvider = new CryptoHashProvider("SHA256");
-
-            return Convert.ToBase64String(hashProvider.CalculateHash(pathBytes)).ToUpperInvariant();
+            return EncryptionUtility.GenerateUniqueToken(packageManager.PathResolver.GetPackageFileName(packageId, version));
         }
 
         private static void ExecuteLocked(string name, Action action)

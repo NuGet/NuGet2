@@ -259,5 +259,11 @@ namespace NuGet.Test.Mocks
         {
             // Nothing to do here.
         }
+
+        public virtual void MoveFile(string src, string destination)
+        {
+            Paths.Add(destination, Paths[src]);
+            Paths.Remove(src);
+        }
     }
 }

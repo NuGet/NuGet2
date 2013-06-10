@@ -104,5 +104,9 @@ namespace NuGet
         {
             // Nothing to do here.
         }
+
+        public void MoveFile(string source, string destination)
+        {
+        }
     }
 }

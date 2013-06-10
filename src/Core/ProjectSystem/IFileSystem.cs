@@ -18,6 +18,7 @@ namespace NuGet
         void AddFile(string path, Stream stream);
         void AddFile(string path, Action<Stream> writeToStream);
         void MakeFileWritable(string path);
+        void MoveFile(string source, string destination);
         Stream CreateFile(string path);
         Stream OpenFile(string path);
         DateTimeOffset GetLastModified(string path);
