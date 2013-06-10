@@ -165,7 +165,7 @@ namespace NuGet.VisualStudio.Test
             packages.Add("A", "1.0.0");
 
             // Act & Assert            
-            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromRegistryRepository(registryKey, false, project, packages));
+            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromRegistryRepository(registryKey, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages));
             Assert.Equal(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_RegistryKeyError, registryPath), exception.Message);
         }
 
@@ -187,7 +187,7 @@ namespace NuGet.VisualStudio.Test
             packages.Add("A", "1.0.0");
 
             // Act & Assert            
-            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromRegistryRepository(registryKey, false, project, packages));
+            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromRegistryRepository(registryKey, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages));
             Assert.Equal(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_InvalidRegistryValue, registryKey, registryPath), exception.Message);
         }
 
@@ -226,7 +226,7 @@ namespace NuGet.VisualStudio.Test
             packages.Add("A", "1.0.0");
 
             // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromRegistryRepository(registryKey, false, project, packages));
+            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromRegistryRepository(registryKey, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages));
             Assert.True(exception.Message.Contains("A.1.0.0 : "));
         }
 
@@ -263,7 +263,7 @@ namespace NuGet.VisualStudio.Test
             var project = TestUtils.GetProject("Foo");
 
             // Act
-            installer.InstallPackagesFromRegistryRepository(registryKey, false, project, packages);
+            installer.InstallPackagesFromRegistryRepository(registryKey, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages);
 
             // Assert
             Assert.Single(consoleOutput);
@@ -319,7 +319,7 @@ namespace NuGet.VisualStudio.Test
 
             // Act
             Assert.False(localRepository.Exists(packageId, new SemanticVersion(packageVersion)));
-            installer.InstallPackagesFromRegistryRepository(registryKey, false, project, packages);
+            installer.InstallPackagesFromRegistryRepository(registryKey, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages);
 
             // Assert
             Assert.True(localRepository.Exists(packageId, new SemanticVersion(packageVersion)));
@@ -341,7 +341,7 @@ namespace NuGet.VisualStudio.Test
             packages.Add("A", "1.0.0");
 
             // Act & Assert            
-            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromVSExtensionRepository(extensionId, false, project, packages));
+            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromVSExtensionRepository(extensionId, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages));
             Assert.Equal(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_InvalidExtensionId, extensionId), exception.Message);
         }
 
@@ -380,7 +380,7 @@ namespace NuGet.VisualStudio.Test
             packages.Add("A", "1.0.0");
 
             // Act & Assert
-            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromVSExtensionRepository(extensionId, false, project, packages));
+            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromVSExtensionRepository(extensionId, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages));
             Assert.True(exception.Message.Contains("A.1.0.0 : "));
         }
 
@@ -417,7 +417,7 @@ namespace NuGet.VisualStudio.Test
             var project = TestUtils.GetProject("Foo");
 
             // Act
-            installer.InstallPackagesFromVSExtensionRepository(extensionId, false, project, packages);
+            installer.InstallPackagesFromVSExtensionRepository(extensionId, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages);
 
             // Assert
             Assert.Single(consoleOutput);
@@ -473,7 +473,7 @@ namespace NuGet.VisualStudio.Test
 
             // Act
             Assert.False(localRepository.Exists(packageId, new SemanticVersion(packageVersion)));
-            installer.InstallPackagesFromVSExtensionRepository(extensionId, false, project, packages);
+            installer.InstallPackagesFromVSExtensionRepository(extensionId, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages);
 
             // Assert
             Assert.True(localRepository.Exists(packageId, new SemanticVersion(packageVersion)));
