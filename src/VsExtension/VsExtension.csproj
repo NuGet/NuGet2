@@ -46,6 +46,7 @@
     <Compile Include="FontAndColorsRegistrationAttribute.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="PkgCmdID.cs" />
+    <Compile Include="NuGetVSEventsPackage.cs" />
     <Compile Include="NuGetPackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProvideBindingPath.cs" Condition=" '$(BuildForDev12)' != 'true' " />
@@ -126,6 +127,10 @@
       <Aliases>dialog</Aliases>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
+    <ProjectReference Include="..\NuGetVSEventsPackage\NuGetVSEventsPackage.csproj">
+      <Project>{1700e91f-4c23-4d98-ade1-ca471a3d52b9}</Project>
+      <Name>NuGetVSEventsPackage</Name>
     </ProjectReference>
     <ProjectReference Include="..\Options\Options.csproj">
       <Project>{53ab7187-cdf3-48b5-b90e-8919d3cb904d}</Project>
