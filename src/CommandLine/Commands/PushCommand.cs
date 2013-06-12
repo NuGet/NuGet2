@@ -28,7 +28,7 @@ namespace NuGet.Commands
             string packagePath = Arguments[0];
 
             // Don't push symbols by default
-            string source = ResolveSource(packagePath);
+            string source = ResolveSource(packagePath, ConfigurationDefaults.Instance.DefaultPushSource);
 
             var apiKey = GetApiKey(source);
             if (String.IsNullOrEmpty(apiKey))
@@ -50,13 +50,18 @@ namespace NuGet.Commands
             }
         }
 
-        public string ResolveSource(string packagePath)
+        public string ResolveSource(string packagePath, string configurationDefaultPushSource = null)
         {
             string source = Source;
 
             if (String.IsNullOrEmpty(source))
             {
                 source = Settings.GetConfigValue("DefaultPushSource");
+            }
+
+            if (String.IsNullOrEmpty(source))
+            {
+                source = configurationDefaultPushSource;
             }
 
             if (!String.IsNullOrEmpty(source))

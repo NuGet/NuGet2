@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-    <metadata>
+    <metadata minClientVersion="2.6">
         <id>$id$</id>
         <version>$version$</version>
         <description>$description$</description>

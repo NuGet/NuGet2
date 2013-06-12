@@ -70,6 +70,7 @@
     <Compile Include="Authoring\PackageDependencySet.cs" />
     <Compile Include="Authoring\PackageReferenceSet.cs" />
     <Compile Include="Authoring\PhysicalPackageAssemblyReference.cs" />
+    <Compile Include="Configuration\ConfigurationDefaults.cs" />
     <Compile Include="Configuration\SettingsCredentialProvider.cs" />
     <Compile Include="Configuration\ISettings.cs" />
     <Compile Include="Configuration\NullSettings.cs" />

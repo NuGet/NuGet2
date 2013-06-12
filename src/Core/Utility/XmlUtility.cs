@@ -72,7 +72,7 @@ namespace NuGet
             return document;
         }
 
-        private static XDocument GetDocument(IFileSystem fileSystem, string path)
+        internal static XDocument GetDocument(IFileSystem fileSystem, string path)
         {
             using (Stream configStream = fileSystem.OpenFile(path))
             {

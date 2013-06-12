@@ -7,6 +7,10 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>4.0</OldToolsVersion>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
   </PropertyGroup>
   <Import Project="..\..\Build\NuGet.Settings.targets" />
   <PropertyGroup>
@@ -17,7 +21,7 @@
     <RootNamespace>NuGet.Server</RootNamespace>
     <AssemblyName>NuGet.Server</AssemblyName>
     <OutputPath>bin</OutputPath>
-    <UseIISExpress>True</UseIISExpress>
+    <UseIISExpress>true</UseIISExpress>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Elmah, Version=1.2.14706.0, Culture=neutral, processorArchitecture=MSIL">
@@ -94,6 +98,9 @@
     <Compile Include="DataServices\Routes.cs" />
     <None Include="Properties\NuGet.Server.nuspec" />
     <Content Include="DataServices\Routes.cs.pp" />
+    <Content Include="web.config.install.xdt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj">

@@ -84,6 +84,30 @@ namespace NuGet.Test
         }
 
         [Fact]
+        public void PushCommandUsesSourceFromConfigurationDefaultsWhenDefaultPushSourceNotSpecifiedByUserOrInConfigFile()
+        {
+            // Arrange
+            var push = new PushCommand();
+            push.SourceProvider = CreateSourceProvider();
+            push.Settings = CreateSettings();
+
+            // Set Configuration Defaults
+            var mockFileSystem = new MockFileSystem();
+            var configurationDefaultsPath = "NuGetDefaults.config";
+            mockFileSystem.AddFile(configurationDefaultsPath, @"
+<configuration>
+     <config>
+        <add key='DefaultPushSource' value='http://contoso.com/packages/' />
+    </config>
+</configuration>");
+
+            ConfigurationDefaults configurationDefaults = new ConfigurationDefaults(mockFileSystem, configurationDefaultsPath);
+
+            // Act & Assert
+            Assert.Equal(push.ResolveSource(@"X:\test\foobar.symbols.nupkg", configurationDefaults.DefaultPushSource), "http://contoso.com/packages/");
+        }
+
+        [Fact]
         public void PushCommandThrowsAnExceptionWhenPackageFileDoesntExist()
         {
             // Arrange            

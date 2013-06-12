@@ -13,11 +13,12 @@ namespace NuGet
         private const string PasswordToken = "Password";
         private const string ClearTextPasswordToken = "ClearTextPassword";
         private readonly ISettings _settingsManager;
-        private readonly IEnumerable<PackageSource> _defaultPackageSources;
+        private readonly IEnumerable<PackageSource> _providerDefaultSources;
         private readonly IDictionary<PackageSource, PackageSource> _migratePackageSources;
+        private readonly IEnumerable<PackageSource> _configurationDefaultSources;
 
         public PackageSourceProvider(ISettings settingsManager)
-            : this(settingsManager, defaultSources: null)
+            : this(settingsManager, providerDefaultSources: null)
         {
         }
 
@@ -25,24 +26,36 @@ namespace NuGet
         /// Creates a new PackageSourceProvider instance.
         /// </summary>
         /// <param name="settingsManager">Specifies the settings file to use to read package sources.</param>
-        /// <param name="defaultSources">Specifies the sources to return if no package sources are available.</param>
-        public PackageSourceProvider(ISettings settingsManager, IEnumerable<PackageSource> defaultSources)
-            : this(settingsManager, defaultSources, migratePackageSources: null)
+        /// <param name="providerDefaultSources">Specifies the default sources to be used as per the PackageSourceProvider. These are always loaded
+        /// Default Feeds from PackageSourceProvider are generally the feeds from the NuGet Client like the NuGetOfficialFeed from the Visual Studio client for NuGet</param>
+        public PackageSourceProvider(ISettings settingsManager, IEnumerable<PackageSource> providerDefaultSources)
+            : this(settingsManager, providerDefaultSources, migratePackageSources: null)
         {
         }
 
         public PackageSourceProvider(
             ISettings settingsManager,
-            IEnumerable<PackageSource> defaultSources,
+            IEnumerable<PackageSource> providerDefaultSources,
             IDictionary<PackageSource, PackageSource> migratePackageSources)
+            : this(settingsManager, providerDefaultSources, migratePackageSources, ConfigurationDefaults.Instance.DefaultPackageSources)
+        {
+
+        }
+
+        internal PackageSourceProvider(
+            ISettings settingsManager,
+            IEnumerable<PackageSource> providerDefaultSources,
+            IDictionary<PackageSource, PackageSource> migratePackageSources,
+            IEnumerable<PackageSource> configurationDefaultSources)
         {
             if (settingsManager == null)
             {
                 throw new ArgumentNullException("settingsManager");
             }
             _settingsManager = settingsManager;
-            _defaultPackageSources = defaultSources ?? Enumerable.Empty<PackageSource>();
+            _providerDefaultSources = providerDefaultSources ?? Enumerable.Empty<PackageSource>();
             _migratePackageSources = migratePackageSources;
+            _configurationDefaultSources = configurationDefaultSources ?? Enumerable.Empty<PackageSource>();
         }
 
         /// <summary>
@@ -53,7 +66,8 @@ namespace NuGet
         {
             var sources = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var settingsValue = new List<SettingValue>();            
-            IList<SettingValue> values = _settingsManager.GetSettingValues(PackageSourcesSectionName, isPath: true);            
+            IList<SettingValue> values = _settingsManager.GetSettingValues(PackageSourcesSectionName, isPath: true);
+            var machineWideStartIndex = 0;
             
             if (!values.IsEmpty())
             {
@@ -81,11 +95,13 @@ namespace NuGet
 
                 // Reverse the the list to be backward compatible
                 settingsValue.Reverse();
+                machineWideStartIndex = settingsValue.Count;
 
                 // Add machine wide sources at the end
                 settingsValue.AddRange(machineWideSources);
             }
 
+            var loadedPackageSources = new List<PackageSource>();
             if (!settingsValue.IsEmpty())
             {
                 // put disabled package source names into the hash set
@@ -93,15 +109,14 @@ namespace NuGet
                 IEnumerable<KeyValuePair<string, string>> disabledSourcesValues = _settingsManager.GetValues(DisabledPackageSourcesSectionName) ??
                                                                                   Enumerable.Empty<KeyValuePair<string, string>>();
                 var disabledSources = new HashSet<string>(disabledSourcesValues.Select(s => s.Key), StringComparer.CurrentCultureIgnoreCase);
-                var loadedPackageSources = settingsValue.
+                loadedPackageSources = settingsValue.
                                            Select(p =>
                                            {
                                                string name = p.Key;
                                                string src = p.Value;
                                                PackageSourceCredential creds = ReadCredential(name);
 
-                                               // We always set the isOfficial bit to false here, as Core doesn't have the concept of an official package source.
-                                               return new PackageSource(src, name, isEnabled: !disabledSources.Contains(name), isOfficial: false)
+                                               return new PackageSource(src, name, isEnabled: !disabledSources.Contains(name))
                                                {
                                                    UserName = creds != null ? creds.Username : null,
                                                    Password = creds != null ? creds.Password : null,
@@ -115,10 +130,11 @@ namespace NuGet
                 {
                     MigrateSources(loadedPackageSources);
                 }
-
-                return loadedPackageSources;
             }
-            return _defaultPackageSources;
+
+            SetDefaultPackageSources(loadedPackageSources, machineWideStartIndex);
+
+            return loadedPackageSources;
         }
 
         private PackageSourceCredential ReadCredential(string sourceName)
@@ -166,6 +182,69 @@ namespace NuGet
             if (hasChanges)
             {
                 SavePackageSources(loadedPackageSources);
+            }
+        }
+
+        private void SetDefaultPackageSources(List<PackageSource> loadedPackageSources, int machineWideStartIndex)
+        {
+            // There are 4 different cases to consider for default package sources
+            // Case 1. Default Package Source is already present matching both feed source and the feed name
+            // Case 2. Default Package Source is already present matching feed source but with a different feed name. DO NOTHING
+            // Case 3. Default Package Source is not present, but there is another feed source with the same feed name. Override that feed entirely
+            // Case 4. Default Package Source is not present, simply, add it
+
+            IEnumerable<PackageSource> allDefaultPackageSources = _configurationDefaultSources;
+
+            if (allDefaultPackageSources.IsEmpty<PackageSource>())
+            {
+                // Update provider default sources and use provider default sources since _configurationDefaultSources is empty
+                UpdateProviderDefaultSources(loadedPackageSources);
+                allDefaultPackageSources = _providerDefaultSources;
+            }
+
+            var defaultPackageSourcesToBeAdded = new List<PackageSource>();
+            foreach (PackageSource packageSource in allDefaultPackageSources)
+            {
+                int sourceMatchingIndex = loadedPackageSources.FindIndex(p => p.Source.Equals(packageSource.Source, StringComparison.OrdinalIgnoreCase));
+                if (sourceMatchingIndex != -1)
+                {
+                    if (loadedPackageSources[sourceMatchingIndex].Name.Equals(packageSource.Name, StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        // Case 1: Both the feed name and source matches. DO NOTHING except set IsOfficial to true
+                        loadedPackageSources[sourceMatchingIndex].IsOfficial = true;
+                    }
+                    else
+                    {
+                        // Case 2: Only feed source matches but name is different. DO NOTHING
+                    }
+                }
+                else
+                {
+                    int nameMatchingIndex = loadedPackageSources.FindIndex(p => p.Name.Equals(packageSource.Name, StringComparison.CurrentCultureIgnoreCase));
+                    if (nameMatchingIndex != -1)
+                    {
+                        // Case 3: Only feed name matches but source is different. Override it entirely
+                        loadedPackageSources[nameMatchingIndex] = packageSource;
+                    }
+                    else
+                    {
+                        // Case 4: Default package source is not present. Add it to the temp list. Later, the temp listed is inserted above the machine wide sources
+                        defaultPackageSourcesToBeAdded.Add(packageSource);
+                    }
+                }
+            }
+            loadedPackageSources.InsertRange(machineWideStartIndex, defaultPackageSourcesToBeAdded);
+        }
+
+        private void UpdateProviderDefaultSources(List<PackageSource> loadedSources)
+        {
+            // If there are NO other non-machine wide sources, providerDefaultSource should be enabled
+            bool areProviderDefaultSourcesEnabled = loadedSources.Count == 0 || loadedSources.Where(p => !p.IsMachineWide).Count() == 0;
+
+            foreach (PackageSource packageSource in _providerDefaultSources)
+            {
+                packageSource.IsEnabled = areProviderDefaultSourcesEnabled;
+                packageSource.IsOfficial = true;
             }
         }
 
