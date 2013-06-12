@@ -523,7 +523,37 @@
   <data name="Error_IncludeReferencedProjectsAndSymbolsNotSupported" xml:space="preserve">
     <value>Specifying both -IncludeReferencedProjects and -Symbols is not supported.</value>
   </data>
-  <data name="ListCommand_LicenseUrl" xml:space="preserve">
-    <value>License url: {0}</value>
+  <data name="Error_MultipleSolutions" xml:space="preserve">
+    <value>This folder contains more than one solution file.</value>
+  </data>
+  <data name="Error_NoSolutionFileNorePackagesConfigFile" xml:space="preserve">
+    <value>This folder contains no solution files, nor packages.config files.</value>
+  </data>
+  <data name="RestoreCommandOptionSolutionDirectoryIsInvalid" xml:space="preserve">
+    <value>Option -SolutionDirectory is not valid when restoring packages for a solution.</value>
+  </data>
+  <data name="RestoreCommandRestoringPackagesForSolution" xml:space="preserve">
+    <value>Restoring NuGet packages for solution {0}.</value>
+  </data>
+  <data name="RestoreCommandRestoringPackagesFromPackagesConfigFile" xml:space="preserve">
+    <value>Restoring NuGet packages listed in packages.config file.</value>
+  </data>
+  <data name="Error_CannotLoadTypeProjectInSolution" xml:space="preserve">
+    <value>Cannot load type Microsoft.Build.Construction.ProjectInSolution from Microsoft.Build.dll</value>
+  </data>
+  <data name="Error_CannotLoadTypeSolutionParser" xml:space="preserve">
+    <value>Cannot load type Microsoft.Build.Construction.SolutionParser from Microsoft.Build.dll</value>
+  </data>
+  <data name="RestoreCommandRestoringPackagesListedInFile" xml:space="preserve">
+    <value>Restoring NuGet packages listed in file {0}.</value>
+  </data>
+  <data name="RestoreCommandCannotDeterminePackagesFolder" xml:space="preserve">
+    <value>Cannot determine the packages folder to restore NuGet packages.</value>
+  </data>
+  <data name="RestoreCommandFileNotFound" xml:space="preserve">
+    <value>Input file does not exist: {0}.</value>
+  </data>
+  <data name="RestoreCommandProjectNotFound" xml:space="preserve">
+    <value>Project file {0} cannot be found.</value>
   </data>
 </root>
