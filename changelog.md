@@ -7,6 +7,7 @@ Change Log / Release Notes
 * Show License Url when listing packages and verbosity is detailed. 
 * [#1956](http://nuget.codeplex.com/workitem/1956) - Add developmentDependency attribute to packages.config and use it in pack command to only include runtime packages
 * [#3386](https://nuget.codeplex.com/workitem/3386) - Group-Policy compatible feature for providing NuGet defaults including the ability to override nuget.org
+* Add Package Restore VS package, which restores NuGet packages when user builds a solution/project inside VS.
 
 ## NuGet 2.6
 
