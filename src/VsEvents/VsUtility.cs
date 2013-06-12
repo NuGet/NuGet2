@@ -11,7 +11,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.VisualStudio;
 using VsServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
-namespace NuGet.NuGetVSEventsPackage
+namespace NuGet.VsEvents
 {
     // The code inside this class is copied from file ProjectExtensions. 
     // The reason of code duplication is to delay loading NuGet.VisualStudio.dll 

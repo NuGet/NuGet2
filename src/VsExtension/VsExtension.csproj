@@ -115,10 +115,6 @@
       <Name>Dialog</Name>
       <Aliases>dialog</Aliases>
     </ProjectReference>
-    <ProjectReference Include="..\NuGetVSEventsPackage\NuGetVSEventsPackage.csproj">
-      <Project>{1700e91f-4c23-4d98-ade1-ca471a3d52b9}</Project>
-      <Name>NuGetVSEventsPackage</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Options\Options.csproj">
       <Project>{53ab7187-cdf3-48b5-b90e-8919d3cb904d}</Project>
       <Name>Options</Name>
@@ -182,6 +178,10 @@
       <Name>VisualStudio</Name>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
+    <ProjectReference Include="..\VsEvents\VsEvents.csproj">
+      <Project>{1700e91f-4c23-4d98-ade1-ca471a3d52b9}</Project>
+      <Name>VsEvents</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

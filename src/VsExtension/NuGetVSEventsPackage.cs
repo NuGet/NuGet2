@@ -4,8 +4,7 @@ using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using NuGet.NuGetVSEventsPackage;
-using NuGet.VisualStudio;
+using NuGet.VsEvents;
 
 namespace NuGet.Tools
 {
