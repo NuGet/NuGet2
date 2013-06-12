@@ -198,12 +198,12 @@ namespace NuGet
         /// We use this method instead of the "safe" methods in FileSystem because it attempts to retry multiple times with delays.
         /// In our case, if we are unable to perform IO over the machine cache, we want to quit trying immediately.
         /// </remarks>
-        private static bool TryAct(Func<bool> action, string fullPath)
+        private bool TryAct(Func<bool> action, string path)
         {
             try
             {
                 // Global: machine cache is per user across TS sessions
-                var mutexName = "Global\\" + EncryptionUtility.GenerateUniqueToken(fullPath);
+                var mutexName = "Global\\" + EncryptionUtility.GenerateUniqueToken(FileSystem.GetFullPath(path) ?? path);
                 using (var mutex = new Mutex(false, mutexName))
                 {
                     bool owner = false;

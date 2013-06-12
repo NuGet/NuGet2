@@ -22,7 +22,8 @@ namespace NuGet.Common
         /// <seealso cref="http://social.msdn.microsoft.com/forums/en-us/clr/thread/D0B3BF82-4D23-47C8-8706-CC847157AC81"/>
         private static string GenerateUniqueToken(IPackageManager packageManager, string packageId, SemanticVersion version)
         {
-            return EncryptionUtility.GenerateUniqueToken(packageManager.PathResolver.GetPackageFileName(packageId, version));
+            var fullPath = packageManager.FileSystem.GetFullPath(packageManager.PathResolver.GetPackageFileName(packageId, version));
+            return EncryptionUtility.GenerateUniqueToken(fullPath);
         }
 
         private static void ExecuteLocked(string name, Action action)
