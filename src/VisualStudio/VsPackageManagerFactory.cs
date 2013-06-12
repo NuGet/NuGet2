@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.Composition;
 using EnvDTE;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace NuGet.VisualStudio
 {
@@ -14,7 +15,7 @@ namespace NuGet.VisualStudio
         private readonly IRepositorySettings _repositorySettings;
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly VsPackageInstallerEvents _packageEvents;
-
+        private readonly IVsFrameworkMultiTargeting _frameworkMultiTargeting;
         private RepositoryInfo _repositoryInfo;
 
         [ImportingConstructor]
@@ -23,7 +24,24 @@ namespace NuGet.VisualStudio
                                        IVsPackageSourceProvider packageSourceProvider,
                                        IFileSystemProvider fileSystemProvider,
                                        IRepositorySettings repositorySettings,
-                                       VsPackageInstallerEvents packageEvents)
+                                       VsPackageInstallerEvents packageEvents) :
+            this(solutionManager, 
+                 repositoryFactory, 
+                 packageSourceProvider, 
+                 fileSystemProvider, 
+                 repositorySettings, 
+                 packageEvents,
+                 ServiceLocator.GetGlobalService<SVsFrameworkMultiTargeting, IVsFrameworkMultiTargeting>())
+        {
+        }
+
+        public VsPackageManagerFactory(ISolutionManager solutionManager,
+                                       IPackageRepositoryFactory repositoryFactory,
+                                       IVsPackageSourceProvider packageSourceProvider,
+                                       IFileSystemProvider fileSystemProvider,
+                                       IRepositorySettings repositorySettings,
+                                       VsPackageInstallerEvents packageEvents,
+                                       IVsFrameworkMultiTargeting frameworkMultiTargeting)
         {
             if (solutionManager == null)
             {
@@ -56,6 +74,7 @@ namespace NuGet.VisualStudio
             _repositoryFactory = repositoryFactory;
             _packageSourceProvider = packageSourceProvider;
             _packageEvents = packageEvents;
+            _frameworkMultiTargeting = frameworkMultiTargeting;
 
             _solutionManager.SolutionClosing += (sender, e) =>
             {
@@ -86,7 +105,8 @@ namespace NuGet.VisualStudio
                                         // We ensure DeleteOnRestartManager is initialized with a PhysicalFileSystem so the
                                         // .deleteme marker files that get created don't get checked into version control
                                         new DeleteOnRestartManager(() => new PhysicalFileSystem(info.FileSystem.Root)),
-                                        _packageEvents);
+                                        _packageEvents,
+                                        _frameworkMultiTargeting);
         }
 
         /// <summary>

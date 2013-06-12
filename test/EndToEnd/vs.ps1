@@ -128,23 +128,23 @@ function New-Project {
 
     # Return the project
 
-	for ($counter = 0; $counter -lt 20; $counter++)
-	{
-		if ($SolutionFolder) {
-			$solutionFolderPath = Get-SolutionFolderPathRecursive $SolutionFolder
-			$project = Get-Project "$($solutionFolderPath)$projectName" -ErrorAction SilentlyContinue
-		}
-		else {
-			$project = Get-Project $projectName -ErrorAction SilentlyContinue
-		}
+    for ($counter = 0; $counter -lt 20; $counter++)
+    {
+        if ($SolutionFolder) {
+            $solutionFolderPath = Get-SolutionFolderPathRecursive $SolutionFolder
+            $project = Get-Project "$($solutionFolderPath)$projectName" -ErrorAction SilentlyContinue
+        }
+        else {
+            $project = Get-Project $projectName -ErrorAction SilentlyContinue
+        }
 
-		if ($project)
-		{
-			break;
-		}
+        if ($project)
+        {
+            break;
+        }
 
-		[System.Threading.Thread]::Sleep(100)
-	}
+        [System.Threading.Thread]::Sleep(100)
+    }
     
     if(!$project) {
         $project = Get-Project "$destPath\"
@@ -193,6 +193,26 @@ function New-ClassLibrary {
     )
 
     $SolutionFolder | New-Project ClassLibrary $ProjectName
+}
+
+function New-PortableLibrary 
+{
+    param(
+        [string]$ProjectName,
+        [string]$Profile = $null,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $project = New-Project PortableClassLibrary $ProjectName $SolutionFolder
+
+    if ($Profile) 
+    {
+        $name = $project.Name
+        $project.Properties.Item("TargetFrameworkMoniker").Value = ".NETPortable,Version=v4.0,Profile=$Profile"
+        $project = Get-Project -Name $name
+    }
+
+    $project
 }
 
 function New-ConsoleApplication {
