@@ -128,11 +128,7 @@
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
     </ProjectReference>
-    <ProjectReference Include="..\NuGetVSEventsPackage\NuGetVSEventsPackage.csproj">
-      <Project>{1700e91f-4c23-4d98-ade1-ca471a3d52b9}</Project>
-      <Name>NuGetVSEventsPackage</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NuGetVSEventsPackage\NuGetVSEventsPackage.csproj">
+    <ProjectReference Include="..\VsEvents\VsEvents.csproj">
       <Project>{1700e91f-4c23-4d98-ade1-ca471a3d52b9}</Project>
       <Name>NuGetVSEventsPackage</Name>
     </ProjectReference>
@@ -215,6 +211,10 @@
       <Name>VisualStudio</Name>
       <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3b</IncludeOutputGroupsInVSIX>
       <IncludeOutputGroupsInVSIXLocalOnly>DebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIXLocalOnly>
+    </ProjectReference>
+    <ProjectReference Include="..\VsEvents\VsEvents.csproj">
+      <Project>{1700e91f-4c23-4d98-ade1-ca471a3d52b9}</Project>
+      <Name>VsEvents</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
