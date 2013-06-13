@@ -1711,7 +1711,14 @@ function Test-InstallPackageThrowsIfThereIsNoCompatibleContentFiles
     
     # Act & Assert
 
-    Assert-Throws { Install-Package TestTargetFxContentFiles -Project $project.Name -Source $context.RepositoryPath } "Could not install package 'TestTargetFxContentFiles 1.0.0'. You are trying to install this package into a project that targets 'Silverlight,Version=v4.0', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
+    $version = "v4.0";
+    if ($dte.Version -eq "12.0")
+    {
+        # On VS 2013, Silverlight 4 project is no longer supported
+        $version = "v5.0"
+    }
+
+    Assert-Throws { Install-Package TestTargetFxContentFiles -Project $project.Name -Source $context.RepositoryPath } "Could not install package 'TestTargetFxContentFiles 1.0.0'. You are trying to install this package into a project that targets 'Silverlight,Version=$version', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
     Assert-NoPackage $project TestTargetFxContentFiles
 }
 
