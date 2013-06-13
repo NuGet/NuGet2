@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.20612.0 VSCLIENT_1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{E7B39EAD-EA32-4011-845A-C949A336389A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "notices", "notices", "{E8BEECAD-4A51-48A6-9602-6D8C6F41841E}"
@@ -49,6 +51,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D617D07A
 		test\EndToEnd\tests\TabExpansionTest.ps1 = test\EndToEnd\tests\TabExpansionTest.ps1
 		test\EndToEnd\tests\uninstall.ps1 = test\EndToEnd\tests\uninstall.ps1
 		test\EndToEnd\tests\update.ps1 = test\EndToEnd\tests\update.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget.build", "nuget.build", "{9D2D9A2A-71C8-481A-A2A3-EF0CE65E3B32}"
+	ProjectSection(SolutionItems) = preProject
+		src\Build\NuGet.Build.nuspec = src\Build\NuGet.Build.nuspec
+		src\Build\NuGet.targets = src\Build\NuGet.targets
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "src\Core\Core.csproj", "{F879F274-EFA0-4157-8404-33A19B4E6AEC}"
@@ -113,12 +121,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandLine.Test", "test\CommandLine.Test\CommandLine.Test.csproj", "{5376E601-D111-4198-8BC2-F1118433CC83}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeamFoundationServer.Test", "test\TeamFoundationServer.Test\TeamFoundationServer.Test.csproj", "{F1A63FD0-E1DE-43C6-940A-754D3B6C0A77}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget.build", "nuget.build", "{9D2D9A2A-71C8-481A-A2A3-EF0CE65E3B32}"
-	ProjectSection(SolutionItems) = preProject
-		src\Build\NuGet.Build.nuspec = src\Build\NuGet.Build.nuspec
-		src\Build\NuGet.targets = src\Build\NuGet.targets
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio11", "src\VisualStudio11\VisualStudio11.csproj", "{051531B6-553F-4B29-BB4A-959E431D1FDC}"
 EndProject
