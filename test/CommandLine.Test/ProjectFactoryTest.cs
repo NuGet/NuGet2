@@ -40,7 +40,7 @@ namespace NuGet.Test
                 Version = "2.0.30619.9000",
                 Title = "NuGet.Test",
                 Description = "",
-                Copyright = "\x00a9 Outercurve Foundation. All rights reserved.",
+                Copyright = "\x00a9 Outercurve. All rights reserved.",
                 Authors = "Outercurve Foundation",
             };
             var projectMock = new Mock<Project>();
@@ -59,7 +59,7 @@ namespace NuGet.Test
         <version>2.0.30619.9000</version>
         <description></description>
         <authors>Outercurve Foundation</authors>
-        <copyright>© Outercurve Foundation. All rights reserved.</copyright>
+        <copyright>© Outercurve. All rights reserved.</copyright>
         <licenseUrl>http://nuget.codeplex.com/license</licenseUrl>
         <projectUrl>http://nuget.codeplex.com</projectUrl>
         <tags>nuget</tags>
