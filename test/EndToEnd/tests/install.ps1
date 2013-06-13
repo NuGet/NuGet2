@@ -916,8 +916,15 @@ function Test-InstallPackageIntoSecondProjectWithIncompatibleAssembliesDoesNotRo
     $p2 = New-WindowsPhoneClassLibrary
 
     # Act
-    $p1 | Install-Package NuGet.Core    
-    Assert-Throws { $p2 | Install-Package NuGet.Core -Version 1.4.20615.9012 } "Could not install package 'NuGet.Core 1.4.20615.9012'. You are trying to install this package into a project that targets 'Silverlight,Version=v4.0,Profile=WindowsPhone71', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
+    $p1 | Install-Package NuGet.Core
+
+    $profile = "WindowsPhone71"
+    if ($dte.Version -eq "10.0")
+    {
+        $profile = "WindowsPhone"
+    }
+
+    Assert-Throws { $p2 | Install-Package NuGet.Core -Version 1.4.20615.9012 } "Could not install package 'NuGet.Core 1.4.20615.9012'. You are trying to install this package into a project that targets 'Silverlight,Version=v4.0,Profile=$profile', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
 
     # Assert    
     Assert-Package $p1 NuGet.Core
