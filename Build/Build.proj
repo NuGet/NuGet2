@@ -16,7 +16,7 @@
         <MonoBuild>true</MonoBuild>
     </PropertyGroup>
 
-    <PropertyGroup>        
+    <PropertyGroup>
         <NuGetRoot>$(MSBuildProjectDirectory)\..</NuGetRoot>
         <NuGetTestRoot>$(NuGetRoot)\test</NuGetTestRoot>
         <NuGetSrcRoot>$(NuGetRoot)\src</NuGetSrcRoot>
@@ -79,8 +79,8 @@
             <ReplaceWith>AssemblyVersion("$(Version)")</ReplaceWith>
         </RegexTransform>
         <RegexTransform Include="$(NuGetRoot)\Common\CommonAssemblyInfo.cs">
-          <Find>AssemblyInformationalVersion\("\d+\.\d+\.\d+"\)</Find>
-          <ReplaceWith>AssemblyInformationalVersion("$(PackageVersion)")</ReplaceWith>
+            <Find>AssemblyInformationalVersion\("\d+\.\d+\.\d+"\)</Find>
+            <ReplaceWith>AssemblyInformationalVersion("$(PackageVersion)")</ReplaceWith>
         </RegexTransform>
         <RegexTransform Include="$(NuGetSrcRoot)\VsConsole\PowerShellHost\Scripts\nuget.psd1">
             <Find><![CDATA[ModuleVersion = '\d+\.\d+\.\d+\.\d+']]></Find>
@@ -144,7 +144,7 @@
     <Target Name="RestorePackages">
         <MsBuild Projects="$(NuGetRoot)\src\CommandLine\CommandLine.csproj"
                    Targets="Build"
-                   Properties="DefineConstants=CODE_ANALYSIS" />        
+                   Properties="DefineConstants=CODE_ANALYSIS" />
 
         <Message Text="Restoring NuGet packages" Importance="High" />
         <MsBuild Projects="@(RestorePackageProjects)"
@@ -158,7 +158,7 @@
     </Target>
 
     <Target Name="BuildMono">
-        <MSBuild Projects="@(MonoProjects)" 
+        <MSBuild Projects="@(MonoProjects)"
                  Targets="Build" />
     </Target>
 
@@ -180,7 +180,24 @@
             <Output TaskParameter="InvalidItems" ItemName="InvalidFiles" />
         </CheckUnexpectedAssemblies>
 
+        <ItemGroup Condition=" $(BuildForDev12) == 'true' ">
+            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.Dialog10.dll" />
+            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.Dialog11.dll"></UnwantedAssembly>
+            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio10.dll"></UnwantedAssembly>
+            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio11.dll"></UnwantedAssembly>
+            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.TeamFoundationServer10.dll"></UnwantedAssembly>
+            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.TeamFoundationServer11.dll"></UnwantedAssembly>
+        </ItemGroup>
+
+        <ItemGroup Condition=" $(BuildForDev12) != 'true' ">
+            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.Dialog.dll"></UnwantedAssembly>
+            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio12.dll"></UnwantedAssembly>
+            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.TeamFoundationServer.dll"></UnwantedAssembly>
+        </ItemGroup>
+        
         <Delete Files="@(InvalidFiles)" />
+        <Delete Files="@(UnwantedAssembly)" />
+        
         <Exec Command="&quot;$(ZipExe)&quot; a -r &quot;$(VisualStudioAddInBuildDirectory)\NuGet.Tools.zip&quot; &quot;$(TempVsixDirectory)\*.*&quot;" />
 
         <Delete Files="$(VsixFileLocation)" />
@@ -189,7 +206,7 @@
         <RemoveDir Directories="$(TempVsixDirectory)" ContinueOnError="true" />
     </Target>
 
-    <Target Name="RunTests">        
+    <Target Name="RunTests">
         <MsBuild Projects="@(TestProjects)"
                   Targets="RunTests"
                   BuildInParallel="$(BuildTestsInParallel)" />
@@ -264,7 +281,7 @@
             <EndToEndTestItems Include="$(EndToEndTestsDirectory)\**\*.*" />
             <EndToEndTestItems Remove="$(EndToEndTestsDirectory)\bin\**\*.*" />
         </ItemGroup>
-        
+
         <Copy ContinueOnError="false" SourceFiles="@(EndToEndTestItems)" DestinationFiles="@(EndToEndTestItems ->'$(EndToEndTestsDropDirectory)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
         <Message Text="Zipping the EndToEnd directory..." Importance="high" />
