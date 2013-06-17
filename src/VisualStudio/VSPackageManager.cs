@@ -1242,7 +1242,7 @@ namespace NuGet.VisualStudio
                 // We need to Remove the handlers here since we're going to attempt
                 // a rollback and we don't want modify the collections while rolling back.
                 projectManager.PackageReferenceRemoved -= removeHandler;
-                projectManager.PackageReferenceAdded -= addingHandler;
+                projectManager.PackageReferenceAdding -= addingHandler;
 
                 // When things fail attempt a rollback
                 RollbackProjectActions(projectManager, packagesAdded, packagesRemoved);
