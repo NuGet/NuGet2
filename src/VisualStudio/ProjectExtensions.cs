@@ -289,6 +289,15 @@ namespace NuGet.VisualStudio
             return project != null && VsConstants.JsProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
         }
 
+        public static bool IsXnaWindowsPhoneProject(this Project project)
+        {
+            // XNA projects will have this property set
+            const string xnaPropertyValue = "Microsoft.Xna.GameStudio.CodeProject.WindowsPhoneProjectPropertiesExtender.XnaRefreshLevel";
+            return project != null && 
+                   "Windows Phone OS 7.1".Equals(project.GetPropertyValue<string>(xnaPropertyValue), StringComparison.OrdinalIgnoreCase);
+
+        }
+
         public static bool IsNativeProject(this Project project)
         {
             return project != null && VsConstants.CppProjectTypeGuid.Equals(project.Kind, StringComparison.OrdinalIgnoreCase);
@@ -378,7 +387,17 @@ namespace NuGet.VisualStudio
                 return "Native, Version=0.0";
             }
 
-            return project.GetPropertyValue<string>("TargetFrameworkMoniker");
+            string targetFramework = project.GetPropertyValue<string>("TargetFrameworkMoniker");
+
+            // XNA project lies about its true identity, reporting itself as a normal .NET 4.0 project.
+            // We detect it and changes its target framework to Silverlight4-WindowsPhone71
+            if (".NETFramework,Version=v4.0".Equals(targetFramework, StringComparison.OrdinalIgnoreCase) &&
+                project.IsXnaWindowsPhoneProject())
+            {
+                return "Silverlight,Version=v4.0,Profile=WindowsPhone71";
+            }
+
+            return targetFramework;
         }
 
         public static FrameworkName GetTargetFrameworkName(this Project project)
