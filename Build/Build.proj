@@ -189,7 +189,7 @@
         <RemoveDir Directories="$(TempVsixDirectory)" ContinueOnError="true" />
     </Target>
 
-    <Target Name="RunTests">        
+    <Target Name="RunTests" Condition=" '$(DisableRunningUnitTests)' != 'true' ">        
         <MsBuild Projects="@(TestProjects)"
                   Targets="RunTests"
                   BuildInParallel="$(BuildTestsInParallel)" />
