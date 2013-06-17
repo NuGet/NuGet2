@@ -1563,7 +1563,7 @@ function Test-InstallingPackageaAfterNuGetDirectoryIsRenamedContinuesUsingDirect
     Assert-AreEqual $expected $content
 }
 
-function Test-InstallingSatellitePackageCopiesFilesIntoRuntimePackageFolderWhenRuntimeIsInstalledAsADependency
+function Test-InstallSatellitePackageCopiesFilesToRuntimeFolderWhenInstalledAsDependency
 {
     param(
         $context
@@ -1581,7 +1581,7 @@ function Test-InstallingSatellitePackageCopiesFilesIntoRuntimePackageFolderWhenR
     Assert-PathExists (Join-Path $solutionDir packages\PackageWithStrongNamedLib.1.1\lib\ja-jp\Core.xml)
 }
 
-function Test-InstallingSatellitePackageCopiesFilesIntoRuntimePackageFolderWhenRuntimeIsAlreadyInstalled
+function Test-InstallSatellitePackageCopiesFilesToExistingRuntimePackageFolder
 {
     param(
         $context
@@ -1982,7 +1982,7 @@ function Test-InstallMetaPackageWorksAsExpected
     Assert-Package $p Dependency
 }
 
-function Test-InstallPackageDoesNotUninstallDependencyGraphWhenSafeUpdatingADependency 
+function Test-InstallPackageDoNotUninstallDependenciesWhenSafeUpdatingDependency 
 {
     # The InstallWalker used to compensate for packages that were already installed by attempting to remove
     # an uninstall operation. Consequently any uninstall operation that occurred later in the graph would cause 

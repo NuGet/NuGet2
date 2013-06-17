@@ -20,7 +20,7 @@ function Test-EnablePackageRestoreOnlyModifyProjectsThatHaveInstalledPackages
     Assert-Null (Get-MsBuildPropertyValue $p2 "RestorePackages")
 }
 
-function Test-EnablePackageRestoreModifyProjectsThatHaveInstalledPackagesEventWhenThePackagesFolderIsMissing
+function Test-EnablePackageRestoreModifyProjectsWhenThePackagesFolderIsMissing
 {
     param($context)
 
