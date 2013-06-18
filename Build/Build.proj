@@ -184,7 +184,6 @@
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.Dialog10.dll" />
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.Dialog11.dll"></UnwantedAssembly>
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio10.dll"></UnwantedAssembly>
-            <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.VisualStudio11.dll"></UnwantedAssembly>
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.TeamFoundationServer10.dll"></UnwantedAssembly>
             <UnwantedAssembly Include="$(TempVsixDirectory)\NuGet.TeamFoundationServer11.dll"></UnwantedAssembly>
         </ItemGroup>
