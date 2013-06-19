@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using NuGet.VisualStudio.Resources;
@@ -64,12 +65,18 @@ namespace NuGet.VisualStudio
                 }
                 else
                 {
-                    NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
-                        Project,
-                        Project.ToVsHierarchy(),
-                        buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
+                    AddImportStatementForVS2013(location, relativeTargetPath);
                 }
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void AddImportStatementForVS2013(ProjectImportLocation location, string relativeTargetPath)
+        {
+            NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+                Project,
+                Project.ToVsHierarchy(),
+                buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
         }
 
         public override void RemoveImport(string targetPath)
@@ -95,12 +102,18 @@ namespace NuGet.VisualStudio
                 }
                 else
                 {
-                    NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
-                        Project,
-                        Project.ToVsHierarchy(),
-                        buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
+                    RemoveImportStatementForVS2013(relativeTargetPath);
                 }
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void RemoveImportStatementForVS2013(string relativeTargetPath)
+        {
+            NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+                Project,
+                Project.ToVsHierarchy(),
+                buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
         }
 
         protected override void AddFileToProject(string path)
