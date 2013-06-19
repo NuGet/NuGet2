@@ -1,7 +1,7 @@
 NuGet Hall of Fame
 ==================
 
-## NuGet 2.6
+## NuGet 2.7
 
 1. [Mike Roth](http://www.codeplex.com/site/users/view/mxrss) ([@mxrss](https://twitter.com/mxrss))
     - Show License url when listing packages and verbosity is detailed. 

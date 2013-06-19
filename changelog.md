@@ -8,6 +8,7 @@ Change Log / Release Notes
 * [#1956](http://nuget.codeplex.com/workitem/1956) - Add developmentDependency attribute to packages.config and use it in pack command to only include runtime packages
 * [#3386](https://nuget.codeplex.com/workitem/3386) - Group-Policy compatible feature for providing NuGet defaults including the ability to override nuget.org
 * Add Package Restore VS package, which restores NuGet packages when user builds a solution/project inside VS.
+* [#2276](https://nuget.codeplex.com/workitem/2276) Support XNA for Windows Phone projects.
 
 ## NuGet 2.6
 
