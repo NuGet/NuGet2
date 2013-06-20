@@ -85,6 +85,8 @@ namespace NuGet.VisualStudio
             }
         }
 
+        // IMPORTANT: The NoInlining is required to prevent CLR from loading VisualStudio12.dll assembly while running 
+        // in VS2010 and VS2012
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void AddImportStatementForVS2013(ProjectImportLocation location, string relativeTargetPath)
         {
@@ -122,6 +124,8 @@ namespace NuGet.VisualStudio
             }
         }
 
+        // IMPORTANT: The NoInlining is required to prevent CLR from loading VisualStudio12.dll assembly while running 
+        // in VS2010 and VS2012
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void RemoveImportStatementForVS2013(string relativeTargetPath)
         {
