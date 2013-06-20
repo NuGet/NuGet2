@@ -215,6 +215,26 @@ function New-PortableLibrary
     $project
 }
 
+function New-JavaScriptApplication 
+{
+    param(
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $SolutionFolder | New-Project WinJS $ProjectName
+}
+
+function New-NativeWinStoreApplication
+{
+    param(
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    $SolutionFolder | New-Project CppWinStoreApplication $ProjectName
+}
+
 function New-ConsoleApplication {
     param(        
         [string]$ProjectName,
@@ -403,7 +423,24 @@ function Get-ProjectDir {
         [parameter(Mandatory = $true)]
         $Project
     )
-    Get-PropertyValue $Project FullPath
+
+    # c++ project has ProjectDirectory
+    $path = Get-PropertyValue $Project 'ProjectDirectory'
+    if ($path) 
+    {
+        return $path
+    }
+
+    $path = Get-PropertyValue $Project FullPath
+    if ($path)
+    {
+        if ([System.IO.File]::Exists($path))
+        {
+            $path = Split-Path $path -Parent
+        }
+    }
+
+    $path
 }
 
 function Get-OutputPath {

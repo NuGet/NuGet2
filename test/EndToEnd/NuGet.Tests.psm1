@@ -132,7 +132,13 @@ function global:Run-Test {
     Add-Type -AssemblyName "Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"
 
     # The vshost that VS launches caues the functional tests to freeze sometimes so disable it
-    [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "false")
+    try
+    {
+        [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "false")
+    }
+    catch
+    {
+    }
     
     try {
         for ($counter = 0; $counter -le 1; $counter++) {
@@ -245,8 +251,12 @@ function global:Run-Test {
                
         Write-TestResults $testRunId $results.Values $testRunOutputPath $LaunchResultsOnFailure
 
-        # Clear out the setting when the tests are done running
-        [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "")
+        try
+        {
+            # Clear out the setting when the tests are done running
+            [Microsoft.Build.Evaluation.ProjectCollection]::GlobalProjectCollection.SetGlobalProperty("UseVSHostingProcess", "")
+        }
+        catch {}
     }
 }
 

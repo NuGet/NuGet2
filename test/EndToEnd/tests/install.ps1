@@ -2213,3 +2213,37 @@ function Test-AssemblyInFrameworkShouldNotHaveBindingRedirect
     Assert-BindingRedirect $p1 app.config System.Net.Http.Primitives '0.0.0.0-4.2.3.0' '4.2.3.0'
     Assert-NoBindingRedirect $p1 app.config System.Runtime '0.0.0.0-1.5.11.0' '1.5.11.0'
 }
+
+function Test-InstallPackageIntoJavascriptApplication
+{
+    if ($dte.Version -eq "10.0")
+    {
+        return
+    }
+
+    # Arrange
+    $p = New-JavaScriptApplication
+
+    # Act
+    $p | Install-Package jQuery
+
+    # Assert
+    Assert-Package $p "jQuery"
+}
+
+function Test-InstallPackageIntoNativeWinStoreApplication
+{
+    if ($dte.Version -eq "10.0")
+    {
+        return
+    }
+
+    # Arrange
+    $p = New-NativeWinStoreApplication
+
+    # Act
+    $p | Install-Package zlib -IgnoreDependencies
+
+    # Assert
+    Assert-Package $p "zlib"
+}

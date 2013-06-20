@@ -62,3 +62,27 @@ function Test-EnablePackageRestoreModifyProjectThatInstallNewPackages
     # Assert
     Assert-AreEqual "true" (Get-MsBuildPropertyValue $p "RestorePackages")
 }
+
+function Test-EnablePackageRestoreOnCspProjects
+{
+    if ($dte.Version -eq "10.0")
+    {
+        return
+    }
+
+    # Arrange
+    $p1 = New-JavaScriptApplication
+    $p2 = New-NativeWinStoreApplication
+
+    $p1 | Install-Package jQuery
+
+    $p2 | Install-Package zlib
+    $p2.Save()
+
+    # Act
+    Enable-PackageRestore
+
+    # Assert
+    Assert-AreEqual "true" (Get-MsBuildPropertyValue $p1 "RestorePackages")
+    Assert-AreEqual "true" (Get-MsBuildPropertyValue $p2 "RestorePackages")
+}
