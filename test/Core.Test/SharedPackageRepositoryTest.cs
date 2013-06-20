@@ -429,6 +429,46 @@ namespace NuGet.Test
             Assert.True(configFileSystem.FileExists("packages.config"));
         }
 
+        // Tests that adding a solution level package which depends on an already installed solution 
+        // level package will succeed.
+        [Fact]
+        public void AddPackageAddSolutionLevelPackageDependingOnAnotherSolutionLevelPackage()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+            var solutionPackage1 = PackageUtility.CreatePackage("SolutionLevel1", tools: new[] { "Install.ps1" });
+            var solutionPackage2 = PackageUtility.CreatePackage("SolutionLevel2", tools: new[] { "Install.ps1" }, dependencies: new[] { new PackageDependency("SolutionLevel1")});            
+            // Act
+            repository.AddPackage(solutionPackage1);
+            repository.AddPackage(solutionPackage2);
+
+            // Assert
+            var packageReferences = repository.PackageReferenceFile.GetPackageReferences()
+                .Select(p => p.Id).OrderBy(id => id).ToArray();
+            Assert.Equal(new [] { "SolutionLevel1", "SolutionLevel2" }, packageReferences);
+        }
+
+        // Tests that adding a solution level package which depends on a project level package will
+        // not succeed.
+        [Fact]
+        public void AddPackageAddSolutionLevelPackageDependingOnProjectLevelPackage()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var configFileSystem = new MockFileSystem();
+            var repository = new SharedPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem, configFileSystem);
+            var solutionPackage = PackageUtility.CreatePackage("SolutionLevel2", tools: new[] { "Install.ps1" }, dependencies: new[] { new PackageDependency("ProjectLevel1") });
+
+            // Act
+            repository.AddPackage(solutionPackage);
+
+            // Assert
+            var packageReferences = repository.PackageReferenceFile.GetPackageReferences().ToArray();
+            Assert.True(packageReferences.IsEmpty());
+        }
+
         [Fact]
         public void AddPackageDoesNotAddReferencesToMetadataPackagesToSolutionConfigFile()
         {
