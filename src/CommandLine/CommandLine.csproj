@@ -55,6 +55,7 @@
     </Compile>
     <Compile Include="Commands\InstallCommand.cs" />
     <Compile Include="Commands\ProjectFactory.cs" />
+    <Compile Include="Commands\RestoreCommand.cs" />
     <Compile Include="Commands\SetApiKeyCommand.cs" />
     <Compile Include="Commands\SourcesCommand.cs" />
     <Compile Include="Commands\SpecCommand.cs" />
@@ -68,6 +69,8 @@
     <Compile Include="Common\CachedPackageSourceProvider.cs" />
     <Compile Include="Common\PackageExtractor.cs" />
     <Compile Include="Common\SelfUpdater.cs" />
+    <Compile Include="Common\Solution.cs" />
+    <Compile Include="Common\ProjectInSolution.cs" />
     <Compile Include="Common\Verbosity.cs" />
     <Compile Include="Common\AggregateRepositoryHelper.cs" />
     <Compile Include="..\..\Common\NuGetConstants.cs">

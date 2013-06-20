@@ -2178,3 +2178,38 @@ function Test-InstallMetadataPackageAddPackageToProject
     Assert-Package $p MetadataPackage
     Assert-Package $p DependencyPackage
 }
+
+function Test-AssemblyInFrameworkShouldNotHaveBindingRedirect
+{
+    # This test requires .NET 4.5 and hence not available to run in VS 2010
+    if ($dte.Version -eq "10.0")
+    {
+        return
+    }
+
+    # Arrange
+    $p1 = New-ConsoleApplication -ProjectName Hello
+
+    # Change it to v4.5
+    $p1.Properties.Item("TargetFrameworkMoniker").Value = ".NETFramework,Version=v4.5"
+
+    # after project retargetting, the $p1 reference is no longer valid. Needs to find it again. 
+
+    $p1 = Get-Project -Name Hello
+
+    Assert-NotNull $p1
+
+    # Profile104 is net45+sl4+wp7.5+win8
+    $p2 = New-PortableLibrary -Profile "Profile104"
+
+    Assert-NotNull $p2
+
+    Add-ProjectReference $p1 $p2
+
+    # Act
+    @($p1, $p2) | Install-Package Microsoft.Net.Http -version 2.2.3-beta -pre
+
+    # Assert
+    Assert-BindingRedirect $p1 app.config System.Net.Http.Primitives '0.0.0.0-4.2.3.0' '4.2.3.0'
+    Assert-NoBindingRedirect $p1 app.config System.Runtime '0.0.0.0-1.5.11.0' '1.5.11.0'
+}

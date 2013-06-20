@@ -6,25 +6,43 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using EnvDTE;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Runtime;
 
 namespace NuGet.VisualStudio
 {
     public static class RuntimeHelpers
     {
-        public static IEnumerable<AssemblyBinding> AddBindingRedirects(Project project, IFileSystemProvider fileSystemProvider, AppDomain domain)
+        public static IEnumerable<AssemblyBinding> AddBindingRedirects(
+            Project project, 
+            IFileSystemProvider fileSystemProvider, 
+            AppDomain domain,
+            IVsFrameworkMultiTargeting frameworkMultiTargeting)
         {
             if (project.SupportsBindingRedirects())
             {
                 // When we're adding binding redirects explicitly, don't check the project type
-                return AddBindingRedirects(project, fileSystemProvider, domain, new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase), checkProjectType: false);
+                return AddBindingRedirects(
+                    project, 
+                    fileSystemProvider, 
+                    domain, 
+                    new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase), 
+                    frameworkMultiTargeting,
+                    checkProjectType: false);
             }
 
             return Enumerable.Empty<AssemblyBinding>();
         }
 
-        private static IEnumerable<AssemblyBinding> AddBindingRedirects(Project project, IFileSystemProvider fileSystemProvider, AppDomain domain, IDictionary<string, HashSet<string>> projectAssembliesCache, bool checkProjectType = true)
+        private static IEnumerable<AssemblyBinding> AddBindingRedirects(
+            Project project, 
+            IFileSystemProvider fileSystemProvider, 
+            AppDomain domain, 
+            IDictionary<string, HashSet<string>> projectAssembliesCache, 
+            IVsFrameworkMultiTargeting frameworkMultiTargeting,
+            bool checkProjectType = true)
         {
             var redirects = Enumerable.Empty<AssemblyBinding>();
             // Only add binding redirects to projects that aren't class libraries
@@ -38,6 +56,13 @@ namespace NuGet.VisualStudio
 
                 redirects = BindingRedirectResolver.GetBindingRedirects(assemblies, domain);
 
+                if (frameworkMultiTargeting != null)
+                {
+                    // filter out assemblies that already exist in the target framework (CodePlex issue #3072)
+                    string targetFramework = project.GetTargetFramework();
+                    redirects = redirects.Where(p => !IsAssemblyAvaialbleInFramework(p.Name, targetFramework, frameworkMultiTargeting));
+                }
+
                 // Create a binding redirect manager over the configuration
                 var manager = new BindingRedirectManager(fileSystem, project.GetConfigurationFile());
 
@@ -48,7 +73,11 @@ namespace NuGet.VisualStudio
             return redirects;
         }
 
-        public static void AddBindingRedirects(ISolutionManager solutionManager, Project project, IFileSystemProvider fileSystemProvider)
+        public static void AddBindingRedirects(
+            ISolutionManager solutionManager, 
+            Project project, 
+            IFileSystemProvider fileSystemProvider, 
+            IVsFrameworkMultiTargeting frameworkMultiTargeting)
         {
             // Create a new app domain so we can load the assemblies without locking them in this app domain
             AppDomain domain = AppDomain.CreateDomain("assembliesDomain");
@@ -58,7 +87,7 @@ namespace NuGet.VisualStudio
                 // Keep track of visited projects
                 if (project.SupportsBindingRedirects())
                 {
-                    AddBindingRedirects(solutionManager, project, fileSystemProvider, domain);
+                    AddBindingRedirects(solutionManager, project, fileSystemProvider, domain, frameworkMultiTargeting);
                 }
             }
             finally
@@ -67,14 +96,26 @@ namespace NuGet.VisualStudio
             }
         }
 
-        private static void AddBindingRedirects(ISolutionManager solutionManager, Project project, IFileSystemProvider fileSystemProvider, AppDomain domain)
+        private static void AddBindingRedirects(
+            ISolutionManager solutionManager, 
+            Project project, 
+            IFileSystemProvider fileSystemProvider, 
+            AppDomain domain,
+            IVsFrameworkMultiTargeting frameworkMultiTargeting)
         {
             var visitedProjects = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var projectAssembliesCache = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
-            AddBindingRedirects(solutionManager, project, fileSystemProvider, domain, visitedProjects, projectAssembliesCache);
+            AddBindingRedirects(solutionManager, project, fileSystemProvider, domain, visitedProjects, projectAssembliesCache, frameworkMultiTargeting);
         }
 
-        private static void AddBindingRedirects(ISolutionManager solutionManager, Project project, IFileSystemProvider fileSystemProvider, AppDomain domain, HashSet<string> projects, IDictionary<string, HashSet<string>> projectAssembliesCache)
+        private static void AddBindingRedirects(
+            ISolutionManager solutionManager, 
+            Project project, 
+            IFileSystemProvider fileSystemProvider, 
+            AppDomain domain, 
+            HashSet<string> projects, 
+            IDictionary<string, HashSet<string>> projectAssembliesCache,
+            IVsFrameworkMultiTargeting frameworkMultiTargeting)
         {
             string projectUniqueName = project.GetUniqueName();
             if (projects.Contains(projectUniqueName))
@@ -84,16 +125,31 @@ namespace NuGet.VisualStudio
 
             if (project.SupportsBindingRedirects())
             {
-                AddBindingRedirects(project, fileSystemProvider, domain, projectAssembliesCache);
+                AddBindingRedirects(project, fileSystemProvider, domain, projectAssembliesCache, frameworkMultiTargeting);
             }
 
             // Add binding redirects to all projects that are referencing this one
             foreach (Project dependentProject in solutionManager.GetDependentProjects(project))
             {
-                AddBindingRedirects(solutionManager, dependentProject, fileSystemProvider, domain, projects, projectAssembliesCache);
+                AddBindingRedirects(
+                    solutionManager, 
+                    dependentProject, 
+                    fileSystemProvider, 
+                    domain, 
+                    projects, 
+                    projectAssembliesCache, 
+                    frameworkMultiTargeting);
             }
 
             projects.Add(projectUniqueName);
+        }
+
+        private static bool IsAssemblyAvaialbleInFramework(string assembly, string targetFramework, IVsFrameworkMultiTargeting frameworkMultiTargeting)
+        {
+            bool result;
+            int succeeded = frameworkMultiTargeting.IsReferenceableInTargetFx(assembly, targetFramework, out result);
+            
+            return ErrorHandler.Succeeded(succeeded) && result;
         }
 
         /// <summary>

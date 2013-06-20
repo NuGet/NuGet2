@@ -49,6 +49,7 @@
     <Compile Include="Core\LocalPackageRepositoryTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetConfigCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetDeleteCommandTest.cs" />
+    <Compile Include="NuGetCommandLine\NuGetRestoreCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetListCommandTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetCommandLineTest.cs" />
     <Compile Include="NuGetCommandLine\NuGetPackCommandTest.cs" />

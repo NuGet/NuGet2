@@ -223,6 +223,24 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot load type Microsoft.Build.Construction.ProjectInSolution from Microsoft.Build.dll.
+        /// </summary>
+        internal static string Error_CannotLoadTypeProjectInSolution {
+            get {
+                return ResourceManager.GetString("Error_CannotLoadTypeProjectInSolution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot load type Microsoft.Build.Construction.SolutionParser from Microsoft.Build.dll.
+        /// </summary>
+        internal static string Error_CannotLoadTypeSolutionParser {
+            get {
+                return ResourceManager.GetString("Error_CannotLoadTypeSolutionParser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot prompt for input in non-interactive mode..
         /// </summary>
         internal static string Error_CannotPromptForInput {
@@ -237,6 +255,24 @@ namespace NuGet {
         internal static string Error_IncludeReferencedProjectsAndSymbolsNotSupported {
             get {
                 return ResourceManager.GetString("Error_IncludeReferencedProjectsAndSymbolsNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This folder contains more than one solution file..
+        /// </summary>
+        internal static string Error_MultipleSolutions {
+            get {
+                return ResourceManager.GetString("Error_MultipleSolutions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This folder contains no solution files, nor packages.config files..
+        /// </summary>
+        internal static string Error_NoSolutionFileNorePackagesConfigFile {
+            get {
+                return ResourceManager.GetString("Error_NoSolutionFileNorePackagesConfigFile", resourceCulture);
             }
         }
         
@@ -277,20 +313,20 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to File &apos;{0}&apos; is not added because the package already contains file &apos;{1}&apos;.
-        /// </summary>
-        internal static string FileNotAddedToPackage {
-            get {
-                return ResourceManager.GetString("FileNotAddedToPackage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to [Y] Yes  [A] Yes to All  [N] No  [L] No to All ?.
         /// </summary>
         internal static string FileConflictChoiceText {
             get {
                 return ResourceManager.GetString("FileConflictChoiceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to File &apos;{0}&apos; is not added because the package already contains file &apos;{1}&apos;.
+        /// </summary>
+        internal static string FileNotAddedToPackage {
+            get {
+                return ResourceManager.GetString("FileNotAddedToPackage", resourceCulture);
             }
         }
         
@@ -799,6 +835,69 @@ namespace NuGet {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot determine the packages folder to restore NuGet packages..
+        /// </summary>
+        internal static string RestoreCommandCannotDeterminePackagesFolder {
+            get {
+                return ResourceManager.GetString("RestoreCommandCannotDeterminePackagesFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Input file does not exist: {0}..
+        /// </summary>
+        internal static string RestoreCommandFileNotFound {
+            get {
+                return ResourceManager.GetString("RestoreCommandFileNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Option -SolutionDirectory is not valid when restoring packages for a solution..
+        /// </summary>
+        internal static string RestoreCommandOptionSolutionDirectoryIsInvalid {
+            get {
+                return ResourceManager.GetString("RestoreCommandOptionSolutionDirectoryIsInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Project file {0} cannot be found..
+        /// </summary>
+        internal static string RestoreCommandProjectNotFound {
+            get {
+                return ResourceManager.GetString("RestoreCommandProjectNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restoring NuGet packages for solution {0}..
+        /// </summary>
+        internal static string RestoreCommandRestoringPackagesForSolution {
+            get {
+                return ResourceManager.GetString("RestoreCommandRestoringPackagesForSolution", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restoring NuGet packages listed in packages.config file..
+        /// </summary>
+        internal static string RestoreCommandRestoringPackagesFromPackagesConfigFile {
+            get {
+                return ResourceManager.GetString("RestoreCommandRestoringPackagesFromPackagesConfigFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restoring NuGet packages listed in file {0}..
+        /// </summary>
+        internal static string RestoreCommandRestoringPackagesListedInFile {
+            get {
+                return ResourceManager.GetString("RestoreCommandRestoringPackagesListedInFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Scanning for projects....
         /// </summary>
         internal static string ScanningForProjects {
@@ -1204,7 +1303,7 @@ namespace NuGet {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} key already exists in Properties collection. Overriding value..
+        ///   Looks up a localized string similar to &apos;{0}&apos; key already exists in Properties collection. Overriding value..
         /// </summary>
         internal static string Warning_DuplicatePropertyKey {
             get {

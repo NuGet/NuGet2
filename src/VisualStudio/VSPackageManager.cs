@@ -19,6 +19,7 @@ namespace NuGet.VisualStudio
         private readonly IDeleteOnRestartManager _deleteOnRestartManager;
         private readonly VsPackageInstallerEvents _packageEvents;
         private bool _bindingRedirectEnabled = true;
+        private readonly IVsFrameworkMultiTargeting _frameworkMultiTargeting;
         private bool _repositoryOperationPending;
 
         public VsPackageManager(ISolutionManager solutionManager,
@@ -27,7 +28,8 @@ namespace NuGet.VisualStudio
                 IFileSystem fileSystem,
                 ISharedPackageRepository sharedRepository,
                 IDeleteOnRestartManager deleteOnRestartManager,
-                VsPackageInstallerEvents packageEvents)
+                VsPackageInstallerEvents packageEvents,
+                IVsFrameworkMultiTargeting frameworkMultiTargeting = null)
             : base(sourceRepository, new DefaultPackagePathResolver(fileSystem), fileSystem, sharedRepository)
         {
             _solutionManager = solutionManager;
@@ -35,6 +37,7 @@ namespace NuGet.VisualStudio
             _packageEvents = packageEvents;
             _fileSystemProvider = fileSystemProvider;
             _deleteOnRestartManager = deleteOnRestartManager;
+            _frameworkMultiTargeting = frameworkMultiTargeting;
 
             _projects = new Dictionary<string, IProjectManager>(StringComparer.OrdinalIgnoreCase);
         }
@@ -1083,7 +1086,7 @@ namespace NuGet.VisualStudio
 
             try
             {
-                RuntimeHelpers.AddBindingRedirects(_solutionManager, project, _fileSystemProvider);
+                RuntimeHelpers.AddBindingRedirects(_solutionManager, project, _fileSystemProvider, _frameworkMultiTargeting);
             }
             catch (Exception e)
             {

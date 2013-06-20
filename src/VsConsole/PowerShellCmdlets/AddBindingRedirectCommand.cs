@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Management.Automation;
-
 using EnvDTE;
+using Microsoft.VisualStudio.Shell.Interop;
 using NuGet.Runtime;
 using NuGet.VisualStudio;
 
@@ -15,17 +15,28 @@ namespace NuGet.PowerShell.Commands
     {
         private readonly ISolutionManager _solutionManager;
         private readonly IFileSystemProvider _fileSystemProvider;
+        private readonly IVsFrameworkMultiTargeting _frameworkMultiTargeting;
 
         public AddBindingRedirectCommand()
-            : this(ServiceLocator.GetInstance<ISolutionManager>(), ServiceLocator.GetInstance<IHttpClientEvents>(), ServiceLocator.GetInstance<IFileSystemProvider>())
+            : this(
+                ServiceLocator.GetInstance<ISolutionManager>(), 
+                ServiceLocator.GetInstance<IHttpClientEvents>(), 
+                ServiceLocator.GetInstance<IFileSystemProvider>(),
+                ServiceLocator.GetGlobalService<SVsFrameworkMultiTargeting, IVsFrameworkMultiTargeting>())
         {
         }
 
-        public AddBindingRedirectCommand(ISolutionManager solutionManager, IHttpClientEvents httpClientEvents, IFileSystemProvider fileSystemProvider)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Multi")]
+        public AddBindingRedirectCommand(
+            ISolutionManager solutionManager, 
+            IHttpClientEvents httpClientEvents, 
+            IFileSystemProvider fileSystemProvider,
+            IVsFrameworkMultiTargeting frameworkMultiTargeting)
             : base(solutionManager, null, httpClientEvents)
         {
             _solutionManager = solutionManager;
             _fileSystemProvider = fileSystemProvider;
+            _frameworkMultiTargeting = frameworkMultiTargeting;
         }
 
         [Parameter(Position = 0, ValueFromPipelineByPropertyName = true)]
@@ -68,7 +79,7 @@ namespace NuGet.PowerShell.Commands
             {
                 foreach (Project project in projects)
                 {
-                    var redirects = RuntimeHelpers.AddBindingRedirects(project, _fileSystemProvider, domain);
+                    var redirects = RuntimeHelpers.AddBindingRedirects(project, _fileSystemProvider, domain, _frameworkMultiTargeting);
 
                     // Print out what we did
                     WriteObject(redirects, enumerateCollection: true);

@@ -1159,7 +1159,8 @@ namespace NuGet.VisualStudio.Test
                 projectSystem,
                 localRepository.Object,
                 new Mock<IDeleteOnRestartManager>().Object,
-                new Mock<VsPackageInstallerEvents>().Object) { CallBase = true };
+                new Mock<VsPackageInstallerEvents>().Object,
+                /* multiFrameworkTargeting */ null) { CallBase = true };
 
             packageManager.Setup(p => p.GetProjectManager(It.IsAny<Project>())).Returns(projectManager);
 
