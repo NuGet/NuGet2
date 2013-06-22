@@ -9,6 +9,7 @@ Change Log / Release Notes
 * [#3386](https://nuget.codeplex.com/workitem/3386) - Group-Policy compatible feature for providing NuGet defaults including the ability to override nuget.org
 * Add Package Restore VS package, which restores NuGet packages when user builds a solution/project inside VS.
 * [#2276](https://nuget.codeplex.com/workitem/2276) Support XNA for Windows Phone projects.
+* Add restore command to nuget.exe
 
 ## NuGet 2.6
 
