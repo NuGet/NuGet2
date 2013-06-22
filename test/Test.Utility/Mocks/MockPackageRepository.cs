@@ -5,7 +5,7 @@ using System;
 
 namespace NuGet.Test.Mocks
 {
-    public class MockPackageRepository : PackageRepositoryBase, ICollection<IPackage>, ILatestPackageLookup, IOperationAwareRepository
+    public class MockPackageRepository : PackageRepositoryBase, ICollection<IPackage>, ILatestPackageLookup, IOperationAwareRepository, IPackageLookup
     {
         private readonly string _source;
         
@@ -156,6 +156,31 @@ namespace NuGet.Test.Mocks
         {
             LastOperation = null;
             return new DisposableAction(() => { LastOperation = operation; });
+        }
+
+        public bool Exists(string packageId, SemanticVersion version)
+        {
+            return FindPackage(packageId, version) != null;
+        }
+
+        public IPackage FindPackage(string packageId, SemanticVersion version)
+        {
+            List<IPackage> packages;
+            if (Packages.TryGetValue(packageId, out packages))
+            {
+                return packages.Find(p => p.Version.Equals(version));
+            }
+            return null;
+        }
+
+        public IEnumerable<IPackage> FindPackagesById(string packageId)
+        {
+            List<IPackage> packages;
+            if (Packages.TryGetValue(packageId, out packages))
+            {
+                return packages;
+            }
+            return Enumerable.Empty<IPackage>();
         }
     }
 }

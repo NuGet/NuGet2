@@ -10,3 +10,4 @@
 
 using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Nu", Justification = "NuGet is the project name")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1701:ResourceStringCompoundWordsShouldBeCasedCorrectly", MessageId = "nuget", Scope = "resource", Target = "NuGet.VsEvents.Resources.resources")]
