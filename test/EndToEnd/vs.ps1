@@ -332,6 +332,16 @@ function Build-Project {
     $dte.Solution.SolutionBuild.BuildProject($Configuration, $Project.UniqueName, $true)
 }
 
+function Clean-Project {
+    # Clean the project and wait for it to complete
+    $dte.Solution.SolutionBuild.Clean($true)
+}
+
+function Build-Solution {
+    # Build and wait for it to complete
+    $dte.Solution.SolutionBuild.Build($true)
+}
+
 function Get-AssemblyReference {
     param(
         [parameter(Mandatory = $true)]

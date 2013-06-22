@@ -13,8 +13,6 @@ namespace NuGet.VsEvents
 {
     public class PackageRestorer
     {
-        private const string PackageReferenceFile = "packages.config";
-        private const string NuGetSolutionSettingsFolder = ".nuget";
         private const string LogEntrySource = "NuGet PackageRestorer";        
 
         private DTE _dte;
@@ -39,7 +37,7 @@ namespace NuGet.VsEvents
             Diagnostic = 4
         };
 
-        public void Initialize(DTE dte)
+        public PackageRestorer(DTE dte)
         {
             _dte = dte;
             _buildEvents = dte.Events.BuildEvents;
@@ -68,7 +66,7 @@ namespace NuGet.VsEvents
                     return;
                 }
 
-                if (!PackagesConfigExists(_dte.Solution))
+                if (!VsUtility.PackagesConfigExists(_dte.Solution))
                 {
                     return;
                 }
@@ -91,8 +89,7 @@ namespace NuGet.VsEvents
             PackageRestore(_dte.Solution);
             foreach (Project project in _dte.Solution.Projects)
             {
-                if (VsUtility.IsSupported(project) &&
-                    project.ContainsFile(PackageReferenceFile))
+                if (project.IsNuGetInUse())
                 {
                     PackageRestore(project);
                 }
@@ -118,42 +115,8 @@ namespace NuGet.VsEvents
         /// <returns>True if the solution is using the old style package restore.</returns>
         private static bool UsingOldPackageRestore(Solution solution)
         {
-            var nugetSolutionFolder = GetNuGetSolutionFolder(solution);
+            var nugetSolutionFolder = VsUtility.GetNuGetSolutionFolder(solution);
             return File.Exists(Path.Combine(nugetSolutionFolder, "nuget.targets"));
-        }
-
-        /// <summary>
-        /// Returns true if the solution or one of its project has the packages.config file.
-        /// </summary>
-        /// <param name="solution"></param>
-        /// <returns></returns>
-        private static bool PackagesConfigExists(Solution solution)
-        {
-            var packageReferenceFileName = Path.Combine(
-                    GetNuGetSolutionFolder(solution),
-                    PackageReferenceFile);
-            if (File.Exists(packageReferenceFileName))
-            {
-                return true;
-            }
-
-            foreach (Project project in solution.Projects)
-            {
-                var projectFullPath = VsUtility.GetFullPath(project);
-                packageReferenceFileName = Path.Combine(
-                    Path.GetDirectoryName(projectFullPath),
-                    PackageReferenceFile);
-
-                // Here we just check if the packages.config file exists instead of checking
-                // if project.ContainsFile(packageReferenceFileName) because that will
-                // cause NuGet.VisualStudio.dll to get loaded.
-                if (VsUtility.IsSupported(project) && File.Exists(packageReferenceFileName))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         /// <summary>
@@ -172,7 +135,7 @@ namespace NuGet.VsEvents
             {
                 var packageReferenceFileName = Path.Combine(
                     Path.GetDirectoryName(projectFullPath),
-                    PackageReferenceFile);
+                    VsUtility.PackageReferenceFile);
                 RestorePackages(packageReferenceFileName, fileSystem);
             }
             catch (Exception ex)
@@ -273,8 +236,8 @@ namespace NuGet.VsEvents
             try
             {
                 var packageReferenceFileName = Path.Combine(
-                    GetNuGetSolutionFolder(solution),
-                    PackageReferenceFile);
+                    VsUtility.GetNuGetSolutionFolder(solution),
+                    VsUtility.PackageReferenceFile);
                 RestorePackages(packageReferenceFileName, fileSystem);
             }
             catch (Exception ex)
@@ -287,12 +250,6 @@ namespace NuGet.VsEvents
             {
                 WriteLine(VerbosityLevel.Normal, Resources.PackageRestoreFinishedForSolution, solution.FullName);
             }
-        }
-
-        private static string GetNuGetSolutionFolder(Solution solution)
-        {
-            var solutionDirectory = Path.GetDirectoryName(solution.FullName);
-            return Path.Combine(solutionDirectory, NuGetSolutionSettingsFolder);
         }
 
         /// <summary>
