@@ -203,7 +203,15 @@ function New-PortableLibrary
         [parameter(ValueFromPipeline = $true)]$SolutionFolder
     )
 
-    $project = New-Project PortableClassLibrary $ProjectName $SolutionFolder
+    try
+    {
+        $project = New-Project PortableClassLibrary $ProjectName $SolutionFolder
+    }
+    catch {
+        # If we're unable to create the project that means we probably don't have some SDK installed
+        # Signal to the runner that we want to skip this test        
+        throw "SKIP: $($_)"
+    }
 
     if ($Profile) 
     {
@@ -222,7 +230,15 @@ function New-JavaScriptApplication
         [parameter(ValueFromPipeline = $true)]$SolutionFolder
     )
 
-    $SolutionFolder | New-Project WinJS $ProjectName
+    try 
+    {
+        $SolutionFolder | New-Project WinJS $ProjectName
+    }
+    catch {
+        # If we're unable to create the project that means we probably don't have some SDK installed
+        # Signal to the runner that we want to skip this test        
+        throw "SKIP: $($_)"
+    }
 }
 
 function New-NativeWinStoreApplication
@@ -232,7 +248,15 @@ function New-NativeWinStoreApplication
         [parameter(ValueFromPipeline = $true)]$SolutionFolder
     )
 
-    $SolutionFolder | New-Project CppWinStoreApplication $ProjectName
+    try
+    {
+        $SolutionFolder | New-Project CppWinStoreApplication $ProjectName
+    }
+    catch {
+        # If we're unable to create the project that means we probably don't have some SDK installed
+        # Signal to the runner that we want to skip this test        
+        throw "SKIP: $($_)"
+    }
 }
 
 function New-ConsoleApplication {
