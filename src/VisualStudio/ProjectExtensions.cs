@@ -33,18 +33,6 @@ namespace NuGet.VisualStudio
             { "web.release.config", "web.config" }
         };
 
-        private static readonly HashSet<string> _supportedProjectTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
-                                                                          VsConstants.WebSiteProjectTypeGuid, 
-                                                                          VsConstants.CsharpProjectTypeGuid, 
-                                                                          VsConstants.VbProjectTypeGuid,
-                                                                          VsConstants.CppProjectTypeGuid,
-                                                                          VsConstants.JsProjectTypeGuid,
-                                                                          VsConstants.FsharpProjectTypeGuid,
-                                                                          VsConstants.NemerleProjectTypeGuid,
-                                                                          VsConstants.WixProjectTypeGuid,
-                                                                          VsConstants.SynergexProjectTypeGuid,
-                                                                          VsConstants.NomadForVisualStudioProjectTypeGuid };
-
         private static readonly HashSet<string> _unsupportedProjectTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
                                                                             VsConstants.LightSwitchProjectTypeGuid,
                                                                             VsConstants.InstallShieldLimitedEditionTypeGuid
@@ -72,6 +60,16 @@ namespace NuGet.VisualStudio
             };
 
         private static readonly char[] PathSeparatorChars = new[] { Path.DirectorySeparatorChar };
+
+
+        /// <summary>
+        /// Determines if NuGet is used in the project. Currently, it is determined by checking if packages.config is part of the project
+        /// </summary>
+        /// <param name="project">The project which is checked to see if NuGet is used in it</param>
+        public static bool IsNuGetInUse(this Project project)
+        {
+            return project.IsSupported() && project.ContainsFile(Constants.PackageReferenceFile);
+        }
 
         // Get the ProjectItems for a folder path
         public static ProjectItems GetProjectItems(this Project project, string folderPath, bool createIfNotExists = false)
@@ -196,11 +194,15 @@ namespace NuGet.VisualStudio
         public static bool ContainsFile(this Project project, string path)
         {
             if (string.Equals(project.Kind, VsConstants.WixProjectTypeGuid, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(project.Kind, VsConstants.NemerleProjectTypeGuid, StringComparison.OrdinalIgnoreCase))
+                string.Equals(project.Kind, VsConstants.NemerleProjectTypeGuid, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(project.Kind, VsConstants.FsharpProjectTypeGuid, StringComparison.OrdinalIgnoreCase))
             {
-                // For Wix project, IsDocumentInProject() returns not found
+                // For Wix and Nemerle projects, IsDocumentInProject() returns not found
                 // even though the file is in the project. So we use GetProjectItem()
-                // instead.
+                // instead. Nemerle is a high-level statically typed programming language for .NET platform
+                // Note that pszMkDocument, the document moniker, passed to IsDocumentInProject(), must be a path to the file
+                // for certain file-based project systems such as F#. And, not just a filename. For these project systems as well,
+                // do the following
                 ProjectItem item = project.GetProjectItem(path);
                 return item != null;
             }
@@ -344,23 +346,7 @@ namespace NuGet.VisualStudio
 
         public static string GetFullPath(this Project project)
         {
-            string fullPath = project.GetPropertyValue<string>("FullPath");
-            if (!String.IsNullOrEmpty(fullPath))
-            {
-                // Some Project System implementations (JS metro app) return the project 
-                // file as FullPath. We only need the parent directory
-                if (File.Exists(fullPath))
-                {
-                    fullPath = Path.GetDirectoryName(fullPath);
-                }
-            }
-            else
-            {
-                // C++ projects do not have FullPath property, but do have ProjectDirectory one.
-                fullPath = project.GetPropertyValue<string>("ProjectDirectory");
-            }
-
-            return fullPath;
+            return VsUtility.GetFullPath(project);
         }
 
         public static string GetTargetFramework(this Project project)
@@ -413,25 +399,7 @@ namespace NuGet.VisualStudio
 
         public static T GetPropertyValue<T>(this Project project, string propertyName)
         {
-            if (project.Properties == null)
-            {
-                // this happens in unit tests
-                return default(T);
-            }
-
-            try
-            {
-                Property property = project.Properties.Item(propertyName);
-                if (property != null)
-                {
-                    // REVIEW: Should this cast or convert?
-                    return (T)property.Value;
-                }
-            }
-            catch (ArgumentException)
-            {
-            }
-            return default(T);
+            return VsUtility.GetPropertyValue<T>(project, propertyName);
         }
 
         private static Regex GetFilterRegex(string wildcard)
@@ -571,7 +539,7 @@ namespace NuGet.VisualStudio
 
         public static bool IsSupported(this Project project)
         {
-            return project.Kind != null && _supportedProjectTypes.Contains(project.Kind);
+            return VsUtility.IsSupported(project);
         }
 
         public static bool IsExplicitlyUnsupported(this Project project)

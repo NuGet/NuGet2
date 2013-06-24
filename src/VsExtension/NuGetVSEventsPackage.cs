@@ -23,10 +23,15 @@ namespace NuGet.Tools
     [PackageRegistration(UseManagedResourcesOnly = true)]
     [ProvideBindingPath]
     [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionBuilding_string)]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.ProjectRetargeting_string)]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionOrProjectUpgrading_string)]
     [Guid(GuidList.guidNuGetVSEventsPackagePkgString)]
     public sealed class NuGetVSEventsPackage : Package
     {
+        private DTEEvents _dteEvents;
         private PackageRestorer _packageRestorer;
+        private ProjectRetargetingHandler _projectRetargetHandler;
+        private ProjectUpgradeHandler _projectUpgradeHandler;
 
         /// <summary>
         /// Default constructor of the package.
@@ -48,8 +53,22 @@ namespace NuGet.Tools
             base.Initialize();
 
             var dte = (DTE)GetService(typeof(SDTE));
-            _packageRestorer = new PackageRestorer();
-            _packageRestorer.Initialize(dte);
+            _dteEvents = dte.Events.DTEEvents;
+            _dteEvents.OnBeginShutdown += OnBeginShutDown;
+
+            _packageRestorer = new PackageRestorer(dte);
+
+            _projectRetargetHandler = new ProjectRetargetingHandler(dte, this);
+            _projectUpgradeHandler = new ProjectUpgradeHandler(this);
+        }
+
+        private void OnBeginShutDown()
+        {
+            _projectRetargetHandler.Dispose();
+            _projectUpgradeHandler.Dispose();
+
+            _dteEvents.OnBeginShutdown -= OnBeginShutDown;
+            _dteEvents = null;
         }
     }
 }

@@ -15,7 +15,7 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="EnvDTE80, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <EmbedInteropTypes>False</EmbedInteropTypes>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -56,15 +56,20 @@
     <Compile Include="..\VisualStudio\VSConstants.cs">
       <Link>VSConstants.cs</Link>
     </Compile>
+    <Compile Include="..\VisualStudio\VsUtility.cs">
+      <Link>VsUtility.cs</Link>
+    </Compile>
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="PackageRestorer.cs" />
+    <Compile Include="ProjectRetargetingHandler.cs" />
+    <Compile Include="ProjectRetargetingUtility.cs" />
+    <Compile Include="ProjectUpgradeHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
       <DependentUpon>Resources.resx</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="VsUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj">

@@ -111,6 +111,7 @@
     <Compile Include="VsTemplateWizard.cs" />
     <Compile Include="PreinstalledPackageConfiguration.cs" />
     <Compile Include="PreinstalledPackageInfo.cs" />
+    <Compile Include="VsUtility.cs" />
     <Compile Include="VsWebsiteHandler.cs" />
     <Compile Include="WindowSettingsManager.cs" />
     <EmbeddedResource Include="..\..\Common\CommonResources.resx">

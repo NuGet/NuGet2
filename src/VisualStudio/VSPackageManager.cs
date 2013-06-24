@@ -150,26 +150,33 @@ namespace NuGet.VisualStudio
             bool skipAssemblyReferences,
             ILogger logger)
         {
-            InitializeLogger(logger, projectManager);
-
-            using (StartInstallOperation(packageId))
+            try
             {
-                IPackage package = PackageRepositoryHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
-                if (skipAssemblyReferences)
+                InitializeLogger(logger, projectManager);
+
+                using (StartInstallOperation(packageId))
                 {
-                    package = new SkipAssemblyReferencesPackage(package);
+                    IPackage package = PackageRepositoryHelper.ResolvePackage(SourceRepository, LocalRepository, packageId, version, allowPrereleaseVersions);
+                    if (skipAssemblyReferences)
+                    {
+                        package = new SkipAssemblyReferencesPackage(package);
+                    }
+
+                    RunSolutionAction(() =>
+                    {
+                        InstallPackage(
+                            package,
+                            projectManager != null ? projectManager.Project.TargetFramework : null,
+                            ignoreDependencies,
+                            allowPrereleaseVersions);
+
+                        AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
+                    });
                 }
-
-                RunSolutionAction(() =>
-                {
-                    InstallPackage(
-                        package,
-                        projectManager != null ? projectManager.Project.TargetFramework : null,
-                        ignoreDependencies,
-                        allowPrereleaseVersions);
-
-                    AddPackageReference(projectManager, package, ignoreDependencies, allowPrereleaseVersions);
-                });
+            }
+            finally
+            {
+                ClearLogger(projectManager);
             }
         }
 
@@ -237,6 +244,7 @@ namespace NuGet.VisualStudio
             {
                 PackageUninstalling -= uninstallingHandler;
                 PackageUninstalled -= uninstalledHandler;
+                ClearLogger(projectManager);
             }
         }
 
@@ -428,6 +436,7 @@ namespace NuGet.VisualStudio
                                     UpdatePackageReference(projectManager, package.Id, package.Version, updateDependencies: true, allowPrereleaseVersions: allowPrereleaseVersions);
                                 }
                             }
+                            ClearLogger(projectManager);
                         }
                         catch (Exception ex)
                         {
@@ -1008,6 +1017,7 @@ namespace NuGet.VisualStudio
 
                             projectAction(projectManager);
                             successfulAtLeastOnce = true;
+                            ClearLogger(projectManager);
                         }
                         catch (Exception ex)
                         {

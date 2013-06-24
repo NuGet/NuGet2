@@ -497,7 +497,7 @@ namespace NuGet.PowerShell.Commands
             int choice = Host.UI.PromptForChoice(VsResources.FileConflictTitle, message, choices, defaultChoice: 2);
 
             Debug.Assert(choice >= 0 && choice < 4);
-            switch (choice) 
+            switch (choice)
             {
                 case 0:
                     return FileConflictResolution.Overwrite;
