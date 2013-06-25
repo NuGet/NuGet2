@@ -232,7 +232,14 @@ function New-JavaScriptApplication
 
     try 
     {
-        $SolutionFolder | New-Project WinJS $ProjectName
+        if ($dte.Version -eq '12.0')
+        {
+            $SolutionFolder | New-Project WinJSBlue $ProjectName
+        }
+        else 
+        {
+            $SolutionFolder | New-Project WinJS $ProjectName
+        }
     }
     catch {
         # If we're unable to create the project that means we probably don't have some SDK installed
@@ -250,7 +257,14 @@ function New-NativeWinStoreApplication
 
     try
     {
-        $SolutionFolder | New-Project CppWinStoreApplication $ProjectName
+        if ($dte.Version -eq '12.0')
+        {
+            $SolutionFolder | New-Project CppWinStoreApplicationBlue $ProjectName
+        }
+        else 
+        {
+            $SolutionFolder | New-Project CppWinStoreApplication $ProjectName
+        }
     }
     catch {
         # If we're unable to create the project that means we probably don't have some SDK installed
