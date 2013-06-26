@@ -436,8 +436,21 @@ function Get-Errors {
         throw "Unable to locate the error list"
     }
     
-    # Get the list of errors from the error list
-    $errorList.Object.ErrorItems    
+    # Get the list of errors from the error list window which contains errors, warnings and info
+    $allItemsInErrorListWindow = $errorList.Object.ErrorItems
+
+    $errorMessages = @()
+    for($i=1; $i -le $allItemsInErrorListWindow.Count; $i++)
+    {
+        $errorLevel = [EnvDTE80.vsBuildErrorLevel]($allItemsInErrorListWindow.Item($i).ErrorLevel)
+        if($errorLevel -eq [EnvDTE80.vsBuildErrorLevel]::vsBuildErrorLevelHigh)
+        {
+            $errorMessages += $allItemsInErrorListWindow.Item($i)
+        }
+    }
+
+    # Force return array. Arrays are zero-based
+    return ,$errorMessages
 }
 
 function Get-ProjectItemPath {

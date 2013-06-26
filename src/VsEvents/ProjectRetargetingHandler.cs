@@ -79,6 +79,7 @@ namespace NuGet.VsEvents
                 String.Join(", ", packagesToBeReinstalled.Select(p => p.Id)));
             retargetErrorTask.ErrorCategory = TaskErrorCategory.Error;
             retargetErrorTask.Category = TaskCategory.BuildCompile;
+            retargetErrorTask.Priority = TaskPriority.High;
             retargetErrorTask.HierarchyItem = pAfterChangeHier;
             _errorListProvider.Tasks.Add(retargetErrorTask);
             _errorListProvider.BringToFront();

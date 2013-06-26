@@ -21,7 +21,7 @@ function Test-ProjectRetargeting-ShowErrorMessage {
 
 	Assert-AreEqual 1 ($errorlist.Count - $errorlistBeforeAct.Count)
 
-	$error = $errorlist.Item($errorlist.Count)
+	$error = $errorlist.Item($errorlist.Count-1)
 
 	Assert-AreEqual 'Some NuGet packages were installed using a target framework different from the current target framework and may need to be reinstalled. For more information, visit http://docs.nuget.org/workflows/reinstalling-packages.  Packages affected: PackageWithNet40AndSLLibButOnlySLGacRefs' $error.Description
 }
