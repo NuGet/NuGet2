@@ -496,7 +496,7 @@ function Test-InstallPackageThatTargetsWindowsPhone {
     Assert-Package $p WpPackage
     Assert-SolutionPackage WpPackage
     $reference = Get-AssemblyReference $p luan
-    Assert-True ($reference.Path.Contains("wp7"))
+    Assert-NotNull $reference
 }
 
 function Test-InstallPackageWithNonExistentFrameworkReferences {
@@ -918,13 +918,20 @@ function Test-InstallPackageIntoSecondProjectWithIncompatibleAssembliesDoesNotRo
     # Act
     $p1 | Install-Package NuGet.Core
 
-    $profile = "WindowsPhone71"
     if ($dte.Version -eq "10.0")
     {
-        $profile = "WindowsPhone"
+        $profile = "Silverlight,Version=v4.0,Profile=WindowsPhone"
+    }
+    else if ($dte.Version -eq "11.0")
+    {
+        $profile = "Silverlight,Version=v4.0,Profile=WindowsPhone71"
+    }
+    else if ($dte.Version -eq "12.0")
+    {
+        $profile = "WindowsPhone,Version=v8.0"
     }
 
-    Assert-Throws { $p2 | Install-Package NuGet.Core -Version 1.4.20615.9012 } "Could not install package 'NuGet.Core 1.4.20615.9012'. You are trying to install this package into a project that targets 'Silverlight,Version=v4.0,Profile=$profile', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
+    Assert-Throws { $p2 | Install-Package NuGet.Core -Version 1.4.20615.9012 } "Could not install package 'NuGet.Core 1.4.20615.9012'. You are trying to install this package into a project that targets '$Profile', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
 
     # Assert    
     Assert-Package $p1 NuGet.Core
@@ -2225,7 +2232,7 @@ function Test-InstallPackageIntoJavascriptApplication
     $p = New-JavaScriptApplication
 
     # Act
-    $p | Install-Package jQuery
+    Install-Package jQuery -ProjectName $p.Name
 
     # Assert
     Assert-Package $p "jQuery"
@@ -2242,7 +2249,7 @@ function Test-InstallPackageIntoNativeWinStoreApplication
     $p = New-NativeWinStoreApplication
 
     # Act
-    $p | Install-Package zlib -IgnoreDependencies
+    Install-Package zlib -IgnoreDependencies -ProjectName $p.Name
 
     # Assert
     Assert-Package $p "zlib"

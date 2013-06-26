@@ -74,9 +74,9 @@ function Test-EnablePackageRestoreOnCspProjects
     $p1 = New-JavaScriptApplication
     $p2 = New-NativeWinStoreApplication
 
-    $p1 | Install-Package jQuery
+    Install-Package jQuery -ProjectName $p1.Name
 
-    $p2 | Install-Package zlib
+    Install-Package zlib -ProjectName $p2.Name
     $p2.Save()
 
     # Act

@@ -135,7 +135,7 @@ namespace NuGet.VisualStudio
             {
                 if (VsVersionHelper.IsVisualStudio2010)
                 {
-                    VisualStudio10.VCProjectHelper.AddFileToProject(Project.Object, fullPath, folderPath);
+                    AddFileToProjectForVS2010(folderPath, fullPath);
                 }
                 else
                 {
@@ -151,9 +151,15 @@ namespace NuGet.VisualStudio
             string folderPath = Path.GetDirectoryName(path);
             string fullPath = GetFullPath(path);
 
-            bool succeeded = VsVersionHelper.IsVisualStudio2010 
-                ? VisualStudio10.VCProjectHelper.RemoveFileFromProject(Project.Object, fullPath, folderPath)
-                : VCProjectHelper.RemoveFileFromProject(Project.Object, fullPath, folderPath);
+            bool succeeded;
+            if (VsVersionHelper.IsVisualStudio2010)
+            {
+                succeeded = RemoveFileFromProjectForVS2010(folderPath, fullPath);
+            }
+            else 
+            {
+                succeeded = VCProjectHelper.RemoveFileFromProject(Project.Object, fullPath, folderPath);
+            }
             
             if (succeeded)
             {
@@ -170,6 +176,20 @@ namespace NuGet.VisualStudio
                     Logger.Log(MessageLevel.Debug, VsResources.Debug_RemovedFile, Path.GetFileName(path));
                 }
             }
+        }
+
+        // Use NoInlining option to prevent the CLR from loading VisualStudio10.dll when running inside VS 2013
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void AddFileToProjectForVS2010(string folderPath, string fullPath)
+        {
+            VisualStudio10.VCProjectHelper.AddFileToProject(Project.Object, fullPath, folderPath);
+        }
+
+        // Use NoInlining option to prevent the CLR from loading VisualStudio10.dll when running inside VS 2013
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private bool RemoveFileFromProjectForVS2010(string folderPath, string fullPath)
+        {
+            return VisualStudio10.VCProjectHelper.RemoveFileFromProject(Project.Object, fullPath, folderPath);
         }
     }
 }
