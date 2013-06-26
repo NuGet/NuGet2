@@ -735,6 +735,9 @@
   <data name="&gt;&gt;MachineWideSourcesLabel.ZOrder" xml:space="preserve">
     <value>2</value>
   </data>
+  <data name="MachineWidePackageSourcesListBox.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Left, Right</value>
+  </data>
   <data name="MachineWidePackageSourcesListBox.IntegralHeight" type="System.Boolean, mscorlib">
     <value>False</value>
   </data>
