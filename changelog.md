@@ -10,6 +10,7 @@ Change Log / Release Notes
 * Add Package Restore VS package, which restores NuGet packages when user builds a solution/project inside VS.
 * [#2276](https://nuget.codeplex.com/workitem/2276) Support XNA for Windows Phone projects.
 * Add restore command to nuget.exe
+* [#2565](https://nuget.codeplex.com/workitem/2565) Handling of Project Retargeting and Project Upgrading Events
 
 ## NuGet 2.6
 
