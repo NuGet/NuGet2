@@ -275,7 +275,7 @@ namespace NuGet
                 {
                     using (Stream stream = FileSystem.OpenFile(_path))
                     {
-                        return XDocument.Load(stream);
+                        return XmlUtility.LoadSafe(stream);
                     }
                 }
 

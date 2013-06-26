@@ -688,7 +688,7 @@ function Test-UninstallingSatellitePackageRemovesFilesFromRuntimePackageFolder
     Assert-PathNotExists (Join-Path $solutionDir packages\PackageWithStrongNamedLib.1.1\lib\ja-jp\Core.xml)
 }
 
-function Test-UninstallingSatellitePackageDoesNotRemoveCollidingRuntimeFilesWhenContentsDiffer
+function Test-UninstallSatellitePackageDoNotRemoveCollidingRuntimeFilesWhenContentsDiffer
 {
     param(
         $context
@@ -708,7 +708,7 @@ function Test-UninstallingSatellitePackageDoesNotRemoveCollidingRuntimeFilesWhen
     Assert-PathExists (Join-Path $solutionDir packages\PackageWithStrongNamedLib.1.1\lib\ja-jp\collision-differences.txt)
 }
 
-function Test-UninstallingSatellitePackageDoesRemoveCollidingRuntimeFilesWhenContentsMatch
+function Test-UninstallSatellitePackageDoRemoveCollidingRuntimeFilesWhenContentsMatch
 {
     param(
         $context
@@ -728,7 +728,7 @@ function Test-UninstallingSatellitePackageDoesRemoveCollidingRuntimeFilesWhenCon
     Assert-PathNotExists (Join-Path $solutionDir packages\PackageWithStrongNamedLib.1.1\lib\ja-jp\collision-match.txt)
 }
 
-function Test-UninstallingSatellitePackageThenRuntimePackageRemoveCollidingRuntimeFilesWhenContentsDiffer
+function Test-UninstallSatelliteThenRuntimeRemoveCollidingRuntimeFilesWhenContentsDiffer
 {
     param(
         $context
@@ -766,7 +766,7 @@ function Test-WebSiteSimpleUninstall
     Assert-PathNotExists (Join-Path (Get-ProjectDir $p) "bin\AwesomeLibrary.dll.refresh")
 }
 
-function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToRemoveContentFiles
+function Test-UninstallPackageUseTargetFxPersistedInPackagesConfigToRemoveContentFiles
 {
     param($context)
 
@@ -798,7 +798,7 @@ function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToRe
     Assert-Null (Get-ProjectItem $p testB4.txt)
 }
 
-function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToRemoveAssemblyReferences
+function Test-UninstallPackageUseTargetFxPersistedInPackagesConfigToRemoveAssemblies
 {
     param($context)
 
@@ -830,7 +830,7 @@ function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToRe
     Assert-Null (Get-AssemblyReference $p testB4.dll)
 }
 
-function Test-UninstallPackageUseTheTargetFrameworkPersistedInPackagesConfigToInvokeUninstallScript
+function Test-UninstallPackageUseTargetFxPersistedInPackagesConfigToInvokeUninstallScript
 {
     param($context)
 
@@ -985,7 +985,7 @@ function Test-UnInstallPackageWithXdtTransformUnTransformsTheFile
     Assert-AreEqual "true" $content.configuration["system.web"].compilation.debug
     Assert-Null $content.configuration["system.web"].customErrors
 }
-function Test-UninstallPackageUninstallAssemblyReferencesHonoringPackageReferencesAccordingToProjectFramework
+function Test-UninstallPackageHonorPackageReferencesAccordingToProjectFramework
 {
     param ($context)
     

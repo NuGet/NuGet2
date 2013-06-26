@@ -203,7 +203,15 @@ function New-PortableLibrary
         [parameter(ValueFromPipeline = $true)]$SolutionFolder
     )
 
-    $project = New-Project PortableClassLibrary $ProjectName $SolutionFolder
+    try
+    {
+        $project = New-Project PortableClassLibrary $ProjectName $SolutionFolder
+    }
+    catch {
+        # If we're unable to create the project that means we probably don't have some SDK installed
+        # Signal to the runner that we want to skip this test        
+        throw "SKIP: $($_)"
+    }
 
     if ($Profile) 
     {
@@ -213,6 +221,56 @@ function New-PortableLibrary
     }
 
     $project
+}
+
+function New-JavaScriptApplication 
+{
+    param(
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    try 
+    {
+        if ($dte.Version -eq '12.0')
+        {
+            $SolutionFolder | New-Project WinJSBlue $ProjectName
+        }
+        else 
+        {
+            $SolutionFolder | New-Project WinJS $ProjectName
+        }
+    }
+    catch {
+        # If we're unable to create the project that means we probably don't have some SDK installed
+        # Signal to the runner that we want to skip this test        
+        throw "SKIP: $($_)"
+    }
+}
+
+function New-NativeWinStoreApplication
+{
+    param(
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    try
+    {
+        if ($dte.Version -eq '12.0')
+        {
+            $SolutionFolder | New-Project CppWinStoreApplicationBlue $ProjectName
+        }
+        else 
+        {
+            $SolutionFolder | New-Project CppWinStoreApplication $ProjectName
+        }
+    }
+    catch {
+        # If we're unable to create the project that means we probably don't have some SDK installed
+        # Signal to the runner that we want to skip this test        
+        throw "SKIP: $($_)"
+    }
 }
 
 function New-ConsoleApplication {
@@ -413,7 +471,24 @@ function Get-ProjectDir {
         [parameter(Mandatory = $true)]
         $Project
     )
-    Get-PropertyValue $Project FullPath
+
+    # c++ project has ProjectDirectory
+    $path = Get-PropertyValue $Project 'ProjectDirectory'
+    if ($path) 
+    {
+        return $path
+    }
+
+    $path = Get-PropertyValue $Project FullPath
+    if ($path)
+    {
+        if ([System.IO.File]::Exists($path))
+        {
+            $path = Split-Path $path -Parent
+        }
+    }
+
+    $path
 }
 
 function Get-OutputPath {

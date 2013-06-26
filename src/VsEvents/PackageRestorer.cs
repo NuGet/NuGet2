@@ -170,7 +170,7 @@ namespace NuGet.VsEvents
 
             if (_isConsentGranted)
             {
-                using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore))
+                using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore, package.Id))
                 {
                     var resolvedPackage = PackageHelper.ResolvePackage(
                         packageManager.SourceRepository, package.Id, package.Version);

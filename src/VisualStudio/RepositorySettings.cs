@@ -209,7 +209,7 @@ namespace NuGet.VisualStudio
                 XDocument document;
                 using (Stream stream = FileSystem.OpenFile(path))
                 {
-                    document = XDocument.Load(stream);
+                    document = XmlUtility.LoadSafe(stream);
                 }
 
                 // <settings>

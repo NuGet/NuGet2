@@ -40,6 +40,9 @@
     <Compile Include="IVsTemplateWizard.cs" />
     <Compile Include="IVsWebsiteHandler.cs" />
     <Compile Include="IWindowSettingsManager.cs" />
+    <Compile Include="Settings\ISettingsManager.cs" />
+    <Compile Include="Settings\ISettingsStore.cs" />
+    <Compile Include="Settings\IWritableSettingsStore.cs" />
     <Compile Include="VsMachineWideSettings.cs" />
     <Compile Include="MessageHelper.cs" />
     <Compile Include="NativeMethods.cs" />
@@ -78,6 +81,9 @@
     <Compile Include="ProjectSystems\WindowsStoreProjectSystem.cs" />
     <Compile Include="ProjectSystems\WixProjectSystem.cs" />
     <Compile Include="RegistryKeyWrapper.cs" />
+    <Compile Include="Settings\SettingsManagerWrapper.cs" />
+    <Compile Include="Settings\SettingsStoreWrapper.cs" />
+    <Compile Include="Settings\WritableSettingsStoreWrapper.cs" />
     <Compile Include="SkipAssemblyReferencesPackage.cs" />
     <Compile Include="SolutionFolderFileSystem.cs" />
     <Compile Include="TfsSourceControlFileSystemProviderPicker.cs" />
@@ -145,15 +151,15 @@
     <Reference Include="Microsoft.VisualStudio.Project.V11Only, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
-      <HintPath>..\..\lib\Microsoft.VisualStudio.Project.V11Only.dll</HintPath>
+      <HintPath>..\..\lib\VS11\Microsoft.VisualStudio.Project.V11Only.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.Settings, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=x86">
-      <HintPath>..\..\lib\VS10\Microsoft.VisualStudio.Settings.dll</HintPath>
+    <Reference Include="$(SettingsAssembly)" Condition=" '$(BuildForDev12)' != 'true' ">
+      <HintPath>$(SettingsAssemblyHintPath)</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.Shell.10.0, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+    <Reference Include="$(ShellAssembly)">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\VS10\Microsoft.VisualStudio.Shell.10.0.dll</HintPath>
+      <HintPath>$(ShellAssemblyHintPath)</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
@@ -171,8 +177,8 @@
     <Reference Include="Microsoft.VisualStudio.TemplateWizardInterface, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.VCProjectEngine, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-      <HintPath>..\..\lib\Microsoft.VisualStudio.VCProjectEngine.dll</HintPath>
+    <Reference Include="$(VCProjectEngineAssembly)">
+      <HintPath>$(VCProjectEngineAssemblyHintPath)</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="PresentationCore" />
@@ -209,7 +215,7 @@
     <Compile Include="PSScriptExecutor.cs" />
     <Compile Include="RepositorySettings.cs" />
     <Compile Include="RuntimeHelpers.cs" />
-    <Compile Include="SettingsManagerBase.cs" />
+    <Compile Include="Settings\SettingsManagerBase.cs" />
     <Compile Include="SmartOutputConsoleProvider.cs" />
     <Compile Include="VsFileSystemProvider.cs" />
     <Compile Include="Extensibility\VsPackageInstaller.cs" />
@@ -256,6 +262,11 @@
       <Project>{7765C89E-790C-4D1E-A877-227E5FE3C90B}</Project>
       <Name>VisualStudio10</Name>
     </ProjectReference>
+    <ProjectReference Include="..\VisualStudio12\VisualStudio12.csproj">
+      <Project>{3dd213f7-999b-4c15-9560-bf9c96cb8c52}</Project>
+      <Name>VisualStudio12</Name>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\VsConsole\Console.Types\Console.Types.csproj">
       <Project>{6FD11460-39A3-4A10-BA63-7541B0A7D053}</Project>
       <Name>Console.Types</Name>
@@ -284,12 +295,6 @@
     <None Include="Properties\install.ps1" />
     <None Include="Properties\NuGet.VisualStudio.nuspec" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

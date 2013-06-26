@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Runtime.Versioning;
@@ -131,6 +130,18 @@ namespace NuGet.PowerShell.Commands
                 return null;
             }
 
+            Project project = GetProject(throwIfNotExists: true);
+            if (project == null)
+            {
+                // No project specified and default project was null
+                return null;
+            }
+
+            return GetProjectManager(project);
+        }
+
+        private Project GetProject(bool throwIfNotExists)
+        {
             Project project = null;
 
             // If the user specified a project then use it
@@ -139,7 +150,7 @@ namespace NuGet.PowerShell.Commands
                 project = SolutionManager.GetProject(ProjectName);
 
                 // If that project was invalid then throw
-                if (project == null)
+                if (project == null && throwIfNotExists)
                 {
                     ErrorHandler.ThrowNoCompatibleProjectsTerminatingError();
                 }
@@ -152,13 +163,7 @@ namespace NuGet.PowerShell.Commands
                 Debug.Assert(project != null, "default project should never be invalid");
             }
 
-            if (project == null)
-            {
-                // No project specified and default project was null
-                return null;
-            }
-
-            return GetProjectManager(project);
+            return project;
         }
 
         private Tuple<IProjectManager, Project> GetProjectManager(Project project)
@@ -324,13 +329,6 @@ namespace NuGet.PowerShell.Commands
             }
         }
 
-        protected IDisposable StartOperation(string operation)
-        {
-            return DisposableAction.All(
-                PackageManager.SourceRepository.StartOperation(operation),
-                ProjectManager != null ? ProjectManager.SourceRepository.StartOperation(operation) : DisposableAction.NoOp);
-        }
-
         private void SaveExpandedNodes()
         {
             // remember which nodes are currently open so that we can keep them open after the operation
@@ -345,6 +343,13 @@ namespace NuGet.PowerShell.Commands
                 _expandedNodesDisposable.Dispose();
                 _expandedNodesDisposable = null;
             }
+        }
+
+        protected override void OnSendingRequest(object sender, WebRequestEventArgs e)
+        {
+            Project project = GetProject(throwIfNotExists: false);
+            var projectGuids = project == null ? null : project.GetAllProjectTypeGuid();
+            HttpUtility.SetUserAgent(e.Request, DefaultUserAgent, projectGuids);
         }
     }
 }

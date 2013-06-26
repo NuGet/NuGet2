@@ -1,11 +1,11 @@
 extern alias dialog;
 extern alias dialog10;
+extern alias dialog11;
 using System;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using EnvDTE;
@@ -19,9 +19,9 @@ using NuGet.VisualStudio.Resources;
 using NuGet.VisualStudio11;
 using NuGetConsole;
 using NuGetConsole.Implementation;
-using NuGetConsole.Implementation.Console;
 using ManagePackageDialog = dialog::NuGet.Dialog.PackageManagerWindow;
 using VS10ManagePackageDialog = dialog10::NuGet.Dialog.PackageManagerWindow;
+using VS11ManagePackageDialog = dialog11::NuGet.Dialog.PackageManagerWindow;
 
 namespace NuGet.Tools
 {
@@ -356,14 +356,26 @@ namespace NuGet.Tools
 
         private static void ShowManageLibraryPackageDialog(Project project, string parameterString = null)
         {
-            DialogWindow window = VsVersionHelper.IsVisualStudio2010 ?
-                GetVS10PackageManagerWindow(project, parameterString) :
-                GetPackageManagerWindow(project, parameterString);
             try
             {
+                DialogWindow window;
+
+                if (VsVersionHelper.IsVisualStudio2010)
+                {
+                    window = GetVS10PackageManagerWindow(project, parameterString);
+                }
+                else if (VsVersionHelper.IsVisualStudio2012)
+                {
+                    window = GetVS11PackageManagerWindow(project, parameterString);
+                }
+                else
+                {
+                    window = GetPackageManagerWindow(project, parameterString);
+                }
+
                 window.ShowModal();
             }
-            catch (TargetInvocationException exception)
+            catch (Exception exception)
             {
                 MessageHelper.ShowErrorMessage(exception, Resources.ErrorDialogBoxTitle);
                 ExceptionHelper.WriteToActivityLog(exception);
@@ -374,6 +386,12 @@ namespace NuGet.Tools
         private static DialogWindow GetVS10PackageManagerWindow(Project project, string parameterString)
         {
             return new VS10ManagePackageDialog(project, parameterString);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static DialogWindow GetVS11PackageManagerWindow(Project project, string parameterString)
+        {
+            return new VS11ManagePackageDialog(project, parameterString);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]

@@ -94,9 +94,9 @@ namespace NuGet.VisualStudio
             return _primaryRepository.Exists(packageId, version);
         }
 
-        public IDisposable StartOperation(string operation)
+        public IDisposable StartOperation(string operation, string mainPackageId)
         {
-            return SourceRepository.StartOperation(operation);
+            return SourceRepository.StartOperation(operation, mainPackageId);
         }
     }
 }

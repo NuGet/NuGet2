@@ -167,7 +167,7 @@ namespace NuGet.Test
         }
 
         [Fact]
-        public void InstallingSatellitePackageCopiesFilesIntoRuntimePackageFolderWhenRuntimeIsAlreadyInstalled()
+        public void InstallSatellitePackageCopiesFilesToExistingRuntimePackageFolder()
         {
             // Arrange
             // Create a runtime package and a satellite package that has a dependency on the runtime package, and uses the

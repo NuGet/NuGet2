@@ -266,7 +266,7 @@ namespace NuGet.Commands
             }
 
             EnsurePackageRestoreConsent(packageRestoreConsent);
-            using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore))
+            using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore, packageId))
             {
                 var package = PackageHelper.ResolvePackage(packageManager.SourceRepository, packageId, version);
                 if (package.IsSatellitePackage())

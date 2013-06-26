@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -20,8 +19,12 @@ namespace NuGet.Dialog
     public partial class PackageManagerWindow : DialogWindow
     {
         internal static PackageManagerWindow CurrentInstance;
-        private const string DialogUserAgentClient = "NuGet Add Package Dialog";
-        private readonly Lazy<string> _dialogUserAgent = new Lazy<string>(() => HttpUtility.CreateUserAgentString(DialogUserAgentClient));
+        private const string DialogUserAgentClient = "NuGet VS Packages Dialog";
+        private const string DialogForSolutionUserAgentClient = "NuGet VS Packages Dialog - Solution";
+        private readonly Lazy<string> _dialogUserAgent = new Lazy<string>(
+            () => HttpUtility.CreateUserAgentString(DialogUserAgentClient, VsVersionHelper.FullVsEdition));
+        private readonly Lazy<string> _dialogForSolutionUserAgent = new Lazy<string>(
+            () => HttpUtility.CreateUserAgentString(DialogForSolutionUserAgentClient, VsVersionHelper.FullVsEdition));
 
         private static readonly string[] Providers = new string[] { "Installed", "Online", "Updates" };
         private const string SearchInSwitch = "/searchin:";
@@ -38,6 +41,7 @@ namespace NuGet.Dialog
         private readonly IOptionsPageActivator _optionsPageActivator;
         private readonly IUpdateAllUIService _updateAllUIService;
         private readonly Project _activeProject;
+        private readonly string _projectGuids;
         private string _searchText;
 
         public PackageManagerWindow(Project project, string dialogParameters = null) :
@@ -57,6 +61,7 @@ namespace NuGet.Dialog
         {
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         private PackageManagerWindow(Project project,
                                     DTE dte,
                                     IVsPackageManagerFactory packageManagerFactory,
@@ -102,6 +107,8 @@ namespace NuGet.Dialog
                     Close();
                     productUpdateService.Update();
                 };
+
+            _projectGuids = _activeProject == null ? null : _activeProject.GetAllProjectTypeGuid(); 
 
             AddUpdateBar(productUpdateService);
             AddRestoreBar(packageRestoreManager);
@@ -432,6 +439,7 @@ namespace NuGet.Dialog
         /// <summary>
         /// Called when coming back from the Options dialog
         /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         private static void OnActivated(Project project)
         {
             var window = new PackageManagerWindow(project);
@@ -439,7 +447,7 @@ namespace NuGet.Dialog
             {
                 window.ShowModal();
             }
-            catch (TargetInvocationException exception)
+            catch (Exception exception)
             {
                 MessageHelper.ShowErrorMessage(exception, NuGet.Dialog.Resources.Dialog_MessageBoxTitle);
                 ExceptionHelper.WriteToActivityLog(exception);
@@ -704,7 +712,10 @@ namespace NuGet.Dialog
 
         private void OnSendingRequest(object sender, WebRequestEventArgs e)
         {
-            HttpUtility.SetUserAgent(e.Request, _dialogUserAgent.Value);
+            HttpUtility.SetUserAgent(
+                e.Request,
+                _activeProject == null ? _dialogForSolutionUserAgent.Value : _dialogUserAgent.Value,
+                _projectGuids);
         }
 
         private void CanExecuteClose(object sender, CanExecuteRoutedEventArgs e)

@@ -74,10 +74,10 @@ namespace NuGet.Dialog.Providers
             return Repository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFrameworks, versionConstraints);
         }
 
-        public IDisposable StartOperation(string operation)
+        public IDisposable StartOperation(string operation, string mainPackageId)
         {
             // Starting an operation is an action that should materialize the repository
-            return Repository.StartOperation(operation);
+            return Repository.StartOperation(operation, mainPackageId);
         }
     }
 }

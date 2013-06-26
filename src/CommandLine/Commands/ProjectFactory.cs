@@ -624,7 +624,9 @@ namespace NuGet.Commands
 
             // Collect all packages
             IDictionary<PackageName, PackageReference> packageReferences = 
-                file.GetPackageReferences().ToDictionary(r => new PackageName(r.Id, r.Version));
+                file.GetPackageReferences()
+                .Where(r => !r.IsDevelopmentDependency)
+                .ToDictionary(r => new PackageName(r.Id, r.Version));
             // add all packages and create an associated dependency to the dictionary
             foreach (PackageReference reference in packageReferences.Values)
             {
@@ -765,7 +767,7 @@ namespace NuGet.Commands
                     {
                         // It's possible for the repositoryPath element to be missing in older versions of 
                         // a NuGet.config file.
-                        var repositoryPathElement = XDocument.Load(stream).Root.Element("repositoryPath");
+                        var repositoryPathElement = XmlUtility.LoadSafe(stream).Root.Element("repositoryPath");
                         if (repositoryPathElement != null)
                         {
                             return repositoryPathElement.Value;

@@ -849,6 +849,101 @@ namespace Proj2
             }
         }
 
+        // Test that NuGet packages of the project are added as dependencies
+        [Fact]
+        public void PackCommand_PackagesAddedAsDependencies()
+        {
+            var targetDir = ConfigurationManager.AppSettings["TargetDir"];
+            var nugetexe = Path.Combine(targetDir, "nuget.exe");
+            var workingDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+            try
+            {
+                Util.CreateDirectory(workingDirectory);
+                var proj1Directory = Path.Combine(workingDirectory, "proj1");
+                var packagesFolder = Path.Combine(proj1Directory, "packages");
+                Util.CreateDirectory(proj1Directory);
+                Util.CreateDirectory(packagesFolder);
+
+                // create project 1
+                Util.CreateFile(
+                    proj1Directory,
+                    "proj1.csproj",
+@"<Project ToolsVersion='4.0' DefaultTargets='Build' 
+    xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <OutputPath>out</OutputPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include='proj1_file1.cs' />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include='proj1_file2.txt' />
+    <Content Include='packages.config' />
+  </ItemGroup>
+  <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
+</Project>");
+                Util.CreateFile(
+                    proj1Directory,
+                    "proj1_file1.cs",
+@"using System;
+
+namespace Proj1
+{
+    public class Class1
+    {
+        public int A { get; set; }
+    }
+}");
+                Util.CreateFile(
+                    proj1Directory,
+                    "packages.config",
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""testPackage1"" version=""1.1.0"" targetFramework=""net45"" />
+  <package id=""testPackage2"" version=""1.1.0"" targetFramework=""net45"" developmentDependency=""true"" />
+</packages>");
+                Util.CreateTestPackage("testPackage1", "1.1.0", packagesFolder);
+                Util.CreateTestPackage("testPackage2", "1.1.0", packagesFolder);
+
+                Util.CreateFile(
+                    proj1Directory,
+                    "proj1_file2.txt",
+                    "file2");
+
+                Util.CreateFile(
+                    proj1Directory,
+                    "test.sln",
+                    "# test solution");
+
+                // Act                 
+                var r = CommandRunner.Run(
+                    nugetexe,
+                    proj1Directory,
+                    "pack proj1.csproj -build",
+                    waitForExit: true);
+                Assert.Equal(0, r.Item1);
+
+                // Assert
+                var package = new OptimizedZipPackage(Path.Combine(proj1Directory, "proj1.0.0.0.0.nupkg"));
+                Assert.Equal(1, package.DependencySets.Count());
+                var dependencySet = package.DependencySets.First();
+
+                // verify that only testPackage1 is added as dependency. testPackage2 is not adde
+                // as dependency because its developmentDependency is true.
+                Assert.Equal(1, dependencySet.Dependencies.Count);                
+                var dependency = dependencySet.Dependencies.First();
+                Assert.Equal("testPackage1", dependency.Id);
+                Assert.Equal("1.1.0", dependency.VersionSpec.ToString());
+            }
+            finally
+            {
+                Directory.Delete(workingDirectory, true);
+            }
+        }
+
 
         /// <summary>
         /// Creates a simple project.

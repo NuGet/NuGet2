@@ -479,9 +479,17 @@ namespace NuGet.Dialog.Providers
             // Only process the result if this node is still selected.
             if (IsSelected)
             {
-                if (task.IsCanceled)
+                if (task.IsFaulted)
                 {
-                    HideProgressPane();
+                    if (cancellationSource.IsCancellationRequested)
+                    {
+                        HideProgressPane();
+                    }
+                    else
+                    {
+                        // show error message in the Message pane
+                        ShowMessagePane(ExceptionUtility.Unwrap(exception).Message);
+                    }
                 }
                 else
                 {
@@ -492,9 +500,9 @@ namespace NuGet.Dialog.Providers
                     int totalPages = (result.TotalCount + PageSize - 1) / PageSize;
                     TotalPages = Math.Max(1, totalPages);
                     CurrentPage = Math.Max(1, result.PageNumber);
-
-                    HideProgressPane();
                 }
+
+                HideProgressPane();
             }
 
             Provider.OnPackageLoadCompleted(this);

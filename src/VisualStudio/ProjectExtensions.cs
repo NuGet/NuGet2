@@ -637,7 +637,6 @@ namespace NuGet.VisualStudio
         public static string[] GetProjectTypeGuids(this Project project)
         {
             // Get the vs hierarchy as an IVsAggregatableProject to get the project type guids
-
             var hierarchy = project.ToVsHierarchy();
             var aggregatableProject = hierarchy as IVsAggregatableProject;
             if (aggregatableProject != null)
@@ -659,6 +658,32 @@ namespace NuGet.VisualStudio
             else
             {
                 return new string[0];
+            }
+        }
+
+        public static string GetAllProjectTypeGuid(this Project project)
+        {
+            // Get the vs hierarchy as an IVsAggregatableProject to get the project type guids
+            var hierarchy = project.ToVsHierarchy();
+            var aggregatableProject = hierarchy as IVsAggregatableProject;
+            if (aggregatableProject != null)
+            {
+                string projectTypeGuids;
+                int hr = aggregatableProject.GetAggregateProjectTypeGuids(out projectTypeGuids);
+                if (hr != VsConstants.S_OK)
+                {
+                    return null;
+                }
+
+                return projectTypeGuids;
+            }
+            else if (!String.IsNullOrEmpty(project.Kind))
+            {
+                return project.Kind;
+            }
+            else
+            {
+                return null;
             }
         }
 
@@ -866,7 +891,7 @@ namespace NuGet.VisualStudio
             }
         }
 
-        // This method should only be called in VS 2012 or above
+        // This method should only be called in VS 2012
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void DoWorkInWriterLock(this Project project, Action<MsBuildProject> action)
         {

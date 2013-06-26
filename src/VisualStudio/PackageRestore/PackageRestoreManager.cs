@@ -286,18 +286,40 @@ namespace NuGet.VisualStudio
             if (!VsVersionHelper.IsVisualStudio2010 && 
                 (project.IsJavaScriptProject() ||  project.IsNativeProject()))
             {
-                project.DoWorkInWriterLock(
-                    buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
-
-                // When inside the Write lock, calling Project.Save() will cause a deadlock.
-                // Thus we will save it after and outside of the Write lock.
-                project.Save();
+                if (VsVersionHelper.IsVisualStudio2012)
+                {
+                    EnablePackageRestoreInVs2012(project);
+                }
+                else
+                {
+                    EnablePackageRestoreInVs2013(project);
+                }
             }
             else
             {
                 MsBuildProject buildProject = project.AsMSBuildProject();
                 EnablePackageRestore(project, buildProject, saveProjectWhenDone: true);
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void EnablePackageRestoreInVs2013(Project project)
+        {
+            NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+                project,
+                project.ToVsHierarchy(),
+                buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void EnablePackageRestoreInVs2012(Project project)
+        {
+            project.DoWorkInWriterLock(
+                buildProject => EnablePackageRestore(project, buildProject, saveProjectWhenDone: false));
+
+            // When inside the Write lock, calling Project.Save() will cause a deadlock.
+            // Thus we will save it after and outside of the Write lock.
+            project.Save();
         }
 
         private void EnablePackageRestore(Project project, MsBuildProject buildProject, bool saveProjectWhenDone)

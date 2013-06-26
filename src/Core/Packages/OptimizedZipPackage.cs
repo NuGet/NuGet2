@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.IO.Packaging;
@@ -193,6 +194,7 @@ namespace NuGet
             }
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch all the exceptions for CreateFile")]
         private void EnsurePackageFiles()
         {
             if (_files != null &&
@@ -233,9 +235,16 @@ namespace NuGet
 
                     using (Stream partStream = file.GetStream())
                     {
-                        using (Stream targetStream = _expandedFileSystem.CreateFile(filePath))
+                        try
                         {
-                            partStream.CopyTo(targetStream);
+                            using (Stream targetStream = _expandedFileSystem.CreateFile(filePath))
+                            {
+                                partStream.CopyTo(targetStream);
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            // if the file is read-only or has an access denied issue, we just ignore it
                         }
                     }
 

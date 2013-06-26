@@ -496,7 +496,7 @@ function Test-InstallPackageThatTargetsWindowsPhone {
     Assert-Package $p WpPackage
     Assert-SolutionPackage WpPackage
     $reference = Get-AssemblyReference $p luan
-    Assert-True ($reference.Path.Contains("wp7"))
+    Assert-NotNull $reference
 }
 
 function Test-InstallPackageWithNonExistentFrameworkReferences {
@@ -918,13 +918,20 @@ function Test-InstallPackageIntoSecondProjectWithIncompatibleAssembliesDoesNotRo
     # Act
     $p1 | Install-Package NuGet.Core
 
-    $profile = "WindowsPhone71"
     if ($dte.Version -eq "10.0")
     {
-        $profile = "WindowsPhone"
+        $profile = "Silverlight,Version=v4.0,Profile=WindowsPhone"
+    }
+    else if ($dte.Version -eq "11.0")
+    {
+        $profile = "Silverlight,Version=v4.0,Profile=WindowsPhone71"
+    }
+    else if ($dte.Version -eq "12.0")
+    {
+        $profile = "WindowsPhone,Version=v8.0"
     }
 
-    Assert-Throws { $p2 | Install-Package NuGet.Core -Version 1.4.20615.9012 } "Could not install package 'NuGet.Core 1.4.20615.9012'. You are trying to install this package into a project that targets 'Silverlight,Version=v4.0,Profile=$profile', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
+    Assert-Throws { $p2 | Install-Package NuGet.Core -Version 1.4.20615.9012 } "Could not install package 'NuGet.Core 1.4.20615.9012'. You are trying to install this package into a project that targets '$Profile', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
 
     # Assert    
     Assert-Package $p1 NuGet.Core
@@ -1563,7 +1570,7 @@ function Test-InstallingPackageaAfterNuGetDirectoryIsRenamedContinuesUsingDirect
     Assert-AreEqual $expected $content
 }
 
-function Test-InstallingSatellitePackageCopiesFilesIntoRuntimePackageFolderWhenRuntimeIsInstalledAsADependency
+function Test-InstallSatellitePackageCopiesFilesToRuntimeFolderWhenInstalledAsDependency
 {
     param(
         $context
@@ -1581,7 +1588,7 @@ function Test-InstallingSatellitePackageCopiesFilesIntoRuntimePackageFolderWhenR
     Assert-PathExists (Join-Path $solutionDir packages\PackageWithStrongNamedLib.1.1\lib\ja-jp\Core.xml)
 }
 
-function Test-InstallingSatellitePackageCopiesFilesIntoRuntimePackageFolderWhenRuntimeIsAlreadyInstalled
+function Test-InstallSatellitePackageCopiesFilesToExistingRuntimePackageFolder
 {
     param(
         $context
@@ -1711,7 +1718,14 @@ function Test-InstallPackageThrowsIfThereIsNoCompatibleContentFiles
     
     # Act & Assert
 
-    Assert-Throws { Install-Package TestTargetFxContentFiles -Project $project.Name -Source $context.RepositoryPath } "Could not install package 'TestTargetFxContentFiles 1.0.0'. You are trying to install this package into a project that targets 'Silverlight,Version=v4.0', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
+    $version = "v4.0";
+    if ($dte.Version -eq "12.0")
+    {
+        # On VS 2013, Silverlight 4 project is no longer supported
+        $version = "v5.0"
+    }
+
+    Assert-Throws { Install-Package TestTargetFxContentFiles -Project $project.Name -Source $context.RepositoryPath } "Could not install package 'TestTargetFxContentFiles 1.0.0'. You are trying to install this package into a project that targets 'Silverlight,Version=$version', but the package does not contain any assembly references or content files that are compatible with that framework. For more information, contact the package author."
     Assert-NoPackage $project TestTargetFxContentFiles
 }
 
@@ -1975,7 +1989,7 @@ function Test-InstallMetaPackageWorksAsExpected
     Assert-Package $p Dependency
 }
 
-function Test-InstallPackageDoesNotUninstallDependencyGraphWhenSafeUpdatingADependency 
+function Test-InstallPackageDoNotUninstallDependenciesWhenSafeUpdatingDependency 
 {
     # The InstallWalker used to compensate for packages that were already installed by attempting to remove
     # an uninstall operation. Consequently any uninstall operation that occurred later in the graph would cause 
@@ -2205,4 +2219,38 @@ function Test-AssemblyInFrameworkShouldNotHaveBindingRedirect
     # Assert
     Assert-BindingRedirect $p1 app.config System.Net.Http.Primitives '0.0.0.0-4.2.3.0' '4.2.3.0'
     Assert-NoBindingRedirect $p1 app.config System.Runtime '0.0.0.0-1.5.11.0' '1.5.11.0'
+}
+
+function Test-InstallPackageIntoJavascriptApplication
+{
+    if ($dte.Version -eq "10.0")
+    {
+        return
+    }
+
+    # Arrange
+    $p = New-JavaScriptApplication
+
+    # Act
+    Install-Package jQuery -ProjectName $p.Name
+
+    # Assert
+    Assert-Package $p "jQuery"
+}
+
+function Test-InstallPackageIntoNativeWinStoreApplication
+{
+    if ($dte.Version -eq "10.0")
+    {
+        return
+    }
+
+    # Arrange
+    $p = New-NativeWinStoreApplication
+
+    # Act
+    Install-Package zlib -IgnoreDependencies -ProjectName $p.Name
+
+    # Assert
+    Assert-Package $p "zlib"
 }

@@ -173,7 +173,7 @@ namespace NuGet
 
             try
             {
-                schemaDocument = XDocument.Load(schemaStream);
+                schemaDocument = XmlUtility.LoadSafe(schemaStream);
             }
             catch
             {

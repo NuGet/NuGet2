@@ -21,9 +21,9 @@ namespace NuGet.VisualStudio
 
         private static bool ShellIsVisualStudioExpressForWindows8()
         {
-            if (VsVersionHelper.VsMajorVersion != 11)
+            if (VsVersionHelper.VsMajorVersion < 11)
             {
-                // We only care for the Dev11 version of the express SKU.
+                // We only care for the Dev11 or above version of the express SKU.
                 return false;
             }
 

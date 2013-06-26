@@ -11,12 +11,12 @@ namespace NuGet
 {
     public static class PackageRepositoryExtensions
     {
-        public static IDisposable StartOperation(this IPackageRepository self, string operation)
+        public static IDisposable StartOperation(this IPackageRepository self, string operation, string mainPackageId)
         {
             IOperationAwareRepository repo = self as IOperationAwareRepository;
             if (repo != null)
             {
-                return repo.StartOperation(operation);
+                return repo.StartOperation(operation, mainPackageId);
             }
             return DisposableAction.NoOp;
         }

@@ -52,7 +52,7 @@ namespace NuGet.Dialog.Providers
         protected override bool ExecuteCore(PackageItem item)
         {
             _activePackageManager = GetActivePackageManager();
-            using (_activePackageManager.SourceRepository.StartOperation(RepositoryOperationNames.Install))
+            using (_activePackageManager.SourceRepository.StartOperation(RepositoryOperationNames.Install, item.Id))
             {
                 IList<Project> selectedProjectsList;
 

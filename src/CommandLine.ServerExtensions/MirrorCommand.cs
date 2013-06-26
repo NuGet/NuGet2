@@ -56,7 +56,7 @@ namespace NuGet.ServerExtensions
 
             bool didSomething = false;
 
-            using (mirrorer.SourceRepository.StartOperation(RepositoryOperationNames.Mirror))
+            using (mirrorer.SourceRepository.StartOperation(RepositoryOperationNames.Mirror, mainPackageId: null))
             {
                 foreach (var package in toMirror)
                 {

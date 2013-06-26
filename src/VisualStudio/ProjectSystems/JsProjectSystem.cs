@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using EnvDTE;
 using NuGet.VisualStudio.Resources;
 
@@ -72,9 +73,27 @@ namespace NuGet.VisualStudio
                 }
 
                 string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
-                Project.DoWorkInWriterLock(buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
-                Project.Save();
+                if (VsVersionHelper.IsVisualStudio2012)
+                {
+                    Project.DoWorkInWriterLock(buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
+                    Project.Save();
+                }
+                else
+                {
+                    AddImportStatementForVS2013(location, relativeTargetPath);
+                }
             }
+        }
+
+        // IMPORTANT: The NoInlining is required to prevent CLR from loading VisualStudio12.dll assembly while running 
+        // in VS2010 and VS2012
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void AddImportStatementForVS2013(ProjectImportLocation location, string relativeTargetPath)
+        {
+            NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+                Project,
+                Project.ToVsHierarchy(),
+                buildProject => buildProject.AddImportStatement(relativeTargetPath, location));
         }
 
         public override void RemoveImport(string targetPath)
@@ -92,9 +111,28 @@ namespace NuGet.VisualStudio
 
                 // For VS 2012 or above, the operation has to be done inside the Writer lock
                 string relativeTargetPath = PathUtility.GetRelativePath(PathUtility.EnsureTrailingSlash(Root), targetPath);
-                Project.DoWorkInWriterLock(buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
-                Project.Save();
+                if (VsVersionHelper.IsVisualStudio2012)
+                {
+                    Project.DoWorkInWriterLock(buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
+                    Project.Save();
+                }
+                else
+                {
+                    RemoveImportStatementForVS2013(relativeTargetPath);
+                }
+
             }
+        }
+
+        // IMPORTANT: The NoInlining is required to prevent CLR from loading VisualStudio12.dll assembly while running 
+        // in VS2010 and VS2012
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void RemoveImportStatementForVS2013(string relativeTargetPath)
+        {
+            NuGet.VisualStudio12.ProjectHelper.DoWorkInWriterLock(
+                Project,
+                Project.ToVsHierarchy(),
+                buildProject => buildProject.RemoveImportStatement(relativeTargetPath));
         }
 
         public void BeginProcessing(IEnumerable<string> batch, PackageAction action)

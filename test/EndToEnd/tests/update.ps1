@@ -980,13 +980,13 @@ function Test-UpdatePackageDontMakeExcessiveNetworkRequests
     # Arrange
     $a = New-ClassLibrary
 
-    $nugetsource = "https://go.microsoft.com/FWLink/?LinkID=206669"
+    $nugetsource = "https://nuget.org/api/v2/"
     
     $repository = Get-PackageRepository $nugetsource
     Assert-NotNull $repository
 
     $packageDownloader = $repository.PackageDownloader
-        Assert-NotNull $packageDownloader
+    Assert-NotNull $packageDownloader
 
     $global:numberOfRequests = 0
     $eventId = "__DataServiceSendingRequest"
