@@ -284,6 +284,36 @@ namespace NuGet.Test
             Assert.Equal("content\\foo", expandedFileSystem.ReadAllText("random\\content\\foo"));
         }
 
+        [Fact]
+        public void DoNotOverwriteExistingFilesWhileExpandingFilesIfContentsAreEqual()
+        {
+            // Arrange
+            var ms = GetPackageStream();
+
+            var fileSystem = new MockFileSystem("x:\\");
+            fileSystem.AddFile("pam.nupkg", ms);
+
+            var expandedFileSystem = new Mock<MockFileSystem>("y:\\")
+            {
+                CallBase = true
+            };
+            expandedFileSystem.Object.AddFile("random\\content\\foo", "content\\foo");
+
+            expandedFileSystem.Setup(f => f.CreateFile("random\\content\\foo"))
+                              .Throws(new InvalidOperationException());
+
+            var ozp = new TestableOptimizedZipPackage(
+                fileSystem, "pam.nupkg", expandedFileSystem.Object);
+
+            // Act
+            ozp.GetFiles().ToList();
+
+            // Assert
+            Assert.True(expandedFileSystem.Object.FileExists("random\\content\\foo"));
+            Assert.True(expandedFileSystem.Object.FileExists("random\\lib\\40\\A.dll"));
+            Assert.Equal("content\\foo", expandedFileSystem.Object.ReadAllText("random\\content\\foo"));
+        }
+
         private static MemoryStream GetPackageStream(
             IEnumerable<IPackageFile> files = null,
             IEnumerable<PackageReferenceSet> references = null)

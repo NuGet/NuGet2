@@ -233,18 +233,33 @@ namespace NuGet
                     string path = UriUtility.GetPath(file.Uri);
                     string filePath = Path.Combine(_expandedFolderPath, path);
 
-                    using (Stream partStream = file.GetStream())
+                    bool copyFile = true;
+                    if (_expandedFileSystem.FileExists(filePath))
                     {
-                        try
+                        using (Stream partStream = file.GetStream(),
+                                      targetStream = _expandedFileSystem.OpenFile(filePath))
                         {
-                            using (Stream targetStream = _expandedFileSystem.CreateFile(filePath))
-                            {
-                                partStream.CopyTo(targetStream);
-                            }
+                            // if the target file already exists, 
+                            // don't copy file if the contents are equal
+                            copyFile = !partStream.ContentEquals(targetStream);
                         }
-                        catch (Exception)
+                    }
+
+                    if (copyFile)
+                    {
+                        using (Stream partStream = file.GetStream())
                         {
-                            // if the file is read-only or has an access denied issue, we just ignore it
+                            try
+                            {
+                                using (Stream targetStream = _expandedFileSystem.CreateFile(filePath))
+                                {
+                                    partStream.CopyTo(targetStream);
+                                }
+                            }
+                            catch (Exception)
+                            {
+                                // if the file is read-only or has an access denied issue, we just ignore it
+                            }
                         }
                     }
 

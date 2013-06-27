@@ -279,7 +279,6 @@
     <Compile Include="Packages\Constants.cs" />
     <Compile Include="Packages\IPackageFile.cs" />
     <Compile Include="Packages\PackageDependency.cs" />
-    <Compile Include="Utility\Crc32.cs" />
     <Compile Include="Repositories\LocalPackageRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\UriUtility.cs" />
