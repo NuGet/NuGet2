@@ -2259,7 +2259,7 @@ function Test-InstallPackageIntoJSAppOnWin81UseTheCorrectFxFolder
 {
     param($context)
 
-    # this test is only application to VS 2013 
+    # this test is only applicable to VS 2013 
     if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0")
     {
         return
@@ -2276,4 +2276,21 @@ function Test-InstallPackageIntoJSAppOnWin81UseTheCorrectFxFolder
     
     Assert-NotNull (Get-ProjectItem $p 'windows81.txt')
     Assert-Null (Get-ProjectItem $p 'windows8.txt')
+}
+
+function Test-SpecifyDifferentVersionThenServerVersion
+{
+    # In this test, we explicitly set the version as "2.0",
+    # whereas the server version is "2.0.0"
+    # this test is to make sure the DataServicePackageRepository 
+    # checks for all variations of "2.0" (2.0, 2.0.0 and 2.0.0.0)
+
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    Install-Package jQuery -version 2.0
+
+    # Assert
+    Assert-Package $p jQuery
 }

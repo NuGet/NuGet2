@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Services.Client;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace NuGet
@@ -9,6 +10,7 @@ namespace NuGet
     public interface IDataServiceQuery<out T> : IDataServiceQuery
     {
         IEnumerator<T> GetEnumerator();
+        IQueryable<T> AsQueryable();
     }
 
     [CLSCompliant(false)]

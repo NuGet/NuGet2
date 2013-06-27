@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data.Services.Client;
 using System.Globalization;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Xml.Linq;
 using NuGet.Resources;
@@ -78,6 +79,11 @@ namespace NuGet
             var query = (DataServiceQuery)_query.Provider.CreateQuery<TElement>(expression);
 
             return new DataServiceQueryWrapper<TElement>(_context, query, typeof(T));
+        }
+
+        public IQueryable<T> AsQueryable()
+        {
+            return (IQueryable<T>)_query;
         }
 
         public IEnumerator<T> GetEnumerator()

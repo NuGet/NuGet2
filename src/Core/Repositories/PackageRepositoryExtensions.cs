@@ -152,16 +152,7 @@ namespace NuGet
             }
             else
             {
-                // TODO: better fix for next release
-                var dataServiceRepo = repository as DataServicePackageRepository;
-                if (dataServiceRepo != null)
-                {
-                    return dataServiceRepo.FindPackagesById(packageId).ToList();
-                }
-                else
-                {
-                    return FindPackagesByIdCore(repository, packageId);
-                }
+                return FindPackagesByIdCore(repository, packageId);
             }
         }
 

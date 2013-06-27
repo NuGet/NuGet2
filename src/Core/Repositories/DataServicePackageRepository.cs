@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Services.Client;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
@@ -9,9 +10,17 @@ using NuGet.Resources;
 
 namespace NuGet
 {
-    public class DataServicePackageRepository : PackageRepositoryBase, IHttpClientEvents, IServiceBasedRepository, ICloneableRepository, ICultureAwareRepository, IOperationAwareRepository
+    public class DataServicePackageRepository : 
+        PackageRepositoryBase, 
+        IHttpClientEvents, 
+        IServiceBasedRepository, 
+        ICloneableRepository, 
+        ICultureAwareRepository, 
+        IOperationAwareRepository,
+        IPackageLookup
     {
         private const string FindPackagesByIdSvcMethod = "FindPackagesById";
+        private const string PackageServiceEntitySetName = "Packages";
         private const string SearchSvcMethod = "Search";
         private const string GetUpdatesSvcMethod = "GetUpdates";
 
@@ -178,7 +187,7 @@ namespace NuGet
         public override IQueryable<IPackage> GetPackages()
         {
             // REVIEW: Is it ok to assume that the package entity set is called packages?
-            return new SmartDataServiceQuery<DataServicePackage>(Context, Constants.PackageServiceEntitySetName);
+            return new SmartDataServiceQuery<DataServicePackage>(Context, PackageServiceEntitySetName);
         }
 
         public IQueryable<IPackage> Search(string searchTerm, IEnumerable<string> targetFrameworks, bool allowPrereleaseVersions)
@@ -213,6 +222,58 @@ namespace NuGet
             return new SmartDataServiceQuery<DataServicePackage>(Context, query);
         }
 
+        public bool Exists(string packageId, SemanticVersion version)
+        {
+            IQueryable<DataServicePackage> query = Context.CreateQuery<DataServicePackage>(PackageServiceEntitySetName).AsQueryable();
+
+            foreach (string versionString in version.GetComparableVersionStrings())
+            {
+                try
+                {
+                    var packages = query.Where(p => p.Id == packageId && p.Version == versionString)
+                                    .Select(p => p.Id)      // since we only want to check for existence, no need to get all attributes
+                                    .ToArray();
+
+                    if (packages.Length == 1)
+                    {
+                        return true;
+                    }
+                }
+                catch (DataServiceQueryException)
+                {
+                    // DataServiceQuery exception will occur when the (id, version) 
+                    // combination doesn't exist.
+                }
+            }
+
+            return false;
+        }
+
+        public IPackage FindPackage(string packageId, SemanticVersion version)
+        {
+            IQueryable<DataServicePackage> query = Context.CreateQuery<DataServicePackage>(PackageServiceEntitySetName).AsQueryable();
+
+            foreach (string versionString in version.GetComparableVersionStrings())
+            {
+                try
+                {
+                    var packages = query.Where(p => p.Id == packageId && p.Version == versionString).ToArray();
+                    Debug.Assert(packages == null || packages.Length <= 1);
+                    if (packages.Length != 0)
+                    {
+                        return packages[0];
+                    }
+                }
+                catch (DataServiceQueryException)
+                {
+                    // DataServiceQuery exception will occur when the (id, version) 
+                    // combination doesn't exist.
+                }
+            }
+
+            return null;
+        }
+
         public IEnumerable<IPackage> FindPackagesById(string packageId)
         {
             try
@@ -224,8 +285,8 @@ namespace NuGet
                 }
 
                 var serviceParameters = new Dictionary<string, object> {
-                { "id", "'" + UrlEncodeOdataParameter(packageId) + "'" }
-            };
+                    { "id", "'" + UrlEncodeOdataParameter(packageId) + "'" }
+                };
 
                 // Create a query for the search service method
                 var query = Context.CreateQuery<DataServicePackage>(FindPackagesByIdSvcMethod, serviceParameters);
