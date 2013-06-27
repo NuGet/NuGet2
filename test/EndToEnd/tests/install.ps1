@@ -922,11 +922,11 @@ function Test-InstallPackageIntoSecondProjectWithIncompatibleAssembliesDoesNotRo
     {
         $profile = "Silverlight,Version=v4.0,Profile=WindowsPhone"
     }
-    else if ($dte.Version -eq "11.0")
+    elseif ($dte.Version -eq "11.0")
     {
         $profile = "Silverlight,Version=v4.0,Profile=WindowsPhone71"
     }
-    else if ($dte.Version -eq "12.0")
+    elseif ($dte.Version -eq "12.0")
     {
         $profile = "WindowsPhone,Version=v8.0"
     }
