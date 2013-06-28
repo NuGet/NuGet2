@@ -28,6 +28,11 @@ namespace NuGet.VisualStudio
             RestoreBar.SetResourceReference(Border.BorderBrushProperty, VsBrushes.ActiveBorderKey);
         }
 
+        public void CleanUp()
+        {
+            _packageRestoreManager.PackagesMissingStatusChanged -= OnPackagesMissingStatusChanged;
+        }
+
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             // when the control is first loaded, check for missing packages

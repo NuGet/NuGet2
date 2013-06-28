@@ -43,6 +43,8 @@ namespace NuGet.Dialog
         private readonly Project _activeProject;
         private readonly string _projectGuids;
         private string _searchText;
+        private ProductUpdateBar _updateBar = null;
+        private PackageRestoreBar _restoreBar;
 
         public PackageManagerWindow(Project project, string dialogParameters = null) :
             this(project,
@@ -191,17 +193,40 @@ namespace NuGet.Dialog
 
         private void AddUpdateBar(IProductUpdateService productUpdateService)
         {
-            var updateBar = new ProductUpdateBar(productUpdateService);
-            updateBar.UpdateStarting += ExecutedClose;
-            LayoutRoot.Children.Add(updateBar);
-            updateBar.SizeChanged += OnHeaderBarSizeChanged;
+            _updateBar = new ProductUpdateBar(productUpdateService);
+            _updateBar.UpdateStarting += ExecutedClose;
+            LayoutRoot.Children.Add(_updateBar);
+            _updateBar.SizeChanged += OnHeaderBarSizeChanged;
+        }
+
+        private void RemoveUpdateBar()
+        {
+            if (_updateBar != null)
+            {
+                LayoutRoot.Children.Remove(_updateBar);
+                _updateBar.CleanUp();
+                _updateBar.UpdateStarting -= ExecutedClose;
+                _updateBar.SizeChanged -= OnHeaderBarSizeChanged;
+                _updateBar = null;
+            }
         }
 
         private void AddRestoreBar(IPackageRestoreManager packageRestoreManager)
         {
-            var restoreBar = new PackageRestoreBar(packageRestoreManager);
-            LayoutRoot.Children.Add(restoreBar);
-            restoreBar.SizeChanged += OnHeaderBarSizeChanged;
+            _restoreBar = new PackageRestoreBar(packageRestoreManager);
+            LayoutRoot.Children.Add(_restoreBar);
+            _restoreBar.SizeChanged += OnHeaderBarSizeChanged;
+        }
+
+        private void RemoveRestoreBar()
+        {
+            if (_restoreBar != null)
+            {
+                LayoutRoot.Children.Remove(_restoreBar);
+                _restoreBar.CleanUp();
+                _restoreBar.SizeChanged -= OnHeaderBarSizeChanged;
+                _restoreBar = null;
+            }
         }
 
         private RestartRequestBar AddRestartRequestBar(IDeleteOnRestartManager deleteOnRestartManager, IVsShell4 vsRestarter)
@@ -509,6 +534,14 @@ namespace NuGet.Dialog
             _smartOutputConsoleProvider.Flush();
 
             _updateAllUIService.DisposeElement();
+
+            if (_httpClientEvents != null)
+            {
+                _httpClientEvents.SendingRequest -= OnSendingRequest;
+            }
+
+            RemoveUpdateBar();
+            RemoveRestoreBar();
 
             CurrentInstance = null;
         }
