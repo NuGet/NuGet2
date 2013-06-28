@@ -83,7 +83,11 @@ namespace NuGet
                 bytesRead = stream.Read(buffer, 0, buffer.Length);
                 if (bytesRead > 0)
                 {
-                    otherStream.Read(otherBuffer, 0, bytesRead);
+                    int otherBytesRead = otherStream.Read(otherBuffer, 0, bytesRead);
+                    if (bytesRead != otherBytesRead)
+                    {
+                        return false;
+                    }
 
                     for (int i = 0; i < bytesRead; i++)
                     {
