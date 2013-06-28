@@ -1,5 +1,4 @@
-﻿using System.IO;
-using EnvDTE;
+﻿using EnvDTE;
 using Moq;
 using Xunit;
 using Xunit.Extensions;
@@ -21,6 +20,29 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             Assert.Equal(@"WebProject\Bin", path);
+        }
+
+        [Theory]
+        [InlineData(null, "Windows")]
+        [InlineData("8.0", "Windows, Version=8.0")]
+        [InlineData("8.1", "Windows, Version=8.1")]
+        public void GetTargetFrameworkForJSProjectReturnsCorrectPlatformVersion(string platformVersion, string exptectedTargetFramework)
+        {
+            // Arrange
+            var project = new Mock<Project>();
+            project.Setup(p => p.Kind).Returns(VsConstants.JsProjectTypeGuid);
+
+            var fxProperty = new Mock<Property>();
+            fxProperty.Setup(x => x.Value).Returns(platformVersion);
+
+            project.Setup(p => p.Properties.Item(It.Is<object>(v => "TargetPlatformVersion".Equals(v))))
+                   .Returns(fxProperty.Object);
+
+            // Act
+            string targetFramework = ProjectExtensions.GetTargetFramework(project.Object);
+
+            // Assert
+            Assert.Equal(exptectedTargetFramework, targetFramework);
         }
 
         [Fact]

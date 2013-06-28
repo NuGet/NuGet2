@@ -359,11 +359,9 @@ namespace NuGet.VisualStudio
             if (project.IsJavaScriptProject())
             {
                 // HACK: The JS Metro project does not have a TargetFrameworkMoniker property set. 
-                // We hard-code the return value so that it behaves as if it had a WinRT target 
-                // framework, i.e. .NETCore, Version=4.5
-
-                // Review: What about future versions? Let's not worry about that for now.
-                return ".NETCore, Version=4.5";
+                // We read the TargetPlatformVersion instead
+                string platformVersion = project.GetPropertyValue<string>("TargetPlatformVersion");
+                return String.IsNullOrEmpty(platformVersion) ? "Windows" : "Windows, Version=" + platformVersion;
             }
 
             if (project.IsNativeProject())

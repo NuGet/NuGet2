@@ -2254,3 +2254,26 @@ function Test-InstallPackageIntoNativeWinStoreApplication
     # Assert
     Assert-Package $p "zlib"
 }
+
+function Test-InstallPackageIntoJSAppOnWin81UseTheCorrectFxFolder
+{
+    param($context)
+
+    # this test is only application to VS 2013 
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0")
+    {
+        return
+    }
+
+    # Arrange
+    $p = New-JavaScriptApplication81
+
+    # Act
+    Install-Package Java -ProjectName -source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p Java
+    
+    Assert-NotNull (Get-ProjectItem $p 'windows81.txt')
+    Assert-Null (Get-ProjectItem $p 'windows8.txt')
+}

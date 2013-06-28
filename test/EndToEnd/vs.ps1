@@ -248,6 +248,24 @@ function New-JavaScriptApplication
     }
 }
 
+function New-JavaScriptApplication81 
+{
+    param(
+        [string]$ProjectName,
+        [parameter(ValueFromPipeline = $true)]$SolutionFolder
+    )
+
+    try 
+    {
+        $SolutionFolder | New-Project WinJSBlue $ProjectName
+    }
+    catch {
+        # If we're unable to create the project that means we probably don't have some SDK installed
+        # Signal to the runner that we want to skip this test        
+        throw "SKIP: $($_)"
+    }
+}
+
 function New-NativeWinStoreApplication
 {
     param(
