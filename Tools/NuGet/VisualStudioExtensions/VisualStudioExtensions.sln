@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio12", "VisualStudio12\VisualStudio12.csproj", "{B9325372-0F37-48AE-B1EF-A4D7CA381191}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionsExplorer", "ExtensionsExplorer\ExtensionsExplorer.csproj", "{948F58A8-C925-4273-AA4A-F7118EAF1512}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionsExplorer.UI", "ExtensionsExplorer.UI\ExtensionsExplorer.UI.csproj", "{448EE4BF-2BD5-407B-94D1-32E6F27C9A24}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualStudio.Types", "VisualStudio.Types\VisualStudio.Types.csproj", "{4A46A16E-C8CA-4608-B881-89D1FD143550}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionsExplorer11", "ExtensionsExplorer11\ExtensionsExplorer11.csproj", "{8AE0F387-364B-4569-95B1-B1ACC3FB0811}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionsExplorer.UI11", "ExtensionsExplorer.UI11\ExtensionsExplorer.UI11.csproj", "{381C86D9-0982-4C17-83A5-AF9F62B9AE7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,16 +18,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B9325372-0F37-48AE-B1EF-A4D7CA381191}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
-		{B9325372-0F37-48AE-B1EF-A4D7CA381191}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
-		{B9325372-0F37-48AE-B1EF-A4D7CA381191}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9325372-0F37-48AE-B1EF-A4D7CA381191}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9325372-0F37-48AE-B1EF-A4D7CA381191}.Mono Debug|Any CPU.ActiveCfg = Mono Debug|Any CPU
-		{B9325372-0F37-48AE-B1EF-A4D7CA381191}.Mono Debug|Any CPU.Build.0 = Mono Debug|Any CPU
-		{B9325372-0F37-48AE-B1EF-A4D7CA381191}.Mono Release|Any CPU.ActiveCfg = Mono Release|Any CPU
-		{B9325372-0F37-48AE-B1EF-A4D7CA381191}.Mono Release|Any CPU.Build.0 = Mono Release|Any CPU
-		{B9325372-0F37-48AE-B1EF-A4D7CA381191}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9325372-0F37-48AE-B1EF-A4D7CA381191}.Release|Any CPU.Build.0 = Release|Any CPU
 		{948F58A8-C925-4273-AA4A-F7118EAF1512}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
 		{948F58A8-C925-4273-AA4A-F7118EAF1512}.Coverage|Any CPU.Build.0 = Release|Any CPU
 		{948F58A8-C925-4273-AA4A-F7118EAF1512}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -48,16 +38,26 @@ Global
 		{448EE4BF-2BD5-407B-94D1-32E6F27C9A24}.Mono Release|Any CPU.Build.0 = Release|Any CPU
 		{448EE4BF-2BD5-407B-94D1-32E6F27C9A24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{448EE4BF-2BD5-407B-94D1-32E6F27C9A24}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4A46A16E-C8CA-4608-B881-89D1FD143550}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
-		{4A46A16E-C8CA-4608-B881-89D1FD143550}.Coverage|Any CPU.Build.0 = Release|Any CPU
-		{4A46A16E-C8CA-4608-B881-89D1FD143550}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4A46A16E-C8CA-4608-B881-89D1FD143550}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4A46A16E-C8CA-4608-B881-89D1FD143550}.Mono Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4A46A16E-C8CA-4608-B881-89D1FD143550}.Mono Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4A46A16E-C8CA-4608-B881-89D1FD143550}.Mono Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4A46A16E-C8CA-4608-B881-89D1FD143550}.Mono Release|Any CPU.Build.0 = Release|Any CPU
-		{4A46A16E-C8CA-4608-B881-89D1FD143550}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4A46A16E-C8CA-4608-B881-89D1FD143550}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AE0F387-364B-4569-95B1-B1ACC3FB0811}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
+		{8AE0F387-364B-4569-95B1-B1ACC3FB0811}.Coverage|Any CPU.Build.0 = Release|Any CPU
+		{8AE0F387-364B-4569-95B1-B1ACC3FB0811}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AE0F387-364B-4569-95B1-B1ACC3FB0811}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AE0F387-364B-4569-95B1-B1ACC3FB0811}.Mono Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AE0F387-364B-4569-95B1-B1ACC3FB0811}.Mono Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AE0F387-364B-4569-95B1-B1ACC3FB0811}.Mono Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AE0F387-364B-4569-95B1-B1ACC3FB0811}.Mono Release|Any CPU.Build.0 = Release|Any CPU
+		{8AE0F387-364B-4569-95B1-B1ACC3FB0811}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AE0F387-364B-4569-95B1-B1ACC3FB0811}.Release|Any CPU.Build.0 = Release|Any CPU
+		{381C86D9-0982-4C17-83A5-AF9F62B9AE7D}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
+		{381C86D9-0982-4C17-83A5-AF9F62B9AE7D}.Coverage|Any CPU.Build.0 = Release|Any CPU
+		{381C86D9-0982-4C17-83A5-AF9F62B9AE7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{381C86D9-0982-4C17-83A5-AF9F62B9AE7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{381C86D9-0982-4C17-83A5-AF9F62B9AE7D}.Mono Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{381C86D9-0982-4C17-83A5-AF9F62B9AE7D}.Mono Debug|Any CPU.Build.0 = Debug|Any CPU
+		{381C86D9-0982-4C17-83A5-AF9F62B9AE7D}.Mono Release|Any CPU.ActiveCfg = Release|Any CPU
+		{381C86D9-0982-4C17-83A5-AF9F62B9AE7D}.Mono Release|Any CPU.Build.0 = Release|Any CPU
+		{381C86D9-0982-4C17-83A5-AF9F62B9AE7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{381C86D9-0982-4C17-83A5-AF9F62B9AE7D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
