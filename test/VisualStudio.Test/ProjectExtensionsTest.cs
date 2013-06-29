@@ -23,7 +23,8 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Theory]
-        [InlineData(null, "Windows")]
+        [InlineData("", "Windows, Version=0.0")]
+        [InlineData(null, "Windows, Version=0.0")]
         [InlineData("8.0", "Windows, Version=8.0")]
         [InlineData("8.1", "Windows, Version=8.1")]
         public void GetTargetFrameworkForJSProjectReturnsCorrectPlatformVersion(string platformVersion, string exptectedTargetFramework)

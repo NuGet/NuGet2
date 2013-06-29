@@ -361,7 +361,7 @@ namespace NuGet.VisualStudio
                 // HACK: The JS Metro project does not have a TargetFrameworkMoniker property set. 
                 // We read the TargetPlatformVersion instead
                 string platformVersion = project.GetPropertyValue<string>("TargetPlatformVersion");
-                return String.IsNullOrEmpty(platformVersion) ? "Windows" : "Windows, Version=" + platformVersion;
+                return String.IsNullOrEmpty(platformVersion) ? "Windows, Version=0.0" : "Windows, Version=" + platformVersion;
             }
 
             if (project.IsNativeProject())
