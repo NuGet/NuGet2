@@ -8,7 +8,7 @@ using NuGet.VisualStudio.Resources;
 namespace NuGet.VisualStudio
 {
     [Export(typeof(IPackageRepository))]
-    public class VsPackageSourceRepository : IServiceBasedRepository, ICloneableRepository, IPackageLookup, IOperationAwareRepository
+    public class VsPackageSourceRepository : IServiceBasedRepository, ICloneableRepository, IPackageLookup, ILatestPackageLookup, IOperationAwareRepository
     {
         private readonly IVsPackageSourceProvider _packageSourceProvider;
         private readonly IPackageRepositoryFactory _repositoryFactory;
@@ -131,6 +131,30 @@ namespace NuGet.VisualStudio
             }
 
             return activeRepository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFrameworks, versionConstraints);
+        }
+
+        public bool TryFindLatestPackageById(string id, out SemanticVersion latestVersion)
+        {
+            var latestPackageLookup = GetActiveRepository() as ILatestPackageLookup;
+            if (latestPackageLookup != null)
+            {
+                return latestPackageLookup.TryFindLatestPackageById(id, out latestVersion);
+            }
+
+            latestVersion = null;
+            return false;
+        }
+
+        public bool TryFindLatestPackageById(string id, bool includePrerelease, out IPackage package)
+        {
+            var latestPackageLookup = GetActiveRepository() as ILatestPackageLookup;
+            if (latestPackageLookup != null)
+            {
+                return latestPackageLookup.TryFindLatestPackageById(id, includePrerelease, out package);
+            }
+
+            package = null;
+            return false;
         }
 
         internal IPackageRepository GetActiveRepository()

@@ -17,7 +17,8 @@ namespace NuGet
         ICloneableRepository, 
         ICultureAwareRepository, 
         IOperationAwareRepository,
-        IPackageLookup
+        IPackageLookup,
+        ILatestPackageLookup
     {
         private const string FindPackagesByIdSvcMethod = "FindPackagesById";
         private const string PackageServiceEntitySetName = "Packages";
@@ -348,6 +349,67 @@ namespace NuGet
             {
                 _currentOperation = oldOperation;
             });
+        }
+
+        public bool TryFindLatestPackageById(string id, out SemanticVersion latestVersion)
+        {
+            latestVersion = null;
+
+            try
+            {
+                var serviceParameters = new Dictionary<string, object> {
+                    { "id", "'" + UrlEncodeOdataParameter(id) + "'" }
+                };
+
+                // Create a query for the search service method
+                var query = Context.CreateQuery<DataServicePackage>(FindPackagesByIdSvcMethod, serviceParameters);
+                var packages = (IQueryable<DataServicePackage>)query.AsQueryable();
+
+                var latestPackage = packages.Where(p => p.IsLatestVersion)
+                                            .Select(p => new { p.Id, p.Version })
+                                            .FirstOrDefault();
+
+                if (latestPackage != null)
+                {
+                    latestVersion = new SemanticVersion(latestPackage.Version);
+                    return true;
+                }
+            }
+            catch (DataServiceQueryException)
+            {
+            }
+
+            return false;
+        }
+
+        public bool TryFindLatestPackageById(string id, bool includePrerelease, out IPackage package)
+        {
+            try
+            {
+                var serviceParameters = new Dictionary<string, object> {
+                    { "id", "'" + UrlEncodeOdataParameter(id) + "'" }
+                };
+
+                // Create a query for the search service method
+                var query = Context.CreateQuery<DataServicePackage>(FindPackagesByIdSvcMethod, serviceParameters);
+                var packages = (IQueryable<DataServicePackage>)query.AsQueryable();
+
+                if (includePrerelease)
+                {
+                    package = packages.Where(p => p.IsAbsoluteLatestVersion).FirstOrDefault();
+                }
+                else
+                {
+                    package = packages.Where(p => p.IsLatestVersion).FirstOrDefault();
+                }
+
+                return package != null;
+            }
+            catch (DataServiceQueryException)
+            {
+                package = null;
+                return false;
+            }
         }
 
         private static string UrlEncodeOdataParameter(string value)

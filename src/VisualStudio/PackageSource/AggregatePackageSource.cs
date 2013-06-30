@@ -17,9 +17,17 @@ namespace NuGet.VisualStudio
             return new[] { Instance }.Concat(provider.GetEnabledPackageSources());
         }
 
-        public static IEnumerable<PackageSource> GetEnabledPackageSourcesWithAggregate()
+        public static IEnumerable<PackageSource> GetEnabledPackageSourcesWithAggregateSmart(this IPackageSourceProvider provider)
         {
-            return GetEnabledPackageSourcesWithAggregate(ServiceLocator.GetInstance<IVsPackageSourceProvider>());
+            var packageSources = provider.GetEnabledPackageSources().ToArray();
+
+            // If there's less than 2 package sources, don't add the Aggregate source because it will be exactly the same as the main source.
+            if (packageSources.Length <= 1)
+            {
+                return packageSources;
+            }
+
+            return new[] { Instance }.Concat(packageSources);
         }
     }
 }

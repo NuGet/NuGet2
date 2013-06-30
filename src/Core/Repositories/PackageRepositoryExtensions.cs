@@ -88,6 +88,18 @@ namespace NuGet
             {
                 allowUnlisted = true;
             }
+            else if (!allowUnlisted && (constraintProvider == null || constraintProvider == NullConstraintProvider.Instance))
+            {
+                var packageLatestLookup = repository as ILatestPackageLookup;
+                if (packageLatestLookup != null)
+                {
+                    IPackage package;
+                    if (packageLatestLookup.TryFindLatestPackageById(packageId, allowPrereleaseVersions, out package))
+                    {
+                        return package;
+                    }
+                }
+            }
 
             // If the repository implements it's own lookup then use that instead.
             // This is an optimization that we use so we don't have to enumerate packages for

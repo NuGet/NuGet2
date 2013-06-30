@@ -153,6 +153,32 @@ namespace NuGet.Test.Mocks
             }
         }
 
+        public bool TryFindLatestPackageById(string id, bool includePrerelease, out IPackage package)
+        {
+            List<IPackage> packages;
+            bool result = Packages.TryGetValue(id, out packages);
+            if (result && packages.Count > 0)
+            {
+                // remove unlisted packages
+                packages.RemoveAll(p => !p.IsListed());
+
+                if (!includePrerelease)
+                {
+                    packages.RemoveAll(p => !p.IsReleaseVersion());
+                }
+
+                if (packages.Count > 0)
+                {
+                    packages.Sort((a, b) => b.Version.CompareTo(a.Version));
+                    package = packages[0];
+                    return true;
+                }
+            }
+
+            package = null;
+            return false;
+        }
+
         public IDisposable StartOperation(string operation, string mainPackageId)
         {
             LastOperation = null;

@@ -394,6 +394,17 @@ namespace NuGetConsole.Host.PowerShell.Implementation
             get
             {
                 var activePackageSource = _packageSourceProvider.ActivePackageSource;
+                if (activePackageSource.IsAggregate())
+                {
+                    // Starting from 2.7, we will not show the All option if there's only one package source.
+                    // Hence, if All is the active package source in that case, we set the sole package source as active.
+                    var packageSources = GetPackageSources();
+                    if (packageSources.Length == 1)
+                    {
+                        return packageSources[0];
+                    }
+                }
+
                 return activePackageSource == null ? null : activePackageSource.Name;
             }
             set
@@ -404,14 +415,14 @@ namespace NuGetConsole.Host.PowerShell.Implementation
                 }
 
                 _packageSourceProvider.ActivePackageSource =
-                    _packageSourceProvider.GetEnabledPackageSourcesWithAggregate().FirstOrDefault(
+                    _packageSourceProvider.GetEnabledPackageSourcesWithAggregateSmart().FirstOrDefault(
                         ps => ps.Name.Equals(value, StringComparison.OrdinalIgnoreCase));
             }
         }
 
         public string[] GetPackageSources()
         {
-            return _packageSourceProvider.GetEnabledPackageSourcesWithAggregate().Select(ps => ps.Name).ToArray();
+            return _packageSourceProvider.GetEnabledPackageSourcesWithAggregateSmart().Select(ps => ps.Name).ToArray();
         }
 
         public string DefaultProject

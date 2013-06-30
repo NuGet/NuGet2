@@ -2294,3 +2294,27 @@ function Test-SpecifyDifferentVersionThenServerVersion
     # Assert
     Assert-Package $p jQuery
 }
+
+function Test-InstallLatestVersionWorksCorrectly
+{
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    Install-Package XamlConverters
+
+    # Assert
+    Assert-Package $p XamlConverters 0.5
+}
+
+function Test-InstallLatestVersionWorksCorrectlyWithPrerelease
+{
+    # Arrange
+    $p = New-WebApplication
+
+    # Act
+    Install-Package XamlConverters -IncludePrerelease
+
+    # Assert
+    Assert-Package $p XamlConverters 0.6-alpha
+}

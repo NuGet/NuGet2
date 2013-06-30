@@ -8,7 +8,7 @@ namespace NuGet.VisualStudio
     /// <summary>
     /// Represents a package repository that implements a dependency provider. 
     /// </summary>
-    public class FallbackRepository : IDependencyResolver, IServiceBasedRepository, IPackageLookup, IOperationAwareRepository
+    public class FallbackRepository : IDependencyResolver, IServiceBasedRepository, IPackageLookup, ILatestPackageLookup, IOperationAwareRepository
     {
         private readonly IPackageRepository _primaryRepository;
         private readonly IPackageRepository _dependencyResolver;
@@ -92,6 +92,30 @@ namespace NuGet.VisualStudio
         public bool Exists(string packageId, SemanticVersion version)
         {
             return _primaryRepository.Exists(packageId, version);
+        }
+
+        public bool TryFindLatestPackageById(string id, out SemanticVersion latestVersion)
+        {
+            var latestPackageLookup = _primaryRepository as ILatestPackageLookup;
+            if (latestPackageLookup != null)
+            {
+                return latestPackageLookup.TryFindLatestPackageById(id, out latestVersion);
+            }
+
+            latestVersion = null;
+            return false;
+        }
+
+        public bool TryFindLatestPackageById(string id, bool includePrerelease, out IPackage package)
+        {
+            var latestPackageLookup = _primaryRepository as ILatestPackageLookup;
+            if (latestPackageLookup != null)
+            {
+                return latestPackageLookup.TryFindLatestPackageById(id, includePrerelease, out package);
+            }
+
+            package = null;
+            return false;
         }
 
         public IDisposable StartOperation(string operation, string mainPackageId)

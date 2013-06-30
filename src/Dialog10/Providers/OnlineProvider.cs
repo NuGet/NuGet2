@@ -84,17 +84,8 @@ namespace NuGet.Dialog.Providers
             Justification = "We want to suppress all errors to show an empty node.")]
         protected override void FillRootNodes()
         {
-            var packageSources = _packageSourceProvider.GetEnabledPackageSourcesWithAggregate().ToList();
-
-            // If there are exactly two package sources, it means one of them is the Aggregate. 
-            // In that case, remove the Aggregate source because it will be exactly the same as the main source.
-            if (packageSources.Count == 2)
-            {
-                // Aggregate source is always the first one.
-                Debug.Assert(packageSources[0].IsAggregate());
-                packageSources.RemoveAt(0);
-            }
-
+            var packageSources = _packageSourceProvider.GetEnabledPackageSourcesWithAggregateSmart();
+           
             // create one tree node per package source
             foreach (var source in packageSources)
             {

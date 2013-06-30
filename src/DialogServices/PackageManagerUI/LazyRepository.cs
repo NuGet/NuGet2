@@ -5,7 +5,7 @@ using System.Runtime.Versioning;
 
 namespace NuGet.Dialog.Providers
 {
-    public class LazyRepository : IServiceBasedRepository, IOperationAwareRepository
+    public class LazyRepository : IServiceBasedRepository, IOperationAwareRepository, ILatestPackageLookup
     {
         private readonly Lazy<IPackageRepository> _repository;
 
@@ -58,11 +58,6 @@ namespace NuGet.Dialog.Providers
             return Repository.Search(searchTerm, targetFrameworks, allowPrereleaseVersions);
         }
 
-        public IEnumerable<IPackage> FindPackagesById(string packageId)
-        {
-            return Repository.FindPackagesById(packageId);
-        }
-
         public IEnumerable<IPackage> GetUpdates(
             IEnumerable<IPackage> 
             packages, 
@@ -72,6 +67,30 @@ namespace NuGet.Dialog.Providers
             IEnumerable<IVersionSpec> versionConstraints)
         {
             return Repository.GetUpdates(packages, includePrerelease, includeAllVersions, targetFrameworks, versionConstraints);
+        }
+
+        public bool TryFindLatestPackageById(string id, out SemanticVersion latestVersion)
+        {
+            var latestPackageLookup = Repository as ILatestPackageLookup;
+            if (latestPackageLookup != null)
+            {
+                return latestPackageLookup.TryFindLatestPackageById(id, out latestVersion);
+            }
+
+            latestVersion = null;
+            return false;
+        }
+
+        public bool TryFindLatestPackageById(string id, bool includePrerelease, out IPackage package)
+        {
+            var latestPackageLookup = Repository as ILatestPackageLookup;
+            if (latestPackageLookup != null)
+            {
+                return latestPackageLookup.TryFindLatestPackageById(id, includePrerelease, out package);
+            }
+
+            package = null;
+            return false;
         }
 
         public IDisposable StartOperation(string operation, string mainPackageId)
