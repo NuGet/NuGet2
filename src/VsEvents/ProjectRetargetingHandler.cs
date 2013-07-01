@@ -74,16 +74,9 @@ namespace NuGet.VsEvents
         {
             Debug.Assert(packagesToBeReinstalled != null && !packagesToBeReinstalled.IsEmpty());
 
-            ErrorTask retargetErrorTask = new ErrorTask();
-            retargetErrorTask.Text = String.Format(CultureInfo.CurrentCulture, Resources.ProjectUpgradeAndRetargetErrorMessage,
-                String.Join(", ", packagesToBeReinstalled.Select(p => p.Id)));
-            retargetErrorTask.ErrorCategory = TaskErrorCategory.Error;
-            retargetErrorTask.Category = TaskCategory.BuildCompile;
-            retargetErrorTask.Priority = TaskPriority.High;
-            retargetErrorTask.HierarchyItem = pAfterChangeHier;
-            _errorListProvider.Tasks.Add(retargetErrorTask);
-            _errorListProvider.BringToFront();
-            _errorListProvider.ForceShowErrors();
+            var errorText = String.Format(CultureInfo.CurrentCulture, Resources.ProjectUpgradeAndRetargetErrorMessage,
+                    String.Join(", ", packagesToBeReinstalled.Select(p => p.Id)));
+            VsUtility.ShowError(_errorListProvider, TaskErrorCategory.Error, errorText, pAfterChangeHier);
         }
 
         #region IVsTrackProjectRetargetingEvents

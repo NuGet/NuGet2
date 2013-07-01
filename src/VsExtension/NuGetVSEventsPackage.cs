@@ -56,8 +56,7 @@ namespace NuGet.Tools
             _dteEvents = dte.Events.DTEEvents;
             _dteEvents.OnBeginShutdown += OnBeginShutDown;
 
-            _packageRestorer = new PackageRestorer(dte);
-
+            _packageRestorer = new PackageRestorer(dte, this);
             _projectRetargetHandler = new ProjectRetargetingHandler(dte, this);
             _projectUpgradeHandler = new ProjectUpgradeHandler(this);
         }
@@ -66,6 +65,7 @@ namespace NuGet.Tools
         {
             _projectRetargetHandler.Dispose();
             _projectUpgradeHandler.Dispose();
+            _packageRestorer.Dispose();
 
             _dteEvents.OnBeginShutdown -= OnBeginShutDown;
             _dteEvents = null;
