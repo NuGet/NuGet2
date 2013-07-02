@@ -138,6 +138,31 @@ namespace NuGet.Dialog.Test
         }
 
         [Fact]
+        public void DoNotSetAggregateSourceAsDefaultIfThereAreMoreThanOneSource()
+        {
+            // Arrange
+            var provider = CreateOnlineProvider();
+
+            // Act
+            var extentionsTree = provider.ExtensionsTree;
+
+            // Assert
+            Assert.Equal(3, extentionsTree.Nodes.Count);
+
+            Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[0]);
+            Assert.Equal("All", extentionsTree.Nodes[0].Name);
+            Assert.False(extentionsTree.Nodes[0].IsSelected);
+
+            Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[1]);
+            Assert.Equal("One", extentionsTree.Nodes[1].Name);
+            Assert.True(extentionsTree.Nodes[1].IsSelected);
+
+            Assert.IsType(typeof(SimpleTreeNode), extentionsTree.Nodes[2]);
+            Assert.Equal("Two", extentionsTree.Nodes[2].Name);
+            Assert.False(extentionsTree.Nodes[2].IsSelected);
+        }
+
+        [Fact]
         public void CanExecuteReturnsCorrectResult()
         {
             // Arrange
