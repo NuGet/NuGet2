@@ -54,7 +54,7 @@ namespace NuGet
         private static XElement GetXml(IPackageFile file, IProjectSystem projectSystem)
         {
             var content = Preprocessor.Process(file, projectSystem);
-            return XElement.Parse(content);
+            return XElement.Parse(content, LoadOptions.PreserveWhitespace);
         }
     }
 }

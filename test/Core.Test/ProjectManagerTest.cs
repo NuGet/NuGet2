@@ -1118,10 +1118,12 @@ namespace NuGet.Test
             var file = new Mock<IPackageFile>();
             file.Setup(m => m.Path).Returns(@"content\web.config.transform");
             file.Setup(m => m.EffectivePath).Returns("web.config.transform");
+            // in the transform snippet below, we put the <add> tag on the same line 
+            // as <configSections> tag to verify that the transform engine preserves 
+            // formatting of the transform file.
             file.Setup(m => m.GetStream()).Returns(() =>
 @"<configuration>
-    <configSections>
-        <add a=""n"" />
+    <configSections> <add a=""n"" />
     </configSections>
 </configuration>
 ".AsStream());
@@ -1136,9 +1138,8 @@ namespace NuGet.Test
             // It does not at the moment, therefore <system.web> element has different indent than <configSections>.
             Assert.Equal(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <configuration>
-  <configSections>
-    <add a=""n"" />
-  </configSections>
+  <configSections> <add a=""n"" />
+    </configSections>
     <system.web>
         <compilation debug=""true"" targetFramework=""4.0"" />
     </system.web>
