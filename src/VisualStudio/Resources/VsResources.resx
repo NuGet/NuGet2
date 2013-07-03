@@ -294,7 +294,7 @@
 Packages installed into Website projects will not be restored during build. Consider converting those into Web application projects if necessary.</value>
   </data>
   <data name="AskForRestoreMessage" xml:space="preserve">
-    <value>Some NuGet packages are missing from this solution. Click to restore.</value>
+    <value>Some NuGet packages are missing from this solution. Click to restore from your online package sources.</value>
   </data>
   <data name="RestoreButtonLabel" xml:space="preserve">
     <value>_Restore</value>

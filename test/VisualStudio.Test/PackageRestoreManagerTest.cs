@@ -12,6 +12,7 @@ using Xunit;
 namespace NuGet.VisualStudio.Test
 {
     using PackageUtility = NuGet.Test.PackageUtility;
+
     public class PackageRestoreManagerTest : IDisposable
     {
         private static readonly string _testRoot = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -263,11 +264,7 @@ namespace NuGet.VisualStudio.Test
             solutionManager.Setup(p => p.GetProjects()).Returns(new[] { project.Object });
 
             // setup file system
-            var fileSystem = new Mock<IFileSystem>();
-            fileSystem.Setup(p => p.DirectoryExists(".nuget")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.exe")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.targets")).Returns(true);
-
+            var fileSystem = new Mock<IFileSystem>(MockBehavior.Strict);
             var fileSystemProvider = new Mock<IFileSystemProvider>();
             fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem.Object);
 
@@ -331,10 +328,10 @@ namespace NuGet.VisualStudio.Test
             solutionManager.Setup(p => p.GetProjects()).Returns(new[] { project.Object });
 
             // setup file system
-            var fileSystem = new Mock<IFileSystem>();
-            fileSystem.Setup(p => p.DirectoryExists(".nuget")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.exe")).Returns(true);
-            fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.targets")).Returns(true);
+            var fileSystem = new Mock<IFileSystem>(MockBehavior.Strict);
+            //fileSystem.Setup(p => p.DirectoryExists(".nuget")).Returns(true);
+            //fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.exe")).Returns(true);
+            //fileSystem.Setup(p => p.FileExists(".nuget\\NuGet.targets")).Returns(true);
 
             var fileSystemProvider = new Mock<IFileSystemProvider>();
             fileSystemProvider.Setup(p => p.GetFileSystem(tempSolutionPath)).Returns(fileSystem.Object);

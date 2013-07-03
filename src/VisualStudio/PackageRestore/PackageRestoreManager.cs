@@ -235,9 +235,9 @@ namespace NuGet.VisualStudio
         public void CheckForMissingPackages()
         {
             // This method is called by both Solution Opened and Solution Closed event handlers.
-            // In the case of Solution Closed event, the IsCurrentSolutionEnabledForRestore is false,
+            // In the case of Solution Closed event, the _solutionManager.IsSolutionOpen is false,
             // and so we won't do the unnecessary work of checking for package references.
-            bool missing = IsCurrentSolutionEnabledForRestore && CheckForMissingPackagesCore();
+            bool missing = _solutionManager.IsSolutionOpen && CheckForMissingPackagesCore();
             PackagesMissingStatusChanged(this, new PackagesMissingStatusEventArgs(missing));
         }
 
@@ -501,8 +501,9 @@ namespace NuGet.VisualStudio
             if (IsCurrentSolutionEnabledForRestore)
             {
                 EnablePackageRestore(e.Project, _packageManagerFactory.CreatePackageManager());
-                CheckForMissingPackages();
             }
+
+            CheckForMissingPackages();
         }
 
         private void OnPackageReferenceAdded(IVsPackageMetadata metadata)
