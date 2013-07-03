@@ -169,13 +169,13 @@ namespace NuGet.VisualStudio
             return false;
         }
 
-        public static void ShowError(ErrorListProvider errorListProvider, TaskErrorCategory errorCategory, string errorText, IVsHierarchy hierarchyItem)
+        public static void ShowError(ErrorListProvider errorListProvider, TaskErrorCategory errorCategory, TaskPriority priority, string errorText, IVsHierarchy hierarchyItem)
         {
             ErrorTask retargetErrorTask = new ErrorTask();
             retargetErrorTask.Text = errorText;
             retargetErrorTask.ErrorCategory = errorCategory;
             retargetErrorTask.Category = TaskCategory.BuildCompile;
-            retargetErrorTask.Priority = TaskPriority.High;
+            retargetErrorTask.Priority = priority;
             retargetErrorTask.HierarchyItem = hierarchyItem;
             errorListProvider.Tasks.Add(retargetErrorTask);
             errorListProvider.BringToFront();

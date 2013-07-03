@@ -519,7 +519,11 @@ function Get-OutputPath {
     Join-Path (Get-ProjectDir) $outputPath
 }
 
-function Get-Errors {
+function Get-ErrorTasks {
+    param(
+        [parameter(Mandatory = $true)]
+        $vsBuildErrorLevel
+    )
     $dte.ExecuteCommand("View.ErrorList", " ")
     
     # Make sure there are no errors in the error list
@@ -532,18 +536,28 @@ function Get-Errors {
     # Get the list of errors from the error list window which contains errors, warnings and info
     $allItemsInErrorListWindow = $errorList.Object.ErrorItems
 
-    $errorMessages = @()
+    $errorTasks = @()
     for($i=1; $i -le $allItemsInErrorListWindow.Count; $i++)
     {
-        $errorLevel = [EnvDTE80.vsBuildErrorLevel]($allItemsInErrorListWindow.Item($i).ErrorLevel)
-        if($errorLevel -eq [EnvDTE80.vsBuildErrorLevel]::vsBuildErrorLevelHigh)
+        $currentErrorLevel = [EnvDTE80.vsBuildErrorLevel]($allItemsInErrorListWindow.Item($i).ErrorLevel)
+        if($currentErrorLevel -eq $vsBuildErrorLevel)
         {
-            $errorMessages += $allItemsInErrorListWindow.Item($i)
+            $errorTasks += $allItemsInErrorListWindow.Item($i)
         }
     }
 
     # Force return array. Arrays are zero-based
-    return ,$errorMessages
+    return ,$errorTasks
+}
+
+function Get-Errors {
+    $vsBuildErrorLevelHigh = [EnvDTE80.vsBuildErrorLevel]::vsBuildErrorLevelHigh
+    return Get-ErrorTasks $vsBuildErrorLevelHigh
+}
+
+function Get-Warnings {
+    $vsBuildErrorLevelMedium = [EnvDTE80.vsBuildErrorLevel]::vsBuildErrorLevelMedium
+    return Get-ErrorTasks $vsBuildErrorLevelMedium
 }
 
 function Get-ProjectItemPath {

@@ -153,7 +153,7 @@ namespace NuGet.VsEvents
                 var errorText = String.Format(CultureInfo.CurrentCulture, 
                     Resources.PackageNotRestoredBecauseOfNoConsent,
                     String.Join(", ", missingPackages.Select(p => p.ToString())));
-                VsUtility.ShowError(_errorListProvider, TaskErrorCategory.Warning, errorText, hierarchyItem: null);
+                VsUtility.ShowError(_errorListProvider, TaskErrorCategory.Warning, TaskPriority.Normal, errorText, hierarchyItem: null);
             }
         }
 
