@@ -105,7 +105,7 @@ namespace NuGet.Dialog.Providers
                 RootNode.Nodes.Add(node);
             }
 
-            if (RootNode.Nodes.Count >= 2 && packageSources[0].IsAggregate())
+            if (RootNode.Nodes.Count >= 2)
             {
                 // Bug #628 : Do not set aggregate source as default because it 
                 // will slow down the dialog when querying two or more sources.
