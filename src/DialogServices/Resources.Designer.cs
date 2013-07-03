@@ -709,6 +709,15 @@ namespace NuGet.Dialog {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Component report.
+        /// </summary>
+        public static string License_ViewLicenseReport {
+            get {
+                return ResourceManager.GetString("License_ViewLicenseReport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No to A_ll.
         /// </summary>
         public static string NoAllLabel {

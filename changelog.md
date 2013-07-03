@@ -11,6 +11,7 @@ Change Log / Release Notes
 * [#2276](https://nuget.codeplex.com/workitem/2276) Support XNA for Windows Phone projects.
 * Add restore command to nuget.exe
 * [#2565](https://nuget.codeplex.com/workitem/2565) Handling of Project Retargeting and Project Upgrading Events
+* Show License friendly names in the dialog
 
 ## NuGet 2.6
 
