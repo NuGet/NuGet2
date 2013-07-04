@@ -41,6 +41,7 @@ namespace NuGet.Server.Infrastructure.Test
         }
 
         [Theory]
+        [InlineData(null)]
         [InlineData("incorrect-key")]
         public void AuthenticationServiceReturnsFalseIfKeyDoesNotMatchConfigurationKey(string key)
         {
