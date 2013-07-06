@@ -128,28 +128,33 @@ namespace NuGet.VisualStudio
             Project project,
             PreinstalledPackageConfiguration configuration,
             Lazy<IRepositorySettings> repositorySettings,
+            IPackageRepository sourceRepository,
             Action<string> warningHandler,
             Action<string> errorHandler)
         {
             string repositoryPath = configuration.RepositoryPath;
             var failedPackageErrors = new List<string>();
 
-            IPackageRepository repository = configuration.IsPreunzipped
-                                                ? (IPackageRepository)new UnzippedPackageRepository(repositoryPath)
-                                                : (IPackageRepository)new LocalPackageRepository(repositoryPath);
-
             foreach (var package in configuration.Packages)
             {
                 // Does the project already have this package installed?
                 if (_packageServices.IsPackageInstalled(project, package.Id))
                 {
-                    // If so, is it the right version?
-                    if (!_packageServices.IsPackageInstalled(project, package.Id, package.Version))
+                    // If so, make sure it's the expected version (getting the latest version available if not explicitly specified)
+                    var packageVersion = package.Version;
+
+                    if (packageVersion == null)
+                    {
+                        packageVersion = sourceRepository.FindPackagesById(package.Id).Max(p => p.Version);
+                    }
+
+                    if (!_packageServices.IsPackageInstalled(project, package.Id, packageVersion))
                     {
                         // No? Raise a warning (likely written to the Output window) and ignore this package.
-                        warningHandler(String.Format(VsResources.PreinstalledPackages_VersionConflict, package.Id, package.Version));
+                        warningHandler(String.Format(VsResources.PreinstalledPackages_VersionConflict, package.Id, packageVersion));
                     }
-                    // Yes? Just silently ignore this package!
+
+                    // The expected package version is already installed; just silently ignore this package.
                 }
                 else
                 {
@@ -160,11 +165,19 @@ namespace NuGet.VisualStudio
                             InfoHandler(String.Format(CultureInfo.CurrentCulture, VsResources.PreinstalledPackages_PackageInstallStatus, package.Id, package.Version));
                         }
 
-                        packageInstaller.InstallPackage(repository, project, package.Id, package.Version.ToString(), ignoreDependencies: true, skipAssemblyReferences: package.SkipAssemblyReferences);
+                        var packageVersion = package.Version != null ? package.Version.ToString() : (string)null;
+                        packageInstaller.InstallPackage(sourceRepository, project, package.Id, packageVersion, ignoreDependencies: true, skipAssemblyReferences: package.SkipAssemblyReferences);
                     }
                     catch (InvalidOperationException exception)
                     {
-                        failedPackageErrors.Add(package.Id + "." + package.Version + " : " + exception.Message);
+                        if (package.Version != null)
+                        {
+                            failedPackageErrors.Add(package.Id + "." + package.Version + " : " + exception.Message);
+                        }
+                        else
+                        {
+                            failedPackageErrors.Add(package.Id + " : " + exception.Message);
+                        }
                     }
                 }
             }

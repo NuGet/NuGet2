@@ -22,15 +22,14 @@ namespace NuGet.VisualStudio
         /// Information for a single preinstalled package.
         /// </summary>
         /// <param name="id">The package Id.</param>
-        /// <param name="version">The package version.</param>
+        /// <param name="version">The package version, or null to represent the latest version.</param>
         /// <param name="skipAssemblyReferences">A boolean indicating whether assembly references from the package should be skipped.</param>
         public PreinstalledPackageInfo(string id, string version, bool skipAssemblyReferences)
         {
             Debug.Assert(!String.IsNullOrWhiteSpace(id));
-            Debug.Assert(!String.IsNullOrWhiteSpace(version));
 
             Id = id;
-            Version = new SemanticVersion(version);
+            Version = !String.IsNullOrWhiteSpace(version) ? new SemanticVersion(version) : (SemanticVersion)null;
             SkipAssemblyReferences = skipAssemblyReferences;
         }
 

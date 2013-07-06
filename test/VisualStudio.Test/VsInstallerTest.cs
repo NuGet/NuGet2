@@ -209,7 +209,7 @@ namespace NuGet.VisualStudio.Test
             hkcu.Setup(r => r.OpenSubKey(registryPath)).Returns((IRegistryKey)null);
             var project = TestUtils.GetProject("Foo");
 
-            var installer = new VsPackageInstaller(null, null, null, null, null, null, null, null, new[] { hkcu.Object });
+            var installer = new VsPackageInstaller(null, null, null, null, null, null, null, null, new[] { hkcu.Object }, null);
             var packages = new Dictionary<string, string>();
             packages.Add("A", "1.0.0");
 
@@ -231,13 +231,85 @@ namespace NuGet.VisualStudio.Test
             hkcu.Setup(r => r.OpenSubKey(registryPath)).Returns(hkcu_repository.Object);
             var project = TestUtils.GetProject("Foo");            
 
-            var installer = new VsPackageInstaller(null, null, null, null, null, null, null, null, new[] { hkcu.Object });
+            var installer = new VsPackageInstaller(null, null, null, null, null, null, null, null, new[] { hkcu.Object }, null);
             var packages = new Dictionary<string, string>();
             packages.Add("A", "1.0.0");
 
             // Act & Assert            
             var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromRegistryRepository(registryKey, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages));
             Assert.Equal(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_InvalidRegistryValue, registryKey, registryPath), exception.Message);
+        }
+
+        [Fact]
+        public void InstallPackagesFromRegistryRepositoryInstallsLatestVersionIfVersionIsNull()
+        {
+            // Arrange
+            var registryPath = @"SOFTWARE\NuGet\Repository";
+            var registryKey = "PreinstalledPackages";
+            var registryValue = @"C:\PreinstalledPackages";
+            var hkcu_repository = new Mock<IRegistryKey>();
+            var hkcu = new Mock<IRegistryKey>();
+            hkcu_repository.Setup(k => k.GetValue(registryKey)).Returns(registryValue);
+            hkcu.Setup(r => r.OpenSubKey(registryPath)).Returns(hkcu_repository.Object);
+
+            var consoleOutput = new List<string>();
+            var console = new Mock<NuGetConsole.IConsole>();
+            console.Setup(c => c.WriteLine(It.IsAny<string>())).Callback<string>(consoleOutput.Add);
+
+            var consoleProvider = new Mock<IOutputConsoleProvider>();
+            consoleProvider.Setup(c => c.CreateOutputConsole(It.IsAny<bool>())).Returns(console.Object);
+
+            var packageId = "A";
+            var packageVersion1 = "1.0.0";
+            var packageVersion2 = "2.0.0-beta";
+
+            var package1 = NuGet.Test.PackageUtility.CreatePackage(packageId, packageVersion1, new[] { "System" });
+            var package2 = NuGet.Test.PackageUtility.CreatePackage(packageId, packageVersion2, new[] { "System" });
+
+            var services = new Mock<IVsPackageInstallerServices>();
+            services.Setup(x => x.IsPackageInstalled(It.IsAny<Project>(), packageId)).Returns(false);
+
+            var fileSystem = new MockFileSystem(registryValue);
+            fileSystem.AddFile("A.1.0.0.nupkg", GetPackageStream(packageId, packageVersion1));
+            fileSystem.AddFile("A.2.0.0-beta.nupkg", GetPackageStream(packageId, packageVersion2));
+
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem);
+
+            var projectRepository = new MockProjectPackageRepository(localRepository);
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(new MockProjectSystem());
+            var project = TestUtils.GetProject("Foo");
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, projectRepository);
+            var packageManager = new Mock<VsPackageManager>(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                fileSystem,
+                localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
+                new Mock<VsPackageInstallerEvents>().Object,
+                /* multiFrameworkTargeting */ null) { CallBase = true };
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), false)).Returns(packageManager.Object);
+            packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager);
+            packageRepositoryFactory.Setup(r => r.CreateRepository(@"x:\test")).Returns(new MockPackageRepository()).Verifiable();
+
+            var installer = new VsPackageInstaller(packageManagerFactory.Object, null, null, consoleProvider.Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, testableRegistryKeys: new[] { hkcu.Object }, testableSourceRepository: sourceRepository);
+            var packages = new Dictionary<string, string>();
+
+            // Note the NULL version string that is used here - that's the key to this test
+            packages.Add(packageId, null);
+
+            // Act
+            Assert.False(localRepository.Exists(packageId, new SemanticVersion(packageVersion1)));
+            Assert.False(localRepository.Exists(packageId, new SemanticVersion(packageVersion2)));
+            installer.InstallPackagesFromRegistryRepository(registryKey, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages);
+
+            // Assert (that version 2 was installed)
+            Assert.False(localRepository.Exists(packageId, new SemanticVersion(packageVersion1)));
+            Assert.True(localRepository.Exists(packageId, new SemanticVersion(packageVersion2)));
         }
 
         [Fact]
@@ -278,13 +350,60 @@ namespace NuGet.VisualStudio.Test
             packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager);
             packageRepositoryFactory.Setup(r => r.CreateRepository(@"x:\test")).Returns(new MockPackageRepository()).Verifiable();
 
-            var installer = new VsPackageInstaller(packageManagerFactory.Object, null, null, null, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, registryKeys: new[] { hkcu.Object });
+            var installer = new VsPackageInstaller(packageManagerFactory.Object, null, null, null, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, testableRegistryKeys: new[] { hkcu.Object }, testableSourceRepository: sourceRepository);
             var packages = new Dictionary<string, string>();
             packages.Add("A", "1.0.0");
 
             // Act & Assert
             var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromRegistryRepository(registryKey, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages));
             Assert.True(exception.Message.Contains("A.1.0.0 : "));
+        }
+
+        [Fact]
+        public void InstallPackagesFromRegistryRepositoryThrowsWhenPackageIsMissingAndVersionIsNull()
+        {
+            // Arrange
+            var registryPath = @"SOFTWARE\NuGet\Repository";
+            var registryKey = "PreinstalledPackages";
+            var registryValue = @"C:\PreinstalledPackages";
+            var hkcu_repository = new Mock<IRegistryKey>();
+            var hkcu = new Mock<IRegistryKey>();
+            hkcu_repository.Setup(k => k.GetValue(registryKey)).Returns(registryValue);
+            hkcu.Setup(r => r.OpenSubKey(registryPath)).Returns(hkcu_repository.Object);
+
+            var services = new Mock<IVsPackageInstallerServices>();
+            services.Setup(x => x.IsPackageInstalled(It.IsAny<Project>(), It.IsAny<string>())).Returns(false);
+
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectRepository = new MockProjectPackageRepository(localRepository);
+            var fileSystem = new MockFileSystem();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(new MockProjectSystem());
+            var project = TestUtils.GetProject("Foo");
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, projectRepository);
+            var packageManager = new Mock<VsPackageManager>(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                fileSystem,
+                localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
+                new Mock<VsPackageInstallerEvents>().Object,
+                /* multiFrameworkTargeting */ null) { CallBase = true };
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), false)).Returns(packageManager.Object);
+            packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager);
+            packageRepositoryFactory.Setup(r => r.CreateRepository(@"x:\test")).Returns(new MockPackageRepository()).Verifiable();
+
+            var installer = new VsPackageInstaller(packageManagerFactory.Object, null, null, null, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, testableRegistryKeys: new[] { hkcu.Object }, testableSourceRepository: sourceRepository);
+            var packages = new Dictionary<string, string>();
+            packages.Add("A", null);
+
+            // Act & Assert
+            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromRegistryRepository(registryKey, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages));
+            Assert.True(exception.Message.Contains("A : "));
         }
 
         [Fact]
@@ -313,7 +432,7 @@ namespace NuGet.VisualStudio.Test
             services.Setup(x => x.IsPackageInstalled(It.IsAny<Project>(), packageId)).Returns(true);
             services.Setup(x => x.IsPackageInstalled(It.IsAny<Project>(), packageId, It.IsAny<SemanticVersion>())).Returns(false);
 
-            var installer = new VsPackageInstaller(null, null, null, consoleProvider.Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, registryKeys: new[] { hkcu.Object });
+            var installer = new VsPackageInstaller(null, null, null, consoleProvider.Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, testableRegistryKeys: new[] { hkcu.Object }, testableSourceRepository: null);
             var packages = new Dictionary<string, string>();
             packages.Add(packageId, packageVersion);
 
@@ -325,6 +444,80 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Single(consoleOutput);
             Assert.True(consoleOutput.Single().Contains(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_VersionConflict, packageId, packageVersion)));
+        }
+
+        [Fact]
+        public void InstallPackagesFromRegistryRepositoryRaisesWarningsIfUnexpectedVersionInstalled()
+        {
+            // Arrange
+            var registryPath = @"SOFTWARE\NuGet\Repository";
+            var registryKey = "PreinstalledPackages";
+            var registryValue = @"C:\PreinstalledPackages";
+            var hkcu_repository = new Mock<IRegistryKey>();
+            var hkcu = new Mock<IRegistryKey>();
+            hkcu_repository.Setup(k => k.GetValue(registryKey)).Returns(registryValue);
+            hkcu.Setup(r => r.OpenSubKey(registryPath)).Returns(hkcu_repository.Object);
+
+            var consoleOutput = new List<string>();
+            var console = new Mock<NuGetConsole.IConsole>();
+            console.Setup(c => c.WriteLine(It.IsAny<string>())).Callback<string>(consoleOutput.Add);
+
+            var consoleProvider = new Mock<IOutputConsoleProvider>();
+            consoleProvider.Setup(c => c.CreateOutputConsole(It.IsAny<bool>())).Returns(console.Object);
+
+            var packageId = "A";
+            var packageVersion1 = "1.0.0";
+            var packageVersion2 = "2.0.0-beta";
+
+            var package1 = NuGet.Test.PackageUtility.CreatePackage(packageId, packageVersion1, new[] { "System" });
+            var package2 = NuGet.Test.PackageUtility.CreatePackage(packageId, packageVersion2, new[] { "System" });
+
+            // This is where we report that we have a different version installed than what is requested
+            var services = new Mock<IVsPackageInstallerServices>();
+            services.Setup(x => x.IsPackageInstalled(It.IsAny<Project>(), packageId)).Returns(true);
+            services.Setup(x => x.IsPackageInstalled(It.IsAny<Project>(), packageId, It.IsAny<SemanticVersion>())).Returns(false);
+
+            var fileSystem = new MockFileSystem(registryValue);
+            fileSystem.AddFile("A.1.0.0.nupkg", GetPackageStream(packageId, packageVersion1));
+            fileSystem.AddFile("A.2.0.0-beta.nupkg", GetPackageStream(packageId, packageVersion2));
+
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem);
+
+            var projectRepository = new MockProjectPackageRepository(localRepository);
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(new MockProjectSystem());
+            var project = TestUtils.GetProject("Foo");
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, projectRepository);
+            var packageManager = new Mock<VsPackageManager>(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                fileSystem,
+                localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
+                new Mock<VsPackageInstallerEvents>().Object,
+                /* multiFrameworkTargeting */ null) { CallBase = true };
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), false)).Returns(packageManager.Object);
+            packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager);
+            packageRepositoryFactory.Setup(r => r.CreateRepository(@"x:\test")).Returns(new MockPackageRepository()).Verifiable();
+
+            var installer = new VsPackageInstaller(packageManagerFactory.Object, null, null, consoleProvider.Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, testableRegistryKeys: new[] { hkcu.Object }, testableSourceRepository: sourceRepository);
+            var packages = new Dictionary<string, string>();
+
+            // Note the NULL version string that is used here - that's the key to this test
+            packages.Add(packageId, null);
+
+            // Act
+            Assert.False(localRepository.Exists(packageId, new SemanticVersion(packageVersion1)));
+            Assert.False(localRepository.Exists(packageId, new SemanticVersion(packageVersion2)));
+            installer.InstallPackagesFromRegistryRepository(registryKey, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages);
+
+            // Assert
+            Assert.Single(consoleOutput);
+            Assert.True(consoleOutput.Single().Contains(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_VersionConflict, packageId, packageVersion2)));
         }
 
         [Fact]
@@ -378,7 +571,7 @@ namespace NuGet.VisualStudio.Test
             var package = NuGet.Test.PackageUtility.CreatePackage(packageId, packageVersion, new[] { "System" });
             sourceRepository.AddPackage(package);
 
-            var installer = new VsPackageInstaller(packageManagerFactory.Object, null, null, consoleProvider.Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, registryKeys: new[] { hkcu.Object });
+            var installer = new VsPackageInstaller(packageManagerFactory.Object, null, null, consoleProvider.Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, testableRegistryKeys: new[] { hkcu.Object }, testableSourceRepository: sourceRepository);
             var packages = new Dictionary<string, string>();
             packages.Add(packageId, packageVersion);
 
@@ -401,13 +594,82 @@ namespace NuGet.VisualStudio.Test
             IInstalledExtension extension = null;
             extensionManagerMock.Setup(em => em.TryGetInstalledExtension(extensionId, out extension)).Returns(false);
 
-            var installer = new VsPackageInstaller(null, null, null, null, null, null, null, null, extensionManagerMock.Object);
+            var installer = new VsPackageInstaller(null, null, null, null, null, null, null, null, extensionManagerMock.Object, null);
             var packages = new Dictionary<string, string>();
             packages.Add("A", "1.0.0");
 
             // Act & Assert            
             var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromVSExtensionRepository(extensionId, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages));
             Assert.Equal(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_InvalidExtensionId, extensionId), exception.Message);
+        }
+
+        [Fact]
+        public void InstallPackagesFromVSExtensionRepositoryInstallsLatestVersionIfVersionIsNull()
+        {
+            // Arrange
+            var extensionId = "myExtensionId";
+
+            var extensionManagerMock = new Mock<IVsExtensionManager>();
+            var extensionMock = new Mock<IInstalledExtension>();
+            extensionMock.Setup(e => e.InstallPath).Returns(@"C:\Extension\Dir");
+            var extension = extensionMock.Object;
+            extensionManagerMock.Setup(em => em.TryGetInstalledExtension(extensionId, out extension)).Returns(true);
+
+            var consoleOutput = new List<string>();
+            var console = new Mock<NuGetConsole.IConsole>();
+            console.Setup(c => c.WriteLine(It.IsAny<string>())).Callback<string>(consoleOutput.Add);
+
+            var consoleProvider = new Mock<IOutputConsoleProvider>();
+            consoleProvider.Setup(c => c.CreateOutputConsole(It.IsAny<bool>())).Returns(console.Object);
+
+            var packageId = "A";
+            var packageVersion1 = "1.0.0";
+            var packageVersion2 = "2.0.0";
+
+            var services = new Mock<IVsPackageInstallerServices>();
+            services.Setup(x => x.IsPackageInstalled(It.IsAny<Project>(), packageId)).Returns(false);
+
+            var fileSystem = new MockFileSystem(String.Empty);
+            fileSystem.AddFile("A.1.0.0.nupkg", GetPackageStream(packageId, packageVersion1));
+            fileSystem.AddFile("A.2.0.0-beta.nupkg", GetPackageStream(packageId, packageVersion2));
+
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem);
+
+            var projectRepository = new MockProjectPackageRepository(localRepository);
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(new MockProjectSystem());
+            var project = TestUtils.GetProject("Foo");
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, projectRepository);
+            var packageManager = new Mock<VsPackageManager>(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                fileSystem,
+                localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
+                new Mock<VsPackageInstallerEvents>().Object,
+                /* multiFrameworkTargeting */ null) { CallBase = true };
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), false)).Returns(packageManager.Object);
+            packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager);
+            packageRepositoryFactory.Setup(r => r.CreateRepository(@"x:\test")).Returns(new MockPackageRepository()).Verifiable();
+
+            var installer = new VsPackageInstaller(packageManagerFactory.Object, null, null, consoleProvider.Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, extensionManagerMock.Object, sourceRepository);
+            var packages = new Dictionary<string, string>();
+
+            // Note the NULL version string that is used here - that's the key to this test
+            packages.Add(packageId, null);
+
+            // Act
+            Assert.False(localRepository.Exists(packageId, new SemanticVersion(packageVersion1)));
+            Assert.False(localRepository.Exists(packageId, new SemanticVersion(packageVersion2)));
+            installer.InstallPackagesFromVSExtensionRepository(extensionId, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages);
+
+            // Assert (that version 2 was installed)
+            Assert.False(localRepository.Exists(packageId, new SemanticVersion(packageVersion1)));
+            Assert.True(localRepository.Exists(packageId, new SemanticVersion(packageVersion2)));
         }
 
         [Fact]
@@ -448,13 +710,60 @@ namespace NuGet.VisualStudio.Test
             packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager);
             packageRepositoryFactory.Setup(r => r.CreateRepository(@"x:\test")).Returns(new MockPackageRepository()).Verifiable();
 
-            var installer = new VsPackageInstaller(packageManagerFactory.Object, null, null, null, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, extensionManagerMock.Object);
+            var installer = new VsPackageInstaller(packageManagerFactory.Object, null, null, null, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, extensionManagerMock.Object, null);
             var packages = new Dictionary<string, string>();
             packages.Add("A", "1.0.0");
 
             // Act & Assert
             var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromVSExtensionRepository(extensionId, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages));
             Assert.True(exception.Message.Contains("A.1.0.0 : "));
+        }
+
+        [Fact]
+        public void InstallPackagesFromVSExtensionRepositoryThrowsWhenPackageIsMissingAndVersionIsNull()
+        {
+            // Arrange
+            var extensionId = "myExtensionId";
+
+            var extensionManagerMock = new Mock<IVsExtensionManager>();
+            var extensionMock = new Mock<IInstalledExtension>();
+            extensionMock.Setup(e => e.InstallPath).Returns(@"C:\Extension\Dir");
+            var extension = extensionMock.Object;
+            extensionManagerMock.Setup(em => em.TryGetInstalledExtension(extensionId, out extension)).Returns(true);
+
+            var services = new Mock<IVsPackageInstallerServices>();
+            services.Setup(x => x.IsPackageInstalled(It.IsAny<Project>(), It.IsAny<string>())).Returns(false);
+
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new MockPackageRepository();
+            var projectRepository = new MockProjectPackageRepository(localRepository);
+            var fileSystem = new MockFileSystem();
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(new MockProjectSystem());
+            var project = TestUtils.GetProject("Foo");
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, projectRepository);
+            var packageManager = new Mock<VsPackageManager>(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                fileSystem,
+                localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
+                new Mock<VsPackageInstallerEvents>().Object,
+                /* multiFrameworkTargeting */ null) { CallBase = true };
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), false)).Returns(packageManager.Object);
+            packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager);
+            packageRepositoryFactory.Setup(r => r.CreateRepository(@"x:\test")).Returns(new MockPackageRepository()).Verifiable();
+
+            var installer = new VsPackageInstaller(packageManagerFactory.Object, null, null, null, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, extensionManagerMock.Object, null);
+            var packages = new Dictionary<string, string>();
+            packages.Add("A", null);
+
+            // Act & Assert
+            var exception = Assert.Throws<InvalidOperationException>(() => installer.InstallPackagesFromVSExtensionRepository(extensionId, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages));
+            Assert.True(exception.Message.Contains("A : "));
         }
 
         [Fact]
@@ -483,7 +792,7 @@ namespace NuGet.VisualStudio.Test
             services.Setup(x => x.IsPackageInstalled(It.IsAny<Project>(), packageId)).Returns(true);
             services.Setup(x => x.IsPackageInstalled(It.IsAny<Project>(), packageId, It.IsAny<SemanticVersion>())).Returns(false);
 
-            var installer = new VsPackageInstaller(null, null, null, consoleProvider.Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, extensionManagerMock.Object);
+            var installer = new VsPackageInstaller(null, null, null, consoleProvider.Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, extensionManagerMock.Object, null);
             var packages = new Dictionary<string, string>();
             packages.Add(packageId, packageVersion);
 
@@ -495,6 +804,77 @@ namespace NuGet.VisualStudio.Test
             // Assert
             Assert.Single(consoleOutput);
             Assert.True(consoleOutput.Single().Contains(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_VersionConflict, packageId, packageVersion)));
+        }
+
+        [Fact]
+        public void InstallPackagesFromVSExtensionRepositoryRaisesWarningsIfUnexpectedVersionIsInstalled()
+        {
+            // Arrange
+            var extensionId = "myExtensionId";
+
+            var extensionManagerMock = new Mock<IVsExtensionManager>();
+            var extensionMock = new Mock<IInstalledExtension>();
+            extensionMock.Setup(e => e.InstallPath).Returns(@"C:\Extension\Dir");
+            var extension = extensionMock.Object;
+            extensionManagerMock.Setup(em => em.TryGetInstalledExtension(extensionId, out extension)).Returns(true);
+
+            var consoleOutput = new List<string>();
+            var console = new Mock<NuGetConsole.IConsole>();
+            console.Setup(c => c.WriteLine(It.IsAny<string>())).Callback<string>(consoleOutput.Add);
+
+            var consoleProvider = new Mock<IOutputConsoleProvider>();
+            consoleProvider.Setup(c => c.CreateOutputConsole(It.IsAny<bool>())).Returns(console.Object);
+
+            var packageId = "A";
+            var packageVersion1 = "1.0.0";
+            var packageVersion2 = "2.0.0";
+
+            // This is where we report that we have a different version installed than what is requested
+            var services = new Mock<IVsPackageInstallerServices>();
+            services.Setup(x => x.IsPackageInstalled(It.IsAny<Project>(), packageId)).Returns(true);
+            services.Setup(x => x.IsPackageInstalled(It.IsAny<Project>(), packageId, It.IsAny<SemanticVersion>())).Returns(false);
+
+            var fileSystem = new MockFileSystem(String.Empty);
+            fileSystem.AddFile("A.1.0.0.nupkg", GetPackageStream(packageId, packageVersion1));
+            fileSystem.AddFile("A.2.0.0-beta.nupkg", GetPackageStream(packageId, packageVersion2));
+
+            var localRepository = new Mock<MockPackageRepository>() { CallBase = true }.As<ISharedPackageRepository>().Object;
+            var sourceRepository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem);
+
+            var projectRepository = new MockProjectPackageRepository(localRepository);
+            var projectSystem = new MockProjectSystem();
+            var pathResolver = new DefaultPackagePathResolver(new MockProjectSystem());
+            var project = TestUtils.GetProject("Foo");
+            var projectManager = new ProjectManager(localRepository, pathResolver, projectSystem, projectRepository);
+            var packageManager = new Mock<VsPackageManager>(
+                TestUtils.GetSolutionManager(),
+                sourceRepository,
+                new Mock<IFileSystemProvider>().Object,
+                fileSystem,
+                localRepository,
+                new Mock<IDeleteOnRestartManager>().Object,
+                new Mock<VsPackageInstallerEvents>().Object,
+                /* multiFrameworkTargeting */ null) { CallBase = true };
+            var packageManagerFactory = new Mock<IVsPackageManagerFactory>();
+            var packageRepositoryFactory = new Mock<IPackageRepositoryFactory>(MockBehavior.Strict);
+            packageManagerFactory.Setup(m => m.CreatePackageManager(It.IsAny<IPackageRepository>(), false)).Returns(packageManager.Object);
+            packageManager.Setup(m => m.GetProjectManager(project)).Returns(projectManager);
+            packageRepositoryFactory.Setup(r => r.CreateRepository(@"x:\test")).Returns(new MockPackageRepository()).Verifiable();
+
+            var installer = new VsPackageInstaller(packageManagerFactory.Object, null, null, consoleProvider.Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, extensionManagerMock.Object, sourceRepository);
+            var packages = new Dictionary<string, string>();
+
+            // Note the NULL version string that is used here - that's the key to this test
+            packages.Add(packageId, null);
+
+            // Act
+            Assert.False(localRepository.Exists(packageId, new SemanticVersion(packageVersion1)));
+            Assert.False(localRepository.Exists(packageId, new SemanticVersion(packageVersion2)));
+            installer.InstallPackagesFromVSExtensionRepository(extensionId, isPreUnzipped: false, skipAssemblyReferences: false, project: project, packageVersions: packages);
+
+            // Assert
+            Assert.Single(consoleOutput);
+            Assert.True(consoleOutput.Single().Contains(string.Format(NuGet.VisualStudio.Resources.VsResources.PreinstalledPackages_VersionConflict, packageId, packageVersion2)));
         }
 
         [Fact]
@@ -548,7 +928,7 @@ namespace NuGet.VisualStudio.Test
             var package = NuGet.Test.PackageUtility.CreatePackage(packageId, packageVersion, new[] { "System" });
             sourceRepository.AddPackage(package);
 
-            var installer = new VsPackageInstaller(packageManagerFactory.Object, null, null, consoleProvider.Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, extensionManagerMock.Object);
+            var installer = new VsPackageInstaller(packageManagerFactory.Object, null, null, consoleProvider.Object, new Mock<IVsCommonOperations>().Object, new Mock<ISolutionManager>().Object, null, services.Object, extensionManagerMock.Object, null);
             var packages = new Dictionary<string, string>();
             packages.Add(packageId, packageVersion);
 
@@ -558,6 +938,31 @@ namespace NuGet.VisualStudio.Test
 
             // Assert
             Assert.True(localRepository.Exists(packageId, new SemanticVersion(packageVersion)));
+        }
+
+        private static System.IO.MemoryStream GetPackageStream(
+            string packageId,
+            string packageVersion,
+            IEnumerable<FrameworkAssemblyReference> frameworkReferences = null)
+        {
+            var builder = new PackageBuilder();
+            builder.Id = packageId;
+            builder.Version = new SemanticVersion(packageVersion);
+            builder.Authors.Add("jeffhandley");
+            builder.Description = "This is a test package";
+            builder.ReleaseNotes = "This is a release note.";
+            builder.Copyright = "Copyright";
+            builder.Files.AddRange(NuGet.Test.PackageUtility.CreateFiles(new[] { NuGet.Test.Utility.PathFixUtility.FixPath(@"readme.txt") }));
+
+            if (frameworkReferences != null)
+            {
+                builder.FrameworkReferences.AddRange(frameworkReferences);
+            }
+
+            var ms = new System.IO.MemoryStream();
+            builder.Save(ms);
+            ms.Seek(0, System.IO.SeekOrigin.Begin);
+            return ms;
         }
     }
 }

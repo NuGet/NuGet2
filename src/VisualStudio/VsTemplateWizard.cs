@@ -211,7 +211,11 @@ namespace NuGet.VisualStudio
             {
                 if (configuration.Packages.Any())
                 {
-                    _preinstalledPackageInstaller.PerformPackageInstall(_installer, project, configuration, RepositorySettings, ShowWarningMessage, ShowErrorMessage);
+                    var repository = configuration.IsPreunzipped
+                                ? (IPackageRepository)new UnzippedPackageRepository(configuration.RepositoryPath)
+                                : (IPackageRepository)new LocalPackageRepository(configuration.RepositoryPath);
+
+                    _preinstalledPackageInstaller.PerformPackageInstall(_installer, project, configuration, RepositorySettings, repository, ShowWarningMessage, ShowErrorMessage);
                 }
             }
         }

@@ -18,6 +18,7 @@ namespace NuGet.VisualStudio
         private readonly IVsWebsiteHandler _websiteHandler;
         private readonly IVsPackageInstallerServices _packageServices;
         private readonly IEnumerable<IRegistryKey> _registryKeys;
+        private readonly IPackageRepository _sourceRepository;
         private readonly object _vsExtensionManager;
 
         [ImportingConstructor]
@@ -43,7 +44,8 @@ namespace NuGet.VisualStudio
         /// <summary>
         /// Creates an instance of the package installer for unit testing of registry-based preinstalled packages. This should only be used for unit tests.
         /// </summary>
-        /// <param name="registryKeys">The optional list of parent registry keys to look in (used for unit tests).</param>
+        /// <param name="testableRegistryKeys">The optional list of parent registry keys to look in (used for unit tests).</param>
+        /// <param name="testableSourceRepository">The optional source repository to use (for unit tests).</param>
         internal VsPackageInstaller(IVsPackageManagerFactory packageManagerFactory,
                                     IScriptExecutor scriptExecutor,
                                     IPackageRepositoryFactory repositoryFactory,
@@ -52,16 +54,19 @@ namespace NuGet.VisualStudio
                                     ISolutionManager solutionManager,
                                     IVsWebsiteHandler websiteHandler,
                                     IVsPackageInstallerServices packageServices,
-                                    IEnumerable<IRegistryKey> registryKeys)
+                                    IEnumerable<IRegistryKey> testableRegistryKeys,
+                                    IPackageRepository testableSourceRepository)
             : this(packageManagerFactory, scriptExecutor, repositoryFactory, consoleProvider, vsCommonOperations, solutionManager, websiteHandler, packageServices)
         {
-            _registryKeys = registryKeys;
+            _registryKeys = testableRegistryKeys;
+            _sourceRepository = testableSourceRepository;
         }
 
         /// <summary>
         /// Creates an instance of the package installer for unit testing of extension-based preinstalled packages.  This should only be used for unit tests.
         /// </summary>
         /// <param name="vsExtensionManager">A mock extension manager instance (used for unit tests).</param>
+        /// <param name="testableSourceRepository">The optional source repository (used for unit tests).</param>
         internal VsPackageInstaller(IVsPackageManagerFactory packageManagerFactory,
                                     IScriptExecutor scriptExecutor,
                                     IPackageRepositoryFactory repositoryFactory,
@@ -70,10 +75,12 @@ namespace NuGet.VisualStudio
                                     ISolutionManager solutionManager,
                                     IVsWebsiteHandler websiteHandler,
                                     IVsPackageInstallerServices packageServices,
-                                    object vsExtensionManager)
+                                    object vsExtensionManager,
+                                    IPackageRepository testableSourceRepository)
             : this(packageManagerFactory, scriptExecutor, repositoryFactory, consoleProvider, vsCommonOperations, solutionManager, websiteHandler, packageServices)
         {
             _vsExtensionManager = vsExtensionManager;
+            _sourceRepository = testableSourceRepository;
         }
 
         [Import]
@@ -181,7 +188,12 @@ namespace NuGet.VisualStudio
             var repositoryPath = preinstalledPackageInstaller.GetRegistryRepositoryPath(keyName, _registryKeys, ThrowError);
 
             var config = GetPreinstalledPackageConfiguration(isPreUnzipped, skipAssemblyReferences, packageVersions, repositoryPath);
-            preinstalledPackageInstaller.PerformPackageInstall(this, project, config, RepositorySettings, ShowWarning, ThrowError);
+
+            var repository = _sourceRepository ?? (config.IsPreunzipped
+                                    ? (IPackageRepository)new UnzippedPackageRepository(config.RepositoryPath)
+                                    : (IPackageRepository)new LocalPackageRepository(config.RepositoryPath));
+
+            preinstalledPackageInstaller.PerformPackageInstall(this, project, config, RepositorySettings, repository, ShowWarning, ThrowError);
         }
 
         public void InstallPackagesFromVSExtensionRepository(string extensionId, bool isPreUnzipped, bool skipAssemblyReferences, Project project, IDictionary<string, string> packageVersions)
@@ -205,7 +217,12 @@ namespace NuGet.VisualStudio
             var repositoryPath = preinstalledPackageInstaller.GetExtensionRepositoryPath(extensionId, _vsExtensionManager, ThrowError);
 
             var config = GetPreinstalledPackageConfiguration(isPreUnzipped, skipAssemblyReferences, packageVersions, repositoryPath);
-            preinstalledPackageInstaller.PerformPackageInstall(this, project, config, RepositorySettings, ShowWarning, ThrowError);
+
+            var repository = _sourceRepository ?? (config.IsPreunzipped
+                                    ? (IPackageRepository)new UnzippedPackageRepository(config.RepositoryPath)
+                                    : (IPackageRepository)new LocalPackageRepository(config.RepositoryPath));
+
+            preinstalledPackageInstaller.PerformPackageInstall(this, project, config, RepositorySettings, repository, ShowWarning, ThrowError);
         }
 
         private static PreinstalledPackageConfiguration GetPreinstalledPackageConfiguration(bool isPreUnzipped, bool skipAssemblyReferences, IDictionary<string, string> packageVersions, string repositoryPath)
