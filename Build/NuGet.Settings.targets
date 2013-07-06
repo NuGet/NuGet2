@@ -24,8 +24,8 @@
         <Dev12Directory>$(MSBuildExtensionsPath)\..\Microsoft Visual Studio 12.0\Common7\IDE</Dev12Directory>
 
         <Dev10Available Condition=" '$(VisualStudioVersion)' == '10.0' Or Exists('$(Dev10Directory)') ">true</Dev10Available>
-        <Dev11Available Condition=" '$(VisualStudioVersion)' == '11.0' Or Exists('$(Dev11Directory)') ">true</Dev11Available>
-        <Dev12Available Condition=" '$(VisualStudioVersion)' == '12.0' Or Exists('$(Dev12Directory)') ">true</Dev12Available>
+        <Dev11Available Condition=" '$(VisualStudioVersion)' == '11.0' And Exists('$(Dev11Directory)') ">true</Dev11Available>
+        <Dev12Available Condition=" '$(VisualStudioVersion)' == '12.0' And Exists('$(Dev12Directory)') ">true</Dev12Available>
     </PropertyGroup>
 
     <PropertyGroup Condition=" $(BuildForDev12) == 'true' ">        
