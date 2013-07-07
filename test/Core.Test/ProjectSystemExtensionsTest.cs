@@ -221,7 +221,9 @@ namespace NuGet.Test
             var files = PackageUtility.CreateFiles(new[] { "a.txt", "b.txt" }, "content");
 
             // Act
-            project.AddFiles(files, new Dictionary<FileTransformExtensions, IPackageFileTransformer>());
+            project.AddFiles(files, 
+                new Dictionary<FileTransformExtensions, IPackageFileTransformer>(), 
+                new ProjectFileProcessingExecutor(project, null));
 
             // Assert
             logger.Verify(l => l.ResolveFileConflict("File 'a.txt' already exists in project 'x:\\root'. Do you want to overwrite it?"), Times.Once());
@@ -241,7 +243,9 @@ namespace NuGet.Test
             var files = PackageUtility.CreateFiles(new[] { "b.txt", "d.txt" }, "content");
 
             // Act
-            project.AddFiles(files, new Dictionary<FileTransformExtensions, IPackageFileTransformer>());
+            project.AddFiles(files,
+                new Dictionary<FileTransformExtensions, IPackageFileTransformer>(),
+                new ProjectFileProcessingExecutor(project, null));
 
             // Assert
             logger.Verify(l => l.ResolveFileConflict(It.IsAny<string>()), Times.Never());
@@ -262,7 +266,9 @@ namespace NuGet.Test
             var files = PackageUtility.CreateFiles(new[] { "b.txt", "d.txt" }, "content");
 
             // Act
-            project.AddFiles(files, new Dictionary<FileTransformExtensions, IPackageFileTransformer>());
+            project.AddFiles(files,
+                new Dictionary<FileTransformExtensions, IPackageFileTransformer>(),
+                new ProjectFileProcessingExecutor(project, null));
 
             // Assert
             Assert.True(project.FileExists("d.txt"));
@@ -301,7 +307,9 @@ namespace NuGet.Test
             var files = PackageUtility.CreateFiles(new [] { "a.txt", "b.txt", "c.txt", "d.txt", "e.txt", "f.txt" }, "content");
 
             // Act
-            project.AddFiles(files, new Dictionary<FileTransformExtensions, IPackageFileTransformer>());
+            project.AddFiles(files,
+                new Dictionary<FileTransformExtensions, IPackageFileTransformer>(),
+                new ProjectFileProcessingExecutor(project, null));
 
             // Assert
             Assert.True(project.FileExists("a.txt"));

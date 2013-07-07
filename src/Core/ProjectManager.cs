@@ -30,6 +30,8 @@ namespace NuGet
             { new FileTransformExtensions(".install.xdt", ".uninstall.xdt"), new XdtTransformer() }
         };
 
+        readonly ProjectFileProcessingBuilder _fileProcessingBuilder;
+
         public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IProjectSystem project, IPackageRepository localRepository)
         {
             if (sourceRepository == null)
@@ -54,6 +56,10 @@ namespace NuGet
             PathResolver = pathResolver;
             LocalRepository = localRepository;
             _packageReferenceRepository = LocalRepository as IPackageReferenceRepository;
+
+            _fileProcessingBuilder = new ProjectFileProcessingBuilder(
+                null // TODO: conventional processors
+                );
         }
 
         public IPackagePathResolver PathResolver
@@ -225,10 +231,13 @@ namespace NuGet
             // so that we don't throw the exception in case the <References> filters out all assemblies.
             FilterAssemblyReferences(assemblyReferences, package.PackageAssemblyReferences);
 
+            // Create a File Processor, contains conventional processing already, add specific fron the package
+            var fileProcessor = _fileProcessingBuilder.Build(Project);
+
             try
             {
                 // Add content files
-                Project.AddFiles(contentFiles, _fileTransformers);
+                Project.AddFiles(contentFiles, _fileTransformers, fileProcessor);
 
                 // Add the references to the reference path
                 foreach (IPackageAssemblyReference assemblyReference in assemblyReferences)

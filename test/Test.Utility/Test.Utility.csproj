@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="Mocks\EventMemoryStream.cs" />
     <Compile Include="Mocks\MockPackageCacheRepository.cs" />
+    <Compile Include="Mocks\MockProjectFileProcessingProjectItem.cs" />
     <Compile Include="Mocks\MockServiceBasePackageRepository.cs" />
     <Compile Include="Mocks\MockSharedPackageRepository.cs" />
     <Compile Include="Mocks\MockFileSystem.cs" />

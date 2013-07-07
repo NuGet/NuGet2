@@ -31,6 +31,13 @@ namespace NuGet.VisualStudio
             Debug.Assert(_baseFileSystem != null);
         }
 
+        public IProjectFileProcessingProjectItem GetItem(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentOutOfRangeException("path");
+
+            return new VsProjectFileProcessingProjectItem(Project.GetProjectItem(path));
+        }
+
         protected Project Project
         {
             get;

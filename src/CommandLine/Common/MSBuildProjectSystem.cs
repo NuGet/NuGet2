@@ -16,6 +16,13 @@ namespace NuGet.Common
             Project = GetProject(projectFile);
         }
 
+        public IProjectFileProcessingProjectItem GetItem(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentOutOfRangeException("path");
+
+            throw new NotImplementedException();
+        }
+
         public bool IsBindingRedirectSupported
         {
             get

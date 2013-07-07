@@ -3,7 +3,7 @@ using System.Runtime.Versioning;
 
 namespace NuGet
 {
-    public interface IProjectSystem : IFileSystem, IPropertyProvider
+    public interface IProjectSystem : IFileSystem, IPropertyProvider, IProjectFileProcessingProject
     {
         FrameworkName TargetFramework { get; }
         string ProjectName { get; }

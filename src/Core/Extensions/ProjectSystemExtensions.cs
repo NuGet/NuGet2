@@ -12,7 +12,8 @@ namespace NuGet
     {
         public static void AddFiles(this IProjectSystem project,
                                     IEnumerable<IPackageFile> files,
-                                    IDictionary<FileTransformExtensions, IPackageFileTransformer> fileTransformers)
+                                    IDictionary<FileTransformExtensions, IPackageFileTransformer> fileTransformers,
+                                    ProjectFileProcessingExecutor fileProcessingExecutor)
         {
             // Convert files to a list
             List<IPackageFile> fileList = files.ToList();
@@ -64,6 +65,8 @@ namespace NuGet
                             }
                             TryAddFile(project, path, file.GetStream);
                         }
+
+                        fileProcessingExecutor.Process(path);
                     }
                 }
             }

@@ -17,6 +17,13 @@ namespace NuGet.Test.Mocks
         {
         }
 
+        public IProjectFileProcessingProjectItem GetItem(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentOutOfRangeException("path");
+
+            return new MockProjectFileProcessingProjectItem(path);
+        }
+
         public MockProjectSystem(FrameworkName frameworkName, string root = @"x:\MockFileSystem")
             : base(root)
         {

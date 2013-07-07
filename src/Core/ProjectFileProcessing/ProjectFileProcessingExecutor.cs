@@ -25,11 +25,11 @@ namespace NuGet
             _processors = new ReadOnlyCollection<IProjectFileProcessor>(processors.ToList());
         }
 
-        public void Process(string targetPath)
+        public void Process(string path)
         {
-            if (targetPath == null) throw new ArgumentNullException("targetPath");
+            if (path == null) throw new ArgumentNullException("path");
 
-            var projectItem = _propertiesProject.GetItem(targetPath);
+            var projectItem = _propertiesProject.GetItem(path);
 
             var matchingRules =
                 from rule in _processors
