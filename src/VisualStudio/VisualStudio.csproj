@@ -42,6 +42,8 @@
     <Compile Include="IWindowSettingsManager.cs" />
     <Compile Include="ProjectFileProcessing\VsProjectFileProcessingBuilderExtensions.cs" />
     <Compile Include="ProjectFileProcessing\VsProjectFileProcessingProjectItem.cs" />
+    <Compile Include="ProjectFileProcessing\VsProjectItemCustomToolSetter.cs" />
+    <Compile Include="ProjectFileProcessing\VsProjectItemProcessorBase.cs" />
     <Compile Include="ProjectFileProcessing\VsProjectItemPropertySetter.cs" />
     <Compile Include="Settings\ISettingsManager.cs" />
     <Compile Include="Settings\ISettingsStore.cs" />

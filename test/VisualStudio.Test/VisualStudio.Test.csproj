@@ -68,6 +68,7 @@
     <Compile Include="PackageRestoreManagerTest.cs" />
     <Compile Include="PathHelperTest.cs" />
     <Compile Include="ProjectExtensionsTest.cs" />
+    <Compile Include="ProjectFileProcessing\VsProjectItemCustomToolSetterTest.cs" />
     <Compile Include="ProjectSystemExtensionsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RepositorySettingsTest.cs" />
@@ -83,8 +84,8 @@
     <Compile Include="VsPackageSourceProviderTest.cs" />
     <Compile Include="VsPackageSourceRepositoryTest.cs" />
     <Compile Include="TestUtils.cs" />
-    <Compile Include="VsProjectFileProcessorTests.cs" />
-    <Compile Include="VsProjectItemPropertySetterTest.cs" />
+    <Compile Include="ProjectFileProcessing\VsProjectFileProcessorTests.cs" />
+    <Compile Include="ProjectFileProcessing\VsProjectItemPropertySetterTest.cs" />
     <Compile Include="VsProjectSystemTest.cs" />
     <Compile Include="VsSettingsTest.cs" />
     <Compile Include="VsSourceControlTrackerTest.cs" />
