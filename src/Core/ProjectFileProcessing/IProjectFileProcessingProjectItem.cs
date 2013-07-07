@@ -14,5 +14,10 @@
         /// <para>Set the value of the named property</para>
         /// </summary>
         void SetPropertyValue(string name, string value);
+
+        /// <summary>
+        /// <para>Runs the custom tool on the projectItem</para>
+        /// </summary>
+        void RunCustomTool();
     }
 }
