@@ -30,6 +30,7 @@ namespace NuGet
             if (path == null) throw new ArgumentNullException("path");
 
             var projectItem = _propertiesProject.GetItem(path);
+            if (projectItem == null) return;
 
             var matchingRules =
                 from rule in _processors

@@ -70,5 +70,24 @@ namespace NuGet.VisualStudio.Test
                 o => o.SetPropertyValue(PropertyName, PropertyValue),
                 Times.Never());
         }
+
+        [Fact]
+        public void VsPropertySetterDoesNothingIfProjectItemNotFound()
+        {
+            var projectItemMock = GetProjectItemMock();
+            var projectMock = GetProjectMock(projectItemMock.Object);
+
+            var sut = new ProjectFileProcessingBuilder(null)
+                .WithVsPropertySetter("*.txt", PropertyName, PropertyValue)
+                .Build(projectMock.Object);
+
+            // act
+            sut.Process("XXX");
+
+            // assert
+            projectItemMock.Verify(
+                o => o.SetPropertyValue(PropertyName, PropertyValue),
+                Times.Never());
+        }
     }
 }

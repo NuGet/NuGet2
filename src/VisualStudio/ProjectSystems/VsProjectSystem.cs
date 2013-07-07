@@ -35,7 +35,11 @@ namespace NuGet.VisualStudio
         {
             if (string.IsNullOrWhiteSpace(path)) throw new ArgumentOutOfRangeException("path");
 
-            return new VsProjectFileProcessingProjectItem(Project.GetProjectItem(path));
+            var projectItem = Project.GetProjectItem(path);
+
+            return projectItem == null
+                       ? null
+                       : new VsProjectFileProcessingProjectItem(projectItem);
         }
 
         protected Project Project
