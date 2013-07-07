@@ -1,4 +1,4 @@
-﻿namespace NuGet.VisualStudio
+﻿namespace NuGet
 {
     /// <summary>
     /// <para>Abstraction for a file processor</para>

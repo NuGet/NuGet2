@@ -1,4 +1,4 @@
-﻿namespace NuGet.VisualStudio
+﻿namespace NuGet
 {
     /// <summary>
     /// <para>Abstraction for methods on a pProject required for package file processing</para>

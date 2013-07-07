@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace NuGet.VisualStudio
+namespace NuGet
 {
     /// <summary>
     /// <para>Sets properties on a project item according to rules set</para>

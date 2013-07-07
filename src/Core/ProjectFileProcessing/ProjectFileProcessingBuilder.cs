@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace NuGet.VisualStudio
+namespace NuGet
 {
     /// <summary>
     /// <para>Simple builder for a <see cref="ProjectFileProcessingExecutor"/></para>
