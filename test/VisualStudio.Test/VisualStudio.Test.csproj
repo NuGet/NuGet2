@@ -83,6 +83,7 @@
     <Compile Include="VsPackageSourceProviderTest.cs" />
     <Compile Include="VsPackageSourceRepositoryTest.cs" />
     <Compile Include="TestUtils.cs" />
+    <Compile Include="VsProjectFileProcessorTests.cs" />
     <Compile Include="VsProjectItemPropertySetterTest.cs" />
     <Compile Include="VsProjectSystemTest.cs" />
     <Compile Include="VsSettingsTest.cs" />

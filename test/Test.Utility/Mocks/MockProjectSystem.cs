@@ -11,24 +11,30 @@ namespace NuGet.Test.Mocks
         private HashSet<string> _topImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private HashSet<string> _bottomImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private HashSet<string> _excludedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        public MockProjectSystem()
-            : this(VersionUtility.DefaultTargetFramework)
-        {
-        }
-
-        public IProjectFileProcessingProjectItem GetItem(string path)
-        {
-            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentOutOfRangeException("path");
-
-            return new MockProjectFileProcessingProjectItem(path);
-        }
+        Func<string, IProjectFileProcessingProjectItem> _getItem;
 
         public MockProjectSystem(FrameworkName frameworkName, string root = @"x:\MockFileSystem")
             : base(root)
         {
             _frameworkName = frameworkName;
             References = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            _getItem = path => new MockProjectFileProcessingProjectItem(path);
+        }
+
+        public MockProjectSystem()
+            : this(VersionUtility.DefaultTargetFramework)
+        {
+        }
+
+        public MockProjectSystem(Func<string, IProjectFileProcessingProjectItem> getItem)
+            : this(VersionUtility.DefaultTargetFramework)
+        {
+            _getItem = getItem;
+        }
+
+        public IProjectFileProcessingProjectItem GetItem(string path)
+        {
+            return _getItem(path);
         }
 
         public bool IsBindingRedirectSupported
