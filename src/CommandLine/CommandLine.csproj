@@ -67,7 +67,6 @@
     <Compile Include="Commands\PushCommand.cs" />
     <Compile Include="Commands\UpdateCommand.cs" />
     <Compile Include="Common\CachedPackageSourceProvider.cs" />
-    <Compile Include="Common\MSBuildProjectFileProcessingProjectItem.cs" />
     <Compile Include="Common\PackageExtractor.cs" />
     <Compile Include="Common\SelfUpdater.cs" />
     <Compile Include="Common\Solution.cs" />

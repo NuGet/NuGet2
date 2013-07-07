@@ -18,9 +18,8 @@ namespace NuGet.Common
 
         public IProjectFileProcessingProjectItem GetItem(string path)
         {
-            if (string.IsNullOrWhiteSpace(path)) throw new ArgumentOutOfRangeException("path");
-
-            throw new NotImplementedException();
+            throw new NotImplementedException(
+                "At this time an MSBuildProjectSystem should not be used to add files to a project");
         }
 
         public bool IsBindingRedirectSupported
