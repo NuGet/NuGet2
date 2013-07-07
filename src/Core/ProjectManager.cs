@@ -32,7 +32,22 @@ namespace NuGet
 
         readonly ProjectFileProcessingBuilder _fileProcessingBuilder;
 
-        public ProjectManager(IPackageRepository sourceRepository, IPackagePathResolver pathResolver, IProjectSystem project, IPackageRepository localRepository)
+        public ProjectManager(
+            IPackageRepository sourceRepository,
+            IPackagePathResolver pathResolver,
+            IProjectSystem project,
+            IPackageRepository localRepository)
+            : this(sourceRepository, pathResolver, project, localRepository, ProjectFileProcessingBuilder.Default)
+        {
+
+        }
+
+        public ProjectManager(
+            IPackageRepository sourceRepository, 
+            IPackagePathResolver pathResolver, 
+            IProjectSystem project, 
+            IPackageRepository localRepository,
+            ProjectFileProcessingBuilder fileProcessingBuilder)
         {
             if (sourceRepository == null)
             {
@@ -57,9 +72,7 @@ namespace NuGet
             LocalRepository = localRepository;
             _packageReferenceRepository = LocalRepository as IPackageReferenceRepository;
 
-            _fileProcessingBuilder = new ProjectFileProcessingBuilder(
-                null // TODO: conventional processors
-                );
+            _fileProcessingBuilder = fileProcessingBuilder;
         }
 
         public IPackagePathResolver PathResolver

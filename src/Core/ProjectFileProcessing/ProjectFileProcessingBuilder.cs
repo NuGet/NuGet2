@@ -4,7 +4,9 @@ using System.Linq;
 namespace NuGet
 {
     /// <summary>
-    /// <para>Simple builder for a <see cref="ProjectFileProcessingExecutor"/></para>
+    ///     <para>
+    ///         Simple builder for a <see cref="ProjectFileProcessingExecutor" />
+    ///     </para>
     /// </summary>
     public class ProjectFileProcessingBuilder
     {
@@ -31,6 +33,24 @@ namespace NuGet
             return new ProjectFileProcessingExecutor(
                 propertiesProject,
                 _processors);
+        }
+
+        static readonly object LockObject = new object();
+        static volatile ProjectFileProcessingBuilder _default;
+
+        public static ProjectFileProcessingBuilder Default
+        {
+            get
+            {
+                if (_default == null)
+                    lock (LockObject)
+                    {
+                        if (_default == null)
+                            return _default = new ProjectFileProcessingBuilder(null);
+                    }
+
+                return _default;
+            }
         }
     }
 }
