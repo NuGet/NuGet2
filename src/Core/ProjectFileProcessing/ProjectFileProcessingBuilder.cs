@@ -51,6 +51,7 @@ namespace NuGet
 
                 return _default;
             }
+            set { _default = value; }
         }
     }
 }
