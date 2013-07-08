@@ -173,7 +173,6 @@ namespace NuGet
         ///     %programdata%\NuGet\Config\IDE\*.config
         ///     %programdata%\NuGet\Config\*.config
         /// </remarks>
-        /// </remarks>
         /// <param name="fileSystem">The file system in which the settings files are read.</param>
         /// <param name="paths">The additional paths under which to look for settings files.</param>
         /// <returns>The list of settings read.</returns>
