@@ -5,7 +5,7 @@ using Xunit;
 
 namespace NuGet.VisualStudio.Test
 {
-    public class VsProjectFileProcessorTests
+    public class ProjectFileProcessorTests
     {
         [Fact]
         public void InstallRunsProcessorForMatchedFiles()
