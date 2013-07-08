@@ -244,8 +244,10 @@ namespace NuGet
             // so that we don't throw the exception in case the <References> filters out all assemblies.
             FilterAssemblyReferences(assemblyReferences, package.PackageAssemblyReferences);
 
-            // Create a File Processor, contains conventional processing already, add specific fron the package
-            var fileProcessor = _fileProcessingBuilder.Build(Project);
+            // Clone the passed builder which contains conventional processing, add specific from the package
+            var fileProcessorBuilder = _fileProcessingBuilder.Clone();
+          
+            var fileProcessor = fileProcessorBuilder.Build(Project);
 
             try
             {

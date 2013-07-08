@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace NuGet
@@ -10,21 +11,27 @@ namespace NuGet
     /// </summary>
     public class ProjectFileProcessingBuilder
     {
-        readonly IEnumerable<IProjectFileProcessor> _processors;
+        readonly IList<IProjectFileProcessor> _processors;
 
         public ProjectFileProcessingBuilder(
             IEnumerable<IProjectFileProcessor> processors)
         {
-            _processors = processors ??
-                          new IProjectFileProcessor[] {};
+            _processors = processors == null
+                              ? new List<IProjectFileProcessor>()
+                              : processors.ToList();
+        }
+
+        public ProjectFileProcessingBuilder Clone()
+        {
+            return new ProjectFileProcessingBuilder(_processors);
         }
 
         public ProjectFileProcessingBuilder WithProcessor(
             IProjectFileProcessor processor)
         {
-            return
-                new ProjectFileProcessingBuilder(
-                    _processors.Concat(new[] {processor}));
+            _processors.Add(processor);
+
+            return this;
         }
 
         public ProjectFileProcessingExecutor Build(
