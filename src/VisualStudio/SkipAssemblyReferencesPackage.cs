@@ -166,5 +166,10 @@ namespace NuGet.VisualStudio
         {
             get { return _basePackage.PackageAssemblyReferences; }
         }
+
+        public IEnumerable<IPackageManifestFile> ManifestFiles
+        {
+            get { return _basePackage.ManifestFiles; }
+        }
     }
 }

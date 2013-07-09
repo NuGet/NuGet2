@@ -1,10 +1,40 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using NuGet.Authoring;
 using Xunit;
 
 namespace NuGet.Test
 {
     public class ManifestVersionUtilityTest
     {
+        [Fact]
+        public void GetManifestVersion7IfFilePropertiesExists()
+        {
+            var manifest = new Manifest
+                {
+                    Metadata = new ManifestMetadata
+                        {
+                            Id = "Foo",
+                            Version = "1.0",
+                            Authors = "A, B",
+                            Description = "Description"
+                        },
+                    Files = new List<ManifestFile>
+                        {
+                            new ManifestFile
+                                {
+                                    Properties = new List<ManifestFileProperty> {new ManifestFileProperty()}
+                                }
+                        }
+                };
+
+            // Act
+            var version = ManifestVersionUtility.GetManifestVersion(manifest);
+
+            // Assert
+            Assert.Equal(7, version);
+        }
+
         [Fact]
         public void GetManifestVersionReturns1IfNoNewPropertiesAreSet()
         {

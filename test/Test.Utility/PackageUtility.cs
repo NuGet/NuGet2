@@ -212,6 +212,7 @@ namespace NuGet.Test
             }
             var targetFramework = allFiles.Select(f => f.TargetFramework).Where(f => f != null);
             mockPackage.Setup(m => m.GetSupportedFrameworks()).Returns(targetFramework);
+            mockPackage.Setup(m => m.ManifestFiles).Returns(Enumerable.Empty<IPackageManifestFile>());
 
             return mockPackage.Object;
         }

@@ -49,6 +49,7 @@ namespace NuGet.Server.DataServices
             Path = derivedData.Path;
             FullPath = derivedData.FullPath;
             MinClientVersion = package.MinClientVersion == null ? null : package.MinClientVersion.ToString();
+            ManifestFiles = package.ManifestFiles;
         }
 
         internal string FullPath
@@ -208,6 +209,12 @@ namespace NuGet.Server.DataServices
         }
 
         public string MinClientVersion
+        {
+            get;
+            set;
+        }
+
+        public IEnumerable<IPackageManifestFile> ManifestFiles
         {
             get;
             set;

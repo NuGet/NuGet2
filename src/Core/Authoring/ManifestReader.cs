@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
+using NuGet.Authoring;
 using NuGet.Resources;
 
 namespace NuGet
@@ -271,11 +272,41 @@ namespace NuGet
                 string target = file.GetOptionalAttributeValue("target").SafeTrim();
                 string exclude = file.GetOptionalAttributeValue("exclude").SafeTrim();
 
+                var propertiesElement = file.ElementsNoNamespace("properties").FirstOrDefault();
+
                 // Multiple sources can be specified by using semi-colon separated values. 
                 files.AddRange(from source in srcElement.Value.Trim(';').Split(';')
-                               select new ManifestFile { Source = source.SafeTrim(), Target = target.SafeTrim(), Exclude = exclude.SafeTrim() });
+                               select new ManifestFile
+                                   {
+                                       Source = source.SafeTrim(), 
+                                       Target = target.SafeTrim(),
+                                       Exclude = exclude.SafeTrim(),
+                                       Properties = ReadFilePropertyList(propertiesElement)
+                                   });
             }
             return files;
+        }
+
+        private static List<ManifestFileProperty> ReadFilePropertyList(XElement xElement)
+        {
+            if (xElement == null)
+            {
+                return null;
+            }
+
+            return (from property in xElement.ElementsNoNamespace("property")
+
+                    let nameAttribute = property.Attribute("name")
+                    where nameAttribute != null && !String.IsNullOrEmpty(nameAttribute.Value)
+
+                    let valueAttribute = property.Attribute("value")
+                    where valueAttribute != null && !String.IsNullOrEmpty(valueAttribute.Value)
+
+                    select new ManifestFileProperty
+                    {
+                        Name = nameAttribute.Value,
+                        Value = valueAttribute.Value
+                    }).ToList();
         }
     }
 }

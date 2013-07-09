@@ -52,6 +52,7 @@
     <Compile Include="Analysis\Rules\WinRTNameIsObsoleteRule.cs" />
     <Compile Include="Authoring\AssemblyMetadata.cs" />
     <Compile Include="Authoring\AssemblyMetadataExtractor.cs" />
+    <Compile Include="Authoring\ManifestFileProperty.cs" />
     <Compile Include="Authoring\EmptyFrameworkFolderFile.cs" />
     <Compile Include="Authoring\IPackageBuilder.cs" />
     <Compile Include="Authoring\IPropertyProvider.cs" />
@@ -106,8 +107,12 @@
     <Compile Include="NETPortable\NetPortableProfileCollection.cs" />
     <Compile Include="NETPortable\NetPortableProfileTable.cs" />
     <Compile Include="PackageRestoreConsent.cs" />
+    <Compile Include="Packages\IPackageManifestFile.cs" />
+    <Compile Include="Packages\IPackageManifestFileProperty.cs" />
     <Compile Include="Packages\LocalPackage.cs" />
     <Compile Include="Packages\OptimizedZipPackage.cs" />
+    <Compile Include="Packages\PackageManifestFile.cs" />
+    <Compile Include="Packages\PackageManifestFileProperty.cs" />
     <Compile Include="Packages\UnzippedPackage.cs" />
     <Compile Include="PackageWalker\NuGetVersionNotSatisfiedException.cs" />
     <Compile Include="ProjectFileProcessing\IProjectFileProcessingProject.cs" />

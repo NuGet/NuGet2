@@ -310,6 +310,11 @@ namespace NuGet
             }
         }
 
+        public IEnumerable<IPackageManifestFile> ManifestFiles
+        {
+            get { return Package.ManifestFiles; }
+        }
+
         public virtual IEnumerable<FrameworkName> GetSupportedFrameworks()
         {
             return Package.GetSupportedFrameworks();

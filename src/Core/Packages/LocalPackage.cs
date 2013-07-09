@@ -10,6 +10,7 @@ namespace NuGet
     {
         private const string ResourceAssemblyExtension = ".resources.dll";
         private IList<IPackageAssemblyReference> _assemblyReferences;
+        IEnumerable<IPackageManifestFile> _manifestFiles;
 
         protected LocalPackage()
         {
@@ -188,6 +189,12 @@ namespace NuGet
             private set;
         }
 
+
+        public IEnumerable<IPackageManifestFile> ManifestFiles
+        {
+            get { return _manifestFiles; }
+        }
+
         public virtual IEnumerable<FrameworkName> GetSupportedFrameworks()
         {
             return FrameworkAssemblies.SelectMany(f => f.SupportedFrameworks).Distinct();
@@ -231,6 +238,10 @@ namespace NuGet
             Copyright = metadata.Copyright;
             PackageAssemblyReferences = metadata.PackageAssemblyReferences;
             MinClientVersion = metadata.MinClientVersion;
+
+            _manifestFiles = manifest.Files == null
+                     ? new PackageManifestFile[] { }
+                     : manifest.Files.Select(file => new PackageManifestFile(file));
 
             // Ensure tags start and end with an empty " " so we can do contains filtering reliably
             if (!String.IsNullOrEmpty(Tags))

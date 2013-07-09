@@ -43,16 +43,22 @@ namespace NuGet
         /// </summary>
         internal const string SchemaVersionV6 = "http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd";
 
+        /// <summary>
+        /// File Properties for processing on add
+        /// </summary>
+        internal const string SchemaVersionV7 = "http://schemas.microsoft.com/packaging/2013/07/nuspec.xsd";
+
         private static readonly string[] VersionToSchemaMappings = new[] {
             SchemaVersionV1,
             SchemaVersionV2,
             SchemaVersionV3,
             SchemaVersionV4,
             SchemaVersionV5,
-            SchemaVersionV6
+            SchemaVersionV6,
+            SchemaVersionV7
         };
 
-        private static ConcurrentDictionary<string, XmlSchemaSet> _manifestSchemaSetCache = new ConcurrentDictionary<string, XmlSchemaSet>(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, XmlSchemaSet> _manifestSchemaSetCache = new ConcurrentDictionary<string, XmlSchemaSet>(StringComparer.OrdinalIgnoreCase);
         
         public static int GetVersionFromNamespace(string @namespace)
         {

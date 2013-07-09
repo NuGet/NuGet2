@@ -219,6 +219,8 @@ namespace NuGet
             set;
         }
 
+        protected IEnumerable<IPackageManifestFile> ManifestFiles { get; set; }
+
         public void Save(Stream stream)
         {
             // Make sure we're saving a valid package id
@@ -348,7 +350,7 @@ namespace NuGet
             // Deserialize the document and extract the metadata
             Manifest manifest = Manifest.ReadFrom(stream, propertyProvider, validateSchema: true);
 
-            Populate(manifest.Metadata);
+            Populate(manifest);
 
             // If there's no base path then ignore the files node
             if (basePath != null)
@@ -364,9 +366,10 @@ namespace NuGet
             }
         }
 
-        public void Populate(ManifestMetadata manifestMetadata)
+        public void Populate(Manifest manifest)
         {
-            IPackageMetadata metadata = manifestMetadata;
+            IPackageMetadata metadata = manifest.Metadata;
+
             Id = metadata.Id;
             Version = metadata.Version;
             Title = metadata.Title;
@@ -391,10 +394,15 @@ namespace NuGet
             DependencySets.AddRange(metadata.DependencySets);
             FrameworkReferences.AddRange(metadata.FrameworkAssemblies);
 
-            if (manifestMetadata.ReferenceSets != null)
+            if (manifest.Metadata.ReferenceSets != null)
             {
-                PackageAssemblyReferences.AddRange(manifestMetadata.ReferenceSets.Select(r => new PackageReferenceSet(r)));
+                PackageAssemblyReferences
+                    .AddRange(manifest.Metadata.ReferenceSets.Select(r => new PackageReferenceSet(r)));
             }
+
+            ManifestFiles = manifest.Files == null
+                                ? null
+                                : manifest.Files.Select(f => new PackageManifestFile(f));
         }
 
         public void PopulateFiles(string basePath, IEnumerable<ManifestFile> files)
@@ -417,7 +425,7 @@ namespace NuGet
 
             using (Stream stream = packagePart.GetStream())
             {
-                Manifest manifest = Manifest.Create(this);
+                Manifest manifest = Manifest.Create(this, ManifestFiles);
                 manifest.Save(stream, minimumManifestVersion);
             }
         }

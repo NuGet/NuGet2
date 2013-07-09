@@ -10,6 +10,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.Serialization;
+using NuGet.Authoring;
 using NuGet.Resources;
 
 namespace NuGet
@@ -30,11 +31,7 @@ namespace NuGet
         [SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "It's easier to create a list")]
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "This is needed for xml serialization")]
         [XmlArray("files")]
-        public List<ManifestFile> Files
-        {
-            get;
-            set;
-        }
+        public List<ManifestFile> Files { get; set; }
 
         public void Save(Stream stream)
         {
@@ -64,7 +61,7 @@ namespace NuGet
                 Validate(this);
             }
 
-            int version = Math.Max(minimumManifestVersion, ManifestVersionUtility.GetManifestVersion(Metadata));
+            int version = Math.Max(minimumManifestVersion, ManifestVersionUtility.GetManifestVersion(this));
             string schemaNamespace = ManifestSchemaUtility.GetSchemaNamespace(version);
 
             // Define the namespaces to use when serializing
@@ -130,33 +127,59 @@ namespace NuGet
             return schemaNamespace;
         }
 
-        public static Manifest Create(IPackageMetadata metadata)
+        public static Manifest Create(
+            IPackageMetadata metadata)
+        {
+            return Create(metadata, null);
+        }
+
+        public static Manifest Create(
+            IPackageMetadata metadata, IEnumerable<IPackageManifestFile> files)
         {
             return new Manifest
-            {
-                Metadata = new ManifestMetadata
                 {
-                    Id = metadata.Id.SafeTrim(),
-                    Version = metadata.Version.ToStringSafe(),
-                    Title = metadata.Title.SafeTrim(),
-                    Authors = GetCommaSeparatedString(metadata.Authors),
-                    Owners = GetCommaSeparatedString(metadata.Owners) ?? GetCommaSeparatedString(metadata.Authors),
-                    Tags = String.IsNullOrEmpty(metadata.Tags) ? null : metadata.Tags.SafeTrim(),
-                    LicenseUrl = ConvertUrlToStringSafe(metadata.LicenseUrl),
-                    ProjectUrl = ConvertUrlToStringSafe(metadata.ProjectUrl),
-                    IconUrl = ConvertUrlToStringSafe(metadata.IconUrl),
-                    RequireLicenseAcceptance = metadata.RequireLicenseAcceptance,
-                    Description = metadata.Description.SafeTrim(),
-                    Copyright = metadata.Copyright.SafeTrim(),
-                    Summary = metadata.Summary.SafeTrim(),
-                    ReleaseNotes = metadata.ReleaseNotes.SafeTrim(),
-                    Language = metadata.Language.SafeTrim(),
-                    DependencySets = CreateDependencySets(metadata),
-                    FrameworkAssemblies = CreateFrameworkAssemblies(metadata),
-                    ReferenceSets = CreateReferenceSets(metadata),
-                    MinClientVersionString = metadata.MinClientVersion.ToStringSafe()
-                },
-            };
+                    Metadata = new ManifestMetadata
+                        {
+                            Id = metadata.Id.SafeTrim(),
+                            Version = metadata.Version.ToStringSafe(),
+                            Title = metadata.Title.SafeTrim(),
+                            Authors = GetCommaSeparatedString(metadata.Authors),
+                            Owners = GetCommaSeparatedString(metadata.Owners) ?? GetCommaSeparatedString(metadata.Authors),
+                            Tags = String.IsNullOrEmpty(metadata.Tags) ? null : metadata.Tags.SafeTrim(),
+                            LicenseUrl = ConvertUrlToStringSafe(metadata.LicenseUrl),
+                            ProjectUrl = ConvertUrlToStringSafe(metadata.ProjectUrl),
+                            IconUrl = ConvertUrlToStringSafe(metadata.IconUrl),
+                            RequireLicenseAcceptance = metadata.RequireLicenseAcceptance,
+                            Description = metadata.Description.SafeTrim(),
+                            Copyright = metadata.Copyright.SafeTrim(),
+                            Summary = metadata.Summary.SafeTrim(),
+                            ReleaseNotes = metadata.ReleaseNotes.SafeTrim(),
+                            Language = metadata.Language.SafeTrim(),
+                            DependencySets = CreateDependencySets(metadata),
+                            FrameworkAssemblies = CreateFrameworkAssemblies(metadata),
+                            ReferenceSets = CreateReferenceSets(metadata),
+                            MinClientVersionString = metadata.MinClientVersion.ToStringSafe()
+
+                        },
+                    Files = Create(files)
+                };
+        }
+
+        static List<ManifestFile> Create(IEnumerable<IPackageManifestFile> files)
+        {
+            if (files == null) return null;
+
+            return files.Select(f => new ManifestFile
+                {
+                    Source = f.Source,
+                    Target = f.Target,
+                    Exclude = f.Exclude,
+                    Properties = f.Properties.Select(p=>new ManifestFileProperty
+                        {
+                            Name = p.Name,
+                            Value = p.Value
+                        }).ToList()
+                }).ToList();
         }
 
         private static string ConvertUrlToStringSafe(Uri url)

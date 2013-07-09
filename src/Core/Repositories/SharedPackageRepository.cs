@@ -148,7 +148,7 @@ namespace NuGet
             // Starting from 2.1, we save the nuspec file into the subdirectory with the name as <packageId>.<version>
             // for example, for jQuery version 1.0, it will be "jQuery.1.0\\jQuery.1.0.nuspec"
             string packageFilePath = GetManifestFilePath(package.Id, package.Version);
-            Manifest manifest = Manifest.Create(package);
+            Manifest manifest = Manifest.Create(package, package.ManifestFiles);
             FileSystem.AddFileWithCheck(packageFilePath, manifest.Save);
 
             // But in order to maintain backwards compatibility with older versions of NuGet, 
