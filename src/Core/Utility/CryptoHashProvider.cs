@@ -3,7 +3,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using NuGet.Resources;
 
@@ -81,7 +80,7 @@ namespace NuGet
             return Enumerable.SequenceEqual(dataHash, hash);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification="We want to return the object.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "We want to return the object.")]
         private HashAlgorithm GetHashAlgorithm()
         {
             if (_hashAlgorithm.Equals(SHA256HashAlgorithm, StringComparison.OrdinalIgnoreCase))
@@ -96,11 +95,11 @@ namespace NuGet
             // Mono does not currently support this method. Have this in a separate method to avoid JITing exceptions.
             var cryptoConfig = typeof(System.Security.Cryptography.CryptoConfig);
 
-            if(cryptoConfig != null) 
+            if (cryptoConfig != null)
             {
-                var allowOnlyFipsAlgorithmsProperty = cryptoConfig.GetProperty("AllowOnlyFipsAlgorithms", BindingFlags.NonPublic | BindingFlags.Static);
+                var allowOnlyFipsAlgorithmsProperty = cryptoConfig.GetProperty("AllowOnlyFipsAlgorithms", BindingFlags.Public | BindingFlags.Static);
 
-                if(allowOnlyFipsAlgorithmsProperty != null)
+                if (allowOnlyFipsAlgorithmsProperty != null)
                 {
                     return (bool)allowOnlyFipsAlgorithmsProperty.GetValue(null, null);
                 }
