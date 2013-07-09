@@ -11,7 +11,7 @@ Change Log / Release Notes
 * [#2276](https://nuget.codeplex.com/workitem/2276) Support XNA for Windows Phone projects.
 * Add restore command to nuget.exe
 * [#2565](https://nuget.codeplex.com/workitem/2565) Handling of Project Retargeting and Project Upgrading Events
-* [#3463](https://nuget.codeplex.com/workitem/3464) Show package restore bar by default, even if package restore mode is not enabled.
+* [#3463](https://nuget.codeplex.com/workitem/3463) Show package restore bar by default, even if package restore mode is not enabled.
 
 ## NuGet 2.6
 
