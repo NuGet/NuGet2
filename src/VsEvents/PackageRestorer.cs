@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -11,7 +12,7 @@ using NuGet.VisualStudio;
 
 namespace NuGet.VsEvents
 {
-    public class PackageRestorer
+    public sealed class PackageRestorer : IDisposable
     {
         private const string LogEntrySource = "NuGet PackageRestorer";        
 
@@ -26,7 +27,9 @@ namespace NuGet.VsEvents
         // won't get disconnected.
         private BuildEvents _buildEvents;
 
-        private bool _isConsentGranted;
+        private SolutionEvents _solutionEvents;
+                
+        private ErrorListProvider _errorListProvider;
 
         enum VerbosityLevel
         {
@@ -37,11 +40,14 @@ namespace NuGet.VsEvents
             Diagnostic = 4
         };
 
-        public PackageRestorer(DTE dte)
+        public PackageRestorer(DTE dte, IServiceProvider serviceProvider)
         {
             _dte = dte;
+            _errorListProvider = new ErrorListProvider(serviceProvider);
             _buildEvents = dte.Events.BuildEvents;
             _buildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
+            _solutionEvents = dte.Events.SolutionEvents;
+            _solutionEvents.AfterClosing += SolutionEvents_AfterClosing;            
 
             // get the "Build" output window pane
             var dte2 = (DTE2)dte;
@@ -54,6 +60,11 @@ namespace NuGet.VsEvents
                     break;
                 }
             }
+        }
+
+        private void SolutionEvents_AfterClosing()
+        {
+            _errorListProvider.Tasks.Clear();
         }
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log an exception as a warning and move on")]
@@ -71,7 +82,15 @@ namespace NuGet.VsEvents
                     return;
                 }
 
-                RestorePackages();                
+                _errorListProvider.Tasks.Clear();
+                if (IsConsentGranted())
+                {
+                    RestorePackages();
+                }
+                else
+                {
+                    CheckForMissingPackages();
+                }
             }
             catch (Exception ex)
             {
@@ -83,18 +102,101 @@ namespace NuGet.VsEvents
 
         private void RestorePackages()
         {
-            _isConsentGranted = IsConsentGranted();
             _msBuildOutputVerbosity = GetMSBuildOutputVerbositySetting(_dte);
             WriteLine(VerbosityLevel.Minimal, Resources.PackageRestoreStarted);
             PackageRestore(_dte.Solution);
             foreach (Project project in _dte.Solution.Projects)
             {
-                if (project.IsNuGetInUse())
+                if (project.IsUnloaded() || project.IsNuGetInUse())
                 {
                     PackageRestore(project);
                 }
             }
             WriteLine(VerbosityLevel.Minimal, Resources.PackageRestoreFinished);
+        }
+
+        /// <summary>
+        /// Checks if there are missing packages that should be restored. If so, a warning will 
+        /// be added to the error list.
+        /// </summary>
+        private void CheckForMissingPackages()
+        {
+            var missingPackages = new List<PackageReference>();
+            var repoSettings = ServiceLocator.GetInstance<IRepositorySettings>();
+            var fileSystem = new PhysicalFileSystem(repoSettings.RepositoryPath);
+
+            missingPackages.AddRange(GetMissingPackages(_dte.Solution, fileSystem));
+            foreach (Project project in _dte.Solution.Projects)
+            {
+                if (project.IsUnloaded())
+                {
+                    var projectFullPath = project.GetFullPath();
+                    if (File.Exists(projectFullPath))
+                    {
+                        var packageReferenceFileFullPath = Path.Combine(
+                            Path.GetDirectoryName(projectFullPath),
+                            VsUtility.PackageReferenceFile);
+                        missingPackages.AddRange(GetMissingPackages(packageReferenceFileFullPath, fileSystem));
+                    }
+                }
+                else
+                {
+                    if (project.IsNuGetInUse())
+                    {
+                        missingPackages.AddRange(GetMissingPackages(project, fileSystem));
+                    }
+                }
+            }
+
+            if (missingPackages.Count > 0)
+            {
+                var errorText = String.Format(CultureInfo.CurrentCulture, 
+                    Resources.PackageNotRestoredBecauseOfNoConsent,
+                    String.Join(", ", missingPackages.Select(p => p.ToString())));
+                VsUtility.ShowError(_errorListProvider, TaskErrorCategory.Warning, TaskPriority.Normal, errorText, hierarchyItem: null);
+            }
+        }
+
+        /// <summary>
+        /// Gets the list of missing solution level packages of the solution.
+        /// </summary>
+        /// <param name="solution">The solution to check.</param>
+        /// <param name="fileSystem">The file sytem of the local repository.</param>
+        /// <returns>The list of missing packages.</returns>
+        private static IEnumerable<PackageReference> GetMissingPackages(Solution solution, IFileSystem fileSystem)
+        {
+            var packageReferenceFileFullPath = Path.Combine(
+                VsUtility.GetNuGetSolutionFolder(solution),
+                VsUtility.PackageReferenceFile);
+            return GetMissingPackages(packageReferenceFileFullPath, fileSystem);
+        }
+
+        /// <summary>
+        /// Gets the list of missing packages of the project.
+        /// </summary>
+        /// <param name="project">The project to check.</param>
+        /// /// <param name="fileSystem">The file sytem of the local repository.</param>
+        /// <returns>The list of missing packages.</returns>
+        private static IEnumerable<PackageReference> GetMissingPackages(Project project, IFileSystem fileSystem)
+        {
+            var projectFullPath = VsUtility.GetFullPath(project);            
+            var packageReferenceFileFullPath = Path.Combine(
+                    Path.GetDirectoryName(projectFullPath),
+                    VsUtility.PackageReferenceFile);
+            return GetMissingPackages(packageReferenceFileFullPath, fileSystem);
+        }
+
+        /// <summary>
+        /// Gets the list of missing packages listed in the package reference file.
+        /// </summary>
+        /// <param name="packageReferenceFileFullPath">The full path of the package reference file.</param>
+        /// <param name="fileSystem">The file system of the local repository</param>
+        /// <returns>The list of missing packages.</returns>
+        private static IEnumerable<PackageReference> GetMissingPackages(string packageReferenceFileFullPath, IFileSystem fileSystem)
+        {
+            var packageReferenceFile = new PackageReferenceFile(packageReferenceFileFullPath);
+            return packageReferenceFile.GetPackageReferences()
+                .Where(package => !IsPackageInstalled(fileSystem, package.Id, package.Version));
         }
 
         /// <summary>
@@ -129,14 +231,15 @@ namespace NuGet.VsEvents
             var repoSettings = ServiceLocator.GetInstance<IRepositorySettings>();
             var fileSystem = new PhysicalFileSystem(repoSettings.RepositoryPath);
             var projectFullPath = VsUtility.GetFullPath(project);
+            
             WriteLine(VerbosityLevel.Normal, Resources.RestoringPackagesOfProject, projectFullPath);
 
             try
             {
-                var packageReferenceFileName = Path.Combine(
+                var packageReferenceFileFullPath = Path.Combine(
                     Path.GetDirectoryName(projectFullPath),
                     VsUtility.PackageReferenceFile);
-                RestorePackages(packageReferenceFileName, fileSystem);
+                RestorePackages(packageReferenceFileFullPath, fileSystem);
             }
             catch (Exception ex)
             {
@@ -158,48 +261,38 @@ namespace NuGet.VsEvents
         private void RestorePackage(PackageReference package, IFileSystem fileSystem)
         {
             WriteLine(VerbosityLevel.Normal, Resources.RestoringPackage, package);
-
-            IVsPackageManagerFactory packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
-            var packageManager = packageManagerFactory.CreatePackageManager();
-
-            if (IsPackageInstalled(packageManager.LocalRepository, fileSystem, package.Id, package.Version))
+            
+            if (IsPackageInstalled(fileSystem, package.Id, package.Version))
             {
                 WriteLine(VerbosityLevel.Normal, Resources.SkipInstalledPackage, package);
                 return;
             }
 
-            if (_isConsentGranted)
+            IVsPackageManagerFactory packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
+            var packageManager = packageManagerFactory.CreatePackageManager();
+            using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore, package.Id))
             {
-                using (packageManager.SourceRepository.StartOperation(RepositoryOperationNames.Restore, package.Id))
-                {
-                    var resolvedPackage = PackageHelper.ResolvePackage(
-                        packageManager.SourceRepository, package.Id, package.Version);
-                    NuGet.Common.PackageExtractor.InstallPackage(packageManager, resolvedPackage);
-                    WriteLine(VerbosityLevel.Normal, Resources.PackageRestored, resolvedPackage);
-                }
-            }
-            else
-            {
-                WriteLine(VerbosityLevel.Quiet, Resources.PackageNotRestoredBecauseOfNoConsent, package);
+                var resolvedPackage = PackageHelper.ResolvePackage(
+                    packageManager.SourceRepository, package.Id, package.Version);
+                NuGet.Common.PackageExtractor.InstallPackage(packageManager, resolvedPackage);
+                WriteLine(VerbosityLevel.Normal, Resources.PackageRestored, resolvedPackage);
             }
         }
 
         /// <summary>
         /// Returns true if the package is already installed in the local repository.
         /// </summary>
-        /// <param name="repository">The local repository.</param>
         /// <param name="fileSystem">The file system of the local repository.</param>
         /// <param name="packageId">The package id.</param>
         /// <param name="version">The package version</param>
         /// <returns>True if the package is installed in the local repository.</returns>
-        private static bool IsPackageInstalled(IPackageRepository repository, IFileSystem fileSystem,
-            string packageId, SemanticVersion version)
+        private static bool IsPackageInstalled(IFileSystem fileSystem, string packageId, SemanticVersion version)
         {
             if (version != null)
             {
                 // If we know exactly what package to lookup, check if it's already installed locally. 
                 // We'll do this by checking if the package directory exists on disk.
-                var localRepository = repository as LocalPackageRepository;
+                var localRepository = new LocalPackageRepository(new DefaultPackagePathResolver(fileSystem), fileSystem);
                 var packagePaths = localRepository.GetPackageLookupPaths(packageId, version);
                 return packagePaths.Any(fileSystem.FileExists);
             }
@@ -207,16 +300,15 @@ namespace NuGet.VsEvents
         }
 
         /// <summary>
-        /// Restores packages listed in the <paramref name="packageReferenceFileName"/> into the packages folder
+        /// Restores packages listed in the <paramref name="packageReferenceFileFullPath"/> into the packages folder
         /// represented by <paramref name="fileSystem"/>.
         /// </summary>
-        /// <param name="packageReferenceFileName">The package reference file name.</param>
+        /// <param name="packageReferenceFileFullPath">The package reference file full path.</param>
         /// <param name="fileSystem">The file system that represents the packages folder.</param>
-        private void RestorePackages(string packageReferenceFileName, IFileSystem fileSystem)
+        private void RestorePackages(string packageReferenceFileFullPath, IFileSystem fileSystem)
         {
-            var packageReferenceFile = new PackageReferenceFile(packageReferenceFileName);
-            var packageReferences = packageReferenceFile.GetPackageReferences().ToList();
-            foreach (var package in packageReferences)
+            var packageReferenceFile = new PackageReferenceFile(packageReferenceFileFullPath);
+            foreach (var package in packageReferenceFile.GetPackageReferences())
             {
                 RestorePackage(package, fileSystem);
             }
@@ -235,10 +327,10 @@ namespace NuGet.VsEvents
 
             try
             {
-                var packageReferenceFileName = Path.Combine(
+                var packageReferenceFileFullPath = Path.Combine(
                     VsUtility.GetNuGetSolutionFolder(solution),
                     VsUtility.PackageReferenceFile);
-                RestorePackages(packageReferenceFileName, fileSystem);
+                RestorePackages(packageReferenceFileFullPath, fileSystem);
             }
             catch (Exception ex)
             {
@@ -294,6 +386,13 @@ namespace NuGet.VsEvents
             {
                 return 0;
             }
+        }
+
+        public void Dispose()
+        {
+            _errorListProvider.Dispose();
+            _buildEvents.OnBuildBegin -= BuildEvents_OnBuildBegin;
+            _solutionEvents.AfterClosing -= SolutionEvents_AfterClosing;
         }
     }
 }

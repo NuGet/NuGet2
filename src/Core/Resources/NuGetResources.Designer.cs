@@ -791,6 +791,15 @@ namespace NuGet.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to parse pendingReinstallation value &apos;{0}&apos; from &apos;{1}&apos;..
+        /// </summary>
+        internal static string ReferenceFile_InvalidPendingReinstallationFlag {
+            get {
+                return ResourceManager.GetString("ReferenceFile_InvalidPendingReinstallationFlag", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to parse version value &apos;{0}&apos; from &apos;{1}&apos;..
         /// </summary>
         internal static string ReferenceFile_InvalidVersion {

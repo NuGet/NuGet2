@@ -83,11 +83,76 @@ namespace NuGet.VsEvents
             return packagesToBeReinstalled;
         }
 
+        /// <summary>
+        /// Marks the packages to be reinstalled on the projects' packages.config
+        /// </summary>
+        internal static void MarkPackagesForReinstallation(Project project, IList<IPackage> packagesToBeReinstalled)
+        {
+            Debug.Assert(project != null);
+            Debug.Assert(packagesToBeReinstalled != null);
+
+            PackageReferenceFile packageReferenceFile = GetPackageReferenceFile(project);
+            if (packageReferenceFile != null)
+            {
+                MarkPackagesForReinstallation(packageReferenceFile, packagesToBeReinstalled);
+            }
+        }
+
+        /// <summary>
+        /// Marks the packages in packageReferenceFile for reinstallation based on packagesToBeReinstalled
+        /// </summary>
+        internal static void MarkPackagesForReinstallation(PackageReferenceFile packageReferenceFile, IList<IPackage> packagesToBeReinstalled)
+        {
+            Debug.Assert(packageReferenceFile != null);
+            Debug.Assert(packagesToBeReinstalled != null);
+
+            List<PackageReference> packageReferences = packageReferenceFile.GetPackageReferences().ToList();
+            foreach (IPackage package in packagesToBeReinstalled)
+            {
+                PackageReference packageReference = packageReferences.Find(p => p.Id.Equals(package.Id, StringComparison.CurrentCultureIgnoreCase) && p.Version == package.Version);
+                Debug.Assert(packageReference != null);
+                packageReferenceFile.MarkEntryForReinstallation(packageReference.Id, packageReference.Version, packageReference.TargetFramework);
+            }
+        }
+
+        /// <summary>
+        /// Returns a list of package references that were marked for reinstallation in packages.config of the project
+        /// </summary>
+        internal static IList<PackageReference> GetPackageReferencesMarkedForReinstallation(Project project)
+        {
+            Debug.Assert(project != null);
+
+            // First call to VsUtility.PackageConfigExists(project) checks if there is a packages.config file under the project folder, Otherwise, return emtpy list
+            // If present, then call VsUtility.IsNuGetInUse to see if NuGet is used in the project. The second call might result in loading of NuGet.VisualStudio.dll
+            if (VsUtility.PackagesConfigExists(project) && project.IsNuGetInUse())
+            {
+                PackageReferenceFile packageReferenceFile = GetPackageReferenceFile(project);
+                Debug.Assert(packageReferenceFile != null);
+
+                IEnumerable<PackageReference> packageReferences = packageReferenceFile.GetPackageReferences();
+                return packageReferences.Where(p => p.PendingReinstallation).ToList();
+            }
+
+            return new List<PackageReference>();
+        }
+
         private static IPackageRepository GetLocalRepository()
         {
             IVsPackageManagerFactory packageManagerFactory = ServiceLocator.GetInstance<IVsPackageManagerFactory>();
             var packageManager = packageManagerFactory.CreatePackageManager();
             return packageManager.LocalRepository;
+        }
+
+        private static PackageReferenceFile GetPackageReferenceFile(Project project)
+        {
+            Debug.Assert(project != null);
+            var projectFullPath = VsUtility.GetFullPath(project);
+            var packageReferenceFile = Path.Combine(Path.GetDirectoryName(projectFullPath), VsUtility.PackageReferenceFile);
+            if (File.Exists(packageReferenceFile))
+            {
+                return new PackageReferenceFile(packageReferenceFile);
+            }
+            return null;
         }
 
         /// <summary>
@@ -99,11 +164,8 @@ namespace NuGet.VsEvents
         {
             Debug.Assert(project != null);
 
-            var projectFullPath = VsUtility.GetFullPath(project);
-            var packageReferenceFileName = Path.Combine(Path.GetDirectoryName(projectFullPath), VsUtility.PackageReferenceFile);
-
-            Debug.Assert(File.Exists(packageReferenceFileName));
-            var packageReferenceFile = new PackageReferenceFile(packageReferenceFileName);
+            PackageReferenceFile packageReferenceFile = GetPackageReferenceFile(project);
+            Debug.Assert(packageReferenceFile != null);
 
             return packageReferenceFile.GetPackageReferences();
         }

@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+using NuGet.Resources;
 using NuGet.Test.Mocks;
 using Xunit;
 using Xunit.Extensions;
@@ -169,6 +170,134 @@ namespace NuGet.Test
             // Assert
             Assert.IsType<InvalidDataException>(exception);
             Assert.Equal(expectedMessage, exception.Message);
+        }
+
+        [Theory]
+        [InlineData("foo")]
+        [InlineData("bar")]
+        [InlineData("baz")]
+        [InlineData("on")]
+        [InlineData("off")]
+        [InlineData("yes")]
+        [InlineData("no")]
+        [InlineData("0")]
+        [InlineData("1")]
+        public void GetPackageReferencesThrowsIfPendingReinstallationFlagIsInvalid(string text)
+        {
+            // Arrange
+            var configFormat = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.3.4"" pendingReinstallation=""{0}"" />
+</packages>";
+
+            var config = string.Format(CultureInfo.InvariantCulture, configFormat, text);
+            var expectedMessage = string.Format(CultureInfo.CurrentCulture, NuGetResources.ReferenceFile_InvalidPendingReinstallationFlag, text, "packages.config");
+
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", config);
+            var packageReferenceFile = new PackageReferenceFile(fileSystem, "packages.config");
+
+            // Act
+            var exception = Record.Exception(() => packageReferenceFile.GetPackageReferences().ToList());
+
+            // Assert
+            Assert.IsType<InvalidDataException>(exception);
+            Assert.Equal(expectedMessage, exception.Message);
+        }
+
+        [Fact]
+        public void GetPackageReferencesParsePackagePendingReinstallationAndReturnsTrue()
+        {
+            // Arrange
+            var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" targetFramework=""sl4"" pendingReinstallation=""true"" />
+  <package id=""B"" version=""1.0"" targetFramework=""sl4"" pendingReinstallation=""TruE"" />
+  <package id=""C"" version=""1.0"" targetFramework=""sl4"" pendingReinstallation=""TRUE"" />
+</packages>";
+
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", config);
+            var packageReferenceFile = new PackageReferenceFile(fileSystem, "packages.config");
+
+            // Act
+            var values = packageReferenceFile.GetPackageReferences().ToList();
+
+            // Assert
+            Assert.Equal(3, values.Count);
+            Assert.True(values[0].PendingReinstallation);
+            Assert.True(values[1].PendingReinstallation);
+            Assert.True(values[2].PendingReinstallation);
+        }
+
+        [Fact]
+        public void GetPackageReferencesParsePackagePendingReinstallationAndReturnsTrueAndFalse()
+        {
+            // Arrange
+            var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0""  targetFramework=""net45"" pendingReinstallation=""false"" />
+  <package id=""B"" version=""1.0""  targetFramework=""net45""/>
+  <package id=""B"" version=""1.0""  targetFramework=""net45"" pendingReinstallation=""true""/>
+</packages>";
+
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", config);
+            var packageReferenceFile = new PackageReferenceFile(fileSystem, "packages.config");
+
+            // Act
+            var values = packageReferenceFile.GetPackageReferences().ToList();
+
+            // Assert
+            Assert.Equal(3, values.Count);
+            Assert.False(values[0].PendingReinstallation);
+            Assert.False(values[1].PendingReinstallation);
+            Assert.True(values[2].PendingReinstallation);
+        }
+
+        [Fact]
+        public void GetPackageReferenceParsesPendingReinstallationWithDifferentCasing()
+        {
+            // Arrange
+            var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0""  targetFramework=""net45"" PendingReINSTALLation=""false"" />
+</packages>";
+
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", config);
+            var packageReferenceFile = new PackageReferenceFile(fileSystem, "packages.config");
+
+            // Act
+            var values = packageReferenceFile.GetPackageReferences().ToList();
+
+            // Assert
+            Assert.Equal(1, values.Count);
+            Assert.False(values[0].PendingReinstallation);
+        }
+
+        [Fact]
+        public void MarkEntryForReinstallationMarksPackagesProperly()
+        {
+            // Arrange
+            var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" targetFramework=""net45""/>
+  <package id=""B"" version=""1.0"" targetFramework=""net45""/>
+</packages>";
+
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", config);
+            var packageReferenceFile = new PackageReferenceFile(fileSystem, "packages.config");
+
+            // Act
+            packageReferenceFile.MarkEntryForReinstallation("A", new SemanticVersion("1.0"), new FrameworkName(".NETFramework, Version=4.5"));
+            var packageReferences = packageReferenceFile.GetPackageReferences().ToList();
+
+            // Assert
+            Assert.Equal(2, packageReferences.Count);
+            Assert.True(packageReferences[0].PendingReinstallation);
+            Assert.False(packageReferences[1].PendingReinstallation);
         }
     }
 }

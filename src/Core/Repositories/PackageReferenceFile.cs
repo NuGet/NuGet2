@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -62,6 +63,7 @@ namespace NuGet
                 string versionConstraintString = e.GetOptionalAttributeValue("allowedVersions");
                 string targetFrameworkString = e.GetOptionalAttributeValue("targetFramework");
                 string developmentFlagString = e.GetOptionalAttributeValue("developmentDependency");
+                string pendingReinstallationString = e.GetOptionalAttributeValue("pendingReinstallation");
                 SemanticVersion version = null;
 
                 if (String.IsNullOrEmpty(id))
@@ -115,7 +117,16 @@ namespace NuGet
                     _developmentFlags[id] = developmentFlagString;
                 }
 
-                yield return new PackageReference(id, version, versionConstaint, targetFramework, developmentFlag);
+                var pendingReinstallation = false;
+                if (!String.IsNullOrEmpty(pendingReinstallationString))
+                {
+                    if (!Boolean.TryParse(pendingReinstallationString, out pendingReinstallation))
+                    {
+                        throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ReferenceFile_InvalidPendingReinstallationFlag, pendingReinstallationString, _path));
+                    }
+                }
+
+                yield return new PackageReference(id, version, versionConstaint, targetFramework, developmentFlag, pendingReinstallation);
             }
         }
 
@@ -157,7 +168,26 @@ namespace NuGet
             AddEntry(document, id, version, targetFramework);
         }
 
+        public void MarkEntryForReinstallation(string id, SemanticVersion version, FrameworkName targetFramework)
+        {
+            Debug.Assert(id != null);
+            Debug.Assert(version != null);
+            Debug.Assert(targetFramework != null);
+
+            XDocument document = GetDocument();
+            if (document != null)
+            {
+                DeleteEntry(id, version);
+                AddEntry(document, id, version, targetFramework, pendingReinstallation: true);
+            }
+        }
+
         private void AddEntry(XDocument document, string id, SemanticVersion version, FrameworkName targetFramework)
+        {
+            AddEntry(document, id, version, targetFramework, pendingReinstallation: false);
+        }
+
+        private void AddEntry(XDocument document, string id, SemanticVersion version, FrameworkName targetFramework, bool pendingReinstallation)
         {
             XElement element = FindEntry(document, id, version);
 
@@ -186,6 +216,11 @@ namespace NuGet
             if (_developmentFlags.TryGetValue(id, out developmentFlag))
             {
                 newElement.Add(new XAttribute("developmentDependency", developmentFlag));
+            }
+
+            if (pendingReinstallation)
+            {
+                newElement.Add(new XAttribute("pendingReinstallation", Boolean.TrueString));
             }
 
             document.Root.Add(newElement);

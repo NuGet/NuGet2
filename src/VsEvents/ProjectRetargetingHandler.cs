@@ -64,26 +64,40 @@ namespace NuGet.VsEvents
 
         private void BuildEvents_OnBuildBegin(vsBuildScope Scope, vsBuildAction Action)
         {
-            // Clear the error list upon the first build action. This includes building, rebuilding, cleaning and so on
+            // Clear the error list upon the first build action
             // Note that the retargeting error message is shown on the errorlistprovider this class creates
             // Hence, explicit clearing of the error list is required
             _errorListProvider.Tasks.Clear();
+
+            if (Action != vsBuildAction.vsBuildActionClean)
+            {
+                ShowWarningsForPackageReinstallation(_dte.Solution);
+            }
         }
 
-        private void ShowRetargetingError(IList<IPackage> packagesToBeReinstalled, IVsHierarchy pAfterChangeHier)
+        private void ShowWarningsForPackageReinstallation(Solution solution)
+        {
+            Debug.Assert(solution != null);
+
+            foreach (Project project in solution.Projects)
+            {
+                IList<PackageReference> packageReferencesToBeReinstalled = ProjectRetargetingUtility.GetPackageReferencesMarkedForReinstallation(project);
+                if (packageReferencesToBeReinstalled.Count > 0)
+                {
+                    Debug.Assert(project.IsNuGetInUse());
+                    IVsHierarchy projectHierarchy = project.ToVsHierarchy();
+                    ShowRetargetingErrorTask(packageReferencesToBeReinstalled.Select(p => p.Id), projectHierarchy, TaskErrorCategory.Warning, TaskPriority.Normal);
+                }
+            }
+        }
+
+        private void ShowRetargetingErrorTask(IEnumerable<string> packagesToBeReinstalled, IVsHierarchy projectHierarchy, TaskErrorCategory errorCategory, TaskPriority priority)
         {
             Debug.Assert(packagesToBeReinstalled != null && !packagesToBeReinstalled.IsEmpty());
 
-            ErrorTask retargetErrorTask = new ErrorTask();
-            retargetErrorTask.Text = String.Format(CultureInfo.CurrentCulture, Resources.ProjectUpgradeAndRetargetErrorMessage,
-                String.Join(", ", packagesToBeReinstalled.Select(p => p.Id)));
-            retargetErrorTask.ErrorCategory = TaskErrorCategory.Error;
-            retargetErrorTask.Category = TaskCategory.BuildCompile;
-            retargetErrorTask.Priority = TaskPriority.High;
-            retargetErrorTask.HierarchyItem = pAfterChangeHier;
-            _errorListProvider.Tasks.Add(retargetErrorTask);
-            _errorListProvider.BringToFront();
-            _errorListProvider.ForceShowErrors();
+            var errorText = String.Format(CultureInfo.CurrentCulture, Resources.ProjectUpgradeAndRetargetErrorMessage,
+                    String.Join(", ", packagesToBeReinstalled));
+            VsUtility.ShowError(_errorListProvider, errorCategory, priority, errorText, projectHierarchy);
         }
 
         #region IVsTrackProjectRetargetingEvents
@@ -96,7 +110,8 @@ namespace NuGet.VsEvents
                 IList<IPackage> packagesToBeReinstalled = ProjectRetargetingUtility.GetPackagesToBeReinstalled(retargetedProject);
                 if (!packagesToBeReinstalled.IsEmpty())
                 {
-                    ShowRetargetingError(packagesToBeReinstalled, pAfterChangeHier);
+                    ShowRetargetingErrorTask(packagesToBeReinstalled.Select(p => p.Id), pAfterChangeHier, TaskErrorCategory.Error, TaskPriority.High);
+                    ProjectRetargetingUtility.MarkPackagesForReinstallation(retargetedProject, packagesToBeReinstalled);
                 }
             }
             return VSConstants.S_OK;

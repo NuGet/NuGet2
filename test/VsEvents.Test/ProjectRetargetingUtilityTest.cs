@@ -273,5 +273,79 @@ namespace NuGet.VsEvents
             Assert.Equal(packagesToBeReinstalled[0].Id, "A");
             Assert.Equal(packagesToBeReinstalled[1].Id, "B");
         }
+
+        [Fact]
+        public static void MarkPackagesForReinstallationMarksPackagesProperly()
+        {
+            // Arrange
+            var config = @"<?xml version=""1.0"" encoding=""utf-8""?>
+<packages>
+  <package id=""A"" version=""1.0"" targetFramework=""net30""/>
+  <package id=""B"" version=""1.0""/>
+  <package id=""C"" version=""1.0"" targetFramework=""net40""/>
+</packages>";
+
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile("packages.config", config);
+            var packageReferenceFile = new PackageReferenceFile(fileSystem, "packages.config");
+
+            IList<IPackage> packagesToBeReinstalled = new List<IPackage>() { PackageUtility.CreatePackage("A", "1.0"), PackageUtility.CreatePackage("C", "1.0") };
+
+            // Act
+            ProjectRetargetingUtility.MarkPackagesForReinstallation(packageReferenceFile, packagesToBeReinstalled);
+            var packageReferences = packageReferenceFile.GetPackageReferences().ToList();
+            
+            // Assert
+            Assert.Equal(3, packageReferences.Count);
+            Assert.Equal("A", packageReferences[0].Id);
+            Assert.Equal("B", packageReferences[1].Id);
+            Assert.Equal("C", packageReferences[2].Id);
+            Assert.True(packageReferences[0].PendingReinstallation);
+            Assert.False(packageReferences[1].PendingReinstallation);
+            Assert.True(packageReferences[2].PendingReinstallation);
+        }
+
+        [Fact]
+        public static void GetPackageReferencesMarkedForReinstallationWhenProjectKindIsNull()
+        {
+            // Arrange
+            Mock<Project> mockProject = new Mock<Project>();
+
+            // Act
+            var packagesToBeReinstalled = ProjectRetargetingUtility.GetPackageReferencesMarkedForReinstallation(mockProject.Object);
+
+            // Assert
+            Assert.True(packagesToBeReinstalled.IsEmpty());
+        }
+
+        [Fact]
+        public static void GetPackageReferencesMarkedForReinstallationWhenProjectIsNotOfSupportedType()
+        {
+            // Arrange
+            Mock<Project> mockProject = new Mock<Project>();
+            mockProject.Setup(p => p.Kind).Returns(Guid.NewGuid().ToString());
+
+            // Act
+            var packagesToBeReinstalled = ProjectRetargetingUtility.GetPackageReferencesMarkedForReinstallation(mockProject.Object);
+
+            // Assert
+            Assert.True(packagesToBeReinstalled.IsEmpty());
+        }
+
+        [Fact]
+        public static void GetPackageReferencesMarkedForReinstallationReturnsEmptyListWhenNuGetIsNotInUseInAProject()
+        {
+            // Arrange
+            Mock<Project> mockProject = new Mock<Project>();
+
+            // Setup project kind to a supported value. This makes sure that the check for existence of packages.config happens
+            mockProject.Setup(p => p.Kind).Returns(VsConstants.CsharpProjectTypeGuid);
+
+            // Act
+            var packagesToBeReinstalled = ProjectRetargetingUtility.GetPackageReferencesMarkedForReinstallation(mockProject.Object);
+
+            // Assert
+            Assert.True(packagesToBeReinstalled.IsEmpty());
+        }
     }
 }

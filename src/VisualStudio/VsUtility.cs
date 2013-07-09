@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using EnvDTE;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using VsServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
@@ -36,6 +37,11 @@ namespace NuGet.VisualStudio
         public static string GetFullPath(Project project)
         {
             Debug.Assert(project != null);
+            if (project.IsUnloaded())
+            {
+                return Path.Combine(Path.GetDirectoryName(project.DTE.Solution.FullName), project.UniqueName);
+            }
+
             string fullPath = GetPropertyValue<string>(project, "FullPath");
             if (!String.IsNullOrEmpty(fullPath))
             {
@@ -161,6 +167,19 @@ namespace NuGet.VisualStudio
                 return true;
             }
             return false;
+        }
+
+        public static void ShowError(ErrorListProvider errorListProvider, TaskErrorCategory errorCategory, TaskPriority priority, string errorText, IVsHierarchy hierarchyItem)
+        {
+            ErrorTask retargetErrorTask = new ErrorTask();
+            retargetErrorTask.Text = errorText;
+            retargetErrorTask.ErrorCategory = errorCategory;
+            retargetErrorTask.Category = TaskCategory.BuildCompile;
+            retargetErrorTask.Priority = priority;
+            retargetErrorTask.HierarchyItem = hierarchyItem;
+            errorListProvider.Tasks.Add(retargetErrorTask);
+            errorListProvider.BringToFront();
+            errorListProvider.ForceShowErrors();
         }
     }
 }
