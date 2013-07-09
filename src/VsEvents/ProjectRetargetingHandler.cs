@@ -79,7 +79,7 @@ namespace NuGet.VsEvents
         {
             Debug.Assert(solution != null);
 
-            foreach (Project project in _dte.Solution.Projects)
+            foreach (Project project in solution.Projects)
             {
                 IList<PackageReference> packageReferencesToBeReinstalled = ProjectRetargetingUtility.GetPackageReferencesMarkedForReinstallation(project);
                 if (packageReferencesToBeReinstalled.Count > 0)
