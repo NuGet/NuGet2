@@ -154,11 +154,15 @@ namespace NuGet.Commands
 
         private void ReadSettings()
         {
-            if (_restoringForSolution)
+            if (_restoringForSolution || !String.IsNullOrEmpty(SolutionDirectory))
             {
+                var solutionDirectory = _restoringForSolution ?
+                    Path.GetDirectoryName(_solutionFileFullPath) :
+                    SolutionDirectory;
+
                 // Read the solution-level settings
                 var solutionSettingsFile = Path.Combine(
-                    Path.GetDirectoryName(_solutionFileFullPath), 
+                    solutionDirectory, 
                     NuGetConstants.NuGetSolutionSettingsFolder);
                 var fileSystem = CreateFileSystem(solutionSettingsFile);
 

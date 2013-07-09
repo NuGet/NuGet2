@@ -266,5 +266,56 @@ EndProject");
                 Util.DeleteDirectory(workingPath);
             }
         }
+
+        // Tests that when -solutionDir is specified, the $(SolutionDir)\.nuget\NuGet.Config file
+        // will be used.
+        [Fact]
+        public void RestoreCommand_FromPackagesConfigFileWithOptionSolutionDir()
+        {
+            // Arrange
+            var tempPath = Path.GetTempPath();
+            var workingPath = Path.Combine(tempPath, Guid.NewGuid().ToString());
+            var repositoryPath = Path.Combine(workingPath, Guid.NewGuid().ToString());
+            var currentDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                Util.CreateDirectory(workingPath);
+                Util.CreateDirectory(repositoryPath);
+                Util.CreateDirectory(Path.Combine(workingPath, ".nuget"));
+                Util.CreateTestPackage("packageA", "1.1.0", repositoryPath);
+                Util.CreateTestPackage("packageB", "2.2.0", repositoryPath);
+                Util.CreateFile(workingPath, "packages.config",
+@"<packages>
+  <package id=""packageA"" version=""1.1.0"" targetFramework=""net45"" />
+  <package id=""packageB"" version=""2.2.0"" targetFramework=""net45"" />
+</packages>");
+                Util.CreateFile(Path.Combine(workingPath, ".nuget"), "nuget.config",
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<configuration>
+  <config>
+    <add key=""repositorypath"" value=""$\..\..\Packages2"" />
+  </config>
+</configuration>");
+
+                string[] args = new string[] { "restore", "-Source", repositoryPath, "-solutionDir", workingPath };
+
+                // Act
+                Directory.SetCurrentDirectory(workingPath);
+                int r = Program.Main(args);
+
+                // Assert
+                Assert.Equal(0, r);
+                var packageFileA = Path.Combine(workingPath, @"packages2\packageA.1.1.0\packageA.1.1.0.nupkg");
+                var packageFileB = Path.Combine(workingPath, @"packages2\packageB.2.2.0\packageB.2.2.0.nupkg");
+                Assert.True(File.Exists(packageFileA));
+                Assert.True(File.Exists(packageFileB));
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(currentDirectory);
+                Util.DeleteDirectory(workingPath);
+            }
+        }
     }
 }
