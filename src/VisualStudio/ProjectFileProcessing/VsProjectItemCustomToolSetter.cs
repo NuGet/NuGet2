@@ -5,7 +5,7 @@ namespace NuGet.VisualStudio
     public class VsProjectItemCustomToolSetter:
         VsProjectItemProcessorBase
     {
-        readonly string _customTool;
+        readonly string _customToolName;
         readonly string _customToolNamespace;
 
         public const string CustomToolPropertyName = "CustomTool";
@@ -13,24 +13,34 @@ namespace NuGet.VisualStudio
 
         public VsProjectItemCustomToolSetter(
             string matchPattern, 
-            string customTool, 
+            string customToolName, 
             string customToolNamespace) : 
                 base(matchPattern)
         {
             if (string.IsNullOrWhiteSpace(matchPattern))
                 throw new ArgumentException("matchPattern cannot be null, empty or whitespace", "matchPattern");
-            if (string.IsNullOrWhiteSpace(customTool))
-                throw new ArgumentException("customTool cannot be null, empty or whitespace", "customTool");
+            if (string.IsNullOrWhiteSpace(customToolName))
+                throw new ArgumentException("customTool cannot be null, empty or whitespace", "customToolName");
 
-            _customTool = customTool;
+            _customToolName = customToolName;
             _customToolNamespace = customToolNamespace;
+        }
+
+        public string CustomToolName
+        {
+            get { return _customToolName; }
+        }
+
+        public string CustomToolNamespace
+        {
+            get { return _customToolNamespace; }
         }
 
         public override void Process(
             IProjectFileProcessingProjectItem projectItem)
         {
-            projectItem.SetPropertyValue(CustomToolPropertyName, _customTool);
-            projectItem.SetPropertyValue(CustomToolNamespacePropertyName, _customToolNamespace);
+            projectItem.SetPropertyValue(CustomToolPropertyName, CustomToolName);
+            projectItem.SetPropertyValue(CustomToolNamespacePropertyName, CustomToolNamespace);
 
             projectItem.RunCustomTool();
         }

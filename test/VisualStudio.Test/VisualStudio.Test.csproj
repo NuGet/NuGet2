@@ -33,6 +33,7 @@
       <HintPath>..\..\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -69,6 +70,7 @@
     <Compile Include="PathHelperTest.cs" />
     <Compile Include="ProjectExtensionsTest.cs" />
     <Compile Include="ProjectFileProcessing\ProjectFileProcessorTests.cs" />
+    <Compile Include="ProjectFileProcessing\VsPackageProcessorExtractorTest.cs" />
     <Compile Include="ProjectFileProcessing\VsProjectItemCustomToolSetterTest.cs" />
     <Compile Include="ProjectSystemExtensionsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,5 +1,4 @@
-﻿using System;
-using Moq;
+﻿using Moq;
 using Xunit;
 
 namespace NuGet.VisualStudio.Test
@@ -38,9 +37,10 @@ namespace NuGet.VisualStudio.Test
         {
             var projectItemMock = GetProjectItemMock();
             var projectMock = GetProjectMock(projectItemMock.Object);
+            var processor = new VsProjectItemPropertySetter("*.txt", PropertyName, PropertyValue);
 
             var sut = new ProjectFileProcessingBuilder(null)
-                .WithVsPropertySetter("*.txt", PropertyName, PropertyValue)
+                .WithProcessor(processor)
                 .Build(projectMock.Object);
 
             // act
@@ -57,9 +57,10 @@ namespace NuGet.VisualStudio.Test
         {
             var projectItemMock = GetProjectItemMock();
             var projectMock = GetProjectMock(projectItemMock.Object);
+            var processor = new VsProjectItemPropertySetter("*.xxx", PropertyName, PropertyValue);
 
             var sut = new ProjectFileProcessingBuilder(null)
-                .WithVsPropertySetter("*.xxx", PropertyName, PropertyValue)
+                .WithProcessor(processor)
                 .Build(projectMock.Object);
 
             // act
@@ -76,9 +77,10 @@ namespace NuGet.VisualStudio.Test
         {
             var projectItemMock = GetProjectItemMock();
             var projectMock = GetProjectMock(projectItemMock.Object);
+            var processor = new VsProjectItemPropertySetter("*.txt", PropertyName, PropertyValue);
 
             var sut = new ProjectFileProcessingBuilder(null)
-                .WithVsPropertySetter("*.txt", PropertyName, PropertyValue)
+                .WithProcessor(processor)
                 .Build(projectMock.Object);
 
             // act

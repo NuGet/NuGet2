@@ -18,8 +18,14 @@ namespace NuGet.Common
 
         public IProjectFileProcessingProjectItem GetItem(string path)
         {
-            throw new NotImplementedException(
-                "At this time an MSBuildProjectSystem should not be used to add files to a project");
+            return null;
+                // At this time an MSBuildProjectSystem should not be used to add files to a project"
+        }
+
+        public IEnumerable<IProjectFileProcessor> GetProcessorsFromPackage(IPackage package)
+        {
+            return null;
+                // At this time an MSBuildProjectSystem should not be used to add files to a project"
         }
 
         public bool IsBindingRedirectSupported

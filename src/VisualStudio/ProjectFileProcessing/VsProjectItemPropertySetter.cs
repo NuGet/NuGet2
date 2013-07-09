@@ -6,7 +6,7 @@
     public class VsProjectItemPropertySetter :
         VsProjectItemProcessorBase
     {
-        readonly string _propertyName;
+        readonly string _propertyName; 
         readonly string _propertyValue;
 
         public VsProjectItemPropertySetter(
@@ -18,10 +18,20 @@
             _propertyValue = propertyValue;
         }
 
+        public string PropertyName
+        {
+            get { return _propertyName; }
+        }
+
+        public string PropertyValue
+        {
+            get { return _propertyValue; }
+        }
+
         public override void Process(
             IProjectFileProcessingProjectItem projectItem)
         {
-            projectItem.SetPropertyValue(_propertyName, _propertyValue);
+            projectItem.SetPropertyValue(PropertyName, PropertyValue);
         }
     }
 }

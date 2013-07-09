@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace NuGet
@@ -34,11 +33,21 @@ namespace NuGet
             return this;
         }
 
-        public ProjectFileProcessingExecutor Build(
-            IProjectFileProcessingProject propertiesProject)
+        public ProjectFileProcessingBuilder WithProcessors(
+            IEnumerable<IProjectFileProcessor> processors)
         {
+            foreach (var processor in processors)
+                _processors.Add(processor);
+
+            return this;
+        }
+
+        public ProjectFileProcessingExecutor Build(
+            IProjectFileProcessingProject project)
+        {
+
             return new ProjectFileProcessingExecutor(
-                propertiesProject,
+                project,
                 _processors);
         }
 

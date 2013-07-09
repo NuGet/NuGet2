@@ -245,10 +245,10 @@ namespace NuGet
             FilterAssemblyReferences(assemblyReferences, package.PackageAssemblyReferences);
 
             // Clone the passed builder which contains conventional processing, add specific from the package
-            var fileProcessorBuilder = _fileProcessingBuilder.Clone();
-          
-            var fileProcessor = fileProcessorBuilder.Build(Project);
-
+            var fileProcessor = _fileProcessingBuilder.Clone()
+                .WithProcessors(Project.GetProcessorsFromPackage(package))
+                .Build(Project);
+            
             try
             {
                 // Add content files

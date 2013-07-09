@@ -22,6 +22,7 @@ namespace NuGet.VisualStudio
 
         private FrameworkName _targetFramework;
         private readonly IFileSystem _baseFileSystem;
+        readonly VsPackageProcessorExtractor _packageProcessorExtractor;
 
         public VsProjectSystem(Project project, IFileSystemProvider fileSystemProvider) 
             : base(project.GetFullPath())
@@ -29,6 +30,8 @@ namespace NuGet.VisualStudio
             Project = project;
             _baseFileSystem = fileSystemProvider.GetFileSystem(project.GetFullPath());
             Debug.Assert(_baseFileSystem != null);
+
+            _packageProcessorExtractor = new VsPackageProcessorExtractor();
         }
 
         public IProjectFileProcessingProjectItem GetItem(string path)
@@ -40,6 +43,13 @@ namespace NuGet.VisualStudio
             return projectItem == null
                        ? null
                        : new VsProjectFileProcessingProjectItem(projectItem);
+        }
+
+        public IEnumerable<IProjectFileProcessor> GetProcessorsFromPackage(
+            IPackage package)
+        {
+            return _packageProcessorExtractor
+                .FromManifestFiles(package.ManifestFiles);
         }
 
         protected Project Project

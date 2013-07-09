@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.Versioning;
 
 namespace NuGet.Test.Mocks
-{
+{ 
     public class MockProjectSystem : MockFileSystem, IProjectSystem
     {
         private FrameworkName _frameworkName;
@@ -35,6 +35,11 @@ namespace NuGet.Test.Mocks
         public IProjectFileProcessingProjectItem GetItem(string path)
         {
             return _getItem(path);
+        }
+
+        public IEnumerable<IProjectFileProcessor> GetProcessorsFromPackage(IPackage package)
+        {
+            return new IProjectFileProcessor[] {};
         }
 
         public bool IsBindingRedirectSupported

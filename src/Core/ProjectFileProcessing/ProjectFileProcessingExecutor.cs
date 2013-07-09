@@ -10,16 +10,16 @@ namespace NuGet
     /// </summary>
     public class ProjectFileProcessingExecutor
     {
-        readonly IProjectFileProcessingProject _propertiesProject;
+        readonly IProjectFileProcessingProject _project;
         readonly ReadOnlyCollection<IProjectFileProcessor> _processors;
 
         public ProjectFileProcessingExecutor(
-            IProjectFileProcessingProject propertiesProject,
+            IProjectFileProcessingProject project, 
             IEnumerable<IProjectFileProcessor> processors)
         {
-            if (propertiesProject == null) throw new ArgumentNullException("propertiesProject");
+            if (project == null) throw new ArgumentNullException("project");
 
-            _propertiesProject = propertiesProject;
+            _project = project;
 
             processors = processors ?? new IProjectFileProcessor[] { };
             _processors = new ReadOnlyCollection<IProjectFileProcessor>(processors.ToList());
@@ -29,7 +29,7 @@ namespace NuGet
         {
             if (path == null) throw new ArgumentNullException("path");
 
-            var projectItem = _propertiesProject.GetItem(path);
+            var projectItem = _project.GetItem(path);
             if (projectItem == null) return;
 
             var matchingRules =

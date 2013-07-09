@@ -4,7 +4,7 @@ namespace NuGet.VisualStudio
 {
     public abstract class VsProjectItemProcessorBase:
         IProjectFileProcessor
-    {
+    { 
         readonly string _matchPattern;
 
         protected VsProjectItemProcessorBase(string matchPattern)
@@ -12,10 +12,15 @@ namespace NuGet.VisualStudio
             _matchPattern = matchPattern;
         }
 
+        public string MatchPattern
+        {
+            get { return _matchPattern; }
+        }
+
         public bool IsMatch(IProjectFileProcessingProjectItem projectItem)
         {
             return PathResolver
-                .GetMatches(new[] { projectItem.Path }, p => p, new[] { _matchPattern })
+                .GetMatches(new[] { projectItem.Path }, p => p, new[] { MatchPattern })
                 .Any();
         }
 

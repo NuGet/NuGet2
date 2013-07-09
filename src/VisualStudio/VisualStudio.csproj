@@ -40,7 +40,7 @@
     <Compile Include="IVsTemplateWizard.cs" />
     <Compile Include="IVsWebsiteHandler.cs" />
     <Compile Include="IWindowSettingsManager.cs" />
-    <Compile Include="ProjectFileProcessing\VsProjectFileProcessingBuilderExtensions.cs" />
+    <Compile Include="ProjectFileProcessing\VsPackageProcessorExtractor.cs" />
     <Compile Include="ProjectFileProcessing\VsProjectFileProcessingProjectItem.cs" />
     <Compile Include="ProjectFileProcessing\VsProjectItemCustomToolSetter.cs" />
     <Compile Include="ProjectFileProcessing\VsProjectItemProcessorBase.cs" />

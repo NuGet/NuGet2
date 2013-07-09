@@ -284,7 +284,7 @@ namespace NuGet
                      f.TargetFramework != VersionUtility.UnsupportedFrameworkName &&
                      (f.Path.StartsWith(Constants.ContentDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
                       f.Path.StartsWith(Constants.ToolsDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)));
-
+            
             if (hasContentOrTool)
             {
                 return true;
