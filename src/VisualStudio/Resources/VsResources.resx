@@ -362,4 +362,7 @@ Packages installed into Website projects will not be restored during build. Cons
   <data name="Warning_PackageNotReferencedByAnyProject" xml:space="preserve">
     <value>Package {0} of version {1} is not referenced by any project.</value>
   </data>
+  <data name="Error_FailedToCreateParentFolder" xml:space="preserve">
+    <value>Failed to create parent folder for file '{0}' in project {1}.</value>
+  </data>
 </root>

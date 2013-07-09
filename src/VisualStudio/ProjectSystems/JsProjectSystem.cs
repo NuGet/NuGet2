@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using EnvDTE;
 using NuGet.VisualStudio.Resources;
@@ -22,6 +24,13 @@ namespace NuGet.VisualStudio
             base.AddFile(path, stream);
         }
 
+        public override void AddFile(string path, System.Action<Stream> writeToStream)
+        {
+            // ensure the parent folder is created before adding file to the project            
+            Project.GetProjectItems(Path.GetDirectoryName(path), createIfNotExists: true);
+            base.AddFile(path, writeToStream);
+        }
+
         protected override void AddFileToProject(string path)
         {
             if (ExcludeFile(path))
@@ -34,6 +43,15 @@ namespace NuGet.VisualStudio
 
             // Add the file to project or folder
             ProjectItems container = Project.GetProjectItems(folderPath, createIfNotExists: true);
+            if (container == null)
+            {
+                throw new ArgumentException(
+                    String.Format(
+                        CultureInfo.CurrentCulture,
+                        VsResources.Error_FailedToCreateParentFolder,
+                        path,
+                        ProjectName));
+            }
             AddFileToContainer(fullPath, folderPath, container);
 
             Logger.Log(MessageLevel.Debug, VsResources.Debug_AddedFileToProject, path, ProjectName);

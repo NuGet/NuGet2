@@ -2232,7 +2232,7 @@ function Test-InstallPackageIntoJavascriptApplication
     $p = New-JavaScriptApplication
 
     # Act
-    Install-Package jQuery -ProjectName $p.Name
+    Install-Package jQuery -ProjectName $p.Name 
 
     # Assert
     Assert-Package $p "jQuery"
@@ -2317,4 +2317,25 @@ function Test-InstallLatestVersionWorksCorrectlyWithPrerelease
 
     # Assert
     Assert-Package $p XamlConverters 0.6-alpha
+}
+
+function Test-PackageWithConfigTransformInstallToWinJsProject
+{
+    param($context)
+
+    if ($dte.Version -eq "10.0")
+    {
+        return
+    }
+
+    # Arrange
+    $p = New-JavaScriptApplication
+
+    # Act
+    Install-Package PackageWithTransform -version 1.0 -ProjectName $p.Name -Source $context.RepositoryPath
+
+    # Assert
+    Assert-Package $p PackageWithTransform
+    Assert-NotNull (Get-ProjectItem $p 'root\a.config')
+    Assert-NotNull (Get-ProjectItem $p 'b.config')
 }
