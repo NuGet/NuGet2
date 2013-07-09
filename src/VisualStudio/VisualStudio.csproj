@@ -40,6 +40,7 @@
     <Compile Include="IVsTemplateWizard.cs" />
     <Compile Include="IVsWebsiteHandler.cs" />
     <Compile Include="IWindowSettingsManager.cs" />
+    <Compile Include="ProjectSystems\CpsProjectSystem.cs" />
     <Compile Include="Settings\ISettingsManager.cs" />
     <Compile Include="Settings\ISettingsStore.cs" />
     <Compile Include="Settings\IWritableSettingsStore.cs" />

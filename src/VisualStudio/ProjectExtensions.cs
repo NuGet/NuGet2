@@ -328,7 +328,7 @@ namespace NuGet.VisualStudio
             return null;
         }
 
-        public static IEnumerable<ProjectItem> GetChildItems(this Project project, string path, string filter, params string[] kinds)
+        public static IEnumerable<ProjectItem> GetChildItems(this Project project, string path, string filter, string desiredKind)
         {
             ProjectItems projectItems = GetProjectItems(project, path);
 
@@ -340,7 +340,8 @@ namespace NuGet.VisualStudio
             Regex matcher = filter.Equals("*.*", StringComparison.OrdinalIgnoreCase) ? null : GetFilterRegex(filter);
 
             return from ProjectItem p in projectItems
-                   where kinds.Contains(p.Kind) && (matcher == null || matcher.IsMatch(p.Name))
+                   where desiredKind.Equals(p.Kind, StringComparison.OrdinalIgnoreCase) && 
+                         (matcher == null || matcher.IsMatch(p.Name))
                    select p;
         }
 
@@ -400,7 +401,7 @@ namespace NuGet.VisualStudio
             return VsUtility.GetPropertyValue<T>(project, propertyName);
         }
 
-        private static Regex GetFilterRegex(string wildcard)
+        internal static Regex GetFilterRegex(string wildcard)
         {
             string pattern = String.Join(String.Empty, wildcard.Split('.').Select(GetPattern));
             return new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
