@@ -2259,8 +2259,8 @@ function Test-InstallPackageIntoJSAppOnWin81UseTheCorrectFxFolder
 {
     param($context)
 
-    # this test is only applicable to VS 2013 
-    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0")
+    # this test is only applicable to VS 2013 on Windows 8.1
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0" -or [System.Environment]::OSVersion.Version -lt 6.3)
     {
         return
     }
@@ -2269,7 +2269,7 @@ function Test-InstallPackageIntoJSAppOnWin81UseTheCorrectFxFolder
     $p = New-JavaScriptApplication81
 
     # Act
-    Install-Package Java -ProjectName -source $context.RepositoryPath
+    Install-Package Java -ProjectName $p.Name -source $context.RepositoryPath
 
     # Assert
     Assert-Package $p Java
@@ -2319,6 +2319,25 @@ function Test-InstallLatestVersionWorksCorrectlyWithPrerelease
     Assert-Package $p XamlConverters 0.6-alpha
 }
 
+function Test-InstallPackageIntoJSAppOnWin81AcceptWinmdFile
+{
+    param($context)
+
+    # this test is only applicable to VS 2013 on Windows 8.1
+    if ($dte.Version -eq "10.0" -or $dte.Version -eq "11.0" -or [System.Environment]::OSVersion.Version -lt 6.3)
+    {
+        return
+    }
+
+    # Arrange
+    $p = New-JavaScriptApplication81
+
+    # Act
+    Install-Package MarkedUp -ProjectName $p.Name
+
+    # Assert
+    Assert-Package $p MarkedUp
+}
 function Test-PackageWithConfigTransformInstallToWinJsProject
 {
     param($context)
