@@ -405,7 +405,7 @@ namespace NuGet.VisualStudio.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An error occurred while trying to restore packages. Please try again..
+        ///   Looks up a localized string similar to An error occurred while trying to restore packages:.
         /// </summary>
         public static string PackageRestoreErrorTryAgain {
             get {

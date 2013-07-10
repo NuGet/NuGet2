@@ -300,7 +300,7 @@ Packages installed into Website projects will not be restored during build. Cons
     <value>_Restore</value>
   </data>
   <data name="PackageRestoreErrorTryAgain" xml:space="preserve">
-    <value>An error occurred while trying to restore packages. Please try again.</value>
+    <value>An error occurred while trying to restore packages:</value>
   </data>
   <data name="PreinstalledPackages_InvalidRegistryValue" xml:space="preserve">
     <value>The preinstalled packages have a reference to a missing Registry value. Could not find a Registry key with name '{0}' under '{1}'.</value>

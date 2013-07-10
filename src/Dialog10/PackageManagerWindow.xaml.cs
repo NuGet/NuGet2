@@ -241,13 +241,9 @@ namespace NuGet.Dialog
         {
             // when the update bar appears, we adjust the window position 
             // so that it doesn't push the main content area down
-            if (e.HeightChanged)
+            if (e.HeightChanged && e.PreviousSize.Height < 0.5)
             {
-                double heightDifference = e.NewSize.Height - e.PreviousSize.Height;
-                if (heightDifference > 0)
-                {
-                    Top = Math.Max(0, Top - heightDifference);
-                }
+                Top = Math.Max(0, Top - e.NewSize.Height);
             }
         }
 
