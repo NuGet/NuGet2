@@ -29,6 +29,8 @@ NuGet Hall of Fame
     - [#3294](http://nuget.codeplex.com/workitem/3294) - Fix bug in nuget.exe package command which would allow adding files with the same name but different casing, eventually causing "Item already exists" exception.
 1. [Daniel Cazzulino](http://www.codeplex.com/site/users/view/dcazzulino) ([@kzu](https://twitter.com/kzu))
     - [#2990](http://nuget.codeplex.com/workitem/2990) - Add Version property to NetPortableProfile class.
+1. [David Simmer](https://www.codeplex.com/site/users/view/DavidSimner)
+    - [#3460](https://nuget.codeplex.com/workitem/3460) - Fix bug NullReferenceException if requireApiKey = true, but the header X-NUGET-APIKEY isn't pres.ent
 
 ## NuGet 2.5
 
