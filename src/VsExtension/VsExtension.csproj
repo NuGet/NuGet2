@@ -50,6 +50,7 @@
     <Compile Include="NuGetPackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProvideBindingPath.cs" Condition=" '$(BuildForDev12)' != 'true' " />
+    <Compile Include="ProvideExpressLoadKeyAttribute.cs" />
     <Compile Include="ProvideSearchProviderAttribute.cs" />
     <Compile Include="Resources.Designer.cs">
       <DependentUpon>Resources.resx</DependentUpon>
