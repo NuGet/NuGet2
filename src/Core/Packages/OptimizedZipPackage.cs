@@ -21,7 +21,11 @@ namespace NuGet
     /// </remarks>
     public class OptimizedZipPackage : LocalPackage
     {
-        private static readonly ConcurrentDictionary<PackageName, string> _cachedExpandedFolder = new ConcurrentDictionary<PackageName, string>();
+        // The DateTimeOffset entry stores the LastModifiedTime of the original .nupkg file that
+        // is passed to this class. This is so that we can invalidate the cache when the original
+        // file has changed.
+        private static readonly ConcurrentDictionary<PackageName, Tuple<string, DateTimeOffset>> _cachedExpandedFolder 
+            = new ConcurrentDictionary<PackageName, Tuple<string, DateTimeOffset>>();
         private static readonly IFileSystem _tempFileSystem = new PhysicalFileSystem(Path.Combine(Path.GetTempPath(), "nuget"));
 
         private Dictionary<string, PhysicalPackageFile> _files;
@@ -30,6 +34,7 @@ namespace NuGet
         private readonly IFileSystem _expandedFileSystem;
         private readonly string _packagePath;
         private string _expandedFolderPath;
+        private readonly bool _forceUseCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OptimizedZipPackage" /> class.
@@ -112,6 +117,21 @@ namespace NuGet
             _expandedFileSystem = expandedFileSystem;
 
             EnsureManifest();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OptimizedZipPackage" /> class.
+        /// </summary>
+        /// <param name="fileSystem">The file system which contains the .nupkg file.</param>
+        /// <param name="packagePath">The relative package path within the file system.</param>
+        /// <param name="expandedFileSystem">The file system which should be used to store unzipped content files.</param>
+        /// <exception cref="System.ArgumentNullException">fileSystem</exception>
+        /// <exception cref="System.ArgumentException">packagePath</exception>
+        internal OptimizedZipPackage(IFileSystem fileSystem, string packagePath, IFileSystem expandedFileSystem, bool forceUseCache) :
+            this(fileSystem, packagePath, expandedFileSystem)
+        {
+            // this is used by unit test
+            _forceUseCache = forceUseCache;
         }
 
         public bool IsValid
@@ -209,10 +229,22 @@ namespace NuGet
 
             var packageName = new PackageName(Id, Version);
 
-            // Only use the cache for expanded folders under %temp%.
-            if (_expandedFileSystem == _tempFileSystem)
+            // Only use the cache for expanded folders under %temp%, or set from unit tests
+            if (_expandedFileSystem == _tempFileSystem || _forceUseCache)
             {
-                _expandedFolderPath = _cachedExpandedFolder.GetOrAdd(packageName, _ => GetExpandedFolderPath());
+                Tuple<string, DateTimeOffset> cacheValue;
+                DateTimeOffset lastModifiedTime = _fileSystem.GetLastModified(_packagePath);
+
+                // if the cache doesn't exist, or it exists but points to a stale package,
+                // then we invalidate the cache and store the new entry.
+                if (!_cachedExpandedFolder.TryGetValue(packageName, out cacheValue) ||
+                    cacheValue.Item2 < lastModifiedTime)
+                {
+                    cacheValue = Tuple.Create(GetExpandedFolderPath(), lastModifiedTime);
+                    _cachedExpandedFolder[packageName] = cacheValue;
+                }
+
+                _expandedFolderPath = cacheValue.Item1;
             }
             else
             {
@@ -240,8 +272,8 @@ namespace NuGet
                                       targetStream = _expandedFileSystem.OpenFile(filePath))
                         {
                             // if the target file already exists, 
-                            // don't copy file if the contents are equal
-                            copyFile = !partStream.ContentEquals(targetStream);
+                            // don't copy file if the lengths are equal.
+                            copyFile = partStream.Length != targetStream.Length;
                         }
                     }
 
@@ -287,10 +319,11 @@ namespace NuGet
             {
                 if (_cachedExpandedFolder.Count > 0)
                 {
-                    foreach (var expandedFolder in _cachedExpandedFolder.Values)
+                    foreach (var valueTuple in _cachedExpandedFolder.Values)
                     {
                         try
                         {
+                            string expandedFolder = valueTuple.Item1;
                             _tempFileSystem.DeleteDirectory(expandedFolder, recursive: true);
                         }
                         catch (Exception)
