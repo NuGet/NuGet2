@@ -12,6 +12,12 @@ namespace NuGet.VisualStudio
             return source == Instance;
         }
 
+        // IMPORTANT: do NOT remove this method. It is used by functional tests.
+        public static IEnumerable<PackageSource> GetEnabledPackageSourcesWithAggregate()
+        {
+            return GetEnabledPackageSourcesWithAggregate(ServiceLocator.GetInstance<IVsPackageSourceProvider>());
+        }
+
         public static IEnumerable<PackageSource> GetEnabledPackageSourcesWithAggregate(this IPackageSourceProvider provider)
         {
             return new[] { Instance }.Concat(provider.GetEnabledPackageSources());
