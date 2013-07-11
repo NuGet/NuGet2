@@ -13,12 +13,18 @@ using NuGet.VisualStudio;
 
 namespace NuGet.VsEvents
 {
-    public sealed class ProjectRetargetingHandler : IVsTrackProjectRetargetingEvents, IDisposable
+    public sealed class ProjectRetargetingHandler : IVsTrackProjectRetargetingEvents, IVsTrackBatchRetargetingEvents, IDisposable
     {
-        private uint _cookie;
+        private uint _cookieProjectRetargeting;
+        private uint _cookieBatchRetargeting;
         private DTE _dte;
         private IVsTrackProjectRetargeting _vsTrackProjectRetargeting;
         private ErrorListProvider _errorListProvider;
+        private IVsMonitorSelection _vsMonitorSelection;
+        private string _platformRetargetingProject;
+
+        private const string NETCore45 = ".NETCore,Version=v4.5";
+        private const string NETCore451 = ".NETCore,Version=v4.5.1";
 
         /// <summary>
         /// Constructs and Registers ("Advises") for Project retargeting events if the IVsTrackProjectRetargeting service is available
@@ -40,19 +46,38 @@ namespace NuGet.VsEvents
             IVsTrackProjectRetargeting vsTrackProjectRetargeting = serviceProvider.GetService(typeof(SVsTrackProjectRetargeting)) as IVsTrackProjectRetargeting;
             if (vsTrackProjectRetargeting != null)
             {
+                _vsMonitorSelection = (IVsMonitorSelection)serviceProvider.GetService(typeof(IVsMonitorSelection));
+                Debug.Assert(_vsMonitorSelection != null);
                 _errorListProvider = new ErrorListProvider(serviceProvider);
                 _dte = dte;
                 _vsTrackProjectRetargeting = vsTrackProjectRetargeting;
 
-                if (_vsTrackProjectRetargeting.AdviseTrackProjectRetargetingEvents(this, out _cookie) == VSConstants.S_OK)
+                // Register for ProjectRetargetingEvents
+                if (_vsTrackProjectRetargeting.AdviseTrackProjectRetargetingEvents(this, out _cookieProjectRetargeting) == VSConstants.S_OK)
                 {
-                    Debug.Assert(_cookie != 0);
+                    Debug.Assert(_cookieProjectRetargeting != 0);
                     _dte.Events.BuildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
                     _dte.Events.SolutionEvents.AfterClosing += SolutionEvents_AfterClosing;
                 }
                 else
                 {
-                    _cookie = 0;
+                    _cookieProjectRetargeting = 0;
+                }
+
+                // Register for BatchRetargetingEvents. Using BatchRetargetingEvents, we need to detect platform retargeting
+                if (_vsTrackProjectRetargeting.AdviseTrackBatchRetargetingEvents(this, out _cookieBatchRetargeting) == VSConstants.S_OK)
+                {
+                    Debug.Assert(_cookieBatchRetargeting != 0);
+                    if (_cookieBatchRetargeting == 0)
+                    {
+                        // Register for dte Events only if they are not already registered for
+                        _dte.Events.BuildEvents.OnBuildBegin += BuildEvents_OnBuildBegin;
+                        _dte.Events.SolutionEvents.AfterClosing += SolutionEvents_AfterClosing;
+                    }
+                }
+                else
+                {
+                    _cookieBatchRetargeting = 0;
                 }
             }
         }
@@ -140,14 +165,78 @@ namespace NuGet.VsEvents
         }
         #endregion
 
+        #region IVsTrackBatchRetargetingEvents
+        int IVsTrackBatchRetargetingEvents.OnBatchRetargetingBegin()
+        {
+            if (VsVersionHelper.VsMajorVersion == 12)
+            {
+                Project project = _vsMonitorSelection.GetActiveProject();
+                if (project != null)
+                {
+                    string frameworkName = VsUtility.GetPropertyValue<string>(project, "TargetFrameworkMoniker");
+                    if (frameworkName != null && NETCore45.Equals(frameworkName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        _platformRetargetingProject = project.Name;
+                    }
+                }
+            }
+            return VSConstants.S_OK;
+        }
+
+        int IVsTrackBatchRetargetingEvents.OnBatchRetargetingEnd()
+        {
+            _errorListProvider.Tasks.Clear();
+            if (_platformRetargetingProject != null)
+            {
+                try
+                {
+                    Project project = _dte.Solution.Item(_platformRetargetingProject);
+                    if (project != null)
+                    {
+                        string frameworkName = VsUtility.GetPropertyValue<string>(project, "TargetFrameworkMoniker");
+                        if (frameworkName != null && NETCore451.Equals(frameworkName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            IList<IPackage> packagesToBeReinstalled = ProjectRetargetingUtility.GetPackagesToBeReinstalled(project);
+                            if (packagesToBeReinstalled.Count > 0)
+                            {
+                                Debug.Assert(project.IsNuGetInUse());
+                                IVsHierarchy projectHierarchy = project.ToVsHierarchy();
+                                ShowRetargetingErrorTask(packagesToBeReinstalled.Select(p => p.Id), projectHierarchy, TaskErrorCategory.Error, TaskPriority.High);
+                            }
+                        }
+                    }
+                }
+                catch (ArgumentException)
+                {
+                    // If the solution does not contain a project named '_platformRetargetingProject', it will throw ArgumentException
+                }
+                _platformRetargetingProject = null;
+            }
+            return VSConstants.S_OK;
+        }
+        #endregion
+
         public void Dispose()
         {
-            _errorListProvider.Dispose();
-            if (_cookie != 0 && _vsTrackProjectRetargeting != null)
+            // Nothing is initialized if _vsTrackProjectRetargeting is null. Check if it is not null
+            if(_vsTrackProjectRetargeting != null)
             {
-                _vsTrackProjectRetargeting.UnadviseTrackProjectRetargetingEvents(_cookie);
-                _dte.Events.BuildEvents.OnBuildBegin -= BuildEvents_OnBuildBegin;
-                _dte.Events.SolutionEvents.AfterClosing -= SolutionEvents_AfterClosing;
+                _errorListProvider.Dispose();
+                if(_cookieProjectRetargeting != 0)
+                {
+                    _vsTrackProjectRetargeting.UnadviseTrackProjectRetargetingEvents(_cookieProjectRetargeting);
+                }
+
+                if(_cookieBatchRetargeting != 0)
+                {
+                    _vsTrackProjectRetargeting.UnadviseTrackBatchRetargetingEvents(_cookieBatchRetargeting);
+                }
+
+                if (_cookieProjectRetargeting != 0 || _cookieBatchRetargeting != 0)
+                {
+                    _dte.Events.BuildEvents.OnBuildBegin -= BuildEvents_OnBuildBegin;
+                    _dte.Events.SolutionEvents.AfterClosing -= SolutionEvents_AfterClosing;
+                }
             }
         }
     }
