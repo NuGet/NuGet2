@@ -36,7 +36,7 @@ namespace NuGet.Server.Infrastructure
                 return false;
             }
 
-            return apiKey.Equals(settingsApiKey, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(apiKey, settingsApiKey, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
