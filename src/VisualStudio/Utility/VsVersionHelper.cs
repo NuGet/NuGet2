@@ -24,6 +24,11 @@ namespace NuGet.VisualStudio
             get { return VsMajorVersion == 11; }
         }
 
+        public static bool IsVisualStudio2013
+        {
+            get { return VsMajorVersion == 12; }
+        }
+
         public static string FullVsEdition
         {
             get { return _fullVsEdition.Value; }
