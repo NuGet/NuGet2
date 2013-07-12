@@ -5,14 +5,14 @@ namespace NuGet
 {
     public class PackageReference : IEquatable<PackageReference>
     {
-        public PackageReference(string id, SemanticVersion version, IVersionSpec versionConstraint, FrameworkName targetFramework, bool isDevelopmentDependency, bool pendingReinstallation = false)
+        public PackageReference(string id, SemanticVersion version, IVersionSpec versionConstraint, FrameworkName targetFramework, bool isDevelopmentDependency, bool requireReinstallation = false)
         {
             Id = id;
             Version = version;
             VersionConstraint = versionConstraint;
             TargetFramework = targetFramework;
             IsDevelopmentDependency = isDevelopmentDependency;
-            PendingReinstallation = pendingReinstallation;
+            RequireReinstallation = requireReinstallation;
         }
 
         public string Id { get; private set; }
@@ -20,7 +20,7 @@ namespace NuGet
         public IVersionSpec VersionConstraint { get; set; }
         public FrameworkName TargetFramework { get; private set; }
         public bool IsDevelopmentDependency { get; private set; }
-        public bool PendingReinstallation { get; private set; }
+        public bool RequireReinstallation { get; private set; }
 
         public override bool Equals(object obj)
         {
