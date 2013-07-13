@@ -300,9 +300,9 @@ namespace NuGet.VsEvents
             Assert.Equal("A", packageReferences[0].Id);
             Assert.Equal("B", packageReferences[1].Id);
             Assert.Equal("C", packageReferences[2].Id);
-            Assert.True(packageReferences[0].PendingReinstallation);
-            Assert.False(packageReferences[1].PendingReinstallation);
-            Assert.True(packageReferences[2].PendingReinstallation);
+            Assert.True(packageReferences[0].RequireReinstallation);
+            Assert.False(packageReferences[1].RequireReinstallation);
+            Assert.True(packageReferences[2].RequireReinstallation);
         }
 
         [Fact]

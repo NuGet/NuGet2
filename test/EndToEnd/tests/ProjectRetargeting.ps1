@@ -80,7 +80,7 @@ function Test-ProjectRetargeting-ClearErrorUponCloseSolution {
     Assert-AreEqual 0 $errorlist.Count
 }
 
-function Test-ProjectRetargeting-ClearErrorAfterRetargetingBackToOriginalFramework {
+function Test-ProjectRetargeting-ClearErrorAndWarningRetargetBackToOriginalFramework {
     param($context)
 
     # Arrange
@@ -109,6 +109,12 @@ function Test-ProjectRetargeting-ClearErrorAfterRetargetingBackToOriginalFramewo
     $errorlist = Get-Errors
 
     Assert-AreEqual 0 $errorlist.Count
+
+    Build-Solution
+
+    $warnings = Get-Warnings
+
+    Assert-AreEqual 0 $warnings.Count
 }
 
 function Test-ProjectRetargeting-ConvertBuildErrorToBuildWarningUponBuild {
@@ -306,4 +312,72 @@ function Test-ProjectRetargeting-ClearWarningUponPackageReinstallationAndBuild
     $warnings = Get-Warnings
 
     Assert-AreEqual 0 $warnings.Count
+}
+
+function Test-ProjectRetargeting-ClearReinstallationFlagRetargetBackToOriginalFramework {
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    $p | Install-Package PackageTargetingNet40AndNet40Client -Source $context.RepositoryPath
+
+    Assert-Package $p 'PackageTargetingNet40AndNet40Client'
+
+    # Act (change the target framework of the project to 4.0-Client and verify that an error is thrown )
+
+    $projectName = $p.Name
+    $p.Properties.Item("TargetFrameworkMoniker").Value = '.NETFramework,Version=v4.0,Profile=Client'
+
+    # Assert (Assert that the package reference has requireReinstallation flag marked to true)
+
+    $p = Get-Project $projectName
+    $packageReferences = Get-ProjectPackageReferences $p
+
+    Assert-AreEqual 1 $packageReferences.Count
+    Assert-True $packageReferences[0].RequireReinstallation
+
+    # Change the framework of the project back to .NET 4.0 and verify that the reinstallation is cleared
+
+    $p = Get-Project $projectName
+    $p.Properties.Item("TargetFrameworkMoniker").Value = '.NETFramework,Version=4.0'
+
+    $p = Get-Project $projectName
+    $packageReferences = Get-ProjectPackageReferences $p
+
+    Assert-AreEqual 1 $packageReferences.Count
+    Assert-False $packageReferences[0].RequireReinstallation
+}
+
+function Test-ProjectRetargeting-ClearReinstallationFlagUponPackageReinstallation {
+    param($context)
+
+    # Arrange
+    $p = New-ClassLibrary
+
+    $p | Install-Package PackageTargetingNet40AndNet40Client -Source $context.RepositoryPath
+
+    Assert-Package $p 'PackageTargetingNet40AndNet40Client'
+
+    # Act (change the target framework of the project to 4.0-Client and verify that an error is thrown )
+
+    $projectName = $p.Name
+    $p.Properties.Item("TargetFrameworkMoniker").Value = '.NETFramework,Version=v4.0,Profile=Client'
+
+    # Assert (Assert that the package reference has requireReinstallation flag marked to true)
+
+    $p = Get-Project $projectName
+    $packageReferences = Get-ProjectPackageReferences $p
+
+    Assert-AreEqual 1 $packageReferences.Count
+    Assert-True $packageReferences[0].RequireReinstallation
+
+    # Assert (Assert that the package reinstallation flag is removed when the package is updated)
+    Update-Package -Reinstall -Project $projectName -Source $context.RepositoryPath
+
+    $p = Get-Project $projectName
+    $packageReferences = Get-ProjectPackageReferences $p
+
+    Assert-AreEqual 1 $packageReferences.Count
+    Assert-False $packageReferences[0].RequireReinstallation
 }

@@ -424,7 +424,7 @@
   <data name="XdtError" xml:space="preserve">
     <value>An error occurred while applying transformation to '{0}' in project '{1}':</value>
   </data>
-  <data name="ReferenceFile_InvalidPendingReinstallationFlag" xml:space="preserve">
-    <value>Unable to parse pendingReinstallation value '{0}' from '{1}'.</value>
+  <data name="ReferenceFile_InvalidRequireReinstallationFlag" xml:space="preserve">
+    <value>Unable to parse requireReinstallation value '{0}' from '{1}'.</value>
   </data>
 </root>

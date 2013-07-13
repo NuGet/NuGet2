@@ -29,6 +29,15 @@ function Get-ProjectRepository {
     New-Object NuGet.PackageReferenceRepository($fileSystem, $packageManager.LocalRepository)
 }
 
+function Get-ProjectPackageReferences {
+    param(
+        [parameter(Mandatory = $true)]
+        $Project
+    )
+
+    $packageReferenceFile = New-Object NuGet.PackageReferenceFile((Get-ProjectItemPath $Project 'packages.config'))
+    return $packageReferenceFile.GetPackageReferences()
+}
 function Get-ProjectPackage {
     param(
         [parameter(Mandatory = $true)]

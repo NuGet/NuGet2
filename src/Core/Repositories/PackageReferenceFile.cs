@@ -63,7 +63,7 @@ namespace NuGet
                 string versionConstraintString = e.GetOptionalAttributeValue("allowedVersions");
                 string targetFrameworkString = e.GetOptionalAttributeValue("targetFramework");
                 string developmentFlagString = e.GetOptionalAttributeValue("developmentDependency");
-                string pendingReinstallationString = e.GetOptionalAttributeValue("pendingReinstallation");
+                string requireReinstallationString = e.GetOptionalAttributeValue("requireReinstallation");
                 SemanticVersion version = null;
 
                 if (String.IsNullOrEmpty(id))
@@ -117,16 +117,16 @@ namespace NuGet
                     _developmentFlags[id] = developmentFlagString;
                 }
 
-                var pendingReinstallation = false;
-                if (!String.IsNullOrEmpty(pendingReinstallationString))
+                var requireReinstallation = false;
+                if (!String.IsNullOrEmpty(requireReinstallationString))
                 {
-                    if (!Boolean.TryParse(pendingReinstallationString, out pendingReinstallation))
+                    if (!Boolean.TryParse(requireReinstallationString, out requireReinstallation))
                     {
-                        throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ReferenceFile_InvalidPendingReinstallationFlag, pendingReinstallationString, _path));
+                        throw new InvalidDataException(String.Format(CultureInfo.CurrentCulture, NuGetResources.ReferenceFile_InvalidRequireReinstallationFlag, requireReinstallationString, _path));
                     }
                 }
 
-                yield return new PackageReference(id, version, versionConstaint, targetFramework, developmentFlag, pendingReinstallation);
+                yield return new PackageReference(id, version, versionConstaint, targetFramework, developmentFlag, requireReinstallation);
             }
         }
 
@@ -168,7 +168,7 @@ namespace NuGet
             AddEntry(document, id, version, targetFramework);
         }
 
-        public void MarkEntryForReinstallation(string id, SemanticVersion version, FrameworkName targetFramework)
+        public void MarkEntryForReinstallation(string id, SemanticVersion version, FrameworkName targetFramework, bool requireReinstallation)
         {
             Debug.Assert(id != null);
             Debug.Assert(version != null);
@@ -178,16 +178,16 @@ namespace NuGet
             if (document != null)
             {
                 DeleteEntry(id, version);
-                AddEntry(document, id, version, targetFramework, pendingReinstallation: true);
+                AddEntry(document, id, version, targetFramework, requireReinstallation);
             }
         }
 
         private void AddEntry(XDocument document, string id, SemanticVersion version, FrameworkName targetFramework)
         {
-            AddEntry(document, id, version, targetFramework, pendingReinstallation: false);
+            AddEntry(document, id, version, targetFramework, requireReinstallation: false);
         }
 
-        private void AddEntry(XDocument document, string id, SemanticVersion version, FrameworkName targetFramework, bool pendingReinstallation)
+        private void AddEntry(XDocument document, string id, SemanticVersion version, FrameworkName targetFramework, bool requireReinstallation)
         {
             XElement element = FindEntry(document, id, version);
 
@@ -218,9 +218,9 @@ namespace NuGet
                 newElement.Add(new XAttribute("developmentDependency", developmentFlag));
             }
 
-            if (pendingReinstallation)
+            if (requireReinstallation)
             {
-                newElement.Add(new XAttribute("pendingReinstallation", Boolean.TrueString));
+                newElement.Add(new XAttribute("requireReinstallation", Boolean.TrueString));
             }
 
             document.Root.Add(newElement);

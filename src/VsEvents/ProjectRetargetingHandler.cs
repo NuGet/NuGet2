@@ -111,8 +111,8 @@ namespace NuGet.VsEvents
                 if (!packagesToBeReinstalled.IsEmpty())
                 {
                     ShowRetargetingErrorTask(packagesToBeReinstalled.Select(p => p.Id), pAfterChangeHier, TaskErrorCategory.Error, TaskPriority.High);
-                    ProjectRetargetingUtility.MarkPackagesForReinstallation(retargetedProject, packagesToBeReinstalled);
                 }
+                ProjectRetargetingUtility.MarkPackagesForReinstallation(retargetedProject, packagesToBeReinstalled);
             }
             return VSConstants.S_OK;
         }

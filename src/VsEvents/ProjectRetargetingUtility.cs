@@ -106,12 +106,12 @@ namespace NuGet.VsEvents
             Debug.Assert(packageReferenceFile != null);
             Debug.Assert(packagesToBeReinstalled != null);
 
-            List<PackageReference> packageReferences = packageReferenceFile.GetPackageReferences().ToList();
-            foreach (IPackage package in packagesToBeReinstalled)
+            IEnumerable<PackageReference> packageReferences = packageReferenceFile.GetPackageReferences();
+
+            foreach (PackageReference packageReference in packageReferences)
             {
-                PackageReference packageReference = packageReferences.Find(p => p.Id.Equals(package.Id, StringComparison.CurrentCultureIgnoreCase) && p.Version == package.Version);
-                Debug.Assert(packageReference != null);
-                packageReferenceFile.MarkEntryForReinstallation(packageReference.Id, packageReference.Version, packageReference.TargetFramework);
+                bool requireReinstallation = packagesToBeReinstalled.Any(p => p.Id.Equals(packageReference.Id, StringComparison.OrdinalIgnoreCase));
+                packageReferenceFile.MarkEntryForReinstallation(packageReference.Id, packageReference.Version, packageReference.TargetFramework, requireReinstallation);
             }
         }
 
@@ -130,7 +130,7 @@ namespace NuGet.VsEvents
                 Debug.Assert(packageReferenceFile != null);
 
                 IEnumerable<PackageReference> packageReferences = packageReferenceFile.GetPackageReferences();
-                return packageReferences.Where(p => p.PendingReinstallation).ToList();
+                return packageReferences.Where(p => p.RequireReinstallation).ToList();
             }
 
             return new List<PackageReference>();
