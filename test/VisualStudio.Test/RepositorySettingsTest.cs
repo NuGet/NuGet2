@@ -68,6 +68,29 @@ namespace NuGet.VisualStudio.Test
         }
 
         [Fact]
+        public void RepositoryPathComesFromConfigFileIsNormalizedToUseCorrectDirectorySeparator()
+        {
+            // Arrange
+            var solutionManager = new Mock<ISolutionManager>();
+            solutionManager.Setup(m => m.SolutionDirectory).Returns(@"bar\baz");
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile(@"bar\nuget.config", @"
+<settings>
+    <repositoryPath>../lib/</repositoryPath>
+</settings>");
+
+            var fileSystemProvider = new Mock<IFileSystemProvider>();
+            fileSystemProvider.Setup(m => m.GetFileSystem(@"bar\baz\.nuget")).Returns(fileSystem);
+            var repositorySettings = new RepositorySettings(solutionManager.Object, fileSystemProvider.Object, new Mock<IVsSourceControlTracker>().Object);
+
+            // Act
+            string path = repositorySettings.RepositoryPath;
+
+            // Assert
+            Assert.Equal(@"bar\..\lib\", path);
+        }
+
+        [Fact]
         public void RepositoryPathDefaultsToPackagesDirectoryIfConfigFileHasEmptyOrNullRepositoryPath()
         {
             // Arrange
