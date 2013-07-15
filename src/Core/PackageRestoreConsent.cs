@@ -10,6 +10,7 @@ namespace NuGet
         private const string PackageRestoreConsentKey = "enabled";
         private readonly ISettings _settings;
         private readonly IEnvironmentVariableReader _environmentReader;
+        private readonly ConfigurationDefaults _configurationDefaults;
 
         public PackageRestoreConsent(ISettings settings)
             : this(settings, new EnvironmentVariableWrapper())
@@ -17,6 +18,11 @@ namespace NuGet
         }
 
         public PackageRestoreConsent(ISettings settings, IEnvironmentVariableReader environmentReader)
+            : this(settings, environmentReader, ConfigurationDefaults.Instance)
+        {
+        }
+
+        public PackageRestoreConsent(ISettings settings, IEnvironmentVariableReader environmentReader, ConfigurationDefaults configurationDefaults)
         {
             if (settings == null)
             {
@@ -27,8 +33,15 @@ namespace NuGet
             {
                 throw new ArgumentNullException("environmentReader");
             }
+
+            if (configurationDefaults == null)
+            {
+                throw new ArgumentNullException("configurationDefaults");
+            }
+
             _settings = settings;
             _environmentReader = environmentReader;
+            _configurationDefaults = configurationDefaults;
         }
 
         public bool IsGranted
@@ -44,19 +57,24 @@ namespace NuGet
         {
             get
             {
-                string settingsValue = _settings.GetValue(PackageRestoreSection, PackageRestoreConsentKey).SafeTrim();
+                string settingsValue = _settings.GetValue(PackageRestoreSection, PackageRestoreConsentKey);
+                if (String.IsNullOrWhiteSpace(settingsValue))
+                {
+                    settingsValue = _configurationDefaults.DefaultPackageRestoreConsent;
+                }
+                settingsValue = settingsValue.SafeTrim();
+
+                if (String.IsNullOrEmpty(settingsValue))
+                {
+                    // default value of user consent is true.
+                    return true;
+                }
+
                 return IsSet(settingsValue);
             }
             set
             {
-                if (!value)
-                {
-                    _settings.DeleteSection(PackageRestoreSection);
-                }
-                else
-                {
-                    _settings.SetValue(PackageRestoreSection, PackageRestoreConsentKey, value.ToString());
-                }
+                _settings.SetValue(PackageRestoreSection, PackageRestoreConsentKey, value.ToString());
             }
         }
 
@@ -64,9 +82,7 @@ namespace NuGet
         {
             bool boolResult;
             int intResult;
-
-            return !String.IsNullOrEmpty(value) &&
-                   ((Boolean.TryParse(value, out boolResult) && boolResult) ||
+            return ((Boolean.TryParse(value, out boolResult) && boolResult) ||
                    (Int32.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out intResult) && (intResult == 1)));
         }
     }
