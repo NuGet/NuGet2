@@ -9,19 +9,21 @@ namespace NuGet.Test
     public class PackageRestoreConsentTest
     {
         [Fact]
-        public void MissingSettingsKeyReturnsFalseForIsGranted()
+        public void MissingSettingsKeyReturnsTrueForIsGranted()
         {
             // Arrange
             var settings = new Mock<ISettings>();
             var environmentReader = new Mock<IEnvironmentVariableReader>();
+            var mockFileSystem = new MockFileSystem();
+            var configurationDefaults = new ConfigurationDefaults(mockFileSystem, "NuGetDefaults.config");
 
-            var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object);
+            var packageRestore = new PackageRestoreConsent(settings.Object, environmentReader.Object, configurationDefaults);
 
             // Act
             bool isGranted = packageRestore.IsGranted;
 
             // Assert
-            Assert.False(isGranted);
+            Assert.True(isGranted);
         }
 
         [Fact]
@@ -67,7 +69,7 @@ namespace NuGet.Test
         [Theory]
         [InlineData("2")]
         [InlineData("wrong")]
-        public void InCorrectEnvironmentVariableReturnsFalseForIsGranted(string environmentValue)
+        public void InCorrectEnvironmentVariableReturnsTrueForIsGranted(string environmentValue)
         {
             // Arrange
             var settings = Mock.Of<ISettings>();
@@ -77,13 +79,16 @@ namespace NuGet.Test
                 r => r.GetEnvironmentVariable("EnableNuGetPackageRestore")).
                 Returns(environmentValue);
 
-            var packageRestore = new PackageRestoreConsent(settings, environmentReader.Object);
+            var mockFileSystem = new MockFileSystem();
+            var configurationDefaults = new ConfigurationDefaults(mockFileSystem, "NuGetDefaults.config");
+
+            var packageRestore = new PackageRestoreConsent(settings, environmentReader.Object, configurationDefaults);
 
             // Act
             bool isGranted = packageRestore.IsGranted;
 
             // Assert
-            Assert.False(isGranted);
+            Assert.True(isGranted);
         }
 
         [Theory]
